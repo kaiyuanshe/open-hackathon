@@ -1,0 +1,50 @@
+<html>
+<head>
+	<meta charset = "utf-8" />
+	<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+	<script src="http://code.jquery.com/jquery-migrate-1.1.0.js"></script>
+	</script>
+</head>
+<body>
+	<div id = "content">
+	<p> {{iden}} , {{name}} </p>
+	</div>
+
+	<script type = "text/javascript">
+		$(function() {
+			$(document).ready(function() {
+				Display();
+			});
+
+			function getUrlparam(name) {
+				var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+				var r = window.location.search.substr(1).match(reg);
+				if (r!=null) return unescape(r[2]); return null;
+			}
+
+			function Display() {
+				var name = "code";
+				var url = window.location.href;
+				var theRequest = new Object();
+				if (url.indexOf("?")!=-1) {
+					var str = url.substr(url.indexOf("?")+1);
+					var strs = str.split("&");
+					for (var i = 0;i < strs.length;i ++)
+					{
+					theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
+					}
+					/*newurl = "https://github.com/login/oauth/access_token?client_id=0eded406cf0b3f83b181&client_secret=3c81babd71d0cf60db3362261d42b4ce6b199538&redirect_uri=http://osslab.chinacloudapp.cn:5080/github&code=" + theRequest[name]+"&jsoncallback=?";
+					$("#content").html("<p>" + theRequest[name]  + "</p>");*/
+					//location.href=newurl;
+//location.href=newurl;
+					/*$.getJSON(newurl,function(json){
+         alert(json[0]._name);
+         });　　*/
+
+				}
+			}
+		});	
+	</script>
+	
+</body>
+</html>
