@@ -1,0 +1,10 @@
+<uwsgi>
+	<pythonpath>/home/opentech/OSSLab-1/</python>
+	<module>run</module>
+	<callable>app</callable>
+	<socket>/tmp/uwsgi.sock</socket>
+	<master/>
+	<processes>8</processes>
+	<memory-report/>
+</uwsgi>
+
