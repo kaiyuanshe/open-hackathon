@@ -11,4 +11,4 @@ def init_session(CON=DB_CONNECT_STRING):
     engine = create_engine(CON, echo=False)
     DBSession.configure(bind=engine)
 
-init_session()  
+#init_session()
