@@ -11,13 +11,18 @@ CONTAINER_NAME='https://kangjihua.blob.core.chinacloudapi.cn/vhds'
 '''
 DB Info
 '''
-database_url = ''
-database_username = ''
-database_password = ''
-database_database = ''
+database_url = 'localhost'
+database_username = 'root'
+database_password = '552523'
+database_database = 'kangjihua'
 database_str = 'mysql+mysqldb://'+database_username+':'+database_password+'@'+database_url+'/'+database_database+'?charset=utf8'
 
 '''
 Guacamole Server Info
 '''
-config_path = ''
+guacamole_config_path = ''
+
+'''
+Log Info
+'''
+logger_path = ''
