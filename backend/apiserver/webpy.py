@@ -1,7 +1,7 @@
 import web,json,restserver,orm,constants
 from backendlogger.logger import Logger
 urls = ('/(.*)', 'index')
-orm.init_session(constants.database_str)
+#orm.init_session(constants.database_str)
 '''
 Rest Server
 '''

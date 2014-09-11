@@ -1,12 +1,11 @@
-import time
+import time,containerservice,constants
 from orm import DBSession
 from orm.tables  import GuacamoleClientInfo,GuacamoleServerLoad
 from datetime import datetime
-import containerservice
 
 #init_session()
-client_time_limit = 7200
-server_time_limit = 10
+client_time_limit = constants.client_time_limit
+server_time_limit = constants.server_time_limit
 
 def __server_protocol_update(protocol,gain,result):
     if protocol=='ssh':
