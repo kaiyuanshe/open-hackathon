@@ -64,7 +64,7 @@ def github():
 		u = User(info['login'],uid,'github')
 		db_session.add(u)
 		db_session.commit()
-	return render_template("github.html",iden=info['id'],name=info['login'])
+	return render_template("github.html",pic=info['id'],name=info['login'])
 	#return render_template("github.html",iden=httpres.read(),name='bbb')
 @app.route('/renren')
 def renren():
@@ -94,7 +94,7 @@ def renren():
 	#info = Str
 	#return render_template("renren.html")
 	#return render_template("renren.html",iden=url_ori,name='cc')
-	return render_template("renren.html",iden = info['response']['id'],name=info['response']['name'])
+	return render_template("renren.html",pic = info['response']['avatar'][0]['url'],name=info['response']['name'])
 @app.route('/iframe')
 def iframe():
 	url = '/guacamole/client.xhtml?id=c%2FContainer%201'
@@ -110,6 +110,9 @@ def iframe():
 	content_t = tot.find('</body>')
 	content = tot[content_s:content_t]
 	return tot
+@app.route('/course')
+def course():
+	return render_template("course.html");
 @app.route('/test_ice')
 def test_ice():
 	return render_template("test_ice.html")
