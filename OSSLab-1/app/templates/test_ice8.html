@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<hr>
+<hr>
+
+
+
+<div class = "row">
+	<div class = "col-md-5">
+	<iframe id = "container1"></iframe>
+	</div>
+	<div class = "col-md-5">
+	<iframe id = "container2"></iframe>
+        </div>
+	<div class = "col-md-5">
+	<iframe id = "container3"></iframe>
+        </div>
+</div>
+<hr>
+<hr>
+
+<div class = "row">
+        <div class = "col-md-5">
+	<iframe id = "container4"></iframe>
+        </div>
+        <div class = "col-md-5">
+	<iframe id = "container5"></iframe>
+        </div>
+        <div class = "col-md-5">
+	<iframe id = "container6"></iframe>
+        </div>
+</div>
+<hr>
+<hr>
+
+<div class = "row">
+        <div class = "col-md-5">
+	<iframe id = "container7"></iframe>
+        </div>
+        <div class = "col-md-5">
+	<iframe id = "container8"></iframe>
+        </div>
+        <div class = "col-md-5">
+	<iframe id = "container9"></iframe>
+        </div>
+</div>
+
+<hr>
+<hr>
+<div class = "col-md-6">
+<iframe id = "container0"></iframe>
+</div>
+<script type = "text/javascript">
+$(function() {
+	Create();
+
+	function Create() {
+		var port = 71;
+		for (var i = 0;i < 10;i ++) {
+			var iid = "#container" + i.toString();
+			//alert(iid);
+			push(iid,port);
+			port ++;
+		}
+	}
+
+	function push(iid,port) {
+		var url = "http://ossdocker.chinacloudapp.cn/guacamole/client.xhtml?id=c/Container " + port.toString();
+		var func = "setFocusThickboxIframe(" + "\"" + iid.substr(1) + "\"" + ")";
+	//	alert(func);
+		$(iid).attr("src",url);
+		$(iid).attr("width","800");
+		$(iid).attr("height","800");
+		$(iid).attr("frameborder","yes");
+		$(iid).attr("scrolling" , "yes");
+		$(iid).attr("onmouseover",func);
+		$(iid).attr("onload",func);
+		$(iid).attr("onmousemove",func);
+		$(iid).attr("onmouseout",func);
+		$(iid).attr("onfocus",func);
+	}
+
+});
+</script>
+<script type="text/javascript">
+function setFocusThickboxIframe(iid) {
+                document.getElementById(iid).focus();
+                //alert("ok");
+        }
+
+</script>
+{% endblock %}

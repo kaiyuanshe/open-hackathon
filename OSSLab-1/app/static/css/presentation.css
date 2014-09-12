@@ -1,0 +1,115 @@
+
+dy
+{
+    font-family: Geneva, Lucida Sans, Lucida Grande, Lucida Sans Unicode, Verdana, sans-serif;
+    font-size: 62.5%;
+}
+
+h1
+{
+    font-size: 2em;
+    font-weight: bold;
+    padding: 1em 0 0.5em;
+}
+
+h2
+{
+    font-size: 1.6em;
+    font-weight: bold;
+    padding: 0.5em 0 0.3em;
+}
+
+h3
+{
+    color: #99bf47;
+    font-size: 1.4em;
+    margin: 0.2em 0 0.3em;
+}
+
+p
+{
+    font-size: 1.2em;
+    line-height: 120%;
+    padding: 0.2em 0;
+}
+
+.container
+{
+    margin: 0 auto;
+    width: 76.5%;
+}
+
+.header
+{
+    -moz-border-radius-topleft: 8px;
+    -moz-border-radius-topright: 8px;
+    border: 5px solid #eee;
+    border-bottom: none;
+    margin-top: 1em;
+}
+
+.header-background
+{
+    -moz-border-radius-topleft: 5px;
+    -moz-border-radius-topright: 5px;
+    background: transparent url('images/green-tile-bg.jpg') repeat-x scroll 0 0;
+    color: #fff;
+    height: 98px;
+    padding: 0 2em;
+}
+
+.introduction
+{
+    border-left: 5px solid #eee;
+    border-right: 5px solid #eee;
+    padding: 1em 2em 4em;
+}
+
+.search-content
+{
+    border-left: 5px solid #eee;
+    border-right: 5px solid #eee;
+    border-bottom: 2px solid #cdc;
+    margin-bottom: 5em;
+    padding: 1em 2em;
+}
+
+ul.results
+{
+    list-style-type: none;
+    margin: 0;
+}
+
+.results li
+{
+    margin-top: 1em;
+}
+
+.results p
+{
+    margin: 0;
+}
+
+.result-url
+{
+    color: #81909F;
+    font-size: 0.9em;
+    font-style: italic;
+}
+
+ul.result-navigation
+{
+    display: none;
+    list-style-image: none;
+    padding: 1em 0;
+}
+
+.result-navigation li
+{
+    background-color: #efefef;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    display: inline;
+    margin: 0 0.2em;
+    padding: 0.3em 0.7em;
+}
