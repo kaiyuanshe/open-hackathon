@@ -52,6 +52,3 @@ coverage.xml
 # Sphinx documentation
 docs/_build/
 
-config.py
-
-*.conf
