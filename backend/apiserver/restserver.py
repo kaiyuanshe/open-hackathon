@@ -1,8 +1,9 @@
-import containerservice
+import containerservice,constants
 from datetime import datetime
 from xml.etree.ElementTree import ElementTree
 from orm.tables import GuacamoleClientInfo, GuacamoleServerLoad
 from orm import DBSession
+
 
 
 '''
@@ -51,10 +52,8 @@ def shutdown_guacamole_client(client_id, image,protocol,mylog):
         pass
     
 def get_guacamole_client(client_id, image,protocol,mylog):
-    #print client_id +'_'+ image+'_' + protocol + '_get_guacamole_client'
     session = DBSession()
     guacamole_client = None
-    mylog.info('zhenime')
     try:
         query = session.query(GuacamoleClientInfo) 
         result = query.filter(GuacamoleClientInfo.user_info == client_id).filter(GuacamoleClientInfo.image == image).with_lockmode('update').first()
@@ -176,7 +175,7 @@ def create_guacamole_server(session,client_id,image,protocol):
             
             #TODO(): new a Guacamole Server, config file name should be specified. And the read_config() here is the lowest efficient part in the lock mode,
             #so this part is moved out of the lock mode 
-            guacamole_server = read_config('/home/kehl/workspace/OSSLab/conf/guacamole_server.xml')
+            guacamole_server = read_config(constants.guacamole_config_path)
             session.execute('LOCK TABLES guacamole_client_info WRITE,guacamole_server_load WRITE')
             session.add(guacamole_server)
             session.commit()
@@ -221,7 +220,3 @@ def read_config(config_file):
     guacamoleServerLoad = GuacamoleServerLoad(server,server_vm,acnt[0],acnt[1],acnt[2],acnt[3],sum(acnt),cur_datetime,0)
     guacamoleServerLoad.guacamole_client_info = guacamole_client_list
     return guacamoleServerLoad
-                      
-
-if __name__ == '__main__':
-    pass

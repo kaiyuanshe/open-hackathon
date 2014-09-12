@@ -1,4 +1,3 @@
-import sys,logging
 from wsgilog import WsgiLog
 import config
 
