@@ -2,41 +2,40 @@
 
 {% block content %}
 <hr>
-<hr>
 	<h1>Choose your course</h1>
 	<div class = "row" id = "course">
 		<h2>&nbsp;&nbsp;Script language</h2>
 		<hr>
 		<div class = "col-md-4">
-		<a id = "image1"><canvas id = "canvas1" height = "300" width = "500" style = "background-color:#FFFF37;"></canvas></a>
+		<a id = "image1"><canvas id = "canvas1" height = "200" width = "400" style = "background-color:#ADADAD;"></canvas></a>
 		</div>
 		<div class = "col-md-4">
-		<a id = "image2"><canvas id = "canvas2" height = "300" width = "500" style = "background-color:#EA0000;"></canvas></a>
+		<a id = "image2"><canvas id = "canvas2" height = "200" width = "400" style = "background-color:#ADADAD;"></canvas></a>
 		</div>
 		<div class = "col-md-4">
-		<a id = "image3"><canvas id = "canvas3" height = "300" width = "500" style = "background-color:#FFDC35;"></canvas></a>
+		<a id = "image3"><canvas id = "canvas3" height = "200" width = "400" style = "background-color:#ADADAD;"></canvas></a>
 		</div>
 		<h2>&nbsp;&nbsp;Database</h2>
 		<hr>
 		<div class = "col-md-4">
-                <a id = "image4"><canvas id = "canvas4" height = "300" width = "500" style = "background-color:#FF8000;"></canvas></a>
+                <a id = "image4"><canvas id = "canvas4" height = "200" width = "400" style = "background-color:#ADADAD;"></canvas></a>
                 </div>
 		<div class = "col-md-4">
-                <a id = "image5"><canvas id = "canvas5" height = "300" width = "500" style = "background-color:#FF00FF;"></canvas></a>
+                <a id = "image5"><canvas id = "canvas5" height = "200" width = "400" style = "background-color:#ADADAD;"></canvas></a>
                 </div>
 		<div class = "col-md-4">
-                <a id = "image6"><canvas id = "canvas6" height = "300" width = "500" style = "background-color:#9AFF02;"></canvas></a>
+                <a id = "image6"><canvas id = "canvas6" height = "200" width = "400" style = "background-color:#ADADAD;"></canvas></a>
                 </div>
 		<h2>&nbsp;&nbsp;Microsoft</h2>
 		<hr>
 		<div class = "col-md-4">
-                <a id = "image7"><canvas id = "canvas7" height = "300" width = "500" style = "background-color:#921AFF;"></canvas></a>
+                <a id = "image7"><canvas id = "canvas7" height = "200" width = "400" style = "background-color:#ADADAD;"></canvas></a>
                 </div>
 		<div class = "col-md-4">
-                <a id = "image8"><canvas id = "canvas8" height = "300" width = "500" style = "background-color:#2894FF;"></canvas></a>
+                <a id = "image8"><canvas id = "canvas8" height = "200" width = "400" style = "background-color:#ADADAD;"></canvas></a>
                 </div>
 		<div class = "col-md-4">
-                <a id = "image9"><canvas id = "canvas9" height = "300" width = "500" style = "background-color:#00FFFF;"></canvas></a>
+                <a id = "image9"><canvas id = "canvas9" height = "200" width = "400" style = "background-color:#ADADAD;"></canvas></a>
                 </div>
 	</div>	
 	<script type = "text/javascript">
@@ -46,13 +45,13 @@
 			ctx = canvas.getContext('2d');
 			//ctx.fillStyle = color;
 			//ctx.fillRect(0,0,400,400);
-			ctx.font = "100px Times New Roman";
+			ctx.font = "80px Times New Roman";
 			//ctx.textAlign = "left";
-			ctx.fillText(text,120-text.length*10,160);
+			ctx.fillText(text,120-text.length*10,100);
 		}
 		canvasvalue('canvas1',"Python");
 		canvasvalue('canvas2',"Ruby");
-		canvasvalue('canvas3',"Perl");
+		canvasvalue('canvas3',"Node.js");
 		canvasvalue('canvas4',"Mysql");
 		canvasvalue('canvas5',"Mongodb");
 		canvasvalue('canvas6',"Redis");
