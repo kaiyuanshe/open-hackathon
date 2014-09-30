@@ -46,6 +46,8 @@ def heart_beat(client_id, image):
     
 def shutdown_guacamole_client(client_id, image,protocol,mylog):
     guacamole_client_host,guacamole_client_vm = cancel_guacamole_client(client_id, image, protocol)
+    if guacamole_client_host==None:
+        return
     signal = containerservice.shutdown_container(guacamole_client_vm,int(guacamole_client_host[guacamole_client_host.index(':')+1:]),image)
     if signal==False:
         mylog.info("shutdown a container failed...")

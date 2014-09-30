@@ -1,4 +1,5 @@
-import web,restserver,orm,constants
+import web,orm,constants
+import apiserver.restserver as restserver
 from backendlogger.logger import Logger
 urls = ('/(.*)', 'index')
 #orm.init_session(constants.database_str)

@@ -1,8 +1,7 @@
 #coding=utf-8
 from azure import MANAGEMENT_HOST
 from azure.servicemanagement import *
-from constants import *
-import datetime
+import datetime,constants
 
 '''
     This service should fulfill these task:
@@ -12,7 +11,7 @@ import datetime
 
 class AzureService():
     def __init__(self, subscription_id=None, cert_file=None, host=MANAGEMENT_HOST):  # 'management.core.chinacloudapi.cn'
-        self.sms = ServiceManagementService(SUBSCRIPTION_ID, CERT_FILE)
+        self.sms = ServiceManagementService(constants.SUBSCRIPTION_ID, constants.CERT_FILE)
         self.__host_instance_count=dict()
         
         #when creating a new virtual machine, set its account with default username and password
@@ -79,7 +78,7 @@ class AzureService():
     
 
     def create_storage(self, storage_name):
-        self.sms.create_storage_account(storage_name, label=storage_name, location=LOCATION)
+        self.sms.create_storage_account(storage_name, label=storage_name, location=constants.LOCATION)
         
     def check_hosted_service_exist(self, hosted_service_name):
         hosted_services = self.sms.list_hosted_services()
@@ -100,9 +99,9 @@ class AzureService():
         hosted_service_exist = self.check_hosted_service_exist(hosted_service_name)
         if hosted_service_exist == False:
             self.sms.create_hosted_service(service_name=hosted_service_name, label=hosted_service_name, description=None,
-                                           location=LOCATION, affinity_group=None, extended_properties=None);
+                                           location=constants.LOCATION, affinity_group=None, extended_properties=None);
         linux_config = self.__linux_config(deployment_name)
-        os_hd = self.__os_hd(LINUX_IMAGE, CONTAINER_NAME, 'linux')  # may be windows
+        os_hd = self.__os_hd(constants.LINUX_IMAGE, constants.CONTAINER_NAME, 'linux')  # may be windows
         network_config = self.__network_config()
         self.sms.create_virtual_machine_deployment(hosted_service_name, deployment_name, 'production', deployment_name,
                                                    deployment_name, linux_config, os_hd, network_config, role_size='Small')
@@ -122,4 +121,4 @@ class AzureService():
     
 if __name__ == '__main__':
     ass = AzureService()
-    ass.create_linux_vm('kangjihua', 'kangjihua')
+    #ass.create_linux_vm('kangjihua', 'kangjihua')
