@@ -1,16 +1,18 @@
 // google oauth
 $(function() {
-	$('#githublogin').click(function() {
+	$('#qqlogin').click(function() {
 		login();
 	});
 
-	var clientId = "client_id=0eded406cf0b3f83b181";
-	var redirect_uri = "redirect_uri=http://osslab.chinacloudapp.cn/github";
-	var scope = "scope=user";
+	var clientId = "client_id=101157515";
+	var redirect_uri = "redirect_uri=http://osslab.chinacloudapp.cn/qq";
+	var scope = "scope=get_user_info";
+	var state="state=osslab";
+	var response_type = "response_type=code"
 	
 	function login() {
-		var arr = [clientId,redirect_uri,scope];
-		var url = "https://github.com/login/oauth/authorize?" + arr.join("&");
+		var arr = [clientId,redirect_uri,scope,state,response_type];
+		var url = "https://graph.qq.com/oauth2.0/authorize?" + arr.join("&");
 		location.href = url;
 		/*$.ajax({
                     type : "GET",

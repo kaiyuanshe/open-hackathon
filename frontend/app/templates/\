@@ -23,8 +23,12 @@
     	<script src = "/js/renren.js"></script>
     	<script src = "/js/github.js"></script>
 	<script src = "/js/qq.js"></script>
-   <style type="text/css">
-    </style>
+	<style>
+	#footer {
+	 height : 60px;
+	 background-color : #f5f5f5; 
+	}
+	</style>
   </head>
 
   <body>
@@ -65,10 +69,9 @@
         <p>July 2014</p>
 	<p>Oneweek Hackathon</p>
       </footer>-->
-	<div id="push"></div>
 	<div id = "footer">
-		<div class = "container2">
-	   		<p class="muted credit">MS opentech<a href="#">Contact us</a><a href="#">Privacy Statement</a>©2014 Microsoft Open Technologies, Inc. All Rights Reserved</p>	
+		<div class = "container">
+			
 		</div>
 	</div>
     </div> <!-- /container -->
