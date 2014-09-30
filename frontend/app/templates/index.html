@@ -24,6 +24,27 @@
     	<script src = "/js/github.js"></script>
 	<script src = "/js/qq.js"></script>
    <style type="text/css">
+	.ds-service-link{
+			display:block;
+			background:url("/pic/service-icons-color.png") no-repeat;	
+			_background-image:url("http://static.duoshuo.com/images/service-icons-color.gif");
+			overflow:hidden;
+
+			width: 72px;
+			font-size: 14px;
+			text-align: left;
+			padding-left: 20px;
+		}
+
+		.ds-qq{
+			background-position: 0 -192px;
+		}
+		.ds-renren{
+			background-position: 0 -32px;
+		}
+		.ds-google{
+			background-position: 0 -240px;
+		}
     </style>
   </head>
 
@@ -50,8 +71,16 @@
 	<p><b><h2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="white">更方便快捷的学习IT知识</font></h2></b></p>
 <p><b><h2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="white">在云端</font></h2></b></p>
 	<p><b><h2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;第三方登录</h2></b></p>
-	<div class = "btn-group-vertical">
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class = "btn btn-default btn-lg" role = "button" id = "googlelogin">google</a><a class = "btn btn-success btn-lg" id = "githublogin" role = "button">github</a><a class = "btn btn-primary btn-lg"role = "button" id = "renrenlogin">renren</a><a class="btn btn-danger btn-lg" role = "button" id = "qqlogin">腾讯QQ</a></p>
+	<div class = "btn-group-vertical"><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="btn btn-default btn-lg" role="button" id="googlelogin">
+				<span class="ds-service-link ds-google">google</span>
+			</a>
+			<a class="btn btn-success btn-lg" id="githublogin" role="button">github</a>
+			<a class="btn btn-primary btn-lg" role="button" id="renrenlogin">
+				<span class="ds-service-link ds-renren">renren</span>
+			</a>
+			<a class="btn btn-danger btn-lg " role="button" id="qqlogin">
+				<span class="ds-service-link ds-qq">腾讯QQ</span>
+			</a></p>
 	</div>
 	</div>
     </div>
@@ -65,12 +94,11 @@
         <p>July 2014</p>
 	<p>Oneweek Hackathon</p>
       </footer>-->
-	<div id="push"></div>
-	<div id = "footer">
-		<div class = "container2">
-	   		<p class="muted credit">MS opentech<a href="#">Contact us</a><a href="#">Privacy Statement</a>©2014 Microsoft Open Technologies, Inc. All Rights Reserved</p>	
-		</div>
-	</div>
+	<footer>
+	<p align="center"><a href="http://osslab.msopentech.cn/Contact">Contact us</a> | <a target="_blank" href="http://osslab.msopentech.cn/Res/en-us/PrivacyStatement.htm">Privacy &amp; Cookies</a> | <a target="_blank" href="http://osslab.msopentech.cn/Res/en-us/ToU.htm">Terms of use</a> | © 2013 Microsoft Open Technologies, Inc.Shanghai</p>
+	</footer>
+     <!-- /container -->
+  
     </div> <!-- /container -->
   </body>
 </html>
