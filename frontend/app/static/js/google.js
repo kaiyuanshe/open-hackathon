@@ -5,7 +5,8 @@ $(function() {
 	});
 
 	var clientId = "client_id=304944766846-7jt8jbm39f1sj4kf4gtsqspsvtogdmem.apps.googleusercontent.com";
-	var redirect_uri = "redirect_uri=http://osslab.chinacloudapp.cn:5080/google";
+	var localurl = location.href;
+	var redirect_uri = "redirect_uri=" + localurl + "google";
 	var scope = "scope=https://www.googleapis.com/auth/userinfo.profile+https://www.googleapis.com/auth/userinfo.email";
 	var response_type = "response_type=token";
 	
@@ -45,9 +46,12 @@ $(function() {
                                                 success: function(msg) {
                                                          $("#name").html('<p style = "color:white">' + msg.name  + "</p>");
                                                          $("#photo").html('<img src = "' + msg.picture + '" height = "30" width = "30"/>');
+							 document.cookie = 'username=' + msg.name;
+							 document.cookie = 'picurl=' + msg.picture;
+							 var pre = window.location.host;
                                                          for (var i = 1;i <= 9;i++) {
                                                                 name = "#image" + i.toString();
-                                                                url = "http://osslab.chinacloudapp.cn:5080/course?type=" + i.toString();
+                                                                url = "course?type=" + i.toString();
                                                                 $(name).attr("href",url);
                                                          }
                                                 },

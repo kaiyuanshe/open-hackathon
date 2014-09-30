@@ -60,9 +60,10 @@
                 canvasvalue('canvas8',"Typescript");
                 canvasvalue('canvas9',"Azure");
 
+		 var pre = window.location.host;
                  for (var i = 1;i <= 9;i++) {
                         name = "#image" + i.toString();
-                        url = "http://osslab.chinacloudapp.cn:5080/course?type=" + i.toString();
+                        url = "course?type=" + i.toString();
                         $(name).attr("href",url);
                 }
 
