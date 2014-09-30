@@ -2,41 +2,40 @@
 
 {% block content %}
 <hr>
-<hr>
-	<h1>Choose your course</h1>
+	<h1>课程选择</h1>
 	<div class = "row" id = "course">
-		<h2>&nbsp;&nbsp;Script language</h2>
+		<h2>&nbsp;&nbsp;脚本语言</h2>
 		<hr>
 		<div class = "col-md-4">
-		<a id = "image1"><canvas id = "canvas1" height = "300" width = "500" style = "background-color:#FFFF37;"></canvas></a>
+		<a id = "image1"><canvas id = "canvas1" height = "200" width = "400" style = "background-color:#ADADAD;"></canvas></a>
 		</div>
 		<div class = "col-md-4">
-		<a id = "image2"><canvas id = "canvas2" height = "300" width = "500" style = "background-color:#EA0000;"></canvas></a>
+		<a id = "image2"><canvas id = "canvas2" height = "200" width = "400" style = "background-color:#ADADAD;"></canvas></a>
 		</div>
 		<div class = "col-md-4">
-		<a id = "image3"><canvas id = "canvas3" height = "300" width = "500" style = "background-color:#FFDC35;"></canvas></a>
+		<a id = "image3"><canvas id = "canvas3" height = "200" width = "400" style = "background-color:#ADADAD;"></canvas></a>
 		</div>
-		<h2>&nbsp;&nbsp;Database</h2>
+		<h2>&nbsp;&nbsp;数据库</h2>
 		<hr>
 		<div class = "col-md-4">
-                <a id = "image4"><canvas id = "canvas4" height = "300" width = "500" style = "background-color:#FF8000;"></canvas></a>
+                <a id = "image4"><canvas id = "canvas4" height = "200" width = "400" style = "background-color:#ADADAD;"></canvas></a>
                 </div>
 		<div class = "col-md-4">
-                <a id = "image5"><canvas id = "canvas5" height = "300" width = "500" style = "background-color:#FF00FF;"></canvas></a>
+                <a id = "image5"><canvas id = "canvas5" height = "200" width = "400" style = "background-color:#ADADAD;"></canvas></a>
                 </div>
 		<div class = "col-md-4">
-                <a id = "image6"><canvas id = "canvas6" height = "300" width = "500" style = "background-color:#9AFF02;"></canvas></a>
+                <a id = "image6"><canvas id = "canvas6" height = "200" width = "400" style = "background-color:#ADADAD;"></canvas></a>
                 </div>
-		<h2>&nbsp;&nbsp;Microsoft</h2>
+		<h2>&nbsp;&nbsp;微软技术</h2>
 		<hr>
 		<div class = "col-md-4">
-                <a id = "image7"><canvas id = "canvas7" height = "300" width = "500" style = "background-color:#921AFF;"></canvas></a>
+                <a id = "image7"><canvas id = "canvas7" height = "200" width = "400" style = "background-color:#ADADAD;"></canvas></a>
                 </div>
 		<div class = "col-md-4">
-                <a id = "image8"><canvas id = "canvas8" height = "300" width = "500" style = "background-color:#2894FF;"></canvas></a>
+                <a id = "image8"><canvas id = "canvas8" height = "200" width = "400" style = "background-color:#ADADAD;"></canvas></a>
                 </div>
 		<div class = "col-md-4">
-                <a id = "image9"><canvas id = "canvas9" height = "300" width = "500" style = "background-color:#00FFFF;"></canvas></a>
+                <a id = "image9"><canvas id = "canvas9" height = "200" width = "400" style = "background-color:#ADADAD;"></canvas></a>
                 </div>
 	</div>	
 	<script type = "text/javascript">
@@ -46,13 +45,13 @@
 			ctx = canvas.getContext('2d');
 			//ctx.fillStyle = color;
 			//ctx.fillRect(0,0,400,400);
-			ctx.font = "100px Times New Roman";
+			ctx.font = "80px Times New Roman";
 			//ctx.textAlign = "left";
-			ctx.fillText(text,120-text.length*10,160);
+			ctx.fillText(text,120-text.length*10,100);
 		}
 		canvasvalue('canvas1',"Python");
 		canvasvalue('canvas2',"Ruby");
-		canvasvalue('canvas3',"Perl");
+		canvasvalue('canvas3',"Node.js");
 		canvasvalue('canvas4',"Mysql");
 		canvasvalue('canvas5',"Mongodb");
 		canvasvalue('canvas6',"Redis");
@@ -61,50 +60,5 @@
 		canvasvalue('canvas9',"Azure");
 		}
 	</script>
-	<script type = "text/javascript">
-		$(function() {
-			$(document).ready(function() {
-				Display();
-			});
-
-			function getUrlparam(name) {
-				var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
-				var r = window.location.search.substr(1).match(reg);
-				if (r!=null) return unescape(r[2]); return null;
-			}
-
-			function Display() {
-				var name = "access_token";
-				var url = window.location.href;
-				var theRequest = new Object();
-				if (url.indexOf("#")!=-1) {
-					var str = url.substr(url.indexOf("#")+1);
-					var strs = str.split("&");
-					for (var i = 0;i < strs.length;i ++)
-					{
-					theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
-					}
-					newurl = "https://www.googleapis.com/oauth2/v1/userinfo?access_token=" + theRequest[name];
-					$.ajax({
-						type : "GET",
-						url : newurl,
-						dataType : "jsonp",
-						success: function(msg) {
-							 $("#name").html('<p style = "color:white">' + msg.name  + "</p>");
-							 $("#photo").html('<img src = "' + msg.picture + '" height = "30" width = "30"/>');
-							 for (var i = 1;i <= 9;i++) {
-								name = "#image" + i.toString();
-								url = "http://osslab.chinacloudapp.cn:5080/course?type=" + i.toString();
-								$(name).attr("href",url);
-							 } 
-						},
-						error : function(msg) {
-							alert("something is wrong!\n" + msg.d);
-						}
-					});
-				}
-			}
-		});	
-	</script>
-	
+	<script src = "/js/google.js"></script>
 {% endblock %} 
