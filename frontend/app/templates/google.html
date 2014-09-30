@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+<hr>
+	<h1>课程选择</h1>
+	<div class = "row" id = "course">
+		<h2>&nbsp;&nbsp;脚本语言</h2>
+		<hr>
+		<div class = "col-md-4">
+		<a id = "image1"><canvas id = "canvas1" height = "200" width = "400" style = "background-color:#ADADAD;"></canvas></a>
+		</div>
+		<div class = "col-md-4">
+		<a id = "image2"><canvas id = "canvas2" height = "200" width = "400" style = "background-color:#ADADAD;"></canvas></a>
+		</div>
+		<div class = "col-md-4">
+		<a id = "image3"><canvas id = "canvas3" height = "200" width = "400" style = "background-color:#ADADAD;"></canvas></a>
+		</div>
+		<h2>&nbsp;&nbsp;数据库</h2>
+		<hr>
+		<div class = "col-md-4">
+                <a id = "image4"><canvas id = "canvas4" height = "200" width = "400" style = "background-color:#ADADAD;"></canvas></a>
+                </div>
+		<div class = "col-md-4">
+                <a id = "image5"><canvas id = "canvas5" height = "200" width = "400" style = "background-color:#ADADAD;"></canvas></a>
+                </div>
+		<div class = "col-md-4">
+                <a id = "image6"><canvas id = "canvas6" height = "200" width = "400" style = "background-color:#ADADAD;"></canvas></a>
+                </div>
+		<h2>&nbsp;&nbsp;微软技术</h2>
+		<hr>
+		<div class = "col-md-4">
+                <a id = "image7"><canvas id = "canvas7" height = "200" width = "400" style = "background-color:#ADADAD;"></canvas></a>
+                </div>
+		<div class = "col-md-4">
+                <a id = "image8"><canvas id = "canvas8" height = "200" width = "400" style = "background-color:#ADADAD;"></canvas></a>
+                </div>
+		<div class = "col-md-4">
+                <a id = "image9"><canvas id = "canvas9" height = "200" width = "400" style = "background-color:#ADADAD;"></canvas></a>
+                </div>
+	</div>	
+	<script type = "text/javascript">
+		window.onload = function() {
+		function canvasvalue(id ,text) {
+			canvas = document.getElementById(id);
+			ctx = canvas.getContext('2d');
+			//ctx.fillStyle = color;
+			//ctx.fillRect(0,0,400,400);
+			ctx.font = "80px Times New Roman";
+			//ctx.textAlign = "left";
+			ctx.fillText(text,120-text.length*10,100);
+		}
+		canvasvalue('canvas1',"Python");
+		canvasvalue('canvas2',"Ruby");
+		canvasvalue('canvas3',"Node.js");
+		canvasvalue('canvas4',"Mysql");
+		canvasvalue('canvas5',"Mongodb");
+		canvasvalue('canvas6',"Redis");
+		canvasvalue('canvas7',".NET");
+		canvasvalue('canvas8',"Typescript");
+		canvasvalue('canvas9',"Azure");
+		}
+	</script>
+	<script src = "/js/google.js"></script>
+{% endblock %} 
