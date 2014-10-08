@@ -147,7 +147,7 @@ def course():
 	#req = urllib2.Request(url = url , data = data)
 	#res = (urllib2.urlopen(req)).read()
 	#res = 'http://' + res
-	return render_template("course.html",name=username,pic=url,urlofi='http://www.baidu.com')
+	return render_template("course.html",name=username,pic=url)
 @app.route('/test_ice')
 def test_ice():
 	return render_template("test_ice.html")
