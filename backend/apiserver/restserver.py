@@ -186,6 +186,7 @@ def create_guacamole_server(session,client_id,image,protocol):
         session.rollback()
     finally:
         session.execute('UNLOCK TABLES')
+        session.commit()
         #session.close()
     
 
