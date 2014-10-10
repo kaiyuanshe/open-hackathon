@@ -5,7 +5,7 @@ $(function() {
 	});
 
 	var clientId = "client_id=101157515";
-	var redirect_uri = "redirect_uri=http://osslab.chinacloudapp.cn/qq";
+	var redirect_uri = "redirect_uri=http://osslab.msopentech.cn/qq";
 	var scope = "scope=get_user_info";
 	var state="state=osslab";
 	var response_type = "response_type=code"

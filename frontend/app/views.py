@@ -29,12 +29,12 @@ def add_head_href(head,href):
 @app.route('/index')
 def index():
         return render_template("index.html")
-@app.route('/linux')
-def linux():
-	return render_template("linux.html")
-@app.route('/windows')
-def windows():
-	return render_template("windows.html")
+@app.route('/PrivacyStatement')
+def PrivacyStatement():
+	return render_template("PrivacyStatement.html")
+@app.route('/TermsOfUse')
+def TermsOfUse():
+	return render_template("TermsOfUse.html")
 @app.route('/paper')
 def paper():
 	return render_template("paper.html")
@@ -78,7 +78,7 @@ def github():
 def qq():
 	code = request.args.get('code')
 	#print code
-	url = '/oauth2.0/token?grant_type=authorization_code&client_id=101157515&client_secret=018293bdbc15ddfc84306234aa34aa6c&redirect_uri=http://osslab.chinacloudapp.cn/qq&code=' + code
+	url = '/oauth2.0/token?grant_type=authorization_code&client_id=101157515&client_secret=018293bdbc15ddfc84306234aa34aa6c&redirect_uri=http://osslab.chinacloudapp.cn/qq&code=' + code + '&state=osslab'
 	httpres = query_info('graph.qq.com',url,2)
 	url_ori = httpres.read()
 	start = url_ori.index('=')
@@ -86,14 +86,15 @@ def qq():
 	access_token = url_ori[start+1:end]
 	url = '/oauth2.0/me?access_token=' + access_token
 	httpres = query_info('graph.qq.com',url,2)
-	#info = json.loads(httpres.read())
-	#openid=info['openid']
-	#appid = info['appid']
-	#url = '/user/get_user_info?access_token=' + access_token + '&oauth_consumer_key=' +appid +'&openid=' + openid
-	#httpres = query_info('graph.qq.com',url,2)
-	#info = json.loads(httpres.read())
-	#print httpres.read()
-	return render_template("qq.html",name='nickname')
+	info = httpres.read()
+	info = info[10:-4]
+	info = json.loads(info)
+	openid=info['openid']
+	appid = info['client_id']
+	url = '/user/get_user_info?access_token=' + access_token + '&oauth_consumer_key=' +appid +'&openid=' + openid
+	httpres = query_info('graph.qq.com',url,2)
+	info = json.loads(httpres.read())	
+	return render_template("qq.html",name=appid)
 @app.route('/renren')
 def renren():
 	url_ori = request.url
@@ -141,8 +142,8 @@ def course():
 	typecode = request.args.get('type')
 	username = request.cookies.get('username')
 	url = request.cookies.get('picurl')
-	#data = {'request':'1'} + {'client_id':username} + {'image' : 'python'} + {'protocol' : 'ssh'}
-	#url = 'http://osslab.chinacloudapp.cn:8080'
+	#data = {'request':'1'} + {'client_id':'username'} + {'image' : 'python'} + {'protocol' : 'ssh'}
+	#url = 'http://osslab1.chinacloudapp.cn:28080'
 	#data = urllib.urlencode(data)
 	#req = urllib2.Request(url = url , data = data)
 	#res = (urllib2.urlopen(req)).read()
