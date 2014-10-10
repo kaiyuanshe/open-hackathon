@@ -50,7 +50,7 @@ def google():
 @app.route('/github')
 def github():
 	code = request.args.get('code')
-	url = '/login/oauth/access_token?client_id=0eded406cf0b3f83b181&client_secret=3c81babd71d0cf60db3362261d42b4ce6b199538&redirect_uri=http://osslab.chinacloudapp.cn/github&code=' + code
+	url = '/login/oauth/access_token?client_id=0eded406cf0b3f83b181&client_secret=3c81babd71d0cf60db3362261d42b4ce6b199538&redirect_uri=http://osslab.msopentech.cn/github&code=' + code
 	httpres = query_info('github.com',url,2);
 	url_ori = httpres.read()
 	start = url_ori.index('=')
@@ -78,7 +78,7 @@ def github():
 def qq():
 	code = request.args.get('code')
 	#print code
-	url = '/oauth2.0/token?grant_type=authorization_code&client_id=101157515&client_secret=018293bdbc15ddfc84306234aa34aa6c&redirect_uri=http://osslab.chinacloudapp.cn/qq&code=' + code + '&state=osslab'
+	url = '/oauth2.0/token?grant_type=authorization_code&client_id=101157515&client_secret=018293bdbc15ddfc84306234aa34aa6c&redirect_uri=http://osslab.msopentech.cn/qq&code=' + code + '&state=osslab'
 	httpres = query_info('graph.qq.com',url,2)
 	url_ori = httpres.read()
 	start = url_ori.index('=')
@@ -94,7 +94,7 @@ def qq():
 	url = '/user/get_user_info?access_token=' + access_token + '&oauth_consumer_key=' +appid +'&openid=' + openid
 	httpres = query_info('graph.qq.com',url,2)
 	info = json.loads(httpres.read())	
-	return render_template("qq.html",name=appid)
+	return render_template("qq.html",name=info['nickname'],pic=info['figureurl'])
 @app.route('/renren')
 def renren():
 	url_ori = request.url
@@ -142,13 +142,13 @@ def course():
 	typecode = request.args.get('type')
 	username = request.cookies.get('username')
 	url = request.cookies.get('picurl')
-	#data = {'request':'1'} + {'client_id':'username'} + {'image' : 'python'} + {'protocol' : 'ssh'}
-	#url = 'http://osslab1.chinacloudapp.cn:28080'
-	#data = urllib.urlencode(data)
-	#req = urllib2.Request(url = url , data = data)
-	#res = (urllib2.urlopen(req)).read()
-	#res = 'http://' + res
-	return render_template("course.html",name=username,pic=url)
+	data = {'request':'1', 'client_id':'zwk', 'image':'python','protocol':'ssh'}
+	url2 = 'http://osslab1.chinacloudapp.cn:28080'
+	data = urllib.urlencode(data)
+	req = urllib2.Request(url = url2 , data = data)
+	res_data = urllib2.urlopen(req)
+	res = 'http://' + res_data.read()
+	return render_template("course.html",name=username,pic=url,vm = res)
 @app.route('/test_ice')
 def test_ice():
 	return render_template("test_ice.html")
