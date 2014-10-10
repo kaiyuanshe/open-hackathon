@@ -25,6 +25,32 @@ def add_head_href(head,href):
 	href = ('src="' + head).join(arr)
 	return href
 
+def mapper(typecode , username):
+	ret = {}
+	ret['request'] = '1'
+	ret['client_id'] = username
+	if (typecode == 8):
+		ret['protocol'] = 'rdp'
+	if (typecode < 8):
+		ret['protocol'] = 'ssh'
+	if (typecode == 1):
+		ret['image'] = 'python'
+	elif (typecode == 2):
+		ret['image'] = 'ruby'
+	elif (typecode == 3):
+		ret['image'] = 'nodejs'
+	elif (typecode == 4):
+		ret['image'] = 'perl'
+	elif (typecode == 5):
+		ret['image'] = 'mysql'
+	elif (typecode == 6):
+		ret['image'] = 'mongodb'
+	elif (typecode == 7):
+		ret['image'] = 'redis'
+	elif (typecode == 8):
+		ret['image'] = 'typescript'
+	return ret
+
 @app.route('/')
 @app.route('/index')
 def index():
@@ -142,7 +168,8 @@ def course():
 	typecode = request.args.get('type')
 	username = request.cookies.get('username')
 	url = request.cookies.get('picurl')
-	data = {'request':'1', 'client_id':'zwk', 'image':'python','protocol':'ssh'}
+	data = mapper(int(typecode),username)
+	#data = {'request':'1', 'client_id':username, 'image':'python','protocol':'ssh'}
 	url2 = 'http://osslab1.chinacloudapp.cn:28080'
 	data = urllib.urlencode(data)
 	req = urllib2.Request(url = url2 , data = data)
