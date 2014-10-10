@@ -1,13 +1,12 @@
 {% extends "base.html" %}
 
 {% block content %}
-<hr>
-<hr>
 
-<a href = "javascript:history.back(-1)">返回上一页</a>
+<a href = "javascript:history.back(-1)">返回上一步
+</a><p>
 <div class = "row" style="padding-left: 15px;">
 <div class = "col-md-6" >
-<iframe id = "vm"  src = "{{urlofi}}" width="800" height="800" frameborder="yes" border="0" marginwidth="100" marginheight="10" scrolling="yes" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>
+<iframe id = "vm"  src = "{{ vm }}" width="800" height="600" frameborder="yes" border="0" marginwidth="10" marginheight="10" scrolling="yes" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>
 <br/>
 
 <script>
@@ -58,7 +57,7 @@ function setFocusThickboxIframe() {
         </div>
 </div>
 -->
-<iframe id = "document" width = "800" height = "800" scrolling = "yes"></iframe>
+<iframe id = "document" width = "800" height = "600" scrolling = "yes"></iframe>
 </div>
 <script src = "/js/course.js">
 </script>
