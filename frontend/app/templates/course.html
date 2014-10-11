@@ -1,19 +1,18 @@
 {% extends "base.html" %}
 
 {% block content %}
-
-<a href = "javascript:history.back(-1)">返回上一步</a>
-<div class = "row" style="padding-left: 15px;">
+<div style="text-align:center;background-color:#F0F0F0;"><a href = "javascript:history.back(-1)">返回上一步</a></div>
+<div class = "row" style="padding-left: 15px; width:1650px;">
 	<div class = "col-md-6" >
-		<iframe id = "vm"  src = "{{ vm }}" width="800" height="600" frameborder="yes" border="0" marginwidth="10" marginheight="10" scrolling="yes" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>
+		<iframe id = "vm"  src = "{{ vm }}" width="800" height="600" frameborder="yes" border="0" marginwidth="10" marginheight="20" scrolling="yes" onclick="setFocusThickboxIframe()" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>
 	<br/>
-
 	<script>
 	function setFocusThickboxIframe() {
-	    document.getElementById("vm").focus();
-	   // alert("ok");
+	    document.getElementById("vm").contentWindow.focus();
+	    //alert("ok");
 	}
 	</script>
+<div>如果终端键盘无法输入，请鼠标点击终端最下边的边框。</div>
 	</div>
 	<div class = "col-md-6">
 		<!--<div class = "row">
@@ -58,6 +57,7 @@
 		-->
 		<iframe id = "document" width = "800" height = "600" scrolling = "yes"></iframe>
 	</div>
+<div>如果终端键盘无法输入，请鼠标点击终端最下边的边框。</div>
 	<script src = "/js/course.js">
 	</script>
 </div>

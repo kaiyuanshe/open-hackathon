@@ -39,7 +39,7 @@ var theRequest = new Object();
                                 word = "http://azure.microsoft.com/en-us";
                         */
                         if (i == 1)
-                                word = "http://www.bing.com/search?q=python%E5%9C%A8%E7%BA%BF%E6%95%99%E7%A8%8B&market=en-us";
+                                word = "http://www.bing.com/search?q=python%E5%9C%A8%E7%BA%BF%E6%95%99%E7%A8%8B&market=zh-us";
                         if (i == 2)
                                 word = "http://www.bing.com/search?q=ruby%E5%9C%A8%E7%BA%BF%E6%95%99%E7%A8%8B&market=zh-us";
                         if (i == 3)
