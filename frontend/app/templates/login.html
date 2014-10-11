@@ -6,7 +6,7 @@
     <meta name="description" content="">
     <meta name="robots" content="noindex,nofollow">
     <meta name="author" content="">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="/js/jquery.min.js"></script>
 	<script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jquery.ui/1.8.18/jquery-ui.min.js"></script>
     <script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.min.js"></script> 
     <link href="/css/bootstrap.min.css" rel="stylesheet">
@@ -19,10 +19,11 @@
 			width: 1080px;
 			margin-left:auto;
 			margin-right:auto;
+			background-color: #eee;
 		}
 		.course-item{
 			border:1px solid #999999;
-			width:200px;
+			width:230px;
 			margin-right:20px;
 		}
 		.head{
@@ -63,6 +64,22 @@
 		.col-md-4{
 			padding:0px;
 		}
+		.div-main{			
+			background-color: #fff;
+			box-shadow: 1px solid;
+			-moz-box-shadow: 10px 10px 10px #999;                    
+			-webkit-box-shadow: 10px 10px 10px #999;                 
+			box-shadow: 10px 10px 10px #999;
+		}
+		.div-main h1,.div-main h2{
+			margin-left: 20px;
+		}
+		.div-row{
+			overflow: hidden;
+			margin-left: auto;
+			margin-right: auto;
+		}
+		
 	</style>
   </head>
  <body>
@@ -76,7 +93,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="http://osslab.msopentech.cn/"><img src="/pic/icon.jpg" height="30" width="30">开源软件实验室(预览版)</a>
+	 <a class="navbar-brand" href="http://osslab.msopentech.cn"><img src="/pic/icon.jpg" height="30" width="30"></img>开源软件实验室(预览版)</a><a style="float:left;font-size:18px;padding-top:16px" href = "http://www.wenjuan.com/s/QBNfiu?test=1&v=0.687169515648">问卷调查</a>
         </div>
         <div class="navbar-collapse collapse">
           <form class="navbar-form navbar-right" role="form">
@@ -90,168 +107,157 @@
         </div><!--/.navbar-collapse -->
       </div>
     </div>
-<br/></br></br></br>    
-	<h1>选择你的科目</h1>
+<br/></br>
+	<div class="div-main">
+		</br></br>    
+		<h1>选择你的科目</h1>
 
-	<div class="row" id="course">
-		<h2>编程语言...</h2>
-		<hr>
+		<div class="row" id="course">
+			<h2>编程语言...</h2>
+			<hr>
+			<div class="div-row">
+				<div class="col-md-4 course-item" style="margin-left: 50px;">
+						<!--<canvas id="canvas1" height="200" width="400" style="background-color:#ADADAD;"></canvas>-->
+						<div class="head">
+							<p>python教程</p>
+						</div>
+						<div class="body">
+							<p class="content">Python, 是一种流行易学而强大的编程语言</p>
+							<p><img height="20" src="/pic/course.ico"><a id="image1">初级教程</a></p>
+							<p><img height="20" src="/pic/course.ico">中级教程</p>
+							<p><img height="20" src="/pic/course.ico">高级教程</p>
+						</div>
+						<div class="foot">
+							<p>更新时间：2014-10-01</p>
+						</div>
+				</div>
+				<div class="col-md-4 course-item">
+					<!--<canvas id="canvas2" height="200" width="400" style="background-color:#ADADAD;"></canvas> -->
+						<div class="head">
+							<p>ruby教程</p>
+						</div>
+						<div class="body">
+							<p class="content">Ruby, 是一种跨平台面向对象的动态类型编程语言</p>
+							<p><img height="20" src="/pic/course.ico"><a id="image2">初级教程</a></p>
+							<p><img height="20" src="/pic/course.ico">中级教程</p>
+							<p><img height="20" src="/pic/course.ico">高级教程</p>
+						</div>
+						<div class="foot">
+							<p>更新时间：2014-10-01</p>
+						</div>
+				</div>
+				<div class="col-md-4 course-item">
+					<!--<canvas id="canvas3" height="200" width="400" style="background-color:#ADADAD;"></canvas> -->
+						<div class="head">
+							<p>NodeJs教程</p>
+						</div>
+						<div class="body">
+							<p class="content">NodeJS, 是一种服务器端的JavaScript编程语言</p>
+							<p><img height="20" src="/pic/course.ico"><a id="image3">初级教程</a></p>
+							<p><img height="20" src="/pic/course.ico">中级教程</p>
+							<p><img height="20" src="/pic/course.ico">高级教程</p>
+						</div>
+						<div class="foot">
+							<p>更新时间：2014-10-01</p>
+						</div>
+				</div>
 
-		<div class="col-md-4 course-item">
-				<!--<canvas id="canvas1" height="200" width="400" style="background-color:#ADADAD;"></canvas>-->
-				<div class="head">
-					<p>python教程</p>
+				<div class="col-md-4 course-item">
+					<!--<canvas id="canvas3" height="200" width="400" style="background-color:#ADADAD;"></canvas> -->
+						<div class="head">
+							<p>Perl教程</p>
+						</div>
+						<div class="body">
+							<p class="content">Perl, 是一种文本和系统处理功能强大的脚本语言</p>
+							<p><img height="20" src="/pic/course.ico"><a id="image4">初级教程</a></p>
+							<p><img height="20" src="/pic/course.ico">中级教程</p>
+							<p><img height="20" src="/pic/course.ico">高级教程</p>
+						</div>
+						<div class="foot">
+							<p>更新时间：2014-10-01</p>
+						</div>
 				</div>
-				<div class="body">
-					<p class="content">Python, 是一种流行易学而强大的编程语言</p>
-					<p><img height="20" src="/pic/course.ico"><a id="image1">初级教程</a></p>
-					<p><img height="20" src="/pic/course.ico">中级教程</p>
-					<p><img height="20" src="/pic/course.ico">高级教程</p>
-				</div>
-				<div class="foot">
-					<p>更新时间：2014-10-01</p>
-				</div>
+			</div>
 		</div>
-		<div class="col-md-4 course-item">
-			<!--<canvas id="canvas2" height="200" width="400" style="background-color:#ADADAD;"></canvas> -->
-				<div class="head">
-					<p>ruby教程</p>
-				</div>
-				<div class="body">
-					<p class="content">Ruby, 是一种跨平台面向对象的动态类型编程语言</p>
-					<p><img height="20" src="/pic/course.ico"><a id="image2">初级教程</a></p>
-					<p><img height="20" src="/pic/course.ico">中级教程</p>
-					<p><img height="20" src="/pic/course.ico">高级教程</p>
-				</div>
-				<div class="foot">
-					<p>更新时间：2014-10-01</p>
-				</div>
-		</div>
-		<div class="col-md-4 course-item">
-			<!--<canvas id="canvas3" height="200" width="400" style="background-color:#ADADAD;"></canvas> -->
-				<div class="head">
-					<p>NodeJs教程</p>
-				</div>
-				<div class="body">
-					<p class="content">NodeJS, 是一种服务器端的JavaScript编程语言</p>
-					<p><img height="20" src="/pic/course.ico"><a id="image3">初级教程</a></p>
-					<p><img height="20" src="/pic/course.ico">中级教程</p>
-					<p><img height="20" src="/pic/course.ico">高级教程</p>
-				</div>
-				<div class="foot">
-					<p>更新时间：2014-10-01</p>
-				</div>
-		</div>
-		<div class="col-md-4 course-item">
-			<!--<canvas id="canvas3" height="200" width="400" style="background-color:#ADADAD;"></canvas> -->
-				<div class="head">
-					<p>Perl教程</p>
-				</div>
-				<div class="body">
-					<p class="content">Perl, 是一种文本和系统处理功能强大的脚本语言</p>
-					<p><img height="20" src="/pic/course.ico"><a id="image4">初级教程</a></p>
-					<p><img height="20" src="/pic/course.ico">中级教程</p>
-					<p><img height="20" src="/pic/course.ico">高级教程</p>
-				</div>
-				<div class="foot">
-					<p>更新时间：2014-10-01</p>
-				</div>
-		</div>
-        </div>
-        <div class="row" id="course">
+		<div class="row" id="course">
 
-		<h2>数据库...</h2>
-		<hr>
-		<div class="col-md-4 course-item">
-                   <div class="head">
-                       <p>MySQL教程</p>
-                   </div>
-                   <div class="body">
-                       <p class="content">MySQL, 是一种流行的关系数据库系统</p>
-                       <p><img height="20" src="/pic/course.ico"><a id="image5">初级教程</a></p>
-                       <p><img height="20" src="/pic/course.ico">中级教程</p>
-                       <p><img height="20" src="/pic/course.ico">高级教程</p>
-                   </div>
-                   <div class="foot">
-                       <p>更新时间：2014-10-01</p>
-                   </div>
-                </div>
-                <div class="col-md-4 course-item">
-                   <div class="head">
-                       <p>MongoDB教程</p>
-                   </div>
-                   <div class="body">
-                       <p class="content">MongoDB, 是一种NoSQL文本数据库系统</p>
-                       <p><img height="20" src="/pic/course.ico"><a id="image6">初级教程</a></p>
-                       <p><img height="20" src="/pic/course.ico">中级教程</p>
-                       <p><img height="20" src="/pic/course.ico">高级教程</p>
-                   </div>
-                   <div class="foot">
-                       <p>更新时间：2014-10-01</p>
-                   </div>
-                </div>
-                <div class="col-md-4 course-item">
-                   <div class="head">
-                       <p>Redis教程</p>
-                   </div>
-                   <div class="body">
-                       <p class="content">Perl, 是一种流行的K-V NoSQL数据库</p>
-                       <p><img height="20" src="/pic/course.ico"><a id="image7">初级教程</a></p>
-                       <p><img height="20" src="/pic/course.ico">中级教程</p>
-                       <p><img height="20" src="/pic/course.ico">高级教程</p>
-                   </div>
-                   <div class="foot">
-                       <p>更新时间：2014-10-01</p>
-                   </div>
-                </div>
-        </div>
-        <div class="row" id="course">
-		<h2>Microsoft</h2>
-		<hr>
-                <div class="col-md-4 course-item">
-                   <div class="head">
-                       <p>TypeScript教程</p>
-                   </div>
-                   <div class="body">
-                       <p class="content">TypeScript，是微软开源的一种新型脚本语言</p>
-                       <p><img height="20" src="/pic/course.ico"><a id="image8">初级教程</a></p>
-                       <p><img height="20" src="/pic/course.ico">中级教程</p>
-                       <p><img height="20" src="/pic/course.ico">高级教程</p>
-                   </div>
-                   <div class="foot">
-                       <p>更新时间：2014-10-01</p>
-                   </div>
-                </div>
-
-	</div>	
+			<h2>数据库...</h2>
+			<hr>
+			<div class="div-row">
+			<div class="col-md-4 course-item" style ="margin-left:50px">
+				<div class="head">
+				   <p>MySQL教程</p>
+			   </div>
+			   <div class="body">
+				   <p class="content">MySQL, 是一种流行的关系数据库系统</p>
+				   <p><img height="20" src="/pic/course.ico"><a id="image5">初级教程</a></p>
+				   <p><img height="20" src="/pic/course.ico">中级教程</p>
+				   <p><img height="20" src="/pic/course.ico">高级教程</p>
+			   </div>
+			   <div class="foot">
+				   <p>更新时间：2014-10-01</p>
+			   </div>
+			</div>
+			<div class="col-md-4 course-item">
+			   <div class="head">
+				   <p>MongoDB教程</p>
+			   </div>
+			   <div class="body">
+				   <p class="content">MongoDB, 是一种NoSQL文本数据库系统</p>
+				   <p><img height="20" src="/pic/course.ico"><a id="image6">初级教程</a></p>
+				   <p><img height="20" src="/pic/course.ico">中级教程</p>
+				   <p><img height="20" src="/pic/course.ico">高级教程</p>
+			   </div>
+			   <div class="foot">
+				   <p>更新时间：2014-10-01</p>
+			   </div>
+			</div>
+			<div class="col-md-4 course-item">
+			   <div class="head">
+				   <p>Redis教程</p>
+			   </div>
+			   <div class="body">
+				   <p class="content">Redis, 是一种流行的K-V NoSQL数据库</p>
+				   <p><img height="20" src="/pic/course.ico"><a id="image7">初级教程</a></p>
+				   <p><img height="20" src="/pic/course.ico">中级教程</p>
+				   <p><img height="20" src="/pic/course.ico">高级教程</p>
+			   </div>
+			   <div class="foot">
+				   <p>更新时间：2014-10-01</p>
+			   </div>
+			</div>
+			</div>
+		</div>
+		<div class="row" id="course">
+			<h2>Microsoft</h2>
+			<hr>
+			<div class="div-row">
+			<div class="col-md-4 course-item" style = "margin-left:50px">
+			   <div class="head">
+				   <p>TypeScript教程</p>
+			   </div>
+			   <div class="body">
+				   <p class="content">TypeScript，是微软开源的一种新型脚本语言</p>
+				   <p><img height="20" src="/pic/course.ico">初级教程</p>
+				   <p><img height="20" src="/pic/course.ico">中级教程</p>
+				   <p><img height="20" src="/pic/course.ico">高级教程</p>
+			   </div>
+			   <div class="foot">
+				   <p>更新时间：2014-10-01</p>
+			   </div>
+			</div>
+			</div>
+		<div>
+	</div>
+	
 	<script type="text/javascript">
-		window.onload = function() {
-		/*canvasvalue('canvas1',"Python");
-		canvasvalue('canvas2',"Ruby");
-		canvasvalue('canvas3',"Perl");
-		canvasvalue('canvas4',"Mysql");
-		canvasvalue('canvas5',"Mongodb");
-		canvasvalue('canvas6',"Redis");
-		canvasvalue('canvas7',".NET");
-		canvasvalue('canvas8',"Typescript");
-		canvasvalue('canvas9',"Azure");		
-		*/
-                /*canvasvalue('canvas1',"Python");
-                canvasvalue('canvas2',"Ruby");
-                canvasvalue('canvas3',"NodeJS");
-                canvasvalue('canvas4',"Perl");
-                canvasvalue('canvas5',"MySQL");
-                canvasvalue('canvas6',"MongoDB");
-                canvasvalue('canvas7',"Redis");
-                canvasvalue('canvas8',"TypeScript");
-		*/
-		for (var i = 1;i <= 8;i++) {
+
+		for (var i = 1;i <= 9;i++) {
 			name = "#image" + i.toString();
 			url = "course?type=" + i.toString();
 			$(name).attr("href",url);
                 }
 
-		}
 	</script>
 	{% block content %} 	
 	{% endblock %}
@@ -262,7 +268,7 @@
 	<hr>
 	<div class="container">
 	<footer>
-	 <p align="center"><a href="http://www.wenjuan.com/s/QBNfiu?test=1&v=0.687169515648">联系我们</a> | <a target="_blank" href="/PrivacyStatement">隐私说明</a> | <a target="_blank" href="/TermsOfUse">使用说明</a> | © 2014 Microsoft Open Technologies, Inc. Shanghai</p>
+	 <p align="center"><a href="http://www.wenjuan.com/s/QBNfiu?test=1&v=0.687169515648">联系我们</a> | <a target="_blank" href="http://osslab.msopentech.cn/PivacyStatemeint">隐私说明</a> | <a target="_blank" href="http://osslab.msopentech.cn/TermsOfUse">使用说明</a> | © 2014 Microsoft Open Technologies (Shanghai) Company Limited</p>
 	</footer>
 	</div>
     
