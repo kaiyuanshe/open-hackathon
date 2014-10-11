@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DoCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8">
@@ -16,7 +16,7 @@
     <link href="/css/bootstrap.min.css" rel="stylesheet">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="/js/bootstrap.min.js"></script>
-	<!--<script src="https://apis.google.com/js/client.js?onload=handleClientLoad"></script>-->
+	<script src="https://apis.google.com/js/client.js?onload=handleClientLoad"></script>
 	<script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.min.js"></script>
   	<script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jquery.ui/1.8.18/jquery-ui.min.js"></script>
 	<script src = "/js/google.js"></script>
@@ -45,61 +45,75 @@
 		.ds-google{
 			background-position: 0 -240px;
 		}
+		.p-center{
+			text-align:center;
+			margin-left:auto;
+			margin-right:auto;
+		}
     </style>
   </head>
 
   <body>
 
-    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="#"><img src = "/pic/icon.jpg" height = "30" width = "30"></img>开源软件实验室(预览版)</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- Main jumbotron for a primary marketing message or call to action -->
-    <div class="jumbotron" style = "background-image : url(http://i.imgur.com/rnbeQcP.jpg)">
-      <div class="container">
-       <p><b><h1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="white">开源软件实验室(预览版)</font></h1></b></p>
-	<p><b><h2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="white">更方便快捷的学习IT知识</font></h2></b></p>
-<p><b><h2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="white">在云端</font></h2></b></p>
-	<p><b><h2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;第三方登录</h2></b></p>
-	<div class = "btn-group-vertical"><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="btn btn-default btn-lg" role="button" id="googlelogin">
-				<span class="ds-service-link ds-google">google</span>
-			</a>
-			<a class="btn btn-success btn-lg" id="githublogin" role="button">github</a>
-			<a class="btn btn-primary btn-lg" role="button" id="renrenlogin">
-				<span class="ds-service-link ds-renren">  人人</span>
-			</a>
-			<a class="btn btn-danger btn-lg " role="button" id="qqlogin">
-				<span class="ds-service-link ds-qq">腾讯QQ</span>
-			</a></p>
+   <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+					<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+				 <a class="navbar-brand" href="http://osslab.msopentech.cn"><img src="/pic/icon.jpg" height="30" width="30"></img>开源软件实验室(预览版)</a><a style="float:left;font-size:18px;padding-top:16px" href = "http://www.wenjuan.com/s/QBNfiu?test=1&v=0.687169515648">问卷调查</a>
+			</div>
+		</div>
 	</div>
-	</div>
-    </div>
 
-       <!--<div id = "googlelogin">google</div>-->
-	  <!--<iframe src="http://10.172.6.196:4200" width="500" height="500" frameborder="no" border="0" marginwidth="0" marginheight="0" scrolling="no"></iframe>-->     
+<!-- Main jumbotron for a primary marketing message or call to action -->
+	<div class="jumbotron" style="background-image : url(http://i.imgur.com/rnbeQcP.jpg)">
+		<div class="container">
+			<span class="p-center"><h1><font color="white">开源软件实验室(预览版)</font></h1></span>
+			<span class="p-center"><b><h2><font color="white">更方便快捷的学习IT知识</font></h2></b>
+			</span>
+			<span class="p-center"><b><h2><font color="white">在云端</font></h2></b>
+			</span>
+			<span class="p-center"><b><h2>第三方登录</h2></b>
+			</span>
+			<div class="btn-group-vertical p-center" style="width:100%">
+				<p>
+					<a class="btn btn-default btn-lg" role="button" id="googlelogin">
+						<span class="ds-service-link ds-google">google</span>
+					</a>
+					<a class="btn btn-success btn-lg" id="githublogin" role="button">
+						<span class="ds-service-link ds-github">github</span>
+					</a>
+					<a class="btn btn-primary btn-lg" role="button" id="renrenlogin">
+						<span class="ds-service-link ds-renren">人人</span>
+					</a>
+					<a class="btn btn-danger btn-lg " role="button" id="qqlogin">
+						<span class="ds-service-link ds-qq">腾讯QQ</span>
+					</a>
+				</p>
+			</div>
+		</div>
+	</div>
+
+	<!--<div id = "googlelogin">google</div>-->
+	<!--<iframe src="http://10.172.6.196:4200" width="500" height="500" frameborder="no" border="0" marginwidth="0" marginheight="0" scrolling="no"></iframe>-->
 	<!--<footer>	
-	<hr>
-	<hr>
-	<hr>
-        <p>July 2014</p>
-	<p>Oneweek Hackathon</p>
-      </footer>-->
+		<hr>
+		<hr>
+		<hr>
+			<p>July 2014</p>
+		<p>Oneweek Hackathon</p>
+		  </footer>-->
 	<footer>
-	<p align="center"><a href="http://www.wenjuan.com/s/QBNfiu?test=1&v=0.687169515648">联系我们</a> | <a target="_blank" href="/PrivacyStatement">隐私条款</a> | <a target="_blank" href="/TermsOfUse">使用条款</a> | © 2014 Microsoft Open Technologies, Inc. Shanghai</p>
+		<p align="center"><a href="http://www.wenjuan.com/s/QBNfiu?test=1&v=0.687169515648">联系我们</a> | <a target="_blank" href="http://osslab.msopentech.cn/PrivacyStatement">隐私条款</a> | <a target="_blank" href="http://osslab.msopentech.cn/TermsOfUse">使用条款</a> | © 2014 Microsoft Open Technologies (Shanghai) Company Limited</p>
 	</footer>
-     <!-- /container -->
-  
-    </div> <!-- /container -->
+	<!-- /container -->
+
+	</div>
+	<!-- /container -->
   </body>
 </html>
 
