@@ -11,6 +11,7 @@ wsgilog
 azure python sdk
 
 1. web.py
+
 	i.   wget http://webpy.org/static/web.py-0.37.tar.gz
 	
 	ii.  tar -xvzf web.py-0.37.tar.gz
