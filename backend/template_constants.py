@@ -28,6 +28,18 @@ Guacamole Server Info
 guacamole_config_path = ''
 
 '''
+Log Info already stored in the backendlogger package
+'''
+log_file = ""#path
+log_format = "[%(asctime)s] %(filename)s:%(lineno)d(%(funcName)s): [%(levelname)s] %(message)s"
+log_dateformat = "%Y-%m-%d %H:%M:%S"
+import logging
+log_level = logging.DEBUG
+log_interval = "d" 
+log_backups = 3
+
+
+'''
 House cleaning time limited
 '''
 client_time_limit = 7200
