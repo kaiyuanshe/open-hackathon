@@ -10,7 +10,6 @@ Rest Server
 class index:
     def __init__(self):
         self.mylog = web.ctx.environ['wsgilog.logger']
-        
     def parse(self,uri):
         pass
     

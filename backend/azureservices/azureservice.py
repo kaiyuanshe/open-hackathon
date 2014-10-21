@@ -28,7 +28,7 @@ class AzureService():
         vm['lab'] = lab
         vm['hostname'] = hostname
         vm['username'] = 'opentech'
-        vm['password'] = '@dministrat0r'
+        vm['password'] = '******'
         if operating_system == 'linux':
             # local port for SSH is 22
             for point in endpoints:
@@ -44,7 +44,7 @@ class AzureService():
         return vm
         
     def __linux_config(self, hostname):
-        linux_config = LinuxConfigurationSet(hostname, 'opentech', '@dministrat0r', True)
+        linux_config = LinuxConfigurationSet(hostname, 'opentech', '******', True)
         linux_config.disable_ssh_password_authentication = False
         return linux_config
     
