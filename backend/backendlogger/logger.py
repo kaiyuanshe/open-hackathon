@@ -1,12 +1,12 @@
 from wsgilog import WsgiLog
-import config
+import constants
 
 class Logger(WsgiLog):
     def __init__(self,application):
         WsgiLog.__init__(self,application,
-                         logformat = config.logformat,
+                         logformat = constants.log_format,
                          tofile = True,
-                         file = config.file,
-                         interval = config.interval,
-                         backups = config.backups
+                         file = constants.log_file,
+                         interval = constants.log_interval,
+                         backups = constants.log_backups
                          )
