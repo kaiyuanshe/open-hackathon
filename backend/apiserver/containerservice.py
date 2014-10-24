@@ -11,13 +11,19 @@ def create_container(vm = '',port = -1,image='',container_info=None):
     url = vm
     data = {'request':'1','image':image,'port':port,'container_info':container_info}
     response =postForContainer(url,data)
-    if response==None:#failed
+    if response==False:#failed
         return False
     print response
     return True
 
 def shutdown_container(vm='',port = -1,image = '',container_info=None):
-    return False
+    url = vm
+    data = {'request':'2','image':image,'port':port,'container_info':container_info}
+    response =postForContainer(url,data)
+    if response==False:#failed
+        return False
+    print response
+    return True
 
 if __name__=='__main__':
     create_container('http://0.0.0.0:5678', 10000, 'python', None)

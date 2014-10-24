@@ -3,13 +3,13 @@
 #notice: if you failed to install these packages, try to figure it out by changing the source list.
 
 apt-get update
-apt-get install build-essential
+apt-get -y install build-essential
 
 
 
 # install curl and pip
 
-apt-get install curl
+apt-get -y install curl
 
 curl https://bootstrap.pypa.io/get-pip.py | sudo python
 
@@ -33,7 +33,7 @@ rm -rf web.py-0.37*
 
 # mysql installation
 
-apt-get install mysql-server mysql-client python-mysqldb
+apt-get -y install mysql-server mysql-client python-mysqldb
 
 
 # azure installation, modify the __init__.py is needed

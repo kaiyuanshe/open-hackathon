@@ -1,4 +1,4 @@
-import web,os
+import web,commands
 urls = ('/(.*)', 'index')
 
 class index:
@@ -15,15 +15,17 @@ class index:
         image = data['image']
         container_info = data['container_info']
         
-    
-    def GET(self,info):
-        web.input(info=None)
-        #shit=web.ctx.items()
-        #print shit
-        info = str(info)
-        info = info.split('_')
-        print info
-        client=''
+        if request=='1':
+            pass
+        elif request=='2':
+            pass
+        else:
+            return False#Illegal request
+        
+        status,output = commands.getstatusoutput('')
+        if status!=0:#error
+            return False
+        return True
         
 
 if __name__ == "__main__":
