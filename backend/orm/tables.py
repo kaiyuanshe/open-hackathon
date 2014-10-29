@@ -15,19 +15,19 @@ class GuacamoleClientInfo(Base):
     guacamole_server = Column(String(50),ForeignKey('guacamole_server_load.guacamole_server'),index = True)
     guacamole_client_name=Column(String(30))
     protocol=Column(String(15),index = True)
-    guacamole_client_host = Column(String(50))
+    container_port = Column(Integer)
     guacamole_client_vm = Column(String(50))
     status = Column(Boolean)
     latest_active_timestamp=Column(DateTime)
     
     
-    def __init__(self,user_info='',image = '',guacamole_server='',guacamole_client_name='',protocol='',guacamole_client_host = '',guacamole_client_vm='',status=0,latest_active_timestamp=''):
+    def __init__(self,user_info='',image = '',guacamole_server='',guacamole_client_name='',protocol='',container_port = 0,guacamole_client_vm='',status=0,latest_active_timestamp=''):
         self.user_info = user_info
         self.image = image
         self.guacamole_server = guacamole_server
         self.guacamole_client_name = guacamole_client_name
         self.protocol = protocol
-        self.guacamole_client_host = guacamole_client_host
+        self.container_port = container_port
         self.guacamole_client_vm = guacamole_client_vm
         self.status = status
         self.latest_active_timestamp = latest_active_timestamp
@@ -38,7 +38,7 @@ class GuacamoleClientInfo(Base):
                                                                              self.guacamole_server,
                                                                              self.guacamole_client_name,
                                                                              self.protocol,
-                                                                             self.guacamole_client_host,
+                                                                             self.container_port,
                                                                              self.guacamole_client_vm,
                                                                              str(self.status),
                                                                              str(self.latest_active_timestamp)

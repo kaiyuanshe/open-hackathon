@@ -45,10 +45,10 @@ def heart_beat(client_id, image):
         session.close()
     
 def shutdown_guacamole_client(client_id, image,protocol,mylog):
-    guacamole_client_host,guacamole_client_vm = cancel_guacamole_client(client_id, image, protocol)
-    if guacamole_client_host==None:
+    container_port,guacamole_client_vm = cancel_guacamole_client(client_id, image, protocol)
+    if container_port==None:
         return
-    signal = containerservice.shutdown_container(guacamole_client_vm,int(guacamole_client_host[guacamole_client_host.index(':')+1:]),image)
+    signal = containerservice.shutdown_container(guacamole_client_vm,container_port,image)
     if signal==False:
         mylog.info("shutdown a container failed...")
         pass
@@ -84,7 +84,7 @@ def get_guacamole_client(client_id, image,protocol,mylog):
 
 def apply_guacamole_client(session,client_id,image,protocol = None):
     guacamole_client=None
-    guacamole_client_host = None
+    container_port = None
     guacamole_client_vm = None
     try:
         query = session.query(GuacamoleClientInfo)
@@ -101,7 +101,7 @@ def apply_guacamole_client(session,client_id,image,protocol = None):
             result.latest_active_timestamp = str(datetime.now())
             guacamole_server = result.guacamole_server
             guacamole_client_name = result.guacamole_client_name
-            guacamole_client_host = result.guacamole_client_host
+            container_port = result.container_port
             guacamole_client_vm = result.guacamole_client_vm
             protocol = result.protocol
             query = session.query(GuacamoleServerLoad)
@@ -117,11 +117,11 @@ def apply_guacamole_client(session,client_id,image,protocol = None):
         print 'apply a guacamole client failed...'
         session.rollback()
     finally:
-        return guacamole_client,guacamole_client_host,guacamole_client_vm
+        return guacamole_client,container_port,guacamole_client_vm
     
 def cancel_guacamole_client(client_id,image,protocol=None):
     session = DBSession()
-    guacamole_client_host = None
+    container_port = None
     guacamole_client_vm = None
     try:
         query = session.query(GuacamoleClientInfo)
@@ -131,7 +131,7 @@ def cancel_guacamole_client(client_id,image,protocol=None):
             result.image = ''
             result.status = 0
             guacamole_server = result.guacamole_server
-            guacamole_client_host = result.guacamole_client_host
+            container_port = result.container_port
             guacamole_client_vm = result.guacamole_client_vm
             
             query = session.query(GuacamoleServerLoad)
@@ -146,13 +146,13 @@ def cancel_guacamole_client(client_id,image,protocol=None):
         session.rollback()
     finally:
         session.close()
-        return guacamole_client_host,guacamole_client_vm
+        return container_port,guacamole_client_vm
 
 def establish_guacamole_client(session,client_id, image, protocol=None):
-    guacamole_client,guacamole_client_host,guacamole_client_vm = apply_guacamole_client(session,client_id,image,protocol)
+    guacamole_client,container_port,guacamole_client_vm = apply_guacamole_client(session,client_id,image,protocol)
     if guacamole_client==None:
         return guacamole_client
-    signal = containerservice.create_container(vm = guacamole_client_vm,port = int(guacamole_client_host[guacamole_client_host.index(':')+1:]),image=image)
+    signal = containerservice.create_container(vm = guacamole_client_vm,port = container_port,image=image)
     if signal==True:
         return guacamole_client
     else:
