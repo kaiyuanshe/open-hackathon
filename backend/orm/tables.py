@@ -81,6 +81,11 @@ class GuacamoleServerLoad(Base):
                                                                         str(self.server_load),
                                                                         )
 
+def create_tables(dburl,echos=False):
+    engine = create_engine(dburl,echo=echos)
+    Base.metadata.create_all(engine)
+    engine.dispose()
+
 if __name__=='__main__':
     engine = create_engine('mysql+mysqldb://root:******@localhost/******?charset=utf8', echo=False)#DB path
     Base.metadata.create_all(engine)

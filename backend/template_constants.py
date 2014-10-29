@@ -19,8 +19,12 @@ DB Info
 database_url = ''
 database_username = ''
 database_password = ''
+database_port = None #default is 3306
 database_database = ''
-database_str = 'mysql+mysqldb://'+database_username+':'+database_password+'@'+database_url+'/'+database_database+'?charset=utf8'
+if database_port!=None:
+    database_str = 'mysql+mysqldb://'+database_username+':'+database_password+'@'+database_url+':'+str(database_port)+'/'+database_database+'?charset=utf8'
+else:
+    database_str = 'mysql+mysqldb://'+database_username+':'+database_password+'@'+database_url+'/'+database_database+'?charset=utf8'
 
 '''
 Guacamole Server Info

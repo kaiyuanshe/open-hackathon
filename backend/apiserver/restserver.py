@@ -1,8 +1,9 @@
-import containerservice,constants
+import containerservice
+import backend.constants as constants
 from datetime import datetime
 from xml.etree.ElementTree import ElementTree
-from orm.tables import GuacamoleClientInfo, GuacamoleServerLoad
-from orm import DBSession
+from backend.orm.tables import GuacamoleClientInfo, GuacamoleServerLoad
+from backend.orm import DBSession
 
 
 
