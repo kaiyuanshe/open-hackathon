@@ -4,11 +4,11 @@ $(function() {
 		login();
 	});
 
-	var clientId = qq_ClientID;
-	var redirect_uri = qq_redirect_uri;
-	var scope = qq_scope;
-	var state = qq_state;
-	var response_type = qq_response_type;
+	var clientId = "client_id=101157515";
+	var redirect_uri = "redirect_uri=http://osslab.msopentech.cn/qq";
+	var scope = "scope=get_user_info";
+	var state="state=osslab";
+	var response_type = "response_type=code"
 	
 	function login() {
 		var arr = [clientId,redirect_uri,scope,state,response_type];

@@ -10,14 +10,14 @@ var theRequest = new Object();
                                 theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
                         }
                         var i = parseInt(theRequest[para]);
-                        var guaca = new String();
+                        /*var guaca = new String();
                         //alert(i.toString());
                         if (parseInt((i-1) / 3) == 0)
                                 guaca = "http://osslab.cloudapp.net:28080/guacamole-0.9.2/client.xhtml?id=c%2Fubuntu";
                         if (parseInt((i-1) / 3) == 1)
                                 guaca = "http://osslab.cloudapp.net:28080/guacamole-0.9.2/client.xhtml?id=c%2Fubuntu";
                         if (parseInt((i-1) / 3) == 2)
-                                guaca = "http://osslab.chinacloudapp.cn:6080/guacamole-0.9.2/client.xhtml?id=c%2Fwindows";
+                                guaca = "http://osslab.chinacloudapp.cn:6080/guacamole-0.9.2/client.xhtml?id=c%2Fwindows";*/
                         var word = new String();
                         /*if (i == 1)
                                 word = "http://en.wikipedia.org/wiki/Python_(programming_language)";
@@ -59,7 +59,7 @@ var theRequest = new Object();
 
 
                         //alert(word);
-                        $("#vm").attr("src",guaca);
+                        // $("#vm").attr("src",guaca);
                         $("#document").attr("src",word);
 }
 });

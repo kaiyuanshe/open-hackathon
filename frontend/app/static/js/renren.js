@@ -4,10 +4,10 @@ $(function() {
                 login();
         });
 
-        var clientId = "client_id=7e0932f4c5b34176b0ca1881f5e88562";
-        var redirect_uri = "redirect_uri=http://osslab.chinacloudapp.cn/renren";
-        var scope = "scope=read_user_message+read_user_feed+read_user_photo";
-        var response_type = "response_type=token";
+        var clientId = renren_ClientID;
+        var redirect_uri = renren_redirect_url;
+        var scope = renren_scope;
+        var response_type = renren_response_type;
 	var display = "display=page";
 //	var state = clientID;
 
@@ -17,8 +17,7 @@ $(function() {
                 location.href = url;
         }
 });
-
- $(function() {
+$(function() {
                         $(document).ready(function() {
                                 Display();
                         });
@@ -66,4 +65,5 @@ $(function() {
                                 }
                         }
                 });
+
 
