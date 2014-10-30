@@ -4,9 +4,9 @@ $(function() {
 		login();
 	});
 
-	var clientId = "client_id=0eded406cf0b3f83b181";
-	var redirect_uri = "redirect_uri=http://osslab.msopentech.cn/github";
-	var scope = "scope=user";
+	var clientId = github_ClientID;
+	var redirect_uri = github_redirect_uri;
+	var scope = github_scope;
 	
 	function login() {
 		var arr = [clientId,redirect_uri,scope];

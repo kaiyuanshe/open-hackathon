@@ -4,11 +4,11 @@ $(function() {
 		login();
 	});
 
-	var clientId = "client_id=304944766846-7jt8jbm39f1sj4kf4gtsqspsvtogdmem.apps.googleusercontent.com";
+	var clientId = google_ClientID;
 	var localurl = location.href;
-	var redirect_uri = "redirect_uri=" + localurl + "google";
-	var scope = "scope=https://www.googleapis.com/auth/userinfo.profile+https://www.googleapis.com/auth/userinfo.email";
-	var response_type = "response_type=token";
+	var redirect_uri = google_redirect_url;
+	var scope = google_scope;
+	var response_type = google_response_type;
 	
 	function login() {
 		var arr = [clientId,redirect_uri,scope,response_type];
