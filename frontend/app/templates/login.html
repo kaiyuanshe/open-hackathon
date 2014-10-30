@@ -6,7 +6,7 @@
     <meta name="description" content="">
     <meta name="robots" content="noindex,nofollow">
     <meta name="author" content="">
-    <script src="/js/jquery.min.js"></script>
+    <script src="/static/js/jquery.min.js"></script>
 	<script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jquery.ui/1.8.18/jquery-ui.min.js"></script>
     <script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.min.js"></script> 
     <link href="/static/css/bootstrap.min.css" rel="stylesheet">
@@ -93,15 +93,15 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="http://osslab.msopentech.cn/"><img src="/static/pic/icon.jpg" height="30" width="30">开�?软件实验室</a>
+          <a class="navbar-brand" href="http://osslab.msopentech.cn/"><img src="/static/pic/icon.jpg" height="30" width="30">开源软件实验室</a>
         </div>
         <div class="navbar-collapse collapse">
           <form class="navbar-form navbar-right" role="form">
             <div class="form-group">
-              <div id="name"><p style="color:white"></p></div>
+              <div id="name"><p style="color:white">{{name}}</p></div>
             </div>
             <div class="form-group">
-              <div id="photo"><img height="30" width="30" src="/static/pic/women_tiny.gif"></div>
+              <div id="photo"><img height="30" width="30" src="{{pic}}"></div>
             </div>
           </form>
         </div><!--/.navbar-collapse -->
@@ -129,13 +129,6 @@
 					<p>更新时间：2014-10-01</p>
 				</div>
 		</div>
-							<p><img height="20" src="/pic/course.ico">中级教程</p>
-							<p><img height="20" src="/pic/course.ico">高级教程</p>
-						</div>
-						<div class="foot">
-							<p>更新时间：2014-10-01</p>
-						</div>
-				</div>
 		<div class="col-md-4 course-item">
 			<!--<canvas id="canvas2" height="200" width="400" style="background-color:#ADADAD;"></canvas> -->
 				<div class="head">
@@ -182,7 +175,7 @@
 				</div>
 		</div>
         </div>
-        <div class="row" id="course">
+        <div class="row" id="course2">
 
 		<h2>数据库...</h2>
 		<hr>
@@ -229,7 +222,7 @@
                    </div>
                 </div>
         </div>
-        <div class="row" id="course">
+        <div class="row" id="course3">
 		<h2>Microsoft</h2>
 		<hr>
                 <div class="col-md-4 course-item">
@@ -250,40 +243,13 @@
 	</div>	
 	<script type="text/javascript">
 		window.onload = function() {
-		function canvasvalue(id ,text) {
-			canvas = document.getElementById(id);
-			ctx = canvas.getContext('2d');
-			//ctx.fillStyle = color;
-			//ctx.fillRect(0,0,400,400);
-			ctx.font = "80px Times New Roman";
-			//ctx.textAlign = "left";
-			ctx.fillText(text,120-text.length*10,100);
-		}
-<!--
-		canvasvalue('canvas1',"Python");
-		canvasvalue('canvas2',"Ruby");
-		canvasvalue('canvas3',"Perl");
-		canvasvalue('canvas4',"Mysql");
-		canvasvalue('canvas5',"Mongodb");
-		canvasvalue('canvas6',"Redis");
-		canvasvalue('canvas7',".NET");
-		canvasvalue('canvas8',"Typescript");
-		canvasvalue('canvas9',"Azure");
--->
-                canvasvalue('image1',"Python");
-                canvasvalue('image2',"Ruby");
-                canvasvalue('image3',"NodeJS");
-                canvasvalue('image4',"Perl");
-                canvasvalue('image5',"MySQL");
-                canvasvalue('image6',"MongoDB");
-                canvasvalue('image7',"Redis");
-                canvasvalue('image8',"TypeScript");
 
-		for (var i = 1;i <= 9;i++) {
-			name = "#image" + i.toString();
-			url = "course?type=" + i.toString();
-			$(name).attr("href",url);
-                }
+            for (var i = 1;i <= 9;i++) {
+                name = "#image" + i.toString();
+                url = "course?type=" + i.toString();
+                $(name).attr("href",url);
+            }
+        }
 
 	</script>
 	{% block content %} 	

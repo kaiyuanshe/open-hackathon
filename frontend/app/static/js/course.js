@@ -59,7 +59,7 @@ var theRequest = new Object();
 
 
                         //alert(word);
-                        $("#vm").attr("src",guaca);
+                        // $("#vm").attr("src",guaca);
                         $("#document").attr("src",word);
 }
 });
