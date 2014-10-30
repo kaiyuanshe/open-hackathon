@@ -65,12 +65,6 @@ def TermsOfUse():
 @app.route('/paper')
 def paper():
     return render_template("paper.html")
-@app.route('/paper2')
-def paper22():
-    return render_template("paper2.html")
-@app.route('/test')
-def test():
-    return render_template("test.html")
 @app.route('/google')
 def google():
     return render_template("google.html")
@@ -162,7 +156,4 @@ def course():
     res_data = urllib2.urlopen(req)
     res = 'http://' + res_data.read()
     return render_template("course.html",name=username,pic=url,vm = res)
-@app.route('/test_ice')
-def test_ice():
-    return render_template("test_ice.html")
 
