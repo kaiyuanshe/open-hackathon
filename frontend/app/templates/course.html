@@ -1,65 +1,64 @@
 {% extends "base.html" %}
 
 {% block content %}
-<hr>
-<hr>
+<div style="text-align:center;background-color:#F0F0F0;"><a href = "javascript:history.back(-1)">返回上一步</a></div>
+<div class = "row" style="padding-left: 15px; width:1650px;">
+	<div class = "col-md-6" >
+		<iframe id = "vm"  src = "{{ vm }}" width="800" height="600" frameborder="yes" border="0" marginwidth="10" marginheight="20" scrolling="yes" onclick="setFocusThickboxIframe()" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>
+	<br/>
+	<script>
+	function setFocusThickboxIframe() {
+	    document.getElementById("vm").contentWindow.focus();
+	    //alert("ok");
+	}
+	</script>
+<div>如果终端键盘无法输入，请鼠标点击终端最下边的边框。</div>
+	</div>
+	<div class = "col-md-6">
+		<!--<div class = "row">
+		<div class = "col-md-6">
+		<h4>&nbsp;&nbsp;&nbsp;Bing Search for materials</h4>
+		<div class="col-lg-8">
+		  <div class = "input-group">
+			<input type = "text" class = "form-control" value = "python">
+			<span class = "input-group-btn">
+			<button class = "btn btn-default" type = "button">Search!</button>
+			</span>
+		 </div>
+		</div>
+		</div>
+		</div>
+		<hr>
+		<br>
+		-->
+		<!--<iframe src="http://osslab.chinacloudapp.cn:5080/demo/paper" width="90%" height="600" frameborder="yes" border="0" scrolling="yes"></iframe>-->
+		<!--<div class = "bing search">
+			 <div class="column onefifth">
+						<h3>Query:</h3>
+						<p>
+								<input id = "txtQuery" type = "text" title = "Search Terms" value = "python" />
+								<button id = "btnSearch" type = "button" title = "Search">Search</button>
+						</p>
+				  <h3 id = "result-header"></h3>
+						<p id = "results-summary"></p>
+						<div id = "search-result">
+								<div id = "result-aggregates" class = "results"></div>
+								<ul id = "result-list" class = "results">
+								</ul>
 
-<a href = "javascript:history.back(-1)">返回上一页</a>
-<div class = "row" style="padding-left: 15px;">
-<div class = "col-md-6" >
-<iframe id = "vm"  src = "{{urlofi}}" width="800" height="800" frameborder="yes" border="0" marginwidth="100" marginheight="10" scrolling="yes" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>
-<br/>
-
-<script>
-function setFocusThickboxIframe() {
-    document.getElementById("vm").focus();
-   // alert("ok");
-}
-</script>
+								<ul id = "result-navigation" class = "result-navigation">
+										<li id = "prev">&laquo;</li>
+										<li id = "next">&raquo;</li>
+								</ul>
+						</div>
+						<p id = "error-list"></p>
+				</div>
+		</div>
+		-->
+		<iframe id = "document" width = "800" height = "600" scrolling = "yes"></iframe>
+	</div>
+<div>如果终端键盘无法输入，请鼠标点击终端最下边的边框。</div>
+	<script src = "/js/course.js">
+	</script>
 </div>
-<div class = "col-md-6">
-<!--<div class = "row">
-<div class = "col-md-6">
-<h4>&nbsp;&nbsp;&nbsp;Bing Search for materials</h4>
-<div class="col-lg-8">
-  <div class = "input-group">
-	<input type = "text" class = "form-control" value = "python">
-	<span class = "input-group-btn">
-	<button class = "btn btn-default" type = "button">Search!</button>
-	</span>
- </div>
-</div>
-</div>
-</div>
-<hr>
-<br>
--->
-<!--<iframe src="http://osslab.chinacloudapp.cn:5080/demo/paper" width="90%" height="600" frameborder="yes" border="0" scrolling="yes"></iframe>-->
-<!--<div class = "bing search">
-	 <div class="column onefifth">
-                <h3>Query:</h3>
-                <p>
-                        <input id = "txtQuery" type = "text" title = "Search Terms" value = "python" />
-                        <button id = "btnSearch" type = "button" title = "Search">Search</button>
-                </p>
-		  <h3 id = "result-header"></h3>
-                <p id = "results-summary"></p>
-                <div id = "search-result">
-                        <div id = "result-aggregates" class = "results"></div>
-                        <ul id = "result-list" class = "results">
-                        </ul>
-
-                        <ul id = "result-navigation" class = "result-navigation">
-                                <li id = "prev">&laquo;</li>
-                                <li id = "next">&raquo;</li>
-                        </ul>
-                </div>
-                <p id = "error-list"></p>
-        </div>
-</div>
--->
-<iframe id = "document" width = "800" height = "800" scrolling = "yes"></iframe>
-</div>
-<script src = "/js/course.js">
-</script>
 {% endblock %}

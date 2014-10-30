@@ -5,7 +5,7 @@ $(function() {
 	});
 
 	var clientId = "client_id=0eded406cf0b3f83b181";
-	var redirect_uri = "redirect_uri=http://osslab.chinacloudapp.cn/github";
+	var redirect_uri = "redirect_uri=http://osslab.msopentech.cn/github";
 	var scope = "scope=user";
 	
 	function login() {
