@@ -39,27 +39,27 @@ var theRequest = new Object();
                                 word = "http://azure.microsoft.com/en-us";
                         */
                         if (i == 1)
-                                word = "http://www.bing.com/search?q=python%E5%9C%A8%E7%BA%BF%E6%95%99%E7%A8%8B&market=zh-us";
+                                word = "http://www.bing.com/search?q=python在线教程";
                         if (i == 2)
-                                word = "http://www.bing.com/search?q=ruby%E5%9C%A8%E7%BA%BF%E6%95%99%E7%A8%8B&market=zh-us";
+                                word = "http://www.bing.com/search?q=ruby在线教程";
                         if (i == 3)
-                                word = "http://www.bing.com/search?q=nodejs%E5%9C%A8%E7%BA%BF%E6%95%99%E7%A8%8B&market=zh-us";
+                                word = "http://www.bing.com/search?q=nodejs在线教程";
                         if (i == 4)
-                                word = "http://www.bing.com/search?q=perl%E5%9C%A8%E7%BA%BF%E6%95%99%E7%A8%8B&market=zh-us";
+                                word = "http://www.bing.com/search?q=perl在线教程";
                         if (i == 5)
-                                word = "http://www.bing.com/search?q=mysql%E5%9C%A8%E7%BA%BF%E6%95%99%E7%A8%8B&market=zh-us";
+                                word = "http://www.bing.com/search?q=mysql在线教程";
                         if (i == 6)
-                                word = "http://www.bing.com/search?q=mongodb%E5%9C%A8%E7%BA%BF%E6%95%99%E7%A8%8B&market=zh-us";
+                                word = "http://www.bing.com/search?q=mongodb在线教程";
                         if (i == 7)
-                                word = "http://www.bing.com/search?q=redis%E5%9C%A8%E7%BA%BF%E6%95%99%E7%A8%8B&market=zh-us";
+                                word = "http://www.bing.com/search?q=redis在线教程";
                         if (i == 8)
-                                word = "http://www.bing.com/search?q=typescript%E5%9C%A8%E7%BA%BF%E6%95%99%E7%A8%8B&market=zh-us";
+                                word = "http://www.bing.com/search?q=typescript在线教程";
                         if (i == 9)
                                 word = "http://www.bing.com/search?q=Azure%20tutorial&qs=n&form=QBRE&pq=azure%20tutorial&sc=8-10&sp=-1&sk=&cvid=f42b51fec72140638217cd06550a9e9a&market=en-us";
 
 
                         //alert(word);
-                        //$("#vm").attr("src",guaca);
+                        $("#vm").attr("src",guaca);
                         $("#document").attr("src",word);
 }
 });
