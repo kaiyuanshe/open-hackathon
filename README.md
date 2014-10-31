@@ -19,5 +19,10 @@ cloudvm:
 	1. sudo bash ./cloudvm_install.sh
 	2. python cloudvm_apiservice.py --port=8080 #any other port is OK
 	
-
+========= 2014/10/31 check out date ===========
+接下来的工作：
+1.	Guacamole config文件的设置以及create虚拟机时端口的配置分配情况
+2.	在cloudvm/cloudvm_apiservice中需要将docker的启动和删除工作的命令完成
+3.	Unittest
+4.	Azureservices中的函数和constants.py下的一些配置文件可能会根据azureservice包中接口的改变而需要更改
 	
