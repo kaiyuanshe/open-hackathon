@@ -18,7 +18,9 @@ cloudvm:
 	
 	1. sudo bash ./cloudvm_install.sh
 	2. python cloudvm_apiservice.py --port=8080 #any other port is OK
-	
+
+
+====================================================================================	
 
 ========= 2014/10/31 check out date ===========
 
