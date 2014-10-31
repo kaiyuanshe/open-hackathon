@@ -1,7 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
-from tables import GuacamoleClientInfo,GuacamoleServerLoad
 import constants
 
 DBSession = sessionmaker(autoflush=True,expire_on_commit=False)
