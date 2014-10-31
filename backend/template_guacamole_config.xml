@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	server name is the guacamole server address, virtual_machine is the vm that guacamole server is running on
+-->
+<server name="osslab.chinacloudapp.cn:8080" virtual_machine="0.0.0.0:22">
+		<!-- protocol name, four different protocols: ssh, vnc, rdp, vnc-read-only -->
+		<protocol name="vnc">
+			<!-- one can access the connection using server name + client name.
+				such as: "osslab.chinacloudapp.cn:8080/guacamole-0.9.2/client.xhtml?id=c/myvnc"
+				
+				container_port is which container port is corresponding to the container.
+				virtual_machine is the host VM that the container is running on 
+			-->
+			<client name="myvnc"> 
+				<container_port>5901</container_port>
+				<virtual_machine>0.0.0.0:5678</virtual_machine>
+			</client>
+		</protocol>
+		<protocol name="ssh">
+			<client name="myssh"> 
+				<container_port>22</container_port>
+				<virtual_machine>0.0.0.0:22</virtual_machine>
+			</client>
+		</protocol>
+		<protocol name="rdp">
+			<client name="myrdp"> 
+				<container_port>3389</container_port>
+				<virtual_machine>0.0.0.0:3389</virtual_machine>
+			</client>
+		</protocol>
+		<protocol name="vnc-read-only">
+			<client name="myvnc_read_only"> 
+				<container_port>5901</container_port>
+				<virtual_machine>0.0.0.0:5901</virtual_machine>
+			</client>
+		</protocol>
+</server>
