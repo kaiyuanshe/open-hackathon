@@ -8,7 +8,7 @@ def postForContainer(url, data):
     return response.read() 
 
 def create_container(vm = '',port = -1,image='',container_info=None):
-    url = vm
+    url = 'http://'+vm
     data = {'request':'1','image':image,'port':port,'container_info':container_info}
     response =postForContainer(url,data)
     if response==False:#failed
@@ -17,7 +17,7 @@ def create_container(vm = '',port = -1,image='',container_info=None):
     return True
 
 def shutdown_container(vm='',port = -1,image = '',container_info=None):
-    url = vm
+    url = 'http://'+vm
     data = {'request':'2','image':image,'port':port,'container_info':container_info}
     response =postForContainer(url,data)
     if response==False:#failed

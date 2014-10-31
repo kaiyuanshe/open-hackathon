@@ -13,6 +13,11 @@ backend:
 
 ====================================================================================
 cloudvm:
-
+	
+	If you want your vm to be the backend vm which is the host of the containers, you shall just enable the cloudvm package
+	
+	1. sudo bash ./cloudvm_install.sh
+	2. python cloudvm_apiservice.py --port=8080 #any other port is OK
+	
 
 	

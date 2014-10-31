@@ -207,9 +207,9 @@ def read_config(config_file):
         for client in clients:
             cnt+=1
             client_name = client.attrib['name']
-            client_host = client[0].text
+            container_port = int(client[0].text)
             client_vm = client[1].text
-            guacamoleClientInfo = GuacamoleClientInfo('','',server,client_name,pro_name,client_host,client_vm,0,cur_datetime)
+            guacamoleClientInfo = GuacamoleClientInfo('','',server,client_name,pro_name,container_port,client_vm,0,cur_datetime)
             guacamole_client_list.append(guacamoleClientInfo)
         if pro_name=='vnc':
             acnt[0] = cnt
