@@ -9,7 +9,7 @@ backend:
 	
 	2. Then add your personal info to backend/template_constants.py and rename template_constants.py to constants.py
 	
-	3. If you want to install the mysql server and want this server to be the data layer, then you need to run the database_init.py file with sudo.
+	3. If you want to install the mysql server and want this server to be the data layer, then you need to run the database_init.py file with sudo. And if you want your mysql server can be accessed by other host, you shall config the mysql server.
 
 ====================================================================================
 cloudvm:
