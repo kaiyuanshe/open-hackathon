@@ -4,11 +4,11 @@ $(function() {
 		login();
 	});
 
-	var clientId = qq_ClientID;
-	var redirect_uri = qq_redirect_uri;
-	var scope = qq_scope;
-	var state = qq_state;
-	var response_type = qq_response_type;
+	var clientId = CONFIG.qq_ClientID;
+	var redirect_uri = CONFIG.qq_redirect_uri;
+	var scope = CONFIG.qq_scope;
+	var state = CONFIG.qq_state;
+	var response_type = CONFIG.qq_response_type;
 	
 	function login() {
 		var arr = [clientId,redirect_uri,scope,state,response_type];

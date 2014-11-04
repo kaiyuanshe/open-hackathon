@@ -4,11 +4,11 @@ $(function() {
 		login();
 	});
 
-	var clientId = google_ClientID;
+	var clientId = CONFIG.google_ClientID;
 	var localurl = location.href;
-	var redirect_uri = google_redirect_url;
-	var scope = google_scope;
-	var response_type = google_response_type;
+	var redirect_uri = CONFIG.google_redirect_url;
+	var scope = CONFIG.google_scope;
+	var response_type = CONFIG.google_response_type;
 	
 	function login() {
 		var arr = [clientId,redirect_uri,scope,response_type];

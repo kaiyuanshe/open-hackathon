@@ -14,7 +14,6 @@ Base.query = db_session.query_property()
 #session.execute('use abc')
 
 def init_db():
-	import models
 	Base.metadata.create_all(bind=engine,checkfirst=False)
 
 #init_db()

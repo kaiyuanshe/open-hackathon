@@ -1,77 +1,50 @@
-from flask import render_template, flash, redirect,request
+import urllib, urllib2, json, uuid
+from flask import render_template, request, jsonify, Response
+from flask.ext.restful import reqparse, abort, Api, Resource
+
 from app import app
-import httplib
-import urllib , urllib2
-import json
-import uuid
-from app import config
-from database import init_db
+from common import *
+from routes import *
 from database import db_session
 from models import User
-#from forms import LoginForm
 
-def query_info(website,url,ssl):
-    if (ssl == 1):
-        conn = httplib.HTTPConnection(website);
-    else:
-        conn = httplib.HTTPSConnection(website);
-    conn.request('GET',url)
-    httpres = conn.getresponse()
-    return httpres
+api = Api(app)
 
-def add_head_href(head,href):
-    arr = href.split('href="')
-    href = ('href="' + head).join(arr)
-    arr = href.split('src="')
-    href = ('src="' + head).join(arr)
-    return href
-
-def mapper(typecode , username):
-    ret = {}
-    ret['request'] = '1'
-    ret['client_id'] = username
-    if (typecode == 8):
-        ret['protocol'] = 'rdp'
-    if (typecode < 8):
-        ret['protocol'] = 'ssh'
-    if (typecode == 1):
-        ret['image'] = 'python'
-    elif (typecode == 2):
-        ret['image'] = 'ruby'
-    elif (typecode == 3):
-        ret['image'] = 'nodejs'
-    elif (typecode == 4):
-        ret['image'] = 'perl'
-    elif (typecode == 5):
-        ret['image'] = 'mysql'
-    elif (typecode == 6):
-        ret['image'] = 'mongodb'
-    elif (typecode == 7):
-        ret['image'] = 'redis'
-    elif (typecode == 8):
-        ret['image'] = 'typescript'
-    return ret
-
+# index page
 @app.route('/')
 @app.route('/index')
 def index():
-        return render_template("index.html")
-@app.route('/PrivacyStatement')
-def PrivacyStatement():
-    return render_template("PrivacyStatement.html")
-@app.route('/TermsOfUse')
-def TermsOfUse():
-    return render_template("TermsOfUse.html")
-@app.route('/paper')
-def paper():
-    return render_template("paper.html")
-@app.route('/google')
-def google():
-    return render_template("google.html")
+    return simple_route("index")
+
+# error handler for 404
+@app.errorhandler(404)
+def page_not_found(error):
+    # render a beautiful 404 page
+    return "Page not Found", 404
+
+# error handler for 500
+@app.errorhandler(500)
+def internal_error(error):
+    # render a beautiful 500 page
+    return "Internal Server Error", 500
+
+# simple webPages
+@app.route('/<path:path>')
+def template_routes(path):
+    return simple_route(path)
+
+# js config
+@app.route('/config.js')
+def js_config():
+    resp =  Response(response="var CONFIG=%s" % json.dumps(get_config("javascript")),
+                     status=200,
+                     mimetype="application/javascript")
+    return resp
+
 @app.route('/github')
 def github():
     code = request.args.get('code')
-    url = config.GITHUB_URL1 + code
+    url = get_config('oauth/github/url') + code
     httpres = query_info('github.com',url,2);
     url_ori = httpres.read()
     start = url_ori.index('=')
@@ -94,12 +67,12 @@ def github():
         db_session.commit()
     #print info
     return render_template("github.html",pic=info['id'],name=info['login'])
-    #return render_template("github.html",iden=httpres.read(),name='bbb')
+
 @app.route('/qq')
 def qq():
     code = request.args.get('code')
     #print code
-    url =  config.QQ_URL + code + '&state=osslab'
+    url =  get_config("oauth/qq/url") + code + '&state=osslab'
     httpres = query_info('graph.qq.com',url,2)
     url_ori = httpres.read()
     start = url_ori.index('=')
@@ -116,6 +89,7 @@ def qq():
     httpres = query_info('graph.qq.com',url,2)
     info = json.loads(httpres.read())   
     return render_template("qq.html",name=info['nickname'],pic=info['figureurl'])
+
 @app.route('/renren')
 def renren():
     url_ori = request.url
@@ -143,17 +117,19 @@ def renren():
     #return render_template("renren.html")
     #return render_template("renren.html",iden=url_ori,name='cc')
     return render_template("renren.html",pic = info['response']['avatar'][0]['url'],name=info['response']['name'])
+
 @app.route('/course')
 def course():
     typecode = request.args.get('type')
     username = request.cookies.get('username')
     url = request.cookies.get('picurl')
     data = mapper(int(typecode),username)
-    #data = {'request':'1', 'client_id':username, 'image':'python','protocol':'ssh'}
-    url2 = config. APISERVER
-    data = urllib.urlencode(data)
-    req = urllib2.Request(url = url2 , data = data)
-    res_data = urllib2.urlopen(req)
-    res = 'http://' + res_data.read()
-    return render_template("course.html",name=username,pic=url,vm = res)
 
+    # url2 = config. APISERVER
+    # data = urllib.urlencode(data)
+    # req = urllib2.Request(url = url2 , data = data)
+    # res_data = urllib2.urlopen(req)
+    # res = 'http://' + res_data.read()
+    return render_template("course.html",name=username,pic=url)
+
+api.add_resource(CourseList, "/api/courses")

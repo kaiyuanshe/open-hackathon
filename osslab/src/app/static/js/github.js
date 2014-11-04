@@ -4,9 +4,9 @@ $(function() {
 		login();
 	});
 
-	var clientId = github_ClientID;
-	var redirect_uri = github_redirect_uri;
-	var scope = github_scope;
+	var clientId = CONFIG.github_ClientID;
+	var redirect_uri = CONFIG.github_redirect_uri;
+	var scope = CONFIG.github_scope;
 	
 	function login() {
 		var arr = [clientId,redirect_uri,scope];

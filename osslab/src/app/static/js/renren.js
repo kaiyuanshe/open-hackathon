@@ -4,10 +4,10 @@ $(function() {
                 login();
         });
 
-        var clientId = renren_ClientID;
-        var redirect_uri = renren_redirect_url;
-        var scope = renren_scope;
-        var response_type = renren_response_type;
+        var clientId = CONFIG.renren_ClientID;
+        var redirect_uri = CONFIG.renren_redirect_url;
+        var scope = CONFIG.renren_scope;
+        var response_type = CONFIG.renren_response_type;
 	var display = "display=page";
 //	var state = clientID;
 

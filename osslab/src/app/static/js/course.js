@@ -3,8 +3,8 @@ var para = "type"
 var url = window.location.href;
 //:alert(url);
 var theRequest = new Object();
-	if (url.indexOf("?")!=-1) {
-        	        var str  = url.substr(url.indexOf("?")+1);
+    if (url.indexOf("?")!=-1) {
+                    var str  = url.substr(url.indexOf("?")+1);
                         var strs = str.split("&");
                         for (var i = 0;i < strs.length; i ++) {
                                 theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);

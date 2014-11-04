@@ -1,0 +1,9 @@
+flask
+flask-restful
+flask-login
+flask-openid
+sqlalchemy
+flask-sqlalchemy
+mysql-python
+wsgilog
+azure

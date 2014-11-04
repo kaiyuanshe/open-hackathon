@@ -1,4 +1,4 @@
-   var clientId = '304944766846-7jt8jbm39f1sj4kf4gtsqspsvtogdmem.apps.googleusercontent.com';
+var clientId = '304944766846-7jt8jbm39f1sj4kf4gtsqspsvtogdmem.apps.googleusercontent.com';
 
 var apiKey = 'AIzaSyAnLbBT3Hy2PfSEUoLwsjbgqSm5H3cHQfk';
 
