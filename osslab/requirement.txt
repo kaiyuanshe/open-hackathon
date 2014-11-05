@@ -2,6 +2,7 @@ flask
 flask-restful
 flask-login
 flask-openid
+flask-cors
 sqlalchemy
 flask-sqlalchemy
 mysql-python
