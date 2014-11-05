@@ -52,4 +52,5 @@ coverage.xml
 # Sphinx documentation
 docs/_build/
 
+.idea/
 /backend_setup.py
