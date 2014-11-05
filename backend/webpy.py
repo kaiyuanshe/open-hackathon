@@ -1,4 +1,4 @@
-import web,orm,constants
+import web,constants
 import apiserver.restserver as restserver
 from backendlogger.logger import Logger
 urls = ('/(.*)', 'index')
@@ -29,6 +29,7 @@ class index:
         else:
             return 'Illegal Request...'
     
+    #GET method is just used for browser testing
     def GET(self,info):
         web.input(info=None)
         #shit=web.ctx.items()
