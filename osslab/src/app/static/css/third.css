@@ -1,0 +1,82 @@
+.main{
+            width:1024px;
+            margin:0 auto;
+            overflow: hidden;
+            margin-top: 10px
+        }
+        ul{
+            padding-left: 0px;
+        }
+        ul li{
+            list-style-type:none;
+        }
+        .main{
+            
+        }
+        .left{
+            height:100%;
+            background-color: #cccccc;
+            width:10%;
+            float: left;
+            padding-bottom: 300px;
+        }
+        .left-title{
+            text-align: center;
+            margin: 10px auto;
+            padding-top:30px;
+            font-size: 20px;
+            font-weight: bold;
+            
+        }
+        .left ul{         
+            text-align: center;
+        }
+        .left ul li button{
+            padding: 5px 0px;
+            cursor: pointer;
+            margin:10px 0px;
+            width: 80%;
+        }
+        .center{
+            width: 60%;
+            float:left;
+            padding-left: 20px;
+            padding-top:10px;
+        }
+        .center .top>div ul li{
+            width: 80px;
+            float:left;
+            cursor: pointer;
+            text-align: center;
+        }
+        .center .top>div ul li div{
+            padding:5px 0px;
+        }
+        .center .top>div ul li .selected{
+            background-color: red;
+            color:#ffffff;
+        }
+        .center .top>div ul li:hover{
+            background-color: #eeeeee;
+        }
+        .right{
+            width: 30%;
+            float:left;
+            padding-left: 20px;
+            padding-top:10px;
+        }
+        .note,.discuss,.count{
+            box-shadow: 10px 10px 5px #888888;
+            border: 1px solid #888888;
+            padding: 5px 8px;
+            height:200px;
+        }
+        .discuss,.count{
+            margin-top: 30px;
+        }
+        .count{
+            height:180px;
+        }
+        .bottom{
+            margin-top: 20px;
+        }
