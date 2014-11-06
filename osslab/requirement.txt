@@ -7,3 +7,6 @@ flask-sqlalchemy
 mysql-python
 wsgilog
 azure
+werkzeug
+jinja2
+six

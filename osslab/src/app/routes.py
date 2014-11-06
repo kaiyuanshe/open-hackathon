@@ -9,7 +9,10 @@ Template_Routes = {
     "PrivacyStatement": "PrivacyStatement.html",
     "TermsOfUse": "TermsOfUse.html",
     'paper': "paper.html",
-    "google": "google.html"
+    "google": "google.html",
+    "head":"head.html",
+    "foot":"foot.html",
+    "third":"third.html",
 }
 
 Courses = [

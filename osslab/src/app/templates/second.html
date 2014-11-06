@@ -1,0 +1,635 @@
+<!--<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="/static/js/jquery.min.js"></script>
+    <script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jquery.ui/1.8.18/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.min.js"></script>
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <script src="/static/js/bootstrap.min.js"></script>
+    <link rel="icon" href="/static/pic/icon.jpg">
+    <meta name="description" content="">
+    
+    <script type="text/javascript" src="/config.js"></script>-->
+    
+    {% extends "base.html" %}
+         {% block content %}     
+         
+    <!-- 分享JS begin -->
+    <script type="text/javascript" id="bdshare_js" data="type=slide&mini=1" ></script>   
+    <script type="text/javascript" id="bdshell_js"></script> 
+    <!-- 分享JS end -->
+    
+    <link rel="stylesheet" href="/static/css/second.css">
+    
+    {% block second %} {% endblock %}
+    
+    
+<!--    <title>OSSLAB - 开源软件实验室(预览版)</title>-->
+    <style>
+        span.bds_more, .bds_tools a{
+            height: 22px !important;
+        }
+    </style>
+
+    <script>
+        document.getElementById('bdshell_js').src = "http://bdimg.share.baidu.com/static/js/shell_v2.js?cdnversion=" + Math.ceil(new Date()/3600000);
+        
+        $(function(){            
+            $(".btn-share").each(function(i){
+                $(this).mouseover(function(){
+                    $(this).attr('class','hover');
+                })
+            })
+            $(".btn-share").each(function(i){
+                $(this).mouseleave(function(){
+                    $(this).attr('class','');
+                })
+            })
+            
+            $(".btn-say").each(function(i){
+                $(this).mouseover(function(){
+                    $(this).attr('class','hover');
+                })
+            })
+            $(".btn-say").each(function(i){
+                $(this).mouseleave(function(){
+                    $(this).attr('class','');
+                })
+            })
+            
+            $(".left ul li").each(function(i){
+                $(this).click(function(){
+                    $(this).children().attr('class','selected');
+                    $(this).siblings().children().attr("class","");
+                    getData($(this).text());
+                })
+            })
+        })
+        
+        function getData(tag){
+            $.ajax({
+				type:'post',
+				dataType:'json',
+                data:{
+                    tag:tag
+                },
+				url:'',
+				success: function(data){										
+					dataLoad(data);	
+				},
+				error: function(XMLHttpRequest,textStatus,errorThrown) {
+                    
+				}
+			});			
+        }
+        
+        function dataLoad(data){
+            var htmlContent="";
+            if(data.length>0){			
+				$.each(data,function(i,val){
+                    htmlContent+='<li><div class="course-list-container"><div class="front"><div style="margin-top:10px;">';
+                    htmlContent+='<img src="'+val.image+'" width="50px" height="50px"/></div>';
+                    htmlContent+='<div><h2>'+val.name+'</h2></div>';
+                    
+                    var recommend=""
+                    for(var i=0;i<val.recommend;i++){
+                        recommend+="★";
+                    }
+                    for(var i=0;i<5-val.recommend;i++){
+                        recommend+="☆";
+                    }
+                    htmlContent+='<div><div style="margin-top:10px;">推荐指数：'+recommend+'</div>';
+                    
+                    htmlContent+='<div style="margin-top:10px;">更新时间：'+val.date+'</div></div></div>';
+                    htmlContent+='<div class="obverse"><div class="obverse-top"><div><h3>'+val.name+'/h3>';
+                    htmlContent+='<div>推荐指数：'+recommend+'</div></div></div>';
+                    htmlContent+='<div class="obverse-center"><div class="obverse-center-left" >';
+                    
+                    var content="";
+                    if(val.content.length>35){
+                        content=val.content.substring(0,35)+"...";
+                    }
+                    else{
+                        content=val.content;
+                    }
+                    htmlContent+='<div style="padding-left:10px">'+content+'</div></div>';
+                    htmlContent+='<div class="obverse-center-right" ><div style="padding-right:30px;overflow:hidden;">';
+                    htmlContent+='<div style="float:right;margin-left: 20px;">&hearts;1234</div>';
+                    htmlContent+='<div style="float:right;">●1234</div></div>';
+                    htmlContent+='<div style="padding-right:30px;overflow:hidden;">';
+                    htmlContent+='<div style="float:right;margin-left: 20px;">&diams;1234</div>';
+                    htmlContent+='<div style="float:right;">&spades;1654 </div></div></div></div>';
+                    htmlContent+='<div class="obverse-bottom" ><div><button id="" class="">我来XX</button>';
+                    htmlContent+='<div class="btn-share"><button>分享</button>';
+                    htmlContent+='<div class="div-share"><div><ul>';
+                    htmlContent+='<div id="bdshare" class="bdshare_t bds_tools get-codes-bdshare">';
+                    htmlContent+='<a class="bds_qzone">QQ空间</a><a class="bds_tsina">新浪微博</a><a class="bds_tqq">腾讯微博</a>';
+                    htmlContent+='<a class="bds_renren">人人网</a><span class="bds_more">更多</span></div>';
+                    htmlContent+='</ul></div></div></div>';
+                    htmlContent+='<div class="btn-say"><button id="" class="">说两句</button>';
+                    htmlContent+='<div class="div-say"><div><input type="text" />';
+                    htmlContent+='<button >发言</button></div></div></div>';
+                    
+                    
+                    
+                    htmlContent+='<div style="float:left;margin-left:20px">● 满 | ○空 | N/A</div>';
+                    htmlContent+=' </div></div></div></div></li>';
+                    htmlContent+='';
+                    htmlContent+='';
+                    
+                })
+            }
+        }
+    </script>
+<!--</head>-->
+<!--<body>-->
+
+<!--    <iframe src="head" width="100%" height="51px" class="navbar-fixed-top" style="border: 1px solid #000;"></iframe>-->
+
+     
+     
+    <div class="main">
+        <div class="left">
+            <div class="left-title">分类导航</div>
+            <ul>
+                <li><div class="selected">大数据</div></li>
+                <li><div>网络</div></li>
+                <li><div>语言</div></li>
+                <li><div>云计算</div></li>
+                <li><div>游戏平台</div></li>
+            </ul>
+            <div class="search">
+                <span>搜索</span>
+                <span><input type="text" id="search" name="search" /><input type="button" value="Search"/></span>
+            </div>
+        </div>
+        
+        <div class="center">
+            <div class="top">
+                <div>
+                    <h3>推荐新环境</h3>
+                    <span>
+                        <input type="text" id="recommend" name="recommend" />
+                        <input type="button" value="提交"/>
+                    </span>
+                </div>               
+            </div>
+            <div class="bottom">
+                <div class="bottom-container">
+                    <div class="sort">
+                        <div>排序</div>
+                        <div>最新上架</div>
+                        <div>本周最流行</div>
+                        <div>本月最流行</div>
+                        <div>综合最流行</div>                        
+                    </div>
+                    <div class="course-list" id="bigData">
+                        <ul>
+                            <li>
+                                <div class="course-list-container">
+                                    <div class="front">
+                                        <div style="margin-top:10px;"><img src="/static/pic/ruby.jpg" width="50px" height="50px"/></div>
+                                        <div><h2>Ruby on Rails</h2></div>
+                                        <div>
+                                            <div style="margin-top:10px;">推荐指数：★★☆☆☆</div>
+                                            <div style="margin-top:10px;">更新时间：2014-10-22</div>
+                                        </div>
+                                    </div>
+                                    <div class="obverse">
+                                        <div class="obverse-top">
+                                            <div>
+                                                <h3>Ruby on Rails</h3>
+                                                <div>推荐指数：★★☆☆☆</div>
+                                            </div>
+                                        </div>
+                                        <div class="obverse-center">
+                                            <div class="obverse-center-left" >
+                                                <div style="padding-left:10px">Ruby，一种为简单快捷的面向对象编程（面向对象程序设计）而创的脚本语言</div>
+                                            </div>
+                                            <div class="obverse-center-right" >
+                                                <div style="padding-right:30px;overflow:hidden;">
+                                                    <div style="float:right;margin-left: 20px;">&hearts;1234</div>
+                                                    <div style="float:right;">●1234</div>
+                                                </div>
+                                                <div style="padding-right:30px;overflow:hidden;">
+                                                    <div style="float:right;margin-left: 20px;">&diams;1234</div>
+                                                    <div style="float:right;">&spades;1654 </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="obverse-bottom" >
+                                            <div>
+                                                <button id="" class="" onclick="window.location.href='third'">我来XX</button>
+                                                
+                                                <div class="btn-share">
+                                                    <button>分享</button>
+                                                    <div class="div-share">
+                                                        <div>
+                                                            <ul>
+                                                                <!-- Baidu Button BEGIN -->
+                                                                <div id="bdshare" class="bdshare_t bds_tools get-codes-bdshare">
+                                                                    <a class="bds_qzone">QQ空间</a>
+                                                                    <a class="bds_tsina">新浪微博</a>
+                                                                    <a class="bds_tqq">腾讯微博</a>
+                                                                    <a class="bds_renren">人人网</a>
+                                                                    <span class="bds_more">更多</span>
+                                                                </div>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="btn-say">
+                                                    <button id="" class="">说两句</button>
+                                                    <div class="div-say">
+                                                        <div>
+                                                            <input type="text" />
+                                                            <button >发言</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div style="float:left;margin-left:20px">
+                                                    ● 满 | ○空 | N/A
+                                                </div>
+                                            </div>
+                                        </div>                                       
+                                    </div>
+                                </div>
+                            </li>
+                            
+                            <li>
+                                <div class="course-list-container">
+                                    <div class="front">
+                                        <div style="margin-top:10px;"><img src="/static/pic/python.jpg" width="50px" height="50px"/></div>
+                                        <div style="width: 45%;"><h2>Python</h2></div>
+                                        <div>
+                                            <div style="margin-top:10px;">推荐指数：★★★☆☆</div>
+                                            <div style="margin-top:10px;">更新时间：2014-10-21</div>
+                                        </div>
+                                    </div>
+                                    <div class="obverse">
+                                        <div class="obverse-top">
+                                            <div>
+                                                <h3 style="margin:0 auto;padding-left:50px;width:50%;float:left">Python</h3>
+                                                <div style="text-align:right;width:50%;float:left;padding-right:30px;">推荐指数：★★★☆☆</div>
+                                            </div>
+                                        </div>
+                                        <div class="obverse-center">
+                                            <div style="width:65%;float:left;">
+                                                <div style="padding-left:10px">Python, 是一种面向对象、解释型计算机程序设计语言</div>
+                                            </div>
+                                            <div style="width:35%;float:left;">
+                                                <div style="padding-right:30px;overflow:hidden;">
+                                                    <div style="float:right;margin-left: 20px;">&hearts;444</div>
+                                                    <div style="float:right;">●777</div>
+                                                </div>
+                                                <div style="padding-right:30px;overflow:hidden;">
+                                                    <div style="float:right;margin-left: 20px;">&diams;124</div>
+                                                    <div style="float:right;">&spades;11111 </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="obverse-bottom" >
+                                            <div>
+                                                <button id="" class="">我来XX</button>
+                                                <div id="" class="btn-share">
+                                                    <button>分享</button>
+                                                    <div class="div-share">
+                                                        <div>
+                                                            <ul>
+                                                                <li>QQ空间</li>
+                                                                <li>腾讯微博</li>
+                                                                <li>新浪微博</li>
+                                                                <li>人人网</li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="btn-say">
+                                                    <button id="" class="">说两句</button>
+                                                    <div class="div-say">
+                                                        <div>
+                                                            <input type="text" />
+                                                            <button >发言</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div style="float:left;margin-left:20px">
+                                                    ● 满 | ○空 | N/A
+                                                </div>
+                                            </div>                                            
+                                        </div>                                       
+                                    </div>
+                                </div>
+                            </li>
+                            
+                            <li>
+                                <div class="course-list-container">
+                                    <div class="front">
+                                        <div style="margin-top:10px;"><img src="/static/pic/javaScript.jpg" width="50px" height="50px"/></div>
+                                        <div style="width: 45%;"><h2>JavaScript</h2></div>
+                                        <div>
+                                            <div style="margin-top:10px;">推荐指数：★★☆☆☆</div>
+                                            <div style="margin-top:10px;">更新时间：2014-10-22</div>
+                                        </div>
+                                    </div>
+                                    <div class="obverse">
+                                        <div class="obverse-top">
+                                            <div>
+                                                <h3 style="margin:0 auto;padding-left:50px;width:50%;float:left">JavaScript</h3>
+                                                <div style="text-align:right;width:50%;float:left;padding-right:30px;">推荐指数：★★☆☆☆</div>
+                                            </div>
+                                        </div>
+                                        <div class="obverse-center">
+                                            <div style="width:65%;float:left;">
+                                                <div style="padding-left:10px">JavaScript是一种脚本语言，是一种动态类型、弱类型、基于原型的语言</div>
+                                            </div>
+                                            <div style="width:35%;float:left;">
+                                                <div style="padding-right:30px;overflow:hidden;">
+                                                    <div style="float:right;margin-left: 20px;">&hearts;1234</div>
+                                                    <div style="float:right;">●1234</div>
+                                                </div>
+                                                <div style="padding-right:30px;overflow:hidden;">
+                                                    <div style="float:right;margin-left: 20px;">&diams;1234</div>
+                                                    <div style="float:right;">&spades;1654 </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="obverse-bottom" >
+                                            <div>
+                                                <button id="" class="">我来XX</button>
+                                                <div id="" class="btn-share">
+                                                    <button>分享</button>
+                                                    <div class="div-share">
+                                                        <div>
+                                                            <ul>
+                                                                <li>QQ空间</li>
+                                                                <li>腾讯微博</li>
+                                                                <li>新浪微博</li>
+                                                                <li>人人网</li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="btn-say">
+                                                    <button id="" class="">说两句</button>
+                                                    <div class="div-say">
+                                                        <div>
+                                                            <input type="text" />
+                                                            <button >发言</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div style="float:left;margin-left:20px">
+                                                    ● 满 | ○空 | N/A
+                                                </div>
+                                            </div>
+                                        </div>                                       
+                                    </div>
+                                </div>
+                            </li>
+                            
+                            <li>
+                                <div class="course-list-container">
+                                    <div class="front">
+                                        <div style="margin-top:10px;"><img src="/static/pic/JAVA.jpg" width="50px" height="50px"/></div>
+                                        <div style="width: 45%;"><h2>JAVA</h2></div>
+                                        <div>
+                                            <div style="margin-top:10px;">推荐指数：★★★★☆</div>
+                                            <div style="margin-top:10px;">更新时间：2014-10-22</div>
+                                        </div>
+                                    </div>
+                                    <div class="obverse">
+                                        <div class="obverse-top">
+                                            <div>
+                                                <h3 style="margin:0 auto;padding-left:50px;width:50%;float:left">JAVA</h3>
+                                                <div style="text-align:right;width:50%;float:left;padding-right:30px;">推荐指数：★★★★☆</div>
+                                            </div>
+                                        </div>
+                                        <div class="obverse-center">
+                                            <div style="width:65%;float:left;">
+                                                <div style="padding-left:10px">java是一种可以撰写跨平台应用软件的面向对象的程序设计语言</div>
+                                            </div>
+                                            <div style="width:35%;float:left;">
+                                                <div style="padding-right:30px;overflow:hidden;">
+                                                    <div style="float:right;margin-left: 20px;">&hearts;1234</div>
+                                                    <div style="float:right;">●1234</div>
+                                                </div>
+                                                <div style="padding-right:30px;overflow:hidden;">
+                                                    <div style="float:right;margin-left: 20px;">&diams;1234</div>
+                                                    <div style="float:right;">&spades;1654 </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="obverse-bottom" >
+                                            <div>
+                                                <button id="" class="">我来XX</button>
+                                                <div id="" class="btn-share">
+                                                    <button>分享</button>
+                                                    <div class="div-share">
+                                                        <div>
+                                                            <ul>
+                                                                <li>QQ空间</li>
+                                                                <li>腾讯微博</li>
+                                                                <li>新浪微博</li>
+                                                                <li>人人网</li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>                                                    
+                                                </div>
+                                                
+                                                <div class="btn-say">
+                                                    <button id="" class="">说两句</button>
+                                                    <div class="div-say">
+                                                        <div>
+                                                            <input type="text" />
+                                                            <button >发言</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div style="float:left;margin-left:20px">
+                                                    ● 满 | ○空 | N/A
+                                                </div>
+                                            </div>
+                                        </div>                                       
+                                    </div>
+                                </div>
+                            </li>
+                            
+                            <li>
+                                <div class="course-list-container">
+                                    <div class="front">
+                                        <div style="margin-top:10px;"><img src="/static/pic/PHP.jpg" width="50px" height="50px"/></div>
+                                        <div style="width: 45%;"><h2>PHP</h2></div>
+                                        <div>
+                                            <div style="margin-top:10px;">推荐指数：★☆☆☆☆</div>
+                                            <div style="margin-top:10px;">更新时间：2014-10-22</div>
+                                        </div>
+                                    </div>
+                                    <div class="obverse">
+                                        <div class="obverse-top">
+                                            <div>
+                                                <h3 style="margin:0 auto;padding-left:50px;width:50%;float:left">PHP</h3>
+                                                <div style="text-align:right;width:50%;float:left;padding-right:30px;">推荐指数：★☆☆☆☆</div>
+                                            </div>
+                                        </div>
+                                        <div class="obverse-center">
+                                            <div style="width:65%;float:left;">
+                                                <div style="padding-left:10px">PHP是一种通用开源脚本语言。易于学习，使用广泛。</div>
+                                            </div>
+                                            <div style="width:35%;float:left;">
+                                                <div style="padding-right:30px;overflow:hidden;">
+                                                    <div style="float:right;margin-left: 20px;">&hearts;1234</div>
+                                                    <div style="float:right;">●1234</div>
+                                                </div>
+                                                <div style="padding-right:30px;overflow:hidden;">
+                                                    <div style="float:right;margin-left: 20px;">&diams;1234</div>
+                                                    <div style="float:right;">&spades;1654 </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="obverse-bottom" >
+                                            <div>
+                                                <button id="" class="">我来XX</button>
+                                                <div id="" class="btn-share">
+                                                    <button>分享</button>
+                                                    <div class="div-share">
+                                                        <div>
+                                                            <ul>
+                                                                <li>QQ空间</li>
+                                                                <li>腾讯微博</li>
+                                                                <li>新浪微博</li>
+                                                                <li>人人网</li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="btn-say">
+                                                    <button id="" class="">说两句</button>
+                                                    <div class="div-say">
+                                                        <div>
+                                                            <input type="text" />
+                                                            <button >发言</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div style="float:left;margin-left:20px">
+                                                    ● 满 | ○空 | N/A
+                                                </div>
+                                            </div>
+                                        </div>                                       
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="right">
+            <div class="left-side">
+                <div class="abstract">
+                    <h2>大数据</h2>
+                    大数据技术(big data)，或称巨量资料，指的是所涉及的资料量规模巨大到无法通过目前主流软件工具，在合理时间内达到撷取、管理、处理、并整理成为帮助企业经营决策更积极目的的资讯。大数据的4V特点：Volume（大量）、Velocity（高速）、Variety（多样）、value（价值）。
+                </div>
+                
+                <div class="count">
+                    <h2 style="border-bottom:1px solid #000000;color:#C30008">社区统计</h2>
+                    <div style="width:48%;float:left;">
+                        <div>最流行</div>
+                        <ul>
+                            <li style="background:url(/static/pic/1.gif) no-repeat 4px center">
+                                <div>Python</div>
+                            </li>
+                            <li style="background:url(/static/pic/2.gif) no-repeat 4px center">
+                                <div>Ruby</div>
+                            </li>
+                            <li style="background:url(/static/pic/3.gif) no-repeat 4px center">
+                                <div>JavaScript</div>
+                            </li>
+                            <li style="background:url(/static/pic/4.gif) no-repeat 4px center">
+                                <div>Java</div>
+                            </li>
+                            <li style="background:url(/static/pic/5.gif) no-repeat 4px center">
+                                <div>PHP</div>
+                            </li>
+                        </ul>
+                        
+                        <div>最活跃用户</div>
+                        <ul>
+                            <li style="background:url(/static/pic/1.gif) no-repeat 4px center">
+                                <div>小A</div>
+                            </li>
+                            <li style="background:url(/static/pic/2.gif) no-repeat 4px center">
+                                <div>小B</div>
+                            </li>
+                            <li style="background:url(/static/pic/3.gif) no-repeat 4px center">
+                                <div>小明</div>
+                            </li>
+                            <li style="background:url(/static/pic/4.gif) no-repeat 4px center">
+                                <div>小涛</div>
+                            </li>
+                            <li style="background:url(/static/pic/5.gif) no-repeat 4px center">
+                                <div>小红</div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div style="width:48%;float:left;margin-left:8px">
+                        <div>最新趋势</div>
+                        <ul>
+                            <li style="background:url(/static/pic/1.gif) no-repeat 4px center">
+                                <div>Ruby</div>
+                            </li>
+                            <li style="background:url(/static/pic/2.gif) no-repeat 4px center">
+                                <div>JavaScript</div>
+                            </li>
+                            <li style="background:url(/static/pic/3.gif) no-repeat 4px center">
+                                <div>Python</div>
+                            </li>
+                            <li style="background:url(/static/pic/4.gif) no-repeat 4px center">
+                                <div>Java</div>
+                            </li>
+                            <li style="background:url(/static/pic/5.gif) no-repeat 4px center">
+                                <div>PHP</div>
+                            </li>
+                        </ul>
+                        
+                        <div>最活跃参与者</div>
+                        <ul>
+                            <li style="background:url(/static/pic/1.gif) no-repeat 4px center">
+                                <div>allen</div>
+                            </li>
+                            <li style="background:url(/static/pic/2.gif) no-repeat 4px center">
+                                <div>bill</div>
+                            </li>
+                            <li style="background:url(/static/pic/3.gif) no-repeat 4px center">
+                                <div>candy</div>
+                            </li>
+                            <li style="background:url(/static/pic/4.gif) no-repeat 4px center">
+                                <div>danny</div>
+                            </li>
+                            <li style="background:url(/static/pic/5.gif) no-repeat 4px center">
+                                <div>eric</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="advertisement">
+                <img src="/static/pic/microsoft.jpg" width="220px" height="220px"/>
+                <img src="/static/pic/ruby.jpg" width="220px" height="220px"/>
+                <img src="/static/pic/python.jpg" width="220px" height="220px"/>
+                <img src="/static/pic/javaScript.jpg" width="220px" height="220px"/>
+            </div>
+        </div>
+    </div>
+    
+<!--    <iframe src="foot" width="100%" height="51px" class="navbar-fixed-buttom" style="border: 1px solid #000;"></iframe>-->
+    {% endblock %}
+<!--</body>
+</html>-->

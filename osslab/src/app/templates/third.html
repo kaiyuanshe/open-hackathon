@@ -1,0 +1,115 @@
+<!--
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jquery.ui/1.8.18/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.min.js"></script>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <script src="js/bootstrap.min.js"></script>
+    <link rel="icon" href="http://osslab.msopentech.cn/pic/icon.jpg">   
+    <meta name="description" content="">
+    <title>OSSLAB - 开源软件实验室(预览版)</title>
+-->
+      
+       {% extends "base.html" %}
+         {% block content %}   
+    <link href="/static/css/third.css" rel="stylesheet"> 
+    <script>
+        $(function(){            
+            $(".center ul li").each(function(i){
+                $(this).click(function(){
+                    $(this).children().attr('class','selected');
+                    $(this).siblings().children().attr("class","");
+                })
+            })
+        })
+    </script>
+<!--
+</head>
+<body>
+-->
+<!--    <iframe src="head.html" width="100%" height="51px" class="navbar-fixed-top" style="border: 1px solid #000;"></iframe>-->
+ 
+    
+    <br />
+    <br />
+    
+    <div class="main">
+        <div class="left">
+            <div class="left-title">工具条</div>
+            <ul>
+                <li><button>Copy</button></li>
+                <li><button>Paste</button></li>
+                <li><button>分离</button></li>
+                <li><button>字+</button></li>
+                <li><button>字-</button></li>
+                <li><button>保存</button></li>
+                <li><button>部署</button></li>
+            </ul>
+        </div>
+        
+        <div class="center">
+            <div class="top">
+                <div style="overflow:hidden;">
+                    <ul >
+                        <li><div class="selected">文字</div></li>
+                        <li><div>图片</div></li>
+                        <li><div>视频</div></li>
+                        <li><div>其他</div></li>
+                    </ul>
+                </div>
+                <div style="width:100%;border:1px solid #888888;height:300px;">
+<!--
+                    <ol class="word">
+                        <li>
+                            <span><h5 style="font-weight: bold;">Python - Official Site</h5></span>
+                            <div>Official site for the interpreted, interactive, object-oriented, extensible programming language....<br/>
+                                <a href="https://www.python.org">https://www.python.org</a>
+                            </div>
+                        </li>
+                        <li>
+                            <span><h5 style="font-weight: bold;">Python_百科</h5></span>
+                            <div>Python（英语发音：/ˈpaɪθən/）, 是一种面向对象、解释型计算机程序设计语言....<br/>
+                                <a href="baike.baidu.com/view/21087.htm">baike.baidu.com/view/21087.htm</a>
+                            </div>
+                        </li>
+                    </ol>
+-->
+                   <iframe src="http://www.bing.com/search?q=python在线教程" width="100%" height="300px" class="" style="border: 1px solid #000;"></iframe>
+                </div>
+            </div>
+            <div class="bottom">
+                <div style="width:100%;border:1px solid #888888;height:360px;background-color:#000000;">
+                    
+                </div>
+            </div>
+        </div>
+        <div class="right">
+            <div class="top">
+                <div class="note">
+                    <h1>笔记</h1>
+                </div>
+                <div class="discuss">
+                    <h3>社区讨论</h3>
+                    <div>用户A：开源软件实验室好，点赞</div>
+                    <div>用户B：同意楼上</div>
+                    <div>用户C：我也说两句</div>
+                    <div style="margin-top:30px;"><input type="text" id="discuss" name="discuss"/>&nbsp;&nbsp;<button id="">发言</button></div>
+                </div>
+                <div class="count">
+                    <h3>统计</h3>
+                    <div>10人在线学习ruby</div>
+                    <div>158人已经学过ruby</div>
+                    <div style="margin-top:30px;"><button id="">叫朋友来学</button></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+<!--    <iframe src="foot.html" width="100%" height="51px" class="navbar-fixed-buttom" style="border: 1px solid #000;"></iframe>-->
+    {% endblock %}
+<!--
+</body>
+</html>-->
