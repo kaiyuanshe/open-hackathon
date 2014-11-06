@@ -1,21 +1,23 @@
 A service to export RESTFul API to manage docker containers.
 
 # Preconditions
-1. Python 2.7: https://www.python.org/downloads/
-2. pip: http://pip.readthedocs.org/en/latest/installing.html
-3. mysql: http://dev.mysql.com/downloads/
-4. windows only: visual c++ compiler for python. http://www.microsoft.com/en-us/download/details.aspx?id=44266
-5. git: http://git-scm.com/downloads
+- Python 2.7: [download python](https://www.python.org/downloads/)
+- pip: [install pip](http://pip.readthedocs.org/en/latest/installing.html)
+- mysql: [download mysql](http://dev.mysql.com/downloads/)
+- *windows only*: [visual c++ compiler for python](http://www.microsoft.com/en-us/download/details.aspx?id=44266)
+- *windows only*: [install MySQL Connector/C for windows](http://dev.mysql.com/downloads/connector/c/6.0.html#downloads)
+- [git](http://git-scm.com/downloads).
+- _optional_, you can install [SmartGit]() if you feel uncomfortable about git bash.
 
 # setup
 after all the preconditions are met on your dev machine, install the following python libraries via pip.
 
 Or you can simply install all libraries by `pip install -r requirements.txt`.
-## `pip install flask`
-## `pip install flask-restful`
-## `pip install docker-py`
-## `pip install gittle`
-## `pip install wsgilog`
+- `pip install flask`
+- `pip install flask-restful`
+- `pip install docker-py`
+- `pip install gittle`
+- `pip install wsgilog`
 
 Note that the list here may not up-to-date. When you see error like `no module named XXX`, that means you need install
 the specific lib in the error message, try `pip install XXX` in this case.

@@ -1,12 +1,13 @@
-import urllib, urllib2, json, uuid
-from flask import render_template, request, jsonify, Response
-from flask.ext.restful import reqparse, abort, Api, Resource
+import uuid
 
+from flask import request, Response
+from flask.ext.restful import Api, Resource
 from app import app
-from common import *
+from common.functions import *
 from routes import *
 from database import db_session
 from models import User
+
 
 api = Api(app)
 

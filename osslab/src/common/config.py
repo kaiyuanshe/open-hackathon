@@ -1,12 +1,4 @@
-CSRF_ENABLED = True
-SECRET_KEY = 'msopentech@dministrat0r'
-
-dbhost = 'localhost'
-dbuser = 'root'
-dbpass = 'fdkiller2011'
-dbname = 'UserInfo'
-
-DB_URI = 'mysql://' + dbuser + ':' + dbpass + '@' + dbhost + '/' + dbname
+# "javascript" section for javascript. see @app.route('/config.js') in app/views.py
 
 Config = {
     "javascript": {
@@ -28,7 +20,7 @@ Config = {
         "renren_response_type": "response_type=token"
     },
     "mysql": {
-        "connection": 'mysql://%s:%s@%s/%s' % ("root" , "fdkiller2011", "localhost", "UserInfo"),
+        "connection": 'mysql://%s:%s@%s/%s' % ("root" , "fdkiller2011", "localhost", "osslab"),
         "database": "UserInfo"
     },
     "oauth": {
