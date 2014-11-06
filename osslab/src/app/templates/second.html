@@ -65,29 +65,33 @@
                     getData($(this).text());
                 })
             })
+
+            $("#start_python").click(function(){
+                location.href = "third?cid=flask
+            });
         })
         
         function getData(tag){
             $.ajax({
-				type:'post',
-				dataType:'json',
+                type:'post',
+                dataType:'json',
                 data:{
                     tag:tag
                 },
-				url:'',
-				success: function(data){										
-					dataLoad(data);	
-				},
-				error: function(XMLHttpRequest,textStatus,errorThrown) {
+                url:'',
+                success: function(data){
+                    dataLoad(data);
+                },
+                error: function(XMLHttpRequest,textStatus,errorThrown) {
                     
-				}
-			});			
+                }
+            });
         }
         
         function dataLoad(data){
             var htmlContent="";
-            if(data.length>0){			
-				$.each(data,function(i,val){
+            if(data.length>0){
+                $.each(data,function(i,val){
                     htmlContent+='<li><div class="course-list-container"><div class="front"><div style="margin-top:10px;">';
                     htmlContent+='<img src="'+val.image+'" width="50px" height="50px"/></div>';
                     htmlContent+='<div><h2>'+val.name+'</h2></div>';
@@ -100,7 +104,6 @@
                         recommend+="☆";
                     }
                     htmlContent+='<div><div style="margin-top:10px;">推荐指数：'+recommend+'</div>';
-                    
                     htmlContent+='<div style="margin-top:10px;">更新时间：'+val.date+'</div></div></div>';
                     htmlContent+='<div class="obverse"><div class="obverse-top"><div><h3>'+val.name+'/h3>';
                     htmlContent+='<div>推荐指数：'+recommend+'</div></div></div>';
@@ -290,7 +293,7 @@
                                         </div>
                                         <div class="obverse-bottom" >
                                             <div>
-                                                <button id="" class="">我来XX</button>
+                                                <button id="start_python" class="">我来XX</button>
                                                 <div id="" class="btn-share">
                                                     <button>分享</button>
                                                     <div class="div-share">
