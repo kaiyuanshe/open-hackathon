@@ -25,6 +25,12 @@
                 })
             })
         })
+
+
+        function setFocusThickboxIframe() {
+            document.getElementById("vm").focus();
+            // alert("ok");
+        }
     </script>
 <!--
 </head>
@@ -81,9 +87,7 @@
                 </div>
             </div>
             <div class="bottom">
-                <div style="width:100%;border:1px solid #888888;height:360px;background-color:#000000;">
-                    
-                </div>
+                <iframe src="http://osslab1.chinacloudapp.cn:9080/client.xhtml?id=c%2Fpython" width="100%" height="300px" class="" style="border: 1px solid #000;"></iframe>
             </div>
         </div>
         <div class="right">
@@ -104,6 +108,10 @@
                     <div>158人已经学过ruby</div>
                     <div style="margin-top:30px;"><button id="">叫朋友来学</button></div>
                 </div>
+                <di>
+                    <h3>run</h3>
+                    <iframe id = "vm" src = "http://osslab1.chinacloudapp.cn:15000" width="100%" height="400" frameborder="yes" border="0" marginwidth="10" marginheight="10" scrolling="yes" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>
+                </di>
             </div>
         </div>
     </div>
