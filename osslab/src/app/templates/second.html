@@ -135,10 +135,8 @@
                     
                     htmlContent+='<div style="float:left;margin-left:20px">● 满 | ○空 | N/A</div>';
                     htmlContent+=' </div></div></div></div></li>';
-                    htmlContent+='';
-                    htmlContent+='';
-                    
                 })
+                $("#course-list").append(htmlContent);
             }
         }
     </script>
@@ -184,7 +182,7 @@
                         <div>本月最流行</div>
                         <div>综合最流行</div>                        
                     </div>
-                    <div class="course-list" id="bigData">
+                    <div class="course-list" id="course-list">
                         <ul>
                             <li>
                                 <div class="course-list-container">
