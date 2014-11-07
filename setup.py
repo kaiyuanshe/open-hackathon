@@ -5,5 +5,5 @@ setup(name='osslab',
       version = __version__,
       author = 'junbo wang',
       author_email='juniwang@microsoft.com',
-      packages=['osslab'],
+      packages=['osslab.src.common'],
 ) 

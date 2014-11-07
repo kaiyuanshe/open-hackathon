@@ -10,22 +10,17 @@
     <link rel="icon" href="/static/pic/icon.jpg">
     <meta name="description" content="">
     
-    <script type="text/javascript" src="/config.js"></script>-->
+    </script>-->
     
     {% extends "base.html" %}
          {% block content %}     
-         
-    <!-- 分享JS begin -->
-    <script type="text/javascript" id="bdshare_js" data="type=slide&mini=1" ></script>   
-    <script type="text/javascript" id="bdshell_js"></script> 
-    <!-- 分享JS end -->
     
     <link rel="stylesheet" href="/static/css/second.css">
-    
+    <script type="text/javascript" src="/config.js">
     {% block second %} {% endblock %}
     
     
-<!--    <title>OSSLAB - 开源软件实验室(预览版)</title>-->
+<!--    <title>OSSLAB - 开源软件实验室(预览版)</title> -->
     <style>
         span.bds_more, .bds_tools a{
             height: 22px !important;
@@ -33,52 +28,33 @@
     </style>
 
     <script>
-        document.getElementById('bdshell_js').src = "http://bdimg.share.baidu.com/static/js/shell_v2.js?cdnversion=" + Math.ceil(new Date()/3600000);
-        
-        $(function(){            
-            $(".btn-share").each(function(i){
-                $(this).mouseover(function(){
-                    $(this).attr('class','hover');
-                })
-            })
-            $(".btn-share").each(function(i){
-                $(this).mouseleave(function(){
-                    $(this).attr('class','');
-                })
-            })
-            
-            $(".btn-say").each(function(i){
-                $(this).mouseover(function(){
-                    $(this).attr('class','hover');
-                })
-            })
-            $(".btn-say").each(function(i){
-                $(this).mouseleave(function(){
-                    $(this).attr('class','');
-                })
-            })
-            
+        window.onload =function(){            
+            getData("web");
+                        
             $(".left ul li").each(function(i){
                 $(this).click(function(){
                     $(this).children().attr('class','selected');
                     $(this).siblings().children().attr("class","");
-                    getData($(this).text());
+                    getData($(this).attr("name"));
                 })
             })
 
-            $("#start_python").click(function(){
-                location.href = "third?cid=flask
-            });
-        })
+//            $("#start_python").click(function(){
+//                location.href = "third?cid=flask";
+//            });
+            
+            //loadEvent();
+        }
         
         function getData(tag){
+            var url='/api/courses'
+            if(tag!=null){
+                url='/api/courses'+"?tag="+tag
+            }
             $.ajax({
-                type:'post',
+                type:'get',
                 dataType:'json',
-                data:{
-                    tag:tag
-                },
-                url:'',
+                url:url,
                 success: function(data){
                     dataLoad(data);
                 },
@@ -89,41 +65,44 @@
         }
         
         function dataLoad(data){
+            data=$.parseJSON(data);
             var htmlContent="";
+            $("#course-list ul").html(htmlContent);
             if(data.length>0){
                 $.each(data,function(i,val){
-                    htmlContent+='<li><div class="course-list-container"><div class="front"><div style="margin-top:10px;">';
-                    htmlContent+='<img src="'+val.image+'" width="50px" height="50px"/></div>';
-                    htmlContent+='<div><h2>'+val.name+'</h2></div>';
+                    htmlContent+='<li><div class="course-list-container"><div class="front"><div style="width:59%">';
+                    htmlContent+='<div style="margin-top:10px;float:left;"><img src="'+val.image+'" width="50px" height="50px"/></div>';
+                    htmlContent+='<div><h3>'+val.name+'</h3></div></div>';
                     
                     var recommend=""
-                    for(var i=0;i<val.recommend;i++){
+                    for(var j=0;j<val.recommend;j++){
                         recommend+="★";
                     }
-                    for(var i=0;i<5-val.recommend;i++){
+                    for(var j=0;j<5-val.recommend;j++){
                         recommend+="☆";
                     }
                     htmlContent+='<div><div style="margin-top:10px;">推荐指数：'+recommend+'</div>';
-                    htmlContent+='<div style="margin-top:10px;">更新时间：'+val.date+'</div></div></div>';
-                    htmlContent+='<div class="obverse"><div class="obverse-top"><div><h3>'+val.name+'/h3>';
+                    htmlContent+='<div style="margin-top:10px;">更新时间：'+val.create_time+'</div></div></div>';
+                    htmlContent+='<div class="obverse"><div class="obverse-top"><div><h3>'+val.name+'</h3>';
                     htmlContent+='<div>推荐指数：'+recommend+'</div></div></div>';
                     htmlContent+='<div class="obverse-center"><div class="obverse-center-left" >';
                     
-                    var content="";
-                    if(val.content.length>35){
-                        content=val.content.substring(0,35)+"...";
+                    var description="";
+                    if(val.description.length>35){
+                        description=val.description.substring(0,35)+"...";
                     }
                     else{
-                        content=val.content;
+                        description=val.description;
                     }
-                    htmlContent+='<div style="padding-left:10px">'+content+'</div></div>';
-                    htmlContent+='<div class="obverse-center-right" ><div style="padding-right:30px;overflow:hidden;">';
-                    htmlContent+='<div style="float:right;margin-left: 20px;">&hearts;1234</div>';
-                    htmlContent+='<div style="float:right;">●1234</div></div>';
-                    htmlContent+='<div style="padding-right:30px;overflow:hidden;">';
-                    htmlContent+='<div style="float:right;margin-left: 20px;">&diams;1234</div>';
-                    htmlContent+='<div style="float:right;">&spades;1654 </div></div></div></div>';
-                    htmlContent+='<div class="obverse-bottom" ><div><button id="" class="">我来XX</button>';
+                    htmlContent+='<div style="padding-left:10px">'+description+'</div></div>';
+                    htmlContent+='<div class="obverse-center-right" ><div style="overflow:hidden;">';
+                    htmlContent+='<div style="float:right;width:50%">&hearts;'+val.like_count+'</div>';
+                    htmlContent+='<div style="float:right;width:50%">●'+val.share_count+'</div></div>';
+                    htmlContent+='<div style="overflow:hidden;">';
+                    htmlContent+='<div style="float:right;width:50%">&diams;'+val.studying_count+'</div>';
+                    htmlContent+='<div style="float:right;width:50%">&spades;'+val.studied_count+' </div></div></div></div>';
+                    id="'"+val.id+"'"
+                    htmlContent+='<div class="obverse-bottom" ><div><button id="" class="" onclick="course('+id+');return false;">我来试试</button>';
                     htmlContent+='<div class="btn-share"><button>分享</button>';
                     htmlContent+='<div class="div-share"><div><ul>';
                     htmlContent+='<div id="bdshare" class="bdshare_t bds_tools get-codes-bdshare">';
@@ -133,14 +112,51 @@
                     htmlContent+='<div class="btn-say"><button id="" class="">说两句</button>';
                     htmlContent+='<div class="div-say"><div><input type="text" />';
                     htmlContent+='<button >发言</button></div></div></div>';
-                    
-                    
-                    
                     htmlContent+='<div style="float:left;margin-left:20px">● 满 | ○空 | N/A</div>';
                     htmlContent+=' </div></div></div></div></li>';
+                    
+                    if(i>=4){
+                       return false ; 
+                    }
                 })
-                $("#course-list").append(htmlContent);
+                $("#course-list ul").html(htmlContent);
+                loadEvent();
             }
+            else{
+                $("#course-list ul").html("<div style='color:red'><h3>暂无相关内容，您可在推荐新环境中填写你感兴趣的内容，我们的工作人员会根据情况增加相关内容</h3></div>");
+            }
+        }
+                        
+        function loadEvent(){
+            $(".btn-share").each(function(i){
+                $(this).mouseover(function(){
+                    $(this).attr('class','hover');
+                })
+            })
+            $(".btn-share").each(function(i){
+                $(this).mouseleave(function(){
+                    $(this).attr('class','');
+                })
+            })
+            
+            $(".btn-say").each(function(i){
+                $(this).mouseover(function(){
+                    $(this).attr('class','hover');
+                })
+            })
+            $(".btn-say").each(function(i){
+                $(this).mouseleave(function(){
+                    $(this).attr('class','');
+                })
+            })
+        }
+        
+        function search(){
+            getData($("#search").val());
+        }
+                        
+        function course(id){
+            window.location.href="third?cid="+id;
         }
     </script>
 <!--</head>-->
@@ -154,15 +170,15 @@
         <div class="left">
             <div class="left-title">分类导航</div>
             <ul>
-                <li><div class="selected">大数据</div></li>
-                <li><div>网络</div></li>
-                <li><div>语言</div></li>
-                <li><div>云计算</div></li>
-                <li><div>游戏平台</div></li>
+                <li name="web" ><div class="selected">网络</div></li>
+                <li name="big data"><div>大数据</div></li>               
+                <li name="language"><div>语言</div></li>
+                <li name="cloud"><div>云计算</div></li>
+                <li name="game"><div>游戏平台</div></li>
             </ul>
             <div class="search">
                 <span>搜索</span>
-                <span><input type="text" id="search" name="search" /><input type="button" value="Search"/></span>
+                <span><input type="text" id="search" name="search" /><input type="button" value="Search" onclick="search();return false;"/></span>
             </div>
         </div>
         
@@ -187,7 +203,7 @@
                     </div>
                     <div class="course-list" id="course-list">
                         <ul>
-                            <li>
+  <!--                          <li>
                                 <div class="course-list-container">
                                     <div class="front">
                                         <div style="margin-top:10px;"><img src="/static/pic/ruby.jpg" width="50px" height="50px"/></div>
@@ -228,7 +244,6 @@
                                                     <div class="div-share">
                                                         <div>
                                                             <ul>
-                                                                <!-- Baidu Button BEGIN -->
                                                                 <div id="bdshare" class="bdshare_t bds_tools get-codes-bdshare">
                                                                     <a class="bds_qzone">QQ空间</a>
                                                                     <a class="bds_tsina">新浪微博</a>
@@ -259,7 +274,7 @@
                                 </div>
                             </li>
                             
-                            <li>
+                        <li>
                                 <div class="course-list-container">
                                     <div class="front">
                                         <div style="margin-top:10px;"><img src="/static/pic/python.jpg" width="50px" height="50px"/></div>
@@ -525,7 +540,7 @@
                                         </div>                                       
                                     </div>
                                 </div>
-                            </li>
+                            </li>-->
                         </ul>
                     </div>
                 </div>
@@ -629,7 +644,14 @@
             </div>
         </div>
     </div>
-    
+             
+    <!-- 分享JS begin -->
+    <script type="text/javascript" id="bdshare_js" data="type=slide&mini=1" ></script>   
+    <script type="text/javascript" id="bdshell_js"></script> 
+    <script>
+        document.getElementById('bdshell_js').src = "http://bdimg.share.baidu.com/static/js/shell_v2.js?cdnversion=" + Math.ceil(new Date()/3600000);
+    </script>
+    <!-- 分享JS end -->
 <!--    <iframe src="foot" width="100%" height="51px" class="navbar-fixed-buttom" style="border: 1px solid #000;"></iframe>-->
     {% endblock %}
 <!--</body>

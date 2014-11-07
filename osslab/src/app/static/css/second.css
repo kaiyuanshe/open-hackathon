@@ -48,7 +48,7 @@
             width:100%;
         }
         .center{
-            width: 40%;
+            width: 48%;
             float:left;
             margin-left: 20px;
             margin-top:10px;
@@ -134,6 +134,7 @@
             color: #FFF;
             display: none\9;
             height: 125px;
+            width:100%;
         }
 
         .course-list ul li .course-list-container:hover .obverse {
@@ -176,8 +177,9 @@
             float:left;
         }
         .obverse-center-right{
-            width:35%;
-            float:left;
+            width: 30%;
+            float: left;
+            margin-left: 5%;
         }
         .obverse-bottom>div{
             margin-top:5px;
@@ -239,7 +241,7 @@
             margin-top:12px;
         }
         .right{
-            width: 48%;
+            width: 40%;
             float:left;
             padding-left: 20px;
             padding-top:10px;
@@ -252,7 +254,7 @@
             box-shadow: 10px 10px 5px #888888;
             border: 1px solid #888888;
             padding: 5px 8px;
-            height: 300px;
+            height: 360px;
         }
         .count{
             margin-top:120px;
