@@ -1,0 +1,14 @@
+<configs>
+     <config name="python" protocol="ssh">
+         <param name="hostname" value="osslab1.chinacloudapp.cn" />
+         <param name="port" value="63025" />
+         <param name="username" value="opentech" />
+         <param name="password" value="@dministrat0r" />
+     </config>
+     <config name="windows" protocol="rdp">
+         <param name="hostname" value="42.159.226.184"/>
+         <param name="port" value="3389" />
+         <param name="username" value="user" />
+         <param name="password" value="Password01!" />
+     </config>
+ </configs>
