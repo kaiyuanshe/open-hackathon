@@ -59,7 +59,6 @@ class DockerTemplates(object):
         url= "http://%s/scm" % host
         return  self.post_to_remote(url, post_data)
 
-
     # move to common.py for re-use
     def post_to_remote(self, url, post_data):
         req = urllib2.Request(url)

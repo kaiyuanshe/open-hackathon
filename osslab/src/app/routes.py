@@ -66,6 +66,7 @@ class DoCourse(Resource):
                 # call remote service to start docker containers
                 course_config = json.load(file("resources/%s/%s_docker.js" % (name, name)))
                 course_id = str(uuid.uuid1())
+
                 course_context = {
                     "course_id": course_id,
                     "course_type":  course_type
@@ -73,6 +74,7 @@ class DoCourse(Resource):
                 try:
                     docker.start_containers(course_config, course_context)
                     # todo: save to database
+
                     running_courses.append((course_id, time.time(), course_config, course_context))
                     return json.dumps(course_context)
                 except Exception as err:
