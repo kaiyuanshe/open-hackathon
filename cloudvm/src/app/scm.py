@@ -4,6 +4,9 @@ from gittle import Gittle
 
 class SCM(object):
     def __init__(self, provider):
+        if provider=="git":
+            self.provider = Git()
+
         self.provider = Git()
 
     def clone(self, args):

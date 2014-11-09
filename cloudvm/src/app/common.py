@@ -1,3 +1,5 @@
+import os
+
 def convert(input):
     if isinstance(input, dict):
         return {convert(key):convert(value) for key,value in input.iteritems()}
@@ -8,3 +10,8 @@ def convert(input):
     else:
         return input
 
+# Guarantee that a diretory exists
+def mkdir_safe(path):
+    if path and not(os.path.exists(path)):
+        os.makedirs(path)
+    return path
