@@ -60,26 +60,34 @@
             background-color: #eeeeee;
         }
         .right{
-            width: 30%;
+            width: 29%;
             float:left;
             padding-left: 20px;
             padding-top:10px;
+            margin-right: 10px;
+        }
+        .right .top h3{
+            margin-top:0px;
+            margin-bottom: 0px;
+            text-align: center;
+            padding: 10px;
+            color:#ffffff;
+        }
+        .right .top ul li>div>div{
+            padding: 5px 8px;
+        }
+        .note,.discuss,.count{
+            display: none;
         }
         .note,.discuss,.count,.run{
-            box-shadow: 10px 10px 5px #888888;
+/*            box-shadow: 10px 10px 5px #888888;*/
             border: 1px solid #888888;
-            padding: 5px 8px;
-            height:200px;
-        }
-        .discuss,.count,.run{
-            margin-top: 30px;
-        }
-        .count{
-            height:180px;
+            height:300px;
         }
         .run{
-            height:180px;
+            margin-top: 30px;
             margin-bottom: 20px;
+            height:350px;
         }
         .bottom{
             margin-top: 20px;
