@@ -18,14 +18,15 @@
         {
             "name": "sshd",
             "image": "rastasheep/ubuntu-sshd:14.04",
-            "expose_ports":[22],
+            "ports":[22],
             "mnt":["%s/src","/src"],
             "detach":true,
             "guacamole": {
                 "protocol": "ssh",
                 "username": "root",
                 "password": "root",
-                "port": 22
+                "port": 22,
+                "hostname": "10.0.2.15"
             }
         }
     ]

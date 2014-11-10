@@ -18,7 +18,7 @@
             background-color: #cccccc;
             width:10%;
             float: left;
-            padding-bottom: 300px;
+            padding-bottom: 415px;
         }
         .left-title{
             text-align: center;
@@ -65,17 +65,21 @@
             padding-left: 20px;
             padding-top:10px;
         }
-        .note,.discuss,.count{
+        .note,.discuss,.count,.run{
             box-shadow: 10px 10px 5px #888888;
             border: 1px solid #888888;
             padding: 5px 8px;
             height:200px;
         }
-        .discuss,.count{
+        .discuss,.count,.run{
             margin-top: 30px;
         }
         .count{
             height:180px;
+        }
+        .run{
+            height:180px;
+            margin-bottom: 20px;
         }
         .bottom{
             margin-top: 20px;

@@ -15,6 +15,7 @@ Template_Routes = {
     "head":"head.html",
     "foot":"foot.html",
     "third":"third.html",
+    "loading":"loading.html"
 }
 
 running_courses = []
@@ -52,6 +53,17 @@ class CourseList(Resource):
 
 
 class DoCourse(Resource):
+    def get(self, name):
+        cs = get_running_course(name)
+        if cs is not None:
+            course_context= cs[3]
+            if not course_context.has_key("guacamole_status"):
+                docker.query_guaca_status(course_context)
+
+            return course_context
+        else:
+            return "Not Found", 404
+
     def post(self, name):
         parser = reqparse.RequestParser()
         parser.add_argument('c',type=int, default=1)
@@ -76,7 +88,7 @@ class DoCourse(Resource):
                     # todo: save to database
 
                     running_courses.append((course_id, time.time(), course_config, course_context))
-                    return json.dumps(course_context)
+                    return course_context
                 except Exception as err:
                     return "fail to start due to '%s'" % err, 500
         else:

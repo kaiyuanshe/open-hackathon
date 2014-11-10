@@ -51,7 +51,7 @@ class DockerTemplates(object):
             gc= {
                 "name": container["name"],
                 "protocol": guac["protocol"],
-                "host": "localhost",
+                "hostname": guac["hostname"], # get from DB rather than from config template
                 "port": 10000+guac["port"]
             }
             if guac.has_key("username"):
@@ -81,12 +81,25 @@ class DockerTemplates(object):
         f.close()
         return convert(json.loads(resp))
 
+    def get_remote(self, url):
+        opener = urllib2.build_opener(urllib2.HTTPHandler)
+        request = urllib2.Request(url)
+        resp = opener.open(request)
+        return resp.read()
+
     def delete_remote(self, url):
         opener = urllib2.build_opener(urllib2.HTTPHandler)
         request = urllib2.Request(url)
         request.get_method = lambda : 'DELETE'
         resp = opener.open(request)
         return "OK"
+
+    def query_guaca_status(self, course_context):
+        try:
+            self.get_remote("http://%s:%s" % (get_vm_public_host(course_context), 18080))
+            course_context["guacamole_status"] = True
+        except:
+            course_context.pop("guacamole_status", None)
 
     def start_containers(self, course_config, course_context):
 
