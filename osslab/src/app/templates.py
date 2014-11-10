@@ -2,7 +2,7 @@ import urllib, urllib2, json
 from functions import convert
 from compiler.ast import flatten
 
-def get_vm_address(context):
+def get_vm_private_address(context):
     # todo get availabe VM
     # 1. ideally its a private ip so not be restricted by port policy of azure(up to 150)
     # and the private ip should be returned by azure SDK
@@ -12,6 +12,10 @@ def get_vm_address(context):
     # service by default(either cloud-init or python remote ssh)
     # 4. keep the private in DB for guacamole server too
     return "localhost:8001"
+
+def get_vm_public_host(context):
+    # sure it must get from DB and it must accessible from public so it's a CloudService endpoint in general.
+    return "localhost"
 
 class DockerTemplates(object):
     def remote_start_container(self, course_context, container, guacamole_config):
@@ -29,6 +33,15 @@ class DockerTemplates(object):
         if container.has_key("mnt"):
             mnts_with_repo = map(lambda s: s if "%s" not in s else s % course_context["local_repo_path"], container["mnt"])
             container["mnt"]= mnts_with_repo
+
+        # todo open port on azure for those must open to public
+        # need design first
+
+        # output: not well designed ,need re-design
+        if container.has_key("public"):
+            op = course_context["output"] if course_context.has_key("output") else []
+            op.append("http://%s:%s" % (get_vm_public_host(course_context), 15000))
+            course_context["output"]= op
 
         # add to guacamole config
         # note the port should get from the container["port"] to get corresponding listening port rather than the
@@ -78,7 +91,7 @@ class DockerTemplates(object):
     def start_containers(self, course_config, course_context):
 
         # get available VM that runs the cloudvm and is available for more containers
-        vm_host= get_vm_address(course_context)
+        vm_host= get_vm_private_address(course_context)
         course_id= course_context["course_id"]
         course_context["vm_host"]= vm_host
         guacamole_config= []
@@ -104,6 +117,16 @@ class DockerTemplates(object):
                 "detach": True,
                 "guacamole_config": guacamole_config
             }
+
+            # return guacamole link to frontend
+            def to_op(config):
+                url= "http://%s:%s/client.xhtml?id=" % (get_vm_public_host(course_context), 18080) + "c%2F" + config["name"]
+                return {
+                    "name": config["name"],
+                    "url": url
+                }
+            course_context["guacamole_servers"]= map(lambda cfg: to_op(cfg), guacamole_config)
+
             self.remote_start_container(course_context, guacamole_container, [])
 
         # response to client

@@ -13,11 +13,11 @@
             "mnt":["%s/src","/src"],
             "url": "http://localhost:8080/client.xhtml?id=c%2Fpython",
             "detach":true,
-            "public_port":true
+            "public":true
         },
         {
             "name": "sshd",
-            "image": "verdverm/flask",
+            "image": "rastasheep/ubuntu-sshd:14.04",
             "expose_ports":[22],
             "mnt":["%s/src","/src"],
             "detach":true,

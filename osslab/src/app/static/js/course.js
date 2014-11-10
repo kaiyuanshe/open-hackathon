@@ -1,65 +1,44 @@
-$(document).ready(function() {
-var para = "type"
-var url = window.location.href;
-//:alert(url);
-var theRequest = new Object();
-    if (url.indexOf("?")!=-1) {
-                    var str  = url.substr(url.indexOf("?")+1);
-                        var strs = str.split("&");
-                        for (var i = 0;i < strs.length; i ++) {
-                                theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
-                        }
-                        var i = parseInt(theRequest[para]);
-                        /*var guaca = new String();
-                        //alert(i.toString());
-                        if (parseInt((i-1) / 3) == 0)
-                                guaca = "http://osslab.cloudapp.net:28080/guacamole-0.9.2/client.xhtml?id=c%2Fubuntu";
-                        if (parseInt((i-1) / 3) == 1)
-                                guaca = "http://osslab.cloudapp.net:28080/guacamole-0.9.2/client.xhtml?id=c%2Fubuntu";
-                        if (parseInt((i-1) / 3) == 2)
-                                guaca = "http://osslab.chinacloudapp.cn:6080/guacamole-0.9.2/client.xhtml?id=c%2Fwindows";*/
-                        var word = new String();
-                        /*if (i == 1)
-                                word = "http://en.wikipedia.org/wiki/Python_(programming_language)";
-                        if (i == 2)
-                                word = "http://en.wikipedia.org/wiki/Ruby_(programming_language)";
-                        if (i == 3)
-                                word = "http://en.wikipedia.org/wiki/JavaScript";
-                        if (i == 4)
-                                word = "http://www.mysql.com";
-                        if (i == 5)
-                                word = "http://www.mongodb.org";
-                        if (i == 6)
-                                word = "http://www.postgresql.org";
-                        if (i == 7)
-                                word = "http://www.microsoft.com/net";
-                        if (i == 8)
-                                word = "http://www.typescriptlang.org";
-                        if (i == 9)
-                                word = "http://azure.microsoft.com/en-us";
-                        */
-                        if (i == 1)
-                                word = "http://www.bing.com/search?q=python在线教程";
-                        if (i == 2)
-                                word = "http://www.bing.com/search?q=ruby在线教程";
-                        if (i == 3)
-                                word = "http://www.bing.com/search?q=nodejs在线教程";
-                        if (i == 4)
-                                word = "http://www.bing.com/search?q=perl在线教程";
-                        if (i == 5)
-                                word = "http://www.bing.com/search?q=mysql在线教程";
-                        if (i == 6)
-                                word = "http://www.bing.com/search?q=mongodb在线教程";
-                        if (i == 7)
-                                word = "http://www.bing.com/search?q=redis在线教程";
-                        if (i == 8)
-                                word = "http://www.bing.com/search?q=typescript在线教程";
-                        if (i == 9)
-                                word = "http://www.bing.com/search?q=Azure%20tutorial&qs=n&form=QBRE&pq=azure%20tutorial&sc=8-10&sp=-1&sk=&cvid=f42b51fec72140638217cd06550a9e9a&market=en-us";
+$(document).ready(function(){
+    var course = getParameterByName("cid");
+    $.ajax({
+        url: '/api/course/' + course,
+        type: "POST",
+        success: function(resp){
+//            alert(resp);
+            var data = $.parseJSON(resp);
+            var servers = data.guacamole_servers;
+            var show_url = data.output[0];
 
+            if(servers.length > 0){
+                $("#vm").attr("src",show_url);
 
-                        //alert(word);
-                        // $("#vm").attr("src",guaca);
-                        $("#document").attr("src",word);
-}
-});
+                // refresh show site
+                setInterval(function(){
+                    $("#vm").attr("src", $("#vm").attr("src"));
+                }, 3000);
+
+                // heart beat
+                setInterval(function(){
+                    $.ajax({
+                        url: '/api/course/' + data.course_id,
+                        type: "PUT",
+                        success: function(){}
+                        error:function(){}
+                    });
+                }, 5000);
+
+                $("#servers").empty();
+                $.each(servers, function(i,s){
+                    var link = $("<a class='server-name'>"+s.name+"</a>").attr("title", s.name).click(function(){
+                       $("#course_if").attr("src",s.url);
+                    });
+                    $("#servers").append(link);
+                })
+                $("#course_if").attr("src",servers[0].url);
+            }
+        },
+        error: function(){
+            alert("course doesn't exist")
+        }
+    });
+})

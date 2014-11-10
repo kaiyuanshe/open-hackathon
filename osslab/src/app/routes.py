@@ -52,7 +52,7 @@ class CourseList(Resource):
 
 
 class DoCourse(Resource):
-    def get(self, name):
+    def post(self, name):
         parser = reqparse.RequestParser()
         parser.add_argument('c',type=int, default=1)
         args = parser.parse_args()

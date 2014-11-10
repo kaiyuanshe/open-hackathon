@@ -24,11 +24,6 @@
                     $(this).siblings().children().attr("class","");
                 })
             })
-
-            setInterval(function(){
-                $("#vm").attr("src", $("#vm").attr("src"));
-            }, 3000);
-
         })
 
 
@@ -37,6 +32,7 @@
             // alert("ok");
         }
     </script>
+    <script type="text/javascript" src="/static/js/course.js"></script>
 <!--
 </head>
 <body>
@@ -91,6 +87,7 @@
                    <iframe src="http://www.bing.com/search?q=python在线教程" width="100%" height="300px" class="" style="border: 1px solid #000;"></iframe>
                 </div>
             </div>
+            <div id="servers"></div>
             <div class="bottom">
                 <iframe id="course_if" src="http://osslab1.chinacloudapp.cn:9080/client.xhtml?id=c%2Fpython" width="100%" height="300px" class="" style="border: 1px solid #000;"></iframe>
             </div>
