@@ -1,5 +1,7 @@
 import httplib
+
 from config import Config
+
 
 def convert(input):
     if isinstance(input, dict):
