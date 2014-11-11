@@ -1,20 +1,20 @@
 // google oauth
 $(function() {
-	$('#googlelogin').click(function() {
-		login();
-	});
+    $('#googlelogin').click(function() {
+        login();
+    });
 
-	var clientId = CONFIG.google_ClientID;
-	var localurl = location.href;
-	var redirect_uri = CONFIG.google_redirect_url;
-	var scope = CONFIG.google_scope;
-	var response_type = CONFIG.google_response_type;
-	
-	function login() {
-		var arr = [clientId,redirect_uri,scope,response_type];
-		var url = "https://accounts.google.com/o/oauth2/auth?" + arr.join("&");
-		location.href = url;
-	}
+    var clientId = CONFIG.google.clientID;
+    var localurl = location.href;
+    var redirect_uri = CONFIG.google.redirect_url;
+    var scope = CONFIG.google.scope;
+    var response_type = CONFIG.google.response_type;
+
+    function login() {
+        var arr = [clientId,redirect_uri,scope,response_type];
+        var url = "https://accounts.google.com/o/oauth2/auth?" + arr.join("&");
+        location.href = url;
+    }
 });
  $(function() {
                         $(document).ready(function() {
@@ -46,9 +46,9 @@ $(function() {
                                                 success: function(msg) {
                                                          $("#name").html('<p style = "color:white">' + msg.name  + "</p>");
                                                          $("#photo").html('<img src = "' + msg.picture + '" height = "30" width = "30"/>');
-							 document.cookie = 'username=' + msg.name;
-							 document.cookie = 'picurl=' + msg.picture;
-							 var pre = window.location.host;
+                             document.cookie = 'username=' + msg.name;
+                             document.cookie = 'picurl=' + msg.picture;
+                             var pre = window.location.host;
                                                          for (var i = 1;i <= 9;i++) {
                                                                 name = "#image" + i.toString();
                                                                 url = "course?type=" + i.toString();

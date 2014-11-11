@@ -63,7 +63,7 @@ $(document).ready(function(){
                                 $("#course_vm").attr("src",servers[0].url);
                                 clearInterval(sciv)
                             }
-                            
+
                         },
                         error: function(){}
                     });

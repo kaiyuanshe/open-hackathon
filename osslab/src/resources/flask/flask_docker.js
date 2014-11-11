@@ -11,7 +11,6 @@
             "image": "verdverm/flask",
             "ports":[5000],
             "mnt":["%s/src","/src"],
-            "url": "http://localhost:8080/client.xhtml?id=c%2Fpython",
             "detach":true,
             "public":true
         },
