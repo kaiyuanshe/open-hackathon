@@ -3,29 +3,35 @@
     "scm" :{
         "provider": "git",
         "repo_name": "flask-example",
-        "repo_url":"https://github.com/juniwang/flask-example.git"
+        "repo_url":"https://github.com/juniwang/flask-example.git",
+        "branch": "master"
     },
     "containers": [
         {
             "name": "web",
             "image": "verdverm/flask",
-            "ports":[5000],
+            "ports":[{
+                "name": "flask",
+                "port": 5000,
+                "public": true
+            }],
             "mnt":["%s/src","/src"],
-            "detach":true,
-            "public":true
+            "detach":true
         },
         {
             "name": "sshd",
             "image": "rastasheep/ubuntu-sshd:14.04",
-            "ports":[22],
+            "ports":[{
+                "name": "ssh",
+                "port": 22
+            }],
             "mnt":["%s/src","/src"],
             "detach":true,
             "guacamole": {
                 "protocol": "ssh",
                 "username": "root",
                 "password": "root",
-                "port": 22,
-                "hostname": "10.0.2.15"
+                "port": 22
             }
         }
     ]
