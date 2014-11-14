@@ -18,7 +18,7 @@
             background-color: #cccccc;
             width:10%;
             float: left;
-            padding-bottom: 415px;
+            padding-bottom: 360px;
         }
         .left-title{
             text-align: center;
@@ -26,7 +26,6 @@
             padding-top:30px;
             font-size: 20px;
             font-weight: bold;
-            
         }
         .left ul{         
             text-align: center;
@@ -43,44 +42,94 @@
             padding-left: 20px;
             padding-top:10px;
         }
-        .center .top>div ul li{
+        .center .top{
+            border: 1px solid #000;
+            box-shadow: 10px 10px 5px #888888;
+        }
+        .center .mid ul li{
             width: 80px;
             float:left;
             cursor: pointer;
             text-align: center;
+            -webkit-border-top-left-radius: 15px;
+            -webkit-border-top-right-radius: 15px;
+            -moz-border-radius-topleft: 15px;    
+            -moz-border-radius-topright: 15px;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+            background-color: rgb(198, 242, 240);
         }
-        .center .top>div ul li div{
+        .center .mid ul li div{
             padding:5px 0px;
         }
-        .center .top>div ul li .selected{
+        .center .mid ul li .selected{
             background-color: red;
             color:#ffffff;
+            -webkit-border-top-left-radius: 15px;
+            -webkit-border-top-right-radius: 15px;
+            -moz-border-radius-topleft: 15px;
+            -moz-border-radius-topright: 15px;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
         }
-        .center .top>div ul li:hover{
+        .center .mid ul li:hover{
             background-color: #eeeeee;
         }
+        #servers{
+            margin-top:10px;
+            font-size: 20px;
+        }
+        #servers .server-name{
+            width: 80px;
+            float:left;
+            cursor: pointer;
+            text-align: center;
+            -webkit-border-top-left-radius: 15px;
+            -webkit-border-top-right-radius: 15px;
+            -moz-border-radius-topleft: 15px;
+            -moz-border-radius-topright: 15px;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+        #servers .selected{
+            background-color: red;
+            color:#ffffff;
+            -webkit-border-top-left-radius: 15px;
+            -webkit-border-top-right-radius: 15px;
+            -moz-border-radius-topleft: 15px;
+            -moz-border-radius-topright: 15px;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
         .right{
-            width: 30%;
+            width: 29%;
             float:left;
             padding-left: 20px;
-            padding-top:10px;
+            margin-right: 10px;
+        }
+        .right .top h3,.center .top h3{
+            margin-top:0px;
+            margin-bottom: 0px;
+            text-align: center;
+            padding: 10px;
+            color:#ffffff;
+        }
+        .right .top ul li>div>div{
+            padding: 5px 8px;
+        }
+        .note,.discuss,.count{
+            display: none;
         }
         .note,.discuss,.count,.run{
-            box-shadow: 10px 10px 5px #888888;
+/*            box-shadow: 10px 10px 5px #888888;*/
             border: 1px solid #888888;
-            padding: 5px 8px;
-            height:200px;
-        }
-        .discuss,.count,.run{
-            margin-top: 30px;
-        }
-        .count{
-            height:180px;
+            height:300px;
         }
         .run{
-            height:180px;
+            margin-top: 30px;
             margin-bottom: 20px;
+            height:350px;
         }
-        .bottom{
+        .mid{
             margin-top: 20px;
         }
