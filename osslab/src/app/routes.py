@@ -13,7 +13,9 @@ Template_Routes = {
     'paper': "paper.html",
     "google": "google.html",
     "third":"third.html",
-    "loading":"loading.html"
+    "loading":"loading.html",
+    "hackathon":"hackathon.html",
+    "rightSide":"rightSide.html"
 }
 
 running_courses = []

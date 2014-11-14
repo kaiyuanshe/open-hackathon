@@ -1,18 +1,3 @@
-<!--
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <script src="js/jquery.min.js"></script>
-    <script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jquery.ui/1.8.18/jquery-ui.min.js"></script>
-    <script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.min.js"></script>
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-    <script src="js/bootstrap.min.js"></script>
-    <link rel="icon" href="http://osslab.msopentech.cn/pic/icon.jpg">   
-    <meta name="description" content="">
-    <title>OSSLAB - �?��软件实验�?预览�?</title>
--->
-      
        {% extends "base.html" %}
          {% block content %}
     <script type="text/javascript" src="/static/js/course.js"></script>
@@ -23,13 +8,21 @@
                 $(this).click(function(){
                     $(this).children().attr('class','selected');
                     $(this).siblings().children().attr("class","");
+                    $("#"+$(this).attr("name")).css("display","block")
+                    $("#"+$(this).attr("name")).siblings().css("display","none")
                 })
             })
             
-            $(".right .top ul li").each(function(i){
+            $(".center .top div").each(function(i){
                 $(this).click(function(){
-                    $(this).children().eq(1).slideToggle("slow");
-                    $(this).siblings().children("div").slideUp("slow");
+                    if($("#hackathon-div").css("display")=="block"){
+                        $(this).siblings().slideUp("slow");
+                        $(".center .bottom").children().attr("height","500px");
+                    }
+                    else{
+                        $(this).siblings().slideDown("slow");
+                        $(".center .bottom").children().attr("height","380px");
+                    }
                 });
             })
         })
@@ -52,13 +45,13 @@
     
     <div class="main">
         <div class="left">
-            <div class="left-title">工具�?/div>
+            <div class="left-title">工具栏</div>
             <ul>
                 <li><button>Copy</button></li>
                 <li><button>Paste</button></li>
                 <li><button>分离</button></li>
-                <li><button>�?</button></li>
-                <li><button>�?</button></li>
+                <li><button>字+</button></li>
+                <li><button>字-</button></li>
                 <li><button>保存</button></li>
                 <li><button>部署</button></li>
                 <li><button id="third-leave">stop</button></li>
@@ -68,81 +61,39 @@
         <div class="center">
             <div class="top">
                 <div style="overflow:hidden;">
-                    <ul >
-                        <li><div class="selected">文字</div></li>
-                        <li><div>图片</div></li>
-                        <li><div>视频</div></li>
-                        <li><div>其他</div></li>
-                    </ul>
+                    <h3 style="background-color:#E81123">Hackathon</h3>
                 </div>
-                <div style="width:100%;border:1px solid #888888;height:400px;">
-<!--
-                    <ol class="word">
-                        <li>
-                            <span><h5 style="font-weight: bold;">Python - Official Site</h5></span>
-                            <div>Official site for the interpreted, interactive, object-oriented, extensible programming language....<br/>
-                                <a href="https://www.python.org">https://www.python.org</a>
-                            </div>
-                        </li>
-                        <li>
-                            <span><h5 style="font-weight: bold;">Python_百科</h5></span>
-                            <div>Python（英语发音：/ˈpaɪθən/�? 是一种面向对象�?解释型计算机程序设计语言....<br/>
-                                <a href="baike.baidu.com/view/21087.htm">baike.baidu.com/view/21087.htm</a>
-                            </div>
-                        </li>
-                    </ol>
--->
-                   <iframe src="http://www.bing.com/search?q=python在线教程" width="100%" height="400px" class="" style="border: 1px solid #000;"></iframe>
-                </div>
+                <div id="hackathon-div" style="width:100%;border:1px solid #888888;height:300px;display:block">
+                   <iframe id = "hackathon" width="100%" height="300" frameborder="yes"  marginwidth="10" marginheight="10" scrolling="yes"></iframe>
+               </div>
             </div>
-            <div id="servers"></div>
-            <div class="bottom">
-                <iframe id="course_vm" src="/loading" width="100%" height="380px" class="" style="border: 1px solid #000;" frameborder="yes" marginwidth="10" marginheight="10" scrolling="yes" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>
+<!--            <div id="servers"><a class='server-name selected' title="ssh">ssh</a></div>-->         
+            <div class="mid" style="overflow:hidden;">
+                <ul >
+                    <li name="iframe1"><div class="selected">JStorm</div></li>
+                    <li name="iframe2"><div>RestAPI</div></li>
+                    <li name="iframe3"><div>Python</div></li>
+                    <li name="iframe4"><div>Flask</div></li>
+                </ul>
+            </div>    
+                
+            <div class="bottom">                
+                <div id="iframe1" style="display:block">
+                    <iframe id="course_vm" src="/loading" width="100%" height="380px" class="" style="border: 1px solid #000;" frameborder="yes" marginwidth="10" scrolling="yes" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>
+                </div>
+                <div id="iframe2" style="display:none">
+                    <iframe id="course_vm" src="/loading" width="100%" height="380px" class="" style="border: 1px solid #000;" frameborder="yes" marginwidth="10" scrolling="yes" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>
+                </div>
+                <div id="iframe3" style="display:none">
+                    <iframe id="course_vm" src="/loading" width="100%" height="380px" class="" style="border: 1px solid #000;" frameborder="yes" marginwidth="10" scrolling="yes" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>
+                </div>
+                <div id="iframe4" style="display:none">
+                    <iframe id="course_vm" src="/loading" width="100%" height="380px" class="" style="border: 1px solid #000;" frameborder="yes" marginwidth="10" scrolling="yes" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>
+                </div>
             </div>
         </div>
         <div class="right">
-            <div class="top">
-                <ul>
-                    <li>   
-                        <h3 style="background-color:#E41388">笔记</h3>
-                        <div class="note">                        
-                            <div>
-                                <ul>
-                                    <li>第一天学习了helloWorld</li>
-                                    <li>第二天学习了循环</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </li>
-                    <li>
-                        <h3 style="background-color:#68217A">社区讨论</h3>
-                        <div class="discuss">
-                            <div>
-                                <div>用户A：开源软件实验室好，点赞</div>
-                                <div>用户B：同意楼�?/div>
-                                <div>用户C：我也说两句</div>
-                                <div style="margin-top:30px;">
-                                    <input type="text" id="discuss" name="discuss"/>&nbsp;&nbsp;
-                                    <button id="">发言</button>
-                                </div>
-                            </div>
-                        </div>
-                    </li>
-                    <li>
-                        <h3 style="background-color:#E81123">统计</h3>
-                        <div class="count">
-                            <div>
-                                <div>10人在线学习ruby</div>
-                                <div>158人已经学过ruby</div>
-                                <div style="margin-top:30px;"><button id="">叫朋友来�?/button></div>
-                           </div>
-                        </div>
-                    </li>
-                </ul>
-                <div class="run">
-                    <h3>result</h3>
-                    <iframe id = "vm" width="100%" height="180" frameborder="yes" border="0" marginwidth="10" marginheight="10" scrolling="yes"></iframe>
-                </div>
+            <iframe id="rightSide" width="100%" height="880px" src="/rightSide" frameborder="yes"></iframe>
             </div>
         </div>
     </div>

@@ -17,7 +17,8 @@ Config = {
         "renren_ClientID": "client_id=7e0932f4c5b34176b0ca1881f5e88562",
         "renren_redirect_url": "redirect_uri=http://osslab.msopentech.cn/renren",
         "renren_scope": "scope=read_user_message+read_user_feed+read_user_photo",
-        "renren_response_type": "response_type=token"
+        "renren_response_type": "response_type=token",
+        "endTime":"2014,11,20,17,05,40"
     },
     "mysql": {
         "connection": 'mysql://%s:%s@%s/%s' % ("root" , "fdkiller2011", "localhost", "osslab"),
