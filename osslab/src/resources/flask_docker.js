@@ -16,6 +16,7 @@
                 "public": true
             }],
             "mnt":["%s/src","/src"],
+            "mnt2": ["/home/opentech/github/flask-example/src", "/src"],
             "detach":true
         },
         {
@@ -26,6 +27,7 @@
                 "port": 22
             }],
             "mnt":["%s/src","/src"],
+            "mnt2": ["/home/opentech/github/flask-example/src", "/src"],
             "detach":true,
             "guacamole": {
                 "protocol": "ssh",

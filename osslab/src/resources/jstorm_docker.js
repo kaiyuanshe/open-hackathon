@@ -16,6 +16,7 @@
                 "public": true
             }],
             "mnt":["%s/src","/src"],
+            "mnt2": ["/home/junbo/github/juniwang/flask-example/src", "/src"],
             "detach":true
         },
         {
@@ -26,6 +27,7 @@
                 "port": 5901
             }],
             "mnt":["%s/src","/data"],
+            "mnt2": ["/home/junbo/github/juniwang/flask-example/src", "/data"],
             "detach":true,
             "tty": true,
             "stdin_open": true,

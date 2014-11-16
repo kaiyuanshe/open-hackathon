@@ -11,22 +11,28 @@ def get_vm_private_host(context):
     # 3. if no VM is ready, we should call azure api to create a new one. The new-created VM must run 'cloudvm'
     # service by default(either cloud-init or python remote ssh)
     # 4. keep the private IP in DB for guacamole server too
-    return "10.0.2.15"
+
+    # return "10.0.2.15"
+    return "10.207.250.79"
 
 def get_cloudvm_address(context):
     # the port is that cloudvm service is listening on. 8001 by default
-    return "%s:%s" % (get_vm_private_host(context), 8001)
+    # connect to cloudvm service through its private address when deploy on azure. Here its public address used for
+    # debug purpose
+    return "%s:%s" % (get_vm_public_host(context), 8001)
 
 def get_vm_public_host(context):
     # sure it must get from DB and it must accessible from public so it's a CloudService endpoint in general.
-    return "localhost"
+
+    # return "localhost"
+    return "osslab1.chinacloudapp.cn"
 
 def get_available_port(port_cfg, course_context):
     # get an available on the target VM. host_port means the port that listening on the host VM.
     # you should see port forward ruls "host_port -> port" on docker status(docker ps) after contain created.
     # again, the data should be in DB
-    if not port_cfg.has_key("host_port"):
-        port_cfg["host_port"]= port_cfg["port"] + 10000
+    if not "host_port" in port_cfg:
+        port_cfg["host_port"] = port_cfg["port"] + 10000
 
     # output: not well designed ,need re-design
     if port_cfg.has_key("public"):
@@ -35,7 +41,8 @@ def get_available_port(port_cfg, course_context):
         # public port means the port open the public. For azure , it's the public port on azure. There
         # should be endpoint on azure that from public_port to host_port
         # need design first
-        port_cfg["public_port"]= port_cfg["host_port"]
+        if not "public_port" in port_cfg:
+            port_cfg["public_port"] = port_cfg["host_port"]
 
         op = course_context["output"] if course_context.has_key("output") else []
         op.append("http://%s:%s" % (get_vm_public_host(course_context), port_cfg["public_port"]))
@@ -117,7 +124,7 @@ class DockerTemplates(object):
 
     def query_guaca_status(self, course_context):
         try:
-            self.get_remote("http://%s:%s" % (get_vm_public_host(course_context), 18080))
+            self.get_remote("http://%s:%s" % (get_vm_public_host(course_context), 9080))
             course_context["guacamole_status"] = True
         except:
             course_context.pop("guacamole_status", None)
@@ -150,6 +157,8 @@ class DockerTemplates(object):
                 "ports": [{
                     "name": "guacamole",
                     "port": 8080,
+                    "host_port": 9080,
+                    "public_port": 9080,
                     "public": True
                 }],
                 "detach": True,
