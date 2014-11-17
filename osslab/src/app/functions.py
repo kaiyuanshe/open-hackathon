@@ -2,7 +2,6 @@ import httplib
 
 from config import Config
 
-
 def convert(input):
     if isinstance(input, dict):
         return {convert(key):convert(value) for key,value in input.iteritems()}
@@ -34,7 +33,7 @@ def query_info(website,url,ssl):
     conn.request('GET',url)
     httpres = conn.getresponse()
     return httpres
-
+            
 def add_head_href(head,href):
     arr = href.split('href="')
     href = ('href="' + head).join(arr)

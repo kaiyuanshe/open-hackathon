@@ -25,10 +25,11 @@ Config = {
             "scope": "scope=get_user_info",
             "state": "state=osslab",
             "response_type": "response_type=code",
-        }
+        },
+        "endTime":"2014,11,20,17,05,40"
     },
     "mysql": {
-        "connection": 'mysql://%s:%s@%s/%s' % ("root" , "fdkiller2011", "localhost", "osslab"),
+        "connection": 'mysql://%s:%s@%s/%s' % ("root", "fdkiller2011", "localhost", "osslab"),
         "database": "UserInfo"
     },
     "oauth": {

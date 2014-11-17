@@ -48,7 +48,7 @@
             width:100%;
         }
         .center{
-            width: 48%;
+            width: 45%;
             float:left;
             margin-left: 20px;
             margin-top:10px;
@@ -241,7 +241,7 @@
             margin-top:12px;
         }
         .right{
-            width: 40%;
+            width: 43%;
             float:left;
             padding-left: 20px;
             padding-top:10px;
@@ -257,7 +257,7 @@
             height: 360px;
         }
         .count{
-            margin-top:120px;
+            margin-top:80px;
             overflow: hidden;
             box-shadow: 10px 10px 5px #888888;
             border: 1px solid #888888;

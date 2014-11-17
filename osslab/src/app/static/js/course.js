@@ -49,8 +49,13 @@ $(document).ready(function(){
                 $("#servers").empty();
                 $.each(servers, function(i,s){
                     var link = $("<a class='server-name'>"+s.name+"</a>").attr("title", s.name).click(function(){
-                       $("#course_vm").attr("src",s.url);
+                       $("#course_vm").attr("src",s.url);  
+                       $(this).addClass("selected");
+                       $(this).siblings().remove("selected");
                     });
+                    if(i==0){
+                        link="<a class='server-name selected' title='"+s.name+"'>"+s.name+"</a>";
+                    }
                     $("#servers").append(link);
                 });
 
