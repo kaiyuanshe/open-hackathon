@@ -1,20 +1,20 @@
 // google oauth
 $(function() {
-	$('#qqlogin').click(function() {
-		login();
-	});
+    $('#qqlogin').click(function() {
+        login();
+    });
 
-	var clientId = CONFIG.qq_ClientID;
-	var redirect_uri = CONFIG.qq_redirect_uri;
-	var scope = CONFIG.qq_scope;
-	var state = CONFIG.qq_state;
-	var response_type = CONFIG.qq_response_type;
-	
-	function login() {
-		var arr = [clientId,redirect_uri,scope,state,response_type];
-		var url = "https://graph.qq.com/oauth2.0/authorize?" + arr.join("&");
-		location.href = url;
-		/*$.ajax({
+    var clientId = CONFIG.qq.clientID;
+    var redirect_uri = CONFIG.qq.redirect_uri;
+    var scope = CONFIG.qq.scope;
+    var state = CONFIG.qq.state;
+    var response_type = CONFIG.qq.response_type;
+
+    function login() {
+        var arr = [clientId,redirect_uri,scope,state,response_type];
+        var url = "https://graph.qq.com/oauth2.0/authorize?" + arr.join("&");
+        location.href = url;
+        /*$.ajax({
                     type : "GET",
                     url : url,
                     datatype : "jsonp",
@@ -25,7 +25,7 @@ $(function() {
                                  alert("something is wrong!\n" + msg.d);
                              }
                 });*/
-	}
+    }
 });
 /*
  $(document).ready(function() {

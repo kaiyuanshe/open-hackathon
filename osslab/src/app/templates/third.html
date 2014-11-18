@@ -1,4 +1,4 @@
-       {% extends "base.html" %}
+{% extends "base.html" %}
          {% block content %}
     <script type="text/javascript" src="/static/js/course.js"></script>
     <link href="/static/css/third.css" rel="stylesheet">
@@ -49,7 +49,7 @@
             <ul>
                 <li><button>Copy</button></li>
                 <li><button>Paste</button></li>
-                <li><button>分离</button></li>
+                <li><a id="new-window" href="#" target="_blank">分离</a></li>
                 <li><button>字+</button></li>
                 <li><button>字-</button></li>
                 <li><button>保存</button></li>
@@ -71,24 +71,24 @@
             <div class="mid" style="overflow:hidden;">
                 <ul >
                     <li name="iframe1"><div class="selected">JStorm</div></li>
-                    <li name="iframe2"><div>RestAPI</div></li>
-                    <li name="iframe3"><div>Python</div></li>
-                    <li name="iframe4"><div>Flask</div></li>
+                    <li name="iframe2"><div>JStorm API</div></li>
+                    <li name="iframe3"><div>MyApp</div></li>
+                    <li name="iframe4"><div>Dev</div></li>
                 </ul>
             </div>    
                 
             <div class="bottom">                
                 <div id="iframe1" style="display:block">
-                    <iframe id="course_vm" src="/loading" width="100%" height="380px" class="" style="border: 1px solid #000;" frameborder="yes" marginwidth="10" scrolling="yes" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>
+                    <iframe id="course_vm1" src="/loading" width="100%" height="380px" class="" style="border: 1px solid #000;" frameborder="yes" marginwidth="10" scrolling="yes" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>
                 </div>
                 <div id="iframe2" style="display:none">
-                    <iframe id="course_vm" src="/loading" width="100%" height="380px" class="" style="border: 1px solid #000;" frameborder="yes" marginwidth="10" scrolling="yes" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>
+                    <iframe id="course_vm2" src="/loading" width="100%" height="380px" class="" style="border: 1px solid #000;" frameborder="yes" marginwidth="10" scrolling="yes" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>
                 </div>
                 <div id="iframe3" style="display:none">
-                    <iframe id="course_vm" src="/loading" width="100%" height="380px" class="" style="border: 1px solid #000;" frameborder="yes" marginwidth="10" scrolling="yes" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>
+                    <iframe id="course_vm3" src="/loading" width="100%" height="380px" class="" style="border: 1px solid #000;" frameborder="yes" marginwidth="10" scrolling="yes" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>
                 </div>
                 <div id="iframe4" style="display:none">
-                    <iframe id="course_vm" src="/loading" width="100%" height="380px" class="" style="border: 1px solid #000;" frameborder="yes" marginwidth="10" scrolling="yes" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>
+                    <iframe id="course_vm4" src="/loading" width="100%" height="380px" class="" style="border: 1px solid #000;" frameborder="yes" marginwidth="10" scrolling="yes" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>
                 </div>
             </div>
         </div>

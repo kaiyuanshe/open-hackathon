@@ -2,7 +2,7 @@ __author__ = "Junbo Wang"
 
 from flask import render_template
 from flask.ext.restful import reqparse, abort, Api, Resource
-import json, uuid, time
+import json, uuid, time, os
 from sample_course import Sample_Courses
 from templates import DockerTemplates;
 
@@ -12,10 +12,11 @@ Template_Routes = {
     "TermsOfUse": "TermsOfUse.html",
     'paper': "paper.html",
     "google": "google.html",
-    "third":"third.html",
-    "loading":"loading.html",
-    "hackathon":"hackathon.html",
-    "rightSide":"rightSide.html"
+    "third": "third.html",
+    "loading": "loading.html",
+    "hackathon": "hackathon.html",
+    "rightSide": "rightSide.html",
+    "error": "error.html"
 }
 
 running_courses = []
@@ -65,32 +66,24 @@ class DoCourse(Resource):
             return "Not Found", 404
 
     def post(self, name):
-        parser = reqparse.RequestParser()
-        parser.add_argument('c',type=int, default=1)
-        args = parser.parse_args()
-        # 1=vm 2=docker
-        course_type = args['c']
-        if name == 'flask':
-            if course_type == 2:
-                # todo: talk with azure to start VMs
-                return "Hello python, welcome to azure"
-            else:
-                # call remote service to start docker containers
-                course_config = json.load(file("resources/%s/%s_docker.js" % (name, name)))
-                course_id = str(uuid.uuid1())
+        template_file = "resources/%s_docker.js" % name
+        if os.path.isfile(template_file):
+            # call remote service to start docker containers
+            course_config = json.load(file(template_file))
+            course_id = str(uuid.uuid1())
 
-                course_context = {
-                    "course_id": course_id,
-                    "course_type":  course_type
-                }
-                try:
-                    docker.start_containers(course_config, course_context)
-                    # todo: save to database
+            course_context = {
+                "course_id": course_id,
+                "course_type":  "docker"
+            }
+            try:
+                docker.start_containers(course_config, course_context)
+                # todo: save to database
 
-                    running_courses.append((course_id, time.time(), course_config, course_context))
-                    return course_context
-                except Exception as err:
-                    return "fail to start due to '%s'" % err, 500
+                running_courses.append((course_id, time.time(), course_config, course_context))
+                return course_context
+            except Exception as err:
+                return "fail to start due to '%s'" % err, 500
         else:
             return "the course is not ready", 404
 
