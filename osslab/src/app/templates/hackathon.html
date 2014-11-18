@@ -1,144 +1,40 @@
    {% extends "base.html" %}
    {% block content %}
-   
-    <link href="/static/css/square/blue.css" rel="stylesheet">
-    <script src="/static/js/jquery.icheck.min.js"></script>
+    <link href="/static/css/hackathon.css" rel="stylesheet">
     <script type="text/javascript" src="/config.js"></script>
+    {% block second %} {% endblock %}
     <style>
-        .main{
-            width: 1024px;
-            margin: 0 auto;
-            overflow: hidden;
-            margin-top: 50px;
-        }
-        .left{
-            width:70%;
-            float:left;
-        }
-        .left .top{
-            margin-top: 20px;
-        }
-        #hackathon{
-            border: 1px solid #000;
-            box-shadow: 10px 10px 5px #888888;
-        }
-        .left .bottom{
-            margin-top:20px;
-            margin-bottom:40px;
-            overflow: hidden;
-        }
-        ul{
-            margin: 0;
-            padding: 0;
-            list-style: none;
-            overflow: hidden;
-            text-align: center;
-        }
-        ul li{
-            float:left;
-            line-height: 18px;
-            padding-left: 20px;
-            width:150px;
-        }
-        .left .bottom ul li div{
-            float:left;
-        }
-        .left .bottom ul li label{
-            margin-left:20px;
-        }
-
-        @-webkit-keyframes redPulse {
-            from { background-color: #bc330d; -webkit-box-shadow: 0 0 9px #333; }
-            50% { background-color: #e33100; -webkit-box-shadow: 0 0 18px #e33100; }
-            to { background-color: #bc330d; -webkit-box-shadow: 0 0 9px #333; }
-        }
-        @keyframes  redPulse {
-            from { background-color: #bc330d; -webkit-box-shadow: 0 0 9px #333; }
-            50% { background-color: #e33100; -webkit-box-shadow: 0 0 18px #e33100; }
-            to { background-color: #bc330d; -webkit-box-shadow: 0 0 9px #333; }
-        }
-        @-moz-keyframes redPulse {
-            from { background-color: #bc330d; -webkit-box-shadow: 0 0 9px #333; }
-            50% { background-color: #e33100; -webkit-box-shadow: 0 0 18px #e33100; }
-            to { background-color: #bc330d; -webkit-box-shadow: 0 0 9px #333; }
-        }
-        @-o-keyframes redPulse {
-            from { background-color: #bc330d; -webkit-box-shadow: 0 0 9px #333; }
-            50% { background-color: #e33100; -webkit-box-shadow: 0 0 18px #e33100; }
-            to { background-color: #bc330d; -webkit-box-shadow: 0 0 9px #333; }
-        }
         
-        .red {
-            -webkit-animation: redPulse 2s infinite;  
-            animation: redPulse 2s infinite;
-            -moz-animation: redPulse 2s infinite;
-            -o-animation: redPulse 2s infinite;
-            
-            transition: background-color 300ms ease-out;
-            -moz-transition: background-color 300ms ease-out;
-            -webkit-transition: background-color 300ms ease-out;
-            -o-transition: background-color 300ms ease-out;
-            
-            border-radius: 4px;
-            box-shadow: none;
-            padding: 0.75em 1.5em;
-            font-size: 1em;
-            color: white;
-            position: relative;
-            text-decoration: none;
-            text-align: center;
-            border-style: solid;
-            border-width: 0;
-            cursor: pointer;
-            font-family: inherit;
-            font-weight: bold;
-            line-height: normal;
-            margin-bottom: 10px;
-        }
-        .right{
-            width:28%;
-            float:left;
-            margin-left:20px;
-        }
-    </style>
-    <script>
-        $(function(){
-          $('input').iCheck({
-            checkboxClass: 'icheckbox_square-blue',
-            radioClass: 'iradio_square-blue',
-            increaseArea: '20%' // optional
-          });
-          $("#rightSide").height($("body").height());
-        });
-    </script>
-    
+    </style>    
        <div class="main">
-           <div class="left">
-               <div class="top">
-                   <iframe id = "hackathon" width="100%" height="470" frameborder="yes"  marginwidth="10" marginheight="10" scrolling="yes"></iframe>
-               </div>
-               <div class="bottom">
-                   <ul>
-                       <li style="margin-left: 150px;"><input type="checkbox" name="JStorm" checked  disabled/><label>JStorm</label></li>
-                       <li><input type="checkbox" name="RestAPI" checked  disabled/><label>RestAPI</label></li>
-                   </ul>
-                   <ul style="margin-top:15px">
-                       <li>WEB APP</li>
-                       <li><input type="radio" name="web"/><label>python</label></li>
-                       <li><input type="radio" name="web"/><label>ruby</label></li>
-                       <li><input type="radio" name="web"/><label>JavaScript</label></li>
-                   </ul>
-                   <ul style="margin-top:15px">
-                       <li>Mobile APP</li>
-                       <li><input type="radio" name="web"/><label>Android</label></li>
-                   </ul>
-                   <div style="text-align:right;margin-right: 10px;">
-                       <button id="submit" name="submit" class="red" onclick="window.location.href='/third'">提交</button>
-                   </div>
-               </div>
-           </div>
+          {% block left %}{% endblock %}
+
            <div class="right">
-                <iframe id="rightSide" width="100%" src="/rightSide" frameborder="yes" border="0"></iframe>
+                <div class="    statistics">
+                    <div><h4>在线人数:5</h4></div>
+                    <div><h4>报名人数:16</h4></div>
+                    <div id="timer"></div>                  
+                    <div style="margin-top:10px">
+                        <img src="/static/pic/map.jpg" style="width:95%"/>
+                    </div>
+                    <div>
+                       <div style="border-bottom:2px solid #E64025"><h3>参赛人员</h3></div>
+                        <ul>
+                            <li><img /><div class="circle online"></div><div class="userName">aa</div></li>
+                            <li><img /><div class="circle online"></div><div class="userName">aa</div></li>
+                            <li><img /><div class="circle success"></div><div class="userName">aa</div></li>
+                            <li><img /><div class="circle online"></div><div class="userName">aa</div></li>
+                            <li><img /><div class="circle"></div><div class="userName">aa</div></li>
+                            <li><img /><div class="circle"></div><div class="userName">aa</div></li>
+                            <li><img /><div class="circle"></div><div class="userName">aa</div></li>
+                            <li><img /><div class="circle online"></div><div class="userName">aa</div></li>
+                            <li><img /><div class="circle"></div><div class="userName">aa</div></li>
+                            <li><img /><div class="circle success"></div><div class="userName">aa</div></li>
+                            <li><img /><div class="circle online"></div><div class="userName">aa</div></li>
+                            <li><img /><div class="circle"></div><div class="userName">aa</div></li>
+                        </ul>
+                    </div>
+                </div>    
            </div>
        </div>
    {% endblock %}
