@@ -12,8 +12,8 @@ def get_vm_private_host(context):
     # service by default(either cloud-init or python remote ssh)
     # 4. keep the private IP in DB for guacamole server too
 
-    # return "10.0.2.15"
-    return "10.207.250.79"
+    return "10.0.2.15"
+    #return "10.207.250.79"
 
 def get_cloudvm_address(context):
     # the port is that cloudvm service is listening on. 8001 by default
@@ -24,8 +24,8 @@ def get_cloudvm_address(context):
 def get_vm_public_host(context):
     # sure it must get from DB and it must accessible from public so it's a CloudService endpoint in general.
 
-    # return "localhost"
-    return "osslab1.chinacloudapp.cn"
+    return "localhost"
+    #return "osslab1.chinacloudapp.cn"
 
 def get_available_port(port_cfg, course_context):
     # get an available on the target VM. host_port means the port that listening on the host VM.

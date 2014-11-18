@@ -24,11 +24,26 @@
         .left ul{         
             text-align: center;
         }
-        .left ul li button{
+        .left ul li{
+            margin-top: 10px;
+            height: 40px;
+        }
+/*        .left ul li button{
             padding: 5px 0px;
             cursor: pointer;
             margin:10px 0px;
             width: 80%;
+        }*/
+        .left ul li a{
+            width: 100%;
+            display: block;
+            height: 100%;
+            cursor: pointer;
+            font-size: 18px;
+            padding-top: 10px;
+        }
+        .left ul li a:hover{
+            background: #999999;
         }
         .center{
             width: 65%;
@@ -50,7 +65,7 @@
             -moz-border-radius-topright: 15px;
             border-top-left-radius: 15px;
             border-top-right-radius: 15px;
-                        margin-top:0px;
+            margin-top:0px;
             margin-bottom: 0px;
             text-align: center;
             padding: 10px;
