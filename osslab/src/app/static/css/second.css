@@ -1,277 +1,108 @@
-        ul{
-            padding-left: 0px;
-        }
-        ul li{
-            list-style-type:none;
-        }
-        .main{
-            margin-top: 10px;
-            width:1024px;
-            margin: 0 auto;
-            overflow: hidden;
-            padding-top: 50px;
-
-        }
         .left{
-            height:100%;
-            background-color: #cccccc;
-            width:10%;
-            float: left;
+            width:72%;
+            float:left;
         }
-        .left-title{
-            text-align: center;
-            margin: 10px auto;
-            padding-top:30px;
-            font-size: 20px;
-            font-weight: bold;
-            
+        .left .top{
+            margin-top: 20px;
+            box-shadow: 10px 10px 5px #888888;
         }
-        .left ul{         
-            text-align: center;
-        }
-        .left ul li div{
-            padding: 15px 0px;
+        .left .top h3{
+            background-color: rgb(198, 242, 240);
+            width:50%;
+            float:left;
             cursor: pointer;
+            -webkit-border-top-left-radius: 15px;
+            -webkit-border-top-right-radius: 15px;
+            -moz-border-radius-topleft: 15px;    
+            -moz-border-radius-topright: 15px;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+            margin-top:0px;
+            margin-bottom: 0px;
+            text-align: center;
+            padding: 10px;
         }
-        .left ul li .selected{
-            background-color: red;
+        .left .top .clickOn{
+            background-color:#ED3E2C;
             color:#ffffff;
         }
-        .left ul li:hover{
-            background-color: #eeeeee;
+        .left .top h3:hover{
+/*            background-color: #eeeeee;*/
         }
-        .search{
-            margin-top: 50px;
-            margin-bottom: 450px;
-        }
-        .search input[type="text"]{
-            width:100%;
-        }
-        .center{
-            width: 45%;
-            float:left;
-            margin-left: 20px;
-            margin-top:10px;
-        }
-        .center>.top{
-            border: 1px solid red;
-        }
-        .center>.top>div{
-            padding-left: 20px;
-            padding-bottom: 10px;
-        }
-        .bottom{
-            margin-top: 20px;
-        }
-        .sort{
-            width:100%;
-            background-color:#999999;
-            overflow: hidden;
-        }
-        .sort div{
-             margin-left: 10px;
-             float: left;
-             color:#ffffff;
-         }
-        .course-list-container{
-            padding-bottom: 10px;
+        #hackathon{
+            border: 1px solid #000;
             box-shadow: 10px 10px 5px #888888;
-            border: 1px solid #888888;      
-            margin-bottom: 10px;
         }
-        .front{
+        .left .bottom{
+            margin-top:20px;
+            margin-bottom:40px;
             overflow: hidden;
-            padding-top: 20px;
-            padding-bottom: 30px;
-            z-index: 10;
         }
-        .front>div{
-            float: left;
-            margin-left: 8px;
+        ul{
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            overflow: hidden;
+            text-align: center;
         }
-        .course-list ul li{
-            position: relative;
+        ul li{
+            float:left;
+            line-height: 18px;
+            padding-left: 20px;
+            width:150px;
         }
-        .course-list ul li .course-list-container .front{
-            -webkit-transition: -webkit-transform .2s ease-in-out;
-            -moz-transition: -moz-transform .2s ease-in-out;
-            -o-transition: -o-transform .2s ease-in-out;
-            -ms-transition: -ms-transform .2s ease-in-out;
-            transition: transform .2s ease-in-out;
-            -webkit-transform: rotateY(0);
-            -ms-transform: rotateY(0);
-            -moz-transform: rotateY(0);
-            transform: rotateY(0);
-            -o-transform: rotateY(0);
+        .left .bottom ul li div{
+            float:left;
         }
-        .course-list ul li .course-list-container:hover .front{
-            -webkit-transform: rotateY(-90deg);
-            -ms-transform: rotateY(-90deg);
-            transform: rotateY(-90deg);
-            -o-transform: rotateY(-90deg);
-            -moz-transform: rotateY(-90deg);
-            -webkit-transition: -webkit-transform .1s ease-in;
-            -moz-transition: -moz-transform .1s ease-in;
-            -o-transition: -o-transform .1s ease-in;
-            -ms-transition: -ms-transform .1s ease-in;
-            transition: transform .1s ease-in;
-        }
-        .course-list ul li .course-list-container .obverse {
-            position: absolute;
-            top: 0;
-            left: 0;
-            background:#666666;
-            -webkit-transition: -webkit-transform .1s ease-in;
-            -moz-transition: -moz-transform .1s ease-in;
-            -o-transition: -o-transform .1s ease-in;
-            transition: transform .1s ease-in;
-            -ms-transition: transform .1s ease-in;
-            -webkit-transform: rotateY(90deg);
-            -ms-transform: rotateY(90deg);
-            transform: rotateY(90deg);
-            -moz-transform: rotateY(90deg);
-            -o-transform: rotateY(90deg);
-            color: #FFF;
-            display: none\9;
-            height: 125px;
-            width:100%;
+        .left .bottom ul li label{
+            margin-left:20px;
         }
 
-        .course-list ul li .course-list-container:hover .obverse {
-            -webkit-transform: rotateY(0);
-            -ms-transform: rotateY(0);
-            -moz-transform: rotateY(0);
-            transform: rotateY(0);
-            -o-transform: rotateY(0);
-            -webkit-transition: -webkit-transform .3s ease-out;
-            -moz-transition: -moz-transform .3s ease-out;
-            -o-transition: -o-transform .3s ease-out;
-            -ms-transition: -ms-transform .3s ease-out;
-            transition: transform .3s ease-out;
-            display: block\9;
+        @-webkit-keyframes redPulse {
+            from { background-color: #bc330d; -webkit-box-shadow: 0 0 9px #333; }
+            50% { background-color: #e33100; -webkit-box-shadow: 0 0 18px #e33100; }
+            to { background-color: #bc330d; -webkit-box-shadow: 0 0 9px #333; }
         }
-        .obverse{
-            z-index: 10;
+        @keyframes  redPulse {
+            from { background-color: #bc330d; -webkit-box-shadow: 0 0 9px #333; }
+            50% { background-color: #e33100; -webkit-box-shadow: 0 0 18px #e33100; }
+            to { background-color: #bc330d; -webkit-box-shadow: 0 0 9px #333; }
         }
-        .obverse-top{
-            overflow: hidden;
-            margin-top: 10px;
+        @-moz-keyframes redPulse {
+            from { background-color: #bc330d; -webkit-box-shadow: 0 0 9px #333; }
+            50% { background-color: #e33100; -webkit-box-shadow: 0 0 18px #e33100; }
+            to { background-color: #bc330d; -webkit-box-shadow: 0 0 9px #333; }
         }
-        .obverse-top h3{
-            margin:0 auto;
-            padding-left:50px;
-            width:50%;
-            float:left;
+        @-o-keyframes redPulse {
+            from { background-color: #bc330d; -webkit-box-shadow: 0 0 9px #333; }
+            50% { background-color: #e33100; -webkit-box-shadow: 0 0 18px #e33100; }
+            to { background-color: #bc330d; -webkit-box-shadow: 0 0 9px #333; }
         }
-        .obverse-top div div{
-            text-align:right;
-            width:50%;
-            float:left;
-            padding-right:30px;
-        }
-        .obverse-center{
-            overflow: hidden;
-        }
-        .obverse-center-left{
-            width:65%;
-            float:left;
-        }
-        .obverse-center-right{
-            width: 30%;
-            float: left;
-            margin-left: 5%;
-        }
-        .obverse-bottom>div{
-            margin-top:5px;
-        }
-        .obverse-bottom>div button{
-            font-family: 微软雅黑,"Microsoft YaHei",sans-serif;
-            background-color: #ED3E2C;
-            border: 2px solid #ED3E2C;
-            border-radius: 5px;
-            color: #FFFFFF;
-            padding: 4px 15px;
-            margin-left: 10px;
-            float:left;
-        }
-        .obverse-bottom>div div.hover .div-share{
-            display: block;
-        }
-        .div-share{
-            left: 75px;
-            top: 113px;
-            position: absolute;
-            z-index: 100;
-            box-shadow: 10px 10px 5px #888888;
-            border: 1px solid #888888;
-            width: 120px;
-            border-radius: 10px;
-            color:#000000;
-            background-color: #eeeeee;
-            display: none;
-        }
-        .div-share>div{
-            padding:3px 20px;
-        }
-        .obverse-bottom>div div.hover .div-say{
-            display: block;
-        }
-        .div-say{
-            left: 120px;
-            top: 113px;
-            position: absolute;
-            z-index: 100;
-            box-shadow: 10px 10px 5px #888888;
-            border: 1px solid #888888;
-            width: 300px;
-            border-radius: 10px;
-            color:#000000;
-            background-color: #eeeeee;
-            display: none;
-            height:60px;
-        }
-        .div-say>div input[type='text']{
-            width:200px;
-            float:left;
-            margin-top:15px;
-            margin-left:10px;
-        }
-        .div-say>div button{
-            float:left;
-            margin-top:12px;
-        }
-        .right{
-            width: 43%;
-            float:left;
-            padding-left: 20px;
-            padding-top:10px;
-        }
-        .left-side{
-            width: 50%;
-            float:left;
-        }
-        .abstract{
-            box-shadow: 10px 10px 5px #888888;
-            border: 1px solid #888888;
-            padding: 5px 8px;
-            height: 360px;
-        }
-        .count{
-            margin-top:80px;
-            overflow: hidden;
-            box-shadow: 10px 10px 5px #888888;
-            border: 1px solid #888888;
-        }
-        .count div ul li{
-            padding-left: 20px;
-            line-height:28px;
-            min-height:30px;
-        }
-        .advertisement{
-            width: 50%;
-            float:left;
-            padding-left: 10px;
-        }
-        .container{
-            overflow: hidden;
+        
+        .red {
+            -webkit-animation: redPulse 2s infinite;  
+            animation: redPulse 2s infinite;
+            -moz-animation: redPulse 2s infinite;
+            -o-animation: redPulse 2s infinite;
+            
+            transition: background-color 300ms ease-out;
+            -moz-transition: background-color 300ms ease-out;
+            -webkit-transition: background-color 300ms ease-out;
+            -o-transition: background-color 300ms ease-out;
+            
+            border-radius: 4px;
+            box-shadow: none;
+            padding: 0.75em 1.5em;
+            font-size: 1em;
+            color: white;
+            position: relative;
+            text-decoration: none;
+            text-align: center;
+            border-style: solid;
+            border-width: 0;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            line-height: normal;
+            margin-bottom: 10px;
         }
