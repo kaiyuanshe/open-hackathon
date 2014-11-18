@@ -8,11 +8,15 @@ from common import *
 from ossdocker import OssDocker
 import json, shutil, os
 import xml.dom.minidom as minidom
+from os.path import realpath, dirname
 
 api = Api(app)
 docker = OssDocker()
 start_time = strftime("%Y-%m-%d %H-%M-%S", gmtime())
-TEMP_DIR = "/tmp/docker"
+
+# make sure OSSLAB_RUN_DIR is writable by the running user: the current user if run in cmd or www-data in apache2.
+# don't use sudo because you cannot always run your code in sudo e.g. apache2 service
+OSSLAB_RUN_DIR = "/var/lib/osslab"
 
 def json_type(data):
     try:
@@ -22,9 +26,9 @@ def json_type(data):
 
 def course_path(id, sub=None):
     if sub is None:
-        return "%s/%s" % (TEMP_DIR, id)
+        return "%s/%s" % (OSSLAB_RUN_DIR, id)
     else:
-        return "%s/%s/%s" % (TEMP_DIR, id, sub)
+        return "%s/%s/%s" % (OSSLAB_RUN_DIR, id, sub)
 
 class Health(Resource):
     def get(self):
@@ -57,7 +61,8 @@ class DockerManager(Resource):
             if guaca is not None:
                 guaca_dir = course_path(course_id, "guacamole")
                 mkdir_safe(guaca_dir)
-                shutil.copyfile("resources/guacamole.properties", "%s/%s" % (guaca_dir, "guacamole.properties"))
+                src_prop_file= "%s/resources/guacamole.properties" % dirname(realpath(__file__))
+                shutil.copyfile(src_prop_file, "%s/%s" % (guaca_dir, "guacamole.properties"))
 
                 # generate guacamole config
                 impl = minidom.getDOMImplementation()

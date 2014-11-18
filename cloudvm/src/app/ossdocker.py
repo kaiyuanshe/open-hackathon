@@ -43,7 +43,7 @@ class OssDocker(object):
         else:
             image = args["image"]
             # ports foramt: [from, to ,from2, to2]. e.g.[9080,8080,3306,3306].Similar with 'mnts'
-            ports = args["ports"] if args.has_key("ports") else []
+            ports = args["docker_ports"] if args.has_key("docker_ports") else []
             port_bingings = dict(zip(ports[1::2], ports[::2]))
 
             mnts = args["mnt"] if args.has_key("mnt") else []

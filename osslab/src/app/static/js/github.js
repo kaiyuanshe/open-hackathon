@@ -1,18 +1,18 @@
 // google oauth
 $(function() {
-	$('#githublogin').click(function() {
-		login();
-	});
+    $('#githublogin').click(function() {
+        login();
+    });
 
-	var clientId = CONFIG.github_ClientID;
-	var redirect_uri = CONFIG.github_redirect_uri;
-	var scope = CONFIG.github_scope;
-	
-	function login() {
-		var arr = [clientId,redirect_uri,scope];
-		var url = "https://github.com/login/oauth/authorize?" + arr.join("&");
-		location.href = url;
-		/*$.ajax({
+    var clientId = CONFIG.github.clientID;
+    var redirect_uri = CONFIG.github.redirect_uri;
+    var scope = CONFIG.github.scope;
+
+    function login() {
+        var arr = [clientId,redirect_uri,scope];
+        var url = "https://github.com/login/oauth/authorize?" + arr.join("&");
+        location.href = url;
+        /*$.ajax({
                     type : "GET",
                     url : url,
                     datatype : "jsonp",
@@ -23,7 +23,7 @@ $(function() {
                                  alert("something is wrong!\n" + msg.d);
                              }
                 });*/
-	}
+    }
 });
 /*
  $(document).ready(function() {
