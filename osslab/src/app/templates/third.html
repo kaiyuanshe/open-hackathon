@@ -1,6 +1,7 @@
 {% extends "hackathon.html" %}
     {% block second %}
     <script type="text/javascript" src="/static/js/course.js"></script>
+    <script type="text/javascript" src="/static/js/third.js"></script>
     <link href="/static/css/third.css" rel="stylesheet">
     {% endblock %}
 <!--
@@ -14,7 +15,7 @@
             <ul>
                 <li><button>Copy</button></li>
                 <li><button>Paste</button></li>
-                <li><button>分离</button></li>
+                <li><a id="new-window" href="#" target="_blank">分离</a></li>
                 <li><button>字+</button></li>
                 <li><button>字-</button></li>
                 <li><button>保存</button></li>
@@ -61,6 +62,10 @@
                 <div id="iframe4" style="display:none">
                     <iframe id="course_vm4" src="/loading" width="100%" height="380px" class="" style="border: 1px solid #000;" frameborder="yes" marginwidth="10" scrolling="yes" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>
                 </div>
+            </div>
+
+            <div style="padding: 10px">
+                <button id="submit" disabled="disabled">submit</button>
             </div>
         </div>
 <!--    <iframe src="foot.html" width="100%" height="51px" class="navbar-fixed-buttom" style="border: 1px solid #000;"></iframe>-->
