@@ -19,7 +19,10 @@ $(document).ready(function(){
                 $("#course_vm3").attr("src",show_url);
 
                 $("#submit").removeAttr("disabled");
-
+                $("#submit").click(function(){
+                    document.location.href="/submitted";
+                })
+                
                 // refresh show tab
 //                window.ivm = setInterval(function(){
 //                    $("#course_vm3").attr("src", $("#course_vm3").attr("src"));
