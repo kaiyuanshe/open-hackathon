@@ -1,0 +1,35 @@
+        .main{
+            width: 1200px;
+            margin: 0 auto;
+            overflow: hidden;
+            margin-top: 50px;
+        }
+
+        .right{
+            width:26%;
+            float:left;
+            margin-left:20px;
+        }
+        .statistics{
+            padding:20px;
+            margin-top:30px;
+
+        }
+        .circle{
+            width: 16px;
+            height: 16px;
+            background-color: #cccccc;
+            border-radius: 8px;
+            float: left;
+            margin-top: 3px;
+        }
+        .userName{
+            margin-left: 30px;
+            float:left;
+        }
+        .online{
+            background-color: #00C957;
+        }
+        .success{
+            background-color: #FFD700;
+        }

@@ -1,6 +1,8 @@
 $(document).ready(function(){
     var course = getParameterByName("cid");
     course= "jstorm"
+
+
     $.ajax({
         url: '/api/course/' + course,
         type: "POST",
@@ -19,12 +21,12 @@ $(document).ready(function(){
                 $("#submit").removeAttr("disabled");
 
                 // refresh show tab
-                window.ivm = setInterval(function(){
-                    $("#course_vm3").attr("src", $("#course_vm3").attr("src"));
-                }, 3000);
+//                window.ivm = setInterval(function(){
+//                    $("#course_vm3").attr("src", $("#course_vm3").attr("src"));
+//                }, 3000);
 
                 // heart beat
-                window.ihb = setInterval(function(){
+                var ihb = setInterval(function(){
                     $.ajax({
                         url: '/api/course/' + data.course_id,
                         type: "PUT",
@@ -40,15 +42,15 @@ $(document).ready(function(){
                         success: function(){
                             $("#course_vm3").attr("src", "about:blank")
                             $("#course_vm4").attr("src", "about:blank")
-                            window.clearInterval(window.ivm);
-                            window.clearInterval(window.ihb);
+//                            window.clearInterval(window.ivm);
+                            clearInterval(ihb);
                             $("#submit").attr("disabled", "disabled");
                         },
                         error:function(){
                             $("#course_vm3").attr("src", "about:blank")
                             $("#course_vm4").attr("src", "about:blank")
-                            window.clearInterval(window.ivm);
-                            window.clearInterval(window.ihb);
+//                            window.clearInterval(window.ivm);
+                            clearInterval(ihb);
                             $("#submit").attr("disabled", "disabled");
                         }
                     });
@@ -76,7 +78,7 @@ $(document).ready(function(){
                                 $("#course_vm4").attr("src",servers[0].url);
                                 clearInterval(sciv)
 
-                                $("#new-window").attr("href", servers[0].url)
+                                $("#new-window").attr("href",servers[0].url);
                             }
                         },
                         error: function(){
