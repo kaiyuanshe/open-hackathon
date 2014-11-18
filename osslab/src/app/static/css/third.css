@@ -36,6 +36,12 @@
             margin:10px 0px;
             width: 80%;
         }
+        .left ul li a{
+            padding: 5px 0px;
+            cursor: pointer;
+            margin:10px;
+            width: 80%;
+        }
         .center{
             width: 60%;
             float:left;

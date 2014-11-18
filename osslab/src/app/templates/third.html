@@ -47,14 +47,14 @@
         <div class="left">
             <div class="left-title">工具栏</div>
             <ul>
-                <li><button>Copy</button></li>
-                <li><button>Paste</button></li>
+                <li><a>Copy</a></li>
+                <li><a>Paste</a></li>
                 <li><a id="new-window" href="#" target="_blank">分离</a></li>
-                <li><button>字+</button></li>
-                <li><button>字-</button></li>
-                <li><button>保存</button></li>
-                <li><button>部署</button></li>
-                <li><button id="third-leave">stop</button></li>
+                <li><a>字+</a></li>
+                <li><a>字-</a></li>
+                <li><a>保存</a></li>
+                <li><a>部署</a></li>
+                <li><a id="third-leave" href="#">stop</a></li>
             </ul>
         </div>
         
@@ -90,6 +90,10 @@
                 <div id="iframe4" style="display:none">
                     <iframe id="course_vm4" src="/loading" width="100%" height="380px" class="" style="border: 1px solid #000;" frameborder="yes" marginwidth="10" scrolling="yes" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>
                 </div>
+            </div>
+
+            <div style="padding: 10px">
+                <button id="submit" disabled="disabled">submit</button>
             </div>
         </div>
         <div class="right">

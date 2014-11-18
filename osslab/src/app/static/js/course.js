@@ -16,6 +16,8 @@ $(document).ready(function(){
                 var show_url = data.output[0];
                 $("#course_vm3").attr("src",show_url);
 
+                $("#submit").removeAttr("disabled");
+
                 // refresh show tab
                 window.ivm = setInterval(function(){
                     $("#course_vm3").attr("src", $("#course_vm3").attr("src"));
@@ -40,14 +42,17 @@ $(document).ready(function(){
                             $("#course_vm4").attr("src", "about:blank")
                             window.clearInterval(window.ivm);
                             window.clearInterval(window.ihb);
+                            $("#submit").attr("disabled", "disabled");
                         },
                         error:function(){
                             $("#course_vm3").attr("src", "about:blank")
                             $("#course_vm4").attr("src", "about:blank")
                             window.clearInterval(window.ivm);
                             window.clearInterval(window.ihb);
+                            $("#submit").attr("disabled", "disabled");
                         }
                     });
+                    return false;
                 });
 
 //                $.each(servers, function(i,s){
