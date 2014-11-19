@@ -1,6 +1,6 @@
 $(document).ready(function(){
     var course = getParameterByName("cid");
-    course= "jstorm"
+    course= "jstorm_github"
 
 
     $.ajax({
