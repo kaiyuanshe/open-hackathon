@@ -3,6 +3,7 @@
     <script type="text/javascript" src="/static/js/course.js"></script>
     <script type="text/javascript" src="/static/js/third.js"></script>
     <link href="/static/css/third.css" rel="stylesheet">
+    <link href="/static/css/color.css" rel="stylesheet">
     {% endblock %}
 <!--
 </head>
@@ -25,6 +26,7 @@
         </div>
         
         <div class="center">
+<!--
             <div class="top">
                 <div style="overflow:hidden;">
                     <h3 name="hackathon-div" class="clickOn">黑客马拉松活动指南</h3>
@@ -39,6 +41,7 @@
                     </div>
                 </div>
             </div>
+-->
 <!--            <div id="servers"><a class='server-name selected' title="ssh">ssh</a></div>-->         
             <div class="mid" style="overflow:hidden;">
                 <ul >
@@ -51,22 +54,22 @@
                 
             <div class="bottom">                
                 <div id="iframe1" style="display:block">
-                    <iframe id="course_vm1" src="/loading" width="100%" height="380px" class="" style="border: 1px solid #000;" frameborder="yes" marginwidth="10" scrolling="yes" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>
+                    <iframe id="course_vm1" src="/loading" width="100%" height="500px" class="" style="border: 1px solid #000;" frameborder="yes" marginwidth="10" scrolling="yes" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>
                 </div>
                 <div id="iframe2" style="display:none">
-                    <iframe id="course_vm2" src="/loading" width="100%" height="380px" class="" style="border: 1px solid #000;" frameborder="yes" marginwidth="10" scrolling="yes" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>
+                    <iframe id="course_vm2" src="/loading" width="100%" height="500px" class="" style="border: 1px solid #000;" frameborder="yes" marginwidth="10" scrolling="yes" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>
                 </div>
                 <div id="iframe3" style="display:none">
-                    <iframe id="course_vm3" src="/loading" width="100%" height="380px" class="" style="border: 1px solid #000;" frameborder="yes" marginwidth="10" scrolling="yes" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>
+                    <iframe id="course_vm3" src="/loading" width="100%" height="500px" class="" style="border: 1px solid #000;" frameborder="yes" marginwidth="10" scrolling="yes" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>
                 </div>
                 <div id="iframe4" style="display:none">
-                    <iframe id="course_vm4" src="/loading" width="100%" height="380px" class="" style="border: 1px solid #000;" frameborder="yes" marginwidth="10" scrolling="yes" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>
+                    <iframe id="course_vm4" src="/loading" width="100%" height="500px" class="" style="border: 1px solid #000;" frameborder="yes" marginwidth="10" scrolling="yes" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>
                 </div>
             </div>
 
-            <div style="padding: 10px">
-                <button id="submit" disabled="disabled">submit</button>
-            </div>
+            <div style="text-align:right;margin-right: 10px;padding: 10px">
+               <button id="submit" name="submit" class="red" disabled="disabled">提交</button>
+           </div>
         </div>
 <!--    <iframe src="foot.html" width="100%" height="51px" class="navbar-fixed-buttom" style="border: 1px solid #000;"></iframe>-->
     {% endblock %}
