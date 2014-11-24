@@ -1,6 +1,15 @@
 import urllib, urllib2, json
 from functions import convert
 from compiler.ast import flatten
+from database import db, DockerHostServer as H, DockerContainer as C, ContainerPort as P
+
+def get_available_vm(course_config, course_context):
+    req_count= len(course_config["containers"]) + 1
+    vm= H.query.filter(H.container_count + req_count <= H.container_max_count).first()
+
+    # todo connect to azure to launch new VM if no existed VM meet the requirement
+    # since it takes some time to launch VM, it's more reasonable to launch VM when the existed ones are almost used up.
+    return vm
 
 def get_vm_private_host(context):
     # todo get availabe VM

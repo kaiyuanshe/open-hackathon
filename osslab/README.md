@@ -12,7 +12,7 @@ Open Source Software Laboratory
 - [git](http://git-scm.com/downloads).
 - _optional_, you can install [SmartGit]() if you feel uncomfortable about git bash.
 
-# setup
+# setup python
 after all the preconditions are met on your dev machine, install the following python libraries via pip.
 
 Or you can simply install all libraries by `pip install -r requirements.txt`.
@@ -22,11 +22,25 @@ pip install flask
 pip install flask-restful
 pip install docker-py
 pip install gittle
-pip install wsgilog
 ```
 
 Note that the list here may not up-to-date. When you see error like `no module named XXX`, that means you need install
 the specific lib in the error message, try `pip install XXX` in this case.
+
+# setup mysql
+configure your mysql instance to add users/privileges. DON'T use root user.
+
+logon mysql console with `root` user(`mysql -u root -p`) and then:
+
+```
+create database hackathon;
+create User 'hackathon'@'localhost' IDENTIFIED by 'your_password';
+GRANT ALL on hackathon.* TO 'hackathon'@'localhost';
+```
+Next update `app/config.py` with your user/password.  And don't submit your password to github.
+
+## initialize tables
+run `python database.py` for the first time to create db tables;
 
 # run
 change directory to `osslab/src` and run `python run.py` to start the flask server.
