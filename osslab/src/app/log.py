@@ -1,24 +1,30 @@
 import logging
 import logging.config
  
-logging.config.fileConfig("logging.conf")
- 
-#create logger
-logger = logging.getLogger("myLogger")
- 
+
 #"application" code
+class Log(object):
+    def __init__(self):
+        logging.config.fileConfig("logging.conf")
+        #create logger
+        self.logger = logging.getLogger("myLogger")
 
-def log_debug(debug):
-    logger.debug(debug)
-    
-def log_info(info):
-    logger.info(info)
+    def debug(self, debug):
+        self.logger.debug(debug)
 
-def log_warn(warn):
-    logger.warn(warn)
+    def info(self, info):
+        self.logger.info(info)
 
-def log_error(error):
-    logger.error(str(error))
+    def warn(self, warn):
+        self.logger.warn(warn)
 
-def log_critical(critical):
-    logger.critical(critical)    
+    def error(self, error):
+        self.logger.error(str(error))
+
+    def critical(self, critical):
+        self.logger.critical(critical)
+
+# usage(make sure /var/log/osslab/ directory exists and accessible):
+# from log import log
+# log.info("some info")
+log = Log()
