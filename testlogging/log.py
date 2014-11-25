@@ -22,3 +22,5 @@ def log_error(error):
 
 def log_critical(critical):
     logger.critical(critical)    
+    
+    There was an error verifying your email.
