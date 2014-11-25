@@ -1,12 +1,13 @@
-import urllib, urllib2, json, uuid
-from flask import render_template, request, jsonify, Response
-from flask.ext.restful import reqparse, abort, Api, Resource
+import uuid
 
+
+from flask import request, Response
+from flask.ext.restful import Api, Resource
 from app import app
-from common import *
+from functions import *
 from routes import *
-from database import db_session
-from models import User
+# from models import User
+
 
 api = Api(app)
 
@@ -59,12 +60,12 @@ def github():
     info = json.loads(httpres.read())
     name = 'github' + str(info['id'])
     uid = str(uuid.uuid3(uuid.NAMESPACE_DNS,name))
-    query = db_session.query(User)
-    result = query.filter(User.uid == uid).first()
-    if (result == None):
-        u = User(info['login'],uid,'github')
-        db_session.add(u)
-        db_session.commit()
+    # query = db_session.query(User)
+    # result = query.filter(User.uid == uid).first()
+    # if (result == None):
+    #     u = User(info['login'],uid,'github')
+        # db_session.add(u)
+        # db_session.commit()
     #print info
     return render_template("github.html",pic=info['id'],name=info['login'])
 
@@ -106,13 +107,13 @@ def renren():
     info = json.loads(httpres.read())
     name = 'renren' + str(info['response']['id'])
     uid = str(uuid.uuid3(uuid.NAMESPACE_DNS,name))
-    query = db_session.query(User)
-    result = query.filter(User.uid == uid).first()
+    # query = db_session.query(User)
+    # result = query.filter(User.uid == uid).first()
     #result = session.query(User).filter(User.uid == uid).all()
-    if (result == None):
-        u = User(info['response']['name'],uid,'renren')
-        db_session.add(u)
-        db_session.commit()
+    # if (result == None):
+    #     u = User(info['response']['name'],uid,'renren')
+        # db_session.add(u)
+        # db_session.commit()
     #info = Str
     #return render_template("renren.html")
     #return render_template("renren.html",iden=url_ori,name='cc')
@@ -133,3 +134,4 @@ def course():
     return render_template("course.html",name=username,pic=url)
 
 api.add_resource(CourseList, "/api/courses")
+api.add_resource(DoCourse, "/api/course/<string:name>")

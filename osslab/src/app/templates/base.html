@@ -1,63 +1,76 @@
-<!DOCTYPE html>
-<html>
-  <head>
-<meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name = "robots" content = "noindex,nofollow" />
-    <meta name="author" content="">
-     <script src="/static/js/jquery.min.js"></script>
-
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script type="text/javascript" src="/static/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/js/jquery.ui-1.8.18.min.js"></script>
+    <script type="text/javascript" src="/static/js/jquery.validate-1.9.min.js"></script>
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/js/common.js"></script>
     <link rel="icon" href="/static/pic/icon.jpg">
+    <meta name="description" content="">
+</head>
+    <style>
+        .navbar-inverse{
+            background-color: #E64025;
+            border-color: #E64025;
+        }
+        .navbar-brand{
+            margin-right: 20px;
+        }
+        .foot-div{
+            background-color: #E64025;
+            border-color: #E64025;
+            color:#ffffff;
+            padding:10px 0px;
+        }
+        .foot-div a{
+            color:#ffffff;
+        }
+    </style>
+<body>
+  
+  <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container">
+            <div class="navbar-header" style="width: 1000px;">
+                <!--<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>-->
 
-    <script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jquery.ui/1.8.18/jquery-ui.min.js"></script>
-    <script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.min.js"></script> 
-    <title>OSSLAB - 开源软件实验室(预览版)</title>
-    <script type="text/javascript" src="/config.js"></script>
-    <!-- Bootstrap core CSS -->
- <link href="/static/css/bootstrap.min.css" rel="stylesheet">
-  <script src="/static/js/bootstrap.min.js"></script>
-  </head>
- <body>
+                 <a  class="navbar-brand" href="http://osslab.msopentech.cn" style="color:#ffffff"><img src="/static/pic/icon.jpg" height="30" width="30"></img>开放Hackathon</a>
+                 <marquee style="color:#000000"  width="700" class="navbar-brand" align="middle" direction="left" behavior="scroll" scrollamount="2" scrolldelay="50" bgcolor="">通知: 1新闻滚动信息;2新闻滚动信息;3新闻滚动信息;4新闻滚动信息;5新闻滚动信息</marquee>
+                 <!--<a style="float:left;font-size:18px;padding-top:16px;color:#ffffff" href = "http://www.wenjuan.com/s/QBNfiu?test=1&v=0.687169515648">                    问卷调查
+                 </a>-->
 
-    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="/"><img src = "/static/pic/icon.jpg" height = "30" width = "30"></img>开源软件实验室</a>
+            </div>
+            <div class="navbar-collapse collapse">
+              <form class="navbar-form navbar-right" role="form">
+                <div class="form-group">
+                  <div id="name"><p style="color:white">{{name}}</p></div>
+                </div>
+                <div class="form-group">
+                  <div id="photo"><img height="" width="" src="{{pic}}"></div>
+                </div>
+              </form>
+            </div>
         </div>
-        <div class="navbar-collapse collapse">
-          <form class="navbar-form navbar-right" role="form">
-            <div class="form-group">
-              <div id = "name"><p style = "color:white">{{name}}</p></div>
-            </div>
-            <div class="form-group">
-              <div id = "photo"><img height = "30" width = "30" src = "{{pic}}"/></div>
-            </div>
-          </form>
-        </div><!--/.navbar-collapse -->
-      </div>
     </div>
-    <hr>
-    <hr>
-    {% block content %} {% endblock %}
-     <!--<footer>
-        <p>July 2014</p>
-      </footer>-->
-	<hr>
-<!--	<div class="container">
--->
-	<footer>
-	 <p align =  "center"><a href="http://www.wenjuan.com/s/QBNfiu?test=1&v=0.687169515648">联系我们</a> | <a target="_blank" href="/PrivacyStatement">隐私说明</a> | <a target="_blank" href="/TermsOfUse">使用说明</a> | &copy; 2014 Microsoft Open Technologies (Shanghai) Company Limited</p>
-	</footer>
-<!--
-	</div>
--->
-    </body>
+
+     {% block content %} {% endblock %}
+
+    <div class="foot-div">
+        <footer>
+            <p align="center">
+                <a href="http://www.wenjuan.com/s/QBNfiu?test=1&v=0.687169515648">联系我们</a> | 
+                <a target="_blank" href="PrivacyStatement">隐私条款</a> | 
+                <a target="_blank" href="TermsOfUse">使用条款</a> | 
+                © 2014 Microsoft Open Technologies (Shanghai) Company Limited
+            </p>
+        </footer>
+    </div>
+</body>
 </html>

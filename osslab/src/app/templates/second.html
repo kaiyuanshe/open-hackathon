@@ -1,0 +1,318 @@
+<!--<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="/static/js/jquery.min.js"></script>
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <script src="/static/js/bootstrap.min.js"></script>
+    <link rel="icon" href="/static/pic/icon.jpg">
+    <meta name="description" content="">
+    
+    </script>-->
+    
+    {% extends "base.html" %}
+         {% block content %}     
+    
+    <link rel="stylesheet" href="/static/css/second.css">
+    <script type="text/javascript" src="/config.js">
+    {% block second %} {% endblock %}
+    
+    
+<!--    <title>OSSLAB - 开源软件实验室(预览版)</title> -->
+    <style>
+        span.bds_more, .bds_tools a{
+            height: 22px !important;
+        }
+    </style>
+
+    <script>
+        window.onload =function(){            
+            getData("web");
+                        
+            $(".left ul li").each(function(i){
+                $(this).click(function(){
+                    $(this).children().attr('class','selected');
+                    $(this).siblings().children().attr("class","");
+                    getData($(this).attr("name"));
+                })
+            })
+
+//            $("#start_python").click(function(){
+//                location.href = "third?cid=flask";
+//            });
+            
+            //loadEvent();
+        }
+        
+        function getData(tag){
+            var url='/api/courses'
+            if(tag!=null){
+                url='/api/courses'+"?tag="+tag
+            }
+            $.ajax({
+                type:'get',
+                dataType:'json',
+                url:url,
+                success: function(data){
+                    dataLoad(data);
+                },
+                error: function(XMLHttpRequest,textStatus,errorThrown) {
+                    
+                }
+            });
+        }
+        
+        function dataLoad(data){
+            data=$.parseJSON(data);
+            var htmlContent="";
+            $("#course-list ul").html(htmlContent);
+            if(data.length>0){
+                $.each(data,function(i,val){
+                    htmlContent+='<li><div class="course-list-container"><div class="front"><div style="width:59%">';
+                    htmlContent+='<div style="margin-top:10px;float:left;"><img src="'+val.image+'" width="50px" height="50px"/></div>';
+                    htmlContent+='<div><h3>'+val.name+'</h3></div></div>';
+                    
+                    var recommend=""
+                    for(var j=0;j<val.recommend;j++){
+                        recommend+="★";
+                    }
+                    for(var j=0;j<5-val.recommend;j++){
+                        recommend+="☆";
+                    }
+                    htmlContent+='<div><div style="margin-top:10px;">推荐指数：'+recommend+'</div>';
+                    htmlContent+='<div style="margin-top:10px;">更新时间：'+val.create_time+'</div></div></div>';
+                    htmlContent+='<div class="obverse"><div class="obverse-top"><div><h3>'+val.name+'</h3>';
+                    htmlContent+='<div>推荐指数：'+recommend+'</div></div></div>';
+                    htmlContent+='<div class="obverse-center"><div class="obverse-center-left" >';
+                    
+                    var description="";
+                    if(val.description.length>35){
+                        description=val.description.substring(0,35)+"...";
+                    }
+                    else{
+                        description=val.description;
+                    }
+                    htmlContent+='<div style="padding-left:10px">'+description+'</div></div>';
+                    htmlContent+='<div class="obverse-center-right" ><div style="overflow:hidden;">';
+                    htmlContent+='<div style="float:right;width:50%">&hearts;'+val.like_count+'</div>';
+                    htmlContent+='<div style="float:right;width:50%">●'+val.share_count+'</div></div>';
+                    htmlContent+='<div style="overflow:hidden;">';
+                    htmlContent+='<div style="float:right;width:50%">&diams;'+val.studying_count+'</div>';
+                    htmlContent+='<div style="float:right;width:50%">&spades;'+val.studied_count+' </div></div></div></div>';
+                    id="'"+val.id+"'"
+                    htmlContent+='<div class="obverse-bottom" ><div><button id="" class="" onclick="course('+id+');return false;">我来试试</button>';
+                    htmlContent+='<div class="btn-share"><button>分享</button>';
+                    htmlContent+='<div class="div-share"><div><ul>';
+                    htmlContent+='<div id="bdshare" class="bdshare_t bds_tools get-codes-bdshare">';
+                    htmlContent+='<a class="bds_qzone">QQ空间</a><a class="bds_tsina">新浪微博</a><a class="bds_tqq">腾讯微博</a>';
+                    htmlContent+='<a class="bds_renren">人人网</a><span class="bds_more">更多</span></div>';
+                    htmlContent+='</ul></div></div></div>';
+                    htmlContent+='<div class="btn-say"><button id="" class="">说两句</button>';
+                    htmlContent+='<div class="div-say"><div><input type="text" />';
+                    htmlContent+='<button >发言</button></div></div></div>';
+                    htmlContent+='<div style="float:left;margin-left:20px">● 满 | ○空 | N/A</div>';
+                    htmlContent+=' </div></div></div></div></li>';
+                    
+                    if(i>=4){
+                       return false ; 
+                    }
+                })
+                $("#course-list ul").html(htmlContent);
+                loadEvent();
+            }
+            else{
+                $("#course-list ul").html("<div style='color:red'><h3>暂无相关内容，您可在推荐新环境中填写你感兴趣的内容，我们的工作人员会根据情况增加相关内容</h3></div>");
+            }
+        }
+                        
+        function loadEvent(){
+            $(".btn-share").each(function(i){
+                $(this).mouseover(function(){
+                    $(this).attr('class','hover');
+                })
+            })
+            $(".btn-share").each(function(i){
+                $(this).mouseleave(function(){
+                    $(this).attr('class','');
+                })
+            })
+            
+            $(".btn-say").each(function(i){
+                $(this).mouseover(function(){
+                    $(this).attr('class','hover');
+                })
+            })
+            $(".btn-say").each(function(i){
+                $(this).mouseleave(function(){
+                    $(this).attr('class','');
+                })
+            })
+        }
+        
+        function search(){
+            getData($("#search").val());
+        }
+                        
+        function course(id){
+            window.location.href="third?cid="+id;
+        }
+    </script>
+<!--</head>-->
+<!--<body>-->
+
+<!--    <iframe src="head" width="100%" height="51px" class="navbar-fixed-top" style="border: 1px solid #000;"></iframe>-->
+
+     
+     
+    <div class="main">
+        <div class="left">
+            <div class="left-title">分类导航</div>
+            <ul>
+                <li name="web" ><div class="selected">网络</div></li>
+                <li name="big data"><div>大数据</div></li>               
+                <li name="language"><div>语言</div></li>
+                <li name="cloud"><div>云计算</div></li>
+                <li name="game"><div>游戏平台</div></li>
+            </ul>
+            <div class="search">
+                <span>搜索</span>
+                <span><input type="text" id="search" name="search" /><input type="button" value="Search" onclick="search();return false;"/></span>
+            </div>
+        </div>
+        
+        <div class="center">
+            <div class="top">
+                <div>
+                    <h3>推荐新环境</h3>
+                    <span>
+                        <input type="text" id="recommend" name="recommend" />
+                        <input type="button" value="提交"/>
+                    </span>
+                </div>               
+            </div>
+            <div class="bottom">
+                <div class="bottom-container">
+                    <div class="sort">
+                        <div>排序</div>
+                        <div>最新上架</div>
+                        <div>本周最流行</div>
+                        <div>本月最流行</div>
+                        <div>综合最流行</div>                        
+                    </div>
+                    <div class="course-list" id="course-list">
+                        <ul>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="right">
+            <div class="left-side">
+                <div class="abstract">
+                    <h2>大数据</h2>
+                    大数据技术(big data)，或称巨量资料，指的是所涉及的资料量规模巨大到无法通过目前主流软件工具，在合理时间内达到撷取、管理、处理、并整理成为帮助企业经营决策更积极目的的资讯。大数据的4V特点：Volume（大量）、Velocity（高速）、Variety（多样）、value（价值）。
+                </div>
+                
+                <div class="count">
+                    <h2 style="border-bottom:1px solid #000000;color:#C30008">社区统计</h2>
+                    <div style="width:48%;float:left;">
+                        <div>最流行</div>
+                        <ul>
+                            <li style="background:url(/static/pic/1.gif) no-repeat 4px center">
+                                <div>Python</div>
+                            </li>
+                            <li style="background:url(/static/pic/2.gif) no-repeat 4px center">
+                                <div>Ruby</div>
+                            </li>
+                            <li style="background:url(/static/pic/3.gif) no-repeat 4px center">
+                                <div>JavaScript</div>
+                            </li>
+                            <li style="background:url(/static/pic/4.gif) no-repeat 4px center">
+                                <div>Java</div>
+                            </li>
+                            <li style="background:url(/static/pic/5.gif) no-repeat 4px center">
+                                <div>PHP</div>
+                            </li>
+                        </ul>
+                        
+                        <div>最活跃用户</div>
+                        <ul>
+                            <li style="background:url(/static/pic/1.gif) no-repeat 4px center">
+                                <div>小A</div>
+                            </li>
+                            <li style="background:url(/static/pic/2.gif) no-repeat 4px center">
+                                <div>小B</div>
+                            </li>
+                            <li style="background:url(/static/pic/3.gif) no-repeat 4px center">
+                                <div>小明</div>
+                            </li>
+                            <li style="background:url(/static/pic/4.gif) no-repeat 4px center">
+                                <div>小涛</div>
+                            </li>
+                            <li style="background:url(/static/pic/5.gif) no-repeat 4px center">
+                                <div>小红</div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div style="width:48%;float:left;margin-left:8px">
+                        <div>最新趋势</div>
+                        <ul>
+                            <li style="background:url(/static/pic/1.gif) no-repeat 4px center">
+                                <div>Ruby</div>
+                            </li>
+                            <li style="background:url(/static/pic/2.gif) no-repeat 4px center">
+                                <div>JavaScript</div>
+                            </li>
+                            <li style="background:url(/static/pic/3.gif) no-repeat 4px center">
+                                <div>Python</div>
+                            </li>
+                            <li style="background:url(/static/pic/4.gif) no-repeat 4px center">
+                                <div>Java</div>
+                            </li>
+                            <li style="background:url(/static/pic/5.gif) no-repeat 4px center">
+                                <div>PHP</div>
+                            </li>
+                        </ul>
+                        
+                        <div>最活跃参与者</div>
+                        <ul>
+                            <li style="background:url(/static/pic/1.gif) no-repeat 4px center">
+                                <div>allen</div>
+                            </li>
+                            <li style="background:url(/static/pic/2.gif) no-repeat 4px center">
+                                <div>bill</div>
+                            </li>
+                            <li style="background:url(/static/pic/3.gif) no-repeat 4px center">
+                                <div>candy</div>
+                            </li>
+                            <li style="background:url(/static/pic/4.gif) no-repeat 4px center">
+                                <div>danny</div>
+                            </li>
+                            <li style="background:url(/static/pic/5.gif) no-repeat 4px center">
+                                <div>eric</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="advertisement">
+                <img src="/static/pic/microsoft.jpg" width="220px" height="220px"/>
+                <img src="/static/pic/ruby.jpg" width="220px" height="220px"/>
+                <img src="/static/pic/python.jpg" width="220px" height="220px"/>
+                <img src="/static/pic/javaScript.jpg" width="220px" height="220px"/>
+            </div>
+        </div>
+    </div>
+             
+    <!-- 分享JS begin -->
+    <script type="text/javascript" id="bdshare_js" data="type=slide&mini=1" ></script>   
+    <script type="text/javascript" id="bdshell_js"></script> 
+    <script>
+        document.getElementById('bdshell_js').src = "http://bdimg.share.baidu.com/static/js/shell_v2.js?cdnversion=" + Math.ceil(new Date()/3600000);
+    </script>
+    <!-- 分享JS end -->
+<!--    <iframe src="foot" width="100%" height="51px" class="navbar-fixed-buttom" style="border: 1px solid #000;"></iframe>-->
+    {% endblock %}
+<!--</body>
+</html>-->

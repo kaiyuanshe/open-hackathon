@@ -1,0 +1,48 @@
+@-webkit-keyframes redPulse {
+            from { background-color: #bc330d; -webkit-box-shadow: 0 0 9px #333; }
+            50% { background-color: #e33100; -webkit-box-shadow: 0 0 18px #e33100; }
+            to { background-color: #bc330d; -webkit-box-shadow: 0 0 9px #333; }
+        }
+        @keyframes  redPulse {
+            from { background-color: #bc330d; -webkit-box-shadow: 0 0 9px #333; }
+            50% { background-color: #e33100; -webkit-box-shadow: 0 0 18px #e33100; }
+            to { background-color: #bc330d; -webkit-box-shadow: 0 0 9px #333; }
+        }
+        @-moz-keyframes redPulse {
+            from { background-color: #bc330d; -webkit-box-shadow: 0 0 9px #333; }
+            50% { background-color: #e33100; -webkit-box-shadow: 0 0 18px #e33100; }
+            to { background-color: #bc330d; -webkit-box-shadow: 0 0 9px #333; }
+        }
+        @-o-keyframes redPulse {
+            from { background-color: #bc330d; -webkit-box-shadow: 0 0 9px #333; }
+            50% { background-color: #e33100; -webkit-box-shadow: 0 0 18px #e33100; }
+            to { background-color: #bc330d; -webkit-box-shadow: 0 0 9px #333; }
+        }
+        
+        .red {
+            -webkit-animation: redPulse 2s infinite;  
+            animation: redPulse 2s infinite;
+            -moz-animation: redPulse 2s infinite;
+            -o-animation: redPulse 2s infinite;
+            
+            transition: background-color 300ms ease-out;
+            -moz-transition: background-color 300ms ease-out;
+            -webkit-transition: background-color 300ms ease-out;
+            -o-transition: background-color 300ms ease-out;
+            
+            border-radius: 4px;
+            box-shadow: none;
+            padding: 1em 3em;
+            font-size: 1em;
+            color: white;
+            position: relative;
+            text-decoration: none;
+            text-align: center;
+            border-style: solid;
+            border-width: 0;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            line-height: normal;
+            margin-bottom: 10px;
+        }

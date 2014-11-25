@@ -1,4 +1,5 @@
 import httplib
+
 from config import Config
 
 def convert(input):
@@ -32,7 +33,7 @@ def query_info(website,url,ssl):
     conn.request('GET',url)
     httpres = conn.getresponse()
     return httpres
-
+            
 def add_head_href(head,href):
     arr = href.split('href="')
     href = ('href="' + head).join(arr)

@@ -1,0 +1,59 @@
+{% extends "hackathon.html" %}
+    {% block second %}
+    <script type="text/javascript" src="/static/js/course.js"></script>
+    <script type="text/javascript" src="/static/js/third.js"></script>
+    <link href="/static/css/third.css" rel="stylesheet">
+    {% endblock %}
+<!--
+</head>
+<body>
+-->
+<!--    <iframe src="head.html" width="100%" height="51px" class="navbar-fixed-top" style="border: 1px solid #000;"></iframe>-->
+    {% block left %}
+        <div class="left">
+            <div class="left-title">工具栏</div>
+            <ul>
+                <li><a>Copy</a></li>
+                <li><a>Paste</a></li>
+                <li><a id="new-window" href="#" target="_blank">分离</a></li>
+                <li><a>字+</a></li>
+                <li><a>字-</a></li>
+                <li><a>保存</a></li>
+                <li><a>部署</a></li>
+                <li><a id="third-leave">stop</a></li>
+            </ul>
+        </div>
+        
+        <div class="center">
+            <!--<div class="top">-->
+                <!--<div style="overflow:hidden;">-->
+                    <!--<h3 name="hackathon-div" class="clickOn">黑客马拉松活动指南</h3>-->
+                    <!--<h3 name="jStormApi-div">jStorm官方文档</h3>-->
+                <!--</div>-->
+                <!--<div>-->
+                    <!--<div id="hackathon-div" style="width:100%;border:1px solid #888888;height:300px;display:block">-->
+                       <!--<iframe id = "hackathon" src="http://www.huodongxing.com/go/msopentech_cocos2dx_hackathon" width="100%" height="300" frameborder="yes"  marginwidth="10" marginheight="10" scrolling="yes"></iframe>-->
+                   <!--</div>-->
+                   <!--<div id="jStormApi-div" style="width:100%;border:1px solid #888888;height:300px;display:none">-->
+                       <!--<iframe id = "jStormApi" src="http://www.oschina.net/p/alibaba-jstorm" width="100%" height="300" frameborder="yes"  marginwidth="10" marginheight="10" scrolling="yes" security="restricted" sandbox=""></iframe>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+<!--            <div id="servers"><a class='server-name selected' title="ssh">ssh</a></div>-->            
+                
+            <div class="bottom">                
+               <div style="margin:100px">
+                   <img />
+                   <p ><h1 style="color:green">Congratulations!!!</h1></p>
+                   <p style="margin-top:30px;"><h3>您的源代码已保存至github:</p></h3>
+                   <p>
+                       <h3><a href="https://github.com/msopentechcn/LABOSS/tree/dev" target="_blank">https://github.com/msopentechcn/LABOSS/tree/dev</a></h3>                    
+                    </p>
+               </div>
+            </div>
+        </div>
+<!--    <iframe src="foot.html" width="100%" height="51px" class="navbar-fixed-buttom" style="border: 1px solid #000;"></iframe>-->
+    {% endblock %}
+<!--
+</body>
+</html>-->

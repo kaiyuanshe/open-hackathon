@@ -2,32 +2,38 @@ __author__ = "Junbo Wang"
 
 from flask import render_template
 from flask.ext.restful import reqparse, abort, Api, Resource
-import json
+import json, uuid, time, os
+from sample_course import Sample_Courses
+from templates import DockerTemplates;
 
 Template_Routes = {
     "index": "index.html",
     "PrivacyStatement": "PrivacyStatement.html",
     "TermsOfUse": "TermsOfUse.html",
     'paper': "paper.html",
-    "google": "google.html"
+    "google": "google.html",
+    "third": "third.html",
+    "loading": "loading.html",
+    "hackathon": "hackathon.html",
+    "rightSide": "rightSide.html",
+    "error": "error.html",
+    "submitted": "submitted.html",
+    "redirect": "redirect.html"
 }
 
-Courses = [
-    {
-        "name": "flask",
-        "create_time": "2014-10-25",
-        "like_count": 30,
-        "description": "Python on Flask",
-        "tags": ["python", "mvc", "flask", "web"]
-    },
-    {
-        "name": "ruby on rails",
-        "create_time": "2014-10-25",
-        "like_count": 32,
-        "description": "Ruby on Rails",
-        "tags": ["ruby", "mvc", "rails", "web"]
-    }
-]
+running_courses = []
+docker = DockerTemplates()
+
+def get_running_course(id):
+    css = filter(lambda x:x[0]==id, running_courses)
+    if len(css) > 0:
+        return css[0]
+
+def delete_course(id):
+    cs = get_running_course(id)
+    if cs != None:
+        docker.stop_containers(cs[2],cs[3])
+        running_courses.remove(cs)
 
 def simple_route(path):
     if Template_Routes.has_key(path):
@@ -37,4 +43,58 @@ def simple_route(path):
 
 class CourseList(Resource):
     def get(self):
-        return json.dumps(Courses)
+        parser = reqparse.RequestParser()
+        parser.add_argument('tag', default=None)
+        args = parser.parse_args()
+
+        kw = args['tag']
+        if kw is None:
+            return json.dumps(Sample_Courses)
+        else:
+            ret = filter(lambda c: len(filter(lambda t: kw.lower() in t.lower(), c["tags"])) > 0, Sample_Courses)
+            return json.dumps(ret)
+
+
+class DoCourse(Resource):
+    def get(self, name):
+        cs = get_running_course(name)
+        if cs is not None:
+            course_context= cs[3]
+            if not course_context.has_key("guacamole_status"):
+                docker.query_guaca_status(course_context)
+
+            return course_context
+        else:
+            return "Not Found", 404
+
+    def post(self, name):
+        template_file = "resources/%s_docker.js" % name
+        if os.path.isfile(template_file):
+            # call remote service to start docker containers
+            course_config = json.load(file(template_file))
+            course_id = str(uuid.uuid1())
+
+            course_context = {
+                "course_id": course_id,
+                "course_type":  "docker"
+            }
+            try:
+                docker.start_containers(course_config, course_context)
+                # todo: save to database
+
+                running_courses.append((course_id, time.time(), course_config, course_context))
+                return course_context
+            except Exception as err:
+                return "fail to start due to '%s'" % err, 500
+        else:
+            return "the course is not ready", 404
+
+    def delete(self, name):
+        return delete_course(name)
+
+    def put(self, name):
+        cs = get_running_course(name)
+        if cs != None:
+            running_courses.append((name, time.time(), cs[2], cs[3]))
+            running_courses.remove(cs)
+        return "OK"

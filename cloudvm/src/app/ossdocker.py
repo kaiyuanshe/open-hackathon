@@ -20,8 +20,8 @@ class OssDocker(object):
         containers = convert(self.client.containers())
         return next((c for c in containers if name in c["Names"] or '/'+name in c["Names"]), None)
 
-    def search_containers_by_course_id(self, id):
-        containers = convert(self.client.containers())
+    def search_containers_by_course_id(self, id, all=False):
+        containers = convert(self.client.containers(all=all))
         return filter(lambda c: name_match(id, c["Names"]), containers)
 
     def stop(self, name):
@@ -32,20 +32,18 @@ class OssDocker(object):
         return True
 
     def run(self, args):
-        full_name = "%s-%s" % (args["uuid"], args["name"])
+        full_name = "%s-%s" % (args["course_id"], args["name"])
         exist = self.get_container(full_name)
         result = {
             "name": args["name"],
-            "url": args["url"],
             "full_name": full_name,
-            "description": args["description"]
         }
         if exist is not None:
             result["c_id"] = exist["Id"]
         else:
             image = args["image"]
             # ports foramt: [from, to ,from2, to2]. e.g.[9080,8080,3306,3306].Similar with 'mnts'
-            ports = args["ports"] if args.has_key("ports") else []
+            ports = args["docker_ports"] if args.has_key("docker_ports") else []
             port_bingings = dict(zip(ports[1::2], ports[::2]))
 
             mnts = args["mnt"] if args.has_key("mnt") else []
