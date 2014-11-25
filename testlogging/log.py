@@ -8,6 +8,8 @@ logger = logging.getLogger("myLogger")
  
 #"application" code
 
+logger.info("info")
+
 def log_debug(debug):
     logger.debug(debug)
     
@@ -23,4 +25,3 @@ def log_error(error):
 def log_critical(critical):
     logger.critical(critical)    
     
-    There was an error verifying your email.
