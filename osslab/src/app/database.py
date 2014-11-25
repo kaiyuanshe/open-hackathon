@@ -1,6 +1,6 @@
 from app import app
 from flask.ext.sqlalchemy import SQLAlchemy
-from app.functions import *
+from functions import *
 
 app.config["SQLALCHEMY_DATABASE_URI"]= safe_get_config("mysql/connection", "mysql://root:root@localhost/hackathon")
 db= SQLAlchemy(app)
