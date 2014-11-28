@@ -141,10 +141,10 @@ class PortBinding(db.Model):
     container_port= db.Column(db.Integer, nullable=False)
 
     host_server_id = db.Column(db.Integer, db.ForeignKey('host_server.id'))
-    host_server = db.relationship('HostServer', backref=db.backref('containers', lazy='dynamic'))
+    host_server = db.relationship('HostServer', backref=db.backref('port_bindings', lazy='dynamic'))
 
     experiment_id = db.Column(db.Integer, db.ForeignKey('experiment.id'))
-    experiment = db.relationship('Experiment', backref=db.backref('containers', lazy='dynamic'))
+    experiment = db.relationship('Experiment', backref=db.backref('port_bindings', lazy='dynamic'))
 
     container_id = db.Column(db.Integer, db.ForeignKey('docker_container.id'))
     container = db.relationship('DockerContainer', backref=db.backref('port_bindings', lazy='dynamic'))

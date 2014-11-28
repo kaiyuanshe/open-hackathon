@@ -4,6 +4,7 @@ from flask import render_template
 from flask.ext.restful import reqparse, abort, Api, Resource
 import json, uuid, time, os
 from sample_course import Sample_Courses
+from flask.ext.login import  login_required
 from templates import DockerTemplates;
 
 Template_Routes = {
@@ -35,6 +36,7 @@ def delete_course(id):
         docker.stop_containers(cs[2],cs[3])
         running_courses.remove(cs)
 
+# @login_required
 def simple_route(path):
     if Template_Routes.has_key(path):
         return render_template(Template_Routes[path])

@@ -3,13 +3,12 @@ import uuid
 
 from flask import request, Response,render_template, flash, redirect, session, url_for, g
 from flask.ext.restful import Api, Resource
-from app import app, oid
+from app import app,oid
 # from app import app
 from functions import *
 from routes import *
-# from models import User
-#from models import User
-from flask.ext.login import login_user, logout_user, current_user, login_required
+from database import *
+from flask.ext.login import  login_required
 
 
 api = Api(app)
@@ -34,7 +33,7 @@ def internal_error(error):
 
 # simple webPages
 @app.route('/<path:path>')
-@login_required
+
 def template_routes(path):
     return simple_route(path)
 
@@ -72,21 +71,20 @@ def github():
     if(len(emailList)>1):
         for data in emailList:
             if(data.get("primary")):
-                email=data.get("email")
+                useremail=data.get("email")
                 break
     else:
-        email=emailList[0].get("email")
+        useremail=emailList[0].get("email")
 
-    session['email'] = email
-    user = User.query.filter_by(email=email).first()
+    session['email'] = useremail
+    user = User.query.filter_by(email=useremail).first()
 
     if (user == None):
-        u = User(info['login'],uid,'github',email)
-        db_session.add(u)
-        db_session.commit()
+        u = User(info['login'],useremail)
+        db.session.add(u)
+        db.session.commit()
 
     else:
-        flash(u'Successfully signed in')
         g.user = user
 
     # query = db_session.query(User)
@@ -172,9 +170,9 @@ def renren():
 @app.before_request
 def before_request():
     g.user = None
-    if 'openid' in session:
-        openid = session['openid']
-        g.user = User.query.filter_by(uid=openid).first()
+    if 'email' in session:
+        email = session['email']
+        g.user = User.query.filter_by(email=email).first()
 
 @app.route('/login', methods = ['GET', 'POST'])
 @oid.loginhandler
@@ -183,7 +181,7 @@ def login():
         # return redirect(url_for('index'))
         return redirect(oid.get_next_url())
     if request.method == 'POST':
-        openid = request.form.get('ema')
+        openid = request.form.get('openid')
         if openid:
             return oid.try_login(openid, ask_for=['name'])
     return render_template('index.html', next=oid.get_next_url(),
@@ -196,7 +194,7 @@ def after_login(resp):
     session['openid'] = resp.identity_url
     user = User.query.filter_by(uid=resp.identity_url).first()
     if user is not None:
-        flash(u'Successfully signed in')
+
         g.user = user
         return redirect(oid.get_next_url())
     return redirect(url_for('create_profile', next=oid.get_next_url(),
