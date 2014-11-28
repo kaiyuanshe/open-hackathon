@@ -1,6 +1,15 @@
 import urllib, urllib2, json
 from functions import convert
 from compiler.ast import flatten
+from database import db, DockerHostServer as H, DockerContainer as C, ContainerPort as P
+
+def get_available_vm(course_config, course_context):
+    req_count= len(course_config["containers"]) + 1
+    vm= H.query.filter(H.container_count + req_count <= H.container_max_count).first()
+
+    # todo connect to azure to launch new VM if no existed VM meet the requirement
+    # since it takes some time to launch VM, it's more reasonable to launch VM when the existed ones are almost used up.
+    return vm
 
 def get_vm_private_host(context):
     # todo get availabe VM
@@ -13,7 +22,7 @@ def get_vm_private_host(context):
     # 4. keep the private IP in DB for guacamole server too
 
     return "10.0.2.15"
-    #return "10.207.250.79"
+    # return "10.207.250.79"
 
 def get_cloudvm_address(context):
     # the port is that cloudvm service is listening on. 8001 by default
@@ -25,7 +34,7 @@ def get_vm_public_host(context):
     # sure it must get from DB and it must accessible from public so it's a CloudService endpoint in general.
 
     return "localhost"
-    #return "osslab1.chinacloudapp.cn"
+    # return "osslab1.chinacloudapp.cn"
 
 def get_available_port(port_cfg, course_context):
     # get an available on the target VM. host_port means the port that listening on the host VM.

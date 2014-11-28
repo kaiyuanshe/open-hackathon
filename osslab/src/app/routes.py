@@ -17,8 +17,8 @@ Template_Routes = {
     "hackathon": "hackathon.html",
     "rightSide": "rightSide.html",
     "error": "error.html",
-    "submitted":"submitted.html",
-    "third":"third.html"
+    "submitted": "submitted.html",
+    "redirect": "redirect.html"
 }
 
 running_courses = []

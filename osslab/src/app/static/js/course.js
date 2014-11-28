@@ -1,7 +1,9 @@
 $(document).ready(function () {
     var course = getParameterByName("cid");
-    course = "jstorm"
+    course= "jstorm_github"
 
+detach_url= "redirect?url=" + encodeURIComponent("http://www.oschina.net/p/alibaba-jstorm");
+                                $("#new-window").attr("href",detach_url);
 
     $.ajax({
         url: '/api/course/' + course,
@@ -81,7 +83,8 @@ $(document).ready(function () {
                                 $("#course_vm4").attr("src", servers[0].url);
                                 clearInterval(sciv)
 
-                                $("#new-window").attr("href", servers[0].url);
+                                detach_url= "redirect?url=" + encodeURIComponent(servers[0].url);
+                                $("#new-window").attr("href",detach_url);
                             }
                         },
                         error: function () {

@@ -7,12 +7,9 @@ from app import app, oid
 # from app import app
 from functions import *
 from routes import *
-from database import db_session
-
-from forms import LoginForm
-from models import User
+# from models import User
+#from models import User
 from flask.ext.login import login_user, logout_user, current_user, login_required
-
 
 
 api = Api(app)
@@ -141,13 +138,13 @@ def renren():
     info = json.loads(httpres.read())
     name = 'renren' + str(info['response']['id'])
     uid = str(uuid.uuid3(uuid.NAMESPACE_DNS,name))
-    query = db_session.query(User)
-    result = query.filter(User.uid == uid).first()
+    # query = db_session.query(User)
+    # result = query.filter(User.uid == uid).first()
     #result = session.query(User).filter(User.uid == uid).all()
-    if (result == None):
-        u = User(info['response']['name'],uid,'renren')
-        db_session.add(u)
-        db_session.commit()
+    # if (result == None):
+    #     u = User(info['response']['name'],uid,'renren')
+        # db_session.add(u)
+        # db_session.commit()
     #info = Str
     #return render_template("renren.html")
     #return render_template("renren.html",iden=url_ori,name='cc')
