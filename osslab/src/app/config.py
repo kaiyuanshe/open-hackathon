@@ -11,7 +11,7 @@ Config = {
         "github": {
             "clientID": "client_id=0eded406cf0b3f83b181",
             "redirect_uri": "redirect_uri=http://osslab.msopentech.cn/github",
-            "github.scope": "scope=user",
+            "scope": "scope=user",
         },
         "google": {
             "clientID": "client_id=304944766846-7jt8jbm39f1sj4kf4gtsqspsvtogdmem.apps.googleusercontent.com",
@@ -41,5 +41,6 @@ Config = {
         }
     }
 }
+
 
 

@@ -12,12 +12,13 @@ Template_Routes = {
     "TermsOfUse": "TermsOfUse.html",
     'paper': "paper.html",
     "google": "google.html",
-    "third": "third.html",
+    "course": "course.html",
     "loading": "loading.html",
     "hackathon": "hackathon.html",
     "rightSide": "rightSide.html",
     "error": "error.html",
-    "submitted":"submitted.html"
+    "submitted":"submitted.html",
+    "third":"third.html"
 }
 
 running_courses = []
