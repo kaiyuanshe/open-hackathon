@@ -1,7 +1,7 @@
 import urllib, urllib2, json
 from functions import convert
 from compiler.ast import flatten
-from database import db, DockerHostServer as H, DockerContainer as C, ContainerPort as P
+from database import db, HostServer as H, DockerContainer as C, PortBinding as P
 
 def get_available_vm(course_config, course_context):
     req_count= len(course_config["containers"]) + 1
