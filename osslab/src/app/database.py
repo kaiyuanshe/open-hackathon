@@ -18,6 +18,18 @@ class User(db.Model):
     def __repr__(self):
         return '<User %r>' % self.username
 
+class Register(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    register_name = db.Column(db.String(80), unique=True)
+    email = db.Column(db.String(120), unique=True)
+
+    def __init__(self,register_name, email):
+        self.register_name = register_name
+        self.email = email
+
+    def __repr__(self):
+        return '<Register %r>' % self.register_name
+
 class HostServer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     vm_name = db.Column(db.String(100), unique=True, nullable=False)

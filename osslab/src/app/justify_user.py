@@ -3,8 +3,8 @@ from database import *
 
 class justifyUser:
 
-    def justify(self, user_email):
-        q = User.query().filter(User.email == user_email).all()
+    def justify(self, email):
+        q = Register.query().filter(Register.email == email).all()
         if len(q) == 0:
             return False
         else:
