@@ -1,7 +1,5 @@
-from log.py import log_error
+import log
 
-
-te = 1
-log_error(te)
-
+tst = 'info'
+log_info(tst)
 

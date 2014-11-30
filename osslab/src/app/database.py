@@ -2,21 +2,76 @@ from app import app
 from flask.ext.sqlalchemy import SQLAlchemy
 from functions import *
 from datetime import datetime
+import uuid
 
 app.config["SQLALCHEMY_DATABASE_URI"]= safe_get_config("mysql/connection", "mysql://root:root@localhost/hackathon")
 db = SQLAlchemy(app)
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True)
-    email = db.Column(db.String(120), unique=True)
+    name = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(100))
+    openid = db.Column(db.String(100))
+    avatar_url = db.Column(db.String(200))
+    slug = db.Column(db.String(50), unique=True, nullable=False) # can be used for branch name of github
+    access_token = db.Column(db.String(100))
+    create_time = db.Column(db.DateTime)
+    last_login_time = db.Column(db.DateTime)
 
-    def __init__(self, username, email):
-        self.username = username
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return unicode(self.id)
+
+    def __init__(self, name, email, openid, avatar_url, access_token, slug=None, create_time=None, last_login_time=None):
+        if create_time is None:
+            create_time = datetime.utcnow()
+        if last_login_time is None:
+            last_login_time = datetime.utcnow()
+        if slug is None:
+            slug = str(uuid.uuid1())[0:8] # todo generate a real slug
+
+        self.name = name
+        self.email = email
+        self.openid = openid
+        self.avatar_url = avatar_url
+        self.slug = slug
+        self.access_token = access_token
+        self.create_time = create_time
+        self.last_login_time = last_login_time
+
+    def __repr__(self):
+        return "User: {name=%s, email=%s, openid=%s, avatar_url=%s, slug=%s, create_time=%r, last_login_time=%r}" % (
+            self.name,
+            self.email,
+            self.openid,
+            self.avatar_url,
+            self.slug,
+            self.create_time,
+            self.last_login_time
+        )
+
+
+class Register(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    register_name = db.Column(db.String(80), unique=True)
+    email = db.Column(db.String(120), unique=True)
+    online = db.Column(db.Integer) # perhaps bool?
+    submitted = db.Column(db.Integer) # bool
+
+    def __init__(self,register_name, email):
+        self.register_name = register_name
         self.email = email
 
     def __repr__(self):
-        return '<User %r>' % self.username
+        return '<Register %r>' % self.register_name
 
 class HostServer(db.Model):
     id = db.Column(db.Integer, primary_key=True)

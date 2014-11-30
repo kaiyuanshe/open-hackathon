@@ -1,13 +1,10 @@
 import json
 from functions import *
+from flask import g
 from compiler.ast import flatten
 from database import *
 from log import log
 from constants import *
-
-# todo replace mock user with the login user
-user = User("mockUser", "name@domain.com")
-user.id = 0
 
 class ExprManager(object):
 
@@ -116,7 +113,7 @@ class ExprManager(object):
         post_data["container_name"] = "%s-%s" % (expr.id, container_config["name"])
 
         # db entity
-        container = DockerContainer(post_data["container_name"], user, host_server, expr, container_config["image"])
+        container = DockerContainer(post_data["container_name"], g.user, host_server, expr, container_config["image"])
         db.session.add(container)
         db.session.commit()
 
@@ -174,12 +171,12 @@ class ExprManager(object):
             return "Not found", 404
 
     def start_expr(self, expr_config):
-        expr = Experiment.query.filter_by(expr_name=expr_config["expr_name"], status=1, user_id=user.id)
+        expr = Experiment.query.filter_by(expr_name=expr_config["expr_name"], status=1, user_id=g.user.id)
         if expr is not None:
             return self.__report_expr_status(expr)
 
         # new expr
-        expr = Experiment(user, "real-time-analytics-hackathon", 0, "docker", expr_config["expr_name"])
+        expr = Experiment(g.user, "real-time-analytics-hackathon", 0, "docker", expr_config["expr_name"])
         db.session.add(expr)
         db.session.commit()
 

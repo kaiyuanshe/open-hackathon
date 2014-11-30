@@ -37,9 +37,11 @@ def post_to_remote(url, post_data, contentType='application/json'):
     f.close()
     return convert(json.loads(resp))
 
-def get_remote(url):
+def get_remote(url, accept=None):
     opener = urllib2.build_opener(urllib2.HTTPHandler)
     request = urllib2.Request(url)
+    if accept is not None:
+        request.add_header("Accept", accept)
     resp = opener.open(request)
     return resp.read()
 
@@ -58,7 +60,7 @@ def query_info(website,url,ssl):
     conn.request('GET',url)
     httpres = conn.getresponse()
     return httpres
-            
+
 def add_head_href(head,href):
     arr = href.split('href="')
     href = ('href="' + head).join(arr)

@@ -1,6 +1,6 @@
 __author__ = "Junbo Wang"
 
-from flask import render_template
+from flask import render_template, g ,session
 from flask.ext.restful import reqparse, abort, Api, Resource
 import json, time, os
 from sample_course import Sample_Courses
@@ -9,14 +9,12 @@ from os.path import realpath, dirname
 from log import log
 
 Template_Routes = {
-    "index": "index.html",
     "PrivacyStatement": "PrivacyStatement.html",
     "TermsOfUse": "TermsOfUse.html",
     'paper': "paper.html",
     "google": "google.html",
-    "third": "third.html",
+    "course": "course.html",
     "loading": "loading.html",
-    "hackathon": "hackathon.html",
     "rightSide": "rightSide.html",
     "error": "error.html",
     "submitted": "submitted.html",
@@ -26,6 +24,7 @@ Template_Routes = {
 manager = ExprManager()
 
 def simple_route(path):
+    session.permanent = False
     if Template_Routes.has_key(path):
         return render_template(Template_Routes[path])
     else:

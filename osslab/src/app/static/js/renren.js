@@ -1,4 +1,5 @@
-//renren oauth	
+// need refactor
+//renren oauth
 $(function() {
         $('#renrenlogin').click(function() {
                 login();
