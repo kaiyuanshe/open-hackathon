@@ -1,12 +1,9 @@
 import uuid
-
-
 from flask import request, Response
 from flask.ext.restful import Api, Resource
 from app import app
 from functions import *
 from routes import *
-# from models import User
 
 
 api = Api(app)
@@ -134,4 +131,4 @@ def course():
     return render_template("course.html",name=username,pic=url)
 
 api.add_resource(CourseList, "/api/courses")
-api.add_resource(DoCourse, "/api/course/<string:name>")
+api.add_resource(DoCourse, "/api/course/<string:id>")
