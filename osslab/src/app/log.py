@@ -1,11 +1,12 @@
 import logging
 import logging.config
- 
+from os.path import realpath, dirname
+
 
 #"application" code
 class Log(object):
     def __init__(self):
-        logging.config.fileConfig("logging.conf")
+        logging.config.fileConfig("%s/logging.conf" % dirname(realpath(__file__)))
         #create logger
         self.logger = logging.getLogger("myLogger")
 

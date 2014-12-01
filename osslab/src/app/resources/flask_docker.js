@@ -1,5 +1,5 @@
 {
-    "course_name": "python_flask_course",
+    "expr_name": "python_on_flask",
     "scm" :{
         "provider": "git",
         "repo_name": "flask-example",

@@ -1,5 +1,5 @@
 {
-    "course_name": "jstrom hackathon",
+    "expr_name": "jstrom hackathon",
     "scm" :{
         "provider": "git",
         "repo_name": "open-hackathon",

@@ -1,4 +1,79 @@
 @charset "UTF-8";
+/*styles by v-allenc*/
+body {
+    background-color: #cccccc;
+}
+.mainContainer {
+    margin: 0 auto;
+    text-align: center;
+}
+
+.jumbotron{
+    overflow:hidden;
+    padding:0px;
+    padding-top:48px;
+}
+
+.jumbotron .left,.jumbotron .right{
+    overflow: hidden;
+    height: 686px;
+    float: left;
+    width: 15%;
+}
+
+.jumbotron .container{
+    width:70%;
+    float:left;
+}
+
+.pattern-column.alignleft{
+    background-image: url(/static/pic/pattern-left-column-inverted.png);
+    background-position: top right;
+    margin-right: 0;
+}
+
+.pattern-column.alignright{
+    background-image: url(/static/pic/pattern-right-column-inverted.png);
+    background-position: top right;
+    margin-right: 0;
+}
+
+.ds-service-link {
+    display: block;
+    overflow: hidden;
+    width: 78px;
+    font-size: 12px;
+    text-align: left;
+    padding-left: 20px;
+    background:url("/static/pic/service-icons-color.png") no-repeat;	
+    _background-image:url("/static/pic/service-icons-color.png");
+    overflow:hidden;
+}
+.ds-qq {
+    background-position: 0 -192px;
+}
+.ds-renren {
+    background-position: 0 -32px;
+}
+.ds-google {
+    background-position: 0 -240px;
+}
+.p-center {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    color: #000000;
+    margin-top: 30px;
+}
+.jumbotron {
+    background-color: #ffffff;
+    margin-bottom: 0px !important;
+}
+
+
+
+
+
 /*styles by Automatic*/
 /* Alignment */
 /* line 4, ../sass/_automattic.scss */
@@ -12,7 +87,6 @@
 .alignright {
   display: inline;
   float: right;
-  margin-left: 1.5em;
 }
 
 /* line 14, ../sass/_automattic.scss */
@@ -696,18 +770,6 @@ html[lang=zh-hans] body {
   min-height: 910px;
   overflow: hidden;
   width: auto;
-}
-/* line 92, ../sass/complete.scss */
-.pattern-column.alignright {
-  background-image: url(../images/pattern-right-column-inverted.png);
-  background-position: top left;
-  margin-left: 0;
-}
-/* line 100, ../sass/complete.scss */
-.pattern-column.alignleft {
-  background-image: url(../images/pattern-left-column-inverted.png);
-  background-position: top right;
-  margin-right: 0;
 }
 
 /* line 109, ../sass/complete.scss */
