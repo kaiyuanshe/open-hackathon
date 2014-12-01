@@ -5,6 +5,7 @@ Open Source Software Laboratory
 
 # Preconditions
 - Python 2.7: [download python](https://www.python.org/downloads/)
+- `sudo apt-get install python-dev libmysqlclient-dev`
 - pip: [install pip](http://pip.readthedocs.org/en/latest/installing.html)
 - mysql: [download mysql](http://dev.mysql.com/downloads/)
 - *windows only*: [visual c++ compiler for python](http://www.microsoft.com/en-us/download/details.aspx?id=44266)
@@ -12,10 +13,11 @@ Open Source Software Laboratory
 - git:[install git](http://git-scm.com/downloads).
 - _optional_, you can install [SmartGit]() if you feel uncomfortable about git bash.
 
+
 # setup python
 after all the preconditions are met on your dev machine, install the following python libraries via pip.
 
-Or you can simply install all libraries by `pip install -r requirements.txt`.
+Or you can simply install all libraries by `pip install -r requirement.txt`.
 
 ```
 pip install flask
