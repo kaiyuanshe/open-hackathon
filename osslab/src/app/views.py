@@ -61,6 +61,11 @@ def js_config():
 def hackathon_settings():
     return render_template("settings.html", user=g.user.nickname, pic=g.user.avatar_url)
 
+@app.route('/hackathon')
+@login_required
+def hackathon():
+    return render_template("hackathon.html", user=g.user.nickname, pic=g.user.avatar_url)
+
 @app.route('/github')
 def github():
     code = request.args.get('code')
