@@ -9,7 +9,8 @@ db = SQLAlchemy(app)
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False)
+    name = db.Column(db.String(50))
+    nickname = db.Column(db.String(50))
     email = db.Column(db.String(100))
     openid = db.Column(db.String(100))
     avatar_url = db.Column(db.String(200))
@@ -30,7 +31,7 @@ class User(db.Model):
     def get_id(self):
         return unicode(self.id)
 
-    def __init__(self, name, email, openid, avatar_url, access_token, slug=None, create_time=None, last_login_time=None):
+    def __init__(self, name, nickname, email, openid, avatar_url, access_token, slug=None, create_time=None, last_login_time=None):
         if create_time is None:
             create_time = datetime.utcnow()
         if last_login_time is None:
@@ -39,6 +40,7 @@ class User(db.Model):
             slug = str(uuid.uuid1())[0:8] # todo generate a real slug
 
         self.name = name
+        self.nickname = nickname
         self.email = email
         self.openid = openid
         self.avatar_url = avatar_url
@@ -48,8 +50,9 @@ class User(db.Model):
         self.last_login_time = last_login_time
 
     def __repr__(self):
-        return "User: {name=%s, email=%s, openid=%s, avatar_url=%s, slug=%s, create_time=%r, last_login_time=%r}" % (
+        return "User: {name=%s, nickname=%s, email=%s, openid=%s, avatar_url=%s, slug=%s, create_time=%r, last_login_time=%r}" % (
             self.name,
+            self.nickname,
             self.email,
             self.openid,
             self.avatar_url,

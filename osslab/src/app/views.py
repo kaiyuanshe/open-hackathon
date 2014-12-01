@@ -59,60 +59,16 @@ def js_config():
 @app.route('/settings')
 @login_required
 def hackathon_settings():
-    return render_template("hackathon.html", user=g.user.name, pic=g.user.avatar_url)
+    return render_template("hackathon.html", user=g.user.nickname, pic=g.user.avatar_url)
 
 @app.route('/github')
 def github():
     code = request.args.get('code')
-    url = get_config('oauth/github/url') + code
-    httpres = query_info('github.com',url,2);
-    url_ori = httpres.read()
-    start = url_ori.index('=')
-    end = url_ori.index('&')
-    #Str = request.query_string
-    access_token = url_ori[start+1:end]
-    url = '/user?access_token=' + access_token
-    conn = httplib.HTTPSConnection('api.github.com')
-    conn.request('GET',url,'',{'user-agent':'flask'})
-    #conn.putheader('User-Agent','flask')
-    httpres = conn.getresponse()
-    info = json.loads(httpres.read())
-    name = 'github' + str(info['id'])
-    uid = str(uuid.uuid3(uuid.NAMESPACE_DNS,name))
-
-    emailUrl = '/user/emails?access_token=' + access_token
-    conn.request('GET',emailUrl,'',{'user-agent':'flask'})
-    httpres = conn.getresponse()
-    emailList = json.loads(httpres.read())
-    if(len(emailList)>1):
-        for data in emailList:
-            if(data.get("primary")):
-                useremail=data.get("email")
-                break
-    else:
-        useremail=emailList[0].get("email")
-
-    session['email'] = useremail
-    user = User.query.filter_by(email=useremail).first()
-
-    if (user == None):
-        u = User(info['login'],useremail)
-        db.session.add(u)
-        db.session.commit()
-
-    else:
-        g.user = user
-
-    # query = db_session.query(User)
-    # result = query.filter(User.uid == uid).first()
-    # if (result == None):
-    #     u = User(info['login'],uid,'github')
-    #     db_session.add(u)
-    #     db_session.commit()
-    #print info
-
-
-    return render_template("github.html",pic=info['avatar_url'],name=info['login'])
+    gl = GithubLogin()
+    user = gl.github_authorized(code)
+    log.info("github user login successfully:" + repr(user))
+    login_user(user)
+    return redirect("/settings")
 
 @app.route('/qq')
 def qq():
@@ -124,7 +80,7 @@ def qq():
 
     qq_login = QQLogin()
     user = qq_login.qq_authorized(code, state)
-    log.info("user login successfully:" + repr(user))
+    log.info("qq user login successfully:" + repr(user))
     login_user(user)
 
     return redirect("/settings")

@@ -36,7 +36,8 @@ Config = {
     },
     "oauth": {
         "github": {
-            "url": '/login/oauth/access_token?client_id=0eded406cf0b3f83b181&client_secret=3c81babd71d0cf60db3362261d42b4ce6b199538&redirect_uri=%s/github&code=' % HOSTNAME
+            "access_token_url": 'https://github.com/login/oauth/access_token?client_id=0eded406cf0b3f83b181&client_secret=3c81babd71d0cf60db3362261d42b4ce6b199538&redirect_uri=%s/github&code=' % HOSTNAME,
+            "user_info_url": 'https://api.github.com/user?access_token='
         },
         "qq": {
             "access_token_url": 'https://graph.qq.com/oauth2.0/token?grant_type=authorization_code&client_id=101157515&client_secret=018293bdbc15ddfc84306234aa34aa6c&redirect_uri=%s/qq&code=' % HOSTNAME,
