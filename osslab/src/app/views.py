@@ -61,14 +61,22 @@ def js_config():
 def hackathon_settings():
     return render_template("hackathon.html", user=g.user.nickname, pic=g.user.avatar_url)
 
+@app.route('/notregister')
+def not_register():
+    return render_template("notregister.html")
+
 @app.route('/github')
 def github():
     code = request.args.get('code')
     gl = GithubLogin()
     user = gl.github_authorized(code)
-    log.info("github user login successfully:" + repr(user))
-    login_user(user)
-    return redirect("/settings")
+    if user[1]:
+        log.info("github user login successfully:" + repr(user[0]))
+        login_user(user[0])
+        return redirect("/settings")
+    else:
+        log.info("don't register" + repr(user[0]))
+        return redirect("/notregister")
 
 @app.route('/qq')
 def qq():
