@@ -4,7 +4,7 @@ from flask.ext.restful import Api, Resource
 from app import app
 from functions import *
 from routes import *
-from database import *
+from database import User
 from login import *
 from constants import *
 from log import log
@@ -59,7 +59,7 @@ def js_config():
 @app.route('/settings')
 @login_required
 def hackathon_settings():
-    return render_template("hackathon.html", user=g.user.nickname, pic=g.user.avatar_url)
+    return render_template("settings.html", user=g.user.nickname, pic=g.user.avatar_url)
 
 @app.route('/github')
 def github():
@@ -96,11 +96,11 @@ def renren():
     #Str = request.query_string
     access_token = url_ori[start+1:end]
     url = '/v2/user/get?access_token=' + access_token
-    httpres = query_info('api.renren.com',url,2)
-    #info = httpres.read()
-    info = json.loads(httpres.read())
-    name = 'renren' + str(info['response']['id'])
-    uid = str(uuid.uuid3(uuid.NAMESPACE_DNS,name))
+    # httpres = query_info('api.renren.com',url,2)
+    # #info = httpres.read()
+    # info = json.loads(httpres.read())
+    # name = 'renren' + str(info['response']['id'])
+    # uid = str(uuid.uuid3(uuid.NAMESPACE_DNS,name))
     # query = db_session.query(User)
     # result = query.filter(User.uid == uid).first()
     #result = session.query(User).filter(User.uid == uid).all()

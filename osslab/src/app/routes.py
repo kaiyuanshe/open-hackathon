@@ -13,7 +13,7 @@ Template_Routes = {
     "TermsOfUse": "TermsOfUse.html",
     'paper': "paper.html",
     "google": "google.html",
-    "course": "course.html",
+    "hackathon": "hackathon.html",
     "loading": "loading.html",
     "rightSide": "rightSide.html",
     "error": "error.html",
