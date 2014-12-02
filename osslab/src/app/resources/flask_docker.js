@@ -1,6 +1,6 @@
 {
     "expr_name": "python_on_flask",
-    "scm" :{
+    "scm2" :{
         "provider": "git",
         "repo_name": "flask-example",
         "repo_url":"https://github.com/juniwang/flask-example.git",
@@ -9,14 +9,14 @@
     "containers": [
         {
             "name": "web",
-            "image": "verdverm/flask",
+            "image": "msopentechcn/flask",
             "ports":[{
                 "name": "flask",
                 "port": 5000,
                 "public": true
             }],
-            "mnt":["%s/src","/src"],
-            "mnt2": ["/home/opentech/github/flask-example/src", "/src"],
+            "mnt2":["%s/src","/src"],
+            "mnt": ["/home/opentech/github/flask-example/src", "/src"],
             "detach":true
         },
         {
@@ -26,8 +26,8 @@
                 "name": "ssh",
                 "port": 22
             }],
-            "mnt":["%s/src","/src"],
-            "mnt2": ["/home/opentech/github/flask-example/src", "/src"],
+            "mnt2":["%s/src","/src"],
+            "mnt": ["/home/opentech/github/flask-example/src", "/src"],
             "detach":true,
             "guacamole": {
                 "protocol": "ssh",

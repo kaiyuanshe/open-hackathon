@@ -1,9 +1,6 @@
 $(document).ready(function () {
     var course = getParameterByName("cid");
-    course= "jstorm_github"
-
-detach_url= "redirect?url=" + encodeURIComponent("http://www.oschina.net/p/alibaba-jstorm");
-                                $("#new-window").attr("href",detach_url);
+    course= "flask"
 
     $.ajax({
         url: '/api/course/' + course,
@@ -12,71 +9,84 @@ detach_url= "redirect?url=" + encodeURIComponent("http://www.oschina.net/p/aliba
             var data = resp
             var servers = data.guacamole_servers;
 
-            // coding here in success() is specially for jStorm.
-            $("#course_vm1").attr("src", "http://jstorm.sourceforge.net")
-            $("#course_vm2").attr("src", "http://flask.pocoo.org/")
-
             if (servers.length > 0) {
-                var show_url = data.output[0];
-                $("#course_vm3").attr("src", show_url);
+                ul = $("<ul/>")
+                // tips tab
+                ul.append($('<li name="hack_main_tips"><div class="selected">Endpoints</div></li>'))
 
-                $("#submit").removeAttr("disabled");
+                // bar and iframe
+                $.each(servers, function(i, s){
+                    ul.append($('<li name="hack_main_'+s.name+'"><div>'+s.name+'</div></li>'))
+                    sd = $('<div/>').attr("id", "hack_main_"+s.name)
+                    ifra=$('<iframe src="'+s.url+'" width="100%" height="600px" class="" style="border: 1px solid #000;" frameborder="yes" marginwidth="10" scrolling="yes" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>')
+                    sd.append(ifra)
+                    $("#hack_main").append(sd)
+                })
+                $("#hackathon_nav").append(ul)
+
+                // show tips by default
+                $("#hack_main_tips").show()
+                $("#hack_main_tips").siblings().hide()
+
+                // submit
                 $("#submit").click(function () {
                     document.location.href = "/submitted";
                 })
 
-                // refresh show tab
-                //                window.ivm = setInterval(function(){
-                //                    $("#course_vm3").attr("src", $("#course_vm3").attr("src"));
-                //                }, 3000);
+                // public urls
+                if (data.public_urls.length > 0){
+                    $.each(data.public_urls, function(i,u){
+                        p=$('<p>'+u.name+':<a target="_blank" href="'+u.url+'">'+u.url+'</a></p>')
+                        $("#hack_pub_web").append(p)
+                    })
+                }
+
+                // nav bar events
+                $(".center .mid ul li").each(function (i) {
+                    $(this).click(function () {
+                        $(this).children().attr('class', 'selected');
+                        $(this).siblings().children().attr("class", "");
+                        $("#" + $(this).attr("name")).show()
+                        $("#" + $(this).attr("name")).siblings().hide()
+                    })
+                })
 
                 // heart beat
                 var ihb = setInterval(function () {
                     $.ajax({
-                        url: '/api/course/' + data.course_id,
+                        url: '/api/course/' + data.expr_id,
                         type: "PUT",
                         success: function () {},
                         error: function () {}
                     });
-                }, 5000);
+                }, 1000*60);
 
+                // cancel button click event
                 $("#third-leave").click(function () {
-                    $.ajax({
-                        url: '/api/course/' + data.course_id,
-                        type: "DELETE",
-                        success: function () {
-                            $("#course_vm3").attr("src", "about:blank")
-                            $("#course_vm4").attr("src", "about:blank")
-                            //                            window.clearInterval(window.ivm);
-                            clearInterval(ihb);
-                            $("#submit").attr("disabled", "disabled");
-                        },
-                        error: function () {
-                            $("#course_vm3").attr("src", "about:blank")
-                            $("#course_vm4").attr("src", "about:blank")
-                            //                            window.clearInterval(window.ivm);
-                            clearInterval(ihb);
-                            $("#submit").attr("disabled", "disabled");
-                        }
-                    });
+                    if(confirm("所有环境将被取消，请确保你的更改已提交至github。您确定取消么？")){
+                        $.ajax({
+                            url: '/api/course/' + data.expr_id,
+                            type: "DELETE",
+                            success: function () {
+                                $("#hack_main_cancelled").show()
+                                $("#hack_main_cancelled").siblings().hide()
+                                clearInterval(ihb);
+                                setInterval(function(){
+                                    document.location.href = "/settings"
+                                }, 5000);
+                            },
+                            error: function () {
+                                clearInterval(ihb);
+                                alert(error)
+                            }
+                        });
+                    }
                     return false;
                 });
 
-                //                $.each(servers, function(i,s){
-                //                    var link = $("<a class='server-name'>"+s.name+"</a>").attr("title", s.name).click(function(){
-                //                       $("#course_vm").attr("src",s.url);
-                //                       $(this).addClass("selected");
-                //                       $(this).siblings().remove("selected");
-                //                    });
-                //                    if(i==0){
-                //                        link="<a class='server-name selected' title='"+s.name+"'>"+s.name+"</a>";
-                //                    }
-                //                    $("#servers").append(link);
-                //                });
-
                 var sciv = setInterval(function () {
                     $.ajax({
-                        url: '/api/course/' + data.course_id,
+                        url: '/api/course/' + data.expr_id,
                         type: "GET",
                         success: function (data) {
                             if (data.guacamole_status) {
@@ -95,22 +105,10 @@ detach_url= "redirect?url=" + encodeURIComponent("http://www.oschina.net/p/aliba
             }
         },
         error: function () {
-            // alert("course doesn't exist")
-            $("#course_vm1").attr("src", "/error")
-            $("#course_vm2").attr("src", "/error")
-            $("#course_vm3").attr("src", "/error")
-            $("#course_vm4").attr("src", "/error")
+            $("#hack_main_error").show();
+            $("#hack_main_error").siblings().hide();
         }
     });
-
-    $(".center ul li").each(function (i) {
-        $(this).click(function () {
-            $(this).children().attr('class', 'selected');
-            $(this).siblings().children().attr("class", "");
-            $("#" + $(this).attr("name")).css("display", "block")
-            $("#" + $(this).attr("name")).siblings().css("display", "none")
-        })
-    })
 
     $(".center .top div h3").each(function (i) {
         $(this).click(function () {

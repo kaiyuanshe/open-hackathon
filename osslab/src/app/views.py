@@ -59,12 +59,12 @@ def js_config():
 @app.route('/settings')
 @login_required
 def hackathon_settings():
-    return render_template("settings.html", user=g.user.nickname, pic=g.user.avatar_url)
+    return render_template("settings.html", name=g.user.nickname, pic=g.user.avatar_url)
 
 @app.route('/hackathon')
 @login_required
 def hackathon():
-    return render_template("hackathon.html", user=g.user.nickname, pic=g.user.avatar_url)
+    return render_template("hackathon.html", name=g.user.nickname, pic=g.user.avatar_url)
 
 @app.route('/github')
 def github():
