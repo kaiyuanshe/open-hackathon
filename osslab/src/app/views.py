@@ -73,6 +73,7 @@ def github():
     if user[1]:
         log.info("github user login successfully:" + repr(user[0]))
         login_user(user[0])
+        user[0].online = 1  #login successfully, status=1
         return redirect("/settings")
     else:
         log.info("don't register" + repr(user[0]))
