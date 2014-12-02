@@ -9,32 +9,33 @@ from constants import *
 class ExprManager(object):
 
     def __get_guacamole_container(self, expr):
-        return expr.containers.filter_by(image=GUACAMOLE_IMAGE).first
+        return expr.containers.filter_by(image=GUACAMOLE_IMAGE).first()
 
     def __report_expr_status(self, expr):
         ret = {
             "expr_id": expr.id,
             "type": expr.type,
-            "expr_name": expr.name,
-            "create_time": expr.create_time,
-            "last_heart_beat_time": expr.last_heart_beat_time,
+            "expr_name": expr.expr_name,
+            "create_time": str(expr.create_time),
+            "last_heart_beat_time": str(expr.last_heart_beat_time),
             "guacamole_status": False
         }
 
         # fill the status of guacamole container
-        try:
-            guaca_container = self.__get_guacamole_container(expr)
-            if guaca_container is not None:
+        guaca_container = self.__get_guacamole_container(expr)
+        if guaca_container is not None:
+            try:
                 guaca_port = guaca_container.port_bindings.filter_by(container_port=GUACAMOLE_PORT).first()
-                get_remote("http://%s:%s" % (guaca_container.host_server.public_dns, guaca_port.container_port))
+                get_remote("http://%s:%s" % (guaca_container.host_server.public_dns, guaca_port.vm_public_port))
                 ret["guacamole_status"] = True
-
+            except Exception as e:
+                log.error(e)
 
             guacamole_servers = []
             for c in expr.containers.all():
                 # return guacamole link to frontend
                 if c.guacamole is not None:
-                    guaca_config = json.load(c.guacamole)
+                    guaca_config = json.loads(c.guacamole)
                     host_server = guaca_container.host_server
                     guaca_pub_port = guaca_container.port_bindings.first().vm_public_port
                     url= "http://%s:%s/client.xhtml?id=" % (host_server.public_dns, guaca_pub_port) + "c%2F" + guaca_config["name"]
@@ -44,8 +45,18 @@ class ExprManager(object):
                     })
 
             ret["guacamole_servers"] = guacamole_servers
-        except Exception as e:
-            log.error(e)
+
+        public_urls = []
+        # return public accessible web url
+        for c in expr.containers.filter(DockerContainer.image != GUACAMOLE_IMAGE):
+            for p in c.port_bindings:
+                if p.vm_public_port is not None:
+                    url= "http://%s:%s" % (c.host_server.public_dns, p.vm_public_port)
+                    public_urls.append({
+                        "name": p.name,
+                        "url": url
+                    })
+        ret["public_urls"] = public_urls
 
         return ret
 
@@ -62,10 +73,14 @@ class ExprManager(object):
         return vm
 
     def __get_available_host_port(self, port_bindings, port):
-        host_port = port + 10000
+        host_port = port
 
         while len(filter(lambda p: p.vm_private_port == host_port, port_bindings)) > 0:
             host_port += 1
+
+        if host_port >= 65535:
+            log.error("port used up on this host server")
+            raise Exception("no port available")
 
         return host_port
 
@@ -81,7 +96,8 @@ class ExprManager(object):
             if not "public_port" in port_cfg:
                 port_cfg["public_port"] = port_cfg["host_port"]
 
-        port_binding = PortBinding(port_cfg["public_port"],
+        port_binding = PortBinding(port_cfg["name"] if "name" in port_cfg else None,
+                                   port_cfg["public_port"] if "public_port" in port_cfg else None,
                                    port_cfg["host_port"],
                                    port_cfg["port"],
                                    host_server,
@@ -133,13 +149,13 @@ class ExprManager(object):
         # add to guacamole config
         # note the port should get from the container["port"] to get corresponding listening port rather than the
         # expose port that defined in the template. Following codes are just example
-        if container_config.has_key("guacamole") and container_config.has_key("ports"):
+        if "guacamole" in container_config and "ports" in container_config:
             guac = container_config["guacamole"]
             port_cfg = filter(lambda p: p["port"] == guac["port"], container_config["ports"])
 
             if len(port_cfg) > 0:
                 gc = {
-                    "name": port_cfg[0]["name"] if port_cfg[0].has_key("name") else container_config["name"],
+                    "name": port_cfg[0]["name"] if "name" in port_cfg[0] else container_config["name"],
                     "protocol": guac["protocol"],
                     "hostname": host_server.private_ip,
                     "port": port_cfg[0]["host_port"]
@@ -158,6 +174,7 @@ class ExprManager(object):
         container_ret = post_to_remote(url, post_data)
         container.container_id = container_ret["container_id"]
         container.status = 1
+        host_server.container_count += 1
         db.session.commit()
 
         return container
@@ -171,7 +188,7 @@ class ExprManager(object):
             return "Not found", 404
 
     def start_expr(self, expr_config):
-        expr = Experiment.query.filter_by(expr_name=expr_config["expr_name"], status=1, user_id=g.user.id)
+        expr = Experiment.query.filter_by(expr_name=expr_config["expr_name"], status=1, user_id=g.user.id).first()
         if expr is not None:
             return self.__report_expr_status(expr)
 
@@ -230,7 +247,7 @@ class ExprManager(object):
         return self.__report_expr_status(expr)
 
     def heart_beat(self, expr_id):
-        expr = Experiment.query.filter_by(id=expr_id, status=1)
+        expr = Experiment.query.filter_by(id=expr_id, status=1).first()
         if expr is None:
             return "Not running", 404
 
@@ -239,7 +256,7 @@ class ExprManager(object):
         return "OK"
 
     def stop_expr(self, expr_id):
-        expr = Experiment.query.filter_by(id=expr_id, status=1)
+        expr = Experiment.query.filter_by(id=expr_id, status=1).first()
         if expr is not None:
             # todo delete source code folder to prevent disk from being used up
 
@@ -249,6 +266,9 @@ class ExprManager(object):
                     url = "%s/docker?cname=%s" % (self.__get_cloudvm_address(c.host_server), c.name)
                     delete_remote(url)
                     c.status = 2
+                    c.host_server.container_count -= 1
+                    if c.host_server.container_count < 0:
+                        c.host_server.container_count = 0
                     db.session.commit()
                 except Exception as e:
                     log.error(e)

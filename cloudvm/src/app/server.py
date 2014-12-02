@@ -6,6 +6,7 @@ from app import app
 from scm import SCM
 from common import *
 from ossdocker import OssDocker
+from log import log
 import json, shutil, os
 import xml.dom.minidom as minidom
 from os.path import realpath, dirname
@@ -92,6 +93,7 @@ class DockerManager(Resource):
 
             return docker.run(args)
         except Exception as err:
+            log.error(err)
             return "fail to start due to '%s'" % err, 500
 
     def delete(self):
@@ -122,6 +124,7 @@ class SourceCode(Resource):
             provider.clone(scm)
             return  scm
         except Exception as err:
+            log.error(err)
             return  "fail to clone source code", 500
 
     def delete(self):

@@ -220,6 +220,7 @@ class PortBinding(db.Model):
     # that means a port occupied by stopped container won't be allocated to new container. So it's possible to start the
     # container again. And the number of port should be enough since we won't have too many containers on the same VM.
     id= db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50))
     vm_public_port= db.Column(db.Integer)
     vm_private_port= db.Column(db.Integer, nullable=False)
     container_port= db.Column(db.Integer, nullable=False)
@@ -233,7 +234,8 @@ class PortBinding(db.Model):
     container_id = db.Column(db.Integer, db.ForeignKey('docker_container.id'))
     container = db.relationship('DockerContainer', backref=db.backref('port_bindings', lazy='dynamic'))
 
-    def __init__(self, vm_public_port, vm_private_port, container_port, host_server, experiment, container):
+    def __init__(self, name, vm_public_port, vm_private_port, container_port, host_server, experiment, container):
+        self.name = name
         self.vm_public_port = vm_public_port
         self.vm_private_port = vm_private_port
         self.container_port = container_port
@@ -242,7 +244,8 @@ class PortBinding(db.Model):
         self.container = container
 
     def __repr__(self):
-        return "PortBinding: {vm_public_port=%d, vm_private_port=%d, container_port=%d, host_server=%r, experiment=%r, container=%r}" % (
+        return "PortBinding: {name=%s, vm_public_port=%d, vm_private_port=%d, container_port=%d, host_server=%r, experiment=%r, container=%r}" % (
+            self.name,
             self.vm_public_port,
             self.vm_private_port,
             self.container_port,
