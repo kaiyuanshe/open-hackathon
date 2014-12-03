@@ -66,17 +66,12 @@ def hackathon_settings():
 def hackathon():
     return render_template("hackathon.html", name=g.user.nickname, pic=g.user.avatar_url)
 
-@app.route('/notregister')
-def not_register():
-    return render_template("notregister.html")
-
 @app.route('/github')
 def github():
     code = request.args.get('code')
     gl = GithubLogin()
     user = gl.github_authorized(code)
     if user[1]:
-        log.info("github user login successfully:" + repr(user[0]))
         login_user(user[0])
         user[0].online = 1  #login successfully, status=1
         return redirect("/settings")
