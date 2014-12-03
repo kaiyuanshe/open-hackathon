@@ -100,10 +100,15 @@ class GithubLogin(object):
             db.session.add(user)
             db.session.commit()
 
-        j = justifyUser()
-        if j.justify(user.email):
-            return [user, True]
+        j = JustifyUser()
+        registered = j.justify(email)
+        if safe_get_config("/user/limitUnRegisteredUser", True) and registered is None:
+            log.info("github user login successfully but not registered. Redirect to registration page")
+            return None
         else:
-            return [user, False]
+            registered.online = 1
+            db.session.commit()
+            log.info("github user login successfully:" + repr(user))
+            return user
 
         #return user

@@ -44,6 +44,9 @@ Config = {
             "openid_url": 'https://graph.qq.com/oauth2.0/me?access_token=',
             "user_info_url": 'https://graph.qq.com/user/get_user_info?access_token=%s&oauth_consumer_key=%s&openid=%s'
         }
+    },
+    "user": {
+        "limitUnRegisteredUser": True
     }
 }
 
