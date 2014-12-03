@@ -66,8 +66,8 @@ class Register(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     register_name = db.Column(db.String(80), unique=True)
     email = db.Column(db.String(120), unique=True)
-    online = db.Column(db.Integer) # perhaps bool?
-    submitted = db.Column(db.Integer) # bool
+    online = db.Column(db.Integer)
+    submitted = db.Column(db.Integer)
 
     def __init__(self,register_name, email):
         self.register_name = register_name

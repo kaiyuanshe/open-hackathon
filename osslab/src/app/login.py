@@ -2,6 +2,7 @@ from database import *
 from functions import *
 from log import log
 import json
+from justify_user import *
 
 class QQLogin(object):
     def qq_authorized(self, auth_code, state):
@@ -99,4 +100,10 @@ class GithubLogin(object):
             db.session.add(user)
             db.session.commit()
 
-        return user
+        j = justifyUser()
+        if j.justify(user.email):
+            return [user, True]
+        else:
+            return [user, False]
+
+        #return user
