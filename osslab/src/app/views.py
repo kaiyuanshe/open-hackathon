@@ -8,7 +8,7 @@ from database import User
 from login import *
 from constants import *
 from log import log
-from flask.ext.login import login_required, LoginManager, login_user, logout_user, current_user
+from flask.ext.login import login_required, LoginManager, logout_user, current_user
 from datetime import timedelta
 
 app.secret_key = os.urandom(24)
@@ -42,7 +42,7 @@ def internal_error(error):
     # render a beautiful 500 page
     return "Internal Server Error", 500
 
-# simple webPages
+# simple webPages. login required
 @app.route('/<path:path>')
 @login_required
 def template_routes(path):
@@ -55,6 +55,10 @@ def js_config():
                      status=200,
                      mimetype="application/javascript")
     return resp
+
+@app.route('/notregister')
+def not_registered():
+    return render_template("notregister.html")
 
 @app.route('/settings')
 @login_required
@@ -71,12 +75,9 @@ def github():
     code = request.args.get('code')
     gl = GithubLogin()
     user = gl.github_authorized(code)
-    if user[1]:
-        login_user(user[0])
-        user[0].online = 1  #login successfully, status=1
+    if user is not None:
         return redirect("/settings")
     else:
-        log.info("don't register" + repr(user[0]))
         return redirect("/notregister")
 
 @app.route('/qq')
@@ -90,7 +91,6 @@ def qq():
     qq_login = QQLogin()
     user = qq_login.qq_authorized(code, state)
     log.info("qq user login successfully:" + repr(user))
-    login_user(user)
 
     return redirect("/settings")
 
@@ -118,9 +118,9 @@ def renren():
         # db_session.add(u)
         # db_session.commit()
     #info = Str
-    #return render_template("renren.html")
+    return render_template("renren.html")
     #return render_template("renren.html",iden=url_ori,name='cc')
-    return render_template("renren.html",pic = info['response']['avatar'][0]['url'],name=info['response']['name'])
+    # return render_template("renren.html",pic = info['response']['avatar'][0]['url'],name=info['response']['name'])
 
 @app.before_request
 def before_request():
