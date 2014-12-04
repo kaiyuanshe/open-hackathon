@@ -6,6 +6,7 @@ from app import app
 from scm import SCM
 from common import *
 from ossdocker import OssDocker
+from log import log
 import json, shutil, os
 import xml.dom.minidom as minidom
 from os.path import realpath, dirname
@@ -37,7 +38,7 @@ class Health(Resource):
             "start_time": start_time,
             "report_time": strftime("%Y-%m-%d %H-%M-%S", gmtime())
         }
-        return json.dumps(health)
+        return health
 
 class DockerManager(Resource):
 
@@ -45,21 +46,21 @@ class DockerManager(Resource):
         try:
             # ====================================================test data start
             # example1:
-            # {"course_id":"abcde", "name":"flask", "image": "verdverm/flask","ports":[15000,5000],"mnt":["/tmp/docker/abcde/flask/src","/src"],"detach":true}
+            # {"expr_id":"abcde", "name":"flask", "image": "verdverm/flask","ports":[15000,5000],"mnt":["/tmp/docker/abcde/flask/src","/src"],"detach":true}
             # example2(guacamole):
-            # {"course_id":"uuid", "name":"flask", "image": "hall/guacamole","ports":[18080,8080],"detach":true,
+            # {"expr_id":"uuid", "name":"flask", "image": "hall/guacamole","ports":[18080,8080],"detach":true,
             # "guacamole_config":[{"name":"web","protocol":"ssh","hostname":"42.159.236.228","port":"63025","username":"opentech","password":"@dministrat0r"}]}
             #
             # ====================================================test data end
 
             args = convert(request.get_json())
-            course_id= args["course_id"]
+            expr_id= args["expr_id"]
             mnts=args["mnt"] if args.has_key("mnt") else []
             # todo parameters validation
 
             guaca = args["guacamole_config"] if args.has_key("guacamole_config") else None
             if guaca is not None:
-                guaca_dir = course_path(course_id, "guacamole")
+                guaca_dir = course_path(expr_id, "guacamole")
                 mkdir_safe(guaca_dir)
                 src_prop_file= "%s/resources/guacamole.properties" % dirname(realpath(__file__))
                 shutil.copyfile(src_prop_file, "%s/%s" % (guaca_dir, "guacamole.properties"))
@@ -90,8 +91,9 @@ class DockerManager(Resource):
                 mnts.append("/etc/guacamole")
                 args["mnt"]= mnts
 
-            return json.dumps(docker.run(args))
+            return docker.run(args)
         except Exception as err:
+            log.error(err)
             return "fail to start due to '%s'" % err, 500
 
     def delete(self):
@@ -101,10 +103,6 @@ class DockerManager(Resource):
         name = args["cname"]
 
         docker.stop(name)
-        id = name[:name.rfind('-')]
-        # remove src code folder for whole course
-        if len(docker.search_containers_by_course_id(id, True)) == 0:
-            shutil.rmtree(course_path(id), ignore_errors=True)
 
         return  "OK"
 
@@ -112,10 +110,10 @@ class SourceCode(Resource):
     def post(self):
         try:
             # ====================================================test data start
-            # {"course_id":"abcde", "repo_name":"flask","repo_url":"https://github.com/juniwang/flask-example.git"}
+            # {"expr_id":"abcde", "repo_name":"flask","repo_url":"https://github.com/juniwang/flask-example.git"}
             # ====================================================test data end
             scm = convert(request.get_json())
-            local_repo_path= course_path(scm["course_id"], scm["repo_name"])
+            local_repo_path= course_path(scm["expr_id"], scm["repo_name"])
             scm["local_repo_path"] = local_repo_path
 
             if os.path.exists(local_repo_path):
@@ -126,15 +124,16 @@ class SourceCode(Resource):
             provider.clone(scm)
             return  scm
         except Exception as err:
+            log.error(err)
             return  "fail to clone source code", 500
 
     def delete(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('course_id')
+        parser.add_argument('expr_id')
         parser.add_argument('repo_name')
         args = parser.parse_args()
 
-        local_repo_path = course_path(args["course_id"], args["repo_name"])
+        local_repo_path = course_path(args["expr_id"], args["repo_name"])
         shutil.rmtree(local_repo_path)
 
         return "OK"

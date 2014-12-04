@@ -20,26 +20,25 @@ class OssDocker(object):
         containers = convert(self.client.containers())
         return next((c for c in containers if name in c["Names"] or '/'+name in c["Names"]), None)
 
-    def search_containers_by_course_id(self, id, all=False):
+    def search_containers_by_expr_id(self, id, all=False):
         containers = convert(self.client.containers(all=all))
         return filter(lambda c: name_match(id, c["Names"]), containers)
 
     def stop(self, name):
         if self.get_container(name) is not None:
             self.client.stop(name)
-            self.client.remove_container(name)
+            # self.client.remove_container(name)
             return True
         return True
 
     def run(self, args):
-        full_name = "%s-%s" % (args["course_id"], args["name"])
-        exist = self.get_container(full_name)
+        container_name = args["container_name"]
+        exist = self.get_container(container_name)
         result = {
-            "name": args["name"],
-            "full_name": full_name,
+            "container_name": container_name
         }
         if exist is not None:
-            result["c_id"] = exist["Id"]
+            result["container_id"] = exist["Id"]
         else:
             image = args["image"]
             # ports foramt: [from, to ,from2, to2]. e.g.[9080,8080,3306,3306].Similar with 'mnts'
@@ -61,7 +60,7 @@ class OssDocker(object):
             working_dir =args["working_dir"] if args.has_key("working_dir") else None
 
             c_id = self.client.create_container(image,
-                                         name=full_name,
+                                         name=container_name,
                                          ports=ports[1::2],
                                          volumes=mnts[1::2],
                                          environment=env,
@@ -72,13 +71,13 @@ class OssDocker(object):
                                          dns=dns,
                                          entrypoint=entrypoint,
                                          working_dir=working_dir)
-            result["c_id"]= c_id["Id"]
+            result["container_id"]= c_id["Id"]
             self.client.start(c_id,
                               port_bindings=port_bingings,
                               binds=mnt_bindings)
 
             # make sure it's running
-            if self.get_container(full_name) is None:
+            if self.get_container(container_name) is None:
                 raise AssertionError("container %s fail to start" % args["name"])
 
 

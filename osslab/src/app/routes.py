@@ -1,43 +1,29 @@
 __author__ = "Junbo Wang"
 
-from flask import render_template
+from flask import render_template, g ,session
 from flask.ext.restful import reqparse, abort, Api, Resource
-import json, uuid, time, os
+import json, time, os
 from sample_course import Sample_Courses
-from flask.ext.login import  login_required
-from templates import DockerTemplates;
+from expr_mgr import ExprManager;
+from os.path import realpath, dirname
+from log import log
 
 Template_Routes = {
-    "index": "index.html",
     "PrivacyStatement": "PrivacyStatement.html",
     "TermsOfUse": "TermsOfUse.html",
     'paper': "paper.html",
     "google": "google.html",
-    "course": "course.html",
     "loading": "loading.html",
-    "hackathon": "hackathon.html",
     "rightSide": "rightSide.html",
     "error": "error.html",
     "submitted": "submitted.html",
     "redirect": "redirect.html"
 }
 
-running_courses = []
-docker = DockerTemplates()
+manager = ExprManager()
 
-def get_running_course(id):
-    css = filter(lambda x:x[0]==id, running_courses)
-    if len(css) > 0:
-        return css[0]
-
-def delete_course(id):
-    cs = get_running_course(id)
-    if cs != None:
-        docker.stop_containers(cs[2],cs[3])
-        running_courses.remove(cs)
-
-# @login_required
 def simple_route(path):
+    session.permanent = False
     if Template_Routes.has_key(path):
         return render_template(Template_Routes[path])
     else:
@@ -58,45 +44,29 @@ class CourseList(Resource):
 
 
 class DoCourse(Resource):
-    def get(self, name):
-        cs = get_running_course(name)
+    def get(self, id):
+        cs = manager.get_expr_status(id)
         if cs is not None:
-            course_context= cs[3]
-            if not course_context.has_key("guacamole_status"):
-                docker.query_guaca_status(course_context)
-
-            return course_context
+            return cs
         else:
             return "Not Found", 404
 
-    def post(self, name):
-        template_file = "resources/%s_docker.js" % name
+    def post(self, id):
+        # the id is actually the name of template when POST
+        template_file= "%s/resources/%s_docker.js" % (dirname(realpath(__file__)), id)
         if os.path.isfile(template_file):
             # call remote service to start docker containers
-            course_config = json.load(file(template_file))
-            course_id = str(uuid.uuid1())
-
-            course_context = {
-                "course_id": course_id,
-                "course_type":  "docker"
-            }
+            expr_config = json.load(file(template_file))
             try:
-                docker.start_containers(course_config, course_context)
-                # todo: save to database
-
-                running_courses.append((course_id, time.time(), course_config, course_context))
-                return course_context
+                return manager.start_expr(expr_config)
             except Exception as err:
+                log.error(err)
                 return "fail to start due to '%s'" % err, 500
         else:
-            return "the course is not ready", 404
+            return "the experiment %s is not ready" % id, 404
 
-    def delete(self, name):
-        return delete_course(name)
+    def delete(self, id):
+        return manager.stop_expr(id)
 
-    def put(self, name):
-        cs = get_running_course(name)
-        if cs != None:
-            running_courses.append((name, time.time(), cs[2], cs[3]))
-            running_courses.remove(cs)
-        return "OK"
+    def put(self, id):
+        return manager.heart_beat(id)

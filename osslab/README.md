@@ -9,7 +9,7 @@ Open Source Software Laboratory
 - mysql: [download mysql](http://dev.mysql.com/downloads/)
 - *windows only*: [visual c++ compiler for python](http://www.microsoft.com/en-us/download/details.aspx?id=44266)
 - *windows only*: [install MySQL Connector/C for windows](http://dev.mysql.com/downloads/connector/c/6.0.html#downloads)
-- [git](http://git-scm.com/downloads).
+- git:[install git](http://git-scm.com/downloads).
 - _optional_, you can install [SmartGit]() if you feel uncomfortable about git bash.
 
 # setup python
@@ -40,7 +40,7 @@ GRANT ALL on hackathon.* TO 'hackathon'@'localhost';
 Next update `app/config.py` with your user/password.  And don't submit your password to github.
 
 ## initialize tables
-run `python database.py` for the first time to create db tables;
+run `python src/setup_db.py` for the first time to create db tables;
 
 # run
 change directory to `osslab/src` and run `python run.py` to start the flask server.
