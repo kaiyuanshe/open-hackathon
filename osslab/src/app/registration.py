@@ -1,9 +1,9 @@
 from database import *
 
 
-class JustifyUser:
+class Registration:
 
-    def justify(self, email):
+    def get_by_email(self, email):
         return Register.query.filter_by(email=email).first()
 
 

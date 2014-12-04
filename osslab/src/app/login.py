@@ -2,7 +2,7 @@ from database import *
 from functions import *
 from log import log
 import json
-from justify_user import *
+from registration import *
 from flask.ext.login import login_user
 
 class QQLogin(object):
@@ -104,8 +104,8 @@ class GithubLogin(object):
 
         login_user(user)
 
-        j = JustifyUser()
-        registered = j.justify(email)
+        j = Registration()
+        registered = j.get_by_email(email)
         if safe_get_config("/user/limitUnRegisteredUser", True) and registered is None:
             log.info("github user login successfully but not registered. Redirect to registration page")
             return None
