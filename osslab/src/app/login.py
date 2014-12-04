@@ -3,6 +3,7 @@ from functions import *
 from log import log
 import json
 from justify_user import *
+from flask.ext.login import login_user
 
 class QQLogin(object):
     def qq_authorized(self, auth_code, state):
@@ -44,6 +45,7 @@ class QQLogin(object):
             db.session.add(user)
             db.session.commit()
 
+        login_user(user)
         return user
 
 class GithubLogin(object):
@@ -99,6 +101,8 @@ class GithubLogin(object):
             user = User(name, nickname, email, openid, avatar, access_token)
             db.session.add(user)
             db.session.commit()
+
+        login_user(user)
 
         j = JustifyUser()
         registered = j.justify(email)
