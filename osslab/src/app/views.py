@@ -127,6 +127,12 @@ def renren():
     #return render_template("renren.html",iden=url_ori,name='cc')
     return render_template("renren.html",pic = info['response']['avatar'][0]['url'],name=info['response']['name'])
 
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
+
+
 @app.before_request
 def before_request():
     g.user = current_user
