@@ -1,3 +1,3 @@
 import sys
-sys.path.append("/var/www/OSSLab-1")
+sys.path.append("/home/opentech/hackathon/github/laboss/osslab/src")
 from app import app as application

@@ -1,6 +1,6 @@
 $(document).ready(function () {
     var course = getParameterByName("cid");
-    course= "flask"
+    course= "python"
 
     $.ajax({
         url: '/api/course/' + course,

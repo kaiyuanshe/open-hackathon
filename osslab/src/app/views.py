@@ -8,7 +8,7 @@ from database import User
 from login import *
 from constants import *
 from log import log
-from flask.ext.login import login_required, LoginManager, login_user, logout_user, current_user
+from flask.ext.login import login_required, LoginManager, logout_user, current_user
 from datetime import timedelta
 
 app.secret_key = os.urandom(24)
@@ -42,7 +42,7 @@ def internal_error(error):
     # render a beautiful 500 page
     return "Internal Server Error", 500
 
-# simple webPages
+# simple webPages. login required
 @app.route('/<path:path>')
 @login_required
 def template_routes(path):
@@ -56,6 +56,10 @@ def js_config():
                      mimetype="application/javascript")
     return resp
 
+@app.route('/notregister')
+def not_registered():
+    return render_template("notregister.html")
+
 @app.route('/settings')
 @login_required
 def hackathon_settings():
@@ -65,10 +69,6 @@ def hackathon_settings():
 @login_required
 def hackathon():
     return render_template("hackathon.html", name=g.user.nickname, pic=g.user.avatar_url)
-
-@app.route('/notregister')
-def not_register():
-    return render_template("notregister.html")
 
 @app.route('/github')
 def github():
@@ -86,7 +86,6 @@ def github():
         else:
              return redirect("/settings")
     else:
-        log.info("don't register" + repr(user[0]))
         return redirect("/notregister")
 
 @app.route('/qq')
@@ -100,7 +99,6 @@ def qq():
     qq_login = QQLogin()
     user = qq_login.qq_authorized(code, state)
     log.info("qq user login successfully:" + repr(user))
-    login_user(user)
 
     return redirect("/settings")
 
@@ -128,9 +126,9 @@ def renren():
         # db_session.add(u)
         # db_session.commit()
     #info = Str
-    #return render_template("renren.html")
+    return render_template("renren.html")
     #return render_template("renren.html",iden=url_ori,name='cc')
-    return render_template("renren.html",pic = info['response']['avatar'][0]['url'],name=info['response']['name'])
+    # return render_template("renren.html",pic = info['response']['avatar'][0]['url'],name=info['response']['name'])
 
 @app.route('/logout')
 def logout():

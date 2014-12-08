@@ -17,7 +17,8 @@ Template_Routes = {
     "rightSide": "rightSide.html",
     "error": "error.html",
     "submitted": "submitted.html",
-    "redirect": "redirect.html"
+    "redirect": "redirect.html",
+    "notregister": "notregister.html"
 }
 
 manager = ExprManager()
