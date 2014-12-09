@@ -9,7 +9,6 @@ from expr_mgr import ExprManager;
 from os.path import realpath, dirname
 from log import log
 from database import *
-import re
 
 Template_Routes = {
     "PrivacyStatement": "PrivacyStatement.html",
@@ -48,28 +47,33 @@ class CourseList(Resource):
 
 class StatusList(Resource):
     # =======================================================return data start
-    # [{"register_name":"zhang", "online":"1","submitted":"0"}, {"register_name":"li", "online":"0","submitted":"1"}]
+    # [{"register_name":"zhang", "online":"1","submitted":"0"..."description":" "}]
     # =======================================================return data end
     def get(self):
-        name_status =  Register.query.with_entities(Register.register_name, Register.online, Register.submitted).all()
+        name_status = Register.query.with_entities(Register.id, Register.register_name, Register.email, Register.online, Register.submitted, Register.create_time, Register.submitted_time, Register.description).all()
         array = []
         for i in range(0, len(name_status)):
             temp = {}
-            temp["register_name"] = name_status[i][0]
-            temp["online"] = name_status[i][1]
-            temp["submitted"] = name_status[i][2]
+            temp["id"] = name_status[i][0]
+            temp["register_name"] = name_status[i][1]
+            temp["email"] = name_status[i][2]
+            temp["online"] = name_status[i][3]
+            temp["submitted"] = name_status[i][4]
+            temp["create_time"] = name_status[i][5]
+            temp["submitted_time"] = name_status[i][6]
+            temp["description"] = name_status[i][7]
             array.append(temp)
-        return json.dumps(array)
+        return array
 
     # =======================================================test data start
-    # {"register_name":"zhang", "online":"1","submitted":"0"}
+    # {"id":1, "online":1,"submitted":0}
     # =======================================================test data end
     def put(self):
         args = convert(request.get_json())
-        register_name = args["register_name"]
-        online = int(args["online"])
-        submitted = int(args["submitted"])
-        u = Register.query.filter_by(register_name = register_name).first()
+        id = args["id"]
+        online = args["online"]
+        submitted = args["submitted"]
+        u = Register.query.filter_by(id=id).first()
         u.online = online
         u.submitted = submitted
         db.session.commit()
