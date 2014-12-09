@@ -8,7 +8,7 @@ from database import User
 from login import *
 from constants import *
 from log import log
-from flask.ext.login import login_required, LoginManager,login_user, logout_user, current_user
+from flask.ext.login import login_required, LoginManager, logout_user, current_user
 from datetime import timedelta
 
 app.secret_key = os.urandom(24)
@@ -75,15 +75,11 @@ def github():
     code = request.args.get('code')
     gl = GithubLogin()
     user = gl.github_authorized(code)
-    if user:
-        log.info("github user login successfully:" + repr(user))
-        login_user(user)
-        user.online = 1  #login successfully, status=1
-
-        expr = Experiment.query.filter(Experiment.id == user.id).all()
-        if expr[0].status ==1:
-            reg=Register.query.filter(Register.email==user.email).all()
-            if reg[0].submitted ==1:
+    if user is not None:
+        expr = Experiment.query.filter(Experiment.user_id == user.id).first()
+        if expr is not None and expr.status == 1:
+            reg = Register.query.filter(Register.email == user.email).first()
+            if reg is not None and reg.submitted == 1:
                 return redirect("/submitted")
             else:
              return redirect("/hackathon")
