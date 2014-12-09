@@ -1,5 +1,6 @@
 __author__ = "Junbo Wang"
 
+from flask import Flask, request
 from flask import render_template, g ,session
 from flask.ext.restful import reqparse, abort, Api, Resource
 import json, time, os
@@ -7,6 +8,8 @@ from sample_course import Sample_Courses
 from expr_mgr import ExprManager;
 from os.path import realpath, dirname
 from log import log
+from database import *
+import re
 
 Template_Routes = {
     "PrivacyStatement": "PrivacyStatement.html",
@@ -42,6 +45,34 @@ class CourseList(Resource):
         else:
             ret = filter(lambda c: len(filter(lambda t: kw.lower() in t.lower(), c["tags"])) > 0, Sample_Courses)
             return json.dumps(ret)
+
+class StatusList(Resource):
+    # =======================================================return data start
+    # [{"register_name":"zhang", "online":"1","submitted":"0"}, {"register_name":"li", "online":"0","submitted":"1"}]
+    # =======================================================return data end
+    def get(self):
+        name_status =  Register.query.with_entities(Register.register_name, Register.online, Register.submitted).all()
+        array = []
+        for i in range(0, len(name_status)):
+            temp = {}
+            temp["register_name"] = name_status[i][0]
+            temp["online"] = name_status[i][1]
+            temp["submitted"] = name_status[i][2]
+            array.append(temp)
+        return json.dumps(array)
+
+    # =======================================================test data start
+    # {"register_name":"zhang", "online":"1","submitted":"0"}
+    # =======================================================test data end
+    def put(self):
+        args = convert(request.get_json())
+        register_name = args["register_name"]
+        online = int(args["online"])
+        submitted = int(args["submitted"])
+        u = Register.query.filter_by(register_name = register_name).first()
+        u.online = online
+        u.submitted = submitted
+        db.session.commit()
 
 
 class DoCourse(Resource):
