@@ -30,8 +30,7 @@ Config = {
             "scope": "scope=get_user_info",
             "state": "state=%s" % QQ_OAUTH_STATE,
             "response_type": "response_type=code",
-        },
-        "endTime":"2014-11,20,17,05,40"
+        }
     },
     "mysql": {
         "connection": 'mysql://%s:%s@%s/%s' % ("hackathon", "hackathon", "localhost", "hackathon"),

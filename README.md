@@ -1,7 +1,13 @@
 LABOSS
 ======
 
-Open Source Software Laboratory
+Open Source Software Laboratory.
+
+For developers, you must start both osslab and cloudvm locally. Also some test data are required.
+1. start osslab locally, please follow detail instructions in `osslab` directory.
+2. start cloudvm locally, please follow detail instructions in `cloudvm` directory.
+3. change directory to `<src_root_on_your_machine>\osslab\src`, edit and run `create_test_data.py` to create test data.
+
 
 ====================================================================================
 

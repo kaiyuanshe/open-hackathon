@@ -9,6 +9,14 @@ the manual steps to deploy open-hackathon platform
 sudo apt-get update
 sudo apt-get install apache2 git python-pip python-dev mysql-server libmysqlclient-dev libapache2-mod-wsgi
 ```
+
+## clone source code
+
+```
+mkdir -p ~/hackathon/github
+cd ~/hackathon/github
+git clone https://github.com/msopentechcn/laboss.git
+```
 ## configure mysql
 logon mysql console via `mysql -u root -p` and then create database/user/access for open hackathon platform.
 
@@ -22,14 +30,6 @@ exit mysql console and initialize mysql by:
 ```
 cd /home/opentech/hackathon/github/laboss/osslab/src
 sudo python setup_db.py
-```
-
-## clone source code
-
-```
-mkdir -p ~/hackathon/github
-cd ~/hackathon/github
-git clone https://github.com/msopentechcn/laboss.git
 ```
 
 ## install python libs
@@ -47,7 +47,7 @@ sudo chown www-data:www-data /var/log/osslab
 ```
 
 ## configure apache2
-update `<src_root>/osslab/apache.conf` and `<src_root>/osslab/src/app.wsgi` if you clone your code in a different directory other than
+update `<src_root>/osslab/osslab.conf` and `<src_root>/osslab/src/app.wsgi` if you clone your code in a different directory other than
 the default one(`/home/opentech/hackathon/github/laboss`)
 
 ```
@@ -60,7 +60,7 @@ sudo service apache2 restart
 ## update config if needed
 in following case, you may want to change config.py:
 - the domain of open hackathon site changed. Change the domain in config.py AND change the url in oauth provider sites(qq, github etc)
-- the database installed in another server or the database user/password
+- the database installed in another server or you configured your own the database user/password
 
 ```
 vi /home/opentech/hackathon/github/laboss/osslab/src/app/config.py
