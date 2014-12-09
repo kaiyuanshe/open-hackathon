@@ -82,9 +82,9 @@ def github():
             if reg is not None and reg.submitted == 1:
                 return redirect("/submitted")
             else:
-             return redirect("/hackathon")
+                return redirect("/hackathon")
         else:
-             return redirect("/settings")
+            return redirect("/settings")
     else:
         return redirect("/notregister")
 
