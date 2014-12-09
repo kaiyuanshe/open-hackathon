@@ -76,7 +76,15 @@ def github():
     gl = GithubLogin()
     user = gl.github_authorized(code)
     if user is not None:
-        return redirect("/settings")
+        expr = Experiment.query.filter(Experiment.user_id == user.id).first()
+        if expr is not None and expr.status == 1:
+            reg = Register.query.filter(Register.email == user.email).first()
+            if reg is not None and reg.submitted == 1:
+                return redirect("/submitted")
+            else:
+                return redirect("/hackathon")
+        else:
+            return redirect("/settings")
     else:
         return redirect("/notregister")
 
@@ -121,6 +129,12 @@ def renren():
     return render_template("renren.html")
     #return render_template("renren.html",iden=url_ori,name='cc')
     # return render_template("renren.html",pic = info['response']['avatar'][0]['url'],name=info['response']['name'])
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
+
 
 @app.before_request
 def before_request():
