@@ -34,12 +34,14 @@ def index():
 @app.errorhandler(404)
 def page_not_found(error):
     # render a beautiful 404 page
+    log.error(error)
     return "Page not Found", 404
 
 # error handler for 500
 @app.errorhandler(500)
 def internal_error(error):
     # render a beautiful 500 page
+    log.error(error)
     return "Internal Server Error", 500
 
 # simple webPages. login required

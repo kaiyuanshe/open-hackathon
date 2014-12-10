@@ -7,7 +7,7 @@ the manual steps to deploy cloudvm service
 
 ```
 sudo apt-get update
-sudo apt-get install apache2 git python-pip libapache2-mod-wsgi
+sudo apt-get install apache2 git python-pip libapache2-mod-wsgi python-dev
 ```
 
 ## clone source code
@@ -22,7 +22,7 @@ git clone https://github.com/msopentechcn/LABOSS.git
 
 ```
 cd LABOSS
-sudo pip install -r osslab/requirement.txt
+sudo pip install -r cloudvm/requirement.txt
 ```
 
 ## configure logs
@@ -33,10 +33,11 @@ sudo chown www-data:www-data /var/log/osslab
 ```
 
 ## configure apache2
-update `<src_root>/cloudvm/cloudvm.conf` and `<src_root>/cloudvm/src/app.wsgi` if you clone your code in a different directory other than
+update `<src_root>/cloudvm/src/cloudvm.conf` and `<src_root>/cloudvm/src/app.wsgi` if you clone your code in a different directory other than
 the default one(`/home/opentech/github/laboss`)
 
 ```
+cd cloudvm
 sudo cp ./cloudvm.conf /etc/apache2/sites-available
 cd /etc/apache2/sites-enabled
 sudo ln -s ../sites-available/cloudvm.conf cloudvm.conf
