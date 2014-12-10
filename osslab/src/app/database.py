@@ -67,22 +67,29 @@ class Register(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     register_name = db.Column(db.String(80))
     email = db.Column(db.String(120), unique=True)
-    online = db.Column(db.Integer)
-    submitted = db.Column(db.Integer)
+    online = db.Column(db.Integer) # 0:offline 1:online
+    submitted = db.Column(db.Integer) # 0:not 1:submitted
     create_time = db.Column(db.DateTime)
     submitted_time = db.Column(db.DateTime)
     description = db.Column(db.String(200))
+    enabled = db.Column(db.Integer)  # 0: disabled 1:enabled
 
-    def __init__(self,register_name, email):
+    def __init__(self, register_name, email, create_time=None, description=None, enabled=None):
+        if create_time is None:
+            create_time = datetime.utcnow()
+        if enabled is None:
+            enabled = 1
+
         self.register_name = register_name
         self.email = email
-        if self.create_time is None:
-            create_time = datetime.utcnow()
-        if self.last_login_time is None:
-            last_login_time = datetime.utcnow()
+        self.online = 0
+        self.submitted = 0
+        self.create_time = create_time
+        self.description = description
+        self.enabled = enabled
 
     def __repr__(self):
-        return "Register = {'id':'%s', 'register_name':'%s', 'email':'%s', 'online':'%s', 'submitted':'%s', 'create_time':'%s', 'submitted_time':'%r', 'description':'%r'}" % (
+        return "Register = {'id':'%d', 'register_name':'%s', 'email':'%s', 'online':'%s', 'submitted':'%s', 'create_time':'%r', 'submitted_time':'%r', 'description':'%s'}" % (
             self.id,
             self.register_name,
             self.email,

@@ -90,13 +90,7 @@ class GithubLogin(object):
             email_info_resp = get_remote(get_config('oauth/github/emails_info_url') + access_token)
             log.debug("get email from github:" + email_info_resp)
             email_info = json.loads(email_info_resp)
-            if len(email_info) > 1:
-                for data in email_info:
-                    if data["primary"]:
-                        email = data["email"]
-                        break
-            else:
-                email=email_info[0]["email"]
+            email = filter(lambda e: e["primary"], email_info)[0]["email"]
 
         log.info("successfully get email:" + email)
         user = User.query.filter_by(openid=openid).first()

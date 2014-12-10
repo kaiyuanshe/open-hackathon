@@ -1,14 +1,13 @@
 __author__ = "Junbo Wang"
 
-from flask import Flask, request
-from flask import render_template, g ,session
+from flask import Flask, request, render_template, g ,session
 from flask.ext.restful import reqparse, abort, Api, Resource
 import json, time, os
 from sample_course import Sample_Courses
 from expr_mgr import ExprManager;
 from os.path import realpath, dirname
 from log import log
-from database import *
+from registration import Registration
 
 Template_Routes = {
     "PrivacyStatement": "PrivacyStatement.html",
@@ -50,33 +49,16 @@ class StatusList(Resource):
     # [{"register_name":"zhang", "online":"1","submitted":"0"..."description":" "}]
     # =======================================================return data end
     def get(self):
-        name_status = Register.query.with_entities(Register.id, Register.register_name, Register.email, Register.online, Register.submitted, Register.create_time, Register.submitted_time, Register.description).all()
-        array = []
-        for i in range(0, len(name_status)):
-            temp = {}
-            temp["id"] = name_status[i][0]
-            temp["register_name"] = name_status[i][1]
-            temp["email"] = name_status[i][2]
-            temp["online"] = name_status[i][3]
-            temp["submitted"] = name_status[i][4]
-            temp["create_time"] = name_status[i][5]
-            temp["submitted_time"] = name_status[i][6]
-            temp["description"] = name_status[i][7]
-            array.append(temp)
-        return array
+        r = Registration()
+        return r.get_all()
 
     # =======================================================test data start
     # {"id":1, "online":1,"submitted":0}
     # =======================================================test data end
     def put(self):
-        args = convert(request.get_json())
-        id = args["id"]
-        online = args["online"]
-        submitted = args["submitted"]
-        u = Register.query.filter_by(id=id).first()
-        u.online = online
-        u.submitted = submitted
-        db.session.commit()
+        args = request.get_json()
+        r = Registration()
+        return r.submit(args)
 
 
 class DoCourse(Resource):
