@@ -51,6 +51,7 @@
             line-height: 18px;
             padding-left: 20px;
             width: 200px;
+            margin-top: 4px;
         }
         .left .bottom ul li div{
             float:left;
@@ -70,7 +71,8 @@
         }
         .webapp-div ul li{
             float:none;
-            margin-top:20px
+            margin-top:20px;
+            width:250px;
         }
         .left .bottom .button {
             display: inline-block;
