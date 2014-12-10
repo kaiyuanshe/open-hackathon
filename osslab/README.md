@@ -10,7 +10,7 @@ Open Source Software Laboratory
 - install required libs by issue `sudo apt-get install python-dev libmysqlclient-dev`
 - *windows only*: [visual c++ compiler for python](http://www.microsoft.com/en-us/download/details.aspx?id=44266)
 - *windows only*: [install MySQL Connector/C for windows](http://dev.mysql.com/downloads/connector/c/6.0.html#downloads)
-- git:[install git](http://git-scm.com/downloads).
+- git: [install git](http://git-scm.com/downloads).
 - _optional_, you can install [SmartGit]() if you feel uncomfortable about git bash.
 - install PyCharm IDE: [download PyCharm Community](https://www.jetbrains.com/pycharm/download/).
 - install Java: `sudo apt-get install openjdk-7-jre`
@@ -41,7 +41,7 @@ Next update `app/config.py` with your user/password.  And don't submit your pass
 ```
 sudo mkdir /var/log/osslab
 sudo chown www-data:www-data /var/log/osslab
-
+```
 
 ## initialize tables
 run `python src/setup_db.py` for the first time to create db tables;
