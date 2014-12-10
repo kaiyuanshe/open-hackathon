@@ -1,4 +1,5 @@
 from app import app
+import time
 from flask.ext.sqlalchemy import SQLAlchemy
 from functions import *
 from datetime import datetime
@@ -64,17 +65,34 @@ class User(db.Model):
 
 class Register(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    register_name = db.Column(db.String(80), unique=True)
+    register_name = db.Column(db.String(80))
     email = db.Column(db.String(120), unique=True)
     online = db.Column(db.Integer)
     submitted = db.Column(db.Integer)
+    create_time = db.Column(db.DateTime)
+    submitted_time = db.Column(db.DateTime)
+    description = db.Column(db.String(200))
 
     def __init__(self,register_name, email):
         self.register_name = register_name
         self.email = email
+        if self.create_time is None:
+            create_time = datetime.utcnow()
+        if self.last_login_time is None:
+            last_login_time = datetime.utcnow()
 
     def __repr__(self):
-        return '<Register %r>' % self.register_name
+        return "Register = {'id':'%s', 'register_name':'%s', 'email':'%s', 'online':'%s', 'submitted':'%s', 'create_time':'%s', 'submitted_time':'%r', 'description':'%r'}" % (
+            self.id,
+            self.register_name,
+            self.email,
+            self.online,
+            self.submitted,
+            self.create_time,
+            self.submitted_time,
+            self.description
+        )
+
 
 class HostServer(db.Model):
     id = db.Column(db.Integer, primary_key=True)

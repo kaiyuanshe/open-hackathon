@@ -7,3 +7,6 @@ class Registration:
         return Register.query.filter_by(email=email).first()
 
 
+
+
+
