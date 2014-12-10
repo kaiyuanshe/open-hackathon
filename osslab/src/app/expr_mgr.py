@@ -101,7 +101,8 @@ class ExprManager(object):
             # todo open port on azure for those must open to public
             # public port means the port open the public. For azure , it's the public port on azure. There
             # should be endpoint on azure that from public_port to host_port
-            port_cfg["host_port"] = port_cfg["port"] + 10000 + reg.id
+            if not "host_port" in port_cfg:
+                port_cfg["host_port"] = port_cfg["port"]
             if not "public_port" in port_cfg:
                 port_cfg["public_port"] = port_cfg["host_port"]
         else:

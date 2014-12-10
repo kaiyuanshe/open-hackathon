@@ -33,12 +33,21 @@ def course_path(id, sub=None):
 
 class Health(Resource):
     def get(self):
-        health = {
-            "status": "OK",
-            "start_time": start_time,
-            "report_time": strftime("%Y-%m-%d %H-%M-%S", gmtime())
-        }
-        return health
+        try:
+            health = {
+                "status": "OK",
+                "start_time": start_time,
+                "report_time": strftime("%Y-%m-%d %H-%M-%S", gmtime()),
+                "docker": docker.health()
+            }
+            return health
+        except Exception as err:
+            log.error(err)
+            return {
+                "status": "Error",
+                "start_time": start_time,
+                "report_time": strftime("%Y-%m-%d %H-%M-%S", gmtime()),
+            }
 
 class DockerManager(Resource):
 

@@ -1,12 +1,13 @@
 __author__ = "Junbo Wang"
 
-from flask import render_template, g ,session
+from flask import Flask, request, render_template, g ,session
 from flask.ext.restful import reqparse, abort, Api, Resource
 import json, time, os
 from sample_course import Sample_Courses
 from expr_mgr import ExprManager;
 from os.path import realpath, dirname
 from log import log
+from registration import Registration
 
 Template_Routes = {
     "PrivacyStatement": "PrivacyStatement.html",
@@ -42,6 +43,22 @@ class CourseList(Resource):
         else:
             ret = filter(lambda c: len(filter(lambda t: kw.lower() in t.lower(), c["tags"])) > 0, Sample_Courses)
             return json.dumps(ret)
+
+class StatusList(Resource):
+    # =======================================================return data start
+    # [{"register_name":"zhang", "online":"1","submitted":"0"..."description":" "}]
+    # =======================================================return data end
+    def get(self):
+        r = Registration()
+        return r.get_all()
+
+    # =======================================================test data start
+    # {"id":1, "online":1,"submitted":0}
+    # =======================================================test data end
+    def put(self):
+        args = request.get_json()
+        r = Registration()
+        return r.submit(args)
 
 
 class DoCourse(Resource):

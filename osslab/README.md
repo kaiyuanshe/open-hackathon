@@ -7,24 +7,21 @@ Open Source Software Laboratory
 - Python 2.7: [download python](https://www.python.org/downloads/)
 - pip: [install pip](http://pip.readthedocs.org/en/latest/installing.html)
 - mysql: [download mysql](http://dev.mysql.com/downloads/)
+- install required libs by issue `sudo apt-get install python-dev libmysqlclient-dev`
 - *windows only*: [visual c++ compiler for python](http://www.microsoft.com/en-us/download/details.aspx?id=44266)
 - *windows only*: [install MySQL Connector/C for windows](http://dev.mysql.com/downloads/connector/c/6.0.html#downloads)
 - git:[install git](http://git-scm.com/downloads).
 - _optional_, you can install [SmartGit]() if you feel uncomfortable about git bash.
+- install PyCharm IDE: [download PyCharm Community](https://www.jetbrains.com/pycharm/download/).
+- install Java: `sudo apt-get install openjdk-7-jre`
+- docker: [install docker](https://docs.docker.com/installation/). Don't forget to [add your login uesr to docker group](http://askubuntu.com/questions/477551/how-can-i-use-docker-without-sudo)
 
 # setup python
-after all the preconditions are met on your dev machine, install the following python libraries via pip.
+after all the preconditions are met on your dev machine, install the required python libraries via pip by:
 
-Or you can simply install all libraries by `pip install -r requirements.txt`.
+`pip install -r requirements.txt`.
 
-```
-pip install flask
-pip install flask-restful
-pip install docker-py
-pip install gittle
-```
-
-Note that the list here may not up-to-date. When you see error like `no module named XXX`, that means you need install
+Note that the file may not up-to-date. When you see error like `no module named XXX`, that means you need install
 the specific lib in the error message, try `pip install XXX` in this case.
 
 # setup mysql
@@ -38,6 +35,13 @@ create User 'hackathon'@'localhost' IDENTIFIED by 'your_password';
 GRANT ALL on hackathon.* TO 'hackathon'@'localhost';
 ```
 Next update `app/config.py` with your user/password.  And don't submit your password to github.
+
+## configure logs
+
+```
+sudo mkdir /var/log/osslab
+sudo chown www-data:www-data /var/log/osslab
+
 
 ## initialize tables
 run `python src/setup_db.py` for the first time to create db tables;
