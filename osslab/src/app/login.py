@@ -87,18 +87,18 @@ class GithubLogin(object):
         email = user_info["email"] if "email" in user_info else None
 
         if email is None:
-            email_info_resp=get_remote(get_config('oauth/github/emails_info_url') + access_token)
+            email_info_resp = get_remote(get_config('oauth/github/emails_info_url') + access_token)
+            log.debug("get email from github:" + email_info_resp)
             email_info = json.loads(email_info_resp)
-            if(len(email_info)>1):
+            if len(email_info) > 1:
                 for data in email_info:
-                    if(data.get("primary")):
-                        email=data.get("email")
+                    if data["primary"]:
+                        email = data["email"]
                         break
             else:
-                email=email_info[0].get("email")
+                email=email_info[0]["email"]
 
-        # todo should we call '/user/emails?access_token=' + access_token to get its primary email?
-
+        log.info("successfully get email:" + email)
         user = User.query.filter_by(openid=openid).first()
         if user is not None:
             user.name = name
@@ -125,5 +125,3 @@ class GithubLogin(object):
             db.session.commit()
             log.info("github user login successfully:" + repr(user))
             return user
-
-        #return user
