@@ -142,3 +142,4 @@ def before_request():
 
 api.add_resource(CourseList, "/api/courses")
 api.add_resource(DoCourse, "/api/course/<string:id>")
+api.add_resource(StatusList, "/api/registerlist")
