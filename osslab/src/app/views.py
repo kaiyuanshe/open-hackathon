@@ -77,6 +77,11 @@ def hackathon():
     app.permanent_session_lifetime = timedelta(days=1)
     return render_template("hackathon.html", name=g.user.nickname, pic=g.user.avatar_url)
 
+@app.route('/submitted')
+@login_required
+def submitted():
+    return render_template("submitted.html", name=g.user.nickname, pic=g.user.avatar_url)
+
 @app.route('/github')
 def github():
     code = request.args.get('code')
