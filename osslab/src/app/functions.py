@@ -58,9 +58,3 @@ def delete_remote(url):
     resp = opener.open(request)
     return "OK"
 
-def json_serial(obj):
-    """JSON serializer for objects not serializable by default json code"""
-
-    if isinstance(obj, datetime):
-        serial = obj.isoformat()
-        return serial

@@ -71,7 +71,7 @@ $(document).ready(function () {
                         success: function () {},
                         error: function () {}
                     });
-                }, 1000*60);
+                }, 1000*60*2);
 
                 // cancel button click event
                 $("#third-leave").click(function () {

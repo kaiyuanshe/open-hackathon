@@ -75,7 +75,7 @@ def hackathon_settings():
 def hackathon():
     session.permanent = True
     app.permanent_session_lifetime = timedelta(days=1)
-    return render_template("hackathon.html", name=g.user.nickname, pic=g.user.avatar_url)
+    return render_template("hackathon.html", name=g.user.nickname, pic=g.user.avatar_url, user=g.user)
 
 @app.route('/submitted')
 @login_required
