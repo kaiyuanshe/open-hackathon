@@ -1,4 +1,5 @@
 import urllib, urllib2, httplib, json, os
+from datetime import datetime
 
 from config import Config
 
@@ -56,3 +57,10 @@ def delete_remote(url):
     request.get_method = lambda : 'DELETE'
     resp = opener.open(request)
     return "OK"
+
+def json_serial(obj):
+    """JSON serializer for objects not serializable by default json code"""
+
+    if isinstance(obj, datetime):
+        serial = obj.isoformat()
+        return serial

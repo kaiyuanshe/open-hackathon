@@ -146,6 +146,8 @@ def logout():
 @app.before_request
 def before_request():
     g.user = current_user
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(days=1)
 
 api.add_resource(CourseList, "/api/courses")
 api.add_resource(DoCourse, "/api/course/<string:id>")

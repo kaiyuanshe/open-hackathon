@@ -50,7 +50,7 @@ class StatusList(Resource):
     # =======================================================return data end
     def get(self):
         r = Registration()
-        return r.get_all()
+        return json.dumps(r.get_all())
 
     # =======================================================test data start
     # {"id":1, "online":1,"submitted":0}

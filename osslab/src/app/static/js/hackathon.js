@@ -1,7 +1,9 @@
 $(document).ready(function () {
     var course = getParameterByName("cid");
     course= "python"
-
+    var main = $("#hack_main").on('mouseover','iframe',function(e){
+        $(this).focus();
+    });
     $.ajax({
         url: '/api/course/' + course,
         type: "POST",
@@ -22,9 +24,15 @@ $(document).ready(function () {
                     li.append(div)
                     ul.append(li)
                     sd = $('<div/>').attr("id", "hack_main_"+s.name)
-                    ifra=$('<iframe src="'+s.url+'" width="100%" height="600px" class="" style="border: 1px solid #000;" frameborder="yes" marginwidth="10" scrolling="yes" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>')
-                    sd.append(ifra)
-                    $("#hack_main").append(sd)
+                    var iframe = $('<iframe>').attr({
+                        src:s.url,
+                        width:'100%',
+                        height:'600px',
+                        frameborder:'yes',
+                        marginwidth:'10',
+                        scrolling:'yes'
+                    }).appendTo(sd);
+                    main.append(sd)
                 })
                 $("#hackathon_nav").append(ul)
 
@@ -144,7 +152,4 @@ $(document).ready(function () {
 
 })
 
-function setFocusThickboxIframe() {
-    document.getElementById("course_vm").contentWindow.focus();
-    // alert("ok");
-}
+
