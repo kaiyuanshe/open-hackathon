@@ -12,7 +12,7 @@ from flask.ext.login import login_required, LoginManager, logout_user, current_u
 from datetime import timedelta
 
 app.secret_key = os.urandom(24)
-app.permanent_session_lifetime = timedelta(days=1)
+
 api = Api(app)
 login_manager = LoginManager()
 login_manager.login_view = "index"
@@ -27,7 +27,6 @@ def load_user(id):
 @app.route('/')
 @app.route('/index')
 def index():
-    session.permanent = False
     return render_template("index.html")
 
 # error handler for 404
@@ -48,6 +47,8 @@ def internal_error(error):
 @app.route('/<path:path>')
 @login_required
 def template_routes(path):
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(days=1)
     return simple_route(path)
 
 # js config
@@ -65,11 +66,15 @@ def not_registered():
 @app.route('/settings')
 @login_required
 def hackathon_settings():
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(days=1)
     return render_template("settings.html", name=g.user.nickname, pic=g.user.avatar_url)
 
 @app.route('/hackathon')
 @login_required
 def hackathon():
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(days=1)
     return render_template("hackathon.html", name=g.user.nickname, pic=g.user.avatar_url)
 
 @app.route('/github')
@@ -78,8 +83,8 @@ def github():
     gl = GithubLogin()
     user = gl.github_authorized(code)
     if user is not None:
-        expr = Experiment.query.filter(Experiment.user_id == user.id).first()
-        if expr is not None and expr.status == 1:
+        expr = Experiment.query.filter_by(user_id=user.id, status=1).first()
+        if expr is not None:
             reg = Register.query.filter(Register.email == user.email).first()
             if reg is not None and reg.submitted == 1:
                 return redirect("/submitted")
