@@ -34,6 +34,7 @@ def simple_route(path):
     else:
         abort(404)
 
+
 class CourseList(Resource):
     def get(self):
         parser = reqparse.RequestParser()
@@ -47,13 +48,15 @@ class CourseList(Resource):
             ret = filter(lambda c: len(filter(lambda t: kw.lower() in t.lower(), c["tags"])) > 0, Sample_Courses)
             return json.dumps(ret)
 
+
 class StatusList(Resource):
     # =======================================================return data start
     # [{"register_name":"zhang", "online":"1","submitted":"0"..."description":" "}]
     # =======================================================return data end
     def get(self):
         r = Registration()
-        return map(lambda u:u.json(), r.get_all())
+        json_ret = map(lambda u: u.json(), r.get_all())
+        return json_ret
 
     # =======================================================test data start
     # {"id":1, "online":1,"submitted":0}

@@ -27,6 +27,7 @@ def load_user(id):
 @app.route('/')
 @app.route('/index')
 def index():
+    logout_user()
     return render_template("index.html")
 
 # error handler for 404
