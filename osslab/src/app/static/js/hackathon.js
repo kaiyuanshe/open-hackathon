@@ -1,6 +1,6 @@
 $(document).ready(function () {
     var course = getParameterByName("cid");
-    course= "python"
+    course= ""
 
     $.ajax({
         url: '/api/course/' + course,
@@ -145,6 +145,11 @@ $(document).ready(function () {
 })
 
 function setFocusThickboxIframe() {
-    document.getElementById("course_vm").contentWindow.focus();
     // alert("ok");
+
+ /*   $(".center .mid ul li div").each(function (i) {
+        if($(this).children().class()=="selected"){
+            document.getElementsByName($(this).attr("name")).contentWindow.focus();
+        }
+    })*/
 }

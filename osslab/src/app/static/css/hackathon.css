@@ -9,7 +9,6 @@
         }
         .left{
             height:100%;
-            background-color: #cccccc;
             width:8%;
             float: left;
             padding-bottom: 600px;
@@ -46,10 +45,11 @@
             background: #999999;
         }
         .center{
-            width: 65%;
+            width: 73%;
             float:left;
             padding-left: 20px;
             padding-top:10px;
+            padding-bottom:30px;
         }
         .center .top{
             box-shadow: 10px 10px 5px #888888;
@@ -135,6 +135,7 @@
         }
         .right{
             margin-left: 0px;
+            padding-bottom: 30px;
         }
         .center .top h3{
 
@@ -146,5 +147,13 @@
             float:left;
             line-height: 18px;
             padding-left: 20px;
-            width:150px;
+            width: 200px;
+            margin-top: 4px;
+        }
+        #new-window{
+            position: absolute;
+            left: 915px;
+            top: 80px;
+            z-index: 100;
+            color: #000000;
         }
