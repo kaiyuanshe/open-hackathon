@@ -1,4 +1,3 @@
-
 $(function(){
     //daoJiShi();
     var endDate=new Date(2014,11,17,18,00,00);//年月日时分秒，月要减去1
@@ -39,3 +38,4 @@ $(function(){
         }
     });
 })
+

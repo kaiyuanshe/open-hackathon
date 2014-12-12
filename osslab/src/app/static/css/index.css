@@ -11,7 +11,6 @@ body {
 .jumbotron{
     overflow:hidden;
     padding:0px;
-    background-color: #ffffff;
     margin-bottom: 0px !important;
 }
 
@@ -23,8 +22,12 @@ body {
 }
 
 .jumbotron .container{
-    width:70%;
-    float:left;
+    width:80%;
+    background: #ffffff;
+    padding: 0 100px;
+}
+
+.jumbotron  .logo64{
 }
 
 .pattern-column.alignleft{
@@ -733,7 +736,6 @@ input[type=search] {
 
 /* line 52, ../sass/complete.scss */
 body {
-  background-color: white;
   font-family: "wf_segoe_ui_normal", "Myriad Pro", "MS Yahei", "Heiti SC", "Arial", "Helvetica", sans-serif;
   margin: 0;
   padding: 0;
@@ -3610,6 +3612,7 @@ blockquote strong::before {
 /* line 30, ../sass/_responsiveslides.scss */
 .upper-home-area {
   width: 100%;
+  margin-top:30px;
 }
 
 /* line 33, ../sass/_responsiveslides.scss */

@@ -37,7 +37,15 @@
             margin-top:50px;
             margin-bottom:40px;
             overflow: hidden;
-            padding: 0 100px;
+        }
+        .bottom .environment-div{
+            margin-bottom: 20px;
+            box-shadow: 10px 10px 5px #888888;
+            border:1px solid #a0a0a0;
+            padding:50px;
+            margin-left: 100px;
+            margin-top: 20px;
+            margin-right: 100px;
         }
         ul{
             margin: 0;
