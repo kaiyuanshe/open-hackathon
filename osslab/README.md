@@ -40,13 +40,36 @@ Next update `app/config.py` with your user/password.  And don't submit your pass
 
 ```
 sudo mkdir /var/log/osslab
-sudo chown www-data:www-data /var/log/osslab
+sudo chmod 777 /var/log/osslab
 
 
 ## initialize tables
 run `python src/setup_db.py` for the first time to create db tables;
 
+## add test data
+
+run `sudo python src/create_test_data.py` to add your cloudvm server.(make sure `cloudvm` service started on your local machine, to start
+`cloudvm` service see README.md in dir `<src_root>/cloudvm`)
+
+also, you need add your primary email of your github account to `register` table. To query your primary email, browse to [github.com](https://github.com)
+click `settings` on the topright corner, then click `emails`. The commands may look like:
+
+```
+mysql -u root -p
+use hackathon;
+insert into register (register_name, email, submitted, enabled) values("Your Name", "xxx@abc.com", 0, 1);
+```
+
+
 # run
+
+## hosts
+important that you update your `hosts` file to resolve `osslab.msopentech.cn` to your local ip.
+That's because the social login(both github and QQ) requires that the domain name must be `osslab.msopentech.cn`.
+
+Add line `127.0.0.1 osslab.msopentech.cn` to `/etc/hosts` on Unix or `C:\Windows\System32\drivers\etc\hosts` on Windows.
+
+## run
 change directory to `osslab/src` and run `python run.py` to start the flask server.
 
 By default the server will listen on port `80` and run in debug model. You can edit run.py to listen a different port.
