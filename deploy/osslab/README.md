@@ -18,6 +18,23 @@ cd ~/hackathon/github
 git clone https://github.com/msopentechcn/laboss.git
 ```
 ## configure mysql
+first of all, make sure the character set is correctly set to `utf8`.
+```
+vim /etc/mysql/my.cnf
+```
+make changes
+```
+[client]
+default-character-set=utf8
+
+[mysqld]
+default-storage-engine=INNODB
+character-set-server=utf8
+collation-server=utf8_general_ci
+```
+and then restart mysql by `/etc/init.d/mysql stop; /etc/init.d/mysql start`
+
+
 logon mysql console via `mysql -u root -p` and then create database/user/access for open hackathon platform.
 
 ```
