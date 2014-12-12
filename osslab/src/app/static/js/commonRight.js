@@ -24,15 +24,23 @@ $(function(){
         url: '/api/registerlist',
         type: "GET",
         success: function (resp) {
+            // USER LIST
             var container = $("#userList ul")
+            var online=0
             $.each(resp, function(i, r){
                 register = $.parseJSON(r)
                 var state = $("<div/>").addClass("circle");
-                if (register.online==1)
+                if (register.online==1){
                     state.addClass("online")
+                    online = online + 1
+                }
                 var usr = $("<div/>").addClass("userName").html(register.register_name)
                 $("<li/>").append(state).append(usr).appendTo(container);
             });
+
+            // user statistics
+            $("#registered_count").html("<h4>注册人数:"+ resp.length +"</h4>")
+            $("#online_count").html("<h4>在线人数:"+ online +"</h4>")
         },
         error: function () {
         }
