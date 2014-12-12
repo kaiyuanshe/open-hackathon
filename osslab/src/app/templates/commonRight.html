@@ -26,15 +26,18 @@
             </div>
             <div class="navbar-collapse collapse">
               <form class="navbar-form navbar-right" role="form">
+{% if user %}
                 <div class="form-group">
-                  <div id="name"><p style="color:white">{{name}}</p></div>
+                  <div id="name"><p style="color:white">{{user.nickname}}</p></div>
                 </div>
                 <div class="form-group">
-                  <div id="photo"><img id="userImg" height="30" width="30" src="{{pic}}"></div>
+                  <div id="photo"><img id="userImg" height="30" width="30" src="{{user.avatar_url}}"></div>
+
                 </div>
                  <div class="form-group">
                   <div id="logout"><p style="color:white;padding-left:5px;cursor:pointer" >[登出]</p></div>
                 </div>
+{% endif %}
               </form>
             </div>
         </div>
@@ -52,26 +55,23 @@
                         <!--<img src="/static/pic/map.jpg" style="width:95%"/>-->
                     </div>
                     <div id="userList">
-                       <div style="border-bottom:2px solid #E64025"><h3>参赛人员</h3></div>
+                        <div style="border-bottom:2px solid #E64025"><h3>参赛人员</h3>
+                        </div>
                         <ul>
-                            <li><img /><div class="circle online"></div><div class="userName">萧峰</div></li>
-                            <li><img /><div class="circle online"></div><div class="userName">张三丰</div></li>
-                            <li><img /><div class="circle success"></div><div class="userName">楚留香</div></li>
-                            <li><img /><div class="circle online"></div><div class="userName">杨过</div></li>
-                            <li><img /><div class="circle"></div><div class="userName">段誉</div></li>
-                            <li><img /><div class="circle"></div><div class="userName">李寻欢</div></li>
-                            <li><img /><div class="circle"></div><div class="userName">韦小宝</div></li>
-                            <li><img /><div class="circle online"></div><div class="userName">独孤求败</div></li>
-                            <li><img /><div class="circle"></div><div class="userName">黄蓉</div></li>
-                            <li><img /><div class="circle success"></div><div class="userName">东方不败</div></li>
-                            <li><img /><div class="circle online"></div><div class="userName">张无忌</div></li>
-                            <li><img /><div class="circle"></div><div class="userName">令狐冲</div></li>
-                            <!--<li><img /><div class="circle"></div><div class="userName">风清扬</div></li>-->
-                            <!--<li><img /><div class="circle"></div><div class="userName">陆小凤</div></li>-->
-                            <!--<li><img /><div class="circle"></div><div class="userName">郭靖</div></li>-->
-                            <!--<li><img /><div class="circle"></div><div class="userName">小龙女</div></li>-->
+                            <!--<li><div class="circle online"></div><div class="userName">萧峰</div></li>-->
+                            <!--<li><div class="circle online"></div><div class="userName">张三丰</div></li>-->
+                            <!--<li><div class="circle success"></div><div class="userName">楚留香</div></li>-->
+                            <!--<li><div class="circle online"></div><div class="userName">杨过</div></li>-->
+                            <!--<li><img /><div class="circle"></div><div class="userName">段誉</div></li>-->
+                            <!--<li><img /><div class="circle"></div><div class="userName">李寻欢</div></li>-->
+                            <!--<li><img /><div class="circle"></div><div class="userName">韦小宝</div></li>-->
+                            <!--<li><img /><div class="circle online"></div><div class="userName">独孤求败</div></li>-->
+                            <!--<li><img /><div class="circle"></div><div class="userName">黄蓉</div></li>-->
+                            <!--<li><img /><div class="circle success"></div><div class="userName">东方不败</div></li>-->
+                            <!--<li><img /><div class="circle online"></div><div class="userName">张无忌</div></li>-->
+                            <!--<li><img /><div class="circle"></div><div class="userName">令狐冲</div></li>-->
                         </ul>
-                    </div>
+                     </div>
                 </div>    
            </div>
        </div>

@@ -6,6 +6,7 @@ from constants import *
 HOSTNAME = "http://osslab.msopentech.cn"
 
 Config = {
+    "environment": "local",
     "javascript": {
         "renren": {
             "clientID": "client_id=7e0932f4c5b34176b0ca1881f5e88562",

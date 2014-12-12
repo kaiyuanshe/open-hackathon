@@ -1,5 +1,6 @@
 from database import *
 from log import log
+from datetime import datetime
 
 
 class Registration:
@@ -24,5 +25,6 @@ class Registration:
 
         u.online = args["online"] if "online" in args else u.online
         u.submitted = args["submitted"] if "submitted" in args else u.submitted
+        u.submitted_time = datetime.utcnow()
         db.session.commit()
         return u

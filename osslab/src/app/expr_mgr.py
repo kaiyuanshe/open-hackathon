@@ -105,6 +105,10 @@ class ExprManager(object):
                 port_cfg["host_port"] = port_cfg["port"]
             if not "public_port" in port_cfg:
                 port_cfg["public_port"] = port_cfg["host_port"]
+
+            if safe_get_config("environment", "prod") == "local" and port_cfg["host_port"]==80:
+                port_cfg["host_port"] += 10000
+                port_cfg["public_port"] = port_cfg["host_port"]
         else:
             port_cfg["host_port"] = self.__get_available_host_port(host_server.port_bindings.all(), port_cfg["port"])
 
