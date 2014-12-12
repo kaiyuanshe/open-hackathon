@@ -59,29 +59,6 @@ def js_config():
                      mimetype="application/javascript")
     return resp
 
-@app.route('/notregister')
-def not_registered():
-    return render_template("notregister.html")
-
-@app.route('/settings')
-@login_required
-def hackathon_settings():
-    session.permanent = True
-    app.permanent_session_lifetime = timedelta(days=1)
-    return render_template("settings.html", name=g.user.nickname, pic=g.user.avatar_url)
-
-@app.route('/hackathon')
-@login_required
-def hackathon():
-    session.permanent = True
-    app.permanent_session_lifetime = timedelta(days=1)
-    return render_template("hackathon.html", name=g.user.nickname, pic=g.user.avatar_url, user=g.user)
-
-@app.route('/submitted')
-@login_required
-def submitted():
-    return render_template("submitted.html", name=g.user.nickname, pic=g.user.avatar_url)
-
 @app.route('/github')
 def github():
     code = request.args.get('code')
