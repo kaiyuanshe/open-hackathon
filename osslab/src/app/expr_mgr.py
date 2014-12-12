@@ -5,6 +5,7 @@ from compiler.ast import flatten
 from database import *
 from log import log
 from constants import *
+from registration import Registration
 
 class ExprManager(object):
 
@@ -73,7 +74,8 @@ class ExprManager(object):
         return vm
 
     def __get_available_host_port(self, port_bindings, port):
-        host_port = port
+
+        host_port = port + 10000
 
         while len(filter(lambda p: p.vm_private_port == host_port, port_bindings)) > 0:
             host_port += 1
@@ -85,16 +87,30 @@ class ExprManager(object):
         return host_port
 
     def __assign_port(self, expr, host_server, container, port_cfg):
-
-        port_cfg["host_port"] = self.__get_available_host_port(host_server.port_bindings.all(), port_cfg["port"])
+        # todo login here is specially for 12/17 hackathon.
+        # The right solution is to pick an assign an unused port, open it on cloud service if it's public
 
         if port_cfg.has_key("public"):
+            # todo only registered user can use public port since public ports are limited and manually maintained
+            # but it's temporary. remove it after this hackathon
+            reg = Registration().get_by_email(expr.user.email)
+            if reg is None:
+                log.warn("UnRegistered user found. It shouldn't happen!")
+                raise Exception("UnRegistered user")
+
             # todo open port on azure for those must open to public
             # public port means the port open the public. For azure , it's the public port on azure. There
             # should be endpoint on azure that from public_port to host_port
-            # todo do more test here since open endpoint on azure cloud service will temporary disable all connects that may cause network error
+            if not "host_port" in port_cfg:
+                port_cfg["host_port"] = port_cfg["port"]
             if not "public_port" in port_cfg:
                 port_cfg["public_port"] = port_cfg["host_port"]
+
+            if safe_get_config("environment", "prod") == "local" and port_cfg["host_port"]==80:
+                port_cfg["host_port"] += 10000
+                port_cfg["public_port"] = port_cfg["host_port"]
+        else:
+            port_cfg["host_port"] = self.__get_available_host_port(host_server.port_bindings.all(), port_cfg["port"])
 
         port_binding = PortBinding(port_cfg["name"] if "name" in port_cfg else None,
                                    port_cfg["public_port"] if "public_port" in port_cfg else None,
@@ -188,7 +204,7 @@ class ExprManager(object):
             return "Not found", 404
 
     def start_expr(self, expr_config):
-        expr = Experiment.query.filter_by(expr_name=expr_config["expr_name"], status=1, user_id=g.user.id).first()
+        expr = Experiment.query.filter_by(status=1, user_id=g.user.id).first()
         if expr is not None:
             return self.__report_expr_status(expr)
 
@@ -228,8 +244,6 @@ class ExprManager(object):
                 "ports": [{
                     "name": "guacamole",
                     "port": GUACAMOLE_PORT,
-                    "host_port": GUACAMOLE_PORT + 1000,
-                    "public_port": GUACAMOLE_PORT + 1000,
                     "public": True
                 }],
                 "detach": True,

@@ -3,14 +3,14 @@
     <link href="/static/css/commonRight.css" rel="stylesheet">
     <script type="text/javascript" src="/config.js"></script>
     <script type="text/javascript" src="/static/js/commonRight.js"></script>
+    <script type="text/javascript" src="/static/js/jquery/jquery.flipcountdown.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/jquery.flipcountdown.css" />
     {% block second %} {% endblock %}
-    <style>
-        
-    </style>    
+
        <div class="main">
            <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
         <div class="container">
-            <div class="navbar-header" style="width: 1000px;">
+            <div class="navbar-header" style="width: 900px;">
                 <!--<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
                     <span class="sr-only">Toggle navigation</span>
                     <span class="icon-bar"></span>
@@ -18,20 +18,26 @@
                     <span class="icon-bar"></span>
                 </button>-->
 
-                 <a  class="navbar-brand" href="http://osslab.msopentech.cn" style="color:#ffffff"><img src="/static/pic/icon.jpg" height="30" width="30"></img>开放Hackathon</a>
-                 <marquee style="color:#000000"  width="700" class="navbar-brand" align="middle" direction="left" behavior="scroll" scrollamount="2" scrolldelay="50" bgcolor="">通知: 1新闻滚动信息;2新闻滚动信息;3新闻滚动信息;4新闻滚动信息;5新闻滚动信息</marquee>
+                 <a  class="navbar-brand" href="http://osslab.msopentech.cn" style="color:#ffffff"><img src="/static/pic/icon.jpg" height="30" width="30"></img>开放黑客松</a>
+                 <marquee style="color:#000000"  width="700" class="navbar-brand" align="middle" direction="left" behavior="scroll" scrollamount="2" scrolldelay="50" bgcolor="">通知:正式活动开始前本环境为体验环境，请注意保存结果</marquee>
                  <!--<a style="float:left;font-size:18px;padding-top:16px;color:#ffffff" href = "http://www.wenjuan.com/s/QBNfiu?test=1&v=0.687169515648">                    问卷调查
                  </a>-->
 
             </div>
             <div class="navbar-collapse collapse">
               <form class="navbar-form navbar-right" role="form">
+{% if user %}
                 <div class="form-group">
-                  <div id="name"><p style="color:white">{{name}}</p></div>
+                  <div id="name"><p style="color:white">{{user.nickname}}</p></div>
                 </div>
                 <div class="form-group">
-                  <div id="photo"><img id="userImg" height="" width="" src="{{pic}}"></div>
+                  <div id="photo"><img id="userImg" height="30" width="30" src="{{user.avatar_url}}"></div>
+
                 </div>
+                 <div class="form-group">
+                  <div id="logout"><p style="color:white;padding-left:5px;cursor:pointer" >[登出]</p></div>
+                </div>
+{% endif %}
               </form>
             </div>
         </div>
@@ -40,35 +46,32 @@
 
            <div class="right">
                 <div class="statistics">
-                    <div><h4><a target="_blank" href="http://www.huodongxing.com/go/msopentech_cocos2dx_hackathon">黑客松活动指南</a></h4></div>
-                    <div><h4><a target="_blank" href="http://www.oschina.net/p/alibaba-jstorm">jStorm官方文档</a></h4></div>
+                    <div><h4><a target="_blank" href="http://www.huodongxing.com/event/2256565202800">黑客松活动指南</a></h4></div>
+                    <div><h4><a target="_blank" href="https://github.com/alibaba/jstorm/wiki/JStorm-Chinese-Documentation">jStorm官方文档</a></h4></div>
                     <div><h4>在线人数:5</h4></div>
                     <div><h4>报名人数:16</h4></div>
-                    <div id="timer"></div>                  
-                    <div style="margin-top:10px">
-                        <img src="/static/pic/map.jpg" style="width:95%"/>
+                    <div style="overflow: hidden;"><h4 style="margin-top: 0px;">距离hackathon结束还有：</h4><div id="timer" style="float:left"></div></div>
+                    <div style="margin-top:40px">
+                        <!--<img src="/static/pic/map.jpg" style="width:95%"/>-->
                     </div>
-                    <div>
-                       <div style="border-bottom:2px solid #E64025"><h3>参赛人员</h3></div>
-                        <ul style="width: 80%;margin: 0 auto;">
-                            <li><img /><div class="circle online"></div><div class="userName">萧峰</div></li>
-                            <li><img /><div class="circle online"></div><div class="userName">张三丰</div></li>
-                            <li><img /><div class="circle success"></div><div class="userName">楚留香</div></li>
-                            <li><img /><div class="circle online"></div><div class="userName">杨过</div></li>
-                            <li><img /><div class="circle"></div><div class="userName">段誉</div></li>
-                            <li><img /><div class="circle"></div><div class="userName">李寻欢</div></li>
-                            <li><img /><div class="circle"></div><div class="userName">韦小宝</div></li>
-                            <li><img /><div class="circle online"></div><div class="userName">独孤求败</div></li>
-                            <li><img /><div class="circle"></div><div class="userName">黄蓉</div></li>
-                            <li><img /><div class="circle success"></div><div class="userName">东方不败</div></li>
-                            <li><img /><div class="circle online"></div><div class="userName">张无忌</div></li>
-                            <li><img /><div class="circle"></div><div class="userName">令狐冲</div></li>
-                            <li><img /><div class="circle"></div><div class="userName">风清扬</div></li>
-                            <li><img /><div class="circle"></div><div class="userName">陆小凤</div></li>
-                            <li><img /><div class="circle"></div><div class="userName">郭靖</div></li>
-                            <li><img /><div class="circle"></div><div class="userName">小龙女</div></li>
+                    <div id="userList">
+                        <div style="border-bottom:2px solid #E64025"><h3>参赛人员</h3>
+                        </div>
+                        <ul>
+                            <!--<li><div class="circle online"></div><div class="userName">萧峰</div></li>-->
+                            <!--<li><div class="circle online"></div><div class="userName">张三丰</div></li>-->
+                            <!--<li><div class="circle success"></div><div class="userName">楚留香</div></li>-->
+                            <!--<li><div class="circle online"></div><div class="userName">杨过</div></li>-->
+                            <!--<li><img /><div class="circle"></div><div class="userName">段誉</div></li>-->
+                            <!--<li><img /><div class="circle"></div><div class="userName">李寻欢</div></li>-->
+                            <!--<li><img /><div class="circle"></div><div class="userName">韦小宝</div></li>-->
+                            <!--<li><img /><div class="circle online"></div><div class="userName">独孤求败</div></li>-->
+                            <!--<li><img /><div class="circle"></div><div class="userName">黄蓉</div></li>-->
+                            <!--<li><img /><div class="circle success"></div><div class="userName">东方不败</div></li>-->
+                            <!--<li><img /><div class="circle online"></div><div class="userName">张无忌</div></li>-->
+                            <!--<li><img /><div class="circle"></div><div class="userName">令狐冲</div></li>-->
                         </ul>
-                    </div>
+                     </div>
                 </div>    
            </div>
        </div>

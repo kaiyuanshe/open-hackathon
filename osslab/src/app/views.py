@@ -8,11 +8,11 @@ from database import User
 from login import *
 from constants import *
 from log import log
-from flask.ext.login import login_required, LoginManager, login_user, logout_user, current_user
+from flask.ext.login import login_required, LoginManager, logout_user, current_user
 from datetime import timedelta
 
 app.secret_key = os.urandom(24)
-app.permanent_session_lifetime = timedelta(days=1)
+
 api = Api(app)
 login_manager = LoginManager()
 login_manager.login_view = "index"
@@ -27,25 +27,29 @@ def load_user(id):
 @app.route('/')
 @app.route('/index')
 def index():
-    session.permanent = False
+    logout_user()
     return render_template("index.html")
 
 # error handler for 404
 @app.errorhandler(404)
 def page_not_found(error):
     # render a beautiful 404 page
+    log.error(error)
     return "Page not Found", 404
 
 # error handler for 500
 @app.errorhandler(500)
 def internal_error(error):
     # render a beautiful 500 page
+    log.error(error)
     return "Internal Server Error", 500
 
-# simple webPages
+# simple webPages. login required
 @app.route('/<path:path>')
 @login_required
 def template_routes(path):
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(days=1)
     return simple_route(path)
 
 # js config
@@ -56,32 +60,22 @@ def js_config():
                      mimetype="application/javascript")
     return resp
 
-@app.route('/settings')
-@login_required
-def hackathon_settings():
-    return render_template("settings.html", name=g.user.nickname, pic=g.user.avatar_url)
-
-@app.route('/hackathon')
-@login_required
-def hackathon():
-    return render_template("hackathon.html", name=g.user.nickname, pic=g.user.avatar_url)
-
-@app.route('/notregister')
-def not_register():
-    return render_template("notregister.html")
-
 @app.route('/github')
 def github():
     code = request.args.get('code')
     gl = GithubLogin()
     user = gl.github_authorized(code)
-    if user[1]:
-        log.info("github user login successfully:" + repr(user[0]))
-        login_user(user[0])
-        user[0].online = 1  #login successfully, status=1
-        return redirect("/settings")
+    if user is not None:
+        expr = Experiment.query.filter_by(user_id=user.id, status=1).first()
+        if expr is not None:
+            reg = Register.query.filter(Register.email == user.email).first()
+            if reg is not None and reg.submitted == 1:
+                return redirect("/submitted")
+            else:
+                return redirect("/hackathon")
+        else:
+            return redirect("/settings")
     else:
-        log.info("don't register" + repr(user[0]))
         return redirect("/notregister")
 
 @app.route('/qq')
@@ -95,7 +89,6 @@ def qq():
     qq_login = QQLogin()
     user = qq_login.qq_authorized(code, state)
     log.info("qq user login successfully:" + repr(user))
-    login_user(user)
 
     return redirect("/settings")
 
@@ -123,13 +116,22 @@ def renren():
         # db_session.add(u)
         # db_session.commit()
     #info = Str
-    #return render_template("renren.html")
+    return render_template("renren.html")
     #return render_template("renren.html",iden=url_ori,name='cc')
-    return render_template("renren.html",pic = info['response']['avatar'][0]['url'],name=info['response']['name'])
+    # return render_template("renren.html",pic = info['response']['avatar'][0]['url'],name=info['response']['name'])
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
+
 
 @app.before_request
 def before_request():
     g.user = current_user
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(days=1)
 
 api.add_resource(CourseList, "/api/courses")
 api.add_resource(DoCourse, "/api/course/<string:id>")
+api.add_resource(StatusList, "/api/registerlist")
