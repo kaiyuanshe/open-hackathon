@@ -21,7 +21,7 @@ def to_json(inst, cls):
             try:
                 d[c.name] = convert[c.type.__class__](v)
             except:
-                d[c.name] = "Error:  Failed to covert using ", str(convert[c.type])
+                d[c.name] = "Error:  Failed to covert using ", str(convert[c.type.__class__])
         elif v is None:
             d[c.name] = str()
         else:

@@ -1,6 +1,7 @@
 $(document).ready(function () {
     var course = getParameterByName("cid");
-    course= "python"
+    if(!course)
+        course = "python"
     var main = $("#hack_main").on('mouseover','iframe',function(e){
         $(this).focus();
     });
