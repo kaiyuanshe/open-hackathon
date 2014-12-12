@@ -1,11 +1,5 @@
 {
-    "expr_name": "python_on_flask",
-    "scm2" :{
-        "provider": "git",
-        "repo_name": "flask-example",
-        "repo_url":"https://github.com/juniwang/flask-example.git",
-        "branch": "master"
-    },
+    "expr_name": "jstrom hackathon_python",
     "containers": [
         {
             "name": "web",
@@ -15,7 +9,7 @@
                 "port": 5000,
                 "public": true
             },{
-                "name": "website",
+                "name": "Deploy",
                 "port": 22
             }],
             "mnt2":["%s/src","/src"],
@@ -29,20 +23,20 @@
             }
         },
         {
-            "name": "sshd",
-            "image": "rastasheep/ubuntu-sshd:14.04",
+            "name": "vnc",
+            "image": "sffamily/ubuntu-gnome-vnc-eclipse",
             "ports":[{
                 "name": "Dev",
-                "port": 22
+                "port": 5901
             }],
-            "mnt2":["%s/src","/src"],
-            "mnt": ["/home/opentech/github/flask-example/src", "/src"],
             "detach":true,
+            "tty": true,
+            "stdin_open": true,
             "guacamole": {
-                "protocol": "ssh",
+                "protocol": "vnc",
                 "username": "root",
-                "password": "root",
-                "port": 22
+                "password": "acoman",
+                "port": 5901
             }
         }
     ]

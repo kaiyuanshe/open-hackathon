@@ -1,6 +1,6 @@
 $(document).ready(function () {
     var course = getParameterByName("cid");
-    course= "flask"
+    course= ""
 
     $.ajax({
         url: '/api/course/' + course,
@@ -16,7 +16,11 @@ $(document).ready(function () {
 
                 // bar and iframe
                 $.each(servers, function(i, s){
-                    ul.append($('<li name="hack_main_'+s.name+'"><div>'+s.name+'</div></li>'))
+                    li = $('<li name="hack_main_'+s.name+'"></li>')
+                    div = $('<div>'+s.name+'</div>')
+                    div.data("data", s)
+                    li.append(div)
+                    ul.append(li)
                     sd = $('<div/>').attr("id", "hack_main_"+s.name)
                     ifra=$('<iframe src="'+s.url+'" width="100%" height="600px" class="" style="border: 1px solid #000;" frameborder="yes" marginwidth="10" scrolling="yes" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>')
                     sd.append(ifra)
@@ -84,13 +88,24 @@ $(document).ready(function () {
                     return false;
                 });
 
+                $("#new-window").click(function(){
+                    data = $(".center .mid ul li .selected").data("data")
+                    if(data && data.url){
+                        detach_url= "redirect?url=" + encodeURIComponent(data.url);
+                        $("#new-window").attr("href",detach_url);
+                        return true;
+                    }else{
+                        $("#new-window").attr("href", "#");
+                        return false;
+                    }
+                });
+
                 var sciv = setInterval(function () {
                     $.ajax({
                         url: '/api/course/' + data.expr_id,
                         type: "GET",
                         success: function (data) {
                             if (data.guacamole_status) {
-                                $("#course_vm4").attr("src", servers[0].url);
                                 clearInterval(sciv)
 
                                 detach_url= "redirect?url=" + encodeURIComponent(servers[0].url);
@@ -130,6 +145,11 @@ $(document).ready(function () {
 })
 
 function setFocusThickboxIframe() {
-    document.getElementById("course_vm").contentWindow.focus();
     // alert("ok");
+
+ /*   $(".center .mid ul li div").each(function (i) {
+        if($(this).children().class()=="selected"){
+            document.getElementsByName($(this).attr("name")).contentWindow.focus();
+        }
+    })*/
 }

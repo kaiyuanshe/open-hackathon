@@ -1,4 +1,4 @@
-import urllib, urllib2, httplib, json
+import urllib, urllib2, httplib, json, os
 
 from config import Config
 
@@ -27,6 +27,11 @@ def get_config(key):
 def safe_get_config(key, default_value):
     r= get_config(key)
     return r if r is not None else default_value
+
+def mkdir_safe(path):
+    if path and not(os.path.exists(path)):
+        os.makedirs(path)
+    return path
 
 # move to common.py for re-use
 def post_to_remote(url, post_data, contentType='application/json'):

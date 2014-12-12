@@ -11,7 +11,7 @@ body {
 .jumbotron{
     overflow:hidden;
     padding:0px;
-    padding-top:48px;
+    margin-bottom: 0px !important;
 }
 
 .jumbotron .left,.jumbotron .right{
@@ -22,8 +22,12 @@ body {
 }
 
 .jumbotron .container{
-    width:70%;
-    float:left;
+    width:80%;
+    background: #ffffff;
+    padding: 0 100px;
+}
+
+.jumbotron  .logo64{
 }
 
 .pattern-column.alignleft{
@@ -38,16 +42,19 @@ body {
     margin-right: 0;
 }
 
+.btn-lg, .btn-group-lg>.btn{
+    padding:10px 25px;
+}
+
 .ds-service-link {
     display: block;
     overflow: hidden;
-    width: 78px;
-    font-size: 12px;
+    width: 58px;
+    font-size: 18px;
     text-align: left;
-    padding-left: 20px;
-    background:url("/static/pic/service-icons-color.png") no-repeat;	
-    _background-image:url("/static/pic/service-icons-color.png");
+    padding-left: 5px;
     overflow:hidden;
+    float: left;
 }
 .ds-qq {
     background-position: 0 -192px;
@@ -63,11 +70,7 @@ body {
     margin-left: auto;
     margin-right: auto;
     color: #000000;
-    margin-top: 30px;
-}
-.jumbotron {
-    background-color: #ffffff;
-    margin-bottom: 0px !important;
+    margin-top: 20px;
 }
 
 
@@ -733,7 +736,6 @@ input[type=search] {
 
 /* line 52, ../sass/complete.scss */
 body {
-  background-color: white;
   font-family: "wf_segoe_ui_normal", "Myriad Pro", "MS Yahei", "Heiti SC", "Arial", "Helvetica", sans-serif;
   margin: 0;
   padding: 0;
@@ -805,15 +807,6 @@ pre {
   float: left;
 }
 
-/* line 138, ../sass/complete.scss */
-a, .readmore {
-  color: #ec008c;
-}
-
-/* line 142, ../sass/complete.scss */
-a:visited, .readmore:visited {
-  color: #f472d0;
-}
 
 /* line 146, ../sass/complete.scss */
 .readmore {
@@ -3619,6 +3612,7 @@ blockquote strong::before {
 /* line 30, ../sass/_responsiveslides.scss */
 .upper-home-area {
   width: 100%;
+  margin-top:30px;
 }
 
 /* line 33, ../sass/_responsiveslides.scss */
