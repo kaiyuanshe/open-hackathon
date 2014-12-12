@@ -151,9 +151,7 @@
             margin-top: 4px;
         }
         #new-window{
-            position: absolute;
-            left: 915px;
-            top: 80px;
+            float:right;
             z-index: 100;
             color: #000000;
         }
