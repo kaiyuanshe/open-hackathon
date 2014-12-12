@@ -19,7 +19,9 @@ Template_Routes = {
     "error": "error.html",
     "submitted": "submitted.html",
     "redirect": "redirect.html",
-    "notregister": "notregister.html"
+    "notregister": "notregister.html",
+    "settings": "settings.html",
+    "hackathon": "hackathon.html"
 }
 
 manager = ExprManager()
@@ -27,7 +29,8 @@ manager = ExprManager()
 def simple_route(path):
     session.permanent = False
     if Template_Routes.has_key(path):
-        return render_template(Template_Routes[path])
+        register = Registration().get_by_email(g.user.email)
+        return render_template(Template_Routes[path], user=g.user, register=register)
     else:
         abort(404)
 

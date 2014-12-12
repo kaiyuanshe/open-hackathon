@@ -26,6 +26,7 @@
             </div>
             <div class="navbar-collapse collapse">
               <form class="navbar-form navbar-right" role="form">
+{% if user %}
                 <div class="form-group">
                   <div id="name"><p style="color:white">{{user.nickname}}</p></div>
                 </div>
@@ -35,6 +36,7 @@
                  <div class="form-group">
                   <div id="logout"><p style="color:white;padding-left:5px;cursor:pointer" >[登出]</p></div>
                 </div>
+{% endif %}
               </form>
             </div>
         </div>
@@ -43,7 +45,7 @@
 
            <div class="right">
                 <div class="statistics">
-                    <div><h4><a target="_blank" href="http://www.huodongxing.com/go/msopentech_cocos2dx_hackathon">黑客松活动指南</a></h4></div>
+                    <div><h4><a target="_blank" href="http://www.huodongxing.com/event/2256565202800">黑客松活动指南</a></h4></div>
                     <div><h4><a target="_blank" href="https://github.com/alibaba/jstorm/wiki/JStorm-Chinese-Documentation">jStorm官方文档</a></h4></div>
                     <div><h4>在线人数:5</h4></div>
                     <div><h4>报名人数:16</h4></div>

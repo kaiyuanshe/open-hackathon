@@ -16,7 +16,7 @@
                 <!--<li><a>保存</a></li>-->
                 <!--<li><a>部署</a></li>-->
                 <li><a id="third-leave">取消</a></li>
-                <li><a id="submit">提交</a></li>
+                <!--<li><a id="submit">提交</a></li>-->
             </ul>
         </div>
         
@@ -34,15 +34,16 @@
                 <div id="hack_main_tips" style="display:none">
                     <p style="margin-top: 50px;font-size:20px; font-weight:bold">您的开发及部署环境已经准备就绪:</p>
                     <div>
-                        <p><b>website:</b>
-                            <a id="hack_pub_web"  href="#" style="margin-top:20px">http://</a>
+                        <p id="hack_pub_web"><b>website:</b>
                         </p>
+                        {% if register %}
                         <p><b>JStorm endpoint:</b>
-                            <a id="JstormEndpoint" href="#">http://</a>
+                            {{register.jstrom_api}}
                         </p>
                         <p><b>JStrom Management Portal:</b>
-                            <a id="JstormAdmin" href="#">http://</a>
+                            <a id="JstormAdmin" target="_blank" href="{{register.jstrom_mgmt_portal}}">{{register.jstrom_mgmt_portal}}</a>
                         </p>
+                        {% endif %}
                     </div>
                 </div>
 

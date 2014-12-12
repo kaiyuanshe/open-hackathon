@@ -7,6 +7,7 @@
             "ports":[{
                 "name": "website",
                 "port": 5000,
+                "host_port": 80,
                 "public": true
             },{
                 "name": "Deploy",

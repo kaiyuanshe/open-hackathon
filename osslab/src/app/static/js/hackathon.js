@@ -48,8 +48,11 @@ $(document).ready(function () {
                 // public urls
                 if (data.public_urls.length > 0){
                     $.each(data.public_urls, function(i,u){
-                        p=$('<p>'+u.name+':<a target="_blank" href="'+u.url+'">'+u.url+'</a></p>')
-                        $("#hack_pub_web").append(p)
+                        var web_link = $("<a/>").attr({
+                            target: "_blank",
+                            href: u.url,
+                            style: "margin-top:20px"
+                        }).html(u.url).appendTo($("#hack_pub_web"))
                     })
                 }
 
