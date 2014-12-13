@@ -5,6 +5,7 @@ $(document).ready(function () {
     var main = $("#hack_main").on('mouseover','iframe',function(e){
         $(this).focus();
     });
+
     $.ajax({
         url: '/api/course/' + course,
         type: "POST",
@@ -155,5 +156,4 @@ $(document).ready(function () {
     })
 
 })
-
 

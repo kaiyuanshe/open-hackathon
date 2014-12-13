@@ -13,7 +13,7 @@
 {% block left %}
 
            <div class="left">
-               <div class="top">
+               <div class="top" style="display:none">
                    <div style="overflow:hidden;">
                         <h3 name="hackathon-div" class="clickOn">黑客松活动指南</h3>
                         <h3 name="jStormApi-div">jStorm官方文档</h3>
@@ -28,26 +28,29 @@
                     </div>
                </div>
                <div class="bottom">
-                   <ul>
-                       <li style="margin-left: 150px;"><input type="checkbox" name="JStorm" checked  disabled/><label>JStorm</label></li>
-                       <li><input type="checkbox" name="RestAPI" checked  disabled/><label>RestAPI</label></li>
-                   </ul>
-                   <div class="webapp-div">
-                       <h3>WEB APP</h3>
+                   <div style="border-bottom: 2px solid red;"><h1>请选择你所需要的环境：</h1></div>
+                   <div class="environment-div">
                        <ul>
-                           <li><input type="radio" cid="ubuntu" name="web" checked="checked"/><label>Ubuntu(空操作系统)</label></li>
-                           <li><input type="radio" cid="python" name="web"/><label>python/flask</label></li>
-                           <li><input type="radio" cid="rails" name="web"/><label>ruby/rails</label></li>
-                           <li><input type="radio" cid="mean" name="web"/><label>JavaScript/MEAN</label></li>
-
+                           <li style="margin-left: 150px;"><input type="checkbox" name="JStorm" checked  disabled/><label>JStorm</label></li>
+                           <li><input type="checkbox" name="RestAPI" checked  disabled/><label>RestAPI</label></li>
                        </ul>
-                   </div>
-                   <!--<ul style="margin-top:15px">-->
-                       <!--<li>Mobile APP</li>-->
-                       <!--<li><input type="radio" name="web"/><label>Android</label></li>-->
-                   <!--</ul>-->
-                   <div style="text-align:right;">
-                       <button id="submit" class="button blue">提交</button>
+                       <div class="webapp-div">
+                           <h3>WEB APP</h3>
+                           <ul>
+                               <li><input type="radio" cid="ubuntu" name="web" checked="checked"/><label>Ubuntu(空操作系统)</label></li>
+                               <li><input type="radio" cid="python" name="web"/><label>python/flask</label></li>
+                               <li><input type="radio" cid="rails" name="web"/><label>ruby/rails</label></li>
+                               <li><input type="radio" cid="mean" name="web"/><label>JavaScript/MEAN</label></li>
+
+                           </ul>
+                       </div>
+                       <!--<ul style="margin-top:15px">-->
+                           <!--<li>Mobile APP</li>-->
+                           <!--<li><input type="radio" name="web"/><label>Android</label></li>-->
+                       <!--</ul>-->
+                       <div style="text-align:right;">
+                           <button id="submit" class="button blue">提交</button>
+                       </div>
                    </div>
                </div>
            </div>
