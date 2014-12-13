@@ -84,13 +84,12 @@ class GithubLogin(object):
         nickname = user_info["name"] if "name" in user_info else name
         openid = str(user_info["id"])
         avatar = user_info["avatar_url"]
-        email = user_info["email"] if "email" in user_info else None
 
-        if email is None:
-            email_info_resp = get_remote(get_config('oauth/github/emails_info_url') + access_token)
-            log.debug("get email from github:" + email_info_resp)
-            email_info = json.loads(email_info_resp)
-            email = filter(lambda e: e["primary"], email_info)[0]["email"]
+        # get user primary email
+        email_info_resp = get_remote(get_config('oauth/github/emails_info_url') + access_token)
+        log.debug("get email from github:" + email_info_resp)
+        email_info = json.loads(email_info_resp)
+        email = filter(lambda e: e["primary"], email_info)[0]["email"]
 
         log.info("successfully get email:" + email)
         user = User.query.filter_by(openid=openid).first()
