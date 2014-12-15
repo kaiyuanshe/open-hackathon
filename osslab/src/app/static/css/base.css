@@ -1,16 +1,28 @@
-        .navbar-inverse{
-            background-color: #E64025;
-            border-color: #E64025;
-        }
-        .navbar-brand{
-            margin-right: 20px;
-        }
-        .foot-div{
-            background-color: #E64025;
-            border-color: #E64025;
-            color:#ffffff;
-            padding:10px 0px;
-        }
-        .foot-div a{
-            color:#ffffff;
-        }
+
+html[lang=zh-hans] * {
+    font:14px/1.5 "Microsoft YaHei","宋体b8b\4f53", "Arial", "Helvetica", sans-serif;
+}
+
+.navbar-inverse{
+    background-color: #E64025;
+    border-color: #E64025;
+}
+.navbar-brand{
+    margin-right: 20px;
+}
+.foot-div{
+    margin-top:100px;
+    background-color: #E64025;
+    border-color: #E64025;
+    color:#ffffff;
+    padding:10px 0px;
+    height: 40px;
+    bottom: 0;
+}
+.foot-div a{
+    color:#ffffff;
+
+}
+.foot-div a:hover {
+    color: #428bca;
+}

@@ -5,23 +5,12 @@
     {% endblock %}
 
     {% block left %}
-        <div class="left">
-            <div class="left-title">工具栏</div>
-            <ul>
-                <!--<li><a>Copy</a></li>-->
-                <!--<li><a>Paste</a></li>-->
-                <li><a id="new-window" href="#" target="_blank">全屏</a></li>
-                <li><a>字+</a></li>
-                <li><a>字-</a></li>
-                <li><a>保存</a></li>
-                <!--<li><a>部署</a></li>-->
-                <li><a id="third-leave">取消</a></li>
-                <li><a id="submit">提交</a></li>
-            </ul>
-        </div>
-        
+
+            <a id="third-leave" style="color:#ffffff">取消</a>
+
         <div class="center">
             <div id="hackathon_nav" class="mid" style="overflow:hidden;">
+                <a id="new-window" href="#" target="_blank"><img src="/static/pic/fullscreen.png"/></a>
             </div>
                 
             <div id="hack_main" class="bottom">
@@ -34,15 +23,21 @@
                 <div id="hack_main_tips" style="display:none">
                     <p style="margin-top: 50px;font-size:20px; font-weight:bold">您的开发及部署环境已经准备就绪:</p>
                     <div>
-                        <p>website：
-                            <div id="hack_pub_web" style="margin-left:20px"></div>
+                        <p id="hack_pub_web"><b>website:</b>
                         </p>
-                        <p>JStorm endpoint: http://www.jstrom.com</p>
-                        <p>JStrom Management Portal: http://www.jstorm.com/admin</p>
+                        {% if register %}
+                        <p><b>JStorm endpoint:</b>
+                            {{register.jstrom_api}}
+                        </p>
+                        <p><b>JStrom Management Portal:</b>
+                            <a id="JstormAdmin" target="_blank" href="{{register.jstrom_mgmt_portal}}">{{register.jstrom_mgmt_portal}}</a>
+                        </p>
+                        {% endif %}
                     </div>
                 </div>
+
                 <div id="hack_main_cancelled" style="display:none">
-                    <p>Your environment was deleted. Will go back to setting page in 5 seconds.</p>
+                    <p>你的体验环境已经被删除，5s后回到初始配置页面</p>
                 </div>
                 <div id="hack_main_error" style="display:none">
                     <iframe src="/error" width="100%" height="500px" class="" style="border: 1px solid #000;" frameborder="yes" marginwidth="10" scrolling="yes" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>

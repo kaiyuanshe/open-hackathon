@@ -1,8 +1,7 @@
 .main{
     width: 1200px;
-    margin: 0 auto;
+    margin: 50px auto 40px;
     overflow: hidden;
-    margin-top: 50px;
 }
 
 .right{
@@ -32,4 +31,8 @@
 }
 .success{
     background-color: #FFD700;
+}
+#userList ul{
+    width: 80%;
+    margin: 10px auto;
 }

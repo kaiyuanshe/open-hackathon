@@ -31,6 +31,13 @@ class OssDocker(object):
             return True
         return True
 
+    def health(self):
+        containers = convert(self.client.containers())
+        return {
+            "status": "OK",
+            "container_count": len(containers)
+        }
+
     def run(self, args):
         container_name = args["container_name"]
         exist = self.get_container(container_name)

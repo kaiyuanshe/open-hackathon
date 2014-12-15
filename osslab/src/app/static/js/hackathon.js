@@ -1,6 +1,10 @@
 $(document).ready(function () {
     var course = getParameterByName("cid");
-    course= "flask"
+    if(!course)
+        course = "python"
+    var main = $("#hack_main").on('mouseover','iframe',function(e){
+        $(this).focus();
+    });
 
     $.ajax({
         url: '/api/course/' + course,
@@ -8,19 +12,24 @@ $(document).ready(function () {
         success: function (resp) {
             var data = resp
             var servers = data.guacamole_servers;
-
             if (servers.length > 0) {
-                ul = $("<ul/>")
+                var  ul = $("<ul>");
                 // tips tab
                 ul.append($('<li name="hack_main_tips"><div class="selected">Endpoints</div></li>'))
-
                 // bar and iframe
                 $.each(servers, function(i, s){
-                    ul.append($('<li name="hack_main_'+s.name+'"><div>'+s.name+'</div></li>'))
-                    sd = $('<div/>').attr("id", "hack_main_"+s.name)
-                    ifra=$('<iframe src="'+s.url+'" width="100%" height="600px" class="" style="border: 1px solid #000;" frameborder="yes" marginwidth="10" scrolling="yes" onmouseover="setFocusThickboxIframe()" onmousemove = "setFocusThickboxIframe()" onmouseout = "setFocusThickboxIframe()" onfocus = "setFocusThickboxIframe()" onblur = "setFocusThickboxIframe()"></iframe>')
-                    sd.append(ifra)
-                    $("#hack_main").append(sd)
+                    var li = $('<li name="hack_main_'+s.name+'"></li>')
+                    li.append($('<div>').data("data", s).text(s.name)).appendTo(ul);
+                    var sd = $('<div>').attr("id", "hack_main_"+s.name)
+                    main.append(sd);
+                    var iframe = $('<iframe>').attr({
+                        src:s.url,
+                        width:'100%',
+                        height:'600px',
+                        frameborder:'yes',
+                        marginwidth:'10',
+                        scrolling:'yes'
+                    }).appendTo(sd);
                 })
                 $("#hackathon_nav").append(ul)
 
@@ -36,8 +45,11 @@ $(document).ready(function () {
                 // public urls
                 if (data.public_urls.length > 0){
                     $.each(data.public_urls, function(i,u){
-                        p=$('<p>'+u.name+':<a target="_blank" href="'+u.url+'">'+u.url+'</a></p>')
-                        $("#hack_pub_web").append(p)
+                        var web_link = $("<a/>").attr({
+                            target: "_blank",
+                            href: u.url,
+                            style: "margin-top:20px"
+                        }).html(u.url).appendTo($("#hack_pub_web"))
                     })
                 }
 
@@ -59,7 +71,7 @@ $(document).ready(function () {
                         success: function () {},
                         error: function () {}
                     });
-                }, 1000*60);
+                }, 1000*60*2);
 
                 // cancel button click event
                 $("#third-leave").click(function () {
@@ -84,13 +96,24 @@ $(document).ready(function () {
                     return false;
                 });
 
+                $("#new-window").click(function(){
+                    data = $(".center .mid ul li .selected").data("data")
+                    if(data && data.url){
+                        detach_url= "redirect?url=" + encodeURIComponent(data.url);
+                        $("#new-window").attr("href",detach_url);
+                        return true;
+                    }else{
+                        $("#new-window").attr("href", "#");
+                        return false;
+                    }
+                });
+
                 var sciv = setInterval(function () {
                     $.ajax({
                         url: '/api/course/' + data.expr_id,
                         type: "GET",
                         success: function (data) {
                             if (data.guacamole_status) {
-                                $("#course_vm4").attr("src", servers[0].url);
                                 clearInterval(sciv)
 
                                 detach_url= "redirect?url=" + encodeURIComponent(servers[0].url);
@@ -129,7 +152,3 @@ $(document).ready(function () {
 
 })
 
-function setFocusThickboxIframe() {
-    document.getElementById("course_vm").contentWindow.focus();
-    // alert("ok");
-}

@@ -2,7 +2,8 @@ from database import *
 from functions import *
 from log import log
 import json
-from justify_user import *
+from registration import *
+from flask.ext.login import login_user
 
 class QQLogin(object):
     def qq_authorized(self, auth_code, state):
@@ -44,6 +45,7 @@ class QQLogin(object):
             db.session.add(user)
             db.session.commit()
 
+        login_user(user)
         return user
 
 class GithubLogin(object):
@@ -79,13 +81,17 @@ class GithubLogin(object):
         #
         user_info = json.loads(user_info_resp)
         name = user_info["login"]
-        nickname = user_info["name"]
+        nickname = user_info["name"] if "name" in user_info else name
         openid = str(user_info["id"])
         avatar = user_info["avatar_url"]
-        email = user_info["email"]
 
-        # todo should we call '/user/emails?access_token=' + access_token to get its primary email?
+        # get user primary email
+        email_info_resp = get_remote(get_config('oauth/github/emails_info_url') + access_token)
+        log.debug("get email from github:" + email_info_resp)
+        email_info = json.loads(email_info_resp)
+        email = filter(lambda e: e["primary"], email_info)[0]["email"]
 
+        log.info("successfully get email:" + email)
         user = User.query.filter_by(openid=openid).first()
         if user is not None:
             user.name = name
@@ -100,10 +106,15 @@ class GithubLogin(object):
             db.session.add(user)
             db.session.commit()
 
-        j = justifyUser()
-        if j.justify(user.email):
-            return [user, True]
-        else:
-            return [user, False]
+        login_user(user)
 
-        #return user
+        j = Registration()
+        registered = j.get_by_email(email)
+        if safe_get_config("/user/limitUnRegisteredUser", True) and registered is None:
+            log.info("github user login successfully but not registered. Redirect to registration page")
+            return None
+        else:
+            registered.online = 1
+            db.session.commit()
+            log.info("github user login successfully:" + repr(user))
+            return user
