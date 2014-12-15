@@ -1,11 +1,16 @@
    {% extends "base.html" %}
-   {% block content %}
-    <link href="/static/css/commonRight.css" rel="stylesheet">
+
+   {% block head %}
+   <link href="/static/css/commonRight.css" rel="stylesheet">
     <script type="text/javascript" src="/config.js"></script>
     <script type="text/javascript" src="/static/js/commonRight.js"></script>
     <script type="text/javascript" src="/static/js/jquery/jquery.flipcountdown.js"></script>
     <link rel="stylesheet" type="text/css" href="/static/css/jquery.flipcountdown.css" />
-    {% block second %} {% endblock %}
+       {% block second %} {% endblock %}
+   {% endblock %}
+   {% block content %}
+
+
 
        <div class="main">
            <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
