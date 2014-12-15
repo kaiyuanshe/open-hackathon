@@ -90,6 +90,7 @@ class GithubLogin(object):
         log.debug("get email from github:" + email_info_resp)
         email_info = json.loads(email_info_resp)
         email = filter(lambda e: e["primary"], email_info)[0]["email"]
+        # email = ",".join(map(lambda e: e["email"], email_info))
 
         log.info("successfully get email:" + email)
         user = User.query.filter_by(openid=openid).first()

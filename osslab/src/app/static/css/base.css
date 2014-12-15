@@ -26,3 +26,6 @@ html[lang=zh-hans] * {
 .foot-div a:hover {
     color: #428bca;
 }
+.hidden{
+visibility:hidden
+}

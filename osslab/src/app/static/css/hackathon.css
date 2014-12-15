@@ -155,3 +155,12 @@
             z-index: 100;
             color: #000000;
         }
+        #hack_main{
+        position: relative;
+        }
+         #hack_main>div{
+         position: absolute;
+        right: 0;
+        left: 0;
+
+         }
