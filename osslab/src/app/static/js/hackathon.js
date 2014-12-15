@@ -12,20 +12,16 @@ $(document).ready(function () {
         success: function (resp) {
             var data = resp
             var servers = data.guacamole_servers;
-
             if (servers.length > 0) {
-                ul = $("<ul/>")
+                var  ul = $("<ul>");
                 // tips tab
                 ul.append($('<li name="hack_main_tips"><div class="selected">Endpoints</div></li>'))
-
                 // bar and iframe
                 $.each(servers, function(i, s){
-                    li = $('<li name="hack_main_'+s.name+'"></li>')
-                    div = $('<div>'+s.name+'</div>')
-                    div.data("data", s)
-                    li.append(div)
-                    ul.append(li)
-                    sd = $('<div/>').attr("id", "hack_main_"+s.name)
+                    var li = $('<li name="hack_main_'+s.name+'"></li>')
+                    li.append($('<div>').data("data", s).text(s.name)).appendTo(ul);
+                    var sd = $('<div>').attr("id", "hack_main_"+s.name)
+                    main.append(sd);
                     var iframe = $('<iframe>').attr({
                         src:s.url,
                         width:'100%',
@@ -34,7 +30,6 @@ $(document).ready(function () {
                         marginwidth:'10',
                         scrolling:'yes'
                     }).appendTo(sd);
-                    main.append(sd)
                 })
                 $("#hackathon_nav").append(ul)
 

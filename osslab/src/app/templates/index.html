@@ -1,21 +1,28 @@
 {% extends "base.html" %}
-     {% block content %}
-    <script type="text/javascript" src="/config.js"></script>
-    <script src="/static/js/login.js"></script>
-    <script src="/static/js/index.js"></script>
-    <link rel="stylesheet" href="/static/css/index.css">
+    {% block head %}
+        <script type="text/javascript" src="/config.js"></script>
+        <script src="/static/js/login.js"></script>
+        <script src="/static/js/index.js"></script>
+        <link rel="stylesheet" href="/static/css/index.css">
+    {% endblock %}
+    {% block header %}
 
-    
+    {% endblock %}
+
+    {% block content %}
+
+
+
     <div class="mainContainer">
        <!-- Main jumbotron for a primary marketing message or call to action -->
-        <div class="jumbotron">
+        <div class="main-wrapper">
             <!--<div class="left">-->
                 <!--<div class="pattern-column alignleft">-->
                     <!--&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;-->
                 <!--</div>-->
             <!--</div>-->
 
-            <div class="container">
+            <div class="w-container">
                 <div class="p-center" style="font-size:63px;padding-bottom: 10px;">
                     <img class="logo64" src="/static/pic/icon64.png" />
                     <!--<h1 style="float:left"><font >开放黑客松</font></h1>-->
