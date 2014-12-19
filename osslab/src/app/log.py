@@ -20,7 +20,7 @@ class Log(object):
         self.logger.warn(warn)
 
     def error(self, error):
-        self.logger.error(str(error))
+        self.logger.error(str(error), exc_info=1)
 
     def critical(self, critical):
         self.logger.critical(critical)
