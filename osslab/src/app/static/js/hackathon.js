@@ -1,7 +1,7 @@
 $(document).ready(function () {
     var course = getParameterByName("cid");
-    if(!course)
-        course = "python"
+    if(!course || typeof(course)=="undefined")
+        course = "ubuntu"
     var main = $("#hack_main").on('mouseover','iframe',function(e){
         $(this).focus();
     });
