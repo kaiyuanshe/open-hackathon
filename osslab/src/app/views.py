@@ -17,9 +17,7 @@ login_manager.login_view = "index"
 login_manager.login_message_category = "info"
 login_manager.setup_app(app)
 
-session.permanent = True
-app.permanent_session_lifetime = timedelta(days=1)
-session["test"]="value"
+PERMANENT_SESSION_LIFETIME  = timedelta(days=1)
 
 @login_manager.user_loader
 def load_user(id):
@@ -131,6 +129,7 @@ def logout():
 def before_request():
     g.user = current_user
     session.permanent = True
+    session["test"] = "value123"
     app.permanent_session_lifetime = timedelta(days=1)
 
 api.add_resource(CourseList, "/api/courses")
