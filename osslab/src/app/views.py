@@ -11,13 +11,15 @@ from log import log
 from flask.ext.login import login_required, LoginManager, logout_user, current_user
 from datetime import timedelta
 
-app.secret_key = os.urandom(24)
-
 api = Api(app)
 login_manager = LoginManager()
 login_manager.login_view = "index"
 login_manager.login_message_category = "info"
 login_manager.setup_app(app)
+
+session.permanent = True
+app.permanent_session_lifetime = timedelta(days=1)
+session["test"]="value"
 
 @login_manager.user_loader
 def load_user(id):
@@ -27,7 +29,6 @@ def load_user(id):
 @app.route('/')
 @app.route('/index')
 def index():
-    logout_user()
     return render_template("index.html")
 
 # error handler for 404
