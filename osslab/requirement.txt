@@ -3,6 +3,7 @@ flask-restful
 flask-login
 flask-openid
 flask-cors
+flask-debugtoolbar
 sqlalchemy
 flask-sqlalchemy
 mysql-python
