@@ -68,12 +68,21 @@
 
 
                 <div class="btn-group-vertical p-center">
+                    {% if "github" in providers %}
                     <span>
                         <a class="btn btn-warning btn-lg" role="button" id="githublogin">
                             <img src="/static/pic/github.png" height="25" width="25" style="float:left"/><span class="ds-service-link">github</span>
                         </a>
+                    </span>
+                    {% endif %}
+                    {% if "qq" in providers %}
+                    <span>
+                        <a class="btn btn-warning btn-lg" role="button" id="qqlogin">
+                            <img src="/static/pic/github.png" height="25" width="25" style="float:left"/><span class="ds-service-link">QQ</span>
+                        </a>
 
                     </span>
+                    {% endif %}
                 </div>
                 <span class="p-center">
                     <b>

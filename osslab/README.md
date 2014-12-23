@@ -43,7 +43,7 @@ collation-server=utf8_general_ci
 and then restart mysql by `/etc/init.d/mysql stop; /etc/init.d/mysql start`.
 In case you have created your DB already before set the charset, you can alter the charset of existing database by `ALTER DATABASE mydatabasename charset=utf8;`
 
-nex logon mysql console with `root` user(`mysql -u root -p`) and then:
+next logon mysql console with `root` user(`mysql -u root -p`) and then:
 
 ```
 create database hackathon;

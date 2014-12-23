@@ -58,3 +58,11 @@ def delete_remote(url):
     resp = opener.open(request)
     return "OK"
 
+def get_class(kls):
+    # kls is the full name of a class obj. e.g. "app.registration.Registration"
+    parts = kls.split('.')
+    module = ".".join(parts[:-1])
+    m = __import__( module )
+    for comp in parts[1:]:
+        m = getattr(m, comp)
+    return m

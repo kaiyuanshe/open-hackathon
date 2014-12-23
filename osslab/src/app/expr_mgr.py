@@ -91,13 +91,6 @@ class ExprManager(object):
         # The right solution is to pick an assign an unused port, open it on cloud service if it's public
 
         if port_cfg.has_key("public"):
-            # todo only registered user can use public port since public ports are limited and manually maintained
-            # but it's temporary. remove it after this hackathon
-            reg = Registration().get_by_email(expr.user.email)
-            if reg is None:
-                log.warn("UnRegistered user found. It shouldn't happen!")
-                raise Exception("UnRegistered user")
-
             # todo open port on azure for those must open to public
             # public port means the port open the public. For azure , it's the public port on azure. There
             # should be endpoint on azure that from public_port to host_port
