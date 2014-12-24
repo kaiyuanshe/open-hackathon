@@ -241,7 +241,7 @@ class PortBinding(db.Model):
     # for simplicity, the port won't be released until the corresponding container removed(not stopped).
     # that means a port occupied by stopped container won't be allocated to new container. So it's possible to start the
     # container again. And the number of port should be enough since we won't have too many containers on the same VM.
-    id= db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50))
     vm_public_port= db.Column(db.Integer)
     vm_private_port= db.Column(db.Integer, nullable=False)
@@ -270,3 +270,21 @@ class PortBinding(db.Model):
 
     def __repr__(self):
         return "PortBinding: " + self.json()
+
+
+class Announcement(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.String(200))
+    enabled = db.Column(db.Integer) # 1=enabled 0=disabled
+    create_time= db.Column(db.DateTime)
+
+    def json(self):
+        return to_json(self, self.__class__)
+
+    def __init__(self, content):
+        self.content = content
+        self.enabled = 1
+        self.create_time = datetime.utcnow()
+
+    def __repr__(self):
+        return "Announcement: " + self.json()
