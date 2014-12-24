@@ -8,7 +8,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Keep_me$secret_!!!&'
 
 # disable the debug toolBar and debug mode in production
-app.config['DEBUG_TB_ENABLED'] = True
+app.config['DEBUG_TB_ENABLED'] = False
 app.debug = True
 
 toolbar = DebugToolbarExtension(app)
