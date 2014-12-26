@@ -119,18 +119,24 @@ class OssDocker(object):
             container_config["Image"] = image
             container_config["Ports"] = ports[1::2]
             container_config["Volumes"] = mnts[1::2]
-            container_config["Env"] = env
+            container_config["Env"] = None
             container_config["Cmd"] = command
             container_config["OpenStdin"] = stdin_open
             container_config["Tty"] = tty
             container_config["Dns"] = dns
             container_config["Entrypoint"] = entrypoint
             container_config["WorkingDir"] = working_dir
+            container_config["PortBindings"] = port_bingings
+            container_config["Binds"] = mnt_bindings
+            container_config['AttachStdin'] = False,
+            container_config['AttachStdout'] = True,
+            container_config['AttachStderr'] = True,
             containers_url = self.base_url + "/containers/create?name=%s" % container_name
+            jdata = json.dumps(container_config)
             req = urllib2.Request(containers_url)
             req.add_header('Content-Type', 'application/json')
-            test = urllib2.urlopen(containers_url, json.dumps(container_config))
-            c_id = json.loads(test)
+            f = urllib2.urlopen(req, jdata)
+            c_id = json.loads(f.read())
             #end
 
             #origin
@@ -148,10 +154,21 @@ class OssDocker(object):
                                          working_dir=working_dir)
             """
             result["container_id"]= c_id["Id"]
+            #new
+            try:
+                url = "http://localhost:4243/containers/%s/start"%c_id["Id"]
+                req_start = urllib2.Request(url)
+                req_start.add_header('Content-Type', 'application/json')
+                response = urllib2.urlopen(url, "")
+            except Exception as e:
+                log.error(e)
+            #end
+            #origin
+            """
             self.client.start(c_id,
                               port_bindings=port_bingings,
                               binds=mnt_bindings)
-
+            """
             # make sure it's running
             if self.get_container(container_name) is None:
                 raise AssertionError("container %s fail to start" % args["name"])
