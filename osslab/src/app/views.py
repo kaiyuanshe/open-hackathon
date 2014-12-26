@@ -11,13 +11,14 @@ from log import log
 from flask.ext.login import login_required, LoginManager, logout_user, current_user
 from datetime import timedelta
 
-app.secret_key = os.urandom(24)
-
 api = Api(app)
 login_manager = LoginManager()
 login_manager.login_view = "index"
 login_manager.login_message_category = "info"
 login_manager.setup_app(app)
+
+session_lifetime_minutes = safe_get_config("login/session_minutes", 60)
+PERMANENT_SESSION_LIFETIME = timedelta(minutes=session_lifetime_minutes)
 
 @login_manager.user_loader
 def load_user(id):
@@ -27,8 +28,7 @@ def load_user(id):
 @app.route('/')
 @app.route('/index')
 def index():
-    logout_user()
-    return render_template("index.html")
+    return render_template("index.html", providers=safe_get_config("login/provider_enabled", ["github"]))
 
 # error handler for 404
 @app.errorhandler(404)
@@ -48,8 +48,8 @@ def internal_error(error):
 @app.route('/<path:path>')
 @login_required
 def template_routes(path):
-    session.permanent = True
-    app.permanent_session_lifetime = timedelta(days=1)
+    # session.permanent = True
+    app.permanent_session_lifetime = timedelta(minutes=session_lifetime_minutes)
     return simple_route(path)
 
 # js config
@@ -129,8 +129,8 @@ def logout():
 @app.before_request
 def before_request():
     g.user = current_user
-    session.permanent = True
-    app.permanent_session_lifetime = timedelta(days=1)
+    # session.permanent = True
+    app.permanent_session_lifetime = timedelta(minutes=session_lifetime_minutes)
 
 api.add_resource(CourseList, "/api/courses")
 api.add_resource(DoCourse, "/api/course/<string:id>")

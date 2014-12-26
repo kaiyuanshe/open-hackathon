@@ -1,3 +1,5 @@
+# -*- coding:utf8 -*-
+#encoding = utf-8
 from database import *
 from functions import *
 from log import log
@@ -8,21 +10,21 @@ from flask.ext.login import login_user
 class QQLogin(object):
     def qq_authorized(self, auth_code, state):
         # get access token
-        token_resp = get_remote(get_config("oauth/qq/access_token_url") + auth_code + '&state=' + state)
+        token_resp = get_remote(get_config("login/qq/access_token_url") + auth_code + '&state=' + state)
         log.debug("get token from qq:" + token_resp)
         start = token_resp.index('=')
         end = token_resp.index('&')
         access_token = token_resp[start+1:end]
 
         # get openID.
-        openid_resp = get_remote(get_config("oauth/qq/openid_url") + access_token)
+        openid_resp = get_remote(get_config("login/qq/openid_url") + access_token)
         log.debug("get openid from qq:" + openid_resp)
         info = json.loads(openid_resp[10:-4])
         openid = info['openid']
         client_id = info['client_id']
 
         # get user info
-        url = get_config("oauth/qq/user_info_url") % (access_token, client_id, openid)
+        url = get_config("login/qq/user_info_url") % (access_token, client_id, openid)
         user_info_resp = get_remote(url)
         log.debug("get user info from qq:" + user_info_resp)
         user_info = json.loads(user_info_resp)
@@ -30,6 +32,7 @@ class QQLogin(object):
         user = User.query.filter_by(openid=openid).first()
         if user is not None:
             user.access_token = access_token
+            user.name = user_info["nickname"]
             user.nickname = user_info["nickname"]
             user.avatar_url = user_info["figureurl"]
             user.last_login_time = datetime.utcnow()
@@ -51,14 +54,14 @@ class QQLogin(object):
 class GithubLogin(object):
     def github_authorized(self, auth_code):
         # get access_token
-        token_resp = get_remote(get_config('oauth/github/access_token_url') + auth_code)
+        token_resp = get_remote(get_config('login/github/access_token_url') + auth_code)
         log.debug("get token from github:" + token_resp)
         start = token_resp.index('=')
         end = token_resp.index('&')
         access_token = token_resp[start+1:end]
 
         # get user info
-        user_info_resp = get_remote(get_config('oauth/github/user_info_url') + access_token)
+        user_info_resp = get_remote(get_config('login/github/user_info_url') + access_token)
         # conn.request('GET',url,'',{'user-agent':'flask'})
         log.debug("get user info from github:" + user_info_resp)
         # example:
@@ -86,10 +89,11 @@ class GithubLogin(object):
         avatar = user_info["avatar_url"]
 
         # get user primary email
-        email_info_resp = get_remote(get_config('oauth/github/emails_info_url') + access_token)
+        email_info_resp = get_remote(get_config('login/github/emails_info_url') + access_token)
         log.debug("get email from github:" + email_info_resp)
         email_info = json.loads(email_info_resp)
         email = filter(lambda e: e["primary"], email_info)[0]["email"]
+        # email = ",".join(map(lambda e: e["email"], email_info))
 
         log.info("successfully get email:" + email)
         user = User.query.filter_by(openid=openid).first()
@@ -110,7 +114,7 @@ class GithubLogin(object):
 
         j = Registration()
         registered = j.get_by_email(email)
-        if safe_get_config("/user/limitUnRegisteredUser", True) and registered is None:
+        if safe_get_config("/register/limitUnRegisteredUser", True) and registered is None:
             log.info("github user login successfully but not registered. Redirect to registration page")
             return None
         else:

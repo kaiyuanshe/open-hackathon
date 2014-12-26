@@ -27,7 +27,6 @@ Template_Routes = {
 manager = ExprManager()
 
 def simple_route(path):
-    session.permanent = False
     if Template_Routes.has_key(path):
         register = Registration().get_by_email(g.user.email)
         return render_template(Template_Routes[path], user=g.user, register=register)

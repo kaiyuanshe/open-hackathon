@@ -2,6 +2,10 @@ __author__ = 'junbo'
 
 from common import convert
 import docker, json
+#new
+import urllib2
+import log
+#end
 
 def name_match(id, l):
     for n in l:
@@ -15,28 +19,72 @@ class OssDocker(object):
         self.client = docker.Client(base_url='unix://var/run/docker.sock',
                                     version='1.12',
                                     timeout=20)
+        #new
+        self.base_url = "http://localhost:4243"
+        #end
+
+    #new
+    def containers(self):
+        try:
+            containers_url = self.base_url + "/containers/json"
+            opener = urllib2.build_opener(urllib2.HTTPHandler)
+            request = urllib2.Request(containers_url)
+            resp = opener.open(request)
+            return convert(json.loads(resp.read()))
+        except Exception as e:
+            log.error(e)
+    #end
 
     def get_container(self, name):
-        containers = convert(self.client.containers())
-        return next((c for c in containers if name in c["Names"] or '/'+name in c["Names"]), None)
+        #new
+        containers_test = self.containers()
+        return next((c for c in containers_test if name in c["Names"] or '/'+name in c["Names"]), None)
+        #end
+
+        #origin
+        #containers = convert(self.client.containers())
+        #return next((c for c in containers if name in c["Names"] or '/'+name in c["Names"]), None)
 
     def search_containers_by_expr_id(self, id, all=False):
-        containers = convert(self.client.containers(all=all))
-        return filter(lambda c: name_match(id, c["Names"]), containers)
+        #new
+        containers_test = self.containers()
+        return filter(lambda c: name_match(id, c["Names"]), containers_test)
+        #end
+
+        #origin
+        #containers = convert(self.client.containers(all=all))
+        #return filter(lambda c: name_match(id, c["Names"]), containers)
 
     def stop(self, name):
         if self.get_container(name) is not None:
-            self.client.stop(name)
+            #new
+            try:
+                url = "http://localhost:4243/containers/%s/stop" % name
+                urllib2.urlopen(url, "")
+            except Exception as e:
+                log.error(e)
+            #end
+            #origin
+            #self.client.stop(name)
             # self.client.remove_container(name)
             return True
         return True
 
     def health(self):
-        containers = convert(self.client.containers())
+        #new
+        containers_test = self.containers()
         return {
             "status": "OK",
-            "container_count": len(containers)
+            "container_count": len(containers_test)
         }
+        #end
+
+        #origin
+        #containers = convert(self.client.containers())
+        #return {
+        #    "status": "OK",
+        #    "container_count": len(containers)
+        #}
 
     def run(self, args):
         container_name = args["container_name"]
@@ -66,7 +114,27 @@ class OssDocker(object):
             entrypoint =args["entrypoint"] if args.has_key("entrypoint") else None
             working_dir =args["working_dir"] if args.has_key("working_dir") else None
 
-            c_id = self.client.create_container(image,
+            #new
+            container_config = {}
+            container_config["Image"] = image
+            container_config["Ports"] = ports[1::2]
+            container_config["Volumes"] = mnts[1::2]
+            container_config["Env"] = env
+            container_config["Cmd"] = command
+            container_config["OpenStdin"] = stdin_open
+            container_config["Tty"] = tty
+            container_config["Dns"] = dns
+            container_config["Entrypoint"] = entrypoint
+            container_config["WorkingDir"] = working_dir
+            containers_url = self.base_url + "/containers/create?name=%s" % container_name
+            req = urllib2.Request(containers_url)
+            req.add_header('Content-Type', 'application/json')
+            test = urllib2.urlopen(containers_url, json.dumps(container_config))
+            c_id = json.loads(test)
+            #end
+
+            #origin
+            """c_id = self.client.create_container(image,
                                          name=container_name,
                                          ports=ports[1::2],
                                          volumes=mnts[1::2],
@@ -78,6 +146,7 @@ class OssDocker(object):
                                          dns=dns,
                                          entrypoint=entrypoint,
                                          working_dir=working_dir)
+            """
             result["container_id"]= c_id["Id"]
             self.client.start(c_id,
                               port_bindings=port_bingings,
