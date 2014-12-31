@@ -1,14 +1,21 @@
 import logging
 import logging.config
 from os.path import realpath, dirname
-
+from logging.handlers import RotatingFileHandler
+from app import app
 
 #"application" code
 class Log(object):
     def __init__(self):
-        logging.config.fileConfig("%s/logging.conf" % dirname(realpath(__file__)))
-        #create logger
-        self.logger = logging.getLogger("myLogger")
+        # logging.config.fileConfig("%s/logging.conf" % dirname(realpath(__file__)))
+        loggers = [app.logger, logging.getLogger('sqlalchemy')]
+        file_handler = RotatingFileHandler('/var/log/osslab/osslab.log', maxBytes=1024 * 1024 * 50, backupCount=14)
+        file_handler.setLevel(logging.DEBUG)
+        for logger in loggers:
+            logger.addHandler(file_handler)
+
+        self.logger = app.logger
+
 
     def debug(self, debug):
         self.logger.debug(debug)

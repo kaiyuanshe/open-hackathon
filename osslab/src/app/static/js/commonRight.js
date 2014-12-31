@@ -45,5 +45,19 @@ $(function(){
         error: function () {
         }
     });
+
+    setInterval(function(){
+        $.ajax({
+            url: '/api/announcement',
+            type: "GET",
+            success: function (resp) {
+                anmt = $.parseJSON(resp)
+                $("#anmt").text(anmt.content)
+            },
+            error: function () {
+            }
+        });
+    }, 3*60*1000);
+
 })
 

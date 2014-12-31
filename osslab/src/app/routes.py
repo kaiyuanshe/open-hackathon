@@ -8,6 +8,7 @@ from expr_mgr import ExprManager;
 from os.path import realpath, dirname
 from log import log
 from registration import Registration
+from database import Announcement
 
 Template_Routes = {
     "PrivacyStatement": "PrivacyStatement.html",
@@ -93,3 +94,8 @@ class DoCourse(Resource):
 
     def put(self, id):
         return manager.heart_beat(id)
+
+
+class Anmt(Resource):
+    def get(self):
+        return Announcement.query.filter_by(enabled=1).first().json()
