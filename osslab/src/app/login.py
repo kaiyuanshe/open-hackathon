@@ -27,7 +27,7 @@ class QQLogin(object):
         url = get_config("login/qq/user_info_url") % (access_token, client_id, openid)
         user_info_resp = get_remote(url)
         log.debug("get user info from qq:" + user_info_resp)
-        user_info = json.loads(user_info_resp)
+        user_info = convert(json.loads(user_info_resp))
 
         user = User.query.filter_by(openid=openid).first()
         if user is not None:
