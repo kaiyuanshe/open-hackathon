@@ -1,4 +1,4 @@
-import urllib, urllib2, httplib, json, os
+import urllib, urllib2, httplib, json, os, requests
 from datetime import datetime
 
 from config import Config
@@ -36,12 +36,20 @@ def mkdir_safe(path):
 
 # move to common.py for re-use
 def post_to_remote(url, post_data, contentType='application/json'):
+    """
     req = urllib2.Request(url)
     req.add_header('Content-Type', contentType)
     f = urllib2.urlopen(req, json.dumps(post_data))
     resp = f.read()
     f.close()
-    return convert(json.loads(resp))
+    """
+    headers = {'content-type':'application/json'}
+    req = requests.post(url, data=json.dumps(post_data),headers=headers)
+    resp = json.loads(req.content)
+
+    return convert(resp)
+
+    #end
 
 def get_remote(url, accept=None):
     opener = urllib2.build_opener(urllib2.HTTPHandler)

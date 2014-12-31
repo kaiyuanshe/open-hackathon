@@ -1,7 +1,7 @@
 $(document).ready(function () {
     var course = getParameterByName("cid");
-    if(!course)
-        course = "python"
+    if(!course || typeof(course)=="undefined")
+        course = "ubuntu"
     var main = $("#hack_main").on('mouseover','iframe',function(e){
         $(this).focus();
     });
@@ -12,20 +12,16 @@ $(document).ready(function () {
         success: function (resp) {
             var data = resp
             var servers = data.guacamole_servers;
-
             if (servers.length > 0) {
-                ul = $("<ul/>")
+                var  ul = $("<ul>");
                 // tips tab
                 ul.append($('<li name="hack_main_tips"><div class="selected">Endpoints</div></li>'))
-
                 // bar and iframe
                 $.each(servers, function(i, s){
-                    li = $('<li name="hack_main_'+s.name+'"></li>')
-                    div = $('<div>'+s.name+'</div>')
-                    div.data("data", s)
-                    li.append(div)
-                    ul.append(li)
-                    sd = $('<div/>').attr("id", "hack_main_"+s.name)
+                    var li = $('<li name="hack_main_'+s.name+'"></li>');
+                    li.append($('<div>').data("data", s).text(s.name)).appendTo(ul);
+                    var sd = $('<div>').attr({"id":"hack_main_"+s.name}).addClass('hidden')
+                    main.append(sd);
                     var iframe = $('<iframe>').attr({
                         src:s.url,
                         width:'100%',
@@ -34,13 +30,12 @@ $(document).ready(function () {
                         marginwidth:'10',
                         scrolling:'yes'
                     }).appendTo(sd);
-                    main.append(sd)
                 })
                 $("#hackathon_nav").append(ul)
 
                 // show tips by default
-                $("#hack_main_tips").show()
-                $("#hack_main_tips").siblings().hide()
+                $("#hack_main_tips").removeClass('hidden');
+                $("#hack_main_tips").siblings().addClass('hidden');
 
                 // submit
                 $("#submit").click(function () {
@@ -59,14 +54,15 @@ $(document).ready(function () {
                 }
 
                 // nav bar events
-                $(".center .mid ul li").each(function (i) {
-                    $(this).click(function () {
-                        $(this).children().attr('class', 'selected');
-                        $(this).siblings().children().attr("class", "");
-                        $("#" + $(this).attr("name")).show()
-                        $("#" + $(this).attr("name")).siblings().hide()
-                    })
+                $(".center .mid ul li").click(function () {
+                    var li = $(this);
+                    var name = '#'+li.attr("name");
+                    var url = li.data().iframe;
+                    li.children().addClass('selected');
+                    li.siblings().children().removeClass("selected")
+                    $(name).removeClass('hidden').siblings().addClass('hidden');
                 })
+
 
                 // heart beat
                 var ihb = setInterval(function () {

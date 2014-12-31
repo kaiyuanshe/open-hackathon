@@ -3,11 +3,22 @@
 body {
     background-color: #cccccc;
 }
-.mainContainer {
-    margin: 0 auto;
-    text-align: center;
+.masthead{
+background-color: #fff;
 }
-
+.mainContainer {
+     width:1000px;
+     margin:0 auto;
+     text-align: center;
+}
+.main-wrapper{
+     background-color:#fff;
+}
+.w-container{
+    width:960px;
+    margin:0 auto;
+    padding-bottom:100px;
+}
 .jumbotron{
     overflow:hidden;
     padding:0px;
@@ -70,7 +81,6 @@ body {
     margin-left: auto;
     margin-right: auto;
     color: #000000;
-    margin-top: 20px;
 }
 
 
@@ -687,37 +697,6 @@ object {
   border-spacing: 0;
 }
 
-@font-face {
-  font-family: 'wf_segoe_ui_light';
-  src: url("//i.s-microsoft.com/fonts/segoe-ui/west-european/light/latest.eot");
-  src: local("Segoe UI Light"), local("Segoe WP Light"), url("//i.s-microsoft.com/fonts/segoe-ui/west-european/light/latest.eot?#iefix") format("embedded-opentype"), url("//i.s-microsoft.com/fonts/segoe-ui/west-european/light/latest.woff") format("woff"), url("//i.s-microsoft.com/fonts/segoe-ui/west-european/light/latest.ttf") format("truetype"), url("//i.s-microsoft.com/fonts/segoe-ui/west-european/light/latest.svg#web") format("svg");
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'wf_segoe_ui_normal';
-  src: url("//i.s-microsoft.com/fonts/segoe-ui/west-european/normal/latest.eot");
-  src: local("Segoe UI"), local("Segoe"), local("Segoe WP"), url("//i.s-microsoft.com/fonts/segoe-ui/west-european/normal/latest.eot?#iefix") format("embedded-opentype"), url("//i.s-microsoft.com/fonts/segoe-ui/west-european/normal/latest.woff") format("woff"), url("//i.s-microsoft.com/fonts/segoe-ui/west-european/normal/latest.ttf") format("truetype"), url("//i.s-microsoft.com/fonts/segoe-ui/west-european/normal/latest.svg#web") format("svg");
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'wf_segoe_ui_semibold';
-  src: url("//i.s-microsoft.com/fonts/segoe-ui/west-european/Semibold/latest.eot");
-  src: local("Segoe UI Semibold"), local("Segoe Semibold"), local("Segoe WP Semibold"), url("//i.s-microsoft.com/fonts/segoe-ui/west-european/Semibold/latest.eot?#iefix") format("embedded-opentype"), url("//i.s-microsoft.com/fonts/segoe-ui/west-european/Semibold/latest.woff") format("woff"), url("//i.s-microsoft.com/fonts/segoe-ui/west-european/Semibold/latest.ttf") format("truetype"), url("//i.s-microsoft.com/fonts/segoe-ui/west-european/Semibold/latest.svg#web") format("svg");
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'wf_icons_normal';
-  src: url("//i.s-microsoft.com/fonts/icons/homepage/normal/2.eot");
-  src: url("//i.s-microsoft.com/fonts/icons/homepage/normal/2.eot?#iefix") format("embedded-opentype"), url("//i.s-microsoft.com/fonts/icons/homepage/normal/2.woff") format("woff"), url("//i.s-microsoft.com/fonts/icons/homepage/normal/2.ttf") format("truetype"), url("//i.s-microsoft.com/fonts/icons/homepage/normal/2.svg#web") format("svg");
-  font-weight: normal;
-  font-style: normal;
-}
 
 /* line 40, ../sass/complete.scss */
 * {
@@ -725,26 +704,13 @@ object {
 }
 
 /* line 44, ../sass/complete.scss */
-html[lang=zh-hans] * {
-  font-family: "MS Yahei", "Heiti SC", "wf_segoe_ui_normal", "Myriad Pro", "Arial", "Helvetica", sans-serif;
-}
+
 
 /* line 48, ../sass/complete.scss */
 input[type=search] {
   -webkit-appearance: textfield;
 }
 
-/* line 52, ../sass/complete.scss */
-body {
-  font-family: "wf_segoe_ui_normal", "Myriad Pro", "MS Yahei", "Heiti SC", "Arial", "Helvetica", sans-serif;
-  margin: 0;
-  padding: 0;
-}
-
-/* line 59, ../sass/complete.scss */
-html[lang=zh-hans] body {
-  font-family: "MS Yahei", "Heiti SC", "wf_segoe_ui_normal", "Myriad Pro", "Arial", "Helvetica", sans-serif;
-}
 
 /* line 63, ../sass/complete.scss */
 #page-wrap {
@@ -3612,7 +3578,7 @@ blockquote strong::before {
 /* line 30, ../sass/_responsiveslides.scss */
 .upper-home-area {
   width: 100%;
-  margin-top:30px;
+  padding:30px;
 }
 
 /* line 33, ../sass/_responsiveslides.scss */
@@ -3776,9 +3742,7 @@ a.readmore-news {
   }
 
   /* line 177, ../sass/_responsiveslides.scss */
-  .rslides h3 {
-    display: none;
-  }
+
 
   /* line 180, ../sass/_responsiveslides.scss */
   .rslides_tabs {
