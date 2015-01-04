@@ -6,11 +6,19 @@ from log import log
 import json
 from registration import *
 from flask.ext.login import login_user
+from flask import request, redirect, session
+from constants import *
 
 class QQLogin(object):
-    def qq_authorized(self, auth_code, state):
+    def qq_authorized(self):
+        code = request.args.get('code')
+        state = request.args.get('state')
+        if state != QQ_OAUTH_STATE:
+            log.warn("STATE match fail. Potentially CSFR.")
+            return "UnAuthorized", 401
+
         # get access token
-        token_resp = get_remote(get_config("login/qq/access_token_url") + auth_code + '&state=' + state)
+        token_resp = get_remote(get_config("login/qq/access_token_url") + code + '&state=' + state)
         log.debug("get token from qq:" + token_resp)
         start = token_resp.index('=')
         end = token_resp.index('&')
@@ -49,12 +57,23 @@ class QQLogin(object):
             db.session.commit()
 
         login_user(user)
-        return user
+        log.info("qq user login successfully:" + repr(user))
+
+        hava_running_expr = Experiment.query.filter_by(user_id=user.id, status=1).count() > 0
+        next_url = session["next"]
+        if next_url is None:
+            next_url = "/hackathon" if hava_running_expr else "/settings"
+        else:
+            session["next"] = None
+
+        return redirect(next_url)
 
 class GithubLogin(object):
-    def github_authorized(self, auth_code):
+    def github_authorized(self):
+        code = request.args.get('code')
+
         # get access_token
-        token_resp = get_remote(get_config('login/github/access_token_url') + auth_code)
+        token_resp = get_remote(get_config('login/github/access_token_url') + code)
         log.debug("get token from github:" + token_resp)
         start = token_resp.index('=')
         end = token_resp.index('&')
@@ -110,15 +129,32 @@ class GithubLogin(object):
             db.session.add(user)
             db.session.commit()
 
+        # login user so that flask-login can manage session and cookies
         login_user(user)
+        log.info("github user login successfully:" + repr(user))
 
-        j = Registration()
-        registered = j.get_by_email(email)
-        if safe_get_config("/register/limitUnRegisteredUser", True) and registered is None:
-            log.info("github user login successfully but not registered. Redirect to registration page")
-            return None
+        # find out the hackacathon registration info
+        is_registration_limited = safe_get_config("/register/limitUnRegisteredUser", True)
+        registered = Registration().get_by_email(email)
+
+        is_admin = user.is_admin()
+        is_not_registered = is_registration_limited and registered is None
+        hava_running_expr = Experiment.query.filter_by(user_id=user.id, status=1).count() > 0
+
+        next_url = session["next"]
+        if next_url is None:
+            next_url = "/hackathon" if hava_running_expr else "/settings"
+        else:
+            session["next"] = None
+
+        if is_not_registered:
+            if is_admin:
+                return redirect(next_url)
+            else:
+                log.info("github user login successfully but not registered. Redirect to registration page")
+                return redirect("/notregister")
         else:
             registered.online = 1
             db.session.commit()
-            log.info("github user login successfully:" + repr(user))
-            return user
+            return redirect(next_url)
+

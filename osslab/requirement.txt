@@ -4,6 +4,7 @@ flask-login
 flask-openid
 flask-cors
 flask-debugtoolbar
+flask-admin
 sqlalchemy
 flask-sqlalchemy
 mysql-python

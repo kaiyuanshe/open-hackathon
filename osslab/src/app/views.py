@@ -10,6 +10,7 @@ from constants import *
 from log import log
 from flask.ext.login import login_required, LoginManager, logout_user, current_user
 from datetime import timedelta
+import admin
 
 api = Api(app)
 login_manager = LoginManager()
@@ -28,6 +29,9 @@ def load_user(id):
 @app.route('/')
 @app.route('/index')
 def index():
+    next = request.args.get("next")
+    if next is not None:
+        session["next"] = next
     return render_template("index.html", providers=safe_get_config("login/provider_enabled", ["github"]))
 
 # error handler for 404
@@ -62,35 +66,19 @@ def js_config():
 
 @app.route('/github')
 def github():
-    code = request.args.get('code')
-    gl = GithubLogin()
-    user = gl.github_authorized(code)
-    if user is not None:
-        expr = Experiment.query.filter_by(user_id=user.id, status=1).first()
-        if expr is not None:
-            reg = Register.query.filter(Register.email == user.email).first()
-            if reg is not None and reg.submitted == 1:
-                return redirect("/submitted")
-            else:
-                return redirect("/hackathon")
-        else:
-            return redirect("/settings")
-    else:
-        return redirect("/notregister")
+    try:
+        return GithubLogin().github_authorized()
+    except Exception as err:
+        log.error(err)
+        return "Internal Server Error", 500
 
 @app.route('/qq')
 def qq():
-    code = request.args.get('code')
-    state = request.args.get('state')
-    if state != QQ_OAUTH_STATE:
-        log.warn("STATE match fail. Potentially CSFR.")
-        return "UnAuthorized", 401
-
-    qq_login = QQLogin()
-    user = qq_login.qq_authorized(code, state)
-    log.info("qq user login successfully:" + repr(user))
-
-    return redirect("/settings")
+    try:
+        return QQLogin().qq_authorized()
+    except Exception as err:
+        log.error(err)
+        return "Internal Server Error", 500
 
 # @app.route('/renren')
 def renren():
@@ -133,6 +121,5 @@ def before_request():
     app.permanent_session_lifetime = timedelta(minutes=session_lifetime_minutes)
 
 api.add_resource(CourseList, "/api/courses")
-api.add_resource(DoCourse, "/api/course/<string:id>")
 api.add_resource(StatusList, "/api/registerlist")
 api.add_resource(Anmt, "/api/announcement")
