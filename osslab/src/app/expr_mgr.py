@@ -6,9 +6,6 @@ from database import *
 from log import log
 from constants import *
 from registration import Registration
-import sys
-
-sys.path.append('/home/zhengxx/Projects/LABOSS/cloudvm/src/app')
 from ossdocker import *
 
 docker = OssDocker()
@@ -89,7 +86,6 @@ class ExprManager(object):
         return vm
 
     def __get_available_host_port(self, port_bindings, port):
-
         host_port = port + 10000
 
         while len(filter(lambda p: p.vm_private_port == host_port, port_bindings)) > 0:
@@ -196,15 +192,13 @@ class ExprManager(object):
         # start container remotely
         guaca = post_data["guacamole_config"] if post_data.has_key("guacamole_config") else None
         if guaca is not None:
-            url = "%s/docker" % self.__get_cloudvm_address(host_server)
+            url = "%s/guacamole" % self.__get_cloudvm_address(host_server)
             post_to_remote(url, post_data)
-            #mnts = post_data["mnt"] if post_data.has_key("mnt") else []
-            #guaca_dir = course_path(post_data["expr_id"], "guacamole")
-            #mnts.append(guaca_dir)
-            #mnts.append("/etc/guacamole")
-            #post_data["mnt"] = #mnts
-            # container_ret = docker.run(post_data)
-        # container_ret = post_to_remote(url, post_data)
+            mnts = post_data["mnt"] if post_data.has_key("mnt") else []
+            guaca_dir = course_path(post_data["expr_id"], "guacamole")
+            mnts.append(guaca_dir)
+            mnts.append("/etc/guacamole")
+            post_data["mnt"] = mnts
         container_ret = docker.run(post_data)
         container.container_id = container_ret["container_id"]
         container.status = 1
@@ -297,7 +291,6 @@ class ExprManager(object):
             # stop containers
             for c in expr.containers:
                 try:
-                    # url = "%s/docker?cname=%s" % (self.__get_cloudvm_address(c.host_server), c.name)
                     docker.stop(c.name)
                     c.status = 2
                     c.host_server.container_count -= 1

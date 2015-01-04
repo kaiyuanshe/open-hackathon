@@ -1,19 +1,20 @@
-from flask import Flask, request
-from flask.ext.restful import reqparse, abort, Api, Resource
-from time import gmtime, strftime
-from gittle import Gittle
-from app import app
-from scm import SCM
-from common import *
-from ossdocker import OssDocker
-from log import log
-import json, shutil, os
+import json
+import shutil
+import os
 import xml.dom.minidom as minidom
 from os.path import realpath, dirname
 
+from flask import request
+
+from flask.ext.restful import reqparse, Api, Resource
+from app import app
+from scm import SCM
+from log import log
+from common import *
+
+
 api = Api(app)
-docker = OssDocker()
-start_time = strftime("%Y-%m-%d %H-%M-%S", gmtime())
+
 
 # make sure OSSLAB_RUN_DIR is writable by the running user: the current user if run in cmd or www-data in apache2.
 # don't use sudo because you cannot always run your code in sudo e.g. apache2 service
@@ -34,26 +35,7 @@ def course_path(id, sub=None):
         return "%s/%s/%s" % (OSSLAB_RUN_DIR, id, sub)
 
 
-class Health(Resource):
-    def get(self):
-        try:
-            health = {
-                "status": "OK",
-                "start_time": start_time,
-                "report_time": strftime("%Y-%m-%d %H-%M-%S", gmtime()),
-                "docker": docker.health()
-            }
-            return health
-        except Exception as err:
-            log.error(err)
-            return {
-                "status": "Error",
-                "start_time": start_time,
-                "report_time": strftime("%Y-%m-%d %H-%M-%S", gmtime()),
-            }
-
-
-class DockerManager(Resource):
+class GuacamoleConfig(Resource):
     def post(self):
         try:
             # ====================================================test data start
@@ -67,7 +49,6 @@ class DockerManager(Resource):
 
             args = convert(request.get_json())
             expr_id = args["expr_id"]
-            mnts = args["mnt"] if args.has_key("mnt") else []
             # todo parameters validation
 
             guaca = args["guacamole_config"] if args.has_key("guacamole_config") else None
@@ -98,25 +79,9 @@ class DockerManager(Resource):
                 f = open("%s/%s" % (guaca_dir, "noauth-config.xml"), "w")
                 dom.writexml(f, addindent="  ", newl="\n", encoding="utf-8")
                 f.close()
-
-                mnts.append(guaca_dir)
-                mnts.append("/etc/guacamole")
-                args["mnt"] = mnts
-                docker.run(args)
-
         except Exception as err:
             log.error(err)
             return "fail to start due to '%s'" % err, 500
-
-    def delete(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument('cname', type=str)
-        args = parser.parse_args()
-        name = args["cname"]
-
-        docker.stop(name)
-
-        return "OK"
 
 
 class SourceCode(Resource):
@@ -152,6 +117,5 @@ class SourceCode(Resource):
         return "OK"
 
 
-api.add_resource(Health, '/')
-api.add_resource(DockerManager, '/docker')
+api.add_resource(GuacamoleConfig, '/guacamole')
 api.add_resource(SourceCode, '/scm')
