@@ -14,7 +14,9 @@
                 "port": 22
             }],
             "command":"/usr/sbin/sshd -D",
-            "detach":true,
+            "AttachStdin":false,
+            "AttachStdout":true,
+            "AttachStderr":true,
             "guacamole": {
                 "protocol": "ssh",
                 "username": "root",
@@ -29,7 +31,9 @@
                 "name": "Dev",
                 "port": 5901
             }],
-            "detach":true,
+            "AttachStdin":false,
+            "AttachStdout":true,
+            "AttachStderr":true,
             "tty": true,
             "stdin_open": true,
             "guacamole": {

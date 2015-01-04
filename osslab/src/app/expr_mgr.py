@@ -7,13 +7,22 @@ from log import log
 from constants import *
 from registration import Registration
 import sys
+
 sys.path.append('/home/zhengxx/Projects/LABOSS/cloudvm/src/app')
 from ossdocker import *
 
-docker=OssDocker()
+docker = OssDocker()
+OSSLAB_RUN_DIR = "/var/lib/osslab"
+
+
+def course_path(id, sub=None):
+    if sub is None:
+        return "%s/%s" % (OSSLAB_RUN_DIR, id)
+    else:
+        return "%s/%s/%s" % (OSSLAB_RUN_DIR, id, sub)
+
 
 class ExprManager(object):
-
     def __get_guacamole_container(self, expr):
         return expr.containers.filter_by(image=GUACAMOLE_IMAGE).first()
 
@@ -44,7 +53,8 @@ class ExprManager(object):
                     guaca_config = json.loads(c.guacamole)
                     host_server = guaca_container.host_server
                     guaca_pub_port = guaca_container.port_bindings.first().vm_public_port
-                    url= "http://%s:%s/client.xhtml?id=" % (host_server.public_dns, guaca_pub_port) + "c%2F" + guaca_config["name"]
+                    url = "http://%s:%s/client.xhtml?id=" % (host_server.public_dns, guaca_pub_port) + "c%2F" + \
+                          guaca_config["name"]
                     guacamole_servers.append({
                         "name": guaca_config["name"],
                         "url": url
@@ -57,7 +67,7 @@ class ExprManager(object):
         for c in expr.containers.filter(DockerContainer.image != GUACAMOLE_IMAGE):
             for p in c.port_bindings:
                 if p.vm_public_port is not None:
-                    url= "http://%s:%s" % (c.host_server.public_dns, p.vm_public_port)
+                    url = "http://%s:%s" % (c.host_server.public_dns, p.vm_public_port)
                     public_urls.append({
                         "name": p.name,
                         "url": url
@@ -67,8 +77,8 @@ class ExprManager(object):
         return ret
 
     def __get_available_vm(self, expr_config):
-        req_count= len(expr_config["containers"]) + 1
-        vm= HostServer.query.filter(HostServer.container_count + req_count <= HostServer.container_max_count).first()
+        req_count = len(expr_config["containers"]) + 1
+        vm = HostServer.query.filter(HostServer.container_count + req_count <= HostServer.container_max_count).first()
 
         # todo connect to azure to launch new VM if no existed VM meet the requirement
         # since it takes some time to launch VM, it's more reasonable to launch VM when the existed ones are almost used up.
@@ -104,7 +114,7 @@ class ExprManager(object):
             if not "public_port" in port_cfg:
                 port_cfg["public_port"] = port_cfg["host_port"]
 
-            if safe_get_config("environment", "prod") == "local" and port_cfg["host_port"]==80:
+            if safe_get_config("environment", "prod") == "local" and port_cfg["host_port"] == 80:
                 port_cfg["host_port"] += 10000
                 port_cfg["public_port"] = port_cfg["host_port"]
         else:
@@ -134,7 +144,7 @@ class ExprManager(object):
         post_data = scm
         post_data["expr_id"] = expr.id
 
-        url= "%s/scm" % self.__get_cloudvm_address(host_server)
+        url = "%s/scm" % self.__get_cloudvm_address(host_server)
         return post_to_remote(url, post_data)
 
     def __remote_start_container(self, expr, host_server, scm, container_config, guacamole_config):
@@ -152,13 +162,13 @@ class ExprManager(object):
         # the mnt may contain placeholder for source code dir which are decided by 'cloudvm' service
         if "ports" in container_config:
             # get an available on the target VM
-            ps= map(lambda p: [self.__assign_port(expr, host_server, container, p).vm_private_port, p["port"]],
-                    container_config["ports"])
+            ps = map(lambda p: [self.__assign_port(expr, host_server, container, p).vm_private_port, p["port"]],
+                     container_config["ports"])
             container_config["docker_ports"] = flatten(ps)
         if container_config.has_key("mnt"):
             local_repo_path = "" if scm is None else scm["local_repo_path"]
             mnts_with_repo = map(lambda s: s if "%s" not in s else s % local_repo_path, container_config["mnt"])
-            container_config["mnt"]= mnts_with_repo
+            container_config["mnt"] = mnts_with_repo
 
         # add to guacamole config
         # note the port should get from the container["port"] to get corresponding listening port rather than the
@@ -184,12 +194,18 @@ class ExprManager(object):
                 guacamole_config.append(gc)
 
         # start container remotely
-        if post_data.has_key("guacamole_config"):
+        guaca = post_data["guacamole_config"] if post_data.has_key("guacamole_config") else None
+        if guaca is not None:
             url = "%s/docker" % self.__get_cloudvm_address(host_server)
-            container_ret = post_to_remote(url, post_data)
-        #container_ret = post_to_remote(url, post_data)
-        else:
-            container_ret=docker.run(post_data)
+            post_to_remote(url, post_data)
+            #mnts = post_data["mnt"] if post_data.has_key("mnt") else []
+            #guaca_dir = course_path(post_data["expr_id"], "guacamole")
+            #mnts.append(guaca_dir)
+            #mnts.append("/etc/guacamole")
+            #post_data["mnt"] = #mnts
+            # container_ret = docker.run(post_data)
+        # container_ret = post_to_remote(url, post_data)
+        container_ret = docker.run(post_data)
         container.container_id = container_ret["container_id"]
         container.status = 1
         host_server.container_count += 1
@@ -239,16 +255,18 @@ class ExprManager(object):
         # start guacamole
         if len(guacamole_config) > 0:
             # also, the guacamole port should come from DB
-            guacamole_container_config= {
+            guacamole_container_config = {
                 "name": "guacamole",
                 "expr_id": expr.id,
                 "image": GUACAMOLE_IMAGE,
                 "ports": [{
-                    "name": "guacamole",
-                    "port": GUACAMOLE_PORT,
-                    "public": True
-                }],
-                "detach": True,
+                              "name": "guacamole",
+                              "port": GUACAMOLE_PORT,
+                              "public": True
+                          }],
+                "AttachStdin": False,
+                "AttachStdout": True,
+                "AttachStderr": True,
                 "guacamole_config": guacamole_config
             }
 
@@ -279,7 +297,7 @@ class ExprManager(object):
             # stop containers
             for c in expr.containers:
                 try:
-                    #url = "%s/docker?cname=%s" % (self.__get_cloudvm_address(c.host_server), c.name)
+                    # url = "%s/docker?cname=%s" % (self.__get_cloudvm_address(c.host_server), c.name)
                     docker.stop(c.name)
                     c.status = 2
                     c.host_server.container_count -= 1

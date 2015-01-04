@@ -20,7 +20,9 @@
             }],
             "mnt2":["%s/src","/src"],
             "mnt": ["/home/opentech/github/flask-example/src", "/src"],
-            "detach":true,
+            "AttachStdin":false,
+            "AttachStdout":true,
+            "AttachStderr":true,
             "guacamole": {
                 "protocol": "ssh",
                 "username": "root",
@@ -37,7 +39,9 @@
             }],
             "mnt2":["%s/src","/src"],
             "mnt": ["/home/opentech/github/flask-example/src", "/src"],
-            "detach":true,
+            "AttachStdin":false,
+            "AttachStdout":true,
+            "AttachStderr":true,
             "guacamole": {
                 "protocol": "ssh",
                 "username": "root",
