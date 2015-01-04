@@ -149,10 +149,10 @@ class OssDocker(object):
             start_config["PortBindings"] = {}
 
             #"Binds" = ["/host/path:/container/path:ro/rw"]
-            if mnt_bindings is not None:
+            if mnt_bindings:
                 start_config["Binds"] = []
                 for key in mnt_bindings:
-                    start_config["Binds"].append(mnt_bindings[key]["bind"] + ":" + key)
+                    start_config["Binds"].append(key + ":" + mnt_bindings[key]["bind"] + ":rw")
             for key in port_bingings:
                 temp = []
                 config = {}

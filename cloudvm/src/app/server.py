@@ -99,8 +99,8 @@ class DockerManager(Resource):
                 mnts.append(guaca_dir)
                 mnts.append("/etc/guacamole")
                 args["mnt"]= mnts
+                return docker.run(args)
 
-            return docker.run(args)
         except Exception as err:
             log.error(err)
             return "fail to start due to '%s'" % err, 500

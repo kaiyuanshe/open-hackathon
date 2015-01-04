@@ -6,6 +6,11 @@ from database import *
 from log import log
 from constants import *
 from registration import Registration
+import sys
+sys.path.append('/home/zhengxx/Projects/LABOSS/cloudvm/src/app')
+from ossdocker import *
+
+docker=OssDocker()
 
 class ExprManager(object):
 
@@ -179,8 +184,12 @@ class ExprManager(object):
                 guacamole_config.append(gc)
 
         # start container remotely
-        url = "%s/docker" % self.__get_cloudvm_address(host_server)
-        container_ret = post_to_remote(url, post_data)
+        if post_data.has_key("guacamole_config"):
+            url = "%s/docker" % self.__get_cloudvm_address(host_server)
+            container_ret = post_to_remote(url, post_data)
+        #container_ret = post_to_remote(url, post_data)
+        else:
+            container_ret=docker.run(post_data)
         container.container_id = container_ret["container_id"]
         container.status = 1
         host_server.container_count += 1
@@ -270,8 +279,8 @@ class ExprManager(object):
             # stop containers
             for c in expr.containers:
                 try:
-                    url = "%s/docker?cname=%s" % (self.__get_cloudvm_address(c.host_server), c.name)
-                    delete_remote(url)
+                    #url = "%s/docker?cname=%s" % (self.__get_cloudvm_address(c.host_server), c.name)
+                    docker.stop(c.name)
                     c.status = 2
                     c.host_server.container_count -= 1
                     if c.host_server.container_count < 0:
