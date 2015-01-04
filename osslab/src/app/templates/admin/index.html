@@ -1,0 +1,16 @@
+{% extends 'admin/master.html' %}
+{% block body %}
+{{ super() }}
+
+<div class="row-fluid">
+    <h1>Welcome to Management Console</h1>
+    <p class="lead">
+        {{ user.nickname }}
+    </p>
+    <p>
+        Manage registered users, hackathons, and administrators. You can add/delete/update all of them here.
+    </p>
+    <a class="btn btn-primary" href="/hackathon"><i class="icon-arrow-left icon-white"></i> Back</a>
+</div>
+
+{% endblock body %}

@@ -33,9 +33,14 @@
                   <div id="photo"><img id="userImg" height="30" width="30" src="{{current_user.avatar_url}}"></div>
 
                 </div>
-                 <div class="form-group">
+                <div class="form-group">
                   <div id="logout"><p style="color:white;padding-left:5px;cursor:pointer" >[登出]</p></div>
                 </div>
+                {% if user.is_admin() %}
+                <div class="form-group">
+                  <div><p style="color:white;padding-left:5px;cursor:pointer" onclick="javascript:location.href='admin'">[Admin]</p></div>
+                </div>
+                {% endif %}
 {% endif %}
               </form>
             </div>

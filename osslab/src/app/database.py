@@ -53,6 +53,9 @@ class User(db.Model):
     def get_id(self):
         return unicode(self.id)
 
+    def is_admin(self):
+        return self.admin.count() > 0
+
     def json(self):
         return to_json(self, self.__class__)
 
@@ -288,3 +291,20 @@ class Announcement(db.Model):
 
     def __repr__(self):
         return "Announcement: " + self.json()
+
+
+# temporary class
+class AdminUser(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user = db.relationship('User', backref=db.backref('admin', lazy='dynamic'), uselist=False)
+
+    def json(self):
+        return to_json(self, self.__class__)
+
+    def __init__(self, user):
+        self.user = user
+
+    def __repr__(self):
+        return "AdminUser: " + self.json()
