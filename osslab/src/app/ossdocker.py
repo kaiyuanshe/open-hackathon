@@ -30,12 +30,17 @@ def name_match(id, l):
 
 class OssDocker(object):
     def __init__(self):
-        self.base_url = "http://localhost:4243"
         self.headers = {'content-type': 'application/json'}
+
+    def base_url(self):
+        vm = HostServer.query.first()
+        vm_url = "http://" + vm.public_dns + ":4243"
+        return vm_url
+
 
     def containers_info(self):
         try:
-            containers_url = self.base_url + "/containers/json"
+            containers_url = self.base_url() + "/containers/json"
             req = requests.get(containers_url)
             return convert(json.loads(req.content))
         except Exception as e:
@@ -55,7 +60,7 @@ class OssDocker(object):
     def stop(self, name):
         if self.get_container(name) is not None:
             try:
-                containers_url = self.base_url + "/containers/%s/stop" % name
+                containers_url = self.base_url() + "/containers/%s/stop" % name
                 requests.post(containers_url)
             except Exception as e:
                 log.error(e)
@@ -112,7 +117,7 @@ class OssDocker(object):
             container_config["AttachStdin"] = args["AttachStdin"],
             container_config["AttachStdout"] = args["AttachStdout"],
             container_config["AttachStderr"] = args["AttachStderr"],
-            containers_url = self.base_url + "/containers/create?name=%s" % container_name
+            containers_url = self.base_url() + "/containers/create?name=%s" % container_name
             req_create = requests.post(containers_url, data=json.dumps(container_config), headers=self.headers)
 
             c_id = json.loads(req_create.content)
@@ -134,7 +139,7 @@ class OssDocker(object):
                 start_config["PortBindings"][str(key) + "/tcp"] = temp
             result["container_id"] = c_id["Id"]
             try:
-                url = self.base_url + "/containers/%s/start" % c_id["Id"]
+                url = self.base_url() + "/containers/%s/start" % c_id["Id"]
                 requests.post(url, data=json.dumps(start_config), headers=self.headers)
             except Exception as e:
                 log.error(e)
