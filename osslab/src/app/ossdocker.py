@@ -6,10 +6,12 @@ import requests
 
 import log
 
+from database import *
+
 
 def convert(input):
     if isinstance(input, dict):
-        return {convert(key):convert(value) for key,value in input.iteritems()}
+        return {convert(key): convert(value) for key, value in input.iteritems()}
     elif isinstance(input, list):
         return [convert(element) for element in input]
     elif isinstance(input, unicode):
@@ -38,7 +40,7 @@ class OssDocker(object):
             return convert(json.loads(req.content))
         except Exception as e:
             log.error(e)
-
+            return []
 
     def get_container(self, name):
         containers = self.containers_info()
@@ -46,24 +48,20 @@ class OssDocker(object):
 
     def search_containers_by_expr_id(self, id, all=False):
         get_containers = self.containers_info()
+        if all:
+            return get_containers
         return filter(lambda c: name_match(id, c["Names"]), get_containers)
 
     def stop(self, name):
         if self.get_container(name) is not None:
             try:
-                containers_url = "http://localhost:4243/containers/%s/stop" % name
+                containers_url = self.base_url + "/containers/%s/stop" % name
                 requests.post(containers_url)
             except Exception as e:
                 log.error(e)
+                return []
             return True
         return True
-
-    def health(self):
-        containers_test = self.containers_info()
-        return {
-            "status": "OK",
-            "container_count": len(containers_test)
-        }
 
     def run(self, args):
         container_name = args["container_name"]
@@ -95,7 +93,7 @@ class OssDocker(object):
             entrypoint = args["entrypoint"] if args.has_key("entrypoint") else None
             working_dir = args["working_dir"] if args.has_key("working_dir") else None
 
-            #headers = {'content-type': 'application/json'}
+            # headers = {'content-type': 'application/json'}
             container_config = {"Image": image, "ExposedPorts": {}}
             for key in port_bingings:
                 container_config["ExposedPorts"][str(key) + "/tcp"] = {}
@@ -112,15 +110,15 @@ class OssDocker(object):
             container_config["Entrypoint"] = entrypoint
             container_config["WorkingDir"] = working_dir
             container_config["AttachStdin"] = args["AttachStdin"],
-            container_config["AttachStdout"] = args["AttachStdin"],
+            container_config["AttachStdout"] = args["AttachStdout"],
             container_config["AttachStderr"] = args["AttachStderr"],
             containers_url = self.base_url + "/containers/create?name=%s" % container_name
             req_create = requests.post(containers_url, data=json.dumps(container_config), headers=self.headers)
 
             c_id = json.loads(req_create.content)
 
-            #start container
-            #start_config = { "PortBindings":{"22/tcp":["10022"]}}, "Binds":[]}
+            # start container
+            # start_config = { "PortBindings":{"22/tcp":["10022"]}}, "Binds":[]}
             start_config = {}
             start_config["PortBindings"] = {}
 
@@ -136,10 +134,11 @@ class OssDocker(object):
                 start_config["PortBindings"][str(key) + "/tcp"] = temp
             result["container_id"] = c_id["Id"]
             try:
-                url = "http://localhost:4243/containers/%s/start" % c_id["Id"]
+                url = self.base_url + "/containers/%s/start" % c_id["Id"]
                 requests.post(url, data=json.dumps(start_config), headers=self.headers)
             except Exception as e:
                 log.error(e)
+                return []
 
             if self.get_container(container_name) is None:
                 raise AssertionError("container %s fail to start" % args["name"])

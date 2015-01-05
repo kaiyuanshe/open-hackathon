@@ -1,11 +1,11 @@
 __author__ = "Junbo Wang"
 
-from flask import Flask, request, render_template, g ,session
+from flask import Flask, request, render_template, g,session
 from flask.ext.restful import reqparse, abort, Api, Resource
 from time import gmtime, strftime
 import json, time, os
 from sample_course import Sample_Courses
-from expr_mgr import ExprManager;
+from expr_mgr import ExprManager
 from os.path import realpath, dirname
 from log import log
 from registration import Registration
@@ -104,22 +104,3 @@ class DoCourse(Resource):
 class Anmt(Resource):
     def get(self):
         return Announcement.query.filter_by(enabled=1).first().json()
-
-
-class Health(Resource):
-    def get(self):
-        try:
-            health = {
-                "status": "OK",
-                "start_time": start_time,
-                "report_time": strftime("%Y-%m-%d %H-%M-%S", gmtime()),
-                "docker": docker.health()
-            }
-            return health
-        except Exception as err:
-            log.error(err)
-            return {
-                "status": "Error",
-                "start_time": start_time,
-                "report_time": strftime("%Y-%m-%d %H-%M-%S", gmtime()),
-            }
