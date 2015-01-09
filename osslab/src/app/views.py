@@ -121,5 +121,6 @@ def before_request():
     app.permanent_session_lifetime = timedelta(minutes=session_lifetime_minutes)
 
 api.add_resource(CourseList, "/api/courses")
+api.add_resource(DoCourse, "/api/course/<id>")
 api.add_resource(StatusList, "/api/registerlist")
 api.add_resource(Anmt, "/api/announcement")

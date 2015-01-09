@@ -53,4 +53,4 @@ def create_first_admin():
         db.session.add(first_admin)
         db.session.commit()
 
-create_first_admin()
+# create_first_admin()

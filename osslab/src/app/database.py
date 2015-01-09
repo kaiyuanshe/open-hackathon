@@ -5,8 +5,9 @@ from functions import *
 from datetime import datetime
 import uuid, json
 
-app.config["SQLALCHEMY_DATABASE_URI"]= safe_get_config("mysql/connection", "mysql://root:root@localhost/hackathon")
+app.config["SQLALCHEMY_DATABASE_URI"] = safe_get_config("mysql/connection", "mysql://root:root@localhost/hackathon")
 db = SQLAlchemy(app)
+
 
 def to_json(inst, cls):
     # add your coversions for things like datetime's
@@ -36,7 +37,7 @@ class User(db.Model):
     email = db.Column(db.String(100))
     openid = db.Column(db.String(100))
     avatar_url = db.Column(db.String(200))
-    slug = db.Column(db.String(50), unique=True, nullable=False) # can be used for branch name of github
+    slug = db.Column(db.String(50), unique=True, nullable=False)  # can be used for branch name of github
     access_token = db.Column(db.String(100))
     create_time = db.Column(db.DateTime)
     last_login_time = db.Column(db.DateTime)
@@ -59,13 +60,14 @@ class User(db.Model):
     def json(self):
         return to_json(self, self.__class__)
 
-    def __init__(self, name, nickname, email, openid, avatar_url, access_token, slug=None, create_time=None, last_login_time=None):
+    def __init__(self, name, nickname, email, openid, avatar_url, access_token, slug=None, create_time=None,
+                 last_login_time=None):
         if create_time is None:
             create_time = datetime.utcnow()
         if last_login_time is None:
             last_login_time = datetime.utcnow()
         if slug is None:
-            slug = str(uuid.uuid1())[0:8] # todo generate a real slug
+            slug = str(uuid.uuid1())[0:8]  # todo generate a real slug
 
         self.name = name
         self.nickname = nickname
@@ -85,8 +87,8 @@ class Register(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     register_name = db.Column(db.String(80))
     email = db.Column(db.String(120), unique=True)
-    online = db.Column(db.Integer) # 0:offline 1:online
-    submitted = db.Column(db.Integer) # 0:not 1:submitted
+    online = db.Column(db.Integer)  # 0:offline 1:online
+    submitted = db.Column(db.Integer)  # 0:not 1:submitted
     create_time = db.Column(db.DateTime)
     submitted_time = db.Column(db.DateTime)
     description = db.Column(db.String(200))
@@ -129,7 +131,8 @@ class HostServer(db.Model):
         return to_json(self, self.__class__)
 
     # e,g,:DockerHostServer('oss-docker-vm1', 'osslab1.chinacloudapp.cn', 8001, '10.207.250.79', 80, 0, 100)
-    def __init__(self, vm_name, public_dns, public_cloudvm_port, private_ip, private_cloudvm_port, container_count, container_max_count):
+    def __init__(self, vm_name, public_dns, public_cloudvm_port, private_ip, private_cloudvm_port, container_count,
+                 container_max_count):
         self.vm_name = vm_name
         self.public_dns = public_dns
         self.public_cloudvm_port = public_cloudvm_port
@@ -144,10 +147,10 @@ class HostServer(db.Model):
 
 class Experiment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    type = db.Column(db.String(50)) #e.g.trial, real-time-analytics-hackathon
-    vm_type = db.Column(db.String(50)) # e.g.docker, azure
+    type = db.Column(db.String(50))  # e.g.trial, real-time-analytics-hackathon
+    vm_type = db.Column(db.String(50))  # e.g.docker, azure
     expr_name = db.Column(db.String(50))
-    status = db.Column(db.Integer) # 0=init 1=running 2=stopped
+    status = db.Column(db.Integer)  # 0=init 1=running 2=stopped
     create_time = db.Column(db.DateTime)
     last_heart_beat_time = db.Column(db.DateTime)
 
@@ -211,9 +214,9 @@ class DockerContainer(db.Model):
     name = db.Column(db.String(100), unique=True, nullable=False)
     image = db.Column(db.String(50), nullable=False)
     container_id = db.Column(db.String(100))
-    status = db.Column(db.Integer) # 0=init 1=running 2=stopped 3=removed
+    status = db.Column(db.Integer)  # 0=init 1=running 2=stopped 3=removed
     guacamole = db.Column(db.String(300))
-    create_time= db.Column(db.DateTime)
+    create_time = db.Column(db.DateTime)
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User', backref=db.backref('containers', lazy='dynamic'))
@@ -231,10 +234,10 @@ class DockerContainer(db.Model):
         self.name = name
         self.user = user
         self.host_server = host_server
-        self.experiment= experiment
-        self.image= image
-        self.status= 0
-        self.create_time= create_time if create_time is not None else datetime.utcnow()
+        self.experiment = experiment
+        self.image = image
+        self.status = 0
+        self.create_time = create_time if create_time is not None else datetime.utcnow()
 
     def __repr__(self):
         return "DockerContainer:" + self.json()
@@ -246,9 +249,9 @@ class PortBinding(db.Model):
     # container again. And the number of port should be enough since we won't have too many containers on the same VM.
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50))
-    vm_public_port= db.Column(db.Integer)
-    vm_private_port= db.Column(db.Integer, nullable=False)
-    container_port= db.Column(db.Integer, nullable=False)
+    vm_public_port = db.Column(db.Integer)
+    vm_private_port = db.Column(db.Integer, nullable=False)
+    container_port = db.Column(db.Integer, nullable=False)
 
     host_server_id = db.Column(db.Integer, db.ForeignKey('host_server.id'))
     host_server = db.relationship('HostServer', backref=db.backref('port_bindings', lazy='dynamic'))
@@ -278,8 +281,8 @@ class PortBinding(db.Model):
 class Announcement(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.String(200))
-    enabled = db.Column(db.Integer) # 1=enabled 0=disabled
-    create_time= db.Column(db.DateTime)
+    enabled = db.Column(db.Integer)  # 1=enabled 0=disabled
+    create_time = db.Column(db.DateTime)
 
     def json(self):
         return to_json(self, self.__class__)

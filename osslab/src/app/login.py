@@ -141,11 +141,11 @@ class GithubLogin(object):
         is_not_registered = is_registration_limited and registered is None
         hava_running_expr = Experiment.query.filter_by(user_id=user.id, status=1).count() > 0
 
-        next_url = session["next"]
-        if next_url is None:
-            next_url = "/hackathon" if hava_running_expr else "/settings"
-        else:
-            session["next"] = None
+        #next_url = session["next"]
+        #if next_url is None:
+        next_url = "/hackathon" if hava_running_expr else "/settings"
+        #else:
+        #   session["next"] = None
 
         if is_not_registered:
             if is_admin:
