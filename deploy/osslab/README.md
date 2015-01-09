@@ -1,4 +1,4 @@
-OSSLAB UI
+Open Hackathon platform UI
 
 # manual
 the manual steps to deploy open-hackathon platform
@@ -45,32 +45,34 @@ GRANT ALL on hackathon.* TO 'hackathon'@'localhost';
 exit mysql console and initialize mysql by:
 
 ```
-cd /home/opentech/hackathon/github/laboss/osslab/src
+cd _<src_root_folder>_/open-hackathon/src
 sudo python setup_db.py
 ```
 
 ## install python libs
 
 ```
-cd laboss
-sudo pip install -r osslab/requirement.txt
+cd _<src_root_folder>_/open-hackathon
+sudo pip install -r requirement.txt
 ```
 
 ## configure logs
+in case it's deploy in Apache2:
 
 ```
-sudo mkdir /var/log/osslab
-sudo chown www-data:www-data /var/log/osslab
+sudo mkdir /var/log/open-hackathon
+sudo chown www-data:www-data /var/log/open-hackathon
 ```
+change `user:group` to other user than `www-data:www-data` if you deploy it not on Apache2 or you customized the run user of Apache2.
 
 ## configure apache2
-update `<src_root>/osslab/osslab.conf` and `<src_root>/osslab/src/app.wsgi` if you clone your code in a different directory other than
+update `_<src_root_folder>_/open-hackathon/open-hackathon.conf` and `_<src_root_folder>_/open-hackathon/src/app.wsgi` if you clone your code in a different directory other than
 the default one(`/home/opentech/hackathon/github/laboss`)
 
 ```
-sudo cp ./osslab.conf /etc/apache2/sites-available
+sudo cp ./open-hackathon.conf /etc/apache2/sites-available
 cd /etc/apache2/sites-enabled
-sudo ln -s ../sites-available/osslab.conf osslab.conf
+sudo ln -s ../sites-available/open-hackathon.conf open-hackathon.conf
 sudo service apache2 restart
 ```
 
@@ -80,9 +82,9 @@ in following case, you may want to change config.py:
 - the database installed in another server or you configured your own the database user/password
 
 ```
-vi /home/opentech/hackathon/github/laboss/osslab/src/app/config.py
+vi _<src_root_folder>_/open-hackathon/src/app/config.py
 ```
 replace the oauth config with correct value.
 
 
-_Note: if the target directory is changed, update `<src_root>/osslab/src/app.wsgi` and `/etc/apache2/sites-available/osslab.conf` too._
+_Note: if the target directory is changed, update `<src_root>/open-hackathon/src/app.wsgi` and `/etc/apache2/sites-available/open-hackathon.conf` too._
