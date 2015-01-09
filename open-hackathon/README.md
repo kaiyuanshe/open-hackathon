@@ -55,8 +55,8 @@ Next update `app/config.py` with your user/password.  And don't submit your pass
 ## configure logs
 
 ```
-sudo mkdir /var/log/osslab
-sudo chmod 777 /var/log/osslab
+sudo mkdir /var/log/open-hackathon
+sudo chmod 777 /var/log/open-hackathon
 ```
 
 ## initialize tables

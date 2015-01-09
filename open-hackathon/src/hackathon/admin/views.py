@@ -18,12 +18,12 @@ class HomeView(AdminIndexView):
         return self.render('admin/index.html', user=g.user)
 
 
-class OsslabBaseView(BaseView):
+class HackathonAdminBaseView(BaseView):
     def render_admin(self, template):
         return self.render("admin/%s" % template)
 
 
-class MyAdminView(OsslabBaseView):
+class MyAdminView(HackathonAdminBaseView):
     @expose('/')
     def index(self):
         return self.render_admin('myadmin.html')
@@ -33,7 +33,7 @@ class MyAdminView(OsslabBaseView):
         return True
 
 
-class AnotherAdminView(OsslabBaseView):
+class AnotherAdminView(HackathonAdminBaseView):
     @expose('/')
     def index(self):
         return self.render_admin('anotheradmin.html')
