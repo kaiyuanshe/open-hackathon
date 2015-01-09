@@ -12,8 +12,6 @@ from registration import Registration
 from database import Announcement
 from ossdocker import *
 
-start_time = strftime("%Y-%m-%d %H-%M-%S", gmtime())
-docker = OssDocker()
 
 Template_Routes = {
     "PrivacyStatement": "PrivacyStatement.html",

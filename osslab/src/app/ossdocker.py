@@ -8,6 +8,8 @@ import log
 
 from database import *
 
+remote_port = "4243"
+
 
 def convert(input):
     if isinstance(input, dict):
@@ -32,45 +34,58 @@ class OssDocker(object):
     def __init__(self):
         self.headers = {'content-type': 'application/json'}
 
-    def base_url(self):
-        vm = HostServer.query.first()
-        vm_url = "http://" + vm.public_dns + ":4243"
+    def get_vm_url(self, vm_dns):
+        # vm = HostServer.query.filter(HostServer.container_count + req_count <= HostServer.container_max_count).first()
+        vm_url = "http://" + vm_dns + ":" + remote_port
         return vm_url
 
-
-    def containers_info(self):
+    def containers_info(self, vm_dns):
         try:
-            containers_url = self.base_url() + "/containers/json"
+            containers_url = self.get_vm_url(vm_dns) + "/containers/json"
             req = requests.get(containers_url)
             return convert(json.loads(req.content))
         except Exception as e:
             log.error(e)
-            return []
+            raise AssertionError("cannot get containers' info")
 
-    def get_container(self, name):
-        containers = self.containers_info()
+    def get_container(self, name, vm_dns):
+        containers = self.containers_info(vm_dns)
         return next((c for c in containers if name in c["Names"] or '/' + name in c["Names"]), None)
 
-    def search_containers_by_expr_id(self, id, all=False):
-        get_containers = self.containers_info()
+    def search_containers_by_expr_id(self, id, vm_dns, all=False):
+        get_containers = self.containers_info(vm_dns)
         if all:
             return get_containers
         return filter(lambda c: name_match(id, c["Names"]), get_containers)
 
-    def stop(self, name):
-        if self.get_container(name) is not None:
+    # stop a container, name is the container's name, vm_dns is vm's ip address
+    def stop(self, name, vm_dns):
+        if self.get_container(name, vm_dns) is not None:
             try:
-                containers_url = self.base_url() + "/containers/%s/stop" % name
+                containers_url = self.get_vm_url(vm_dns) + "/containers/%s/stop" % name
                 requests.post(containers_url)
             except Exception as e:
                 log.error(e)
-                return []
+                log.error("container %s fail to stop" % name)
+                return "container %s fail to stop" % name, 500
             return True
         return True
 
-    def run(self, args):
+    # start a container, vm_dns is vm's ip address, start_config is the configure of container which you want to start
+    def start(self, vm_dns, container_id, start_config={}):
+        try:
+            url = vm_dns + "/containers/%s/start" % container_id
+            requests.post(url, data=json.dumps(start_config), headers=self.headers)
+        except Exception as e:
+            log.error(e)
+            log.error("container %s fail to start" % container_id)
+            return "container %s fail to start" % container_id, 500
+
+    # run a container, the configure of container which you want to create, vm_dns is vm's ip address
+    def run(self, args, vm_dns):
         container_name = args["container_name"]
-        exist = self.get_container(container_name)
+        exist = self.get_container(container_name, vm_dns)
+        vm_url = self.get_vm_url(vm_dns)
         result = {
             "container_name": container_name
         }
@@ -97,6 +112,9 @@ class OssDocker(object):
             dns = args["dns"] if args.has_key("dns") else None
             entrypoint = args["entrypoint"] if args.has_key("entrypoint") else None
             working_dir = args["working_dir"] if args.has_key("working_dir") else None
+            attach_std_in = args["AttachStdin"] if args.has_key("AttachStdin") else False
+            attach_std_out = args["AttachStdout"] if args.has_key("AttachStdout") else False
+            attach_std_err = args["AttachStderr"] if args.has_key("AttachStderr") else False
 
             # headers = {'content-type': 'application/json'}
             container_config = {"Image": image, "ExposedPorts": {}}
@@ -114,20 +132,24 @@ class OssDocker(object):
             container_config["Dns"] = dns
             container_config["Entrypoint"] = entrypoint
             container_config["WorkingDir"] = working_dir
-            container_config["AttachStdin"] = args["AttachStdin"],
-            container_config["AttachStdout"] = args["AttachStdout"],
-            container_config["AttachStderr"] = args["AttachStderr"],
-            containers_url = self.base_url() + "/containers/create?name=%s" % container_name
-            req_create = requests.post(containers_url, data=json.dumps(container_config), headers=self.headers)
+            container_config["AttachStdin"] = attach_std_in
+            container_config["AttachStdout"] = attach_std_out
+            container_config["AttachStderr"] = attach_std_err
+            try:
+                containers_url = vm_url + "/containers/create?name=%s" % container_name
+                req_create = requests.post(containers_url, data=json.dumps(container_config), headers=self.headers)
+            except Exception as e:
+                log.error(e)
+                log.error("container %s fail to create" % container_name)
+                return "container %s fail to create" % container_name, 500
 
-            c_id = json.loads(req_create.content)
+            container = json.loads(req_create.content)
 
             # start container
             # start_config = { "PortBindings":{"22/tcp":["10022"]}}, "Binds":[]}
-            start_config = {}
-            start_config["PortBindings"] = {}
+            start_config = {"PortBindings": {}}
 
-            #"Binds" = ["/host/path:/container/path:ro/rw"]
+            # "Binds" = ["/host/path:/container/path:ro/rw"]
             if mnt_bindings:
                 start_config["Binds"] = []
                 for key in mnt_bindings:
@@ -137,15 +159,10 @@ class OssDocker(object):
                 config = {"HostPort": str(port_bingings[key])}
                 temp.append(config)
                 start_config["PortBindings"][str(key) + "/tcp"] = temp
-            result["container_id"] = c_id["Id"]
-            try:
-                url = self.base_url() + "/containers/%s/start" % c_id["Id"]
-                requests.post(url, data=json.dumps(start_config), headers=self.headers)
-            except Exception as e:
-                log.error(e)
-                return []
+            result["container_id"] = container["Id"]
+            self.start(vm_url, container["Id"], start_config)
 
-            if self.get_container(container_name) is None:
+            if self.get_container(container_name, vm_dns) is None:
                 raise AssertionError("container %s fail to start" % args["name"])
 
         return result

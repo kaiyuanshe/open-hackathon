@@ -199,7 +199,7 @@ class ExprManager(object):
             mnts.append(guaca_dir)
             mnts.append("/etc/guacamole")
             post_data["mnt"] = mnts
-        container_ret = docker.run(post_data)
+        container_ret = docker.run(post_data, host_server.public_dns)
         container.container_id = container_ret["container_id"]
         container.status = 1
         host_server.container_count += 1
@@ -291,7 +291,7 @@ class ExprManager(object):
             # stop containers
             for c in expr.containers:
                 try:
-                    docker.stop(c.name)
+                    docker.stop(c.name, c.host_server.public_dns)
                     c.status = 2
                     c.host_server.container_count -= 1
                     if c.host_server.container_count < 0:
