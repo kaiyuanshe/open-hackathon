@@ -10,7 +10,9 @@
         {
             "name": "jstorm",
             "image": "sffamily/jstorm-base",
-            "detach":true,
+            "AttachStdin":false,
+            "AttachStdout":true,
+            "AttachStderr":true,
             "tty": true,
             "stdin_open": true
         },
@@ -23,7 +25,9 @@
                 "host_port": 15001
             }],
             "mnt":["%s/jStorm-api/src","/src"],
-            "detach":true
+            "AttachStdin":false,
+            "AttachStdout":true,
+            "AttachStderr":true,
         },
         {
             "name": "python-app",
@@ -34,7 +38,9 @@
                 "public": true
             }],
             "mnt":["%s/app/python-on-flask/src","/src"],
-            "detach":true
+            "AttachStdin":false,
+            "AttachStdout":true,
+            "AttachStderr":true,
         },
         {
             "name": "vnc",
@@ -45,7 +51,9 @@
             }],
             "mnt":["%s/src","/data"],
             "mnt2": ["/home/junbo/github/juniwang/flask-example/src", "/data"],
-            "detach":true,
+            "AttachStdin":false,
+            "AttachStdout":true,
+            "AttachStderr":true,
             "tty": true,
             "stdin_open": true,
             "guacamole": {

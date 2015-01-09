@@ -92,6 +92,17 @@ By default the server will listen on port `80` and run in debug model. You can e
 
 Browse to `http://localhost` to see the welcome page to make sure its ready.
 
+## docker remote api
+If you want to use docker remote api to visit docker on your host machine or Azure server, please change the following configure:
+
+Please edit this file: /etc/init/docker.conf or /etc/default/docker and update the DOCKER_OPTS variable to the following:
+
+DOCKER_OPTS = '-H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock'
+
+The daemon process will listen on port '4243', if '4243' port has been occupied on the machine which you want to visit, please change it.
+
+Then restart the docker process: service docker restart
+
 ## notice on windows
 you cannot listen on port 80 by default on windows since the windows http service is listening on 80. Try run `net stop http`
 on command line to stop http service and release 80 port. Moreover, you may want to run `sc config http start= disabled` to

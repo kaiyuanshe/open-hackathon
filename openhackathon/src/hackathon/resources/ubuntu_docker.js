@@ -13,7 +13,9 @@
                 "name": "Deploy",
                 "port": 22
             }],
-            "detach":true,
+            "AttachStdin":false,
+            "AttachStdout":true,
+            "AttachStderr":true,
             "tty": true,
             "stdin_open": true,
             "guacamole": {
@@ -30,7 +32,9 @@
                 "name": "Dev",
                 "port": 5901
             }],
-            "detach":true,
+            "AttachStdin":false,
+            "AttachStdout":true,
+            "AttachStderr":true,
             "tty": true,
             "stdin_open": true,
             "guacamole": {
