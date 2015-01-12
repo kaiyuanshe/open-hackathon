@@ -7,7 +7,7 @@ from log import log
 from constants import *
 from registration import Registration
 from ossdocker import *
-from rollback import *
+# from rollback import *
 
 docker = OssDocker()
 OSSLAB_RUN_DIR = "/var/lib/osslab"
