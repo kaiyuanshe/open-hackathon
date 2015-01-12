@@ -11,7 +11,8 @@
         .logo{border-bottom:1px solid red;height:70px;text-align:center;}
         .message{padding-top:42px;text-align:center;}
         .message p{padding-bottom:25px;font-size:16px;}
-        .main .btn-red{display:inline-block;padding:0 20px;margin-right:18px;background:#e73c31;height:42px;line-height:42px;color:#fff;}
+        .main .btn-red{display:inline-block;padding:0
+        20px;margin-right:18px;background:#e73c31;height:42px;line-height:42px;color:#fff;}
         .main .btn-red:hover{background:#e55359;color:#fff;text-decoration:none;}
     </style>
     <script>
@@ -24,21 +25,24 @@
             wait--;
             setTimeout(function() {get_code_time(o)}, 1000)
         }
+
     </script>
 </head>
 <body>
-    <div class="main">
-        <div class="logo">
-            <img src="/static/pic/icon64.png" alt=""/>
-        </div>
-        <div class="message">
-            <p><b>对不起，您还未注册本次黑客松！ </b></p><br>
-            <p><b>请到如下网站注册 (等待 <span id="time">5</span> 秒后自动跳转) ...</b></p><br>
-            <p class="btnBox">
-                <a href="http://www.huodongxing.com/event/2256565202800" class="btn-red">立即去报名</a>
-                <a href="/index" class="btn-red" target="_self">返回首页</a>
-            </p>
-        </div>
+<div class="main">
+    <div class="logo">
+        <img src="/static/pic/icon64.png" alt=""/>
     </div>
+    <div class="message">
+        <p><b>对不起，您还未注册本次黑客松！ </b></p><br>
+
+        <p><b>请到如下网站注册 (等待 <span id="time">5</span> 秒后自动跳转) ...</b></p><br>
+
+        <p class="btnBox">
+            <a href="http://www.huodongxing.com/event/2256565202800" class="btn-red">立即去报名</a>
+            <a href="/index" class="btn-red" target="_self">返回首页</a>
+        </p>
+    </div>
+</div>
 </body>
 </html>

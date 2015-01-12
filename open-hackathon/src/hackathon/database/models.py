@@ -1,12 +1,11 @@
-from . import UserMixin, app
-import time
-from flask.ext.sqlalchemy import SQLAlchemy
-from functions import *
-from datetime import datetime
-import uuid, json
+import sys
 
-app.config["SQLALCHEMY_DATABASE_URI"] = safe_get_config("mysql/connection", "mysql://root:root@localhost/hackathon")
-db = SQLAlchemy(app)
+sys.path.append("..")
+from . import UserMixin
+from . import db
+from datetime import datetime
+import uuid
+import json
 
 
 def to_json(inst, cls):

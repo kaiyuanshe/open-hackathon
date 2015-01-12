@@ -1,16 +1,15 @@
 __author__ = "Junbo Wang"
 
-from flask import Flask, request, render_template, g,session
-from flask.ext.restful import reqparse, abort, Api, Resource
-from time import gmtime, strftime
-import json, time, os
-from sample_course import Sample_Courses
-from expr_mgr import ExprManager
+import os
 from os.path import realpath, dirname
-from log import log
-from registration import Registration
-from database import Announcement
+
+from flask import request, render_template, g
+from flask_restful import reqparse, abort, Resource
+
+from hackathon.expr.expr_mgr import ExprManager
+from database.models import Announcement
 from ossdocker import *
+from hackathon import user_manager, expr_manager
 
 
 Template_Routes = {
@@ -30,9 +29,10 @@ Template_Routes = {
 
 manager = ExprManager()
 
+
 def simple_route(path):
     if Template_Routes.has_key(path):
-        register = Registration().get_by_email(g.user.email)
+        register = user_manager.get_registration_by_email(g.user.email)
         return render_template(Template_Routes[path], user=g.user, register=register)
     else:
         abort(404)
@@ -44,21 +44,13 @@ class CourseList(Resource):
         parser.add_argument('tag', default=None)
         args = parser.parse_args()
 
-        kw = args['tag']
-        if kw is None:
-            return json.dumps(Sample_Courses)
-        else:
-            ret = filter(lambda c: len(filter(lambda t: kw.lower() in t.lower(), c["tags"])) > 0, Sample_Courses)
-            return json.dumps(ret)
-
 
 class StatusList(Resource):
     # =======================================================return data start
     # [{"register_name":"zhang", "online":"1","submitted":"0"..."description":" "}]
     # =======================================================return data end
     def get(self):
-        r = Registration()
-        json_ret = map(lambda u: u.json(), r.get_all())
+        json_ret = map(lambda u: u.json(), user_manager.get_all_registration())
         return json_ret
 
     # =======================================================test data start
@@ -66,8 +58,7 @@ class StatusList(Resource):
     # =======================================================test data end
     def put(self):
         args = request.get_json()
-        r = Registration()
-        return r.submit(args)
+        return expr_manager.submit_expr((args))
 
 
 class DoCourse(Resource):
@@ -80,7 +71,7 @@ class DoCourse(Resource):
 
     def post(self, id):
         # the id is actually the name of template when POST
-        template_file= "%s/resources/%s_docker.js" % (dirname(realpath(__file__)), id)
+        template_file = "%s/resources/%s_docker.js" % (dirname(realpath(__file__)), id)
         if os.path.isfile(template_file):
             # call remote service to start docker containers
             expr_config = json.load(file(template_file))

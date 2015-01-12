@@ -4,8 +4,7 @@ from database import *
 from functions import *
 from log import log
 import json
-from registration import *
-from flask.ext.login import login_user
+from flask_login import login_user
 from flask import request, redirect, session
 from constants import *
 

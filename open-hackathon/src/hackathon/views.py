@@ -1,14 +1,14 @@
 import uuid
 from flask import request, Response, render_template, flash, redirect, session, url_for, g
-from flask.ext.restful import Api, Resource
+from flask_restful import Api, Resource
 from hackathon import app
 from functions import *
 from routes import *
-from database import User
+from database.models import User
 from login import *
 from constants import *
 from log import log
-from flask.ext.login import login_required, LoginManager, logout_user, current_user
+from flask_login import login_required, LoginManager, logout_user, current_user
 from datetime import timedelta
 import admin
 
@@ -59,7 +59,7 @@ def template_routes(path):
 # js config
 @app.route('/config.js')
 def js_config():
-    resp =  Response(response="var CONFIG=%s" % json.dumps(get_config("javascript")),
+    resp = Response(response="var CONFIG=%s" % json.dumps(get_config("javascript")),
                      status=200,
                      mimetype="application/javascript")
     return resp

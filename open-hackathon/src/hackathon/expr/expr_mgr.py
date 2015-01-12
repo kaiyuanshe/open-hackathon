@@ -1,12 +1,14 @@
-import json
-from functions import *
-from flask import g
+import sys
+
+sys.path.append("..")
 from compiler.ast import flatten
-from database import *
-from log import log
-from constants import *
-from registration import Registration
-from ossdocker import *
+from hackathon.database.models import *
+from hackathon.log import log
+from hackathon.constants import *
+from hackathon.ossdocker import *
+import json
+from hackathon.functions import *
+from flask import g
 
 docker = OssDocker()
 OSSLAB_RUN_DIR = "/var/lib/osslab"
@@ -41,7 +43,7 @@ class ExprManager(object):
                 get_remote("http://%s:%s" % (guaca_container.host_server.public_dns, guaca_port.vm_public_port))
                 ret["guacamole_status"] = True
             except Exception as e:
-                log.error(e)
+                log.log.error(e)
 
             guacamole_servers = []
             for c in expr.containers.all():
