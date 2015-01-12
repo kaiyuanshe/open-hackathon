@@ -10,7 +10,7 @@ from os.path import realpath, dirname
 from log import log
 from registration import Registration
 from database import Announcement
-from ossdocker import *
+from remotedocker import *
 
 
 Template_Routes = {

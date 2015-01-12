@@ -30,7 +30,7 @@ def name_match(id, l):
     return False
 
 
-class OssDocker(object):
+class RemoteDocker(object):
     def __init__(self):
         self.headers = {'content-type': 'application/json'}
 
@@ -71,10 +71,17 @@ class OssDocker(object):
                 # return True
         return True
 
+    # inspect a container, return value is this container is running or false
+    def inspect(self, vm_dns, container_id):
+        url = vm_dns + "/containers/%s/inspect" % container_id
+        req = json.loads(requests.get(url).content)
+        return req["States"]["Running"]
+
     # start a container, vm_dns is vm's ip address, start_config is the configure of container which you want to start
     def start(self, vm_dns, container_id, start_config={}):
         url = vm_dns + "/containers/%s/start" % container_id
         requests.post(url, data=json.dumps(start_config), headers=self.headers)
+        return self.inspect(vm_dns, container_id)
 
     # run a container, the configure of container which you want to create, vm_dns is vm's ip address
     def run(self, args, vm_dns):

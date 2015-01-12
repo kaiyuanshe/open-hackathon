@@ -6,10 +6,10 @@ from database import *
 from log import log
 from constants import *
 from registration import Registration
-from ossdocker import *
+from remotedocker import *
 # from rollback import *
 
-docker = OssDocker()
+docker = RemoteDocker()
 OSSLAB_RUN_DIR = "/var/lib/osslab"
 
 
@@ -243,6 +243,7 @@ class ExprManager(object):
 
         # start containers
         guacamole_config = []
+
         containers = map(lambda container_config: self.__remote_start_container(expr,
                                                                                 host_server,
                                                                                 scm,
@@ -270,13 +271,24 @@ class ExprManager(object):
 
             guca_container = self.__remote_start_container(expr, host_server, scm, guacamole_container_config, [])
             containers.append(guca_container)
-
+        if not self.justify_containers_running(expr.id):
+            self.stop_expr(expr.id)
+            return "failed to start"
         # after everything is ready, set the expr state to running
         expr.status = 1
         db.session.commit()
 
         # response to caller
         return self.__report_expr_status(expr)
+
+    def justify_containers_running(self, expr_id):
+        expr = Experiment.query.filter_by(id=expr_id).first()
+        if expr is not None:
+            for c in expr.containers:
+                if c.status != 1:
+                    return False
+            return True
+
 
     def heart_beat(self, expr_id):
         expr = Experiment.query.filter_by(id=expr_id, status=1).first()
@@ -288,7 +300,7 @@ class ExprManager(object):
         return "OK"
 
     def stop_expr(self, expr_id):
-        expr = Experiment.query.filter_by(id=expr_id, status=1).first()
+        expr = Experiment.query.filter_by(id=expr_id).first()
         if expr is not None:
             # todo delete source code folder to prevent disk from being used up
 
