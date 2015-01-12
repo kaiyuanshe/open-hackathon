@@ -7,6 +7,7 @@ from log import log
 from constants import *
 from registration import Registration
 from ossdocker import *
+from rollback import *
 
 docker = OssDocker()
 OSSLAB_RUN_DIR = "/var/lib/osslab"
@@ -200,13 +201,16 @@ class ExprManager(object):
             mnts.append("/etc/guacamole")
             post_data["mnt"] = mnts
         container_ret = docker.run(post_data, host_server.public_dns)
+
+        if not container_ret:
+            pass        # make change, call rollback
+
         container.container_id = container_ret["container_id"]
         container.status = 1
         host_server.container_count += 1
         db.session.commit()
 
         return container
-
 
     def get_expr_status(self, expr_id):
         expr = Experiment.query.filter_by(id=expr_id, status=1).first()

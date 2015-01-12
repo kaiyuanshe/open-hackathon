@@ -67,19 +67,14 @@ class OssDocker(object):
             except Exception as e:
                 log.error(e)
                 log.error("container %s fail to stop" % name)
-                return "container %s fail to stop" % name, 500
-            return True
+                return False
+                # return True
         return True
 
     # start a container, vm_dns is vm's ip address, start_config is the configure of container which you want to start
     def start(self, vm_dns, container_id, start_config={}):
-        try:
-            url = vm_dns + "/containers/%s/start" % container_id
-            requests.post(url, data=json.dumps(start_config), headers=self.headers)
-        except Exception as e:
-            log.error(e)
-            log.error("container %s fail to start" % container_id)
-            return "container %s fail to start" % container_id, 500
+        url = vm_dns + "/containers/%s/start" % container_id
+        requests.post(url, data=json.dumps(start_config), headers=self.headers)
 
     # run a container, the configure of container which you want to create, vm_dns is vm's ip address
     def run(self, args, vm_dns):
@@ -103,9 +98,6 @@ class OssDocker(object):
                 mnts[::2])
             mnts_t = map(lambda s: {"bind": s, "ro": False}, mnts[1::2])
             mnt_bindings = dict(zip(mnts_f, mnts_t))
-
-            # env = args["environments"] if args.has_key("environments") else {}
-            # detach = args["detach"] if args.has_key('detach') else False
             command = args["command"] if args.has_key('command') else None
             stdin_open = args["stdin_open"] if args.has_key("stdin_open") else False
             tty = args["tty"] if args.has_key("tty") else False
@@ -141,7 +133,7 @@ class OssDocker(object):
             except Exception as e:
                 log.error(e)
                 log.error("container %s fail to create" % container_name)
-                return "container %s fail to create" % container_name, 500
+                return False
 
             container = json.loads(req_create.content)
 
@@ -160,7 +152,13 @@ class OssDocker(object):
                 temp.append(config)
                 start_config["PortBindings"][str(key) + "/tcp"] = temp
             result["container_id"] = container["Id"]
-            self.start(vm_url, container["Id"], start_config)
+
+            try:
+                self.start(vm_url, container["Id"], start_config)
+            except Exception as e:
+                log.error(e)
+                log.error("container %s fail to start" % container["Id"])
+                return False
 
             if self.get_container(container_name, vm_dns) is None:
                 raise AssertionError("container %s fail to start" % args["name"])
