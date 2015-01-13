@@ -6,10 +6,11 @@ And the whole environment cotains serval components such guacamole , nginx , tom
 sudo apt-get update && sudo apt-get upgrade
 sudo add-apt-repository ppa:nginx/stable
 
-sudo apt-get install vim git
-sudo easy_install pip
 sudo apt-get install build-essential python python-dev python-setuptools libmysqlclient-dev
 sudo apt-get install guacamole libguac-dev libcairo-dev libvncserver0 libguac-client-ssh0 libguac-client-vnc0 
+
+sudo apt-get install vim git
+sudo easy_install pip
 
 sudo apt-get install tomcat7
 sudo apt-get install openjdk-7-jdk
@@ -18,6 +19,11 @@ sudo apt-get install mysql-server
 
 sudo pip install virtualenv
 sudo pip install uwsgi
+```
+#Get src from github
+```
+cd /opt/
+git clone https://github.com/msopentechcn/open-hackathon.git
 ```
 
 #config guacamole
@@ -34,7 +40,7 @@ Then copy the auth-provider jar file to the path that was setted in the config f
 ```
 sudo cp deploy/openhackathon-gucamole-authentication-1.0-SNAPSHOT.jar /var/lib/guacamole/
 ```
-Note: the _auth-request-url_ value must be setted match the _open-hackathon_ src provides
+Note: the `auth-request-url` value must be setted match the _open-hackathon_ src provides
 And every time you change this file , you may need to restart guacd and tomcat7 service
 
 #config tomcat7
@@ -53,24 +59,20 @@ sudo service tomcat7 restart
 ```
 
 #Deploy open-hackathon withn Nginx
-####- Get src from github
-```
-cd /opt/
-git clone https://github.com/msopentechcn/open-hackathon.git
-```
+
 Before deploy the web application ,we need to setup all the dependencies and do some pre-execution
 ```
 echo "127.0.0.1    osslab.msopentech.cn" >> /etc/hosts
 sudo mkdir /var/log/uwsgi
 sudo mkdir /var/log/open-hackathon
-cd open-hackathon
+cd /opt/open-hackathon
 virtualenv venv
 source venv/bin/activate
 cd /opt/open-hackathon/open-hackathon/
 sudo pip install -r requirement.txt
 ```
 ####- confi mysql
-edit `/etc/my.conf` make changes like this:
+edit `/etc/mysql/my.conf` make changes like this:
 ```shell
 [client]
 default-character-set=utf8
