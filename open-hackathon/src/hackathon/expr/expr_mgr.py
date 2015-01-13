@@ -5,7 +5,7 @@ from compiler.ast import flatten
 from hackathon.database.models import *
 from hackathon.log import log
 from hackathon.constants import *
-from hackathon.ossdocker import *
+from hackathon.docker import OssDocker
 import json
 from hackathon.functions import *
 from flask import g
@@ -306,3 +306,5 @@ class ExprManager(object):
             db.session.commit()
 
         return "OK"
+
+expr_manager = ExprManager()

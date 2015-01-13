@@ -1,12 +1,13 @@
 # -*- coding:utf8 -*-
 #encoding = utf-8
-from database import *
+from database.models import *
 from functions import *
 from log import log
 import json
 from flask_login import login_user
 from flask import request, redirect, session
 from constants import *
+from user import user_manager
 
 
 class LoginBase(object):
@@ -149,7 +150,7 @@ class GithubLogin(LoginBase):
 
         # find out the hackacathon registration info
         is_registration_limited = safe_get_config("/register/limitUnRegisteredUser", True)
-        registered = Registration().get_by_email(email)
+        registered = user_manager.get_by_email(email)
 
         is_admin = user.is_admin()
         is_not_registered = is_registration_limited and registered is None

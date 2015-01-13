@@ -1,5 +1,3 @@
-__author__ = 'junbo'
-
 from gittle import Gittle
 
 class SCM(object):
