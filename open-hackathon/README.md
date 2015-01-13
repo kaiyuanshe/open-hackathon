@@ -95,13 +95,25 @@ Browse to `http://localhost` to see the welcome page to make sure its ready.
 ## docker remote api
 If you want to use docker remote api to visit docker on your host machine or Azure server, please change the following configure:
 
-Please edit this file: /etc/init/docker.conf or /etc/default/docker and update the DOCKER_OPTS variable to the following:
+Please edit this `file: /etc/init/docker.conf` or `/etc/default/docker` and update the `DOCKER_OPTS` variable to the following:
 
-DOCKER_OPTS = '-H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock'
+DOCKER_OPTS = `-H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock`
 
-The daemon process will listen on port '4243', if '4243' port has been occupied on the machine which you want to visit, please change it.
+The daemon process will listen on port `4243`, if `4243` port has been occupied on the machine which you want to visit, please change it.
 
 Then restart the docker process: service docker restart
+
+If you want to know the information of containers, please enter the address like following (Only running containers are shown by default):
+
+`http://localhost:4243/containers/json`
+
+If you want to inspect a specified container's information, you can input this:
+
+`http://localhost:4243/containers/<container id or name>/json`
+
+More information you can visit:
+
+`https://docs.docker.com/reference/api/docker_remote_api_v1.16/`
 
 ## notice on windows
 you cannot listen on port 80 by default on windows since the windows http service is listening on 80. Try run `net stop http`

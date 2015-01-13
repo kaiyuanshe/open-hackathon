@@ -201,10 +201,6 @@ class ExprManager(object):
             mnts.append("/etc/guacamole")
             post_data["mnt"] = mnts
         container_ret = docker.run(post_data, host_server.public_dns)
-
-        if not container_ret:
-            pass        # make change, call rollback
-
         container.container_id = container_ret["container_id"]
         container.status = 1
         host_server.container_count += 1
@@ -220,6 +216,10 @@ class ExprManager(object):
             return "Not found", 404
 
     def start_expr(self, expr_config):
+        starting_expr = Experiment.query.filter_by(status=3, user_id=g.user.id).first()
+        if starting_expr is not None:
+            return "Please wait a few seconds ... "
+
         expr = Experiment.query.filter_by(status=1, user_id=g.user.id).first()
         if expr is not None:
             return self.__report_expr_status(expr)
@@ -243,13 +243,18 @@ class ExprManager(object):
 
         # start containers
         guacamole_config = []
-
-        containers = map(lambda container_config: self.__remote_start_container(expr,
-                                                                                host_server,
-                                                                                scm,
-                                                                                container_config,
-                                                                                guacamole_config),
-                         expr_config["containers"])
+        try:
+            expr.status = 3
+            db.session.commit()
+            containers = map(lambda container_config: self.__remote_start_container(expr,
+                                                                                    host_server,
+                                                                                    scm,
+                                                                                    container_config,
+                                                                                    guacamole_config),
+                             expr_config["containers"])
+        except Exception as e:
+            self.roll_back(expr.id)
+            log.error(e)
 
         # start guacamole
         if len(guacamole_config) > 0:
@@ -271,24 +276,11 @@ class ExprManager(object):
 
             guca_container = self.__remote_start_container(expr, host_server, scm, guacamole_container_config, [])
             containers.append(guca_container)
-        if not self.justify_containers_running(expr.id):
-            self.stop_expr(expr.id)
-            return "failed to start"
-        # after everything is ready, set the expr state to running
         expr.status = 1
         db.session.commit()
 
         # response to caller
         return self.__report_expr_status(expr)
-
-    def justify_containers_running(self, expr_id):
-        expr = Experiment.query.filter_by(id=expr_id).first()
-        if expr is not None:
-            for c in expr.containers:
-                if c.status != 1:
-                    return False
-            return True
-
 
     def heart_beat(self, expr_id):
         expr = Experiment.query.filter_by(id=expr_id, status=1).first()
@@ -299,8 +291,30 @@ class ExprManager(object):
         db.session.commit()
         return "OK"
 
-    def stop_expr(self, expr_id):
+    def roll_back(self, expr_id):
         expr = Experiment.query.filter_by(id=expr_id).first()
+        if expr is not None:
+            # stop containers and change expr status
+            for c in expr.containers:
+                try:
+                    docker.stop(c.name, c.host_server.public_dns)
+                    c.status = 2
+                    c.host_server.container_count -= 1
+                    if c.host_server.container_count < 0:
+                        c.host_server.container_count = 0
+                    db.session.commit()
+                except Exception as e:
+                    expr.status = 5
+                    db.session.commit()
+                    log.info("rollback failed")
+                    log.error(e)
+
+            expr.status = 4
+            db.session.commit()
+            log.info("rollback succeeded")
+
+    def stop_expr(self, expr_id):
+        expr = Experiment.query.filter_by(id=expr_id, status=1).first()
         if expr is not None:
             # todo delete source code folder to prevent disk from being used up
 

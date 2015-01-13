@@ -139,7 +139,7 @@ class Experiment(db.Model):
     type = db.Column(db.String(50))  # e.g.trial, real-time-analytics-hackathon
     vm_type = db.Column(db.String(50))  # e.g.docker, azure
     expr_name = db.Column(db.String(50))
-    status = db.Column(db.Integer)  # 0=init 1=running 2=stopped
+    status = db.Column(db.Integer)  # 0=init 1=running 2=stopped 3=expr running 4=roll succeeded 5=rollback failed
     create_time = db.Column(db.DateTime)
     last_heart_beat_time = db.Column(db.DateTime)
 
