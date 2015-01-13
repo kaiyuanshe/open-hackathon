@@ -10,6 +10,7 @@ from flask import request, redirect, session
 from hackathon.constants import QQ_OAUTH_STATE
 from . import user_manager
 from datetime import datetime
+from hackathon.enum import ExprStatus
 
 
 class LoginBase(object):
@@ -48,11 +49,11 @@ class QQLogin(LoginBase):
         user = db_adapter.find_first_object(User, openid=openid)
         if user is not None:
             db_adapter.update_object(user,
-                                            name=user_info["nickname"],
-                                            nickname=user_info["nickname"],
-                                            access_token=access_token,
-                                            avatar_url=user_info["figureurl"],
-                                            last_login_time=datetime.utcnow())
+                                     name=user_info["nickname"],
+                                     nickname=user_info["nickname"],
+                                     access_token=access_token,
+                                     avatar_url=user_info["figureurl"],
+                                     last_login_time=datetime.utcnow())
             db_adapter.commit()
         else:
 
@@ -70,7 +71,7 @@ class QQLogin(LoginBase):
 
         self.check_first_user(user)
 
-        hava_running_expr = db_adapter.count(Experiment, user_id=user.id, status=1) > 0
+        hava_running_expr = db_adapter.count(Experiment, user_id=user.id, status=ExprStatus.Running) > 0
         next_url = session["next"] if 'next' in session else None
         if next_url is None:
             next_url = "/hackathon" if hava_running_expr else "/settings"
@@ -129,12 +130,12 @@ class GithubLogin(LoginBase):
         user = db_adapter.find_first_object(User, openid=openid)
         if user is not None:
             db_adapter.update_object(user,
-                                            name=name,
-                                            nickname=nickname,
-                                            access_token=access_token,
-                                            email=email,
-                                            avatar_url=avatar,
-                                            last_login_time=datetime.utcnow())
+                                     name=name,
+                                     nickname=nickname,
+                                     access_token=access_token,
+                                     email=email,
+                                     avatar_url=avatar,
+                                     last_login_time=datetime.utcnow())
             db_adapter.commit()
         else:
             user = User(name, nickname, email, openid, avatar, access_token)
@@ -153,7 +154,7 @@ class GithubLogin(LoginBase):
 
         is_admin = user.is_admin()
         is_not_registered = is_registration_limited and registered is None
-        hava_running_expr = db_adapter.count(Experiment, user_id=user.id, status=1) > 0
+        hava_running_expr = db_adapter.count(Experiment, user_id=user.id, status=ExprStatus.Running) > 0
 
         next_url = session["next"] if 'next' in session else None
         if next_url is None:

@@ -6,6 +6,7 @@ from . import db
 from datetime import datetime
 import uuid
 import json
+from hackathon.enum import *
 
 
 def to_json(inst, cls):
@@ -224,7 +225,7 @@ class DockerContainer(db.Model):
         self.host_server = host_server
         self.experiment = experiment
         self.image = image
-        self.status = 0
+        self.status = ContainerStatus.Init
         self.create_time = create_time if create_time is not None else datetime.utcnow()
 
     def __repr__(self):

@@ -13,6 +13,7 @@ from hackathon.log import log
 from hackathon.constants import *
 from hackathon.docker import OssDocker
 from hackathon.functions import *
+from hackathon.enum import *
 
 docker = OssDocker()
 OSSLAB_RUN_DIR = "/var/lib/osslab"
@@ -208,7 +209,7 @@ class ExprManager(object):
             post_data["mnt"] = mnts
         container_ret = docker.run(post_data, host_server.public_dns)
         container.container_id = container_ret["container_id"]
-        container.status = 1
+        container.status = ContainerStatus.Running
         host_server.container_count += 1
         db_adapter.commit()
 
@@ -228,7 +229,7 @@ class ExprManager(object):
             return self.__report_expr_status(expr)
 
         # new expr
-        expr = Experiment(g.user, "real-time-analytics-hackathon", 0, "docker", expr_config["expr_name"])
+        expr = Experiment(g.user, "real-time-analytics-hackathon", ExprStatus.Init, "docker", expr_config["expr_name"])
         db_adapter.add_object(expr)
         db_adapter.commit()
 
@@ -275,7 +276,7 @@ class ExprManager(object):
             containers.append(guca_container)
 
         # after everything is ready, set the expr state to running
-        expr.status = 1
+        expr.status = ExprStatus.Running
         db_adapter.commit()
 
         # response to caller
@@ -298,7 +299,7 @@ class ExprManager(object):
             for c in expr.containers:
                 try:
                     docker.stop(c.name, c.host_server.public_dns)
-                    c.status = 2
+                    c.status = ContainerStatus.Stopped
                     c.host_server.container_count -= 1
                     if c.host_server.container_count < 0:
                         c.host_server.container_count = 0
@@ -306,7 +307,7 @@ class ExprManager(object):
                 except Exception as e:
                     log.error(e)
 
-            expr.status = 2
+            expr.status = ExprStatus.Stopped
             db_adapter.commit()
 
         return "OK"
