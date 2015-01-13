@@ -122,5 +122,27 @@ sudo /etc/init.d/uwsgi start
 sudo /etc/init.d/nginx restart
 ```
 # Test the Web-application
+After finishsd those steps you could do some tests on local machine                     
+check guacd service:[http://localhost:8080/guacamole](http://localhost:8080/guacamole)                     
+check nginx service for proxy forwarding:[http://osslab.msopentech.cn/guacamole](http://localhost:8080/guacamole)     
+check open-hackathon web application:[http://localhost](http://localhost:8080/guacamole)                   
+
+# setup Dev evnvironment
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
