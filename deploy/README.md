@@ -1,4 +1,4 @@
-python script to deploy OSSLab to microsoft Azure.
+python script to deploy Open Hackathon platform to microsoft Azure.
 
 # Dependencies
 - python 2.7 or above.

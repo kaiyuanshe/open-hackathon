@@ -9,17 +9,14 @@ A service to export RESTFul API to manage docker containers.
 - [git](http://git-scm.com/downloads).
 - _optional_, you can install [SmartGit]() if you feel uncomfortable about git bash.
 
+# clone source code
+change directory to your local workspace, an clone source code.
+
+
 # setup
-after all the preconditions are met on your dev machine, install the following python libraries via pip.
+after all the preconditions are met on your dev machine, install the following python libraries via `pip install -r requirements.txt`.
 
-Or you can simply install all libraries by `pip install -r requirements.txt`.
-- `pip install flask`
-- `pip install flask-restful`
-- `pip install docker-py`
-- `pip install gittle`
-- `pip install wsgilog`
-
-Note that the list here may not up-to-date. When you see error like `no module named XXX`, that means you need install
+Note that the list  may not up-to-date. When you see error like `no module named XXX`, that means you need install
 the specific lib in the error message, try `pip install XXX` in this case.
 
 # run

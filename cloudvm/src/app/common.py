@@ -1,3 +1,5 @@
+__author__ = 'root'
+
 import os
 
 def convert(input):
@@ -10,8 +12,9 @@ def convert(input):
     else:
         return input
 
+
 # Guarantee that a diretory exists
 def mkdir_safe(path):
-    if path and not(os.path.exists(path)):
+    if path and not (os.path.exists(path)):
         os.makedirs(path)
     return path

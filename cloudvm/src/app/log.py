@@ -25,7 +25,7 @@ class Log(object):
     def critical(self, critical):
         self.logger.critical(critical)
 
-# usage(make sure /var/log/osslab/ directory exists and accessible):
+# usage(make sure /var/log/openhackathon/ directory exists and accessible):
 # from log import log
 # log.info("some info")
 log = Log()
