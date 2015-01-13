@@ -128,7 +128,21 @@ check nginx service for proxy forwarding:[http://osslab.msopentech.cn/guacamole]
 check open-hackathon web application:[http://localhost](http://localhost:8080/guacamole)                   
 
 # setup Dev evnvironment
+Also we can make this whole running environment to be a "DEV evironment"
+A python IDE is only what we lacked we can get "PyCharm" from [https://www.jetbrains.com/pycharm/](https://www.jetbrains.com/pycharm/) freely       
 
+Then we can develop or debug the open-hackathon on this machine
+
+# setup cloudVM service
+This cloudVM service could be setuped on anthoer hosts as well as localhost.
+ 
+####download dependencies 
+```
+sudo apt-get install docker.io
+sudo pip install -r /opt/open-hackathon/cloudvm/requestment.txt
+```
+####pdockers images 
+sudo docker pull 42.159.103.213:5000/rails
 
 
 
