@@ -127,36 +127,38 @@ check guacd service:[http://localhost:8080/guacamole](http://localhost:8080/guac
 check nginx service for proxy forwarding:[http://osslab.msopentech.cn/guacamole](http://localhost:8080/guacamole)     
 check open-hackathon web application:[http://localhost](http://localhost:8080/guacamole)                   
 
-# setup Dev evnvironment
-Also we can make this whole running environment to be a "DEV evironment"
-A python IDE is only what we lacked we can get "PyCharm" from [https://www.jetbrains.com/pycharm/](https://www.jetbrains.com/pycharm/) freely       
 
-Then we can develop or debug the open-hackathon on this machine
+#Python IDE
+Get "PyCharm" from [https://www.jetbrains.com/pycharm/](https://www.jetbrains.com/pycharm/) freely on your localhost     
+Extract the download `pycharm-community-4.0.4.tar.gz` , execuse `pycharm-community-4.0.4/bin/pycharm.sh`can open this software.
+Then we can develop or debug the open-hackathon
 
 # setup cloudVM service
-This cloudVM service could be setuped on anthoer hosts as well as localhost.
- 
+
 ####download dependencies 
 ```
 sudo apt-get install docker.io
 sudo pip install -r /opt/open-hackathon/cloudvm/requestment.txt
 ```
-####pdockers images 
+####download docker images 
+```
 sudo docker pull 42.159.103.213:5000/rails
+sudo docker pull 42.159.103.213:5000/mean
+sudo docker pull 42.159.103.213:5000/ubuntu-sshd
+sudo docker pull sffamily/ubuntu-gnome-vnc-eclipse
+```
+####config docker remote api
+If you want to use docker remote api to visit docker on your host machine or Azure server, please change the following configure:          
+Please edit this file: /etc/init/docker.conf or /etc/default/docker and update the DOCKER_OPTS variable to the following:
+```
+DOCKER_OPTS = '-H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock'
+```
+The daemon process will listen on port '4243', if '4243' port has been occupied on the machine which you want to visit, please change it. 
+And add user into docker gourp 
+```
+sudo groupadd docker
+sudo gpasswd -a ${USER} docker
+```
+Then restart the docker process: `service docker.io restart`
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#Debug the web application
