@@ -49,10 +49,10 @@ case "$1" in
   status)
         ps -ef | grep uwsgi
         ;;
-      *)
-            N=/etc/init.d/$NAME
-            echo "Usage: $N {start|stop|status}" >&2
-            exit 1
-            ;;
+  *)
+        N=/etc/init.d/$NAME
+        echo "Usage: $N {start|stop|status}" >&2
+        exit 1
+        ;;
 esac
 exit 0
