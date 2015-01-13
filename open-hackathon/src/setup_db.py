@@ -1,4 +1,4 @@
-from hackathon.database import *
+from hackathon.database.models import Role, db
 from hackathon.constants import ADMIN, HOST
 
 # initialize db tables

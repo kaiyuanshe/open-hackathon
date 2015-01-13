@@ -9,3 +9,6 @@ QQ_OAUTH_STATE = "openhackathon" # todo state should be constant. Actually it sh
 # DEFAULT ROLES
 ADMIN = "admin"
 HOST = "host"
+
+# docker
+DOCKER_DEFAULT_REMOTE_PORT = 4243
