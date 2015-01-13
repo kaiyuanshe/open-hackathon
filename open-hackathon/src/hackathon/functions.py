@@ -34,7 +34,7 @@ def mkdir_safe(path):
     return path
 
 
-def post_to_remote(url, post_data, headers):
+def post_to_remote(url, post_data, headers=None):
     default_headers = {"content-type": "application/json"}
     if headers is not None and isinstance(headers, dict):
         default_headers.update(headers)

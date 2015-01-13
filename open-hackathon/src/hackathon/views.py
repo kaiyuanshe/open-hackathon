@@ -1,14 +1,17 @@
-from flask import Response, render_template, url_for, g, abort
-from hackathon import app, api, login_manager
-from user import user_manager
-from expr import expr_manager
-from database.models import User, Announcement
-from login import *
-from log import log
-from flask_login import login_required, logout_user, current_user
 from datetime import timedelta
-from flask_restful import Resource, reqparse
 from os.path import realpath, dirname
+import os
+
+from flask import Response, render_template, url_for, g, abort
+from flask_login import login_required, logout_user, current_user
+from flask_restful import Resource
+
+from . import app, api, login_manager
+from expr import expr_manager
+from database.models import Announcement
+from user.login import *
+from log import log
+from database import db_adapter
 
 
 session_lifetime_minutes = safe_get_config("login/session_minutes", 60)
@@ -146,13 +149,6 @@ def renren():
     return render_template("renren.html")
 
 
-class CourseList(Resource):
-    def get(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument('tag', default=None)
-        args = parser.parse_args()
-
-
 class StatusList(Resource):
     # =======================================================return data start
     # [{"register_name":"zhang", "online":"1","submitted":"0"..."description":" "}]
@@ -200,10 +196,9 @@ class DoCourse(Resource):
 
 class Anmt(Resource):
     def get(self):
-        return Announcement.query.filter_by(enabled=1).first().json()
+        return db_adapter.find_first_object(Announcement, enabled=1).json()
 
 
-api.add_resource(CourseList, "/api/courses")
 api.add_resource(DoCourse, "/api/course/<id>")
 api.add_resource(StatusList, "/api/registerlist")
 api.add_resource(Anmt, "/api/announcement")

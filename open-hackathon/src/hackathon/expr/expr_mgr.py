@@ -1,14 +1,18 @@
 import sys
 
 sys.path.append("..")
+
 from compiler.ast import flatten
-from hackathon.database.models import *
+from datetime import datetime
+
+from flask import g
+
+from hackathon.database.models import HostServer, DockerContainer, PortBinding, Experiment, SCM, Register
+from hackathon.database import db_adapter
 from hackathon.log import log
 from hackathon.constants import *
 from hackathon.docker import OssDocker
-import json
 from hackathon.functions import *
-from flask import g
 
 docker = OssDocker()
 OSSLAB_RUN_DIR = "/var/lib/osslab"
@@ -77,7 +81,8 @@ class ExprManager(object):
 
     def __get_available_vm(self, expr_config):
         req_count = len(expr_config["containers"]) + 1
-        vm = HostServer.query.filter(HostServer.container_count + req_count <= HostServer.container_max_count).first()
+        vm = db_adapter.filter(HostServer,
+                               HostServer.container_count + req_count <= HostServer.container_max_count).first()
 
         # todo connect to azure to launch new VM if no existed VM meet the requirement
         # since it takes some time to launch VM, it's more reasonable to launch VM when the existed ones are almost used up.
@@ -125,8 +130,8 @@ class ExprManager(object):
                                    host_server,
                                    expr,
                                    container)
-        db.session.add(port_binding)
-        db.session.commit()
+        db_adapter.add_object(port_binding)
+        db_adapter.commit()
 
         return port_binding
 
@@ -152,8 +157,8 @@ class ExprManager(object):
 
         # db entity
         container = DockerContainer(post_data["container_name"], g.user, host_server, expr, container_config["image"])
-        db.session.add(container)
-        db.session.commit()
+        db_adapter.add_object(container)
+        db_adapter.commit()
 
         # format data in the template such as port and mnt.
         # the port defined in template have only expose port, we should assign a listening port in program
@@ -205,27 +210,27 @@ class ExprManager(object):
         container.container_id = container_ret["container_id"]
         container.status = 1
         host_server.container_count += 1
-        db.session.commit()
+        db_adapter.commit()
 
         return container
 
 
     def get_expr_status(self, expr_id):
-        expr = Experiment.query.filter_by(id=expr_id, status=1).first()
+        expr = db_adapter.find_first_object(Experiment, id=expr_id, status=1)
         if expr is not None:
             return self.__report_expr_status(expr)
         else:
             return "Not found", 404
 
     def start_expr(self, expr_config):
-        expr = Experiment.query.filter_by(status=1, user_id=g.user.id).first()
+        expr = db_adapter.find_first_object(Experiment, status=1, user_id=g.user.id)
         if expr is not None:
             return self.__report_expr_status(expr)
 
         # new expr
         expr = Experiment(g.user, "real-time-analytics-hackathon", 0, "docker", expr_config["expr_name"])
-        db.session.add(expr)
-        db.session.commit()
+        db_adapter.add_object(expr)
+        db_adapter.commit()
 
         # get available VM that runs the cloudvm and is available for more containers
         host_server = self.__get_available_vm(expr_config)
@@ -236,8 +241,8 @@ class ExprManager(object):
             s = expr_config["scm"]
             local_repo_path = self.__remote_checkout(host_server, expr, expr_config["scm"])
             scm = SCM(expr, s["provider"], s["branch"], s["repo_name"], s["repo_url"], local_repo_path)
-            db.session.add(scm)
-            db.session.commit()
+            db_adapter.add_object(scm)
+            db_adapter.commit()
 
         # start containers
         guacamole_config = []
@@ -271,7 +276,7 @@ class ExprManager(object):
 
         # after everything is ready, set the expr state to running
         expr.status = 1
-        db.session.commit()
+        db_adapter.commit()
 
         # response to caller
         return self.__report_expr_status(expr)
@@ -282,13 +287,12 @@ class ExprManager(object):
             return "Not running", 404
 
         expr.last_heart_beat_time = datetime.utcnow()
-        db.session.commit()
+        db_adapter.commit()
         return "OK"
 
     def stop_expr(self, expr_id):
         expr = Experiment.query.filter_by(id=expr_id, status=1).first()
         if expr is not None:
-            # todo delete source code folder to prevent disk from being used up
 
             # stop containers
             for c in expr.containers:
@@ -298,13 +302,32 @@ class ExprManager(object):
                     c.host_server.container_count -= 1
                     if c.host_server.container_count < 0:
                         c.host_server.container_count = 0
-                    db.session.commit()
+                    db_adapter.commit()
                 except Exception as e:
                     log.error(e)
 
             expr.status = 2
-            db.session.commit()
+            db_adapter.commit()
 
         return "OK"
+
+
+    def submit_expr(self, args):
+        if "id" not in args:
+            log.warn("cannot submit expr for the lack of id")
+            raise Exception("id unavailable")
+
+        id = args["id"]
+        u = db_adapter.find_first_object(Register, id=id)
+        if u is None:
+            log.debug("register user not found:" + id)
+            return "user not found", 404
+
+        u.online = args["online"] if "online" in args else u.online
+        u.submitted = args["submitted"] if "submitted" in args else u.submitted
+        u.submitted_time = datetime.utcnow()
+        db_adapter.commit()
+        return u
+
 
 expr_manager = ExprManager()
