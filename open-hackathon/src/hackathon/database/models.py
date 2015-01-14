@@ -1,12 +1,12 @@
-from . import UserMixin, app
-import time
-from flask.ext.sqlalchemy import SQLAlchemy
-from functions import *
-from datetime import datetime
-import uuid, json
+import sys
 
-app.config["SQLALCHEMY_DATABASE_URI"] = safe_get_config("mysql/connection", "mysql://root:root@localhost/hackathon")
-db = SQLAlchemy(app)
+sys.path.append("..")
+from . import UserMixin
+from . import db
+from datetime import datetime
+import uuid
+import json
+from hackathon.enum import *
 
 
 def to_json(inst, cls):
@@ -225,7 +225,7 @@ class DockerContainer(db.Model):
         self.host_server = host_server
         self.experiment = experiment
         self.image = image
-        self.status = 0
+        self.status = ContainerStatus.Init
         self.create_time = create_time if create_time is not None else datetime.utcnow()
 
     def __repr__(self):

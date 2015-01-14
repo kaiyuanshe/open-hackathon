@@ -4,12 +4,13 @@ from os.path import realpath, dirname
 from logging.handlers import RotatingFileHandler
 from hackathon import app
 
-#"application" code
+# "application" code
 class Log(object):
     def __init__(self):
         # logging.config.fileConfig("%s/logging.conf" % dirname(realpath(__file__)))
         loggers = [app.logger, logging.getLogger('sqlalchemy')]
-        file_handler = RotatingFileHandler('/var/log/open-hackathon/open-hackathon.log', maxBytes=1024 * 1024 * 50, backupCount=14)
+        file_handler = RotatingFileHandler('/var/log/open-hackathon/open-hackathon.log', maxBytes=1024 * 1024 * 50,
+                                           backupCount=14)
         file_handler.setLevel(logging.DEBUG)
         for logger in loggers:
             logger.addHandler(file_handler)

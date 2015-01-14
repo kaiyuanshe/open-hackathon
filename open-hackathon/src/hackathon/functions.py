@@ -1,9 +1,5 @@
-import urllib, urllib2, httplib, json, os, requests
-from datetime import datetime
-
+import urllib2, json, os, requests
 from config import Config
-
-# common functions
 
 
 def convert(input):
@@ -38,14 +34,14 @@ def mkdir_safe(path):
     return path
 
 
-# move to common.py for re-use
-def post_to_remote(url, post_data, headers={"content-type": "application/json"}):
-    req = requests.post(url, data=json.dumps(post_data), headers=headers)
+def post_to_remote(url, post_data, headers=None):
+    default_headers = {"content-type": "application/json"}
+    if headers is not None and isinstance(headers, dict):
+        default_headers.update(headers)
+    req = requests.post(url, data=json.dumps(post_data), headers=default_headers)
     resp = json.loads(req.content)
 
     return convert(resp)
-
-    # end
 
 
 def get_remote(url, accept=None):

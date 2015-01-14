@@ -1,25 +1,11 @@
-__author__ = 'junbo'
+import sys
 
+sys.path.append("..")
 import json
-
 import requests
-
-import log
-
-from database import *
-
-remote_port = "4243"
-
-
-def convert(input):
-    if isinstance(input, dict):
-        return {convert(key): convert(value) for key, value in input.iteritems()}
-    elif isinstance(input, list):
-        return [convert(element) for element in input]
-    elif isinstance(input, unicode):
-        return input.encode('utf-8')
-    else:
-        return input
+from hackathon.log import log
+from hackathon.constants import DOCKER_DEFAULT_REMOTE_PORT
+from hackathon.functions import convert
 
 
 def name_match(id, l):
@@ -30,13 +16,12 @@ def name_match(id, l):
     return False
 
 
-class OssDocker(object):
-    def __init__(self):
-        self.headers = {'content-type': 'application/json'}
+default_http_headers = {'content-type': 'application/json'}
 
+
+class OssDocker(object):
     def get_vm_url(self, vm_dns):
-        # vm = HostServer.query.filter(HostServer.container_count + req_count <= HostServer.container_max_count).first()
-        vm_url = "http://" + vm_dns + ":" + remote_port
+        vm_url = "http://" + vm_dns + ":" + str(DOCKER_DEFAULT_REMOTE_PORT)
         return vm_url
 
     def containers_info(self, vm_dns):
@@ -75,7 +60,7 @@ class OssDocker(object):
     def start(self, vm_dns, container_id, start_config={}):
         try:
             url = vm_dns + "/containers/%s/start" % container_id
-            requests.post(url, data=json.dumps(start_config), headers=self.headers)
+            requests.post(url, data=json.dumps(start_config), headers=default_http_headers)
         except Exception as e:
             log.error(e)
             log.error("container %s fail to start" % container_id)
@@ -137,7 +122,7 @@ class OssDocker(object):
             container_config["AttachStderr"] = attach_std_err
             try:
                 containers_url = vm_url + "/containers/create?name=%s" % container_name
-                req_create = requests.post(containers_url, data=json.dumps(container_config), headers=self.headers)
+                req_create = requests.post(containers_url, data=json.dumps(container_config), headers=default_http_headers)
             except Exception as e:
                 log.error(e)
                 log.error("container %s fail to create" % container_name)
