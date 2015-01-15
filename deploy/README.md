@@ -110,7 +110,7 @@ What we need is already putted in the `deploy` folder, So we can do it like this
 ```
 sudo rm -rf /etc/nginx/sites-enabled/default
 sudo cp deploy/nginx_openhackathon.conf /etc/nginx/conf.d/
-sudo cp deploy/nginx_openhackathon.uwsgi.ini ../
+sudo cp deploy/nginx_openhackathon.uwsgi.ini ./
 sudo cp deploy/uwsgi /etc/init.d/
 ```
 Note: Please check the three files carefully , especially about the paths !!!           
