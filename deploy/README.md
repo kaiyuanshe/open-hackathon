@@ -29,7 +29,8 @@ git clone https://github.com/msopentechcn/open-hackathon.git
 ###setup guacamole-server
 ```
 sudo apt-get install libtool libcairo2-dev libpng12-dev libossp-uuid-dev
-sudo apt-get install apt-get install libfreerdp-dev libpango1.0-dev libssh2-1-dev libtelnet-dev libvncserver-dev libpulse-dev libssl-dev libvorbis-dev
+sudo apt-get install apt-get install libfreerdp-dev libpango1.0-dev libssh2-1-dev libtelnet-dev 
+sudo apt-get install libvncserver-dev libpulse-dev libssl-dev libvorbis-dev
 
 git clone git://github.com/glyptodon/guacamole-server.git
 cd guacamole-server/
@@ -37,6 +38,8 @@ autoreconf -fi
 ./configure --with-init-dir=/etc/init.d
 make
 make install
+ldconfig
+/etc/init.d/guacd start
 ```
 ###setup guacamole-client
 ```
