@@ -40,13 +40,9 @@ class RemoteDocker(object):
         return vm_url
 
     def containers_info(self, vm_dns):
-        try:
-            containers_url = self.get_vm_url(vm_dns) + "/containers/json"
-            req = requests.get(containers_url)
-            return convert(json.loads(req.content))
-        except Exception as e:
-            log.error(e)
-            raise AssertionError("cannot get containers' info")
+        containers_url = self.get_vm_url(vm_dns) + "/containers/json"
+        req = requests.get(containers_url)
+        return convert(json.loads(req.content))
 
     def get_container(self, name, vm_dns):
         containers = self.containers_info(vm_dns)
@@ -65,16 +61,13 @@ class RemoteDocker(object):
                 containers_url = self.get_vm_url(vm_dns) + "/containers/%s/stop" % name
                 requests.post(containers_url)
             except Exception as e:
-                log.error(e)
-                log.error("container %s fail to stop" % name)
-                return False
-        return True
+                log.info("container %s fail to stop" % name)
+                raise AssertionError("container %s fail to stop" % name)
 
     # start a container, vm_dns is vm's ip address, start_config is the configure of container which you want to start
     def start(self, vm_url, container_id, start_config={}):
         url = vm_url + "/containers/%s/start" % container_id
         requests.post(url, data=json.dumps(start_config), headers=self.headers)
-        #return self.inspect(vm_dns, container_id)
 
     # remove a container
     def remove(self, vm_url, container_id):
@@ -85,7 +78,10 @@ class RemoteDocker(object):
     def create(self, vm_url, container_config, container_name):
         containers_url = vm_url + "/containers/create?name=%s" % container_name
         req_create = requests.post(containers_url, data=json.dumps(container_config), headers=self.headers)
-        return json.loads(req_create.content)
+        container = json.loads(req_create.content)
+        if container is None:
+            raise AssertionError("container %s fail to create" % container_name)
+        return container
 
     # run a container, the configure of container which you want to create, vm_dns is vm's ip address
     def run(self, args, vm_dns):
@@ -95,6 +91,7 @@ class RemoteDocker(object):
         result = {
             "container_name": container_name
         }
+
         if exist is not None:
             result["container_id"] = exist["Id"]
         else:
@@ -139,13 +136,12 @@ class RemoteDocker(object):
             container_config["AttachStdout"] = attach_std_out
             container_config["AttachStderr"] = attach_std_err
 
-            #create a container
+            # create a container
             try:
                 container = self.create(vm_url, container_config, container_name)
-            except:
-                log.error("container %s fail to create" % container_name)
+            except Exception as e:
+                log.info("container %s fail to create" % container_name)
                 return None
-
 
             # start_config = { "PortBindings":{"22/tcp":["10022"]}}, "Binds":[]}
             start_config = {"PortBindings": {}}
@@ -165,12 +161,9 @@ class RemoteDocker(object):
             # start container
             try:
                 self.start(vm_url, container["Id"], start_config)
-            except:
-                log.error("container %s fail to start" % container["Id"])
+            except Exception as e:
+                log.info("container %s fail to start" % container["Id"])
                 return None
-            #print val
-            #log.error("container %s fail to start" % container["Id"])
-            #return None
 
             if self.get_container(container_name, vm_dns) is None:
                 raise AssertionError("container %s fail to start" % args["name"])

@@ -3,7 +3,7 @@ from functions import *
 from flask import g
 from compiler.ast import flatten
 from database import *
-from log import log
+from log import *
 from constants import *
 from registration import Registration
 from remotedocker import *
@@ -11,6 +11,7 @@ from remotedocker import *
 
 docker = RemoteDocker()
 OSSLAB_RUN_DIR = "/var/lib/osslab"
+
 
 
 def course_path(id, sub=None):
@@ -150,6 +151,9 @@ class ExprManager(object):
         post_data["container_name"] = "%s-%s" % (expr.id, container_config["name"])
 
         # db entity
+        #self.count += 1
+        #if self.count == 3:
+        #    raise AssertionError
         container = DockerContainer(post_data["container_name"], g.user, host_server, expr, container_config["image"])
         db.session.add(container)
         db.session.commit()
@@ -201,6 +205,9 @@ class ExprManager(object):
             mnts.append("/etc/guacamole")
             post_data["mnt"] = mnts
         container_ret = docker.run(post_data, host_server.public_dns)
+        if container_ret is None:
+            log.info("container %s fail to run" % post_data["container_name"])
+            raise AssertionError("failed to run container")
         container.container_id = container_ret["container_id"]
         container.status = 1
         host_server.container_count += 1
@@ -216,6 +223,7 @@ class ExprManager(object):
             return "Not found", 404
 
     def start_expr(self, expr_config):
+        #self.count = 0
         starting_expr = Experiment.query.filter_by(status=3, user_id=g.user.id).first()
         if starting_expr is not None:
             return "Please wait a few seconds ... "
@@ -244,6 +252,7 @@ class ExprManager(object):
         # start containers
         guacamole_config = []
         try:
+
             expr.status = 3
             db.session.commit()
             containers = map(lambda container_config: self.__remote_start_container(expr,
@@ -255,6 +264,7 @@ class ExprManager(object):
         except Exception as e:
             self.roll_back(expr.id)
             log.error(e)
+
 
         # start guacamole
         if len(guacamole_config) > 0:
@@ -273,8 +283,12 @@ class ExprManager(object):
                 "AttachStderr": True,
                 "guacamole_config": guacamole_config
             }
+            try:
+                guca_container = self.__remote_start_container(expr, host_server, scm, guacamole_container_config, [])
+            except Exception as e:
+                self.roll_back(expr.id)
+                log.error(e)
 
-            guca_container = self.__remote_start_container(expr, host_server, scm, guacamole_container_config, [])
             containers.append(guca_container)
         expr.status = 1
         db.session.commit()
@@ -302,16 +316,17 @@ class ExprManager(object):
                     c.host_server.container_count -= 1
                     if c.host_server.container_count < 0:
                         c.host_server.container_count = 0
-                    db.session.commit()
                 except Exception as e:
                     expr.status = 5
                     db.session.commit()
                     log.info("rollback failed")
                     log.error(e)
-
-            expr.status = 4
-            db.session.commit()
-            log.info("rollback succeeded")
+        ports = PortBinding.query.filter_by(experiment_id=expr_id).all()
+        for port in ports:
+            db.session.delete(port)
+        expr.status = 4
+        db.session.commit()
+        log.info("rollback succeeded")
 
     def stop_expr(self, expr_id):
         expr = Experiment.query.filter_by(id=expr_id, status=1).first()
