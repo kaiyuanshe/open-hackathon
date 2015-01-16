@@ -7,10 +7,10 @@ from datetime import datetime
 
 from flask import g
 
-from hackathon.database.models import HostServer, DockerContainer, PortBinding, Experiment, SCM, Register
+from hackathon.database.models import *
 from hackathon.database import db_adapter
 from hackathon.log import log
-from hackathon.constants import *
+from hackathon.constants import GUACAMOLE
 from hackathon.docker import OssDocker
 from hackathon.functions import *
 from hackathon.enum import *
@@ -27,37 +27,43 @@ def course_path(id, sub=None):
 
 
 class ExprManager(object):
-    def __get_guacamole_container(self, expr):
-        return expr.containers.filter_by(image=GUACAMOLE_IMAGE).first()
+    def __get_guacamole_environment(self, expr):
+        return expr.virtual_environments.filter_by(image=GUACAMOLE.IMAGE).first()
+
+    def __get_guacamole_host(self, ve):
+        if ve.provider == VirtualEnvironmentProvider.Docker:
+            return ve.container.host_server.public_dns
+        else:
+            # todo support azure VM
+            raise Exception("not support yet")
 
     def __report_expr_status(self, expr):
         ret = {
             "expr_id": expr.id,
-            "type": expr.type,
-            "expr_name": expr.expr_name,
+            "hackathon": expr.hackathon.name,
             "create_time": str(expr.create_time),
             "last_heart_beat_time": str(expr.last_heart_beat_time),
             "guacamole_status": False
         }
 
         # fill the status of guacamole container
-        guaca_container = self.__get_guacamole_container(expr)
-        if guaca_container is not None:
+        guaca_env = self.__get_guacamole_environment(expr)
+        if guaca_env is not None:
+            guaca_container = guaca_env.container
+            guaca_port = guaca_env.port_bindings.filter_by(binding_type=PortBindingType.CloudService).first()
             try:
-                guaca_port = guaca_container.port_bindings.filter_by(container_port=GUACAMOLE_PORT).first()
-                get_remote("http://%s:%s" % (guaca_container.host_server.public_dns, guaca_port.vm_public_port))
+                get_remote("http://%s:%s" % (guaca_container.host_server.public_dns, guaca_port.port_from))
                 ret["guacamole_status"] = True
             except Exception as e:
-                log.log.error(e)
+                log.error(e)
 
             guacamole_servers = []
-            for c in expr.containers.all():
+            for ve in expr.virtual_environments.all():
                 # return guacamole link to frontend
-                if c.guacamole is not None:
-                    guaca_config = json.loads(c.guacamole)
-                    host_server = guaca_container.host_server
-                    guaca_pub_port = guaca_container.port_bindings.first().vm_public_port
-                    url = "http://%s:%s/client.xhtml?id=" % (host_server.public_dns, guaca_pub_port) + "c%2F" + \
+                if ve.remote_provider == RemoteProvider.Guacamole:
+                    guaca_config = json.loads(ve.remote_paras)
+                    url = "http://%s:%s/client.xhtml?id=" % (
+                    guaca_container.host_server.public_dns, guaca_port.port_from) + "c%2F" + \
                           guaca_config["name"]
                     guacamole_servers.append({
                         "name": guaca_config["name"],
@@ -68,22 +74,25 @@ class ExprManager(object):
 
         public_urls = []
         # return public accessible web url
-        for c in expr.containers.filter(DockerContainer.image != GUACAMOLE_IMAGE):
-            for p in c.port_bindings:
-                if p.vm_public_port is not None:
-                    url = "http://%s:%s" % (c.host_server.public_dns, p.vm_public_port)
-                    public_urls.append({
-                        "name": p.name,
-                        "url": url
-                    })
+        for ve in expr.virtual_environments.filter(VirtualEnvironment.image != GUACAMOLE.IMAGE).all():
+            # todo only docker handled now. add Azure VM support later
+            if ve.provider == VirtualEnvironmentProvider.Docker:
+                for p in ve.port_bindings.all():
+                    if p.binding_type == PortBindingType.CloudService:
+                        hs = db_adapter.find_first_object(DockerHostServer, id=p.binding_resource_id)
+                        url = "http://%s:%s" % (hs.public_dns, p.port_from)
+                        public_urls.append({
+                            "name": p.name,
+                            "url": url
+                        })
         ret["public_urls"] = public_urls
 
         return ret
 
-    def __get_available_vm(self, expr_config):
-        req_count = len(expr_config["containers"]) + 1
-        vm = db_adapter.filter(HostServer,
-                               HostServer.container_count + req_count <= HostServer.container_max_count).first()
+    def __get_available_docker_host(self, expr_config):
+        req_count = len(expr_config["containers"]) + 1  # todo only +1 when guacamole container is required
+        vm = db_adapter.filter(DockerHostServer,
+                               DockerHostServer.container_count + req_count <= DockerHostServer.container_max_count).first()
 
         # todo connect to azure to launch new VM if no existed VM meet the requirement
         # since it takes some time to launch VM, it's more reasonable to launch VM when the existed ones are almost used up.
@@ -96,7 +105,7 @@ class ExprManager(object):
     def __get_available_host_port(self, port_bindings, port):
         host_port = port + 10000
 
-        while len(filter(lambda p: p.vm_private_port == host_port, port_bindings)) > 0:
+        while len(filter(lambda p: p.port_from == host_port, port_bindings)) > 0:
             host_port += 1
 
         if host_port >= 65535:
@@ -105,9 +114,7 @@ class ExprManager(object):
 
         return host_port
 
-    def __assign_port(self, expr, host_server, container, port_cfg):
-        # todo login here is specially for 12/17 hackathon.
-        # The right solution is to pick an assign an unused port, open it on cloud service if it's public
+    def __assign_port(self, expr, host_server, ve, port_cfg):
 
         if port_cfg.has_key("public"):
             # todo open port on azure for those must open to public
@@ -121,27 +128,48 @@ class ExprManager(object):
             if safe_get_config("environment", "prod") == "local" and port_cfg["host_port"] == 80:
                 port_cfg["host_port"] += 10000
                 port_cfg["public_port"] = port_cfg["host_port"]
+
+            binding_cloudservice = PortBinding(port_cfg["name"] if "name" in port_cfg else None,
+                                               port_cfg["public_port"],
+                                               port_cfg["host_port"],
+                                               PortBindingType.CloudService,
+                                               host_server.id,
+                                               ve,
+                                               expr)
+            binding_docker = PortBinding(port_cfg["name"] if "name" in port_cfg else None,
+                                         port_cfg["host_port"],
+                                         port_cfg["port"],
+                                         PortBindingType.Docker,
+                                         host_server.id,
+                                         ve,
+                                         expr)
+            db_adapter.add_object(binding_cloudservice)
+            db_adapter.add_object(binding_docker)
+            db_adapter.commit()
+            return binding_docker
         else:
-            port_cfg["host_port"] = self.__get_available_host_port(host_server.port_bindings.all(), port_cfg["port"])
+            host_ports = db_adapter.find_all_objects(PortBinding, binding_type=PortBindingType.Docker,
+                                                     binding_resource_id=host_server.id)
+            port_cfg["host_port"] = self.__get_available_host_port(host_ports, port_cfg["port"])
 
-        port_binding = PortBinding(port_cfg["name"] if "name" in port_cfg else None,
-                                   port_cfg["public_port"] if "public_port" in port_cfg else None,
-                                   port_cfg["host_port"],
-                                   port_cfg["port"],
-                                   host_server,
-                                   expr,
-                                   container)
-        db_adapter.add_object(port_binding)
-        db_adapter.commit()
+            port_binding = PortBinding(port_cfg["name"] if "name" in port_cfg else None,
+                                       port_cfg["host_port"],
+                                       port_cfg["port"],
+                                       PortBindingType.Docker,
+                                       host_server.id,
+                                       ve,
+                                       expr)
+            db_adapter.add_object(port_binding)
+            db_adapter.commit()
+            return port_binding
 
-        return port_binding
 
     def __get_cloudvm_address(self, host_server):
         # the port is that cloudvm service is listening on. By default: 8001 on cloudService and python cmd, 80 on apache2
 
         # connect to cloudvm service through its private address when deploy on azure. Here its public address used for
         # debug purpose since local dev environment cannot access its private address
-        return "http://%s:%s" % (host_server.public_dns, host_server.public_cloudvm_port)
+        return "http://%s:%s" % (host_server.public_dns, 8001)
         # return "%s:%s" % (host_server.private_ip, host_server.private_cloudvm_port)
 
     def __remote_checkout(self, host_server, expr, scm):
@@ -157,7 +185,19 @@ class ExprManager(object):
         post_data["container_name"] = "%s-%s" % (expr.id, container_config["name"])
 
         # db entity
-        container = DockerContainer(post_data["container_name"], g.user, host_server, expr, container_config["image"])
+        provider = container_config["provider"] if "provider" in container_config else VirtualEnvironmentProvider.Docker
+        remote_provider = ""
+        if "remote" in post_data and "provider" in post_data["remote"]:
+            remote_provider = post_data["remote"]["provider"]
+        ve = VirtualEnvironment(provider,
+                                post_data["container_name"],
+                                container_config["image"],
+                                VirtualEnvStatus.Init,
+                                remote_provider,
+                                g.user,
+                                expr)
+        container = DockerContainer(post_data["container_name"], host_server, ve, expr, container_config["image"])
+        db_adapter.add_object(ve)
         db_adapter.add_object(container)
         db_adapter.commit()
 
@@ -166,7 +206,7 @@ class ExprManager(object):
         # the mnt may contain placeholder for source code dir which are decided by 'cloudvm' service
         if "ports" in container_config:
             # get an available on the target VM
-            ps = map(lambda p: [self.__assign_port(expr, host_server, container, p).vm_private_port, p["port"]],
+            ps = map(lambda p: [self.__assign_port(expr, host_server, ve, p).port_from, p["port"]],
                      container_config["ports"])
             container_config["docker_ports"] = flatten(ps)
         if container_config.has_key("mnt"):
@@ -177,8 +217,9 @@ class ExprManager(object):
         # add to guacamole config
         # note the port should get from the container["port"] to get corresponding listening port rather than the
         # expose port that defined in the template. Following codes are just example
-        if "guacamole" in container_config and "ports" in container_config:
-            guac = container_config["guacamole"]
+        if "remote" in container_config and container_config["remote"][
+            "provider"] == "guacamole" and "ports" in container_config:
+            guac = container_config["remote"]
             port_cfg = filter(lambda p: p["port"] == guac["port"], container_config["ports"])
 
             if len(port_cfg) > 0:
@@ -194,7 +235,7 @@ class ExprManager(object):
                     gc["password"] = guac["password"]
 
                 # save guacamole config into DB
-                container.guacamole = json.dumps(gc)
+                ve.remote_paras = json.dumps(gc)
                 guacamole_config.append(gc)
 
         # start container remotely
@@ -209,11 +250,11 @@ class ExprManager(object):
             post_data["mnt"] = mnts
         container_ret = docker.run(post_data, host_server.public_dns)
         container.container_id = container_ret["container_id"]
-        container.status = ContainerStatus.Running
+        ve.status = VirtualEnvStatus.Running
         host_server.container_count += 1
         db_adapter.commit()
 
-        return container
+        return ve
 
 
     def get_expr_status(self, expr_id):
@@ -223,18 +264,25 @@ class ExprManager(object):
         else:
             return "Not found", 404
 
-    def start_expr(self, expr_config):
-        expr = db_adapter.find_first_object(Experiment, status=1, user_id=g.user.id)
+    def start_expr(self, hackathon_name, expr_config):
+        hackathon = db_adapter.find_first_object(Hackathon, name=hackathon_name)
+        if hackathon is None:
+            raise Exception("hackathon %s doesn't exist.")
+
+        expr = db_adapter.find_first_object(Experiment, status=ExprStatus.Running,
+                                            user_id=g.user.id,
+                                            hackathon_id=hackathon.id)
         if expr is not None:
             return self.__report_expr_status(expr)
 
         # new expr
-        expr = Experiment(g.user, "real-time-analytics-hackathon", ExprStatus.Init, "docker", expr_config["expr_name"])
+        expr = Experiment(g.user, hackathon, ExprStatus.Init)
         db_adapter.add_object(expr)
         db_adapter.commit()
 
         # get available VM that runs the cloudvm and is available for more containers
-        host_server = self.__get_available_vm(expr_config)
+        # todo check the 'provider' first
+        host_server = self.__get_available_docker_host(expr_config)
 
         # checkout source code
         scm = None
@@ -260,10 +308,10 @@ class ExprManager(object):
             guacamole_container_config = {
                 "name": "guacamole",
                 "expr_id": expr.id,
-                "image": GUACAMOLE_IMAGE,
+                "image": GUACAMOLE.IMAGE,
                 "ports": [{
                               "name": "guacamole",
-                              "port": GUACAMOLE_PORT,
+                              "port": GUACAMOLE.PORT,
                               "public": True
                           }],
                 "AttachStdin": False,
@@ -283,7 +331,7 @@ class ExprManager(object):
         return self.__report_expr_status(expr)
 
     def heart_beat(self, expr_id):
-        expr = Experiment.query.filter_by(id=expr_id, status=1).first()
+        expr = Experiment.query.filter_by(id=expr_id, status=ExprStatus.Running).first()
         if expr is None:
             return "Not running", 404
 
@@ -292,20 +340,20 @@ class ExprManager(object):
         return "OK"
 
     def stop_expr(self, expr_id):
-        expr = Experiment.query.filter_by(id=expr_id, status=1).first()
+        expr = Experiment.query.filter_by(id=expr_id, status=ExprStatus.Running).first()
         if expr is not None:
 
             # stop containers
-            for c in expr.containers:
-                try:
-                    docker.stop(c.name, c.host_server.public_dns)
-                    c.status = ContainerStatus.Stopped
-                    c.host_server.container_count -= 1
-                    if c.host_server.container_count < 0:
-                        c.host_server.container_count = 0
-                    db_adapter.commit()
-                except Exception as e:
-                    log.error(e)
+            for c in expr.virtual_environments:
+                if c.provider == VirtualEnvironmentProvider.Docker:
+                    try:
+                        docker.stop(c.name, c.container.host_server.public_dns)
+                        c.status = VirtualEnvStatus.Stopped
+                        c.host_server.container_count -= 1
+                        if c.host_server.container_count < 0:
+                            c.host_server.container_count = 0
+                    except Exception as e:
+                        log.error(e)
 
             expr.status = ExprStatus.Stopped
             db_adapter.commit()
@@ -324,7 +372,7 @@ class ExprManager(object):
             log.debug("register user not found:" + id)
             return "user not found", 404
 
-        u.online = args["online"] if "online" in args else u.online
+        # u.online = args["online"] if "online" in args else u.online
         u.submitted = args["submitted"] if "submitted" in args else u.submitted
         u.submitted_time = datetime.utcnow()
         db_adapter.commit()

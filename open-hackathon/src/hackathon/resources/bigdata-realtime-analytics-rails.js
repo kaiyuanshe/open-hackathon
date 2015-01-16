@@ -1,31 +1,33 @@
 {
-    "expr_name": "jstrom hackathon_python",
+    "expr_name": "jstrom hackathon_rails",
     "containers": [
         {
+            "provider": "docker",
             "name": "web",
-            "image": "msopentechcn/flask",
+            "image": "msopentechcn/rails",
             "ports":[{
                 "name": "website",
-                "port": 5000,
+                "port": 3000,
                 "host_port": 80,
                 "public": true
             },{
                 "name": "Deploy",
                 "port": 22
             }],
-            "mnt2":["%s/src","/src"],
-            "mnt": ["/home/opentech/github/flask-example/src", "/src"],
+            "command":"/usr/sbin/sshd -D",
             "AttachStdin":false,
             "AttachStdout":true,
             "AttachStderr":true,
-            "guacamole": {
+            "remote": {
+                "provider": "guacamole",
                 "protocol": "ssh",
                 "username": "root",
-                "password": "root",
-                "port": 22
+                "password": "acoman",
+                "port": 22,
             }
         },
         {
+            "provider": "docker",
             "name": "vnc",
             "image": "sffamily/ubuntu-gnome-vnc-eclipse",
             "ports":[{
@@ -37,7 +39,8 @@
             "AttachStderr":true,
             "tty": true,
             "stdin_open": true,
-            "guacamole": {
+            "remote": {
+                "provider": "guacamole",
                 "protocol": "vnc",
                 "username": "root",
                 "password": "acoman",

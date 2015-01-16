@@ -7,7 +7,7 @@ from hackathon.log import log
 import json
 from flask_login import login_user
 from flask import request, redirect, session
-from hackathon.constants import QQ_OAUTH_STATE
+from hackathon.config import QQ_OAUTH_STATE
 from . import user_manager
 from datetime import datetime
 from hackathon.enum import ExprStatus
@@ -53,7 +53,8 @@ class QQLogin(LoginBase):
                                      nickname=user_info["nickname"],
                                      access_token=access_token,
                                      avatar_url=user_info["figureurl"],
-                                     last_login_time=datetime.utcnow())
+                                     last_login_time=datetime.utcnow(),
+                                     online=1)
             db_adapter.commit()
         else:
 
@@ -62,7 +63,8 @@ class QQLogin(LoginBase):
                         None,
                         openid,
                         user_info["figureurl"],
-                        access_token)
+                        access_token,
+                        1)
             db_adapter.add_object(user)
             db_adapter.commit()
 
@@ -135,10 +137,11 @@ class GithubLogin(LoginBase):
                                      access_token=access_token,
                                      email=email,
                                      avatar_url=avatar,
-                                     last_login_time=datetime.utcnow())
+                                     last_login_time=datetime.utcnow(),
+                                     online=1)
             db_adapter.commit()
         else:
-            user = User(name, nickname, email, openid, avatar, access_token)
+            user = User(name, nickname, email, openid, avatar, access_token, 1)
             db_adapter.add_object(user)
             db_adapter.commit()
 
@@ -169,7 +172,5 @@ class GithubLogin(LoginBase):
                 log.info("github user login successfully but not registered. Redirect to registration page")
                 return redirect("/notregister")
         else:
-            db_adapter.update_object(registered, online=1)
-            db_adapter.commit()
             return redirect(next_url)
 

@@ -1,21 +1,17 @@
 {
-    "expr_name": "python_on_flask",
-    "scm2" :{
-        "provider": "git",
-        "repo_name": "flask-example",
-        "repo_url":"https://github.com/juniwang/flask-example.git",
-        "branch": "master"
-    },
+    "expr_name": "jstrom hackathon_python",
     "containers": [
         {
+            "provider": "docker",
             "name": "web",
             "image": "msopentechcn/flask",
             "ports":[{
                 "name": "website",
                 "port": 5000,
+                "host_port": 80,
                 "public": true
             },{
-                "name": "website",
+                "name": "Deploy",
                 "port": 22
             }],
             "mnt2":["%s/src","/src"],
@@ -23,7 +19,8 @@
             "AttachStdin":false,
             "AttachStdout":true,
             "AttachStderr":true,
-            "guacamole": {
+            "remote": {
+                "provider": "guacamole",
                 "protocol": "ssh",
                 "username": "root",
                 "password": "root",
@@ -31,22 +28,24 @@
             }
         },
         {
-            "name": "sshd",
-            "image": "rastasheep/ubuntu-sshd:14.04",
+            "provider": "docker",
+            "name": "vnc",
+            "image": "sffamily/ubuntu-gnome-vnc-eclipse",
             "ports":[{
                 "name": "Dev",
-                "port": 22
+                "port": 5901
             }],
-            "mnt2":["%s/src","/src"],
-            "mnt": ["/home/opentech/github/flask-example/src", "/src"],
             "AttachStdin":false,
             "AttachStdout":true,
             "AttachStderr":true,
-            "guacamole": {
-                "protocol": "ssh",
+            "tty": true,
+            "stdin_open": true,
+            "remote": {
+                "provider": "guacamole",
+                "protocol": "vnc",
                 "username": "root",
-                "password": "root",
-                "port": 22
+                "password": "acoman",
+                "port": 5901
             }
         }
     ]
