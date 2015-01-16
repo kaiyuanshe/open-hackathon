@@ -5,7 +5,7 @@ from flask import redirect, request, url_for, g
 from hackathon import app
 from flask_admin import BaseView, expose, Admin, AdminIndexView
 from hackathon.decorators import role_required
-from hackathon.constants import ADMIN, HOST
+from hackathon.constants import ROLE
 
 
 class HomeView(AdminIndexView):
@@ -13,7 +13,7 @@ class HomeView(AdminIndexView):
     def index(self):
         if not g.user.is_authenticated():
             return redirect(url_for('index', next=request.path))
-        if not g.user.has_roles((ADMIN, HOST)):
+        if not g.user.has_roles((ROLE.ADMIN, ROLE.HOST)):
             return redirect("/hackathon")
         return self.render('admin/index.html', user=g.user)
 
@@ -28,7 +28,7 @@ class MyAdminView(HackathonAdminBaseView):
     def index(self):
         return self.render_admin('myadmin.html')
 
-    @role_required(ADMIN)
+    @role_required(ROLE.ADMIN)
     def is_accessible(self):
         return True
 
@@ -42,7 +42,7 @@ class AnotherAdminView(HackathonAdminBaseView):
     def test(self):
         return self.render_admin('test.html')
 
-    @role_required([ADMIN, HOST])
+    @role_required([ROLE.ADMIN, ROLE.HOST])
     def is_accessible(self):
         return True
 

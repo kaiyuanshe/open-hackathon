@@ -3,11 +3,12 @@ from os.path import realpath, dirname
 import os
 
 from flask import Response, render_template, url_for, g, abort
-from flask_login import login_required, logout_user, current_user
-from flask_restful import Resource
+from flask_login import login_required, current_user
+from flask_restful import Resource, reqparse
 
 from . import app, api, login_manager
 from expr import expr_manager
+from user import user_manager
 from database.models import Announcement
 from user.login import *
 from log import log
@@ -49,7 +50,7 @@ def load_user(id):
 
 @app.route('/logout')
 def logout():
-    logout_user()
+    user_manager.logout(g.user)
     return redirect(url_for('index'))
 
 
@@ -162,36 +163,55 @@ class StatusList(Resource):
     # =======================================================test data end
     def put(self):
         args = request.get_json()
-        return expr_manager.submit_expr((args))
+        return expr_manager.submit_expr(args)
 
 
 class DoCourse(Resource):
-    def get(self, id):
-        cs = expr_manager.get_expr_status(id)
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('id', type=int)
+        args = parser.parse_args()
+        if 'id' not in args:
+            return "Bad Request", 400
+
+        cs = expr_manager.get_expr_status(args['id'])
         if cs is not None:
             return cs
         else:
             return "Not Found", 404
 
-    def post(self, id):
-        # the id is actually the name of template when POST
-        template_file = "%s/resources/%s_docker.js" % (dirname(realpath(__file__)), id)
+    def post(self):
+        args = request.get_json()
+        if "cid" not in args or "hackathon" not in args:
+            return "invalid parameter", 400
+        cid = args["cid"]
+        hackathon = args["hackathon"]
+        template_file = "%s/resources/%s-%s.js" % (dirname(realpath(__file__)), hackathon, cid)
         if os.path.isfile(template_file):
             # call remote service to start docker containers
             expr_config = json.load(file(template_file))
             try:
-                return expr_manager.start_expr(expr_config)
+                return expr_manager.start_expr(hackathon, expr_config)
             except Exception as err:
                 log.error(err)
                 return "fail to start due to '%s'" % err, 500
         else:
             return "the experiment %s is not ready" % id, 404
 
-    def delete(self, id):
-        return expr_manager.stop_expr(id)
+    def delete(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('id', type=int)
+        args = parser.parse_args()
+        if 'id' not in args:
+            return "Bad Request", 400
 
-    def put(self, id):
-        return expr_manager.heart_beat(id)
+        return expr_manager.stop_expr(args["id"])
+
+    def put(self):
+        args = request.get_json()
+        if "id" not in args:
+            return "invalid parameter", 400
+        return expr_manager.heart_beat(args["id"])
 
 
 class Anmt(Resource):
@@ -199,6 +219,6 @@ class Anmt(Resource):
         return db_adapter.find_first_object(Announcement, enabled=1).json()
 
 
-api.add_resource(DoCourse, "/api/course/<id>")
+api.add_resource(DoCourse, "/api/course")
 api.add_resource(StatusList, "/api/registerlist")
 api.add_resource(Anmt, "/api/announcement")

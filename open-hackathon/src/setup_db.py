@@ -1,5 +1,5 @@
 from hackathon.database.models import Role, db
-from hackathon.constants import ADMIN, HOST
+from hackathon.constants import ROLE
 
 # initialize db tables
 # make sure database and user correctly created in mysql
@@ -15,5 +15,5 @@ def add_role(role):
         db.session.commit()
 
 
-add_role(ADMIN)
-add_role(HOST)
+add_role(ROLE.ADMIN)
+add_role(ROLE.HOST)
