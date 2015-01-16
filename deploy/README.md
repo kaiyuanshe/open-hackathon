@@ -7,8 +7,6 @@ sudo apt-get update && sudo apt-get upgrade
 sudo add-apt-repository ppa:nginx/stable
 
 sudo apt-get install build-essential python python-dev python-setuptools libmysqlclient-dev
-sudo apt-get install libtool libcairo2-dev libpng12-dev libossp-uuid-dev
-sudo apt-get install apt-get install libfreerdp-dev libpango1.0-dev libssh2-1-dev libtelnet-dev libvncserver-dev libpulse-dev libssl-dev libvorbis-dev
 
 sudo apt-get install vim git
 sudo easy_install pip
@@ -28,6 +26,23 @@ git clone https://github.com/msopentechcn/open-hackathon.git
 ```
 
 #config guacamole
+###setup guacamole-server
+```
+sudo apt-get install libtool libcairo2-dev libpng12-dev libossp-uuid-dev
+sudo apt-get install apt-get install libfreerdp-dev libpango1.0-dev libssh2-1-dev libtelnet-dev libvncserver-dev libpulse-dev libssl-dev libvorbis-dev
+
+git clone git://github.com/glyptodon/guacamole-server.git
+cd guacamole-server/
+autoreconf -fi
+./configure --with-init-dir=/etc/init.d
+make
+make install
+```
+###setup guacamole-client
+```
+wget http://jaist.dl.sourceforge.net/project/guacamole/current/binary/guacamole-0.9.4.war
+```
+###config guacamole
 Check the guacamole config file `/etc/guacamole.properties`, and edit the file like this:
 ```shell
 guacd-hostname: localhost
