@@ -7,6 +7,7 @@ sudo apt-get update && sudo apt-get upgrade
 sudo add-apt-repository ppa:nginx/stable
 
 sudo apt-get install build-essential python python-dev python-setuptools libmysqlclient-dev
+sudo apt-get install libtool libcairo2-dev libpng12-dev libossp-uuid-dev
 sudo apt-get install apt-get install libfreerdp-dev libpango1.0-dev libssh2-1-dev libtelnet-dev libvncserver-dev libpulse-dev libssl-dev libvorbis-dev
 
 sudo apt-get install vim git
