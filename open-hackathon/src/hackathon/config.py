@@ -52,7 +52,8 @@ Config = {
             "user_info_url": 'https://graph.qq.com/user/get_user_info?access_token=%s&oauth_consumer_key=%s&openid=%s'
         },
         "provider_enabled": ["github", "qq"],
-        "session_minutes": 60
+        "session_minutes": 60,
+        "token_expiration_minutes": 60 * 24
     },
     "register": {
         "limitUnRegisteredUser": True
