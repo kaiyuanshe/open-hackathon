@@ -1,9 +1,13 @@
 # "javascript" section for javascript. see @app.route('/config.js') in app/views.py
 
-from constants import *
-
 # oauth constants
 HOSTNAME = "http://osslab.msopentech.cn"
+QQ_OAUTH_STATE = "openhackathon"  # todo state should be constant. Actually it should be unguessable to prevent CSFA
+
+MYSQL_HOST = "localhost"
+MYSQL_USER = "hackathon"
+MYSQL_PWD = "hackathon"
+MYSQL_DB = "hackathon"
 
 Config = {
     "environment": "local",
@@ -27,15 +31,14 @@ Config = {
         },
         "qq": {
             "clientID": "client_id=101157515",
-            "redirect_uri": "redirect_uri=http://openhackathon.msopentech.cn/qq",
+            "redirect_uri": "redirect_uri=http://osslab.msopentech.cn/qq",
             "scope": "scope=get_user_info",
             "state": "state=%s" % QQ_OAUTH_STATE,
             "response_type": "response_type=code",
         }
     },
     "mysql": {
-        "connection": 'mysql://%s:%s@%s/%s' % ("hackathon", "hackathon", "localhost", "hackathon"),
-        "database": "hackathon"
+        "connection": 'mysql://%s:%s@%s/%s' % (MYSQL_USER, MYSQL_PWD, MYSQL_HOST, MYSQL_DB)
     },
     "login": {
         "github": {

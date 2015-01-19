@@ -1,14 +1,21 @@
 $(document).ready(function () {
-    var course = getParameterByName("cid");
-    if(!course || typeof(course)=="undefined")
-        course = "ubuntu"
+    var cid = getParameterByName("cid");
+    if(!cid || typeof(cid)=="undefined")
+        cid = "ubuntu"
     var main = $("#hack_main").on('mouseover','iframe',function(e){
         $(this).focus();
     });
 
+    var hackathon = "bigdata-realtime-analytics"
+
     $.ajax({
-        url: '/api/course/' + course,
+        url: '/api/course',
         type: "POST",
+        data: JSON.stringify({
+            "cid": cid,
+            "hackathon": hackathon
+        }),
+        contentType: "application/json",
         success: function (resp) {
             var data = resp
             var servers = data.guacamole_servers;
@@ -67,8 +74,12 @@ $(document).ready(function () {
                 // heart beat
                 var ihb = setInterval(function () {
                     $.ajax({
-                        url: '/api/course/' + data.expr_id,
+                        url: '/api/course',
                         type: "PUT",
+                        data: JSON.stringify({
+                            "id": data.expr_id
+                        }),
+                        contentType: "application/json",
                         success: function () {},
                         error: function () {}
                     });
@@ -78,7 +89,7 @@ $(document).ready(function () {
                 $("#third-leave").click(function () {
                     if(confirm("所有环境将被取消，请确保你的更改已提交至github。您确定取消么？")){
                         $.ajax({
-                            url: '/api/course/' + data.expr_id,
+                            url: '/api/course?id=' + data.expr_id,
                             type: "DELETE",
                             success: function () {
                                 $("#hack_main_cancelled").show()
@@ -111,7 +122,7 @@ $(document).ready(function () {
 
                 var sciv = setInterval(function () {
                     $.ajax({
-                        url: '/api/course/' + data.expr_id,
+                        url: '/api/course?id=' + data.expr_id,
                         type: "GET",
                         success: function (data) {
                             if (data.guacamole_status) {

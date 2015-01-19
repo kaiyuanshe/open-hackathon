@@ -4,7 +4,7 @@ sys.path.append("..")
 import json
 import requests
 from hackathon.log import log
-from hackathon.constants import DOCKER_DEFAULT_REMOTE_PORT
+from hackathon.constants import DOCKER
 from hackathon.functions import convert
 
 
@@ -21,7 +21,7 @@ default_http_headers = {'content-type': 'application/json'}
 
 class OssDocker(object):
     def get_vm_url(self, vm_dns):
-        vm_url = "http://" + vm_dns + ":" + str(DOCKER_DEFAULT_REMOTE_PORT)
+        vm_url = "http://" + vm_dns + ":" + str(DOCKER.DEFAULT_REMOTE_PORT)
         return vm_url
 
     def containers_info(self, vm_dns):
