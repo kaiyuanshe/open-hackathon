@@ -26,11 +26,16 @@ git clone https://github.com/msopentechcn/open-hackathon.git
 ```
 
 #config guacamole
+Do this steps you should follow [http://guac-dev.org/doc/gug/installing-guacamole.html](http://guac-dev.org/doc/gug/installing-guacamole.html)      
+Here are the main steps about configure and depoly guacamole-server as well as guacamole-client
+
+
 ###setup guacamole-server
 ```
 sudo apt-get install libtool libcairo2-dev libpng12-dev libossp-uuid-dev
-sudo apt-get install apt-get install libfreerdp-dev libpango1.0-dev libssh2-1-dev libtelnet-dev 
+sudo apt-get install libfreerdp-dev libpango1.0-dev libssh2-1-dev libtelnet-dev 
 sudo apt-get install libvncserver-dev libpulse-dev libssl-dev libvorbis-dev
+sudo apt-get install autoconf
 
 git clone git://github.com/glyptodon/guacamole-server.git
 cd guacamole-server/
@@ -45,8 +50,10 @@ ldconfig
 ```
 wget http://jaist.dl.sourceforge.net/project/guacamole/current/binary/guacamole-0.9.4.war
 ```
+Then deploy this `guacamole.war` into tomcat7 
+
 ###config guacamole
-Check the guacamole config file `/etc/guacamole.properties`, and edit the file like this:
+Check the guacamole config file `/etc/guacamole/guacamole.properties`, and edit the file like this:
 ```shell
 guacd-hostname: localhost
 guacd-port:     4822
@@ -66,10 +73,6 @@ And every time you change this file , you may need to restart guacd and tomcat7 
 After installed tomcat7 we need to make tomcat load the guacamole-UI web application. The guacamole.war was provided after we install guacamole commponent.     
 So we can config tomcat7 like these steps:
 ```
-sudo ln -s /var/lib/tomcat7/conf /usr/share/tomcat7/conf
-sudo ln -s /var/lib/tomcat7/webapps /usr/share/tomcat7/webapps
-sudo cp /var/lib/guacamole/guacamole.war /usr/share/tomcat7/webapps/
-
 sudo mkdir /usr/share/tomcat7/.guacamole
 sudo ln -s /etc/guacamole/guacamole.properties /usr/share/tomcat7/.guacamole/guacamole.properties
 
