@@ -9,7 +9,7 @@ from flask_restful import Resource, reqparse
 from . import app, api, login_manager
 from expr import expr_manager
 from user import user_manager
-from database.models import Announcement
+from database.models import Announcement, User
 from user.login import *
 from log import log
 from database import db_adapter
@@ -45,7 +45,7 @@ def simple_route(path):
 # login methods
 @login_manager.user_loader
 def load_user(id):
-    return User.query.filter_by(id=int(id)).first()
+    return db_adapter.find_first_object(User, id=int(id))
 
 
 @app.route('/logout')

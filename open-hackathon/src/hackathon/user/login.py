@@ -1,24 +1,17 @@
 # -*- coding:utf8 -*-
 # encoding = utf-8
 from hackathon.database import db_adapter
-from hackathon.database.models import Experiment, User
+from hackathon.database.models import Experiment
 from hackathon.functions import get_remote, get_config, convert, safe_get_config
 from hackathon.log import log
 import json
-from flask_login import login_user
 from flask import request, redirect, session
 from hackathon.config import QQ_OAUTH_STATE
 from . import user_manager
-from datetime import datetime
 from hackathon.enum import ExprStatus
 
 
-class LoginBase(object):
-    def check_first_user(self, user):
-        user_manager.check_first_user(user)
-
-
-class QQLogin(LoginBase):
+class QQLogin():
     def qq_authorized(self):
         code = request.args.get('code')
         state = request.args.get('state')
@@ -46,32 +39,11 @@ class QQLogin(LoginBase):
         log.debug("get user info from qq:" + user_info_resp)
         user_info = convert(json.loads(user_info_resp))
 
-        user = db_adapter.find_first_object(User, openid=openid)
-        if user is not None:
-            db_adapter.update_object(user,
-                                     name=user_info["nickname"],
-                                     nickname=user_info["nickname"],
-                                     access_token=access_token,
-                                     avatar_url=user_info["figureurl"],
-                                     last_login_time=datetime.utcnow(),
-                                     online=1)
-            db_adapter.commit()
-        else:
-
-            user = User(user_info["nickname"],
-                        user_info["nickname"],
-                        None,
-                        openid,
-                        user_info["figureurl"],
-                        access_token,
-                        1)
-            db_adapter.add_object(user)
-            db_adapter.commit()
-
-        login_user(user)
-        log.info("qq user login successfully:" + repr(user))
-
-        self.check_first_user(user)
+        user = user_manager.login(openid,
+                                  name=user_info["nickname"],
+                                  nickname=user_info["nickname"],
+                                  access_token=access_token,
+                                  avatar_url=user_info["figureurl"])['user']
 
         hava_running_expr = db_adapter.count(Experiment, user_id=user.id, status=ExprStatus.Running) > 0
         next_url = session["next"] if 'next' in session else None
@@ -83,7 +55,7 @@ class QQLogin(LoginBase):
         return redirect(next_url)
 
 
-class GithubLogin(LoginBase):
+class GithubLogin():
     def github_authorized(self):
         code = request.args.get('code')
 
@@ -129,27 +101,12 @@ class GithubLogin(LoginBase):
         email = filter(lambda e: e["primary"], email_info)[0]["email"]
 
         log.info("successfully get email:" + email)
-        user = db_adapter.find_first_object(User, openid=openid)
-        if user is not None:
-            db_adapter.update_object(user,
-                                     name=name,
-                                     nickname=nickname,
-                                     access_token=access_token,
-                                     email=email,
-                                     avatar_url=avatar,
-                                     last_login_time=datetime.utcnow(),
-                                     online=1)
-            db_adapter.commit()
-        else:
-            user = User(name, nickname, email, openid, avatar, access_token, 1)
-            db_adapter.add_object(user)
-            db_adapter.commit()
-
-        # login user so that flask-login can manage session and cookies
-        login_user(user)
-        log.info("github user login successfully:" + repr(user))
-
-        self.check_first_user(user)
+        user = user_manager.login(openid,
+                                  name=name,
+                                  nickname=nickname,
+                                  access_token=access_token,
+                                  email=email,
+                                  avatar_url=avatar)['user']
 
         # find out the hackacathon registration info
         is_registration_limited = safe_get_config("/register/limitUnRegisteredUser", True)
