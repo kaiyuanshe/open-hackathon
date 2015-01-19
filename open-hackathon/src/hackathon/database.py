@@ -49,24 +49,14 @@ class User(db.Model, UserMixin):
     def json(self):
         return to_json(self, self.__class__)
 
-    def __init__(self, name, nickname, email, openid, avatar_url, access_token, slug=None, create_time=None,
-                 last_login_time=None):
-        if create_time is None:
-            create_time = datetime.utcnow()
-        if last_login_time is None:
-            last_login_time = datetime.utcnow()
-        if slug is None:
-            slug = str(uuid.uuid1())[0:8]  # todo generate a real slug
-
-        self.name = name
-        self.nickname = nickname
-        self.email = email
-        self.openid = openid
-        self.avatar_url = avatar_url
-        self.slug = slug
-        self.access_token = access_token
-        self.create_time = create_time
-        self.last_login_time = last_login_time
+    def __init__(self, **kwargs):
+        super(User, self).__init__(**kwargs)
+        if self.create_time is None:
+            self.create_time = datetime.utcnow()
+        if self.last_login_time is None:
+            self.last_login_time = datetime.utcnow()
+        if self.slug is None:
+            self.slug = str(uuid.uuid1())[0:8]  # todo generate a real slug
 
     def __repr__(self):
         return "User: " + self.json()
@@ -88,19 +78,14 @@ class Register(db.Model):
     def json(self):
         return to_json(self, self.__class__)
 
-    def __init__(self, register_name, email, create_time=None, description=None, enabled=None):
-        if create_time is None:
-            create_time = datetime.utcnow()
-        if enabled is None:
-            enabled = 1
-
-        self.register_name = register_name
-        self.email = email
+    def __init__(self, **kwargs):
+        super(Register, self).__init__(**kwargs)
+        if self.create_time is None:
+            self.create_time = datetime.utcnow()
+        if self.enabled is None:
+            self.enabled = 1
         self.online = 0
         self.submitted = 0
-        self.create_time = create_time
-        self.description = description
-        self.enabled = enabled
 
     def __repr__(self):
         return "Register:" + self.json()
@@ -120,15 +105,8 @@ class HostServer(db.Model):
         return to_json(self, self.__class__)
 
     # e,g,:DockerHostServer('oss-docker-vm1', 'osslab1.chinacloudapp.cn', 8001, '10.207.250.79', 80, 0, 100)
-    def __init__(self, vm_name, public_dns, public_cloudvm_port, private_ip, private_cloudvm_port, container_count,
-                 container_max_count):
-        self.vm_name = vm_name
-        self.public_dns = public_dns
-        self.public_cloudvm_port = public_cloudvm_port
-        self.private_ip = private_ip
-        self.private_cloudvm_port = private_cloudvm_port
-        self.container_count = container_count
-        self.container_max_count = container_max_count
+    def __init__(self, **kwargs):
+        super(HostServer, self).__init_(**kwargs)
 
     def __repr__(self):
         return "HostServer: " + self.json()
@@ -149,19 +127,12 @@ class Experiment(db.Model):
     def json(self):
         return to_json(self, self.__class__)
 
-    def __init__(self, user, type, status, vm_type, expr_name, create_time=None, last_heart_beat_time=None):
-        if create_time is None:
-            create_time = datetime.utcnow()
-        if last_heart_beat_time is None:
-            last_heart_beat_time = datetime.utcnow()
-
-        self.user = user
-        self.type = type
-        self.vm_type = vm_type
-        self.expr_name = expr_name
-        self.status = status
-        self.create_time = create_time
-        self.last_heart_beat_time = last_heart_beat_time
+    def __init__(self, **kwargs):
+        super(Experiment, self).__init__(**kwargs)
+        if self.create_time is None:
+            self.create_time = datetime.utcnow()
+        if self.last_heart_beat_time is None:
+            self.last_heart_beat_time = datetime.utcnow()
 
     def __repr__(self):
         return "Experiment: " + self.json()
@@ -182,17 +153,10 @@ class SCM(db.Model):
     def json(self):
         return to_json(self, self.__class__)
 
-    def __init__(self, experiment, provider, branch, repo_name, repo_url, local_repo_path=None, create_time=None):
-        if create_time is None:
-            create_time = datetime.utcnow()
-
-        self.experiment = experiment
-        self.provider = provider
-        self.branch = branch
-        self.repo_name = repo_name
-        self.repo_url = repo_url
-        self.local_repo_path = local_repo_path
-        self.create_time = create_time
+    def __init__(self, **kwargs):
+        super(SCM, self).__init__(**kwargs)
+        if self.create_time is None:
+            self.create_time = datetime.utcnow()
 
     def __repr__(self):
         return "SCM: " + self.json()
@@ -219,14 +183,12 @@ class DockerContainer(db.Model):
     def json(self):
         return to_json(self, self.__class__)
 
-    def __init__(self, name, user, host_server, experiment, image, create_time=None):
-        self.name = name
-        self.user = user
-        self.host_server = host_server
-        self.experiment = experiment
-        self.image = image
+    def __init__(self, **kwargs):
+        super(DockerContainer, self).__init__(**kwargs)
         self.status = 0
-        self.create_time = create_time if create_time is not None else datetime.utcnow()
+        if self.create_time is None:
+            self.create_time = datetime.utcnow()
+
 
     def __repr__(self):
         return "DockerContainer:" + self.json()
@@ -254,14 +216,8 @@ class PortBinding(db.Model):
     def json(self):
         return to_json(self, self.__class__)
 
-    def __init__(self, name, vm_public_port, vm_private_port, container_port, host_server, experiment, container):
-        self.name = name
-        self.vm_public_port = vm_public_port
-        self.vm_private_port = vm_private_port
-        self.container_port = container_port
-        self.host_server = host_server
-        self.experiment = experiment
-        self.container = container
+    def __init__(self, **kwargs):
+        super(PortBinding, self).__init__(**kwargs)
 
     def __repr__(self):
         return "PortBinding: " + self.json()
