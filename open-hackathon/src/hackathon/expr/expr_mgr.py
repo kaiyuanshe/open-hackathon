@@ -258,7 +258,7 @@ class ExprManager(object):
 
 
     def get_expr_status(self, expr_id):
-        expr = db_adapter.find_first_object(Experiment, id=expr_id, status=1)
+        expr = db_adapter.find_first_object(Experiment, id=expr_id, status=ExprStatus.Running)
         if expr is not None:
             return self.__report_expr_status(expr)
         else:

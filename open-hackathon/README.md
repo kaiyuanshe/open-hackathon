@@ -1,4 +1,4 @@
-LABOSS
+Open Hackathon Platform
 ======
 
 Open Source Software Laboratory
