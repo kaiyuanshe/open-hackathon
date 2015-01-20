@@ -1,12 +1,11 @@
-from . import UserMixin, app
-import time
-from flask.ext.sqlalchemy import SQLAlchemy
-from functions import *
-from datetime import datetime
-import uuid, json
+import sys
 
-app.config["SQLALCHEMY_DATABASE_URI"] = safe_get_config("mysql/connection", "mysql://root:root@localhost/hackathon")
-db = SQLAlchemy(app)
+sys.path.append("..")
+from . import UserMixin
+from . import db
+from datetime import datetime
+import uuid
+import json
 
 
 def to_json(inst, cls):
@@ -35,11 +34,12 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50))
     nickname = db.Column(db.String(50))
-    email = db.Column(db.String(100))
+    email = db.Column(db.String(50))
     openid = db.Column(db.String(100))
     avatar_url = db.Column(db.String(200))
     slug = db.Column(db.String(50), unique=True, nullable=False)  # can be used for branch name of github
     access_token = db.Column(db.String(100))
+    online = db.Column(db.Integer)  # 0:offline 1:online
     create_time = db.Column(db.DateTime)
     last_login_time = db.Column(db.DateTime)
 
@@ -62,18 +62,44 @@ class User(db.Model, UserMixin):
         return "User: " + self.json()
 
 
+class UserToken(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    token = db.Column(db.String(50), unique=True, nullable=False)
+
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
+    user = db.relationship('User', backref=db.backref('tokens', lazy='dynamic'))
+
+    issue_date = db.Column(db.DateTime)
+    expire_date = db.Column(db.DateTime, nullable=False)
+
+    def json(self):
+        return to_json(self, self.__class__)
+
+    def __init__(self, token, user, expire_date, issue_date=None):
+        if issue_date is None:
+            issue_date = datetime.utcnow()
+
+        self.token = token
+        self.user = user
+        self.expire_date = expire_date
+        self.issue_date = issue_date
+
+    def __repr__(self):
+        return "UserToken: " + self.json()
+
+
 class Register(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     register_name = db.Column(db.String(80))
     email = db.Column(db.String(120), unique=True)
-    online = db.Column(db.Integer)  # 0:offline 1:online
-    submitted = db.Column(db.Integer)  # 0:not 1:submitted
     create_time = db.Column(db.DateTime)
-    submitted_time = db.Column(db.DateTime)
     description = db.Column(db.String(200))
     enabled = db.Column(db.Integer)  # 0: disabled 1:enabled
     jstrom_api = db.Column(db.String(50))
     jstrom_mgmt_portal = db.Column(db.String(50))
+
+    hackathon_id = db.Column(db.Integer, db.ForeignKey('hackathon.id', ondelete='CASCADE'))
+    hackathon = db.relationship('Hackathon', backref=db.backref('registers', lazy='dynamic'))
 
     def json(self):
         return to_json(self, self.__class__)
@@ -85,19 +111,42 @@ class Register(db.Model):
         if self.enabled is None:
             self.enabled = 1
         self.online = 0
-        self.submitted = 0
 
     def __repr__(self):
         return "Register:" + self.json()
 
 
-class HostServer(db.Model):
+class Hackathon(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True, nullable=False)
+    sponsor = db.Column(db.Integer)
+    status = db.Column(db.Integer)
+    start_time = db.Column(db.DateTime)
+    end_time = db.Column(db.DateTime)
+    create_time = db.Column(db.DateTime)
+
+    def json(self):
+        return to_json(self, self.__class__)
+
+    # e,g,:DockerHostServer('oss-docker-vm1', 'osslab1.chinacloudapp.cn', 8001, '10.207.250.79', 80, 0, 100)
+    def __init__(self, name, sponsor, create_time=None):
+        if create_time is None:
+            create_time = datetime.utcnow()
+        self.name = name
+        self.sponsor = sponsor
+        self.create_time = create_time
+
+    def __repr__(self):
+        return "Hackathon: " + self.json()
+
+
+class DockerHostServer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     vm_name = db.Column(db.String(100), unique=True, nullable=False)
     public_dns = db.Column(db.String(50))
-    public_cloudvm_port = db.Column(db.Integer)
+    public_docker_api_port = db.Column(db.Integer)
     private_ip = db.Column(db.String(50), unique=True)
-    private_cloudvm_port = db.Column(db.Integer)
+    private_docker_api_port = db.Column(db.Integer)
     container_count = db.Column(db.Integer, nullable=False)
     container_max_count = db.Column(db.Integer, nullable=False)
 
@@ -106,7 +155,7 @@ class HostServer(db.Model):
 
     # e,g,:DockerHostServer('oss-docker-vm1', 'osslab1.chinacloudapp.cn', 8001, '10.207.250.79', 80, 0, 100)
     def __init__(self, **kwargs):
-        super(HostServer, self).__init_(**kwargs)
+        super(DockerHostServer, self).__init__(**kwargs)
 
     def __repr__(self):
         return "HostServer: " + self.json()
@@ -117,12 +166,15 @@ class Experiment(db.Model):
     type = db.Column(db.String(50))  # e.g.trial, real-time-analytics-hackathon
     vm_type = db.Column(db.String(50))  # e.g.docker, azure
     expr_name = db.Column(db.String(50))
-    status = db.Column(db.Integer)  # 0=init 1=running 2=stopped 3=expr running 4=roll succeeded 5=rollback failed
+    status = db.Column(db.Integer)  # see enum.py
     create_time = db.Column(db.DateTime)
     last_heart_beat_time = db.Column(db.DateTime)
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
     user = db.relationship('User', backref=db.backref('experiments', lazy='dynamic'))
+
+    hackathon_id = db.Column(db.Integer, db.ForeignKey('hackathon.id', ondelete='CASCADE'))
+    hackathon = db.relationship('Hackathon', backref=db.backref('experiments', lazy='dynamic'))
 
     def json(self):
         return to_json(self, self.__class__)
@@ -136,6 +188,34 @@ class Experiment(db.Model):
 
     def __repr__(self):
         return "Experiment: " + self.json()
+
+
+class VirtualEnvironment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    provider = db.Column(db.String(10), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    image = db.Column(db.String(100))
+    status = db.Column(db.Integer)  # see enum.py
+    remote_provider = db.Column(db.String(20))
+    remote_paras = db.Column(db.String(300))
+    create_time = db.Column(db.DateTime)
+
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user = db.relationship('User', backref=db.backref('virtual_environments', lazy='dynamic'))
+
+    experiment_id = db.Column(db.Integer, db.ForeignKey('experiment.id', ondelete='CASCADE'))
+    experiment = db.relationship('Experiment', backref=db.backref('virtual_environments', lazy='dynamic'))
+
+    def json(self):
+        return to_json(self, self.__class__)
+
+    def __init__(self, **kwargs):
+        super(VirtualEnvironment, self).__init__(**kwargs)
+        if self.create_time is None:
+            self.create_time = datetime.utcnow()
+
+    def __repr__(self):
+        return "VirtualEnvironment: " + self.json()
 
 
 class SCM(db.Model):
@@ -162,23 +242,20 @@ class SCM(db.Model):
         return "SCM: " + self.json()
 
 
+# detail info of a VirtualEnvironment in case Docker
 class DockerContainer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
     image = db.Column(db.String(50), nullable=False)
     container_id = db.Column(db.String(100))
-    status = db.Column(db.Integer)  # 0=init 1=running 2=stopped 3=removed
-    guacamole = db.Column(db.String(300))
     create_time = db.Column(db.DateTime)
 
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    user = db.relationship('User', backref=db.backref('containers', lazy='dynamic'))
+    virtual_environment_id = db.Column(db.Integer, db.ForeignKey('virtual_environment.id', ondelete='CASCADE'))
+    virtual_environment = db.relationship(VirtualEnvironment,
+                                          backref=db.backref('container', uselist=False))
 
-    host_server_id = db.Column(db.Integer, db.ForeignKey('host_server.id', ondelete='CASCADE'))
-    host_server = db.relationship('HostServer', backref=db.backref('containers', lazy='dynamic'))
-
-    experiment_id = db.Column(db.Integer, db.ForeignKey('experiment.id', ondelete='CASCADE'))
-    experiment = db.relationship('Experiment', backref=db.backref('containers', lazy='dynamic'))
+    host_server_id = db.Column(db.Integer, db.ForeignKey('docker_host_server.id', ondelete='CASCADE'))
+    host_server = db.relationship('DockerHostServer', backref=db.backref('containers', lazy='dynamic'))
 
     def json(self):
         return to_json(self, self.__class__)
@@ -188,7 +265,6 @@ class DockerContainer(db.Model):
         self.status = 0
         if self.create_time is None:
             self.create_time = datetime.utcnow()
-
 
     def __repr__(self):
         return "DockerContainer:" + self.json()
@@ -200,18 +276,17 @@ class PortBinding(db.Model):
     # container again. And the number of port should be enough since we won't have too many containers on the same VM.
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50))
-    vm_public_port = db.Column(db.Integer)
-    vm_private_port = db.Column(db.Integer, nullable=False)
-    container_port = db.Column(db.Integer, nullable=False)
+    port_from = db.Column(db.Integer, nullable=False)
+    port_to = db.Column(db.Integer, nullable=False)
+    binding_type = db.Column(db.Integer)  # CloudService or Docker, see enum.py
+    binding_resource_id = db.Column(
+        db.Integer)  # DockerHostServer.id if binding_type is Docker, VM resource id if cloudservice
 
-    host_server_id = db.Column(db.Integer, db.ForeignKey('host_server.id', ondelete='CASCADE'))
-    host_server = db.relationship('HostServer', backref=db.backref('port_bindings', lazy='dynamic'))
+    virtual_environment_id = db.Column(db.Integer, db.ForeignKey('virtual_environment.id', ondelete='CASCADE'))
+    virtual_environment = db.relationship('VirtualEnvironment', backref=db.backref('port_bindings', lazy='dynamic'))
 
     experiment_id = db.Column(db.Integer, db.ForeignKey('experiment.id', ondelete='CASCADE'))
     experiment = db.relationship('Experiment', backref=db.backref('port_bindings', lazy='dynamic'))
-
-    container_id = db.Column(db.Integer, db.ForeignKey('docker_container.id', ondelete='CASCADE'))
-    container = db.relationship('DockerContainer', backref=db.backref('port_bindings', lazy='dynamic'))
 
     def json(self):
         return to_json(self, self.__class__)

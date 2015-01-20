@@ -1,6 +1,8 @@
-from azure import *
+import sys
+
+sys.path.append("..")
 from azure.servicemanagement import *
-from functions import get_config
+from hackathon.functions import get_config
 
 sub_id = get_config("azure/subscriptionId")
 cert_path = get_config('azure/certPath')

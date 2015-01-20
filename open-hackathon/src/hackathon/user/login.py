@@ -1,26 +1,17 @@
 # -*- coding:utf8 -*-
-#encoding = utf-8
-from database import *
-from functions import *
-from log import log
+# encoding = utf-8
+from hackathon.database import db_adapter
+from hackathon.database.models import Experiment
+from hackathon.functions import get_remote, get_config, convert, safe_get_config
+from hackathon.log import log
 import json
-from registration import *
-from flask.ext.login import login_user
 from flask import request, redirect, session
-from constants import *
+from hackathon.config import QQ_OAUTH_STATE
+from . import user_manager
+from hackathon.enum import ExprStatus
 
 
-class LoginBase(object):
-    def check_first_user(self, user):
-        # make the first login user be the first super admin
-        admin = Role.query.filter_by(name="admin").first()
-        if admin.users.count() == 0:
-            first_admin = UserRole(admin, user)
-            db.session.add(first_admin)
-            db.session.commit()
-
-
-class QQLogin(LoginBase):
+class QQLogin():
     def qq_authorized(self):
         code = request.args.get('code')
         state = request.args.get('state')
@@ -33,7 +24,7 @@ class QQLogin(LoginBase):
         log.debug("get token from qq:" + token_resp)
         start = token_resp.index('=')
         end = token_resp.index('&')
-        access_token = token_resp[start+1:end]
+        access_token = token_resp[start + 1:end]
 
         # get openID.
         openid_resp = get_remote(get_config("login/qq/openid_url") + access_token)
@@ -48,31 +39,13 @@ class QQLogin(LoginBase):
         log.debug("get user info from qq:" + user_info_resp)
         user_info = convert(json.loads(user_info_resp))
 
-        user = User.query.filter_by(openid=openid).first()
-        if user is not None:
-            user.access_token = access_token
-            user.name = user_info["nickname"]
-            user.nickname = user_info["nickname"]
-            user.avatar_url = user_info["figureurl"]
-            user.last_login_time = datetime.utcnow()
-            db.session.commit()
-        else:
+        user = user_manager.login(openid,
+                                  name=user_info["nickname"],
+                                  nickname=user_info["nickname"],
+                                  access_token=access_token,
+                                  avatar_url=user_info["figureurl"])['user']
 
-            user = User(user_info["nickname"],
-                    user_info["nickname"],
-                    None,
-                    openid,
-                    user_info["figureurl"],
-                    access_token)
-            db.session.add(user)
-            db.session.commit()
-
-        login_user(user)
-        log.info("qq user login successfully:" + repr(user))
-
-        self.check_first_user(user)
-
-        hava_running_expr = Experiment.query.filter_by(user_id=user.id, status=1).count() > 0
+        hava_running_expr = db_adapter.count(Experiment, user_id=user.id, status=ExprStatus.Running) > 0
         next_url = session["next"] if 'next' in session else None
         if next_url is None:
             next_url = "/hackathon" if hava_running_expr else "/settings"
@@ -81,7 +54,8 @@ class QQLogin(LoginBase):
 
         return redirect(next_url)
 
-class GithubLogin(LoginBase):
+
+class GithubLogin():
     def github_authorized(self):
         code = request.args.get('code')
 
@@ -90,7 +64,7 @@ class GithubLogin(LoginBase):
         log.debug("get token from github:" + token_resp)
         start = token_resp.index('=')
         end = token_resp.index('&')
-        access_token = token_resp[start+1:end]
+        access_token = token_resp[start + 1:end]
 
         # get user info
         user_info_resp = get_remote(get_config('login/github/user_info_url') + access_token)
@@ -125,36 +99,22 @@ class GithubLogin(LoginBase):
         log.debug("get email from github:" + email_info_resp)
         email_info = json.loads(email_info_resp)
         email = filter(lambda e: e["primary"], email_info)[0]["email"]
-        # email = ",".join(map(lambda e: e["email"], email_info))
 
         log.info("successfully get email:" + email)
-        user = User.query.filter_by(openid=openid).first()
-        if user is not None:
-            user.name = name
-            user.nickname = nickname
-            user.access_token = access_token
-            user.email = email
-            user.avatar_url = avatar
-            user.last_login_time = datetime.utcnow()
-            db.session.commit()
-        else:
-            user = User(name, nickname, email, openid, avatar, access_token)
-            db.session.add(user)
-            db.session.commit()
-
-        # login user so that flask-login can manage session and cookies
-        login_user(user)
-        log.info("github user login successfully:" + repr(user))
-
-        self.check_first_user(user)
+        user = user_manager.login(openid,
+                                  name=name,
+                                  nickname=nickname,
+                                  access_token=access_token,
+                                  email=email,
+                                  avatar_url=avatar)['user']
 
         # find out the hackacathon registration info
         is_registration_limited = safe_get_config("/register/limitUnRegisteredUser", True)
-        registered = Registration().get_by_email(email)
+        registered = user_manager.get_registration_by_email(email)
 
         is_admin = user.is_admin()
         is_not_registered = is_registration_limited and registered is None
-        hava_running_expr = Experiment.query.filter_by(user_id=user.id, status=1).count() > 0
+        hava_running_expr = db_adapter.count(Experiment, user_id=user.id, status=ExprStatus.Running) > 0
 
 
         next_url = session["next"] if 'next' in session else None
@@ -170,7 +130,5 @@ class GithubLogin(LoginBase):
                 log.info("github user login successfully but not registered. Redirect to registration page")
                 return redirect("/notregister")
         else:
-            registered.online = 1
-            db.session.commit()
             return redirect(next_url)
 

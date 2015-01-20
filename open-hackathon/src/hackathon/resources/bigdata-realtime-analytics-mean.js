@@ -1,9 +1,10 @@
 {
-    "expr_name": "jstrom hackathon_rails",
-    "containers": [
+    "expr_name": "jstrom hackathon_mean",
+    "virtual_environments": [
         {
+            "provider": "docker",
             "name": "web",
-            "image": "msopentechcn/rails",
+            "image": "msopentechcn/mean",
             "ports":[{
                 "name": "website",
                 "port": 3000,
@@ -17,7 +18,8 @@
             "AttachStdin":false,
             "AttachStdout":true,
             "AttachStderr":true,
-            "guacamole": {
+            "remote": {
+                "provider": "guacamole",
                 "protocol": "ssh",
                 "username": "root",
                 "password": "acoman",
@@ -25,6 +27,7 @@
             }
         },
         {
+            "provider": "docker",
             "name": "vnc",
             "image": "sffamily/ubuntu-gnome-vnc-eclipse",
             "ports":[{
@@ -36,7 +39,8 @@
             "AttachStderr":true,
             "tty": true,
             "stdin_open": true,
-            "guacamole": {
+            "remote": {
+                "provider": "guacamole",
                 "protocol": "vnc",
                 "username": "root",
                 "password": "acoman",

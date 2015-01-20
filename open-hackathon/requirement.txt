@@ -13,3 +13,4 @@ azure
 werkzeug
 jinja2
 six
+requests
