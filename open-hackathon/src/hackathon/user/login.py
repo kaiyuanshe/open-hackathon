@@ -1,20 +1,25 @@
 # -*- coding:utf8 -*-
 # encoding = utf-8
-from hackathon.database import db_adapter
-from hackathon.database.models import Experiment
-from hackathon.functions import get_remote, get_config, convert, safe_get_config
+from hackathon.functions import get_remote, get_config, convert
 from hackathon.log import log
 import json
-from flask import request, redirect, session
 from hackathon.config import QQ_OAUTH_STATE
 from . import user_manager
-from hackathon.enum import ExprStatus
+from hackathon.constants import OAUTH_PROVIDER
 
 
-class QQLogin():
-    def qq_authorized(self):
-        code = request.args.get('code')
-        state = request.args.get('state')
+class LoginProviderBase():
+    def login(self, args):
+        pass
+
+    def logout(self, user):
+        user_manager.db_logout(user)
+
+
+class QQLogin(LoginProviderBase):
+    def login(self, args):
+        code = args.get('code')
+        state = args.get('state')
         if state != QQ_OAUTH_STATE:
             log.warn("STATE match fail. Potentially CSFR.")
             return "UnAuthorized", 401
@@ -39,25 +44,24 @@ class QQLogin():
         log.debug("get user info from qq:" + user_info_resp)
         user_info = convert(json.loads(user_info_resp))
 
-        user = user_manager.login(openid,
-                                  name=user_info["nickname"],
-                                  nickname=user_info["nickname"],
-                                  access_token=access_token,
-                                  avatar_url=user_info["figureurl"])['user']
+        user_with_token = user_manager.db_login(openid,
+                                                name=user_info["nickname"],
+                                                nickname=user_info["nickname"],
+                                                access_token=access_token,
+                                                avatar_url=user_info["figureurl"])
 
-        hava_running_expr = db_adapter.count(Experiment, user_id=user.id, status=ExprStatus.Running) > 0
-        next_url = session["next"] if 'next' in session else None
-        if next_url is None:
-            next_url = "/hackathon" if hava_running_expr else "/settings"
-        else:
-            session["next"] = None
+        # login flask
+        user = user_with_token["user"]
+        log.info("QQ user login successfully:" + repr(user))
 
-        return redirect(next_url)
+        detail = user_manager.get_user_detail_info(user)
+        detail["token"] = user_with_token["token"].token
+        return detail
 
 
-class GithubLogin():
-    def github_authorized(self):
-        code = request.args.get('code')
+class GithubLogin(LoginProviderBase):
+    def login(self, args):
+        code = args.get('code')
 
         # get access_token
         token_resp = get_remote(get_config('login/github/access_token_url') + code)
@@ -101,33 +105,23 @@ class GithubLogin():
         email = filter(lambda e: e["primary"], email_info)[0]["email"]
 
         log.info("successfully get email:" + email)
-        user = user_manager.login(openid,
-                                  name=name,
-                                  nickname=nickname,
-                                  access_token=access_token,
-                                  email=email,
-                                  avatar_url=avatar)['user']
+        user_with_token = user_manager.db_login(openid,
+                                                name=name,
+                                                nickname=nickname,
+                                                access_token=access_token,
+                                                email=email,
+                                                avatar_url=avatar)
 
-        # find out the hackacathon registration info
-        is_registration_limited = safe_get_config("/register/limitUnRegisteredUser", True)
-        registered = user_manager.get_registration_by_email(email)
+        # login flask
+        user = user_with_token["user"]
+        log.info("github user login successfully:" + repr(user))
 
-        is_admin = user.is_admin()
-        is_not_registered = is_registration_limited and registered is None
-        hava_running_expr = db_adapter.count(Experiment, user_id=user.id, status=ExprStatus.Running) > 0
+        detail = user_manager.get_user_detail_info(user)
+        detail["token"] = user_with_token["token"].token
+        return detail
 
-        next_url = session["next"] if 'next' in session else None
-        if next_url is None:
-            next_url = "/hackathon" if hava_running_expr else "/settings"
-        else:
-            session["next"] = None
 
-        if is_not_registered:
-            if is_admin:
-                return redirect(next_url)
-            else:
-                log.info("github user login successfully but not registered. Redirect to registration page")
-                return redirect("/notregister")
-        else:
-            return redirect(next_url)
-
+login_providers = {
+    OAUTH_PROVIDER.GITHUB: GithubLogin(),
+    OAUTH_PROVIDER.QQ: QQLogin()
+}

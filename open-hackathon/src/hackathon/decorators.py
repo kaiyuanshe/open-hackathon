@@ -1,5 +1,6 @@
 from flask import g
 from functools import wraps
+from user import user_manager
 
 
 def role_required(*roles):
@@ -14,3 +15,12 @@ def role_required(*roles):
         return decorated_view
 
     return wrapper
+
+
+def token_required(func):
+    def authenticate_and_call(*args, **kwargs):
+        if not user_manager.validate_request():
+            return "Access Denied", 403
+        return func(*args, **kwargs)
+
+    return authenticate_and_call
