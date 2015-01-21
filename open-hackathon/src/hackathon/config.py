@@ -34,7 +34,7 @@ Config = {
         }
     },
     "mysql": {
-        "connection": 'mysql://%s:%s@%s/%s' % ("hackathon", "fendoe.0", "localhost", "hackathon"),
+        "connection": 'mysql://%s:%s@%s/%s' % ("hackathon", "hackathon", "localhost", "hackathon"),
         "database": "hackathon"
     },
     "login": {
