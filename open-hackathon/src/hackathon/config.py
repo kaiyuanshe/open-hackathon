@@ -30,7 +30,7 @@ Config = {
         "token_expiration_minutes": 60 * 24
     },
     "register": {
-        "limitUnRegisteredUser": True
+        "limitUnRegisteredUser": False
     },
     "azure": {
         "subscriptionId": "31e6e137-4656-4f88-96fb-4c997b14a644",

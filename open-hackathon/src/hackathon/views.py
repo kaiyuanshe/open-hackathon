@@ -95,7 +95,16 @@ class LoginResource(Resource):
         return login_providers.values()[0].logout(g.user)
 
 
+# todo health page
+class HealthResource(Resource):
+    def get(self):
+        return {
+            "status": "OK"
+        }
+
+
 api.add_resource(DoCourse, "/api/course")
 api.add_resource(StatusList, "/api/registerlist")
 api.add_resource(Anmt, "/api/announcement")
 api.add_resource(LoginResource, "/api/user/login")
+api.add_resource(HealthResource, "/", "/health")
