@@ -9,7 +9,7 @@ Open Hackathon Platform API service
   * [Clone SourceCode](#clone-sourcecode)
   * [Install Guacamole](#install-guacamole)
   * [Install Pathon and Python modules](#install-pathon-and-python-modules)
-  * [Configure MySQL](#config-mysql)
+  * [Configure MySQL](#configure-mysql)
   * [Run](#run)
   * [Debug](#debug)
 * [API](#api)
