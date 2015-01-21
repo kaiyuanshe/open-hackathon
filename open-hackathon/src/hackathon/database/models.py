@@ -260,7 +260,8 @@ class DockerContainer(db.Model):
     def json(self):
         return to_json(self, self.__class__)
 
-    def __init__(self, **kwargs):
+    def __init__(self, exper, **kwargs):
+        self.experiment = exper
         super(DockerContainer, self).__init__(**kwargs)
         self.status = 0
         if self.create_time is None:

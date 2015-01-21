@@ -129,20 +129,20 @@ class ExprManager(object):
                 port_cfg["host_port"] += 10000
                 port_cfg["public_port"] = port_cfg["host_port"]
 
-            binding_cloudservice = PortBinding(port_cfg["name"] if "name" in port_cfg else None,
-                                               port_cfg["public_port"],
-                                               port_cfg["host_port"],
-                                               PortBindingType.CloudService,
-                                               host_server.id,
-                                               ve,
-                                               expr)
-            binding_docker = PortBinding(port_cfg["name"] if "name" in port_cfg else None,
-                                         port_cfg["host_port"],
-                                         port_cfg["port"],
-                                         PortBindingType.Docker,
-                                         host_server.id,
-                                         ve,
-                                         expr)
+            binding_cloudservice = PortBinding(name=port_cfg["name"] if "name" in port_cfg else None,
+                                               port_from=port_cfg["public_port"],
+                                               port_to=port_cfg["host_port"],
+                                               binding_type=PortBindingType.CloudService,
+                                               binding_resource_id=host_server.id,
+                                               virtual_environment=ve,
+                                               experiment=expr)
+            binding_docker = PortBinding(name=port_cfg["name"] if "name" in port_cfg else None,
+                                         port_from=port_cfg["host_port"],
+                                         port_to=port_cfg["port"],
+                                         binding_type=PortBindingType.Docker,
+                                         binding_resource_id=host_server.id,
+                                         virtual_environment=ve,
+                                         experiment=expr)
             db_adapter.add_object(binding_cloudservice)
             db_adapter.add_object(binding_docker)
             db_adapter.commit()
@@ -152,13 +152,13 @@ class ExprManager(object):
                                                      binding_resource_id=host_server.id)
             port_cfg["host_port"] = self.__get_available_host_port(host_ports, port_cfg["port"])
 
-            port_binding = PortBinding(port_cfg["name"] if "name" in port_cfg else None,
-                                       port_cfg["host_port"],
-                                       port_cfg["port"],
-                                       PortBindingType.Docker,
-                                       host_server.id,
-                                       ve,
-                                       expr)
+            port_binding = PortBinding(name=port_cfg["name"] if "name" in port_cfg else None,
+                                       port_from=port_cfg["host_port"],
+                                       port_to=port_cfg["port"],
+                                       binding_type=PortBindingType.Docker,
+                                       binding_resource_id=host_server.id,
+                                       virtual_environment=ve,
+                                       experiment=expr)
             db_adapter.add_object(port_binding)
             db_adapter.commit()
             return port_binding
@@ -187,17 +187,16 @@ class ExprManager(object):
         remote_provider = ""
         if "remote" in post_data and "provider" in post_data["remote"]:
             remote_provider = post_data["remote"]["provider"]
-        ve = VirtualEnvironment(provider,
-                                post_data["container_name"],
-                                container_config["image"],
-                                VirtualEnvStatus.Init,
-                                remote_provider,
-                                g.user,
-                                expr)
-        container = DockerContainer(post_data["container_name"], host_server, ve, expr, container_config["image"])
-        db_adapter.add_object(ve)
-        db_adapter.add_object(container)
-        db_adapter.commit()
+        ve = VirtualEnvironment(provider=provider,
+                                name=post_data["container_name"],
+                                image=container_config["image"],
+                                status=VirtualEnvStatus.Init,
+                                remote_provider=remote_provider,
+                                user=g.user,
+                                experiment=expr)
+        container = DockerContainer(expr, name=post_data["container_name"], host_server=host_server,
+                                    virtual_environment=ve,
+                                    image=container_config["image"])
 
         # format data in the template such as port and mnt.
         # the port defined in template have only expose port, we should assign a listening port in program
@@ -249,12 +248,13 @@ class ExprManager(object):
         container_ret = docker.run(post_data, host_server.public_dns)
         if container_ret is None:
             log.info("container %s fail to run" % post_data["container_name"])
-            raise AssertionError("failed to run container")
+            raise AssertionError
         container.container_id = container_ret["container_id"]
         ve.status = VirtualEnvStatus.Running
         host_server.container_count += 1
+        db_adapter.add_object(ve)
+        db_adapter.add_object(container)
         db_adapter.commit()
-
         return ve
 
     def get_expr_status(self, expr_id):
@@ -275,8 +275,15 @@ class ExprManager(object):
         if expr is not None:
             return self.__report_expr_status(expr)
 
+        expr = db_adapter.find_first_object(Experiment, status=ExprStatus.Starting,
+                                            user_id=g.user.id,
+                                            hackathon_id=hackathon.id)
+
+        if expr is not None:
+            return "Please wait for a few seconds ... "
+
         # new expr
-        expr = Experiment(g.user, hackathon, ExprStatus.Init)
+        expr = Experiment(user=g.user, hackathon=hackathon, status=ExprStatus.Init)
         db_adapter.add_object(expr)
         db_adapter.commit()
 
@@ -289,26 +296,28 @@ class ExprManager(object):
         if "scm" in expr_config:
             s = expr_config["scm"]
             local_repo_path = self.__remote_checkout(host_server, expr, expr_config["scm"])
-            scm = SCM(expr, s["provider"], s["branch"], s["repo_name"], s["repo_url"], local_repo_path)
+            scm = SCM(experiment=expr, provider=s["provider"], branch=s["branch"], repo_name=s["repo_name"],
+                      repo_url=s["repo_url"], local_repo_path=local_repo_path)
             db_adapter.add_object(scm)
             db_adapter.commit()
 
         # start containers
         guacamole_config = []
         try:
-
-            expr.status = 3
-            db.session.commit()
+            expr.status = ExprStatus.Starting
+            db_adapter.commit()
             containers = map(lambda container_config: self.__remote_start_container(expr,
                                                                                     host_server,
                                                                                     scm,
                                                                                     container_config,
                                                                                     guacamole_config),
                              expr_config["containers"])
-        except Exception as e:
-            self.roll_back(expr.id)
-            log.error(e)
 
+        except Exception as e:
+            log.info(e)
+            log.info("Failed starting containers")
+            self.__roll_back(expr.id)
+            return "Failed starting containers", 500
 
         # start guacamole
         if len(guacamole_config) > 0:
@@ -330,8 +339,10 @@ class ExprManager(object):
             try:
                 guca_container = self.__remote_start_container(expr, host_server, scm, guacamole_container_config, [])
             except Exception as e:
-                self.roll_back(expr.id)
-                log.error(e)
+                log.info(e)
+                log.info("Failed starting guacamole container")
+                self.__roll_back(expr.id)
+                return "Failed starting guacamole container", 500
 
             containers.append(guca_container)
 
@@ -351,28 +362,33 @@ class ExprManager(object):
         db_adapter.commit()
         return "OK"
 
-    def roll_back(self, expr_id):
-        expr = Experiment.query.filter_by(id=expr_id).first()
-        if expr is not None:
-            # stop containers and change expr status
-            for c in expr.containers:
-                try:
-                    docker.stop(c.name, c.host_server.public_dns)
-                    c.status = 2
-                    c.host_server.container_count -= 1
-                    if c.host_server.container_count < 0:
-                        c.host_server.container_count = 0
-                except Exception as e:
-                    expr.status = 5
-                    db.session.commit()
-                    log.info("rollback failed")
-                    log.error(e)
-        ports = PortBinding.query.filter_by(experiment_id=expr_id).all()
-        for port in ports:
-            db.session.delete(port)
-        expr.status = 4
-        db.session.commit()
-        log.info("rollback succeeded")
+    def __roll_back(self, expr_id):
+        log.info("Starting rollback ...")
+        try:
+            expr = Experiment.query.filter_by(id=expr_id).first()
+            expr.status = ExprStatus.Rollbacking
+            db_adapter.commit()
+            if expr is not None:
+                # stop containers and change expr status
+                for c in expr.virtual_environments:
+                    if c.provider == VirtualEnvironmentProvider.Docker:
+                            docker.stop(c.name, c.container.host_server.public_dns)
+                            c.status = VirtualEnvStatus.Stopped
+                            c.container.host_server.container_count -= 1
+                            if c.container.host_server.container_count < 0:
+                                c.container.host_server.container_count = 0
+            # delete ports
+            ports = PortBinding.query.filter_by(experiment_id=expr_id).all()
+            for port in ports:
+                db.session.delete(port)
+            expr.status = ExprStatus.Rollbacked
+            db.session.commit()
+            log.info("Rollback succeeded")
+        except Exception as e:
+            expr.status = ExprStatus.Failed
+            db.session.commit()
+            log.info("Rollback failed")
+            log.error(e)
 
     def stop_expr(self, expr_id):
         expr = Experiment.query.filter_by(id=expr_id, status=ExprStatus.Running).first()
@@ -384,9 +400,9 @@ class ExprManager(object):
                     try:
                         docker.stop(c.name, c.container.host_server.public_dns)
                         c.status = VirtualEnvStatus.Stopped
-                        c.host_server.container_count -= 1
-                        if c.host_server.container_count < 0:
-                            c.host_server.container_count = 0
+                        c.container.host_server.container_count -= 1
+                        if c.container.host_server.container_count < 0:
+                            c.container.host_server.container_count = 0
                     except Exception as e:
                         log.error(e)
 
