@@ -73,6 +73,32 @@ class User(db.Model, UserMixin):
         return "User: " + self.json()
 
 
+class UserToken(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    token = db.Column(db.String(50), unique=True, nullable=False)
+
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
+    user = db.relationship('User', backref=db.backref('tokens', lazy='dynamic'))
+
+    issue_date = db.Column(db.DateTime)
+    expire_date = db.Column(db.DateTime, nullable=False)
+
+    def json(self):
+        return to_json(self, self.__class__)
+
+    def __init__(self, token, user, expire_date, issue_date=None):
+        if issue_date is None:
+            issue_date = datetime.utcnow()
+
+        self.token = token
+        self.user = user
+        self.expire_date = expire_date
+        self.issue_date = issue_date
+
+    def __repr__(self):
+        return "UserToken: " + self.json()
+
+
 class Register(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     register_name = db.Column(db.String(80))

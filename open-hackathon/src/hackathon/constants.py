@@ -14,3 +14,12 @@ class ROLE:
 # docker
 class DOCKER:
     DEFAULT_REMOTE_PORT = 4243
+
+
+class HTTP_HEADER:
+    TOKEN = "token"
+
+
+class OAUTH_PROVIDER:
+    GITHUB = "github"
+    QQ = "qq"
