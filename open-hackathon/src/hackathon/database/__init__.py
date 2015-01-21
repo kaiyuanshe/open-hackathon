@@ -1,7 +1,7 @@
 import sys
 
 sys.path.append("..")
-from hackathon.constants import ADMIN
+from hackathon.constants import ROLE
 from flask_sqlalchemy import SQLAlchemy
 from hackathon import app
 from db_adapters import SQLAlchemyAdapter
@@ -27,7 +27,7 @@ class UserMixin(object):
         return unicode(self.get_user_id())
 
     def is_admin(self):
-        return self.has_roles(ADMIN)
+        return self.has_roles(ROLE.ADMIN)
 
     def has_roles(self, *requirements):
         """ Return True if the user has all of the specified roles. Return False otherwise.

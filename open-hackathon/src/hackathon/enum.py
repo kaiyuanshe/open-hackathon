@@ -9,8 +9,22 @@ class ExprStatus:
     Rollbacked = 7
 
 
-class ContainerStatus:
+class VirtualEnvStatus:
     Init = 0
     Running = 1
     Stopped = 2
     Deleted = 3
+
+
+class PortBindingType:
+    CloudService = 1
+    Docker = 2
+
+
+class VirtualEnvironmentProvider:
+    AzureVM = "azure-vm"
+    Docker = "docker"
+
+
+class RemoteProvider:
+    Guacamole = "guacamole"
