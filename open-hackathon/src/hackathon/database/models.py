@@ -178,13 +178,25 @@ class Experiment(db.Model):
 
     def json(self):
         return to_json(self, self.__class__)
-
+    """
     def __init__(self, **kwargs):
         super(Experiment, self).__init__(**kwargs)
         if self.create_time is None:
             self.create_time = datetime.utcnow()
         if self.last_heart_beat_time is None:
             self.last_heart_beat_time = datetime.utcnow()
+    """
+    def __init__(self, user, hackathon, status, create_time=None, last_heart_beat_time=None):
+        if create_time is None:
+            create_time = datetime.utcnow()
+        if last_heart_beat_time is None:
+            last_heart_beat_time = datetime.utcnow()
+
+        self.user = user
+        self.hackathon = hackathon
+        self.status = status
+        self.create_time = create_time
+        self.last_heart_beat_time = last_heart_beat_time
 
     def __repr__(self):
         return "Experiment: " + self.json()

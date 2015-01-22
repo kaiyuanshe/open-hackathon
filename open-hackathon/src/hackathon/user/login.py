@@ -61,15 +61,7 @@ class QQLogin(LoginProviderBase):
 
 class GithubLogin(LoginProviderBase):
     def login(self, args):
-        code = args.get('code')
-
-        # get access_token
-        token_resp = get_remote(get_config('login/github/access_token_url') + code)
-        log.debug("get token from github:" + token_resp)
-        start = token_resp.index('=')
-        end = token_resp.index('&')
-        access_token = token_resp[start + 1:end]
-
+        access_token = args.get('access_token')
         # get user info
         user_info_resp = get_remote(get_config('login/github/user_info_url') + access_token)
         # conn.request('GET',url,'',{'user-agent':'flask'})

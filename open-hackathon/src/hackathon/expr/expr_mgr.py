@@ -283,7 +283,7 @@ class ExprManager(object):
             return "Please wait for a few seconds ... "
 
         # new expr
-        expr = Experiment(user=g.user, hackathon=hackathon, status=ExprStatus.Init)
+        expr = Experiment(g.user, hackathon, ExprStatus.Init)
         db_adapter.add_object(expr)
         db_adapter.commit()
 
