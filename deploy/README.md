@@ -40,11 +40,11 @@ sudo apt-get install autoconf
 git clone git://github.com/glyptodon/guacamole-server.git
 cd guacamole-server/
 autoreconf -fi
-./configure --with-init-dir=/etc/init.d
-make
-make install
-ldconfig
-/etc/init.d/guacd start
+sudo ./configure --with-init-dir=/etc/init.d
+sudo make
+sudo make install
+sudo ldconfig
+sudo /etc/init.d/guacd start
 ```
 ###setup guacamole-client
 ```
@@ -60,7 +60,7 @@ guacd-port:     4822
 
 lib-directory: /var/lib/guacamole
 auth-provider: com.openhackathon.guacamole.OpenHackathonAuthenticationProvider
-auth-request-url: http://osslab.msopentech.cn/checkguacookies
+auth-request-url: http://osslab.msopentech.cn/api/guacamoleconfig
 ```
 Then copy the auth-provider jar file to the path that was setted in the config file
 ```
