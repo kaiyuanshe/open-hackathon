@@ -53,7 +53,7 @@ wget http://jaist.dl.sourceforge.net/project/guacamole/current/binary/guacamole-
 Then deploy this `guacamole.war` into tomcat7 
 
 ###config guacamole
-Check the guacamole config file `/etc/guacamole/guacamole.properties`, and edit the file like this:
+create the guacamole config file `/etc/guacamole/guacamole.properties`, and edit the file like this:
 ```shell
 guacd-hostname: localhost
 guacd-port:     4822
