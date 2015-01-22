@@ -163,9 +163,6 @@ class DockerHostServer(db.Model):
 
 class Experiment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    type = db.Column(db.String(50))  # e.g.trial, real-time-analytics-hackathon
-    vm_type = db.Column(db.String(50))  # e.g.docker, azure
-    expr_name = db.Column(db.String(50))
     status = db.Column(db.Integer)  # see enum.py
     create_time = db.Column(db.DateTime)
     last_heart_beat_time = db.Column(db.DateTime)
@@ -178,25 +175,13 @@ class Experiment(db.Model):
 
     def json(self):
         return to_json(self, self.__class__)
-    """
+
     def __init__(self, **kwargs):
         super(Experiment, self).__init__(**kwargs)
         if self.create_time is None:
             self.create_time = datetime.utcnow()
         if self.last_heart_beat_time is None:
             self.last_heart_beat_time = datetime.utcnow()
-    """
-    def __init__(self, user, hackathon, status, create_time=None, last_heart_beat_time=None):
-        if create_time is None:
-            create_time = datetime.utcnow()
-        if last_heart_beat_time is None:
-            last_heart_beat_time = datetime.utcnow()
-
-        self.user = user
-        self.hackathon = hackathon
-        self.status = status
-        self.create_time = create_time
-        self.last_heart_beat_time = last_heart_beat_time
 
     def __repr__(self):
         return "Experiment: " + self.json()
