@@ -7,7 +7,7 @@ Open Hackathon Platform API service
   * [Install MySQL](#install-mysql)
   * [Install docker](#install-docker)
   * [Clone SourceCode](#clone-sourcecode)
-  * [Install Guacamole](#install-guacamole)
+  * [Setup Guacamole](#setup-guacamole)
   * [Install Pathon and Python modules](#install-pathon-and-python-modules)
   * [Configure MySQL](#configure-mysql)
   * [Run](#run)
@@ -69,13 +69,13 @@ git clone https://github.com/msopentechcn/open-hackathon.git
 
 **_Notice that you MUST [folk](http://www.worldhello.net/gotgithub/04-work-with-others/010-fork-and-pull.html) the repository to your account/organization before contributing any changes. Pull Requests are welcome._**
 
-### Install Guacamole
+### Setup Guacamole
 for simplicity, we recommend you start guacamole using `docker`.
 ```
 sudo docker run -d -i -t -p 8080:8080 -v /opt/open-hackathon/deploy/guacamole:/etc/guacamole hall/guacamole
 ```
 change the port and directory if needed. Also make sure `guacamole.properties` file is correctly configured. The file is in
-directory `/opt/open-hackathon` and it's right for you local environment by default. The content may look like:
+directory `/opt/open-hackathon/deploy/guacamole` and it's right for you local environment by default. The content may look like:
 ```
 # Hostname and port of guacamole proxy
 guacd-hostname: localhost
@@ -91,47 +91,7 @@ Usually the only config need to update is `auth-request-url`. _You need to stop 
 in case `guacamole.properties` updated_.
 
 ##### install guacamole manually(not via docker)
-**_if you decide to start guacamole by docker, skip this section and go to next to config python._**
-
-**in case you want to install guacamole locally rather than docker , here is the detailed steps.**
-- install guacamole related libraries, Tomcat and JDK
-```shell
-sudo apt-get install guacamole libguac-dev libcairo-dev libvncserver0 libguac-client-ssh0 libguac-client-vnc0
-sudo apt-get install tomcat7
-sudo apt-get install openjdk-7-jdk
-```
-- config guacamole
-Check the guacamole config file `/etc/guacamole.properties`, and edit the file like this:
-```shell
-guacd-hostname: localhost
-guacd-port:     4822
-
-lib-directory: /var/lib/guacamole
-auth-provider: com.openhackathon.guacamole.OpenHackathonAuthenticationProvider
-auth-request-url: http://osslab.msopentech.cn/checkguacookies
-```
-
-- copy the auth-provider jar file to the path that was setted in the config file
-```
-sudo cp deploy/guacamole/openhackathon-gucamole-authentication-1.0-SNAPSHOT.jar /var/lib/guacamole/
-```
-**Note**: _the `auth-request-url` value must be setted match the _open-hackathon_ src provides
-And every time you change this file , you may need to restart guacd and tomcat7 service_
-
-- config tomcat7
-After installed tomcat7 we need to make tomcat load the guacamole-UI web application. The guacamole.war was provided after we install guacamole commponent.
-So we can config tomcat7 like these steps:
-```
-sudo ln -s /var/lib/tomcat7/conf /usr/share/tomcat7/conf
-sudo ln -s /var/lib/tomcat7/webapps /usr/share/tomcat7/webapps
-sudo cp /var/lib/guacamole/guacamole.war /usr/share/tomcat7/webapps/
-
-sudo mkdir /usr/share/tomcat7/.guacamole
-sudo ln -s /etc/guacamole/guacamole.properties /usr/share/tomcat7/.guacamole/guacamole.properties
-
-sudo service guacd restart
-sudo service tomcat7 restart
-```
+in case you want to install guacamole locally rather than docker , refer to [instrutions](https://github.com/msopentechcn/open-hackathon/wiki/Setup-Guacamole-withn-custom-authentication) for the detailed steps.
 
 ### Install Pathon and Python modules
 download [Python 2.7](https://www.python.org/downloads/) and add script `python` to your `$PATH`. Make sure the version of python is 2.7.
