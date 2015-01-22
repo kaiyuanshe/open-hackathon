@@ -94,11 +94,6 @@ class LoginResource(Resource):
     def delete(self):
         return login_providers.values()[0].logout(g.user)
 
-class TokenResource(Resource):
-    def post(self):
-        body = request.get_json()
-        provider = body["provider"]
-        return login_providers[provider].login(body)
 
 # todo health page
 class HealthResource(Resource):
@@ -112,6 +107,5 @@ api.add_resource(DoCourse, "/api/course")
 api.add_resource(StatusList, "/api/registerlist")
 api.add_resource(Anmt, "/api/announcement")
 api.add_resource(LoginResource, "/api/user/login")
-api.add_resource(TokenResource, "/api/token/login")
 api.add_resource(HealthResource, "/", "/health")
 

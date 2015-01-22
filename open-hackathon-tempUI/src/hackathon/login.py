@@ -24,7 +24,7 @@ class GithubLogin():
         # conn.request('GET',url,'',{'user-agent':'flask'})
         log.debug("get token info from github")
         data = {"provider": "github", "code": code, "access_token": access_token}
-        return post_to_remote('http://osslab.msopentech.cn:15000/api/token/login', data)
+        return post_to_remote('/api/user/login', data)
         # example:
         #
         # {"login":"juniwang","id":8814383,"avatar_url":"https://avatars.githubusercontent.com/u/8814383?v=3","gravatar_id":"",
