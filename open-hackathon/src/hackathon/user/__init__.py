@@ -1,4 +1,5 @@
 import sys
+from _codecs import register
 
 sys.path.append("..")
 from hackathon.database.models import *
@@ -12,8 +13,8 @@ class UserManager(object):
     def __init__(self, db_adapter):
         self.db_adapter = db_adapter
 
-    def get_registration_by_email(self, email):
-        return self.db_adapter.find_first_object(Register, email=email, enabled=1)
+    def get_registration_by_email(self,emails):
+        return self.db_adapter.filter(Register,Register.enabled==1).first()
 
     def get_all_registration(self):
         reg_list = self.db_adapter.find_all_objects(Register, enabled=1)
@@ -37,6 +38,9 @@ class UserManager(object):
             first_admin = UserRole(admin, user)
             self.db_adapter.add_object(first_admin)
             self.db_adapter.commit()
+            
+    def check_email_states(self,emails):
+        return self.db_adapter.filter(UserEmail, email in emails)
 
     def logout(self, user):
         logout_user()

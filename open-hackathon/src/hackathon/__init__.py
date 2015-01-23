@@ -2,7 +2,7 @@ __author__ = 'Junbo Wang'
 __version__ = '2.0'
 
 from flask import Flask
-from flask_debugtoolbar import DebugToolbarExtension
+#from flask_debugtoolbar import DebugToolbarExtension
 from hackathon.functions import safe_get_config
 from flask_login import LoginManager
 from flask_restful import Api
@@ -24,7 +24,7 @@ api = Api(app)
 # disable the debug toolBar and debug mode in production
 app.config['DEBUG_TB_ENABLED'] = False
 app.debug = True
-toolbar = DebugToolbarExtension(app)
+#toolbar = DebugToolbarExtension(app)
 
 # db configuration
 app.config["SQLALCHEMY_DATABASE_URI"] = safe_get_config("mysql/connection", "mysql://root:root@localhost/hackathon")
