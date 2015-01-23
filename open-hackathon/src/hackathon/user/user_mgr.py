@@ -1,4 +1,5 @@
 import sys
+from _codecs import register
 
 sys.path.append("..")
 from hackathon.database.models import *
@@ -41,7 +42,7 @@ class UserManager(object):
         return None
 
     def get_registration_by_email(self,emails):
-        return self.db_adapter.filter(Register,Register.enabled==1).first()
+        return self.db_adapter.filter(Register,Register.email in emails, Register.enabled==1).first()
 
     def get_all_registration(self):
         reg_list = self.db.find_all_objects(Register, enabled=1)
