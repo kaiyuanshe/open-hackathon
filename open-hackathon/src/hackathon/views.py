@@ -11,7 +11,7 @@ from database import db_adapter
 from decorators import token_required
 
 
-class StatusList(Resource):
+class RegisterListResource(Resource):
     # =======================================================return data start
     # [{"register_name":"zhang", "online":"1","submitted":"0"..."description":" "}]
     # =======================================================return data end
@@ -20,15 +20,8 @@ class StatusList(Resource):
         json_ret = map(lambda u: u.json(), user_manager.get_all_registration())
         return json_ret
 
-    # =======================================================test data start
-    # {"id":1, "online":1,"submitted":0}
-    # =======================================================test data end
-    def put(self):
-        args = request.get_json()
-        return expr_manager.submit_expr(args)
 
-
-class DoCourse(Resource):
+class CourseResource(Resource):
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument('id', type=int)
@@ -79,7 +72,7 @@ class DoCourse(Resource):
         return expr_manager.heart_beat(args["id"])
 
 
-class Anmt(Resource):
+class BulletinResource(Resource):
     def get(self):
         return db_adapter.find_first_object(Announcement, enabled=1).json()
 
@@ -103,9 +96,9 @@ class HealthResource(Resource):
         }
 
 
-api.add_resource(DoCourse, "/api/course")
-api.add_resource(StatusList, "/api/register/list")
-api.add_resource(Anmt, "/api/bulletin")
+api.add_resource(CourseResource, "/api/course")
+api.add_resource(RegisterListResource, "/api/register/list")
+api.add_resource(BulletinResource, "/api/bulletin")
 api.add_resource(LoginResource, "/api/user/login")
 api.add_resource(HealthResource, "/", "/health")
 

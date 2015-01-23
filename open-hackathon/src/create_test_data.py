@@ -7,13 +7,13 @@ from hackathon.database import db
 from hackathon.database.models import *
 
 
-#vm = DockerHostServer(vm_name="localhost", public_dns="localhost", public_docker_api_port=8001, private_ip="10.0.2.15",
-#                      private_docker_api_port=8001, container_count=0, container_max_count=100)
-# vm = DockerHostServer("osslab-vm-20.chinacloudapp.cn", "osslab-vm-20.chinacloudapp.cn", 8001, "10.210.18.47", 8001, 0, 100)
-#db.session.add(vm)
+vm = DockerHostServer(vm_name="localhost", public_dns="localhost", public_docker_api_port=8001, private_ip="10.0.2.15",
+                      private_docker_api_port=8001, container_count=0, container_max_count=100)
+vm = DockerHostServer("osslab-vm-20.chinacloudapp.cn", "osslab-vm-20.chinacloudapp.cn", 8001, "10.210.18.47", 8001, 0, 100)
+db.session.add(vm)
 
-# localhost = HostServer("localhost", "localhost", 8001, "10.0.2.15", 8001, 0, 100)
-#db.session.add(localhost)
+localhost = DockerHostServer("localhost", "localhost", 8001, "10.0.2.15", 8001, 0, 100)
+db.session.add(localhost)
 
 amt = Announcement("欢迎访问开放黑客松平台")
 db.session.add(amt)
