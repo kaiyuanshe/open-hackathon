@@ -8,6 +8,37 @@ import json
 from config import *
 from constants import *
 
+class QQLogin():
+    def login(self, args):
+        code = args.get('code')
+        state = "openhackathon"
+        # if state != QQ_OAUTH_STATE:
+        #    log.warn("STATE match fail. Potentially CSFR.")
+        #    return "UnAuthorized", 401
+
+        # get access token
+        token_resp = get_remote(get_config("login/qq/access_token_url") + code + '&state=' + state)
+        log.debug("get token from qq:" + token_resp)
+        start = token_resp.index('=')
+        end = token_resp.index('&')
+        access_token = token_resp[start + 1:end]
+        # openid = args['openid']
+        # client_id = args['client_id']
+        # get openID.
+        openid_resp = get_remote(get_config("login/qq/openid_url") + access_token)
+
+        info = json.loads(openid_resp[10:-4])
+        openid = info['openid']
+        client_id = info['client_id']
+        log.debug("get openid from qq:" + access_token)
+        log.debug("get openid from qq:" + client_id)
+        log.debug("get openid from qq:" + openid)
+
+        # get user info
+        data = {"provider": "qq", "code": code, "access_token": access_token, "client_id": client_id, "openid": openid}
+        # url = get_config("login/qq/user_info_url") % (access_token, client_id, openid)
+        return post_to_remote('http://osslab.msopentech.cn:15000/api/user/login', data)
+
 
 class GithubLogin():
     def login(self, args):
@@ -24,7 +55,7 @@ class GithubLogin():
         # conn.request('GET',url,'',{'user-agent':'flask'})
         log.debug("get token info from github")
         data = {"provider": "github", "code": code, "access_token": access_token}
-        return post_to_remote('/api/user/login', data)
+        return post_to_remote('http://osslab.msopentech.cn:15000/api/user/login', data)
         # example:
         #
         # {"login":"juniwang","id":8814383,"avatar_url":"https://avatars.githubusercontent.com/u/8814383?v=3","gravatar_id":"",
@@ -46,5 +77,6 @@ class GithubLogin():
 
 
 login_providers = {
-    "github": GithubLogin()
+    "github": GithubLogin(),
+    "qq": QQLogin()
 }

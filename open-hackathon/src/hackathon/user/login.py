@@ -34,8 +34,8 @@ class QQLogin(LoginProviderBase):
         client_id = args['client_id']
         # get openID.
         # openid_resp = get_remote(get_config("login/qq/openid_url") + access_token)
-        log.debug("get openid from qq:" + access_token)
-        log.debug("get openid from qq:" + client_id)
+        log.debug("get access_token from qq:" + access_token)
+        log.debug("get client_id from qq:" + client_id)
         log.debug("get openid from qq:" + openid)
         # info = json.loads(openid_resp[10:-4])
         # openid = info['openid']
@@ -51,6 +51,7 @@ class QQLogin(LoginProviderBase):
                                                 name=user_info["nickname"],
                                                 nickname=user_info["nickname"],
                                                 access_token=access_token,
+                                                email=None,
                                                 avatar_url=user_info["figureurl"])
 
         # login flask

@@ -79,7 +79,8 @@ class UserManager(object):
             self.db.commit()
         else:
 
-            user = User(name=kwargs["name"],
+            user = User(openid=openid,
+                        name=kwargs["name"],
                         nickname=kwargs["nickname"],
                         email=kwargs["email"],
                         access_token=kwargs["access_token"],
