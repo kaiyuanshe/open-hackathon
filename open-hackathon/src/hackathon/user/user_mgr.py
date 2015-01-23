@@ -1,4 +1,5 @@
 import sys
+from _codecs import register
 
 sys.path.append("..")
 from hackathon.database.models import *
@@ -6,7 +7,7 @@ from hackathon.log import log
 from hackathon.database import db_adapter
 from datetime import datetime, timedelta
 from hackathon.constants import ROLE, HTTP_HEADER
-from hackathon.enum import ExprStatus
+from hackathon.enum import ExprStatus, EmailStatus
 from hackathon.functions import safe_get_config
 from flask import request, g
 import uuid
@@ -40,8 +41,8 @@ class UserManager(object):
             return t.user
         return None
 
-    def get_registration_by_email(self, email):
-        return self.db.find_first_object(Register, email=email, enabled=1)
+    def get_registration_by_email(self,emails):
+        return self.db_adapter.filter(Register,Register.email in emails, Register.enabled==1).first()
 
     def get_all_registration(self):
         reg_list = self.db.find_all_objects(Register, enabled=1)
@@ -66,28 +67,44 @@ class UserManager(object):
 
     def db_login(self, openid, **kwargs):
         # update db
+        emails = map(lambda e: e['email'], kwargs['email_info'])
+        email_info = kwargs['email_info']
         user = self.db.find_first_object(User, openid=openid)
         if user is not None:
             self.db.update_object(user,
                                   name=kwargs["name"],
                                   nickname=kwargs["nickname"],
-                                  email=kwargs["email"],
                                   access_token=kwargs["access_token"],
                                   avatar_url=kwargs["avatar_url"],
                                   last_login_time=datetime.utcnow(),
                                   online=1)
+            for n in range(0,len(email_info)):
+                email = email_info[n]['email']
+                primary_email = email_info[n]['primary']
+                verified = email_info[n]['verified']
+                if self.db.find_first_object(UserEmail,email=email) is None:
+                    useremail = UserEmail(kwargs['name'], email, primary_email, verified,user)
+                    self.db.add_object(useremail)
             self.db.commit()
         else:
 
             user = User(kwargs["name"],
                         kwargs["nickname"],
-                        kwargs["email"],
-                        kwargs["access_token"],
+                        openid,
                         kwargs["avatar_url"],
-                        datetime.utcnow(),
+                        kwargs["access_token"],
                         1)
             self.db.add_object(user)
             self.db.commit()
+            
+            for n in email_info:
+                email = n['email']
+                primary_email = n['primary']
+                verified = n['verified']              
+                useremail = UserEmail(name, email, primary_email, verified,user)
+                self.db.add_object(useremail)
+                self.db.commit()
+            
 
         # make the first login user be admin
         self.__check_first_user(user)
@@ -111,7 +128,7 @@ class UserManager(object):
             "id": user.id,
             "name": user.name,
             "nickname": user.nickname,
-            "email": user.email,
+            "email": user.emails.filter_by(primary_email = EmailStatus.Primary).first().email,
             "avatar_url": user.avatar_url,
             "online": user.online,
             "create_time": str(user.create_time),

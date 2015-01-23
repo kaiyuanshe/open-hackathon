@@ -1,4 +1,7 @@
 import sys
+from samba.dcerpc.nbt import db_change_info
+import email
+import os
 
 sys.path.append("..")
 from . import UserMixin
@@ -34,7 +37,7 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50))
     nickname = db.Column(db.String(50))
-    email = db.Column(db.String(50))
+    #email = db.Column(db.String(50)) put into a new sheet
     openid = db.Column(db.String(100))
     avatar_url = db.Column(db.String(200))
     slug = db.Column(db.String(50), unique=True, nullable=False)  # can be used for branch name of github
@@ -49,7 +52,7 @@ class User(db.Model, UserMixin):
     def json(self):
         return to_json(self, self.__class__)
 
-    def __init__(self, name, nickname, email, openid, avatar_url, access_token, online=0, slug=None, create_time=None,
+    def __init__(self, name, nickname, openid, avatar_url, access_token, online=0, slug=None, create_time=None,
                  last_login_time=None):
         if create_time is None:
             create_time = datetime.utcnow()
@@ -60,7 +63,7 @@ class User(db.Model, UserMixin):
 
         self.name = name
         self.nickname = nickname
-        self.email = email
+        #self.email = email
         self.openid = openid
         self.avatar_url = avatar_url
         self.slug = slug
@@ -71,7 +74,26 @@ class User(db.Model, UserMixin):
 
     def __repr__(self):
         return "User: " + self.json()
-
+    
+class UserEmail(db.Model):
+    id = db.Column(db.Integer,primary_key=True)
+    name = db.Column(db.String(80))
+    email = db.Column(db.String(120))
+    primary_email = db.Column(db.Integer) # 0:NOT Primary Email 1:Primary Email
+    verified = db.Column(db.Integer) # 0 for not verified, 1 for verified
+    
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
+    user = db.relationship('User', backref=db.backref('emails', lazy='dynamic'))
+    
+    def get_user_email(self):
+        return self.email(self,email)
+    
+    def __init__(self,name,email,primary_email,verified,user):
+        self.name = name
+        self.email = email
+        self.primary_email = primary_email
+        self.verified = verified
+        self.user = user
 
 class UserToken(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -131,7 +153,7 @@ class Register(db.Model):
 
     def __repr__(self):
         return "Register:" + self.json()
-
+    
 
 class Hackathon(db.Model):
     id = db.Column(db.Integer, primary_key=True)
