@@ -104,8 +104,8 @@ class HealthResource(Resource):
 
 
 api.add_resource(DoCourse, "/api/course")
-api.add_resource(StatusList, "/api/registerlist")
-api.add_resource(Anmt, "/api/announcement")
+api.add_resource(StatusList, "/api/register/list")
+api.add_resource(Anmt, "/api/bulletin")
 api.add_resource(LoginResource, "/api/user/login")
 api.add_resource(HealthResource, "/", "/health")
 
