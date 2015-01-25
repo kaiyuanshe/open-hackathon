@@ -8,7 +8,9 @@
  * Controller of the learnangularApp
  */
 angular.module('learnangularApp')
-  .controller('AboutCtrl', function ($scope) {
+  .controller('AboutCtrl', function ($scope,$cookies) {
+    console.log($cookies)
+    $cookies.
     $scope.awesomeThings = [
       'HTML5 Boilerplate',
       'AngularJS',

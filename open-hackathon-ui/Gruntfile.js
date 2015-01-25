@@ -200,7 +200,7 @@ module.exports = function (grunt) {
       app: {
         ignorePath: /^\/|\.\.\//,
         src: ['<%= config.app %>/index.html'],
-        exclude: ['bower_components/bootstrap-sass-official/assets/javascripts/bootstrap.js']
+        exclude: ['bower_components/bootstrap-sass-official/assets/javascripts/bootstrap.js','bower_components/angular-route/angular-route.js']
       },
       sass: {
         src: ['<%= config.app %>/styles/{,*/}*.{scss,sass}'],
@@ -415,6 +415,12 @@ module.exports = function (grunt) {
       'watch'
     ]);
   });
+  /* grunt.registerTask('run','start the server and preview your app.js',function(target){
+      grunt.util.spawn({
+        cmd: 'node',
+        args: 'app.js'
+      }, grunt.task.current.async());
+   }*/
 
   grunt.registerTask('server', function (target) {
     grunt.log.warn('The `server` task has been deprecated. Use `grunt serve` to start a server.');

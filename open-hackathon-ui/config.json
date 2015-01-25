@@ -1,0 +1,13 @@
+{
+    "hostname":"osslab.msopentech.cn",
+    "post":"80",
+    "proxy":"http://127.0.0.1:15000",
+    "api":{
+        "user":{"login":"post"}
+    },
+    "sociallogin": {
+        "router":"/:name(github|qq)",
+        "github": "https://github.com/login/oauth/authorize?client_id=0eded406cf0b3f83b181&redirect_uri=http://osslab.msopentech.cn/github&scope=user",
+        "qq":""
+    }
+}
