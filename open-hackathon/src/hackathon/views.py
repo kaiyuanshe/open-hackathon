@@ -76,6 +76,10 @@ class BulletinResource(Resource):
     def get(self):
         return db_adapter.find_first_object(Announcement, enabled=1).json()
 
+    @token_required
+    def post(self):
+        pass
+
 
 class LoginResource(Resource):
     def post(self):
@@ -96,9 +100,40 @@ class HealthResource(Resource):
         }
 
 
+class HackathonResource(Resource):
+    @token_required
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('id', type=int, location='args')
+        args = parser.parse_args()
+        if 'id' not in args:
+            return "invalid arguments", 400
+        return db_adapter.find_first_object(Announcement, id=args['id'], enabled=1).json()
+
+# todo post
+    @token_required
+    def post(self):
+        pass
+
+
+class HackathonListResource(Resource):
+    @token_required
+    def get(self):
+        return map(lambda u: u.json(), db_adapter.find_all_objects(Announcement, enabled=1))
+
+
+# todo user hackthon
+class UserHackathonResource(Resource):
+    def get(self):
+        pass
+
+
 api.add_resource(UserExperimentResource, "/api/user/experiment")
 api.add_resource(RegisterListResource, "/api/register/list")
 api.add_resource(BulletinResource, "/api/bulletin")
 api.add_resource(LoginResource, "/api/user/login")
 api.add_resource(HealthResource, "/", "/health")
+api.add_resource(HackathonResource, "/api/hackathon")
+api.add_resource(HackathonListResource, "/api/hackathon/list")
+api.add_resource(UserHackathonResource, "/api/user/hackathon")
 
