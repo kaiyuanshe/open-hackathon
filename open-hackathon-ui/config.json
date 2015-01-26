@@ -1,0 +1,8 @@
+{
+    "hostname":"osslab.msopentech.cn",
+    "post":"80",
+    "sociallogin": {
+        "github": "https://github.com/login/oauth/authorize?client_id=0eded406cf0b3f83b181&redirect_uri=http://osslab.msopentech.cn/github&scope=user",
+        "qq":""
+    }
+}
