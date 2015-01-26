@@ -21,10 +21,10 @@ class RegisterListResource(Resource):
         return json_ret
 
 
-class CourseResource(Resource):
+class UserExperimentResource(Resource):
     def get(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('id', type=int)
+        parser.add_argument('id', type=int, location='args')
         args = parser.parse_args()
         if 'id' not in args:
             return "Bad Request", 400
@@ -57,7 +57,7 @@ class CourseResource(Resource):
     @token_required
     def delete(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('id', type=int)
+        parser.add_argument('id', type=int, location='args')
         args = parser.parse_args()
         if 'id' not in args:
             return "Bad Request", 400
@@ -96,7 +96,7 @@ class HealthResource(Resource):
         }
 
 
-api.add_resource(CourseResource, "/api/course")
+api.add_resource(UserExperimentResource, "/api/user/experiment")
 api.add_resource(RegisterListResource, "/api/register/list")
 api.add_resource(BulletinResource, "/api/bulletin")
 api.add_resource(LoginResource, "/api/user/login")

@@ -1,10 +1,12 @@
 # -*- coding:utf8 -*-
 # encoding = utf-8
+
 from hackathon.functions import get_remote, get_config, convert
 from hackathon.log import log
 import json
 from hackathon.config import QQ_OAUTH_STATE
 from . import user_manager
+
 from hackathon.constants import OAUTH_PROVIDER
 
 
@@ -69,7 +71,7 @@ class GithubLogin(LoginProviderBase):
         # get user info
         user_info_resp = get_remote(get_config('login/github/user_info_url') + access_token)
         # conn.request('GET',url,'',{'user-agent':'flask'})
-        log.debug("get user info from github:" + user_info_resp)
+        log.debug("get user info from github:" + user_info_resp + '\n')
         # example:
         #
         # {"login":"juniwang","id":8814383,"avatar_url":"https://avatars.githubusercontent.com/u/8814383?v=3","gravatar_id":"",
@@ -96,16 +98,18 @@ class GithubLogin(LoginProviderBase):
 
         # get user primary email
         email_info_resp = get_remote(get_config('login/github/emails_info_url') + access_token)
-        log.debug("get email from github:" + email_info_resp)
+        log.debug("get email from github:" + email_info_resp + '\n')
+        #email_info include all user email provided by github
+        #email is user's primary email
         email_info = json.loads(email_info_resp)
-        email = filter(lambda e: e["primary"], email_info)[0]["email"]
+        
+        
 
-        log.info("successfully get email:" + email)
         user_with_token = user_manager.db_login(openid,
                                                 name=name,
                                                 nickname=nickname,
                                                 access_token=access_token,
-                                                email=email,
+                                                email_info=email_info,
                                                 avatar_url=avatar)
 
         # login flask
@@ -115,6 +119,7 @@ class GithubLogin(LoginProviderBase):
         detail = user_manager.get_user_detail_info(user)
         detail["token"] = user_with_token["token"].token
         return detail
+
 
 
 login_providers = {

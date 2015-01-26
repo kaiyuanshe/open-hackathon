@@ -52,6 +52,10 @@ class SQLAlchemyAdapter(DBAdapter):
     def filter(self, ObjectClass, *criterion):
         query = ObjectClass.query
         return query.filter(*criterion)
+    
+    def filter_by(self, ObjectClass, *criterion):
+        query = ObjectClass.query
+        return query.filter_by(*criterion)
 
     def find_first_object(self, ObjectClass, **kwargs):
         """ Retrieve the first object matching the case sensitive filters in 'kwargs'. """

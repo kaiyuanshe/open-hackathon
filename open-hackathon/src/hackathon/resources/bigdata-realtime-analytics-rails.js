@@ -23,7 +23,7 @@
                 "protocol": "ssh",
                 "username": "root",
                 "password": "acoman",
-                "port": 22,
+                "port": 22
             }
         },
         {

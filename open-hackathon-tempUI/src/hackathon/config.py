@@ -48,7 +48,7 @@ Config = {
         },
         "hackathon": {
             "endpoint": HOSTNAME + ":15000",
-            "local_endpoint": HOSTNAME + ":5000"
+            "local_endpoint": HOSTNAME + ":80"
         }
     }
 }
