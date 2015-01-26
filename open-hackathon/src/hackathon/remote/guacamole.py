@@ -1,28 +1,23 @@
 from flask import Flask,request,g
-from flask_login import current_user
+from flask_restful import Resource
+from hackathon.decorators import token_required
 from hackathon.log import log
-from hackathon import app
-from hackathon.database.models import User
 import json
 
+class guacamoleResource(Resource):
 
+	@token_required
+	def get(self):
 
-@app.before_request
-def before_request():
-    g.user = current_user
-    # session.permanent = True
+		log.info("call getguacadconfig")
+		connection_name = request.args.get("id")
+		log.info("connection name is " + connection_name)
 
+		userID = g.user.get_user_id()
+		guacadconfig = g.user.virtual_environments.filter_by(remote_provider='guacamole',name=connection_name,user_id=userID,status=1).first()
 
-@app.route('/getguacadconfig')
-def getguacadconfig():
+		debuginfo = guacadconfig.remote_paras
 
-	log.info("call getguacadconfig")
-	connection_name = request.args.get("id")
-	log.info("connection name is " + connection_name)
+		log.info("guacamole configuration is :" + guacadconfig.remote_paras)
 
-	userID = g.user.get_user_id()
-
-	guacdconfig = g.user.virtual_environments.filter_by(remote_provider='guacamole',name=connection_name,user_id=userID,status=1).all()
-	log.info('guacamole jsonString is :' + json.dumps(guacdconfig))
-
-	return guacdconfig
+		return guacadconfig.remote_paras

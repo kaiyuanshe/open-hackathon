@@ -14,27 +14,28 @@ public class Connect2OpenHackathon {
 	private Logger logger = LoggerFactory.getLogger(Connect2OpenHackathon.class.getClass());
 	private URL url = null ;
     private BufferedReader in = null;
-    private String urlSTring = null ;
+    private String urlString = null ;
 		
 	public Connect2OpenHackathon(String urlSTring) throws Exception{
-		this.urlSTring = urlSTring;
+		this.urlString = urlSTring;
 	}
 	
 	/*check user withn cookies */
-	public String getGuacamoleJSONString(String tokenString) {
+	public String getGuacamoleJSONString(String connectionID,String tokenString) {
 		
-        String result = null ;
+        String result = "" ;
         HttpURLConnection conn = null ;
         
         try {
-        	 url = new URL(urlSTring);
+        	 url = new URL(urlString+"?id="+connectionID);
 
         	 HttpURLConnection.setFollowRedirects(false);
-        	 conn = (HttpURLConnection) url.openConnection();
-        	 
+        	 conn = (HttpURLConnection) url.openConnection();       	 
              conn.setRequestMethod("GET");  
              conn.setUseCaches(false);
              conn.setRequestProperty("token", tokenString);
+             logger.info("======================Two request-parameters,id:" + connectionID + ", token:" +tokenString);
+             logger.info("======================send http-request to open-hackathon");
              conn.connect();
              
              int status = conn.getResponseCode();
@@ -42,7 +43,7 @@ public class Connect2OpenHackathon {
              if (status != 200) {
             	 logger.error("OpenHackathon http reponse code is :" + conn.getResponseCode());
             	 logger.debug("user may have not login , please do it before your request !!!");
-            	 return result ;
+            	 return null ;
              }
            
              in = new BufferedReader(new InputStreamReader(conn.getInputStream()));

@@ -66,7 +66,7 @@ class ExprManager(object):
                     guaca_container.host_server.public_dns, guaca_port.port_from) + "c%2F" + \
                           guaca_config["name"]
                     guacamole_servers.append({
-                        "name": guaca_config["name"],
+                        "name": guaca_config["displayname"],
                         "url": url
                     })
 
@@ -224,6 +224,7 @@ class ExprManager(object):
 
             if len(port_cfg) > 0:
                 gc = {
+	                "displayname": port_cfg[0]["name"] if "name" in port_cfg[0] else container_config["name"],
                     "name": post_data["container_name"],
                     "connectionID": post_data["container_name"],
                     "protocol": guac["protocol"],
@@ -312,6 +313,7 @@ class ExprManager(object):
                 "image": GUACAMOLE.IMAGE,
                 "ports": [{
                               "name": "guacamole",
+                              "host_port": 12345,
                               "port": GUACAMOLE.PORT,
                               "public": True
                           }],

@@ -9,7 +9,7 @@ from flask import g, request
 from log import log
 from database import db_adapter
 from decorators import token_required
-
+from remote.guacamole import guacamoleResource
 
 class StatusList(Resource):
     # =======================================================return data start
@@ -28,7 +28,7 @@ class StatusList(Resource):
         return expr_manager.submit_expr(args)
 
 
-class DoCourse(Resource):
+class Course(Resource):
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument('id', type=int)
@@ -103,8 +103,9 @@ class HealthResource(Resource):
         }
 
 
-api.add_resource(DoCourse, "/api/course")
+api.add_resource(Course, "/api/course")
 api.add_resource(StatusList, "/api/registerlist")
 api.add_resource(Anmt, "/api/announcement")
 api.add_resource(LoginResource, "/api/user/login")
 api.add_resource(HealthResource, "/", "/health")
+api.add_resource(guacamoleResource, "/api/guacamoleconfig")
