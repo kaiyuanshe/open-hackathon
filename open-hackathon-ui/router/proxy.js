@@ -3,7 +3,6 @@ var router = express.Router()
 var config = require('../config')
 var services = require('../common/services')
 var request = require('request')
-var async = require('async')
 var util = require('util')
 
 router.get('/github', function(req, res) {
@@ -47,4 +46,4 @@ router.get('/qq', function(req, res) {
     })
 })
 
-module.exports = router;
+module.exports = router

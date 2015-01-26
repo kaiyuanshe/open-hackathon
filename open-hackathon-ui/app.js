@@ -18,6 +18,7 @@ app.use(bodyParser.urlencoded({
 }))
 app.use(bodyParser.json())
 app.use(proxy)
+
 app.get('/clearcookie', function(req, res) {
     res.clearCookie('osslab.msopentech.cn')
     res.redirect('/sss.html')
