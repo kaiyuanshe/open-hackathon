@@ -37,7 +37,7 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50))
     nickname = db.Column(db.String(50))
-    #email = db.Column(db.String(50)) put into a new sheet
+    # email = db.Column(db.String(50)) put into a new sheet
     openid = db.Column(db.String(100))
     avatar_url = db.Column(db.String(200))
     slug = db.Column(db.String(50), unique=True, nullable=False)  # can be used for branch name of github
@@ -52,48 +52,39 @@ class User(db.Model, UserMixin):
     def json(self):
         return to_json(self, self.__class__)
 
-    def __init__(self, name, nickname, openid, avatar_url, access_token, online=0, slug=None, create_time=None,
-                 last_login_time=None):
-        if create_time is None:
-            create_time = datetime.utcnow()
-        if last_login_time is None:
-            last_login_time = datetime.utcnow()
-        if slug is None:
-            slug = str(uuid.uuid1())[0:8]  # todo generate a real slug
-
-        self.name = name
-        self.nickname = nickname
-        #self.email = email
-        self.openid = openid
-        self.avatar_url = avatar_url
-        self.slug = slug
-        self.online = online
-        self.access_token = access_token
-        self.create_time = create_time
-        self.last_login_time = last_login_time
+    def __init__(self, **kwargs):
+        super(User, self).__init__(**kwargs)
+        if self.create_time is None:
+            self.create_time = datetime.utcnow()
+        if self.last_login_time is None:
+            self.last_login_time = datetime.utcnow()
+        if self.slug is None:
+            self.slug = str(uuid.uuid1())[0:8]  # todo generate a real slug
 
     def __repr__(self):
         return "User: " + self.json()
-    
+
+
 class UserEmail(db.Model):
-    id = db.Column(db.Integer,primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80))
     email = db.Column(db.String(120))
-    primary_email = db.Column(db.Integer) # 0:NOT Primary Email 1:Primary Email
-    verified = db.Column(db.Integer) # 0 for not verified, 1 for verified
-    
+    primary_email = db.Column(db.Integer)  # 0:NOT Primary Email 1:Primary Email
+    verified = db.Column(db.Integer)  # 0 for not verified, 1 for verified
+
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
     user = db.relationship('User', backref=db.backref('emails', lazy='dynamic'))
-    
+
     def get_user_email(self):
-        return self.email(self,email)
-    
-    def __init__(self,name,email,primary_email,verified,user):
+        return self.email(self, email)
+
+    def __init__(self, name, email, primary_email, verified, user):
         self.name = name
         self.email = email
         self.primary_email = primary_email
         self.verified = verified
         self.user = user
+
 
 class UserToken(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -137,23 +128,17 @@ class Register(db.Model):
     def json(self):
         return to_json(self, self.__class__)
 
-    def __init__(self, hackathon, register_name, email, create_time=None, description=None, enabled=None):
-        if create_time is None:
-            create_time = datetime.utcnow()
-        if enabled is None:
-            enabled = 1
-
-        self.hackathon = hackathon
-        self.register_name = register_name
-        self.email = email
-        self.submitted = 0
-        self.create_time = create_time
-        self.description = description
-        self.enabled = enabled
+    def __init__(self, **kwargs):
+        super(Register, self).__init__(**kwargs)
+        if self.create_time is None:
+            self.create_time = datetime.utcnow()
+        if self.enabled is None:
+            self.enabled = 1
+        self.online = 0
 
     def __repr__(self):
         return "Register:" + self.json()
-    
+
 
 class Hackathon(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -192,16 +177,9 @@ class DockerHostServer(db.Model):
     def json(self):
         return to_json(self, self.__class__)
 
-    def __init__(self, vm_name, public_dns, public_docker_api_port, private_ip, private_docker_api_port,
-                 container_count=0,
-                 container_max_count=0):
-        self.vm_name = vm_name
-        self.public_dns = public_dns
-        self.public_docker_api_port = public_docker_api_port
-        self.private_ip = private_ip
-        self.private_docker_api_port = private_docker_api_port
-        self.container_count = container_count
-        self.container_max_count = container_max_count
+    # e,g,:DockerHostServer('oss-docker-vm1', 'osslab1.chinacloudapp.cn', 8001, '10.207.250.79', 80, 0, 100)
+    def __init__(self, **kwargs):
+        super(DockerHostServer, self).__init__(**kwargs)
 
     def __repr__(self):
         return "HostServer: " + self.json()
@@ -222,17 +200,12 @@ class Experiment(db.Model):
     def json(self):
         return to_json(self, self.__class__)
 
-    def __init__(self, user, hackathon, status, create_time=None, last_heart_beat_time=None):
-        if create_time is None:
-            create_time = datetime.utcnow()
-        if last_heart_beat_time is None:
-            last_heart_beat_time = datetime.utcnow()
-
-        self.user = user
-        self.hackathon = hackathon
-        self.status = status
-        self.create_time = create_time
-        self.last_heart_beat_time = last_heart_beat_time
+    def __init__(self, **kwargs):
+        super(Experiment, self).__init__(**kwargs)
+        if self.create_time is None:
+            self.create_time = datetime.utcnow()
+        if self.last_heart_beat_time is None:
+            self.last_heart_beat_time = datetime.utcnow()
 
     def __repr__(self):
         return "Experiment: " + self.json()
@@ -257,19 +230,10 @@ class VirtualEnvironment(db.Model):
     def json(self):
         return to_json(self, self.__class__)
 
-    def __init__(self, provider, name, image, status, remote_provider, user, experiment, create_time=None):
-        if create_time is None:
-            create_time = datetime.utcnow()
-
-        self.provider = provider
-        self.name = name
-        self.image = image
-        self.status = status
-        self.remote_provider = remote_provider
-        self.status = status
-        self.create_time = create_time
-        self.user = user
-        self.experiment = experiment
+    def __init__(self, **kwargs):
+        super(VirtualEnvironment, self).__init__(**kwargs)
+        if self.create_time is None:
+            self.create_time = datetime.utcnow()
 
     def __repr__(self):
         return "VirtualEnvironment: " + self.json()
@@ -290,17 +254,10 @@ class SCM(db.Model):
     def json(self):
         return to_json(self, self.__class__)
 
-    def __init__(self, experiment, provider, branch, repo_name, repo_url, local_repo_path=None, create_time=None):
-        if create_time is None:
-            create_time = datetime.utcnow()
-
-        self.experiment = experiment
-        self.provider = provider
-        self.branch = branch
-        self.repo_name = repo_name
-        self.repo_url = repo_url
-        self.local_repo_path = local_repo_path
-        self.create_time = create_time
+    def __init__(self, **kwargs):
+        super(SCM, self).__init__(**kwargs)
+        if self.create_time is None:
+            self.create_time = datetime.utcnow()
 
     def __repr__(self):
         return "SCM: " + self.json()
@@ -324,13 +281,12 @@ class DockerContainer(db.Model):
     def json(self):
         return to_json(self, self.__class__)
 
-    def __init__(self, name, host_server, virtual_environment, experiment, image, create_time=None):
-        self.name = name
-        self.host_server = host_server
-        self.virtual_environment = virtual_environment
-        self.experiment = experiment
-        self.image = image
-        self.create_time = create_time if create_time is not None else datetime.utcnow()
+    def __init__(self, exper, **kwargs):
+        self.experiment = exper
+        super(DockerContainer, self).__init__(**kwargs)
+        self.status = 0
+        if self.create_time is None:
+            self.create_time = datetime.utcnow()
 
     def __repr__(self):
         return "DockerContainer:" + self.json()
@@ -357,14 +313,8 @@ class PortBinding(db.Model):
     def json(self):
         return to_json(self, self.__class__)
 
-    def __init__(self, name, port_from, port_to, binding_type, binding_resource_id, virtual_environment, experiment):
-        self.name = name
-        self.port_from = port_from
-        self.port_to = port_to
-        self.binding_type = binding_type
-        self.binding_resource_id = binding_resource_id
-        self.virtual_environment = virtual_environment
-        self.experiment = experiment
+    def __init__(self, **kwargs):
+        super(PortBinding, self).__init__(**kwargs)
 
     def __repr__(self):
         return "PortBinding: " + self.json()

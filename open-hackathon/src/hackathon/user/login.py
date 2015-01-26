@@ -20,25 +20,28 @@ class LoginProviderBase():
 
 class QQLogin(LoginProviderBase):
     def login(self, args):
-        code = args.get('code')
-        state = args.get('state')
-        if state != QQ_OAUTH_STATE:
-            log.warn("STATE match fail. Potentially CSFR.")
-            return "UnAuthorized", 401
+        # code = args.get('code')
+        # state = args.get('state')
+        # if state != QQ_OAUTH_STATE:
+        #    log.warn("STATE match fail. Potentially CSFR.")
+        #    return "UnAuthorized", 401
 
         # get access token
-        token_resp = get_remote(get_config("login/qq/access_token_url") + code + '&state=' + state)
-        log.debug("get token from qq:" + token_resp)
-        start = token_resp.index('=')
-        end = token_resp.index('&')
-        access_token = token_resp[start + 1:end]
-
+        # token_resp = get_remote(get_config("login/qq/access_token_url") + code + '&state=' + state)
+        # log.debug("get token from qq:" + token_resp)
+        # start = token_resp.index('=')
+        # end = token_resp.index('&')
+        access_token = args['access_token']
+        openid = args['openid']
+        client_id = args['client_id']
         # get openID.
-        openid_resp = get_remote(get_config("login/qq/openid_url") + access_token)
-        log.debug("get openid from qq:" + openid_resp)
-        info = json.loads(openid_resp[10:-4])
-        openid = info['openid']
-        client_id = info['client_id']
+        # openid_resp = get_remote(get_config("login/qq/openid_url") + access_token)
+        log.debug("get access_token from qq:" + access_token)
+        log.debug("get client_id from qq:" + client_id)
+        log.debug("get openid from qq:" + openid)
+        # info = json.loads(openid_resp[10:-4])
+        # openid = info['openid']
+        # client_id = info['client_id']
 
         # get user info
         url = get_config("login/qq/user_info_url") % (access_token, client_id, openid)
@@ -50,6 +53,7 @@ class QQLogin(LoginProviderBase):
                                                 name=user_info["nickname"],
                                                 nickname=user_info["nickname"],
                                                 access_token=access_token,
+                                                email=None,
                                                 avatar_url=user_info["figureurl"])
 
         # login flask
@@ -63,15 +67,7 @@ class QQLogin(LoginProviderBase):
 
 class GithubLogin(LoginProviderBase):
     def login(self, args):
-        code = args.get('code')
-
-        # get access_token
-        token_resp = get_remote(get_config('login/github/access_token_url') + code)
-        log.debug("get token from github:" + token_resp)
-        start = token_resp.index('=')
-        end = token_resp.index('&')
-        access_token = token_resp[start + 1:end]
-
+        access_token = args.get('access_token')
         # get user info
         user_info_resp = get_remote(get_config('login/github/user_info_url') + access_token)
         # conn.request('GET',url,'',{'user-agent':'flask'})
