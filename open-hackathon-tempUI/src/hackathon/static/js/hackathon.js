@@ -8,7 +8,7 @@ $(document).ready(function () {
 
     var hackathon = "bigdata-realtime-analytics"
 
-    hpost('/api/course',{
+    hpost('/api/user/experiment',{
             "cid": cid,
             "hackathon": hackathon
         },
@@ -69,7 +69,7 @@ $(document).ready(function () {
 
                 // heart beat
                 var ihb = setInterval(function () {
-                    hput('/api/course',{
+                    hput('/api/user/experiment',{
                             "id": data.expr_id
                         },
                         function () {},
@@ -80,7 +80,7 @@ $(document).ready(function () {
                 // cancel button click event
                 $("#third-leave").click(function () {
                     if(confirm("所有环境将被取消，请确保你的更改已提交至github。您确定取消么？")){
-                        hdelete('/api/course?id=' + data.expr_id,
+                        hdelete('/api/user/experiment?id=' + data.expr_id,
                             function () {
                                 $("#hack_main_cancelled").show()
                                 $("#hack_main_cancelled").siblings().hide()
@@ -111,7 +111,7 @@ $(document).ready(function () {
                 });
 
                 var sciv = setInterval(function () {
-                    hget('/api/course?id=' + data.expr_id,
+                    hget('/api/user/experiment?id=' + data.expr_id,
                         function (data) {
                             if (data.guacamole_status) {
                                 clearInterval(sciv)

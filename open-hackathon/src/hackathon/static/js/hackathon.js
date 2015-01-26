@@ -9,7 +9,7 @@ $(document).ready(function () {
     var hackathon = "bigdata-realtime-analytics"
 
     $.ajax({
-        url: '/api/course',
+        url: '/api/user/experiment',
         type: "POST",
         data: JSON.stringify({
             "cid": cid,
@@ -74,7 +74,7 @@ $(document).ready(function () {
                 // heart beat
                 var ihb = setInterval(function () {
                     $.ajax({
-                        url: '/api/course',
+                        url: '/api/user/experiment',
                         type: "PUT",
                         data: JSON.stringify({
                             "id": data.expr_id
@@ -89,7 +89,7 @@ $(document).ready(function () {
                 $("#third-leave").click(function () {
                     if(confirm("所有环境将被取消，请确保你的更改已提交至github。您确定取消么？")){
                         $.ajax({
-                            url: '/api/course?id=' + data.expr_id,
+                            url: '/api/user/experiment?id=' + data.expr_id,
                             type: "DELETE",
                             success: function () {
                                 $("#hack_main_cancelled").show()
@@ -122,7 +122,7 @@ $(document).ready(function () {
 
                 var sciv = setInterval(function () {
                     $.ajax({
-                        url: '/api/course?id=' + data.expr_id,
+                        url: '/api/user/experiment?id=' + data.expr_id,
                         type: "GET",
                         success: function (data) {
                             if (data.guacamole_status) {

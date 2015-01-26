@@ -28,6 +28,11 @@
             }
         },
         {
+            "pri":"avm"
+            "cloud-service":{},
+            "deployment":{}
+        },
+        {
             "provider": "docker",
             "name": "vnc",
             "image": "sffamily/ubuntu-gnome-vnc-eclipse",

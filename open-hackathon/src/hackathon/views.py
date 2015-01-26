@@ -11,7 +11,7 @@ from database import db_adapter
 from decorators import token_required
 
 
-class StatusList(Resource):
+class RegisterListResource(Resource):
     # =======================================================return data start
     # [{"register_name":"zhang", "online":"1","submitted":"0"..."description":" "}]
     # =======================================================return data end
@@ -20,18 +20,11 @@ class StatusList(Resource):
         json_ret = map(lambda u: u.json(), user_manager.get_all_registration())
         return json_ret
 
-    # =======================================================test data start
-    # {"id":1, "online":1,"submitted":0}
-    # =======================================================test data end
-    def put(self):
-        args = request.get_json()
-        return expr_manager.submit_expr(args)
 
-
-class DoCourse(Resource):
+class UserExperimentResource(Resource):
     def get(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('id', type=int)
+        parser.add_argument('id', type=int, location='args')
         args = parser.parse_args()
         if 'id' not in args:
             return "Bad Request", 400
@@ -64,7 +57,7 @@ class DoCourse(Resource):
     @token_required
     def delete(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('id', type=int)
+        parser.add_argument('id', type=int, location='args')
         args = parser.parse_args()
         if 'id' not in args:
             return "Bad Request", 400
@@ -79,9 +72,13 @@ class DoCourse(Resource):
         return expr_manager.heart_beat(args["id"])
 
 
-class Anmt(Resource):
+class BulletinResource(Resource):
     def get(self):
         return db_adapter.find_first_object(Announcement, enabled=1).json()
+
+    @token_required
+    def post(self):
+        pass
 
 
 class LoginResource(Resource):
@@ -103,8 +100,40 @@ class HealthResource(Resource):
         }
 
 
-api.add_resource(DoCourse, "/api/course")
-api.add_resource(StatusList, "/api/registerlist")
-api.add_resource(Anmt, "/api/announcement")
+class HackathonResource(Resource):
+    @token_required
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('id', type=int, location='args')
+        args = parser.parse_args()
+        if 'id' not in args:
+            return "invalid arguments", 400
+        return db_adapter.find_first_object(Announcement, id=args['id'], enabled=1).json()
+
+# todo post
+    @token_required
+    def post(self):
+        pass
+
+
+class HackathonListResource(Resource):
+    @token_required
+    def get(self):
+        return map(lambda u: u.json(), db_adapter.find_all_objects(Announcement, enabled=1))
+
+
+# todo user hackthon
+class UserHackathonResource(Resource):
+    def get(self):
+        pass
+
+
+api.add_resource(UserExperimentResource, "/api/user/experiment")
+api.add_resource(RegisterListResource, "/api/register/list")
+api.add_resource(BulletinResource, "/api/bulletin")
 api.add_resource(LoginResource, "/api/user/login")
 api.add_resource(HealthResource, "/", "/health")
+api.add_resource(HackathonResource, "/api/hackathon")
+api.add_resource(HackathonListResource, "/api/hackathon/list")
+api.add_resource(UserHackathonResource, "/api/user/hackathon")
+
