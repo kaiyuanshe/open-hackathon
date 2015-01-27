@@ -154,6 +154,38 @@ make sure `debug` mode is set `True` in file `/opt/open-hackathon/open-hackathon
 - add an new `python` configuration. Fill the required blanks and Apply
 - click Debug Icon(a spider icon) in toolbar to start debugging
 
+# setup cloudVM service
+####download dependencies 
+```
+sudo apt-get install docker.io
+sudo pip install -r /opt/open-hackathon/cloudvm/requestment.txt
+```
+####download docker images 
+```
+sudo docker pull 42.159.103.213:5000/rails
+sudo docker pull 42.159.103.213:5000/mean
+sudo docker pull 42.159.103.213:5000/ubuntu-sshd
+sudo docker pull sffamily/ubuntu-gnome-vnc-eclipse
+```
+####config docker remote api
+If you want to use docker remote api to visit docker on your host machine or Azure server, please change the following configure:          
+Please edit this file: `/etc/init/docker.conf` or `/etc/default/docker` and update the `DOCKER_OPTS` variable to the following:
+```
+DOCKER_OPTS = '-H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock'
+```
+The daemon process will listen on port '4243', if '4243' port has been occupied on the machine which you want to visit, please change it.
+If you want to know the information of containers, please enter the address like following (Only running containers are shown by default):
+`http://localhost:4243/containers/json`
+If you want to inspect a specified container's information, you can input this:
+`http://localhost:4243/containers/<container id or name>/json`
+More information docker remote api you can visit:
+`https://docs.docker.com/reference/api/docker_remote_api_v1.16/`
+And add user into docker group
+```
+sudo groupadd docker
+sudo gpasswd -a ${USER} docker
+```
+Then restart the docker process: `service docker.io restart`
 # API
 the public APIs exposed
 
