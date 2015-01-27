@@ -11,6 +11,7 @@ from database import db_adapter
 from decorators import token_required
 from remote.guacamole import GuacamoleInfo
 
+
 class RegisterListResource(Resource):
     # =======================================================return data start
     # [{"register_name":"zhang", "online":"1","submitted":"0"..."description":" "}]
@@ -19,8 +20,6 @@ class RegisterListResource(Resource):
     def get(self):
         json_ret = map(lambda u: u.json(), user_manager.get_all_registration())
         return json_ret
-
-
 
 class UserExperimentResource(Resource):
     def get(self):
@@ -133,7 +132,6 @@ class GuacamoleResource(Resource):
     @token_required
     def get(self):
         return GuacamoleInfo.getConnectInfo()
-
 
 api.add_resource(UserExperimentResource, "/api/user/experiment")
 api.add_resource(RegisterListResource, "/api/register/list")
