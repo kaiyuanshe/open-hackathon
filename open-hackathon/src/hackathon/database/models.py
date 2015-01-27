@@ -1,5 +1,4 @@
 import sys
-from samba.dcerpc.nbt import db_change_info
 import email
 import os
 
@@ -37,7 +36,6 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50))
     nickname = db.Column(db.String(50))
-    #email = db.Column(db.String(50)) put into a new sheet
     openid = db.Column(db.String(100))
     avatar_url = db.Column(db.String(200))
     slug = db.Column(db.String(50), unique=True, nullable=False)  # can be used for branch name of github
@@ -63,7 +61,6 @@ class User(db.Model, UserMixin):
 
         self.name = name
         self.nickname = nickname
-        #self.email = email
         self.openid = openid
         self.avatar_url = avatar_url
         self.slug = slug
