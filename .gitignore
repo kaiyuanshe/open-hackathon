@@ -53,4 +53,7 @@ coverage.xml
 docs/_build/
 
 .idea/
-/backend_setup.py
+
+
+.settings/
+
