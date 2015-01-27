@@ -36,10 +36,6 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50))
     nickname = db.Column(db.String(50))
-<<<<<<< HEAD
-=======
-    # email = db.Column(db.String(50)) put into a new sheet
->>>>>>> opentech/master
     openid = db.Column(db.String(100))
     avatar_url = db.Column(db.String(200))
     slug = db.Column(db.String(50), unique=True, nullable=False)  # can be used for branch name of github
@@ -54,26 +50,7 @@ class User(db.Model, UserMixin):
     def json(self):
         return to_json(self, self.__class__)
 
-<<<<<<< HEAD
-    def __init__(self, name, nickname, openid, avatar_url, access_token, online=0, slug=None, create_time=None,
-                 last_login_time=None):
-        if create_time is None:
-            create_time = datetime.utcnow()
-        if last_login_time is None:
-            last_login_time = datetime.utcnow()
-        if slug is None:
-            slug = str(uuid.uuid1())[0:8]  # todo generate a real slug
 
-        self.name = name
-        self.nickname = nickname
-        self.openid = openid
-        self.avatar_url = avatar_url
-        self.slug = slug
-        self.online = online
-        self.access_token = access_token
-        self.create_time = create_time
-        self.last_login_time = last_login_time
-=======
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
         if self.create_time is None:
@@ -82,7 +59,7 @@ class User(db.Model, UserMixin):
             self.last_login_time = datetime.utcnow()
         if self.slug is None:
             self.slug = str(uuid.uuid1())[0:8]  # todo generate a real slug
->>>>>>> opentech/master
+
 
     def __repr__(self):
         return "User: " + self.json()
