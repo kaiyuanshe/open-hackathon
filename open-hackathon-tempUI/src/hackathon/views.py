@@ -2,12 +2,13 @@ from datetime import timedelta
 from os.path import realpath, dirname
 import os
 
-from flask import Response, render_template, abort
-from . import app
+from flask import Response, render_template, abort, request
+from . import *
 from log import log
 import json
 from hackathon.functions import get_config
-
+from login import login_providers
+from flask_restful import Resource
 
 Template_Routes = {
     "PrivacyStatement": "PrivacyStatement.html",
@@ -69,3 +70,17 @@ def js_config():
                     status=200,
                     mimetype="application/javascript")
     return resp
+
+
+class Get_login(Resource):
+    def post(self):
+        body = request.get_json()
+        provider = body["provider"]
+        return login_providers[provider].login(body)
+
+api.add_resource(Get_login, "/ui/login")
+
+
+# @app.route('/ui/login')
+
+
