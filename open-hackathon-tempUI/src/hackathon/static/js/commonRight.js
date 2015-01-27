@@ -46,11 +46,11 @@ $(function(){
 
     setInterval(function(){
         hget('/api/announcement',
-            success: function (resp) {
+            function (resp) {
                 anmt = $.parseJSON(resp)
                 $("#anmt").text(anmt.content)
             },
-            error: function () {
+            function () {
             }
         );
     }, 3*60*1000);

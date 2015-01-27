@@ -28,3 +28,7 @@ class VirtualEnvironmentProvider:
 
 class RemoteProvider:
     Guacamole = "guacamole"
+    
+class EmailStatus:
+    Primary = 1
+    NonPrimary = 0
