@@ -21,20 +21,20 @@ public class Connect2OpenHackathon {
 	}
 	
 	/*check user withn cookies */
-	public String getGuacamoleJSONString(String connectionID,String tokenString) {
+	public String getGuacamoleJSONString(String connectionName,String tokenString) {
 		
         String result = "" ;
         HttpURLConnection conn = null ;
         
         try {
-        	 url = new URL(urlString+"?id="+connectionID);
+        	 url = new URL(urlString+"?id="+connectionName);
 
         	 HttpURLConnection.setFollowRedirects(false);
         	 conn = (HttpURLConnection) url.openConnection();       	 
              conn.setRequestMethod("GET");  
              conn.setUseCaches(false);
              conn.setRequestProperty("token", tokenString);
-             logger.info("======================Two request-parameters,id:" + connectionID + ", token:" +tokenString);
+             logger.info("======================Two request-parameters,connectionName:" + connectionName + ", token:" +tokenString);
              logger.debug("======================send http-request to open-hackathon");
              conn.connect();
              

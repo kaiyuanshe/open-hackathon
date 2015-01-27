@@ -131,7 +131,7 @@ class UserHackathonResource(Resource):
 class GuacamoleResource(Resource):
     @token_required
     def get(self):
-        return GuacamoleInfo.getConnectInfo()
+        return GuacamoleInfo().getConnectInfo()
 
 api.add_resource(UserExperimentResource, "/api/user/experiment")
 api.add_resource(RegisterListResource, "/api/register/list")

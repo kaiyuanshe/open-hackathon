@@ -101,7 +101,7 @@ $(document).ready(function () {
                 $("#new-window").click(function(){
                     data = $(".center .mid ul li .selected").data("data")
                     if(data && data.url){
-                        detach_url= "redirect?url=" + encodeURIComponent("http://localhost:8080/guacamole/client.xhtml?id=12-web"+"&token="+get_token());
+                        detach_url= "redirect?url=" + encodeURIComponent(s.url+"&token=" + get_token());
                         $("#new-window").attr("href",detach_url);
                         return true;
                     }else{
