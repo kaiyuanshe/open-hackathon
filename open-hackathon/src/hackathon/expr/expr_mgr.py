@@ -221,7 +221,7 @@ class ExprManager(object):
 
             if len(port_cfg) > 0:
                 gc = {
-	                "displayname": port_cfg[0]["name"] if "name" in port_cfg[0] else container_config["name"],
+                    "displayname": port_cfg[0]["name"] if "name" in port_cfg[0] else container_config["name"],
                     "name": post_data["container_name"],
                     "connectionID": post_data["container_name"],
                     "protocol": guac["protocol"],
