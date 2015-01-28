@@ -38,15 +38,15 @@ sudo apt-get install libfreerdp-dev libpango1.0-dev libssh2-1-dev libtelnet-dev
 sudo apt-get install libvncserver-dev libpulse-dev libssl-dev libvorbis-dev
 sudo apt-get install autoconf
 
-wget http://jaist.dl.sourceforge.net/project/guacamole/current/source/guacamole-server-0.9.3.tar.gz
-tar -zxvf guacamole-server-0.9.3.tar.gz
-cd guacamole-server-0.9.3/
-autoreconf -fi
-./configure --with-init-dir=/etc/init.d
-make
-make install
-ldconfig
-/etc/init.d/guacd start
+sudo wget http://jaist.dl.sourceforge.net/project/guacamole/current/source/guacamole-server-0.9.3.tar.gz
+sudo tar -zxvf guacamole-server-0.9.3.tar.gz
+sudo cd guacamole-server-0.9.3/
+sudo autoreconf -fi
+sudo ./configure --with-init-dir=/etc/init.d
+sudo make
+sudo make install
+sudo ldconfig
+sudo /etc/init.d/guacd start
 ```
 ###setup guacamole-client
 ```
