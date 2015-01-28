@@ -1,14 +1,15 @@
+import os
 from os.path import realpath, dirname
 from flask_restful import Resource, reqparse
 from . import api
 from expr import expr_manager
-from database.models import *
+from database.models import Announcement, Hackathon, Register, Template
 from user.login import *
 from flask import g, request
 from log import log
 from database import db_adapter
 from decorators import token_required
-from sqlalchemy import and_
+from user.user_functions import get_user_experiment, get_user_hackathon
 from remote.guacamole import GuacamoleInfo
 
 
@@ -20,6 +21,7 @@ class RegisterListResource(Resource):
     def get(self):
         json_ret = map(lambda u: u.json(), user_manager.get_all_registration())
         return json_ret
+
 
 class UserExperimentResource(Resource):
     # user experiment id
@@ -61,7 +63,7 @@ class UserExperimentResource(Resource):
         parser.add_argument('id', type=int, location='args')
         args = parser.parse_args()
         if args['id'] is None:
-            return json.dumps({"error": "Bad request"}), 400
+            return {"error": "Bad request"}, 400
 
         return expr_manager.stop_expr(args["id"])
 
@@ -103,15 +105,15 @@ class HealthResource(Resource):
 
 
 class HackathonResource(Resource):
-    # id is hackathon id
+    # hid is hackathon id
     @token_required
     def get(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('id', type=int, location='args')
+        parser.add_argument('hid', type=int, location='args')
         args = parser.parse_args()
-        if args['id'] is None:
+        if args['hid'] is None:
             return {"error": "Bad request"}, 400
-        return db_adapter.find_first_object(Hackathon, id=args['id']).json()
+        return db_adapter.find_first_object(Hackathon, id=args['hid']).json()
 
     # todo hackathon post
     @token_required
@@ -125,32 +127,29 @@ class HackathonListResource(Resource):
 
 
 class HackathonStatResource(Resource):
-    # id is hackathon id
+    # hid is hackathon id
     def get(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('id', type=int, location='args')
+        parse.add_argument('hid', type=int, location='args')
         args = parse.parse_args()
-        if args['id'] is None:
-            return json.dumps({"error": "Bad request"}), 400
-        total_num = Register.query.filter(Register.hackathon_id == args['id']).count()
-        enabled_num = Register.query.filter(Register.hackathon_id == args['id'], Register.enabled == 1).count()
-        disabled_num = Register.query.filter(Register.hackathon_id == args['id'], Register.enabled == 0).count()
-        return {'id': args['id'], 'total': total_num, 'online': enabled_num, 'offline': disabled_num}
+        if args['hid'] is None:
+            return {"error": "Bad request"}, 400
+        total_num = db_adapter.count(Register, id=args['hid'])
+        enabled_num = db_adapter.count(Register, id=args['hid'], enabled=1)
+        disabled_num = db_adapter.count(Register, id=args['hid'], enabled=0)
+        return {'hid': args['hid'], 'total': total_num, 'online': enabled_num, 'offline': disabled_num}
 
 
 class UserHackathonResource(Resource):
-    # id is user id
+    # uid is user id
     @token_required
     def get(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('id', type=int, location='args')
+        parse.add_argument('uid', type=int, location='args')
         args = parse.parse_args()
-        if args['id'] is None:
-            return json.dumps({"error": "Bad request"}), 400
-        hackathon = map(lambda u: u.hackathon.json(),
-                   Experiment.query.filter(and_(Experiment.user_id == args['id'], Experiment.status < 5)).all())
-        unique_hackathon = [x for x in set(hackathon)]
-        return unique_hackathon
+        if args['uid'] is None:
+            return {"error": "Bad request"}, 400
+        return get_user_hackathon(args['uid'])
 
     # todo user hackathon post
     @token_required
@@ -164,21 +163,26 @@ class UserHackathonResource(Resource):
 
 
 class HackathonTemplateResource(Resource):
+    # hid is hackathon id
     def get(self):
-        return map(lambda u: u.json(), db_adapter.find_all_objects(Template))
+        parse = reqparse.RequestParser()
+        parse.add_argument('hid', type=int, location='args')
+        args = parse.parse_args()
+        if args['hid'] is None:
+            return {"error": "Bad request"}, 400
+        return map(lambda u: u.json(), db_adapter.find_all_objects(Template, hackathon_id=args['hid']))
 
 
 class UserExperimentListResource(Resource):
-    # id is user id
+    # uid is user id
     @token_required
     def get(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('id', type=int, location='args')
+        parse.add_argument('uid', type=int, location='args')
         args = parse.parse_args()
-        if args['id'] is None:
-            return json.dumps({"error": "Bad request"}), 400
-        return map(lambda u: u.json(),
-                   Experiment.query.filter(and_(Experiment.user_id == args['id'], Experiment.status < 5)).all())
+        if args['uid'] is None:
+            return {"error": "Bad request"}, 400
+        return get_user_experiment(args['uid'])
 
 
 class GuacamoleResource(Resource):

@@ -25,16 +25,16 @@ db.session.add(amt)
 h = Hackathon("bigdata-realtime-analytics", 1)
 db.session.add(h)
 
-t = Template(name='ubuntu')
+t = Template(hackathon=h, name='ubuntu')
 db.session.add(t)
 
-t = Template(name='rails')
+t = Template(hackathon=h, name='rails')
 db.session.add(t)
 
-t = Template(name='mean')
+t = Template(hackathon=h, name='mean')
 db.session.add(t)
 
-t = Template(name='python')
+t = Template(hackathon=h, name='python')
 db.session.add(t)
 
 db.session.commit()
