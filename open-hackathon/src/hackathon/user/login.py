@@ -1,10 +1,11 @@
 # -*- coding:utf8 -*-
 # encoding = utf-8
+import sys
 
+sys.path.append("..")
 from hackathon.functions import get_remote, get_config, convert
 from hackathon.log import log
 import json
-from hackathon.config import QQ_OAUTH_STATE
 from . import user_manager
 
 from hackathon.constants import OAUTH_PROVIDER

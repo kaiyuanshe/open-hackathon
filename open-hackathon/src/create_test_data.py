@@ -25,7 +25,7 @@ db.session.add(amt)
 h = Hackathon("bigdata-realtime-analytics", 1)
 db.session.add(h)
 
-r = Register(hackathon=h, register_name="xxzhe", email="zhengxx012@gmail.com")
+r = Register(hackathon=h, register_name="junbo", email="juniwang@microsoft.com")
 db.session.add(r)
 
 db.session.commit()

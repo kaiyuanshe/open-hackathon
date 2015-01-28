@@ -26,7 +26,7 @@ $(document).ready(function () {
                     var sd = $('<div>').attr({"id":"hack_main_"+s.name}).addClass('hidden')
                     main.append(sd);
                     var iframe = $('<iframe>').attr({
-                        src:s.url,
+                        src:s.url+"&token=" + get_token(),
                         width:'100%',
                         height:'600px',
                         frameborder:'yes',
@@ -101,7 +101,7 @@ $(document).ready(function () {
                 $("#new-window").click(function(){
                     data = $(".center .mid ul li .selected").data("data")
                     if(data && data.url){
-                        detach_url= "redirect?url=" + encodeURIComponent(data.url);
+                        detach_url= "redirect?url=" + encodeURIComponent(s.url+"&token=" + get_token());
                         $("#new-window").attr("href",detach_url);
                         return true;
                     }else{
@@ -124,7 +124,7 @@ $(document).ready(function () {
                             clearInterval(sciv)
                         }
                     );
-                }, 2000);
+                }, 1000 * 60);
             }
         },
         function () {
