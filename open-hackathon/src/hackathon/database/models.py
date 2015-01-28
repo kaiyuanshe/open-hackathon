@@ -379,20 +379,19 @@ class UserRole(db.Model):
 
 class Template(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    url = db.Column(db.String(100))
-    type = db.Column(db.String(50))
+    name = db.Column(db.String(50))
+    url = db.Column(db.String(200))  # backup, templates' location
+    provider = db.Column(db.String(20))
     create_time = db.Column(db.DateTime)
-    last_modify_time = db.Column(db.DateTime)
 
-    def __init__(self, url, type, create_time=None, last_modify_time=None):
-        if create_time is None:
-            create_time = datetime.utcnow()
-        if last_modify_time is None:
-            last_modify_time = datetime.utcnow()
-        self.url = url
-        self.type = type
-        self.create_time = create_time
-        self.last_modify_time = last_modify_time
+    hackathon_id = db.Column(db.Integer, db.ForeignKey('hackathon.id', ondelete='CASCADE'))
+    hackathon = db.relationship('Hackathon', backref=db.backref('templates', lazy='dynamic'))
+
+    def json(self):
+        return to_json(self, self.__class__)
+
+    def __repr__(self):
+        return "UserResource: " + self.json()
 
 
 class UserTemplate(db.Model):
@@ -464,12 +463,6 @@ class UserResource(db.Model):
         self.cloud_service_id = cloud_service_id
         self.create_time = create_time
         self.last_modify_time = last_modify_time
-
-    def json(self):
-        return to_json(self, self.__class__)
-
-    def __repr__(self):
-        return "UserResource: " + self.json()
 
 
 class VMEndpoint(db.Model):

@@ -26,15 +26,18 @@ h = Hackathon("bigdata-realtime-analytics", 1)
 db.session.add(h)
 
 r = Register(hackathon=h, register_name="Yifu Huang", email="ifhuang91@gmail.com")
-db.session.add(r)
 
-# add public templates to database
-template_dir = 'resources'
-template_files = os.listdir(template_dir)
-for template_file in template_files:
-    template_url = os.getcwd() + os.path.sep + template_dir + os.path.sep + template_file
-    template = Template(template_url, 'public')
-    db.session.add(template)
-    db.session.commit()
+t = Template(hackathon=h, name='ubuntu')
+db.session.add(t)
+
+t = Template(hackathon=h, name='rails')
+db.session.add(t)
+
+t = Template(hackathon=h, name='mean')
+db.session.add(t)
+
+t = Template(hackathon=h, name='python')
+db.session.add(t)
 
 db.session.commit()
+
