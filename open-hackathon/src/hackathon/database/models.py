@@ -1,5 +1,4 @@
 import sys
-from samba.dcerpc.nbt import db_change_info
 import email
 import os
 
