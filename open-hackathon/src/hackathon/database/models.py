@@ -375,8 +375,6 @@ class UserRole(db.Model):
         return "UserRole: " + self.json()
 
 
-# ------------------------------ Tables are introduced by azure-auto-deploy ------------------------------
-
 class Template(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50))
@@ -390,8 +388,17 @@ class Template(db.Model):
     def json(self):
         return to_json(self, self.__class__)
 
+    def __init__(self, **kwargs):
+        super(Template, self).__init__(**kwargs)
+
+        if self.provider is None:
+            self.provider = "docker"
+        self.create_time = datetime.utcnow()
+
     def __repr__(self):
-        return "UserResource: " + self.json()
+        return "Template: " + self.json()
+
+# ------------------------------ Tables are introduced by azure-auto-deploy ------------------------------
 
 
 class UserTemplate(db.Model):
@@ -463,6 +470,12 @@ class UserResource(db.Model):
         self.cloud_service_id = cloud_service_id
         self.create_time = create_time
         self.last_modify_time = last_modify_time
+
+    def json(self):
+        return to_json(self, self.__class__)
+
+    def __repr__(self):
+        return "UserResource: " + self.json()
 
 
 class VMEndpoint(db.Model):

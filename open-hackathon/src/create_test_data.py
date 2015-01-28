@@ -39,5 +39,12 @@ db.session.add(t)
 t = Template(hackathon=h, name='python')
 db.session.add(t)
 
+t = Template(hackathon=h, name='azure-1', provider='azure',
+             url='/home/if/If/LABOSS/open-hackathon/src/hackathon/resources/bigdata-realtime-analytics-azure-1.js')
+db.session.add(t)
+t = Template(hackathon=h, name='azure-2', provider='azure',
+             url='/home/if/If/LABOSS/open-hackathon/src/hackathon/resources/bigdata-realtime-analytics-azure-2.js')
+db.session.add(t)
+
 db.session.commit()
 

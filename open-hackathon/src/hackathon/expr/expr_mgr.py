@@ -229,10 +229,24 @@ class ExprManager(object):
         else:
             return "Not found", 404
 
-    def start_expr(self, hackathon_name, expr_config):
+    def start_expr(self, hackathon_name, template_name):
         hackathon = db_adapter.find_first_object(Hackathon, name=hackathon_name)
         if hackathon is None:
             raise Exception("hackathon %s doesn't exist.")
+
+        template = db_adapter.find_first_object(Template, hackathon=hackathon, name=template_name)
+        if template is None:
+            raise Exception("template %s doesn't exist.")
+        
+        template_file = "%s/resources/%s-%s.js" % (dirname(realpath(__file__)), hackathon, cid)
+        if os.path.isfile(template_file):
+            # call remote service to start docker containers
+            expr_config = json.load(file(template_file))
+
+        else:
+            return "the experiment %s is not ready" % id, 404
+
+
 
         expr = db_adapter.find_first_object(Experiment, status=ExprStatus.Running,
                                             user_id=g.user.id,
