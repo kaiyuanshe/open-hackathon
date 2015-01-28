@@ -20,7 +20,7 @@ angular
         'ngTouch'
     ])
     .config(function($stateProvider, $urlRouterProvider) {
-        $urlRouterProvider.otherwise('/')
+        $urlRouterProvider.otherwise('/');
         $stateProvider
             .state('index', {
                 url: '',
@@ -48,5 +48,5 @@ angular
                         controller: 'AboutCtrl'
                     }
                 }
-            })
+            });
     });

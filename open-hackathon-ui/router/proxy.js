@@ -5,6 +5,8 @@ var services = require('../common/services')
 var request = require('request')
 var util = require('util')
 
+
+var COOKIE_USERINFORMATION = 'UserInformation'
 router.get('/github', function(req, res) {
     var option = {
         'content-type': 'application/json',
@@ -17,17 +19,14 @@ router.get('/github', function(req, res) {
             code: req.query.code
         }
     }
-    request.post(option, function(err, body) {
+    request.post(option, function(err, request, body) {
         services.user.login.post({
-            Provider: 'github',
+            provider: 'github',
             access_token: body.access_token,
-            client_id: config.sociallogin.qq.client_id
+            client_id: config.sociallogin.github.client_id
         }, function(response, data) {
-            res.cookie('UserInformation', JSON.stringify(data), {
-                maxAge: 86400000,
-                httpOnly: true
-            });
-            res.sendFile('/')
+            res.cookie(COOKIE_USERINFORMATION, JSON.stringify(data));
+            res.redirect('/')
         })
     })
 })
@@ -36,13 +35,20 @@ router.get('/qq', function(req, res) {
     services.user.login.post({
         Provider: 'qq',
         access_token: req.query['#access_token'],
-        client_id: config.sociallogin.github.client_id
+        client_id: config.sociallogin.qq.client_id
     }, function(response, data) {
-        res.cookie('UserInformation', JSON.stringify(data), {
-            maxAge: 86400000,
-            httpOnly: true
-        });
-        res.sendFile('/')
+        res.cookie(COOKIE_USERINFORMATION, JSON.stringify(data));
+        res.redirect('/')
+    })
+})
+
+router.delete('/proxy/login', function(req, res) {
+    services.user.login.del({
+        token: req.body.token
+    }, function(response, data) {
+        res.clearCookie(COOKIE_USERINFORMATION)
+        if (response.statusCode != 200)
+            util.log('')
     })
 })
 
