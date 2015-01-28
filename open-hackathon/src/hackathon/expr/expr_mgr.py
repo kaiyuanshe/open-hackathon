@@ -30,7 +30,6 @@ class ExprManager(object):
             "hackathon": expr.hackathon.name,
             "create_time": str(expr.create_time),
             "last_heart_beat_time": str(expr.last_heart_beat_time),
-            "guacamole_status": False
         }
 
         guacamole_servers = []
@@ -38,7 +37,8 @@ class ExprManager(object):
             # return guacamole link to frontend
             if ve.remote_provider == RemoteProvider.Guacamole:
                 guaca_config = json.loads(ve.remote_paras)
-                url = "http://%s/guacamole/client.xhtml?id=" % (safe_get_config("guacamole/host","localhost:8080")) + "c%2F" + guaca_config["name"]
+                url = "%s/guacamole/client.xhtml?id=" % (
+                safe_get_config("guacamole/host", "localhost:8080")) + "c%2F" + guaca_config["name"]
                 guacamole_servers.append({
                     "name": guaca_config["displayname"],
                     "url": url
@@ -272,10 +272,10 @@ class ExprManager(object):
             expr.status = ExprStatus.Starting
             db_adapter.commit()
             map(lambda container_config: self.__remote_start_container(expr,
-                                                                        host_server,
-                                                                        scm,
-                                                                        container_config),
-                             expr_config["containers"])
+                                                                       host_server,
+                                                                       scm,
+                                                                       container_config),
+                expr_config["containers"])
 
         except Exception as e:
             log.info(e)
@@ -301,19 +301,19 @@ class ExprManager(object):
 
     def __roll_back(self, expr_id):
         log.info("Starting rollback ...")
+        expr = Experiment.query.filter_by(id=expr_id).first()
         try:
-            expr = Experiment.query.filter_by(id=expr_id).first()
             expr.status = ExprStatus.Rollbacking
             db_adapter.commit()
             if expr is not None:
                 # stop containers and change expr status
                 for c in expr.virtual_environments:
                     if c.provider == VirtualEnvironmentProvider.Docker:
-                            docker.stop(c.name, c.container.host_server.public_dns)
-                            c.status = VirtualEnvStatus.Stopped
-                            c.container.host_server.container_count -= 1
-                            if c.container.host_server.container_count < 0:
-                                c.container.host_server.container_count = 0
+                        docker.stop(c.name, c.container.host_server.public_dns)
+                        c.status = VirtualEnvStatus.Stopped
+                        c.container.host_server.container_count -= 1
+                        if c.container.host_server.container_count < 0:
+                            c.container.host_server.container_count = 0
             # delete ports
             ports = PortBinding.query.filter_by(experiment_id=expr_id).all()
             for port in ports:

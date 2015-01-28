@@ -22,6 +22,7 @@ class RegisterListResource(Resource):
         json_ret = map(lambda u: u.json(), user_manager.get_all_registration())
         return json_ret
 
+
 class UserExperimentResource(Resource):
     def get(self):
         parser = reqparse.RequestParser()
@@ -133,6 +134,7 @@ class GuacamoleResource(Resource):
     @token_required
     def get(self):
         return GuacamoleInfo().getConnectInfo()
+
 
 api.add_resource(UserExperimentResource, "/api/user/experiment")
 api.add_resource(RegisterListResource, "/api/register/list")

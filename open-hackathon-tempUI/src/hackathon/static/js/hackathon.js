@@ -124,7 +124,7 @@ $(document).ready(function () {
                             clearInterval(sciv)
                         }
                     );
-                }, 2000);
+                }, 1000 * 60);
             }
         },
         function () {
