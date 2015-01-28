@@ -27,7 +27,8 @@ git clone https://github.com/msopentechcn/open-hackathon.git
 
 #config guacamole
 Do this steps you should follow [http://guac-dev.org/doc/gug/installing-guacamole.html](http://guac-dev.org/doc/gug/installing-guacamole.html)      
-Here are the main steps about configure and depoly guacamole-server as well as guacamole-client
+Here are the main steps about configure and depoly guacamole-server as well as guacamole-client       
+Note：*guacamole version choose 0.9.3 !!!*
 
 
 ###setup guacamole-server
@@ -37,8 +38,9 @@ sudo apt-get install libfreerdp-dev libpango1.0-dev libssh2-1-dev libtelnet-dev
 sudo apt-get install libvncserver-dev libpulse-dev libssl-dev libvorbis-dev
 sudo apt-get install autoconf
 
-git clone git://github.com/glyptodon/guacamole-server.git
-cd guacamole-server/
+wget http://jaist.dl.sourceforge.net/project/guacamole/current/source/guacamole-server-0.9.3.tar.gz
+tar -zxvf guacamole-server-0.9.3.tar.gz
+cd guacamole-server-0.9.3/
 autoreconf -fi
 ./configure --with-init-dir=/etc/init.d
 make
@@ -48,7 +50,7 @@ ldconfig
 ```
 ###setup guacamole-client
 ```
-wget http://jaist.dl.sourceforge.net/project/guacamole/current/binary/guacamole-0.9.4.war
+wget http://jaist.dl.sourceforge.net/project/guacamole/current/binary/guacamole-0.9.3.war
 ```
 Then deploy this `guacamole.war` into tomcat7 
 
@@ -60,7 +62,8 @@ guacd-port:     4822
 
 lib-directory: /var/lib/guacamole
 auth-provider: com.openhackathon.guacamole.OpenHackathonAuthenticationProvider
-auth-request-url: http://osslab.msopentech.cn/checkguacookies
+auth-request-url: http://osslab.msopentech.cn:15000/api/guacamoleconfig
+
 ```
 Then copy the auth-provider jar file to the path that was setted in the config file
 ```
