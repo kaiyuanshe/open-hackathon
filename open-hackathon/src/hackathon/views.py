@@ -10,6 +10,7 @@ from log import log
 from database import db_adapter
 from decorators import token_required
 from health import report_health
+from remote.guacamole import GuacamoleInfo
 
 
 class RegisterListResource(Resource):
@@ -20,7 +21,6 @@ class RegisterListResource(Resource):
     def get(self):
         json_ret = map(lambda u: u.json(), user_manager.get_all_registration())
         return json_ret
-
 
 class UserExperimentResource(Resource):
     def get(self):
@@ -129,6 +129,11 @@ class UserHackathonResource(Resource):
         pass
 
 
+class GuacamoleResource(Resource):
+    @token_required
+    def get(self):
+        return GuacamoleInfo().getConnectInfo()
+
 api.add_resource(UserExperimentResource, "/api/user/experiment")
 api.add_resource(RegisterListResource, "/api/register/list")
 api.add_resource(BulletinResource, "/api/bulletin")
@@ -137,4 +142,6 @@ api.add_resource(HealthResource, "/", "/health")
 api.add_resource(HackathonResource, "/api/hackathon")
 api.add_resource(HackathonListResource, "/api/hackathon/list")
 api.add_resource(UserHackathonResource, "/api/user/hackathon")
+api.add_resource(GuacamoleResource, "/api/guacamoleconfig")
+
 
