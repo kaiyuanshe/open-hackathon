@@ -374,3 +374,24 @@ class UserRole(db.Model):
 
     def __repr__(self):
         return "UserRole: " + self.json()
+
+
+class Template(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True)
+    url = db.Column(db.String(200))  # backup, templates' location
+    provider = db.Column(db.String(20))
+    create_time = db.Column(db.DateTime)
+
+    def json(self):
+        return to_json(self, self.__class__)
+
+    def __init__(self, **kwargs):
+        super(Template, self).__init__(**kwargs)
+
+        if self.provider is None:
+            self.provider = "docker"
+        self.create_time = datetime.utcnow()
+
+    def __repr__(self):
+        return "Template: " + self.json()

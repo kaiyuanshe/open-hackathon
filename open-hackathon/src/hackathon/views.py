@@ -15,7 +15,7 @@ class RegisterListResource(Resource):
     # =======================================================return data start
     # [{"register_name":"zhang", "online":"1","submitted":"0"..."description":" "}]
     # =======================================================return data end
-    # @token_required
+    @token_required
     def get(self):
         json_ret = map(lambda u: u.json(), user_manager.get_all_registration())
         return json_ret
@@ -23,6 +23,7 @@ class RegisterListResource(Resource):
 
 class UserExperimentResource(Resource):
     # user experiment id
+    @token_required
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument('id', type=int, location='args')
@@ -103,7 +104,7 @@ class HealthResource(Resource):
 
 class HackathonResource(Resource):
     # id is hackathon id
-    # @token_required
+    @token_required
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument('id', type=int, location='args')
@@ -119,7 +120,6 @@ class HackathonResource(Resource):
 
 
 class HackathonListResource(Resource):
-    # @token_required
     def get(self):
         return map(lambda u: u.json(), db_adapter.find_all_objects(Hackathon))
 
@@ -140,6 +140,7 @@ class HackathonStatResource(Resource):
 
 class UserHackathonResource(Resource):
     # id is user id
+    @token_required
     def get(self):
         parse = reqparse.RequestParser()
         parse.add_argument('id', type=int, location='args')
@@ -152,22 +153,24 @@ class UserHackathonResource(Resource):
         return unique_hackathon
 
     # todo user hackathon post
+    @token_required
     def post(self):
         pass
 
     # todo delete user hackathon
+    @token_required
     def delete(self):
         pass
 
 
-# todo hackathon template
 class HackathonTemplateResource(Resource):
     def get(self):
-        pass
+        return map(lambda u: u.json(), db_adapter.find_all_objects(Template))
 
 
 class UserExperimentListResource(Resource):
     # id is user id
+    @token_required
     def get(self):
         parse = reqparse.RequestParser()
         parse.add_argument('id', type=int, location='args')

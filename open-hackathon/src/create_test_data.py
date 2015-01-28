@@ -25,6 +25,20 @@ db.session.add(amt)
 h = Hackathon("bigdata-realtime-analytics", 1)
 db.session.add(h)
 
+t = Template(name='ubuntu')
+db.session.add(t)
+
+t = Template(name='rails')
+db.session.add(t)
+
+t = Template(name='mean')
+db.session.add(t)
+
+t = Template(name='python')
+db.session.add(t)
+
+db.session.commit()
+
 r = Register(hackathon=h, register_name="xxzhe", email="zhengxx012@gmail.com")
 db.session.add(r)
 
