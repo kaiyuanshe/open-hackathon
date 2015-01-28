@@ -22,20 +22,8 @@ class QQLogin():
         start = token_resp.index('=')
         end = token_resp.index('&')
         access_token = token_resp[start + 1:end]
-        # openid = args['openid']
-        # client_id = args['client_id']
-        # get openID.
-        openid_resp = get_remote(get_config("login/qq/openid_url") + access_token)
-
-        info = json.loads(openid_resp[10:-4])
-        openid = info['openid']
-        client_id = info['client_id']
-        log.debug("get openid from qq:" + access_token)
-        log.debug("get openid from qq:" + client_id)
-        log.debug("get openid from qq:" + openid)
-
         # get user info
-        data = {"provider": "qq", "code": code, "access_token": access_token, "client_id": client_id, "openid": openid}
+        data = {"provider": "qq", "access_token": access_token}
         # url = get_config("login/qq/user_info_url") % (access_token, client_id, openid)
         return post_to_remote('http://osslab.msopentech.cn:15000/api/user/login', data)
 

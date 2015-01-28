@@ -16,7 +16,7 @@ class LoginProviderBase():
         pass
 
     def logout(self, user):
-        user_manager.db_logout(user)
+        return user_manager.db_logout(user)
 
 
 class QQLogin(LoginProviderBase):
@@ -33,16 +33,15 @@ class QQLogin(LoginProviderBase):
         # start = token_resp.index('=')
         # end = token_resp.index('&')
         access_token = args['access_token']
-        openid = args['openid']
-        client_id = args['client_id']
         # get openID.
-        # openid_resp = get_remote(get_config("login/qq/openid_url") + access_token)
+        openid_resp = get_remote(get_config("login/qq/openid_url") + access_token)
         log.debug("get access_token from qq:" + access_token)
-        log.debug("get client_id from qq:" + client_id)
-        log.debug("get openid from qq:" + openid)
-        # info = json.loads(openid_resp[10:-4])
-        # openid = info['openid']
-        # client_id = info['client_id']
+
+        info = json.loads(openid_resp[10:-4])
+        openid = info['openid']
+        log.debug("get client_id from qq:" + openid)
+        client_id = info['client_id']
+        log.debug("get openid from qq:" + client_id)
 
         # get user info
         url = get_config("login/qq/user_info_url") % (access_token, client_id, openid)
