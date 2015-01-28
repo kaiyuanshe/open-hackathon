@@ -38,7 +38,7 @@ Config = {
         "managementServiceHostBase": "management.core.chinacloudapi.cn"
     },
     "guacamole": {
-        "host": "localhost:8080"
+        "host": "http://localhost:8080"
     }
 }
 

@@ -10,6 +10,7 @@ from log import log
 from database import db_adapter
 from decorators import token_required
 from user.user_functions import get_user_experiment, get_user_hackathon
+from health import report_health
 from remote.guacamole import GuacamoleInfo
 
 
@@ -96,12 +97,12 @@ class LoginResource(Resource):
         return login_providers.values()[0].logout(g.user)
 
 
-# todo health page
 class HealthResource(Resource):
     def get(self):
-        return {
-            "status": "OK"
-        }
+        parser = reqparse.RequestParser()
+        parser.add_argument('q', type=str, location='args')
+        args = parser.parse_args()
+        return report_health(args['q'])
 
 
 class HackathonResource(Resource):
@@ -115,7 +116,7 @@ class HackathonResource(Resource):
             return {"error": "Bad request"}, 400
         return db_adapter.find_first_object(Hackathon, id=args['hid']).json()
 
-    # todo hackathon post
+    # todo post
     @token_required
     def post(self):
         pass
@@ -191,6 +192,8 @@ class GuacamoleResource(Resource):
         return GuacamoleInfo().getConnectInfo()
 
 
+api.add_resource(UserExperimentResource, "/api/user/experiment")
+api.add_resource(RegisterListResource, "/api/register/list")
 api.add_resource(BulletinResource, "/api/bulletin")
 api.add_resource(LoginResource, "/api/user/login")
 api.add_resource(HackathonResource, "/api/hackathon")
@@ -198,9 +201,7 @@ api.add_resource(HackathonListResource, "/api/hackathon/list")
 api.add_resource(HackathonTemplateResource, "/api/hackathon/template")
 api.add_resource(HackathonStatResource, "/api/hackathon/stat")
 api.add_resource(HealthResource, "/", "/health")
-api.add_resource(RegisterListResource, "/api/register/list")
 api.add_resource(UserHackathonResource, "/api/user/hackathon")
-api.add_resource(UserExperimentResource, "/api/user/experiment")
 api.add_resource(UserExperimentListResource, "/api/user/experiment/list")
 api.add_resource(GuacamoleResource, "/api/guacamoleconfig")
 

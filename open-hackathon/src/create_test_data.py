@@ -40,6 +40,9 @@ db.session.add(t)
 db.session.commit()
 
 r = Register(hackathon=h, register_name="xxzhe", email="zhengxx012@gmail.com")
+
+r = Register(hackathon=h, register_name="junbo", email="juniwang@microsoft.com")
+
 db.session.add(r)
 
 db.session.commit()
