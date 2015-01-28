@@ -3,10 +3,7 @@ import sys
 sys.path.append("..")
 
 from compiler.ast import flatten
-from datetime import datetime
-
 from flask import g
-
 from hackathon.database.models import *
 from hackathon.database import db_adapter
 from hackathon.log import log
@@ -27,16 +24,6 @@ def course_path(id, sub=None):
 
 
 class ExprManager(object):
-    def __get_guacamole_environment(self, expr):
-        return expr.virtual_environments.filter_by(image=GUACAMOLE.IMAGE).first()
-
-    def __get_guacamole_host(self, ve):
-        if ve.provider == VirtualEnvironmentProvider.Docker:
-            return ve.container.host_server.public_dns
-        else:
-            # todo support azure VM
-            raise Exception("not support yet")
-
     def __report_expr_status(self, expr):
         ret = {
             "expr_id": expr.id,
@@ -46,31 +33,18 @@ class ExprManager(object):
             "guacamole_status": False
         }
 
-        # fill the status of guacamole container
-        guaca_env = self.__get_guacamole_environment(expr)
-        if guaca_env is not None:
-            guaca_container = guaca_env.container
-            guaca_port = guaca_env.port_bindings.filter_by(binding_type=PortBindingType.CloudService).first()
-            try:
-                get_remote("http://%s:%s" % (guaca_container.host_server.public_dns, guaca_port.port_from))
-                ret["guacamole_status"] = True
-            except Exception as e:
-                log.error(e)
+        guacamole_servers = []
+        for ve in expr.virtual_environments.all():
+            # return guacamole link to frontend
+            if ve.remote_provider == RemoteProvider.Guacamole:
+                guaca_config = json.loads(ve.remote_paras)
+                url = "http://%s/guacamole/client.xhtml?id=" % (safe_get_config("guacamole/host","localhost:8080")) + "c%2F" + guaca_config["name"]
+                guacamole_servers.append({
+                    "name": guaca_config["displayname"],
+                    "url": url
+                })
 
-            guacamole_servers = []
-            for ve in expr.virtual_environments.all():
-                # return guacamole link to frontend
-                if ve.remote_provider == RemoteProvider.Guacamole:
-                    guaca_config = json.loads(ve.remote_paras)
-                    url = "http://%s:%s/client.xhtml?id=" % (
-                        guaca_container.host_server.public_dns, guaca_port.port_from) + "c%2F" + \
-                          guaca_config["name"]
-                    guacamole_servers.append({
-                        "name": guaca_config["name"],
-                        "url": url
-                    })
-
-            ret["guacamole_servers"] = guacamole_servers
+        ret["guacamole_servers"] = guacamole_servers
 
         public_urls = []
         # return public accessible web url
@@ -90,7 +64,7 @@ class ExprManager(object):
         return ret
 
     def __get_available_docker_host(self, expr_config):
-        req_count = len(expr_config["containers"]) + 1  # todo only +1 when guacamole container is required
+        req_count = len(expr_config["containers"])
         vm = db_adapter.filter(DockerHostServer,
                                DockerHostServer.container_count + req_count <= DockerHostServer.container_max_count).first()
 
@@ -177,7 +151,7 @@ class ExprManager(object):
         url = "%s/scm" % self.__get_cloudvm_address(host_server)
         return post_to_remote(url, post_data)
 
-    def __remote_start_container(self, expr, host_server, scm, container_config, guacamole_config):
+    def __remote_start_container(self, expr, host_server, scm, container_config):
         post_data = container_config
         post_data["expr_id"] = expr.id
         post_data["container_name"] = "%s-%s" % (expr.id, container_config["name"])
@@ -221,7 +195,8 @@ class ExprManager(object):
 
             if len(port_cfg) > 0:
                 gc = {
-                    "name": port_cfg[0]["name"] if "name" in port_cfg[0] else container_config["name"],
+                    "displayname": port_cfg[0]["name"] if "name" in port_cfg[0] else container_config["name"],
+                    "name": post_data["container_name"],
                     "protocol": guac["protocol"],
                     "hostname": host_server.private_ip,
                     "port": port_cfg[0]["host_port"]
@@ -233,18 +208,8 @@ class ExprManager(object):
 
                 # save guacamole config into DB
                 ve.remote_paras = json.dumps(gc)
-                guacamole_config.append(gc)
 
         # start container remotely
-        guaca = post_data["guacamole_config"] if post_data.has_key("guacamole_config") else None
-        if guaca is not None:
-            url = "%s/guacamole" % self.__get_cloudvm_address(host_server)
-            post_to_remote(url, post_data)
-            mnts = post_data["mnt"] if post_data.has_key("mnt") else []
-            guaca_dir = course_path(post_data["expr_id"], "guacamole")
-            mnts.append(guaca_dir)
-            mnts.append("/etc/guacamole")
-            post_data["mnt"] = mnts
         container_ret = docker.run(post_data, host_server.public_dns)
         if container_ret is None:
             log.info("container %s fail to run" % post_data["container_name"])
@@ -306,11 +271,10 @@ class ExprManager(object):
         try:
             expr.status = ExprStatus.Starting
             db_adapter.commit()
-            containers = map(lambda container_config: self.__remote_start_container(expr,
-                                                                                    host_server,
-                                                                                    scm,
-                                                                                    container_config,
-                                                                                    guacamole_config),
+            map(lambda container_config: self.__remote_start_container(expr,
+                                                                        host_server,
+                                                                        scm,
+                                                                        container_config),
                              expr_config["containers"])
 
         except Exception as e:
@@ -318,33 +282,6 @@ class ExprManager(object):
             log.info("Failed starting containers")
             self.__roll_back(expr.id)
             return "Failed starting containers", 500
-
-        # start guacamole
-        if len(guacamole_config) > 0:
-            # also, the guacamole port should come from DB
-            guacamole_container_config = {
-                "name": "guacamole",
-                "expr_id": expr.id,
-                "image": GUACAMOLE.IMAGE,
-                "ports": [{
-                              "name": "guacamole",
-                              "port": GUACAMOLE.PORT,
-                              "public": True
-                          }],
-                "AttachStdin": False,
-                "AttachStdout": True,
-                "AttachStderr": True,
-                "guacamole_config": guacamole_config
-            }
-            try:
-                guca_container = self.__remote_start_container(expr, host_server, scm, guacamole_container_config, [])
-            except Exception as e:
-                log.info(e)
-                log.info("Failed starting guacamole container")
-                self.__roll_back(expr.id)
-                return "Failed starting guacamole container", 500
-
-            containers.append(guca_container)
 
         # after everything is ready, set the expr state to running
         expr.status = ExprStatus.Running

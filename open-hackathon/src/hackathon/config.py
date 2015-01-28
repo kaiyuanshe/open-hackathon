@@ -36,6 +36,9 @@ Config = {
         "subscriptionId": "31e6e137-4656-4f88-96fb-4c997b14a644",
         "certPath": "/home/junbo/juni-openhackathon.pem",
         "managementServiceHostBase": "management.core.chinacloudapi.cn"
+    },
+    "guacamole": {
+        "host": "localhost:8080"
     }
 }
 
