@@ -9,6 +9,7 @@ from flask import g, request
 from log import log
 from database import db_adapter
 from decorators import token_required
+from health import report_health
 
 
 class RegisterListResource(Resource):
@@ -92,12 +93,12 @@ class LoginResource(Resource):
         return login_providers.values()[0].logout(g.user)
 
 
-# todo health page
 class HealthResource(Resource):
     def get(self):
-        return {
-            "status": "OK"
-        }
+        parser = reqparse.RequestParser()
+        parser.add_argument('q', type=str, location='args')
+        args = parser.parse_args()
+        return report_health(args['q'])
 
 
 class HackathonResource(Resource):
@@ -110,7 +111,7 @@ class HackathonResource(Resource):
             return "invalid arguments", 400
         return db_adapter.find_first_object(Announcement, id=args['id'], enabled=1).json()
 
-# todo post
+    # todo post
     @token_required
     def post(self):
         pass

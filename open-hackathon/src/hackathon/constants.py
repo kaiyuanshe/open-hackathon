@@ -23,3 +23,9 @@ class HTTP_HEADER:
 class OAUTH_PROVIDER:
     GITHUB = "github"
     QQ = "qq"
+
+
+class HEALTH_STATE:
+    OK = "ok"
+    WARNING = "warning"
+    ERROR = "error"
