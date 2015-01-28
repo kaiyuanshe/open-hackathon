@@ -169,7 +169,13 @@ sudo pip install -r /opt/open-hackathon/cloudvm/requestment.txt
 ```
 sudo docker pull 42.159.103.213:5000/rails
 sudo docker pull 42.159.103.213:5000/mean
-sudo docker pull 42.159.103.213:5000/ubuntu-sshd
+```
+after pull down these two images PLS rename to `msopentechcn/rails` and `msopentechcn/mean` withn this commnad:    
+`sudo docker tar <imageID> "newName"`       
+Then pull down other three images
+```
+sudo docker pull msopentechcn/flask
+sudo docker pull rastasheep/ubuntu-sshd
 sudo docker pull sffamily/ubuntu-gnome-vnc-eclipse
 ```
 ####config docker remote api
