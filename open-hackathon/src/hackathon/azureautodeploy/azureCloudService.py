@@ -1,8 +1,10 @@
 __author__ = 'Yifu Huang'
 
-from src.app.azureUtil import *
-from src.app.log import *
-from src.app.database import *
+import sys
+sys.path.append("..")
+from hackathon.azureautodeploy.azureUtil import *
+from hackathon.log import *
+from hackathon.database.models import *
 
 
 class AzureCloudService:

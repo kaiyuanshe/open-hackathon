@@ -1,6 +1,7 @@
-__author__ = 'Yifu Huang'
-
-from src.app.azureUtil import *
+from __future__ import absolute_import
+import sys
+sys.path.append("..")
+from hackathon.azureautodeploy.azureUtil import *
 from azure.servicemanagement import *
 import datetime
 

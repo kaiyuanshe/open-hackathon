@@ -5,7 +5,7 @@
 
 from hackathon.database import db
 from hackathon.database.models import *
-
+from hackathon.log import *
 
 # vm = DockerHostServer(vm_name="localhost", public_dns="localhost", public_docker_api_port=8001, private_ip="10.0.2.15",
 # private_docker_api_port=8001, container_count=0, container_max_count=100)
@@ -27,24 +27,23 @@ db.session.add(h)
 
 r = Register(hackathon=h, register_name="Yifu Huang", email="ifhuang91@gmail.com")
 
-t = Template(hackathon=h, name='ubuntu')
-db.session.add(t)
-
-t = Template(hackathon=h, name='rails')
-db.session.add(t)
-
-t = Template(hackathon=h, name='mean')
-db.session.add(t)
-
-t = Template(hackathon=h, name='python')
-db.session.add(t)
-
-t = Template(hackathon=h, name='azure-1', provider='azure',
-             url='/home/if/If/LABOSS/open-hackathon/src/hackathon/resources/bigdata-realtime-analytics-azure-1.js')
-db.session.add(t)
-t = Template(hackathon=h, name='azure-2', provider='azure',
-             url='/home/if/If/LABOSS/open-hackathon/src/hackathon/resources/bigdata-realtime-analytics-azure-2.js')
-db.session.add(t)
+# add public templates to database
+template_dir = 'hackathon/resources'
+if not os.path.isdir(template_dir):
+    log.error('template dir %s is not exist' % template_dir)
+    sys.exit(1)
+template_files = os.listdir(template_dir)
+if template_files is None:
+    log.error('template dir %s is empty' % template_dir)
+    sys.exit(1)
+for template_file in template_files:
+    name = template_file.replace('bigdata-realtime-analytics-', '').replace('.js', '')
+    template_url = os.getcwd() + os.path.sep + template_dir + os.path.sep + template_file
+    provider = 'docker'
+    if 'azure' in name:
+        provider = 'azure'
+    template = Template(hackathon=h, name=name, url=template_url, provider=provider)
+    db.session.add(template)
 
 db.session.commit()
 

@@ -11,6 +11,7 @@ from hackathon.constants import GUACAMOLE
 from hackathon.docker import OssDocker
 from hackathon.functions import *
 from hackathon.enum import *
+from hackathon.azureautodeploy.azureImpl import AzureImpl
 
 docker = OssDocker()
 OSSLAB_RUN_DIR = "/var/lib/osslab"
@@ -32,35 +33,41 @@ class ExprManager(object):
             "last_heart_beat_time": str(expr.last_heart_beat_time),
         }
 
-        guacamole_servers = []
-        for ve in expr.virtual_environments.all():
-            # return guacamole link to frontend
-            if ve.remote_provider == RemoteProvider.Guacamole:
-                guaca_config = json.loads(ve.remote_paras)
-                url = "%s/guacamole/client.xhtml?id=" % (
-                safe_get_config("guacamole/host", "localhost:8080")) + "c%2F" + guaca_config["name"]
-                guacamole_servers.append({
-                    "name": guaca_config["displayname"],
-                    "url": url
-                })
+        # Docker
+        if expr.user_template is None:
+            guacamole_servers = []
+            for ve in expr.virtual_environments.all():
+                # return guacamole link to frontend
+                if ve.remote_provider == RemoteProvider.Guacamole:
+                    guaca_config = json.loads(ve.remote_paras)
+                    url = "%s/guacamole/client.xhtml?id=" % (
+                    safe_get_config("guacamole/host", "localhost:8080")) + "c%2F" + guaca_config["name"]
+                    guacamole_servers.append({
+                        "name": guaca_config["displayname"],
+                        "url": url
+                    })
 
-        ret["guacamole_servers"] = guacamole_servers
+            ret["guacamole_servers"] = guacamole_servers
 
-        public_urls = []
-        # return public accessible web url
-        for ve in expr.virtual_environments.filter(VirtualEnvironment.image != GUACAMOLE.IMAGE).all():
-            # todo only docker handled now. add Azure VM support later
-            if ve.provider == VirtualEnvironmentProvider.Docker:
-                for p in ve.port_bindings.all():
-                    if p.binding_type == PortBindingType.CloudService:
-                        hs = db_adapter.find_first_object(DockerHostServer, id=p.binding_resource_id)
-                        url = "http://%s:%s" % (hs.public_dns, p.port_from)
-                        public_urls.append({
-                            "name": p.name,
-                            "url": url
-                        })
-        ret["public_urls"] = public_urls
-
+            public_urls = []
+            # return public accessible web url
+            for ve in expr.virtual_environments.filter(VirtualEnvironment.image != GUACAMOLE.IMAGE).all():
+                # todo only docker handled now. add Azure VM support later
+                if ve.provider == VirtualEnvironmentProvider.Docker:
+                    for p in ve.port_bindings.all():
+                        if p.binding_type == PortBindingType.CloudService:
+                            hs = db_adapter.find_first_object(DockerHostServer, id=p.binding_resource_id)
+                            url = "http://%s:%s" % (hs.public_dns, p.port_from)
+                            public_urls.append({
+                                "name": p.name,
+                                "url": url
+                            })
+            ret["public_urls"] = public_urls
+        else:
+            uo = UserOperation.query.filter_by(user_template=expr.user_template).all()
+            ret['user_operation'] = map(lambda u: u.json(), uo)
+            ur = UserResource.query.filter_by(user_template=expr.user_template).all()
+            ret['user_resource'] = map(lambda u: u.json(), ur)
         return ret
 
     def __get_available_docker_host(self, expr_config):
@@ -235,18 +242,13 @@ class ExprManager(object):
             raise Exception("hackathon %s doesn't exist.")
 
         template = db_adapter.find_first_object(Template, hackathon=hackathon, name=template_name)
-        if template is None:
+        if template is None or not os.path.isfile(template.url):
             raise Exception("template %s doesn't exist.")
-        
-        template_file = "%s/resources/%s-%s.js" % (dirname(realpath(__file__)), hackathon, cid)
-        if os.path.isfile(template_file):
-            # call remote service to start docker containers
-            expr_config = json.load(file(template_file))
 
-        else:
-            return "the experiment %s is not ready" % id, 404
-
-
+        try:
+            expr_config = json.load(file(template.url))
+        except Exception as e:
+            raise Exception(e)
 
         expr = db_adapter.find_first_object(Experiment, status=ExprStatus.Running,
                                             user_id=g.user.id,
@@ -257,7 +259,6 @@ class ExprManager(object):
         expr = db_adapter.find_first_object(Experiment, status=ExprStatus.Starting,
                                             user_id=g.user.id,
                                             hackathon_id=hackathon.id)
-
         if expr is not None:
             return "Please wait for a few seconds ... "
 
@@ -266,37 +267,51 @@ class ExprManager(object):
         db_adapter.add_object(expr)
         db_adapter.commit()
 
-        # get available VM that runs the cloudvm and is available for more containers
-        # todo check the 'provider' first
-        host_server = self.__get_available_docker_host(expr_config)
+        provider = expr_config['virtual_environments'][0]['provider']
+        if provider == VirtualEnvironmentProvider.Docker:
+            # get available VM that runs the cloudvm and is available for more containers
+            host_server = self.__get_available_docker_host(expr_config)
 
-        # checkout source code
-        scm = None
-        if "scm" in expr_config:
-            s = expr_config["scm"]
-            local_repo_path = self.__remote_checkout(host_server, expr, expr_config["scm"])
-            scm = SCM(experiment=expr, provider=s["provider"], branch=s["branch"], repo_name=s["repo_name"],
-                      repo_url=s["repo_url"], local_repo_path=local_repo_path)
-            db_adapter.add_object(scm)
-            db_adapter.commit()
+            # checkout source code
+            scm = None
+            if "scm" in expr_config:
+                s = expr_config["scm"]
+                local_repo_path = self.__remote_checkout(host_server, expr, expr_config["scm"])
+                scm = SCM(experiment=expr, provider=s["provider"], branch=s["branch"], repo_name=s["repo_name"],
+                          repo_url=s["repo_url"], local_repo_path=local_repo_path)
+                db_adapter.add_object(scm)
+                db_adapter.commit()
 
-        # start containers
-        guacamole_config = []
-        try:
+            # start containers
+            guacamole_config = []
+            try:
+                expr.status = ExprStatus.Starting
+                db_adapter.commit()
+                map(lambda container_config: self.__remote_start_container(expr,
+                                                                           host_server,
+                                                                           scm,
+                                                                           container_config),
+                    expr_config["containers"])
+
+            except Exception as e:
+                log.info(e)
+                log.info("Failed starting containers")
+                self.__roll_back(expr.id)
+                return "Failed starting containers", 500
+        else:
+            user_template = db_adapter.find_first_object(UserTemplate, user=g.user, template=template)
+            if user_template is None:
+                user_template = UserTemplate(g.user, template)
+                db_adapter.add_object(user_template)
+            expr.user_template = user_template
             expr.status = ExprStatus.Starting
             db_adapter.commit()
-            map(lambda container_config: self.__remote_start_container(expr,
-                                                                       host_server,
-                                                                       scm,
-                                                                       container_config),
-                expr_config["containers"])
-
-        except Exception as e:
-            log.info(e)
-            log.info("Failed starting containers")
-            self.__roll_back(expr.id)
-            return "Failed starting containers", 500
-
+            azure = AzureImpl()
+            sub_id = get_config("azure/subscriptionId")
+            cert_path = get_config('azure/certPath')
+            service_host_base = get_config("azure/managementServiceHostBase")
+            azure.connect(sub_id, cert_path, service_host_base)
+            azure.create_async(user_template)
         # after everything is ready, set the expr state to running
         expr.status = ExprStatus.Running
         db_adapter.commit()

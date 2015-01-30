@@ -1,7 +1,9 @@
 __author__ = 'Yifu Huang'
-
-from src.app.database import *
-from src.app.log import *
+import sys
+sys.path.append("..")
+from hackathon.database.models import *
+from hackathon.database import db_adapter
+from hackathon.log import *
 import time
 import os
 import json
@@ -70,8 +72,10 @@ def user_operation_commit(user_template, operation, status, note=None):
     :return:
     """
     user_operation = UserOperation(user_template, operation, status, note)
-    db.session.add(user_operation)
-    db.session.commit()
+    log.debug(user_operation.json())
+    db_adapter.add_object(user_operation)
+    log.debug(db_adapter)
+    db_adapter.commit()
 
 
 def user_resource_commit(user_template, type, name, status, cs_id=None):

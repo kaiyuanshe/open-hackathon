@@ -1,14 +1,14 @@
 __author__ = 'Yifu Huang'
-
-from src.app.cloudABC import CloudABC
-from src.app.azureStorage import *
-from src.app.azureCloudService import *
-from src.app.azureVirtualMachines import *
+import sys
+sys.path.append("..")
+from hackathon.azureautodeploy.azureStorage import *
+from hackathon.azureautodeploy.azureCloudService import *
+from hackathon.azureautodeploy.azureVirtualMachines import *
 from azure.servicemanagement import *
 from multiprocessing import Process
 
 
-class AzureImpl(CloudABC):
+class AzureImpl():
     """
     Azure cloud service management
     For logic: besides resources created by this program itself, it can reuse other storage,
@@ -18,25 +18,18 @@ class AzureImpl(CloudABC):
     """
 
     def __init__(self):
-        super(AzureImpl, self).__init__()
         self.sms = None
         self.user_template = None
         self.template_config = None
         self.update_template_config = None
 
-    def connect(self, user_info):
+    def connect(self, subscription_id, pem_url, management_host):
         """
         Connect to azure service management service according to given user info
-        :param user_info:
         :return: Whether service management service is connected
         """
-        user_key = UserKey.query.filter_by(user_info=user_info).first()
-        # make sure user key exists
-        if user_key is None:
-            log.debug('user [%d] not exist' % user_info.id)
-            return False
         try:
-            self.sms = ServiceManagementService(user_key.subscription_id, user_key.pem_url, user_key.management_host)
+            self.sms = ServiceManagementService(subscription_id, pem_url, management_host)
         except Exception as e:
             log.debug(e)
             return False

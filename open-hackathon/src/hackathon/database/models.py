@@ -196,6 +196,10 @@ class Experiment(db.Model):
     hackathon_id = db.Column(db.Integer, db.ForeignKey('hackathon.id', ondelete='CASCADE'))
     hackathon = db.relationship('Hackathon', backref=db.backref('experiments', lazy='dynamic'))
 
+    # adaptor for auto azure deploy
+    user_template_id = db.Column(db.Integer, db.ForeignKey('user_template.id', ondelete='CASCADE'))
+    user_template = db.relationship('UserTemplate', backref=db.backref('experiments', lazy='dynamic'))
+
     def json(self):
         return to_json(self, self.__class__)
 
