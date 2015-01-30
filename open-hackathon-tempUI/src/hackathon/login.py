@@ -6,6 +6,7 @@ from functions import get_remote, get_config, convert, post_to_remote
 import urllib2
 from log import log
 import json
+from flask import redirect, url_for
 from config import *
 from constants import *
 import requests
@@ -67,8 +68,8 @@ class GithubLogin():
 
 
 class GitcafeLogin():
-    def login(self, args):
-        code = args.get('code')
+    def login(self, code):
+        # code = args.get('code')
         url = get_config('login/gitcafe/access_token_url') + code
         opener = urllib2.build_opener(urllib2.HTTPHandler)
         request = urllib2.Request(url, "")
@@ -79,7 +80,11 @@ class GitcafeLogin():
         # token_resp = json.loads(resp.read())
         #token_resp = req.content()
         data = {"provider": "gitcafe",  "access_token": token_resp['access_token']}
-        return post_to_remote('http://hackathon.chinacloudapp.cn:15000/api/user/login', data)
+        req = post_to_remote('http://hackathon.chinacloudapp.cn:15000/api/user/login', data)
+        if len(req['experiments']) > 0:
+            redirect(url_for('/hackathon'))
+        else:
+            redirect('/settings.html')
 
 
 
