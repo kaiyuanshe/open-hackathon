@@ -11,38 +11,29 @@ import org.slf4j.LoggerFactory;
  * 
  * @author v-bih
  * 
- * @param  jsonString
- * @return GuacamoleConfiguration
  */
 public class Trans2GuacdConfiguration {
-	
-	private GuacamoleConfiguration configuration ;
-	private Logger logger = LoggerFactory.getLogger(Trans2GuacdConfiguration.class.getClass());
 
-	public Trans2GuacdConfiguration(String jsonString) {
-			
-		configuration = new GuacamoleConfiguration();		
-		try {
-			
-			JSONObject json = new JSONObject(jsonString.replace("\\", ""));
-			configuration = new GuacamoleConfiguration();
-			
-			configuration.setProtocol(json.getString("protocol"));
-			configuration.setParameter("name", json.getString("name"));
-			configuration.setParameter("username", json.getString("username"));
-			configuration.setParameter("password", json.getString("password"));
-			configuration.setParameter("hostname", json.getString("hostname"));
-			configuration.setParameter("port", json.getString("port"));
-			
-		} catch (Exception e) {
-			logger.error("==================Failed when transfor jsonString to GuacamoleConfiguation  ");
-			configuration = new GuacamoleConfiguration();
-			e.printStackTrace();			
-		}			
-	}
+    private final Logger logger = LoggerFactory.getLogger(Trans2GuacdConfiguration.class.getClass());
 
-	public GuacamoleConfiguration getConfiguration() {
-		return configuration;
-	}
 
+    public GuacamoleConfiguration getConfiguration(final String jsonString) {
+        try {
+
+            final JSONObject json = new JSONObject(jsonString);
+            final GuacamoleConfiguration configuration = new GuacamoleConfiguration();
+
+            configuration.setProtocol(json.getString("protocol"));
+            configuration.setParameter("name", json.getString("name"));
+            configuration.setParameter("username", json.getString("username"));
+            configuration.setParameter("password", json.getString("password"));
+            configuration.setParameter("hostname", json.getString("hostname"));
+            configuration.setParameter("port", json.getString("port"));
+            return configuration;
+
+        } catch (Exception e) {
+            logger.error("Failed to load GuacamoleConfiguation from json " + jsonString, e);
+            return null;
+        }
+    }
 }
