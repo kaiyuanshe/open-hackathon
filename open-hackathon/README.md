@@ -85,7 +85,7 @@ lib-directory: /etc/guacamole
 
 # Auth provider class (authenticates user/pass combination, needed if using the provided login screen)
 auth-provider: com.openhackathon.guacamole.OpenHackathonAuthenticationProvider
-auth-request-url: http://osslab.msopentech.cn/checkguacookies
+auth-request-url: http://osslab.msopentech.cn:15000/api/guacamoleconfig
 ```
 Usually the only config need to update is `auth-request-url`. _You need to stop the guacamole container and start another one
 in case `guacamole.properties` updated_.
