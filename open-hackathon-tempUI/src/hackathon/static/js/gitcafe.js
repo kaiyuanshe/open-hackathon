@@ -1,8 +1,8 @@
 $(document).ready(function(){
     var code = getParameterByName("code")
 
-    hqg_post_local("/ui/login", {
-            "provider": "github",
+    gitcafe_post_local("/ui/login", {
+            "provider": "gitcafe",
             "code": code
         },
         function(resp){

@@ -23,6 +23,7 @@ class HTTP_HEADER:
 class OAUTH_PROVIDER:
     GITHUB = "github"
     QQ = "qq"
+    GITCAFE = "gitcafe"
 
 
 class HEALTH_STATE:

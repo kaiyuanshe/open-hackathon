@@ -78,12 +78,8 @@ class UserEmail(db.Model):
     def get_user_email(self):
         return self.email(self, email)
 
-    def __init__(self, name, email, primary_email, verified, user):
-        self.name = name
-        self.email = email
-        self.primary_email = primary_email
-        self.verified = verified
-        self.user = user
+    def __init__(self, **kwargs):
+        super(UserEmail, self).__init__(**kwargs)
 
 
 class UserToken(db.Model):

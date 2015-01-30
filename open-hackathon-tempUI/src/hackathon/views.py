@@ -24,7 +24,8 @@ Template_Routes = {
     "settings": "settings.html",
     "hackathon": "hackathon.html",
     "github": "github.html",
-    "qq": "qq.html"
+    "qq": "qq.html",
+    "gitcafe": "gitcafe.html"
 }
 
 
