@@ -133,6 +133,7 @@ class GuacamoleResource(Resource):
     def get(self):
         return GuacamoleInfo().getConnectInfo()
 
+
 api.add_resource(UserExperimentResource, "/api/user/experiment")
 api.add_resource(RegisterListResource, "/api/register/list")
 api.add_resource(BulletinResource, "/api/bulletin")

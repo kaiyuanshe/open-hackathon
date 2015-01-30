@@ -1,11 +1,11 @@
 import sys
-
 sys.path.append("..")
+
 from flask import redirect, request, url_for, g
 from hackathon import app
 from flask_admin import BaseView, expose, Admin, AdminIndexView
-from hackathon.decorators import role_required
-from hackathon.constants import ROLE
+from decorators import role_required
+from constants import ROLE
 
 
 class HomeView(AdminIndexView):
