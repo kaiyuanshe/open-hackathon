@@ -39,12 +39,14 @@ class QQLogin(LoginProviderBase):
         user_info_resp = get_remote(url)
         log.debug("get user info from qq:" + user_info_resp)
         user_info = convert(json.loads(user_info_resp))
-
+        email_info = [
+            {'name': user_info["nickname"], 'email': None, 'id': id, 'verified': 1, 'primary': 1,
+             'nickname': user_info["nickname"], 'avatar_url': user_info["figureurl"]}]
         user_with_token = user_manager.db_login(openid,
                                                 name=user_info["nickname"],
                                                 nickname=user_info["nickname"],
                                                 access_token=access_token,
-                                                email=None,
+                                                email_info=email_info,
                                                 avatar_url=user_info["figureurl"])
 
         # login flask
