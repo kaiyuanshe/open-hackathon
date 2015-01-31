@@ -78,12 +78,8 @@ class UserEmail(db.Model):
     def get_user_email(self):
         return self.email(self, email)
 
-    def __init__(self, name, email, primary_email, verified, user):
-        self.name = name
-        self.email = email
-        self.primary_email = primary_email
-        self.verified = verified
-        self.user = user
+    def __init__(self, **kwargs):
+        super(UserEmail, self).__init__(**kwargs)
 
 
 class UserToken(db.Model):
@@ -374,3 +370,27 @@ class UserRole(db.Model):
 
     def __repr__(self):
         return "UserRole: " + self.json()
+
+
+class Template(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50))
+    url = db.Column(db.String(200))  # backup, templates' location
+    provider = db.Column(db.String(20))
+    create_time = db.Column(db.DateTime)
+
+    hackathon_id = db.Column(db.Integer, db.ForeignKey('hackathon.id', ondelete='CASCADE'))
+    hackathon = db.relationship('Hackathon', backref=db.backref('templates', lazy='dynamic'))
+
+    def json(self):
+        return to_json(self, self.__class__)
+
+    def __init__(self, **kwargs):
+        super(Template, self).__init__(**kwargs)
+
+        if self.provider is None:
+            self.provider = "docker"
+        self.create_time = datetime.utcnow()
+
+    def __repr__(self):
+        return "Template: " + self.json()

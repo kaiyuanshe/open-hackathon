@@ -47,9 +47,9 @@ class UserManager(object):
         reg_list = self.db.find_all_objects(Register, enabled=1)
 
         def online(r):
-            u = self.db.find_first_object(User, email=r.email)
+            u = self.db.find_first_object(UserEmail, email=r.email)
             if u is not None:
-                r.online = u.online
+                r.online = u.user.online
             else:
                 r.online = 0
             return r
@@ -61,8 +61,10 @@ class UserManager(object):
         try:
             self.db.update_object(user, online=0)
             self.db.commit()
+            return "OK"
         except Exception as e:
             log.error(e)
+            return "log out failed"
 
     def db_login(self, openid, **kwargs):
         # update db
@@ -81,7 +83,8 @@ class UserManager(object):
                 primary_email = email_info[n]['primary']
                 verified = email_info[n]['verified']
                 if self.db.find_first_object(UserEmail, email=email) is None:
-                    useremail = UserEmail(kwargs['name'], email, primary_email, verified, user)
+                    useremail = UserEmail(name=kwargs['name'], email=email, primary_email=primary_email,
+                                          verified=verified, user=user)
                     self.db.add_object(useremail)
             self.db.commit()
         else:
@@ -99,7 +102,8 @@ class UserManager(object):
                 email = n['email']
                 primary_email = n['primary']
                 verified = n['verified']
-                useremail = UserEmail(kwargs['name'], email, primary_email, verified, user)
+                useremail = UserEmail(name=kwargs['name'], email=email, primary_email=primary_email,
+                                      verified=verified, user=user)
                 self.db.add_object(useremail)
                 self.db.commit()
 

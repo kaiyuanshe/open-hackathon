@@ -8,7 +8,7 @@ from log import log
 import json
 from hackathon.functions import get_config
 from login import login_providers
-from flask_restful import Resource
+from flask_restful import Resource, reqparse
 
 Template_Routes = {
     "PrivacyStatement": "PrivacyStatement.html",
@@ -24,7 +24,8 @@ Template_Routes = {
     "settings": "settings.html",
     "hackathon": "hackathon.html",
     "github": "github.html",
-    "qq": "qq.html"
+    "qq": "qq.html",
+    # "gitcafe": "gitcafe.html"
 }
 
 
@@ -78,8 +79,17 @@ class Get_login(Resource):
         provider = body["provider"]
         return login_providers[provider].login(body)
 
-api.add_resource(Get_login, "/ui/login")
 
+class Gitcafe(Resource):
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('code', type=str, location='args')
+        args = parser.parse_args()
+        login_providers["gitcafe"].login(args['code'])
+
+
+api.add_resource(Get_login, "/ui/login")
+api.add_resource(Gitcafe, "/gitcafe")
 
 # @app.route('/ui/login')
 
