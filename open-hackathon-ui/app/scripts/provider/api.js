@@ -11,7 +11,7 @@ angular
             save: 'post'
         };
 
-        var apiModules = ['course', 'registerlist', 'announcement', 'login'];
+        var apiModules = ['course', 'register/list', 'announcement', 'login'];
         var resource = $resource('/api/:m', {
             m: '@m'
         });

@@ -1,7 +1,7 @@
 $(document).ready(function(){
     var code = getParameterByName("code")
 
-    hpost_local("/ui/login", {
+    hqg_post_local("/ui/login", {
             "provider": "github",
             "code": code
         },
