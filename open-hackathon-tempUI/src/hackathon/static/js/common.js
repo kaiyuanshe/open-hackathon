@@ -21,28 +21,7 @@ var hpost = function(url, data, success_func, error_func){
         error: error_func
     })
 }
-var hqg_post_local = function(url, data, success_func, error_func){
-     $.ajax({
-        url: CONFIG.hackathon.qg_local_endpoint + url,
-        type: "POST",
-        headers: h_headers,
-        data: JSON.stringify(data),
-        contentType: "application/json",
-        success: success_func,
-        error: error_func
-    })
-}
-var gitcafe_post_local = function(url, data, success_func, error_func){
-     $.ajax({
-        url: CONFIG.hackathon.gitcafe_endpoint + url,
-        type: "POST",
-        headers: h_headers,
-        data: JSON.stringify(data),
-        contentType: "application/json",
-        success: success_func,
-        error: error_func
-    })
-}
+
 var hget = function(url, success_func, error_func){
     $.ajax({
         url: CONFIG.hackathon.endpoint + url,

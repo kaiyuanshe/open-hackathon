@@ -8,7 +8,6 @@ from log import log
 import json
 from hackathon.functions import get_config
 from login import login_providers
-from flask_restful import Resource, reqparse
 
 Template_Routes = {
     "PrivacyStatement": "PrivacyStatement.html",
@@ -22,10 +21,7 @@ Template_Routes = {
     "redirect": "redirect.html",
     "notregister": "notregister.html",
     "settings": "settings.html",
-    "hackathon": "hackathon.html",
-    "github": "github.html",
-    "qq": "qq.html",
-    # "gitcafe": "gitcafe.html"
+    "hackathon": "hackathon.html"
 }
 
 
@@ -73,24 +69,28 @@ def js_config():
     return resp
 
 
-class Get_login(Resource):
-    def post(self):
-        body = request.get_json()
-        provider = body["provider"]
-        return login_providers[provider].login(body)
+def __login(provider):
+    code = request.args.get('code')
+    login_result = login_providers[provider].login({
+        "code": code
+    })
+    if len(login_result['experiments']) > 0:
+        return simple_route("hackathon")
+    else:
+        return simple_route("settings")
 
 
-class Gitcafe(Resource):
-    def get(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument('code', type=str, location='args')
-        args = parser.parse_args()
-        login_providers["gitcafe"].login(args['code'])
+@app.route('/qq')
+def qq_login():
+    return __login("qq")
 
 
-api.add_resource(Get_login, "/ui/login")
-api.add_resource(Gitcafe, "/gitcafe")
+@app.route('/github')
+def github_login():
+    return __login("github")
 
-# @app.route('/ui/login')
 
+@app.route('/gitcafe')
+def gitcafe_login():
+    return __login("gitcafe")
 
