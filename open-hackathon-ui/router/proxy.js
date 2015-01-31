@@ -1,32 +1,55 @@
 var express = require('express')
 var router = express.Router()
 var config = require('../config')
-var  request = require('request')
+var services = require('../common/services')
+var request = require('request')
+var util = require('util')
 
-function GetAPIPath(module,method){
-    return [config.proxy,'api',module,method || ''].join('/')
-}
 
-router.get(config.sociallogin.router,function(req,res){
+var COOKIE_USERINFORMATION = 'UserInformation'
+router.get('/github', function(req, res) {
     var option = {
-        url: GetAPIPath('user','login'),
-        json:{
-            provider:req.params.name,
+        'content-type': 'application/json',
+        url: config.sociallogin.github.access_token_url,
+        json: {
+            method: config.sociallogin.github.method,
+            client_id: config.sociallogin.github.client_id,
+            client_secret: config.sociallogin.github.client_secret,
+            redirect_uri: util.format(config.sociallogin.github.redirect_uri, config.hostname),
             code: req.query.code
         }
     }
-    request[config.api.user.login](option,function(err, response,body){
-        if(err){
-            log('err : sociallogin',err)
-            log('err : body',body)
-        }else{
-            for(var key in body){
-                  res.cookie(key,body[key]);
-            }
-            //res.cookie('rememberme','1',{ expires: new Date(Date.now() + 2592000000), httpOnly: true })
-            res.redirect('/');
-        }
+    request.post(option, function(err, request, body) {
+        services.user.login.post({
+            provider: 'github',
+            access_token: body.access_token,
+            client_id: config.sociallogin.github.client_id
+        }, function(response, data) {
+            res.cookie(COOKIE_USERINFORMATION, JSON.stringify(data));
+            res.redirect('/')
+        })
     })
 })
 
-module.exports = router;
+router.get('/qq', function(req, res) {
+    services.user.login.post({
+        Provider: 'qq',
+        access_token: req.query['#access_token'],
+        client_id: config.sociallogin.qq.client_id
+    }, function(response, data) {
+        res.cookie(COOKIE_USERINFORMATION, JSON.stringify(data));
+        res.redirect('/')
+    })
+})
+
+router.delete('/proxy/login', function(req, res) {
+    services.user.login.del({
+        token: req.body.token
+    }, function(response, data) {
+        res.clearCookie(COOKIE_USERINFORMATION)
+        if (response.statusCode != 200)
+            util.log('')
+    })
+})
+
+module.exports = router
