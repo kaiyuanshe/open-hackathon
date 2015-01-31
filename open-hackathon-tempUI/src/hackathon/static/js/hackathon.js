@@ -8,7 +8,7 @@ $(document).ready(function () {
 
     var hackathon = "bigdata-realtime-analytics"
 
-    hpost('/api/course',{
+    hpost('/api/user/experiment',{
             "cid": cid,
             "hackathon": hackathon
         },
@@ -26,7 +26,7 @@ $(document).ready(function () {
                     var sd = $('<div>').attr({"id":"hack_main_"+s.name}).addClass('hidden')
                     main.append(sd);
                     var iframe = $('<iframe>').attr({
-                        src:s.url,
+                        src:s.url+"&token=" + get_token(),
                         width:'100%',
                         height:'600px',
                         frameborder:'yes',
@@ -69,7 +69,7 @@ $(document).ready(function () {
 
                 // heart beat
                 var ihb = setInterval(function () {
-                    hput('/api/course',{
+                    hput('/api/user/experiment',{
                             "id": data.expr_id
                         },
                         function () {},
@@ -80,7 +80,7 @@ $(document).ready(function () {
                 // cancel button click event
                 $("#third-leave").click(function () {
                     if(confirm("所有环境将被取消，请确保你的更改已提交至github。您确定取消么？")){
-                        hdelete('/api/course?id=' + data.expr_id,
+                        hdelete('/api/user/experiment?id=' + data.expr_id,
                             function () {
                                 $("#hack_main_cancelled").show()
                                 $("#hack_main_cancelled").siblings().hide()
@@ -101,7 +101,7 @@ $(document).ready(function () {
                 $("#new-window").click(function(){
                     data = $(".center .mid ul li .selected").data("data")
                     if(data && data.url){
-                        detach_url= "redirect?url=" + encodeURIComponent(data.url);
+                        detach_url= "redirect?url=" + encodeURIComponent(s.url+"&token=" + get_token());
                         $("#new-window").attr("href",detach_url);
                         return true;
                     }else{
@@ -111,7 +111,7 @@ $(document).ready(function () {
                 });
 
                 var sciv = setInterval(function () {
-                    hget('/api/course?id=' + data.expr_id,
+                    hget('/api/user/experiment?id=' + data.expr_id,
                         function (data) {
                             if (data.guacamole_status) {
                                 clearInterval(sciv)
@@ -124,7 +124,7 @@ $(document).ready(function () {
                             clearInterval(sciv)
                         }
                     );
-                }, 2000);
+                }, 1000 * 60);
             }
         },
         function () {

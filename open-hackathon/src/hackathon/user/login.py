@@ -1,10 +1,13 @@
 # -*- coding:utf8 -*-
 # encoding = utf-8
+import sys
+
+sys.path.append("..")
 from hackathon.functions import get_remote, get_config, convert
 from hackathon.log import log
 import json
-from hackathon.config import QQ_OAUTH_STATE
 from . import user_manager
+
 from hackathon.constants import OAUTH_PROVIDER
 
 
@@ -13,30 +16,32 @@ class LoginProviderBase():
         pass
 
     def logout(self, user):
-        user_manager.db_logout(user)
+        return user_manager.db_logout(user)
 
 
 class QQLogin(LoginProviderBase):
     def login(self, args):
-        code = args.get('code')
-        state = args.get('state')
-        if state != QQ_OAUTH_STATE:
-            log.warn("STATE match fail. Potentially CSFR.")
-            return "UnAuthorized", 401
+        # code = args.get('code')
+        # state = args.get('state')
+        # if state != QQ_OAUTH_STATE:
+        #    log.warn("STATE match fail. Potentially CSFR.")
+        #    return "UnAuthorized", 401
 
         # get access token
-        token_resp = get_remote(get_config("login/qq/access_token_url") + code + '&state=' + state)
-        log.debug("get token from qq:" + token_resp)
-        start = token_resp.index('=')
-        end = token_resp.index('&')
-        access_token = token_resp[start + 1:end]
-
+        # token_resp = get_remote(get_config("login/qq/access_token_url") + code + '&state=' + state)
+        # log.debug("get token from qq:" + token_resp)
+        # start = token_resp.index('=')
+        # end = token_resp.index('&')
+        access_token = args['access_token']
         # get openID.
         openid_resp = get_remote(get_config("login/qq/openid_url") + access_token)
-        log.debug("get openid from qq:" + openid_resp)
+        log.debug("get access_token from qq:" + access_token)
+
         info = json.loads(openid_resp[10:-4])
         openid = info['openid']
+        log.debug("get client_id from qq:" + openid)
         client_id = info['client_id']
+        log.debug("get openid from qq:" + client_id)
 
         # get user info
         url = get_config("login/qq/user_info_url") % (access_token, client_id, openid)
@@ -48,6 +53,7 @@ class QQLogin(LoginProviderBase):
                                                 name=user_info["nickname"],
                                                 nickname=user_info["nickname"],
                                                 access_token=access_token,
+                                                email=None,
                                                 avatar_url=user_info["figureurl"])
 
         # login flask
@@ -61,19 +67,11 @@ class QQLogin(LoginProviderBase):
 
 class GithubLogin(LoginProviderBase):
     def login(self, args):
-        code = args.get('code')
-
-        # get access_token
-        token_resp = get_remote(get_config('login/github/access_token_url') + code)
-        log.debug("get token from github:" + token_resp)
-        start = token_resp.index('=')
-        end = token_resp.index('&')
-        access_token = token_resp[start + 1:end]
-
+        access_token = args.get('access_token')
         # get user info
         user_info_resp = get_remote(get_config('login/github/user_info_url') + access_token)
         # conn.request('GET',url,'',{'user-agent':'flask'})
-        log.debug("get user info from github:" + user_info_resp)
+        log.debug("get user info from github:" + user_info_resp + '\n')
         # example:
         #
         # {"login":"juniwang","id":8814383,"avatar_url":"https://avatars.githubusercontent.com/u/8814383?v=3","gravatar_id":"",
@@ -100,16 +98,18 @@ class GithubLogin(LoginProviderBase):
 
         # get user primary email
         email_info_resp = get_remote(get_config('login/github/emails_info_url') + access_token)
-        log.debug("get email from github:" + email_info_resp)
+        log.debug("get email from github:" + email_info_resp + '\n')
+        #email_info include all user email provided by github
+        #email is user's primary email
         email_info = json.loads(email_info_resp)
-        email = filter(lambda e: e["primary"], email_info)[0]["email"]
+        
+        
 
-        log.info("successfully get email:" + email)
         user_with_token = user_manager.db_login(openid,
                                                 name=name,
                                                 nickname=nickname,
                                                 access_token=access_token,
-                                                email=email,
+                                                email_info=email_info,
                                                 avatar_url=avatar)
 
         # login flask
@@ -119,6 +119,7 @@ class GithubLogin(LoginProviderBase):
         detail = user_manager.get_user_detail_info(user)
         detail["token"] = user_with_token["token"].token
         return detail
+
 
 
 login_providers = {

@@ -1,13 +1,20 @@
 {
-    "hostname":"osslab.msopentech.cn",
-    "post":"80",
-    "proxy":"http://127.0.0.1:15000",
-    "api":{
-        "user":{"login":"post"}
+    "hostname": "osslab.msopentech.cn",
+    "post": "80",
+    "proxy": "http://127.0.0.1:15000",
+    "api": {
+        "user": ["login"]
     },
     "sociallogin": {
-        "router":"/:name(github|qq)",
-        "github": "https://github.com/login/oauth/authorize?client_id=0eded406cf0b3f83b181&redirect_uri=http://osslab.msopentech.cn/github&scope=user",
-        "qq":""
+        "router": "/:name(github|qq)",
+        "github": {
+            "client_id": "0eded406cf0b3f83b181",
+            "client_secret": "3c81babd71d0cf60db3362261d42b4ce6b199538",
+            "redirect_uri": "http://%s/github",
+            "access_token_url": "https://github.com/login/oauth/access_token"
+        },
+        "qq": {
+            "client_id": "101157515"
+        }
     }
 }

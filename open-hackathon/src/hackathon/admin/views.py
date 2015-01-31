@@ -54,3 +54,4 @@ admin.init_app(app)
 
 admin.add_view(MyAdminView(name="view1", category='Test'))
 admin.add_view(AnotherAdminView(name="view2", category='Test'))
+
