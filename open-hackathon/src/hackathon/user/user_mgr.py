@@ -127,6 +127,13 @@ class UserManager(object):
             return True
         return False
 
+    def get_user_by_id(self, user_id):
+        user = self.db.find_first_object(User, id=user_id)
+        if user is not None:
+            return self.get_user_info(user)
+        else:
+            return "Not found", 404
+
     def get_user_info(self, user):
         return {
             "id": user.id,
