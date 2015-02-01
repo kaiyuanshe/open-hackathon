@@ -11,6 +11,27 @@ from flask import redirect, url_for
 hackathon_api_url = get_config("hackathon-api/endpoint")
 
 
+class LoginUser:
+    def __init__(self, **kwargs):
+        self.id = kwargs["id"]
+        self.name = kwargs["name"]
+        self.nickname = kwargs["nickname"]
+        self.avatar_url = kwargs["avatar_url"]
+
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return unicode(self.id)
+
+
 class QQLogin():
     def login(self, args):
         code = args.get('code')

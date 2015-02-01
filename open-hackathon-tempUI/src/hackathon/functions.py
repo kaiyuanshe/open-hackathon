@@ -53,11 +53,14 @@ def get_remote(url, accept=None):
     return resp.read()
 
 
-def delete_remote(url):
+def delete_remote(url, headers=None):
     opener = urllib2.build_opener(urllib2.HTTPHandler)
     request = urllib2.Request(url)
     request.get_method = lambda: 'DELETE'
-    resp = opener.open(request)
+    if headers is not None and isinstance(headers, dict):
+        map(lambda k: request.add_header(k, headers[k]), headers.keys())
+
+    opener.open(request)
     return "OK"
 
 

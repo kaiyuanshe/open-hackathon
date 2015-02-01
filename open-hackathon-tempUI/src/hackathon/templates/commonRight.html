@@ -28,7 +28,7 @@
             </div>
             <div class="navbar-collapse collapse">
                 <form class="navbar-form navbar-right" role="form">
-                    {% if user %}
+                    {% if current_user.is_authenticated() %}
                     <div class="form-group">
                         <div id="name"><p style="color:white">{{current_user.nickname}}</p></div>
                     </div>

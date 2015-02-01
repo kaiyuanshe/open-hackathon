@@ -2,7 +2,7 @@ __author__ = 'root'
 import sys
 
 sys.path.append("..")
-from database.models import Experiment
+from hackathon.database.models import Experiment
 from sqlalchemy import and_
 
 
