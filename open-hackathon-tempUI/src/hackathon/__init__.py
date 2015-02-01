@@ -11,7 +11,7 @@ app = Flask(__name__)
 api = Api(app)
 app.config['SECRET_KEY'] = '*K&ep_me^se(ret_!@#$'
 
-app.config['DEBUG_TB_ENABLED'] = True
+app.config['DEBUG_TB_ENABLED'] = False
 toolbar = DebugToolbarExtension(app)
 
 # flask login
