@@ -525,9 +525,15 @@ class VMConfig(db.Model):
     create_time = db.Column(db.DateTime)
     last_modify_time = db.Column(db.DateTime)
     virtual_machine_id = db.Column(db.Integer, db.ForeignKey('user_resource.id', ondelete='CASCADE'))
-    virtual_machine = db.relationship('UserResource', backref=db.backref('vm_config', lazy='dynamic'))
+    virtual_machine = db.relationship('UserResource', backref=db.backref('vm_config1', lazy='dynamic'))
+    remote_provider = db.Column(db.String(20))
+    remote_paras = db.Column(db.String(300))
+    user_template_id = db.Column(db.Integer, db.ForeignKey('user_template.id', ondelete='CASCADE'))
+    user_template = db.relationship('UserTemplate', backref=db.backref('vm_config2', lazy='dynamic'))
 
-    def __init__(self, virtual_machine, dns, public_ip, private_ip, create_time=None, last_modify_time=None):
+    def __init__(self, virtual_machine, dns, public_ip, private_ip,
+                 remote_provider, remote_paras, user_template,
+                 create_time=None, last_modify_time=None):
         if create_time is None:
             create_time = datetime.utcnow()
         if last_modify_time is None:
@@ -536,6 +542,9 @@ class VMConfig(db.Model):
         self.dns = dns
         self.public_ip = public_ip
         self.private_ip = private_ip
+        self.remote_provider = remote_provider
+        self.remote_paras = remote_paras
+        self.user_template = user_template
         self.create_time = create_time
         self.last_modify_time = last_modify_time
 

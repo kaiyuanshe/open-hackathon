@@ -149,7 +149,7 @@ def vm_endpoint_update(cs, vm):
     db_adapter.commit()
 
 
-def vm_config_commit(vm, dns, public_ip, private_ip):
+def vm_config_commit(vm, dns, public_ip, private_ip, remote_provider, remote_paras, user_template):
     """
     Commit vm config to database
     :param vm:
@@ -159,7 +159,10 @@ def vm_config_commit(vm, dns, public_ip, private_ip):
                                  virtual_machine=vm,
                                  dns=dns,
                                  public_ip=public_ip,
-                                 private_ip=private_ip)
+                                 private_ip=private_ip,
+                                 remote_provider=remote_provider,
+                                 remote_paras=remote_paras,
+                                 user_template=user_template)
     db_adapter.commit()
 
 

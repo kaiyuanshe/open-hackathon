@@ -50,7 +50,7 @@
             "role_size" : "Small",
             "remote": {
                 "provider": "guacamole",
-                "protocol": "vnc",
+                "protocol": "rdp",
                 "input_endpoint_name" : "rdp"
             }
         }

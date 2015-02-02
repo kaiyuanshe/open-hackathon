@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 import sys
+
 sys.path.append("..")
 from hackathon.azureautodeploy.azureUtil import *
 from azure.servicemanagement import *
@@ -64,6 +65,17 @@ class AzureVirtualMachines:
                                                   container,
                                                   blob)
             os_hd = OSVirtualHardDisk(virtual_machine['source_image_name'], media_link)
+            # remote
+            remote = virtual_machine['remote']
+            remote_provider = remote['provider']
+            remote_protocol = remote['protocol']
+            remote_input_endpoint_name = remote['input_endpoint_name']
+            gc = {
+                'displayname': remote_input_endpoint_name,
+                'protocol': remote_protocol,
+                "username": system_config['user_name'],
+                "password": system_config['user_password']
+            }
             network_config = virtual_machine['network_config']
             network = ConfigurationSet()
             network.configuration_set_type = network_config['configuration_set_type']
@@ -83,6 +95,8 @@ class AzureVirtualMachines:
                                                   input_endpoint['protocol'],
                                                   port,
                                                   input_endpoint['local_port']))
+                if remote_input_endpoint_name == input_endpoint['name']:
+                    gc['port'] = port
             # avoid duplicate deployment
             if self.deployment_exists(cloud_service['service_name'], deployment['deployment_name']):
                 if db_adapter.count(UserResource,
@@ -166,7 +180,9 @@ class AzureVirtualMachines:
                         self.__vm_info_helper(cs,
                                               cloud_service['service_name'],
                                               deployment['deployment_name'],
-                                              virtual_machine['role_name'])
+                                              virtual_machine['role_name'],
+                                              remote_provider,
+                                              gc)
             else:
                 # delete old deployment
                 db_adapter.delete_all_objects(UserResource,
@@ -237,7 +253,9 @@ class AzureVirtualMachines:
                     self.__vm_info_helper(cs,
                                           cloud_service['service_name'],
                                           deployment['deployment_name'],
-                                          virtual_machine['role_name'])
+                                          virtual_machine['role_name'],
+                                          remote_provider,
+                                          gc)
         user_operation_commit(self.user_template, CREATE_VIRTUAL_MACHINES, END)
         return True
 
@@ -332,7 +350,7 @@ class AzureVirtualMachines:
                 return role_instance.instance_status
         return None
 
-    def __vm_info_helper(self, cs, cs_name, dm_name, vm_name):
+    def __vm_info_helper(self, cs, cs_name, dm_name, vm_name, remote_provider, gc):
         """
         Help to complete vm info
         :param cs:
@@ -347,6 +365,7 @@ class AzureVirtualMachines:
                                           type=VIRTUAL_MACHINE,
                                           name=vm_name,
                                           cloud_service_id=cs.id)
+        gc['name'] = vm.id
         vm_endpoint_update(cs, vm)
         # commit vm config
         deploy = self.sms.get_deployment_by_name(cs_name, dm_name)
@@ -357,5 +376,12 @@ class AzureVirtualMachines:
                 # to get public ip
                 if role.instance_endpoints is not None:
                     public_ip = role.instance_endpoints.instance_endpoints[0].vip
-                vm_config_commit(vm, deploy.url, public_ip, role.ip_address)
+                    gc['hostname'] = public_ip
+                vm_config_commit(vm,
+                                 deploy.url,
+                                 public_ip,
+                                 role.ip_address,
+                                 remote_provider,
+                                 json.dumps(gc),
+                                 self.user_template)
                 break

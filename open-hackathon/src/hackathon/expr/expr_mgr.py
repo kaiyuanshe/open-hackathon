@@ -19,7 +19,6 @@ cert_path = get_config('azure/certPath')
 service_host_base = get_config("azure/managementServiceHostBase")
 azure.connect(sub_id, cert_path, service_host_base)
 uo_id = 0
-ur_id = 0
 
 
 def course_path(id, sub=None):
@@ -33,52 +32,53 @@ class ExprManager(object):
     def __report_expr_status(self, expr):
         ret = {
             "expr_id": expr.id,
+            "status": expr.status,
             "hackathon": expr.hackathon.name,
             "create_time": str(expr.create_time),
             "last_heart_beat_time": str(expr.last_heart_beat_time),
         }
-        # Docker
+        guacamole_servers = []
         if expr.user_template.template.provider == VirtualEnvironmentProvider.Docker:
-            guacamole_servers = []
-            for ve in expr.virtual_environments.all():
-                # return guacamole link to frontend
-                if ve.remote_provider == RemoteProvider.Guacamole:
-                    guaca_config = json.loads(ve.remote_paras)
-                    url = "%s/guacamole/client.xhtml?id=" % (
-                        safe_get_config("guacamole/host", "localhost:8080")) + "c%2F" + guaca_config["name"]
-                    guacamole_servers.append({
-                        "name": guaca_config["displayname"],
-                        "url": url
-                    })
-            ret["guacamole_servers"] = guacamole_servers
-            public_urls = []
-            # return public accessible web url
-            for ve in expr.virtual_environments.filter(VirtualEnvironment.image != GUACAMOLE.IMAGE).all():
-                # todo only docker handled now. add Azure VM support later
-                if ve.provider == VirtualEnvironmentProvider.Docker:
-                    for p in ve.port_bindings.all():
-                        if p.binding_type == PortBindingType.CloudService:
-                            hs = db_adapter.find_first_object(DockerHostServer, id=p.binding_resource_id)
-                            url = "http://%s:%s" % (hs.public_dns, p.port_from)
-                            public_urls.append({
-                                "name": p.name,
-                                "url": url
-                            })
-            ret["public_urls"] = public_urls
-        # Azure-VM
+            ves = expr.virtual_environments.all()
         else:
-            ret['user_operation'] = None
-            global uo_id
-            uo = query_user_operation(expr.user_template, CREATE, uo_id)
-            if len(uo) > 0:
-                uo_id = uo[-1].id
-                ret['user_operation'] = map(lambda u: u.json(), uo)
-            ret['user_resource'] = None
-            global ur_id
-            ur = query_user_resource(expr.user_template, ur_id)
-            if len(ur) > 0:
-                ur_id = ur[-1].id
-                ret['user_resource'] = map(lambda u: u.json(), ur)
+            ves = db_adapter.find_all_objects(VMConfig, user_template_id=expr.user_template.id)
+        for ve in ves:
+            # return guacamole link to frontend
+            if ve.remote_provider == RemoteProvider.Guacamole:
+                guaca_config = json.loads(ve.remote_paras)
+                url = "%s/guacamole/client.xhtml?id=" % (
+                    safe_get_config("guacamole/host", "localhost:8080")) + "c%2F" + str(guaca_config["name"])
+                guacamole_servers.append({
+                    "name": guaca_config["displayname"],
+                    "url": url
+                })
+        ret["guacamole_servers"] = guacamole_servers
+        public_urls = []
+        # return public accessible web url
+        for ve in expr.virtual_environments.filter(VirtualEnvironment.image != GUACAMOLE.IMAGE).all():
+            # todo only docker handled now. add Azure VM support later
+            if ve.provider == VirtualEnvironmentProvider.Docker:
+                for p in ve.port_bindings.all():
+                    if p.binding_type == PortBindingType.CloudService:
+                        hs = db_adapter.find_first_object(DockerHostServer, id=p.binding_resource_id)
+                        url = "http://%s:%s" % (hs.public_dns, p.port_from)
+                        public_urls.append({
+                            "name": p.name,
+                            "url": url
+                        })
+        ret["public_urls"] = public_urls
+        if expr.user_template.template.provider == VirtualEnvironmentProvider.AzureVM:
+            if expr.status == ExprStatus.Starting:
+                global uo_id
+                uo = query_user_operation(expr.user_template, CREATE, uo_id)
+                if len(uo) > 0:
+                    uo_last = uo[-1]
+                    if uo_last.status == FAIL:
+                        expr.status = ExprStatus.Failed
+                        db_adapter.commit()
+                    if uo_last.operation == CREATE and uo_last.status == END:
+                        expr.status = ExprStatus.Running
+                        db_adapter.commit()
         return ret
 
     def __get_available_docker_host(self, expr_config):
@@ -241,7 +241,7 @@ class ExprManager(object):
         return ve
 
     def get_expr_status(self, expr_id):
-        expr = db_adapter.find_first_object(Experiment, id=expr_id, status=ExprStatus.Running)
+        expr = db_adapter.find_first_object(Experiment, id=expr_id)
         if expr is not None:
             return self.__report_expr_status(expr)
         else:
@@ -273,7 +273,7 @@ class ExprManager(object):
                                             user_id=g.user.id,
                                             hackathon_id=hackathon.id)
         if expr is not None:
-            return "Please wait for a few seconds ... "
+            return self.__report_expr_status(expr)
 
         user_template = db_adapter.find_first_object(UserTemplate, user=g.user, template=template)
         if user_template is None:
