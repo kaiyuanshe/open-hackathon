@@ -4,9 +4,6 @@ sys.path.append("..")
 
 from compiler.ast import flatten
 from flask import g
-from hackathon.database.models import *
-from hackathon.database import db_adapter
-from hackathon.log import log
 from hackathon.constants import GUACAMOLE
 from hackathon.docker import OssDocker
 from hackathon.functions import *
@@ -313,6 +310,8 @@ class ExprManager(object):
                 map(lambda container_config:
                     self.__remote_start_container(expr, host_server, scm, container_config),
                     expr_config["virtual_environments"])
+                expr.status = ExprStatus.Running
+                db_adapter.commit()
             except Exception as e:
                 log.error(e)
                 log.error("Failed starting containers")
@@ -321,14 +320,12 @@ class ExprManager(object):
         else:
             expr.status = ExprStatus.Starting
             db_adapter.commit()
-            # start create azure resources according to user template
+            # start create azure vm according to user template
             if not azure.create_async(user_template):
-                m = 'failed creating azure resources'
+                m = 'failed creating azure vm'
                 log.error(m)
                 return m
         # after everything is ready, set the expr state to running
-        expr.status = ExprStatus.Running
-        db_adapter.commit()
 
         # response to caller
         return self.__report_expr_status(expr)
@@ -371,12 +368,12 @@ class ExprManager(object):
             log.error(e)
 
     def stop_expr(self, expr_id):
-        expr = Experiment.query.filter_by(id=expr_id, status=ExprStatus.Running).first()
+        expr = db_adapter.find_first_object(Experiment, id=expr_id, status=ExprStatus.Running)
         if expr is not None:
-
-            # stop containers
-            for c in expr.virtual_environments:
-                if c.provider == VirtualEnvironmentProvider.Docker:
+            # Docker
+            if expr.user_template.template.provider == VirtualEnvironmentProvider.Docker:
+                # stop containers
+                for c in expr.virtual_environments:
                     try:
                         docker.stop(c.name, c.container.host_server.public_dns)
                         c.status = VirtualEnvStatus.Stopped
@@ -385,11 +382,16 @@ class ExprManager(object):
                             c.container.host_server.container_count = 0
                     except Exception as e:
                         log.error(e)
-
+            else:
+                if not azure.shutdown_async(expr.user_template):
+                    m = 'failed stopping azure vm'
+                    log.error(m)
+                    return m
             expr.status = ExprStatus.Stopped
             db_adapter.commit()
-
-        return "OK"
+            return "OK"
+        else:
+            return "expr not exist"
 
     def submit_expr(self, args):
         if "id" not in args:
