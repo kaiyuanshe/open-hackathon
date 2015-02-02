@@ -509,6 +509,12 @@ class VMEndpoint(db.Model):
         self.create_time = create_time
         self.last_modify_time = last_modify_time
 
+    def json(self):
+        return to_json(self, self.__class__)
+
+    def __repr__(self):
+        return "VMEndpoint: " + self.json()
+
 
 class VMConfig(db.Model):
     __tablename__ = 'vm_config'
@@ -532,5 +538,11 @@ class VMConfig(db.Model):
         self.private_ip = private_ip
         self.create_time = create_time
         self.last_modify_time = last_modify_time
+
+    def json(self):
+        return to_json(self, self.__class__)
+
+    def __repr__(self):
+        return "VMConfig: " + self.json()
 
 # ------------------------------ Tables are introduced by azure-auto-deploy ------------------------------

@@ -6,6 +6,7 @@
 from hackathon.database import db
 from hackathon.database.models import *
 from hackathon.log import *
+from hackathon.enum import *
 
 # vm = DockerHostServer(vm_name="localhost", public_dns="localhost", public_docker_api_port=8001, private_ip="10.0.2.15",
 # private_docker_api_port=8001, container_count=0, container_max_count=100)
@@ -42,9 +43,9 @@ if template_files is None:
 for template_file in template_files:
     name = template_file.replace('bigdata-realtime-analytics-', '').replace('.js', '')
     template_url = os.getcwd() + os.path.sep + template_dir + os.path.sep + template_file
-    provider = 'docker'
+    provider = VirtualEnvironmentProvider.Docker
     if 'azure' in name:
-        provider = 'azure'
+        provider = VirtualEnvironmentProvider.AzureVM
     template = Template(hackathon=h, name=name, url=template_url, provider=provider)
     db.session.add(template)
 

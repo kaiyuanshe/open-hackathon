@@ -8,19 +8,20 @@ import time
 import os
 import json
 
-# resource name
+# resource name in table UserResource
 STORAGE_ACCOUNT = 'storage account'
 CLOUD_SERVICE = 'cloud service'
 VIRTUAL_MACHINES = 'virtual machines'
 DEPLOYMENT = 'deployment'
 VIRTUAL_MACHINE = 'virtual machine'
-# resource status
+# resource status in table UserResource
 RUNNING = 'Running'
 STOPPED = 'Stopped'
+# resource status in program
 READY_ROLE = 'ReadyRole'
 STOPPED_VM = 'StoppedVM'
 STOPPED_DEALLOCATED = 'StoppedDeallocated'
-# operation name
+# operation name in table UserOperation
 CREATE = 'create'
 CREATE_STORAGE_ACCOUNT = CREATE + ' ' + STORAGE_ACCOUNT
 CREATE_CLOUD_SERVICE = CREATE + ' ' + CLOUD_SERVICE
@@ -34,7 +35,7 @@ DELETE_DEPLOYMENT = DELETE + ' ' + DEPLOYMENT
 DELETE_VIRTUAL_MACHINE = DELETE + ' ' + VIRTUAL_MACHINE
 SHUTDOWN = 'shutdown'
 SHUTDOWN_VIRTUAL_MACHINE = SHUTDOWN + ' ' + VIRTUAL_MACHINE
-# operation status
+# operation status in table UserOperation
 START = 'start'
 FAIL = 'fail'
 END = 'end'
@@ -71,10 +72,11 @@ def user_operation_commit(user_template, operation, status, note=None):
     :param note:
     :return:
     """
-    user_operation = UserOperation(user_template, operation, status, note)
-    log.debug(user_operation.json())
-    db_adapter.add_object(user_operation)
-    log.debug(db_adapter)
+    db_adapter.add_object_kwargs(UserOperation,
+                                 user_template=user_template,
+                                 operation=operation,
+                                 status=status,
+                                 note=note)
     db_adapter.commit()
 
 
@@ -86,18 +88,23 @@ def user_resource_commit(user_template, type, name, status, cs_id=None):
     :param status:
     :return:
     """
-    user_resource = UserResource(user_template, type, name, status, cs_id)
-    db.session.add(user_resource)
-    db.session.commit()
+    db_adapter.add_object_kwargs(UserResource,
+                                 user_template=user_template,
+                                 type=type,
+                                 name=name,
+                                 status=status,
+                                 cloud_service_id=cs_id)
+    db_adapter.commit()
 
 
 def user_resource_status_update(user_template, type, name, status, cs_id=None):
-    ur = UserResource.query.filter_by(user_template=user_template,
+    ur = db_adapter.find_first_object(UserResource,
+                                      user_template_id=user_template.id,
                                       type=type,
                                       name=name,
-                                      cloud_service_id=cs_id).first()
+                                      cloud_service_id=cs_id)
     ur.status = status
-    db.session.commit()
+    db_adapter.commit()
 
 
 def vm_endpoint_commit(name, protocol, port, local_port, cs):
@@ -110,9 +117,13 @@ def vm_endpoint_commit(name, protocol, port, local_port, cs):
     :param cs:
     :return:
     """
-    vm_endpoint = VMEndpoint(name, protocol, port, local_port, cs)
-    db.session.add(vm_endpoint)
-    db.session.commit()
+    db_adapter.add_object_kwargs(VMEndpoint,
+                                 name=name,
+                                 protocol=protocol,
+                                 public_port=port,
+                                 private_port=local_port,
+                                 cloud_service=cs)
+    db_adapter.commit()
 
 
 def vm_endpoint_rollback(cs):
@@ -121,8 +132,8 @@ def vm_endpoint_rollback(cs):
     :param cs:
     :return:
     """
-    VMEndpoint.query.filter_by(cloud_service=cs, virtual_machine=None).delete()
-    db.session.commit()
+    db_adapter.delete_all_objects(VMEndpoint, cloud_service_id=cs.id, virtual_machine_id=None)
+    db_adapter.commit()
 
 
 def vm_endpoint_update(cs, vm):
@@ -132,10 +143,10 @@ def vm_endpoint_update(cs, vm):
     :param vm:
     :return:
     """
-    vm_endpoints = VMEndpoint.query.filter_by(cloud_service=cs, virtual_machine=None).all()
+    vm_endpoints = db_adapter.filter_by(VMEndpoint, cloud_service=cs, virtual_machine=None).all()
     for vm_endpoint in vm_endpoints:
         vm_endpoint.virtual_machine = vm
-    db.session.commit()
+    db_adapter.commit()
 
 
 def vm_config_commit(vm, dns, public_ip, private_ip):
@@ -144,9 +155,12 @@ def vm_config_commit(vm, dns, public_ip, private_ip):
     :param vm:
     :return:
     """
-    vm_config = VMConfig(vm, dns, public_ip, private_ip)
-    db.session.add(vm_config)
-    db.session.commit()
+    db_adapter.add_object_kwargs(VMConfig,
+                                 virtual_machine=vm,
+                                 dns=dns,
+                                 public_ip=public_ip,
+                                 private_ip=private_ip)
+    db_adapter.commit()
 
 
 def wait_for_async(sms, request_id, second_per_loop, loop):
@@ -161,16 +175,16 @@ def wait_for_async(sms, request_id, second_per_loop, loop):
         log.debug('%s [%s] loop count [%d]' % (WAIT_FOR_ASYNC, request_id, count))
         count += 1
         if count > loop:
-            log.debug('Timed out waiting for async operation to complete.')
+            log.error('Timed out waiting for async operation to complete.')
             return False
         time.sleep(second_per_loop)
         result = sms.get_operation_status(request_id)
     if result.status != SUCCEEDED:
-        log.debug(vars(result))
+        log.error(vars(result))
         if result.error:
-            log.debug(result.error.code)
-            log.debug(vars(result.error))
-        log.debug('Asynchronous operation did not succeed.')
+            log.error(result.error.code)
+            log.error(vars(result.error))
+        log.error('Asynchronous operation did not succeed.')
         return False
     return True
 
@@ -188,35 +202,32 @@ def load_template(user_template, operation):
         except Exception as e:
             m = 'ugly json format: %s' % e.message
             user_operation_commit(user_template, operation, FAIL, m)
-            log.debug(e)
+            log.error(e)
             return None
     else:
         m = '%s not exist' % user_template.template.url
         user_operation_commit(user_template, operation, FAIL, m)
-        log.debug(m)
+        log.error(m)
         return None
-    template_config = {T_EXPR_NAME: raw_template[T_EXPR_NAME],
-                       T_STORAGE_ACCOUNT: raw_template[T_STORAGE_ACCOUNT],
-                       T_CONTAINER: raw_template[T_CONTAINER],
-                       T_CLOUD_SERVICE: raw_template[T_CLOUD_SERVICE],
-                       T_DEPLOYMENT: raw_template[T_DEPLOYMENT],
-                       T_VIRTUAL_MACHINES: raw_template[R_VIRTUAL_ENVIRONMENTS]}
+    template_config = {
+        T_EXPR_NAME: raw_template[T_EXPR_NAME],
+        T_STORAGE_ACCOUNT: raw_template[T_STORAGE_ACCOUNT],
+        T_CONTAINER: raw_template[T_CONTAINER],
+        T_CLOUD_SERVICE: raw_template[T_CLOUD_SERVICE],
+        T_DEPLOYMENT: raw_template[T_DEPLOYMENT],
+        T_VIRTUAL_MACHINES: raw_template[R_VIRTUAL_ENVIRONMENTS]
+    }
     return template_config
 
 
-def query_user_operation(user_template, operation):
-    return UserOperation.query.filter_by(user_template=user_template). \
-        filter(UserOperation.operation.like(operation + '%')).all()
+def query_user_operation(user_template, operation, id):
+    return db_adapter.filter(UserOperation,
+                             UserOperation.user_template == user_template,
+                             UserOperation.operation.like(operation + '%'),
+                             UserOperation.id > id).all()
 
 
-def query_user_resource(user_template):
-    return UserResource.query.filter_by(user_template=user_template).all()
-
-
-def operation_status(user_template, operation):
-    if UserOperation.query.filter_by(user_template=user_template, status=FAIL). \
-            filter(UserOperation.operation.like(operation + '%')).count() > 0:
-        return FAIL
-    if UserOperation.query.filter_by(user_template=user_template, operation=operation, status=END).count() > 0:
-        return END
-    return START
+def query_user_resource(user_template, id):
+    return db_adapter.filter(UserResource,
+                             UserResource.user_template == user_template,
+                             UserResource.id > id).all()

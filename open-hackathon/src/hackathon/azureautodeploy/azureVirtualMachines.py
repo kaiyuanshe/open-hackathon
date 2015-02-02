@@ -33,11 +33,11 @@ class AzureVirtualMachines:
         cloud_service = self.template_config['cloud_service']
         deployment = self.template_config['deployment']
         virtual_machines = self.template_config['virtual_machines']
-        cs = UserResource.query.filter_by(type=CLOUD_SERVICE, name=cloud_service['service_name']).first()
+        cs = db_adapter.find_first_object(UserResource, type=CLOUD_SERVICE, name=cloud_service['service_name'])
         if cs is None:
             m = '%s %s not running in database now' % (CLOUD_SERVICE, cloud_service['service_name'])
             user_operation_commit(self.user_template, CREATE_VIRTUAL_MACHINES, FAIL, m)
-            log.debug(m)
+            log.error(m)
             return False
         for virtual_machine in virtual_machines:
             user_operation_commit(self.user_template, CREATE_DEPLOYMENT, START)
@@ -51,15 +51,18 @@ class AzureVirtualMachines:
                 config.domain_join = None
                 config.win_rm = None
             else:
-                config = LinuxConfigurationSet(system_config['host_name'], system_config['user_name'],
-                                               system_config['user_password'], False)
+                config = LinuxConfigurationSet(system_config['host_name'],
+                                               system_config['user_name'],
+                                               system_config['user_password'],
+                                               False)
             now = datetime.datetime.now()
             blob = '%s-%s-%s-%s-%s-%s-%s.vhd' % (virtual_machine['source_image_name'],
                                                  str(now.year), str(now.month), str(now.day),
                                                  str(now.hour), str(now.minute), str(now.second))
             media_link = 'https://%s.%s/%s/%s' % (storage_account['service_name'],
                                                   storage_account['url_base'],
-                                                  container, blob)
+                                                  container,
+                                                  blob)
             os_hd = OSVirtualHardDisk(virtual_machine['source_image_name'], media_link)
             network_config = virtual_machine['network_config']
             network = ConfigurationSet()
@@ -68,87 +71,114 @@ class AzureVirtualMachines:
             for input_endpoint in input_endpoints:
                 port = int(input_endpoint['local_port'])
                 # avoid duplicate vm endpoint under same cloud service
-                while VMEndpoint.query.filter_by(cloud_service=cs, public_port=port).count() > 0:
+                while db_adapter.count(VMEndpoint, cloud_service_id=cs.id, public_port=port) > 0:
                     port = (port + 1) % 65536
-                vm_endpoint_commit(input_endpoint['name'], input_endpoint['protocol'],
-                                   port, input_endpoint['local_port'], cs)
+                vm_endpoint_commit(input_endpoint['name'],
+                                   input_endpoint['protocol'],
+                                   port,
+                                   input_endpoint['local_port'],
+                                   cs)
                 network.input_endpoints.input_endpoints.append(
-                    ConfigurationSetInputEndpoint(input_endpoint['name'], input_endpoint['protocol'],
-                                                  port, input_endpoint['local_port']))
+                    ConfigurationSetInputEndpoint(input_endpoint['name'],
+                                                  input_endpoint['protocol'],
+                                                  port,
+                                                  input_endpoint['local_port']))
             # avoid duplicate deployment
             if self.deployment_exists(cloud_service['service_name'], deployment['deployment_name']):
-                if UserResource.query.filter_by(type=DEPLOYMENT, name=deployment['deployment_name'],
-                                                cloud_service_id=cs.id).count() == 0:
-                    m = '%s %s exist but not created by this function before' %\
+                if db_adapter.count(UserResource,
+                                    type=DEPLOYMENT,
+                                    name=deployment['deployment_name'],
+                                    cloud_service_id=cs.id) == 0:
+                    m = '%s %s exist but not created by this function before' % \
                         (DEPLOYMENT, deployment['deployment_name'])
                     user_resource_commit(self.user_template, DEPLOYMENT, deployment['deployment_name'], RUNNING, cs.id)
                 else:
-                    m = '%s %s exist and created by this function before' %\
+                    m = '%s %s exist and created by this function before' % \
                         (DEPLOYMENT, deployment['deployment_name'])
                 user_operation_commit(self.user_template, CREATE_DEPLOYMENT, END, m)
                 log.debug(m)
                 # avoid duplicate role
-                if self.role_exists(cloud_service['service_name'], deployment['deployment_name'],
+                if self.role_exists(cloud_service['service_name'],
+                                    deployment['deployment_name'],
                                     virtual_machine['role_name']):
-                    if UserResource.query.filter_by(user_template=self.user_template, type=VIRTUAL_MACHINE,
-                                                    name=virtual_machine['role_name'],
-                                                    cloud_service_id=cs.id).count() == 0:
-                        m = '%s %s exist but not created by this user template before' %\
+                    if db_adapter.count(UserResource,
+                                        user_template_id=self.user_template.id,
+                                        type=VIRTUAL_MACHINE,
+                                        name=virtual_machine['role_name'],
+                                        cloud_service_id=cs.id) == 0:
+                        m = '%s %s exist but not created by this user template before' % \
                             (VIRTUAL_MACHINE, virtual_machine['role_name'])
                         user_operation_commit(self.user_template, CREATE_VIRTUAL_MACHINE, FAIL, m)
                         vm_endpoint_rollback(cs)
-                        log.debug(m)
+                        log.error(m)
                         return False
                     else:
-                        m = '%s %s exist and created by this user template before' %\
+                        m = '%s %s exist and created by this user template before' % \
                             (VIRTUAL_MACHINE, virtual_machine['role_name'])
                         user_operation_commit(self.user_template, CREATE_VIRTUAL_MACHINE, END, m)
                         vm_endpoint_rollback(cs)
                         log.debug(m)
                 else:
                     # delete old virtual machine info in database, cascade delete old vm endpoint and old vm config
-                    UserResource.query.filter_by(type=VIRTUAL_MACHINE, name=virtual_machine['role_name'],
-                                                 cloud_service_id=cs.id).delete()
-                    db.session.commit()
+                    db_adapter.delete_all_objects(UserResource,
+                                                  type=VIRTUAL_MACHINE,
+                                                  name=virtual_machine['role_name'],
+                                                  cloud_service_id=cs.id)
+                    db_adapter.commit()
                     try:
-                        result = self.sms.add_role(cloud_service['service_name'], deployment['deployment_name'],
-                                                   virtual_machine['role_name'], config, os_hd,
-                                                   network_config=network, role_size=virtual_machine['role_size'])
+                        result = self.sms.add_role(cloud_service['service_name'],
+                                                   deployment['deployment_name'],
+                                                   virtual_machine['role_name'],
+                                                   config,
+                                                   os_hd,
+                                                   network_config=network,
+                                                   role_size=virtual_machine['role_size'])
                     except Exception as e:
                         user_operation_commit(self.user_template, CREATE_VIRTUAL_MACHINE, FAIL, e.message)
                         vm_endpoint_rollback(cs)
-                        log.debug(e)
+                        log.error(e)
                         return False
                     # make sure async operation succeeds
                     if not wait_for_async(self.sms, result.request_id, ASYNC_TICK, ASYNC_LOOP):
                         m = WAIT_FOR_ASYNC + ' ' + FAIL
                         user_operation_commit(self.user_template, CREATE_VIRTUAL_MACHINE, FAIL, m)
                         vm_endpoint_rollback(cs)
-                        log.debug(m)
+                        log.error(m)
                         return False
                     # make sure role is ready
-                    if not self.wait_for_role(cloud_service['service_name'], deployment['deployment_name'],
-                                              virtual_machine['role_name'], VIRTUAL_MACHINE_TICK,
+                    if not self.wait_for_role(cloud_service['service_name'],
+                                              deployment['deployment_name'],
+                                              virtual_machine['role_name'],
+                                              VIRTUAL_MACHINE_TICK,
                                               VIRTUAL_MACHINE_LOOP):
                         m = '%s %s created but not ready' % (VIRTUAL_MACHINE, virtual_machine['role_name'])
                         user_operation_commit(self.user_template, CREATE_VIRTUAL_MACHINE, FAIL, m)
                         vm_endpoint_rollback(cs)
-                        log.debug(m)
+                        log.error(m)
                         return False
                     else:
-                        user_resource_commit(self.user_template, VIRTUAL_MACHINE,
-                                             virtual_machine['role_name'], RUNNING, cs.id)
+                        user_resource_commit(self.user_template,
+                                             VIRTUAL_MACHINE,
+                                             virtual_machine['role_name'],
+                                             RUNNING,
+                                             cs.id)
                         user_operation_commit(self.user_template, CREATE_VIRTUAL_MACHINE, END)
-                        self.__vm_info_helper(cs, cloud_service['service_name'], deployment['deployment_name'],
+                        self.__vm_info_helper(cs,
+                                              cloud_service['service_name'],
+                                              deployment['deployment_name'],
                                               virtual_machine['role_name'])
             else:
                 # delete old deployment
-                UserResource.query.filter_by(type=DEPLOYMENT, name=deployment['deployment_name'],
-                                             cloud_service_id=cs.id).delete()
+                db_adapter.delete_all_objects(UserResource,
+                                              type=DEPLOYMENT,
+                                              name=deployment['deployment_name'],
+                                              cloud_service_id=cs.id)
                 # delete old virtual machine info in database, cascade delete old vm endpoint and old vm config
-                UserResource.query.filter_by(type=VIRTUAL_MACHINE, name=virtual_machine['role_name'],
-                                             cloud_service_id=cs.id).delete()
-                db.session.commit()
+                db_adapter.delete_all_objects(UserResource,
+                                              type=VIRTUAL_MACHINE,
+                                              name=virtual_machine['role_name'],
+                                              cloud_service_id=cs.id)
+                db_adapter.commit()
                 try:
                     result = self.sms.create_virtual_machine_deployment(cloud_service['service_name'],
                                                                         deployment['deployment_name'],
@@ -163,7 +193,7 @@ class AzureVirtualMachines:
                     user_operation_commit(self.user_template, CREATE_DEPLOYMENT, FAIL, e.message)
                     user_operation_commit(self.user_template, CREATE_VIRTUAL_MACHINE, FAIL, e.message)
                     vm_endpoint_rollback(cs)
-                    log.debug(e)
+                    log.error(e)
                     return False
                 # make sure async operation succeeds
                 if not wait_for_async(self.sms, result.request_id, ASYNC_TICK, ASYNC_LOOP):
@@ -171,32 +201,42 @@ class AzureVirtualMachines:
                     user_operation_commit(self.user_template, CREATE_DEPLOYMENT, FAIL, m)
                     user_operation_commit(self.user_template, CREATE_VIRTUAL_MACHINE, FAIL, m)
                     vm_endpoint_rollback(cs)
-                    log.debug(m)
+                    log.error(m)
                     return False
                 # make sure deployment is ready
-                if not self.__wait_for_deployment(cloud_service['service_name'], deployment['deployment_name'],
-                                                  DEPLOYMENT_TICK, DEPLOYMENT_LOOP):
+                if not self.__wait_for_deployment(cloud_service['service_name'],
+                                                  deployment['deployment_name'],
+                                                  DEPLOYMENT_TICK,
+                                                  DEPLOYMENT_LOOP):
                     m = '%s %s created but not ready' % (DEPLOYMENT, deployment['deployment_name'])
                     user_operation_commit(self.user_template, CREATE_DEPLOYMENT, FAIL, m)
                     vm_endpoint_rollback(cs)
-                    log.debug(m)
+                    log.error(m)
                     return False
                 else:
                     user_resource_commit(self.user_template, DEPLOYMENT, deployment['deployment_name'], RUNNING, cs.id)
                     user_operation_commit(self.user_template, CREATE_DEPLOYMENT, END)
                 # make sure role is ready
-                if not self.wait_for_role(cloud_service['service_name'], deployment['deployment_name'],
-                                          virtual_machine['role_name'], VIRTUAL_MACHINE_TICK, VIRTUAL_MACHINE_LOOP):
+                if not self.wait_for_role(cloud_service['service_name'],
+                                          deployment['deployment_name'],
+                                          virtual_machine['role_name'],
+                                          VIRTUAL_MACHINE_TICK,
+                                          VIRTUAL_MACHINE_LOOP):
                     m = '%s %s created but not ready' % (VIRTUAL_MACHINE, virtual_machine['role_name'])
                     user_operation_commit(self.user_template, CREATE_VIRTUAL_MACHINE, FAIL, m)
                     vm_endpoint_rollback(cs)
-                    log.debug(m)
+                    log.error(m)
                     return False
                 else:
-                    user_resource_commit(self.user_template, VIRTUAL_MACHINE,
-                                         virtual_machine['role_name'], RUNNING, cs.id)
+                    user_resource_commit(self.user_template,
+                                         VIRTUAL_MACHINE,
+                                         virtual_machine['role_name'],
+                                         RUNNING,
+                                         cs.id)
                     user_operation_commit(self.user_template, CREATE_VIRTUAL_MACHINE, END)
-                    self.__vm_info_helper(cs, cloud_service['service_name'], deployment['deployment_name'],
+                    self.__vm_info_helper(cs,
+                                          cloud_service['service_name'],
+                                          deployment['deployment_name'],
                                           virtual_machine['role_name'])
         user_operation_commit(self.user_template, CREATE_VIRTUAL_MACHINES, END)
         return True
@@ -212,7 +252,7 @@ class AzureVirtualMachines:
             props = self.sms.get_deployment_by_name(service_name, deployment_name)
         except Exception as e:
             if e.message != 'Not found (Not Found)':
-                log.debug('%s %s: %s' % (DEPLOYMENT, deployment_name, e))
+                log.error('%s %s: %s' % (DEPLOYMENT, deployment_name, e))
             return False
         return props is not None
 
@@ -228,7 +268,7 @@ class AzureVirtualMachines:
             props = self.sms.get_role(service_name, deployment_name, role_name)
         except Exception as e:
             if e.message != 'Not found (Not Found)':
-                log.debug('%s %s: %s' % (VIRTUAL_MACHINE, role_name, e))
+                log.error('%s %s: %s' % (VIRTUAL_MACHINE, role_name, e))
             return False
         return props is not None
 
@@ -250,7 +290,7 @@ class AzureVirtualMachines:
             log.debug('_wait_for_role [%s] loop count: %d' % (role_instance_name, count))
             count += 1
             if count > loop:
-                log.debug('Timed out waiting for role instance status.')
+                log.error('Timed out waiting for role instance status.')
                 return False
             time.sleep(second_per_loop)
             props = self.sms.get_deployment_by_name(service_name, deployment_name)
@@ -274,7 +314,7 @@ class AzureVirtualMachines:
             log.debug('_wait_for_deployment [%s] loop count: %d' % (deployment_name, count))
             count += 1
             if count > loop:
-                log.debug('Timed out waiting for deployment status.')
+                log.error('Timed out waiting for deployment status.')
                 return False
             time.sleep(second_per_loop)
             props = self.sms.get_deployment_by_name(service_name, deployment_name)
@@ -302,8 +342,11 @@ class AzureVirtualMachines:
         :return:
         """
         # associate vm endpoint with specific vm
-        vm = UserResource.query.filter_by(user_template=self.user_template, type=VIRTUAL_MACHINE,
-                                          name=vm_name, cloud_service_id=cs.id).first()
+        vm = db_adapter.find_first_object(UserResource,
+                                          user_template=self.user_template,
+                                          type=VIRTUAL_MACHINE,
+                                          name=vm_name,
+                                          cloud_service_id=cs.id)
         vm_endpoint_update(cs, vm)
         # commit vm config
         deploy = self.sms.get_deployment_by_name(cs_name, dm_name)

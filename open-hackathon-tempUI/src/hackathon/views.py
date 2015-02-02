@@ -1,4 +1,4 @@
-from flask import Response, render_template, abort, request, session, g, redirect
+from flask import Response, render_template, abort, request, session, g, redirect, make_response
 from . import *
 from log import log
 import json
@@ -96,9 +96,11 @@ def __login(provider):
     login_user(user)
     session["token"] = login_result["token"]
     if len(login_result['experiments']) > 0:
-        return redirect("hackathon")
+        response = make_response(redirect("hackathon"))
     else:
-        return redirect("settings")
+        response = make_response(redirect("settings"))
+    response.set_cookie('token', login_result['token'])
+    return response
 
 
 @app.route('/qq')

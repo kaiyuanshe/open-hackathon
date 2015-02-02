@@ -31,28 +31,28 @@ class AzureCloudService:
         if not self.cloud_service_exists(cloud_service['service_name']):
             # delete old cloud service info in database, cascade delete old deployment, old virtual machine,
             # old vm endpoint and old vm config
-            UserResource.query.filter_by(type=CLOUD_SERVICE, name=cloud_service['service_name']).delete()
-            db.session.commit()
+            db_adapter.delete_all_objects(UserResource, type=CLOUD_SERVICE, name=cloud_service['service_name'])
+            db_adapter.commit()
             try:
                 self.sms.create_hosted_service(service_name=cloud_service['service_name'],
                                                label=cloud_service['label'],
                                                location=cloud_service['location'])
             except Exception as e:
                 user_operation_commit(self.user_template, CREATE_CLOUD_SERVICE, FAIL, e.message)
-                log.debug(e)
+                log.error(e)
                 return False
             # make sure cloud service is created
             if not self.cloud_service_exists(cloud_service['service_name']):
                 m = '%s %s created but not exist' % (CLOUD_SERVICE, ['service_name'])
                 user_operation_commit(self.user_template, CREATE_CLOUD_SERVICE, FAIL, m)
-                log.debug(m)
+                log.error(m)
                 return False
             else:
                 user_resource_commit(self.user_template, CLOUD_SERVICE,  cloud_service['service_name'], RUNNING)
                 user_operation_commit(self.user_template, CREATE_CLOUD_SERVICE, END)
         else:
             # check whether cloud service created by this function before
-            if UserResource.query.filter_by(type=CLOUD_SERVICE, name=cloud_service['service_name']).count() == 0:
+            if db_adapter.count(UserResource, type=CLOUD_SERVICE, name=cloud_service['service_name']) == 0:
                 m = '%s %s exist but not created by this function before' %\
                     (CLOUD_SERVICE, cloud_service['service_name'])
                 user_resource_commit(self.user_template, CLOUD_SERVICE,  cloud_service['service_name'], RUNNING)
@@ -72,6 +72,6 @@ class AzureCloudService:
             props = self.sms.get_hosted_service_properties(name)
         except Exception as e:
             if e.message != 'Not found (Not Found)':
-                log.debug('%s %s: %s' % (CLOUD_SERVICE, name, e))
+                log.error('%s %s: %s' % (CLOUD_SERVICE, name, e))
             return False
         return props is not None
