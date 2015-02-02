@@ -62,6 +62,7 @@ Config = {
             "scope": "scope=read"
         },
         "hackathon": {
+            "name": "bigdata-realtime-analytics",
             "endpoint": HACkATHON_API_ENDPOINT
         }
     }

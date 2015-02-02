@@ -26,7 +26,7 @@ $(function(){
 
     $("#submit").click(function(){
         cid = $(".webapp-div input:checked").attr("cid")
-        window.location.href = "hackathon?cid=" + cid
+        window.location.href = "hackathon?hackathon=" + hackathon + "&cid=" + cid
     });
 });
 
