@@ -25,7 +25,10 @@ db.session.add(amt)
 h = Hackathon("bigdata-realtime-analytics", 1)
 db.session.add(h)
 
-r = Register(hackathon=h, register_name="Yifu Huang", email="ifhuang91@gmail.com")
+
+db.session.add(Register(hackathon=h, register_name="Yifu Huang", email="ifhuang91@gmail.com"))
+db.session.add(Register(hackathon=h, register_name="xxzhe", email="zhengxx012@gmail.com"))
+db.session.add(Register(hackathon=h, register_name="junbo", email="juniwang@microsoft.com"))
 
 # add public templates to database
 template_dir = 'hackathon/resources'
@@ -46,4 +49,3 @@ for template_file in template_files:
     db.session.add(template)
 
 db.session.commit()
-

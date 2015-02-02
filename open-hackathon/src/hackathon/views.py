@@ -186,6 +186,16 @@ class GuacamoleResource(Resource):
         return GuacamoleInfo().getConnectInfo()
 
 
+class UserResource(Resource):
+    def get(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('uid', type=int, location='args')
+        args = parse.parse_args()
+        if args['uid'] is None:
+            return {"error": "Bad request"}, 400
+        return user_manager.get_user_by_id(args['uid'])
+
+
 api.add_resource(UserExperimentResource, "/api/user/experiment")
 api.add_resource(RegisterListResource, "/api/register/list")
 api.add_resource(BulletinResource, "/api/bulletin")
@@ -198,4 +208,5 @@ api.add_resource(HealthResource, "/", "/health")
 api.add_resource(UserHackathonResource, "/api/user/hackathon")
 api.add_resource(UserExperimentListResource, "/api/user/experiment/list")
 api.add_resource(GuacamoleResource, "/api/guacamoleconfig")
+api.add_resource(UserResource, "/api/user")
 
