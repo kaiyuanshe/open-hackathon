@@ -13,6 +13,6 @@ $(function() {
     $("#submit").click(function() {
         var radio = $('input:radio:checked');
         var cid = radio.val();
-        window.location.href = "/hackathon?hackathon=" + CONFIG.hackathon.name + "&cid=" + cid
+        window.location.href = "/hackathon?cid=" + cid
     });
 });

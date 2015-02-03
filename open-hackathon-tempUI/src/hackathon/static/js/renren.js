@@ -49,7 +49,7 @@ $(function() {
                                         newurl_t = "m/v2/user/get?access_token=" +  theRequest[name];
                                         newurl = "https://api.renren.com/v2/user/get?access_token=" +  theRequest[name] /*+ "&state=7e0932f4c5b34176b0ca1881f5e88562" + "&jsoncallback=?"*/;
         //                              $("#content").html("<p>" + newurl +" " +  theRequest[name]  + "</p>");
-                                        var tmpurl = "http://osslab.chinacloudapp.cn:5080/renren";
+                                        var tmpurl = "http://hackathon.chinacloudapp.cn:5080/renren";
         //                              location.href = newurl;
                                         /*$.ajax({
                                                 type : "GET",

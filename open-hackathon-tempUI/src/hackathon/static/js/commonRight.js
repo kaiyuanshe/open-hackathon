@@ -1,13 +1,11 @@
 $(function() {
-    //daoJiShi();
-
     var $timer = $('#end_timer');
     var timerTmpe = '{day}天{hour}小时{minute}分钟{second}秒'
     Countdown(endDate, function(timer) {
         if (timer) {
             $timer.text(timerTmpe.format(timer))
         } else {
-            $('#timer').text('本次活动以结束，非常感谢您的参与。')
+            $('#timer').text('本次活动已结束，非常感谢您的参与。')
         }
     })
 

@@ -1,28 +1,29 @@
 {
-    "expr_name": "jstrom hackathon_mean",
-    "virtual_environments": [
+    "expr_name": "jstrom hackathon_ubuntu",
+    "containers": [
         {
             "provider": "docker",
             "name": "web",
-            "image": "msopentechcn/mean",
+            "image": "rastasheep/ubuntu-sshd:latest",
             "ports":[{
                 "name": "website",
-                "port": 3000,
+                "port": 80,
                 "host_port": 80,
                 "public": true
             },{
                 "name": "Deploy",
                 "port": 22
             }],
-            "command":"/usr/sbin/sshd -D",
             "AttachStdin":false,
             "AttachStdout":true,
             "AttachStderr":true,
+            "tty": true,
+            "stdin_open": true,
             "remote": {
                 "provider": "guacamole",
                 "protocol": "ssh",
                 "username": "root",
-                "password": "acoman",
+                "password": "root",
                 "port": 22
             }
         },

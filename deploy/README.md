@@ -60,7 +60,7 @@ guacd-port:     4822
 
 lib-directory: /var/lib/guacamole
 auth-provider: com.openhackathon.guacamole.OpenHackathonAuthenticationProvider
-auth-request-url: http://osslab.msopentech.cn/checkguacookies
+auth-request-url: http://hackathon.chinacloudapp.cn/checkguacookies
 ```
 Then copy the auth-provider jar file to the path that was setted in the config file
 ```
@@ -84,7 +84,7 @@ sudo service tomcat7 restart
 
 Before deploy the web application ,we need to setup all the dependencies and do some pre-execution
 ```
-echo "127.0.0.1    osslab.msopentech.cn" >> /etc/hosts
+echo "127.0.0.1    hackathon.chinacloudapp.cn" >> /etc/hosts
 sudo mkdir /var/log/uwsgi
 sudo mkdir /var/log/open-hackathon
 cd /opt/open-hackathon
@@ -146,7 +146,7 @@ sudo /etc/init.d/nginx restart
 # Test the Web-application
 After finishsd those steps you could do some tests on local machine                     
 check guacd service:[http://localhost:8080/guacamole](http://localhost:8080/guacamole)                     
-check nginx service for proxy forwarding:[http://osslab.msopentech.cn/guacamole](http://localhost:8080/guacamole)     
+check nginx service for proxy forwarding:[http://hackathon.chinacloudapp.cn/guacamole](http://localhost:8080/guacamole)
 check open-hackathon web application:[http://localhost](http://localhost:8080/guacamole)                   
 
 
