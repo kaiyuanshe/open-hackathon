@@ -13,15 +13,6 @@ from hackathon.functions import *
 from hackathon.enum import *
 
 docker = OssDocker()
-OSSLAB_RUN_DIR = "/var/lib/osslab"
-
-
-def course_path(id, sub=None):
-    if sub is None:
-        return "%s/%s" % (OSSLAB_RUN_DIR, id)
-    else:
-        return "%s/%s/%s" % (OSSLAB_RUN_DIR, id, sub)
-
 
 class ExprManager(object):
     def __report_expr_status(self, expr):
