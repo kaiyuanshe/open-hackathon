@@ -21,7 +21,7 @@ $(function(){
     })
 
     $.ajax({
-        url: '/api/registerlist',
+        url: '/api/register/list',
         type: "GET",
         success: function (resp) {
             // USER LIST
@@ -48,7 +48,7 @@ $(function(){
 
     setInterval(function(){
         $.ajax({
-            url: '/api/announcement',
+            url: '/api/bulletin',
             type: "GET",
             success: function (resp) {
                 anmt = $.parseJSON(resp)

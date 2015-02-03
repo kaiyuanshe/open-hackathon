@@ -1,8 +1,6 @@
 {% extends "base.html" %} {% block head %}
 <script type="text/javascript" src="/config.js"></script>
 <script src="/static/js/login.js"></script>
-<script src="/static/js/index.js"></script>
-
 {% endblock %} {% block header %} {% endblock %} {% block content %}
 <nav id="ohp_header" class="navbar navbar-inverse navbar-fixed-top">
     <div class="container">
@@ -18,33 +16,38 @@
         <div class="page-header">
             <h1>Open XML SDK 在线编程黑客松</h1>
         </div>
-        <a class="btn btn-lg btn-success" href="#" role="button">
-            <img src="/static/pic/gitcafe.login.jpg" alt="gitcafe"> GitCafe</a>
-        <div class="row">
-            <div class="col-md-3"> <img src="/static/pic/MSOpenTech_Logo_NoTagline_fit.jpg">
-                <h2></h2>
-                <p></p>
+        <a class="btn btn-lg btn-success" href="javascript:;" role="button" id="githublogin" title="login">
+            <img src="/static/pic/gitcafe.login.jpg">
+            <span>GitHub</span>
+        </a>
+        <a class="btn btn-lg btn-success" href="javascript:;" role="button" id="gitcafelogin" title="login">
+            <img src="/static/pic/gitcafe.login.jpg">
+            <span>GitCafe</span>
+        </a>
+        <div class="organizers">
+            <div class="row ">
+                <div class="col-md-4">
+                    <img src="/static/pic/jkxy.jpg">
+                </div>
+                <div class="col-md-4">
+                    <img src="/static/pic/gitcafe.png">
+                </div>
+                <div class="col-md-4">
+                    <img src="/static/pic/kaiyuanshe.jpg">
+                </div>
             </div>
-            <div class="col-md-3">
-                <img src="/static/pic/jkxy.jpg">
-                <h2></h2>
-                <p></p>
-            </div>
-            <div class="col-md-3"> <img src="/static/pic/gitcafe.png">
-                <h2></h2>
-                <p></p>
-            </div>
-            <div class="col-md-3"> <img src="/static/pic/kaiyuanshe.jpg">
-                <h2></h2>
-                <p></p>
+            <div class="row">
+                <div class="col-md-12">
+                    <img src="/static/pic/MSOpenTech_Logo_NoTagline_fit.jpg" style="width: 400px;height: auto;">
+                </div>
             </div>
         </div>
-    </div>
-    <div class="login">
-        <div class="container ">
-            <p> <b>建议使用环境：支持HTML5的浏览器(IE 10+,Chrome,Firefox,Safari)，请尽量使用分辨率较高的宽幅显示。</b>
-            </p>
+        <div class="row">
+            <div class="col-md-12">
+                <b>建议使用环境：支持HTML5的浏览器(IE 10+,Chrome,Firefox,Safari)，请尽量使用分辨率较高的宽幅显示。</b>
+            </div>
         </div>
     </div>
 </div>
+
 {% endblock %}
