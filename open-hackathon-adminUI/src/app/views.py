@@ -14,8 +14,9 @@ class HomeView(AdminIndexView):
         #if not g.user.is_authenticated():
         #    return redirect(url_for('index', next=request.path))
         #if not g.user.has_roles((ROLE.ADMIN, ROLE.HOST)):
+
         #    return redirect("/hackathon")
-        return self.render('admin/index.html', user=g.user)
+        return self.render('admin/index.html')
 
 
 class HackathonAdminBaseView(BaseView):
