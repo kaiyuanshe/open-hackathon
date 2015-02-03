@@ -26,7 +26,7 @@ class RegisterListResource(Resource):
 
 class UserExperimentResource(Resource):
     # user experiment id
-    @token_required
+    #@token_required
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument('id', type=int, location='args')

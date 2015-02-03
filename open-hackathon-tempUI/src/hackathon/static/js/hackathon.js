@@ -6,7 +6,7 @@ $(document).ready(function () {
         $(this).focus();
     });
 
-    var hackathon = "bigdata-realtime-analytics"
+    var hackathon = CONFIG.hackathon.name
 
     hpost('/api/user/experiment',{
             "cid": cid,
@@ -18,21 +18,23 @@ $(document).ready(function () {
             if (servers.length > 0) {
                 var  ul = $("<ul>");
                 // tips tab
-                ul.append($('<li name="hack_main_tips"><div class="selected">Endpoints</div></li>'))
+                // ul.append($('<li name="hack_main_tips"><div class="selected">Endpoints</div></li>'))
                 // bar and iframe
                 $.each(servers, function(i, s){
-                    var li = $('<li name="hack_main_'+s.name+'"></li>');
-                    li.append($('<div>').data("data", s).text(s.name)).appendTo(ul);
-                    var sd = $('<div>').attr({"id":"hack_main_"+s.name}).addClass('hidden')
-                    main.append(sd);
-                    var iframe = $('<iframe>').attr({
-                        src:s.url+"&token=" + get_token(),
-                        width:'100%',
-                        height:'600px',
-                        frameborder:'yes',
-                        marginwidth:'10',
-                        scrolling:'yes'
-                    }).appendTo(sd);
+                    if (s.name=="Deploy") {
+                        var li = $('<li name="hack_main_'+s.name+'"></li>');
+                        li.append($('<div>').data("data", s).text(s.name)).appendTo(ul);
+                        var sd = $('<div>').attr({"id":"hack_main_"+s.name}).addClass("selected")
+                        main.append(sd);
+                        var iframe = $('<iframe>').attr({
+                            src:s.url+"&token=" + get_token(),
+                            width:'100%',
+                            height:'600px',
+                            frameborder:'yes',
+                            marginwidth:'10',
+                            scrolling:'yes'
+                        }).appendTo(sd);
+                    }
                 })
                 $("#hackathon_nav").append(ul)
 

@@ -6,7 +6,7 @@ $(document).ready(function () {
         $(this).focus();
     });
 
-    var hackathon = "bigdata-realtime-analytics"
+    var hackathon = CONFIG.hackathon.name
 
     $.ajax({
         url: '/api/user/experiment',
