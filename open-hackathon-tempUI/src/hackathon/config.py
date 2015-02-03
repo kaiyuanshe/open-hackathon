@@ -62,7 +62,7 @@ Config = {
             "scope": "scope=read"
         },
         "hackathon": {
-            "name": "bigdata-realtime-analytics",
+            "name": "openxml-sdk",
             "endpoint": HACkATHON_API_ENDPOINT
         }
     }
