@@ -1,61 +1,64 @@
-{% extends "commonRight.html" %}
-
-{% block second %}
+{% extends "commonRight.html" %} {% block second %}
 
 <link href="/static/css/square/blue.css" rel="stylesheet">
-<link href="/static/css/settings.css" rel="stylesheet">
 <script src="/static/js/jquery/jquery.icheck.min.js"></script>
 <script src="/static/js/settings.js"></script>
-{% block third %}{% endblock %}
-{% endblock %}
-
-
-{% block left %}
-
-<div class="left">
-    <div class="top" style="display:none">
-        <div style="overflow:hidden;">
-            <h3 name="hackathon-div" class="clickOn">黑客松活动指南</h3>
-
-            <h3 name="jStormApi-div">jStorm官方文档</h3>
+{% block third %}{% endblock %} {% endblock %} {% block left %}
+<div class="col-md-9 text-left ">
+    <div class="page-header">
+        <h1>请选择你所需要的环境</h1>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-4 text-center">
+            <label class="radio-inline ">
+                <img src="/static/pic/windowsr2.icon.png" alt="windows service 2012 R2" /> Windows 2012 R2
+                <input type="radio" name="web"  value="windows" checked="checked" >
+            </label>
+            <ul class="services-list">
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+            </ul>
         </div>
-        <div>
-            <div id="hackathon-div" style="width:100%;border:1px solid #888888;height:400px;display:block">
-                <iframe id="hackathon" src="http://www.huodongxing.com/event/2256565202800" width="100%" height="400px"
-                        frameborder="yes" marginwidth="10" marginheight="10" scrolling="yes"></iframe>
-            </div>
-            <div id="jStormApi-div" style="width:100%;border:1px solid #888888;height:400px;display:none">
-                <iframe id="jStormApi" src="http://www.oschina.net/p/alibaba-jstorm" width="100%" height="400px"
-                        frameborder="yes" marginwidth="10" marginheight="10" scrolling="yes" security="restricted"
-                        sandbox=""></iframe>
-            </div>
+        <div class="col-md-4  text-center">
+            <label class="radio-inline ">
+                <img src="/static/pic/ubuntn.icon.png" alt="Ubuntn Desktop" /> Ubuntn Desktop
+                <input type="radio" name="web"  value="ud">
+            </label>
+            <ul class="services-list">
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+            </ul>
+        </div>
+        <div class="col-md-4 text-center">
+            <label class="radio-inline ">
+                <img src="/static/pic/terminal.icon.png" alt="Ubuntn Terminal" /> Ubuntn Terminal
+                <input type="radio" name="web"  value="ut">
+            </label>
+            <ul class="services-list">
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+            </ul>
         </div>
     </div>
-    <div class="bottom">
-        <div style="border-bottom: 2px solid red;"><h1>请选择你所需要的环境：</h1></div>
-        <div class="environment-div">
-            <ul>
-                <li style="margin-left: 150px;"><input type="checkbox" name="JStorm" checked
-                                                       disabled/><label>JStorm</label></li>
-                <li><input type="checkbox" name="RestAPI" checked disabled/><label>RestAPI</label></li>
-            </ul>
-            <div class="webapp-div">
-                <h3>WEB APP</h3>
-                <ul>
-                    <li><input type="radio" cid="Windows" name="web" checked="checked"/><label>Windows</label></li>
-                    <li><input type="radio" cid="ud" name="web"/><label>Linux Desktop</label></li>
-                    <li><input type="radio" cid="ut" name="web"/><label>Linux Terminal</label></li>
-                </ul>
-            </div>
-            <!--<ul style="margin-top:15px">-->
-            <!--<li>Mobile APP</li>-->
-            <!--<li><input type="radio" name="web"/><label>Android</label></li>-->
-            <!--</ul>-->
-            <div style="text-align:right;">
-                <button id="submit" class="button blue">提交</button>
-            </div>
+    <div class="row form-group">
+        <div class="col-md-12 text-center">
+            <button id="submit" class="btn btn-lg btn-primary"  style="width:200px">提交</button>
         </div>
     </div>
 </div>
-
 {% endblock %}

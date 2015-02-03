@@ -1,34 +1,27 @@
-$(function(){
-    //daoJiShi();
-    var endDate=new Date(2014, 3, 16,0,00,00);//年月日时分秒，月要减去1
-    $('#timer').flipcountdown({size:"sm",
-        tick:function(){
-            var nol = function(h){
-                return h>9?h:'0'+h;
-            }
-            var now=new Date();
-            var oft=Math.round((endDate-now)/1000);
-            var ofd=parseInt(oft/3600/24);
-            var ofh=parseInt((oft%(3600*24))/3600);
-            var ofm=parseInt((oft%3600)/60);
-            var ofs=oft%60;
-            return nol(ofd)+' '+nol(ofh)+' '+nol(ofm)+' '+nol(ofs);
+$(function() {
+    var $timer = $('#end_timer');
+    var timerTmpe = '{day}天{hour}小时{minute}分钟{second}秒'
+    Countdown(endDate, function(timer) {
+        if (timer) {
+            $timer.text(timerTmpe.format(timer))
+        } else {
+            $('#timer').text('本次活动已结束，非常感谢您的参与。')
         }
-    });
+    })
 
-    $("#logout p").click(function() {
-        window.location.href="/logout";
+    $("#logout").click(function() {
+        window.location.href = "/logout";
     })
 
     hget('/api/register/list',
-        function (resp) {
+        function(resp) {
             // USER LIST
             var container = $("#userList ul")
-            var online=0
-            $.each(resp, function(i, r){
+            var online = 0
+            $.each(resp, function(i, r) {
                 register = $.parseJSON(r)
                 var state = $("<div/>").addClass("circle");
-                if (register.online==1){
+                if (register.online == 1) {
                     state.addClass("online")
                     online = online + 1
                 }
@@ -37,23 +30,20 @@ $(function(){
             });
 
             // user statistics
-            $("#registered_count").html("<h4>注册人数:"+ resp.length +"</h4>")
-            $("#online_count").html("<h4>在线人数:"+ online +"</h4>")
+            $("#registered_count").html("<h4>注册人数:" + resp.length + "</h4>")
+            $("#online_count").html("<h4>在线人数:" + online + "</h4>")
         },
-        function () {
-        }
+        function() {}
     );
 
-    setInterval(function(){
+    setInterval(function() {
         hget('/api/bulletin',
-            function (resp) {
+            function(resp) {
                 anmt = $.parseJSON(resp)
                 $("#anmt").text(anmt.content)
             },
-            function () {
-            }
+            function() {}
         );
-    }, 3*60*1000);
+    }, 3 * 60 * 1000);
 
 })
-
