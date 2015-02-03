@@ -62,7 +62,7 @@ Config = {
             "scope": "scope=read"
         },
         "hackathon": {
-            "name": "openxml-sdk",
+            "name": "open-xml-sdk",
             "endpoint": HACkATHON_API_ENDPOINT
         }
     }
