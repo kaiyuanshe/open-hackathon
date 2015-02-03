@@ -2,19 +2,43 @@ __author__ = 'root'
 
 # -*- coding:utf8 -*-
 # encoding = utf-8
-from functions import get_remote, get_config, convert, post_to_remote
+from functions import get_remote, get_config, post_to_remote
+import urllib2
 from log import log
 import json
-from config import *
-from constants import *
+from flask import redirect, url_for
+
+hackathon_api_url = get_config("hackathon-api/endpoint")
+
+
+class LoginUser:
+    def __init__(self, **kwargs):
+        self.id = kwargs["id"]
+        self.name = kwargs["name"]
+        self.nickname = kwargs["nickname"]
+        self.avatar_url = kwargs["avatar_url"]
+
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return unicode(self.id)
+
 
 class QQLogin():
     def login(self, args):
         code = args.get('code')
         state = "openhackathon"
         # if state != QQ_OAUTH_STATE:
-        #    log.warn("STATE match fail. Potentially CSFR.")
-        #    return "UnAuthorized", 401
+        # log.warn("STATE match fail. Potentially CSFR.")
+        # return "UnAuthorized", 401
 
         # get access token
         token_resp = get_remote(get_config("login/qq/access_token_url") + code + '&state=' + state)
@@ -25,7 +49,7 @@ class QQLogin():
         # get user info
         data = {"provider": "qq", "access_token": access_token}
         # url = get_config("login/qq/user_info_url") % (access_token, client_id, openid)
-        return post_to_remote('http://osslab.msopentech.cn:15000/api/user/login', data)
+        return post_to_remote('%s/api/user/login' % hackathon_api_url, data)
 
 
 class GithubLogin():
@@ -43,7 +67,7 @@ class GithubLogin():
         # conn.request('GET',url,'',{'user-agent':'flask'})
         log.debug("get token info from github")
         data = {"provider": "github", "code": code, "access_token": access_token}
-        return post_to_remote('http://osslab.msopentech.cn:15000/api/user/login', data)
+        return post_to_remote('%s/api/user/login' % hackathon_api_url, data)
         # example:
         #
         # {"login":"juniwang","id":8814383,"avatar_url":"https://avatars.githubusercontent.com/u/8814383?v=3","gravatar_id":"",
@@ -64,7 +88,24 @@ class GithubLogin():
         #
 
 
+class GitcafeLogin():
+    def login(self, args):
+        code = args.get('code')
+        url = get_config('login/gitcafe/access_token_url') + code
+        opener = urllib2.build_opener(urllib2.HTTPHandler)
+        request = urllib2.Request(url, "")
+        # req = requests.post(url, verify=True)
+        resp = opener.open(request)
+        # log.debug("get token from gitcafe:" + resp.read())
+        token_resp = json.loads(resp.read())
+        # token_resp = json.loads(resp.read())
+        # token_resp = req.content()
+        data = {"provider": "gitcafe", "access_token": token_resp['access_token']}
+        return post_to_remote('%s/api/user/login' % hackathon_api_url, data)
+
+
 login_providers = {
     "github": GithubLogin(),
-    "qq": QQLogin()
+    "qq": QQLogin(),
+    "gitcafe": GitcafeLogin()
 }

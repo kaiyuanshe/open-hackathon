@@ -1,12 +1,14 @@
 # -*- coding:utf8 -*-
 # encoding = utf-8
 import sys
+import urllib2
 
 sys.path.append("..")
 from hackathon.functions import get_remote, get_config, convert
 from hackathon.log import log
 import json
 from . import user_manager
+import requests
 
 from hackathon.constants import OAUTH_PROVIDER
 
@@ -21,17 +23,6 @@ class LoginProviderBase():
 
 class QQLogin(LoginProviderBase):
     def login(self, args):
-        # code = args.get('code')
-        # state = args.get('state')
-        # if state != QQ_OAUTH_STATE:
-        #    log.warn("STATE match fail. Potentially CSFR.")
-        #    return "UnAuthorized", 401
-
-        # get access token
-        # token_resp = get_remote(get_config("login/qq/access_token_url") + code + '&state=' + state)
-        # log.debug("get token from qq:" + token_resp)
-        # start = token_resp.index('=')
-        # end = token_resp.index('&')
         access_token = args['access_token']
         # get openID.
         openid_resp = get_remote(get_config("login/qq/openid_url") + access_token)
@@ -48,12 +39,14 @@ class QQLogin(LoginProviderBase):
         user_info_resp = get_remote(url)
         log.debug("get user info from qq:" + user_info_resp)
         user_info = convert(json.loads(user_info_resp))
-
+        email_info = [
+            {'name': user_info["nickname"], 'email': None, 'id': id, 'verified': 1, 'primary': 1,
+             'nickname': user_info["nickname"], 'avatar_url': user_info["figureurl"]}]
         user_with_token = user_manager.db_login(openid,
                                                 name=user_info["nickname"],
                                                 nickname=user_info["nickname"],
                                                 access_token=access_token,
-                                                email=None,
+                                                email_info=email_info,
                                                 avatar_url=user_info["figureurl"])
 
         # login flask
@@ -99,11 +92,9 @@ class GithubLogin(LoginProviderBase):
         # get user primary email
         email_info_resp = get_remote(get_config('login/github/emails_info_url') + access_token)
         log.debug("get email from github:" + email_info_resp + '\n')
-        #email_info include all user email provided by github
-        #email is user's primary email
+        # email_info include all user email provided by github
+        # email is user's primary email
         email_info = json.loads(email_info_resp)
-        
-        
 
         user_with_token = user_manager.db_login(openid,
                                                 name=name,
@@ -121,8 +112,42 @@ class GithubLogin(LoginProviderBase):
         return detail
 
 
+class GitcafeLogin(LoginProviderBase):
+    def login(self, args):
+        token = args.get('access_token')
+        value = "Bearer " + token
+        header = {"Authorization": value}
+        opener = urllib2.build_opener(urllib2.HTTPHandler)
+        request = urllib2.Request("https://api.s.gitcafe.org/api/v1/user")
+        request.add_header("Authorization", value)
+        user_info = opener.open(request)
+        # log.info(user_info.read())
+        info = json.loads(user_info.read())
+        # log.info(info)
+        name = info['username']
+        email = info['email']
+        id = info['id']
+        nickname = info['fullname']
+        avatar_url = info['avatar_url']
+        email_info = [
+            {'name': name, 'email': email, 'id': id, 'verified': 1, 'primary': 1, 'nickname': nickname,
+             'avatar_url': avatar_url}]
+        user_with_token = user_manager.db_login(id,
+                                                name=name,
+                                                nickname=nickname,
+                                                access_token=token,
+                                                email_info=email_info,
+                                                avatar_url=avatar_url)
+        user = user_with_token["user"]
+        log.info("gitcafe user login successfully:" + repr(user))
+
+        detail = user_manager.get_user_detail_info(user)
+        detail["token"] = user_with_token["token"].token
+        return detail
+
 
 login_providers = {
     OAUTH_PROVIDER.GITHUB: GithubLogin(),
-    OAUTH_PROVIDER.QQ: QQLogin()
+    OAUTH_PROVIDER.QQ: QQLogin(),
+    OAUTH_PROVIDER.GITCAFE: GitcafeLogin()
 }

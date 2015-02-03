@@ -20,7 +20,7 @@ $(function(){
         window.location.href="/logout";
     })
 
-    hget('/api/registerlist',
+    hget('/api/register/list',
         function (resp) {
             // USER LIST
             var container = $("#userList ul")
@@ -45,7 +45,7 @@ $(function(){
     );
 
     setInterval(function(){
-        hget('/api/announcement',
+        hget('/api/bulletin',
             function (resp) {
                 anmt = $.parseJSON(resp)
                 $("#anmt").text(anmt.content)

@@ -83,7 +83,8 @@ class UserManager(object):
                 primary_email = email_info[n]['primary']
                 verified = email_info[n]['verified']
                 if self.db.find_first_object(UserEmail, email=email) is None:
-                    useremail = UserEmail(kwargs['name'], email, primary_email, verified, user)
+                    useremail = UserEmail(name=kwargs['name'], email=email, primary_email=primary_email,
+                                          verified=verified, user=user)
                     self.db.add_object(useremail)
             self.db.commit()
         else:
@@ -101,7 +102,8 @@ class UserManager(object):
                 email = n['email']
                 primary_email = n['primary']
                 verified = n['verified']
-                useremail = UserEmail(kwargs['name'], email, primary_email, verified, user)
+                useremail = UserEmail(name=kwargs['name'], email=email, primary_email=primary_email,
+                                      verified=verified, user=user)
                 self.db.add_object(useremail)
                 self.db.commit()
 
@@ -124,6 +126,13 @@ class UserManager(object):
             g.user = user
             return True
         return False
+
+    def get_user_by_id(self, user_id):
+        user = self.db.find_first_object(User, id=user_id)
+        if user is not None:
+            return self.get_user_info(user)
+        else:
+            return "Not found", 404
 
     def get_user_info(self, user):
         return {

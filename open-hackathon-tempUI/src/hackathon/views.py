@@ -1,14 +1,14 @@
-from datetime import timedelta
-from os.path import realpath, dirname
-import os
-
-from flask import Response, render_template, abort, request
+from flask import Response, render_template, abort, request, session, g, redirect
 from . import *
 from log import log
 import json
-from hackathon.functions import get_config
-from login import login_providers
-from flask_restful import Resource
+from functions import get_config, delete_remote, get_remote
+from login import login_providers, LoginUser
+from flask_login import login_required, current_user, logout_user, login_user
+from datetime import timedelta
+
+session_lifetime_minutes = 60
+PERMANENT_SESSION_LIFETIME = timedelta(minutes=session_lifetime_minutes)
 
 Template_Routes = {
     "PrivacyStatement": "PrivacyStatement.html",
@@ -22,10 +22,21 @@ Template_Routes = {
     "redirect": "redirect.html",
     "notregister": "notregister.html",
     "settings": "settings.html",
-    "hackathon": "hackathon.html",
-    "github": "github.html",
-    "qq": "qq.html"
+    "hackathon": "hackathon.html"
 }
+
+
+@login_manager.user_loader
+def load_user(id):
+    ur = get_remote("%s/api/user?uid=%d" % (get_config("hackathon-api/endpoint"), int(id)))
+    ur = json.loads(ur)
+    return LoginUser(id=ur["id"], name=ur["name"], nickname=ur["nickname"], avatar_url=ur["avatar_url"])
+
+
+@app.before_request
+def before_request():
+    g.user = current_user
+    app.permanent_session_lifetime = timedelta(minutes=session_lifetime_minutes)
 
 
 def simple_route(path):
@@ -59,6 +70,7 @@ def internal_error(error):
 
 
 @app.route('/<path:path>')
+@login_required
 def template_routes(path):
     return simple_route(path)
 
@@ -72,15 +84,45 @@ def js_config():
     return resp
 
 
-class Get_login(Resource):
-    def post(self):
-        body = request.get_json()
-        provider = body["provider"]
-        return login_providers[provider].login(body)
+def __login(provider):
+    code = request.args.get('code')
+    login_result = login_providers[provider].login({
+        "code": code
+    })
+    user = LoginUser(id=login_result["id"],
+                     name=login_result["name"],
+                     avatar_url=login_result["avatar_url"],
+                     nickname=login_result["nickname"])
+    login_user(user)
+    session["token"] = login_result["token"]
+    if len(login_result['experiments']) > 0:
+        return redirect("hackathon")
+    else:
+        return redirect("settings")
 
-api.add_resource(Get_login, "/ui/login")
+
+@app.route('/qq')
+def qq_login():
+    return __login("qq")
 
 
-# @app.route('/ui/login')
+@app.route('/github')
+def github_login():
+    return __login("github")
 
 
+@app.route('/gitcafe')
+def gitcafe_login():
+    return __login("gitcafe")
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    url = "%s/api/user/login?uid=%d" % (get_config("hackathon-api/endpoint"), g.user.id)
+    delete_remote(url, {
+        "token": session["token"]
+    })
+    session.pop("token")
+    logout_user()
+    return redirect("index")
