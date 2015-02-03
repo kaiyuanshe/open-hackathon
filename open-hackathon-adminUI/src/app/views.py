@@ -48,8 +48,16 @@ class AnotherAdminView(HackathonAdminBaseView):
         return True
 
 
+class AdminLoginView(AdminIndexView):
+    @expose('/')
+    def index(self):
+        return self.render_admin('login.html')
+
+
 admin = Admin(name="Open Hackathon Admin Console",base_template='admin/osslayout.html',index_view=HomeView())
 admin.init_app(app)
-
 admin.add_view(MyAdminView(name="view1", category='Test'))
 admin.add_view(AnotherAdminView(name="view2", category='Test'))
+
+
+
