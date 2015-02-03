@@ -38,13 +38,13 @@ a {
     display: inline-block;
     vertical-align: middle;
 }
-.navbar-inverse .navbar-nav>li>a{
+.navbar-inverse .navbar-nav>li>a {
     color: #fff;
     font-size: 16px;
     line-height: 60px;
 }
-.navbar-inverse .navbar-nav>li>a:hover{
-    color:#00abec;
+.navbar-inverse .navbar-nav>li>a:hover {
+    color: #00abec;
 }
 .radio-inline, .checkbox-inline {
     padding-left: 0;
@@ -155,4 +155,10 @@ a {
 }
 .btn img {
     width: 30px;
+}
+.services-list {
+    text-align: left;
+    list-style: none;
+    margin-top: 20px;
+    line-height: 30px;
 }

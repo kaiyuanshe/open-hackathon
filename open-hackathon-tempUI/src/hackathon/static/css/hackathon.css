@@ -10,6 +10,7 @@ body {
 }
 .work-fluid {
     position: absolute;
+    padding: 0 0 0 5px;
     top: 90px;
     bottom: 60px;
     left: 250px;
@@ -30,8 +31,8 @@ body {
     word-break: normal;
     overflow-y: auto;
     z-index: 10;
-    -webkit-box-shadow: px 0px 0px rgba(0, 0, 0, 0.12);
-    box-shadow: 5px 0px 0px rgba(0, 0, 0, 0.12);
+    -webkit-box-shadow: 5px 0px 0px rgba(0, 0, 0, 0.4);
+    box-shadow: 5px 0px 0px rgba(0, 0, 0, 0.4);
     -webkit-transition: all 500ms ease;
     -moz-transition: all 500ms ease;
     -ms-transition: all 500ms ease;
@@ -56,4 +57,14 @@ body {
 }
 .vm-box img {
     height: 100px;
+}
+.center{
+    position: relative;
+    display: table;
+    width: 100%;
+    height: 100%;
+}
+.center iframe{
+    position: absolute;
+    top:0;
 }

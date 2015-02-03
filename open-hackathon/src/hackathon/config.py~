@@ -38,7 +38,7 @@ Config = {
         "managementServiceHostBase": "management.core.chinacloudapi.cn"
     },
     "guacamole": {
-        "host": "http://osslab.cloudvm.cn:8080"
+        "host": "http://localhost:8080"
     }
 }
 

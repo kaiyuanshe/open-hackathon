@@ -20,6 +20,8 @@
                     <ul class="dropdown-menu" role="menu">
                         <li><a href="#">{{current_user.nickname}}</a>
                         </li>
+                        <li><a target="_blank" href="http://www.huodongxing.com/event/2256565202800">黑客松活动指南</a>
+                        </li>
                         <li><a id="logout" href="#">登出</a>
                         </li>
                     </ul>
@@ -34,11 +36,7 @@
         <div class="row  form-group">
             {% block left %}{% endblock %}
             <div class="col-md-3">
-                <h4><a target="_blank" href="http://www.huodongxing.com/event/2256565202800">黑客松活动指南</a></h4>
-                <h4><a target="_blank" href="https://github.com/alibaba/jstorm/wiki/JStorm-Chinese-Documentation">jStorm官方文档</a></h4>
-                <h4 style="margin-top: 0px;">距离hackathon结束还有：</h4>
-
-                <div id="timer" style="float:left"></div>
+                <h4 style="margin-top: 0px;" id="timer">距离hackathon结束还有：  <div id="end_timer" style="float:left"></div></h4>
                 <h3>参赛人员</h3>
                 <ul>
                 </ul>

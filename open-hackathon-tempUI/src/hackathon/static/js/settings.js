@@ -1,32 +1,18 @@
-
-$(function(){
-    $('input').iCheck({
+$(function() {
+    var list = $('.services-list').hide().eq(0).show();
+    $('input:radio').iCheck({
         checkboxClass: 'icheckbox_square-blue',
         radioClass: 'iradio_square-blue',
         increaseArea: '20%' // optional
+    }).on('ifChecked', function(event) {
+        var parent = $(this).parents('.text-center');
+        list.hide();
+        list= parent.find('ul');
+        list.show();
     });
-    $("#rightSide").height($("body").height());
-
-    $(".left .top div h3").each(function (i) {
-        $(this).click(function () {
-            /*if($("#hackathon-div").css("display")=="block"){
-                        $(this).siblings().slideUp("slow");
-                        $(".center .bottom").children().children().attr("height","500px");
-                    }
-                    else{
-                        $(this).siblings().slideDown("slow");
-                        $(".center .bottom").children().children().attr("height","380px");
-                    }*/
-            $(this).attr('class', 'clickOn');
-            $(this).siblings().attr("class", "");
-            $("#" + $(this).attr("name")).css("display", "block")
-            $("#" + $(this).attr("name")).siblings().css("display", "none")
-        });
-    })
-
-    $("#submit").click(function(){
-        cid = $(".webapp-div input:checked").attr("cid")
-        window.location.href = "hackathon?cid=" + cid
+    $("#submit").click(function() {
+        var radio = $('input:radio:checked');
+        var cid = radio.val();
+        window.location.href = "/hackathon?hackathon=" + CONFIG.hackathon.name + "&cid=" + cid
     });
 });
-

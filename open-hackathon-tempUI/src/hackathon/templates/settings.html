@@ -4,61 +4,61 @@
 <script src="/static/js/jquery/jquery.icheck.min.js"></script>
 <script src="/static/js/settings.js"></script>
 {% block third %}{% endblock %} {% endblock %} {% block left %}
-
 <div class="col-md-9 text-left ">
     <div class="page-header">
         <h1>请选择你所需要的环境</h1>
     </div>
     <div class="row form-group">
-        <div class="col-md-4 col-md-offset-3">
-            <label class="checkbox-inline">
-                <input type="checkbox" id="JStorm" value="option1" checked disabled> JStorm
+        <div class="col-md-4 text-center">
+            <label class="radio-inline ">
+                <img src="/static/pic/windowsr2.icon.png" alt="windows service 2012 R2" /> Windows 2012 R2
+                <input type="radio" name="web" cid="Windows" value="Windows" checked="checked" >
             </label>
+            <ul class="services-list">
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+            </ul>
         </div>
-        <div class="col-md-4">
-            <label class="checkbox-inline">
-                <input type="checkbox" id="RestAPI" value="option2" checked disabled> RestAPI
+        <div class="col-md-4  text-center">
+            <label class="radio-inline ">
+                <img src="/static/pic/ubuntn.icon.png" alt="Ubuntn Desktop" /> Ubuntn Desktop
+                <input type="radio" name="web" cid="ubuntn" value="ubuntn">
             </label>
+            <ul class="services-list">
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+            </ul>
+        </div>
+        <div class="col-md-4 text-center">
+            <label class="radio-inline ">
+                <img src="/static/pic/terminal.icon.png" alt="Ubuntn Terminal" /> Ubuntn Terminal
+                <input type="radio" name="web" cid="Terminal" value="Terminal">
+            </label>
+            <ul class="services-list">
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+                <li>dfsadfadsfadf</li>
+            </ul>
         </div>
     </div>
     <div class="row form-group">
-        <div class="col-md-3 text-center">
-            <label class="checkbox-inline"> <strong>WEB APP</strong> </label>
-        </div>
-        <div class="col-md-4  ">
-            <label class="radio-inline">
-                <input type="radio" name="web" id="ubuntu" value="option1"> Ubuntu(空操作系统)
-            </label>
-        </div>
-    </div>
-    <div class="row form-group">
-        <div class="col-md-4 col-md-offset-3">
-            <label class="radio-inline">
-                <input type="radio" name="web" id="python" value="option2"> python/flask
-            </label>
-        </div>
-    </div>
-    <div class="row form-group">
-        <div class="col-md-4 col-md-offset-3">
-            <label class="radio-inline">
-                <input type="radio" name="web" id="rails" value="option3"> ruby/rails
-            </label>
-        </div>
-    </div>
-    <div class="row form-group">
-        <div class="col-md-4 col-md-offset-3">
-            <label class="radio-inline">
-                <input type="radio" name="web" id="mean" value="option3"> JavaScript/MEAN
-            </label>
-        </div>
-    </div>
-    <div class="row form-group">
-        <div class="col-md-8 col-md-offset-3">
-            <button id="submit" class="btn  btn-primary">提交</button>
+        <div class="col-md-12 text-center">
+            <button id="submit" class="btn btn-lg btn-primary"  style="width:200px">提交</button>
         </div>
     </div>
 </div>
-
-
-
 {% endblock %}
