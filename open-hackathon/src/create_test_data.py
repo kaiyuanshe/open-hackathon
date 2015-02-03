@@ -25,7 +25,12 @@ db.session.add(amt)
 h = Hackathon("bigdata-realtime-analytics", 1)
 db.session.add(h)
 
-r = Register(hackathon=h, register_name="junbo", email="juniwang@microsoft.com")
-db.session.add(r)
+db.session.add(Template(hackathon=h, name='ubuntu'))
+db.session.add(Template(hackathon=h, name='rails'))
+db.session.add(Template(hackathon=h, name='mean'))
+db.session.add(Template(hackathon=h, name='python'))
+
+db.session.add(Register(hackathon=h, register_name="xxzhe", email="zhengxx012@gmail.com"))
+db.session.add(Register(hackathon=h, register_name="junbo", email="juniwang@microsoft.com"))
 
 db.session.commit()
