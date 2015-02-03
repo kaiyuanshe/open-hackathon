@@ -1,5 +1,4 @@
 import sys
-from samba.dcerpc.nbt import db_change_info
 import email
 import os
 
@@ -37,7 +36,6 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50))
     nickname = db.Column(db.String(50))
-    # email = db.Column(db.String(50)) put into a new sheet
     openid = db.Column(db.String(100))
     avatar_url = db.Column(db.String(200))
     slug = db.Column(db.String(50), unique=True, nullable=False)  # can be used for branch name of github
@@ -52,6 +50,7 @@ class User(db.Model, UserMixin):
     def json(self):
         return to_json(self, self.__class__)
 
+
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
         if self.create_time is None:
@@ -60,6 +59,7 @@ class User(db.Model, UserMixin):
             self.last_login_time = datetime.utcnow()
         if self.slug is None:
             self.slug = str(uuid.uuid1())[0:8]  # todo generate a real slug
+
 
     def __repr__(self):
         return "User: " + self.json()
