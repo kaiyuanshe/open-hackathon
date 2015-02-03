@@ -148,7 +148,6 @@ class Hackathon(db.Model):
     def json(self):
         return to_json(self, self.__class__)
 
-    # e,g,:DockerHostServer('oss-docker-vm1', 'osslab1.chinacloudapp.cn', 8001, '10.207.250.79', 80, 0, 100)
     def __init__(self, name, sponsor, create_time=None):
         if create_time is None:
             create_time = datetime.utcnow()
@@ -173,7 +172,6 @@ class DockerHostServer(db.Model):
     def json(self):
         return to_json(self, self.__class__)
 
-    # e,g,:DockerHostServer('oss-docker-vm1', 'osslab1.chinacloudapp.cn', 8001, '10.207.250.79', 80, 0, 100)
     def __init__(self, **kwargs):
         super(DockerHostServer, self).__init__(**kwargs)
 
