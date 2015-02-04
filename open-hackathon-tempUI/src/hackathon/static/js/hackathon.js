@@ -1,4 +1,7 @@
 $(document).ready(function() {
+
+    var ifrem = $();
+
     var cid = getParameterByName("cid");
     if (!cid || typeof(cid) == "undefined")
         cid = "ut"
@@ -11,12 +14,26 @@ $(document).ready(function() {
         if (timer) {
             $timer.text(timerTmpe.format(timer))
         } else {
-            $('#timer').text('本次活动以结束，非常感谢您的参与。')
+            $('#timer').text('本次活动已结束，非常感谢您的参与。')
         }
     })
-    var hackathon = CONFIG.hackathon.name
+    api_stat(function(data) {
+        var str = '  <h4 class="text-center">在线人数：<span>{online} </span> 参赛人数：<span>{total}</span></h4>';
+        $('#stat').html(str.format(data));
+    })
+    $('.nav a[data-action="fullscreen"]').bind('click', function(e) {
+        $('.center iframe[class!="invisible"]').addClass('work-full')
+    });
+    $(document, 'html,body,iframe').keydown(function(e) {
+        e = window.event || e || e.which;
+        if (e.ctrlKey && e.which == 113) {
+            ifrem.toggleClass('work-full');
+            e.preventDefault()
+            return false;
+        }
+    });
 
-    function checkstart(id,callback) {
+    function checkstart(id, callback) {
         setTimeout(loopstart);
 
         function loopstart() {
@@ -37,7 +54,7 @@ $(document).ready(function() {
 
     hpost('/api/user/experiment', {
             "cid": cid,
-            "hackathon": hackathon
+            "hackathon": CONFIG.hackathon.name
         },
         function(resp) {
             var data = resp
@@ -49,24 +66,20 @@ $(document).ready(function() {
                             <h4>{name}<h4>\
                         </div>\
                     </div>';
-
-            checkstart(data.expr_id,function(data) {
+            checkstart(data.expr_id, function(data) {
                 var servers = data.guacamole_servers;
                 var work_center = $('.center');
                 var hnav = $(".hackathon-nav").on('click', 'a.vm-box', function(e) {
-                    var a = $(this);
+                    hnav.find('.vm-box').removeClass('active')
+                    var a = $(this).addClass('active');
                     var url = a.data('url');
                     var name = a.attr('id')
-                    var ifrem = work_center.find('#' + name);
-                    work_center.find('iframe').css({
-                        visibility: 'hidden'
-                    });
+                    ifrem = work_center.find('#' + name);
+                    work_center.find('iframe').addClass('invisible');
                     if (ifrem.length > 0) {
-                        ifrem.css({
-                            visibility: 'visible'
-                        });
+                        ifrem.removeClass('invisible');
                     } else {
-                        work_center.append($('<iframe>').attr({
+                        ifrem = $('<iframe>').attr({
                             src: url + "&token=" + get_token(),
                             id: name,
                             width: '100%',
@@ -74,16 +87,14 @@ $(document).ready(function() {
                             frameborder: 'yes',
                             marginwidth: '10',
                             scrolling: 'yes'
-                        }))
+                        }).appendTo(work_center)
                     }
                 });
-
                 $.each(servers, function(i, s) {
                     hnav.append(tmpe.format(s));
-                })
+                });
                 hnav.find('a.vm-box:eq(0)').trigger('click');
             })
-
         },
         function() {
 
