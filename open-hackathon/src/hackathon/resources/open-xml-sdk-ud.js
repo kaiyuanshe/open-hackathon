@@ -1,6 +1,6 @@
 {
     "expr_name": "jstrom hackathon_ubuntu",
-    "containers": [
+    "virtual_environments": [
         {
             "provider": "docker",
             "name": "web",
@@ -8,7 +8,6 @@
             "ports":[{
                 "name": "website",
                 "port": 80,
-                "host_port": 80,
                 "public": true
             },{
                 "name": "Deploy",
