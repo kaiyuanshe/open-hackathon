@@ -35,9 +35,9 @@ class AzureImpl():
             return False
         return True
 
-    def create_async(self, user_template):
+    def create_async(self, user_template, vm_id):
         try:
-            p = Process(target=self.create_sync, args=(user_template,))
+            p = Process(target=self.create_sync, args=(user_template, vm_id))
             p.start()
         except Exception as e:
             log.error(e)
@@ -71,7 +71,7 @@ class AzureImpl():
             return False
         return True
 
-    def create_sync(self, user_template):
+    def create_sync(self, user_template, vm_id):
         """
         Create virtual machines according to given user template (assume all fields needed are in template)
         1. Load template from json into dictionary
@@ -84,7 +84,7 @@ class AzureImpl():
         """
         self.user_template = user_template
         user_operation_commit(self.user_template, CREATE, START)
-        self.template_config = load_template(user_template, CREATE)
+        self.template_config = load_template(user_template, CREATE, vm_id)
         if self.template_config is None:
             return False
         if not AzureStorage(self.sms, self.user_template, self.template_config).create_storage_account():

@@ -313,7 +313,7 @@ class ExprManager(object):
             expr.status = ExprStatus.Starting
             db_adapter.commit()
             # start create azure vm according to user template
-            if not azure.create_async(user_template):
+            if not azure.create_async(user_template, expr.id):
                 m = 'failed creating azure vm'
                 log.error(m)
                 return m

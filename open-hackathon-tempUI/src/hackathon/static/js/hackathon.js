@@ -1,7 +1,7 @@
 $(document).ready(function() {
     var cid = getParameterByName("cid");
     if (!cid || typeof(cid) == "undefined")
-        cid = "ubuntu"
+        cid = "ut"
     var main = $("#hack_main").on('mouseover', 'iframe', function(e) {
         $(this).focus();
     });
@@ -22,7 +22,7 @@ $(document).ready(function() {
         function loopstart() {
             hget('/api/user/experiment?id=' + id,
                 function(data) {
-                    if (data.guacamole_status) {
+                    if (data.status == 2) { // expr is running
                         callback(data)
                     } else {
                         setTimeout(loopstart, 60000);
@@ -49,42 +49,41 @@ $(document).ready(function() {
                             <h4>{name}<h4>\
                         </div>\
                     </div>';
-            if (servers.length > 0) {
-                checkstart(data.expr_id,function(data) {
-                    var servers = data.guacamole_servers;
-                    var work_center = $('.center');
-                    var hnav = $(".hackathon-nav").on('click', 'a.vm-box', function(e) {
-                        var a = $(this);
-                        var url = a.data('url');
-                        var name = a.attr('id')
-                        var ifrem = work_center.find('#' + name);
-                        work_center.find('iframe').css({
-                            visibility: 'hidden'
-                        });
-                        if (ifrem.length > 0) {
-                            ifrem.css({
-                                visibility: 'visible'
-                            });
-                        } else {
-                            work_center.append($('<iframe>').attr({
-                                src: url + "&token=" + get_token(),
-                                id: name,
-                                width: '100%',
-                                height: '100%',
-                                frameborder: 'yes',
-                                marginwidth: '10',
-                                scrolling: 'yes'
-                            }))
-                        }
+
+            checkstart(data.expr_id,function(data) {
+                var servers = data.guacamole_servers;
+                var work_center = $('.center');
+                var hnav = $(".hackathon-nav").on('click', 'a.vm-box', function(e) {
+                    var a = $(this);
+                    var url = a.data('url');
+                    var name = a.attr('id')
+                    var ifrem = work_center.find('#' + name);
+                    work_center.find('iframe').css({
+                        visibility: 'hidden'
                     });
-                    hnav.find('a.vm-box:eq(0)').trigger('click');
-                    $.each(servers, function(i, s) {
-                        if (s.name == "Deploy") {
-                            hnav.append(tmpe.format(s));
-                        }
-                    })
+                    if (ifrem.length > 0) {
+                        ifrem.css({
+                            visibility: 'visible'
+                        });
+                    } else {
+                        work_center.append($('<iframe>').attr({
+                            src: url + "&token=" + get_token(),
+                            id: name,
+                            width: '100%',
+                            height: '100%',
+                            frameborder: 'yes',
+                            marginwidth: '10',
+                            scrolling: 'yes'
+                        }))
+                    }
+                });
+
+                $.each(servers, function(i, s) {
+                    hnav.append(tmpe.format(s));
                 })
-            }
+                hnav.find('a.vm-box:eq(0)').trigger('click');
+            })
+
         },
         function() {
 
