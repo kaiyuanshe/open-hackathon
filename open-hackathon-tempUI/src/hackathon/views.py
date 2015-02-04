@@ -1,4 +1,4 @@
-from flask import Response, render_template, abort, request, session, g, redirect
+from flask import Response, render_template, abort, request, session, g, redirect, make_response
 from . import *
 from log import log
 import json

@@ -3,9 +3,10 @@
 
 '''not necessary for Production environment'''
 
-from hackathon.database import db
+from hackathon.database import *
 from hackathon.database.models import *
-
+from hackathon.log import *
+from hackathon.enum import *
 
 # vm = DockerHostServer(vm_name="localhost", public_dns="localhost", public_docker_api_port=8001, private_ip="10.0.2.15",
 # private_docker_api_port=8001, container_count=0, container_max_count=100)
@@ -14,28 +15,40 @@ from hackathon.database.models import *
 #                       container_count=0, container_max_count=100)
 # db.session.add(vm)
 
-localhost = DockerHostServer(vm_name="localhost", public_dns="localhost", public_docker_api_port=8001,
+db_adapter.add_object_kwargs(DockerHostServer,
+                             vm_name="localhost",
+                             public_dns="localhost",
+                             public_docker_api_port=8001,
                              private_ip="10.0.2.15",
-                             private_docker_api_port=8001, container_count=0, container_max_count=100)
-db.session.add(localhost)
+                             private_docker_api_port=8001,
+                             container_count=0,
+                             container_max_count=100)
 
-amt = Announcement("欢迎访问开放黑客松平台")
-db.session.add(amt)
+db_adapter.add_object_kwargs(Announcement, content="欢迎访问开放黑客松平台")
 
-h = Hackathon(anme="bigdata-realtime-analytics")
-db.session.add(h)
-db.session.add(Template(hackathon=h, name='ubuntu'))
-db.session.add(Template(hackathon=h, name='rails'))
-db.session.add(Template(hackathon=h, name='mean'))
-db.session.add(Template(hackathon=h, name='python'))
+hackathon_name = 'open-xml-sdk'
+h = db_adapter.add_object_kwargs(Hackathon, name=hackathon_name, sponsor=1)
 
-h2 = Hackathon(name="open-xml-sdk")
-db.session.add(h2)
-db.session.add(Template(hackathon=h2, name='ut'))
-db.session.add(Template(hackathon=h2, name='ud'))
-db.session.add(Template(hackathon=h2, name='windows'))
+db_adapter.add_object_kwargs(Register, hackathon=h, register_name="Yifu Huang", email="ifhuang91@gmail.com")
+db_adapter.add_object_kwargs(Register, hackathon=h, register_name="xxzhe", email="zhengxx012@gmail.com")
+db_adapter.add_object_kwargs(Register, hackathon=h, register_name="junbo", email="juniwang@microsoft.com")
 
-db.session.add(Register(hackathon=h, register_name="xxzhe", email="zhengxx012@gmail.com"))
-db.session.add(Register(hackathon=h, register_name="junbo", email="juniwang@microsoft.com"))
+# add public templates to database
+template_dir = 'hackathon/resources'
+if not os.path.isdir(template_dir):
+    log.error('template dir %s is not exist' % template_dir)
+    sys.exit(1)
+template_files = os.listdir(template_dir)
+if template_files is None:
+    log.error('template dir %s is empty' % template_dir)
+    sys.exit(1)
+for template_file in template_files:
+    if hackathon_name in template_file:
+        name = template_file.replace(hackathon_name+'-', '').replace('.js', '')
+        template_url = os.getcwd() + os.path.sep + template_dir + os.path.sep + template_file
+        provider = VirtualEnvironmentProvider.Docker
+        if name == 'windows':
+            provider = VirtualEnvironmentProvider.AzureVM
+        db_adapter.add_object_kwargs(Template, hackathon=h, name=name, url=template_url, provider=provider)
 
-db.session.commit()
+db_adapter.commit()

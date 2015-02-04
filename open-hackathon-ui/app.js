@@ -13,7 +13,7 @@ app.enable('trust proxy')
 app.use(express.static(__dirname + '/.tmp'))
 app.use('/bower_components', express.static('./bower_components'))
 app.use(express.static(__dirname + '/app'))
-app.use(log4js.connectLogger(path.join(__dirname, 'log4js.json')))
+//app.use(log4js.connectLogger(path.join(__dirname, 'log4js.json')))
 app.use(cookieParser())
 app.use(bodyParser.urlencoded({
     extended: true
@@ -38,9 +38,9 @@ app.get('/clearcookie', function(req, res) {
 })
 
 app.listen(port, config.hostname, function() {
-    log4js.worker().error('start ' + config.hostname + ', started on prot ' + port);
+   //log4js.worker().info('start ' + config.hostname + ', started on prot ' + port);
 })
 
 process.on('uncaughtEExeption', function(err) {
-    log4js.worker().error('Error caught in uncaughtException event:', err);
+    //log4js.worker().error('Error caught in uncaughtException event:', err);
 })
