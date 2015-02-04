@@ -12,20 +12,12 @@ from hackathon.azureautodeploy.azureImpl import AzureImpl
 from hackathon.azureautodeploy.azureUtil import *
 
 docker = OssDocker()
-OSSLAB_RUN_DIR = "/var/lib/osslab"
 azure = AzureImpl()
 sub_id = get_config("azure/subscriptionId")
 cert_path = get_config('azure/certPath')
 service_host_base = get_config("azure/managementServiceHostBase")
 azure.connect(sub_id, cert_path, service_host_base)
 uo_id = 0
-
-
-def course_path(id, sub=None):
-    if sub is None:
-        return "%s/%s" % (OSSLAB_RUN_DIR, id)
-    else:
-        return "%s/%s/%s" % (OSSLAB_RUN_DIR, id, sub)
 
 
 class ExprManager(object):

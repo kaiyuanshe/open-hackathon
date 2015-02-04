@@ -6,6 +6,7 @@ from functions import get_config, delete_remote, get_remote
 from login import login_providers, LoginUser
 from flask_login import login_required, current_user, logout_user, login_user
 from datetime import timedelta
+from flask import make_response
 
 session_lifetime_minutes = 60
 PERMANENT_SESSION_LIFETIME = timedelta(minutes=session_lifetime_minutes)
@@ -94,12 +95,13 @@ def __login(provider):
                      avatar_url=login_result["avatar_url"],
                      nickname=login_result["nickname"])
     login_user(user)
+
     session["token"] = login_result["token"]
     if len(login_result['experiments']) > 0:
         response = make_response(redirect("hackathon"))
     else:
         response = make_response(redirect("settings"))
-    response.set_cookie('token', login_result['token'])
+    response.set_cookie('token', login_result["token"])
     return response
 
 
