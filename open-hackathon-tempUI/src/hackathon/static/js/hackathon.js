@@ -39,7 +39,7 @@ $(document).ready(function() {
         function loopstart() {
             hget('/api/user/experiment?id=' + id,
                 function(data) {
-                    if (data.guacamole_servers.length > 0) {
+                    if (data.status == 2) { // expr is running
                         callback(data)
                     } else {
                         setTimeout(loopstart, 60000);
@@ -101,4 +101,3 @@ $(document).ready(function() {
         }
     );
 })
-
