@@ -62,3 +62,6 @@ docs/_build/
 # certificates
 *.cer
 *.pem
+
+*guacamole.properties
+*config.py
