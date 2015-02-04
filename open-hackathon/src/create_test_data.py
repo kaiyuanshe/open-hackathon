@@ -22,13 +22,18 @@ db.session.add(localhost)
 amt = Announcement("欢迎访问开放黑客松平台")
 db.session.add(amt)
 
-h = Hackathon("bigdata-realtime-analytics", 1)
+h = Hackathon(anme="bigdata-realtime-analytics")
 db.session.add(h)
-
 db.session.add(Template(hackathon=h, name='ubuntu'))
 db.session.add(Template(hackathon=h, name='rails'))
 db.session.add(Template(hackathon=h, name='mean'))
 db.session.add(Template(hackathon=h, name='python'))
+
+h2 = Hackathon(name="open-xml-sdk")
+db.session.add(h2)
+db.session.add(Template(hackathon=h2, name='ut'))
+db.session.add(Template(hackathon=h2, name='ud'))
+db.session.add(Template(hackathon=h2, name='windows'))
 
 db.session.add(Register(hackathon=h, register_name="xxzhe", email="zhengxx012@gmail.com"))
 db.session.add(Register(hackathon=h, register_name="junbo", email="juniwang@microsoft.com"))
