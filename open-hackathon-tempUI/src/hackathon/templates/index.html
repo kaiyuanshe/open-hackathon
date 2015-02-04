@@ -1,106 +1,53 @@
-{% extends "base.html" %}
-{% block head %}
+{% extends "base.html" %} {% block head %}
 <script type="text/javascript" src="/config.js"></script>
 <script src="/static/js/login.js"></script>
-<script src="/static/js/index.js"></script>
-<link rel="stylesheet" href="/static/css/index.css">
-{% endblock %}
-{% block header %}
-
-{% endblock %}
-
-{% block content %}
-
-
-<div class="mainContainer">
-    <!-- Main jumbotron for a primary marketing message or call to action -->
-    <div class="main-wrapper">
-        <!--<div class="left">-->
-        <!--<div class="pattern-column alignleft">-->
-        <!--&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;-->
-        <!--</div>-->
-        <!--</div>-->
-
-        <div class="w-container">
-            <div class="p-center" style="font-size:63px;padding-bottom: 10px;">
-                <img class="logo64" src="/static/pic/icon64.png"/>
-                <!--<h1 style="float:left"><font >开放黑客松</font></h1>-->
-                开放黑客松
-            </div>
-            <!-- <span class="p-center"><h1><font color="white"><img src="/pic/indexContent1.png" style="width:50%" /></font></h1></span> -->
-            <!--                <span class="p-center"><b><h2><font>更方便快捷的在云端学习IT知识</font></h2></b> -->
-            <!-- <span class="p-center"><h1><font color="white"><img src="/pic/indexContent2.png" style="width:50%" /></font></h1></span> -->
-
-            <div class="upper-home-area group">
-                <div class="home-news-area-wrapper">
-                    <ul class="home-news-area group rslides rslides1" id="newsSlider" style="max-width: 1280px;">
-                        <li id="rslides1_s0" class="rslides1_on">
-                            <h3>活动主办方</h3>
-                            <img width="770" height="300" src="/static/pic/LOGO.png"
-                                 class="attachment-slider-thumb wp-post-image" alt="kaiyaunshe-carousel">
-                        </li>
-
-                        <li id="rslides1_s1" class="">
-                            <h3>Open Hackathon</h3>
-                            <img width="768" height="300" src="/static/pic/huodongxing.png"
-                                 class="attachment-slider-thumb wp-post-image" alt="MSOpenTechChina">
-                        </li>
-
-                        <li id="rslides1_s2" class="">
-                            <h3>Jstorm Platfrom</h3>
-                            <img width="768" height="300" src="/static/pic/JstormPlatfrom.jpg"
-                                 class="attachment-slider-thumb wp-post-image" alt="VMDepot News Image">
-                        </li>
-
-                        <li id="rslides1_s3" class="">
-                            <h3>Open Hackathon Platfrom Architecture</h3>
-                            <img width="768" height="300" src="/static/pic/HackathonPlatfrom.jpg"
-                                 class="attachment-slider-thumb wp-post-image" alt="openJDK news">
-                        </li>
-
-
-                    </ul>
-                    <!-- home news area rslides -->
-                </div>
-                <!-- home news area wrapper -->
-            </div>
-
-
-            <div class="btn-group-vertical p-center">
-                    <span>
-                        <a class="btn btn-warning btn-lg" role="button" id="githublogin">
-                            <img src="/static/pic/github.png" height="25" width="25" style="float:left"/><span
-                                class="ds-service-link">github</span>
-                        </a>
-                    </span>
-                    <span>
-                        <a class="btn btn-warning btn-lg" role="button" id="qqlogin">
-                            <img src="/static/pic/github.png" height="25" width="25" style="float:left"/><span
-                                class="ds-service-link">QQ</span>
-                        </a>
-                    </span>
-                    <span>
-                        <a class="btn btn-warning btn-lg" role="button" id="gitcafelogin">
-                            <img src="/static/pic/gitcafe.png" height="25" width="25" style="float:left"/><span
-                                class="ds-service-link">gitcafe</span>
-                        </a>
-                    </span>
-            </div>
-                <span class="p-center">
-                    <b>
-                        <h5>
-                            <b>建议使用环境：支持HTML5的浏览器(IE 10+,Chrome,Firefox,Safari)，请尽量使用分辨率较高的宽幅显示。</b><br><br>
-                        </h5>
-                    </b>
-                </span>
+{% endblock %} {% block header %} {% endblock %} {% block content %}
+<nav id="ohp_header" class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="/"> 开放黑客松</a>
         </div>
-
-        <!--<div class="right">-->
-        <!--<div class="pattern-column alignright">-->
-        <!--&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;-->
-        <!--</div>-->
-        <!--</div>-->
+        <div id="navbar" class="collapse navbar-collapse">
+        </div>
+    </div>
+</nav>
+<div id="main">
+    <div class="container">
+        <div class="page-header">
+            <h1>Open XML SDK 在线编程黑客松</h1>
+        </div>
+        <a class="btn btn-lg btn-success" href="javascript:;" role="button" id="githublogin" title="login">
+            <img src="/static/pic/gitcafe.login.jpg">
+            <span>GitHub</span>
+        </a>
+        <a class="btn btn-lg btn-success" href="javascript:;" role="button" id="gitcafelogin" title="login">
+            <img src="/static/pic/gitcafe.login.jpg">
+            <span>GitCafe</span>
+        </a>
+        <div class="organizers">
+            <div class="row ">
+                <div class="col-md-4">
+                    <img src="/static/pic/jkxy.jpg">
+                </div>
+                <div class="col-md-4">
+                    <img src="/static/pic/gitcafe.png">
+                </div>
+                <div class="col-md-4">
+                    <img src="/static/pic/kaiyuanshe.jpg">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <img src="/static/pic/MSOpenTech_Logo_NoTagline_fit.jpg" style="width: 400px;height: auto;">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <b>建议使用环境：支持HTML5的浏览器(IE 10+,Chrome,Firefox,Safari)，请尽量使用分辨率较高的宽幅显示。</b>
+            </div>
+        </div>
     </div>
 </div>
-{% endblock %}
 
+{% endblock %}

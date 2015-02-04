@@ -20,9 +20,9 @@ import java.util.*;
 
 
 public class OpenHackathonAuthenticationProvider extends SimpleAuthenticationProvider {
-	
+
     private Logger logger = LoggerFactory.getLogger(OpenHackathonAuthenticationProvider.class.getClass());
-	
+
     private static final StringGuacamoleProperty AUTH_REQUEST_URL = new StringGuacamoleProperty() {
         @Override
         public String getName() { return "auth-request-url"; }
@@ -31,7 +31,7 @@ public class OpenHackathonAuthenticationProvider extends SimpleAuthenticationPro
     /*constructed functions*/
     
     public OpenHackathonAuthenticationProvider() {
-    	logger.debug("==============================gucamole authentication jar log init =============================================");
+        logger.debug("==============================gucamole authentication jar log init =============================================");
     }
 
     @Override
@@ -59,9 +59,7 @@ public class OpenHackathonAuthenticationProvider extends SimpleAuthenticationPro
         }
         
         String name = config.getParameter("name");
-        logger.debug(" CLASS is "+ context.getRootConnectionGroup().getConnectionDirectory().getClass().getName());
         SimpleConnectionDirectory connections = (SimpleConnectionDirectory) context.getRootConnectionGroup().getConnectionDirectory();
-        logger.debug("======================get info from GuacamoleConfiguration name:"+ name);
         logger.info("protocal select :" + config.getProtocol() );
         SimpleConnection connection = new SimpleConnection(name, name, config);
         connections.putConnection(connection);
@@ -69,34 +67,29 @@ public class OpenHackathonAuthenticationProvider extends SimpleAuthenticationPro
     }
 
     private GuacamoleConfiguration getGuacamoleConfiguration(HttpServletRequest request) throws GuacamoleException {
-    	
+
         GuacamoleConfiguration config ;
         String jsonString = null;
         
         String tokenString = request.getParameter("token");
-        
         String connectionName = request.getParameter("id").substring(2);
-        
-        logger.info("tokenString is : |" + tokenString);
-        
-               
+
         /*check user valid or not*/
         try {
             
             String authRequestURL = GuacamoleProperties.getProperty(AUTH_REQUEST_URL);
-            logger.debug("==============================OpenHackathon guacd Auth request URL is : " + authRequestURL);
-			
+            logger.info("==============================OpenHackathon guacd Auth request URL is : " + authRequestURL);
+
             Connect2OpenHackathon conn = new Connect2OpenHackathon(authRequestURL);
             jsonString = conn.getGuacamoleJSONString(connectionName,tokenString);
             logger.info("get guacamole config json String :" + jsonString);
-			
-            String finalString = jsonString.substring(1, jsonString.length()-1).replace("\\", "");
-            Trans2GuacdConfiguration trans = new Trans2GuacdConfiguration(finalString);
+            
+            Trans2GuacdConfiguration trans = new Trans2GuacdConfiguration(jsonString);
             config = trans.getConfiguration();
-			
             return config ;
+            
         } catch (Exception e) {
-            logger.error("=============================Exception when connect with open-hackathon to check User login");
+            logger.error("=============================Exception when connect with open-hackathon to get guacamole configuration values");
             e.printStackTrace();
             return null;
         }
