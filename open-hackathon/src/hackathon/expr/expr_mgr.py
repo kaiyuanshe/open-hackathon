@@ -40,7 +40,7 @@ class ExprManager(object):
             if ve.remote_provider == RemoteProvider.Guacamole:
                 guaca_config = json.loads(ve.remote_paras)
                 url = "%s/guacamole/client.xhtml?id=" % (
-                    safe_get_config("guacamole/host", "localhost:8080")) + "c%2F" + str(guaca_config["name"])
+                    safe_get_config("guacamole/host", "localhost:8080")) + "c%2F" + guaca_config["name"]
                 guacamole_servers.append({
                     "name": guaca_config["displayname"],
                     "url": url
