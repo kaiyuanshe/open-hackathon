@@ -192,6 +192,9 @@ class ExprManager(object):
                                     virtual_environment=ve,
                                     image=container_config["image"])
 
+        db_adapter.add_object(ve)
+        db_adapter.add_object(container)
+        db_adapter.commit()
         # format data in the template such as port and mnt.
         # the port defined in template have only expose port, we should assign a listening port in program
         # the mnt may contain placeholder for source code dir which are decided by 'cloudvm' service
@@ -237,8 +240,6 @@ class ExprManager(object):
         container.container_id = container_ret["container_id"]
         ve.status = VirtualEnvStatus.Running
         host_server.container_count += 1
-        db_adapter.add_object(ve)
-        db_adapter.add_object(container)
         db_adapter.commit()
         return ve
 
