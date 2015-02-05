@@ -52,7 +52,7 @@ body {
     margin-top: 20px;
     position: relative;
 }
-.vm-box:hover {
+.vm-box:hover  , .vm-box.active{
     background: #00abec;
 }
 .vm-box img {
@@ -67,4 +67,14 @@ body {
 .center iframe{
     position: absolute;
     top:0;
+}
+#stat span{
+    color: #00abec;
+}
+
+.center  iframe.work-full {
+    position: fixed;
+    top:0;
+    z-index: 999999;
+    left:0;
 }

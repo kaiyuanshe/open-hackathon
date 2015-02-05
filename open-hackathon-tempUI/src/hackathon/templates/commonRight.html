@@ -13,6 +13,9 @@
         <div class="collapse navbar-collapse">
             {% if current_user.is_authenticated() %}
             <ul class="nav navbar-nav navbar-right">
+              <li>
+                    <a href="javascript:;" id="timer">距离hackathon结束还有：<span  id="end_timer" ></span></a>
+                </li>
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
                         <img id="userImg" src="{{current_user.avatar_url}}">
@@ -35,12 +38,6 @@
     <div class="container">
         <div class="row  form-group">
             {% block left %}{% endblock %}
-            <div class="col-md-3">
-                <h4 style="margin-top: 0px;" id="timer">距离hackathon结束还有：  <div id="end_timer" style="float:left"></div></h4>
-                <h3>参赛人员</h3>
-                <ul>
-                </ul>
-            </div>
         </div>
     </div>
 </div>

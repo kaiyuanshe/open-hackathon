@@ -3,7 +3,7 @@
 # oauth constants
 HOSTNAME = "http://hackathon.chinacloudapp.cn"  # host name of the UI site
 QQ_OAUTH_STATE = "openhackathon"  # todo state should be constant. Actually it should be unguessable to prevent CSFA
-HACkATHON_API_ENDPOINT = "http://0.0.0.0:15000"
+HACkATHON_API_ENDPOINT = "http://localhost:15000"
 
 Config = {
     "environment": "local",
