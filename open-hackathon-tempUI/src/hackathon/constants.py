@@ -1,10 +1,3 @@
-# guacamole container constants
-class GUACAMOLE:
-    STATUS = "guacamole_status"
-    IMAGE = "hall/guacamole"
-    PORT = 8080
-
-
 # DEFAULT ROLES
 class ROLE:
     ADMIN = "admin"
