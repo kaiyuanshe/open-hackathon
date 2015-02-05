@@ -44,17 +44,11 @@ class UserExperimentResource(Resource):
             return "invalid parameter", 400
         cid = args["cid"]
         hackathon = args["hackathon"]
-        template_file = "%s/resources/%s-%s.js" % (dirname(realpath(__file__)), hackathon, cid)
-        if os.path.isfile(template_file):
-            # call remote service to start docker containers
-            expr_config = json.load(file(template_file))
-            try:
-                return expr_manager.start_expr(hackathon, expr_config)
-            except Exception as err:
-                log.error(err)
-                return "fail to start due to '%s'" % err, 500
-        else:
-            return "the experiment %s is not ready" % id, 404
+        try:
+            return expr_manager.start_expr(hackathon, cid)
+        except Exception as err:
+            log.error(err)
+            return "fail to start due to '%s'" % err, 500
 
     @token_required
     def delete(self):
@@ -122,8 +116,12 @@ class HackathonResource(Resource):
 
 class HackathonListResource(Resource):
     def get(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('name',type=str, location='args')
+        args = parse.parse_args()
+        if args['name'] is not None:
+            return db_adapter.find_first_object(Hackathon, name=args['name']).json()
         return map(lambda u: u.json(), db_adapter.find_all_objects(Hackathon))
-
 
 class HackathonStatResource(Resource):
     # hid is hackathon id

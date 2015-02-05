@@ -1,6 +1,6 @@
 {
     "expr_name": "jstrom hackathon_rails",
-    "containers": [
+    "virtual_environments": [
         {
             "provider": "docker",
             "name": "web",
