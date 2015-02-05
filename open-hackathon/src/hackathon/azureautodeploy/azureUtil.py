@@ -107,7 +107,7 @@ def user_resource_status_update(user_template, type, name, status, cs_id=None):
     db_adapter.commit()
 
 
-def vm_endpoint_commit(name, protocol, port, local_port, cs):
+def vm_endpoint_commit(name, protocol, port, local_port, cs, vm):
     """
     Commit vm endpoint to database before create vm
     :param name:
@@ -122,30 +122,8 @@ def vm_endpoint_commit(name, protocol, port, local_port, cs):
                                  protocol=protocol,
                                  public_port=port,
                                  private_port=local_port,
-                                 cloud_service=cs)
-    db_adapter.commit()
-
-
-def vm_endpoint_rollback(cs):
-    """
-    Rollback vm endpoint in database because no vm created
-    :param cs:
-    :return:
-    """
-    db_adapter.delete_all_objects(VMEndpoint, cloud_service_id=cs.id, virtual_machine_id=None)
-    db_adapter.commit()
-
-
-def vm_endpoint_update(cs, vm):
-    """
-    Update vm endpoint in database after vm created
-    :param cs:
-    :param vm:
-    :return:
-    """
-    vm_endpoints = db_adapter.filter_by(VMEndpoint, cloud_service=cs, virtual_machine=None).all()
-    for vm_endpoint in vm_endpoints:
-        vm_endpoint.virtual_machine = vm
+                                 cloud_service=cs,
+                                 virtual_machine=vm)
     db_adapter.commit()
 
 
