@@ -4,7 +4,7 @@
         {
             "provider": "docker",
             "name": "web",
-            "image": "rastasheep/ubuntu-sshd:latest",
+            "image": "42.159.103.213:5000/mono-ssh",
             "ports":[{
                 "name": "website",
                 "port": 80,
@@ -29,7 +29,7 @@
         {
             "provider": "docker",
             "name": "vnc",
-            "image": "sffamily/ubuntu-gnome-vnc-eclipse",
+            "image": "42.159.103.213:5000/mono",
             "ports":[{
                 "name": "Dev",
                 "port": 5901

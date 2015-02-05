@@ -27,7 +27,7 @@ db_adapter.add_object_kwargs(DockerHostServer,
 db_adapter.add_object_kwargs(Announcement, content="欢迎访问开放黑客松平台")
 
 hackathon_name = 'open-xml-sdk'
-h = db_adapter.add_object_kwargs(Hackathon, name=hackathon_name, sponsor=1)
+h = db_adapter.add_object_kwargs(Hackathon, name=hackathon_name, sponsor=1, end_time="2015-03-16 00:00:00")
 
 db_adapter.add_object_kwargs(Register, hackathon=h, register_name="Yifu Huang", email="ifhuang91@gmail.com")
 db_adapter.add_object_kwargs(Register, hackathon=h, register_name="xxzhe", email="zhengxx012@gmail.com")
