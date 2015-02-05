@@ -166,7 +166,8 @@ sudo docker pull 42.159.103.213:5000/mean
 ```
 after pull down these two images PLS rename to `msopentechcn/rails` and `msopentechcn/mean` withn this commnad:      
 `sudo docke images` to find out imageID from image name              
-`sudo docker tag <imageID> "newName"` Then pull down other three images                      
+`sudo docker tag <imageID> "newName"`   to rename image     
+Then pull down other three images                      
 ```
 sudo docker pull msopentechcn/flask
 sudo docker pull rastasheep/ubuntu-sshd
