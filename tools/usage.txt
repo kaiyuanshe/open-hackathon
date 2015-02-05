@@ -8,7 +8,7 @@ make nsenter
 cp nsenter /usr/local/bin
 
 #put docker-enter into /usr/local/bin and add X
-chmod + x docker-enter
+chmod +x docker-enter
 cp docker-enter /usr/local/bin
 
 
