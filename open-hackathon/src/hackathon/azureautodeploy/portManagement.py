@@ -121,10 +121,10 @@ class PortManagement():
 
 # ---------------------------------------- usage ---------------------------------------- #
 
-p = PortManagement()
-sub_id = get_config("azure/subscriptionId")
-cert_path = get_config('azure/certPath')
-service_host_base = get_config("azure/managementServiceHostBase")
-t = p.connect(sub_id, cert_path, service_host_base)
-public_port = p.assign_public_port('open-tech-cloud-service', 'Production', 'qwe', 3389)
-print public_port
+# p = PortManagement()
+# sub_id = get_config("azure/subscriptionId")
+# cert_path = get_config('azure/certPath')
+# service_host_base = get_config("azure/managementServiceHostBase")
+# t = p.connect(sub_id, cert_path, service_host_base)
+# public_port = p.assign_public_port('open-tech-cloud-service', 'Production', 'qwe', 3389)
+# print public_port
