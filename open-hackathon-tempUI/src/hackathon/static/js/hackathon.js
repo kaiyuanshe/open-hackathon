@@ -1,7 +1,7 @@
 $(document).ready(function() {
     var cid = getParameterByName("cid");
     if (!cid || typeof(cid) == "undefined")
-        cid = "ubuntu"
+        cid = "ut"
     var main = $("#hack_main").on('mouseover', 'iframe', function(e) {
         $(this).focus();
     });
