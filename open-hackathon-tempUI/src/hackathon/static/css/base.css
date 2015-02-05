@@ -164,3 +164,52 @@ a {
     padding: 0;
     text-indent: 80px;
 }
+.error-container {
+    display: none;
+    background-color: #8cc7e5;
+    width: 850px;
+    padding: 15px;
+    margin: 50px auto;
+}
+.error-body {
+    background-color: #565551;
+    color: #fff;
+    padding-bottom: 40px;
+}
+.error-body .header .error {
+    border-bottom: 1px solid #fff;
+    margin: 0 30px 20px 30px;
+    padding: 20px 0 15px 0;
+    text-align: center;
+}
+.error-body .header .error .code {
+    font-size: 72pt;
+    color: #8cc7e5;
+    text-align: right;
+    margin-right: 25px;
+}
+.error-body .header .error .message {
+    font-size: 44pt;
+    text-align: left;
+}
+.error-body .more-details .more-info {
+    text-align: center;
+    font-size: 30pt;
+}
+.smallscreen{
+    display: none;
+    position: fixed;
+    right: 0;
+    top: 0;
+    z-index: 9999999;
+    width: 30px;
+    height: 30px;
+    background: #00abec;
+}
+.smallscreen a{
+    color:#fff;
+    font-size: 30px;
+}
+.smallscreen a:hover{
+    text-decoration: none;
+}

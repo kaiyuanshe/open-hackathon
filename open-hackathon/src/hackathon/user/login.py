@@ -130,7 +130,7 @@ class GitcafeLogin(LoginProviderBase):
         nickname = info['fullname']
         if nickname is None:
             nickname = name
-        avatar_url = info['avatar_url']
+        avatar_url = "https" + info['avatar_url'][4:]
         email_info = [
             {'name': name, 'email': email, 'id': id, 'verified': 1, 'primary': 1, 'nickname': nickname,
              'avatar_url': avatar_url}]
