@@ -8,30 +8,44 @@ $(document).ready(function() {
     var main = $("#hack_main").on('mouseover', 'iframe', function(e) {
         $(this).focus();
     });
-    var $timer = $('#end_timer');
-    var timerTmpe = '{day}天{hour}小时{minute}分钟{second}秒'
-    Countdown(endDate, function(timer) {
-        if (timer) {
-            $timer.text(timerTmpe.format(timer))
+    api_stat(function(data) {
+        var str = '  <h4 class="col-md-offset-1">在线人数：<span>{online} </span></h4><h4  class="col-md-offset-1">参赛人数：<span>{total}</span></h4>';
+        $('#stat').html(str.format(data));
+    })
+    $(document).bind('tiemer', function(e, d) {
+        var $timer = $('#end_timer');
+        var timerTmpe = '{day}天{hour}小时{minute}分钟{second}秒';
+        if (d.end_time) {
+            var enddate = new Date(d.end_time)
+            Countdown(enddate, function(timer) {
+                if (timer) {
+                    $timer.text(timerTmpe.format(timer))
+                } else {
+                    $('#timer').text('本次活动已结束，非常感谢您的参与。')
+                }
+            })
         } else {
             $('#timer').text('本次活动已结束，非常感谢您的参与。')
         }
-    })
-    api_stat(function(data) {
-        var str = '  <h4 class="text-center">在线人数：<span>{online} </span> 参赛人数：<span>{total}</span></h4>';
-        $('#stat').html(str.format(data));
+    });
+    var smscress = $('.smallscreen').on('click', 'a', function(e) {
+        ifrem.removeClass('work-full');
+        smscress.hide();
     })
     $('.nav a[data-action="fullscreen"]').bind('click', function(e) {
-        $('.center iframe[class!="invisible"]').addClass('work-full')
+        ifrem.addClass('work-full')
+        smscress.show();
     });
-    $(document, 'html,body,iframe').keydown(function(e) {
+    /*$(document, 'html,body,iframe').keydown(function(e) {
         e = window.event || e || e.which;
         if (e.ctrlKey && e.which == 113) {
-            ifrem.toggleClass('work-full');
+            ifrem.toggleClass('work-full', function(e) {
+                console.log();
+            });
             e.preventDefault()
             return false;
         }
-    });
+    });*/
 
     function checkstart(id, callback) {
         setTimeout(loopstart);
@@ -68,7 +82,9 @@ $(document).ready(function() {
                     </div>';
             checkstart(data.expr_id, function(data) {
                 var servers = data.guacamole_servers;
-                var work_center = $('.center');
+                var work_center = $('.center').on('mouseover', 'iframe', function(e) {
+                    $(this).focus();
+                });
                 var hnav = $(".hackathon-nav").on('click', 'a.vm-box', function(e) {
                     hnav.find('.vm-box').removeClass('active')
                     var a = $(this).addClass('active');
@@ -96,8 +112,9 @@ $(document).ready(function() {
                 hnav.find('a.vm-box:eq(0)').trigger('click');
             })
         },
-        function() {
-
+        function(data) {
+            $('#load').hide();
+            $('#error').show();
         }
     );
 })
