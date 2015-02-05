@@ -29,13 +29,14 @@ class ExprManager(object):
             "create_time": str(expr.create_time),
             "last_heart_beat_time": str(expr.last_heart_beat_time),
         }
+
+        # return guacamole link to frontend
         guacamole_servers = []
         if expr.user_template.template.provider == VirtualEnvironmentProvider.Docker:
             ves = expr.virtual_environments.all()
         else:
             ves = db_adapter.find_all_objects(VMConfig, user_template_id=expr.user_template.id)
         for ve in ves:
-            # return guacamole link to frontend
             if ve.remote_provider == RemoteProvider.Guacamole:
                 guaca_config = json.loads(ve.remote_paras)
                 url = "%s/guacamole/client.xhtml?id=" % (
@@ -44,9 +45,9 @@ class ExprManager(object):
                     "name": guaca_config["displayname"],
                     "url": url
                 })
-        ret["guacamole_servers"] = guacamole_servers
-        public_urls = []
+
         # return public accessible web url
+        public_urls = []
         for ve in expr.virtual_environments.filter(VirtualEnvironment.image != GUACAMOLE.IMAGE).all():
             # todo only docker handled now. add Azure VM support later
             if ve.provider == VirtualEnvironmentProvider.Docker:
@@ -71,6 +72,10 @@ class ExprManager(object):
                     if uo_last.operation == CREATE and uo_last.status == END:
                         expr.status = ExprStatus.Running
                         db_adapter.commit()
+
+        if expr.status == ExprStatus.Running:
+            ret["guacamole_servers"] = guacamole_servers
+
         return ret
 
     def __get_available_docker_host(self, expr_config):

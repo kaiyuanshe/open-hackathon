@@ -116,8 +116,12 @@ class HackathonResource(Resource):
 
 class HackathonListResource(Resource):
     def get(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('name',type=str, location='args')
+        args = parse.parse_args()
+        if args['name'] is not None:
+            return db_adapter.find_first_object(Hackathon, name=args['name']).json()
         return map(lambda u: u.json(), db_adapter.find_all_objects(Hackathon))
-
 
 class HackathonStatResource(Resource):
     # hid is hackathon id

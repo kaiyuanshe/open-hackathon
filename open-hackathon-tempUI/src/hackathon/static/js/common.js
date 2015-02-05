@@ -25,6 +25,7 @@ var hpost = function(url, data, success_func, error_func) {
 
 var hget = function(url, success_func, error_func) {
     $.ajax({
+        cache: false,
         url: CONFIG.hackathon.endpoint + url,
         type: "GET",
         headers: h_headers,
@@ -134,4 +135,19 @@ function Countdown(endTime, callback) {
             callback(null);
         }
     }
+}
+
+function api_stat(callback) {
+    hget('/api/hackathon/list?name=' + CONFIG.hackathon.name, function(data) {
+        (function loop() {
+            hget('/api/hackathon/stat?hid=' + $.parseJSON(data).id, function(data) {
+                callback(data);
+                setTimeout(loop, 60000)
+            }, function() {
+                callback(null);
+            });
+        })();
+    }, function() {
+        callback(null)
+    })
 }

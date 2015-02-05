@@ -148,12 +148,10 @@ class Hackathon(db.Model):
     def json(self):
         return to_json(self, self.__class__)
 
-    def __init__(self, name, sponsor, create_time=None):
-        if create_time is None:
-            create_time = datetime.utcnow()
-        self.name = name
-        self.sponsor = sponsor
-        self.create_time = create_time
+    def __init__(self, **kwargs):
+        super(Hackathon, self).__init__(**kwargs)
+        if self.create_time is None:
+            self.create_time = datetime.utcnow()
 
     def __repr__(self):
         return "Hackathon: " + self.json()
