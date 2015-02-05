@@ -1,13 +1,17 @@
-#Install esenter first
-cd /tmp
-curl https://www.kernel.org/pub/linux/utils/util-linux/v2.24/util-linux-2.24.tar.gz   | tar -zxf-
-cd util-linux-2.24
-./configure --without-ncurses
-make nsenter
+#===============================================================================================
+#Install esenter first,not need it right now.
+#cd /tmp
+#curl https://www.kernel.org/pub/linux/utils/util-linux/v2.24/util-linux-2.24.tar.gz   | tar -zxf-
+#cd util-linux-2.24
+#./configure --without-ncurses
+#make nsenter
+#===============================================================================================
 
+
+
+
+#Steps
 cp nsenter /usr/local/bin
-
-#put docker-enter into /usr/local/bin and add X
 chmod +x docker-enter
 cp docker-enter /usr/local/bin
 
