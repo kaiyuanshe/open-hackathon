@@ -149,7 +149,7 @@ class UserManager(object):
     def get_user_detail_info(self, user):
         detail = self.get_user_info(user)
 
-        experiments = user.experiments.filter_by(status=ExprStatus.Running)
+        experiments = user.experiments.filter_by(status=ExprStatus.Running).all()
         detail["experiments"] = []
         map(lambda e: detail["experiments"].append({
             "id": e.id,
