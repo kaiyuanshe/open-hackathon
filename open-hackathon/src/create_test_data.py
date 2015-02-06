@@ -16,11 +16,11 @@ from hackathon.enum import *
 # db.session.add(vm)
 
 db_adapter.add_object_kwargs(DockerHostServer,
-                             vm_name="localhost",
-                             public_dns="localhost",
-                             public_docker_api_port=8001,
-                             private_ip="10.0.2.15",
-                             private_docker_api_port=8001,
+                             vm_name="OSSLAB-VM-18",
+                             public_dns="osslab-vm-18.chinacloudapp.cn",
+                             public_docker_api_port=4243,
+                             private_ip="10.210.18.47",
+                             private_docker_api_port=4243,
                              container_count=0,
                              container_max_count=100)
 
