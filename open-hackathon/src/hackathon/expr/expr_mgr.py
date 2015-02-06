@@ -115,7 +115,12 @@ class ExprManager(object):
                 port_cfg["public_port"] = port_cfg["host_port"]
 
             if safe_get_config("environment", "prod") == "local" and port_cfg["host_port"] == 80:
-                port_cfg["host_port"] += 10000
+
+                host_ports = db_adapter.find_all_objects(PortBinding, binding_type=PortBindingType.Docker,
+                                                         binding_resource_id=host_server.id)
+
+
+                port_cfg["host_port"] = self.__get_available_host_port(host_ports, port_cfg["port"])
                 port_cfg["public_port"] = port_cfg["host_port"]
 
             binding_cloudservice = PortBinding(name=port_cfg["name"] if "name" in port_cfg else None,
@@ -187,6 +192,9 @@ class ExprManager(object):
                                     virtual_environment=ve,
                                     image=container_config["image"])
 
+        db_adapter.add_object(ve)
+        db_adapter.add_object(container)
+        db_adapter.commit()
         # format data in the template such as port and mnt.
         # the port defined in template have only expose port, we should assign a listening port in program
         # the mnt may contain placeholder for source code dir which are decided by 'cloudvm' service
@@ -232,8 +240,6 @@ class ExprManager(object):
         container.container_id = container_ret["container_id"]
         ve.status = VirtualEnvStatus.Running
         host_server.container_count += 1
-        db_adapter.add_object(ve)
-        db_adapter.add_object(container)
         db_adapter.commit()
         return ve
 
@@ -300,7 +306,7 @@ class ExprManager(object):
                                                    local_repo_path=local_repo_path)
                 db_adapter.commit()
             # start containers
-            guacamole_config = []
+            # guacamole_config = []
             try:
                 expr.status = ExprStatus.Starting
                 db_adapter.commit()

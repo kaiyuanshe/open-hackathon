@@ -6,6 +6,8 @@ from flask import request, g
 from hackathon.enum import VirtualEnvStatus, RemoteProvider
 from hackathon.azureautodeploy.azureUtil import *
 import json
+from hackathon.database import *
+from hackathon.database.models import *
 
 
 class GuacamoleInfo():
