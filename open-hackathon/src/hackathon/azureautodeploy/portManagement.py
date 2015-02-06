@@ -55,8 +55,9 @@ class PortManagement():
             for role in deployment.role_list.roles:
                 for configuration_set in role.configuration_sets.configuration_sets:
                     if configuration_set.configuration_set_type == 'NetworkConfiguration':
-                        for input_endpoint in configuration_set.input_endpoints.input_endpoints:
-                            ports.append(input_endpoint.port)
+                        if configuration_set.input_endpoints is not None:
+                            for input_endpoint in configuration_set.input_endpoints.input_endpoints:
+                                ports.append(input_endpoint.port)
         return ports
 
     def __compose_network_config(self, cloud_service_name, deployment_name, virtual_machine_name,
@@ -126,5 +127,5 @@ class PortManagement():
 # cert_path = get_config('azure/certPath')
 # service_host_base = get_config("azure/managementServiceHostBase")
 # t = p.connect(sub_id, cert_path, service_host_base)
-# public_port = p.assign_public_port('open-tech-cloud-service', 'Production', 'qwe', 3389)
+# public_port = p.assign_public_port('open-tech-service', 'Production', 'open-tech-role-4', 3389)
 # print public_port

@@ -1,8 +1,9 @@
 __author__ = 'Yifu Huang'
 import sys
+
 sys.path.append("..")
+from hackathon.database import *
 from hackathon.database.models import *
-from hackathon.database import db_adapter
 from hackathon.log import *
 import time
 import os
@@ -170,7 +171,7 @@ def wait_for_async(sms, request_id, second_per_loop, loop):
     return True
 
 
-def load_template(user_template, operation, vm_id):
+def load_template(user_template, operation, expr_id):
     """
     Load json based template into dictionary
     :param user_template:
@@ -199,7 +200,7 @@ def load_template(user_template, operation, vm_id):
         T_VIRTUAL_MACHINES: raw_template[R_VIRTUAL_ENVIRONMENTS]
     }
     for vm in template_config[T_VIRTUAL_MACHINES]:
-        vm['role_name'] = '%s-%d' % (vm['role_name'], vm_id)
+        vm['role_name'] = '%s-%d' % (vm['role_name'], expr_id)
     return template_config
 
 

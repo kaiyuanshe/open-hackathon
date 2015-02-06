@@ -3,6 +3,7 @@ import sys
 
 sys.path.append("..")
 from hackathon.azureautodeploy.azureUtil import *
+from hackathon.database import *
 from azure.servicemanagement import *
 import datetime
 
@@ -81,8 +82,8 @@ class AzureVirtualMachines:
             gc = {
                 'displayname': remote_input_endpoint_name,
                 'protocol': remote_protocol,
-                "username": system_config['user_name'] if not None else ,
-                "password": system_config['user_password']
+                "username": system_config['user_name'] if image['type'] == 'os' else 'opentech',
+                "password": system_config['user_password'] if image['type'] == 'os' else 'Password01!'
             }
             # avoid duplicate deployment
             if self.deployment_exists(cloud_service['service_name'], deployment['deployment_name']):
@@ -401,6 +402,7 @@ class AzureVirtualMachines:
             for role in deployment.role_list.roles:
                 for configuration_set in role.configuration_sets.configuration_sets:
                     if configuration_set.configuration_set_type == 'NetworkConfiguration':
-                        for input_endpoint in configuration_set.input_endpoints.input_endpoints:
-                            ports.append(input_endpoint.port)
+                        if configuration_set.input_endpoints is not None:
+                            for input_endpoint in configuration_set.input_endpoints.input_endpoints:
+                                ports.append(input_endpoint.port)
         return ports
