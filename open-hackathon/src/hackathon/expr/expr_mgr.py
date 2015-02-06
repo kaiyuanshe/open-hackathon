@@ -10,6 +10,7 @@ from hackathon.functions import *
 from hackathon.enum import *
 from hackathon.azureautodeploy.azureImpl import AzureImpl
 from hackathon.azureautodeploy.azureUtil import *
+from hackathon.azureautodeploy.portManagement import *
 
 docker = OssDocker()
 azure = AzureImpl()
@@ -50,9 +51,10 @@ class ExprManager(object):
         public_urls = []
         for ve in expr.virtual_environments.filter(VirtualEnvironment.image != GUACAMOLE.IMAGE).all():
             # todo only docker handled now. add Azure VM support later
+            # todo return public url is judge portbinding name = "website"
             if ve.provider == VirtualEnvironmentProvider.Docker:
                 for p in ve.port_bindings.all():
-                    if p.binding_type == PortBindingType.CloudService:
+                    if p.binding_type == PortBindingType.CloudService and p.name == "website":
                         hs = db_adapter.find_first_object(DockerHostServer, id=p.binding_resource_id)
                         url = "http://%s:%s" % (hs.public_dns, p.port_from)
                         public_urls.append({
@@ -103,25 +105,40 @@ class ExprManager(object):
 
         return host_port
 
+    def __get_available_public_port(self, host_server_id, host_port):
+        p = PortManagement()
+        sub_id = get_config("azure/subscriptionId")
+        cert_path = get_config('azure/certPath')
+        service_host_base = get_config("azure/managementServiceHostBase")
+        p.connect(sub_id, cert_path, service_host_base)
+
+        docker_host_server = db_adapter.find_first_object(DockerHostServer, id=host_server_id)
+        host_server_name = docker_host_server.vm_name
+        host_server_dns = docker_host_server.public_dns.split('.')[0]
+        public_port = p.assign_public_port(host_server_dns, 'Production', host_server_name, host_port)
+        return public_port
+
     def __assign_port(self, expr, host_server, ve, port_cfg):
 
         if port_cfg.has_key("public"):
             # todo open port on azure for those must open to public
             # public port means the port open the public. For azure , it's the public port on azure. There
             # should be endpoint on azure that from public_port to host_port
+            host_ports = db_adapter.find_all_objects(PortBinding, binding_type=PortBindingType.Docker,
+                                                     binding_resource_id=host_server.id)
             if not "host_port" in port_cfg:
-                port_cfg["host_port"] = port_cfg["port"]
+                port_cfg["host_port"] = self.__get_available_host_port(host_ports, port_cfg["port"])
             if not "public_port" in port_cfg:
-                port_cfg["public_port"] = port_cfg["host_port"]
+                port_cfg["public_port"] = self.__get_available_public_port(host_server.id, port_cfg["host_port"])
 
             if safe_get_config("environment", "prod") == "local" and port_cfg["host_port"] == 80:
-
                 host_ports = db_adapter.find_all_objects(PortBinding, binding_type=PortBindingType.Docker,
                                                          binding_resource_id=host_server.id)
 
-
                 port_cfg["host_port"] = self.__get_available_host_port(host_ports, port_cfg["port"])
-                port_cfg["public_port"] = port_cfg["host_port"]
+                # port_cfg["public_port"] = port_cfg["host_port"]
+
+                port_cfg["public_port"] = self.__get_available_public_port(host_server.id, port_cfg["host_port"])
 
             binding_cloudservice = PortBinding(name=port_cfg["name"] if "name" in port_cfg else None,
                                                port_from=port_cfg["public_port"],
@@ -221,8 +238,8 @@ class ExprManager(object):
                     "displayname": port_cfg[0]["name"] if "name" in port_cfg[0] else container_config["name"],
                     "name": post_data["container_name"],
                     "protocol": guac["protocol"],
-                    "hostname": host_server.private_ip,
-                    "port": port_cfg[0]["host_port"]
+                    "hostname": host_server.public_dns,
+                    "port": port_cfg[0]["public_port"]
                 }
                 if "username" in guac:
                     gc["username"] = guac["username"]
@@ -248,7 +265,7 @@ class ExprManager(object):
         if expr is not None:
             return self.__report_expr_status(expr)
         else:
-            return "Not found", 404
+            return {"error": "Experiment Not found"}, 404
 
     def start_expr(self, hackathon_name, template_name):
         hackathon = db_adapter.find_first_object(Hackathon, name=hackathon_name)
@@ -319,7 +336,7 @@ class ExprManager(object):
                 log.error(e)
                 log.error("Failed starting containers")
                 self.__roll_back(expr.id)
-                return "Failed starting containers", 500
+                return {"error": "Failed starting containers"}, 500
         else:
             expr.status = ExprStatus.Starting
             db_adapter.commit()
@@ -336,7 +353,7 @@ class ExprManager(object):
     def heart_beat(self, expr_id):
         expr = Experiment.query.filter_by(id=expr_id, status=ExprStatus.Running).first()
         if expr is None:
-            return "Not running", 404
+            return {"error": "Experiment doesn't running"}, 404
 
         expr.last_heart_beat_time = datetime.utcnow()
         db_adapter.commit()
