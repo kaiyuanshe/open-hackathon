@@ -6,10 +6,8 @@ import urllib2
 sys.path.append("..")
 from hackathon.functions import get_remote, get_config, convert
 from hackathon.log import log
-import json
 from . import user_manager
-import requests
-
+from hackathon.database.models import *
 from hackathon.constants import OAUTH_PROVIDER
 
 
@@ -62,6 +60,7 @@ class GithubLogin(LoginProviderBase):
     def login(self, args):
         access_token = args.get('access_token')
         # get user info
+
         user_info_resp = get_remote(get_config('login/github/user_info_url') + access_token)
         # conn.request('GET',url,'',{'user-agent':'flask'})
         log.debug("get user info from github:" + user_info_resp + '\n')
@@ -88,26 +87,23 @@ class GithubLogin(LoginProviderBase):
         nickname = user_info["name"] if "name" in user_info else name
         openid = str(user_info["id"])
         avatar = user_info["avatar_url"]
-
         # get user primary email
         email_info_resp = get_remote(get_config('login/github/emails_info_url') + access_token)
         log.debug("get email from github:" + email_info_resp + '\n')
         # email_info include all user email provided by github
         # email is user's primary email
         email_info = json.loads(email_info_resp)
-
         user_with_token = user_manager.db_login(openid,
                                                 name=name,
                                                 nickname=nickname,
                                                 access_token=access_token,
                                                 email_info=email_info,
                                                 avatar_url=avatar)
-
         # login flask
         user = user_with_token["user"]
         log.info("github user login successfully:" + repr(user))
-
-        detail = user_manager.get_user_detail_info(user)
+        hackathon_name = args.get('hackathon_name')
+        detail = user_manager.get_user_detail_info(user, hackathon_name=hackathon_name)
         detail["token"] = user_with_token["token"].token
         return detail
 
@@ -143,8 +139,10 @@ class GitcafeLogin(LoginProviderBase):
         user = user_with_token["user"]
         log.info("gitcafe user login successfully:" + repr(user))
 
-        detail = user_manager.get_user_detail_info(user)
+        hackathon_name = args.get('hackathon_name')
+        detail = user_manager.get_user_detail_info(user, hackathon_name=hackathon_name)
         detail["token"] = user_with_token["token"].token
+
         return detail
 
 
@@ -153,3 +151,4 @@ login_providers = {
     OAUTH_PROVIDER.QQ: QQLogin(),
     OAUTH_PROVIDER.GITCAFE: GitcafeLogin()
 }
+

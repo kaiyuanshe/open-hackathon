@@ -77,11 +77,11 @@ $(document).ready(function() {
                             <a href="javascript:;" title="" class="vm-box"  id="{name}"  data-url="{url}">\
                                 <img src="/static/pic/dseries.png" alt="">\
                             </a>\
-                            <h4>{name}<h4>\
+                            <h4 name="dserie">{name}<h4>\
                         </div>\
                     </div>';
             checkstart(data.expr_id, function(data) {
-                var servers = data.guacamole_servers;
+                var servers = data.remote_servers || data.guacamole_servers;
                 var work_center = $('.center').on('mouseover', 'iframe', function(e) {
                     $(this).focus();
                 });
@@ -106,8 +106,14 @@ $(document).ready(function() {
                         }).appendTo(work_center)
                     }
                 });
+
                 $.each(servers, function(i, s) {
-                    hnav.append(tmpe.format(s));
+                    var puburls = s.public_urls || data.public_urls
+                    var vm = $(tmpe.format(s))
+                    $.each(puburls, function(i, urls) {
+                        vm.find('h4[name]').append('<h4 class="col-md-offset-1">您在开发环境部署的应用或网站可访问下面地址：</h4><h4 class="col-md-offset-1"><a href="{url}" target="_blank">{url}</a></h4>'.format(urls))
+                    });
+                    hnav.append(vm);
                 });
                 hnav.find('a.vm-box:eq(0)').trigger('click');
             })

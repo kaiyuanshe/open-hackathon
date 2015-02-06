@@ -1,0 +1,13 @@
+flask
+flask-restful
+flask-cors
+flask-admin
+sqlalchemy
+flask-sqlalchemy
+mysql-python
+wsgilog
+azure
+werkzeug
+jinja2
+six
+requests

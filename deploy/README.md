@@ -4,20 +4,14 @@ And the whole environment cotains serval components such guacamole , nginx , tom
 #install components
 ```shell
 sudo apt-get update && sudo apt-get upgrade
-sudo add-apt-repository ppa:nginx/stable
-
 sudo apt-get install build-essential python python-dev python-setuptools libmysqlclient-dev
-
 sudo apt-get install vim git
 sudo easy_install pip
-
 sudo apt-get install tomcat7
 sudo apt-get install openjdk-7-jdk
 sudo apt-get install nginx
 sudo apt-get install mysql-server
 
-sudo pip install virtualenv
-sudo pip install uwsgi
 ```
 #Get src from github
 ```
@@ -27,7 +21,8 @@ git clone https://github.com/msopentechcn/open-hackathon.git
 
 #config guacamole
 Do this steps you should follow [http://guac-dev.org/doc/gug/installing-guacamole.html](http://guac-dev.org/doc/gug/installing-guacamole.html)      
-Here are the main steps about configure and depoly guacamole-server as well as guacamole-client
+Here are the main steps about configure and depoly guacamole-server as well as guacamole-client       
+Note：*guacamole version choose 0.9.3 !!!*
 
 
 ###setup guacamole-server
@@ -37,20 +32,23 @@ sudo apt-get install libfreerdp-dev libpango1.0-dev libssh2-1-dev libtelnet-dev
 sudo apt-get install libvncserver-dev libpulse-dev libssl-dev libvorbis-dev
 sudo apt-get install autoconf
 
-git clone git://github.com/glyptodon/guacamole-server.git
-cd guacamole-server/
-autoreconf -fi
-./configure --with-init-dir=/etc/init.d
-make
-make install
-ldconfig
-/etc/init.d/guacd start
+sudo wget http://jaist.dl.sourceforge.net/project/guacamole/current/source/guacamole-server-0.9.3.tar.gz
+sudo tar -zxvf guacamole-server-0.9.3.tar.gz
+sudo cd guacamole-server-0.9.3/
+sudo autoreconf -fi
+sudo ./configure --with-init-dir=/etc/init.d
+sudo make
+sudo make install
+sudo ldconfig
+sudo /etc/init.d/guacd start
 ```
 ###setup guacamole-client
+Download guacamole-client war package ,and deploy the `guacamole.war` into tomcat7 
 ```
-wget http://jaist.dl.sourceforge.net/project/guacamole/current/binary/guacamole-0.9.4.war
+wget http://jaist.dl.sourceforge.net/project/guacamole/current/binary/guacamole-0.9.3.war
+mv guacamole-0.9.3.war /var/lib/tomcat7/webapps/guacamole.war
 ```
-Then deploy this `guacamole.war` into tomcat7 
+
 
 ###config guacamole
 Check the guacamole config file `/etc/guacamole/guacamole.properties`, and edit the file like this:
@@ -60,7 +58,7 @@ guacd-port:     4822
 
 lib-directory: /var/lib/guacamole
 auth-provider: com.openhackathon.guacamole.OpenHackathonAuthenticationProvider
-auth-request-url: http://hackathon.chinacloudapp.cn/checkguacookies
+auth-request-url: http://localhost:15000/api/guacamoleconfig
 ```
 Then copy the auth-provider jar file to the path that was setted in the config file
 ```
@@ -80,7 +78,7 @@ sudo service guacd restart
 sudo service tomcat7 restart
 ```
 
-#Deploy open-hackathon withn Nginx
+#Deploy open-hackathon withn uWsgi
 
 Before deploy the web application ,we need to setup all the dependencies and do some pre-execution
 ```
@@ -119,7 +117,7 @@ Then we should initialize tables and creat test data:
 sudo python /opt/open-hackathon/open-hackathon/src/setup_db.py
 mysql -u root -p
 use hackathon;
-insert into register (register_name, email, submitted, enabled) values("Your Name", "xxx@abc.com", 0, 1);
+insert into register (register_name, email, enabled) values("Your Name", "xxx@abc.com", 1);
 ```
 ####- deploy withn nginx
 To deploy the web application in nginx service , we need to provide:            
@@ -141,12 +139,11 @@ Then we would start and restart these services
 sudo /etc/init.d/guacd restart
 sudo /etc/init.d/tomcat7 restart
 sudo /etc/init.d/uwsgi start
-sudo /etc/init.d/nginx restart
 ```
 # Test the Web-application
 After finishsd those steps you could do some tests on local machine                     
-check guacd service:[http://localhost:8080/guacamole](http://localhost:8080/guacamole)                     
-check nginx service for proxy forwarding:[http://hackathon.chinacloudapp.cn/guacamole](http://localhost:8080/guacamole)
+check guacd service:[http://localhost:8080/guacamole](http://localhost:8080/guacamole)                            
+check nginx service for proxy forwarding:[http://hackathon.chinacloudapp.cn/guacamole](http://localhost:8080/guacamole)           
 check open-hackathon web application:[http://localhost](http://localhost:8080/guacamole)                   
 
 
@@ -166,7 +163,14 @@ sudo pip install -r /opt/open-hackathon/cloudvm/requestment.txt
 ```
 sudo docker pull 42.159.103.213:5000/rails
 sudo docker pull 42.159.103.213:5000/mean
-sudo docker pull 42.159.103.213:5000/ubuntu-sshd
+```
+after pull down these two images PLS rename to `msopentechcn/rails` and `msopentechcn/mean` withn this commnad:      
+`sudo docke images` to find out imageID from image name              
+`sudo docker tag <imageID> "newName"`   to rename image     
+Then pull down other three images                      
+```
+sudo docker pull msopentechcn/flask
+sudo docker pull rastasheep/ubuntu-sshd
 sudo docker pull sffamily/ubuntu-gnome-vnc-eclipse
 ```
 ####config docker remote api
