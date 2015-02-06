@@ -3,6 +3,7 @@ import sys
 
 sys.path.append("..")
 from hackathon.azureautodeploy.azureUtil import *
+from hackathon.database import *
 from azure.servicemanagement import *
 import datetime
 
@@ -43,28 +44,36 @@ class AzureVirtualMachines:
         for virtual_machine in virtual_machines:
             user_operation_commit(self.user_template, CREATE_DEPLOYMENT, START)
             user_operation_commit(self.user_template, CREATE_VIRTUAL_MACHINE, START)
+            config = None
+            os_hd = None
+            vm_image = None
+            image = virtual_machine['image']
             system_config = virtual_machine['system_config']
-            # check whether virtual machine is Windows or Linux
-            if system_config['os_family'] == WINDOWS:
-                config = WindowsConfigurationSet(computer_name=system_config['host_name'],
-                                                 admin_password=system_config['user_password'],
-                                                 admin_username=system_config['user_name'])
-                config.domain_join = None
-                config.win_rm = None
+            if image['type'] == 'os':
+                # check whether virtual machine is Windows or Linux
+                if system_config['os_family'] == WINDOWS:
+                    config = WindowsConfigurationSet(computer_name=system_config['host_name'],
+                                                     admin_password=system_config['user_password'],
+                                                     admin_username=system_config['user_name'])
+                    config.domain_join = None
+                    config.win_rm = None
+                else:
+                    config = LinuxConfigurationSet(system_config['host_name'],
+                                                   system_config['user_name'],
+                                                   system_config['user_password'],
+                                                   False)
+                now = datetime.datetime.now()
+                blob = '%s-%s-%s-%s-%s-%s-%s.vhd' % (image['name'],
+                                                     str(now.year), str(now.month), str(now.day),
+                                                     str(now.hour), str(now.minute), str(now.second))
+                media_link = 'https://%s.%s/%s/%s' % (storage_account['service_name'],
+                                                      storage_account['url_base'],
+                                                      container,
+                                                      blob)
+                os_hd = OSVirtualHardDisk(image['name'], media_link)
             else:
-                config = LinuxConfigurationSet(system_config['host_name'],
-                                               system_config['user_name'],
-                                               system_config['user_password'],
-                                               False)
-            now = datetime.datetime.now()
-            blob = '%s-%s-%s-%s-%s-%s-%s.vhd' % (virtual_machine['source_image_name'],
-                                                 str(now.year), str(now.month), str(now.day),
-                                                 str(now.hour), str(now.minute), str(now.second))
-            media_link = 'https://%s.%s/%s/%s' % (storage_account['service_name'],
-                                                  storage_account['url_base'],
-                                                  container,
-                                                  blob)
-            os_hd = OSVirtualHardDisk(virtual_machine['source_image_name'], media_link)
+                vm_image = image['name']
+            network_config = virtual_machine['network_config']
             # remote
             remote = virtual_machine['remote']
             remote_provider = remote['provider']
@@ -73,30 +82,9 @@ class AzureVirtualMachines:
             gc = {
                 'displayname': remote_input_endpoint_name,
                 'protocol': remote_protocol,
-                "username": system_config['user_name'],
-                "password": system_config['user_password']
+                "username": system_config['user_name'] if image['type'] == 'os' else 'opentech',
+                "password": system_config['user_password'] if image['type'] == 'os' else 'Password01!'
             }
-            network_config = virtual_machine['network_config']
-            network = ConfigurationSet()
-            network.configuration_set_type = network_config['configuration_set_type']
-            input_endpoints = network_config['input_endpoints']
-            for input_endpoint in input_endpoints:
-                port = int(input_endpoint['local_port'])
-                # avoid duplicate vm endpoint under same cloud service
-                while db_adapter.count(VMEndpoint, cloud_service_id=cs.id, public_port=port) > 0:
-                    port = (port + 1) % 65536
-                vm_endpoint_commit(input_endpoint['name'],
-                                   input_endpoint['protocol'],
-                                   port,
-                                   input_endpoint['local_port'],
-                                   cs)
-                network.input_endpoints.input_endpoints.append(
-                    ConfigurationSetInputEndpoint(input_endpoint['name'],
-                                                  input_endpoint['protocol'],
-                                                  port,
-                                                  input_endpoint['local_port']))
-                if remote_input_endpoint_name == input_endpoint['name']:
-                    gc['port'] = port
             # avoid duplicate deployment
             if self.deployment_exists(cloud_service['service_name'], deployment['deployment_name']):
                 if db_adapter.count(UserResource,
@@ -123,14 +111,12 @@ class AzureVirtualMachines:
                         m = '%s %s exist but not created by this user template before' % \
                             (VIRTUAL_MACHINE, virtual_machine['role_name'])
                         user_operation_commit(self.user_template, CREATE_VIRTUAL_MACHINE, FAIL, m)
-                        vm_endpoint_rollback(cs)
                         log.error(m)
                         return False
                     else:
                         m = '%s %s exist and created by this user template before' % \
                             (VIRTUAL_MACHINE, virtual_machine['role_name'])
                         user_operation_commit(self.user_template, CREATE_VIRTUAL_MACHINE, END, m)
-                        vm_endpoint_rollback(cs)
                         log.debug(m)
                 else:
                     # delete old virtual machine info in database, cascade delete old vm endpoint and old vm config
@@ -145,18 +131,16 @@ class AzureVirtualMachines:
                                                    virtual_machine['role_name'],
                                                    config,
                                                    os_hd,
-                                                   network_config=network,
-                                                   role_size=virtual_machine['role_size'])
+                                                   role_size=virtual_machine['role_size'],
+                                                   vm_image_name=vm_image)
                     except Exception as e:
                         user_operation_commit(self.user_template, CREATE_VIRTUAL_MACHINE, FAIL, e.message)
-                        vm_endpoint_rollback(cs)
                         log.error(e)
                         return False
                     # make sure async operation succeeds
                     if not wait_for_async(self.sms, result.request_id, ASYNC_TICK, ASYNC_LOOP):
                         m = WAIT_FOR_ASYNC + ' ' + FAIL
                         user_operation_commit(self.user_template, CREATE_VIRTUAL_MACHINE, FAIL, m)
-                        vm_endpoint_rollback(cs)
                         log.error(m)
                         return False
                     # make sure role is ready
@@ -167,7 +151,6 @@ class AzureVirtualMachines:
                                               VIRTUAL_MACHINE_LOOP):
                         m = '%s %s created but not ready' % (VIRTUAL_MACHINE, virtual_machine['role_name'])
                         user_operation_commit(self.user_template, CREATE_VIRTUAL_MACHINE, FAIL, m)
-                        vm_endpoint_rollback(cs)
                         log.error(m)
                         return False
                     else:
@@ -182,7 +165,8 @@ class AzureVirtualMachines:
                                               deployment['deployment_name'],
                                               virtual_machine['role_name'],
                                               remote_provider,
-                                              gc)
+                                              gc,
+                                              network_config)
             else:
                 # delete old deployment
                 db_adapter.delete_all_objects(UserResource,
@@ -203,12 +187,11 @@ class AzureVirtualMachines:
                                                                         virtual_machine['role_name'],
                                                                         config,
                                                                         os_hd,
-                                                                        network_config=network,
-                                                                        role_size=virtual_machine['role_size'])
+                                                                        role_size=virtual_machine['role_size'],
+                                                                        vm_image_name=vm_image)
                 except Exception as e:
                     user_operation_commit(self.user_template, CREATE_DEPLOYMENT, FAIL, e.message)
                     user_operation_commit(self.user_template, CREATE_VIRTUAL_MACHINE, FAIL, e.message)
-                    vm_endpoint_rollback(cs)
                     log.error(e)
                     return False
                 # make sure async operation succeeds
@@ -216,7 +199,6 @@ class AzureVirtualMachines:
                     m = WAIT_FOR_ASYNC + ' ' + FAIL
                     user_operation_commit(self.user_template, CREATE_DEPLOYMENT, FAIL, m)
                     user_operation_commit(self.user_template, CREATE_VIRTUAL_MACHINE, FAIL, m)
-                    vm_endpoint_rollback(cs)
                     log.error(m)
                     return False
                 # make sure deployment is ready
@@ -226,7 +208,6 @@ class AzureVirtualMachines:
                                                   DEPLOYMENT_LOOP):
                     m = '%s %s created but not ready' % (DEPLOYMENT, deployment['deployment_name'])
                     user_operation_commit(self.user_template, CREATE_DEPLOYMENT, FAIL, m)
-                    vm_endpoint_rollback(cs)
                     log.error(m)
                     return False
                 else:
@@ -240,7 +221,6 @@ class AzureVirtualMachines:
                                           VIRTUAL_MACHINE_LOOP):
                     m = '%s %s created but not ready' % (VIRTUAL_MACHINE, virtual_machine['role_name'])
                     user_operation_commit(self.user_template, CREATE_VIRTUAL_MACHINE, FAIL, m)
-                    vm_endpoint_rollback(cs)
                     log.error(m)
                     return False
                 else:
@@ -255,7 +235,8 @@ class AzureVirtualMachines:
                                           deployment['deployment_name'],
                                           virtual_machine['role_name'],
                                           remote_provider,
-                                          gc)
+                                          gc,
+                                          network_config)
         user_operation_commit(self.user_template, CREATE_VIRTUAL_MACHINES, END)
         return True
 
@@ -350,7 +331,7 @@ class AzureVirtualMachines:
                 return role_instance.instance_status
         return None
 
-    def __vm_info_helper(self, cs, cs_name, dm_name, vm_name, remote_provider, gc):
+    def __vm_info_helper(self, cs, cs_name, dm_name, vm_name, remote_provider, gc, network_config):
         """
         Help to complete vm info
         :param cs:
@@ -366,7 +347,35 @@ class AzureVirtualMachines:
                                           name=vm_name,
                                           cloud_service_id=cs.id)
         gc['name'] = vm.name
-        vm_endpoint_update(cs, vm)
+        network = ConfigurationSet()
+        network.configuration_set_type = network_config['configuration_set_type']
+        input_endpoints = network_config['input_endpoints']
+        assigned_ports = self.__get_assigned_ports(cs_name)
+        for input_endpoint in input_endpoints:
+            port = int(input_endpoint['local_port'])
+            # avoid duplicate vm endpoint under same cloud service
+            while port in assigned_ports:
+                port = (port + 1) % 65536
+            assigned_ports.append(port)
+            vm_endpoint_commit(input_endpoint['name'],
+                               input_endpoint['protocol'],
+                               port,
+                               input_endpoint['local_port'],
+                               cs,
+                               vm)
+            network.input_endpoints.input_endpoints.append(
+                ConfigurationSetInputEndpoint(input_endpoint['name'],
+                                              input_endpoint['protocol'],
+                                              port,
+                                              input_endpoint['local_port']))
+            if gc['displayname'] == input_endpoint['name']:
+                gc['port'] = port
+        result = self.sms.update_role(cs_name,
+                                      dm_name,
+                                      vm_name,
+                                      network_config=network)
+        wait_for_async(self.sms, result.request_id, ASYNC_TICK, ASYNC_LOOP)
+        self.wait_for_role(cs_name, dm_name, vm_name, VIRTUAL_MACHINE_TICK, VIRTUAL_MACHINE_LOOP)
         # commit vm config
         deploy = self.sms.get_deployment_by_name(cs_name, dm_name)
         for role in deploy.role_instance_list:
@@ -385,3 +394,15 @@ class AzureVirtualMachines:
                                  json.dumps(gc),
                                  self.user_template)
                 break
+
+    def __get_assigned_ports(self, cloud_service_name):
+        properties = self.sms.get_hosted_service_properties(cloud_service_name, True)
+        ports = []
+        for deployment in properties.deployments.deployments:
+            for role in deployment.role_list.roles:
+                for configuration_set in role.configuration_sets.configuration_sets:
+                    if configuration_set.configuration_set_type == 'NetworkConfiguration':
+                        if configuration_set.input_endpoints is not None:
+                            for input_endpoint in configuration_set.input_endpoints.input_endpoints:
+                                ports.append(input_endpoint.port)
+        return ports
