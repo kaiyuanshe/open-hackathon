@@ -29,9 +29,13 @@ Template_Routes = {
 
 @login_manager.user_loader
 def load_user(id):
-    ur = get_remote("%s/api/user?uid=%d" % (get_config("hackathon-api/endpoint"), int(id)))
-    ur = json.loads(ur)
-    return LoginUser(id=ur["id"], name=ur["name"], nickname=ur["nickname"], avatar_url=ur["avatar_url"])
+    try:
+        ur = get_remote("%s/api/user?uid=%d" % (get_config("hackathon-api/endpoint"), int(id)))
+        ur = json.loads(ur)
+        return LoginUser(id=ur["id"], name=ur["name"], nickname=ur["nickname"], avatar_url=ur["avatar_url"])
+    except Exception as e:
+        log.error(e)
+        return None
 
 
 @app.before_request
