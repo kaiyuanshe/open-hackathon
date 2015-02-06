@@ -98,11 +98,16 @@ def __login(provider):
     login_user(user)
 
     session["token"] = login_result["token"]
-    if len(login_result['experiments']) > 0:
-        response = make_response(redirect("hackathon"))
+
+    if login_result["register_state"] == False:
+        response = make_response(redirect("notregister"))
     else:
-        response = make_response(redirect("settings"))
-    response.set_cookie('token', login_result["token"])
+        if len(login_result['experiments']) > 0:
+            response = make_response(redirect("hackathon"))
+        else:
+            response = make_response(redirect("settings"))
+        response.set_cookie('token', login_result["token"])
+
     return response
 
 

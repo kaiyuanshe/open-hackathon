@@ -67,7 +67,7 @@ class GithubLogin():
         # user_info_resp = get_remote(get_config('login/github/user_info_url') + access_token)
         # conn.request('GET',url,'',{'user-agent':'flask'})
         log.debug("get token info from github")
-        data = {"provider": "github", "code": code, "access_token": access_token}
+        data = {"provider": "github", "code": code, "access_token": access_token, "hackathon_name": hackathon_name}
         return post_to_remote('%s/api/user/login' % hackathon_api_url, data)
         # example:
         #
