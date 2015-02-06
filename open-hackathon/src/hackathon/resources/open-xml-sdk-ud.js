@@ -7,7 +7,8 @@
             "image": "42.159.103.213:5000/mono",
             "ports":[{
                 "name": "Dev",
-                "port": 5901
+                "port": 5901,
+                "public": true
             }],
             "AttachStdin":false,
             "AttachStdout":true,
