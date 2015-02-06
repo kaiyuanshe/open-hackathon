@@ -71,8 +71,8 @@ class ExprManager(object):
         if expr.user_template.template.provider == VirtualEnvironmentProvider.AzureVM:
             if expr.status == ExprStatus.Starting:
                 global process
-                if process is not None:
-                    if process == 0:
+                if process.poll() is not None:
+                    if process.poll() == 0:
                         expr.status = ExprStatus.Running
                     else:
                         expr.status = ExprStatus.Failed

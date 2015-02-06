@@ -159,7 +159,6 @@ class AzureVirtualMachines:
                                              virtual_machine['role_name'],
                                              RUNNING,
                                              cs.id)
-                        user_operation_commit(self.user_template, CREATE_VIRTUAL_MACHINE, END)
                         self.__vm_info_helper(cs,
                                               cloud_service['service_name'],
                                               deployment['deployment_name'],
@@ -167,6 +166,7 @@ class AzureVirtualMachines:
                                               remote_provider,
                                               gc,
                                               network_config)
+                        user_operation_commit(self.user_template, CREATE_VIRTUAL_MACHINE, END)
             else:
                 # delete old deployment
                 db_adapter.delete_all_objects(UserResource,
@@ -229,7 +229,6 @@ class AzureVirtualMachines:
                                          virtual_machine['role_name'],
                                          RUNNING,
                                          cs.id)
-                    user_operation_commit(self.user_template, CREATE_VIRTUAL_MACHINE, END)
                     self.__vm_info_helper(cs,
                                           cloud_service['service_name'],
                                           deployment['deployment_name'],
@@ -237,6 +236,7 @@ class AzureVirtualMachines:
                                           remote_provider,
                                           gc,
                                           network_config)
+                    user_operation_commit(self.user_template, CREATE_VIRTUAL_MACHINE, END)
         user_operation_commit(self.user_template, CREATE_VIRTUAL_MACHINES, END)
         return True
 
@@ -354,9 +354,9 @@ class AzureVirtualMachines:
         for input_endpoint in input_endpoints:
             port = int(input_endpoint['local_port'])
             # avoid duplicate vm endpoint under same cloud service
-            while port in assigned_ports:
+            while str(port) in assigned_ports:
                 port = (port + 1) % 65536
-            assigned_ports.append(port)
+            assigned_ports.append(str(port))
             vm_endpoint_commit(input_endpoint['name'],
                                input_endpoint['protocol'],
                                port,
@@ -366,7 +366,7 @@ class AzureVirtualMachines:
             network.input_endpoints.input_endpoints.append(
                 ConfigurationSetInputEndpoint(input_endpoint['name'],
                                               input_endpoint['protocol'],
-                                              port,
+                                              str(port),
                                               input_endpoint['local_port']))
             if gc['displayname'] == input_endpoint['name']:
                 gc['port'] = port
