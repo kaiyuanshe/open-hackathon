@@ -9,9 +9,10 @@ from flask import g, request
 from log import log
 from database import db_adapter
 from decorators import token_required
-from user.user_functions import get_user_experiment, get_user_hackathon, get_hackathon_stat
+from user.user_functions import get_user_experiment, get_user_hackathon
 from health import report_health
 from remote.guacamole import GuacamoleInfo
+from hack import hack_manager
 
 
 class RegisterListResource(Resource):
@@ -137,7 +138,7 @@ class HackathonStatResource(Resource):
         if args['hid'] is None:
             return {"error": "Bad request"}, 400
 
-        return get_hackathon_stat(args['hid'])
+        return hack_manager.get_hackathon_stat(args['hid'])
 
 
 class UserHackathonResource(Resource):
