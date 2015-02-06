@@ -11,7 +11,8 @@
                 "public": true
             },{
                 "name": "Deploy",
-                "port": 22
+                "port": 22,
+                "public": true
             }],
             "AttachStdin":false,
             "AttachStdout":true,
