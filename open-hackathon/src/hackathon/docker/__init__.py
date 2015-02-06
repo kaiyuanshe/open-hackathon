@@ -4,7 +4,6 @@ sys.path.append("..")
 import json
 import requests
 from hackathon.log import log
-from hackathon.constants import DOCKER
 from hackathon.functions import convert
 
 
@@ -20,13 +19,13 @@ default_http_headers = {'content-type': 'application/json'}
 
 
 class OssDocker(object):
-    def get_vm_url(self, vm_dns):
-        vm_url = "http://" + vm_dns + ":" + str(DOCKER.DEFAULT_REMOTE_PORT)
+    def get_vm_url(self, docker_host):
+        vm_url = "http://" + docker_host.public_dns + ":" + str(docker_host.public_docker_api_port)
         return vm_url
 
-    def containers_info(self, vm_dns):
+    def containers_info(self, docker_host):
         try:
-            containers_url = self.get_vm_url(vm_dns) + "/containers/json"
+            containers_url = self.get_vm_url(docker_host) + "/containers/json"
             req = requests.get(containers_url)
             return convert(json.loads(req.content))
         except Exception as e:
@@ -34,21 +33,21 @@ class OssDocker(object):
             log.info("cannot get containers' info")
             raise AssertionError
 
-    def get_container(self, name, vm_dns):
-        containers = self.containers_info(vm_dns)
+    def get_container(self, name, docker_host):
+        containers = self.containers_info(docker_host)
         return next((c for c in containers if name in c["Names"] or '/' + name in c["Names"]), None)
 
-    def search_containers_by_expr_id(self, id, vm_dns, all=False):
-        get_containers = self.containers_info(vm_dns)
+    def search_containers_by_expr_id(self, id, docker_host, all=False):
+        get_containers = self.containers_info(docker_host)
         if all:
             return get_containers
         return filter(lambda c: name_match(id, c["Names"]), get_containers)
 
     # stop a container, name is the container's name, vm_dns is vm's ip address
-    def stop(self, name, vm_dns):
-        if self.get_container(name, vm_dns) is not None:
+    def stop(self, name, docker_host):
+        if self.get_container(name, docker_host) is not None:
             try:
-                containers_url = self.get_vm_url(vm_dns) + "/containers/%s/stop" % name
+                containers_url = self.get_vm_url(docker_host) + "/containers/%s/stop" % name
                 requests.post(containers_url)
             except Exception as e:
                 log.info(e)
@@ -56,9 +55,9 @@ class OssDocker(object):
                 raise AssertionError
 
     # start a container, vm_dns is vm's ip address, start_config is the configure of container which you want to start
-    def start(self, vm_dns, container_id, start_config={}):
+    def start(self, docker_host, container_id, start_config={}):
         try:
-            url = vm_dns + "/containers/%s/start" % container_id
+            url = self.get_vm_url(docker_host) + "/containers/%s/start" % container_id
             req = requests.post(url, data=json.dumps(start_config), headers=default_http_headers)
             log.info(req.content)
         except Exception as e:
@@ -66,23 +65,22 @@ class OssDocker(object):
             raise AssertionError("container %s fail to start" % container_id)
 
     # create a container
-    def create(self, vm_url, container_config, container_name):
-        containers_url = vm_url + "/containers/create?name=%s" % container_name
+    def create(self, docker_host, container_config, container_name):
+        containers_url = self.get_vm_url(docker_host) + "/containers/create?name=%s" % container_name
         try:
             req_create = requests.post(containers_url, data=json.dumps(container_config), headers=default_http_headers)
             container = json.loads(req_create.content)
-        except:
-            log.info(req_create.content)
-            raise AssertionError
+        except Exception as err:
+            log.error(err)
+            raise
         if container is None:
             raise AssertionError("container is none")
         return container
 
     # run a container, the configure of container which you want to create, vm_dns is vm's ip address
-    def run(self, args, vm_dns):
+    def run(self, args, docker_host):
         container_name = args["container_name"]
-        exist = self.get_container(container_name, vm_dns)
-        vm_url = self.get_vm_url(vm_dns)
+        exist = self.get_container(container_name, docker_host)
         result = {
             "container_name": container_name
         }
@@ -131,7 +129,7 @@ class OssDocker(object):
             container_config["AttachStdout"] = attach_std_out
             container_config["AttachStderr"] = attach_std_err
             try:
-                container = self.create(vm_url, container_config, container_name)
+                container = self.create(docker_host, container_config, container_name)
             except Exception as e:
                 log.info(e)
                 log.info("container %s fail to create" % container_name)
@@ -155,13 +153,13 @@ class OssDocker(object):
             result["container_id"] = container["Id"]
             # start container
             try:
-                self.start(vm_url, container["Id"], start_config)
+                self.start(docker_host, container["Id"], start_config)
             except Exception as e:
                 log.error(e)
                 log.error("container %s fail to start" % container["Id"])
                 return None
 
-            if self.get_container(container_name, vm_dns) is None:
+            if self.get_container(container_name, docker_host) is None:
                 log.error("container %s fail to start" % args["name"])
                 return None
 

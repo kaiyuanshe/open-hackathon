@@ -81,7 +81,7 @@ $(document).ready(function() {
                         </div>\
                     </div>';
             checkstart(data.expr_id, function(data) {
-                var servers = data.remote_service || data.guacamole_servers;
+                var servers = data.remote_servers || data.guacamole_servers;
                 var work_center = $('.center').on('mouseover', 'iframe', function(e) {
                     $(this).focus();
                 });
