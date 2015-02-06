@@ -46,6 +46,8 @@ class ExprManager(object):
                     "name": guaca_config["displayname"],
                     "url": url
                 })
+        if expr.status == ExprStatus.Running:
+            ret["remote_servers"] = guacamole_servers
 
         # return public accessible web url
         public_urls = []
@@ -62,6 +64,7 @@ class ExprManager(object):
                             "url": url
                         })
         ret["public_urls"] = public_urls
+
         if expr.user_template.template.provider == VirtualEnvironmentProvider.AzureVM:
             if expr.status == ExprStatus.Starting:
                 global uo_id
@@ -75,8 +78,7 @@ class ExprManager(object):
                         expr.status = ExprStatus.Running
                         db_adapter.commit()
 
-        if expr.status == ExprStatus.Running:
-            ret["guacamole_servers"] = guacamole_servers
+
 
         return ret
 
@@ -250,7 +252,7 @@ class ExprManager(object):
                 ve.remote_paras = json.dumps(gc)
 
         # start container remotely
-        container_ret = docker.run(post_data, host_server.public_dns)
+        container_ret = docker.run(post_data, host_server)
         if container_ret is None:
             log.info("container %s fail to run" % post_data["container_name"])
             raise AssertionError
@@ -369,7 +371,7 @@ class ExprManager(object):
                 # stop containers and change expr status
                 for c in expr.virtual_environments:
                     if c.provider == VirtualEnvironmentProvider.Docker:
-                        docker.stop(c.name, c.container.host_server.public_dns)
+                        docker.stop(c.name, c.container.host_server)
                         c.status = VirtualEnvStatus.Stopped
                         c.container.host_server.container_count -= 1
                         if c.container.host_server.container_count < 0:
@@ -395,7 +397,7 @@ class ExprManager(object):
                 # stop containers
                 for c in expr.virtual_environments:
                     try:
-                        docker.stop(c.name, c.container.host_server.public_dns)
+                        docker.stop(c.name, c.container.host_server)
                         c.status = VirtualEnvStatus.Stopped
                         c.container.host_server.container_count -= 1
                         if c.container.host_server.container_count < 0:
