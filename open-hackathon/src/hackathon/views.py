@@ -32,7 +32,11 @@ class UserExperimentResource(Resource):
         args = parser.parse_args()
         if args['id'] is None:
             return json.dumps({"error": "Bad request"}), 400
-        cs = expr_manager.get_expr_status(args['id'])
+        try:
+            cs = expr_manager.get_expr_status(args['id'])
+        except Exception as e:
+            log.error(e)
+            return {"error": "Please Reload then Wait"}, 500
         if cs is not None:
             return cs
         else:
