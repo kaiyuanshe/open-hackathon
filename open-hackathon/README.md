@@ -81,6 +81,21 @@ for simplicity, we recommend you start guacamole using `docker`.
 sudo docker run -d -i -t -p 8080:8080 -v /opt/open-hackathon/deploy/guacamole:/etc/guacamole hall/guacamole
 ```
 change the port and directory if needed. Also make sure `guacamole.properties` file is correctly configured. The file is in
+<<<<<<< HEAD
+directory `/opt/open-hackathon/deploy/guacamole` and it's right for you local environment by default. The content may look like:
+```
+# Hostname and port of guacamole proxy
+guacd-hostname: localhost
+guacd-port:     4822
+
+lib-directory: /etc/guacamole
+
+# Auth provider class (authenticates user/pass combination, needed if using the provided login screen)
+auth-provider: com.openhackathon.guacamole.OpenHackathonAuthenticationProvider
+auth-request-url: http://osslab.msopentech.cn:15000/api/guacamoleconfig
+```
+Usually the only config need to update is `auth-request-url`. _You need to stop the guacamole container and start another one
+in case `guacamole.properties` updated_.
 directory `/opt/open-hackathon/deploy/guacamole` and it's right for you local environment by default. Usually the only config need to update is `auth-request-url`.
 _You need to stop the guacamole container and start another one in case `guacamole.properties` updated_.
 
