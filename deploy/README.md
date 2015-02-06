@@ -58,7 +58,7 @@ guacd-port:     4822
 
 lib-directory: /var/lib/guacamole
 auth-provider: com.openhackathon.guacamole.OpenHackathonAuthenticationProvider
-auth-request-url: http://hackathon.chinacloudapp.cn:15000/api/guacamoleconfig
+auth-request-url: http://localhost:15000/api/guacamoleconfig
 ```
 Then copy the auth-provider jar file to the path that was setted in the config file
 ```
