@@ -5,7 +5,7 @@ from hackathon.database.models import *
 from hackathon.log import log
 from hackathon.database import db_adapter
 from datetime import datetime, timedelta
-from hackathon.constants import ROLE, HTTP_HEADER
+from hackathon.constants import HTTP_HEADER
 from hackathon.enum import ExprStatus, EmailStatus
 from hackathon.functions import safe_get_config
 from hackathon.hack import hack_manager
@@ -16,15 +16,6 @@ import uuid
 class UserManager(object):
     def __init__(self, db_adapter):
         self.db = db_adapter
-
-    def __check_first_user(self, user):
-        # make the first login user be the first super admin
-        admin = self.db.find_first_object(Role, name=ROLE.ADMIN)
-        if admin.users.count() == 0:
-            log.info("no admin found, will let the first login user be the first admin.")
-            first_admin = UserRole(admin, user)
-            self.db.add_object(first_admin)
-            self.db.commit()
 
     def __generate_api_token(self, user):
         token_issue_date = datetime.utcnow()
@@ -110,9 +101,6 @@ class UserManager(object):
                                       verified=verified, user=user)
                 self.db.add_object(useremail)
                 self.db.commit()
-
-        # make the first login user be admin
-        self.__check_first_user(user)
 
         # generate API token
         token = self.__generate_api_token(user)
