@@ -4,11 +4,9 @@ import sys
 import urllib2
 
 sys.path.append("..")
-from hackathon.functions import get_remote, get_config,convert
+from hackathon.functions import get_remote, get_config, convert
 from hackathon.log import log
-import json
 from . import user_manager
-from hackathon.database import *
 from hackathon.database.models import *
 from hackathon.constants import OAUTH_PROVIDER
 
@@ -104,13 +102,10 @@ class GithubLogin(LoginProviderBase):
         # login flask
         user = user_with_token["user"]
         log.info("github user login successfully:" + repr(user))
-
-        emails=map(lambda x:x['email'],json.loads(email_info_resp))
         hackathon_name = args.get('hackathon_name')
-        detail = user_manager.get_user_detail_info(user,hackathon_name=hackathon_name,emails=emails)
+        detail = user_manager.get_user_detail_info(user, hackathon_name=hackathon_name)
         detail["token"] = user_with_token["token"].token
         return detail
-
 
 
 class GitcafeLogin(LoginProviderBase):
@@ -145,8 +140,7 @@ class GitcafeLogin(LoginProviderBase):
         log.info("gitcafe user login successfully:" + repr(user))
 
         hackathon_name = args.get('hackathon_name')
-
-        detail = user_manager.get_user_detail_info(user,hackathon_name=hackathon_name,emails=[email])
+        detail = user_manager.get_user_detail_info(user, hackathon_name=hackathon_name)
         detail["token"] = user_with_token["token"].token
 
         return detail

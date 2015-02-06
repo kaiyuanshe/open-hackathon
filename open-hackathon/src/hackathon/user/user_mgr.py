@@ -40,8 +40,11 @@ class UserManager(object):
             return t.user
         return None
 
-    def get_registration_by_email(self, emails,hackathon_id):
-        return self.db.filter(Register, Register.email.in_(emails), Register.enabled == 1,Register.hackathon_id == hackathon_id).first()
+    def get_registration_by_email(self, user, hackathon_id):
+
+        emails = map(lambda x:x.email, user.emails.all())
+        return self.db.filter(Register, Register.email.in_(emails), Register.enabled == 1,
+                              Register.hackathon_id == hackathon_id).first()
 
     def get_all_registration(self):
         reg_list = self.db.find_all_objects(Register, enabled=1)
@@ -157,11 +160,10 @@ class UserManager(object):
         }), experiments)
 
         hackathon_name = kwargs['hackathon_name']
-        emails = kwargs['emails']
         hackathon_id = db_adapter.find_first_object(Hackathon, name=hackathon_name).id
-        check = user_manager.get_registration_by_email(emails, hackathon_id)
 
-        if safe_get_config('checkRegister',False) == True and check is None :
+        check = user_manager.get_registration_by_email(user, hackathon_id)
+        if safe_get_config('checkRegister', False) == True and check is None:
             detail["register_state"] = False
         else:
             detail["register_state"] = True
