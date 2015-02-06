@@ -60,9 +60,9 @@ class OssDocker(object):
         try:
             url = vm_dns + "/containers/%s/start" % container_id
             req = requests.post(url, data=json.dumps(start_config), headers=default_http_headers)
-        except Exception as e:
             log.info(req.content)
-            log.info(e)
+        except Exception as e:
+            log.error(e)
             raise AssertionError("container %s fail to start" % container_id)
 
     # create a container
@@ -157,12 +157,12 @@ class OssDocker(object):
             try:
                 self.start(vm_url, container["Id"], start_config)
             except Exception as e:
-                log.info(e)
-                log.info("container %s fail to start" % container["Id"])
+                log.error(e)
+                log.error("container %s fail to start" % container["Id"])
                 return None
 
             if self.get_container(container_name, vm_dns) is None:
-                log.info("container %s fail to start" % args["name"])
+                log.error("container %s fail to start" % args["name"])
                 return None
 
         return result

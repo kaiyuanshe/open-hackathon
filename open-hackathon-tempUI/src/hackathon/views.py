@@ -2,7 +2,7 @@ from flask import Response, render_template, abort, request, session, g, redirec
 from . import *
 from log import log
 import json
-from functions import get_config, delete_remote, get_remote
+from functions import get_config, delete_remote, get_remote, safe_get_config
 from login import login_providers, LoginUser
 from flask_login import login_required, current_user, logout_user, login_user
 from datetime import timedelta
@@ -51,7 +51,8 @@ def simple_route(path):
 @app.route('/')
 @app.route('/index')
 def index():
-    return render_template("index.html")
+    return render_template("index.html",
+                           providers=safe_get_config("login/provider_enabled", ["github", "qq", "gitcafe"]))
 
 
 # error handler for 404

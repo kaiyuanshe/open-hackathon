@@ -365,7 +365,7 @@ class AzureVirtualMachines:
                                           type=VIRTUAL_MACHINE,
                                           name=vm_name,
                                           cloud_service_id=cs.id)
-        gc['name'] = vm.id
+        gc['name'] = vm.name
         vm_endpoint_update(cs, vm)
         # commit vm config
         deploy = self.sms.get_deployment_by_name(cs_name, dm_name)
