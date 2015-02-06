@@ -7,7 +7,7 @@ sys.path.append("..")
 from hackathon.functions import get_remote, get_config, convert
 from hackathon.log import log
 from . import user_manager
-from hackathon.database.models import *
+import json
 from hackathon.constants import OAUTH_PROVIDER
 
 
