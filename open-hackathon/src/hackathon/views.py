@@ -124,9 +124,7 @@ class HackathonListResource(Resource):
         parse = reqparse.RequestParser()
         parse.add_argument('name', type=str, location='args')
         args = parse.parse_args()
-        if args['name'] is not None:
-            return db_adapter.find_first_object(Hackathon, name=args['name'])
-        return map(lambda u: u.json(), db_adapter.find_all_objects(Hackathon))
+        return hack_manager.get_hackathon_list(args["name"])
 
 
 class HackathonStatResource(Resource):

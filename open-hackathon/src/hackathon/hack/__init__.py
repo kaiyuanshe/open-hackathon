@@ -34,5 +34,10 @@ class HackathonManager():
 
         return stat
 
+    def get_hackathon_list(self, name=None):
+        if name is not None:
+            return db_adapter.find_first_object(Hackathon, name=name).json()
+        return map(lambda u: u.json(), db_adapter.find_all_objects(Hackathon))
+
 
 hack_manager = HackathonManager(db_adapter)
