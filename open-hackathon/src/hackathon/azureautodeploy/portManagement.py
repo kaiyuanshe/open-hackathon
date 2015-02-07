@@ -4,7 +4,6 @@ import sys
 
 sys.path.append("..")
 from hackathon.log import *
-from hackathon.functions import *
 from azure.servicemanagement import *
 import time
 
