@@ -1,8 +1,10 @@
 __author__ = 'Yifu Huang'
 
-from hackathon.azureautodeploy.azureImpl import *
-from hackathon.functions import *
 import sys
+sys.path.append("..")
+
+from azureImpl import *
+from hackathon.functions import *
 
 if __name__ == "__main__":
     args = sys.argv[1:]

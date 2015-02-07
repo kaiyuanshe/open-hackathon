@@ -9,6 +9,8 @@ from hackathon.docker import OssDocker
 from hackathon.enum import *
 from hackathon.azureautodeploy.azureUtil import *
 from hackathon.azureautodeploy.portManagement import *
+from hackathon.azureautodeploy.azureImpl import AzureImpl
+from hackathon.functions import safe_get_config, get_config, post_to_remote
 from subprocess import Popen
 
 docker = OssDocker()
@@ -406,7 +408,7 @@ class ExprManager(object):
                     except Exception as e:
                         log.error(e)
             else:
-                if not azure.shutdown_async(expr.user_template):
+                if not AzureImpl().shutdown_async(expr.user_template):
                     m = 'failed stopping azure vm'
                     log.error(m)
                     return m
