@@ -2,9 +2,9 @@ __author__ = 'Yifu Huang'
 import sys
 
 sys.path.append("..")
-from hackathon.azureautodeploy.azureStorage import *
-from hackathon.azureautodeploy.azureCloudService import *
-from hackathon.azureautodeploy.azureVirtualMachines import *
+from azureStorage import *
+from azureCloudService import *
+from azureVirtualMachines import *
 from azure.servicemanagement import *
 from multiprocessing import Process
 
