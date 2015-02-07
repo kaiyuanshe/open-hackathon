@@ -6,18 +6,12 @@ from compiler.ast import flatten
 from flask import g
 from hackathon.constants import GUACAMOLE
 from hackathon.docker import OssDocker
-from hackathon.functions import *
 from hackathon.enum import *
-from hackathon.azureautodeploy.azureImpl import AzureImpl
 from hackathon.azureautodeploy.azureUtil import *
 from hackathon.azureautodeploy.portManagement import *
+from subprocess import Popen
 
 docker = OssDocker()
-azure = AzureImpl()
-sub_id = get_config("azure/subscriptionId")
-cert_path = get_config('azure/certPath')
-service_host_base = get_config("azure/managementServiceHostBase")
-azure.connect(sub_id, cert_path, service_host_base)
 process = None
 
 
@@ -77,14 +71,12 @@ class ExprManager(object):
         if expr.user_template.template.provider == VirtualEnvironmentProvider.AzureVM:
             if expr.status == ExprStatus.Starting:
                 global process
-                if not process.is_alive():
-                    if process.exitcode == 0:
+                if process.poll() is not None:
+                    if process.poll() == 0:
                         expr.status = ExprStatus.Running
                     else:
                         expr.status = ExprStatus.Failed
                     db_adapter.commit()
-
-
 
         return ret
 
@@ -350,7 +342,9 @@ class ExprManager(object):
             # start create azure vm according to user template
             try:
                 global process
-                process = azure.create_async(user_template, expr.id)
+                path = os.path.dirname(__file__) + '/../azureautodeploy/azureCreateAsync.py'
+                command = ['python', path, str(user_template.id), str(expr.id)]
+                process = Popen(command)
             except Exception as e:
                 log.error(e)
                 return {"error": "Failed starting azure"}, 500
