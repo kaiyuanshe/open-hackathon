@@ -14,7 +14,6 @@ from hackathon.functions import safe_get_config, get_config, post_to_remote
 from subprocess import Popen
 
 docker = OssDocker()
-process = None
 
 
 class ExprManager(object):
@@ -71,14 +70,8 @@ class ExprManager(object):
         ret["public_urls"] = public_urls
 
         if expr.user_template.template.provider == VirtualEnvironmentProvider.AzureVM:
-            if expr.status == ExprStatus.Starting:
-                global process
-                if process.poll() is not None:
-                    if process.poll() == 0:
-                        expr.status = ExprStatus.Running
-                    else:
-                        expr.status = ExprStatus.Failed
-                    db_adapter.commit()
+            if expr.status == ExprStatus.Failed:
+                return {"error": "Failed starting azure"}, 500
 
         return ret
 
@@ -343,10 +336,9 @@ class ExprManager(object):
             db_adapter.commit()
             # start create azure vm according to user template
             try:
-                global process
                 path = os.path.dirname(__file__) + '/../azureautodeploy/azureCreateAsync.py'
                 command = ['python', path, str(user_template.id), str(expr.id)]
-                process = Popen(command)
+                Popen(command)
             except Exception as e:
                 log.error(e)
                 return {"error": "Failed starting azure"}, 500
