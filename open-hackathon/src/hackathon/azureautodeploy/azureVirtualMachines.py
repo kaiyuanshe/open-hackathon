@@ -86,7 +86,7 @@ class AzureVirtualMachines:
                 "password": system_config['user_password'] if image['type'] == 'os' else 'Password01!'
             }
             # avoid duplicate deployment
-            if self.deployment_exists(cloud_service['service_name'], deployment['deployment_name']):
+            if self.deployment_exists(cloud_service['service_name'], deployment['deployment_slot']):
                 if db_adapter.count(UserResource,
                                     type=DEPLOYMENT,
                                     name=deployment['deployment_name'],
@@ -240,19 +240,21 @@ class AzureVirtualMachines:
         user_operation_commit(self.user_template, CREATE_VIRTUAL_MACHINES, END)
         return True
 
-    def deployment_exists(self, service_name, deployment_name):
+    def deployment_exists(self, service_name, deployment_slot):
         """
-        Check whether specific deployment exist
+        Check whether specific deployment slot exist
+        If deployment slot exist, reset deployment name
         :param service_name:
-        :param deployment_name:
+        :param deployment_slot:
         :return:
         """
         try:
-            props = self.sms.get_deployment_by_name(service_name, deployment_name)
+            props = self.sms.get_deployment_by_slot(service_name, deployment_slot)
         except Exception as e:
             if e.message != 'Not found (Not Found)':
-                log.error('%s %s: %s' % (DEPLOYMENT, deployment_name, e))
+                log.error('%s %s: %s' % (DEPLOYMENT, deployment_slot, e))
             return False
+        self.template_config[T_DEPLOYMENT]['deployment_name'] = props.name
         return props is not None
 
     def role_exists(self, service_name, deployment_name, role_name):

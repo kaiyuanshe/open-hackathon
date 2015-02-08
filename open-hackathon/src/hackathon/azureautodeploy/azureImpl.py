@@ -138,7 +138,7 @@ class AzureImpl():
         cs = db_adapter.find_first_object(UserResource, type=CLOUD_SERVICE, name=cloud_service['service_name'])
         # make sure deployment exist in azure
         if not AzureVirtualMachines(self.sms, self.user_template, self.template_config). \
-                deployment_exists(cloud_service['service_name'], deployment['deployment_name']):
+                deployment_exists(cloud_service['service_name'], deployment['deployment_slot']):
             m = '%s %s not exist in azure' % (DEPLOYMENT, deployment['deployment_name'])
             user_operation_commit(self.user_template, operation, FAIL, m)
             log.error(m)
