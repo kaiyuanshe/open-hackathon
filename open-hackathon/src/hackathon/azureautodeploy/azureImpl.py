@@ -6,7 +6,6 @@ from azureStorage import *
 from azureCloudService import *
 from azureVirtualMachines import *
 from azure.servicemanagement import *
-from multiprocessing import Process
 
 
 class AzureImpl():
@@ -31,23 +30,6 @@ class AzureImpl():
         """
         try:
             self.sms = ServiceManagementService(subscription_id, pem_url, management_host)
-        except Exception as e:
-            log.error(e)
-            return False
-        return True
-
-    def create_async(self, user_template, vm_id):
-        try:
-            p = Process(target=self.create_sync, args=(user_template, vm_id))
-            p.start()
-        except Exception as e:
-            raise e
-        return p
-
-    def shutdown_async(self, user_template):
-        try:
-            p = Process(target=self.shutdown_sync, args=(user_template,))
-            p.start()
         except Exception as e:
             log.error(e)
             return False

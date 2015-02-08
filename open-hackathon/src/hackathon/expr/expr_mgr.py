@@ -399,13 +399,16 @@ class ExprManager(object):
                             c.container.host_server.container_count = 0
                     except Exception as e:
                         log.error(e)
+                expr.status = ExprStatus.Stopped
+                db_adapter.commit()
             else:
-                if not AzureImpl().shutdown_async(expr.user_template):
-                    m = 'failed stopping azure vm'
-                    log.error(m)
-                    return m
-            expr.status = ExprStatus.Stopped
-            db_adapter.commit()
+                try:
+                    path = os.path.dirname(__file__) + '/../azureautodeploy/azureShutdownAsync.py'
+                    command = ['python', path, str(expr.user_template.id), str(expr.id)]
+                    Popen(command)
+                except Exception as e:
+                    log.error(e)
+                    return {"error": "Failed shutdown azure"}, 500
             return "OK"
         else:
             return "expr not exist"
