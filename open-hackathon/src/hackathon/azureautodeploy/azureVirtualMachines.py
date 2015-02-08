@@ -1,7 +1,8 @@
 from __future__ import absolute_import
 import sys
+import os
 
-sys.path.append("..")
+sys.path.append(os.path.dirname(__file__) + "/../../")
 from hackathon.azureautodeploy.azureUtil import *
 from hackathon.database import *
 from azure.servicemanagement import *
