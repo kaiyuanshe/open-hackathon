@@ -132,16 +132,10 @@ class ExprManager(object):
             if not "host_port" in port_cfg:
                 port_cfg["host_port"] = self.__get_available_host_port(host_ports, port_cfg["port"])
             if not "public_port" in port_cfg:
-                port_cfg["public_port"] = self.__get_available_public_port(host_server, port_cfg["host_port"])
-
-            if safe_get_config("environment", "prod") == "local" and port_cfg["host_port"] == 80:
-                host_ports = db_adapter.find_all_objects(PortBinding, binding_type=PortBindingType.Docker,
-                                                         binding_resource_id=host_server.id)
-
-                port_cfg["host_port"] = self.__get_available_host_port(host_ports, port_cfg["port"])
-                # port_cfg["public_port"] = port_cfg["host_port"]
-
-                port_cfg["public_port"] = self.__get_available_public_port(host_server, port_cfg["host_port"])
+                if safe_get_config("environment", "prod") == "local":
+                    port_cfg["public_port"] = port_cfg["host_port"]
+                else:
+                    port_cfg["public_port"] = self.__get_available_public_port(host_server, port_cfg["host_port"])
 
             binding_cloudservice = PortBinding(name=port_cfg["name"] if "name" in port_cfg else None,
                                                port_from=port_cfg["public_port"],
