@@ -71,10 +71,6 @@ class ExprManager(object):
                 })
         ret["public_urls"] = public_urls
 
-        if expr.user_template.template.provider == VirtualEnvironmentProvider.AzureVM:
-            if expr.status == ExprStatus.Failed:
-                return {"error": "Failed starting azure"}, 500
-
         return ret
 
     def __get_available_docker_host(self, expr_config):

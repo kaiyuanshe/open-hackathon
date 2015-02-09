@@ -55,8 +55,10 @@ $(document).ready(function() {
                 function(data) {
                     if (data.status == 2) { // expr is running
                         callback(data)
-                    } else {
+                    } else if (data.status == 1) { // expr is starting
                         setTimeout(loopstart, 60000);
+                    } else {
+                       showErrorMsg()
                     }
                 },
                 function(err) {
@@ -64,6 +66,18 @@ $(document).ready(function() {
                 }
             );
         };
+    }
+
+    function showErrorMsg(code,msg){
+        $('#load').hide();
+        var errorbox =  $('#error');
+        if(code){
+            errorbox.find('.code').text(code);
+        }
+        if(msg){
+            errorbox.find('.message').text(msg);
+        }
+        errorbox.show();
     }
 
     hpost('/api/user/experiment', {
