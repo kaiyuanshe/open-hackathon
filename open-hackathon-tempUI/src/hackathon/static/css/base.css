@@ -126,8 +126,17 @@ a {
     text-align: center;
     padding-bottom: 30px;
 }
-#main .organizers img {
+#main .organizers .col-md-4 {
     height: 150px;
+    vertical-align: middle;
+}
+.gitcafe{
+    padding-top:20px 
+}
+#main .organizers img {
+    max-width: 300px;
+    max-height: 150px;
+    vertical-align: middle;
     margin: 20px 0;
 }
 .btn, .btn-lg, .btn-group-lg>.btn {
@@ -196,7 +205,7 @@ a {
     text-align: center;
     font-size: 30pt;
 }
-.smallscreen{
+.smallscreen {
     display: none;
     position: fixed;
     right: 0;
@@ -206,10 +215,10 @@ a {
     height: 30px;
     background: #00abec;
 }
-.smallscreen a{
-    color:#fff;
+.smallscreen a {
+    color: #fff;
     font-size: 30px;
 }
-.smallscreen a:hover{
+.smallscreen a:hover {
     text-decoration: none;
 }
