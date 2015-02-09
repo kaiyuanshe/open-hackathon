@@ -55,15 +55,17 @@ class UserExperimentResource(Resource):
             log.error(err)
             return {"error": "fail to start due to '%s'" % err}, 500
 
-    @token_required
+    # @token_required
     def delete(self):
+        # id is experiment id
         parser = reqparse.RequestParser()
         parser.add_argument('id', type=int, location='args')
+        parser.add_argument('force', type=int, location='args')
         args = parser.parse_args()
-        if args['id'] is None:
+        if args['id'] is None or args['force'] is None:
             return {"error": "Bad request"}, 400
 
-        return expr_manager.stop_expr(args["id"])
+        return expr_manager.stop_expr(args["id"], args['force'])
 
     @token_required
     def put(self):

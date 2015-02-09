@@ -9,6 +9,7 @@ import time
 
 
 class PortManagement():
+
     def __init__(self):
         self.sms = None
 
@@ -45,6 +46,24 @@ class PortManagement():
                              100)
         return public_port
 
+    def release_public_port(self, cloud_service_name, deployment_slot, virtual_machine_name, private_port):
+        # decompose network config to update
+        deployment = self.sms.get_deployment_by_slot(cloud_service_name, deployment_slot)
+        network = self.__decompose_network_config(cloud_service_name,
+                                                  deployment.name,
+                                                  virtual_machine_name,
+                                                  private_port)
+        result = self.sms.update_role(cloud_service_name,
+                                      deployment.name,
+                                      virtual_machine_name,
+                                      network_config=network)
+        self.__wait_for_async(result.request_id, 5, 100)
+        self.__wait_for_role(cloud_service_name,
+                             deployment.name,
+                             virtual_machine_name,
+                             5,
+                             100)
+
     # ---------------------------------------- helper functions ---------------------------------------- #
 
     def __get_assigned_ports(self, cloud_service_name):
@@ -66,17 +85,35 @@ class PortManagement():
         network.configuration_set_type = 'NetworkConfiguration'
         for configuration_set in virtual_machine.configuration_sets.configuration_sets:
             if configuration_set.configuration_set_type == 'NetworkConfiguration':
-                for input_endpoint in configuration_set.input_endpoints.input_endpoints:
-                    network.input_endpoints.input_endpoints.append(
-                        ConfigurationSetInputEndpoint(input_endpoint.name,
-                                                      input_endpoint.protocol,
-                                                      input_endpoint.port,
-                                                      input_endpoint.local_port)
-                    )
-                break
+                if configuration_set.input_endpoints is not None:
+                    for input_endpoint in configuration_set.input_endpoints.input_endpoints:
+                        network.input_endpoints.input_endpoints.append(
+                            ConfigurationSetInputEndpoint(input_endpoint.name,
+                                                          input_endpoint.protocol,
+                                                          input_endpoint.port,
+                                                          input_endpoint.local_port)
+                        )
+                    break
         network.input_endpoints.input_endpoints.append(
             ConfigurationSetInputEndpoint('auto-' + str(public_port), 'tcp', str(public_port), str(private_port))
         )
+        return network
+
+    def __decompose_network_config(self, cloud_service_name, deployment_name, virtual_machine_name, private_port):
+        virtual_machine = self.sms.get_role(cloud_service_name, deployment_name, virtual_machine_name)
+        network = ConfigurationSet()
+        network.configuration_set_type = 'NetworkConfiguration'
+        for configuration_set in virtual_machine.configuration_sets.configuration_sets:
+            if configuration_set.configuration_set_type == 'NetworkConfiguration':
+                if configuration_set.input_endpoints is not None:
+                    for input_endpoint in configuration_set.input_endpoints.input_endpoints:
+                        if input_endpoint.local_port != str(private_port):
+                            network.input_endpoints.input_endpoints.append(
+                                ConfigurationSetInputEndpoint(input_endpoint.name,
+                                                              input_endpoint.protocol,
+                                                              input_endpoint.port,
+                                                              input_endpoint.local_port)
+                            )
         return network
 
     def __wait_for_async(self, request_id, second_per_loop, loop):
@@ -119,12 +156,12 @@ class PortManagement():
                 return role_instance.instance_status
         return None
 
-# ---------------------------------------- usage ---------------------------------------- #
+        # ---------------------------------------- usage ---------------------------------------- #
 
+# from hackathon.functions import *
 # p = PortManagement()
 # sub_id = get_config("azure/subscriptionId")
 # cert_path = get_config('azure/certPath')
 # service_host_base = get_config("azure/managementServiceHostBase")
 # t = p.connect(sub_id, cert_path, service_host_base)
-# public_port = p.assign_public_port('open-tech-service', 'Production', 'open-tech-role-4', 3389)
-# print public_port
+# p.release_public_port('open-tech-service', 'Production', 'open-tech-role-4', 80)
