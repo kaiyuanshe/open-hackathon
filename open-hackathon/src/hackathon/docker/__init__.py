@@ -59,12 +59,11 @@ class OssDocker(object):
     def delete(self, name, docker_host):
         try:
             containers_url = self.get_vm_url(docker_host) + "/containers/%s?force=1" % name
-            requests.delete(containers_url)
-        except Exception as e:
-            log.error(e)
-            log.error(requests.content)
+            req = requests.delete(containers_url)
+            log.info(req.content)
+        except:
             log.error("container %s fail to stop" % name)
-            raise AssertionError
+            raise
 
     # start a container, vm_dns is vm's ip address, start_config is the configure of container which you want to start
     def start(self, docker_host, container_id, start_config={}):
@@ -72,9 +71,9 @@ class OssDocker(object):
             url = self.get_vm_url(docker_host) + "/containers/%s/start" % container_id
             req = requests.post(url, data=json.dumps(start_config), headers=default_http_headers)
             log.info(req.content)
-        except Exception as e:
-            log.error(e)
-            raise AssertionError("container %s fail to start" % container_id)
+        except:
+            log.error("container %s fail to start" % container_id)
+            raise AssertionError()
 
     # create a container
     def create(self, docker_host, container_config, container_name):

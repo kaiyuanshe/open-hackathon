@@ -255,8 +255,8 @@ class ExprManager(object):
         # start container remotely
         container_ret = docker.run(post_data, host_server)
         if container_ret is None:
-            log.info("container %s fail to run" % post_data["container_name"])
-            raise AssertionError
+            log.error("container %s fail to run" % post_data["container_name"])
+            raise Exception("container_ret is none")
         container.container_id = container_ret["container_id"]
         ve.status = VirtualEnvStatus.Running
         host_server.container_count += 1
