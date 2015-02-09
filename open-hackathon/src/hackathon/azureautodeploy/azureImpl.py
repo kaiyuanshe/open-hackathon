@@ -6,7 +6,6 @@ from azureStorage import *
 from azureCloudService import *
 from azureVirtualMachines import *
 from azure.servicemanagement import *
-from multiprocessing import Process
 
 
 class AzureImpl():
@@ -31,23 +30,6 @@ class AzureImpl():
         """
         try:
             self.sms = ServiceManagementService(subscription_id, pem_url, management_host)
-        except Exception as e:
-            log.error(e)
-            return False
-        return True
-
-    def create_async(self, user_template, vm_id):
-        try:
-            p = Process(target=self.create_sync, args=(user_template, vm_id))
-            p.start()
-        except Exception as e:
-            raise e
-        return p
-
-    def shutdown_async(self, user_template):
-        try:
-            p = Process(target=self.shutdown_sync, args=(user_template,))
-            p.start()
         except Exception as e:
             log.error(e)
             return False
@@ -156,7 +138,7 @@ class AzureImpl():
         cs = db_adapter.find_first_object(UserResource, type=CLOUD_SERVICE, name=cloud_service['service_name'])
         # make sure deployment exist in azure
         if not AzureVirtualMachines(self.sms, self.user_template, self.template_config). \
-                deployment_exists(cloud_service['service_name'], deployment['deployment_name']):
+                deployment_exists(cloud_service['service_name'], deployment['deployment_slot']):
             m = '%s %s not exist in azure' % (DEPLOYMENT, deployment['deployment_name'])
             user_operation_commit(self.user_template, operation, FAIL, m)
             log.error(m)

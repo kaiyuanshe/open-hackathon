@@ -9,12 +9,10 @@ from hackathon.docker import OssDocker
 from hackathon.enum import *
 from hackathon.azureautodeploy.azureUtil import *
 from hackathon.azureautodeploy.portManagement import *
-from hackathon.azureautodeploy.azureImpl import AzureImpl
 from hackathon.functions import safe_get_config, get_config, post_to_remote
 from subprocess import Popen
 
 docker = OssDocker()
-process = None
 
 
 class ExprManager(object):
@@ -71,14 +69,8 @@ class ExprManager(object):
         ret["public_urls"] = public_urls
 
         if expr.user_template.template.provider == VirtualEnvironmentProvider.AzureVM:
-            if expr.status == ExprStatus.Starting:
-                global process
-                if process.poll() is not None:
-                    if process.poll() == 0:
-                        expr.status = ExprStatus.Running
-                    else:
-                        expr.status = ExprStatus.Failed
-                    db_adapter.commit()
+            if expr.status == ExprStatus.Failed:
+                return {"error": "Failed starting azure"}, 500
 
         return ret
 
@@ -343,10 +335,9 @@ class ExprManager(object):
             db_adapter.commit()
             # start create azure vm according to user template
             try:
-                global process
                 path = os.path.dirname(__file__) + '/../azureautodeploy/azureCreateAsync.py'
                 command = ['python', path, str(user_template.id), str(expr.id)]
-                process = Popen(command)
+                Popen(command)
             except Exception as e:
                 log.error(e)
                 return {"error": "Failed starting azure"}, 500
@@ -407,13 +398,16 @@ class ExprManager(object):
                             c.container.host_server.container_count = 0
                     except Exception as e:
                         log.error(e)
+                expr.status = ExprStatus.Stopped
+                db_adapter.commit()
             else:
-                if not AzureImpl().shutdown_async(expr.user_template):
-                    m = 'failed stopping azure vm'
-                    log.error(m)
-                    return m
-            expr.status = ExprStatus.Stopped
-            db_adapter.commit()
+                try:
+                    path = os.path.dirname(__file__) + '/../azureautodeploy/azureShutdownAsync.py'
+                    command = ['python', path, str(expr.user_template.id), str(expr.id)]
+                    Popen(command)
+                except Exception as e:
+                    log.error(e)
+                    return {"error": "Failed shutdown azure"}, 500
             return "OK"
         else:
             return "expr not exist"
