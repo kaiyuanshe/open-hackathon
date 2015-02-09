@@ -4,6 +4,7 @@ body {
 .footer {
     position: absolute;
     bottom: 0;
+    margin-left:250px; 
 }
 .footer .container {
     width: 100%;
@@ -13,7 +14,7 @@ body {
     padding: 0 0 0 5px;
     top: 90px;
     bottom: 60px;
-    left: 250px;
+    left: 245px;
     right: 0;
     width: auto;
     height: auto;
@@ -23,7 +24,7 @@ body {
     position: fixed;
     width: 250px;
     left: 0px;
-    bottom: 60px;
+    bottom: 0px;
     top: 90px;
     color: #fff;
     background: #1F2327;
@@ -31,13 +32,7 @@ body {
     word-break: normal;
     overflow-y: auto;
     z-index: 10;
-    -webkit-box-shadow: 5px 0px 0px rgba(0, 0, 0, 0.4);
-    box-shadow: 5px 0px 0px rgba(0, 0, 0, 0.4);
-    -webkit-transition: all 500ms ease;
-    -moz-transition: all 500ms ease;
-    -ms-transition: all 500ms ease;
-    -o-transition: all 500ms ease;
-    transition: all 500ms ease;
+    border-right: solid  2px #aaa;
 }
 .hackathon-nav .row {
     margin: 0;
