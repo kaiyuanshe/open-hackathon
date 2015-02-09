@@ -364,6 +364,13 @@ class ExprManager(object):
         db_adapter.commit()
         return "OK"
 
+    def __delete_ports(self, expr_id):
+        ports = PortBinding.query.filter_by(experiment_id=expr_id).all()
+        if ports is not None:
+            for port in ports:
+                db.session.delete(port)
+            db.session.commit()
+
     def __roll_back(self, expr_id):
         log.info("Starting rollback ...")
         expr = Experiment.query.filter_by(id=expr_id).first()
@@ -380,9 +387,7 @@ class ExprManager(object):
                         if c.container.host_server.container_count < 0:
                             c.container.host_server.container_count = 0
             # delete ports
-            ports = PortBinding.query.filter_by(experiment_id=expr_id).all()
-            for port in ports:
-                db.session.delete(port)
+            self.__delete_ports(expr_id)
             expr.status = ExprStatus.Rollbacked
             db.session.commit()
             log.info("Rollback succeeded")
