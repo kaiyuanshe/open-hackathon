@@ -88,6 +88,7 @@ class ExprManager(object):
 
     # todo p = PortManagement()
     def __get_available_public_port(self, host_server, host_port):
+        log.debug("starting to get azure port")
         p = PortManagement()
         sub_id = get_config("azure/subscriptionId")
         cert_path = get_config('azure/certPath')
@@ -97,6 +98,7 @@ class ExprManager(object):
         host_server_name = host_server.vm_name
         host_server_dns = host_server.public_dns.split('.')[0]
         public_port = p.assign_public_port(host_server_dns, 'Production', host_server_name, host_port)
+        log.debug("public port : %d" % public_port)
         return public_port
 
     def __release_public_port(self, host_server, host_port):
@@ -108,6 +110,7 @@ class ExprManager(object):
 
         host_server_name = host_server.vm_name
         host_server_dns = host_server.public_dns.split('.')[0]
+        log.debug("starting to release ports: %d" % host_port)
         p.release_public_port(host_server_dns, 'Production', host_server_name, host_port)
 
     def __assign_port(self, expr, host_server, ve, port_cfg):
@@ -177,6 +180,7 @@ class ExprManager(object):
         post_data = container_config
         post_data["expr_id"] = expr.id
         post_data["container_name"] = "%s-%s" % (expr.id, container_config["name"])
+        log.debug("starting to start container: %s" % post_data["container_name"])
 
         # db entity
         provider = container_config["provider"] if "provider" in container_config else VirtualEnvironmentProvider.Docker
@@ -243,6 +247,7 @@ class ExprManager(object):
         ve.status = VirtualEnvStatus.Running
         host_server.container_count += 1
         db_adapter.commit()
+        log.debug("starting container %s is ended ... " % post_data["container_name"])
         return ve
 
     def get_expr_status(self, expr_id):
@@ -348,6 +353,7 @@ class ExprManager(object):
         return "OK"
 
     def __release_ports(self, expr_id, host_server):
+        log.debug("Begin to release ports: expr_id: %d, host_server: %r" % (expr_id, host_server))
         ports = PortBinding.query.filter_by(experiment_id=expr_id).all()
         if ports is not None:
             for port in ports:
@@ -362,7 +368,7 @@ class ExprManager(object):
 
         :param expr_id: experiment id
         """
-        log.info("Starting rollback ...")
+        log.debug("Starting rollback ...")
         expr = Experiment.query.filter_by(id=expr_id).first()
         try:
             expr.status = ExprStatus.Rollbacking
@@ -393,6 +399,7 @@ class ExprManager(object):
         :param force: 0: only stop container and release ports, 1: force stop and delete container and release ports.
         :return:
         """
+        log.debug("begin to stop %d" % expr_id)
         expr = db_adapter.find_first_object(Experiment, id=expr_id, status=ExprStatus.Running)
         if expr is not None:
             # Docker
@@ -400,6 +407,7 @@ class ExprManager(object):
                 # stop containers
                 for c in expr.virtual_environments:
                     try:
+                        log.debug("begin to stop %s" % c.name)
                         if force:
                             docker.delete(c.name, c.container.host_server)
                             c.status = VirtualEnvStatus.Deleted

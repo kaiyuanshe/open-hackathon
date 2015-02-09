@@ -28,25 +28,27 @@ class OssDocker(object):
         try:
             containers_url = self.get_vm_url(docker_host) + "/containers/json"
             req = requests.get(containers_url)
+            log.debug(req.content)
             return convert(json.loads(req.content))
-        except Exception as e:
-            log.info(e)
-            log.info("cannot get containers' info")
-            raise AssertionError
+        except:
+            log.error("cannot get containers' info")
+            raise
 
     def __get_available_host_port(self, port_bindings, port):
         host_port = port + 10000
 
-        while port in port_bindings:
+        while host_port in port_bindings:
             host_port += 1
 
         if host_port >= 65535:
             log.error("port used up on this host server")
             raise Exception("no port available")
 
+        log.debug("host_port is %d " % host_port)
         return host_port
 
     def get_available_host_port(self, docker_host, private_port):
+        log.debug("try to assign docker port %d on server %r" % (private_port, docker_host))
         containers = self.containers_info(docker_host)
         host_ports = flatten(map(lambda p: p['Ports'], containers))
         host_public_ports = map(lambda p: p['PublicPort'], host_ports)
@@ -68,18 +70,17 @@ class OssDocker(object):
             try:
                 containers_url = self.get_vm_url(docker_host) + "/containers/%s/stop" % name
                 requests.post(containers_url)
-            except Exception as e:
-                log.error(e)
-                log.error(requests.content)
+                log.debug(requests.content)
+            except:
                 log.error("container %s fail to stop" % name)
-                raise AssertionError
+                raise
 
     # stop a container and delete it
     def delete(self, name, docker_host):
         try:
             containers_url = self.get_vm_url(docker_host) + "/containers/%s?force=1" % name
             req = requests.delete(containers_url)
-            log.info(req.content)
+            log.debug(req.content)
         except:
             log.error("container %s fail to stop" % name)
             raise
@@ -89,17 +90,18 @@ class OssDocker(object):
         try:
             url = self.get_vm_url(docker_host) + "/containers/%s/start" % container_id
             req = requests.post(url, data=json.dumps(start_config), headers=default_http_headers)
-            log.info(req.content)
+            log.debug(req.content)
         except:
             log.error("container %s fail to start" % container_id)
-            raise AssertionError()
+            raise
 
     # create a container
     def create(self, docker_host, container_config, container_name):
         containers_url = self.get_vm_url(docker_host) + "/containers/create?name=%s" % container_name
         try:
-            req_create = requests.post(containers_url, data=json.dumps(container_config), headers=default_http_headers)
-            container = json.loads(req_create.content)
+            req = requests.post(containers_url, data=json.dumps(container_config), headers=default_http_headers)
+            log.debug(req.content)
+            container = json.loads(req.content)
         except Exception as err:
             log.error(err)
             raise
@@ -161,10 +163,9 @@ class OssDocker(object):
             try:
                 container = self.create(docker_host, container_config, container_name)
             except Exception as e:
-                log.info(e)
-                log.info("container %s fail to create" % container_name)
+                log.error(e)
+                log.error("container %s fail to create" % container_name)
                 return None
-
 
             # start container
             # start_config = { "PortBindings":{"22/tcp":["10022"]}}, "Binds":[]}
@@ -190,7 +191,7 @@ class OssDocker(object):
                 return None
 
             if self.get_container(container_name, docker_host) is None:
-                log.error("container %s fail to start" % args["name"])
+                log.error("container %s fail to start" % container_name)
                 return None
 
         return result
