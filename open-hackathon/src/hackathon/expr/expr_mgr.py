@@ -9,12 +9,10 @@ from hackathon.docker import OssDocker
 from hackathon.enum import *
 from hackathon.azureautodeploy.azureUtil import *
 from hackathon.azureautodeploy.portManagement import *
-from hackathon.azureautodeploy.azureImpl import AzureImpl
 from hackathon.functions import safe_get_config, get_config, post_to_remote
 from subprocess import Popen
 
 docker = OssDocker()
-process = None
 
 
 class ExprManager(object):
@@ -26,6 +24,9 @@ class ExprManager(object):
             "create_time": str(expr.create_time),
             "last_heart_beat_time": str(expr.last_heart_beat_time),
         }
+
+        if expr.status != ExprStatus.Running:
+            return ret
 
         # return guacamole link to frontend
         guacamole_servers = []
@@ -70,16 +71,6 @@ class ExprManager(object):
                 })
         ret["public_urls"] = public_urls
 
-        if expr.user_template.template.provider == VirtualEnvironmentProvider.AzureVM:
-            if expr.status == ExprStatus.Starting:
-                global process
-                if process.poll() is not None:
-                    if process.poll() == 0:
-                        expr.status = ExprStatus.Running
-                    else:
-                        expr.status = ExprStatus.Failed
-                    db_adapter.commit()
-
         return ret
 
     def __get_available_docker_host(self, expr_config):
@@ -118,6 +109,17 @@ class ExprManager(object):
         host_server_dns = host_server.public_dns.split('.')[0]
         public_port = p.assign_public_port(host_server_dns, 'Production', host_server_name, host_port)
         return public_port
+
+    def __release_public_port(self, host_server, host_port):
+        p = PortManagement()
+        sub_id = get_config("azure/subscriptionId")
+        cert_path = get_config('azure/certPath')
+        service_host_base = get_config("azure/managementServiceHostBase")
+        p.connect(sub_id, cert_path, service_host_base)
+
+        host_server_name = host_server.vm_name
+        host_server_dns = host_server.public_dns.split('.')[0]
+        p.release_public_port(host_server_dns, 'Production', host_server_name, host_port)
 
     def __assign_port(self, expr, host_server, ve, port_cfg):
 
@@ -343,10 +345,9 @@ class ExprManager(object):
             db_adapter.commit()
             # start create azure vm according to user template
             try:
-                global process
                 path = os.path.dirname(__file__) + '/../azureautodeploy/azureCreateAsync.py'
                 command = ['python', path, str(user_template.id), str(expr.id)]
-                process = Popen(command)
+                Popen(command)
             except Exception as e:
                 log.error(e)
                 return {"error": "Failed starting azure"}, 500
@@ -364,25 +365,37 @@ class ExprManager(object):
         db_adapter.commit()
         return "OK"
 
+    def __release_ports(self, expr_id, host_server):
+        ports = PortBinding.query.filter_by(experiment_id=expr_id).all()
+        if ports is not None:
+            for port in ports:
+                if port.binding_type == 1:
+                    self.__release_public_port(host_server, port.port_to)
+                db.session.delete(port)
+            db.session.commit()
+
     def __roll_back(self, expr_id):
+        """
+        force delete container
+
+        :param expr_id: experiment id
+        """
         log.info("Starting rollback ...")
         expr = Experiment.query.filter_by(id=expr_id).first()
         try:
             expr.status = ExprStatus.Rollbacking
             db_adapter.commit()
             if expr is not None:
-                # stop containers and change expr status
+                # delete containers and change expr status
                 for c in expr.virtual_environments:
                     if c.provider == VirtualEnvironmentProvider.Docker:
-                        docker.stop(c.name, c.container.host_server)
-                        c.status = VirtualEnvStatus.Stopped
+                        docker.delete(c.name, c.container.host_server)
+                        c.status = VirtualEnvStatus.Deleted
                         c.container.host_server.container_count -= 1
                         if c.container.host_server.container_count < 0:
                             c.container.host_server.container_count = 0
+                        self.__release_ports(expr_id, c.container.host_server)
             # delete ports
-            ports = PortBinding.query.filter_by(experiment_id=expr_id).all()
-            for port in ports:
-                db.session.delete(port)
             expr.status = ExprStatus.Rollbacked
             db.session.commit()
             log.info("Rollback succeeded")
@@ -392,7 +405,12 @@ class ExprManager(object):
             log.info("Rollback failed")
             log.error(e)
 
-    def stop_expr(self, expr_id):
+    def stop_expr(self, expr_id, force=0):
+        """
+        :param expr_id: experiment id
+        :param force: 0: only stop container and release ports, 1: force stop and delete container and release ports.
+        :return:
+        """
         expr = db_adapter.find_first_object(Experiment, id=expr_id, status=ExprStatus.Running)
         if expr is not None:
             # Docker
@@ -400,20 +418,32 @@ class ExprManager(object):
                 # stop containers
                 for c in expr.virtual_environments:
                     try:
-                        docker.stop(c.name, c.container.host_server)
-                        c.status = VirtualEnvStatus.Stopped
+                        if force:
+                            docker.delete(c.name, c.container.host_server)
+                            c.status = VirtualEnvStatus.Deleted
+                        else:
+                            docker.stop(c.name, c.container.host_server)
+                            c.status = VirtualEnvStatus.Stopped
                         c.container.host_server.container_count -= 1
                         if c.container.host_server.container_count < 0:
                             c.container.host_server.container_count = 0
+                        self.__release_ports(expr_id, c.container.host_server)
                     except Exception as e:
                         log.error(e)
+                        return {"error": "Failed stop/delete container"}, 500
+                if force:
+                    expr.status = ExprStatus.Deleted
+                else:
+                    expr.status = ExprStatus.Stopped
+                db_adapter.commit()
             else:
-                if not AzureImpl().shutdown_async(expr.user_template):
-                    m = 'failed stopping azure vm'
-                    log.error(m)
-                    return m
-            expr.status = ExprStatus.Stopped
-            db_adapter.commit()
+                try:
+                    path = os.path.dirname(__file__) + '/../azureautodeploy/azureShutdownAsync.py'
+                    command = ['python', path, str(expr.user_template.id), str(expr.id)]
+                    Popen(command)
+                except Exception as e:
+                    log.error(e)
+                    return {"error": "Failed shutdown azure"}, 500
             return "OK"
         else:
             return "expr not exist"
