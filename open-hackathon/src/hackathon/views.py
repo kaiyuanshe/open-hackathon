@@ -62,7 +62,7 @@ class UserExperimentResource(Resource):
         parser.add_argument('id', type=int, location='args')
         parser.add_argument('force', type=int, location='args')
         args = parser.parse_args()
-        if args['id'] or args['force'] is None:
+        if args['id'] is None or args['force'] is None:
             return {"error": "Bad request"}, 400
 
         return expr_manager.stop_expr(args["id"], args['force'])

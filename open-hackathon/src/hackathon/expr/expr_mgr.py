@@ -375,6 +375,11 @@ class ExprManager(object):
             db.session.commit()
 
     def __roll_back(self, expr_id):
+        """
+        force delete container
+
+        :param expr_id: experiment id
+        """
         log.info("Starting rollback ...")
         expr = Experiment.query.filter_by(id=expr_id).first()
         try:
@@ -425,7 +430,11 @@ class ExprManager(object):
                         self.__release_ports(expr_id, c.container.host_server)
                     except Exception as e:
                         log.error(e)
-                expr.status = ExprStatus.Stopped
+                        return {"error": "Failed stop/delete container"}, 500
+                if force:
+                    expr.status = ExprStatus.Deleted
+                else:
+                    expr.status = ExprStatus.Stopped
                 db_adapter.commit()
             else:
                 try:
