@@ -64,8 +64,8 @@ class UserExperimentResource(Resource):
         args = parser.parse_args()
         if args['id'] is None or args['force'] is None:
             return {"error": "Bad request"}, 400
-
         return expr_manager.stop_expr(args["id"], args['force'])
+
 
     @token_required
     def put(self):
