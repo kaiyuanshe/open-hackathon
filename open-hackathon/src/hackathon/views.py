@@ -60,11 +60,12 @@ class UserExperimentResource(Resource):
         # id is experiment id
         parser = reqparse.RequestParser()
         parser.add_argument('id', type=int, location='args')
+        parser.add_argument('force', type=int, location='args')
         args = parser.parse_args()
-        if args['id'] is None:
+        if args['id'] or args['force'] is None:
             return {"error": "Bad request"}, 400
 
-        return expr_manager.stop_expr(args["id"])
+        return expr_manager.stop_expr(args["id"], args['force'])
 
     @token_required
     def put(self):
