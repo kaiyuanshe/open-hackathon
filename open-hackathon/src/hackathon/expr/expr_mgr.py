@@ -7,7 +7,7 @@ from flask import g
 from hackathon.constants import GUACAMOLE
 from hackathon.docker import OssDocker
 from hackathon.enum import *
-from hackathon.azureautodeploy.azureUtil import *
+from hackathon.azureautodeploy.azureImpl import *
 from hackathon.azureautodeploy.portManagement import *
 from hackathon.functions import safe_get_config, get_config, post_to_remote
 from subprocess import Popen
@@ -33,7 +33,12 @@ class ExprManager(object):
         if expr.user_template.template.provider == VirtualEnvironmentProvider.Docker:
             ves = expr.virtual_environments.all()
         else:
-            ves = db_adapter.find_all_objects(VMConfig, user_template_id=expr.user_template.id)
+            vms = db_adapter.find_all_objects(UserResource,
+                                              type=VIRTUAL_MACHINE,
+                                              status=RUNNING,
+                                              user_template_id=expr.user_template.id)
+            vms_id = map(lambda v: v.id, vms)
+            ves = db_adapter.find_all_objects(VMConfig, virtual_machine_id=vms_id)
         for ve in ves:
             if ve.remote_provider == RemoteProvider.Guacamole:
                 guaca_config = json.loads(ve.remote_paras)
@@ -59,7 +64,12 @@ class ExprManager(object):
                             "url": url
                         })
         else:
-            for vm_config in db_adapter.find_all_objects(VMConfig, user_template_id=expr.user_template.id):
+            vms = db_adapter.find_all_objects(UserResource,
+                                              type=VIRTUAL_MACHINE,
+                                              status=RUNNING,
+                                              user_template_id=expr.user_template.id)
+            vms_id = map(lambda v: v.id, vms)
+            for vm_config in db_adapter.find_all_objects(VMConfig, virtual_machine_id=vms_id):
                 dns = vm_config.dns[:-1]
                 vm = vm_config.virtual_machine
                 endpoint = db_adapter.find_first_object(VMEndpoint, private_port=80, virtual_machine=vm)
@@ -431,13 +441,29 @@ class ExprManager(object):
                     expr.status = ExprStatus.Stopped
                 db_adapter.commit()
             else:
-                try:
-                    path = os.path.dirname(__file__) + '/../azureautodeploy/azureShutdownAsync.py'
-                    command = ['python', path, str(expr.user_template.id), str(expr.id)]
-                    Popen(command)
-                except Exception as e:
-                    log.error(e)
-                    return {"error": "Failed shutdown azure"}, 500
+                azure = AzureImpl()
+                sub_id = get_config("azure/subscriptionId")
+                cert_path = get_config('azure/certPath')
+                service_host_base = get_config("azure/managementServiceHostBase")
+                if not azure.connect(sub_id, cert_path, service_host_base):
+                    return {"error": "Failed connect azure"}, 500
+                if force == 0:
+                    try:
+                        result = azure.shutdown_sync(expr.user_template, expr_id)
+                    except Exception as e:
+                        log.error(e)
+                        return {"error": "Failed shutdown azure"}, 500
+                    expr.status = ExprStatus.Stopped
+                else:
+                    try:
+                        result = azure.delete_sync(expr.user_template, expr_id)
+                    except Exception as e:
+                        log.error(e)
+                        return {"error": "Failed delete azure"}, 500
+                    expr.status = ExprStatus.Deleted
+                db_adapter.commit()
+                if not result:
+                    return {"error": "Failed stop azure"}, 500
             return "OK"
         else:
             return "expr not exist"
