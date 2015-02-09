@@ -25,6 +25,9 @@ class ExprManager(object):
             "last_heart_beat_time": str(expr.last_heart_beat_time),
         }
 
+        if expr.status != ExprStatus.Running:
+            return ret
+
         # return guacamole link to frontend
         guacamole_servers = []
         if expr.user_template.template.provider == VirtualEnvironmentProvider.Docker:
@@ -67,10 +70,6 @@ class ExprManager(object):
                     "url": dns + ':' + str(port)
                 })
         ret["public_urls"] = public_urls
-
-        if expr.user_template.template.provider == VirtualEnvironmentProvider.AzureVM:
-            if expr.status == ExprStatus.Failed:
-                return {"error": "Failed starting azure"}, 500
 
         return ret
 
