@@ -86,18 +86,7 @@ class ExprManager(object):
             raise Exception("No available VM.")
         return vm
 
-    def __get_available_host_port(self, port_bindings, port):
-        host_port = port + 10000
-
-        while len(filter(lambda p: p.port_from == host_port, port_bindings)) > 0:
-            host_port += 1
-
-        if host_port >= 65535:
-            log.error("port used up on this host server")
-            raise Exception("no port available")
-
-        return host_port
-
+    # todo p = PortManagement()
     def __get_available_public_port(self, host_server, host_port):
         p = PortManagement()
         sub_id = get_config("azure/subscriptionId")
@@ -127,10 +116,11 @@ class ExprManager(object):
             # todo open port on azure for those must open to public
             # public port means the port open the public. For azure , it's the public port on azure. There
             # should be endpoint on azure that from public_port to host_port
-            host_ports = db_adapter.find_all_objects(PortBinding, binding_type=PortBindingType.Docker,
-                                                     binding_resource_id=host_server.id)
+            # host_ports = db_adapter.find_all_objects(PortBinding, binding_type=PortBindingType.Docker,
+            #                                        binding_resource_id=host_server.id)
+
             if not "host_port" in port_cfg:
-                port_cfg["host_port"] = self.__get_available_host_port(host_ports, port_cfg["port"])
+                port_cfg["host_port"] = docker.get_available_host_port(host_server, port_cfg["port"])
             if not "public_port" in port_cfg:
                 if safe_get_config("environment", "prod") == "local":
                     port_cfg["public_port"] = port_cfg["host_port"]
@@ -156,9 +146,7 @@ class ExprManager(object):
             db_adapter.commit()
             return binding_docker
         else:
-            host_ports = db_adapter.find_all_objects(PortBinding, binding_type=PortBindingType.Docker,
-                                                     binding_resource_id=host_server.id)
-            port_cfg["host_port"] = self.__get_available_host_port(host_ports, port_cfg["port"])
+            port_cfg["host_port"] = docker.get_available_host_port(host_server, port_cfg["port"])
 
             port_binding = PortBinding(name=port_cfg["name"] if "name" in port_cfg else None,
                                        port_from=port_cfg["host_port"],

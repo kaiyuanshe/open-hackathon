@@ -5,6 +5,7 @@ import json
 import requests
 from hackathon.log import log
 from hackathon.functions import convert
+from compiler.ast import flatten
 
 
 def name_match(id, l):
@@ -32,6 +33,24 @@ class OssDocker(object):
             log.info(e)
             log.info("cannot get containers' info")
             raise AssertionError
+
+    def __get_available_host_port(self, port_bindings, port):
+        host_port = port + 10000
+
+        while port in port_bindings:
+            host_port += 1
+
+        if host_port >= 65535:
+            log.error("port used up on this host server")
+            raise Exception("no port available")
+
+        return host_port
+
+    def get_available_host_port(self, docker_host, private_port):
+        containers = self.containers_info(docker_host)
+        host_ports = flatten(map(lambda p: p['Ports'], containers))
+        host_public_ports = map(lambda p: p['PublicPort'], host_ports)
+        return self.__get_available_host_port(host_public_ports, private_port)
 
     def get_container(self, name, docker_host):
         containers = self.containers_info(docker_host)
