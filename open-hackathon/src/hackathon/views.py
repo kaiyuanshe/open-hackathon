@@ -9,9 +9,10 @@ from flask import g, request
 from log import log
 from database import db_adapter
 from decorators import token_required
-from user.user_functions import get_user_experiment, get_user_hackathon, get_hackathon_stat
+from user.user_functions import get_user_experiment, get_user_hackathon
 from health import report_health
 from remote.guacamole import GuacamoleInfo
+from hack import hack_manager
 
 
 class RegisterListResource(Resource):
@@ -31,7 +32,11 @@ class UserExperimentResource(Resource):
         args = parser.parse_args()
         if args['id'] is None:
             return json.dumps({"error": "Bad request"}), 400
-        cs = expr_manager.get_expr_status(args['id'])
+        try:
+            cs = expr_manager.get_expr_status(args['id'])
+        except Exception as e:
+            log.error(e)
+            return {"error": "Please Reload then Wait"}, 500
         if cs is not None:
             return cs
         else:
@@ -119,9 +124,7 @@ class HackathonListResource(Resource):
         parse = reqparse.RequestParser()
         parse.add_argument('name', type=str, location='args')
         args = parse.parse_args()
-        if args['name'] is not None:
-            return db_adapter.find_first_object(Hackathon, name=args['name']).json()
-        return map(lambda u: u.json(), db_adapter.find_all_objects(Hackathon))
+        return hack_manager.get_hackathon_list(args["name"])
 
 
 class HackathonStatResource(Resource):
@@ -133,7 +136,7 @@ class HackathonStatResource(Resource):
         if args['hid'] is None:
             return {"error": "Bad request"}, 400
 
-        return get_hackathon_stat(args['hid'])
+        return hack_manager.get_hackathon_stat(args['hid'])
 
 
 class UserHackathonResource(Resource):

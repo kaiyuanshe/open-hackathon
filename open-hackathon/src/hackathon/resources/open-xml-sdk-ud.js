@@ -6,6 +6,10 @@
             "name": "vnc",
             "image": "42.159.103.213:5000/mono",
             "ports":[{
+                "name": "website",
+                "port": 80,
+                "public": true
+            },{
                 "name": "Dev",
                 "port": 5901,
                 "public": true

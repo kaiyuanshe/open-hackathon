@@ -1,8 +1,11 @@
 __author__ = 'Yifu Huang'
 import sys
+import os
+
+sys.path.append(os.path.dirname(__file__) + "/../../")
 sys.path.append("..")
+from hackathon.database import *
 from hackathon.database.models import *
-from hackathon.database import db_adapter
 from hackathon.log import *
 import time
 import os
@@ -107,7 +110,7 @@ def user_resource_status_update(user_template, type, name, status, cs_id=None):
     db_adapter.commit()
 
 
-def vm_endpoint_commit(name, protocol, port, local_port, cs):
+def vm_endpoint_commit(name, protocol, port, local_port, cs, vm):
     """
     Commit vm endpoint to database before create vm
     :param name:
@@ -122,30 +125,8 @@ def vm_endpoint_commit(name, protocol, port, local_port, cs):
                                  protocol=protocol,
                                  public_port=port,
                                  private_port=local_port,
-                                 cloud_service=cs)
-    db_adapter.commit()
-
-
-def vm_endpoint_rollback(cs):
-    """
-    Rollback vm endpoint in database because no vm created
-    :param cs:
-    :return:
-    """
-    db_adapter.delete_all_objects(VMEndpoint, cloud_service_id=cs.id, virtual_machine_id=None)
-    db_adapter.commit()
-
-
-def vm_endpoint_update(cs, vm):
-    """
-    Update vm endpoint in database after vm created
-    :param cs:
-    :param vm:
-    :return:
-    """
-    vm_endpoints = db_adapter.filter_by(VMEndpoint, cloud_service=cs, virtual_machine=None).all()
-    for vm_endpoint in vm_endpoints:
-        vm_endpoint.virtual_machine = vm
+                                 cloud_service=cs,
+                                 virtual_machine=vm)
     db_adapter.commit()
 
 
@@ -192,7 +173,7 @@ def wait_for_async(sms, request_id, second_per_loop, loop):
     return True
 
 
-def load_template(user_template, operation, vm_id):
+def load_template(user_template, operation, expr_id):
     """
     Load json based template into dictionary
     :param user_template:
@@ -221,7 +202,7 @@ def load_template(user_template, operation, vm_id):
         T_VIRTUAL_MACHINES: raw_template[R_VIRTUAL_ENVIRONMENTS]
     }
     for vm in template_config[T_VIRTUAL_MACHINES]:
-        vm['role_name'] = '%s-%d' % (vm['role_name'], vm_id)
+        vm['role_name'] = '%s-%d' % (vm['role_name'], expr_id)
     return template_config
 
 

@@ -6,19 +6,13 @@ from compiler.ast import flatten
 from flask import g
 from hackathon.constants import GUACAMOLE
 from hackathon.docker import OssDocker
-from hackathon.functions import *
 from hackathon.enum import *
-from hackathon.azureautodeploy.azureImpl import AzureImpl
 from hackathon.azureautodeploy.azureUtil import *
 from hackathon.azureautodeploy.portManagement import *
+from hackathon.functions import safe_get_config, get_config, post_to_remote
+from subprocess import Popen
 
 docker = OssDocker()
-azure = AzureImpl()
-sub_id = get_config("azure/subscriptionId")
-cert_path = get_config('azure/certPath')
-service_host_base = get_config("azure/managementServiceHostBase")
-azure.connect(sub_id, cert_path, service_host_base)
-uo_id = 0
 
 
 class ExprManager(object):
@@ -30,6 +24,9 @@ class ExprManager(object):
             "create_time": str(expr.create_time),
             "last_heart_beat_time": str(expr.last_heart_beat_time),
         }
+
+        if expr.status != ExprStatus.Running:
+            return ret
 
         # return guacamole link to frontend
         guacamole_servers = []
@@ -51,10 +48,8 @@ class ExprManager(object):
 
         # return public accessible web url
         public_urls = []
-        for ve in expr.virtual_environments.filter(VirtualEnvironment.image != GUACAMOLE.IMAGE).all():
-            # todo only docker handled now. add Azure VM support later
-            # todo return public url is judge portbinding name = "website"
-            if ve.provider == VirtualEnvironmentProvider.Docker:
+        if expr.user_template.template.provider == VirtualEnvironmentProvider.Docker:
+            for ve in expr.virtual_environments.filter(VirtualEnvironment.image != GUACAMOLE.IMAGE).all():
                 for p in ve.port_bindings.all():
                     if p.binding_type == PortBindingType.CloudService and p.name == "website":
                         hs = db_adapter.find_first_object(DockerHostServer, id=p.binding_resource_id)
@@ -63,22 +58,22 @@ class ExprManager(object):
                             "name": p.name,
                             "url": url
                         })
+        else:
+            for vm_config in db_adapter.find_all_objects(VMConfig, user_template_id=expr.user_template.id):
+                dns = vm_config.dns[:-1]
+                vm = vm_config.virtual_machine
+                endpoint = db_adapter.find_first_object(VMEndpoint, private_port=80, virtual_machine=vm)
+                name = endpoint.name
+                port = endpoint.public_port
+                public_urls.append({
+                    "name": name,
+                    "url": dns + ':' + str(port)
+                })
         ret["public_urls"] = public_urls
 
         if expr.user_template.template.provider == VirtualEnvironmentProvider.AzureVM:
-            if expr.status == ExprStatus.Starting:
-                global uo_id
-                uo = query_user_operation(expr.user_template, CREATE, uo_id)
-                if len(uo) > 0:
-                    uo_last = uo[-1]
-                    if uo_last.status == FAIL:
-                        expr.status = ExprStatus.Failed
-                        db_adapter.commit()
-                    if uo_last.operation == CREATE and uo_last.status == END:
-                        expr.status = ExprStatus.Running
-                        db_adapter.commit()
-
-
+            if expr.status == ExprStatus.Failed:
+                return {"error": "Failed starting azure"}, 500
 
         return ret
 
@@ -107,16 +102,15 @@ class ExprManager(object):
 
         return host_port
 
-    def __get_available_public_port(self, host_server_id, host_port):
+    def __get_available_public_port(self, host_server, host_port):
         p = PortManagement()
         sub_id = get_config("azure/subscriptionId")
         cert_path = get_config('azure/certPath')
         service_host_base = get_config("azure/managementServiceHostBase")
         p.connect(sub_id, cert_path, service_host_base)
 
-        docker_host_server = db_adapter.find_first_object(DockerHostServer, id=host_server_id)
-        host_server_name = docker_host_server.vm_name
-        host_server_dns = docker_host_server.public_dns.split('.')[0]
+        host_server_name = host_server.vm_name
+        host_server_dns = host_server.public_dns.split('.')[0]
         public_port = p.assign_public_port(host_server_dns, 'Production', host_server_name, host_port)
         return public_port
 
@@ -131,7 +125,7 @@ class ExprManager(object):
             if not "host_port" in port_cfg:
                 port_cfg["host_port"] = self.__get_available_host_port(host_ports, port_cfg["port"])
             if not "public_port" in port_cfg:
-                port_cfg["public_port"] = self.__get_available_public_port(host_server.id, port_cfg["host_port"])
+                port_cfg["public_port"] = self.__get_available_public_port(host_server, port_cfg["host_port"])
 
             if safe_get_config("environment", "prod") == "local" and port_cfg["host_port"] == 80:
                 host_ports = db_adapter.find_all_objects(PortBinding, binding_type=PortBindingType.Docker,
@@ -140,7 +134,7 @@ class ExprManager(object):
                 port_cfg["host_port"] = self.__get_available_host_port(host_ports, port_cfg["port"])
                 # port_cfg["public_port"] = port_cfg["host_port"]
 
-                port_cfg["public_port"] = self.__get_available_public_port(host_server.id, port_cfg["host_port"])
+                port_cfg["public_port"] = self.__get_available_public_port(host_server, port_cfg["host_port"])
 
             binding_cloudservice = PortBinding(name=port_cfg["name"] if "name" in port_cfg else None,
                                                port_from=port_cfg["public_port"],
@@ -343,10 +337,13 @@ class ExprManager(object):
             expr.status = ExprStatus.Starting
             db_adapter.commit()
             # start create azure vm according to user template
-            if not azure.create_async(user_template, expr.id):
-                m = 'failed creating azure vm'
-                log.error(m)
-                return m
+            try:
+                path = os.path.dirname(__file__) + '/../azureautodeploy/azureCreateAsync.py'
+                command = ['python', path, str(user_template.id), str(expr.id)]
+                Popen(command)
+            except Exception as e:
+                log.error(e)
+                return {"error": "Failed starting azure"}, 500
         # after everything is ready, set the expr state to running
 
         # response to caller
@@ -404,13 +401,16 @@ class ExprManager(object):
                             c.container.host_server.container_count = 0
                     except Exception as e:
                         log.error(e)
+                expr.status = ExprStatus.Stopped
+                db_adapter.commit()
             else:
-                if not azure.shutdown_async(expr.user_template):
-                    m = 'failed stopping azure vm'
-                    log.error(m)
-                    return m
-            expr.status = ExprStatus.Stopped
-            db_adapter.commit()
+                try:
+                    path = os.path.dirname(__file__) + '/../azureautodeploy/azureShutdownAsync.py'
+                    command = ['python', path, str(expr.user_template.id), str(expr.id)]
+                    Popen(command)
+                except Exception as e:
+                    log.error(e)
+                    return {"error": "Failed shutdown azure"}, 500
             return "OK"
         else:
             return "expr not exist"

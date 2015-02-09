@@ -19,12 +19,10 @@ class GuacamoleInfo():
                                                              status=VirtualEnvStatus.Running).first()
         # azure vm
         if guacadconfig is None:
-            user_template = db_adapter.find_first_object(UserTemplate, user=g.user)
             vm = db_adapter.find_first_object(UserResource,
                                               type=VIRTUAL_MACHINE,
                                               name=connection_name,
-                                              status=RUNNING,
-                                              user_template=user_template)
+                                              status=RUNNING)
             guacadconfig = db_adapter.find_first_object(VMConfig,
                                                         remote_provider=RemoteProvider.Guacamole,
                                                         virtual_machine_id=vm.id)
