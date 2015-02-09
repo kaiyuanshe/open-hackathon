@@ -23,16 +23,13 @@ if __name__ == "__main__":
     cert_path = get_config('azure/certPath')
     service_host_base = get_config("azure/managementServiceHostBase")
     if not azure.connect(sub_id, cert_path, service_host_base):
-        set_expr_status(expr_id, ExprStatus.Failed)
         sys.exit(-1)
     user_template = db_adapter.get_object(UserTemplate, ut_id)
     try:
-        result = azure.create_sync(user_template, expr_id)
+        result = azure.shutdown_sync(user_template, expr_id)
     except Exception as e:
         log.error(e)
-        set_expr_status(expr_id, ExprStatus.Failed)
         sys.exit(-1)
     if not result:
-        set_expr_status(expr_id, ExprStatus.Failed)
         sys.exit(-1)
-    set_expr_status(expr_id, ExprStatus.Running)
+    set_expr_status(expr_id, ExprStatus.Stopped)
