@@ -119,7 +119,7 @@ class GitcafeLogin(LoginProviderBase):
         user_info = opener.open(request).read()
         log.debug(user_info)
         info = json.loads(user_info)
-        # log.info(info)
+
         name = info['username']
         email = info['email']
         id = info['id']
@@ -146,6 +146,7 @@ class GitcafeLogin(LoginProviderBase):
         detail = user_manager.get_user_detail_info(user, hackathon_name=hackathon_name)
         detail["token"] = user_with_token["token"].token
 
+        log.debug("gitcafe user login successfully: %r" % detail)
         return detail
 
 

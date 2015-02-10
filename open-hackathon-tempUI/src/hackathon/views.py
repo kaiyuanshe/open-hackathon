@@ -21,9 +21,7 @@ Template_Routes = {
     "error": "error.html",
     "submitted": "submitted.html",
     "redirect": "redirect.html",
-    "notregister": "notregister.html",
-    "settings": "settings.html",
-    "hackathon": "hackathon.html"
+    "notregister": "notregister.html"
 }
 
 
@@ -81,6 +79,30 @@ def template_routes(path):
     return simple_route(path)
 
 
+@app.route('/settings')
+@login_required
+def settings():
+    if not session["register_state"]:
+        return redirect("notregister")
+
+    return render_template("settings.html")
+
+
+@app.route('/hackathon')
+@login_required
+def settings():
+    if not session["register_state"]:
+        return redirect("notregister")
+
+    return render_template("hackathon.html")
+
+
+@app.route('/<path:path>')
+@login_required
+def template_routes(path):
+    return simple_route(path)
+
+
 # js config
 @app.route('/config.js')
 def js_config():
@@ -102,8 +124,9 @@ def __login(provider):
     login_user(user)
 
     session["token"] = login_result["token"]
+    session["register_state"] = login_required["register_state"]
 
-    if login_result["register_state"] == False:
+    if not login_result["register_state"]:
         response = make_response(redirect("notregister"))
     else:
         if len(login_result['experiments']) > 0:
