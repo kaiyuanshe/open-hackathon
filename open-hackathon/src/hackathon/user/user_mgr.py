@@ -36,7 +36,7 @@ class UserManager(object):
         emails = map(lambda x: x.email, user.emails.all())
         return self.db.filter(Register, Register.email.in_(emails),
                               Register.enabled == 1,
-                              Register.hackathon_id == hack.id).first()
+                              Register.hackathon_id == hack.id).count() > 0
 
     def get_all_registration(self):
         reg_list = self.db.find_all_objects(Register, enabled=1)
@@ -110,14 +110,15 @@ class UserManager(object):
         }
 
     def validate_request(self):
-        if HTTP_HEADER.TOKEN in request.headers:
-            token = request.headers[HTTP_HEADER.TOKEN]
-            user = self.__validate_token(token)
-            if user is None:
-                return False
-            g.user = user
-            return True
-        return False
+        if HTTP_HEADER.TOKEN not in request.headers:
+            return False
+
+        user = self.__validate_token(request.headers[HTTP_HEADER.TOKEN])
+        if user is None:
+            return False
+
+        g.user = user
+        return True
 
     def get_user_by_id(self, user_id):
         user = self.db.find_first_object(User, id=user_id)

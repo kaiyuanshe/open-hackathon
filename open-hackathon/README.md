@@ -140,11 +140,19 @@ sudo python /opt/open-hackathon/open-hackathon/src/setup_db.py
 sudo python /opt/open-hackathon/open-hackathon/src/create_test_data.py
 ```
 ### Run
-one more step, make sure log folder is created and properly authorized.
+then make sure log folder is created and properly authorized.
 ```
 sudo mkdir /var/log/open-hackathon
 sudo chmod -R 644 /var/log/open-hackathon
 ```
+
+one last step, create your own config file by coping the config-sample.py and editing its content:
+```
+cd /opt/open-hackathon/open-hackathon/src/hackathon
+cp config-sample.py config
+```
+usually, you need update the guacamole config or DB configs.
+
 Everything is OK now! Start the API server in command line:
 ```
 cd /opt/open-hackathon/open-hackathon/src
