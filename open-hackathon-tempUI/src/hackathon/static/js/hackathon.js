@@ -16,7 +16,7 @@ $(document).ready(function() {
         var $timer = $('#end_timer');
         var timerTmpe = '{day}天{hour}小时{minute}分钟{second}秒';
         if (d.end_time) {
-            var enddate = new Date(Date.parse(d.end_time.replace(/-/g, '')))
+            var enddate = new Date(Date.parse(d.end_time.replace(/-/g, '/')))
             Countdown(enddate, function(timer) {
                 if (timer) {
                     $timer.text(timerTmpe.format(timer))
