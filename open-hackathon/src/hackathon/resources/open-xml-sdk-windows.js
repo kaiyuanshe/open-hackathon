@@ -50,7 +50,7 @@
                     }
                 ]
             },
-            "role_size" : "Small",
+            "role_size" : "Basic_A3",
             "remote": {
                 "provider": "guacamole",
                 "protocol": "rdp",
