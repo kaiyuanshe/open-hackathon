@@ -101,7 +101,7 @@ class GitcafeLogin():
         token_resp = json.loads(resp.read())
         # token_resp = json.loads(resp.read())
         # token_resp = req.content()
-        data = {"provider": "gitcafe", "access_token": token_resp['access_token'], "name": hackathon_name}
+        data = {"provider": "gitcafe", "access_token": token_resp['access_token'], "hackathon_name": hackathon_name}
         return post_to_remote('%s/api/user/login' % hackathon_api_url, data)
 
 
