@@ -91,7 +91,7 @@ def settings():
 
 @app.route('/hackathon')
 @login_required
-def settings():
+def hackathon():
     if not session["register_state"]:
         return redirect("notregister")
 
