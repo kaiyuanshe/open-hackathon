@@ -19,7 +19,7 @@ Config = {
             "user_info_url": 'https://graph.qq.com/user/get_user_info?access_token=%s&oauth_consumer_key=%s&openid=%s'
         },
         "gitcafe": {
-            "access_token_url": 'https://s.gitcafe.org/oauth/token?client_id=3c4db5b888e7cb35e6f580f9eb6777655f228a66d2beaaf361de3578b88fe46e&client_secret=e32af01fe52f5c57312b1ccca4bdead604bb6e6314f66a569a924b9ff6223d74&redirect_uri=%s/gitcafe&grant_type=authorization_code&code=' % HOSTNAME
+            "access_token_url": 'https://api.gitcafe.com/oauth/token?client_id=25ba4f6f90603bd2f3d310d11c0665d937db8971c8a5db00f6c9b9852547d6b8&client_secret=e3d821e82d15096054abbc7fbf41727d3650cab6404a242373f5c446c0918634&redirect_uri=%s/gitcafe&grant_type=authorization_code&code=' % HOSTNAME
         },
         "provider_enabled": ["github", "qq", "gitcafe"],
         "session_minutes": 60,
