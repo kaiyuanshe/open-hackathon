@@ -114,7 +114,7 @@ class GitcafeLogin(LoginProviderBase):
         value = "Bearer " + token
         header = {"Authorization": value}
         opener = urllib2.build_opener(urllib2.HTTPHandler)
-        request = urllib2.Request("https://api.s.gitcafe.org/api/v1/user")
+        request = urllib2.Request(get_config("login/gitcafe/user_info_url"))
         request.add_header("Authorization", value)
         user_info = opener.open(request)
         # log.info(user_info.read())
