@@ -1,11 +1,13 @@
 import sys
 
 sys.path.append("..")
-from hackathon.database.models import User
+from hackathon.database.models import *
 from hackathon.database import db_adapter
 from hackathon.constants import HEALTH_STATE
+from hackathon.docker import *
 
 STATUS = "status"
+DESCRIPTION = "description"
 
 
 class HealthCheck():
@@ -14,6 +16,7 @@ class HealthCheck():
 
 
 class MySQLHealthCheck(HealthCheck):
+
     def __init__(self):
         self.db = db_adapter
 
@@ -26,16 +29,42 @@ class MySQLHealthCheck(HealthCheck):
         except Exception as e:
             return {
                 STATUS: HEALTH_STATE.ERROR,
-                "description": e.message
+                DESCRIPTION: e.message
             }
 
 
 class DockerHealthCheck(HealthCheck):
+
+    def __init__(self):
+        self.db = db_adapter
+        self.docker = OssDocker()
+
     def reportHealth(self):
-        # todo connect to docker host servers
-        return {
-            STATUS: HEALTH_STATE.OK
-        }
+        try:
+            hosts = self.db.find_all_objects(DockerHostServer)
+            alive = 0
+            for host in hosts:
+                if self.docker.ping(host):
+                    alive += 1
+            if alive == len(hosts):
+                return {
+                    STATUS: HEALTH_STATE.OK
+                }
+            elif alive > 0:
+                return {
+                    STATUS: HEALTH_STATE.WARNING,
+                    DESCRIPTION: 'at least one docker host servers are down'
+                }
+            else:
+                return {
+                    STATUS: HEALTH_STATE.ERROR,
+                    DESCRIPTION: 'all docker host servers are down'
+                }
+        except Exception as e:
+            return {
+                STATUS: HEALTH_STATE.ERROR,
+                "description": e.message
+            }
 
 
 class GuacamoleHealthCheck(HealthCheck):
