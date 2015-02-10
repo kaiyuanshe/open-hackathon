@@ -68,10 +68,23 @@ class DockerHealthCheck(HealthCheck):
 
 
 class GuacamoleHealthCheck(HealthCheck):
+
+    # todo now check only server status
+    def __init__(self):
+        self.guacamole_url = get_config("guacamole/host") + '/guacamole'
+
     def reportHealth(self):
-        # todo connect to guacamole to check its status. Maybe telnet?
+        try:
+            req = requests.get(self.guacamole_url)
+            log.debug(req.status_code)
+            if req.status_code == 200:
+                return {
+                    STATUS: HEALTH_STATE.OK
+                }
+        except Exception as e:
+            log.error(e)
         return {
-            STATUS: HEALTH_STATE.OK
+            STATUS: HEALTH_STATE.ERROR
         }
 
 
@@ -93,3 +106,6 @@ class AzureHealthCheck(HealthCheck):
             return {
                 STATUS: HEALTH_STATE.ERROR
             }
+
+g = GuacamoleHealthCheck()
+print g.reportHealth()
