@@ -12,17 +12,26 @@ def name_match(id, l):
     for n in l:
         if id in n:
             return True
-
     return False
-
 
 default_http_headers = {'content-type': 'application/json'}
 
 
 class OssDocker(object):
+
     def get_vm_url(self, docker_host):
         vm_url = "http://" + docker_host.public_dns + ":" + str(docker_host.public_docker_api_port)
         return vm_url
+
+    def ping(self, docker_host):
+        try:
+            ping_url = self.get_vm_url(docker_host) + '/_ping'
+            req = requests.get(ping_url)
+            log.debug(req.content)
+            return req.status_code == 200 and req.content == 'OK'
+        except Exception as e:
+            log.error(e)
+            return False
 
     def containers_info(self, docker_host):
         try:
