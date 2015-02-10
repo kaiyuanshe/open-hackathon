@@ -7,7 +7,7 @@ from flask import g
 from hackathon.constants import GUACAMOLE
 from hackathon.docker import OssDocker
 from hackathon.enum import *
-from hackathon.azureautodeploy.azureUtil import *
+from hackathon.azureautodeploy.azureImpl import *
 from hackathon.azureautodeploy.portManagement import *
 from hackathon.functions import safe_get_config, get_config, post_to_remote
 from subprocess import Popen
@@ -33,7 +33,12 @@ class ExprManager(object):
         if expr.user_template.template.provider == VirtualEnvironmentProvider.Docker:
             ves = expr.virtual_environments.all()
         else:
-            ves = db_adapter.find_all_objects(VMConfig, user_template_id=expr.user_template.id)
+            vms = db_adapter.find_all_objects(UserResource,
+                                              type=VIRTUAL_MACHINE,
+                                              status=RUNNING,
+                                              user_template_id=expr.user_template.id)
+            vms_id = map(lambda v: v.id, vms)
+            ves = db_adapter.find_all_objects(VMConfig, virtual_machine_id=vms_id)
         for ve in ves:
             if ve.remote_provider == RemoteProvider.Guacamole:
                 guaca_config = json.loads(ve.remote_paras)
@@ -59,7 +64,12 @@ class ExprManager(object):
                             "url": url
                         })
         else:
-            for vm_config in db_adapter.find_all_objects(VMConfig, user_template_id=expr.user_template.id):
+            vms = db_adapter.find_all_objects(UserResource,
+                                              type=VIRTUAL_MACHINE,
+                                              status=RUNNING,
+                                              user_template_id=expr.user_template.id)
+            vms_id = map(lambda v: v.id, vms)
+            for vm_config in db_adapter.find_all_objects(VMConfig, virtual_machine_id=vms_id):
                 dns = vm_config.dns[:-1]
                 vm = vm_config.virtual_machine
                 endpoint = db_adapter.find_first_object(VMEndpoint, private_port=80, virtual_machine=vm)
@@ -86,19 +96,9 @@ class ExprManager(object):
             raise Exception("No available VM.")
         return vm
 
-    def __get_available_host_port(self, port_bindings, port):
-        host_port = port + 10000
-
-        while len(filter(lambda p: p.port_from == host_port, port_bindings)) > 0:
-            host_port += 1
-
-        if host_port >= 65535:
-            log.error("port used up on this host server")
-            raise Exception("no port available")
-
-        return host_port
-
+    # todo p = PortManagement()
     def __get_available_public_port(self, host_server, host_port):
+        log.debug("starting to get azure port")
         p = PortManagement()
         sub_id = get_config("azure/subscriptionId")
         cert_path = get_config('azure/certPath')
@@ -108,6 +108,7 @@ class ExprManager(object):
         host_server_name = host_server.vm_name
         host_server_dns = host_server.public_dns.split('.')[0]
         public_port = p.assign_public_port(host_server_dns, 'Production', host_server_name, host_port)
+        log.debug("public port : %d" % public_port)
         return public_port
 
     def __release_public_port(self, host_server, host_port):
@@ -119,6 +120,7 @@ class ExprManager(object):
 
         host_server_name = host_server.vm_name
         host_server_dns = host_server.public_dns.split('.')[0]
+        log.debug("starting to release ports: %d" % host_port)
         p.release_public_port(host_server_dns, 'Production', host_server_name, host_port)
 
     def __assign_port(self, expr, host_server, ve, port_cfg):
@@ -127,10 +129,11 @@ class ExprManager(object):
             # todo open port on azure for those must open to public
             # public port means the port open the public. For azure , it's the public port on azure. There
             # should be endpoint on azure that from public_port to host_port
-            host_ports = db_adapter.find_all_objects(PortBinding, binding_type=PortBindingType.Docker,
-                                                     binding_resource_id=host_server.id)
+            # host_ports = db_adapter.find_all_objects(PortBinding, binding_type=PortBindingType.Docker,
+            #                                        binding_resource_id=host_server.id)
+
             if not "host_port" in port_cfg:
-                port_cfg["host_port"] = self.__get_available_host_port(host_ports, port_cfg["port"])
+                port_cfg["host_port"] = docker.get_available_host_port(host_server, port_cfg["port"])
             if not "public_port" in port_cfg:
                 if safe_get_config("environment", "prod") == "local":
                     port_cfg["public_port"] = port_cfg["host_port"]
@@ -156,9 +159,7 @@ class ExprManager(object):
             db_adapter.commit()
             return binding_docker
         else:
-            host_ports = db_adapter.find_all_objects(PortBinding, binding_type=PortBindingType.Docker,
-                                                     binding_resource_id=host_server.id)
-            port_cfg["host_port"] = self.__get_available_host_port(host_ports, port_cfg["port"])
+            port_cfg["host_port"] = docker.get_available_host_port(host_server, port_cfg["port"])
 
             port_binding = PortBinding(name=port_cfg["name"] if "name" in port_cfg else None,
                                        port_from=port_cfg["host_port"],
@@ -189,6 +190,7 @@ class ExprManager(object):
         post_data = container_config
         post_data["expr_id"] = expr.id
         post_data["container_name"] = "%s-%s" % (expr.id, container_config["name"])
+        log.debug("starting to start container: %s" % post_data["container_name"])
 
         # db entity
         provider = container_config["provider"] if "provider" in container_config else VirtualEnvironmentProvider.Docker
@@ -249,12 +251,13 @@ class ExprManager(object):
         # start container remotely
         container_ret = docker.run(post_data, host_server)
         if container_ret is None:
-            log.info("container %s fail to run" % post_data["container_name"])
-            raise AssertionError
+            log.error("container %s fail to run" % post_data["container_name"])
+            raise Exception("container_ret is none")
         container.container_id = container_ret["container_id"]
         ve.status = VirtualEnvStatus.Running
         host_server.container_count += 1
         db_adapter.commit()
+        log.debug("starting container %s is ended ... " % post_data["container_name"])
         return ve
 
     def get_expr_status(self, expr_id):
@@ -360,6 +363,7 @@ class ExprManager(object):
         return "OK"
 
     def __release_ports(self, expr_id, host_server):
+        log.debug("Begin to release ports: expr_id: %d, host_server: %r" % (expr_id, host_server))
         ports = PortBinding.query.filter_by(experiment_id=expr_id).all()
         if ports is not None:
             for port in ports:
@@ -374,7 +378,7 @@ class ExprManager(object):
 
         :param expr_id: experiment id
         """
-        log.info("Starting rollback ...")
+        log.debug("Starting rollback ...")
         expr = Experiment.query.filter_by(id=expr_id).first()
         try:
             expr.status = ExprStatus.Rollbacking
@@ -405,6 +409,7 @@ class ExprManager(object):
         :param force: 0: only stop container and release ports, 1: force stop and delete container and release ports.
         :return:
         """
+        log.debug("begin to stop %d" % expr_id)
         expr = db_adapter.find_first_object(Experiment, id=expr_id, status=ExprStatus.Running)
         if expr is not None:
             # Docker
@@ -412,6 +417,7 @@ class ExprManager(object):
                 # stop containers
                 for c in expr.virtual_environments:
                     try:
+                        log.debug("begin to stop %s" % c.name)
                         if force:
                             docker.delete(c.name, c.container.host_server)
                             c.status = VirtualEnvStatus.Deleted
@@ -431,13 +437,29 @@ class ExprManager(object):
                     expr.status = ExprStatus.Stopped
                 db_adapter.commit()
             else:
-                try:
-                    path = os.path.dirname(__file__) + '/../azureautodeploy/azureShutdownAsync.py'
-                    command = ['python', path, str(expr.user_template.id), str(expr.id)]
-                    Popen(command)
-                except Exception as e:
-                    log.error(e)
-                    return {"error": "Failed shutdown azure"}, 500
+                azure = AzureImpl()
+                sub_id = get_config("azure/subscriptionId")
+                cert_path = get_config('azure/certPath')
+                service_host_base = get_config("azure/managementServiceHostBase")
+                if not azure.connect(sub_id, cert_path, service_host_base):
+                    return {"error": "Failed connect azure"}, 500
+                if force == 0:
+                    try:
+                        result = azure.shutdown_sync(expr.user_template, expr_id)
+                    except Exception as e:
+                        log.error(e)
+                        return {"error": "Failed shutdown azure"}, 500
+                    expr.status = ExprStatus.Stopped
+                else:
+                    try:
+                        result = azure.delete_sync(expr.user_template, expr_id)
+                    except Exception as e:
+                        log.error(e)
+                        return {"error": "Failed delete azure"}, 500
+                    expr.status = ExprStatus.Deleted
+                db_adapter.commit()
+                if not result:
+                    return {"error": "Failed stop azure"}, 500
             return "OK"
         else:
             return "expr not exist"
