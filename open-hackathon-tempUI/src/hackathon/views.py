@@ -46,6 +46,7 @@ def simple_route(path):
     if Template_Routes.has_key(path):
         return render_template(Template_Routes[path])
     else:
+        log.warn("page '%s' not found" % path)
         abort(404)
 
 
@@ -90,7 +91,7 @@ def settings():
 
 @app.route('/hackathon')
 @login_required
-def settings():
+def hackathon():
     if not session["register_state"]:
         return redirect("notregister")
 
