@@ -98,12 +98,6 @@ def hackathon():
     return render_template("hackathon.html")
 
 
-@app.route('/<path:path>')
-@login_required
-def template_routes(path):
-    return simple_route(path)
-
-
 # js config
 @app.route('/config.js')
 def js_config():
