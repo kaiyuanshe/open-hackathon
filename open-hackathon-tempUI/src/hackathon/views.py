@@ -46,6 +46,7 @@ def simple_route(path):
     if Template_Routes.has_key(path):
         return render_template(Template_Routes[path])
     else:
+        log.warn("page '%s' not found" % path)
         abort(404)
 
 
