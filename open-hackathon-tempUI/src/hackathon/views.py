@@ -119,7 +119,7 @@ def __login(provider):
     login_user(user)
 
     session["token"] = login_result["token"]
-    session["register_state"] = login_required["register_state"]
+    session["register_state"] = login_result["register_state"]
 
     if not login_result["register_state"]:
         response = make_response(redirect("notregister"))
