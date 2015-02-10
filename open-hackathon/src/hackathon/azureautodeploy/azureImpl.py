@@ -35,6 +35,18 @@ class AzureImpl():
             return False
         return True
 
+    def ping(self):
+        """
+        Use list storage accounts to check azure service management service health
+        :return:
+        """
+        try:
+            self.sms.list_storage_accounts()
+        except Exception as e:
+            log.error(e)
+            return False
+        return True
+
     def create_sync(self, user_template, expr_id):
         """
         Create virtual machines according to given user template (assume all fields needed are in template)
