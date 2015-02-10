@@ -141,14 +141,14 @@ function api_stat(callback) {
     hget('/api/hackathon/list?name=' + CONFIG.hackathon.name, function(data) {
         var json = $.parseJSON(data);
         $(document).trigger('tiemer', [json]);
-        (function loop(data) {
-            hget('/api/hackathon/stat?hid=' + data.id, function(data) {
+        (function loop() {
+            hget('/api/hackathon/stat?hid=' + json.id, function(data) {
                 callback(data);
                 setTimeout(loop, 60000)
             }, function() {
                 callback(null);
             });
-        })(json);
+        })();
     }, function() {
         callback(null)
     })
