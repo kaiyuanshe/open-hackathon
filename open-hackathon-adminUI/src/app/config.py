@@ -1,7 +1,7 @@
 # "javascript" section for javascript. see @app.route('/config.js') in app/views.py
 
 # oauth constants
-HOSTNAME = "http://osslab.msopentech.cn"
+HOSTNAME = "http://hackathon.chinacloudapp.cn"
 QQ_OAUTH_STATE = "openhackathon"  # todo state should be constant. Actually it should be unguessable to prevent CSFA
 
 Config = {
