@@ -114,19 +114,22 @@ class GitcafeLogin(LoginProviderBase):
         value = "Bearer " + token
         header = {"Authorization": value}
         opener = urllib2.build_opener(urllib2.HTTPHandler)
-        request = urllib2.Request("https://api.s.gitcafe.org/api/v1/user")
+        request = urllib2.Request(get_config("login/gitcafe/user_info_url"))
         request.add_header("Authorization", value)
-        user_info = opener.open(request)
-        # log.info(user_info.read())
-        info = json.loads(user_info.read())
-        # log.info(info)
+        user_info = opener.open(request).read()
+        log.debug(user_info)
+        info = json.loads(user_info)
+
         name = info['username']
         email = info['email']
         id = info['id']
         nickname = info['fullname']
         if nickname is None:
             nickname = name
-        avatar_url = "https" + info['avatar_url'][4:]
+        if info['avatar_url'].startswith('https'):
+            avatar_url = info['avatar_url']
+        else:
+            avatar_url = "https" + info['avatar_url'][4:]
         email_info = [
             {'name': name, 'email': email, 'id': id, 'verified': 1, 'primary': 1, 'nickname': nickname,
              'avatar_url': avatar_url}]
@@ -143,6 +146,7 @@ class GitcafeLogin(LoginProviderBase):
         detail = user_manager.get_user_detail_info(user, hackathon_name=hackathon_name)
         detail["token"] = user_with_token["token"].token
 
+        log.debug("gitcafe user login successfully: %r" % detail)
         return detail
 
 

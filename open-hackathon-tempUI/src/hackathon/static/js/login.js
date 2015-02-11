@@ -12,7 +12,7 @@ $(document).ready(function(){
     });
     $('#gitcafelogin').click(function() {
         var arr = [CONFIG.gitcafe.clientID, CONFIG.gitcafe.redirect_uri, CONFIG.gitcafe.clientSecret, CONFIG.gitcafe.scope, CONFIG.gitcafe.response_type];
-        var url = "https://s.gitcafe.org/oauth/authorize?" + arr.join("&");
+        var url = "https://api.gitcafe.com/oauth/authorize?" + arr.join("&");
         location.href = url;
     });
 });

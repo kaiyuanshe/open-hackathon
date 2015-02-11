@@ -3,16 +3,24 @@ __author__ = 'Yifu Huang'
 import sys
 
 sys.path.append("..")
-from hackathon.log import *
+from hackathon.azureautodeploy.azureUtil import *
 from azure.servicemanagement import *
 import time
 
 
 class PortManagement():
+
     def __init__(self):
         self.sms = None
 
     def connect(self, subscription_id, pem_url, management_host):
+        """
+        Connect to azure service management service
+        :param subscription_id:
+        :param pem_url:
+        :param management_host:
+        :return:
+        """
         try:
             self.sms = ServiceManagementService(subscription_id, pem_url, management_host)
         except Exception as e:
@@ -21,34 +29,111 @@ class PortManagement():
         return True
 
     def assign_public_port(self, cloud_service_name, deployment_slot, virtual_machine_name, private_port):
+        """
+        Assign public port of cloud service for private port of virtual machine
+        Return -1 if failed
+        :param cloud_service_name:
+        :param deployment_slot:
+        :param virtual_machine_name:
+        :param private_port:
+        :return:
+        """
         assigned_ports = self.__get_assigned_ports(cloud_service_name)
+        if assigned_ports is None:
+            return -1
         # duplicate detection for public port
         public_port = int(private_port)
         while str(public_port) in assigned_ports:
             public_port = (public_port + 1) % 65536
         # compose network config to update
-        deployment = self.sms.get_deployment_by_slot(cloud_service_name, deployment_slot)
+        try:
+            deployment = self.sms.get_deployment_by_slot(cloud_service_name, deployment_slot)
+        except Exception as e:
+            log.error(e)
+            return -1
         network = self.__compose_network_config(cloud_service_name,
                                                 deployment.name,
                                                 virtual_machine_name,
                                                 public_port,
                                                 private_port)
-        result = self.sms.update_role(cloud_service_name,
-                                      deployment.name,
-                                      virtual_machine_name,
-                                      network_config=network)
-        self.__wait_for_async(result.request_id, 5, 100)
-        self.__wait_for_role(cloud_service_name,
-                             deployment.name,
-                             virtual_machine_name,
-                             5,
-                             100)
+        if network is None:
+            return -1
+        try:
+            result = self.sms.update_role(cloud_service_name,
+                                          deployment.name,
+                                          virtual_machine_name,
+                                          network_config=network)
+        except Exception as e:
+            log.error(e)
+            return -1
+        if not self.__wait_for_async(result.request_id, 5, 200):
+            log.error(WAIT_FOR_ASYNC + ' ' + FAIL)
+            return -1
+        if not self.__wait_for_role(cloud_service_name,
+                                    deployment.name,
+                                    virtual_machine_name,
+                                    5,
+                                    200):
+            log.error('%s %s not ready' % (VIRTUAL_MACHINE, virtual_machine_name))
+            return -1
         return public_port
+
+    def release_public_port(self, cloud_service_name, deployment_slot, virtual_machine_name, private_port):
+        """
+        Release public port of cloud service according to private port of virtual machine
+        Return False if failed
+        :param cloud_service_name:
+        :param deployment_slot:
+        :param virtual_machine_name:
+        :param private_port:
+        :return:
+        """
+        # decompose network config to update
+        try:
+            deployment = self.sms.get_deployment_by_slot(cloud_service_name, deployment_slot)
+        except Exception as e:
+            log.error(e)
+            return False
+        network = self.__decompose_network_config(cloud_service_name,
+                                                  deployment.name,
+                                                  virtual_machine_name,
+                                                  private_port)
+        if network is None:
+            return False
+        try:
+            result = self.sms.update_role(cloud_service_name,
+                                          deployment.name,
+                                          virtual_machine_name,
+                                          network_config=network)
+        except Exception as e:
+            log.error(e)
+            return False
+        if not self.__wait_for_async(result.request_id, 5, 200):
+            log.error(WAIT_FOR_ASYNC + ' ' + FAIL)
+            return False
+        if not self.__wait_for_role(cloud_service_name,
+                                    deployment.name,
+                                    virtual_machine_name,
+                                    5,
+                                    200):
+            log.error('%s %s not ready' % (VIRTUAL_MACHINE, virtual_machine_name))
+            return False
+        return True
 
     # ---------------------------------------- helper functions ---------------------------------------- #
 
     def __get_assigned_ports(self, cloud_service_name):
-        properties = self.sms.get_hosted_service_properties(cloud_service_name, True)
+        """
+        Get the list of assigned ports of specific cloud service
+        Return None if failed
+        :param cloud_service_name:
+        :return:
+        """
+        try:
+            properties = self.sms.get_hosted_service_properties(cloud_service_name, True)
+        except Exception as e:
+            log.error(e)
+            return None
         ports = []
         for deployment in properties.deployments.deployments:
             for role in deployment.role_list.roles:
@@ -59,24 +144,69 @@ class PortManagement():
                                 ports.append(input_endpoint.port)
         return ports
 
-    def __compose_network_config(self, cloud_service_name, deployment_name, virtual_machine_name,
-                                 public_port, private_port):
-        virtual_machine = self.sms.get_role(cloud_service_name, deployment_name, virtual_machine_name)
+    def __compose_network_config(self, cloud_service_name, deployment_name,
+                                 virtual_machine_name, public_port, private_port):
+        """
+        Create a new network config by adding given endpoint
+        Return None if failed
+        :param cloud_service_name:
+        :param deployment_name:
+        :param virtual_machine_name:
+        :param public_port:
+        :param private_port:
+        :return:
+        """
+        try:
+            virtual_machine = self.sms.get_role(cloud_service_name, deployment_name, virtual_machine_name)
+        except Exception as e:
+            log.error(e)
+            return None
         network = ConfigurationSet()
         network.configuration_set_type = 'NetworkConfiguration'
         for configuration_set in virtual_machine.configuration_sets.configuration_sets:
             if configuration_set.configuration_set_type == 'NetworkConfiguration':
-                for input_endpoint in configuration_set.input_endpoints.input_endpoints:
-                    network.input_endpoints.input_endpoints.append(
-                        ConfigurationSetInputEndpoint(input_endpoint.name,
-                                                      input_endpoint.protocol,
-                                                      input_endpoint.port,
-                                                      input_endpoint.local_port)
-                    )
-                break
+                if configuration_set.input_endpoints is not None:
+                    for input_endpoint in configuration_set.input_endpoints.input_endpoints:
+                        network.input_endpoints.input_endpoints.append(
+                            ConfigurationSetInputEndpoint(input_endpoint.name,
+                                                          input_endpoint.protocol,
+                                                          input_endpoint.port,
+                                                          input_endpoint.local_port)
+                        )
+                    break
         network.input_endpoints.input_endpoints.append(
             ConfigurationSetInputEndpoint('auto-' + str(public_port), 'tcp', str(public_port), str(private_port))
         )
+        return network
+
+    def __decompose_network_config(self, cloud_service_name, deployment_name, virtual_machine_name, private_port):
+        """
+        Create a new network config by deleting given endpoint
+        Return None if failed
+        :param cloud_service_name:
+        :param deployment_name:
+        :param virtual_machine_name:
+        :param private_port:
+        :return:
+        """
+        try:
+            virtual_machine = self.sms.get_role(cloud_service_name, deployment_name, virtual_machine_name)
+        except Exception as e:
+            log.error(e)
+            return None
+        network = ConfigurationSet()
+        network.configuration_set_type = 'NetworkConfiguration'
+        for configuration_set in virtual_machine.configuration_sets.configuration_sets:
+            if configuration_set.configuration_set_type == 'NetworkConfiguration':
+                if configuration_set.input_endpoints is not None:
+                    for input_endpoint in configuration_set.input_endpoints.input_endpoints:
+                        if input_endpoint.local_port != str(private_port):
+                            network.input_endpoints.input_endpoints.append(
+                                ConfigurationSetInputEndpoint(input_endpoint.name,
+                                                              input_endpoint.protocol,
+                                                              input_endpoint.port,
+                                                              input_endpoint.local_port)
+                            )
         return network
 
     def __wait_for_async(self, request_id, second_per_loop, loop):
@@ -120,11 +250,18 @@ class PortManagement():
         return None
 
 # ---------------------------------------- usage ---------------------------------------- #
-
-# p = PortManagement()
-# sub_id = get_config("azure/subscriptionId")
-# cert_path = get_config('azure/certPath')
-# service_host_base = get_config("azure/managementServiceHostBase")
-# t = p.connect(sub_id, cert_path, service_host_base)
-# public_port = p.assign_public_port('open-tech-service', 'Production', 'open-tech-role-4', 3389)
-# print public_port
+#
+# from hackathon.functions import *
+#
+#
+# def test():
+#     p = PortManagement()
+#     sub_id = get_config("azure/subscriptionId")
+#     cert_path = get_config('azure/certPath')
+#     service_host_base = get_config("azure/managementServiceHostBase")
+#     t = p.connect(sub_id, cert_path, service_host_base)
+#     port = p.release_public_port('open-tech-service', 'Production', 'open-tech-role-15', 5000)
+#     print port
+#
+# if __name__ == "__main__":
+#     test()

@@ -16,7 +16,7 @@ $(document).ready(function() {
         var $timer = $('#end_timer');
         var timerTmpe = '{day}天{hour}小时{minute}分钟{second}秒';
         if (d.end_time) {
-            var enddate = new Date(d.end_time)
+            var enddate = new Date(Date.parse(d.end_time.replace(/-/g, '/')))
             Countdown(enddate, function(timer) {
                 if (timer) {
                     $timer.text(timerTmpe.format(timer))
@@ -55,8 +55,10 @@ $(document).ready(function() {
                 function(data) {
                     if (data.status == 2) { // expr is running
                         callback(data)
-                    } else {
+                    } else if (data.status == 1) { // expr is starting
                         setTimeout(loopstart, 60000);
+                    } else {
+                       showErrorMsg()
                     }
                 },
                 function(err) {
@@ -64,6 +66,18 @@ $(document).ready(function() {
                 }
             );
         };
+    }
+
+    function showErrorMsg(code,msg){
+        $('#load').hide();
+        var errorbox =  $('#error');
+        if(code){
+            errorbox.find('.code').text(code);
+        }
+        if(msg){
+            errorbox.find('.message').text(msg);
+        }
+        errorbox.show();
     }
 
     hpost('/api/user/experiment', {
@@ -100,9 +114,9 @@ $(document).ready(function() {
                             id: name,
                             width: '100%',
                             height: '100%',
-                            frameborder: 'yes',
-                            marginwidth: '10',
-                            scrolling: 'yes'
+                            frameborder: 'no',
+                            marginwidth: '0',
+                            scrolling: 'no',
                         }).appendTo(work_center)
                     }
                 });
