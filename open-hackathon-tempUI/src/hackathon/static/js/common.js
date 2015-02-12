@@ -139,8 +139,10 @@ function Countdown(endTime, callback) {
 
 function api_stat(callback) {
     hget('/api/hackathon/list?name=' + CONFIG.hackathon.name, function(data) {
+        var json = $.parseJSON(data);
+        $(document).trigger('tiemer', [json]);
         (function loop() {
-            hget('/api/hackathon/stat?hid=' + $.parseJSON(data).id, function(data) {
+            hget('/api/hackathon/stat?hid=' + json.id, function(data) {
                 callback(data);
                 setTimeout(loop, 60000)
             }, function() {

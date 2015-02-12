@@ -22,6 +22,9 @@ Config = {
             "openid_url": 'https://graph.qq.com/oauth2.0/me?access_token=',
             "user_info_url": 'https://graph.qq.com/user/get_user_info?access_token=%s&oauth_consumer_key=%s&openid=%s'
         },
+        "gitcafe": {
+            "user_info_url": "https://api.gitcafe.com/api/v1/user"
+        },
         "token_expiration_minutes": 60 * 24
     },
     "azure": {
@@ -31,7 +34,8 @@ Config = {
     },
     "guacamole": {
         "host": "http://localhost:8080"
-    }
+    },
+    "checkRegister": False
 }
 
 

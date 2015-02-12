@@ -81,6 +81,21 @@ for simplicity, we recommend you start guacamole using `docker`.
 sudo docker run -d -i -t -p 8080:8080 -v /opt/open-hackathon/deploy/guacamole:/etc/guacamole hall/guacamole
 ```
 change the port and directory if needed. Also make sure `guacamole.properties` file is correctly configured. The file is in
+<<<<<<< HEAD
+directory `/opt/open-hackathon/deploy/guacamole` and it's right for you local environment by default. The content may look like:
+```
+# Hostname and port of guacamole proxy
+guacd-hostname: localhost
+guacd-port:     4822
+
+lib-directory: /etc/guacamole
+
+# Auth provider class (authenticates user/pass combination, needed if using the provided login screen)
+auth-provider: com.openhackathon.guacamole.OpenHackathonAuthenticationProvider
+auth-request-url: http://osslab.msopentech.cn:15000/api/guacamoleconfig
+```
+Usually the only config need to update is `auth-request-url`. _You need to stop the guacamole container and start another one
+in case `guacamole.properties` updated_.
 directory `/opt/open-hackathon/deploy/guacamole` and it's right for you local environment by default. Usually the only config need to update is `auth-request-url`.
 _You need to stop the guacamole container and start another one in case `guacamole.properties` updated_.
 
@@ -125,11 +140,19 @@ sudo python /opt/open-hackathon/open-hackathon/src/setup_db.py
 sudo python /opt/open-hackathon/open-hackathon/src/create_test_data.py
 ```
 ### Run
-one more step, make sure log folder is created and properly authorized.
+then make sure log folder is created and properly authorized.
 ```
 sudo mkdir /var/log/open-hackathon
 sudo chmod -R 644 /var/log/open-hackathon
 ```
+
+one last step, create your own config file by coping the config-sample.py and editing its content:
+```
+cd /opt/open-hackathon/open-hackathon/src/hackathon
+cp config-sample.py config
+```
+usually, you need update the guacamole config or DB configs.
+
 Everything is OK now! Start the API server in command line:
 ```
 cd /opt/open-hackathon/open-hackathon/src

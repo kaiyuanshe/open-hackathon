@@ -16,20 +16,30 @@
         <div class="page-header">
             <h1>Open XML SDK 在线编程黑客松</h1>
         </div>
+        {% if "github" in providers %}
         <a class="btn btn-lg btn-success" href="javascript:;" role="button" id="githublogin" title="login">
             <img src="/static/pic/gitcafe.login.jpg">
             <span>GitHub</span>
         </a>
+        {% endif %}
+        {% if "qq" in providers %}
+        <a class="btn btn-lg btn-success" href="javascript:;" role="button" id="qqlogin" title="login">
+            <img src="/static/pic/gitcafe.login.jpg">
+            <span>QQ</span>
+        </a>
+        {% endif %}
+        {% if "gitcafe" in providers %}
         <a class="btn btn-lg btn-success" href="javascript:;" role="button" id="gitcafelogin" title="login">
             <img src="/static/pic/gitcafe.login.jpg">
             <span>GitCafe</span>
         </a>
+        {% endif %}
         <div class="organizers">
             <div class="row ">
                 <div class="col-md-4">
-                    <img src="/static/pic/jkxy.jpg">
+                    <img src="/static/pic/jkxy.png">
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-4 gitcafe" >
                     <img src="/static/pic/gitcafe.png">
                 </div>
                 <div class="col-md-4">

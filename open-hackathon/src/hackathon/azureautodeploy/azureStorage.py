@@ -1,9 +1,9 @@
 __author__ = 'Yifu Huang'
 import sys
 sys.path.append("..")
-from hackathon.azureautodeploy.azureUtil import *
-from hackathon.log import *
+from azureUtil import *
 from hackathon.database.models import *
+from hackathon.log import *
 
 
 class AzureStorage:

@@ -2,15 +2,15 @@
     "expr_name": "windows",
     "description" : "one storage account, one container, one cloud service, one deployment, multiple virtual machines (Windows/Linux), multiple input endpoints",
     "storage_account" : {
-        "service_name" : "opentech0storage",
+        "service_name" : "portalvhdsnc364fhj0dlpp",
         "description" : "storage-description",
         "label" : "storage-label",
         "location" : "China East",
         "url_base" : "blob.core.chinacloudapi.cn"
     },
-    "container" : "open-tech-container",
+    "container" : "vhds",
     "cloud_service" : {
-        "service_name" : "open-tech-cloud-service",
+        "service_name" : "open-tech-service",
         "label" : "cloud-service-label",
         "location" : "China East"
     },
@@ -26,10 +26,13 @@
             "system_config" : {
                 "os_family" : "Windows",
                 "host_name" : "hostname",
-                "user_name" : "username123",
-                "user_password" : "UserPassword123"
+                "user_name" : "azureUser888",
+                "user_password" : "PASSword00X"
             },
-            "source_image_name" : "0c5c79005aae478e8883bf950a861ce0__Windows-Server-2012-Essentials-20141204-enus",
+            "image" : {
+                "type" : "vm",
+                "name" : "openxml"
+            },
             "network_config" : {
                 "configuration_set_type" : "NetworkConfiguration",
                 "input_endpoints" : [
@@ -47,7 +50,7 @@
                     }
                 ]
             },
-            "role_size" : "Small",
+            "role_size" : "Basic_A3",
             "remote": {
                 "provider": "guacamole",
                 "protocol": "rdp",

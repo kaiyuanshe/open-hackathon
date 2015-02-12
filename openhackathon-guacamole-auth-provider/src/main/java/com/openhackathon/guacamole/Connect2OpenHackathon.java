@@ -71,5 +71,3 @@ public class Connect2OpenHackathon {
 
 }
 
-
-

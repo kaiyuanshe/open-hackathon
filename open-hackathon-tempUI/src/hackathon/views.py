@@ -2,7 +2,7 @@ from flask import Response, render_template, abort, request, session, g, redirec
 from . import *
 from log import log
 import json
-from functions import get_config, delete_remote, get_remote
+from functions import get_config, delete_remote, get_remote, safe_get_config
 from login import login_providers, LoginUser
 from flask_login import login_required, current_user, logout_user, login_user
 from datetime import timedelta
@@ -21,17 +21,19 @@ Template_Routes = {
     "error": "error.html",
     "submitted": "submitted.html",
     "redirect": "redirect.html",
-    "notregister": "notregister.html",
-    "settings": "settings.html",
-    "hackathon": "hackathon.html"
+    "notregister": "notregister.html"
 }
 
 
 @login_manager.user_loader
 def load_user(id):
-    ur = get_remote("%s/api/user?uid=%d" % (get_config("hackathon-api/endpoint"), int(id)))
-    ur = json.loads(ur)
-    return LoginUser(id=ur["id"], name=ur["name"], nickname=ur["nickname"], avatar_url=ur["avatar_url"])
+    try:
+        ur = get_remote("%s/api/user?uid=%d" % (get_config("hackathon-api/endpoint"), int(id)))
+        ur = json.loads(ur)
+        return LoginUser(id=ur["id"], name=ur["name"], nickname=ur["nickname"], avatar_url=ur["avatar_url"])
+    except Exception as e:
+        log.error(e)
+        return None
 
 
 @app.before_request
@@ -44,6 +46,7 @@ def simple_route(path):
     if Template_Routes.has_key(path):
         return render_template(Template_Routes[path])
     else:
+        log.warn("page '%s' not found" % path)
         abort(404)
 
 
@@ -51,7 +54,8 @@ def simple_route(path):
 @app.route('/')
 @app.route('/index')
 def index():
-    return render_template("index.html")
+    return render_template("index.html",
+                           providers=safe_get_config("login/provider_enabled", ["github", "qq", "gitcafe"]))
 
 
 # error handler for 404
@@ -76,6 +80,24 @@ def template_routes(path):
     return simple_route(path)
 
 
+@app.route('/settings')
+@login_required
+def settings():
+    if not session["register_state"]:
+        return redirect("notregister")
+
+    return render_template("settings.html")
+
+
+@app.route('/hackathon')
+@login_required
+def hackathon():
+    if not session["register_state"]:
+        return redirect("notregister")
+
+    return render_template("hackathon.html")
+
+
 # js config
 @app.route('/config.js')
 def js_config():
@@ -97,11 +119,17 @@ def __login(provider):
     login_user(user)
 
     session["token"] = login_result["token"]
-    if len(login_result['experiments']) > 0:
-        response = make_response(redirect("hackathon"))
+    session["register_state"] = login_result["register_state"]
+
+    if not login_result["register_state"]:
+        response = make_response(redirect("notregister"))
     else:
-        response = make_response(redirect("settings"))
-    response.set_cookie('token', login_result["token"])
+        if len(login_result['experiments']) > 0:
+            response = make_response(redirect("hackathon"))
+        else:
+            response = make_response(redirect("settings"))
+        response.set_cookie('token', login_result["token"])
+
     return response
 
 

@@ -3,7 +3,7 @@
 # oauth constants
 HOSTNAME = "http://hackathon.chinacloudapp.cn"  # host name of the UI site
 QQ_OAUTH_STATE = "openhackathon"  # todo state should be constant. Actually it should be unguessable to prevent CSFA
-HACkATHON_API_ENDPOINT = "http://localhost:15000"
+HACkATHON_API_ENDPOINT = "http://hackathon.chinacloudapp.cn:15000"
 
 Config = {
     "environment": "local",
@@ -14,12 +14,12 @@ Config = {
             "emails_info_url": 'https://api.github.com/user/emails?access_token='
         },
         "qq": {
-            "access_token_url": 'https://graph.qq.com/oauth2.0/token?grant_type=authorization_code&client_id=101157515&client_secret=018293bdbc15ddfc84306234aa34aa6c&redirect_uri=%s/qq&code=' % HOSTNAME,
+            "access_token_url": 'https://graph.qq.com/oauth2.0/token?grant_type=authorization_code&client_id=101192358&client_secret=d94f8e7baee4f03371f52d21c4400cab&redirect_uri=%s/qq&code=' % HOSTNAME,
             "openid_url": 'https://graph.qq.com/oauth2.0/me?access_token=',
             "user_info_url": 'https://graph.qq.com/user/get_user_info?access_token=%s&oauth_consumer_key=%s&openid=%s'
         },
         "gitcafe": {
-            "access_token_url": 'https://s.gitcafe.org/oauth/token?client_id=3c4db5b888e7cb35e6f580f9eb6777655f228a66d2beaaf361de3578b88fe46e&client_secret=e32af01fe52f5c57312b1ccca4bdead604bb6e6314f66a569a924b9ff6223d74&redirect_uri=%s/gitcafe&grant_type=authorization_code&code=' % HOSTNAME
+            "access_token_url": 'https://api.gitcafe.com/oauth/token?client_id=25ba4f6f90603bd2f3d310d11c0665d937db8971c8a5db00f6c9b9852547d6b8&client_secret=e3d821e82d15096054abbc7fbf41727d3650cab6404a242373f5c446c0918634&redirect_uri=%s/gitcafe&grant_type=authorization_code&code=' % HOSTNAME
         },
         "provider_enabled": ["github", "qq", "gitcafe"],
         "session_minutes": 60,
@@ -47,19 +47,18 @@ Config = {
             "response_type": "response_type=token",
         },
         "qq": {
-            "clientID": "client_id=101157515",
+            "clientID": "client_id=101192358",
             "redirect_uri": "redirect_uri=%s/qq" % HOSTNAME,
             "scope": "scope=get_user_info",
             "state": "state=%s" % QQ_OAUTH_STATE,
             "response_type": "response_type=code",
         },
         "gitcafe": {
-            "clientID": "client_id=3c4db5b888e7cb35e6f580f9eb6777655f228a66d2beaaf361de3578b88fe46e",
-            "clientSecret": "client_secret=e32af01fe52f5c57312b1ccca4bdead604bb6e6314f66a569a924b9ff6223d74",
+            "clientID": "client_id=25ba4f6f90603bd2f3d310d11c0665d937db8971c8a5db00f6c9b9852547d6b8",
+            "clientSecret": "client_secret=e3d821e82d15096054abbc7fbf41727d3650cab6404a242373f5c446c0918634",
             "redirect_uri": "redirect_uri=http://hackathon.chinacloudapp.cn/gitcafe",
             "response_type": "response_type=code",
-            "code": "d64ee06fe6f0fd4607ac5d9219d2f53c94eba7d4da0d07ddf8960f0b2922e29e",
-            "scope": "scope=read"
+            "scope": "scope=public"
         },
         "hackathon": {
             "name": "open-xml-sdk",

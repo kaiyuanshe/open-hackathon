@@ -12,6 +12,7 @@ from decorators import token_required
 from user.user_functions import get_user_experiment, get_user_hackathon
 from health import report_health
 from remote.guacamole import GuacamoleInfo
+from hack import hack_manager
 
 
 class RegisterListResource(Resource):
@@ -31,11 +32,15 @@ class UserExperimentResource(Resource):
         args = parser.parse_args()
         if args['id'] is None:
             return json.dumps({"error": "Bad request"}), 400
-        cs = expr_manager.get_expr_status(args['id'])
+        try:
+            cs = expr_manager.get_expr_status(args['id'])
+        except Exception as e:
+            log.error(e)
+            return {"error": "Please Reload then Wait"}, 500
         if cs is not None:
             return cs
         else:
-            return "Not Found", 404
+            return {"error": "Not Found"}, 404
 
     @token_required
     def post(self):
@@ -48,17 +53,19 @@ class UserExperimentResource(Resource):
             return expr_manager.start_expr(hackathon, cid)
         except Exception as err:
             log.error(err)
-            return "fail to start due to '%s'" % err, 500
+            return {"error": "fail to start due to '%s'" % err}, 500
 
-    @token_required
+    # @token_required
     def delete(self):
+        # id is experiment id
         parser = reqparse.RequestParser()
         parser.add_argument('id', type=int, location='args')
+        parser.add_argument('force', type=int, location='args')
         args = parser.parse_args()
-        if args['id'] is None:
+        if args['id'] is None or args['force'] is None:
             return {"error": "Bad request"}, 400
+        return expr_manager.stop_expr(args["id"], args['force'])
 
-        return expr_manager.stop_expr(args["id"])
 
     @token_required
     def put(self):
@@ -117,11 +124,10 @@ class HackathonResource(Resource):
 class HackathonListResource(Resource):
     def get(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('name',type=str, location='args')
+        parse.add_argument('name', type=str, location='args')
         args = parse.parse_args()
-        if args['name'] is not None:
-            return db_adapter.find_first_object(Hackathon, name=args['name']).json()
-        return map(lambda u: u.json(), db_adapter.find_all_objects(Hackathon))
+        return hack_manager.get_hackathon_list(args["name"])
+
 
 class HackathonStatResource(Resource):
     # hid is hackathon id
@@ -131,10 +137,8 @@ class HackathonStatResource(Resource):
         args = parse.parse_args()
         if args['hid'] is None:
             return {"error": "Bad request"}, 400
-        total_num = db_adapter.count(Register, id=args['hid'])
-        enabled_num = db_adapter.count(Register, id=args['hid'], enabled=1)
-        disabled_num = db_adapter.count(Register, id=args['hid'], enabled=0)
-        return {'hid': args['hid'], 'total': total_num, 'online': enabled_num, 'offline': disabled_num}
+
+        return hack_manager.get_hackathon_stat(args['hid'])
 
 
 class UserHackathonResource(Resource):
