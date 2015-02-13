@@ -6,13 +6,19 @@ from app import app
 from flask_admin import BaseView, expose, Admin, AdminIndexView
 from decorators import role_required
 from constants import ROLE
-from functions import get_config, delete_remote, get_remote, safe_get_config
+from functions import get_config , delete_remote, get_remote, safe_get_config
 import json
 
 ###########
 from flask_login import login_required, current_user, logout_user, login_user
-from login import login_providers, LoginUser
+from admin.login import login_providers, LoginUser
 from flask import Response, render_template, abort, request, session, g, redirect, make_response
+
+
+
+
+
+
 
 class IndexView(AdminIndexView):
     @expose('/')
@@ -104,5 +110,4 @@ def __login(provider):
 @app.route('/github')
 def github_login():
     return __login("github")
-
 
