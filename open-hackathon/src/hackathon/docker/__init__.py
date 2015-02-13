@@ -60,7 +60,9 @@ class OssDocker(object):
         log.debug("try to assign docker port %d on server %r" % (private_port, docker_host))
         containers = self.containers_info(docker_host)
         host_ports = flatten(map(lambda p: p['Ports'], containers))
-        host_public_ports = map(lambda p: p['PublicPort'], host_ports)
+        def sub(port):
+            return -1 if "PublicPort" in port else port["PublicPort"]
+        host_public_ports = map(lambda x: sub(x), host_ports)
         return self.__get_available_host_port(host_public_ports, private_port)
 
     def get_container(self, name, docker_host):
