@@ -31,7 +31,7 @@ h = db_adapter.add_object_kwargs(Hackathon, name=hackathon_name, sponsor=1, end_
 
 db_adapter.add_object_kwargs(Register, hackathon=h, register_name="Yifu Huang", email="ifhuang91@gmail.com")
 db_adapter.add_object_kwargs(Register, hackathon=h, register_name="xxzhe", email="zhengxx012@gmail.com")
-db_adapter.add_object_kwargs(Register, hackathon=h, register_name="junbo", email="juniwang@microsoft.com")
+db_adapter.add_object_kwargs(Register, hackathon=h, register_name="Ice", email="v-iceshi@microsoft.com")
 
 # add public templates to database
 template_dir = 'hackathon/resources'
