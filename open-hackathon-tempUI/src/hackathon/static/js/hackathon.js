@@ -1,7 +1,9 @@
 $(document).ready(function() {
 
     var ifrem = $();
-
+     setTimeout(function(){
+        $('#tooltip').fadeOut(2000);
+     }, 1500);
     var cid = getParameterByName("cid");
     if (!cid || typeof(cid) == "undefined")
         cid = "ut"
