@@ -17,7 +17,7 @@ class QQLogin():
         #    return "UnAuthorized", 401
 
         # get access token
-        token_resp = get_remote(get_config("login/qq/access_token_url") + code + '&state=' + state)
+        token_resp = get_remote(get_config("login.qq.access_token_url") + code + '&state=' + state)
         log.debug("get token from qq:" + token_resp)
         start = token_resp.index('=')
         end = token_resp.index('&')
@@ -33,7 +33,7 @@ class GithubLogin():
         code = args.get('code')
 
         # get access_token
-        token_resp = get_remote(get_config('login/github/access_token_url') + code)
+        token_resp = get_remote(get_config('login.github.access_token_url') + code)
         log.debug("get token from github:" + token_resp)
         start = token_resp.index('=')
         end = token_resp.index('&')

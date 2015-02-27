@@ -1,13 +1,21 @@
 import sys
 
 sys.path.append("..")
-from hackathon.constants import ROLE
-from flask_sqlalchemy import SQLAlchemy
-from hackathon import app
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
 from db_adapters import SQLAlchemyAdapter
+from hackathon.functions import safe_get_config
 
-db = SQLAlchemy(app)
-db_adapter = SQLAlchemyAdapter(db)
+
+engine = create_engine(safe_get_config("mysql.connection", "mysql://root:root@localhost/hackathon"),
+                       convert_unicode=True)
+db_session = scoped_session(sessionmaker(autocommit=False,
+                                         autoflush=False,
+                                         bind=engine))
+Base = declarative_base()
+Base.query = db_session.query_property()
+db_adapter = SQLAlchemyAdapter(db_session)
 
 
 class UserMixin(object):
@@ -25,9 +33,6 @@ class UserMixin(object):
 
     def get_id(self):
         return unicode(self.get_user_id())
-
-    def is_admin(self):
-        return self.has_roles(ROLE.ADMIN)
 
     def has_roles(self, *requirements):
         """ Return True if the user has all of the specified roles. Return False otherwise.

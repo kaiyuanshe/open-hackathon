@@ -1,5 +1,5 @@
-from hackathon.database.models import db
+from hackathon.database import Base, engine
 from setup_db import setup_db
 
-db.drop_all()
+Base.metadata.drop_all(bind=engine)
 setup_db()

@@ -13,14 +13,22 @@ app.config['SECRET_KEY'] = '*K&ep_me^se(ret_!@#$'
 # flask restful
 api = Api(app)
 
-
 # CORS
 app.config['CORS_HEADERS'] = 'Content-Type, token'
 cors = CORS(app)
 
-
-# db configuration
-app.config["SQLALCHEMY_DATABASE_URI"] = safe_get_config("mysql/connection", "mysql://root:root@localhost/hackathon")
-
 from . import views
-import admin
+
+
+### example of scheduler
+# from scheduler import scheduler
+# from datetime import datetime, timedelta
+#
+# def alarm(time):
+#     print('Alarm! This alarm was scheduled at %s.' % time)
+#     return {
+#         "key": "val"
+#     }
+#
+# alarm_time = datetime.now() + timedelta(seconds=10)
+# scheduler.add_job(alarm, 'date', run_date=alarm_time, args=[datetime.now()])

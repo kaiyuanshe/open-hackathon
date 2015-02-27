@@ -8,8 +8,8 @@ from log import log
 import json
 from flask import redirect, url_for
 
-hackathon_api_url = get_config("hackathon-api/endpoint")
-hackathon_name = get_config("javascript/hackathon/name")
+hackathon_api_url = get_config("hackathon-api.endpoint")
+hackathon_name = get_config("javascript.hackathon.name")
 
 
 class LoginUser:
@@ -42,7 +42,7 @@ class QQLogin():
         # return "UnAuthorized", 401
 
         # get access token
-        token_resp = get_remote(get_config("login/qq/access_token_url") + code + '&state=' + state)
+        token_resp = get_remote(get_config("login.qq.access_token_url") + code + '&state=' + state)
         log.debug("get token from qq:" + token_resp)
         start = token_resp.index('=')
         end = token_resp.index('&')
@@ -58,7 +58,7 @@ class GithubLogin():
         code = args.get('code')
 
         # get access_token
-        token_resp = get_remote(get_config('login/github/access_token_url') + code)
+        token_resp = get_remote(get_config('login.github.access_token_url') + code)
         log.debug("get token from github:" + token_resp)
         start = token_resp.index('=')
         end = token_resp.index('&')
@@ -92,7 +92,7 @@ class GithubLogin():
 class GitcafeLogin():
     def login(self, args):
         code = args.get('code')
-        url = get_config('login/gitcafe/access_token_url') + code
+        url = get_config('login.gitcafe.access_token_url') + code
         opener = urllib2.build_opener(urllib2.HTTPHandler)
         request = urllib2.Request(url, "")
         # req = requests.post(url, verify=True)

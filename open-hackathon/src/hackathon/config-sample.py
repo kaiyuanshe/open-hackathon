@@ -35,7 +35,11 @@ Config = {
     "guacamole": {
         "host": "http://localhost:8080"
     },
-    "checkRegister": False
+    "checkRegister": False,
+    "scheduler": {
+        "job_store": "mysql",
+        "job_store_url": 'mysql://%s:%s@%s/%s' % (MYSQL_USER, MYSQL_PWD, MYSQL_HOST, MYSQL_DB)
+    }
 }
 
 

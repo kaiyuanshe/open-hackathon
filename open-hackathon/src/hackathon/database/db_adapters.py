@@ -1,12 +1,11 @@
 class DBAdapter(object):
-    def __init__(self, db):
-        self.db = db
+    def __init__(self, db_session):
+        self.db_session = db_session
 
 
 class SQLAlchemyAdapter(DBAdapter):
-
-    def __init__(self, db):
-        super(SQLAlchemyAdapter, self).__init__(db)
+    def __init__(self, db_session):
+        super(SQLAlchemyAdapter, self).__init__(db_session)
 
     def get_object(self, ObjectClass, id):
         """ Retrieve one object specified by the primary key 'pk' """
@@ -74,7 +73,7 @@ class SQLAlchemyAdapter(DBAdapter):
     def filter(self, ObjectClass, *criterion):
         query = ObjectClass.query
         return query.filter(*criterion)
-    
+
     def filter_by(self, ObjectClass, **kwargs):
         query = ObjectClass.query
         return query.filter_by(**kwargs)
@@ -118,12 +117,12 @@ class SQLAlchemyAdapter(DBAdapter):
         return query.first()
 
     def add_object(self, inst):
-        self.db.session.add(inst)
+        self.db_session.add(inst)
 
     def add_object_kwargs(self, ObjectClass, **kwargs):
         """ Add an object of class 'ObjectClass' with fields and values specified in '**kwargs'. """
         object = ObjectClass(**kwargs)
-        self.db.session.add(object)
+        self.db_session.add(object)
         return object
 
     def update_object(self, object, **kwargs):
@@ -136,7 +135,7 @@ class SQLAlchemyAdapter(DBAdapter):
 
     def delete_object(self, object):
         """ Delete object 'object'. """
-        self.db.session.delete(object)
+        self.db_session.delete(object)
 
     def delete_all_objects(self, ObjectClass, **kwargs):
         """ Delete all objects matching the case sensitive filters in 'kwargs'. """
@@ -159,4 +158,10 @@ class SQLAlchemyAdapter(DBAdapter):
         query.delete(synchronize_session=False)
 
     def commit(self):
-        self.db.session.commit()
+        self.db_session.commit()
+
+    def remove(self):
+        self.db_session.remove()
+
+    def merge(self, obj):
+        self.db_session.merge(obj)

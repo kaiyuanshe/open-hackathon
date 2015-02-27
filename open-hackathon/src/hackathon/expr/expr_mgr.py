@@ -43,7 +43,7 @@ class ExprManager(object):
             if ve.remote_provider == RemoteProvider.Guacamole:
                 guaca_config = json.loads(ve.remote_paras)
                 url = "%s/guacamole/client.xhtml?id=" % (
-                    safe_get_config("guacamole/host", "localhost:8080")) + "c%2F" + guaca_config["name"]
+                    safe_get_config("guacamole.host", "localhost:8080")) + "c%2F" + guaca_config["name"]
                 guacamole_servers.append({
                     "name": guaca_config["displayname"],
                     "url": url
@@ -100,9 +100,9 @@ class ExprManager(object):
     def __get_available_public_port(self, host_server, host_port):
         log.debug("starting to get azure port")
         p = PortManagement()
-        sub_id = get_config("azure/subscriptionId")
-        cert_path = get_config('azure/certPath')
-        service_host_base = get_config("azure/managementServiceHostBase")
+        sub_id = get_config("azure.subscriptionId")
+        cert_path = get_config('azure.certPath')
+        service_host_base = get_config("azure.managementServiceHostBase")
         p.connect(sub_id, cert_path, service_host_base)
 
         host_server_name = host_server.vm_name
@@ -113,9 +113,9 @@ class ExprManager(object):
 
     def __release_public_port(self, host_server, host_port):
         p = PortManagement()
-        sub_id = get_config("azure/subscriptionId")
-        cert_path = get_config('azure/certPath')
-        service_host_base = get_config("azure/managementServiceHostBase")
+        sub_id = get_config("azure.subscriptionId")
+        cert_path = get_config('azure.certPath')
+        service_host_base = get_config("azure.managementServiceHostBase")
         p.connect(sub_id, cert_path, service_host_base)
 
         host_server_name = host_server.vm_name
@@ -438,9 +438,9 @@ class ExprManager(object):
                 db_adapter.commit()
             else:
                 azure = AzureImpl()
-                sub_id = get_config("azure/subscriptionId")
-                cert_path = get_config('azure/certPath')
-                service_host_base = get_config("azure/managementServiceHostBase")
+                sub_id = get_config("azure.subscriptionId")
+                cert_path = get_config('azure.certPath')
+                service_host_base = get_config("azure.managementServiceHostBase")
                 if not azure.connect(sub_id, cert_path, service_host_base):
                     return {"error": "Failed connect azure"}, 500
                 if force == 0:
