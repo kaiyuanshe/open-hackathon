@@ -1,10 +1,9 @@
 import sys
 import email
-import os
-
-sys.path.append("..")
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy.orm import relationship, backref
+from . import Base
 from . import UserMixin
-from . import db
 from datetime import datetime
 import uuid
 import json
@@ -14,7 +13,7 @@ def to_json(inst, cls):
     # add your coversions for things like datetime's
     # and what-not that aren't serializable.
     convert = dict()
-    convert[db.DateTime] = str
+    convert[DateTime] = str
 
     d = dict()
     for c in cls.__table__.columns:
@@ -32,17 +31,19 @@ def to_json(inst, cls):
     return json.dumps(d)
 
 
-class User(db.Model, UserMixin):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50))
-    nickname = db.Column(db.String(50))
-    openid = db.Column(db.String(100))
-    avatar_url = db.Column(db.String(200))
-    slug = db.Column(db.String(50), unique=True, nullable=False)  # can be used for branch name of github
-    access_token = db.Column(db.String(100))
-    online = db.Column(db.Integer)  # 0:offline 1:online
-    create_time = db.Column(db.DateTime)
-    last_login_time = db.Column(db.DateTime)
+class User(UserMixin, Base):
+    __tablename__ = 'user'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50))
+    nickname = Column(String(50))
+    openid = Column(String(100))
+    avatar_url = Column(String(200))
+    slug = Column(String(50), unique=True, nullable=False)  # can be used for branch name of github
+    access_token = Column(String(100))
+    online = Column(Integer)  # 0:offline 1:online
+    create_time = Column(DateTime)
+    last_login_time = Column(DateTime)
 
     def get_user_id(self):
         return self.id
@@ -65,32 +66,36 @@ class User(db.Model, UserMixin):
         return "User: " + self.json()
 
 
-class UserEmail(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80))
-    email = db.Column(db.String(120))
-    primary_email = db.Column(db.Integer)  # 0:NOT Primary Email 1:Primary Email
-    verified = db.Column(db.Integer)  # 0 for not verified, 1 for verified
+class UserEmail(Base):
+    __tablename__ = 'user_email'
 
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
-    user = db.relationship('User', backref=db.backref('emails', lazy='dynamic'))
+    id = Column(Integer, primary_key=True)
+    name = Column(String(80))
+    email = Column(String(120))
+    primary_email = Column(Integer)  # 0:NOT Primary Email 1:Primary Email
+    verified = Column(Integer)  # 0 for not verified, 1 for verified
+
+    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
+    user = relationship('User', backref=backref('emails', lazy='dynamic'))
 
     def get_user_email(self):
-        return self.email(self, email)
+        return self.email
 
     def __init__(self, **kwargs):
         super(UserEmail, self).__init__(**kwargs)
 
 
-class UserToken(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    token = db.Column(db.String(50), unique=True, nullable=False)
+class UserToken(Base):
+    __tablename__ = 'user_token'
 
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
-    user = db.relationship('User', backref=db.backref('tokens', lazy='dynamic'))
+    id = Column(Integer, primary_key=True)
+    token = Column(String(50), unique=True, nullable=False)
 
-    issue_date = db.Column(db.DateTime)
-    expire_date = db.Column(db.DateTime, nullable=False)
+    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
+    user = relationship('User', backref=backref('tokens', lazy='dynamic'))
+
+    issue_date = Column(DateTime)
+    expire_date = Column(DateTime, nullable=False)
 
     def json(self):
         return to_json(self, self.__class__)
@@ -108,18 +113,20 @@ class UserToken(db.Model):
         return "UserToken: " + self.json()
 
 
-class Register(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    register_name = db.Column(db.String(80))
-    email = db.Column(db.String(120), unique=True)
-    create_time = db.Column(db.DateTime)
-    description = db.Column(db.String(200))
-    enabled = db.Column(db.Integer)  # 0: disabled 1:enabled
-    jstrom_api = db.Column(db.String(50))
-    jstrom_mgmt_portal = db.Column(db.String(50))
+class Register(Base):
+    __tablename__ = 'register'
 
-    hackathon_id = db.Column(db.Integer, db.ForeignKey('hackathon.id', ondelete='CASCADE'))
-    hackathon = db.relationship('Hackathon', backref=db.backref('registers', lazy='dynamic'))
+    id = Column(Integer, primary_key=True)
+    register_name = Column(String(80))
+    email = Column(String(120), unique=True)
+    create_time = Column(DateTime)
+    description = Column(String(200))
+    enabled = Column(Integer)  # 0: disabled 1:enabled
+    jstrom_api = Column(String(50))
+    jstrom_mgmt_portal = Column(String(50))
+
+    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
+    hackathon = relationship('Hackathon', backref=backref('registers', lazy='dynamic'))
 
     def json(self):
         return to_json(self, self.__class__)
@@ -136,14 +143,16 @@ class Register(db.Model):
         return "Register:" + self.json()
 
 
-class Hackathon(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), unique=True, nullable=False)
-    sponsor = db.Column(db.Integer)
-    status = db.Column(db.Integer)
-    start_time = db.Column(db.DateTime)
-    end_time = db.Column(db.DateTime)
-    create_time = db.Column(db.DateTime)
+class Hackathon(Base):
+    __tablename__ = 'hackathon'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), unique=True, nullable=False)
+    sponsor = Column(Integer)
+    status = Column(Integer)
+    start_time = Column(DateTime)
+    end_time = Column(DateTime)
+    create_time = Column(DateTime)
 
     def json(self):
         return to_json(self, self.__class__)
@@ -157,15 +166,17 @@ class Hackathon(db.Model):
         return "Hackathon: " + self.json()
 
 
-class DockerHostServer(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    vm_name = db.Column(db.String(100), unique=True, nullable=False)
-    public_dns = db.Column(db.String(50))
-    public_docker_api_port = db.Column(db.Integer)
-    private_ip = db.Column(db.String(50), unique=True)
-    private_docker_api_port = db.Column(db.Integer)
-    container_count = db.Column(db.Integer, nullable=False)
-    container_max_count = db.Column(db.Integer, nullable=False)
+class DockerHostServer(Base):
+    __tablename__ = 'docker_host_server'
+
+    id = Column(Integer, primary_key=True)
+    vm_name = Column(String(100), unique=True, nullable=False)
+    public_dns = Column(String(50))
+    public_docker_api_port = Column(Integer)
+    private_ip = Column(String(50), unique=True)
+    private_docker_api_port = Column(Integer)
+    container_count = Column(Integer, nullable=False)
+    container_max_count = Column(Integer, nullable=False)
 
     def json(self):
         return to_json(self, self.__class__)
@@ -177,21 +188,23 @@ class DockerHostServer(db.Model):
         return "HostServer: " + self.json()
 
 
-class Experiment(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    status = db.Column(db.Integer)  # see enum.py
-    create_time = db.Column(db.DateTime)
-    last_heart_beat_time = db.Column(db.DateTime)
+class Experiment(Base):
+    __tablename__ = 'experiment'
 
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
-    user = db.relationship('User', backref=db.backref('experiments', lazy='dynamic'))
+    id = Column(Integer, primary_key=True)
+    status = Column(Integer)  # see enum.py
+    create_time = Column(DateTime)
+    last_heart_beat_time = Column(DateTime)
 
-    hackathon_id = db.Column(db.Integer, db.ForeignKey('hackathon.id', ondelete='CASCADE'))
-    hackathon = db.relationship('Hackathon', backref=db.backref('experiments', lazy='dynamic'))
+    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
+    user = relationship('User', backref=backref('experiments', lazy='dynamic'))
+
+    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
+    hackathon = relationship('Hackathon', backref=backref('experiments', lazy='dynamic'))
 
     # adaptor for auto azure deploy
-    user_template_id = db.Column(db.Integer, db.ForeignKey('user_template.id', ondelete='CASCADE'))
-    user_template = db.relationship('UserTemplate', backref=db.backref('experiments', lazy='dynamic'))
+    user_template_id = Column(Integer, ForeignKey('user_template.id', ondelete='CASCADE'))
+    user_template = relationship('UserTemplate', backref=backref('experiments', lazy='dynamic'))
 
     def json(self):
         return to_json(self, self.__class__)
@@ -207,21 +220,23 @@ class Experiment(db.Model):
         return "Experiment: " + self.json()
 
 
-class VirtualEnvironment(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    provider = db.Column(db.String(10), nullable=False)
-    name = db.Column(db.String(100), nullable=False)
-    image = db.Column(db.String(100))
-    status = db.Column(db.Integer)  # see enum.py
-    remote_provider = db.Column(db.String(20))
-    remote_paras = db.Column(db.String(300))
-    create_time = db.Column(db.DateTime)
+class VirtualEnvironment(Base):
+    __tablename__ = 'virtual_environment'
 
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    user = db.relationship('User', backref=db.backref('virtual_environments', lazy='dynamic'))
+    id = Column(Integer, primary_key=True)
+    provider = Column(String(10), nullable=False)
+    name = Column(String(100), nullable=False)
+    image = Column(String(100))
+    status = Column(Integer)  # see enum.py
+    remote_provider = Column(String(20))
+    remote_paras = Column(String(300))
+    create_time = Column(DateTime)
 
-    experiment_id = db.Column(db.Integer, db.ForeignKey('experiment.id', ondelete='CASCADE'))
-    experiment = db.relationship('Experiment', backref=db.backref('virtual_environments', lazy='dynamic'))
+    user_id = Column(Integer, ForeignKey('user.id'))
+    user = relationship('User', backref=backref('virtual_environments', lazy='dynamic'))
+
+    experiment_id = Column(Integer, ForeignKey('experiment.id', ondelete='CASCADE'))
+    experiment = relationship('Experiment', backref=backref('virtual_environments', lazy='dynamic'))
 
     def json(self):
         return to_json(self, self.__class__)
@@ -235,44 +250,22 @@ class VirtualEnvironment(db.Model):
         return "VirtualEnvironment: " + self.json()
 
 
-class SCM(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    provider = db.Column(db.String(20))
-    branch = db.Column(db.String(50))
-    repo_name = db.Column(db.String(50))
-    repo_url = db.Column(db.String(100))
-    local_repo_path = db.Column(db.String(100))
-    create_time = db.Column(db.DateTime)
-
-    experiment_id = db.Column(db.Integer, db.ForeignKey('experiment.id', ondelete='CASCADE'))
-    experiment = db.relationship('Experiment', backref=db.backref('scm', lazy='dynamic'))
-
-    def json(self):
-        return to_json(self, self.__class__)
-
-    def __init__(self, **kwargs):
-        super(SCM, self).__init__(**kwargs)
-        if self.create_time is None:
-            self.create_time = datetime.utcnow()
-
-    def __repr__(self):
-        return "SCM: " + self.json()
-
-
 # detail info of a VirtualEnvironment in case Docker
-class DockerContainer(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), unique=True, nullable=False)
-    image = db.Column(db.String(50), nullable=False)
-    container_id = db.Column(db.String(100))
-    create_time = db.Column(db.DateTime)
+class DockerContainer(Base):
+    __tablename__ = 'docker_container'
 
-    virtual_environment_id = db.Column(db.Integer, db.ForeignKey('virtual_environment.id', ondelete='CASCADE'))
-    virtual_environment = db.relationship(VirtualEnvironment,
-                                          backref=db.backref('container', uselist=False))
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), unique=True, nullable=False)
+    image = Column(String(50), nullable=False)
+    container_id = Column(String(100))
+    create_time = Column(DateTime)
 
-    host_server_id = db.Column(db.Integer, db.ForeignKey('docker_host_server.id', ondelete='CASCADE'))
-    host_server = db.relationship('DockerHostServer', backref=db.backref('containers', lazy='dynamic'))
+    virtual_environment_id = Column(Integer, ForeignKey('virtual_environment.id', ondelete='CASCADE'))
+    virtual_environment = relationship(VirtualEnvironment,
+                                       backref=backref('container', uselist=False))
+
+    host_server_id = Column(Integer, ForeignKey('docker_host_server.id', ondelete='CASCADE'))
+    host_server = relationship('DockerHostServer', backref=backref('containers', lazy='dynamic'))
 
     def json(self):
         return to_json(self, self.__class__)
@@ -288,23 +281,25 @@ class DockerContainer(db.Model):
         return "DockerContainer:" + self.json()
 
 
-class PortBinding(db.Model):
+class PortBinding(Base):
+    __tablename__ = 'port_binding'
+
     # for simplicity, the port won't be released until the corresponding container removed(not stopped).
     # that means a port occupied by stopped container won't be allocated to new container. So it's possible to start the
     # container again. And the number of port should be enough since we won't have too many containers on the same VM.
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50))
-    port_from = db.Column(db.Integer, nullable=False)
-    port_to = db.Column(db.Integer, nullable=False)
-    binding_type = db.Column(db.Integer)  # CloudService or Docker, see enum.py
-    binding_resource_id = db.Column(
-        db.Integer)  # DockerHostServer.id if binding_type is Docker, VM resource id if cloudservice
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50))
+    port_from = Column(Integer, nullable=False)
+    port_to = Column(Integer, nullable=False)
+    binding_type = Column(Integer)  # CloudService or Docker, see enum.py
+    binding_resource_id = Column(
+        Integer)  # DockerHostServer.id if binding_type is Docker, VM resource id if cloudservice
 
-    virtual_environment_id = db.Column(db.Integer, db.ForeignKey('virtual_environment.id', ondelete='CASCADE'))
-    virtual_environment = db.relationship('VirtualEnvironment', backref=db.backref('port_bindings', lazy='dynamic'))
+    virtual_environment_id = Column(Integer, ForeignKey('virtual_environment.id', ondelete='CASCADE'))
+    virtual_environment = relationship('VirtualEnvironment', backref=backref('port_bindings', lazy='dynamic'))
 
-    experiment_id = db.Column(db.Integer, db.ForeignKey('experiment.id', ondelete='CASCADE'))
-    experiment = db.relationship('Experiment', backref=db.backref('port_bindings', lazy='dynamic'))
+    experiment_id = Column(Integer, ForeignKey('experiment.id', ondelete='CASCADE'))
+    experiment = relationship('Experiment', backref=backref('port_bindings', lazy='dynamic'))
 
     def json(self):
         return to_json(self, self.__class__)
@@ -316,11 +311,13 @@ class PortBinding(db.Model):
         return "PortBinding: " + self.json()
 
 
-class Announcement(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    content = db.Column(db.String(200))
-    enabled = db.Column(db.Integer)  # 1=enabled 0=disabled
-    create_time = db.Column(db.DateTime)
+class Announcement(Base):
+    __tablename__ = 'announcement'
+
+    id = Column(Integer, primary_key=True)
+    content = Column(String(200))
+    enabled = Column(Integer)  # 1=enabled 0=disabled
+    create_time = Column(DateTime)
 
     def json(self):
         return to_json(self, self.__class__)
@@ -334,10 +331,12 @@ class Announcement(db.Model):
         return "Announcement: " + self.json()
 
 
-class Role(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), unique=True)
-    create_time = db.Column(db.DateTime)
+class Role(Base):
+    __tablename__ = 'role'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50), unique=True)
+    create_time = Column(DateTime)
 
     def json(self):
         return to_json(self, self.__class__)
@@ -350,15 +349,17 @@ class Role(db.Model):
         return "Role: " + self.json()
 
 
-class UserRole(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    create_time = db.Column(db.DateTime)
+class UserRole(Base):
+    __tablename__ = 'user_role'
 
-    user_id = db.Column(db.Integer(), db.ForeignKey('user.id', ondelete='CASCADE'))
-    user = db.relationship('User', backref=db.backref('roles', lazy='dynamic'))
+    id = Column(Integer, primary_key=True)
+    create_time = Column(DateTime)
 
-    role_id = db.Column(db.Integer(), db.ForeignKey('role.id', ondelete='CASCADE'))
-    role = db.relationship('Role', backref=db.backref('users', lazy='dynamic'))
+    user_id = Column(Integer(), ForeignKey('user.id', ondelete='CASCADE'))
+    user = relationship('User', backref=backref('roles', lazy='dynamic'))
+
+    role_id = Column(Integer(), ForeignKey('role.id', ondelete='CASCADE'))
+    role = relationship('Role', backref=backref('users', lazy='dynamic'))
 
     def json(self):
         return to_json(self, self.__class__)
@@ -372,15 +373,17 @@ class UserRole(db.Model):
         return "UserRole: " + self.json()
 
 
-class Template(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50))
-    url = db.Column(db.String(200))  # backup, templates' location
-    provider = db.Column(db.String(20))
-    create_time = db.Column(db.DateTime)
+class Template(Base):
+    __tablename__ = 'template'
 
-    hackathon_id = db.Column(db.Integer, db.ForeignKey('hackathon.id', ondelete='CASCADE'))
-    hackathon = db.relationship('Hackathon', backref=db.backref('templates', lazy='dynamic'))
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50))
+    url = Column(String(200))  # backup, templates' location
+    provider = Column(String(20))
+    create_time = Column(DateTime)
+
+    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
+    hackathon = relationship('Hackathon', backref=backref('templates', lazy='dynamic'))
 
     def json(self):
         return to_json(self, self.__class__)
@@ -395,17 +398,20 @@ class Template(db.Model):
     def __repr__(self):
         return "Template: " + self.json()
 
+
 # ------------------------------ Tables are introduced by azure-auto-deploy ------------------------------
 
 
-class UserTemplate(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    create_time = db.Column(db.DateTime)
-    last_modify_time = db.Column(db.DateTime)
-    user_id = db.Column(db.Integer(), db.ForeignKey('user.id', ondelete='CASCADE'))
-    user = db.relationship('User', backref=db.backref('user_template', lazy='dynamic'))
-    template_id = db.Column(db.Integer, db.ForeignKey('template.id', ondelete='CASCADE'))
-    template = db.relationship('Template', backref=db.backref('user_template', lazy='dynamic'))
+class UserTemplate(Base):
+    __tablename__ = 'user_template'
+
+    id = Column(Integer, primary_key=True)
+    create_time = Column(DateTime)
+    last_modify_time = Column(DateTime)
+    user_id = Column(Integer(), ForeignKey('user.id', ondelete='CASCADE'))
+    user = relationship('User', backref=backref('user_template', lazy='dynamic'))
+    template_id = Column(Integer, ForeignKey('template.id', ondelete='CASCADE'))
+    template = relationship('Template', backref=backref('user_template', lazy='dynamic'))
 
     def __init__(self, user, template, create_time=None, last_modify_time=None):
         if create_time is None:
@@ -418,14 +424,16 @@ class UserTemplate(db.Model):
         self.last_modify_time = last_modify_time
 
 
-class UserOperation(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    operation = db.Column(db.String(50))
-    status = db.Column(db.String(50))
-    note = db.Column(db.String(500))
-    exec_time = db.Column(db.DateTime)
-    user_template_id = db.Column(db.Integer, db.ForeignKey('user_template.id', ondelete='CASCADE'))
-    user_template = db.relationship('UserTemplate', backref=db.backref('user_operation', lazy='dynamic'))
+class UserOperation(Base):
+    __tablename__ = 'user_operation'
+
+    id = Column(Integer, primary_key=True)
+    operation = Column(String(50))
+    status = Column(String(50))
+    note = Column(String(500))
+    exec_time = Column(DateTime)
+    user_template_id = Column(Integer, ForeignKey('user_template.id', ondelete='CASCADE'))
+    user_template = relationship('UserTemplate', backref=backref('user_operation', lazy='dynamic'))
 
     def __init__(self, user_template, operation, status, note=None, exec_time=None):
         if exec_time is None:
@@ -443,17 +451,19 @@ class UserOperation(db.Model):
         return "UserOperation: " + self.json()
 
 
-class UserResource(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    type = db.Column(db.String(50))
-    name = db.Column(db.String(50))
-    status = db.Column(db.String(50))
-    create_time = db.Column(db.DateTime)
-    last_modify_time = db.Column(db.DateTime)
-    user_template_id = db.Column(db.Integer, db.ForeignKey('user_template.id', ondelete='CASCADE'))
-    user_template = db.relationship('UserTemplate', backref=db.backref('user_resource1', lazy='dynamic'))
+class UserResource(Base):
+    __tablename__ = 'user_resource'
+
+    id = Column(Integer, primary_key=True)
+    type = Column(String(50))
+    name = Column(String(50))
+    status = Column(String(50))
+    create_time = Column(DateTime)
+    last_modify_time = Column(DateTime)
+    user_template_id = Column(Integer, ForeignKey('user_template.id', ondelete='CASCADE'))
+    user_template = relationship('UserTemplate', backref=backref('user_resource1', lazy='dynamic'))
     # for deployment and virtual machine
-    cloud_service_id = db.Column(db.Integer, db.ForeignKey('user_resource.id', ondelete='CASCADE'))
+    cloud_service_id = Column(Integer, ForeignKey('user_resource.id', ondelete='CASCADE'))
 
     def __init__(self, user_template, type, name, status, cloud_service_id, create_time=None, last_modify_time=None):
         if create_time is None:
@@ -475,21 +485,22 @@ class UserResource(db.Model):
         return "UserResource: " + self.json()
 
 
-class VMEndpoint(db.Model):
+class VMEndpoint(Base):
     __tablename__ = 'vm_endpoint'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50))
-    protocol = db.Column(db.String(50))
-    public_port = db.Column(db.Integer)
-    private_port = db.Column(db.Integer)
-    create_time = db.Column(db.DateTime)
-    last_modify_time = db.Column(db.DateTime)
-    cloud_service_id = db.Column(db.Integer, db.ForeignKey('user_resource.id', ondelete='CASCADE'))
-    cloud_service = db.relationship('UserResource', foreign_keys=[cloud_service_id],
-                                    backref=db.backref('vm_endpoint1', lazy='dynamic'))
-    virtual_machine_id = db.Column(db.Integer, db.ForeignKey('user_resource.id', ondelete='CASCADE'))
-    virtual_machine = db.relationship('UserResource', foreign_keys=[virtual_machine_id],
-                                      backref=db.backref('vm_endpoint2', lazy='dynamic'))
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50))
+    protocol = Column(String(50))
+    public_port = Column(Integer)
+    private_port = Column(Integer)
+    create_time = Column(DateTime)
+    last_modify_time = Column(DateTime)
+    cloud_service_id = Column(Integer, ForeignKey('user_resource.id', ondelete='CASCADE'))
+    cloud_service = relationship('UserResource', foreign_keys=[cloud_service_id],
+                                 backref=backref('vm_endpoint1', lazy='dynamic'))
+    virtual_machine_id = Column(Integer, ForeignKey('user_resource.id', ondelete='CASCADE'))
+    virtual_machine = relationship('UserResource', foreign_keys=[virtual_machine_id],
+                                   backref=backref('vm_endpoint2', lazy='dynamic'))
 
     def __init__(self, name, protocol, public_port, private_port, cloud_service, virtual_machine=None,
                  create_time=None, last_modify_time=None):
@@ -513,20 +524,21 @@ class VMEndpoint(db.Model):
         return "VMEndpoint: " + self.json()
 
 
-class VMConfig(db.Model):
+class VMConfig(Base):
     __tablename__ = 'vm_config'
-    id = db.Column(db.Integer, primary_key=True)
-    dns = db.Column(db.String(50))
-    public_ip = db.Column(db.String(50))
-    private_ip = db.Column(db.String(50))
-    create_time = db.Column(db.DateTime)
-    last_modify_time = db.Column(db.DateTime)
-    virtual_machine_id = db.Column(db.Integer, db.ForeignKey('user_resource.id', ondelete='CASCADE'))
-    virtual_machine = db.relationship('UserResource', backref=db.backref('vm_config1', lazy='dynamic'))
-    remote_provider = db.Column(db.String(20))
-    remote_paras = db.Column(db.String(300))
-    user_template_id = db.Column(db.Integer, db.ForeignKey('user_template.id', ondelete='CASCADE'))
-    user_template = db.relationship('UserTemplate', backref=db.backref('vm_config2', lazy='dynamic'))
+
+    id = Column(Integer, primary_key=True)
+    dns = Column(String(50))
+    public_ip = Column(String(50))
+    private_ip = Column(String(50))
+    create_time = Column(DateTime)
+    last_modify_time = Column(DateTime)
+    virtual_machine_id = Column(Integer, ForeignKey('user_resource.id', ondelete='CASCADE'))
+    virtual_machine = relationship('UserResource', backref=backref('vm_config1', lazy='dynamic'))
+    remote_provider = Column(String(20))
+    remote_paras = Column(String(300))
+    user_template_id = Column(Integer, ForeignKey('user_template.id', ondelete='CASCADE'))
+    user_template = relationship('UserTemplate', backref=backref('vm_config2', lazy='dynamic'))
 
     def __init__(self, virtual_machine, dns, public_ip, private_ip,
                  remote_provider, remote_paras, user_template,
