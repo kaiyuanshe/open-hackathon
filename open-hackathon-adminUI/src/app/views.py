@@ -1,26 +1,37 @@
-import sys
 
-sys.path.append("..")
-from flask import redirect, request, url_for, g
-from app import app
+from . import app
 from flask_admin import BaseView, expose, Admin, AdminIndexView
 from decorators import role_required
 from constants import ROLE
-from functions import get_config , delete_remote, get_remote, safe_get_config
+from functions import get_config
 import json
 
-###########
-from flask_login import login_required, current_user, logout_user, login_user
-from admin.login import login_providers, LoginUser
-from flask import Response, render_template, abort, request, session, g, redirect, make_response
+from flask_login import login_required, current_user, logout_user, login_user,LoginManager
+from admin.login import login_providers
+from flask import Response, render_template, request, session, g, redirect, make_response
+from database.models import AdminUser
+from database import db_adapter
+from datetime import timedelta
 
 
+login_manager = LoginManager()
+login_manager.init_app(app)
+@login_manager.user_loader
+def load_user(id):
+    return db_adapter.find_first_object(AdminUser,id=id)
 
 
+session_lifetime_minutes = 60
+PERMANENT_SESSION_LIFETIME = timedelta(minutes=session_lifetime_minutes)
+
+@app.before_request
+def before_request():
+    g.admin = current_user
+    app.permanent_session_lifetime = timedelta(minutes=session_lifetime_minutes)
 
 
-
-class IndexView(AdminIndexView):
+class HomeView(AdminIndexView):
+    @login_required
     @expose('/')
     def index(self):
         #if not g.user.is_authenticated():
@@ -28,13 +39,12 @@ class IndexView(AdminIndexView):
         #if not g.user.has_roles((ROLE.ADMIN, ROLE.HOST)):
 
         #    return redirect("/hackathon")
-        return self.render('admin/login.html')
+        return self.render('admin/home.html')
 
 
 class HackathonAdminBaseView(BaseView):
     def render_admin(self, template):
         return self.render("admin/%s" % template)
-
 
 class MyAdminView(HackathonAdminBaseView):
     @expose('/')
@@ -60,16 +70,13 @@ class AnotherAdminView(HackathonAdminBaseView):
         return True
 
 
-
-
-admin = Admin(name="Open Hackathon Admin Console",index_view=IndexView())
+admin = Admin(name="Open Hackathon Admin Console",base_template='admin/osslayout.html',index_view=HomeView())
 admin.init_app(app)
 
 admin.add_view(MyAdminView(name="view1", category='Test'))
 admin.add_view(AnotherAdminView(name="view2", category='Test'))
 
 ###############################################################################################
-
 
 # js config
 @app.route('/config.js')
@@ -80,34 +87,42 @@ def js_config():
     return resp
 
 
-
 def __login(provider):
     code = request.args.get('code')
     login_result = login_providers[provider].login({
         "code": code
     })
-    user = LoginUser(id=login_result["id"],
+    admin = AdminUser(id=login_result["id"],
                      name=login_result["name"],
                      avatar_url=login_result["avatar_url"],
                      nickname=login_result["nickname"])
-    login_user(user)
+    login_user(admin)
 
     session["token"] = login_result["token"]
-
-    if login_result["register_state"] == False:
-        response = make_response(redirect("notregister"))
-    else:
-        if len(login_result['experiments']) > 0:
-            response = make_response(redirect("hackathon"))
-        else:
-            response = make_response(redirect("settings"))
-        response.set_cookie('token', login_result["token"])
-
-    return response
-
+    return make_response(redirect("/admin"))
 
 
 @app.route('/github')
 def github_login():
     return __login("github")
 
+
+@app.route('/qq')
+def qq_login():
+    return __login("qq")
+
+
+
+@app.route('/')
+@app.route('/index')
+def index():
+    return render_template('/admin/login.html')
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    login_providers.values()[0].logout(g.admin)
+    session.pop("token")
+    logout_user()
+    return redirect("/index")

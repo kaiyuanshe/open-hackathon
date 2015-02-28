@@ -1,6 +1,5 @@
-from flask import g
-from functools import wraps
 
+from functools import wraps
 
 def role_required(*roles):
     def wrapper(func):

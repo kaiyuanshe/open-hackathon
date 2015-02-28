@@ -3,10 +3,13 @@
 # oauth constants
 HOSTNAME = "http://hackathon.chinacloudapp.cn"
 QQ_OAUTH_STATE = "openhackathon"  # todo state should be constant. Actually it should be unguessable to prevent CSFA
-HACkATHON_API_ENDPOINT = "http://hackathon.chinacloudapp.cn:16000"
+HACkATHON_API_ENDPOINT = "http://hackathon.chinacloudapp.cn/admin"
 
 Config = {
     "environment": "local",
+    "mysql": {
+        "connection": 'mysql://%s:%s@%s/%s' % ('root', '123456', 'localhost', 'hackathon')
+    },
     "login": {
         "github": {
             "access_token_url": 'https://github.com/login/oauth/access_token?client_id=a10e2290ed907918d5ab&client_secret=5b240a2a1bed6a6cf806fc2f34eb38a33ce03d75&redirect_uri=%s/github&code=' % HOSTNAME,
@@ -14,7 +17,7 @@ Config = {
             "emails_info_url": 'https://api.github.com/user/emails?access_token='
         },
         "qq": {
-            "access_token_url": 'https://graph.qq.com/oauth2.0/token?grant_type=authorization_code&client_id=101157515&client_secret=018293bdbc15ddfc84306234aa34aa6c&redirect_uri=%s/qq&code=' % HOSTNAME,
+            "access_token_url": 'https://graph.qq.com/oauth2.0/token?grant_type=authorization_code&client_id=101192358&client_secret=d94f8e7baee4f03371f52d21c4400cab&redirect_uri=%s/qq&code=' % HOSTNAME,
             "openid_url": 'https://graph.qq.com/oauth2.0/me?access_token=',
             "user_info_url": 'https://graph.qq.com/user/get_user_info?access_token=%s&oauth_consumer_key=%s&openid=%s'
         },
@@ -44,14 +47,13 @@ Config = {
             "response_type": "response_type=token",
         },
         "qq": {
-            "clientID": "client_id=101157515",
-            "redirect_uri": "redirect_uri=http://osslab.msopentech.cn/qq",
+            "clientID": "client_id=101192358",
+            "redirect_uri": "redirect_uri=%s/qq" % HOSTNAME,
             "scope": "scope=get_user_info",
             "state": "state=%s" % QQ_OAUTH_STATE,
             "response_type": "response_type=code",
         },
         "hackathon": {
-            "name": "open-xml-sdk",
             "endpoint": HACkATHON_API_ENDPOINT
         }
     }

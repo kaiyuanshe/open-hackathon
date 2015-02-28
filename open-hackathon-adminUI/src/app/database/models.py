@@ -33,7 +33,7 @@ def to_json(inst, cls):
 
 
 
-class Admin(db.Model, UserMixin):
+class AdminUser(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50))
     nickname = db.Column(db.String(50))
@@ -44,14 +44,14 @@ class Admin(db.Model, UserMixin):
     create_time = db.Column(db.DateTime)
     last_login_time = db.Column(db.DateTime)
 
-    def get_admin_id(self):
+    def get_admin_user_id(self):
         return self.id
 
     def json(self):
         return to_json(self, self.__class__)
 
     def __init__(self, **kwargs):
-        super(Admin, self).__init__(**kwargs)
+        super(AdminUser, self).__init__(**kwargs)
         if self.create_time is None:
             self.create_time = datetime.utcnow()
         if self.last_login_time is None:
@@ -60,7 +60,19 @@ class Admin(db.Model, UserMixin):
 #            self.slug = str(uuid.uuid1())[0:8]  # todo generate a real slug
 
     def __repr__(self):
-        return "User: " + self.json()
+        return "AdminUser: " + self.json()
+
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return unicode(self.id)
 
 
 
@@ -71,8 +83,8 @@ class AdminEmail(db.Model):
     primary_email = db.Column(db.Integer)  # 0:NOT Primary Email 1:Primary Email
     verified = db.Column(db.Integer)  # 0 for not verified, 1 for verified
 
-    admin_id = db.Column(db.Integer, db.ForeignKey('admin.id', ondelete='CASCADE'))
-    admin = db.relationship('Admin', backref=db.backref('emails', lazy='dynamic'))
+    admin_id = db.Column(db.Integer, db.ForeignKey('admin_user.id', ondelete='CASCADE'))
+    admin = db.relationship('AdminUser', backref=db.backref('emails', lazy='dynamic'))
 
     def get_admin_email(self):
         return self.email(self, email)
@@ -86,8 +98,8 @@ class AdminToken(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     token = db.Column(db.String(50), unique=True, nullable=False)
 
-    admin_id = db.Column(db.Integer, db.ForeignKey('admin.id', ondelete='CASCADE'))
-    admin = db.relationship('Admin', backref=db.backref('tokens', lazy='dynamic'))
+    admin_id = db.Column(db.Integer, db.ForeignKey('admin_user.id', ondelete='CASCADE'))
+    admin = db.relationship('AdminUser', backref=db.backref('tokens', lazy='dynamic'))
 
     issue_date = db.Column(db.DateTime)
     expire_date = db.Column(db.DateTime, nullable=False)

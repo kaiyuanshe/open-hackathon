@@ -1,9 +1,9 @@
 import sys
 
 sys.path.append("..")
-from hackathon.constants import ROLE
+from app.constants import ROLE
 from flask_sqlalchemy import SQLAlchemy
-from hackathon import app
+from app import app
 from db_adapters import SQLAlchemyAdapter
 
 db = SQLAlchemy(app)
