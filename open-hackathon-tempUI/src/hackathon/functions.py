@@ -15,7 +15,7 @@ def convert(input):
 
 def get_config(key):
     ret = Config
-    for arg in key.split("/"):
+    for arg in key.split("."):
         if arg in ret and isinstance(ret, dict):
             ret = ret[arg]
         else:
