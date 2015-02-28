@@ -82,8 +82,8 @@ class OssDocker(object):
         if self.get_container(name, docker_host) is not None:
             try:
                 containers_url = self.get_vm_url(docker_host) + "/containers/%s/stop" % name
-                requests.post(containers_url)
-                log.debug(requests.content)
+                req = requests.post(containers_url)
+                log.debug(req.content)
             except:
                 log.error("container %s fail to stop" % name)
                 raise
@@ -204,7 +204,8 @@ class OssDocker(object):
                 return None
 
             if self.get_container(container_name, docker_host) is None:
-                log.error("container %s fail to start" % container_name)
+                log.error("container %s has started, but can not find it in containers' info, maybe it exited again."
+                          % container_name)
                 return None
 
         return result

@@ -15,7 +15,6 @@ class HackathonManager():
     def get_hackathon_by_id(self, hackathon_id):
         return self.db.find_first_object(Hackathon, id=hackathon_id)
 
-
     def get_hackathon_stat(self, hackathon_id):
         reg_email_list = map(lambda r: r.email,
                              self.db.find_all_objects(Register, hackathon_id=hackathon_id, enabled=1))
@@ -26,7 +25,7 @@ class HackathonManager():
             "online": 0,
             "offline": reg_count
         }
-        if (reg_count > 0):
+        if reg_count > 0:
             user_id_list = map(lambda ue: ue.user_id, UserEmail.query.filter(UserEmail.email.in_(reg_email_list)).all())
             user_id_online = filter(lambda user_id: User.query.filter(User.id == user_id).first().online, user_id_list)
             stat["offline"] = reg_count - stat["online"]
