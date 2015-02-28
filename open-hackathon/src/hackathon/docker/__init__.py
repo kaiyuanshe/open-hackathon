@@ -14,11 +14,11 @@ def name_match(id, l):
             return True
     return False
 
+
 default_http_headers = {'content-type': 'application/json'}
 
 
 class OssDocker(object):
-
     def get_vm_url(self, docker_host):
         vm_url = "http://" + docker_host.public_dns + ":" + str(docker_host.public_docker_api_port)
         return vm_url
@@ -60,8 +60,10 @@ class OssDocker(object):
         log.debug("try to assign docker port %d on server %r" % (private_port, docker_host))
         containers = self.containers_info(docker_host)
         host_ports = flatten(map(lambda p: p['Ports'], containers))
+
         def sub(port):
-            return -1 if "PublicPort" in port else port["PublicPort"]
+            return port["PublicPort"] if "PublicPort" in port else -1
+
         host_public_ports = map(lambda x: sub(x), host_ports)
         return self.__get_available_host_port(host_public_ports, private_port)
 
@@ -132,25 +134,25 @@ class OssDocker(object):
         else:
             image = args["image"]
             # ports foramt: [from, to ,from2, to2]. e.g.[9080,8080,3306,3306].Similar with 'mnts'
-            ports = args["docker_ports"] if args.has_key("docker_ports") else []
+            ports = args["docker_ports"] if "docker_ports" in args else []
             port_bingings = dict(zip(ports[1::2], ports[::2]))
 
-            mnts = args["mnt"] if args.has_key("mnt") else []
+            mnts = args["mnt"] if "mnt" in args else []
             mnts_f = map(
-                lambda s: s if "%s" not in s or not args.has_key("scm") else s % args["scm"]["local_repo_path"],
+                lambda s: s if "%s" not in s or "scm" not in args else s % args["scm"]["local_repo_path"],
                 mnts[::2])
             mnts_t = map(lambda s: {"bind": s, "ro": False}, mnts[1::2])
             mnt_bindings = dict(zip(mnts_f, mnts_t))
 
-            command = args["command"] if args.has_key('command') else None
-            stdin_open = args["stdin_open"] if args.has_key("stdin_open") else False
-            tty = args["tty"] if args.has_key("tty") else False
-            dns = args["dns"] if args.has_key("dns") else None
-            entrypoint = args["entrypoint"] if args.has_key("entrypoint") else None
-            working_dir = args["working_dir"] if args.has_key("working_dir") else None
-            attach_std_in = args["AttachStdin"] if args.has_key("AttachStdin") else False
-            attach_std_out = args["AttachStdout"] if args.has_key("AttachStdout") else False
-            attach_std_err = args["AttachStderr"] if args.has_key("AttachStderr") else False
+            command = args["command"] if "command" in args else None
+            stdin_open = args["stdin_open"] if "stdin_open" in args else False
+            tty = args["tty"] if "tty" in args else False
+            dns = args["dns"] if "dns" in args else None
+            entrypoint = args["entrypoint"] if "entrypoint" in args else None
+            working_dir = args["working_dir"] if "working_dir" in args else None
+            attach_std_in = args["AttachStdin"] if "AttachStdin" in args else False
+            attach_std_out = args["AttachStdout"] if "AttachStdout" in args else False
+            attach_std_err = args["AttachStderr"] if "AttachStderr" in args else False
 
             # headers = {'content-type': 'application/json'}
             container_config = {"Image": image, "ExposedPorts": {}}

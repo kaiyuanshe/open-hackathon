@@ -66,7 +66,6 @@ class UserExperimentResource(Resource):
             return {"error": "Bad request"}, 400
         return expr_manager.stop_expr(args["id"], args['force'])
 
-
     @token_required
     def put(self):
         args = request.get_json()
