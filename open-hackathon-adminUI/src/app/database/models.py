@@ -6,7 +6,6 @@ sys.path.append("..")
 from . import UserMixin
 from . import db
 from datetime import datetime
-import uuid
 import json
 
 
@@ -59,22 +58,6 @@ class AdminUser(db.Model, UserMixin):
 #        if self.slug is None:
 #            self.slug = str(uuid.uuid1())[0:8]  # todo generate a real slug
 
-    def __repr__(self):
-        return "AdminUser: " + self.json()
-
-    def is_authenticated(self):
-        return True
-
-    def is_active(self):
-        return True
-
-    def is_anonymous(self):
-        return False
-
-    def get_id(self):
-        return unicode(self.id)
-
-
 
 class AdminEmail(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -124,8 +107,8 @@ class AdminToken(db.Model):
 class AdminGroup(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(16))
-    hackathon_id = db.Column(db.Integer)
+    name = db.Column(db.String(32))
+    hackathon_id = db.Column(db.Integer, nullable=False)
     create_time = db.Column(db.DateTime)
 
     def json(self):
@@ -144,12 +127,12 @@ class AdminUserGroup(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     group_id = db.Column(db.Integer, unique=True, nullable=False)
     admin_email = db.Column(db.String(120))
-    state = db.Column(db.String(16))
+    state = db.Column(db.Integer)
     remarks = db.Column(db.String(255))
     create_time = db.Column(db.DateTime)
 
-    group_id = db.Column(db.Integer(), db.ForeignKey('admin_group.id', ondelete='CASCADE'))
-    admin_group = db.relationship('AdminGroup', backref=db.backref('admin_group', lazy='dynamic'))
+    admin_group = db.Column(db.Integer(), db.ForeignKey('admin_group.id', ondelete='CASCADE'))
+    admin_user_group = db.relationship('AdminGroup', backref=db.backref('admin_group', lazy='dynamic'))
 
     def json(self):
         return to_json(self, self.__class__)

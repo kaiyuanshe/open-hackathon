@@ -6,12 +6,16 @@ from constants import ROLE
 from functions import get_config
 import json
 
-from flask_login import login_required, current_user, logout_user, login_user,LoginManager
+from flask_login import login_required, current_user,login_user,LoginManager
 from admin.login import login_providers
-from flask import Response, render_template, request, session, g, redirect, make_response
+from flask import Response, render_template, request, g, redirect, make_response
 from database.models import AdminUser
 from database import db_adapter
 from datetime import timedelta
+
+
+session_lifetime_minutes = 60
+PERMANENT_SESSION_LIFETIME = timedelta(minutes=session_lifetime_minutes)
 
 
 login_manager = LoginManager()
@@ -20,9 +24,6 @@ login_manager.init_app(app)
 def load_user(id):
     return db_adapter.find_first_object(AdminUser,id=id)
 
-
-session_lifetime_minutes = 60
-PERMANENT_SESSION_LIFETIME = timedelta(minutes=session_lifetime_minutes)
 
 @app.before_request
 def before_request():
@@ -92,13 +93,7 @@ def __login(provider):
     login_result = login_providers[provider].login({
         "code": code
     })
-    admin = AdminUser(id=login_result["id"],
-                     name=login_result["name"],
-                     avatar_url=login_result["avatar_url"],
-                     nickname=login_result["nickname"])
-    login_user(admin)
-
-    session["token"] = login_result["token"]
+    login_user(login_result)
     return make_response(redirect("/admin"))
 
 
@@ -123,6 +118,4 @@ def index():
 @login_required
 def logout():
     login_providers.values()[0].logout(g.admin)
-    session.pop("token")
-    logout_user()
     return redirect("/index")

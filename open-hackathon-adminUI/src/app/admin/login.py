@@ -5,30 +5,34 @@ import urllib2
 sys.path.append("..")
 # -*- coding:utf8 -*-
 # encoding = utf-8
-from app.functions import get_remote, get_config, post_to_remote, convert
+from app.functions import get_remote, get_config, convert
 from app.log import log
 import json
 from admin_mgr import admin_manager
-
+from flask import session
+from flask_login import logout_user
 
 class LoginBase():
-
     def login2db(self,openid,**kwargs):
-
         admin_with_token = admin_manager.db_login(openid, **kwargs)
         # login flask
         admin = admin_with_token["admin"]
-        log.info("github user login successfully:" + repr(admin))
-        detail = admin_manager.get_admin_info(admin)
-        detail["token"] = admin_with_token["token"].token
-        return detail
+        log.info("login successfully:" + repr(admin))
+        session["token"] = admin_with_token["token"].token
+        #TODO session's contents will be appended , such as cookies if we conmunicate with APIservice
+        return admin_manager.get_admin_info(admin)
 
     def logout(self, admin):
+        session.pop("token")
+        logout_user()
         return admin_manager.db_logout(admin)
 
 
+
 class QQLogin(LoginBase):
+
     def login(self, args):
+        log.info('login from QQ')
         code = args.get('code')
         state = "openhackathon"
         # if state != QQ_OAUTH_STATE:
@@ -72,6 +76,7 @@ class QQLogin(LoginBase):
 
 class GithubLogin(LoginBase):
     def login(self, args):
+        log.info('login from GitHub')
         code = args.get('code')
 
         # get access_token
@@ -130,6 +135,7 @@ class GithubLogin(LoginBase):
 
 class GitcafeLogin(LoginBase):
     def login(self, args):
+        log.info('login from Gitcafe')
         code = args.get('code')
         url = get_config('login/gitcafe/access_token_url') + code
         opener = urllib2.build_opener(urllib2.HTTPHandler)
