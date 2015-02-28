@@ -71,7 +71,7 @@ class GuacamoleHealthCheck(HealthCheck):
 
     # todo now check only server status
     def __init__(self):
-        self.guacamole_url = get_config("guacamole/host") + '/guacamole'
+        self.guacamole_url = get_config("guacamole.host") + '/guacamole'
 
     def reportHealth(self):
         try:
@@ -92,9 +92,9 @@ class AzureHealthCheck(HealthCheck):
 
     def __init__(self):
         self.azure = AzureImpl()
-        sub_id = get_config("azure/subscriptionId")
-        cert_path = get_config('azure/certPath')
-        service_host_base = get_config("azure/managementServiceHostBase")
+        sub_id = get_config("azure.subscriptionId")
+        cert_path = get_config('azure.certPath')
+        service_host_base = get_config("azure.managementServiceHostBase")
         self.azure.connect(sub_id, cert_path, service_host_base)
 
     def reportHealth(self):

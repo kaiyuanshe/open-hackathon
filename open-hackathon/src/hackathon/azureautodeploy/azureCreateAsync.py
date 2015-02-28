@@ -19,9 +19,9 @@ if __name__ == "__main__":
     ut_id = int(args[0])
     expr_id = int(args[1])
     azure = AzureImpl()
-    sub_id = get_config("azure/subscriptionId")
-    cert_path = get_config('azure/certPath')
-    service_host_base = get_config("azure/managementServiceHostBase")
+    sub_id = get_config("azure.subscriptionId")
+    cert_path = get_config('azure.certPath')
+    service_host_base = get_config("azure.managementServiceHostBase")
     if not azure.connect(sub_id, cert_path, service_host_base):
         set_expr_status(expr_id, ExprStatus.Failed)
         sys.exit(-1)
