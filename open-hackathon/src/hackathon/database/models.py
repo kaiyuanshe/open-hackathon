@@ -14,7 +14,7 @@ def to_json(inst, cls):
     # add your coversions for things like datetime's
     # and what-not that aren't serializable.
     convert = dict()
-    convert[db.DateTime] = str
+    convert[db.DateTime] = long
 
     d = dict()
     for c in cls.__table__.columns:
@@ -22,7 +22,7 @@ def to_json(inst, cls):
         if c.type.__class__ in convert.keys() and v is not None:
             try:
                 func = convert[c.type.__class__]
-                d[c.name] = func(v)
+                d[c.name] = func((v - datetime(1970, 1, 1)).total_seconds() * 1000)
             except:
                 d[c.name] = "Error:  Failed to covert using ", str(convert[c.type.__class__])
         elif v is None:
@@ -50,7 +50,6 @@ class User(db.Model, UserMixin):
     def json(self):
         return to_json(self, self.__class__)
 
-
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
         if self.create_time is None:
@@ -59,7 +58,6 @@ class User(db.Model, UserMixin):
             self.last_login_time = datetime.utcnow()
         if self.slug is None:
             self.slug = str(uuid.uuid1())[0:8]  # todo generate a real slug
-
 
     def __repr__(self):
         return "User: " + self.json()
@@ -394,6 +392,7 @@ class Template(db.Model):
 
     def __repr__(self):
         return "Template: " + self.json()
+
 
 # ------------------------------ Tables are introduced by azure-auto-deploy ------------------------------
 
