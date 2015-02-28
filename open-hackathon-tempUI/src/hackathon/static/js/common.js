@@ -87,30 +87,16 @@ String.prototype.format = function(args) {
 
 function Countdown(endTime, callback) {
     var time_end, time_server, time_now_1, time_now_2;
-    time_end = endTime.getTime()
+    time_end = endTime;
     time_now_1 = new Date();
     time_now_1 = time_now_1.getTime();
-    function getServerDate(cb){
-        $.ajax({
-            url: '/',
-            complete:function(xhr){ 
-              var s = xhr.getResponseHeader('Date');
-              if(s){
-                cb(s);
-              }else{ 
-               cb(new Date());
-              }      
-            }
-        });
-    }
-    getServerDate(function(date){
-          time_server = Date.parse(date);
-          time_now_2 = new Date();
-          time_now_2 = time_now_2.getTime();
-          time_server = time_server + (time_now_2 - time_now_1);
-          setTimeout(show_time, 1000);
+    hget('/api/currenttime', function(data) {
+        time_server = data.currenttime;
+        time_now_2 = new Date();
+        time_now_2 = time_now_2.getTime();
+        time_server = time_server + (time_now_2 - time_now_1);
+        setTimeout(show_time, 1000);
     })
-
 
     function show_time() {
         var timing = {
