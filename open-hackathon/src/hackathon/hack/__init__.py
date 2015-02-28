@@ -28,9 +28,9 @@ class HackathonManager():
         }
         if (reg_count > 0):
             user_id_list = map(lambda ue: ue.user_id, UserEmail.query.filter(UserEmail.email.in_(reg_email_list)).all())
-            online_count = User.query.filter(User.id.in_(user_id_list)).count()
-            stat["online"] = online_count
-            stat["offline"] = reg_count - online_count
+            user_id_online = filter(lambda user_id: User.query.filter(User.id == user_id).first().online, user_id_list)
+            stat["offline"] = reg_count - stat["online"]
+            stat["online"] = len(user_id_online)
 
         return stat
 
