@@ -20,7 +20,7 @@ class UserManager(object):
     def __generate_api_token(self, user):
         token_issue_date = datetime.utcnow()
         token_expire_date = token_issue_date + timedelta(
-            minutes=safe_get_config("login/token_expiration_minutes", 1440))
+            minutes=safe_get_config("login.token_expiration_minutes", 1440))
         user_token = UserToken(str(uuid.uuid1()), user, token_expire_date, token_issue_date)
         self.db.add_object(user_token)
         self.db.commit()

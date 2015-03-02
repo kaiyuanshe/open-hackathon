@@ -23,7 +23,7 @@ class QQLogin(LoginProviderBase):
     def login(self, args):
         access_token = args['access_token']
         # get openID.
-        openid_resp = get_remote(get_config("login/qq/openid_url") + access_token)
+        openid_resp = get_remote(get_config("login.qq.openid_url") + access_token)
         log.debug("get access_token from qq:" + access_token)
 
         info = json.loads(openid_resp[10:-4])
@@ -33,7 +33,7 @@ class QQLogin(LoginProviderBase):
         log.debug("get openid from qq:" + client_id)
 
         # get user info
-        url = get_config("login/qq/user_info_url") % (access_token, client_id, openid)
+        url = get_config("login.qq.user_info_url") % (access_token, client_id, openid)
         user_info_resp = get_remote(url)
         log.debug("get user info from qq:" + user_info_resp)
         user_info = convert(json.loads(user_info_resp))
@@ -61,7 +61,7 @@ class GithubLogin(LoginProviderBase):
         access_token = args.get('access_token')
         # get user info
 
-        user_info_resp = get_remote(get_config('login/github/user_info_url') + access_token)
+        user_info_resp = get_remote(get_config('login.github.user_info_url') + access_token)
         # conn.request('GET',url,'',{'user-agent':'flask'})
         log.debug("get user info from github:" + user_info_resp + '\n')
         # example:
@@ -88,7 +88,7 @@ class GithubLogin(LoginProviderBase):
         openid = str(user_info["id"])
         avatar = user_info["avatar_url"]
         # get user primary email
-        email_info_resp = get_remote(get_config('login/github/emails_info_url') + access_token)
+        email_info_resp = get_remote(get_config('login.github.emails_info_url') + access_token)
         log.debug("get email from github:" + email_info_resp + '\n')
         # email_info include all user email provided by github
         # email is user's primary email
@@ -114,7 +114,7 @@ class GitcafeLogin(LoginProviderBase):
         value = "Bearer " + token
         header = {"Authorization": value}
         opener = urllib2.build_opener(urllib2.HTTPHandler)
-        request = urllib2.Request(get_config("login/gitcafe/user_info_url"))
+        request = urllib2.Request(get_config("login.gitcafe.user_info_url"))
         request.add_header("Authorization", value)
         user_info = opener.open(request).read()
         log.debug(user_info)

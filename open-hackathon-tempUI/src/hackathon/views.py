@@ -29,7 +29,7 @@ Template_Routes = {
 @login_manager.user_loader
 def load_user(id):
     try:
-        ur = get_remote("%s/api/user?uid=%d" % (get_config("hackathon-api/endpoint"), int(id)))
+        ur = get_remote("%s/api/user?uid=%d" % (get_config("hackathon-api.endpoint"), int(id)))
         ur = json.loads(ur)
         return LoginUser(id=ur["id"], name=ur["name"], nickname=ur["nickname"], avatar_url=ur["avatar_url"])
     except Exception as e:
@@ -56,7 +56,7 @@ def simple_route(path):
 @app.route('/index')
 def index():
     return render_template("index.html",
-                           providers=safe_get_config("login/provider_enabled", ["github", "qq", "gitcafe"]))
+                           providers=safe_get_config("login.provider_enabled", ["github", "qq", "gitcafe"]))
 
 
 # error handler for 404
@@ -152,7 +152,7 @@ def gitcafe_login():
 @app.route("/logout")
 @login_required
 def logout():
-    url = "%s/api/user/login?uid=%d" % (get_config("hackathon-api/endpoint"), g.user.id)
+    url = "%s/api/user/login?uid=%d" % (get_config("hackathon-api.endpoint"), g.user.id)
     delete_remote(url, {
         "token": session["token"]
     })

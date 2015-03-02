@@ -15,7 +15,6 @@ class HackathonManager():
     def get_hackathon_by_id(self, hackathon_id):
         return self.db.find_first_object(Hackathon, id=hackathon_id)
 
-
     def get_hackathon_stat(self, hackathon_id):
         reg_email_list = map(lambda r: r.email,
                              self.db.find_all_objects(Register, hackathon_id=hackathon_id, enabled=1))
