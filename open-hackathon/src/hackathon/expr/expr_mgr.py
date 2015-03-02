@@ -123,18 +123,66 @@ class ExprManager(object):
         log.debug("starting to release ports: %d" % host_port)
         p.release_public_port(host_server_dns, 'Production', host_server_name, host_port)
 
-    def __assign_port(self, expr, host_server, ve, port_cfg):
+    def __assign_multiple_ports(self, expr, host_server, ve, port_cfg):
+        # get 'host_port'
+        map(lambda u: u.update(
+            {'host_port': docker.get_available_host_port(host_server, u['port'])}) if 'host_port' not in u else None,
+            port_cfg)
 
-        if port_cfg.has_key("public"):
+        # get 'public' cfg
+        public_ports_cfg = filter(lambda u: 'public' in u, port_cfg)
+        if safe_get_config("environment", "prod") == "local":
+            map(lambda u: u.update({'public_port': u['host_port']}), public_ports_cfg)
+        else:
+            map(lambda u: u.update({'public_port': u['host_port']}),
+                self.__get_available_public_port(host_server, public_ports_cfg))
+
+        binding_dockers = []
+
+        for public_cfg in public_ports_cfg:
+            binding_cloudservice = PortBinding(name=public_cfg["name"] if "name" in public_cfg else None,
+                                               port_from=public_cfg["public_port"],
+                                               port_to=public_cfg["host_port"],
+                                               binding_type=PortBindingType.CloudService,
+                                               binding_resource_id=host_server.id,
+                                               virtual_environment=ve,
+                                               experiment=expr)
+            binding_docker = PortBinding(name=public_cfg["name"] if "name" in public_cfg else None,
+                                         port_from=public_cfg["host_port"],
+                                         port_to=public_cfg["port"],
+                                         binding_type=PortBindingType.Docker,
+                                         binding_resource_id=host_server.id,
+                                         virtual_environment=ve,
+                                         experiment=expr)
+            binding_dockers.append(binding_docker)
+            db_adapter.add_object(binding_cloudservice)
+            db_adapter.add_object(binding_docker)
+        db_adapter.commit()
+
+        local_ports_cfg = filter(lambda u: 'public' not in u, port_cfg)
+        for local_cfg in local_ports_cfg:
+            port_binding = PortBinding(name=local_cfg["name"] if "name" in local_cfg else None,
+                                       port_from=local_cfg["host_port"],
+                                       port_to=local_cfg["port"],
+                                       binding_type=PortBindingType.Docker,
+                                       binding_resource_id=host_server.id,
+                                       virtual_environment=ve,
+                                       experiment=expr)
+            binding_dockers.append(port_binding)
+            db_adapter.add_object(port_binding)
+        db_adapter.commit()
+        return binding_dockers
+
+    def __assign_port(self, expr, host_server, ve, port_cfg):
+        if "public" in port_cfg:
             # todo open port on azure for those must open to public
             # public port means the port open the public. For azure , it's the public port on azure. There
             # should be endpoint on azure that from public_port to host_port
             # host_ports = db_adapter.find_all_objects(PortBinding, binding_type=PortBindingType.Docker,
-            #                                        binding_resource_id=host_server.id)
-
-            if not "host_port" in port_cfg:
+            # binding_resource_id=host_server.id)
+            if "host_port" not in port_cfg:
                 port_cfg["host_port"] = docker.get_available_host_port(host_server, port_cfg["port"])
-            if not "public_port" in port_cfg:
+            if "public_port" not in port_cfg:
                 if safe_get_config("environment", "prod") == "local":
                     port_cfg["public_port"] = port_cfg["host_port"]
                 else:
@@ -216,10 +264,14 @@ class ExprManager(object):
         # the mnt may contain placeholder for source code dir which are decided by 'cloudvm' service
         if "ports" in container_config:
             # get an available on the target VM
+
             ps = map(lambda p: [self.__assign_port(expr, host_server, ve, p).port_from, p["port"]],
                      container_config["ports"])
+
+            # self.__assign_port(expr, host_server, ve, container_config["ports"])
+
             container_config["docker_ports"] = flatten(ps)
-        if container_config.has_key("mnt"):
+        if "mnt" in container_config:
             local_repo_path = "" if scm is None else scm["local_repo_path"]
             mnts_with_repo = map(lambda s: s if "%s" not in s else s % local_repo_path, container_config["mnt"])
             container_config["mnt"] = mnts_with_repo
@@ -369,8 +421,20 @@ class ExprManager(object):
             for port in ports:
                 if safe_get_config("environment", "prod") != "local" and port.binding_type == 1:
                     self.__release_public_port(host_server, port.port_to)
-                db.session.delete(port)
-            db.session.commit()
+                db_session.delete(port)
+            db_session.commit()
+
+    def __release_multiple_ports(self, expr_id, host_server):
+        log.debug("Begin to release ports: expr_id: %d, host_server: %r" % (expr_id, host_server))
+        ports = PortBinding.query.filter_by(experiment_id=expr_id).all()
+        if ports is not None:
+            ports_to = filter(lambda u: safe_get_config("environment", "prod") != "local" and u.binding_type == 1,
+                              ports)
+            if len(ports_to) != 0:
+                self.__release_ports(host_server, ports_to)
+            for port in ports:
+                db_session.delete(port)
+            db_session.commit()
 
     def __roll_back(self, expr_id):
         """
@@ -395,11 +459,11 @@ class ExprManager(object):
                         self.__release_ports(expr_id, c.container.host_server)
             # delete ports
             expr.status = ExprStatus.Rollbacked
-            db.session.commit()
+            db_session.commit()
             log.info("Rollback succeeded")
         except Exception as e:
             expr.status = ExprStatus.Failed
-            db.session.commit()
+            db_session.commit()
             log.info("Rollback failed")
             log.error(e)
 
