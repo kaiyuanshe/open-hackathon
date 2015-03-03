@@ -13,6 +13,7 @@ from user.user_functions import get_user_experiment, get_user_hackathon
 from health import report_health
 from remote.guacamole import GuacamoleInfo
 from hack import hack_manager
+import time
 
 
 class RegisterListResource(Resource):
@@ -65,7 +66,6 @@ class UserExperimentResource(Resource):
         if args['id'] is None or args['force'] is None:
             return {"error": "Bad request"}, 400
         return expr_manager.stop_expr(args["id"], args['force'])
-
 
     @token_required
     def put(self):
@@ -202,6 +202,11 @@ class UserResource(Resource):
         return user_manager.get_user_by_id(args['uid'])
 
 
+class CurrentTime(Resource):
+    def get(self):
+        return {"currenttime": long(time.time() * 1000)}
+
+
 api.add_resource(UserExperimentResource, "/api/user/experiment")
 api.add_resource(RegisterListResource, "/api/register/list")
 api.add_resource(BulletinResource, "/api/bulletin")
@@ -215,4 +220,5 @@ api.add_resource(UserHackathonResource, "/api/user/hackathon")
 api.add_resource(UserExperimentListResource, "/api/user/experiment/list")
 api.add_resource(GuacamoleResource, "/api/guacamoleconfig")
 api.add_resource(UserResource, "/api/user")
+api.add_resource(CurrentTime, "/api/currenttime")
 

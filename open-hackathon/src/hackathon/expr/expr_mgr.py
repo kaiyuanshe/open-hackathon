@@ -367,7 +367,7 @@ class ExprManager(object):
         ports = PortBinding.query.filter_by(experiment_id=expr_id).all()
         if ports is not None:
             for port in ports:
-                if port.binding_type == 1:
+                if safe_get_config("environment", "prod") != "local" and port.binding_type == 1:
                     self.__release_public_port(host_server, port.port_to)
                 db.session.delete(port)
             db.session.commit()
