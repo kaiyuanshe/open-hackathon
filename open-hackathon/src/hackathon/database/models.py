@@ -9,11 +9,15 @@ import uuid
 import json
 
 
+def date_serializer(date):
+    return long((date - datetime(1970, 1, 1)).total_seconds() * 1000)
+
+
 def to_json(inst, cls):
     # add your coversions for things like datetime's
     # and what-not that aren't serializable.
     convert = dict()
-    convert[DateTime] = long
+    convert[DateTime] = date_serializer
 
     d = dict()
     for c in cls.__table__.columns:
@@ -21,7 +25,7 @@ def to_json(inst, cls):
         if c.type.__class__ in convert.keys() and v is not None:
             try:
                 func = convert[c.type.__class__]
-                d[c.name] = func((v - datetime(1970, 1, 1)).total_seconds() * 1000)
+                d[c.name] = func(v)
             except:
                 d[c.name] = "Error:  Failed to covert using ", str(convert[c.type.__class__])
         elif v is None:
