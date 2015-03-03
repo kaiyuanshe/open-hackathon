@@ -2,6 +2,8 @@ import logging
 import logging.config
 from os.path import realpath, dirname
 
+
+
 # "application" code
 class Log(object):
     def __init__(self):

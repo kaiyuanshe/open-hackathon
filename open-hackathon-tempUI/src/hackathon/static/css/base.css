@@ -222,3 +222,7 @@ a {
 .smallscreen a:hover {
     text-decoration: none;
 }
+
+.t-content{
+    min-height: 60px;
+}
