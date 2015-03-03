@@ -30,13 +30,13 @@ class ExprManager(object):
 
         # return guacamole link to frontend
         guacamole_servers = []
-        if expr.user_template.template.provider == VirtualEnvironmentProvider.Docker:
+        if expr.template.provider == VirtualEnvironmentProvider.Docker:
             ves = expr.virtual_environments.all()
         else:
             vms = db_adapter.find_all_objects(UserResource,
                                               type=VIRTUAL_MACHINE,
                                               status=RUNNING,
-                                              user_template_id=expr.user_template.id)
+                                              template_id=expr.template.id)
             vms_id = map(lambda v: v.id, vms)
             ves = db_adapter.find_all_objects(VMConfig, virtual_machine_id=vms_id)
         for ve in ves:
@@ -53,7 +53,7 @@ class ExprManager(object):
 
         # return public accessible web url
         public_urls = []
-        if expr.user_template.template.provider == VirtualEnvironmentProvider.Docker:
+        if expr.template.provider == VirtualEnvironmentProvider.Docker:
             for ve in expr.virtual_environments.filter(VirtualEnvironment.image != GUACAMOLE.IMAGE).all():
                 for p in ve.port_bindings.all():
                     if p.binding_type == PortBindingType.CloudService and p.name == "website":
@@ -67,7 +67,7 @@ class ExprManager(object):
             vms = db_adapter.find_all_objects(UserResource,
                                               type=VIRTUAL_MACHINE,
                                               status=RUNNING,
-                                              user_template_id=expr.user_template.id)
+                                              template_id=expr.template.id)
             vms_id = map(lambda v: v.id, vms)
             for vm_config in db_adapter.find_all_objects(VMConfig, virtual_machine_id=vms_id):
                 dns = vm_config.dns[:-1]
@@ -83,10 +83,11 @@ class ExprManager(object):
 
         return ret
 
-    def __get_available_docker_host(self, expr_config):
+    def __get_available_docker_host(self, expr_config, hackathon):
         req_count = len(expr_config["virtual_environments"])
         vm = db_adapter.filter(DockerHostServer,
-                               DockerHostServer.container_count + req_count <= DockerHostServer.container_max_count).first()
+                               DockerHostServer.container_count + req_count <= DockerHostServer.container_max_count,
+                               DockerHostServer.hackathon == hackathon).first()
 
         # todo connect to azure to launch new VM if no existed VM meet the requirement
         # since it takes some time to launch VM, it's more reasonable to launch VM when the existed ones are almost used up.
@@ -245,12 +246,13 @@ class ExprManager(object):
         remote_provider = ""
         if "remote" in post_data and "provider" in post_data["remote"]:
             remote_provider = post_data["remote"]["provider"]
+        user = g.get('user', None)
         ve = VirtualEnvironment(provider=provider,
                                 name=post_data["container_name"],
                                 image=container_config["image"],
                                 status=VirtualEnvStatus.Init,
                                 remote_provider=remote_provider,
-                                user=g.user,
+                                user=user,
                                 experiment=expr)
         container = DockerContainer(expr, name=post_data["container_name"], host_server=host_server,
                                     virtual_environment=ve,
@@ -289,7 +291,7 @@ class ExprManager(object):
                     "displayname": port_cfg[0]["name"] if "name" in port_cfg[0] else container_config["name"],
                     "name": post_data["container_name"],
                     "protocol": guac["protocol"],
-                    "hostname": host_server.public_dns,
+                    "hostname": host_server.public_ip,
                     "port": port_cfg[0]["public_port"]
                 }
                 if "username" in guac:
@@ -347,20 +349,27 @@ class ExprManager(object):
         if expr is not None:
             return self.__report_expr_status(expr)
 
-        user_template = db_adapter.find_first_object(UserTemplate, user=g.user, template=template)
-        if user_template is None:
-            user_template = db_adapter.add_object_kwargs(UserTemplate, user=g.user, template=template)
+        expr = db_adapter.find_first_object(Experiment, status=ExprStatus.Running, hackathon_id=hackathon.id,
+                                            user_id=None, template=template)
+        # todo virtual environment user id
+        if expr is not None:
+            db_adapter.update_object(expr, user_id=g.user.id)
+            for ve in expr.virtual_environments:
+                db_adapter.update_object(ve, user_id=g.user.id)
+            db_session.commit()
+            return self.__report_expr_status(expr)
+
         # new expr
         expr = db_adapter.add_object_kwargs(Experiment,
                                             user=g.user,
                                             hackathon=hackathon,
                                             status=ExprStatus.Init,
-                                            user_template=user_template)
+                                            template=template)
         db_adapter.commit()
 
         if template.provider == VirtualEnvironmentProvider.Docker:
             # get available VM that runs the cloudvm and is available for more containers
-            host_server = self.__get_available_docker_host(expr_config)
+            host_server = self.__get_available_docker_host(expr_config, hackathon)
             # checkout source code
             scm = None
             if "scm" in expr_config:
@@ -395,7 +404,7 @@ class ExprManager(object):
             # start create azure vm according to user template
             try:
                 path = os.path.dirname(__file__) + '/../azureautodeploy/azureCreateAsync.py'
-                command = ['python', path, str(user_template.id), str(expr.id)]
+                command = ['python', path, str(template.id), str(expr.id)]
                 Popen(command)
             except Exception as e:
                 log.error(e)
@@ -431,7 +440,7 @@ class ExprManager(object):
             ports_to = filter(lambda u: safe_get_config("environment", "prod") != "local" and u.binding_type == 1,
                               ports)
             if len(ports_to) != 0:
-                self.__release_ports(host_server, ports_to)
+                self.__release_public_port(host_server, ports_to)
             for port in ports:
                 db_session.delete(port)
             db_session.commit()
@@ -477,7 +486,7 @@ class ExprManager(object):
         expr = db_adapter.find_first_object(Experiment, id=expr_id, status=ExprStatus.Running)
         if expr is not None:
             # Docker
-            if expr.user_template.template.provider == VirtualEnvironmentProvider.Docker:
+            if expr.template.provider == VirtualEnvironmentProvider.Docker:
                 # stop containers
                 for c in expr.virtual_environments:
                     try:
@@ -509,14 +518,14 @@ class ExprManager(object):
                     return {"error": "Failed connect azure"}, 500
                 if force == 0:
                     try:
-                        result = azure.shutdown_sync(expr.user_template, expr_id)
+                        result = azure.shutdown_sync(expr.template, expr_id)
                     except Exception as e:
                         log.error(e)
                         return {"error": "Failed shutdown azure"}, 500
                     expr.status = ExprStatus.Stopped
                 else:
                     try:
-                        result = azure.delete_sync(expr.user_template, expr_id)
+                        result = azure.delete_sync(expr.template, expr_id)
                     except Exception as e:
                         log.error(e)
                         return {"error": "Failed delete azure"}, 500
@@ -544,6 +553,68 @@ class ExprManager(object):
         u.submitted_time = datetime.utcnow()
         db_adapter.commit()
         return u
+
+    def default_docker(self, hackathon_name, template_name):
+        # start ut
+        log.debug("start default docker: hackathon name %s, template name %s ... " % (hackathon_name, template_name))
+        hackathon = db_adapter.find_first_object(Hackathon, name=hackathon_name)
+        if hackathon is None:
+            raise Exception("start default docker failed, hackathon %s doesn't exist.")
+
+        template = db_adapter.find_first_object(Template, hackathon=hackathon, name=template_name)
+        if template is None or not os.path.isfile(template.url):
+            raise Exception("start default docker failed, template %s doesn't exist.")
+
+        try:
+            expr_config = json.load(file(template.url))
+        except Exception as e:
+            raise Exception(e)
+
+        # user_template = db_adapter.add_object_kwargs(UserTemplate, user=None, template=template)
+
+        # new expr
+        expr = db_adapter.add_object_kwargs(Experiment,
+                                            user=None,
+                                            hackathon=hackathon,
+                                            status=ExprStatus.Init,
+                                            template=template)
+        db_adapter.commit()
+
+        if template.provider == VirtualEnvironmentProvider.Docker:
+            # get available VM that runs the cloudvm and is available for more containers
+            host_server = self.__get_available_docker_host(expr_config, hackathon)
+            # checkout source code
+            scm = None
+            # start containers
+            # guacamole_config = []
+            try:
+                expr.status = ExprStatus.Starting
+                db_adapter.commit()
+                map(lambda container_config:
+                    self.__remote_start_container(expr, host_server, scm, container_config),
+                    expr_config["virtual_environments"])
+                expr.status = ExprStatus.Running
+                db_adapter.commit()
+            except Exception as e:
+                log.error(e)
+                log.error("Failed starting containers")
+                self.__roll_back(expr.id)
+                return {"error": "Failed starting containers"}, 500
+        else:
+            expr.status = ExprStatus.Starting
+            db_adapter.commit()
+            # start create azure vm according to user template
+            try:
+                path = os.path.dirname(__file__) + '/../azureautodeploy/azureCreateAsync.py'
+                command = ['python', path, str(template.id), str(expr.id)]
+                Popen(command)
+            except Exception as e:
+                log.error(e)
+                return {"error": "Failed starting azure"}, 500
+        # after everything is ready, set the expr state to running
+
+        # response to caller
+        return self.__report_expr_status(expr)
 
 
 expr_manager = ExprManager()

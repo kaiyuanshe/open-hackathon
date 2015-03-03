@@ -170,11 +170,15 @@ class DockerHostServer(Base):
     id = Column(Integer, primary_key=True)
     vm_name = Column(String(100), unique=True, nullable=False)
     public_dns = Column(String(50))
+    public_ip = Column(String(50), unique=True)
     public_docker_api_port = Column(Integer)
     private_ip = Column(String(50), unique=True)
     private_docker_api_port = Column(Integer)
     container_count = Column(Integer, nullable=False)
     container_max_count = Column(Integer, nullable=False)
+
+    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
+    hackathon = relationship('Hackathon', backref=backref('docker_host_servers', lazy='dynamic'))
 
     def json(self):
         return to_json(self, self.__class__)
@@ -201,8 +205,8 @@ class Experiment(Base):
     hackathon = relationship('Hackathon', backref=backref('experiments', lazy='dynamic'))
 
     # adaptor for auto azure deploy
-    user_template_id = Column(Integer, ForeignKey('user_template.id', ondelete='CASCADE'))
-    user_template = relationship('UserTemplate', backref=backref('experiments', lazy='dynamic'))
+    template_id = Column(Integer, ForeignKey('template.id', ondelete='CASCADE'))
+    template = relationship('Template', backref=backref('experiments', lazy='dynamic'))
 
     def json(self):
         return to_json(self, self.__class__)
@@ -329,48 +333,6 @@ class Announcement(Base):
         return "Announcement: " + self.json()
 
 
-class Role(Base):
-    __tablename__ = 'role'
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String(50), unique=True)
-    create_time = Column(DateTime)
-
-    def json(self):
-        return to_json(self, self.__class__)
-
-    def __init__(self, name):
-        self.name = name
-        self.create_time = datetime.utcnow()
-
-    def __repr__(self):
-        return "Role: " + self.json()
-
-
-class UserRole(Base):
-    __tablename__ = 'user_role'
-
-    id = Column(Integer, primary_key=True)
-    create_time = Column(DateTime)
-
-    user_id = Column(Integer(), ForeignKey('user.id', ondelete='CASCADE'))
-    user = relationship('User', backref=backref('roles', lazy='dynamic'))
-
-    role_id = Column(Integer(), ForeignKey('role.id', ondelete='CASCADE'))
-    role = relationship('Role', backref=backref('users', lazy='dynamic'))
-
-    def json(self):
-        return to_json(self, self.__class__)
-
-    def __init__(self, role, user):
-        self.role = role
-        self.user = user
-        self.create_time = datetime.utcnow()
-
-    def __repr__(self):
-        return "UserRole: " + self.json()
-
-
 class Template(Base):
     __tablename__ = 'template'
 
@@ -398,30 +360,6 @@ class Template(Base):
 
 
 # ------------------------------ Tables are introduced by azure-auto-deploy ------------------------------
-
-
-class UserTemplate(Base):
-    __tablename__ = 'user_template'
-
-    id = Column(Integer, primary_key=True)
-    create_time = Column(DateTime)
-    last_modify_time = Column(DateTime)
-    user_id = Column(Integer(), ForeignKey('user.id', ondelete='CASCADE'))
-    user = relationship('User', backref=backref('user_template', lazy='dynamic'))
-    template_id = Column(Integer, ForeignKey('template.id', ondelete='CASCADE'))
-    template = relationship('Template', backref=backref('user_template', lazy='dynamic'))
-
-    def __init__(self, user, template, create_time=None, last_modify_time=None):
-        if create_time is None:
-            create_time = datetime.utcnow()
-        if last_modify_time is None:
-            last_modify_time = datetime.utcnow()
-        self.user = user
-        self.template = template
-        self.create_time = create_time
-        self.last_modify_time = last_modify_time
-
-
 class UserOperation(Base):
     __tablename__ = 'user_operation'
 
@@ -430,13 +368,13 @@ class UserOperation(Base):
     status = Column(String(50))
     note = Column(String(500))
     exec_time = Column(DateTime)
-    user_template_id = Column(Integer, ForeignKey('user_template.id', ondelete='CASCADE'))
-    user_template = relationship('UserTemplate', backref=backref('user_operation', lazy='dynamic'))
+    template_id = Column(Integer, ForeignKey('template.id', ondelete='CASCADE'))
+    template = relationship('Template', backref=backref('user_operation', lazy='dynamic'))
 
-    def __init__(self, user_template, operation, status, note=None, exec_time=None):
+    def __init__(self, template, operation, status, note=None, exec_time=None):
         if exec_time is None:
             exec_time = datetime.utcnow()
-        self.user_template = user_template
+        self.template = template
         self.operation = operation
         self.status = status
         self.note = note
@@ -458,17 +396,17 @@ class UserResource(Base):
     status = Column(String(50))
     create_time = Column(DateTime)
     last_modify_time = Column(DateTime)
-    user_template_id = Column(Integer, ForeignKey('user_template.id', ondelete='CASCADE'))
-    user_template = relationship('UserTemplate', backref=backref('user_resource1', lazy='dynamic'))
+    template_id = Column(Integer, ForeignKey('template.id', ondelete='CASCADE'))
+    template = relationship('Template', backref=backref('user_resource1', lazy='dynamic'))
     # for deployment and virtual machine
     cloud_service_id = Column(Integer, ForeignKey('user_resource.id', ondelete='CASCADE'))
 
-    def __init__(self, user_template, type, name, status, cloud_service_id, create_time=None, last_modify_time=None):
+    def __init__(self, template, type, name, status, cloud_service_id, create_time=None, last_modify_time=None):
         if create_time is None:
             create_time = datetime.utcnow()
         if last_modify_time is None:
             last_modify_time = datetime.utcnow()
-        self.user_template = user_template
+        self.template = template
         self.type = type
         self.name = name
         self.status = status
@@ -535,11 +473,11 @@ class VMConfig(Base):
     virtual_machine = relationship('UserResource', backref=backref('vm_config1', lazy='dynamic'))
     remote_provider = Column(String(20))
     remote_paras = Column(String(300))
-    user_template_id = Column(Integer, ForeignKey('user_template.id', ondelete='CASCADE'))
-    user_template = relationship('UserTemplate', backref=backref('vm_config2', lazy='dynamic'))
+    template_id = Column(Integer, ForeignKey('template.id', ondelete='CASCADE'))
+    template = relationship('Template', backref=backref('vm_config2', lazy='dynamic'))
 
     def __init__(self, virtual_machine, dns, public_ip, private_ip,
-                 remote_provider, remote_paras, user_template,
+                 remote_provider, remote_paras, template,
                  create_time=None, last_modify_time=None):
         if create_time is None:
             create_time = datetime.utcnow()
@@ -551,7 +489,7 @@ class VMConfig(Base):
         self.private_ip = private_ip
         self.remote_provider = remote_provider
         self.remote_paras = remote_paras
-        self.user_template = user_template
+        self.template = template
         self.create_time = create_time
         self.last_modify_time = last_modify_time
 

@@ -207,6 +207,19 @@ class CurrentTime(Resource):
         return {"currenttime": long(time.time() * 1000)}
 
 
+class TestDefaultDocker(Resource):
+    def post(self):
+        args = request.get_json()
+        if "cid" not in args or "hackathon" not in args:
+            return "invalid parameter", 400
+        cid = args["cid"]
+        hackathon = args["hackathon"]
+        try:
+            return expr_manager.default_docker(hackathon, cid)
+        except Exception as err:
+            log.error(err)
+            return {"error": "fail to start due to '%s'" % err}, 500
+
 api.add_resource(UserExperimentResource, "/api/user/experiment")
 api.add_resource(RegisterListResource, "/api/register/list")
 api.add_resource(BulletinResource, "/api/bulletin")
@@ -221,4 +234,5 @@ api.add_resource(UserExperimentListResource, "/api/user/experiment/list")
 api.add_resource(GuacamoleResource, "/api/guacamoleconfig")
 api.add_resource(UserResource, "/api/user")
 api.add_resource(CurrentTime, "/api/currenttime")
+api.add_resource(TestDefaultDocker, "/api/test/docker")
 
