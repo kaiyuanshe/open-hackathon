@@ -131,12 +131,16 @@ class ExprManager(object):
             port_cfg)
 
         # get 'public' cfg
-        public_ports_cfg = filter(lambda u: 'public' in u, port_cfg)
+        public_ports_cfg = filter(lambda p: 'public' in p, port_cfg)
+        public_host_ports = [u['host_port'] for u in public_ports_cfg]
         if safe_get_config("environment", "prod") == "local":
-            map(lambda u: u.update({'public_port': u['host_port']}), public_ports_cfg)
+            map(lambda cfg: cfg.update({'public_port': cfg['host_port']}), public_ports_cfg)
         else:
-            map(lambda u: u.update({'public_port': u['host_port']}),
-                self.__get_available_public_port(host_server, public_ports_cfg))
+            # todo is __get_avilable_public_port args is list
+            # public_ports = self.__get_available_public_port(host_server, public_host_ports)
+            public_ports = [self.__get_available_public_port(host_server, port) for port in public_host_ports]
+            for i in range(len(public_ports_cfg)):
+                public_ports_cfg[i]['public_port'] = public_ports[i]
 
         binding_dockers = []
 
@@ -221,21 +225,7 @@ class ExprManager(object):
             db_adapter.commit()
             return port_binding
 
-    def __get_cloudvm_address(self, host_server):
-        # the port is that cloudvm service is listening on. By default: 8001 on cloudService and python cmd, 80 on apache2
-        # connect to cloudvm service through its private address when deploy on azure. Here its public address used for
-        # debug purpose since local dev environment cannot access its private address
-        return "http://%s:%s" % (host_server.public_dns, 8001)
-        # return "%s:%s" % (host_server.private_ip, host_server.private_cloudvm_port)
-
-    def __remote_checkout(self, host_server, expr, scm):
-        post_data = scm
-        post_data["expr_id"] = expr.id
-
-        url = "%s/scm" % self.__get_cloudvm_address(host_server)
-        return post_to_remote(url, post_data)
-
-    def __remote_start_container(self, expr, host_server, scm, container_config):
+    def __remote_start_container(self, expr, host_server, container_config):
         post_data = container_config
         post_data["expr_id"] = expr.id
         post_data["container_name"] = "%s-%s" % (expr.id, container_config["name"])
@@ -267,17 +257,13 @@ class ExprManager(object):
         if "ports" in container_config:
             # get an available on the target VM
 
-            ps = map(lambda p: [self.__assign_port(expr, host_server, ve, p).port_from, p["port"]],
-                     container_config["ports"])
+            # ps = map(lambda p: [self.__assign_port(expr, host_server, ve, p).port_from, p["port"]],
+            # container_config["ports"])
 
-            # self.__assign_port(expr, host_server, ve, container_config["ports"])
+            ps = map(lambda p: [p.port_from, p.port_to],
+                     self.__assign_multiple_ports(expr, host_server, ve, container_config["ports"]))
 
             container_config["docker_ports"] = flatten(ps)
-        if "mnt" in container_config:
-            local_repo_path = "" if scm is None else scm["local_repo_path"]
-            mnts_with_repo = map(lambda s: s if "%s" not in s else s % local_repo_path, container_config["mnt"])
-            container_config["mnt"] = mnts_with_repo
-
         # add to guacamole config
         # note the port should get from the container["port"] to get corresponding listening port rather than the
         # expose port that defined in the template. Following codes are just example
@@ -351,7 +337,6 @@ class ExprManager(object):
 
         expr = db_adapter.find_first_object(Experiment, status=ExprStatus.Running, hackathon_id=hackathon.id,
                                             user_id=None, template=template)
-        # todo virtual environment user id
         if expr is not None:
             db_adapter.update_object(expr, user_id=g.user.id)
             for ve in expr.virtual_environments:
@@ -370,26 +355,13 @@ class ExprManager(object):
         if template.provider == VirtualEnvironmentProvider.Docker:
             # get available VM that runs the cloudvm and is available for more containers
             host_server = self.__get_available_docker_host(expr_config, hackathon)
-            # checkout source code
-            scm = None
-            if "scm" in expr_config:
-                s = expr_config["scm"]
-                local_repo_path = self.__remote_checkout(host_server, expr, expr_config["scm"])
-                scm = db_adapter.add_object_kwargs(SCM,
-                                                   experiment=expr,
-                                                   provider=s["provider"],
-                                                   branch=s["branch"],
-                                                   repo_name=s["repo_name"],
-                                                   repo_url=s["repo_url"],
-                                                   local_repo_path=local_repo_path)
-                db_adapter.commit()
             # start containers
             # guacamole_config = []
             try:
                 expr.status = ExprStatus.Starting
                 db_adapter.commit()
                 map(lambda container_config:
-                    self.__remote_start_container(expr, host_server, scm, container_config),
+                    self.__remote_start_container(expr, host_server, container_config),
                     expr_config["virtual_environments"])
                 expr.status = ExprStatus.Running
                 db_adapter.commit()
@@ -435,13 +407,17 @@ class ExprManager(object):
 
     def __release_multiple_ports(self, expr_id, host_server):
         log.debug("Begin to release ports: expr_id: %d, host_server: %r" % (expr_id, host_server))
-        ports = PortBinding.query.filter_by(experiment_id=expr_id).all()
-        if ports is not None:
-            ports_to = filter(lambda u: safe_get_config("environment", "prod") != "local" and u.binding_type == 1,
-                              ports)
+        ports_binding = PortBinding.query.filter_by(experiment_id=expr_id).all()
+        if ports_binding is not None:
+            docker_binding = filter(lambda u: safe_get_config("environment", "prod") != "local" and u.binding_type == 1,
+                                    ports_binding)
+            ports_to = [d.port_to for d in docker_binding]
             if len(ports_to) != 0:
-                self.__release_public_port(host_server, ports_to)
-            for port in ports:
+                for port in ports_to:
+                    self.__release_public_port(host_server, port)
+                # todo if list is ok
+                # self._release_public_port(host_server, ports_to)
+            for port in ports_binding:
                 db_session.delete(port)
             db_session.commit()
 
@@ -500,9 +476,11 @@ class ExprManager(object):
                         c.container.host_server.container_count -= 1
                         if c.container.host_server.container_count < 0:
                             c.container.host_server.container_count = 0
-                        self.__release_ports(expr_id, c.container.host_server)
+                        # self.__release_ports(expr_id, c.container.host_server)
+                        self.__release_multiple_ports(expr_id, c.container.host_server)
                     except Exception as e:
                         log.error(e)
+                        self.__roll_back(expr_id)
                         return {"error": "Failed stop/delete container"}, 500
                 if force:
                     expr.status = ExprStatus.Deleted
@@ -555,7 +533,6 @@ class ExprManager(object):
         return u
 
     def default_docker(self, hackathon_name, template_name):
-        # start ut
         log.debug("start default docker: hackathon name %s, template name %s ... " % (hackathon_name, template_name))
         hackathon = db_adapter.find_first_object(Hackathon, name=hackathon_name)
         if hackathon is None:
@@ -564,13 +541,10 @@ class ExprManager(object):
         template = db_adapter.find_first_object(Template, hackathon=hackathon, name=template_name)
         if template is None or not os.path.isfile(template.url):
             raise Exception("start default docker failed, template %s doesn't exist.")
-
         try:
             expr_config = json.load(file(template.url))
         except Exception as e:
             raise Exception(e)
-
-        # user_template = db_adapter.add_object_kwargs(UserTemplate, user=None, template=template)
 
         # new expr
         expr = db_adapter.add_object_kwargs(Experiment,
@@ -583,15 +557,11 @@ class ExprManager(object):
         if template.provider == VirtualEnvironmentProvider.Docker:
             # get available VM that runs the cloudvm and is available for more containers
             host_server = self.__get_available_docker_host(expr_config, hackathon)
-            # checkout source code
-            scm = None
-            # start containers
-            # guacamole_config = []
             try:
                 expr.status = ExprStatus.Starting
                 db_adapter.commit()
                 map(lambda container_config:
-                    self.__remote_start_container(expr, host_server, scm, container_config),
+                    self.__remote_start_container(expr, host_server, container_config),
                     expr_config["virtual_environments"])
                 expr.status = ExprStatus.Running
                 db_adapter.commit()
@@ -611,9 +581,6 @@ class ExprManager(object):
             except Exception as e:
                 log.error(e)
                 return {"error": "Failed starting azure"}, 500
-        # after everything is ready, set the expr state to running
-
-        # response to caller
         return self.__report_expr_status(expr)
 
 
