@@ -566,3 +566,32 @@ class VMConfig(Base):
         return "VMConfig: " + self.json()
 
 # ------------------------------ Tables are introduced by azure-auto-deploy ------------------------------
+
+# ------------------------------ Tables for those logic around admin-site --------------------------------
+class AdminToken(Base):
+    id = Column(Integer, primary_key=True)
+    token = Column(String(50), unique=True, nullable=False)
+
+    admin_id = Column(Integer, ForeignKey('admin_user.id', ondelete='CASCADE'))
+    admin = relationship('AdminUser', backref=backref('tokens', lazy='dynamic'))
+
+    issue_date = Column(DateTime)
+    expire_date = Column(DateTime, nullable=False)
+
+    def json(self):
+        return to_json(self, self.__class__)
+
+    def __init__(self, token, admin, expire_date, issue_date=None):
+        if issue_date is None:
+            issue_date = datetime.utcnow()
+
+        self.token = token
+        self.admin = admin
+        self.expire_date = expire_date
+        self.issue_date = issue_date
+
+    def __repr__(self):
+        return "AdminToken: " + self.json()
+
+
+# ------------------------------ Tables for those logic around admin-site --------------------------------
