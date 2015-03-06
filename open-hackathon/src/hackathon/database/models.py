@@ -589,5 +589,4 @@ class AdminToken(Base):
     def __repr__(self):
         return "AdminToken: " + self.json()
 
-
 # ------------------------------ Tables for those logic around admin-site --------------------------------

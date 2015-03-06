@@ -2,11 +2,9 @@ import sys
 
 sys.path.append("..")
 from hackathon.database.models import *
-from hackathon.log import log
 from hackathon.database import db_adapter
-from datetime import datetime, timedelta
+from datetime import datetime
 from hackathon.constants import HTTP_HEADER
-
 from flask import request, g
 
 
