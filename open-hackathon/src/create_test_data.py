@@ -48,6 +48,7 @@ db_adapter.add_object_kwargs(AdminUserGroup,
                                     group_id=2)
 
 
+
 # add public templates to database
 template_dir = 'hackathon/resources'
 if not os.path.isdir(template_dir):

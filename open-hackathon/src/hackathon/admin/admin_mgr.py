@@ -31,6 +31,7 @@ class AdminManager(object):
         return True
 
 
+
     def get_hackid_from_token(self):
 
         admin = self.__validate_token(request.headers[HTTP_HEADER.TOKEN])

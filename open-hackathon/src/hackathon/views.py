@@ -230,6 +230,7 @@ class AdminHackathonsResource(Resource):
     @admin_token_required
     def get(self):
         return ""
+    
 
     @admin_check_hackthon
     def post(self):
