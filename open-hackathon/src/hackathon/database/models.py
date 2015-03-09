@@ -568,6 +568,52 @@ class VMConfig(Base):
 # ------------------------------ Tables are introduced by azure-auto-deploy ------------------------------
 
 # ------------------------------ Tables for those logic around admin-site --------------------------------
+
+class AdminUser(Base):
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50))
+    nickname = Column(String(50))
+    openid = Column(String(100))
+    avatar_url = Column(String(200))
+    access_token = Column(String(100))
+    online = Column(Integer)  # 0:offline 1:online
+    create_time = Column(DateTime)
+    last_login_time = Column(DateTime)
+
+    def get_admin_user_id(self):
+        return self.id
+
+    def json(self):
+        return to_json(self, self.__class__)
+
+    def __init__(self, **kwargs):
+        super(AdminUser, self).__init__(**kwargs)
+        if self.create_time is None:
+            self.create_time = datetime.utcnow()
+        if self.last_login_time is None:
+            self.last_login_time = datetime.utcnow()
+#        if self.slug is None:
+#            self.slug = str(uuid.uuid1())[0:8]  # todo generate a real slug
+
+
+class AdminEmail(Base):
+    id = Column(Integer, primary_key=True)
+    name = Column(String(80))
+    email = Column(String(120))
+    primary_email = Column(Integer)  # 0:NOT Primary Email 1:Primary Email
+    verified = Column(Integer)  # 0 for not verified, 1 for verified
+
+    admin_id = Column(Integer, ForeignKey('admin_user.id', ondelete='CASCADE'))
+    admin = relationship('AdminUser', backref=backref('emails', lazy='dynamic'))
+
+    def get_admin_email(self):
+        return self.email(self, email)
+
+    def __init__(self, **kwargs):
+        super(AdminEmail, self).__init__(**kwargs)
+
+
+
 class AdminToken(Base):
     id = Column(Integer, primary_key=True)
     token = Column(String(50), unique=True, nullable=False)
@@ -592,5 +638,46 @@ class AdminToken(Base):
 
     def __repr__(self):
         return "AdminToken: " + self.json()
+
+
+
+class AdminGroup(Base):
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(32))
+    hackathon_id = Column(Integer, nullable=False)
+    create_time = Column(DateTime)
+
+    def json(self):
+        return to_json(self, self.__class__)
+
+    def __init__(self, **kwargs):
+        super(AdminGroup, self).__init__(**kwargs)
+
+    def __repr__(self):
+        return "AdminGroup: " + self.json()
+
+
+
+class AdminUserGroup(Base):
+
+    id = Column(Integer, primary_key=True)
+    group_id = Column(Integer, unique=True, nullable=False)
+    admin_email = Column(String(120))
+    state = Column(Integer)
+    remarks = Column(String(255))
+    create_time = Column(DateTime)
+
+    admin_group = Column(Integer(), ForeignKey('admin_group.id', ondelete='CASCADE'))
+    admin_user_group = relationship('AdminGroup', backref=backref('admin_group', lazy='dynamic'))
+
+    def json(self):
+        return to_json(self, self.__class__)
+
+    def __init__(self, **kwargs):
+        super(AdminUserGroup, self).__init__(**kwargs)
+
+    def __repr__(self):
+        return "AdminUserGroup: " + self.json()
 
 # ------------------------------ Tables for those logic around admin-site --------------------------------

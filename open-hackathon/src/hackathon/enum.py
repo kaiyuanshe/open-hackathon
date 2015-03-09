@@ -33,3 +33,8 @@ class RemoteProvider:
 class EmailStatus:
     Primary = 1
     NonPrimary = 0
+
+
+class AdminUserGroupStates:
+    Actived = 1
+    Disable = 0

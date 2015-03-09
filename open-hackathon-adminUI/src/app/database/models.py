@@ -142,3 +142,4 @@ class AdminUserGroup(db.Model):
 
     def __repr__(self):
         return "AdminUserGroup: " + self.json()
+
