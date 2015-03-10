@@ -131,7 +131,7 @@ class AdminManager(object):
             "id": admin.id,
             "name": admin.name,
             "nickname": admin.nickname,
-            "email": admin.emails.filter_by(primary_email=EmailStatus.Primary).first().email,
+            "email": admin.emails.__filter_by(primary_email=EmailStatus.Primary).first().email,
             "avatar_url": admin.avatar_url,
             "online": admin.online,
             "create_time": str(admin.create_time),
