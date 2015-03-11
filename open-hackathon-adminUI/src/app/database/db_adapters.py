@@ -28,7 +28,7 @@ class SQLAlchemyAdapter(DBAdapter):
             # Add a filter to the query
             # _in do not support relationship query now, use foreign key instead
             # _in do not support None
-            query = query.filter(field.in_((field_value,)))
+            query = query.__filter(field.in_((field_value,)))
 
         # Execute query
         return query.all()
@@ -47,7 +47,7 @@ class SQLAlchemyAdapter(DBAdapter):
                     "SQLAlchemyAdapter.find_first_object(): Class '%s' has no field '%s'." % (ObjectClass, field_name))
 
             # Add a filter to the query
-            query = query.filter(field.like((field_value,)))
+            query = query.__filter(field.like((field_value,)))
 
         # Execute query
         return query.all()
@@ -66,18 +66,18 @@ class SQLAlchemyAdapter(DBAdapter):
                     "SQLAlchemyAdapter.find_first_object(): Class '%s' has no field '%s'." % (ObjectClass, field_name))
 
             # Add a filter to the query
-            query = query.filter(field.in_((field_value,)))
+            query = query.__filter(field.in_((field_value,)))
 
         # Execute query
         return query.count()
 
     def filter(self, ObjectClass, *criterion):
         query = ObjectClass.query
-        return query.filter(*criterion)
+        return query.__filter(*criterion)
     
     def filter_by(self, ObjectClass, **kwargs):
         query = ObjectClass.query
-        return query.filter_by(**kwargs)
+        return query.__filter_by(**kwargs)
 
     def find_first_object(self, ObjectClass, **kwargs):
         """ Retrieve the first object matching the case sensitive filters in 'kwargs'. """
@@ -93,7 +93,7 @@ class SQLAlchemyAdapter(DBAdapter):
                     "SQLAlchemyAdapter.find_first_object(): Class '%s' has no field '%s'." % (ObjectClass, field_name))
 
             # Add a case sensitive filter to the query
-            query = query.filter(field == field_value)  # case sensitive!!
+            query = query.__filter(field == field_value)  # case sensitive!!
 
         # Execute query
         return query.first()
@@ -112,7 +112,7 @@ class SQLAlchemyAdapter(DBAdapter):
                     "SQLAlchemyAdapter.find_first_object(): Class '%s' has no field '%s'." % (ObjectClass, field_name))
 
             # Add a case sensitive filter to the query
-            query = query.filter(field.ilike(field_value))  # case INsensitive!!
+            query = query.__filter(field.ilike(field_value))  # case INsensitive!!
 
         # Execute query
         return query.first()
@@ -152,7 +152,7 @@ class SQLAlchemyAdapter(DBAdapter):
                     "SQLAlchemyAdapter.find_first_object(): Class '%s' has no field '%s'." % (ObjectClass, field_name))
 
             # Add a filter to the query
-            query = query.filter(field.in_((field_value,)))
+            query = query.__filter(field.in_((field_value,)))
 
         # Execute delete
         # query filter by in_ do not support none args, use synchronize_session=False instead

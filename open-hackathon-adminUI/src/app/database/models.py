@@ -1,6 +1,5 @@
 import sys
 import email
-import os
 
 sys.path.append("..")
 from . import UserMixin

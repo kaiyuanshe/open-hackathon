@@ -12,6 +12,7 @@ from admin_mgr import admin_manager
 from flask import session
 from flask_login import logout_user
 
+
 class LoginBase():
     def login2db(self,openid,**kwargs):
         admin_with_token = admin_manager.db_login(openid, **kwargs)

@@ -27,6 +27,7 @@ def token_required(func):
     return authenticate_and_call
 
 
+
 def admin_token_required(func):
 
     def authenticate_and_call(*args, **kwargs):

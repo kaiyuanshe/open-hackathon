@@ -1,13 +1,11 @@
+werkzeug==0.9.6
 flask
-flask-restful
-flask-cors
+flask-debugtoolbar
 flask-admin
 sqlalchemy
 flask-sqlalchemy
 mysql-python
 wsgilog
-azure
-werkzeug
 jinja2
 six
 requests

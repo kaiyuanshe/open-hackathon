@@ -29,7 +29,7 @@ class AzureStorage:
         # avoid duplicate storage account
         if not self.__storage_account_exists(storage_account['service_name']):
             # delete old info in database
-            db_adapter.delete_all_objects(UserResource, type=STORAGE_ACCOUNT, name=storage_account['service_name'])
+            db_adapter.delete_all_objects_by(UserResource, type=STORAGE_ACCOUNT, name=storage_account['service_name'])
             db_adapter.commit()
             try:
                 result = self.sms.create_storage_account(storage_account['service_name'],
@@ -57,7 +57,7 @@ class AzureStorage:
                 user_operation_commit(self.user_template, CREATE_STORAGE_ACCOUNT, END)
         else:
             # check whether storage account created by this function before
-            if db_adapter.count(UserResource, type=STORAGE_ACCOUNT, name=storage_account['service_name']) == 0:
+            if db_adapter.count_by(UserResource, type=STORAGE_ACCOUNT, name=storage_account['service_name']) == 0:
                 m = '%s %s exist but not created by this function before' %\
                     (STORAGE_ACCOUNT, storage_account['service_name'])
                 user_resource_commit(self.user_template, STORAGE_ACCOUNT, storage_account['service_name'], RUNNING)

@@ -1,9 +1,7 @@
-import os
-from os.path import realpath, dirname
 from flask_restful import Resource, reqparse
 from . import api
 from expr import expr_manager
-from database.models import Announcement, Hackathon, Register, Template
+from database.models import Announcement, Hackathon, Template
 from user.login import *
 from flask import g, request
 from log import log
@@ -81,7 +79,7 @@ class UserExperimentResource(Resource):
 
 class BulletinResource(Resource):
     def get(self):
-        return db_adapter.find_first_object(Announcement, enabled=1).json()
+        return db_adapter.find_first_object_by(Announcement, enabled=1).json()
 
     # todo bulletin post
     @token_required
@@ -117,7 +115,7 @@ class HackathonResource(Resource):
         args = parser.parse_args()
         if args['hid'] is None:
             return {"error": "Bad request"}, 400
-        return db_adapter.find_first_object(Hackathon, id=args['hid']).json()
+        return db_adapter.find_first_object_by(Hackathon, id=args['hid']).json()
 
     # todo post
     @token_required
@@ -175,7 +173,7 @@ class HackathonTemplateResource(Resource):
         args = parse.parse_args()
         if args['hid'] is None:
             return {"error": "Bad request"}, 400
-        return map(lambda u: u.json(), db_adapter.find_all_objects(Template, hackathon_id=args['hid']))
+        return map(lambda u: u.json(), db_adapter.find_all_objects_by(Template, hackathon_id=args['hid']))
 
 
 class UserExperimentListResource(Resource):

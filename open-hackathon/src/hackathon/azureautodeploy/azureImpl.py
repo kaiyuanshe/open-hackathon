@@ -176,7 +176,7 @@ class AzureImpl():
                     return False
                 else:
                     # delete deployment
-                    db_adapter.delete_all_objects(UserResource,
+                    db_adapter.delete_all_objects_by(UserResource,
                                                   user_template_id=user_template.id,
                                                   type=DEPLOYMENT,
                                                   name=deployment['deployment_name'],
@@ -194,7 +194,7 @@ class AzureImpl():
                     return False
                 else:
                     # delete vm, cascade delete vm endpoint and vm config
-                    db_adapter.delete_all_objects(UserResource,
+                    db_adapter.delete_all_objects_by(UserResource,
                                                   user_template_id=user_template.id,
                                                   type=VIRTUAL_MACHINE,
                                                   name=virtual_machine['role_name'],
@@ -228,7 +228,7 @@ class AzureImpl():
                     return False
                 else:
                     # delete vm, cascade delete vm endpoint and vm config
-                    db_adapter.delete_all_objects(UserResource,
+                    db_adapter.delete_all_objects_by(UserResource,
                                                   user_template_id=user_template.id,
                                                   type=VIRTUAL_MACHINE,
                                                   name=virtual_machine['role_name'],
@@ -254,11 +254,11 @@ class AzureImpl():
             log.error(m)
             return None
         # make sure cloud service exist in database
-        if db_adapter.count(UserResource, type=CLOUD_SERVICE, name=cloud_service['service_name']) == 0:
+        if db_adapter.countc(UserResource, type=CLOUD_SERVICE, name=cloud_service['service_name']) == 0:
             m = '%s %s not exist in database' % (CLOUD_SERVICE, cloud_service['service_name'])
             log.debug(m)
             user_resource_commit(self.user_template, CLOUD_SERVICE, cloud_service['service_name'], RUNNING)
-        cs = db_adapter.find_first_object(UserResource, type=CLOUD_SERVICE, name=cloud_service['service_name'])
+        cs = db_adapter.find_first_object_by(UserResource, type=CLOUD_SERVICE, name=cloud_service['service_name'])
         # make sure deployment exist in azure
         if not AzureVirtualMachines(self.sms, self.user_template, self.template_config). \
                 deployment_exists(cloud_service['service_name'], deployment['deployment_slot']):
@@ -267,7 +267,7 @@ class AzureImpl():
             log.error(m)
             return None
         # make sure deployment exist in database
-        if db_adapter.count(UserResource,
+        if db_adapter.count_by(UserResource,
                             type=DEPLOYMENT,
                             name=deployment['deployment_name'],
                             cloud_service_id=cs.id) == 0:
@@ -285,7 +285,7 @@ class AzureImpl():
                 log.error(m)
                 return None
             # make sure virtual machine of user template exist in database
-            if db_adapter.count(UserResource,
+            if db_adapter.count_by(UserResource,
                                 user_template_id=self.user_template.id,
                                 type=VIRTUAL_MACHINE,
                                 name=virtual_machine['role_name'],

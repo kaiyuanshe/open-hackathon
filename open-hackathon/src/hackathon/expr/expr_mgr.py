@@ -33,12 +33,12 @@ class ExprManager(object):
         if expr.user_template.template.provider == VirtualEnvironmentProvider.Docker:
             ves = expr.virtual_environments.all()
         else:
-            vms = db_adapter.find_all_objects(UserResource,
+            vms = db_adapter.find_all_objects_by(UserResource,
                                               type=VIRTUAL_MACHINE,
                                               status=RUNNING,
                                               user_template_id=expr.user_template.id)
             vms_id = map(lambda v: v.id, vms)
-            ves = db_adapter.find_all_objects(VMConfig, virtual_machine_id=vms_id)
+            ves = db_adapter.find_all_objects_by(VMConfig, virtual_machine_id=vms_id)
         for ve in ves:
             if ve.remote_provider == RemoteProvider.Guacamole:
                 guaca_config = json.loads(ve.remote_paras)
@@ -57,22 +57,22 @@ class ExprManager(object):
             for ve in expr.virtual_environments.filter(VirtualEnvironment.image != GUACAMOLE.IMAGE).all():
                 for p in ve.port_bindings.all():
                     if p.binding_type == PortBindingType.CloudService and p.name == "website":
-                        hs = db_adapter.find_first_object(DockerHostServer, id=p.binding_resource_id)
+                        hs = db_adapter.find_first_object_by(DockerHostServer, id=p.binding_resource_id)
                         url = "http://%s:%s" % (hs.public_dns, p.port_from)
                         public_urls.append({
                             "name": p.name,
                             "url": url
                         })
         else:
-            vms = db_adapter.find_all_objects(UserResource,
+            vms = db_adapter.find_all_objects_by(UserResource,
                                               type=VIRTUAL_MACHINE,
                                               status=RUNNING,
                                               user_template_id=expr.user_template.id)
             vms_id = map(lambda v: v.id, vms)
-            for vm_config in db_adapter.find_all_objects(VMConfig, virtual_machine_id=vms_id):
+            for vm_config in db_adapter.find_all_objects_by(VMConfig, virtual_machine_id=vms_id):
                 dns = vm_config.dns[:-1]
                 vm = vm_config.virtual_machine
-                endpoint = db_adapter.find_first_object(VMEndpoint, private_port=80, virtual_machine=vm)
+                endpoint = db_adapter.find_first_object_by(VMEndpoint, private_port=80, virtual_machine=vm)
                 name = endpoint.name
                 port = endpoint.public_port
                 public_urls.append({
@@ -85,7 +85,7 @@ class ExprManager(object):
 
     def __get_available_docker_host(self, expr_config):
         req_count = len(expr_config["virtual_environments"])
-        vm = db_adapter.filter(DockerHostServer,
+        vm = db_adapter.__filter(DockerHostServer,
                                DockerHostServer.container_count + req_count <= DockerHostServer.container_max_count).first()
 
         # todo connect to azure to launch new VM if no existed VM meet the requirement
@@ -261,18 +261,18 @@ class ExprManager(object):
         return ve
 
     def get_expr_status(self, expr_id):
-        expr = db_adapter.find_first_object(Experiment, id=expr_id)
+        expr = db_adapter.find_first_object_by(Experiment, id=expr_id)
         if expr is not None:
             return self.__report_expr_status(expr)
         else:
             return {"error": "Experiment Not found"}, 404
 
     def start_expr(self, hackathon_name, template_name):
-        hackathon = db_adapter.find_first_object(Hackathon, name=hackathon_name)
+        hackathon = db_adapter.find_first_object_by(Hackathon, name=hackathon_name)
         if hackathon is None:
             raise Exception("hackathon %s doesn't exist.")
 
-        template = db_adapter.find_first_object(Template, hackathon=hackathon, name=template_name)
+        template = db_adapter.find_first_object_by(Template, hackathon=hackathon, name=template_name)
         if template is None or not os.path.isfile(template.url):
             raise Exception("template %s doesn't exist.")
 
@@ -281,21 +281,21 @@ class ExprManager(object):
         except Exception as e:
             raise Exception(e)
 
-        expr = db_adapter.find_first_object(Experiment,
+        expr = db_adapter.find_first_object_by(Experiment,
                                             status=ExprStatus.Running,
                                             user_id=g.user.id,
                                             hackathon_id=hackathon.id)
         if expr is not None:
             return self.__report_expr_status(expr)
 
-        expr = db_adapter.find_first_object(Experiment,
+        expr = db_adapter.find_first_object_by(Experiment,
                                             status=ExprStatus.Starting,
                                             user_id=g.user.id,
                                             hackathon_id=hackathon.id)
         if expr is not None:
             return self.__report_expr_status(expr)
 
-        user_template = db_adapter.find_first_object(UserTemplate, user=g.user, template=template)
+        user_template = db_adapter.find_first_object_by(UserTemplate, user=g.user, template=template)
         if user_template is None:
             user_template = db_adapter.add_object_kwargs(UserTemplate, user=g.user, template=template)
         # new expr
@@ -309,26 +309,14 @@ class ExprManager(object):
         if template.provider == VirtualEnvironmentProvider.Docker:
             # get available VM that runs the cloudvm and is available for more containers
             host_server = self.__get_available_docker_host(expr_config)
-            # checkout source code
-            scm = None
-            if "scm" in expr_config:
-                s = expr_config["scm"]
-                local_repo_path = self.__remote_checkout(host_server, expr, expr_config["scm"])
-                scm = db_adapter.add_object_kwargs(SCM,
-                                                   experiment=expr,
-                                                   provider=s["provider"],
-                                                   branch=s["branch"],
-                                                   repo_name=s["repo_name"],
-                                                   repo_url=s["repo_url"],
-                                                   local_repo_path=local_repo_path)
-                db_adapter.commit()
+
             # start containers
             # guacamole_config = []
             try:
                 expr.status = ExprStatus.Starting
                 db_adapter.commit()
                 map(lambda container_config:
-                    self.__remote_start_container(expr, host_server, scm, container_config),
+                    self.__remote_start_container(expr, host_server, None, container_config),
                     expr_config["virtual_environments"])
                 expr.status = ExprStatus.Running
                 db_adapter.commit()
@@ -354,7 +342,7 @@ class ExprManager(object):
         return self.__report_expr_status(expr)
 
     def heart_beat(self, expr_id):
-        expr = Experiment.query.filter_by(id=expr_id, status=ExprStatus.Running).first()
+        expr = Experiment.query.__filter_by(id=expr_id, status=ExprStatus.Running).first()
         if expr is None:
             return {"error": "Experiment doesn't running"}, 404
 
@@ -364,13 +352,13 @@ class ExprManager(object):
 
     def __release_ports(self, expr_id, host_server):
         log.debug("Begin to release ports: expr_id: %d, host_server: %r" % (expr_id, host_server))
-        ports = PortBinding.query.filter_by(experiment_id=expr_id).all()
+        ports = PortBinding.query.__filter_by(experiment_id=expr_id).all()
         if ports is not None:
             for port in ports:
                 if safe_get_config("environment", "prod") != "local" and port.binding_type == 1:
                     self.__release_public_port(host_server, port.port_to)
-                db.session.delete(port)
-            db.session.commit()
+                db_adapter.delete_object(port)
+            db_adapter.commit()
 
     def __roll_back(self, expr_id):
         """
@@ -379,7 +367,7 @@ class ExprManager(object):
         :param expr_id: experiment id
         """
         log.debug("Starting rollback ...")
-        expr = Experiment.query.filter_by(id=expr_id).first()
+        expr = Experiment.query.__filter_by(id=expr_id).first()
         try:
             expr.status = ExprStatus.Rollbacking
             db_adapter.commit()
@@ -395,11 +383,11 @@ class ExprManager(object):
                         self.__release_ports(expr_id, c.container.host_server)
             # delete ports
             expr.status = ExprStatus.Rollbacked
-            db.session.commit()
+            db_adapter.commit()
             log.info("Rollback succeeded")
         except Exception as e:
             expr.status = ExprStatus.Failed
-            db.session.commit()
+            db_adapter.commit()
             log.info("Rollback failed")
             log.error(e)
 
@@ -410,7 +398,7 @@ class ExprManager(object):
         :return:
         """
         log.debug("begin to stop %d" % expr_id)
-        expr = db_adapter.find_first_object(Experiment, id=expr_id, status=ExprStatus.Running)
+        expr = db_adapter.find_first_object_by(Experiment, id=expr_id, status=ExprStatus.Running)
         if expr is not None:
             # Docker
             if expr.user_template.template.provider == VirtualEnvironmentProvider.Docker:
@@ -470,7 +458,7 @@ class ExprManager(object):
             raise Exception("id unavailable")
 
         id = args["id"]
-        u = db_adapter.find_first_object(Register, id=id)
+        u = db_adapter.find_first_object_by(Register, id=id)
         if u is None:
             log.debug("register user not found:" + id)
             return "user not found", 404

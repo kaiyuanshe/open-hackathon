@@ -1,3 +1,4 @@
+
 import sys
 
 sys.path.append("..")
@@ -53,7 +54,7 @@ class AdminManager(object):
 
 
     # check the admin authority on hackathon
-    def validate_hackathon_request(self, hackathon_id):
+    def validate_admin_hackathon_request(self, hackathon_id):
 
         if HTTP_HEADER.TOKEN not in request.headers:
             return False
@@ -72,3 +73,4 @@ class AdminManager(object):
 
 
 admin_manager = AdminManager(db_adapter)
+

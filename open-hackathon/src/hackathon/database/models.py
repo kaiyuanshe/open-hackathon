@@ -1,9 +1,6 @@
-import sys
-import email
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship, backref
 from . import Base
-from . import UserMixin
 from datetime import datetime
 import uuid
 import json
@@ -35,7 +32,7 @@ def to_json(inst, cls):
     return json.dumps(d)
 
 
-class User(UserMixin, Base):
+class User(Base):
     __tablename__ = 'user'
 
     id = Column(Integer, primary_key=True)
@@ -51,6 +48,18 @@ class User(UserMixin, Base):
 
     def get_user_id(self):
         return self.id
+
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return unicode(self.get_user_id())
 
     def json(self):
         return to_json(self, self.__class__)
@@ -608,9 +617,6 @@ class AdminEmail(Base):
     admin_id = Column(Integer, ForeignKey('admin_user.id', ondelete='CASCADE'))
     admin = relationship('AdminUser', backref=backref('emails', lazy='dynamic'))
 
-    def get_admin_email(self):
-        return self.email(self, email)
-
     def __init__(self, **kwargs):
         super(AdminEmail, self).__init__(**kwargs)
 
@@ -683,3 +689,4 @@ class AdminUserGroup(Base):
         return "AdminUserGroup: " + self.json()
 
 # ------------------------------ Tables for those logic around admin-site --------------------------------
+
