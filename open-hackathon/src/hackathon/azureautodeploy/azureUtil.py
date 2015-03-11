@@ -101,7 +101,7 @@ def user_resource_commit(user_template, type, name, status, cs_id=None):
 
 
 def user_resource_status_update(user_template, type, name, status, cs_id=None):
-    ur = db_adapter.find_first_object(UserResource,
+    ur = db_adapter.find_first_object_by(UserResource,
                                       user_template_id=user_template.id,
                                       type=type,
                                       name=name,
@@ -207,13 +207,13 @@ def load_template(user_template, operation, expr_id):
 
 
 def query_user_operation(user_template, operation, id):
-    return db_adapter.filter(UserOperation,
+    return db_adapter.__filter(UserOperation,
                              UserOperation.user_template == user_template,
                              UserOperation.operation.like(operation + '%'),
                              UserOperation.id > id).all()
 
 
 def query_user_resource(user_template, id):
-    return db_adapter.filter(UserResource,
+    return db_adapter.__filter(UserResource,
                              UserResource.user_template == user_template,
                              UserResource.id > id).all()

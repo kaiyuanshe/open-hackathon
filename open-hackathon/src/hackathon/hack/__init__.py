@@ -10,14 +10,14 @@ class HackathonManager():
         self.db = db
 
     def get_hackathon_by_name(self, name):
-        return self.db.find_first_object(Hackathon, name=name)
+        return self.db.find_first_object_by(Hackathon, name=name)
 
     def get_hackathon_by_id(self, hackathon_id):
-        return self.db.find_first_object(Hackathon, id=hackathon_id)
+        return self.db.find_first_object_by(Hackathon, id=hackathon_id)
 
     def get_hackathon_stat(self, hackathon_id):
         reg_email_list = map(lambda r: r.email,
-                             self.db.find_all_objects(Register, hackathon_id=hackathon_id, enabled=1))
+                             self.db.find_all_objects_by(Register, hackathon_id=hackathon_id, enabled=1))
         reg_count = len(reg_email_list)
         stat = {
             "total": reg_count,
@@ -28,6 +28,7 @@ class HackathonManager():
         if reg_count > 0:
             user_id_list = map(lambda ue: ue.user_id, UserEmail.query.filter(UserEmail.email.in_(reg_email_list)).all())
             user_id_online = filter(lambda user_id: User.query.filter(User.id == user_id).first().online, user_id_list)
+            self.db.commit()
             stat["offline"] = reg_count - stat["online"]
             stat["online"] = len(user_id_online)
 
@@ -35,7 +36,7 @@ class HackathonManager():
 
     def get_hackathon_list(self, name=None):
         if name is not None:
-            return db_adapter.find_first_object(Hackathon, name=name).json()
+            return db_adapter.find_first_object_by(Hackathon, name=name).json()
         return map(lambda u: u.json(), db_adapter.find_all_objects(Hackathon))
 
 

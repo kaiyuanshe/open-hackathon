@@ -23,26 +23,25 @@ class UserManager(object):
             minutes=safe_get_config("login.token_expiration_minutes", 1440))
         user_token = UserToken(str(uuid.uuid1()), user, token_expire_date, token_issue_date)
         self.db.add_object(user_token)
-        self.db.commit()
         return user_token
 
     def __validate_token(self, token):
-        t = self.db.find_first_object(UserToken, token=token)
+        t = self.db.find_first_object_by(UserToken, token=token)
         if t is not None and t.expire_date >= datetime.utcnow():
             return t.user
         return None
 
     def __validate_user_registered(self, user, hack):
         emails = map(lambda x: x.email, user.emails.all())
-        return self.db.filter(Register, Register.email.in_(emails),
+        return self.db.count(Register, Register.email.in_(emails),
                               Register.enabled == 1,
-                              Register.hackathon_id == hack.id).count() > 0
+                              Register.hackathon_id == hack.id) > 0
 
     def get_all_registration(self):
-        reg_list = self.db.find_all_objects(Register, enabled=1)
+        reg_list = self.db.find_all_objects_by(Register, enabled=1)
 
         def online(r):
-            u = self.db.find_first_object(UserEmail, email=r.email)
+            u = self.db.find_first_object_by(UserEmail, email=r.email)
             if u is not None:
                 r.online = u.user.online
             else:
@@ -55,7 +54,6 @@ class UserManager(object):
     def db_logout(self, user):
         try:
             self.db.update_object(user, online=0)
-            self.db.commit()
             return "OK"
         except Exception as e:
             log.error(e)
@@ -64,7 +62,7 @@ class UserManager(object):
     def db_login(self, openid, **kwargs):
         # update db
         email_info = kwargs['email_info']
-        user = self.db.find_first_object(User, openid=openid)
+        user = self.db.find_first_object_by(User, openid=openid)
         if user is not None:
             self.db.update_object(user,
                                   name=kwargs["name"],
@@ -77,11 +75,10 @@ class UserManager(object):
                 email = email_info[n]['email']
                 primary_email = email_info[n]['primary']
                 verified = email_info[n]['verified']
-                if self.db.find_first_object(UserEmail, email=email) is None:
+                if self.db.find_first_object_by(UserEmail, email=email) is None:
                     useremail = UserEmail(name=kwargs['name'], email=email, primary_email=primary_email,
                                           verified=verified, user=user)
                     self.db.add_object(useremail)
-            self.db.commit()
         else:
             user = User(openid=openid,
                         name=kwargs["name"],
@@ -91,7 +88,6 @@ class UserManager(object):
                         online=1)
 
             self.db.add_object(user)
-            self.db.commit()
 
             for n in email_info:
                 email = n['email']
@@ -100,7 +96,6 @@ class UserManager(object):
                 useremail = UserEmail(name=kwargs['name'], email=email, primary_email=primary_email,
                                       verified=verified, user=user)
                 self.db.add_object(useremail)
-                self.db.commit()
 
         # generate API token
         token = self.__generate_api_token(user)
@@ -121,7 +116,7 @@ class UserManager(object):
         return True
 
     def get_user_by_id(self, user_id):
-        user = self.db.find_first_object(User, id=user_id)
+        user = self.db.find_first_object_by(User, id=user_id)
         if user is not None:
             return self.get_user_info(user)
         else:

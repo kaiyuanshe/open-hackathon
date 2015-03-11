@@ -35,7 +35,7 @@ class AzureVirtualMachines:
         cloud_service = self.template_config['cloud_service']
         deployment = self.template_config['deployment']
         virtual_machines = self.template_config['virtual_machines']
-        cs = db_adapter.find_first_object(UserResource, type=CLOUD_SERVICE, name=cloud_service['service_name'])
+        cs = db_adapter.find_first_object_by(UserResource, type=CLOUD_SERVICE, name=cloud_service['service_name'])
         if cs is None:
             m = '%s %s not running in database now' % (CLOUD_SERVICE, cloud_service['service_name'])
             user_operation_commit(self.user_template, CREATE_VIRTUAL_MACHINES, FAIL, m)
@@ -87,7 +87,7 @@ class AzureVirtualMachines:
             }
             # avoid duplicate deployment
             if self.deployment_exists(cloud_service['service_name'], deployment['deployment_slot']):
-                if db_adapter.count(UserResource,
+                if db_adapter.count_by(UserResource,
                                     type=DEPLOYMENT,
                                     name=deployment['deployment_name'],
                                     cloud_service_id=cs.id) == 0:
@@ -103,7 +103,7 @@ class AzureVirtualMachines:
                 if self.role_exists(cloud_service['service_name'],
                                     deployment['deployment_name'],
                                     virtual_machine['role_name']):
-                    if db_adapter.count(UserResource,
+                    if db_adapter.count_by(UserResource,
                                         user_template_id=self.user_template.id,
                                         type=VIRTUAL_MACHINE,
                                         name=virtual_machine['role_name'],
@@ -120,7 +120,7 @@ class AzureVirtualMachines:
                         log.debug(m)
                 else:
                     # delete old virtual machine info in database, cascade delete old vm endpoint and old vm config
-                    db_adapter.delete_all_objects(UserResource,
+                    db_adapter.delete_all_objects_by(UserResource,
                                                   type=VIRTUAL_MACHINE,
                                                   name=virtual_machine['role_name'],
                                                   cloud_service_id=cs.id)
@@ -169,12 +169,12 @@ class AzureVirtualMachines:
                         user_operation_commit(self.user_template, CREATE_VIRTUAL_MACHINE, END)
             else:
                 # delete old deployment
-                db_adapter.delete_all_objects(UserResource,
+                db_adapter.delete_all_objects_by(UserResource,
                                               type=DEPLOYMENT,
                                               name=deployment['deployment_name'],
                                               cloud_service_id=cs.id)
                 # delete old virtual machine info in database, cascade delete old vm endpoint and old vm config
-                db_adapter.delete_all_objects(UserResource,
+                db_adapter.delete_all_objects_by(UserResource,
                                               type=VIRTUAL_MACHINE,
                                               name=virtual_machine['role_name'],
                                               cloud_service_id=cs.id)
@@ -343,7 +343,7 @@ class AzureVirtualMachines:
         :return:
         """
         # associate vm endpoint with specific vm
-        vm = db_adapter.find_first_object(UserResource,
+        vm = db_adapter.find_first_object_by(UserResource,
                                           user_template=self.user_template,
                                           type=VIRTUAL_MACHINE,
                                           name=vm_name,
