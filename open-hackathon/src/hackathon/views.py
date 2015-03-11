@@ -215,7 +215,7 @@ class TestDefaultDocker(Resource):
         cid = args["cid"]
         hackathon = args["hackathon"]
         try:
-            return expr_manager.default_docker(hackathon, cid)
+            return expr_manager.default_expr(hackathon, cid)
         except Exception as err:
             log.error(err)
             return {"error": "fail to start due to '%s'" % err}, 500

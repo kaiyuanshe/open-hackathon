@@ -126,19 +126,19 @@ class ExprManager(object):
 
     def __assign_multiple_ports(self, expr, host_server, ve, port_cfg):
         # get 'host_port'
-        map(lambda u: u.update(
-            {'host_port': docker.get_available_host_port(host_server, u['port'])}) if 'host_port' not in u else None,
+        map(lambda p: p.update(
+            {'host_port': docker.get_available_host_port(host_server, p['port'])}) if 'host_port' not in p else None,
             port_cfg)
 
         # get 'public' cfg
         public_ports_cfg = filter(lambda p: 'public' in p, port_cfg)
-        public_host_ports = [u['host_port'] for u in public_ports_cfg]
+        host_ports = [u['host_port'] for u in public_ports_cfg]
         if safe_get_config("environment", "prod") == "local":
             map(lambda cfg: cfg.update({'public_port': cfg['host_port']}), public_ports_cfg)
         else:
             # todo is __get_avilable_public_port args is list
-            # public_ports = self.__get_available_public_port(host_server, public_host_ports)
-            public_ports = [self.__get_available_public_port(host_server, port) for port in public_host_ports]
+            # public_ports = self.__get_available_public_port(host_server, host_ports)
+            public_ports = [self.__get_available_public_port(host_server, port) for port in host_ports]
             for i in range(len(public_ports_cfg)):
                 public_ports_cfg[i]['public_port'] = public_ports[i]
 
@@ -164,7 +164,7 @@ class ExprManager(object):
             db_adapter.add_object(binding_docker)
         db_adapter.commit()
 
-        local_ports_cfg = filter(lambda u: 'public' not in u, port_cfg)
+        local_ports_cfg = filter(lambda p: 'public' not in p, port_cfg)
         for local_cfg in local_ports_cfg:
             port_binding = PortBinding(name=local_cfg["name"] if "name" in local_cfg else None,
                                        port_from=local_cfg["host_port"],
@@ -178,54 +178,7 @@ class ExprManager(object):
         db_adapter.commit()
         return binding_dockers
 
-    def __assign_port(self, expr, host_server, ve, port_cfg):
-        if "public" in port_cfg:
-            # todo open port on azure for those must open to public
-            # public port means the port open the public. For azure , it's the public port on azure. There
-            # should be endpoint on azure that from public_port to host_port
-            # host_ports = db_adapter.find_all_objects(PortBinding, binding_type=PortBindingType.Docker,
-            # binding_resource_id=host_server.id)
-            if "host_port" not in port_cfg:
-                port_cfg["host_port"] = docker.get_available_host_port(host_server, port_cfg["port"])
-            if "public_port" not in port_cfg:
-                if safe_get_config("environment", "prod") == "local":
-                    port_cfg["public_port"] = port_cfg["host_port"]
-                else:
-                    port_cfg["public_port"] = self.__get_available_public_port(host_server, port_cfg["host_port"])
-
-            binding_cloudservice = PortBinding(name=port_cfg["name"] if "name" in port_cfg else None,
-                                               port_from=port_cfg["public_port"],
-                                               port_to=port_cfg["host_port"],
-                                               binding_type=PortBindingType.CloudService,
-                                               binding_resource_id=host_server.id,
-                                               virtual_environment=ve,
-                                               experiment=expr)
-            binding_docker = PortBinding(name=port_cfg["name"] if "name" in port_cfg else None,
-                                         port_from=port_cfg["host_port"],
-                                         port_to=port_cfg["port"],
-                                         binding_type=PortBindingType.Docker,
-                                         binding_resource_id=host_server.id,
-                                         virtual_environment=ve,
-                                         experiment=expr)
-            db_adapter.add_object(binding_cloudservice)
-            db_adapter.add_object(binding_docker)
-            db_adapter.commit()
-            return binding_docker
-        else:
-            port_cfg["host_port"] = docker.get_available_host_port(host_server, port_cfg["port"])
-
-            port_binding = PortBinding(name=port_cfg["name"] if "name" in port_cfg else None,
-                                       port_from=port_cfg["host_port"],
-                                       port_to=port_cfg["port"],
-                                       binding_type=PortBindingType.Docker,
-                                       binding_resource_id=host_server.id,
-                                       virtual_environment=ve,
-                                       experiment=expr)
-            db_adapter.add_object(port_binding)
-            db_adapter.commit()
-            return port_binding
-
-    def __remote_start_container(self, expr, host_server, container_config):
+    def __remote_start_container(self, expr, host_server, container_config, user):
         post_data = container_config
         post_data["expr_id"] = expr.id
         post_data["container_name"] = "%s-%s" % (expr.id, container_config["name"])
@@ -236,13 +189,14 @@ class ExprManager(object):
         remote_provider = ""
         if "remote" in post_data and "provider" in post_data["remote"]:
             remote_provider = post_data["remote"]["provider"]
-        user = g.get('user', None)
+        # user = g.get('user', None)
+        user_id = ReservedUser.DefaultUserID if user is None else user.id
         ve = VirtualEnvironment(provider=provider,
                                 name=post_data["container_name"],
                                 image=container_config["image"],
                                 status=VirtualEnvStatus.Init,
                                 remote_provider=remote_provider,
-                                user=user,
+                                user_id=user_id,
                                 experiment=expr)
         container = DockerContainer(expr, name=post_data["container_name"], host_server=host_server,
                                     virtual_environment=ve,
@@ -336,12 +290,13 @@ class ExprManager(object):
             return self.__report_expr_status(expr)
 
         expr = db_adapter.find_first_object(Experiment, status=ExprStatus.Running, hackathon_id=hackathon.id,
-                                            user_id=None, template=template)
+                                            user_id=ReservedUser.DefaultUserID, template=template)
         if expr is not None:
             db_adapter.update_object(expr, user_id=g.user.id)
             for ve in expr.virtual_environments:
                 db_adapter.update_object(ve, user_id=g.user.id)
             db_session.commit()
+            self.check_default_expr()
             return self.__report_expr_status(expr)
 
         # new expr
@@ -361,7 +316,7 @@ class ExprManager(object):
                 expr.status = ExprStatus.Starting
                 db_adapter.commit()
                 map(lambda container_config:
-                    self.__remote_start_container(expr, host_server, container_config),
+                    self.__remote_start_container(expr, host_server, container_config, g.user),
                     expr_config["virtual_environments"])
                 expr.status = ExprStatus.Running
                 db_adapter.commit()
@@ -395,16 +350,6 @@ class ExprManager(object):
         db_adapter.commit()
         return "OK"
 
-    def __release_ports(self, expr_id, host_server):
-        log.debug("Begin to release ports: expr_id: %d, host_server: %r" % (expr_id, host_server))
-        ports = PortBinding.query.filter_by(experiment_id=expr_id).all()
-        if ports is not None:
-            for port in ports:
-                if safe_get_config("environment", "prod") != "local" and port.binding_type == 1:
-                    self.__release_public_port(host_server, port.port_to)
-                db_session.delete(port)
-            db_session.commit()
-
     def __release_multiple_ports(self, expr_id, host_server):
         log.debug("Begin to release ports: expr_id: %d, host_server: %r" % (expr_id, host_server))
         ports_binding = PortBinding.query.filter_by(experiment_id=expr_id).all()
@@ -415,8 +360,8 @@ class ExprManager(object):
             if len(ports_to) != 0:
                 for port in ports_to:
                     self.__release_public_port(host_server, port)
-                # todo if list is ok
-                # self._release_public_port(host_server, ports_to)
+                    # todo if list is ok
+                    # self._release_public_port(host_server, ports_to)
             for port in ports_binding:
                 db_session.delete(port)
             db_session.commit()
@@ -441,7 +386,7 @@ class ExprManager(object):
                         c.container.host_server.container_count -= 1
                         if c.container.host_server.container_count < 0:
                             c.container.host_server.container_count = 0
-                        self.__release_ports(expr_id, c.container.host_server)
+                        self.__release_multiple_ports(expr_id, c.container.host_server)
             # delete ports
             expr.status = ExprStatus.Rollbacked
             db_session.commit()
@@ -532,15 +477,18 @@ class ExprManager(object):
         db_adapter.commit()
         return u
 
-    def default_docker(self, hackathon_name, template_name):
-        log.debug("start default docker: hackathon name %s, template name %s ... " % (hackathon_name, template_name))
-        hackathon = db_adapter.find_first_object(Hackathon, name=hackathon_name)
+    def default_expr(self, hackathon, template):
+        # hackathon = db_adapter.find_first_object(Hackathon, name=hackathon_name)
         if hackathon is None:
-            raise Exception("start default docker failed, hackathon %s doesn't exist.")
+            raise Exception("start default docker failed, hackathon object is none.")
 
-        template = db_adapter.find_first_object(Template, hackathon=hackathon, name=template_name)
+        # template = db_adapter.find_first_object(Template, hackathon=hackathon, name=template_name)
         if template is None or not os.path.isfile(template.url):
-            raise Exception("start default docker failed, template %s doesn't exist.")
+            raise Exception("start default docker failed, template object is none")
+
+        log.debug(
+            "start default experiment: hackathon name %s, template name %s ... " % (hackathon.name, template.name))
+
         try:
             expr_config = json.load(file(template.url))
         except Exception as e:
@@ -548,7 +496,7 @@ class ExprManager(object):
 
         # new expr
         expr = db_adapter.add_object_kwargs(Experiment,
-                                            user=None,
+                                            user_id=ReservedUser.DefaultUserID,
                                             hackathon=hackathon,
                                             status=ExprStatus.Init,
                                             template=template)
@@ -561,7 +509,7 @@ class ExprManager(object):
                 expr.status = ExprStatus.Starting
                 db_adapter.commit()
                 map(lambda container_config:
-                    self.__remote_start_container(expr, host_server, container_config),
+                    self.__remote_start_container(expr, host_server, container_config, None),
                     expr_config["virtual_environments"])
                 expr.status = ExprStatus.Running
                 db_adapter.commit()
@@ -582,6 +530,17 @@ class ExprManager(object):
                 log.error(e)
                 return {"error": "Failed starting azure"}, 500
         return self.__report_expr_status(expr)
+
+    def check_default_expr(self):
+        templates = db_adapter.find_all_objects(Template)
+        for template in templates:
+            expr = db_adapter.find_first_object(Experiment, user_id=ReservedUser.DefaultUserID, template=template,
+                                                status=ExprStatus.Running)
+            if template.provider == VirtualEnvironmentProvider.AzureVM:
+                continue
+            if expr is None:
+                log.debug("no idle template: %s ... " % template.name)
+                self.default_expr(template.hackathon, template)
 
 
 expr_manager = ExprManager()

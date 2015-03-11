@@ -33,3 +33,8 @@ class RemoteProvider:
 class EmailStatus:
     Primary = 1
     NonPrimary = 0
+
+
+class ReservedUser:
+    DefaultUserID = -1
+    DockerVM = -2
