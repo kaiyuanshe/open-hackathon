@@ -587,9 +587,6 @@ class AdminUser(Base):
     create_time = Column(DateTime)
     last_login_time = Column(DateTime)
 
-    def get_admin_user_id(self):
-        return self.id
-
     def json(self):
         return to_json(self, self.__class__)
 

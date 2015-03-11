@@ -42,6 +42,9 @@ class AdminUser(db.Model, UserMixin):
     create_time = db.Column(db.DateTime)
     last_login_time = db.Column(db.DateTime)
 
+    def get_admin_id(self):
+        return self.id
+
     def json(self):
         return to_json(self, self.__class__)
 

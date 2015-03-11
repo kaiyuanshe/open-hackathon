@@ -1,4 +1,3 @@
-
 import sys
 
 sys.path.append("..")
@@ -14,7 +13,7 @@ class AdminManager(object):
         self.db = db_adapter
 
     def __validate_token(self, token):
-        t = self.db.find_first_object(AdminToken, AdminToken.token==token)
+        t = self.db.find_first_object(AdminToken, AdminToken.token == token)
         if t is not None and t.expire_date >= datetime.utcnow():
             return t.admin
         return None
@@ -41,11 +40,11 @@ class AdminManager(object):
         emails = map(lambda x: x.email, admin_emails)
 
         # get AdminUserHackathonRels from query withn filter by email
-        admin_user_hackathon_rels = self.db.find_all_objects(AdminUserHackathonRel, AdminUserHackathonRel.admin_email.in_(emails))
+        admin_user_hackathon_rels = self.db.find_all_objects(AdminUserHackathonRel,
+                                                             AdminUserHackathonRel.admin_email.in_(emails))
 
-        #get hackathon_ids_from AdminUserHackathonRels details
+        # get hackathon_ids_from AdminUserHackathonRels details
         hackathon_ids = map(lambda x: x.hackathon_id, admin_user_hackathon_rels)
-
 
         return hackathon_ids
 
@@ -59,12 +58,11 @@ class AdminManager(object):
         hack_ids = self.get_hackid_from_adminid(g.admin.id)
 
         # get hackathon_id from group and check if its SuperAdmin
-        if (-1).in_(hack_ids):
+        if ('-1').in_(hack_ids):
             return True
         else:
-            #check  if the hackathon owned by the admin
+            # check  if the hackathon owned by the admin
             return hackathon_id.in_(hack_ids)
-
 
 
 admin_manager = AdminManager(db_adapter)
