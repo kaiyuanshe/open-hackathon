@@ -570,6 +570,7 @@ class VMConfig(Base):
 # ------------------------------ Tables for those logic around admin-site --------------------------------
 
 class AdminUser(Base):
+    __tablename__ = 'admin_user'
     id = Column(Integer, primary_key=True)
     name = Column(String(50))
     nickname = Column(String(50))
@@ -597,6 +598,7 @@ class AdminUser(Base):
 
 
 class AdminEmail(Base):
+    __tablename__ = 'admin_email'
     id = Column(Integer, primary_key=True)
     name = Column(String(80))
     email = Column(String(120))
@@ -615,6 +617,7 @@ class AdminEmail(Base):
 
 
 class AdminToken(Base):
+    __tablename__ = 'admin_token'
     id = Column(Integer, primary_key=True)
     token = Column(String(50), unique=True, nullable=False)
 
@@ -642,7 +645,7 @@ class AdminToken(Base):
 
 
 class AdminGroup(Base):
-
+    __tablename__ = 'admin_group'
     id = Column(Integer, primary_key=True)
     name = Column(String(32))
     hackathon_id = Column(Integer, nullable=False)
@@ -660,16 +663,15 @@ class AdminGroup(Base):
 
 
 class AdminUserGroup(Base):
-
+    __tablename__ = 'admin_user_group'
     id = Column(Integer, primary_key=True)
-    group_id = Column(Integer, unique=True, nullable=False)
     admin_email = Column(String(120))
     state = Column(Integer)
     remarks = Column(String(255))
     create_time = Column(DateTime)
 
-    admin_group = Column(Integer(), ForeignKey('admin_group.id', ondelete='CASCADE'))
-    admin_user_group = relationship('AdminGroup', backref=backref('admin_group', lazy='dynamic'))
+    group_id = Column(Integer(), ForeignKey('admin_group.id', ondelete='CASCADE'))
+    admin_user_group = relationship('AdminGroup', backref=backref('admin_user_group', lazy='dynamic'))
 
     def json(self):
         return to_json(self, self.__class__)
