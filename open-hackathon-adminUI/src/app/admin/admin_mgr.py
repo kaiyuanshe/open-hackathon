@@ -126,17 +126,6 @@ class AdminManager(object):
         else:
             return "Not found", 404
 
-    def get_admin_info(self, admin):
-        return {
-            "id": admin.id,
-            "name": admin.name,
-            "nickname": admin.nickname,
-            "email": admin.emails.__filter_by(primary_email=EmailStatus.Primary).first().email,
-            "avatar_url": admin.avatar_url,
-            "online": admin.online,
-            "create_time": str(admin.create_time),
-            "last_login_time": str(admin.last_login_time)
-        }
 
 #    def get_admin_detail_info(self, admin, **kwargs):
 #        detail = self.get_admin_info(admin)

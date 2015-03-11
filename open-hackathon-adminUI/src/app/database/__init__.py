@@ -24,7 +24,7 @@ class UserMixin(object):
         pass
 
     def get_id(self):
-        return unicode(self.get_user_id())
+        return unicode(self.get_admin_id())
 
     def is_admin(self):
         return self.has_roles(ROLE.ADMIN)

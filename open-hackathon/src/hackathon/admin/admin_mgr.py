@@ -14,7 +14,7 @@ class AdminManager(object):
         self.db = db_adapter
 
     def __validate_token(self, token):
-        t = self.db.find_first_object(AdminToken, token=token)
+        t = self.db.find_first_object(AdminToken, AdminToken.token==token)
         if t is not None and t.expire_date >= datetime.utcnow():
             return t.admin
         return None
@@ -37,18 +37,18 @@ class AdminManager(object):
         # can not use backref in db models
 
         # get emails from admin though admin.id in table admin_email
-        admin_emails = self.db.filter(AdminEmail, AdminEmail.admin_id == admin_id)
-        emails = map(lambda x: x.email, admin_emails.all())
+        admin_emails = self.db.find_all_objects(AdminEmail, AdminEmail.admin_id == admin_id)
+        emails = map(lambda x: x.email, admin_emails)
 
         # get AdminUserGroup from query withn filter by email
-        admin_user_groups = self.db.filter(AdminUserGroup, AdminUserGroup.admin_email.in_(emails))
+        admin_user_groups = self.db.find_all_objects(AdminUserGroup, AdminUserGroup.admin_email.in_(emails))
 
         #get AdminGroup though admin_user_group's group_id
-        admin_group_ids = map(lambda x: x.group_id, admin_user_groups.all())
-        admin_groups = self.db.filter(AdminGroup, AdminGroup.id.in_(admin_group_ids))
+        admin_group_ids = map(lambda x: x.group_id, admin_user_groups)
+        admin_groups = self.db.find_all_objects(AdminGroup, AdminGroup.id.in_(admin_group_ids))
 
         #get hackathon_id from AdminGroup details
-        hackathon_ids = admin_group_ids = map(lambda x: x.hackathon_id, admin_groups.all())
+        hackathon_ids = map(lambda x: x.hackathon_id, admin_groups)
 
         return hackathon_ids
 
