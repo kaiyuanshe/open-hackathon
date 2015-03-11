@@ -14,10 +14,6 @@ PERMANENT_SESSION_LIFETIME = timedelta(minutes=session_lifetime_minutes)
 Template_Routes = {
     "PrivacyStatement": "PrivacyStatement.html",
     "TermsOfUse": "TermsOfUse.html",
-    'paper': "paper.html",
-    "google": "google.html",
-    "loading": "loading.html",
-    "rightSide": "rightSide.html",
     "error": "error.html",
     "submitted": "submitted.html",
     "redirect": "redirect.html",
@@ -76,7 +72,6 @@ def internal_error(error):
 
 
 @app.route('/<path:path>')
-@login_required
 def template_routes(path):
     return simple_route(path)
 

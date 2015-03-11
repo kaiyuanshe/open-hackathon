@@ -16,8 +16,7 @@ class HackathonManager():
         return self.db.find_first_object_by(Hackathon, id=hackathon_id)
 
     def get_hackathon_stat(self, hackathon_id):
-        reg_email_list = map(lambda r: r.email,
-                             self.db.find_all_objects_by(Register, hackathon_id=hackathon_id, enabled=1))
+        reg_email_list = [r.email for r in self.db.find_all_objects_by(Register, hackathon_id=hackathon_id, enabled=1)]
         reg_count = len(reg_email_list)
         stat = {
             "total": reg_count,
@@ -26,11 +25,10 @@ class HackathonManager():
             "offline": reg_count
         }
         if reg_count > 0:
-            user_id_list = map(lambda ue: ue.user_id, UserEmail.query.filter(UserEmail.email.in_(reg_email_list)).all())
-            user_id_online = filter(lambda user_id: User.query.filter(User.id == user_id).first().online, user_id_list)
-            self.db.commit()
-            stat["offline"] = reg_count - stat["online"]
-            stat["online"] = len(user_id_online)
+            user_id_list = [x.user_id for x in self.db.find_all_objects(UserEmail, UserEmail.email.in_(reg_email_list))]
+            user_id_online = self.db.count(User, (User.id.in_(user_id_list) & (User.online == 1)))
+            stat["online"] = user_id_online
+            stat["offline"] = reg_count - user_id_online
 
         return stat
 
