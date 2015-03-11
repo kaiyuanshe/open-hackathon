@@ -15,9 +15,6 @@ import time
 from admin.admin_mgr import admin_manager
 
 
-
-
-
 class RegisterListResource(Resource):
     # =======================================================return data start
     # [{"register_name":"zhang", "online":"1","submitted":"0"..."description":" "}]
