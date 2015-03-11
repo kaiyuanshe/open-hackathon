@@ -1,9 +1,15 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
-from sqlalchemy.orm import relationship, backref
-from . import Base
+from sqlalchemy.orm import backref, relation
+from . import Base, db_adapter
 from datetime import datetime
 import uuid
 import json
+
+
+def relationship(*arg, **kw):
+    ret = relation(*arg, **kw)
+    db_adapter.commit()
+    return ret
 
 
 def date_serializer(date):
