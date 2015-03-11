@@ -35,6 +35,6 @@ class EmailStatus:
     NonPrimary = 0
 
 
-class AdminUserGroupStates:
+class AdminUserHackathonRelStates:
     Actived = 1
-    Disable = 0
+    Disabled = 0

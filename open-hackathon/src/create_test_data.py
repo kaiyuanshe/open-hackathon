@@ -36,18 +36,15 @@ db_adapter.add_object_kwargs(Register, hackathon=h, register_name="xxzhe", email
 db_adapter.add_object_kwargs(Register, hackathon=h, register_name="Ice", email="v-iceshi@microsoft.com")
 
 #add a test admin account not super admin
-db_adapter.add_object_kwargs(AdminGroup,
-                                     id=2,
-                                     name="TestAdmin",
-                                     hackathon_id= 1 ,
-                                     create_time = "2015-03-09 00:00:00")
-db_adapter.add_object_kwargs(AdminUserGroup,
-                                    id=2,
-                                    admin_email='v-bih@microsoft.com',
-                                    state='actived',
-                                    remarks='test admins',
-                                    create_time = "2015-03-09 00:00:00",
-                                    group_id=2)
+
+testadmin = db_adapter.find_first_object(AdminUserHackathonRel,admin_email='v-bih@microsoft.com')
+if testadmin is None:
+    db_adapter.add_object_kwargs(AdminUserHackathonRel,
+                                        admin_email='v-bih@microsoft.com',
+                                        hackathon_id=1,
+                                        state=AdminUserHackathonRelStates.Actived,
+                                        remarks='test admins',
+                                        create_time = datetime.utcnow())
 
 
 
@@ -68,6 +65,5 @@ for template_file in template_files:
         if name == 'windows':
             provider = VirtualEnvironmentProvider.AzureVM
         db_adapter.add_object_kwargs(Template, hackathon=h, name=name, url=template_url, provider=provider)
-
 
 db_adapter.commit()
