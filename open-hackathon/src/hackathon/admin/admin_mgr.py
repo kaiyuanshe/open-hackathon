@@ -6,6 +6,7 @@ from hackathon.database import db_adapter
 from datetime import datetime
 from hackathon.constants import HTTP_HEADER
 from flask import request, g
+from hackathon import log
 
 
 class AdminManager(object):
@@ -20,10 +21,13 @@ class AdminManager(object):
 
 
     def validate_request(self):
-        if HTTP_HEADER.TOKEN not in request.headers:
-            return False
 
-        admin = self.__validate_token(request.headers[HTTP_HEADER.TOKEN])
+        if request.headers.environ['HTTP_TOKEN'] is None:
+            log.error('invailed request from checking TOKEN')
+            return False
+#        if HTTP_HEADER.TOKEN not in request.headers:
+#            return False
+        admin = self.__validate_token(request.headers.environ['HTTP_TOKEN'])
         if admin is None:
             return False
 
@@ -46,7 +50,7 @@ class AdminManager(object):
         # get hackathon_ids_from AdminUserHackathonRels details
         hackathon_ids = map(lambda x: x.hackathon_id, admin_user_hackathon_rels)
 
-        return hackathon_ids
+        return list(set(hackathon_ids))
 
 
     # check the admin authority on hackathon
