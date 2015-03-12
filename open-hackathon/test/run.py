@@ -6,33 +6,35 @@
 
 import unittest
 import sys
-import os
-from os.path import isfile, join, isdir, realpath, dirname
+from os.path import realpath, dirname
 
 __usage__ = '''
 %prog      # Searches CWD
 %prog DIR
 '''
 
+def show_detail(items):
+    for i in items:
+        print repr(i)
 
 def show_test_result(result):
     print
     print "---- START OF TEST RESULTS"
     print result
     print
-    print "fooResult::errors"
-    print result.errors
+    print "Result::errors"
+    print show_detail(result.errors)
     print
-    print "fooResult::failures"
-    print result.failures
+    print "Result::failures"
+    print show_detail(result.failures)
     print
-    print "fooResult::skipped"
-    print result.skipped
+    print "Result::skipped"
+    print show_detail(result.skipped)
     print
-    print "fooResult::successful"
+    print "Result::successful"
     print result.wasSuccessful()
     print
-    print "fooResult::test-run"
+    print "Result::test-run"
     print result.testsRun
     print "---- END OF TEST RESULTS"
     print

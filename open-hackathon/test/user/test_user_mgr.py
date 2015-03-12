@@ -48,7 +48,7 @@ class UserManagerTest(unittest.TestCase):
 
     def test_validate_request_token_expired(self):
         token_value = "token_value"
-        token = UserToken(token_value, None, datetime.utcnow() - timedelta(seconds=30))
+        token = UserToken(token=token_value, user=None, expire_date=datetime.utcnow() - timedelta(seconds=30))
 
         # mock pu
         mock_db = Mock()
@@ -64,7 +64,7 @@ class UserManagerTest(unittest.TestCase):
     def test_validate_request_token_valid(self):
         token_value = "token_value"
         user = User(name="test_name")
-        token = UserToken(token_value, user, datetime.utcnow() + timedelta(seconds=30))
+        token = UserToken(token=token_value, user=user, expire_date=datetime.utcnow() + timedelta(seconds=30))
 
         # mock pu
         mock_db = Mock()
