@@ -9,3 +9,4 @@ wsgilog
 jinja2
 six
 requests
+mock==1.0.1
