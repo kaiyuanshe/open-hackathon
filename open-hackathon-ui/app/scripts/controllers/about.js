@@ -2,12 +2,12 @@
 
 /**
  * @ngdoc function
- * @name learnangularApp.controller:AboutCtrl
+ * @name hackathonApp.controller:AboutCtrl
  * @description
  * # AboutCtrl
- * Controller of the learnangularApp
+ * Controller of the hackathonApp
  */
-angular.module('learnangularApp')
+angular.module('hackathonApp')
   .controller('AboutCtrl', function ($scope,$cookieStore) {
     console.log($cookieStore);
     $scope.awesomeThings = [
