@@ -10,3 +10,4 @@ wsgilog
 azure
 requests
 apscheduler
+mock==1.0.1
