@@ -6,12 +6,13 @@ from user.login import *
 from flask import g, request
 from log import log
 from database import db_adapter
-from decorators import token_required
+from decorators import token_required, admin_token_required
 from user.user_functions import get_user_experiment, get_user_hackathon
 from health import report_health
 from remote.guacamole import GuacamoleInfo
 from hack import hack_manager
 import time
+from admin.admin_mgr import admin_manager
 
 
 class RegisterListResource(Resource):
@@ -220,3 +221,14 @@ api.add_resource(GuacamoleResource, "/api/guacamoleconfig")
 api.add_resource(UserResource, "/api/user")
 api.add_resource(CurrentTime, "/api/currenttime")
 
+# ------------------------------ APIs for admin-site --------------------------------
+class AdminHackathonsResource(Resource):
+    @admin_token_required
+    def get(self):
+        admin = g.admin
+        return admin_manager.get_hackid_from_adminid(admin.id)
+
+    def post(self):
+        return ""
+
+api.add_resource(AdminHackathonsResource, "/api/admin/hackathons")

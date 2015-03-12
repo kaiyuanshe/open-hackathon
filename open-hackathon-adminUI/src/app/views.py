@@ -107,7 +107,6 @@ def qq_login():
     return __login("qq")
 
 
-
 @app.route('/')
 @app.route('/index')
 def index():

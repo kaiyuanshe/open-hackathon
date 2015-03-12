@@ -42,7 +42,7 @@ class AdminUser(db.Model, UserMixin):
     create_time = db.Column(db.DateTime)
     last_login_time = db.Column(db.DateTime)
 
-    def get_admin_user_id(self):
+    def get_admin_id(self):
         return self.id
 
     def json(self):
@@ -68,9 +68,6 @@ class AdminEmail(db.Model):
     admin_id = db.Column(db.Integer, db.ForeignKey('admin_user.id', ondelete='CASCADE'))
     admin = db.relationship('AdminUser', backref=db.backref('emails', lazy='dynamic'))
 
-    def get_admin_email(self):
-        return self.email(self, email)
-
     def __init__(self, **kwargs):
         super(AdminEmail, self).__init__(**kwargs)
 
@@ -89,55 +86,31 @@ class AdminToken(db.Model):
     def json(self):
         return to_json(self, self.__class__)
 
-    def __init__(self, token, admin, expire_date, issue_date=None):
-        if issue_date is None:
+    def __init__(self, **kwargs):
+        super(AdminToken, self).__init__(**kwargs)
+        if self.issue_date is None:
             issue_date = datetime.utcnow()
-
-        self.token = token
-        self.admin = admin
-        self.expire_date = expire_date
-        self.issue_date = issue_date
 
     def __repr__(self):
         return "AdminToken: " + self.json()
 
 
-
-class AdminGroup(db.Model):
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(32))
-    hackathon_id = db.Column(db.Integer, nullable=False)
-    create_time = db.Column(db.DateTime)
-
-    def json(self):
-        return to_json(self, self.__class__)
-
-    def __init__(self, **kwargs):
-        super(AdminGroup, self).__init__(**kwargs)
-
-    def __repr__(self):
-        return "AdminGroup: " + self.json()
-
-
-
-class AdminUserGroup(db.Model):
+class AdminUserHackathonRel(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
-    group_id = db.Column(db.Integer, unique=True, nullable=False)
     admin_email = db.Column(db.String(120))
+    role_type = db.Column(db.Integer)
+    hackathon_id = db.Column(db.Integer)
     state = db.Column(db.Integer)
     remarks = db.Column(db.String(255))
     create_time = db.Column(db.DateTime)
 
-    admin_group = db.Column(db.Integer(), db.ForeignKey('admin_group.id', ondelete='CASCADE'))
-    admin_user_group = db.relationship('AdminGroup', backref=db.backref('admin_group', lazy='dynamic'))
 
     def json(self):
         return to_json(self, self.__class__)
 
     def __init__(self, **kwargs):
-        super(AdminUserGroup, self).__init__(**kwargs)
+        super(AdminUserHackathonRel, self).__init__(**kwargs)
 
     def __repr__(self):
         return "AdminUserGroup: " + self.json()
