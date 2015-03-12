@@ -1,11 +1,14 @@
+from sqlalchemy.orm import relationship
+
+
 class SQLAlchemyAdapterMetaClass(type):
     @staticmethod
-    def wrap(method):
+    def wrap(func):
         """Return a wrapped instance method"""
 
         def auto_commit(self, *args, **kwargs):
             try:
-                return_value = method(self, *args, **kwargs)
+                return_value = func(self, *args, **kwargs)
                 self.commit()
                 return return_value
             except:
@@ -15,13 +18,11 @@ class SQLAlchemyAdapterMetaClass(type):
         return auto_commit
 
     def __new__(cls, name, bases, attrs):
-        """If the class has a 'run' method, wrap it"""
-        no_wrap = ["commit",
-                   "merge",
-                   "rollback",
-                   "remove"]
+        """If the method in this list, DON'T wrap it"""
+        no_wrap = ["commit", "merge", "rollback", "remove"]
 
         def wrap(method):
+            """private methods are not wrapped"""
             if method not in no_wrap and not method.startswith("__"):
                 attrs[method] = cls.wrap(attrs[method])
 
@@ -59,7 +60,6 @@ class SQLAlchemyAdapter(DBAdapter):
     # ------------------------------ methods that no need to wrap --- end------------------------------
 
     # ------------------------------ auto wrapped 'public' methods  --- start ------------------------------
-
     def get_object(self, ObjectClass, id):
         """ Retrieve one object specified by the primary key 'pk' """
         return ObjectClass.query.get(id)
@@ -115,4 +115,4 @@ class SQLAlchemyAdapter(DBAdapter):
         # query filter by in_ do not support none args, use synchronize_session=False instead
         query.delete(synchronize_session=False)
 
-# ------------------------------ auto wrapped 'public' methods  --- end ------------------------------
+        # ------------------------------ auto wrapped 'public' methods  --- end ------------------------------
