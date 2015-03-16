@@ -1,27 +1,29 @@
-import sys
-import email
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship, backref
 from . import Base
-from . import UserMixin
 from datetime import datetime
 import uuid
 import json
+
+
+def date_serializer(date):
+    return long((date - datetime(1970, 1, 1)).total_seconds() * 1000)
 
 
 def to_json(inst, cls):
     # add your coversions for things like datetime's
     # and what-not that aren't serializable.
     convert = dict()
-    convert[DateTime] = long
+    convert[DateTime] = date_serializer
 
+    # todo datatime
     d = dict()
     for c in cls.__table__.columns:
         v = getattr(inst, c.name)
         if c.type.__class__ in convert.keys() and v is not None:
             try:
                 func = convert[c.type.__class__]
-                d[c.name] = func((v - datetime(1970, 1, 1)).total_seconds() * 1000)
+                d[c.name] = func(v)
             except:
                 d[c.name] = "Error:  Failed to covert using ", str(convert[c.type.__class__])
         elif v is None:
@@ -31,7 +33,7 @@ def to_json(inst, cls):
     return json.dumps(d)
 
 
-class User(UserMixin, Base):
+class User(Base):
     __tablename__ = 'user'
 
     id = Column(Integer, primary_key=True)
@@ -47,6 +49,18 @@ class User(UserMixin, Base):
 
     def get_user_id(self):
         return self.id
+
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return unicode(self.get_user_id())
 
     def json(self):
         return to_json(self, self.__class__)
@@ -499,4 +513,4 @@ class VMConfig(Base):
     def __repr__(self):
         return "VMConfig: " + self.json()
 
-# ------------------------------ Tables are introduced by azure-auto-deploy ------------------------------
+

@@ -6,7 +6,10 @@ import requests
 from hackathon.log import log
 from hackathon.functions import convert
 from compiler.ast import flatten
-
+from threading import Lock
+from hackathon.database import db_adapter
+from hackathon.database.models import Experiment
+from enum import ExprStatus
 
 def name_match(id, l):
     for n in l:
@@ -19,9 +22,22 @@ default_http_headers = {'content-type': 'application/json'}
 
 
 class OssDocker(object):
+    def __init__(self):
+        self.host_ports = []
+        self.lock = Lock()
+        self.count = 0
+
     def get_vm_url(self, docker_host):
         vm_url = "http://" + docker_host.public_dns + ":" + str(docker_host.public_docker_api_port)
         return vm_url
+
+    def __ports_cache(self):
+        num = db_adapter.count(Experiment, Experiment.status == ExprStatus.Starting)
+        if num > 0:
+            log.debug("there are %d experiment is starting, host ports will updated in next loop")
+            return
+        log.debug("-----release ports cache successfully------")
+        self.host_ports = []
 
     def ping(self, docker_host):
         try:
@@ -44,17 +60,22 @@ class OssDocker(object):
             raise
 
     def __get_available_host_port(self, port_bindings, port):
-        host_port = port + 10000
 
-        while host_port in port_bindings:
-            host_port += 1
-
-        if host_port >= 65535:
-            log.error("port used up on this host server")
-            raise Exception("no port available")
-
-        log.debug("host_port is %d " % host_port)
-        return host_port
+        self.lock.acquire()
+        try:
+            host_port = port + 10000
+            while host_port in port_bindings or host_port in self.host_ports:
+                host_port += 1
+            if host_port >= 65535:
+                log.error("port used up on this host server")
+                raise Exception("no port available")
+            if self.count == 30:
+                self.__ports_cache()
+            self.host_ports.append(host_port)
+            log.debug("host_port is %d " % host_port)
+            return host_port
+        finally:
+            self.lock.release()
 
     def get_available_host_port(self, docker_host, private_port):
         log.debug("try to assign docker port %d on server %r" % (private_port, docker_host))

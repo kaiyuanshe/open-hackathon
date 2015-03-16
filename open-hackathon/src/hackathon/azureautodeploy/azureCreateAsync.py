@@ -25,9 +25,9 @@ if __name__ == "__main__":
     if not azure.connect(sub_id, cert_path, service_host_base):
         set_expr_status(expr_id, ExprStatus.Failed)
         sys.exit(-1)
-    user_template = db_adapter.get_object(Template, ut_id)
+    template = db_adapter.get_object(Template, ut_id)
     try:
-        result = azure.create_sync(user_template, expr_id)
+        result = azure.create_sync(template, expr_id)
     except Exception as e:
         log.error(e)
         set_expr_status(expr_id, ExprStatus.Failed)

@@ -1,9 +1,8 @@
-import os
-from os.path import realpath, dirname
 from flask_restful import Resource, reqparse
 from . import api
 from expr import expr_manager
-from database.models import Announcement, Hackathon, Register, Template
+from expr.expr_mgr import static_encapsulation
+from database.models import Announcement, Hackathon, Template
 from user.login import *
 from flask import g, request
 from log import log
@@ -51,7 +50,7 @@ class UserExperimentResource(Resource):
         cid = args["cid"]
         hackathon = args["hackathon"]
         try:
-            return expr_manager.start_expr(hackathon, cid)
+            return expr_manager.start_expr(hackathon, cid, g.user.id)
         except Exception as err:
             log.error(err)
             return {"error": "fail to start due to '%s'" % err}, 500
@@ -77,7 +76,7 @@ class UserExperimentResource(Resource):
 
 class BulletinResource(Resource):
     def get(self):
-        return db_adapter.find_first_object(Announcement, enabled=1).json()
+        return db_adapter.find_first_object_by(Announcement, enabled=1).json()
 
     # todo bulletin post
     @token_required
@@ -113,7 +112,7 @@ class HackathonResource(Resource):
         args = parser.parse_args()
         if args['hid'] is None:
             return {"error": "Bad request"}, 400
-        return db_adapter.find_first_object(Hackathon, id=args['hid']).json()
+        return db_adapter.find_first_object_by(Hackathon, id=args['hid']).json()
 
     # todo post
     @token_required
@@ -171,7 +170,7 @@ class HackathonTemplateResource(Resource):
         args = parse.parse_args()
         if args['hid'] is None:
             return {"error": "Bad request"}, 400
-        return map(lambda u: u.json(), db_adapter.find_all_objects(Template, hackathon_id=args['hid']))
+        return map(lambda u: u.json(), db_adapter.find_all_objects_by(Template, hackathon_id=args['hid']))
 
 
 class UserExperimentListResource(Resource):
@@ -220,6 +219,13 @@ class TestDefaultDocker(Resource):
             log.error(err)
             return {"error": "fail to start due to '%s'" % err}, 500
 
+
+class DefaultExperiment(Resource):
+    def get(self):
+        static_encapsulation()
+        return {"Info": "start default experiment"}, 200
+
+
 api.add_resource(UserExperimentResource, "/api/user/experiment")
 api.add_resource(RegisterListResource, "/api/register/list")
 api.add_resource(BulletinResource, "/api/bulletin")
@@ -235,4 +241,5 @@ api.add_resource(GuacamoleResource, "/api/guacamoleconfig")
 api.add_resource(UserResource, "/api/user")
 api.add_resource(CurrentTime, "/api/currenttime")
 api.add_resource(TestDefaultDocker, "/api/test/docker")
+api.add_resource(DefaultExperiment, "/api/default/experiment")
 

@@ -67,7 +67,7 @@ T_VIRTUAL_MACHINES = 'virtual_machines'
 R_VIRTUAL_ENVIRONMENTS = 'virtual_environments'
 
 
-def user_operation_commit(user_template, operation, status, note=None):
+def user_operation_commit(template, operation, status, note=None):
     """
     Commit user operation to database
     :param operation:
@@ -76,14 +76,14 @@ def user_operation_commit(user_template, operation, status, note=None):
     :return:
     """
     db_adapter.add_object_kwargs(UserOperation,
-                                 user_template=user_template,
+                                 template=template,
                                  operation=operation,
                                  status=status,
                                  note=note)
     db_adapter.commit()
 
 
-def user_resource_commit(user_template, type, name, status, cs_id=None):
+def user_resource_commit(template, type, name, status, cs_id=None):
     """
     Commit user resource to database
     :param type:
@@ -92,7 +92,7 @@ def user_resource_commit(user_template, type, name, status, cs_id=None):
     :return:
     """
     db_adapter.add_object_kwargs(UserResource,
-                                 user_template=user_template,
+                                 template=template,
                                  type=type,
                                  name=name,
                                  status=status,
@@ -100,9 +100,9 @@ def user_resource_commit(user_template, type, name, status, cs_id=None):
     db_adapter.commit()
 
 
-def user_resource_status_update(user_template, type, name, status, cs_id=None):
-    ur = db_adapter.find_first_object(UserResource,
-                                      user_template_id=user_template.id,
+def user_resource_status_update(template, type, name, status, cs_id=None):
+    ur = db_adapter.find_first_object_by(UserResource,
+                                      template_id=template.id,
                                       type=type,
                                       name=name,
                                       cloud_service_id=cs_id)
@@ -130,7 +130,7 @@ def vm_endpoint_commit(name, protocol, port, local_port, cs, vm):
     db_adapter.commit()
 
 
-def vm_config_commit(vm, dns, public_ip, private_ip, remote_provider, remote_paras, user_template):
+def vm_config_commit(vm, dns, public_ip, private_ip, remote_provider, remote_paras, template):
     """
     Commit vm config to database
     :param vm:
@@ -143,7 +143,7 @@ def vm_config_commit(vm, dns, public_ip, private_ip, remote_provider, remote_par
                                  private_ip=private_ip,
                                  remote_provider=remote_provider,
                                  remote_paras=remote_paras,
-                                 user_template=user_template)
+                                 template=template)
     db_adapter.commit()
 
 
@@ -173,24 +173,24 @@ def wait_for_async(sms, request_id, second_per_loop, loop):
     return True
 
 
-def load_template(user_template, operation, expr_id):
+def load_template(template, operation, expr_id):
     """
     Load json based template into dictionary
-    :param user_template:
+    :param template:
     :return:
     """
     # make sure template url exists
-    if os.path.isfile(user_template.template.url):
+    if os.path.isfile(template.url):
         try:
-            raw_template = json.load(file(user_template.template.url))
+            raw_template = json.load(file(template.url))
         except Exception as e:
             m = 'ugly json format: %s' % e.message
-            user_operation_commit(user_template, operation, FAIL, m)
+            user_operation_commit(operation, FAIL, m)
             log.error(e)
             return None
     else:
-        m = '%s not exist' % user_template.template.url
-        user_operation_commit(user_template, operation, FAIL, m)
+        m = '%s not exist' % template.url
+        user_operation_commit(operation, FAIL, m)
         log.error(m)
         return None
     template_config = {
@@ -206,14 +206,14 @@ def load_template(user_template, operation, expr_id):
     return template_config
 
 
-def query_user_operation(user_template, operation, id):
-    return db_adapter.filter(UserOperation,
-                             UserOperation.user_template == user_template,
+def query_user_operation(template, operation, id):
+    return db_adapter.find_all_objects(UserOperation,
+                             UserOperation.template == template,
                              UserOperation.operation.like(operation + '%'),
-                             UserOperation.id > id).all()
+                             UserOperation.id > id)
 
 
-def query_user_resource(user_template, id):
-    return db_adapter.filter(UserResource,
-                             UserResource.user_template == user_template,
-                             UserResource.id > id).all()
+def query_user_resource(template, id):
+    return db_adapter.find_all_objects(UserResource,
+                             UserResource.template == template,
+                             UserResource.id > id)

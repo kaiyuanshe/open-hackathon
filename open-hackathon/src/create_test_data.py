@@ -8,6 +8,7 @@ from hackathon.database.models import *
 from hackathon.log import *
 from hackathon.enum import *
 import os
+from os.path import realpath, dirname
 
 # vm = DockerHostServer(vm_name="localhost", public_dns="localhost", public_docker_api_port=8001, private_ip="10.0.2.15",
 # private_docker_api_port=8001, container_count=0, container_max_count=100)
@@ -49,7 +50,7 @@ db_adapter.add_object_kwargs(Register, hackathon=h, register_name="xxzhe", email
 db_adapter.add_object_kwargs(Register, hackathon=h, register_name="Ice", email="v-iceshi@microsoft.com")
 
 # add public templates to database
-template_dir = 'hackathon/resources'
+template_dir = dirname(realpath(__file__)) + '/hackathon/resources'
 if not os.path.isdir(template_dir):
     log.error('template dir %s is not exist' % template_dir)
     sys.exit(1)
@@ -59,8 +60,8 @@ if template_files is None:
     sys.exit(1)
 for template_file in template_files:
     if hackathon_name in template_file:
-        name = template_file.replace(hackathon_name + '-', '').replace('.js', '')
-        template_url = os.getcwd() + os.path.sep + template_dir + os.path.sep + template_file
+        name = template_file.replace(hackathon_name+'-', '').replace('.js', '')
+        template_url = template_dir + os.path.sep + template_file
         provider = VirtualEnvironmentProvider.Docker
         if name == 'windows':
             provider = VirtualEnvironmentProvider.AzureVM

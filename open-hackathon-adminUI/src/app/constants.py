@@ -1,8 +1,3 @@
-# guacamole container constants
-class GUACAMOLE:
-    STATUS = "guacamole_status"
-    IMAGE = "hall/guacamole"
-    PORT = 8080
 
 
 # DEFAULT ROLES
@@ -10,7 +5,11 @@ class ROLE:
     ADMIN = "admin"
     HOST = "host"
 
+class OAUTH_PROVIDER:
+    GITHUB = "github"
+    QQ = "qq"
+    GITCAFE = "gitcafe"
 
-# docker
-class DOCKER:
-    DEFAULT_REMOTE_PORT = 4243
+
+class HTTP_HEADER:
+    TOKEN = "token"
