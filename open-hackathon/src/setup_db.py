@@ -3,6 +3,7 @@ from hackathon.database.models import AdminUserHackathonRel
 from hackathon.database import db_adapter
 from datetime import datetime
 from hackathon.enum import AdminUserHackathonRelStates
+from hackathon.constants import ADMIN
 
 
 def setup_db():
@@ -12,12 +13,13 @@ def setup_db():
     Base.metadata.create_all(bind=engine)
 
     # init db : add a super admin account
-    superadmin = db_adapter.find_first_object_by(AdminUserHackathonRel, admin_email='2303202961@qq.com',
-                                                 hackathon_id=-1)
+    superadmin = db_adapter.find_first_object_by(AdminUserHackathonRel,
+                                                 admin_email=ADMIN.DEFAULT_SUPER_ADMIN_EMAIL,
+                                                 hackathon_id=ADMIN.SUPER_ADMIN_GROUP_ID)
     if superadmin is None:
         db_adapter.add_object_kwargs(AdminUserHackathonRel,
-                                     admin_email='2303202961@qq.com',
-                                     hackathon_id=-1,
+                                     admin_email=ADMIN.DEFAULT_SUPER_ADMIN_EMAIL,
+                                     hackathon_id=ADMIN.SUPER_ADMIN_GROUP_ID,
                                      state=AdminUserHackathonRelStates.Actived,
                                      remarks='super admins',
                                      create_time=datetime.utcnow())
