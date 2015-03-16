@@ -3,6 +3,7 @@ import sys
 sys.path.append("../src/hackathon")
 import unittest
 from hackathon.user.user_mgr import UserManager
+from hackathon.database import SQLAlchemyAdapter
 from hackathon.database.models import UserToken, User
 from hackathon import app
 from mock import Mock
@@ -37,7 +38,7 @@ class UserManagerTest(unittest.TestCase):
         token_value = "token_value"
 
         # mock pu
-        mock_db = Mock()
+        mock_db = Mock(spec=SQLAlchemyAdapter)
         mock_db.find_first_object_by.return_value = None
 
         um = UserManager(mock_db)
@@ -45,7 +46,8 @@ class UserManagerTest(unittest.TestCase):
         with app.test_request_context('/api', headers={"token": token_value}):
             self.assertTrue("token" in request.headers)
             self.assertFalse(um.validate_request())
-            self.assertEqual(mock_db.find_first_object_by.call_count, 1)
+            mock_db.find_first_object_by.assert_called_once_with(UserToken, token=token_value)
+
 
 
     def test_validate_request_token_expired(self):
@@ -53,7 +55,7 @@ class UserManagerTest(unittest.TestCase):
         token = UserToken(token=token_value, user=None, expire_date=datetime.utcnow() - timedelta(seconds=30))
 
         # mock pu
-        mock_db = Mock()
+        mock_db = Mock(spec=SQLAlchemyAdapter)
         mock_db.find_first_object_by.return_value = token
 
         um = UserManager(mock_db)
@@ -62,6 +64,7 @@ class UserManagerTest(unittest.TestCase):
             self.assertTrue("token" in request.headers)
             self.assertFalse(um.validate_request())
             self.assertEqual(mock_db.find_first_object_by.call_count, 1)
+            mock_db.find_first_object_by.assert_called_once_with(UserToken, token=token_value)
 
 
     def test_validate_request_token_valid(self):
@@ -70,7 +73,7 @@ class UserManagerTest(unittest.TestCase):
         token = UserToken(token=token_value, user=user, expire_date=datetime.utcnow() + timedelta(seconds=30))
 
         # mock pu
-        mock_db = Mock()
+        mock_db = Mock(spec=SQLAlchemyAdapter)
         mock_db.find_first_object_by.return_value = token
 
         um = UserManager(mock_db)
@@ -78,5 +81,5 @@ class UserManagerTest(unittest.TestCase):
         with app.test_request_context('/', headers={"token": token_value}):
             self.assertTrue("token" in request.headers)
             self.assertTrue(um.validate_request())
-            self.assertEqual(mock_db.find_first_object_by.call_count, 1)
+            mock_db.find_first_object_by.assert_called_once_with(UserToken, token=token_value)
             self.assertEqual(g.user, user)
