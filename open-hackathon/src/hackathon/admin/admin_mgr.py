@@ -14,7 +14,7 @@ class AdminManager(object):
         self.db = db_adapter
 
     def __validate_token(self, token):
-        t = self.db.find_first_object(AdminToken, AdminToken.token == token)
+        t = self.db.find_first_object_by(AdminToken, token=token)
         if t is not None and t.expire_date >= datetime.utcnow():
             return t.admin
         return None

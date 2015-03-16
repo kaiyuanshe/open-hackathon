@@ -5,7 +5,7 @@ import unittest
 from hackathon.admin.admin_mgr import AdminManager
 from hackathon.database.models import AdminUser, AdminToken, AdminEmail, AdminUserHackathonRel
 from hackathon import app
-from mock import Mock
+from mock import Mock,ANY
 from datetime import datetime, timedelta
 from flask import request, g
 
@@ -38,13 +38,13 @@ class AdminManagerTest(unittest.TestCase):
 
         # mock pu
         mock_db = Mock()
-        mock_db.find_first_object.return_value = None
+        mock_db.find_first_object_by.return_value = None
         am = AdminManager(mock_db)
 
         with app.test_request_context('/api', headers={"token": token_value}):
             self.assertTrue("token" in request.headers)
             self.assertFalse(am.validate_request())
-            self.assertEqual(mock_db.find_first_object.call_count, 1)
+            mock_db.find_first_object_by.assert_called_once_with(AdminToken, token=token_value)
 
     def test_validate_request_token_expired(self):
         token_value = "token_value"
@@ -52,14 +52,14 @@ class AdminManagerTest(unittest.TestCase):
 
         # mock pu
         mock_db = Mock()
-        mock_db.find_first_object.return_value = token
+        mock_db.find_first_object_by.return_value = token
 
         am = AdminManager(mock_db)
 
         with app.test_request_context('/', headers={"token": token_value}):
             self.assertTrue("token" in request.headers)
             self.assertFalse(am.validate_request())
-            self.assertEqual(mock_db.find_first_object.call_count, 1)
+            mock_db.find_first_object_by.assert_called_once_with(AdminToken, token=token_value)
 
     def test_validate_request_token_valid(self):
         token_value = "token_value"
@@ -68,13 +68,13 @@ class AdminManagerTest(unittest.TestCase):
 
         # mock pu
         mock_db = Mock()
-        mock_db.find_first_object.return_value = token
+        mock_db.find_first_object_by.return_value = token
         am = AdminManager(mock_db)
 
         with app.test_request_context('/', headers={"token": token_value}):
             self.assertTrue("token" in request.headers)
             self.assertTrue(am.validate_request())
-            self.assertEqual(mock_db.find_first_object.call_count, 1)
+            mock_db.find_first_object_by.assert_called_once_with(AdminToken, token=token_value)
             self.assertEqual(g.admin, admin)
 
 
@@ -93,8 +93,8 @@ class AdminManagerTest(unittest.TestCase):
         am = AdminManager(mock_db)
 
         self.assertEqual(am.get_hackid_from_adminid(1), [-1L])
-        self.assertEqual(mock_db.find_all_objects.call_count, 1)
-        self.assertEqual(mock_db.find_all_objects_by.call_count, 1)
+        mock_db.find_all_objects_by.assert_called_once_with(AdminEmail, admin_id=1)
+        mock_db.find_all_objects.assert_called_once_with(AdminUserHackathonRel,ANY)
         # calls=[call.find_all_objects(AdminEmail,ANY),call.find_all_objects(AdminUserHackathonRel,ANY)]
         #mock_db.find_all_objects_by.assert_has_calls(calls, any_order=True)
 
@@ -120,8 +120,8 @@ class AdminManagerTest(unittest.TestCase):
         with app.test_request_context('/', headers={"token": token_value}):
             g.admin = AdminUser(id=1, name='testadmin')
             self.assertTrue(am.validate_admin_hackathon_request(1))
-            self.assertEqual(mock_db.find_all_objects.call_count, 1)
-            self.assertEqual(mock_db.find_all_objects_by.call_count, 1)
+            mock_db.find_all_objects_by.assert_called_once_with(AdminEmail, admin_id=1)
+            mock_db.find_all_objects.assert_called_once_with(AdminUserHackathonRel,ANY)
 
     def test_validate_admin_hackathon_request_have_authority(self):
         token_value = "token_value"
@@ -135,10 +135,9 @@ class AdminManagerTest(unittest.TestCase):
         am = AdminManager(mock_db)
         with app.test_request_context('/', headers={"token": token_value}):
             g.admin = AdminUser(id=1, name='testadmin')
-            self.assertEqual(am.get_hackid_from_adminid(1), [1L])
             self.assertTrue(am.validate_admin_hackathon_request(1))
-            self.assertEqual(mock_db.find_all_objects.call_count, 2)
-            self.assertEqual(mock_db.find_all_objects_by.call_count, 2)
+            mock_db.find_all_objects_by.assert_called_once_with(AdminEmail, admin_id=1)
+            mock_db.find_all_objects.assert_called_once_with(AdminUserHackathonRel,ANY)
 
     def test_validate_admin_hackathon_request_havnt_authority(self):
         token_value = "token_value"
@@ -152,10 +151,9 @@ class AdminManagerTest(unittest.TestCase):
         am = AdminManager(mock_db)
         with app.test_request_context('/', headers={"token": token_value}):
             g.admin = AdminUser(id=1, name='testadmin')
-            self.assertEqual(am.get_hackid_from_adminid(1), [1L])
             self.assertFalse(am.validate_admin_hackathon_request(2))
-            self.assertEqual(mock_db.find_all_objects.call_count, 2)
-            self.assertEqual(mock_db.find_all_objects_by.call_count, 2)
+            mock_db.find_all_objects_by.assert_called_once_with(AdminEmail, admin_id=1)
+            mock_db.find_all_objects.assert_called_once_with(AdminUserHackathonRel,ANY)
 
 
 if __name__ == '__main__':
