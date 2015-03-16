@@ -6,7 +6,7 @@ from hackathon.database import db_adapter
 from datetime import datetime
 from hackathon.constants import HTTP_HEADER
 from flask import request, g
-from hackathon import log
+from hackathon.log import log
 
 
 class AdminManager(object):
@@ -21,13 +21,10 @@ class AdminManager(object):
 
 
     def validate_request(self):
-
-        if request.headers.environ['HTTP_TOKEN'] is None:
+        if HTTP_HEADER.TOKEN not in request.headers:
             log.error('invailed request from checking TOKEN')
             return False
-#        if HTTP_HEADER.TOKEN not in request.headers:
-#            return False
-        admin = self.__validate_token(request.headers.environ['HTTP_TOKEN'])
+        admin = self.__validate_token(request.headers['token'])
         if admin is None:
             return False
 
@@ -40,7 +37,7 @@ class AdminManager(object):
         # can not use backref in db models
 
         # get emails from admin though admin.id in table admin_email
-        admin_emails = self.db.find_all_objects(AdminEmail, AdminEmail.admin_id == admin_id)
+        admin_emails = self.db.find_all_objects_by(AdminEmail, admin_id=admin_id)
         emails = map(lambda x: x.email, admin_emails)
 
         # get AdminUserHackathonRels from query withn filter by email
@@ -62,11 +59,11 @@ class AdminManager(object):
         hack_ids = self.get_hackid_from_adminid(g.admin.id)
 
         # get hackathon_id from group and check if its SuperAdmin
-        if ('-1').in_(hack_ids):
+        if (-1L) in (hack_ids):
             return True
         else:
             # check  if the hackathon owned by the admin
-            return hackathon_id.in_(hack_ids)
+            return hackathon_id in (hack_ids)
 
 
 admin_manager = AdminManager(db_adapter)

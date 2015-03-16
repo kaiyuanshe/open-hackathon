@@ -11,6 +11,7 @@ from flask import request, g
 
 
 class UserManagerTest(unittest.TestCase):
+
     def setUp(self):
         app.config['TESTING'] = True
         app.config['WTF_CSRF_ENABLED'] = False
@@ -41,10 +42,11 @@ class UserManagerTest(unittest.TestCase):
 
         um = UserManager(mock_db)
 
-        with app.test_request_context('/', headers={"token": token_value}):
+        with app.test_request_context('/api', headers={"token": token_value}):
             self.assertTrue("token" in request.headers)
             self.assertFalse(um.validate_request())
             self.assertEqual(mock_db.find_first_object_by.call_count, 1)
+
 
     def test_validate_request_token_expired(self):
         token_value = "token_value"
@@ -60,6 +62,7 @@ class UserManagerTest(unittest.TestCase):
             self.assertTrue("token" in request.headers)
             self.assertFalse(um.validate_request())
             self.assertEqual(mock_db.find_first_object_by.call_count, 1)
+
 
     def test_validate_request_token_valid(self):
         token_value = "token_value"

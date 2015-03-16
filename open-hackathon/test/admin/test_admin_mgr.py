@@ -1,19 +1,161 @@
+import sys
+
+sys.path.append("../src/hackathon")
 import unittest
+from hackathon.admin.admin_mgr import AdminManager
+from hackathon.database.models import AdminUser, AdminToken, AdminEmail, AdminUserHackathonRel
+from hackathon import app
 from mock import Mock
-from hackathon.admin.admin_mgr import admin_manager
+from datetime import datetime, timedelta
+from flask import request, g
 
 
-class mytest(unittest.TestCase):
+class AdminManagerTest(unittest.TestCase):
     def setUp(self):
-        pass
+        app.config['TESTING'] = True
+        app.config['WTF_CSRF_ENABLED'] = False
 
     def tearDown(self):
         pass
 
 
-    @unittest.skip("cannot pass")
-    def test_get_id_from_token(self):
-        self.assertEqual(admin_manager.get_hackid_from_adminID(1), [1L, 2L], 'test failed')
+    # ---------------------test method: validate_request--------------------------------------
+    def test_validate_request_if_token_missing(self):
+        am = AdminManager(None)
+        '''more args for app.text_request_context:
+                 path='/', base_url=None, query_string=None,
+                 method='GET', input_stream=None, content_type=None,
+                 content_length=None, errors_stream=None, multithread=False,
+                 multiprocess=False, run_once=False, headers=None, data=None,
+                 environ_base=None, environ_overrides=None, charset='utf-8'
+        '''
+        with app.test_request_context('/', headers=None):
+            self.assertFalse("token" in request.headers)
+            self.assertFalse(am.validate_request())
+
+    def test_validate_request_token_not_found(self):
+        token_value = "token_value"
+
+        # mock pu
+        mock_db = Mock()
+        mock_db.find_first_object.return_value = None
+        am = AdminManager(mock_db)
+
+        with app.test_request_context('/api', headers={"token": token_value}):
+            self.assertTrue("token" in request.headers)
+            self.assertFalse(am.validate_request())
+            self.assertEqual(mock_db.find_first_object.call_count, 1)
+
+    def test_validate_request_token_expired(self):
+        token_value = "token_value"
+        token = AdminToken(token=token_value, admin=None, expire_date=datetime.utcnow() - timedelta(seconds=30))
+
+        # mock pu
+        mock_db = Mock()
+        mock_db.find_first_object.return_value = token
+
+        am = AdminManager(mock_db)
+
+        with app.test_request_context('/', headers={"token": token_value}):
+            self.assertTrue("token" in request.headers)
+            self.assertFalse(am.validate_request())
+            self.assertEqual(mock_db.find_first_object.call_count, 1)
+
+    def test_validate_request_token_valid(self):
+        token_value = "token_value"
+        admin = AdminUser(name="test_name")
+        token = AdminToken(token=token_value, admin=admin, expire_date=datetime.utcnow() + timedelta(seconds=30))
+
+        # mock pu
+        mock_db = Mock()
+        mock_db.find_first_object.return_value = token
+        am = AdminManager(mock_db)
+
+        with app.test_request_context('/', headers={"token": token_value}):
+            self.assertTrue("token" in request.headers)
+            self.assertTrue(am.validate_request())
+            self.assertEqual(mock_db.find_first_object.call_count, 1)
+            self.assertEqual(g.admin, admin)
+
+
+    # ---------------------test method: get_hackid_from_adminid----------------------------------
+    def test_get_hackid_from_adminid(self):
+        admin_email_test = [AdminEmail(email='test@ms.com')]
+        admin_user_hackathon_rel = [AdminUserHackathonRel(hackathon_id=-1L)]
+        emails = ['test@ms.com']
+
+        mock_db = Mock()
+        mock_db.find_all_objects_by.return_value = admin_email_test
+        mock_db.find_all_objects.return_value = admin_user_hackathon_rel
+
+        # mock_db.find_all_objects_by.side_effect = [admin_email_test, admin_user_hackathon_rel]
+        # mock_db.find_all_objects_by.call_args_list = [call(AdminEmail, admin_id=1),call(AdminUserHackathonRel,AdminUserHackathonRel.admin_email.in_(emails))]
+        am = AdminManager(mock_db)
+
+        self.assertEqual(am.get_hackid_from_adminid(1), [-1L])
+        self.assertEqual(mock_db.find_all_objects.call_count, 1)
+        self.assertEqual(mock_db.find_all_objects_by.call_count, 1)
+        # calls=[call.find_all_objects(AdminEmail,ANY),call.find_all_objects(AdminUserHackathonRel,ANY)]
+        #mock_db.find_all_objects_by.assert_has_calls(calls, any_order=True)
+
+
+    # ---------------------test method:validate_admin_hackathon_request---------------------------
+    def test_validate_admin_hackathon_request_token_missing(self):
+        am = AdminManager(None)
+        with app.test_request_context('/', headers=None):
+            g.admin = AdminUser(id=1, name='testadmin')
+            self.assertTrue(am.validate_admin_hackathon_request(1))
+            self.assertFalse('token' in request.headers)
+
+    def test_validate_admin_hackathon_request_super_admin(self):
+        token_value = "token_value"
+        admin_email_test = [AdminEmail(email='test@ms.com')]
+        admin_user_hackathon_rel = [AdminUserHackathonRel(hackathon_id=-1L)]
+
+        mock_db = Mock()
+        mock_db.find_all_objects_by.return_value = admin_email_test
+        mock_db.find_all_objects.return_value = admin_user_hackathon_rel
+
+        am = AdminManager(mock_db)
+        with app.test_request_context('/', headers={"token": token_value}):
+            g.admin = AdminUser(id=1, name='testadmin')
+            self.assertTrue(am.validate_admin_hackathon_request(1))
+            self.assertEqual(mock_db.find_all_objects.call_count, 1)
+            self.assertEqual(mock_db.find_all_objects_by.call_count, 1)
+
+    def test_validate_admin_hackathon_request_have_authority(self):
+        token_value = "token_value"
+        admin_email_test = [AdminEmail(email='test@ms.com')]
+        admin_user_hackathon_rel = [AdminUserHackathonRel(hackathon_id=1L)]
+
+        mock_db = Mock()
+        mock_db.find_all_objects_by.return_value = admin_email_test
+        mock_db.find_all_objects.return_value = admin_user_hackathon_rel
+
+        am = AdminManager(mock_db)
+        with app.test_request_context('/', headers={"token": token_value}):
+            g.admin = AdminUser(id=1, name='testadmin')
+            self.assertEqual(am.get_hackid_from_adminid(1), [1L])
+            self.assertTrue(am.validate_admin_hackathon_request(1))
+            self.assertEqual(mock_db.find_all_objects.call_count, 2)
+            self.assertEqual(mock_db.find_all_objects_by.call_count, 2)
+
+    def test_validate_admin_hackathon_request_havnt_authority(self):
+        token_value = "token_value"
+        admin_email_test = [AdminEmail(email='test@ms.com')]
+        admin_user_hackathon_rel = [AdminUserHackathonRel(hackathon_id=1L)]
+
+        mock_db = Mock()
+        mock_db.find_all_objects_by.return_value = admin_email_test
+        mock_db.find_all_objects.return_value = admin_user_hackathon_rel
+
+        am = AdminManager(mock_db)
+        with app.test_request_context('/', headers={"token": token_value}):
+            g.admin = AdminUser(id=1, name='testadmin')
+            self.assertEqual(am.get_hackid_from_adminid(1), [1L])
+            self.assertFalse(am.validate_admin_hackathon_request(2))
+            self.assertEqual(mock_db.find_all_objects.call_count, 2)
+            self.assertEqual(mock_db.find_all_objects_by.call_count, 2)
 
 
 if __name__ == '__main__':
