@@ -6,6 +6,7 @@ from hackathon.database import db_adapter
 from datetime import datetime
 from hackathon.constants import HTTP_HEADER
 from flask import request, g
+from hackathon.log import log
 
 
 class AdminManager(object):
@@ -13,7 +14,7 @@ class AdminManager(object):
         self.db = db_adapter
 
     def __validate_token(self, token):
-        t = self.db.find_first_object(AdminToken, AdminToken.token == token)
+        t = self.db.find_first_object_by(AdminToken, token=token)
         if t is not None and t.expire_date >= datetime.utcnow():
             return t.admin
         return None
@@ -21,9 +22,9 @@ class AdminManager(object):
 
     def validate_request(self):
         if HTTP_HEADER.TOKEN not in request.headers:
+            log.error('invailed request from checking TOKEN')
             return False
-
-        admin = self.__validate_token(request.headers[HTTP_HEADER.TOKEN])
+        admin = self.__validate_token(request.headers['token'])
         if admin is None:
             return False
 
@@ -36,7 +37,7 @@ class AdminManager(object):
         # can not use backref in db models
 
         # get emails from admin though admin.id in table admin_email
-        admin_emails = self.db.find_all_objects(AdminEmail, AdminEmail.admin_id == admin_id)
+        admin_emails = self.db.find_all_objects_by(AdminEmail, admin_id=admin_id)
         emails = map(lambda x: x.email, admin_emails)
 
         # get AdminUserHackathonRels from query withn filter by email
@@ -46,7 +47,7 @@ class AdminManager(object):
         # get hackathon_ids_from AdminUserHackathonRels details
         hackathon_ids = map(lambda x: x.hackathon_id, admin_user_hackathon_rels)
 
-        return hackathon_ids
+        return list(set(hackathon_ids))
 
 
     # check the admin authority on hackathon
@@ -58,11 +59,11 @@ class AdminManager(object):
         hack_ids = self.get_hackid_from_adminid(g.admin.id)
 
         # get hackathon_id from group and check if its SuperAdmin
-        if ('-1').in_(hack_ids):
+        if (-1L) in (hack_ids):
             return True
         else:
             # check  if the hackathon owned by the admin
-            return hackathon_id.in_(hack_ids)
+            return hackathon_id in (hack_ids)
 
 
 admin_manager = AdminManager(db_adapter)
