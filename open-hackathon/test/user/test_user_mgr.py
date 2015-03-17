@@ -37,7 +37,6 @@ class UserManagerTest(unittest.TestCase):
     def test_validate_request_token_not_found(self):
         token_value = "token_value"
 
-        # mock pu
         mock_db = Mock(spec=SQLAlchemyAdapter)
         mock_db.find_first_object_by.return_value = None
 
@@ -54,7 +53,6 @@ class UserManagerTest(unittest.TestCase):
         token_value = "token_value"
         token = UserToken(token=token_value, user=None, expire_date=datetime.utcnow() - timedelta(seconds=30))
 
-        # mock pu
         mock_db = Mock(spec=SQLAlchemyAdapter)
         mock_db.find_first_object_by.return_value = token
 
@@ -72,7 +70,6 @@ class UserManagerTest(unittest.TestCase):
         user = User(name="test_name")
         token = UserToken(token=token_value, user=user, expire_date=datetime.utcnow() + timedelta(seconds=30))
 
-        # mock pu
         mock_db = Mock(spec=SQLAlchemyAdapter)
         mock_db.find_first_object_by.return_value = token
 

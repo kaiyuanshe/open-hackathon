@@ -1,28 +1,57 @@
-
 from . import app
 from flask_admin import BaseView, expose, Admin, AdminIndexView
 from decorators import role_required
 from constants import ROLE
 from functions import get_config
 import json
-
-from flask_login import login_required, current_user,login_user,LoginManager
+from constants import HTTP_HEADER
+from flask_login import login_required, current_user, login_user, LoginManager
 from admin.login import login_providers
-from flask import Response, render_template, request, g, redirect, make_response
+from flask import Response, render_template, request, g, redirect, make_response, session
 from database.models import AdminUser
 from database import db_adapter
 from datetime import timedelta
-
+from functions import safe_get_config, post_to_remote, delete_remote, get_remote, put_to_remote
 
 session_lifetime_minutes = 60
 PERMANENT_SESSION_LIFETIME = timedelta(minutes=session_lifetime_minutes)
 
-
 login_manager = LoginManager()
 login_manager.init_app(app)
+
+
+def __get_headers():
+    return {
+        "content-type": "application/json",
+        HTTP_HEADER.TOKEN: session[HTTP_HEADER.TOKEN] if HTTP_HEADER.TOKEN in session else ""
+    }
+
+
+def __get_uri(path):
+    if path.startswith("/"):
+        path = path.lstrip("/")
+    return "%s/%s" % (safe_get_config('hackathon-api.endpoint', 'http://localhost:15000'), path)
+
+
+def post_to_api_service(path, post_data):
+    return post_to_remote(__get_uri(path), post_data, headers=__get_headers())
+
+
+def put_to_api_service(path, post_data):
+    return put_to_remote(__get_uri(path), post_data, headers=__get_headers())
+
+
+def get_from_api_service(path):
+    return get_remote(__get_uri(path), headers=__get_headers())
+
+
+def delete_from_api_service(path):
+    return delete_remote(__get_uri(path), headers=__get_headers())
+
+
 @login_manager.user_loader
 def load_user(id):
-    return db_adapter.find_first_object(AdminUser,id=id)
+    return db_adapter.find_first_object(AdminUser, id=id)
 
 
 @app.before_request
@@ -35,17 +64,18 @@ class HomeView(AdminIndexView):
     @login_required
     @expose('/')
     def index(self):
-        #if not g.user.is_authenticated():
-        #    return redirect(url_for('index', next=request.path))
-        #if not g.user.has_roles((ROLE.ADMIN, ROLE.HOST)):
+        # if not g.user.is_authenticated():
+        # return redirect(url_for('index', next=request.path))
+        # if not g.user.has_roles((ROLE.ADMIN, ROLE.HOST)):
 
-        #    return redirect("/hackathon")
+        # return redirect("/hackathon")
         return self.render('admin/home.html')
 
 
 class HackathonAdminBaseView(BaseView):
     def render_admin(self, template):
         return self.render("admin/%s" % template)
+
 
 class MyAdminView(HackathonAdminBaseView):
     @expose('/')
@@ -71,7 +101,7 @@ class AnotherAdminView(HackathonAdminBaseView):
         return True
 
 
-admin = Admin(name="Open Hackathon Admin Console",base_template='admin/osslayout.html',index_view=HomeView())
+admin = Admin(name="Open Hackathon Admin Console", base_template='admin/osslayout.html', index_view=HomeView())
 admin.init_app(app)
 
 admin.add_view(MyAdminView(name="view1", category='Test'))

@@ -31,13 +31,7 @@ db_adapter.add_object_kwargs(Announcement, content="欢迎访问开放黑客松�
 hackathon_name = 'open-xml-sdk'
 h = db_adapter.add_object_kwargs(Hackathon, name=hackathon_name, sponsor=1, end_time="2015-03-16 00:00:00")
 
-db_adapter.add_object_kwargs(Register, hackathon=h, register_name="Yifu Huang", email="ifhuang91@gmail.com")
-db_adapter.add_object_kwargs(Register, hackathon=h, register_name="xxzhe", email="zhengxx012@gmail.com")
-db_adapter.add_object_kwargs(Register, hackathon=h, register_name="Ice", email="v-iceshi@microsoft.com")
-
-#add a test admin account not super admin
-
-testadmin = db_adapter.find_first_object(AdminUserHackathonRel, admin_email='v-bih@microsoft.com')
+testadmin = db_adapter.find_first_object_by(AdminUserHackathonRel, admin_email='v-bih@microsoft.com')
 if testadmin is None:
     db_adapter.add_object_kwargs(AdminUserHackathonRel,
                                  admin_email='v-bih@microsoft.com',

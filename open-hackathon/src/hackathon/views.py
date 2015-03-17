@@ -226,9 +226,10 @@ class AdminHackathonsResource(Resource):
     @admin_token_required
     def get(self):
         admin = g.admin
-        return admin_manager.get_hackid_from_adminid(admin.id)
+        return admin_manager.get_hack_id_by_admin_id(admin.id)
 
     def post(self):
         return ""
+
 
 api.add_resource(AdminHackathonsResource, "/api/admin/hackathons")
