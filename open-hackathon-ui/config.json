@@ -1,6 +1,7 @@
 {
   "hostname": "hackathon.chinacloudapp.cn",
-  "proxy": "http://127.0.0.1:15000",
+  "hackathon_name":"open-xml-sdk",
+  "proxy": "http://open-hackathon.chinacloudapp.cn:15002",
   "api": {
     "user": {
       "login":["post","del"],

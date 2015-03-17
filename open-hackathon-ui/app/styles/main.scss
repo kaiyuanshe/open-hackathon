@@ -8,60 +8,75 @@ body {
   font: 14px/1.5 arial, "Microsoft Yahei", "Hiragino Sans GB", sans-serif;
   padding-top: 90px;
 }
+
 a {
   color: #00abec;
 }
+
 #ohp_header.navbar, #ohp_header .navbar {
   min-height: 90px;
 }
+
 #ohp_header .navbar-brand {
   height: 90px;
 }
+
 #ohp_header.navbar-inverse {
   background-color: #1a1a1a;
 }
+
 #ohp_header .dropdown-menu {
   background: #525252;
   border-radius: 0;
   padding: 0;
   border-top: none;
 }
-#ohp_header .dropdown-menu>li>a {
+
+#ohp_header .dropdown-menu > li > a {
   padding: 10px 20px;
   color: #fff;
   border-top: 1px solid #101010;
 }
-#ohp_header .dropdown-menu>li>a:hover, #ohp_header .dropdown-menu>li>a:focus {
+
+#ohp_header .dropdown-menu > li > a:hover, #ohp_header .dropdown-menu > li > a:focus {
   color: #00ABEC;
   text-decoration: none;
   background-color: #101010;
 }
-.navbar-inverse .navbar-nav>.open>a, .navbar-inverse .navbar-nav>.open>a:hover, .navbar-inverse .navbar-nav>.open>a:focus {
+
+.navbar-inverse .navbar-nav > .open > a, .navbar-inverse .navbar-nav > .open > a:hover, .navbar-inverse .navbar-nav > .open > a:focus {
   background-color: #525252;
 }
+
 .checkbox-inline div, .radio-inline div {
   display: inline-block;
   vertical-align: middle;
 }
-.navbar-inverse .navbar-nav>li>a {
+
+.navbar-inverse .navbar-nav > li > a {
   color: #fff;
   font-size: 16px;
   line-height: 60px;
 }
-.navbar-inverse .navbar-nav>li>a:hover {
+
+.navbar-inverse .navbar-nav > li > a:hover {
   color: #00abec;
 }
+
 .radio-inline, .checkbox-inline {
   padding-left: 0;
 }
+
 #carousel {
   background-color: #fff;
   height: 500px;
   margin: 90px -15px 0;
 }
+
 #carousel .item {
   height: 500px;
 }
+
 #carousel .carousel-indicators li {
   width: 15px;
   height: 15px;
@@ -69,22 +84,27 @@ a {
   border: none;
   border-radius: 0;
 }
+
 #userImg {
   height: 60px;
   width: 60px;
 }
+
 #carousel .carousel-indicators .active {
   background-color: #00abec;
   width: 15px;
   height: 15px;
   margin: 1px;
 }
+
 #carousel .item img {
   width: 150%;
 }
+
 #ohp_header .navbar-inverse {
   background-color: #1a1a1a;
 }
+
 #ohp_header .navbar-brand {
   background: url('/images/icon64.png') no-repeat;
   color: #00abec;
@@ -93,83 +113,105 @@ a {
   font-size: 30px;
   line-height: 60px;
 }
+
 #ohp_header .navbar {
   border-radius: 0;
 }
+
 #partner {
   text-align: center;
   background-color: #fff;
 }
+
 #partner .col-md-4 {
   text-align: center;
 }
+
 #partner .col-md-4 img {
   height: 200px;
   width: 90%;
 }
+
 .page-header {
   background-color: #fff;
   text-align: center;
 }
+
 .footer {
   background-color: #1a1a1a;
   bottom: 0;
   width: 100%;
   height: 60px;
 }
+
 .btn-primary {
   background-color: #00abec;
 }
+
 #main {
   background-color: #00abec;
 }
+
 #main h1 {
   font-size: 3em;
 }
-#main>.container {
+
+#main > .container {
   background-color: #fff;
   text-align: center;
   padding-bottom: 30px;
 }
+
 #main .organizers .col-md-4 {
   height: 150px;
   vertical-align: middle;
 }
-.gitcafe{
-  padding-top:20px
+
+.gitcafe {
+  padding-top: 20px
 }
+
 #main .organizers img {
   max-width: 300px;
   max-height: 150px;
   vertical-align: middle;
   margin: 20px 0;
 }
-.btn, .btn-lg, .btn-group-lg>.btn {
+
+.btn, .btn-lg, .btn-group-lg > .btn {
   border-radius: 0;
 }
+
 .login {
   min-height: 100px;
   text-align: center;
 }
+
 .login .container {
   background-color: #fff;
   padding-bottom: 30px;
 }
+
 .login img {
   width: 30px;
 }
+
 .container .text-muted {
   margin: 20px 0;
 }
+
 .footer a {
   color: #969696;
 }
+
 .footer a:hover {
   opacity: .7;
 }
+
 .btn img {
   width: 30px;
 }
+
 .services-list {
   text-align: left;
   list-style: none;
@@ -178,6 +220,7 @@ a {
   padding: 0;
   text-indent: 80px;
 }
+
 .error-container {
   display: none;
   background-color: #8cc7e5;
@@ -185,31 +228,37 @@ a {
   padding: 15px;
   margin: 50px auto;
 }
+
 .error-body {
   background-color: #565551;
   color: #fff;
   padding-bottom: 40px;
 }
+
 .error-body .header .error {
   border-bottom: 1px solid #fff;
   margin: 0 30px 20px 30px;
   padding: 20px 0 15px 0;
   text-align: center;
 }
+
 .error-body .header .error .code {
   font-size: 72pt;
   color: #8cc7e5;
   text-align: right;
   margin-right: 25px;
 }
+
 .error-body .header .error .message {
   font-size: 44pt;
   text-align: left;
 }
+
 .error-body .more-details .more-info {
   text-align: center;
   font-size: 30pt;
 }
+
 .smallscreen {
   display: none;
   position: fixed;
@@ -220,15 +269,169 @@ a {
   height: 30px;
   background: #00abec;
 }
+
 .smallscreen a {
   color: #fff;
   font-size: 30px;
 }
+
 .smallscreen a:hover {
   text-decoration: none;
 }
 
-.t-content{
+.t-content {
   min-height: 60px;
 }
 
+body.hackathon {
+  overflow: hidden;
+}
+
+.hackathon .footer {
+  position: absolute;
+  bottom: 0;
+  margin-left: 250px;
+}
+
+.hackathon .footer .container {
+  width: 100%;
+}
+
+.hackathon .work-fluid {
+  position: absolute;
+  padding: 0 0 0 5px;
+  top: 90px;
+  bottom: 60px;
+  left: 245px;
+  right: 0;
+  width: auto;
+  height: auto;
+  background: #fff;
+}
+
+.hackathon .hackathon-nav {
+  position: fixed;
+  width: 250px;
+  left: 0px;
+  bottom: 0px;
+  top: 90px;
+  color: #fff;
+  background: #1F2327;
+  word-wrap: break-word;
+  word-break: normal;
+  overflow-y: auto;
+  z-index: 10;
+  border-right: solid 2px #aaa;
+}
+
+.hackathon .hackathon-nav .row {
+  margin: 0;
+}
+
+.hackathon .vm-box {
+  display: inline-block;
+  height: 150px;
+  width: 150px;
+  background: #525252;
+  vertical-align: middle;
+  padding-top: 25px;
+  margin-top: 20px;
+  position: relative;
+}
+
+.hackathon .vm-box:hover, .hackathon .vm-box.active {
+  background: #00abec;
+}
+
+.hackathon .vm-box img {
+  height: 100px;
+}
+
+.hackathon .center {
+  position: relative;
+  display: table;
+  width: 100%;
+  height: 100%;
+}
+
+.hackathon .center iframe {
+  position: absolute;
+  top: 0;
+}
+
+.hackathon #stat span {
+  color: #00abec;
+}
+
+.hackathon .center iframe.work-full {
+  position: fixed;
+  top: 0;
+  z-index: 999999;
+  left: 0;
+}
+
+.hackathon .tooltip.bottom .tooltip-arrow {
+  border-bottom-color: #00abec;
+}
+
+.hackathon .tooltip-inner {
+  background-color: #00abec;
+}
+
+.hackathon .tooltip.bottom {
+  margin-top: -5px;
+  filter: inherit;
+  opacity: inherit;
+}
+
+.checkbox-inline div, .radio-inline div {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.icheckbox_square-blue, .iradio_square-blue {
+  display: block;
+  margin: 0;
+  padding: 0;
+  width: 22px;
+  height: 22px;
+  background: url('/images/blue.png') no-repeat;
+  border: none;
+  cursor: pointer;
+}
+
+.iradio_square-blue {
+  background-position: -144px 0;
+}
+
+.iradio_square-blue.checked {
+  background-position: -168px 0;
+}
+
+.iradio_square-blue input[type="radio"] {
+  position: absolute;
+  top: -20%;
+  left: -20%;
+  display: block;
+  width: 140%;
+  height: 140%;
+  margin: 0px;
+  padding: 0px;
+  border: 0px;
+  opacity: 0;
+  background: rgb(255, 255, 255);
+}
+
+.iradio_square-blue .iCheck-helper {
+  position: absolute;
+  top: -20%;
+  left: -20%;
+  display: block;
+  width: 140%;
+  height: 140%;
+  margin: 0px;
+  padding: 0px;
+  border: 0px;
+  opacity: 0;
+  background: rgb(255, 255, 255);
+}

@@ -1,6 +1,6 @@
 'use strict';
 /**
- * @namespace hackathonApp
+ * @namespace oh.controllers
  * @author <ifendoe@gmail.com>
  * @version 0.0.1
  * Created by Boli Guan on 15-3-12.
@@ -8,29 +8,13 @@
 
 /**
  * @ngdoc function
- * @name hackathonApp.controller:notregister
+ * @name oh.controllers:notregister.controller
  * @description
  * @author <ifendoe@gmail.com>
- * # notregisterCtrl
- * Controller of the hackathonApp
+ * # notregister.controller
+ * Controller of the notregister.controller
  */
-angular.module('hackathonApp')
-  .controller('notregisterCtrl', function ($scope, $timeout) {
-    //alert(1111111);
-    $scope.second = 5;
-   // alert('dfsdf');
+angular.module('oh.controllers')
+  .controller('notregister.controller', function ($scope, $timeout, $interval) {
 
-    var timer = $timeout(function(){
-      console.log( "Timeout executed", Date.now());
-      $timeout.
-    },1000);
-    timer.then(function(){
-      console.log( "Timer resolved!", Date.now() );
-    },function(){
-      console.log( "Timer rejected!", Date.now() );
-    })
-    $scope.clear= function(){
-      console.log('111111111')
-      $timeout.cancel( timer );
-    }
   });

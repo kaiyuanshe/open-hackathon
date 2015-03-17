@@ -1,15 +1,21 @@
 'use strict';
+/**
+ * @namespace oh.app
+ * @author <ifendoe@gmail.com>
+ * @version 0.0.1
+ * Created by Boli Guan on 15-3-10.
+ */
 
 /**
  * @ngdoc overview
- * @name learnangularApp
+ * @name hackathonApp
  * @description
- * # learnangularApp
+ * # hackathonApp
  *
  * Main module of the application.
  */
 angular
-  .module('hackathonApp', [
+  .module('oh.app', [
     'ngAnimate',
     'ngAria',
     'ngCookies',
@@ -17,13 +23,17 @@ angular
     'ngResource',
     'ui.router',
     'ngSanitize',
-    'ngTouch'
+    'ngTouch',
+    'ui.bootstrap',
+    'oh.services',
+    'oh.controllers',
+    'oh.directives'
   ])
   .config(function ($stateProvider, $urlRouterProvider) {
     $urlRouterProvider.otherwise('/');
     $stateProvider
       .state('index', {
-        url: '',
+        url: '/',
         views: {
           '': {
             templateUrl: 'views/master.html'
@@ -33,28 +43,38 @@ angular
           },
           'main@index': {
             templateUrl: 'views/main.html',
-            controller: 'MainCtrl'
+            controller: 'main.controller'
           },
           'footer@index': {
             templateUrl: 'views/footer.html'
           }
         }
       })
-      .state('index.about', {
-        url: '/about',
+      .state('index.settings', {
+        url: 'settings',
         views: {
+          'header@index': {
+            templateUrl: 'views/header.html',
+            controller: function ($scope) {
+              $scope.isShow = true;
+            }
+          },
           'main@index': {
-            templateUrl: 'views/about.html',
-            controller: 'AboutCtrl'
+            templateUrl: 'views/settings.html',
+            controller: 'settings.controller'
           }
         }
       })
-      .state('index.settings', {
-        url: '/settings',
+      .state('index.hackathon', {
+        url: 'hackathon',
         views: {
+          'header@index': {
+            templateUrl: 'views/hackathon-header.html',
+            controller: 'oh.header.controller'
+          },
           'main@index': {
-            templateUrl: 'views/settings.html',
-            controller: 'SettingsCtrl'
+            templateUrl: 'views/hackathon.html',
+            controller: ''
           }
         }
       })
@@ -62,16 +82,48 @@ angular
         url: '/notregister',
         views: {
           '': {
-            templateUrl: 'views/notregister.html'//,
-           ,controller:'notregisterCtrl'
+            templateUrl: 'views/notregister.html',
+            controller: 'notregister.controller'
           }
         }
-      }).state('index.hackathon', {
-        url: '/hackathon',
+      })
+      .state('index.challenges', {
+        url: 'challenges',
         views: {
+          'header@index': {
+            templateUrl: 'views/header.html',
+            controller: function ($scope, User) {
+              if (User) {
+                $scope.isShow = true;
+              }
+            }
+          },
           'main@index': {
-            templateUrl: 'views/hackathon.html'
+            templateUrl: 'views/challenges.html'
           }
         }
-      });
+      })
+    ;
   });
+
+String.prototype.format = function (args) {
+  var result = this;
+  if (arguments.length > 0) {
+    if (arguments.length == 1 && typeof(args) == 'object') {
+      for (var key in args) {
+        if (args[key] != undefined) {
+          var reg = new RegExp('({' + key + '})', 'g');
+          result = result.replace(reg, args[key]);
+        }
+      }
+    } else {
+      for (var i = 0; i < arguments.length; i++) {
+        if (arguments[i] != undefined) {
+          var reg = new RegExp('({[' + i + ']})', 'g');
+          result = result.replace(reg, arguments[i]);
+        }
+      }
+    }
+  }
+  return result;
+};

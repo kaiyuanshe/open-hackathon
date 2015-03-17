@@ -1,5 +1,5 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" ng-app="oh.app">
 <head>
   <meta charset="utf-8">
   <title>open hackathon ui</title>
@@ -14,14 +14,13 @@
   <!-- build:css(.tmp) styles/main.css -->
   <link rel="stylesheet" href="styles/main.css">
   <link rel="stylesheet" href="styles/header.css">
-  <link rel="stylesheet" href="styles/jquery.flipcountdown.css">
   <!-- endbuild -->
   <!-- build:js scripts/vendor/modernizr.js -->
   <script src="bower_components/modernizr/modernizr.js"></script>
   <!-- endbuild -->
 
 </head>
-<body ng-app="hackathonApp">
+<body ng-class="{hackathon: hackathon}" ng-init="hackathon = false">
 <!--[if lt IE 10]>
 <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade
   your browser</a> to improve your experience.</p>
@@ -48,6 +47,7 @@
 <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
 <script src="bower_components/angular-touch/angular-touch.js"></script>
 <script src="bower_components/angular-ui-router/release/angular-ui-router.js"></script>
+<script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
 <!-- endbower -->
 <!-- endbuild -->
 
@@ -70,13 +70,13 @@
 </script>
 
 <!-- build:js({app,.tmp}) scripts/main.js -->
-<script src="scripts/jquery/jquery.flipcountdown.js"></script>
 <script src="scripts/app.js"></script>
+<script src="scripts/provider/services.js"></script>
 <script src="scripts/controllers/main.js"></script>
-<script src="scripts/controllers/about.js"></script>
 <script src="scripts/controllers/notregister.js"></script>
 <script src="scripts/controllers/hackathon.js"></script>
 <script src="scripts/controllers/settings.js"></script>
+<script src="scripts/directives/directives.js"></script>
 <!-- endbuild -->
 </body>
 </html>

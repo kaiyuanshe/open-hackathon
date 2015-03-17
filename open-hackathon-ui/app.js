@@ -18,16 +18,22 @@ app.engine('html', hbs.__express);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static(path.join(__dirname, '.tmp')));
-app.use(express.static(path.join(__dirname,'app')));
+app.use(express.static(path.join(__dirname, 'app')));
 app.use('/bower_components', express.static('./bower_components'))
 app.use(cookieParser());
 
-app.use(function (req, res, next){
+app.use(function (req, res, next) {
   res.api = services;
   res.config = config;
   next();
 });
-
+app.get('/config', function (req, res) {
+  res.json({
+    name: config.hackathon_name,
+    url: config.proxy,
+    api: config.api
+  });
+});
 app.use(proxy);
 
 app.use(function (req, res, next) {
@@ -46,7 +52,7 @@ if (app.get('env') === 'development') {
   });
 }
 
-var port = normalizePort(process.env.PORT || 80 );
+var port = normalizePort(process.env.PORT || 80);
 var server = http.createServer(app);
 
 server.listen(port, function () {
@@ -84,29 +90,3 @@ function normalizePort(val) {
   }
   return false;
 }
-
-
-/*app.get('/addcookie', function(req, res) {
- res.cookie('add', JSON.stringify({
- ab: 'sdfsadf',
- sss: 'sdfsf'
- }));
- res.cookie('UserInformation', '{"avatar_url":"https://avatars.githubusercontent.com/u/5856568?v=3","create_time":"2015-01-27 03:35:27","email":"ifendoe@gmail.com","experiments":[],"id":1,"last_login_time":"2015-01-27 03:35:27","name":"Fendoe","nickname":"Boli Guan","online":1,"token":"896628af-a5d5-11e4-879d-0800271a48a8"}')
- res.redirect('/')
- })
-
- app.get('/clearcookie', function(req, res) {
- console.log(req.cookies)
- res.clearCookie('UserInformation')
- res.clearCookie('add')
- res.redirect('/')
- })
-
- app.listen(port, function() {
- consolelog.log('start ' + config.hostname + ', started on prot ' + port)
- //log4js.worker().info('start ' + config.hostname + ', started on prot ' + port);
- })
-
- process.on('uncaughtEExeption', function(err) {
- //log4js.worker().error('Error caught in uncaughtException event:', err);
- })*/
