@@ -5,7 +5,7 @@ from app.database.models import *
 from app.log import log
 from app.database import db_adapter
 from datetime import datetime, timedelta
-from app.constants import HTTP_HEADER,ROLE
+from app.constants import HTTP_HEADER, ROLE
 from app.enum import EmailStatus
 from app.functions import safe_get_config
 from flask import request, g
@@ -20,7 +20,8 @@ class AdminManager(object):
         token_issue_date = datetime.utcnow()
         token_expire_date = token_issue_date + timedelta(
             minutes=safe_get_config("login/token_expiration_minutes", 1440))
-        admin_token = AdminToken(token=str(uuid.uuid1()), admin=admin, expire_date=token_expire_date, issue_date=token_issue_date)
+        admin_token = AdminToken(token=str(uuid.uuid1()), admin=admin, expire_date=token_expire_date,
+                                 issue_date=token_issue_date)
         self.db.add_object(admin_token)
         self.db.commit()
         return admin_token
@@ -58,16 +59,16 @@ class AdminManager(object):
                 verified = email_info[n]['verified']
                 if self.db.find_first_object(AdminEmail, email=email) is None:
                     adminemail = AdminEmail(name=kwargs['name'], email=email, primary_email=primary_email,
-                                          verified=verified, admin=admin)
+                                            verified=verified, admin=admin)
                     self.db.add_object(adminemail)
             self.db.commit()
         else:
             admin = AdminUser(openid=openid,
-                        name=kwargs["name"],
-                        nickname=kwargs["nickname"],
-                        access_token=kwargs["access_token"],
-                        avatar_url=kwargs["avatar_url"],
-                        online=1)
+                              name=kwargs["name"],
+                              nickname=kwargs["nickname"],
+                              access_token=kwargs["access_token"],
+                              avatar_url=kwargs["avatar_url"],
+                              online=1)
 
             self.db.add_object(admin)
             self.db.commit()
@@ -77,7 +78,7 @@ class AdminManager(object):
                 primary_email = n['primary']
                 verified = n['verified']
                 adminemail = AdminEmail(name=kwargs['name'], email=email, primary_email=primary_email,
-                                      verified=verified, admin=admin)
+                                        verified=verified, admin=admin)
                 self.db.add_object(adminemail)
                 self.db.commit()
 
@@ -124,12 +125,11 @@ class AdminManager(object):
 
         # get emails from admin though admin.id in table admin_email
         admin_emails = self.db.find_all_objects_by(AdminEmail, admin_id=admin_id)
-        if admin_emails is None:
-            return None
         emails = map(lambda x: x.email, admin_emails)
 
         # get AdminUserHackathonRels from query withn filter by email
-        admin_user_hackathon_rels = self.db.find_all_objects(AdminUserHackathonRel,AdminUserHackathonRel.admin_email.in_(emails))
+        admin_user_hackathon_rels = self.db.find_all_objects(AdminUserHackathonRel,
+                                                             AdminUserHackathonRel.admin_email.in_(emails))
         if admin_user_hackathon_rels is None:
             return None
 
@@ -142,17 +142,18 @@ class AdminManager(object):
         # 0:super admin
         # 1:comman admin
 
-        hackathon_ids = admin_manager.get_hackid_from_adminid(g.admin.id)
-        #None  or not None { has -1 or has not }
+        hackathon_ids = self.get_hackid_from_adminid(g.admin.id)
+        # None  or not None { has -1 or has not }
 
-        if hackathon_ids is None :
+        if hackathon_ids is None:
             return False
         else:
             #only super admin can access
-            if role == [ROLE.SUPER_ADMIN]:
+            if role == ROLE.SUPER_ADMIN:
                 return (-1L) in (hackathon_ids)
             #comman admin all can access
-            else : return True
+            else:
+                return True
 
 
 admin_manager = AdminManager(db_adapter)
