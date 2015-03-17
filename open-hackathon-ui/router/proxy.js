@@ -5,6 +5,7 @@ var services = require('../common/services')
 var request = require('request')
 var util = require('util')
 
+
 var COOKIE_USERINFORMATION = 'User'
 
 function login(res, name, token) {
@@ -13,12 +14,12 @@ function login(res, name, token) {
     access_token: token
   }, function (response, data) {
     res.cookie(COOKIE_USERINFORMATION, JSON.stringify(data));
-    if (data.experiments) {
-      res.send('<script>window.opener.location.href = "/#/hackathon";window.close();</script>');
+    if (data.experiments.length > 0) {
+      res.send('<script type="text/javascript">window.opener.location.href = "/#/hackathon";window.close();</script>');
     } else if (data.register_state) {
-      res.send('<script>window.opener.location.href = "/#/settings";window.close();</script>');
+      res.send('<script type="text/javascript">window.opener.location.href = "/#/settings";window.close();</script>');
     } else {
-      res.send('<script>window.opener.location.href = "/#/notregister";window.close();</script>');
+      res.send('<script type="text/javascript">window.opener.location.href = "/#/notregister";window.close();</script>');
     }
   });
 }
@@ -45,15 +46,6 @@ router.get('/qq', function (req, res) {
 
 router.get('/gitcafe', function (req, res) {
 
-});
-
-router.delete('/proxy/login', function (req, res) {
-  res.api.login.del({
-    token: req.body.token
-  }, function (ares, body) {
-    res.clearCookie(COOKIE_USERINFORMATION);
-    res.josn(data);
-  });
 });
 
 module.exports = router
