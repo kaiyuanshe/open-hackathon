@@ -5,7 +5,7 @@ from app.database.models import *
 from app.log import log
 from app.database import db_adapter
 from datetime import datetime, timedelta
-from app.constants import HTTP_HEADER
+from app.constants import HTTP_HEADER,ROLE
 from app.enum import EmailStatus
 from app.functions import safe_get_config
 from flask import request, g
@@ -129,14 +129,30 @@ class AdminManager(object):
         emails = map(lambda x: x.email, admin_emails)
 
         # get AdminUserHackathonRels from query withn filter by email
-        admin_user_hackathon_rels = self.db.find_all_objects(AdminUserHackathonRel,
-                                                             AdminUserHackathonRel.admin_email.in_(emails))
+        admin_user_hackathon_rels = self.db.find_all_objects(AdminUserHackathonRel,AdminUserHackathonRel.admin_email.in_(emails))
         if admin_user_hackathon_rels is None:
             return None
 
         # get hackathon_ids_from AdminUserHackathonRels details
         hackathon_ids = map(lambda x: x.hackathon_id, admin_user_hackathon_rels)
         return list(set(hackathon_ids))
+
+    def check_role(self, role):
+
+        # 0:super admin
+        # 1:comman admin
+
+        hackathon_ids = admin_manager.get_hackid_from_adminid(g.admin.id)
+        #None  or not None { has -1 or has not }
+
+        if hackathon_ids is None :
+            return False
+        else:
+            #only super admin can access
+            if role == [ROLE.SUPER_ADMIN]:
+                return (-1L) in (hackathon_ids)
+            #comman admin all can access
+            else : return True
 
 
 admin_manager = AdminManager(db_adapter)
