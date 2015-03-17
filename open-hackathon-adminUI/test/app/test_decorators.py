@@ -12,5 +12,14 @@ class DecoratorsTest(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def test_test(self):
+    def test_role_required_super_admin_success(self):
+        return
+
+    def test_role_required_super_admin_fail(self):
+        return
+
+    def test_role_required_comman_admin_success(self):
+        return
+
+    def test_role_required_comman_admin_fail(self):
         return
