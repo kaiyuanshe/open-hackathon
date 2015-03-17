@@ -1,23 +1,46 @@
 {
-    "hostname": "hackathon.chinacloudapp.cn",
-    "post": "80",
-    "proxy": "http://127.0.0.1:15000",
-    "api": {
-        "user": ["login","experiment"],
-        "register":["list"],
-        "bulletin":[],
-        "hackathon":["list","stat","template"]
+  "hostname": "hackathon.chinacloudapp.cn",
+  "hackathon_name":"open-xml-sdk",
+  "proxy": "http://open-hackathon.chinacloudapp.cn:15002",
+  "api": {
+    "user": {
+      "login":["post","del"],
+      "hackathon":["get"],
+      "experiment":{
+        "_self":["get","post","del","put"],
+        "list":["get"]
+      }
     },
-    "sociallogin": {
-        "router": "/:name(github|qq)",
-        "github": {
-            "client_id": "0eded406cf0b3f83b181",
-            "client_secret": "3c81babd71d0cf60db3362261d42b4ce6b199538",
-            "redirect_uri": "http://%s/github",
-            "access_token_url": "https://github.com/login/oauth/access_token"
-        },
-        "qq": {
-            "client_id": "101157515"
-        }
+    "register":{
+      "list":["get"]
+    },
+    "bulletin":{
+      "_self":["get","post"]
+    },
+    "hackathon":{
+      "_self":["get","post"],
+      "list":["get"],
+      "stat":["get"],
+      "template":["get"]
     }
+  },
+  "sociallogin": {
+    "github": {
+      "client_id": "a10e2290ed907918d5ab",
+      "client_secret": "5b240a2a1bed6a6cf806fc2f34eb38a33ce03d75",
+      "redirect_uri": "http://%s/github",
+      "access_token_url": "https://github.com/login/oauth/access_token"
+    },
+    "qq": {
+      "client_id": "101157515"
+    },
+    "gitcafe":{
+      "clientID": "client_id=3c4db5b888e7cb35e6f580f9eb6777655f228a66d2beaaf361de3578b88fe46e",
+      "clientSecret": "client_secret=e32af01fe52f5c57312b1ccca4bdead604bb6e6314f66a569a924b9ff6223d74",
+      "redirect_uri": "redirect_uri=http://hackathon.chinacloudapp.cn/gitcafe",
+      "response_type": "response_type=code",
+      "code": "d64ee06fe6f0fd4607ac5d9219d2f53c94eba7d4da0d07ddf8960f0b2922e29e",
+      "scope": "scope=read"
+    }
+  }
 }
