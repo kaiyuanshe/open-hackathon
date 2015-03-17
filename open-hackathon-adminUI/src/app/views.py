@@ -52,7 +52,7 @@ class MyAdminView(HackathonAdminBaseView):
     def index(self):
         return self.render_admin('myadmin.html')
 
-    @role_required(ROLE.ADMIN)
+    @role_required(ROLE.COMMAN_ADMIN)
     def is_accessible(self):
         return True
 
@@ -66,7 +66,7 @@ class AnotherAdminView(HackathonAdminBaseView):
     def test(self):
         return self.render_admin('test.html')
 
-    @role_required([ROLE.ADMIN, ROLE.HOST])
+    @role_required(ROLE.SUPER_ADMIN)
     def is_accessible(self):
         return True
 
@@ -77,7 +77,6 @@ admin.init_app(app)
 admin.add_view(MyAdminView(name="view1", category='Test'))
 admin.add_view(AnotherAdminView(name="view2", category='Test'))
 
-###############################################################################################
 
 # js config
 @app.route('/config.js')

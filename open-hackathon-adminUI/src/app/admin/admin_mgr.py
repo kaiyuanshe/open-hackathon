@@ -31,26 +31,6 @@ class AdminManager(object):
             return t.admin
         return None
 
-#    def __validate_user_registered(self, user, hack):
-#        emails = map(lambda x: x.email, user.emails.all())
-#        return self.db.filter(Register, Register.email.in_(emails),
-#                              Register.enabled == 1,
-#                              Register.hackathon_id == hack.id).count() > 0
-
-#    def get_all_registration(self):
-#        reg_list = self.db.find_all_objects(Register, enabled=1)
-
-#        def online(r):
-#            u = self.db.find_first_object(UserEmail, email=r.email)
-#            if u is not None:
-#                r.online = u.user.online
-#            else:
-#                r.online = 0
-#            return r
-
-#        map(lambda r: online(r), reg_list)
-#        return reg_list
-
     def db_logout(self, admin):
         try:
             self.db.update_object(admin, online=0)
@@ -138,21 +118,25 @@ class AdminManager(object):
             "last_login_time": str(admin.last_login_time)
         }
 
-#    def get_admin_detail_info(self, admin, **kwargs):
-#        detail = self.get_admin_info(admin)
-#
-#        experiments = admin.experiments.filter_by(status=ExprStatus.Running).all()
-#        detail["experiments"] = []
-#        map(lambda e: detail["experiments"].append({
-#            "id": e.id,
-#            "hackathon_id": e.hackathon_id
-#        }), experiments)
-#        detail["register_state"] = True
-#        hack = hack_manager.get_hackathon_by_name(kwargs['hackathon_name'])
-#        if hack is not None and safe_get_config('checkRegister', False) == True:
-#            detail["register_state"] = self.__validate_admin_registered(admin, hack)
+    def get_hackid_from_adminid(self, admin_id):
 
-#        return detail
+        # can not use backref in db models
+
+        # get emails from admin though admin.id in table admin_email
+        admin_emails = self.db.find_all_objects_by(AdminEmail, admin_id=admin_id)
+        if admin_emails is None:
+            return None
+        emails = map(lambda x: x.email, admin_emails)
+
+        # get AdminUserHackathonRels from query withn filter by email
+        admin_user_hackathon_rels = self.db.find_all_objects(AdminUserHackathonRel,
+                                                             AdminUserHackathonRel.admin_email.in_(emails))
+        if admin_user_hackathon_rels is None:
+            return None
+
+        # get hackathon_ids_from AdminUserHackathonRels details
+        hackathon_ids = map(lambda x: x.hackathon_id, admin_user_hackathon_rels)
+        return list(set(hackathon_ids))
 
 
 admin_manager = AdminManager(db_adapter)
