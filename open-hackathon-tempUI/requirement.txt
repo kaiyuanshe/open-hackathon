@@ -3,4 +3,3 @@ flask
 flask-restful
 flask-login
 flask-debugtoolbar
-flask-restful
