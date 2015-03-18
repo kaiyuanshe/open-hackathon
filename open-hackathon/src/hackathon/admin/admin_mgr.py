@@ -32,7 +32,7 @@ class AdminManager(object):
         return True
 
 
-    def get_hackid_from_adminid(self, admin_id):
+    def get_hack_id_by_admin_id(self, admin_id):
 
         # can not use backref in db models
 
@@ -56,7 +56,7 @@ class AdminManager(object):
         if HTTP_HEADER.TOKEN not in request.headers:
             return True
 
-        hack_ids = self.get_hackid_from_adminid(g.admin.id)
+        hack_ids = self.get_hack_id_by_admin_id(g.admin.id)
 
         # get hackathon_id from group and check if its SuperAdmin
         if (-1L) in (hack_ids):

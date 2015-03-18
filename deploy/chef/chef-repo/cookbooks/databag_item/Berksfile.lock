@@ -1,0 +1,9 @@
+DEPENDENCIES
+  databag_item
+    path: .
+    metadata: true
+
+GRAPH
+  citadel (1.0.2)
+  databag_item (1.1.0)
+    citadel (>= 0.0.0)
