@@ -17,7 +17,7 @@ class FunctionsTest(unittest.TestCase):
 
 
     def test_get_config_format_error(self):
-        self.assertEqual(get_config('mysql.sql'),None)
+        self.assertIsNone(get_config('mysql.sql'))
 
 
     def test_get_config(self):
@@ -25,7 +25,7 @@ class FunctionsTest(unittest.TestCase):
 
 
     def test_safe_get_config_default(self):
-        self.assertEqual(get_config('mysql.sql'),None)
+        self.assertIsNone(get_config('mysql.sql'))
         self.assertEqual(safe_get_config('mysql.sql','default'),'default')
 
 
