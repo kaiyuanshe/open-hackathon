@@ -80,3 +80,4 @@ class UserManagerTest(unittest.TestCase):
             self.assertTrue(um.validate_request())
             mock_db.find_first_object_by.assert_called_once_with(UserToken, token=token_value)
             self.assertEqual(g.user, user)
+            
