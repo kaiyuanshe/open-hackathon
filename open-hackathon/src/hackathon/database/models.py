@@ -120,7 +120,7 @@ class UserToken(Base):
     def __init__(self, **kwargs):
         super(UserToken, self).__init__(**kwargs)
         if self.issue_date is None:
-            issue_date = datetime.utcnow()
+            self.issue_date = datetime.utcnow()
 
     def __repr__(self):
         return "UserToken: " + self.json()
@@ -640,7 +640,7 @@ class AdminToken(Base):
     def __init__(self, **kwargs):
         super(AdminToken, self).__init__(**kwargs)
         if self.issue_date is None:
-            issue_date = datetime.utcnow()
+            self.issue_date = datetime.utcnow()
 
     def __repr__(self):
         return "AdminToken: " + self.json()
@@ -666,6 +666,3 @@ class AdminUserHackathonRel(Base):
 
     def __repr__(self):
         return "AdminUserGroup: " + self.json()
-
-# ------------------------------ Tables for those logic around admin-site --------------------------------
-
