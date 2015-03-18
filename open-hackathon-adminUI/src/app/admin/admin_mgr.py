@@ -121,8 +121,6 @@ class AdminManager(object):
 
     def get_hackid_from_adminid(self, admin_id):
 
-        # can not use backref in db models
-
         # get emails from admin though admin.id in table admin_email
         admin_emails = self.db.find_all_objects_by(AdminEmail, admin_id=admin_id)
         emails = map(lambda x: x.email, admin_emails)
@@ -130,7 +128,7 @@ class AdminManager(object):
         # get AdminUserHackathonRels from query withn filter by email
         admin_user_hackathon_rels = self.db.find_all_objects(AdminUserHackathonRel,
                                                              AdminUserHackathonRel.admin_email.in_(emails))
-        if admin_user_hackathon_rels is None:
+        if len(admin_user_hackathon_rels) == 0 :
             return None
 
         # get hackathon_ids_from AdminUserHackathonRels details
@@ -150,7 +148,7 @@ class AdminManager(object):
         else:
             #only super admin can access
             if role == ROLE.SUPER_ADMIN:
-                return (-1L) in (hackathon_ids)
+                return -1 in hackathon_ids
             #comman admin all can access
             else:
                 return True

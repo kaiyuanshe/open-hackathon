@@ -82,7 +82,7 @@ class MyAdminView(HackathonAdminBaseView):
     def index(self):
         return self.render_admin('myadmin.html')
 
-    @role_required(ROLE.COMMAN_ADMIN)
+    @role_required(ROLE.COMMON_ADMIN)
     def is_accessible(self):
         return True
 
@@ -130,6 +130,9 @@ def __login(provider):
 def github_login():
     return __login("github")
 
+@app.route('/weibo')
+def github_login():
+    return __login("weibo")
 
 @app.route('/qq')
 def qq_login():

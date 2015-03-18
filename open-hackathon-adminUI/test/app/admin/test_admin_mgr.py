@@ -22,7 +22,6 @@ class AdminManagerTest(unittest.TestCase):
     def test_get_hackid_by_adminid(self):
         admin_email_test = [AdminEmail(email='test@ms.com')]
         admin_user_hackathon_rel = [AdminUserHackathonRel(hackathon_id=-1)]
-        emails = ['test@ms.com']
 
         mock_db = Mock()
         mock_db.find_all_objects_by.return_value = admin_email_test
@@ -40,7 +39,6 @@ class AdminManagerTest(unittest.TestCase):
     def test_check_role_super_admin_success(self):
         admin_email_test = [AdminEmail(email='test@ms.com')]
         admin_user_hackathon_rel = [AdminUserHackathonRel(hackathon_id=-1)]
-        emails = ['test@ms.com']
 
         mock_db = Mock()
         mock_db.find_all_objects_by.return_value = admin_email_test
@@ -56,7 +54,6 @@ class AdminManagerTest(unittest.TestCase):
     def test_check_role_super_admin_faild(self):
         admin_email_test = [AdminEmail(email='test@ms.com')]
         admin_user_hackathon_rel = [AdminUserHackathonRel(hackathon_id=2)]
-        emails = ['test@ms.com']
 
         mock_db = Mock()
         mock_db.find_all_objects_by.return_value = admin_email_test
@@ -69,10 +66,9 @@ class AdminManagerTest(unittest.TestCase):
             mock_db.find_all_objects_by.assert_called_once_with(AdminEmail, admin_id=1)
             mock_db.find_all_objects.assert_called_once_with(AdminUserHackathonRel, ANY)
 
-    def test_check_role_comman_admin_success(self):
+    def test_check_role_common_admin_success(self):
         admin_email_test = [AdminEmail(email='test@ms.com')]
         admin_user_hackathon_rel = [AdminUserHackathonRel(hackathon_id=2)]
-        emails = ['test@ms.com']
 
         mock_db = Mock()
         mock_db.find_all_objects_by.return_value = admin_email_test
@@ -85,10 +81,9 @@ class AdminManagerTest(unittest.TestCase):
             mock_db.find_all_objects_by.assert_called_once_with(AdminEmail, admin_id=1)
             mock_db.find_all_objects.assert_called_once_with(AdminUserHackathonRel, ANY)
 
-    def test_check_role_comman_admin_faild(self):
+    def test_check_role_common_admin_faild(self):
         admin_email_test = [AdminEmail(email='test@ms.com')]
         admin_user_hackathon_rel = None
-        emails = ['test@ms.com']
 
         mock_db = Mock()
         mock_db.find_all_objects_by.return_value = admin_email_test

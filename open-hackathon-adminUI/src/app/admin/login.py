@@ -31,7 +31,6 @@ class LoginBase():
 
 
 class QQLogin(LoginBase):
-
     def login(self, args):
         log.info('login from QQ')
         code = args.get('code')
@@ -72,7 +71,6 @@ class QQLogin(LoginBase):
                             access_token=access_token,
                             email_info=email_info,
                             avatar_url=user_info["figureurl"])
-
 
 
 class GithubLogin(LoginBase):
@@ -133,7 +131,6 @@ class GithubLogin(LoginBase):
                                     avatar_url=avatar)
 
 
-
 class GitcafeLogin(LoginBase):
     def login(self, args):
         log.info('login from Gitcafe')
@@ -179,8 +176,14 @@ class GitcafeLogin(LoginBase):
                             email_info=email_info,
                             avatar_url=avatar_url)
 
+
+class WeiboLogin(LoginBase):
+    def login(self, args):
+        return
+
 login_providers = {
     "github": GithubLogin(),
+    "weibo": WeiboLogin(),
     "qq": QQLogin(),
     "gitcafe": GitcafeLogin()
 }

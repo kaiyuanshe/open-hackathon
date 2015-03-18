@@ -13,7 +13,7 @@ class FunctionsTest(unittest.TestCase):
         pass
 
     def test_get_config_key_missing(self):
-        self.assertEqual(get_config('hackathon-api.endpoint_test'),None)
+        self.assertIsNone(get_config('hackathon-api.endpoint_test'))
 
 
     def test_get_config_format_error(self):
