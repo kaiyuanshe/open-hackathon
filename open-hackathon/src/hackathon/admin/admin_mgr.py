@@ -59,7 +59,7 @@ class AdminManager(object):
         hack_ids = self.get_hack_id_by_admin_id(g.admin.id)
 
         # get hackathon_id from group and check if its SuperAdmin
-        if (-1L) in (hack_ids):
+        if -1 in hack_ids:
             return True
         else:
             # check  if the hackathon owned by the admin

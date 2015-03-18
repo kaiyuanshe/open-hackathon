@@ -12,45 +12,11 @@ class SQLAlchemyAdapter(DBAdapter):
         """ Retrieve one object specified by the primary key 'pk' """
         return ObjectClass.query.get(id)
 
-    def find_all_objects(self, ObjectClass, **kwargs):
-        """ Retrieve all objects matching the case sensitive filters in 'kwargs'. """
+    def find_all_objects(self, ObjectClass, *criterion):
+        return ObjectClass.query.filter(*criterion).all()
 
-        # Convert each name/value pair in 'kwargs' into a filter
-        query = ObjectClass.query
-        for field_name, field_value in kwargs.items():
-
-            # Make sure that ObjectClass has a 'field_name' property
-            field = getattr(ObjectClass, field_name, None)
-            if field is None:
-                raise KeyError(
-                    "SQLAlchemyAdapter.find_first_object(): Class '%s' has no field '%s'." % (ObjectClass, field_name))
-
-            # Add a filter to the query
-            # _in do not support relationship query now, use foreign key instead
-            # _in do not support None
-            query = query.filter(field.in_((field_value,)))
-
-        # Execute query
-        return query.all()
-
-    def find_all_objects_like(self, ObjectClass, **kwargs):
-        """ Retrieve all objects matching the case sensitive filters in 'kwargs'. """
-
-        # Convert each name/value pair in 'kwargs' into a filter
-        query = ObjectClass.query
-        for field_name, field_value in kwargs.items():
-
-            # Make sure that ObjectClass has a 'field_name' property
-            field = getattr(ObjectClass, field_name, None)
-            if field is None:
-                raise KeyError(
-                    "SQLAlchemyAdapter.find_first_object(): Class '%s' has no field '%s'." % (ObjectClass, field_name))
-
-            # Add a filter to the query
-            query = query.filter(field.like((field_value,)))
-
-        # Execute query
-        return query.all()
+    def find_all_objects_by(self, ObjectClass, **kwargs):
+        return ObjectClass.query.filter_by(**kwargs).all()
 
     def count(self, ObjectClass, **kwargs):
         """ Retrieve all objects matching the case sensitive filters in 'kwargs'. """
