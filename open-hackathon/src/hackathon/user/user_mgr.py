@@ -32,6 +32,9 @@ class UserManager(object):
         return None
 
     def __validate_user_registered(self, user, hack):
+        if hack.check_register == 0:
+            return True
+
         emails = map(lambda x: x.email, user.emails.all())
         return self.db.count(Register, Register.email.in_(emails),
                               Register.enabled == 1,
@@ -144,9 +147,9 @@ class UserManager(object):
             "hackathon_id": e.hackathon_id
         }), experiments)
 
-        detail["register_state"] = True
+        detail["register_state"] = False
         hack = hack_manager.get_hackathon_by_name(kwargs['hackathon_name'])
-        if hack is not None and safe_get_config('checkRegister', False) == True:
+        if hack is not None:
             detail["register_state"] = self.__validate_user_registered(user, hack)
 
         return detail

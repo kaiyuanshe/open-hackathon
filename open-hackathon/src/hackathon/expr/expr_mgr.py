@@ -34,9 +34,9 @@ class ExprManager(object):
             ves = expr.virtual_environments.all()
         else:
             vms = db_adapter.find_all_objects_by(UserResource,
-                                              type=VIRTUAL_MACHINE,
-                                              status=RUNNING,
-                                              user_template_id=expr.user_template.id)
+                                                 type=VIRTUAL_MACHINE,
+                                                 status=RUNNING,
+                                                 user_template_id=expr.user_template.id)
             vms_id = map(lambda v: v.id, vms)
             ves = db_adapter.find_all_objects_by(VMConfig, virtual_machine_id=vms_id)
         for ve in ves:
@@ -65,9 +65,9 @@ class ExprManager(object):
                         })
         else:
             vms = db_adapter.find_all_objects_by(UserResource,
-                                              type=VIRTUAL_MACHINE,
-                                              status=RUNNING,
-                                              user_template_id=expr.user_template.id)
+                                                 type=VIRTUAL_MACHINE,
+                                                 status=RUNNING,
+                                                 user_template_id=expr.user_template.id)
             vms_id = map(lambda v: v.id, vms)
             for vm_config in db_adapter.find_all_objects_by(VMConfig, virtual_machine_id=vms_id):
                 dns = vm_config.dns[:-1]
@@ -83,10 +83,12 @@ class ExprManager(object):
 
         return ret
 
-    def __get_available_docker_host(self, expr_config):
+    def __get_available_docker_host(self, expr_config, hackathon):
         req_count = len(expr_config["virtual_environments"])
-        vm = db_adapter.__filter(DockerHostServer,
-                               DockerHostServer.container_count + req_count <= DockerHostServer.container_max_count).first()
+
+        vm = db_adapter.filter(DockerHostServer,
+                               DockerHostServer.container_count + req_count <= DockerHostServer.container_max_count,
+                               DockerHostServer.hackathon_id == hackathon.id).first()
 
         # todo connect to azure to launch new VM if no existed VM meet the requirement
         # since it takes some time to launch VM, it's more reasonable to launch VM when the existed ones are almost used up.
@@ -130,7 +132,7 @@ class ExprManager(object):
             # public port means the port open the public. For azure , it's the public port on azure. There
             # should be endpoint on azure that from public_port to host_port
             # host_ports = db_adapter.find_all_objects(PortBinding, binding_type=PortBindingType.Docker,
-            #                                        binding_resource_id=host_server.id)
+            # binding_resource_id=host_server.id)
 
             if not "host_port" in port_cfg:
                 port_cfg["host_port"] = docker.get_available_host_port(host_server, port_cfg["port"])
@@ -282,16 +284,16 @@ class ExprManager(object):
             raise Exception(e)
 
         expr = db_adapter.find_first_object_by(Experiment,
-                                            status=ExprStatus.Running,
-                                            user_id=g.user.id,
-                                            hackathon_id=hackathon.id)
+                                               status=ExprStatus.Running,
+                                               user_id=g.user.id,
+                                               hackathon_id=hackathon.id)
         if expr is not None:
             return self.__report_expr_status(expr)
 
         expr = db_adapter.find_first_object_by(Experiment,
-                                            status=ExprStatus.Starting,
-                                            user_id=g.user.id,
-                                            hackathon_id=hackathon.id)
+                                               status=ExprStatus.Starting,
+                                               user_id=g.user.id,
+                                               hackathon_id=hackathon.id)
         if expr is not None:
             return self.__report_expr_status(expr)
 
@@ -308,7 +310,7 @@ class ExprManager(object):
 
         if template.provider == VirtualEnvironmentProvider.Docker:
             # get available VM that runs the cloudvm and is available for more containers
-            host_server = self.__get_available_docker_host(expr_config)
+            host_server = self.__get_available_docker_host(expr_config, hackathon)
 
             # start containers
             # guacamole_config = []
