@@ -6,50 +6,46 @@ var request = require('request')
 var util = require('util')
 
 
-var COOKIE_USERINFORMATION = 'UserInformation'
-router.get('/github', function(req, res) {
-    var option = {
-        'content-type': 'application/json',
-        url: config.sociallogin.github.access_token_url,
-        json: {
-            method: config.sociallogin.github.method,
-            client_id: config.sociallogin.github.client_id,
-            client_secret: config.sociallogin.github.client_secret,
-            redirect_uri: util.format(config.sociallogin.github.redirect_uri, config.hostname),
-            code: req.query.code
-        }
-    };
-    request.post(option, function(err, request, body) {
-        services.user.login.post({
-            provider: 'github',
-            access_token: body.access_token
-        }, function(response, data) {
-            res.cookie(COOKIE_USERINFORMATION, JSON.stringify(data));
-            res.redirect('/');
-        });
-    });
-})
+var COOKIE_USERINFORMATION = 'User'
 
-router.get('/qq', function(req, res) {
-    services.user.login.post({
-        Provider: 'qq',
-        access_token: req.query['#access_token'],
-    }, function(response, data) {
-        res.cookie(COOKIE_USERINFORMATION, JSON.stringify(data));
-        res.redirect('/')
-    })
-})
+function login(res, name, token) {
+  res.api.user.login.post({
+    provider: name,
+    access_token: token
+  }, function (response, data) {
+    res.cookie(COOKIE_USERINFORMATION, JSON.stringify(data));
+    if (data.experiments.length > 0) {
+      res.send('<script type="text/javascript">window.opener.location.href = "/#/hackathon";window.close();</script>');
+    } else if (data.register_state) {
+      res.send('<script type="text/javascript">window.opener.location.href = "/#/settings";window.close();</script>');
+    } else {
+      res.send('<script type="text/javascript">window.opener.location.href = "/#/notregister";window.close();</script>');
+    }
+  });
+}
 
-router.delete('/proxy/login', function(req, res) {
-    services.user.login.del({
-        token: req.body.token
-    }, function(response, data) {
-        res.clearCookie(COOKIE_USERINFORMATION);
-        res.josn(data);
-    });
-})
-router.all('/proxy/:api(*)/:?',function(req,res){
-    console.log(req);
-    res.json(req);
-})
+router.get('/github', function (req, res) {
+  var option = {
+    'content-type': 'application/json',
+    url: config.sociallogin.github.access_token_url,
+    json: {
+      client_id: config.sociallogin.github.client_id,
+      client_secret: config.sociallogin.github.client_secret,
+      redirect_uri: util.format(config.sociallogin.github.redirect_uri, config.hostname),
+      code: req.query.code
+    }
+  };
+  request.get(option, function (err, request, body) {
+    login(res, 'github', body.access_token);
+  });
+});
+
+router.get('/qq', function (req, res) {
+  login(res, 'qq', req.query['#access_token']);
+});
+
+router.get('/gitcafe', function (req, res) {
+
+});
+
 module.exports = router

@@ -1,11 +1,14 @@
+from sqlalchemy.orm import relationship
+
+
 class SQLAlchemyAdapterMetaClass(type):
     @staticmethod
-    def wrap(method):
+    def wrap(func):
         """Return a wrapped instance method"""
 
         def auto_commit(self, *args, **kwargs):
             try:
-                return_value = method(self, *args, **kwargs)
+                return_value = func(self, *args, **kwargs)
                 self.commit()
                 return return_value
             except:
@@ -15,13 +18,11 @@ class SQLAlchemyAdapterMetaClass(type):
         return auto_commit
 
     def __new__(cls, name, bases, attrs):
-        """If the class has a 'run' method, wrap it"""
-        no_wrap = ["commit",
-                   "merge",
-                   "rollback",
-                   "remove"]
+        """If the method in this list, DON'T wrap it"""
+        no_wrap = ["commit", "merge", "rollback", "remove"]
 
         def wrap(method):
+            """private methods are not wrapped"""
             if method not in no_wrap and not method.startswith("__"):
                 attrs[method] = cls.wrap(attrs[method])
 
@@ -58,7 +59,6 @@ class SQLAlchemyAdapter(DBAdapter):
     # ------------------------------ methods that no need to wrap --- end------------------------------
 
     # ------------------------------ auto wrapped 'public' methods  --- start ------------------------------
-
     def get_object(self, ObjectClass, id):
         """ Retrieve one object specified by the primary key 'pk' """
         return ObjectClass.query.get(id)
@@ -68,27 +68,6 @@ class SQLAlchemyAdapter(DBAdapter):
 
     def find_all_objects_by(self, ObjectClass, **kwargs):
         return ObjectClass.query.filter_by(**kwargs).all()
-
-    def find_all_objects_temp(self, ObjectClass, **kwargs):
-        """ Retrieve all objects matching the case sensitive filters in 'kwargs'. """
-
-        # Convert each name/value pair in 'kwargs' into a filter
-        query = ObjectClass.query
-        for field_name, field_value in kwargs.items():
-
-            # Make sure that ObjectClass has a 'field_name' property
-            field = getattr(ObjectClass, field_name, None)
-            if field is None:
-                raise KeyError(
-                    "SQLAlchemyAdapter.find_first_object(): Class '%s' has no field '%s'." % (ObjectClass, field_name))
-
-            # Add a filter to the query
-            # _in do not support relationship query now, use foreign key instead
-            # _in do not support None
-            query = query.filter(field.in_((field_value,)))
-
-        # Execute query
-        return query.all()
 
     def count(self, ObjectClass, *criterion):
         return ObjectClass.query.filter(*criterion).count()

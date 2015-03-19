@@ -1,18 +1,19 @@
 from flask_restful import Resource, reqparse
 from . import api
 from expr import expr_manager
-from expr.expr_mgr import static_encapsulation
+from expr.expr_mgr import open_check_expr
 from database.models import Announcement, Hackathon, Template
 from user.login import *
 from flask import g, request
 from log import log
 from database import db_adapter
-from decorators import token_required
+from decorators import token_required, admin_token_required
 from user.user_functions import get_user_experiment, get_user_hackathon
 from health import report_health
 from remote.guacamole import GuacamoleInfo
 from hack import hack_manager
 import time
+from admin.admin_mgr import admin_manager
 
 
 class RegisterListResource(Resource):
@@ -222,7 +223,7 @@ class TestDefaultDocker(Resource):
 
 class DefaultExperiment(Resource):
     def get(self):
-        static_encapsulation()
+        open_check_expr()
         return {"Info": "start default experiment"}, 200
 
 
@@ -243,3 +244,17 @@ api.add_resource(CurrentTime, "/api/currenttime")
 api.add_resource(TestDefaultDocker, "/api/test/docker")
 api.add_resource(DefaultExperiment, "/api/default/experiment")
 
+# ------------------------------ APIs for admin-site --------------------------------
+
+
+class AdminHackathonsResource(Resource):
+    @admin_token_required
+    def get(self):
+        admin = g.admin
+        return admin_manager.get_hack_id_by_admin_id(admin.id)
+
+    def post(self):
+        return ""
+
+
+api.add_resource(AdminHackathonsResource, "/api/admin/hackathons")

@@ -23,7 +23,7 @@ def __report_detail(health, items):
     for key, value in items.iteritems():
         sub_report = value.reportHealth()
         health[key] = sub_report
-        if sub_report[STATUS] != HEALTH_STATE.OK:
+        if sub_report[STATUS] != HEALTH_STATE.OK and health[STATUS] != HEALTH_STATE.ERROR:
             health[STATUS] = sub_report[STATUS]
     return health
 
@@ -38,7 +38,7 @@ def report_health(q):
         }
 
     up = datetime.utcnow() - app_start_time
-    days, hours, minutes = up.days, up.seconds // 3600, up.seconds % 3600 / 60.0
+    days, hours, minutes = up.days, up.seconds / 3600, up.seconds % 3600 / 60.0
     health = {
         STATUS: HEALTH_STATE.OK,
         "start_time": str(app_start_time),

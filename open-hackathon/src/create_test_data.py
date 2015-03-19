@@ -45,9 +45,14 @@ db_adapter.add_object_kwargs(DockerHostServer,
                              container_max_count=100,
                              hackathon=h)
 
-db_adapter.add_object_kwargs(Register, hackathon=h, register_name="Yifu Huang", email="ifhuang91@gmail.com")
-db_adapter.add_object_kwargs(Register, hackathon=h, register_name="xxzhe", email="zhengxx012@gmail.com")
-db_adapter.add_object_kwargs(Register, hackathon=h, register_name="Ice", email="v-iceshi@microsoft.com")
+testadmin = db_adapter.find_first_object_by(AdminUserHackathonRel, admin_email='v-bih@microsoft.com')
+if testadmin is None:
+    db_adapter.add_object_kwargs(AdminUserHackathonRel,
+                                 admin_email='v-bih@microsoft.com',
+                                 hackathon_id=1,
+                                 state=AdminUserHackathonRelStates.Actived,
+                                 remarks='test admins',
+                                 create_time=datetime.utcnow())
 
 # add public templates to database
 template_dir = dirname(realpath(__file__)) + '/hackathon/resources'
@@ -60,7 +65,7 @@ if template_files is None:
     sys.exit(1)
 for template_file in template_files:
     if hackathon_name in template_file:
-        name = template_file.replace(hackathon_name+'-', '').replace('.js', '')
+        name = template_file.replace(hackathon_name + '-', '').replace('.js', '')
         template_url = template_dir + os.path.sep + template_file
         provider = VirtualEnvironmentProvider.Docker
         if name == 'windows':

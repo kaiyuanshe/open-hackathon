@@ -21,7 +21,7 @@ class LoginBase():
         log.info("login successfully:" + repr(admin))
         session["token"] = admin_with_token["token"].token
         #TODO session's contents will be appended , such as cookies if we conmunicate with APIservice
-        return admin_manager.get_admin_info(admin)
+        return admin
 
     def logout(self, admin):
         session.pop("token")
@@ -31,7 +31,6 @@ class LoginBase():
 
 
 class QQLogin(LoginBase):
-
     def login(self, args):
         log.info('login from QQ')
         code = args.get('code')
@@ -74,14 +73,13 @@ class QQLogin(LoginBase):
                             avatar_url=user_info["figureurl"])
 
 
-
 class GithubLogin(LoginBase):
     def login(self, args):
         log.info('login from GitHub')
         code = args.get('code')
 
         # get access_token
-        token_resp = get_remote(get_config('login/github/access_token_url') + code)
+        token_resp = get_remote(get_config('login.github.access_token_url') + code)
         log.debug("get token from github:" + token_resp)
         start = token_resp.index('=')
         end = token_resp.index('&')
@@ -92,7 +90,7 @@ class GithubLogin(LoginBase):
         log.debug("get token info from github")
 
         # get user info
-        user_info_resp = get_remote(get_config('login/github/user_info_url') + access_token)
+        user_info_resp = get_remote(get_config('login.github.user_info_url') + access_token)
         # conn.request('GET',url,'',{'user-agent':'flask'}):
 
         # example:
@@ -120,7 +118,7 @@ class GithubLogin(LoginBase):
         openid = str(user_info["id"])
         avatar = user_info["avatar_url"]
         # get user primary email
-        email_info_resp = get_remote(get_config('login/github/emails_info_url') + access_token)
+        email_info_resp = get_remote(get_config('login.github.emails_info_url') + access_token)
         log.debug("get email from github:" + email_info_resp + '\n')
         # email_info include all user email provided by github
         # email is user's primary email
@@ -131,7 +129,6 @@ class GithubLogin(LoginBase):
                                     access_token=access_token,
                                     email_info=email_info,
                                     avatar_url=avatar)
-
 
 
 class GitcafeLogin(LoginBase):
@@ -179,8 +176,14 @@ class GitcafeLogin(LoginBase):
                             email_info=email_info,
                             avatar_url=avatar_url)
 
+
+class WeiboLogin(LoginBase):
+    def login(self, args):
+        return
+
 login_providers = {
     "github": GithubLogin(),
+    "weibo": WeiboLogin(),
     "qq": QQLogin(),
     "gitcafe": GitcafeLogin()
 }

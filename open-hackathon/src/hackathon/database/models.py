@@ -1,9 +1,15 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
-from sqlalchemy.orm import relationship, backref
-from . import Base
+from sqlalchemy.orm import backref, relation
+from . import Base, db_adapter
 from datetime import datetime
 import uuid
 import json
+
+
+def relationship(*arg, **kw):
+    ret = relation(*arg, **kw)
+    db_adapter.commit()
+    return ret
 
 
 def date_serializer(date):
@@ -112,14 +118,10 @@ class UserToken(Base):
     def json(self):
         return to_json(self, self.__class__)
 
-    def __init__(self, token, user, expire_date, issue_date=None):
-        if issue_date is None:
-            issue_date = datetime.utcnow()
-
-        self.token = token
-        self.user = user
-        self.expire_date = expire_date
-        self.issue_date = issue_date
+    def __init__(self, **kwargs):
+        super(UserToken, self).__init__(**kwargs)
+        if self.issue_date is None:
+            self.issue_date = datetime.utcnow()
 
     def __repr__(self):
         return "UserToken: " + self.json()
@@ -514,3 +516,92 @@ class VMConfig(Base):
         return "VMConfig: " + self.json()
 
 
+# ------------------------------ Tables are introduced by azure-auto-deploy ------------------------------
+
+# ------------------------------ Tables for those logic around admin-site --------------------------------
+
+class AdminUser(Base):
+    __tablename__ = 'admin_user'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50))
+    nickname = Column(String(50))
+    openid = Column(String(100))
+    avatar_url = Column(String(200))
+    access_token = Column(String(100))
+    online = Column(Integer)  # 0:offline 1:online
+    create_time = Column(DateTime)
+    last_login_time = Column(DateTime)
+
+    def json(self):
+        return to_json(self, self.__class__)
+
+    def __init__(self, **kwargs):
+        super(AdminUser, self).__init__(**kwargs)
+        if self.create_time is None:
+            self.create_time = datetime.utcnow()
+        if self.last_login_time is None:
+            self.last_login_time = datetime.utcnow()
+
+
+# if self.slug is None:
+#            self.slug = str(uuid.uuid1())[0:8]  # todo generate a real slug
+
+
+class AdminEmail(Base):
+    __tablename__ = 'admin_email'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(80))
+    email = Column(String(120))
+    primary_email = Column(Integer)  # 0:NOT Primary Email 1:Primary Email
+    verified = Column(Integer)  # 0 for not verified, 1 for verified
+
+    admin_id = Column(Integer, ForeignKey('admin_user.id', ondelete='CASCADE'))
+    admin = relationship('AdminUser', backref=backref('emails', lazy='dynamic'))
+
+    def __init__(self, **kwargs):
+        super(AdminEmail, self).__init__(**kwargs)
+
+
+class AdminToken(Base):
+    __tablename__ = 'admin_token'
+    id = Column(Integer, primary_key=True)
+    token = Column(String(50), unique=True, nullable=False)
+
+    admin_id = Column(Integer, ForeignKey('admin_user.id', ondelete='CASCADE'))
+    admin = relationship('AdminUser', backref=backref('tokens', lazy='dynamic'))
+
+    issue_date = Column(DateTime)
+    expire_date = Column(DateTime, nullable=False)
+
+    def json(self):
+        return to_json(self, self.__class__)
+
+    def __init__(self, **kwargs):
+        super(AdminToken, self).__init__(**kwargs)
+        if self.issue_date is None:
+            self.issue_date = datetime.utcnow()
+
+    def __repr__(self):
+        return "AdminToken: " + self.json()
+
+
+class AdminUserHackathonRel(Base):
+    __tablename__ = 'admin_user_hackathon_rel'
+    id = Column(Integer, primary_key=True)
+    admin_email = Column(String(120))
+    role_type = Column(Integer)
+    hackathon_id = Column(Integer)
+    state = Column(Integer)
+    remarks = Column(String(255))
+    create_time = Column(DateTime)
+
+    def json(self):
+        return to_json(self, self.__class__)
+
+    def __init__(self, **kwargs):
+        super(AdminUserHackathonRel, self).__init__(**kwargs)
+        if self.create_time is None:
+            self.create_time = datetime.utcnow()
+
+    def __repr__(self):
+        return "AdminUserGroup: " + self.json()

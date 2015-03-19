@@ -30,3 +30,8 @@ class HEALTH_STATE:
     OK = "ok"
     WARNING = "warning"
     ERROR = "error"
+
+
+class ADMIN:
+    SUPER_ADMIN_GROUP_ID = 1
+    DEFAULT_SUPER_ADMIN_EMAIL = "2303202961@qq.com"

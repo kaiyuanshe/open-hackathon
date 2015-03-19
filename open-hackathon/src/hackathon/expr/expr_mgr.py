@@ -16,6 +16,8 @@ from datetime import timedelta
 
 docker = OssDocker()
 
+alarm_time = datetime.now() + timedelta(seconds=1)
+
 # initial once
 
 
@@ -37,12 +39,14 @@ class ExprManager(object):
         if expr.template.provider == VirtualEnvironmentProvider.Docker:
             ves = expr.virtual_environments.all()
         else:
-            vms = db_adapter.find_all_objects_temp(UserResource,
-                                                   type=VIRTUAL_MACHINE,
-                                                   status=RUNNING,
-                                                   template_id=expr.template.id)
+            vms = db_adapter.find_all_objects_by(UserResource,
+                                                 type=VIRTUAL_MACHINE,
+                                                 status=RUNNING,
+                                                 template_id=expr.template.id)
             vms_id = map(lambda v: v.id, vms)
-            ves = db_adapter.find_all_objects_temp(VMConfig, virtual_machine_id=vms_id)
+            ves = []
+            for id in vms_id:
+                ves.append(db_adapter.find_first_object_by(VMConfig, virtual_machine_id=id))
         for ve in ves:
             if ve.remote_provider == RemoteProvider.Guacamole:
                 guaca_config = json.loads(ve.remote_paras)
@@ -73,7 +77,10 @@ class ExprManager(object):
                                                  status=RUNNING,
                                                  template_id=expr.template.id)
             vms_id = map(lambda v: v.id, vms)
-            for vm_config in db_adapter.find_all_objects_by(VMConfig, virtual_machine_id=vms_id):
+            vms_all = []
+            for id in vms_id:
+                vms_all.append(db_adapter.find_first_object_by(VMConfig, virtual_machine_id=id))
+            for vm_config in vms_all:
                 dns = vm_config.dns[:-1]
                 vm = vm_config.virtual_machine
                 endpoint = db_adapter.find_first_object_by(VMEndpoint, private_port=80, virtual_machine=vm)
@@ -300,7 +307,8 @@ class ExprManager(object):
             for ve in expr.virtual_environments:
                 db_adapter.update_object(ve, user_id=user_id)
             db_session.commit()
-            add_job()
+            log.debug("experiment had been assigned, check experiment and start new job ... ")
+            scheduler.add_job(check_default_expr, 'date', next_run_time=alarm_time)
             return expr
 
     def start_expr(self, hackathon_name, template_name, user_id):
@@ -502,6 +510,12 @@ class ExprManager(object):
         return u
 
 
+def open_check_expr():
+    log.debug("start checking experiment ... ")
+    scheduler.add_job(check_default_expr, 'interval', id='1', replace_existing=True, next_run_time=alarm_time,
+                      hours=1)
+
+
 def check_default_expr():
     templates = db_adapter.find_all_objects(Template)
     total_azure = get_config("container_total.azure")
@@ -532,19 +546,6 @@ def check_default_expr():
         except Exception as e:
             log.error(e)
             log.error("check default experiment failed")
-
-
-def static_encapsulation():
-    log.debug("start checking experiment ... ")
-    alarm_time = datetime.now() + timedelta(seconds=1)
-    scheduler.add_job(check_default_expr, 'interval', id='1', replace_existing=True, next_run_time=alarm_time,
-                      minutes=10)
-
-
-def add_job():
-    log.debug("experiment had been assigned, check experiment and start new job ... ")
-    alarm_time = datetime.now() + timedelta(seconds=1)
-    scheduler.add_job(check_default_expr, 'date', next_run_time=alarm_time)
 
 
 expr_manager = ExprManager()

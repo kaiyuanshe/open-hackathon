@@ -5,9 +5,11 @@ from hackathon.constants import HEALTH_STATE
 from hackathon.docker import *
 from hackathon.azureautodeploy.azureImpl import *
 from hackathon.functions import *
+from sqlalchemy import __version__
 
 STATUS = "status"
 DESCRIPTION = "description"
+VERSION = "version"
 
 
 class HealthCheck():
@@ -16,7 +18,6 @@ class HealthCheck():
 
 
 class MySQLHealthCheck(HealthCheck):
-
     def __init__(self):
         self.db = db_adapter
 
@@ -24,17 +25,18 @@ class MySQLHealthCheck(HealthCheck):
         try:
             self.db.count(User)
             return {
-                STATUS: HEALTH_STATE.OK
+                STATUS: HEALTH_STATE.OK,
+                VERSION: __version__
             }
         except Exception as e:
             return {
                 STATUS: HEALTH_STATE.ERROR,
+                VERSION: __version__,
                 DESCRIPTION: e.message
             }
 
 
 class DockerHealthCheck(HealthCheck):
-
     def __init__(self):
         self.db = db_adapter
         self.docker = OssDocker()
@@ -68,7 +70,6 @@ class DockerHealthCheck(HealthCheck):
 
 
 class GuacamoleHealthCheck(HealthCheck):
-
     # todo now check only server status
     def __init__(self):
         self.guacamole_url = get_config("guacamole.host") + '/guacamole'
@@ -89,7 +90,6 @@ class GuacamoleHealthCheck(HealthCheck):
 
 
 class AzureHealthCheck(HealthCheck):
-
     def __init__(self):
         self.azure = AzureImpl()
         sub_id = get_config("azure.subscriptionId")
@@ -106,6 +106,7 @@ class AzureHealthCheck(HealthCheck):
             return {
                 STATUS: HEALTH_STATE.ERROR
             }
+
 
 g = GuacamoleHealthCheck()
 print g.reportHealth()

@@ -5,7 +5,7 @@ from app.database.models import *
 from app.log import log
 from app.database import db_adapter
 from datetime import datetime, timedelta
-from app.constants import HTTP_HEADER
+from app.constants import HTTP_HEADER, ROLE
 from app.enum import EmailStatus
 from app.functions import safe_get_config
 from flask import request, g
@@ -20,7 +20,8 @@ class AdminManager(object):
         token_issue_date = datetime.utcnow()
         token_expire_date = token_issue_date + timedelta(
             minutes=safe_get_config("login/token_expiration_minutes", 1440))
-        admin_token = AdminToken(str(uuid.uuid1()), admin, token_expire_date, token_issue_date)
+        admin_token = AdminToken(token=str(uuid.uuid1()), admin=admin, expire_date=token_expire_date,
+                                 issue_date=token_issue_date)
         self.db.add_object(admin_token)
         self.db.commit()
         return admin_token
@@ -30,26 +31,6 @@ class AdminManager(object):
         if t is not None and t.expire_date >= datetime.utcnow():
             return t.admin
         return None
-
-#    def __validate_user_registered(self, user, hack):
-#        emails = map(lambda x: x.email, user.emails.all())
-#        return self.db.filter(Register, Register.email.in_(emails),
-#                              Register.enabled == 1,
-#                              Register.hackathon_id == hack.id).count() > 0
-
-#    def get_all_registration(self):
-#        reg_list = self.db.find_all_objects(Register, enabled=1)
-
-#        def online(r):
-#            u = self.db.find_first_object(UserEmail, email=r.email)
-#            if u is not None:
-#                r.online = u.user.online
-#            else:
-#                r.online = 0
-#            return r
-
-#        map(lambda r: online(r), reg_list)
-#        return reg_list
 
     def db_logout(self, admin):
         try:
@@ -78,16 +59,16 @@ class AdminManager(object):
                 verified = email_info[n]['verified']
                 if self.db.find_first_object(AdminEmail, email=email) is None:
                     adminemail = AdminEmail(name=kwargs['name'], email=email, primary_email=primary_email,
-                                          verified=verified, admin=admin)
+                                            verified=verified, admin=admin)
                     self.db.add_object(adminemail)
             self.db.commit()
         else:
             admin = AdminUser(openid=openid,
-                        name=kwargs["name"],
-                        nickname=kwargs["nickname"],
-                        access_token=kwargs["access_token"],
-                        avatar_url=kwargs["avatar_url"],
-                        online=1)
+                              name=kwargs["name"],
+                              nickname=kwargs["nickname"],
+                              access_token=kwargs["access_token"],
+                              avatar_url=kwargs["avatar_url"],
+                              online=1)
 
             self.db.add_object(admin)
             self.db.commit()
@@ -97,7 +78,7 @@ class AdminManager(object):
                 primary_email = n['primary']
                 verified = n['verified']
                 adminemail = AdminEmail(name=kwargs['name'], email=email, primary_email=primary_email,
-                                      verified=verified, admin=admin)
+                                        verified=verified, admin=admin)
                 self.db.add_object(adminemail)
                 self.db.commit()
 
@@ -138,21 +119,39 @@ class AdminManager(object):
             "last_login_time": str(admin.last_login_time)
         }
 
-#    def get_admin_detail_info(self, admin, **kwargs):
-#        detail = self.get_admin_info(admin)
-#
-#        experiments = admin.experiments.filter_by(status=ExprStatus.Running).all()
-#        detail["experiments"] = []
-#        map(lambda e: detail["experiments"].append({
-#            "id": e.id,
-#            "hackathon_id": e.hackathon_id
-#        }), experiments)
-#        detail["register_state"] = True
-#        hack = hack_manager.get_hackathon_by_name(kwargs['hackathon_name'])
-#        if hack is not None and safe_get_config('checkRegister', False) == True:
-#            detail["register_state"] = self.__validate_admin_registered(admin, hack)
+    def get_hackid_from_adminid(self, admin_id):
 
-#        return detail
+        # get emails from admin though admin.id in table admin_email
+        admin_emails = self.db.find_all_objects_by(AdminEmail, admin_id=admin_id)
+        emails = map(lambda x: x.email, admin_emails)
+
+        # get AdminUserHackathonRels from query withn filter by email
+        admin_user_hackathon_rels = self.db.find_all_objects(AdminUserHackathonRel,
+                                                             AdminUserHackathonRel.admin_email.in_(emails))
+        if len(admin_user_hackathon_rels) == 0 :
+            return None
+
+        # get hackathon_ids_from AdminUserHackathonRels details
+        hackathon_ids = map(lambda x: x.hackathon_id, admin_user_hackathon_rels)
+        return list(set(hackathon_ids))
+
+    def check_role(self, role):
+
+        # 0:super admin
+        # 1:comman admin
+
+        hackathon_ids = self.get_hackid_from_adminid(g.admin.id)
+        # None  or not None { has -1 or has not }
+
+        if hackathon_ids is None:
+            return False
+        else:
+            #only super admin can access
+            if role == ROLE.SUPER_ADMIN:
+                return -1 in hackathon_ids
+            #comman admin all can access
+            else:
+                return True
 
 
 admin_manager = AdminManager(db_adapter)

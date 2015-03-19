@@ -38,3 +38,8 @@ class EmailStatus:
 class ReservedUser:
     DefaultUserID = -1
     DockerVM = -2
+
+
+class AdminUserHackathonRelStates:
+    Actived = 1
+    Disabled = 0

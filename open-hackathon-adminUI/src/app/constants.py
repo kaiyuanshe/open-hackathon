@@ -2,8 +2,8 @@
 
 # DEFAULT ROLES
 class ROLE:
-    ADMIN = "admin"
-    HOST = "host"
+    SUPER_ADMIN = 0
+    COMMON_ADMIN = 1
 
 class OAUTH_PROVIDER:
     GITHUB = "github"

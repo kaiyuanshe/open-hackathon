@@ -49,6 +49,16 @@ def post_to_remote(url, post_data, headers=None):
     return convert(resp)
 
 
+def put_to_remote(url, post_data, headers=None):
+    default_headers = {"content-type": "application/json"}
+    if headers is not None and isinstance(headers, dict):
+        default_headers.update(headers)
+    req = requests.put(url, data=json.dumps(post_data), headers=default_headers)
+    resp = json.loads(req.content)
+
+    return convert(resp)
+
+
 def get_remote(url, accept=None):
     opener = urllib2.build_opener(urllib2.HTTPHandler)
     request = urllib2.Request(url)
@@ -62,7 +72,7 @@ def delete_remote(url):
     opener = urllib2.build_opener(urllib2.HTTPHandler)
     request = urllib2.Request(url)
     request.get_method = lambda: 'DELETE'
-    resp = opener.open(request)
+    opener.open(request)
     return "OK"
 
 
