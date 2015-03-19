@@ -109,10 +109,11 @@ class UserToken(db.Model):
 class Register(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     register_name = db.Column(db.String(80))
-    email = db.Column(db.String(120), unique=True)
+    email = db.Column(db.String(120))
     create_time = db.Column(db.DateTime)
     description = db.Column(db.String(200))
     enabled = db.Column(db.Integer)  # 0: disabled 1:enabled
+
     jstrom_api = db.Column(db.String(50))
     jstrom_mgmt_portal = db.Column(db.String(50))
 
@@ -139,9 +140,12 @@ class Hackathon(db.Model):
     name = db.Column(db.String(100), unique=True, nullable=False)
     sponsor = db.Column(db.Integer)
     status = db.Column(db.Integer)
+    check_register = db.Column(db.Integer)  # 1=True 0=False
+
     start_time = db.Column(db.DateTime)
     end_time = db.Column(db.DateTime)
     create_time = db.Column(db.DateTime)
+    update_time = db.Column(db.DateTime)
 
     def json(self):
         return to_json(self, self.__class__)
@@ -158,12 +162,14 @@ class Hackathon(db.Model):
 class DockerHostServer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     vm_name = db.Column(db.String(100), unique=True, nullable=False)
+    hackathon_id = db.Column(db.Integer)
     public_dns = db.Column(db.String(50))
     public_docker_api_port = db.Column(db.Integer)
     private_ip = db.Column(db.String(50), unique=True)
     private_docker_api_port = db.Column(db.Integer)
     container_count = db.Column(db.Integer, nullable=False)
     container_max_count = db.Column(db.Integer, nullable=False)
+
 
     def json(self):
         return to_json(self, self.__class__)

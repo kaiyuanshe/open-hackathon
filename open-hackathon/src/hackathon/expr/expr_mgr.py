@@ -83,10 +83,11 @@ class ExprManager(object):
 
         return ret
 
-    def __get_available_docker_host(self, expr_config):
+    def __get_available_docker_host(self, expr_config, hackathon):
         req_count = len(expr_config["virtual_environments"])
         vm = db_adapter.filter(DockerHostServer,
-                               DockerHostServer.container_count + req_count <= DockerHostServer.container_max_count).first()
+                               DockerHostServer.container_count + req_count <= DockerHostServer.container_max_count,
+                               DockerHostServer.hackathon_id == hackathon.id).first()
 
         # todo connect to azure to launch new VM if no existed VM meet the requirement
         # since it takes some time to launch VM, it's more reasonable to launch VM when the existed ones are almost used up.
@@ -130,7 +131,7 @@ class ExprManager(object):
             # public port means the port open the public. For azure , it's the public port on azure. There
             # should be endpoint on azure that from public_port to host_port
             # host_ports = db_adapter.find_all_objects(PortBinding, binding_type=PortBindingType.Docker,
-            #                                        binding_resource_id=host_server.id)
+            # binding_resource_id=host_server.id)
 
             if not "host_port" in port_cfg:
                 port_cfg["host_port"] = docker.get_available_host_port(host_server, port_cfg["port"])
@@ -308,7 +309,7 @@ class ExprManager(object):
 
         if template.provider == VirtualEnvironmentProvider.Docker:
             # get available VM that runs the cloudvm and is available for more containers
-            host_server = self.__get_available_docker_host(expr_config)
+            host_server = self.__get_available_docker_host(expr_config, hackathon)
             # checkout source code
             scm = None
             if "scm" in expr_config:

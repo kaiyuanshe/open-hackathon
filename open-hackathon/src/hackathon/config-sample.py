@@ -34,8 +34,7 @@ Config = {
     },
     "guacamole": {
         "host": "http://localhost:8080"
-    },
-    "checkRegister": False
+    }
 }
 
 
