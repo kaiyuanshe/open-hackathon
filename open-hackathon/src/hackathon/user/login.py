@@ -181,10 +181,10 @@ class WeiboLogin(LoginProviderBase):
         email_info_resp_json = json.loads(email_info_resp)
         email = email_info_resp_json['email']
         email_info = [
-            {'name': name, 'email': email, 'id': id, 'verified': 1, 'primary': 1, 'nickname': nickname,
+            {'name': name, 'email': email, 'id': openid, 'verified': 1, 'primary': 1, 'nickname': nickname,
              'avatar_url': avatar_url}]
 
-        user_with_token = user_manager.db_login(id,
+        user_with_token = user_manager.db_login(openid,
                                                 name=name,
                                                 nickname=nickname,
                                                 access_token=access_token,
