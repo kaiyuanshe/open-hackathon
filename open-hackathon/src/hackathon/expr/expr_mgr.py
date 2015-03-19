@@ -337,7 +337,6 @@ class ExprManager(object):
                                         Experiment.status == ExprStatus.Running))
         if template.provider == VirtualEnvironmentProvider.Docker:
             # get available VM that runs the cloudvm and is available for more containers
-
             # start containers
             # guacamole_config = []
             try:

@@ -5,6 +5,7 @@
     <title>{% block title %}{% if admin_view.category %}{{ admin_view.category }} - {% endif %}{{ admin_view.name }} -
         {{ admin_view.admin.name }}{% endblock %}</title>
     {% block head_meta %}
+    <meta property="wb:webmaster" content= {{meta_content.weibo}} >
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">

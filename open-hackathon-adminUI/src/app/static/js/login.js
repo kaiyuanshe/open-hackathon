@@ -10,4 +10,10 @@ $(document).ready(function(){
         var url = "https://graph.qq.com/oauth2.0/authorize?" + arr.join("&");
         location.href = url;
     });
+
+    $('#weibologin').click(function() {
+        var arr = [CONFIG.weibo.clientID, CONFIG.weibo.redirect_uri, CONFIG.weibo.scope];
+        var url = "https://api.weibo.com/oauth2/authorize?" + arr.join("&");
+        location.href = url;
+    });
 });

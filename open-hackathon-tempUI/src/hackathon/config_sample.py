@@ -3,7 +3,7 @@
 # oauth constants
 HOSTNAME = "http://hackathon.chinacloudapp.cn"  # host name of the UI site
 QQ_OAUTH_STATE = "openhackathon"  # todo state should be constant. Actually it should be unguessable to prevent CSFA
-HACkATHON_API_ENDPOINT = "http://hackathon.chinacloudapp.cn:15000"
+HACKATHON_API_ENDPOINT = "http://hackathon.chinacloudapp.cn:15000"
 
 Config = {
     "environment": "local",
@@ -21,12 +21,17 @@ Config = {
         "gitcafe": {
             "access_token_url": 'https://api.gitcafe.com/oauth/token?client_id=25ba4f6f90603bd2f3d310d11c0665d937db8971c8a5db00f6c9b9852547d6b8&client_secret=e3d821e82d15096054abbc7fbf41727d3650cab6404a242373f5c446c0918634&redirect_uri=%s/gitcafe&grant_type=authorization_code&code=' % HOSTNAME
         },
-        "provider_enabled": ["github", "qq", "gitcafe"],
+        "weibo":{
+            "access_token_url": 'https://api.weibo.com/oauth2/access_token?client_id=582725653&client_secret=28f5325cb57613b9f135185b5245c5a2&grant_type=authorization_code&redirect_uri=%s/weibo&code=' % HOSTNAME,
+            "user_info_url": 'https://api.weibo.com/2/users/show.json?access_token=',
+            "email_info_url": 'https://api.weibo.com/2/account/profile/email.json?access_token='
+        },
+        "provider_enabled": ["github", "qq", "gitcafe" , "weibo"],
         "session_minutes": 60,
         "token_expiration_minutes": 60 * 24
     },
     "hackathon-api": {
-        "endpoint": HACkATHON_API_ENDPOINT
+        "endpoint": HACKATHON_API_ENDPOINT
     },
     "javascript": {
         "renren": {
@@ -39,6 +44,12 @@ Config = {
             "clientID": "client_id=a10e2290ed907918d5ab",
             "redirect_uri": "redirect_uri=%s/github" % HOSTNAME,
             "scope": "scope=user",
+        },
+        "weibo": {
+            "meta_content": "a6a3b875cfdf95e2",
+            "clientID": "client_id=582725653",
+            "redirect_uri": "redirect_uri=%s/weibo" % HOSTNAME,
+            "scope": "scope=all",
         },
         "google": {
             "clientID": "client_id=304944766846-7jt8jbm39f1sj4kf4gtsqspsvtogdmem.apps.googleusercontent.com",
@@ -62,7 +73,7 @@ Config = {
         },
         "hackathon": {
             "name": "open-xml-sdk",
-            "endpoint": HACkATHON_API_ENDPOINT
+            "endpoint": HACKATHON_API_ENDPOINT
         }
     }
 }
