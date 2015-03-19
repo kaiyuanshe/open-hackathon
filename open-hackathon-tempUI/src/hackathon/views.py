@@ -52,7 +52,8 @@ def simple_route(path):
 @app.route('/index')
 def index():
     return render_template("index.html",
-                           providers=safe_get_config("login.provider_enabled", ["github", "qq", "gitcafe"]))
+                           providers=safe_get_config("login.provider_enabled", ["github", "qq", "gitcafe","weibo"]),
+                           meta_content={'weibo':get_config('javascript.weibo.meta_content')})
 
 
 # error handler for 404
@@ -143,6 +144,10 @@ def github_login():
 def gitcafe_login():
     return __login("gitcafe")
 
+
+@app.route('/weibo')
+def weibo_login():
+    return __login("weibo")
 
 @app.route("/logout")
 @login_required

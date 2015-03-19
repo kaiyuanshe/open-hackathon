@@ -17,32 +17,30 @@
             <h1>Open XML SDK 在线编程黑客松</h1>
         </div>
         {% if "github" in providers %}
-        <a class="btn btn-lg btn-success" href="javascript:;" role="button" id="githublogin" title="login">
-            <img src="/static/pic/gitcafe.login.jpg">
+        <a class="btn btn-success" href="javascript:;" role="button" id="githublogin" title="login">
+            <img src="/static/pic/github_32x32.png">
             <span>GitHub</span>
         </a>
         {% endif %}
         {% if "qq" in providers %}
-        <a class="btn btn-lg btn-success" href="javascript:;" role="button" id="qqlogin" title="login">
-            <img src="/static/pic/gitcafe.login.jpg">
-            <span>QQ</span>
+        <a class="btn" href="javascript:;" role="button" id="qqlogin" title="login" >
+            <img src="/static/pic/Connect_logo_4.png" >
         </a>
         {% endif %}
         {% if "gitcafe" in providers %}
-        <a class="btn btn-lg btn-success" href="javascript:;" role="button" id="gitcafelogin" title="login">
+        <a class="btn btn-success" href="javascript:;" role="button" id="gitcafelogin" title="login">
             <img src="/static/pic/gitcafe.login.jpg">
             <span>GitCafe</span>
         </a>
         {% endif %}
+        {% if "weibo" in providers %}
+        <a class="btn " href="javascript:;" role="button" id="weibologin" title="login">
+            <img src="/static/pic/weibo_173x32.png">
+        </a>
+        {% endif %}
         <div class="organizers">
             <div class="row ">
-                <div class="col-md-4">
-                    <img src="/static/pic/jkxy.png">
-                </div>
-                <div class="col-md-4 gitcafe" >
-                    <img src="/static/pic/gitcafe.png">
-                </div>
-                <div class="col-md-4">
+                <div class="col-md-offset-4 col-md-4">
                     <img src="/static/pic/kaiyuanshe.jpg">
                 </div>
             </div>

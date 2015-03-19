@@ -12,7 +12,6 @@ from flask import request, g
 
 
 class UserManagerTest(unittest.TestCase):
-
     def setUp(self):
         app.config['TESTING'] = True
         app.config['WTF_CSRF_ENABLED'] = False
@@ -48,7 +47,6 @@ class UserManagerTest(unittest.TestCase):
             mock_db.find_first_object_by.assert_called_once_with(UserToken, token=token_value)
 
 
-
     def test_validate_request_token_expired(self):
         token_value = "token_value"
         token = UserToken(token=token_value, user=None, expire_date=datetime.utcnow() - timedelta(seconds=30))
@@ -80,4 +78,3 @@ class UserManagerTest(unittest.TestCase):
             self.assertTrue(um.validate_request())
             mock_db.find_first_object_by.assert_called_once_with(UserToken, token=token_value)
             self.assertEqual(g.user, user)
-            

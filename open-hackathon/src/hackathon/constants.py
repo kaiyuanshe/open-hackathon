@@ -24,6 +24,7 @@ class OAUTH_PROVIDER:
     GITHUB = "github"
     QQ = "qq"
     GITCAFE = "gitcafe"
+    WEIBO= "weibo"
 
 
 class HEALTH_STATE:
