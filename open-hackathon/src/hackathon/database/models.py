@@ -141,8 +141,10 @@ class Register(Base):
     hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
     hackathon = relationship('Hackathon', backref=backref('registers', lazy='dynamic'))
 
+
     def json(self):
         return to_json(self, self.__class__)
+
 
     def __init__(self, **kwargs):
         super(Register, self).__init__(**kwargs)
@@ -151,6 +153,7 @@ class Register(Base):
         if self.enabled is None:
             self.enabled = 1
         self.online = 0
+
 
     def __repr__(self):
         return "Register:" + self.json()
@@ -163,9 +166,12 @@ class Hackathon(Base):
     name = Column(String(100), unique=True, nullable=False)
     sponsor = Column(Integer)
     status = Column(Integer)
+    check_register = Column(Integer)  # 1=True 0=False
+
     start_time = Column(DateTime)
     end_time = Column(DateTime)
     create_time = Column(DateTime)
+    update_time = Column(DateTime)
 
     def json(self):
         return to_json(self, self.__class__)
@@ -184,12 +190,14 @@ class DockerHostServer(Base):
 
     id = Column(Integer, primary_key=True)
     vm_name = Column(String(100), unique=True, nullable=False)
+    hackathon_id = Column(Integer)
     public_dns = Column(String(50))
     public_docker_api_port = Column(Integer)
     private_ip = Column(String(50), unique=True)
     private_docker_api_port = Column(Integer)
     container_count = Column(Integer, nullable=False)
     container_max_count = Column(Integer, nullable=False)
+
 
     def json(self):
         return to_json(self, self.__class__)
@@ -605,7 +613,7 @@ class AdminUser(Base):
 
 
 # if self.slug is None:
-#            self.slug = str(uuid.uuid1())[0:8]  # todo generate a real slug
+# self.slug = str(uuid.uuid1())[0:8]  # todo generate a real slug
 
 
 class AdminEmail(Base):
