@@ -53,7 +53,8 @@ def simple_route(path):
 def index():
     return render_template("index.html",
                            providers=safe_get_config("login.provider_enabled", ["github", "qq", "gitcafe","weibo"]),
-                           meta_content={'weibo':get_config('javascript.weibo.meta_content')})
+                           meta_content={'weibo':get_config('login.weibo.meta_content'),
+                                         'qq':get_config('login.qq.meta_content')})
 
 
 # error handler for 404

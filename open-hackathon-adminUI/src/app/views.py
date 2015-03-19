@@ -142,7 +142,8 @@ def qq_login():
 @app.route('/')
 @app.route('/index')
 def index():
-    return render_template('/admin/login.html',meta_content={'weibo':get_config('javascript.weibo.meta_content')})
+    return render_template('/admin/login.html',meta_content={'weibo':get_config('login.weibo.meta_content'),
+                                                             "qq":get_config('login.qq.meta_content')})
 
 
 @app.route("/logout")
