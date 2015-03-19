@@ -5,7 +5,7 @@ import urllib2
 sys.path.append("..")
 # -*- coding:utf8 -*-
 # encoding = utf-8
-from app.functions import get_remote, get_config, convert
+from app.functions import get_remote, get_config,post_to_remote, convert
 from app.log import log
 import json
 from admin_mgr import admin_manager
@@ -147,7 +147,6 @@ class GitcafeLogin(LoginBase):
 
         token = token_resp['access_token']
         value = "Bearer " + token
-        header = {"Authorization": value}
         opener = urllib2.build_opener(urllib2.HTTPHandler)
         request = urllib2.Request(get_config("login/gitcafe/user_info_url"))
         request.add_header("Authorization", value)
@@ -179,7 +178,55 @@ class GitcafeLogin(LoginBase):
 
 class WeiboLogin(LoginBase):
     def login(self, args):
-        return
+        log.info('login from Weibo Sina')
+        code = args.get('code')
+
+        # get access_token
+        log.debug(get_config('login.weibo.access_token_url') + code)
+        token_resp = post_to_remote(get_config('login.weibo.access_token_url') + code,{})
+        log.debug("get token from Weibo:" + str(token_resp))
+
+        access_token = token_resp['access_token']
+        uid = token_resp['uid']
+        log.debug("get token info from Weibo :" + access_token)
+
+        # get user info
+        # https://api.weibo.com/2/users/show.json?access_token=2.005RDjXC0rYD8d39ca83156aLZWgZE&uid=1404376560
+        user_info_resp = get_remote(get_config('login.weibo.user_info_url') + access_token + "&uid=" + uid)
+        user_info = json.loads(user_info_resp)
+        log.debug("get user base info from Weibo:" + user_info_resp)
+        # {"id":2330622122,"idstr":"2330622122","class":1,"screen_name":"test name","name":"test name",
+        # "province":"31","city":"10","location":"shanghai yangpu","description":"","url":"",
+        # "profile_image_url":"http://tp3.sinaimg.cn/2330622122/50/5629035320/1",
+        # "profile_url":"u/2330622122","domain":"","weihao":"","gender":"m","followers_count":34,
+        # "friends_count":42,"pagefriends_count":0,"statuses_count":0,"favourites_count":1,
+        # "created_at":"Mon Aug 22 17:58:15 +0800 2011","following":false,"allow_all_act_msg":false,
+        # "geo_enabled":true,"verified":false,"verified_type":-1,"remark":"","ptype":0,"allow_all_comment":true,
+        # "avatar_large":"http://tp3.sinaimg.cn/2330622122/180/5629035320/1","avatar_hd":"http://tp3.sinaimg.cn/2330622122/180/5629035320/1",
+        # "verified_reason":"","verified_trade":"","verified_reason_url":"","verified_source":"","verified_source_url":"",
+        # "follow_me":false,"online_status":0,"bi_followers_count":8,"lang":"zh-cn","star":0,"mbtype":0,"mbrank":0,
+        # "block_word":0,"block_app":0,"credit_score":80,"urank":6}
+        openid = user_info['id']
+        name = user_info['name']
+        nickname = user_info['screen_name']
+        avatar = user_info['avatar_hd']
+
+        # get user primary email
+        email_info_resp = get_remote(get_config('login.weibo.email_info_url') + access_token)
+        log.debug("get email from github:" + email_info_resp)
+
+        email_info_resp_json = json.loads(email_info_resp)
+        email = email_info_resp_json['email']
+
+        email_info = [
+            {'name': name, 'email': email, 'id': id, 'verified': 1, 'primary': 1, 'nickname': nickname,
+             'avatar_url': avatar}]
+
+        return self.login2db(openid, name=name,
+                                    nickname=nickname,
+                                    access_token=access_token,
+                                    email_info=email_info,
+                                    avatar_url=avatar)
 
 login_providers = {
     "github": GithubLogin(),

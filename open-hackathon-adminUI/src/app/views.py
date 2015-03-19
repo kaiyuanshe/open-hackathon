@@ -131,7 +131,7 @@ def github_login():
     return __login("github")
 
 @app.route('/weibo')
-def github_login():
+def weibo_login():
     return __login("weibo")
 
 @app.route('/qq')
@@ -142,7 +142,7 @@ def qq_login():
 @app.route('/')
 @app.route('/index')
 def index():
-    return render_template('/admin/login.html')
+    return render_template('/admin/login.html',meta_content={'weibo':get_config('javascript.weibo.meta_content')})
 
 
 @app.route("/logout")

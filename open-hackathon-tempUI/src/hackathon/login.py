@@ -69,24 +69,6 @@ class GithubLogin():
         log.debug("get token info from github")
         data = {"provider": "github", "code": code, "access_token": access_token, "hackathon_name": hackathon_name}
         return post_to_remote('%s/api/user/login' % hackathon_api_url, data)
-        # example:
-        #
-        # {"login":"juniwang","id":8814383,"avatar_url":"https://avatars.githubusercontent.com/u/8814383?v=3","gravatar_id":"",
-        # "url":"https://api.github.com/users/juniwang","html_url":"https://github.com/juniwang",
-        # "followers_url":"https://api.github.com/users/juniwang/followers",
-        # "following_url":"https://api.github.com/users/juniwang/following{/other_user}",
-        # "gists_url":"https://api.github.com/users/juniwang/gists{/gist_id}",
-        # "starred_url":"https://api.github.com/users/juniwang/starred{/owner}{/repo}",
-        # "subscriptions_url":"https://api.github.com/users/juniwang/subscriptions",
-        # "organizations_url":"https://api.github.com/users/juniwang/orgs","repos_url":"https://api.github.com/users/juniwang/repos",
-        # "events_url":"https://api.github.com/users/juniwang/events{/privacy}",
-        # "received_events_url":"https://api.github.com/users/juniwang/received_events","type":"User","site_admin":false,
-        # "name":"Junbo Wang","company":"","blog":"","location":"Shanghai China",
-        # "email":"wangjunbo924@gmail.com","hireable":false,"bio":null,"public_repos":12,"public_gists":0,"followers":0,
-        # "following":1,"created_at":"2014-09-18T01:30:30Z","updated_at":"2014-11-25T09:00:37Z","private_gists":0,
-        # "total_private_repos":0,"owned_private_repos":0,"disk_usage":14179,"collaborators":0,
-        # "plan":{"name":"free","space":307200,"collaborators":0,"private_repos":0}}
-        #
 
 
 class GitcafeLogin():
@@ -105,8 +87,25 @@ class GitcafeLogin():
         return post_to_remote('%s/api/user/login' % hackathon_api_url, data)
 
 
+class WeiboLogin():
+    def login(self,args):
+        code = args.get('code')
+
+        # get access_token
+        log.debug(get_config('login.weibo.access_token_url') + code)
+        token_resp = post_to_remote(get_config('login.weibo.access_token_url') + code,{})
+        log.debug("get token from Weibo:" + str(token_resp))
+
+        access_token = token_resp['access_token']
+        uid = token_resp['uid']
+
+        log.debug("get token info from weibo")
+        data = {"provider": "weibo", "code": code, "access_token": access_token, "uid":uid, "hackathon_name": hackathon_name}
+        return post_to_remote('%s/api/user/login' % hackathon_api_url, data)
+
 login_providers = {
     "github": GithubLogin(),
     "qq": QQLogin(),
-    "gitcafe": GitcafeLogin()
+    "gitcafe": GitcafeLogin(),
+    "weibo": WeiboLogin()
 }
