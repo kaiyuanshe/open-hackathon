@@ -201,7 +201,6 @@ class WeiboLogin(LoginProviderBase):
         return detail
 
 
-
 login_providers = {
     OAUTH_PROVIDER.GITHUB: GithubLogin(),
     OAUTH_PROVIDER.QQ: QQLogin(),
