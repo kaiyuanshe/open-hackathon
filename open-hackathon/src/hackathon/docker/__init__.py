@@ -22,10 +22,10 @@ default_http_headers = {'content-type': 'application/json'}
 
 
 class OssDocker(object):
+    host_ports = []
+
     def __init__(self):
-        self.host_ports = []
         self.lock = Lock()
-        self.count = 0
 
     def get_vm_url(self, docker_host):
         vm_url = "http://" + docker_host.public_dns + ":" + str(docker_host.public_docker_api_port)
@@ -37,7 +37,7 @@ class OssDocker(object):
             log.debug("there are %d experiment is starting, host ports will updated in next loop")
             return
         log.debug("-----release ports cache successfully------")
-        self.host_ports = []
+        OssDocker.host_ports = []
 
     def ping(self, docker_host):
         try:
@@ -64,14 +64,14 @@ class OssDocker(object):
         self.lock.acquire()
         try:
             host_port = port + 10000
-            while host_port in port_bindings or host_port in self.host_ports:
+            while host_port in port_bindings or host_port in OssDocker.host_ports:
                 host_port += 1
             if host_port >= 65535:
                 log.error("port used up on this host server")
                 raise Exception("no port available")
-            if self.count == 30:
+            if len(OssDocker.host_ports) >= 30:
                 self.__ports_cache()
-            self.host_ports.append(host_port)
+            OssDocker.host_ports.append(host_port)
             log.debug("host_port is %d " % host_port)
             return host_port
         finally:

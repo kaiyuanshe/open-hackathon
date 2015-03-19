@@ -300,7 +300,7 @@ class ExprManager(object):
             for ve in expr.virtual_environments:
                 db_adapter.update_object(ve, user_id=user_id)
             db_session.commit()
-            static_encapsulation()
+            add_job()
             return expr
 
     def start_expr(self, hackathon_name, template_name, user_id):
@@ -535,10 +535,16 @@ def check_default_expr():
 
 
 def static_encapsulation():
+    log.debug("start checking experiment ... ")
     alarm_time = datetime.now() + timedelta(seconds=1)
     scheduler.add_job(check_default_expr, 'interval', id='1', replace_existing=True, next_run_time=alarm_time,
-                      minutes=30)
-    # scheduler.add_job(docker.ports_cache, 'interval', id='2', replace_existing=True, next_run_time=alarm_time, hours=1)
+                      minutes=10)
+
+
+def add_job():
+    log.debug("experiment had been assigned, check experiment and start new job ... ")
+    alarm_time = datetime.now() + timedelta(seconds=1)
+    scheduler.add_job(check_default_expr, 'date', next_run_time=alarm_time)
 
 
 expr_manager = ExprManager()
