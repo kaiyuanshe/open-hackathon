@@ -1,43 +1,48 @@
-var express = require('express')
-var config = require('../config')
-var request = require('request')
+var request = require('request');
+var config = require('../config');
 
-module.exports = (function() {
-    var service = {}
-    var methods = {
-        post: 'post',
-        del: 'del',
-        put: 'put'
-    }
-    var api_modulse = config.api
-    var getCmd = function(module, action) {
-        var objCmd = {}
-        for (var key in methods) {
-            objCmd[key] = (function(key, value) {
-                return function(query, callback) {
-                    var options = {
-                        method: key,
-                        'content-type': 'application/json',
-                        url: action == null ? [config.proxy, 'api', module].join('/') : [config.proxy, 'api', module, action].join('/'),
-                        json: query
-                    }
-                    request(options, function(err, res, data) {
-                        callback(res, data)
-                    })
-                }
-            })(key, methods[key])
+
+module.exports = (function () {
+  function scan(obj, name) {
+    var key;
+    var getCmd = {};
+    if (obj instanceof Array) {
+      for (key in obj) {
+        getCmd[obj[key]] = scan(obj[key], name)
+      }
+      return getCmd;
+    } else if (obj instanceof Object) {
+      for (key in obj) {
+        if (obj.hasOwnProperty(key)) {
+          if (key == '_self') {
+            getCmd = scan(obj[key], name)
+          } else {
+            getCmd[key] = scan(obj[key], name + '/' + key);
+          }
         }
-        return objCmd
-    }
-    for (var key in api_modulse) {
-        service[key] = (function(module) {
-            return getCmd(module, null)
-        })(key);
-        for (var i in api_modulse[key]) {
-            service[key][api_modulse[key][i]] = (function(module, action) {
-                return getCmd(module, action)
-            })(key, api_modulse[key][i])
+      }
+      return getCmd;
+    } else {
+      return getCmd[obj] = function (query, headers, callback) {
+        if (!callback) {
+          callback = headers;
+          headers = {};
         }
+        var options = {
+          method: obj,
+          url: name,
+          'content-type': 'application/json',
+          headers: headers,
+          json: query
+        }
+        request(options, function (err, res, data) {
+          callback(res, data);
+        })
+      }
     }
-    return service
-})()
+  }
+
+  return scan(config.api, config.proxy+'/api');
+})();
+
+

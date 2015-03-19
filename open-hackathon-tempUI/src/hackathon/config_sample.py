@@ -3,7 +3,7 @@
 # oauth constants
 HOSTNAME = "http://hackathon.chinacloudapp.cn"  # host name of the UI site
 QQ_OAUTH_STATE = "openhackathon"  # todo state should be constant. Actually it should be unguessable to prevent CSFA
-HACkATHON_API_ENDPOINT = "http://hackathon.chinacloudapp.cn:15000"
+HACKATHON_API_ENDPOINT = "http://hackathon.chinacloudapp.cn:15000"
 
 Config = {
     "environment": "local",
@@ -31,7 +31,7 @@ Config = {
         "token_expiration_minutes": 60 * 24
     },
     "hackathon-api": {
-        "endpoint": HACkATHON_API_ENDPOINT
+        "endpoint": HACKATHON_API_ENDPOINT
     },
     "javascript": {
         "renren": {
@@ -73,7 +73,7 @@ Config = {
         },
         "hackathon": {
             "name": "open-xml-sdk",
-            "endpoint": HACkATHON_API_ENDPOINT
+            "endpoint": HACKATHON_API_ENDPOINT
         }
     }
 }

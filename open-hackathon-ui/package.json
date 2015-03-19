@@ -35,6 +35,7 @@
     "body-parser": "^1.10.2",
     "cookie-parser": "^1.3.3",
     "express": "^4.11.1",
+    "hbs": "^3.0.0",
     "log4js": "^0.6.22",
     "request": "^2.51.0"
   },
