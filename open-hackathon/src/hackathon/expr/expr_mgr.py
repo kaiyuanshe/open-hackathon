@@ -16,8 +16,6 @@ from datetime import timedelta
 
 docker = OssDocker()
 
-alarm_time = datetime.now() + timedelta(seconds=1)
-
 # initial once
 
 
@@ -308,6 +306,7 @@ class ExprManager(object):
                 db_adapter.update_object(ve, user_id=user_id)
             db_session.commit()
             log.debug("experiment had been assigned, check experiment and start new job ... ")
+            alarm_time = datetime.now() + timedelta(seconds=1)
             scheduler.add_job(check_default_expr, 'date', next_run_time=alarm_time)
             return expr
 
@@ -511,12 +510,13 @@ class ExprManager(object):
 
 def open_check_expr():
     log.debug("start checking experiment ... ")
+    alarm_time = datetime.now() + timedelta(seconds=1)
     scheduler.add_job(check_default_expr, 'interval', id='1', replace_existing=True, next_run_time=alarm_time,
                       hours=1)
 
 
 def check_default_expr():
-    templates = db_adapter.find_all_objects(Template)
+    templates = db_adapter.find_all_objects_order_by(Template)
     total_azure = get_config("container_total.azure")
     total_docker = get_config("container_total.docker")
     for template in templates:
@@ -529,6 +529,13 @@ def check_default_expr():
             if template.provider == VirtualEnvironmentProvider.AzureVM:
                 while curr_num < total_azure:
                     remain_num = total_azure - curr_num
+                    start_num = db_adapter.count_by(Experiment, user_id=ReservedUser.DefaultUserID, template=template,
+                                                    status=ExprStatus.Starting)
+                    if start_num > 0:
+                        log.debug("there is an azure is starting, please waiting for 15 seconds ... ")
+                        alarm_time = datetime.now() + timedelta(seconds=15)
+                        scheduler.add_job(check_default_expr, 'date', next_run_time=alarm_time)
+                        return
                     log.debug("no idle template: %s , remain num is %d ... " % (template.name, remain_num))
                     expr_manager.start_expr(template.hackathon.name, template.name, ReservedUser.DefaultUserID)
                     curr_num += 1
@@ -536,7 +543,6 @@ def check_default_expr():
             elif template.provider == VirtualEnvironmentProvider.Docker:
                 log.debug("template name is %s, hackathon name is %s" % (template.name, template.hackathon.name))
                 while curr_num < total_docker:
-                    # continue
                     remain_num = total_docker - curr_num
                     log.debug("no idle template: %s, remain num is %d ... " % (template.name, remain_num))
                     expr_manager.start_expr(template.hackathon.name, template.name, ReservedUser.DefaultUserID)

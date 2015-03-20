@@ -23,7 +23,7 @@ db_adapter.add_object_kwargs(Announcement, content="欢迎访问开放黑客松�
 hackathon_name = 'open-xml-sdk'
 h = db_adapter.add_object_kwargs(Hackathon, name=hackathon_name, sponsor=1, end_time="2015-03-16 00:00:00")
 
-"""db_adapter.add_object_kwargs(DockerHostServer,
+db_adapter.add_object_kwargs(DockerHostServer,
                              vm_name="OSSLAB-VM-18",
                              public_dns="osslab-vm-18.chinacloudapp.cn",
                              public_ip="139.217.0.232",
@@ -32,18 +32,18 @@ h = db_adapter.add_object_kwargs(Hackathon, name=hackathon_name, sponsor=1, end_
                              private_docker_api_port=4243,
                              container_count=0,
                              container_max_count=100,
-                             hackathon=h)"""
-
-db_adapter.add_object_kwargs(DockerHostServer,
-                             vm_name="localhost",
-                             public_dns="localhost",
-                             public_ip="localhost",
-                             public_docker_api_port=4243,
-                             private_ip="10.0.2.15",
-                             private_docker_api_port=4243,
-                             container_count=0,
-                             container_max_count=100,
                              hackathon=h)
+
+# db_adapter.add_object_kwargs(DockerHostServer,
+#                              vm_name="localhost",
+#                              public_dns="localhost",
+#                              public_ip="localhost",
+#                              public_docker_api_port=4243,
+#                              private_ip="10.0.2.15",
+#                              private_docker_api_port=4243,
+#                              container_count=0,
+#                              container_max_count=100,
+#                              hackathon=h)
 
 testadmin = db_adapter.find_first_object_by(AdminUserHackathonRel, admin_email='v-bih@microsoft.com')
 if testadmin is None:

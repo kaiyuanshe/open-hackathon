@@ -66,3 +66,4 @@ docs/_build/
 *guacamole.properties
 *config.py
 *update_test_data.py
+open-hackathon/src/create_test_data.py

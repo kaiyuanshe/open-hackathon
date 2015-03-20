@@ -82,6 +82,7 @@ class OssDocker(object):
         containers = self.containers_info(docker_host)
         host_ports = flatten(map(lambda p: p['Ports'], containers))
 
+        # todo if azure return -1
         def sub(port):
             return port["PublicPort"] if "PublicPort" in port else -1
 
