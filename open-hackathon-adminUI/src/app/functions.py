@@ -1,8 +1,19 @@
+<<<<<<< HEAD
+import urllib2
+import json
+import os
+
+import requests
+
+from config import Config
+
+=======
 import json, os, requests, urllib2
 try:
     from config import Config
 except ImportError:
     from config_sample import Config
+>>>>>>> upstream/master
 
 def convert(input):
     if isinstance(input, dict):

@@ -42,7 +42,6 @@ class SQLAlchemyAdapter(DBAdapter):
     def __init__(self, db_session):
         super(SQLAlchemyAdapter, self).__init__(db_session)
 
-
     # ------------------------------ methods that no need to wrap --- start ------------------------------
 
     def commit(self):
@@ -69,6 +68,9 @@ class SQLAlchemyAdapter(DBAdapter):
 
     def find_all_objects_by(self, ObjectClass, **kwargs):
         return ObjectClass.query.filter_by(**kwargs).all()
+
+    def find_all_objects_order_by(self, ObjectClass, **kwargs):
+        return ObjectClass.query.filter_by(**kwargs).order_by(ObjectClass.id.desc()).all()
 
     def count(self, ObjectClass, *criterion):
         return ObjectClass.query.filter(*criterion).count()

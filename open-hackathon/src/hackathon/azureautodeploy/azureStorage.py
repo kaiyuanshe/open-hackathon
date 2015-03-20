@@ -13,9 +13,9 @@ class AzureStorage:
     Currently the status of storage in database is only RUNNING
     """
 
-    def __init__(self, sms, user_template, template_config):
+    def __init__(self, sms, template, template_config):
         self.sms = sms
-        self.user_template = user_template
+        self.template = template
         self.template_config = template_config
 
     def create_storage_account(self):
@@ -24,7 +24,7 @@ class AzureStorage:
         Else check whether it created by this function before
         :return:
         """
-        user_operation_commit(self.user_template, CREATE_STORAGE_ACCOUNT, START)
+        user_operation_commit(self.template, CREATE_STORAGE_ACCOUNT, START)
         storage_account = self.template_config['storage_account']
         # avoid duplicate storage account
         if not self.__storage_account_exists(storage_account['service_name']):
@@ -37,34 +37,34 @@ class AzureStorage:
                                                          storage_account['label'],
                                                          location=storage_account['location'])
             except Exception as e:
-                user_operation_commit(self.user_template, CREATE_STORAGE_ACCOUNT, FAIL, e.message)
+                user_operation_commit(self.template, CREATE_STORAGE_ACCOUNT, FAIL, e.message)
                 log.error(e)
                 return False
             # make sure async operation succeeds
             if not wait_for_async(self.sms, result.request_id, ASYNC_TICK, ASYNC_LOOP):
                 m = WAIT_FOR_ASYNC + ' ' + FAIL
-                user_operation_commit(self.user_template, CREATE_STORAGE_ACCOUNT, FAIL, m)
+                user_operation_commit(self.template, CREATE_STORAGE_ACCOUNT, FAIL, m)
                 log.error(m)
                 return False
             # make sure storage account exists
             if not self.__storage_account_exists(storage_account['service_name']):
                 m = '%s %s created but not exist' % (STORAGE_ACCOUNT, storage_account['service_name'])
-                user_operation_commit(self.user_template, CREATE_STORAGE_ACCOUNT, FAIL, m)
+                user_operation_commit(self.template, CREATE_STORAGE_ACCOUNT, FAIL, m)
                 log.error(m)
                 return False
             else:
-                user_resource_commit(self.user_template, STORAGE_ACCOUNT, storage_account['service_name'], RUNNING)
-                user_operation_commit(self.user_template, CREATE_STORAGE_ACCOUNT, END)
+                user_resource_commit(self.template, STORAGE_ACCOUNT, storage_account['service_name'], RUNNING)
+                user_operation_commit(self.template, CREATE_STORAGE_ACCOUNT, END)
         else:
             # check whether storage account created by this function before
             if db_adapter.count_by(UserResource, type=STORAGE_ACCOUNT, name=storage_account['service_name']) == 0:
                 m = '%s %s exist but not created by this function before' %\
                     (STORAGE_ACCOUNT, storage_account['service_name'])
-                user_resource_commit(self.user_template, STORAGE_ACCOUNT, storage_account['service_name'], RUNNING)
+                user_resource_commit(self.template, STORAGE_ACCOUNT, storage_account['service_name'], RUNNING)
             else:
                 m = '%s %s exist and created by this function before' %\
                     (STORAGE_ACCOUNT, storage_account['service_name'])
-            user_operation_commit(self.user_template, CREATE_STORAGE_ACCOUNT, END, m)
+            user_operation_commit(self.template, CREATE_STORAGE_ACCOUNT, END, m)
             log.debug(m)
         return True
 
