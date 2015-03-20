@@ -86,9 +86,9 @@ class ExprManager(object):
     def __get_available_docker_host(self, expr_config, hackathon):
         req_count = len(expr_config["virtual_environments"])
 
-        vm = db_adapter.filter(DockerHostServer,
+        vm = db_adapter.find_first_object(DockerHostServer,
                                DockerHostServer.container_count + req_count <= DockerHostServer.container_max_count,
-                               DockerHostServer.hackathon_id == hackathon.id).first()
+                               DockerHostServer.hackathon_id == hackathon.id)
 
         # todo connect to azure to launch new VM if no existed VM meet the requirement
         # since it takes some time to launch VM, it's more reasonable to launch VM when the existed ones are almost used up.

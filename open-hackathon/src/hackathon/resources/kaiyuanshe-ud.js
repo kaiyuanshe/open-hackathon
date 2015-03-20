@@ -1,35 +1,30 @@
 {
-    "expr_name": "kaiyuanse-ubuntu-terminal",
+    "expr_name": "kaiyuanshe-ud",
     "virtual_environments": [
         {
             "provider": "docker",
             "name": "ubuntu",
-            "image": "sffamily/ulampssh",
+            "image": "sffamily/ubuntu-gnome-vnc-eclipse",
             "ports":[{
                 "name": "website",
                 "port": 80,
                 "public": true
             },{
-                "name": "ssh",
-                "port": 22,
+                "name": "vnc",
+                "port": 5901,
                 "public": true
-            },{
-                "name": "mysql",
-                "port": 3306,
-                "public": false
             }],
             "AttachStdin":false,
             "AttachStdout":true,
             "AttachStderr":true,
             "tty": true,
-            "Env": ["ROOT_PASS=acowoman"],
             "stdin_open": true,
             "remote": {
                 "provider": "guacamole",
-                "protocol": "ssh",
+                "protocol": "vnc",
                 "username": "root",
-                "password": "acowoman",
-                "port": 22
+                "password": "acoman",
+                "port": 5901
             }
         }
     ]

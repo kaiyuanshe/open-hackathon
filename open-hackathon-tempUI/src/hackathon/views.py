@@ -1,4 +1,4 @@
-from flask import Response, render_template, abort, request, session, g, redirect, make_response
+from flask import Response, render_template, abort, request, session, g, redirect
 from . import *
 from log import log
 import json
@@ -18,7 +18,7 @@ Template_Routes = {
     "submitted": "submitted.html",
     "redirect": "redirect.html",
     "notregister": "notregister.html",
-    "challenges":"challenges.html"
+    "challenges": "challenges.html"
 }
 
 
@@ -39,9 +39,17 @@ def before_request():
     app.permanent_session_lifetime = timedelta(minutes=session_lifetime_minutes)
 
 
+def oauth_meta_content():
+    return {
+        'weibo': get_config('login.weibo.meta_content'),
+        'qq': get_config('login.qq.meta_content')
+    }
+
+
 def simple_route(path):
     if Template_Routes.has_key(path):
-        return render_template(Template_Routes[path])
+        return render_template(Template_Routes[path],
+                               meta_content=oauth_meta_content())
     else:
         log.warn("page '%s' not found" % path)
         abort(404)
@@ -52,8 +60,9 @@ def simple_route(path):
 @app.route('/index')
 def index():
     return render_template("index.html",
-                           providers=safe_get_config("login.provider_enabled", ["github", "qq", "gitcafe","weibo"]),
-                           meta_content={'weibo':get_config('javascript.weibo.meta_content')})
+                           providers=safe_get_config("login.provider_enabled", ["github", "qq", "gitcafe", "weibo"]),
+                           meta_content=oauth_meta_content()
+    )
 
 
 # error handler for 404
@@ -83,7 +92,7 @@ def settings():
     if not session["register_state"]:
         return redirect("notregister")
 
-    return render_template("settings.html")
+    return render_template("settings.html", meta_content=oauth_meta_content())
 
 
 @app.route('/hackathon')
@@ -92,7 +101,7 @@ def hackathon():
     if not session["register_state"]:
         return redirect("notregister")
 
-    return render_template("hackathon.html")
+    return render_template("hackathon.html", meta_content=oauth_meta_content())
 
 
 # js config
@@ -148,6 +157,7 @@ def gitcafe_login():
 @app.route('/weibo')
 def weibo_login():
     return __login("weibo")
+
 
 @app.route("/logout")
 @login_required

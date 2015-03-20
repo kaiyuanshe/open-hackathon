@@ -12,7 +12,7 @@ from hackathon.constants import OAUTH_PROVIDER
 
 
 class LoginProviderBase():
-    
+
     def login(self, args):
         pass
 
