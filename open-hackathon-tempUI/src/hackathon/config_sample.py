@@ -36,12 +36,6 @@ Config = {
         "endpoint": HACKATHON_API_ENDPOINT
     },
     "javascript": {
-        "renren": {
-            "clientID": "client_id=7e0932f4c5b34176b0ca1881f5e88562",
-            "redirect_url": "redirect_uri=%s/renren" % HOSTNAME,
-            "scope": "scope=read_user_message+read_user_feed+read_user_photo",
-            "response_type": "response_type=token",
-        },
         "github": {
             "clientID": "client_id=a10e2290ed907918d5ab",
             "redirect_uri": "redirect_uri=%s/github" % HOSTNAME,
@@ -51,12 +45,6 @@ Config = {
             "clientID": "client_id=582725653",
             "redirect_uri": "redirect_uri=%s/weibo" % HOSTNAME,
             "scope": "scope=all",
-        },
-        "google": {
-            "clientID": "client_id=304944766846-7jt8jbm39f1sj4kf4gtsqspsvtogdmem.apps.googleusercontent.com",
-            "redirect_url": "redirect_uri=%s/google" % HOSTNAME,
-            "scope": "scope=https://www.googleapis.com/auth/userinfo.profile+https://www.googleapis.com/auth/userinfo.email",
-            "response_type": "response_type=token",
         },
         "qq": {
             "clientID": "client_id=101192358",
