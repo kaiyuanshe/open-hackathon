@@ -17,9 +17,16 @@ Config = {
             "emails_info_url": 'https://api.github.com/user/emails?access_token='
         },
         "qq": {
+            "meta_content": "274307566465013314076545663016134754100636",
             "access_token_url": 'https://graph.qq.com/oauth2.0/token?grant_type=authorization_code&client_id=101192358&client_secret=d94f8e7baee4f03371f52d21c4400cab&redirect_uri=%s/qq&code=' % HOSTNAME,
             "openid_url": 'https://graph.qq.com/oauth2.0/me?access_token=',
             "user_info_url": 'https://graph.qq.com/user/get_user_info?access_token=%s&oauth_consumer_key=%s&openid=%s'
+        },
+        "weibo":{
+            "meta_content": "a6a3b875cfdf95e2",
+            "access_token_url": 'https://api.weibo.com/oauth2/access_token?client_id=582725653&client_secret=28f5325cb57613b9f135185b5245c5a2&grant_type=authorization_code&redirect_uri=%s/weibo&code=' % HOSTNAME,
+            "user_info_url": 'https://api.weibo.com/2/users/show.json?access_token=',
+            "email_info_url": 'https://api.weibo.com/2/account/profile/email.json?access_token='
         },
         "provider_enabled": ["github", "qq"],
         "session_minutes": 60,
@@ -39,6 +46,11 @@ Config = {
             "clientID": "client_id=a10e2290ed907918d5ab",
             "redirect_uri": "redirect_uri=%s/github" % HOSTNAME,
             "scope": "scope=user",
+        },
+        "weibo": {
+            "clientID": "client_id=582725653",
+            "redirect_uri": "redirect_uri=%s/weibo" % HOSTNAME,
+            "scope": "scope=all",
         },
         "google": {
             "clientID": "client_id=304944766846-7jt8jbm39f1sj4kf4gtsqspsvtogdmem.apps.googleusercontent.com",
