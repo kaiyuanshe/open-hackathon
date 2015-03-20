@@ -229,14 +229,16 @@ class ExprManager(object):
         # add to guacamole config
         # note the port should get from the container["port"] to get corresponding listening port rather than the
         # expose port that defined in the template. Following codes are just example
-        if "remote" in container_config and container_config["remote"][
-            "provider"] == "guacamole" and "ports" in container_config:
+        if "remote" in container_config \
+                and container_config["remote"]["provider"] == "guacamole" \
+                and "ports" in container_config:
             guac = container_config["remote"]
             port_cfg = filter(lambda p: p["port"] == guac["port"], container_config["ports"])
 
             if len(port_cfg) > 0:
                 gc = {
-                    "displayname": port_cfg[0]["name"] if "name" in port_cfg[0] else container_config["name"],
+                    "displayname": container_config["displayname"] if "displayname" in container_config else
+                    container_config["name"],
                     "name": post_data["container_name"],
                     "protocol": guac["protocol"],
                     "hostname": host_server.public_dns,
