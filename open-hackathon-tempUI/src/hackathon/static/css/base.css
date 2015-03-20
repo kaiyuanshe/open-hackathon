@@ -48,6 +48,7 @@ a {
 }
 .radio-inline, .checkbox-inline {
     padding-left: 0;
+    width: 200px;
 }
 #carousel {
     background-color: #fff;
@@ -171,7 +172,8 @@ a {
     margin-top: 20px;
     line-height: 30px;
     padding: 0;
-    text-indent: 80px;
+    width: 160px;
+    display: inline-block;
 }
 .error-container {
     display: none;
