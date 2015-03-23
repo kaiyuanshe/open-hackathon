@@ -7,50 +7,37 @@
           <h1>请选择你所需要的环境</h1>
         </div>
         <div class="row form-group">
-          <div class="col-md-4 text-center">
+          <div class="col-md-6  text-center">
             <label class="radio-inline ">
-              <img src="/images/windowsr2.icon.png" alt="windows service 2012 R2"/> Windows 2012 R2
-              <div class="iradio_square-blue" ng-class="{checked:type == 'windows'}" style="position: relative;">
-                <input type="radio" name="web" value="windows" checked ng-model="type">
+              <img src="/images/ubuntu.icon.png" alt="Ubuntu Desktop" /> LAMP + UBUNTU
+              <div class="iradio_square-blue" ng-class="{checked:type == 'ssh'}" style="position: relative;">
+                <input type="radio" name="web" value="ssh" checked ng-model="type">
                 <ins class="iCheck-helper"></ins>
               </div>
             </label>
-            <ul class="services-list">
-              <li>Windows Server 2012R2</li>
-              <li>Visual Studio 2013 Community</li>
-              <li>Open XML SDK and Tools</li>
-              <li>Chrome</li>
-              <li>Firefox</li>
-            </ul>
+            <div>
+              <ul class="services-list">
+                <li>Ubuntu</li>
+                <li>Apache</li>
+                <li>MySQL</li>
+                <li>PHP</li>
+              </ul>
+            </div>
           </div>
-          <div class="col-md-4  text-center">
+          <div class="col-md-6 text-center">
             <label class="radio-inline ">
-              <img src="/images/ubuntu.icon.png" alt="Ubuntu Desktop"/> Ubuntu Desktop
-              <div class="iradio_square-blue" ng-class="{checked:type == 'ud'}" style="position: relative;">
-                <input type="radio" name="web" value="ud" checked ng-model="type">
+              <img src="/images/ubuntu.icon.png" alt="Ubuntu Terminal" /> UBUNTU + GNOME
+              <div class="iradio_square-blue" ng-class="{checked:type == 'VNC'}" style="position: relative;">
+                <input type="radio" name="web" value="VNC" checked ng-model="type">
                 <ins class="iCheck-helper"></ins>
               </div>
             </label>
-            <ul class="services-list">
-              <li>Ubuntu 14.04 TLS</li>
-              <li>Mono</li>
-              <li>Open XML SDK</li>
-              <li>Eclipse</li>
-            </ul>
-          </div>
-          <div class="col-md-4 text-center">
-            <label class="radio-inline ">
-              <img src="/images/terminal.icon.png" alt="Ubuntu Terminal"/> Ubuntu Terminal
-              <div class="iradio_square-blue" ng-class="{checked:type == 'ut'}" style="position: relative;">
-                <input type="radio" name="web" value="ut" checked ng-model="type">
-                <ins class="iCheck-helper"></ins>
-              </div>
-            </label>
-            <ul class="services-list">
-              <li>Ubuntu 14.04 TLS</li>
-              <li>Mono</li>
-              <li>Open XML SDK</li>
-            </ul>
+            <div>
+              <ul class="services-list">
+                <li>Ubuntu</li>
+                <li>GNome</li>
+              </ul>
+            </div>
           </div>
         </div>
         <div class="row form-group">

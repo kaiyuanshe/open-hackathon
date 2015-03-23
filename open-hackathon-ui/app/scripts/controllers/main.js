@@ -18,18 +18,29 @@ s.controller('main.controller', function ($scope) {
   var l, t;
   l = (screen.width - 600) / 2;
   t = (screen.height - 400) / 2;
-  $scope.githublogin = function () {
-    var url = "https://github.com/login/oauth/authorize?client_id=a10e2290ed907918d5ab&redirect_uri=http://hackathon.chinacloudapp.cn/github&scope=user";
+  function openWindow(url){
     window.open(url, '_blank', 'toolbar=no, directories=no, status=yes,location=no, menubar=no, width=600, height=500, top=' + t + ', left=' + l);
+  }
+  $scope.githublogin = function () {
+    var url = 'https://github.com/login/oauth/authorize?'+
+      $.param($scope.config.sociallogin.github);
+    openWindow(url);
   };
   $scope.qqlogin = function () {
-    var url = 'https://graph.qq.com/oauth2.0/authorize?client_id=101157515&redirect_uri=http://hackathon.chinacloudapp.cn/qq&scope=get_user_info&state=openhackathon&response_type=code';
-    window.open(url, '_blank', 'toolbar=no, directories=no, status=yes,location=no, menubar=no, width=600, height=500, top=' + t + ', left=' + l);
+    var url = 'https://graph.qq.com/oauth2.0/authorize?'+
+    $.param($scope.config.sociallogin.qq);
+    openWindow(url);
   };
   $scope.gitcafelogin = function () {
-    var url = 'https://graph.qq.com/oauth2.0/authorize?client_id=101157515&redirect_uri=http://hackathon.chinacloudapp.cn/qq&scope=get_user_info&state=openhackathon&response_type=code';
-    window.open(url, '_blank', 'toolbar=no, directories=no, status=yes,location=no, menubar=no, width=600, height=500, top=' + t + ', left=' + l);
+    var url = 'https://graph.qq.com/oauth2.0/authorize?'+
+      $.param($scope.config.sociallogin.gitcafe);
+    openWindow(url);
   };
+  $scope.weibologin = function(){
+    var url = 'https://api.weibo.com/oauth2/authorize?'+
+      $.param($scope.config.sociallogin.weibo);
+    openWindow(url);
+  }
 });
 
 

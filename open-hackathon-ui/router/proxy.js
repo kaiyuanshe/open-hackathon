@@ -27,11 +27,11 @@ function login(res, name, token) {
 router.get('/github', function (req, res) {
   var option = {
     'content-type': 'application/json',
-    url: config.sociallogin.github.access_token_url,
+    url: config.login.github.access_token_url,
     json: {
-      client_id: config.sociallogin.github.client_id,
-      client_secret: config.sociallogin.github.client_secret,
-      redirect_uri: util.format(config.sociallogin.github.redirect_uri, config.hostname),
+      client_id: config.login.github.client_id,
+      client_secret: config.login.github.client_secret,
+      redirect_uri: util.format(config.login.github.redirect_uri, config.hostname),
       code: req.query.code
     }
   };
@@ -41,11 +41,55 @@ router.get('/github', function (req, res) {
 });
 
 router.get('/qq', function (req, res) {
-  login(res, 'qq', req.query['#access_token']);
+  var option = {
+    'content-type': 'application/json',
+    url: config.login.qq.access_token_url,
+    json: {
+      client_id: config.login.qq.client_id,
+      client_secret: config.login.qq.client_secret,
+      redirect_uri: util.format(config.login.qq.redirect_uri, config.hostname),
+      grant_type: config.login.qq.grant_type,
+      code: req.query.code
+    }
+  };
+  request.get(option, function (err, request, body) {
+    login(res, 'qq', body.access_token);
+  });
+
 });
 
 router.get('/gitcafe', function (req, res) {
+  var option = {
+    'content-type': 'application/json',
+    url: config.login.gitcafe.access_token_url,
+    json: {
+      client_id: config.login.gitcafe.client_id,
+      client_secret: config.login.gitcafe.client_secret,
+      redirect_uri: util.format(config.login.gitcafe.redirect_uri, config.hostname),
+      grant_type: config.login.gitcafe.grant_type,
+      code: req.query.code
+    }
+  };
+  request.get(option, function (err, request, body) {
+    login(res, 'gitcafe', body.access_token);
+  });
+});
 
+router.get('/weibo', function (req, res) {
+  var option = {
+    'content-type': 'application/json',
+    url: config.login.weibo.access_token_url,
+    json: {
+      client_id: config.login.weibo.client_id,
+      client_secret: config.login.weibo.client_secret,
+      redirect_uri: util.format(config.login.weibo.redirect_uri, config.hostname),
+      grant_type: config.login.weibo.grant_type,
+      code: req.query.code
+    }
+  };
+  request.get(option, function (err, request, body) {
+    login(res, 'weibo', body.access_token);
+  });
 });
 
 module.exports = router

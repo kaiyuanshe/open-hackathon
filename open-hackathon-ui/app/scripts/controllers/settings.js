@@ -15,7 +15,7 @@
  */
 angular.module('oh.controllers')
   .controller('settings.controller', function ($scope, $cookieStore, $state, API) {
-    $scope.type = 'windows';
+    $scope.type = 'ssh';
     var User = $cookieStore.get('User') || '';
     if (!User) {
       $state.go('index');
