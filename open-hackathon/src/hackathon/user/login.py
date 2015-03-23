@@ -12,7 +12,6 @@ from hackathon.constants import OAUTH_PROVIDER
 
 
 class LoginProviderBase():
-
     def login(self, args):
         pass
 
@@ -52,7 +51,8 @@ class QQLogin(LoginProviderBase):
         user = user_with_token["user"]
         log.info("QQ user login successfully:" + repr(user))
 
-        detail = user_manager.get_user_detail_info(user)
+        hackathon_name = args.get('hackathon_name')
+        detail = user_manager.get_user_detail_info(user, hackathon_name=hackathon_name)
         detail["token"] = user_with_token["token"].token
         return detail
 

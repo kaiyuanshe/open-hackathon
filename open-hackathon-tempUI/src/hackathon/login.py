@@ -6,7 +6,6 @@ from functions import get_remote, get_config, post_to_remote
 import urllib2
 from log import log
 import json
-from flask import redirect, url_for
 
 hackathon_api_url = get_config("hackathon-api.endpoint")
 hackathon_name = get_config("javascript.hackathon.name")
@@ -48,7 +47,7 @@ class QQLogin():
         end = token_resp.index('&')
         access_token = token_resp[start + 1:end]
         # get user info
-        data = {"provider": "qq", "access_token": access_token}
+        data = {"provider": "qq", "access_token": access_token, "hackathon_name": hackathon_name}
         # url = get_config("login/qq/user_info_url") % (access_token, client_id, openid)
         return post_to_remote('%s/api/user/login' % hackathon_api_url, data)
 
@@ -88,20 +87,22 @@ class GitcafeLogin():
 
 
 class WeiboLogin():
-    def login(self,args):
+    def login(self, args):
         code = args.get('code')
 
         # get access_token
         log.debug(get_config('login.weibo.access_token_url') + code)
-        token_resp = post_to_remote(get_config('login.weibo.access_token_url') + code,{})
+        token_resp = post_to_remote(get_config('login.weibo.access_token_url') + code, {})
         log.debug("get token from Weibo:" + str(token_resp))
 
         access_token = token_resp['access_token']
         uid = token_resp['uid']
 
         log.debug("get token info from weibo")
-        data = {"provider": "weibo", "code": code, "access_token": access_token, "uid":uid, "hackathon_name": hackathon_name}
+        data = {"provider": "weibo", "code": code, "access_token": access_token, "uid": uid,
+                "hackathon_name": hackathon_name}
         return post_to_remote('%s/api/user/login' % hackathon_api_url, data)
+
 
 login_providers = {
     "github": GithubLogin(),
