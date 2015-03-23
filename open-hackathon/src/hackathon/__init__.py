@@ -8,7 +8,7 @@ from flask_cors import CORS
 
 # flask
 app = Flask(__name__)
-app.config['SECRET_KEY'] = '*K&ep_me^se(ret_!@#$'
+app.config['SECRET_KEY'] = safe_get_config("app.secret_key", "secret_key")
 
 # flask restful
 api = Api(app)
@@ -25,7 +25,7 @@ from . import views
 # from datetime import datetime, timedelta
 #
 # def alarm(time):
-#     print('Alarm! This alarm was scheduled at %s.' % time)
+# print('Alarm! This alarm was scheduled at %s.' % time)
 #     return {
 #         "key": "val"
 #     }

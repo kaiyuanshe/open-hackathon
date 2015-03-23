@@ -5,7 +5,7 @@ $(document).ready(function() {
         $('#tooltip').fadeOut(2000);
      }, 1500);
     var cid = getParameterByName("cid");
-    if (!cid || typeof(cid) == "undefined")
+    if (!cid || typeof(cid) == "undefined" || cid=="undefined")
         cid = "ut"
     var main = $("#hack_main").on('mouseover', 'iframe', function(e) {
         $(this).focus();
