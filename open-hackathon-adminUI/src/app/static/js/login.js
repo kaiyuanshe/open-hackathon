@@ -1,19 +1,19 @@
 $(document).ready(function(){
+
     $('#githublogin').click(function() {
-        var arr = [CONFIG.github.clientID, CONFIG.github.redirect_uri, CONFIG.github.scope];
-        var url = "https://github.com/login/oauth/authorize?" + arr.join("&");
-        location.href = url;
+        location.href = CONFIG.github.authorize_url;
     });
 
     $('#qqlogin').click(function() {
-        var arr = [CONFIG.qq.clientID, CONFIG.qq.redirect_uri, CONFIG.qq.scope, CONFIG.qq.state, CONFIG.qq.response_type];
-        var url = "https://graph.qq.com/oauth2.0/authorize?" + arr.join("&");
-        location.href = url;
+        location.href = CONFIG.qq.authorize_url;
     });
 
-    $('#weibologin').click(function() {
-        var arr = [CONFIG.weibo.clientID, CONFIG.weibo.redirect_uri, CONFIG.weibo.scope];
-        var url = "https://api.weibo.com/oauth2/authorize?" + arr.join("&");
-        location.href = url;
+    $('#gitcafelogin').click(function() {
+        location.href = CONFIG.gitcafe.authorize_url;
     });
+
+     $('#weibologin').click(function() {
+        location.href = CONFIG.weibo.authorize_url;
+    });
+
 });

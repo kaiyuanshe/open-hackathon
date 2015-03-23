@@ -1,6 +1,3 @@
-from sqlalchemy.orm import relationship
-
-
 class SQLAlchemyAdapterMetaClass(type):
     @staticmethod
     def wrap(func):
