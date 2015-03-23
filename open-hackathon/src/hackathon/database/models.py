@@ -189,11 +189,11 @@ class DockerHostServer(Base):
     __tablename__ = 'docker_host_server'
 
     id = Column(Integer, primary_key=True)
-    vm_name = Column(String(100), unique=True, nullable=False)
+    vm_name = Column(String(100), nullable=False)
     hackathon_id = Column(Integer)
     public_dns = Column(String(50))
     public_docker_api_port = Column(Integer)
-    private_ip = Column(String(50), unique=True)
+    private_ip = Column(String(50))
     private_docker_api_port = Column(Integer)
     container_count = Column(Integer, nullable=False)
     container_max_count = Column(Integer, nullable=False)

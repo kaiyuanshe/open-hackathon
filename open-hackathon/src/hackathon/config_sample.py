@@ -10,6 +10,9 @@ MYSQL_DB = "hackathon"
 
 Config = {
     "environment": "local",
+    "app": {
+        "secret_key": "secret_key"
+    },
     "mysql": {
         "connection": 'mysql://%s:%s@%s/%s' % (MYSQL_USER, MYSQL_PWD, MYSQL_HOST, MYSQL_DB)
     },
@@ -23,7 +26,12 @@ Config = {
             "user_info_url": 'https://graph.qq.com/user/get_user_info?access_token=%s&oauth_consumer_key=%s&openid=%s'
         },
         "gitcafe": {
-            "user_info_url": "https://api.gitcafe.com/api/v1/user"
+            # gitcafe domain:  gcas.dgz.sh/gcs.dgz.sh for Staging, api.gitcafe.com/gitcafe.com for Production
+            "user_info_url": "https://gcas.dgz.sh/api/v1/user"
+        },
+        "weibo": {
+            "user_info_url": 'https://api.weibo.com/2/users/show.json?access_token=',
+            "email_info_url": 'https://api.weibo.com/2/account/profile/email.json?access_token='
         },
         "weibo": {
             "user_info_url": 'https://api.weibo.com/2/users/show.json?access_token=',
@@ -44,6 +52,3 @@ Config = {
         "job_store_url": 'mysql://%s:%s@%s/%s' % (MYSQL_USER, MYSQL_PWD, MYSQL_HOST, MYSQL_DB)
     }
 }
-
-
-

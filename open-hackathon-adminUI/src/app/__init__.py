@@ -8,4 +8,4 @@ app = Flask(__name__)
 from . import views
 
 app.config["SQLALCHEMY_DATABASE_URI"] = safe_get_config("mysql.connection", "mysql://root:root@localhost/hackathon")
-app.config['SECRET_KEY'] = '*K&ep_me^se(ret_!@#$:secret'
+app.config['SECRET_KEY'] = safe_get_config("app.secret_key", "secret_key")

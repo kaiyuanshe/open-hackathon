@@ -86,9 +86,9 @@ class ExprManager(object):
     def __get_available_docker_host(self, expr_config, hackathon):
         req_count = len(expr_config["virtual_environments"])
 
-        vm = db_adapter.filter(DockerHostServer,
+        vm = db_adapter.find_first_object(DockerHostServer,
                                DockerHostServer.container_count + req_count <= DockerHostServer.container_max_count,
-                               DockerHostServer.hackathon_id == hackathon.id).first()
+                               DockerHostServer.hackathon_id == hackathon.id)
 
         # todo connect to azure to launch new VM if no existed VM meet the requirement
         # since it takes some time to launch VM, it's more reasonable to launch VM when the existed ones are almost used up.
@@ -229,14 +229,16 @@ class ExprManager(object):
         # add to guacamole config
         # note the port should get from the container["port"] to get corresponding listening port rather than the
         # expose port that defined in the template. Following codes are just example
-        if "remote" in container_config and container_config["remote"][
-            "provider"] == "guacamole" and "ports" in container_config:
+        if "remote" in container_config \
+                and container_config["remote"]["provider"] == "guacamole" \
+                and "ports" in container_config:
             guac = container_config["remote"]
             port_cfg = filter(lambda p: p["port"] == guac["port"], container_config["ports"])
 
             if len(port_cfg) > 0:
                 gc = {
-                    "displayname": port_cfg[0]["name"] if "name" in port_cfg[0] else container_config["name"],
+                    "displayname": container_config["displayname"] if "displayname" in container_config else
+                    container_config["name"],
                     "name": post_data["container_name"],
                     "protocol": guac["protocol"],
                     "hostname": host_server.public_dns,

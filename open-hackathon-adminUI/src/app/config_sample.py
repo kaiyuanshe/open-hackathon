@@ -1,73 +1,83 @@
 # "javascript" section for javascript. see @app.route('/config.js') in app/views.py
 
 # oauth constants
-HOSTNAME = "http://hackathon.chinacloudapp.cn"
+HOSTNAME = "http://open-hackathon-dev.chinacloudapp.cn"  # host name of the UI site
 QQ_OAUTH_STATE = "openhackathon"  # todo state should be constant. Actually it should be unguessable to prevent CSFA
-HACkATHON_API_ENDPOINT = "http://hackathon.chinacloudapp.cn/admin"
+HACKATHON_API_ENDPOINT = "http://open-hackathon-dev.chinacloudapp.cn:15000"
+
+GITHUB_CLIENT_ID = "b8e407813350f26bf537"
+GITHUB_CLIENT_SECRET = "daa78ae27e13c9f5b4a884bd774cadf2f75a199f"
+
+QQ_CLIENT_ID = "101200890"
+QQ_CLIENT_SECRET = "88ad67bd4521c4cc47136854781cb9b5"
+QQ_META_CONTENT = "274307566465013314076545663016134754100636"
+
+# gitcafe domain:  gcas.dgz.sh/gcs.dgz.sh for Staging, api.gitcafe.com/gitcafe.com for Production
+GITCAFE_CLIENT_ID = "1c33ecdf4dd0826325f60a92e91834522b1cdf47a7f90bdaa79f0526fdc48727"
+GITCAFE_CLIENT_SECRET = "80b63609000b20c1260df28081c08712617648e1b528086bbb089f0af4614509"
+
+WEIBO_CLIENT_ID = "1943560862"
+WEIBO_CLIENT_SECRET = "a5332c39c129902e561bff5e4bcc5982"
+WEIBO_META_CONTENT = "ae884e09bc02b700"
 
 Config = {
     "environment": "local",
+    "app": {
+        "secret_key": "secret_key"
+    },
     "mysql": {
         "connection": 'mysql://%s:%s@%s/%s' % ('hackathon', 'hackathon', 'localhost', 'hackathon')
     },
     "login": {
         "github": {
-            "access_token_url": 'https://github.com/login/oauth/access_token?client_id=a10e2290ed907918d5ab&client_secret=5b240a2a1bed6a6cf806fc2f34eb38a33ce03d75&redirect_uri=%s/github&code=' % HOSTNAME,
+            "access_token_url": 'https://github.com/login/oauth/access_token?client_id=%s&client_secret=%s&redirect_uri=%s/github&code=' % (
+                GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, HOSTNAME),
             "user_info_url": 'https://api.github.com/user?access_token=',
             "emails_info_url": 'https://api.github.com/user/emails?access_token='
         },
         "qq": {
-            "meta_content": "274307566465013314076545663016134754100636",
-            "access_token_url": 'https://graph.qq.com/oauth2.0/token?grant_type=authorization_code&client_id=101192358&client_secret=d94f8e7baee4f03371f52d21c4400cab&redirect_uri=%s/qq&code=' % HOSTNAME,
+            "meta_content": QQ_META_CONTENT,
+            "access_token_url": 'https://graph.qq.com/oauth2.0/token?grant_type=authorization_code&client_id=%s&client_secret=%s&redirect_uri=%s/qq&code=' % (
+                QQ_CLIENT_ID, QQ_CLIENT_SECRET, HOSTNAME),
             "openid_url": 'https://graph.qq.com/oauth2.0/me?access_token=',
             "user_info_url": 'https://graph.qq.com/user/get_user_info?access_token=%s&oauth_consumer_key=%s&openid=%s'
         },
-        "weibo":{
-            "meta_content": "a6a3b875cfdf95e2",
-            "access_token_url": 'https://api.weibo.com/oauth2/access_token?client_id=582725653&client_secret=28f5325cb57613b9f135185b5245c5a2&grant_type=authorization_code&redirect_uri=%s/weibo&code=' % HOSTNAME,
-            "user_info_url": 'https://api.weibo.com/2/users/show.json?access_token=',
-            "email_info_url": 'https://api.weibo.com/2/account/profile/email.json?access_token='
+        "gitcafe": {
+            "access_token_url": 'https://gcas.dgz.sh/oauth/token?client_id=%s&client_secret=%s&redirect_uri=%s/gitcafe&grant_type=authorization_code&code=' % (
+                GITCAFE_CLIENT_ID, GITCAFE_CLIENT_SECRET, HOSTNAME)
+        },
+        "weibo": {
+            "meta_content": WEIBO_META_CONTENT,
+            "access_token_url": 'https://api.weibo.com/oauth2/access_token?client_id=%s&client_secret=%s&grant_type=authorization_code&redirect_uri=%s/weibo&code=' % (
+                WEIBO_CLIENT_ID, WEIBO_CLIENT_SECRET, HOSTNAME)
         },
         "provider_enabled": ["github", "qq"],
         "session_minutes": 60,
         "token_expiration_minutes": 60 * 24
     },
-        "hackathon-api": {
-        "endpoint": HACkATHON_API_ENDPOINT
+    "hackathon-api": {
+        "endpoint": HACKATHON_API_ENDPOINT
     },
     "javascript": {
-        "renren": {
-            "clientID": "client_id=7e0932f4c5b34176b0ca1881f5e88562",
-            "redirect_url": "redirect_uri=%s/renren" % HOSTNAME,
-            "scope": "scope=read_user_message+read_user_feed+read_user_photo",
-            "response_type": "response_type=token",
-        },
         "github": {
-            "clientID": "client_id=a10e2290ed907918d5ab",
-            "redirect_uri": "redirect_uri=%s/github" % HOSTNAME,
-            "scope": "scope=user",
+            "authorize_url": "https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s/github&scope=user" % (
+                GITHUB_CLIENT_ID, HOSTNAME)
         },
         "weibo": {
-            "clientID": "client_id=582725653",
-            "redirect_uri": "redirect_uri=%s/weibo" % HOSTNAME,
-            "scope": "scope=all",
-        },
-        "google": {
-            "clientID": "client_id=304944766846-7jt8jbm39f1sj4kf4gtsqspsvtogdmem.apps.googleusercontent.com",
-            "redirect_url": "redirect_uri=%s/google" % HOSTNAME,
-            "scope": "scope=https://www.googleapis.com/auth/userinfo.profile+https://www.googleapis.com/auth/userinfo.email",
-            "response_type": "response_type=token",
+            "authorize_url": "https://api.weibo.com/oauth2/authorize?client_id=%s&redirect_uri=%s/weibo&scope=all" % (
+                WEIBO_CLIENT_ID, HOSTNAME)
         },
         "qq": {
-            "clientID": "client_id=101192358",
-            "redirect_uri": "redirect_uri=%s/qq" % HOSTNAME,
-            "scope": "scope=get_user_info",
-            "state": "state=%s" % QQ_OAUTH_STATE,
-            "response_type": "response_type=code",
+            "authorize_url": "https://graph.qq.com/oauth2.0/authorize?client_id=%s&redirect_uri=%s/qq&scope=get_user_info&state=%s&response_type=code" % (
+                QQ_CLIENT_ID, HOSTNAME, QQ_OAUTH_STATE)
+        },
+        "gitcafe": {
+            "authorize_url": "https://gcs.dgz.sh/oauth/authorize?response_type=code&client_id=%s&redirect_uri=%s/gitcafe&scope=public" % (
+                GITCAFE_CLIENT_ID, HOSTNAME)
         },
         "hackathon": {
             "name": "open-xml-sdk",
-            "endpoint": HACkATHON_API_ENDPOINT
+            "endpoint": HACKATHON_API_ENDPOINT
         }
     }
 }

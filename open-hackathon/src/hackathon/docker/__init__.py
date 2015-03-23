@@ -109,6 +109,7 @@ class OssDocker(object):
             raise
 
     # create a container
+    # https://docs.docker.com/reference/api/docker_remote_api_v1.17/#create-a-container
     def create(self, docker_host, container_config, container_name):
         containers_url = self.get_vm_url(docker_host) + "/containers/create?name=%s" % container_name
         try:
@@ -153,6 +154,7 @@ class OssDocker(object):
             attach_std_in = args["AttachStdin"] if "AttachStdin" in args else False
             attach_std_out = args["AttachStdout"] if "AttachStdout" in args else False
             attach_std_err = args["AttachStderr"] if "AttachStderr" in args else False
+            env_variable = args["Env"] if "Env" in args else None
 
             # headers = {'content-type': 'application/json'}
             container_config = {"Image": image, "ExposedPorts": {}}
@@ -162,7 +164,7 @@ class OssDocker(object):
                 for v in mnts_f:
                     container_config["Volumes"] = {}
                     container_config["Volumes"][v] = {}
-            container_config["Env"] = None
+            container_config["Env"] = env_variable
             if command is not None:
                 container_config["Cmd"] = command.split(" ")
             container_config["OpenStdin"] = stdin_open
