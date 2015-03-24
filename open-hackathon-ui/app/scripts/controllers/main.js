@@ -15,29 +15,32 @@
  */
 var s = angular.module('oh.controllers', []);
 s.controller('main.controller', function ($scope) {
-  var l, t;
-  l = (screen.width - 600) / 2;
-  t = (screen.height - 400) / 2;
-  function openWindow(url){
-    window.open(url, '_blank', 'toolbar=no, directories=no, status=yes,location=no, menubar=no, width=600, height=500, top=' + t + ', left=' + l);
+
+  function openWindow(url, width) {
+    width = width || 600;
+    var l, t;
+    l = (screen.width - width ) / 2;
+    t = (screen.height - 400) / 2;
+    window.open(url, '_blank', 'toolbar=no, directories=no, status=yes,location=no, menubar=no, width=' + width + ', height=500, top=' + t + ', left=' + l);
   }
+
   $scope.githublogin = function () {
-    var url = 'https://github.com/login/oauth/authorize?'+
+    var url = 'https://github.com/login/oauth/authorize?' +
       $.param($scope.config.sociallogin.github);
     openWindow(url);
   };
   $scope.qqlogin = function () {
-    var url = 'https://graph.qq.com/oauth2.0/authorize?'+
-    $.param($scope.config.sociallogin.qq);
+    var url = 'https://graph.qq.com/oauth2.0/authorize?' +
+      $.param($scope.config.sociallogin.qq);
     openWindow(url);
   };
   $scope.gitcafelogin = function () {
-    var url = 'https://graph.qq.com/oauth2.0/authorize?'+
+    var url = 'https://api.gitcafe.com/oauth/authorize?' +
       $.param($scope.config.sociallogin.gitcafe);
-    openWindow(url);
+    openWindow(url, 980);
   };
-  $scope.weibologin = function(){
-    var url = 'https://api.weibo.com/oauth2/authorize?'+
+  $scope.weibologin = function () {
+    var url = 'https://api.weibo.com/oauth2/authorize?' +
       $.param($scope.config.sociallogin.weibo);
     openWindow(url);
   }
