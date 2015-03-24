@@ -13,3 +13,4 @@ class OAUTH_PROVIDER:
 
 class HTTP_HEADER:
     TOKEN = "token"
+    HACKATHON_ID = "hackathon_id"

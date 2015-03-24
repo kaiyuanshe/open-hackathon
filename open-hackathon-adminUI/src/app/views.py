@@ -20,10 +20,11 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 
-def __get_headers():
+def __get_headers(hackathon_id):
     return {
         "content-type": "application/json",
-        HTTP_HEADER.TOKEN: session[HTTP_HEADER.TOKEN] if HTTP_HEADER.TOKEN in session else ""
+        HTTP_HEADER.TOKEN: session[HTTP_HEADER.TOKEN] if HTTP_HEADER.TOKEN in session else "",
+        HTTP_HEADER.HACKATHON_ID: hackathon_id
     }
 
 
@@ -33,20 +34,20 @@ def __get_uri(path):
     return "%s/%s" % (safe_get_config('hackathon-api.endpoint', 'http://localhost:15000'), path)
 
 
-def post_to_api_service(path, post_data):
-    return post_to_remote(__get_uri(path), post_data, headers=__get_headers())
+def post_to_api_service(path, post_data, hackathon_id):
+    return post_to_remote(__get_uri(path), post_data, headers=__get_headers(hackathon_id))
 
 
-def put_to_api_service(path, post_data):
-    return put_to_remote(__get_uri(path), post_data, headers=__get_headers())
+def put_to_api_service(path, post_data, hackathon_id):
+    return put_to_remote(__get_uri(path), post_data, headers=__get_headers(hackathon_id))
 
 
-def get_from_api_service(path):
-    return get_remote(__get_uri(path), headers=__get_headers())
+def get_from_api_service(path, hackathon_id):
+    return get_remote(__get_uri(path), headers=__get_headers(hackathon_id))
 
 
-def delete_from_api_service(path):
-    return delete_remote(__get_uri(path), headers=__get_headers())
+def delete_from_api_service(path, hackathon_id):
+    return delete_remote(__get_uri(path), headers=__get_headers(hackathon_id))
 
 
 @login_manager.user_loader
