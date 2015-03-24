@@ -6,7 +6,7 @@ from user.login import *
 from flask import g, request
 from log import log
 from database import db_adapter
-from decorators import token_required, admin_token_required
+from decorators import token_required, admin_token_required, admin_hackathon_authority_check
 from user.user_functions import get_user_experiment, get_user_hackathon
 from health import report_health
 from remote.guacamole import GuacamoleInfo
@@ -229,7 +229,7 @@ class AdminHackathonListResource(Resource):
         admin = g.admin
         hackathon_ids = admin_manager.get_hack_id_by_admin_id(admin.id)
         hackathon_list = db_adapter.find_all_objects(Hackathon, Hackathon.id.in_(hackathon_ids))
-        return map(lambda u: u.json(),hackathon_list)
+        return map(lambda u: u.json(), hackathon_list)
 
 
 class AdminRegisterListResource(Resource):
@@ -243,7 +243,6 @@ class AdminRegisterListResource(Resource):
 
 
 class AdminRegisterResource(Resource):
-
     def get(self):
         parse = reqparse.RequestParser()
         parse.add_argument('id', type=int, location='args')
@@ -252,20 +251,23 @@ class AdminRegisterResource(Resource):
 
 
     @admin_token_required
+    @admin_hackathon_authority_check
     def post(self):
-        #create a new Register for a hackathon
+        # create a new Register for a hackathon
         args = request.get_json()
-        return register_manager.create_register(args)
+        return register_manager.create_or_update_register(args)
 
 
     @admin_token_required
+    @admin_hackathon_authority_check
     def put(self):
-        #update a Register
+        # update a Register
         args = request.get_json()
-        return register_manager.update_register(args)
+        return register_manager.create_or_update_register(args)
 
 
     @admin_token_required
+    @admin_hackathon_authority_check
     def delete(self):
         parse = reqparse.RequestParser()
         parse.add_argument('id', type=int, location='args')

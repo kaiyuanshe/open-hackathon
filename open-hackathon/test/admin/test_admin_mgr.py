@@ -2,10 +2,10 @@ import sys
 
 sys.path.append("../src/hackathon")
 import unittest
-from hackathon.admin.admin_mgr import AdminManager
+from hackathon.admin.admin_mgr import AdminManager, admin_manager
 from hackathon.database.models import AdminUser, AdminToken, AdminEmail, AdminUserHackathonRel
 from hackathon import app
-from mock import Mock, ANY
+from mock import Mock, ANY, patch
 from datetime import datetime, timedelta
 from flask import request, g
 
@@ -19,7 +19,8 @@ class AdminManagerTest(unittest.TestCase):
         pass
 
 
-    # ---------------------test method: validate_request--------------------------------------
+    '''test method: validate_request'''
+
     def test_validate_request_if_token_missing(self):
         am = AdminManager(None)
         '''more args for app.text_request_context:
@@ -75,11 +76,11 @@ class AdminManagerTest(unittest.TestCase):
             self.assertEqual(g.admin, admin)
 
 
-    # ---------------------test method: get_hackid_from_adminid----------------------------------
+    '''test method: get_hackid_from_adminid'''
+
     def test_get_hackid_by_adminid(self):
         admin_email_test = [AdminEmail(email='test@ms.com')]
         admin_user_hackathon_rel = [AdminUserHackathonRel(hackathon_id=-1)]
-        emails = ['test@ms.com']
 
         mock_db = Mock()
         mock_db.find_all_objects_by.return_value = admin_email_test
@@ -92,7 +93,8 @@ class AdminManagerTest(unittest.TestCase):
         mock_db.find_all_objects.assert_called_once_with(AdminUserHackathonRel, ANY)
 
 
-    # ---------------------test method:validate_admin_hackathon_request---------------------------
+    '''test method:validate_admin_hackathon_request'''
+
     def test_validate_admin_hackathon_request_token_missing(self):
         am = AdminManager(None)
         with app.test_request_context('/', headers=None):
@@ -147,6 +149,33 @@ class AdminManagerTest(unittest.TestCase):
             self.assertFalse(am.validate_admin_hackathon_request(2))
             mock_db.find_all_objects_by.assert_called_once_with(AdminEmail, admin_id=1)
             mock_db.find_all_objects.assert_called_once_with(AdminUserHackathonRel, ANY)
+
+
+    '''test method : check_admin_hackathon_authority'''
+
+    @patch.object(AdminManager, 'validate_admin_hackathon_request', return_value=True)
+    def test_check_admin_hackathon_authority_hearder_miss_hackathon_id(self, mock_method):
+        with app.test_request_context('/'):
+            self.assertFalse(admin_manager.check_admin_hackathon_authority())
+            self.assertEqual(mock_method.call_count, 0)
+
+    @patch.object(AdminManager, 'validate_admin_hackathon_request', return_value=True)
+    def test_check_admin_hackathon_authority_hearder_hackathon_id_is_not_num(self, mock_method):
+        with app.test_request_context('/', headers={"hackathon_id": "test"}):
+            self.assertFalse(admin_manager.check_admin_hackathon_authority())
+            self.assertEqual(mock_method.call_count, 0)
+
+    @patch.object(AdminManager, 'validate_admin_hackathon_request', return_value=False)
+    def test_check_admin_hackathon_authority_faild(self, mock_thethod):
+        with app.test_request_context('/', headers={"hackathon_id": 1}):
+            self.assertFalse(admin_manager.check_admin_hackathon_authority())
+            mock_thethod.assert_called_once_with(1)
+
+    @patch.object(AdminManager, 'validate_admin_hackathon_request', return_value=True)
+    def test_check_admin_hackathon_authority_success(self, mock_thethod):
+        with app.test_request_context('/', headers={"hackathon_id": 1}):
+            self.assertTrue(admin_manager.check_admin_hackathon_authority())
+            mock_thethod.assert_called_once_with(1)
 
 
 if __name__ == '__main__':
