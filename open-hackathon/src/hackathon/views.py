@@ -1,11 +1,11 @@
 from flask_restful import Resource, reqparse
-from . import api
+from . import api, app
 from expr import expr_manager
 from database.models import Announcement, Hackathon, Template
 from user.login import *
 from flask import g, request
 from log import log
-from database import db_adapter
+from database import db_adapter, db_session
 from decorators import token_required, admin_token_required, admin_hackathon_authority_check
 from user.user_functions import get_user_experiment, get_user_hackathon
 from health import report_health
@@ -14,6 +14,11 @@ from hack import hack_manager
 import time
 from admin.admin_mgr import admin_manager
 from hackathon.registration.register_mgr import register_manager
+
+
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db_session.remove()
 
 
 class RegisterListResource(Resource):
