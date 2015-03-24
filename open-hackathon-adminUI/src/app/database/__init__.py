@@ -1,7 +1,6 @@
 import sys
 
 sys.path.append("..")
-from app.constants import ROLE
 from flask_sqlalchemy import SQLAlchemy
 from app import app
 from db_adapters import SQLAlchemyAdapter
@@ -25,7 +24,3 @@ class UserMixin(object):
 
     def get_id(self):
         return unicode(self.get_admin_id())
-
-    def is_admin(self):
-        return self.has_roles(ROLE.ADMIN)
-

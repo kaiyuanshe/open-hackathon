@@ -163,9 +163,12 @@ def weibo_login():
 @login_required
 def logout():
     url = "%s/api/user/login?uid=%d" % (get_config("hackathon-api.endpoint"), g.user.id)
-    delete_remote(url, {
-        "token": session["token"]
-    })
-    session.pop("token")
+    try:
+        delete_remote(url, {
+            "token": session["token"]
+        })
+    except Exception as e:
+        log.debug("logout remote failed")
+        log.error(e)
     logout_user()
-    return redirect("index")
+    return redirect("/")

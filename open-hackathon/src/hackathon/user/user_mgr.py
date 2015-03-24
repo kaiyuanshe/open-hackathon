@@ -21,7 +21,8 @@ class UserManager(object):
         token_issue_date = datetime.utcnow()
         token_expire_date = token_issue_date + timedelta(
             minutes=safe_get_config("login.token_expiration_minutes", 1440))
-        user_token = UserToken(token=str(uuid.uuid1()), user=user, expire_date=token_expire_date, issue_date=token_issue_date)
+        user_token = UserToken(token=str(uuid.uuid1()), user=user, expire_date=token_expire_date,
+                               issue_date=token_issue_date)
         self.db.add_object(user_token)
         return user_token
 
@@ -31,14 +32,18 @@ class UserManager(object):
             return t.user
         return None
 
+    def __get_user_primary_email(self, user):
+        e = user.emails.filter_by(primary_email=EmailStatus.Primary).first()
+        return e.email if e is not None else ""
+
     def __validate_user_registered(self, user, hack):
         if hack.check_register == 0:
             return True
 
         emails = map(lambda x: x.email, user.emails.all())
         return self.db.count(Register, Register.email.in_(emails),
-                              Register.enabled == 1,
-                              Register.hackathon_id == hack.id) > 0
+                             Register.enabled == 1,
+                             Register.hackathon_id == hack.id) > 0
 
     def get_all_registration(self):
         reg_list = self.db.find_all_objects_by(Register, enabled=1)
@@ -130,7 +135,7 @@ class UserManager(object):
             "id": user.id,
             "name": user.name,
             "nickname": user.nickname,
-            "email": user.emails.filter_by(primary_email=EmailStatus.Primary).first().email,
+            "email": self.__get_user_primary_email(user),
             "avatar_url": user.avatar_url,
             "online": user.online,
             "create_time": str(user.create_time),

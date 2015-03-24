@@ -176,14 +176,19 @@ class WeiboLogin(LoginProviderBase):
         nickname = user_info['screen_name']
         avatar_url = user_info['avatar_hd']
 
-        # get user primary email
-        email_info_resp = get_remote(get_config('login.weibo.email_info_url') + access_token)
-        log.debug("get email from github:" + email_info_resp)
-        email_info_resp_json = json.loads(email_info_resp)
-        email = email_info_resp_json['email']
-        email_info = [
-            {'name': name, 'email': email, 'id': openid, 'verified': 1, 'primary': 1, 'nickname': nickname,
-             'avatar_url': avatar_url}]
+        # get user email
+        email_info = []
+        try:
+            email_info_resp = get_remote(get_config('login.weibo.email_info_url') + access_token)
+            log.debug("get email from github:" + email_info_resp)
+            email_info_resp_json = json.loads(email_info_resp)
+            email = email_info_resp_json['email']
+            email_info = [
+                {'name': name, 'email': email, 'id': openid, 'verified': 1, 'primary': 1, 'nickname': nickname,
+                 'avatar_url': avatar_url}]
+        except Exception as e:
+            log.debug("fail to get user email from weibo")
+            log.error(e)
 
         user_with_token = user_manager.db_login(openid,
                                                 name=name,
