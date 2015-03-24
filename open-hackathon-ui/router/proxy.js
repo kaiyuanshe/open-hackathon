@@ -14,6 +14,7 @@ function login(res, name, token) {
     access_token: token
   }, function (response, data) {
     res.cookie(COOKIE_USERINFORMATION, JSON.stringify(data));
+    console.log(data)
     if (data.experiments.length > 0) {
       res.send('<script type="text/javascript">window.opener.location.href = "/#/hackathon";window.close();</script>');
     } else if (data.register_state) {
@@ -71,6 +72,7 @@ router.get('/gitcafe', function (req, res) {
     }
   };
   request.get(option, function (err, request, body) {
+    console.log(body)
     login(res, 'gitcafe', body.access_token);
   });
 });

@@ -35,7 +35,7 @@ s.controller('main.controller', function ($scope) {
     openWindow(url);
   };
   $scope.gitcafelogin = function () {
-    var url = 'https://api.gitcafe.com/oauth/authorize?' +
+    var url = 'https://gcs.dgz.sh/oauth/authorize?' +
       $.param($scope.config.sociallogin.gitcafe);
     openWindow(url, 980);
   };
