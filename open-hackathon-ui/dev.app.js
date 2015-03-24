@@ -17,10 +17,10 @@ app.set('views', path.join(__dirname, 'views'));
 app.engine('html', hbs.__express);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
-/*app.use(express.static(path.join(__dirname, '.tmp')));
+app.use(express.static(path.join(__dirname, '.tmp')));
 app.use(express.static(path.join(__dirname, 'app')));
-app.use('/bower_components', express.static('./bower_components'))*/
-app.use(express.static(path.join(__dirname, 'dist')));
+app.use('/bower_components', express.static('./bower_components'))
+//app.use(express.static(path.join(__dirname, 'dist')));
 app.use(cookieParser());
 
 app.use(function (req, res, next) {
