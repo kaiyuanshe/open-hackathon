@@ -34,3 +34,12 @@ def admin_token_required(func):
         return func(*args, **kwargs)
 
     return authenticate_and_call
+
+
+def admin_hackathon_authority_check(func):
+    def authenticate_and_call(*args, **kwargs):
+        if not admin_manager.check_admin_hackathon_authority():
+            return "Access Denied", 403
+        return func(*args, **kwargs)
+
+    return authenticate_and_call

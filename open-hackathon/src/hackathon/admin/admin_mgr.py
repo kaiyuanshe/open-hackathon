@@ -63,7 +63,21 @@ class AdminManager(object):
             return True
         else:
             # check  if the hackathon owned by the admin
-            return hackathon_id in (hack_ids)
+            return hackathon_id in hack_ids
+
+
+    def check_admin_hackathon_authority(self):
+
+        if HTTP_HEADER.HACKATHON_ID in request.headers:
+            try:
+                g.hackathon_id = long(request.headers['hackathon_id'])
+                return self.validate_admin_hackathon_request(g.hackathon_id)
+            except Exception:
+                log.debug("hackathon_id is not a num")
+                return False
+        else:
+            log.debug("HEARDER lost hackathon_id")
+            return False
 
 
 admin_manager = AdminManager(db_adapter)

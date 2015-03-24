@@ -18,13 +18,14 @@ class DOCKER:
 
 class HTTP_HEADER:
     TOKEN = "token"
+    HACKATHON_ID = "hackathon_id"
 
 
 class OAUTH_PROVIDER:
     GITHUB = "github"
     QQ = "qq"
     GITCAFE = "gitcafe"
-    WEIBO= "weibo"
+    WEIBO = "weibo"
 
 
 class HEALTH_STATE:
