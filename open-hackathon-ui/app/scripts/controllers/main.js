@@ -17,11 +17,12 @@ var s = angular.module('oh.controllers', []);
 s.controller('main.controller', function ($scope) {
 
   function openWindow(url, width) {
-    width = width || 600;
-    var l, t;
-    l = (screen.width - width ) / 2;
-    t = (screen.height - 400) / 2;
-    window.open(url, '_blank', 'toolbar=no, directories=no, status=yes,location=no, menubar=no, width=' + width + ', height=500, top=' + t + ', left=' + l);
+//    width = width || 600;
+//    var l, t;
+//    l = (screen.width - width ) / 2;
+//    t = (screen.height - 400) / 2;
+//    window.open(url, '_blank', 'toolbar=no, directories=no, status=yes,location=no, menubar=no, width=' + width + ', height=500, top=' + t + ', left=' + l);
+    window.location.href = url
   }
 
   $scope.githublogin = function () {
