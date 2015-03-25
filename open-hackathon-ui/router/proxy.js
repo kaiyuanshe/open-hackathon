@@ -3,6 +3,7 @@ var router = express.Router()
 var config = require('../config')
 var services = require('../common/services')
 var request = require('request')
+var querystring = require('querystring');
 var util = require('util')
 
 
@@ -11,7 +12,8 @@ var COOKIE_USERINFORMATION = 'User'
 function login(res, name, token) {
   res.api.user.login.post({
     provider: name,
-    access_token: token
+    access_token: token,
+    hackathon_name: config.hackathon_name
   }, function (response, data) {
     res.cookie(COOKIE_USERINFORMATION, JSON.stringify(data));
     console.log(data)
@@ -29,12 +31,13 @@ router.get('/github', function (req, res) {
   var option = {
     'content-type': 'application/json',
     url: config.login.github.access_token_url,
-    json: {
+    qs: {
       client_id: config.login.github.client_id,
       client_secret: config.login.github.client_secret,
       redirect_uri: util.format(config.login.github.redirect_uri, config.hostname),
       code: req.query.code
-    }
+    },
+    json:{}
   };
   request.get(option, function (err, request, body) {
     login(res, 'github', body.access_token);
@@ -45,15 +48,18 @@ router.get('/qq', function (req, res) {
   var option = {
     'content-type': 'application/json',
     url: config.login.qq.access_token_url,
-    json: {
+    qs: {
       client_id: config.login.qq.client_id,
       client_secret: config.login.qq.client_secret,
       redirect_uri: util.format(config.login.qq.redirect_uri, config.hostname),
       grant_type: config.login.qq.grant_type,
-      code: req.query.code
-    }
+      code: req.query.code,
+      state: 'openhackathon'
+    },
+    json:{}
   };
   request.get(option, function (err, request, body) {
+    body = querystring.parse(body);
     login(res, 'qq', body.access_token);
   });
 
@@ -63,16 +69,16 @@ router.get('/gitcafe', function (req, res) {
   var option = {
     'content-type': 'application/json',
     url: config.login.gitcafe.access_token_url,
-    json: {
+    qs: {
       client_id: config.login.gitcafe.client_id,
       client_secret: config.login.gitcafe.client_secret,
       redirect_uri: util.format(config.login.gitcafe.redirect_uri, config.hostname),
       grant_type: config.login.gitcafe.grant_type,
       code: req.query.code
-    }
+    },
+    json:{}
   };
-  request.get(option, function (err, request, body) {
-    console.log(body)
+  request.post(option, function (err, request, body) {
     login(res, 'gitcafe', body.access_token);
   });
 });
@@ -81,17 +87,19 @@ router.get('/weibo', function (req, res) {
   var option = {
     'content-type': 'application/json',
     url: config.login.weibo.access_token_url,
-    json: {
+    qs: {
       client_id: config.login.weibo.client_id,
       client_secret: config.login.weibo.client_secret,
       redirect_uri: util.format(config.login.weibo.redirect_uri, config.hostname),
       grant_type: config.login.weibo.grant_type,
       code: req.query.code
-    }
+    },
+    json:{}
   };
-  request.get(option, function (err, request, body) {
+  request.post(option, function (err, request, body) {
     login(res, 'weibo', body.access_token);
   });
 });
+
 
 module.exports = router

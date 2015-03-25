@@ -9,7 +9,7 @@
 <nav id="ohp_header" class="navbar navbar-inverse navbar-fixed-top">
     <div class="container-fluid">
         <div class="navbar-header">
-            <a class="navbar-brand" href="/"> 开放黑客松</a>
+            <a class="navbar-brand" href="http://hacking.kaiyuanshe.cn"> 开放黑客松</a>
         </div>
         <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
@@ -20,7 +20,7 @@
             {% if current_user.is_authenticated() %}
             <ul class="nav navbar-nav navbar-right">
                 <li>
-                    <a href="javascript:;" id="timer">距离hackathon结束还有：<span  id="end_timer" ></span></a>
+                    <a href="javascript:;" id="timer">模拟 距离hackathon结束还有：<span  id="end_timer" ></span></a>
                 </li>
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
@@ -35,11 +35,13 @@
                     <ul class="dropdown-menu" role="menu">
                         <li><a href="#">{{current_user.nickname}}</a>
                         </li>
-                        <li><a target="_blank" href="https://campaign.gitcafe.com/openxml-hackathon2015">黑客松活动指南</a>
+                        <li><a>管理我的黑客松</a>
                         </li>
-                        <li><a target="_blank" href="/challenges">Open XML SDK 黑客松 挑战</a>
+                        <li><a>黑客松活动指南</a>
                         </li>
-                         <li><a target="_blank" href="https://github.com/msopentechcn/open-hackathon/wiki/OpenXML-SDK-在线编程黑客松平台《使用帮助》">使用帮助</a>
+                        <li><a>我的黑客松挑战</a>
+                        </li>
+                        <li><a target="_blank" href="https://github.com/msopentechcn/open-hackathon/wiki/OpenXML-SDK-在线编程黑客松平台《使用帮助》">使用帮助</a>
                         </li>
                         <li><a id="logout" href="/logout">登出</a>
                         </li>
