@@ -16,7 +16,7 @@ $(function() {
             $('#timer').text('本次活动已结束，非常感谢您的参与。')
         }
     });
-    api_stat()
+    api_stat(function(){})
     $("#logout").click(function() {
         window.location.href = "/logout";
     })
