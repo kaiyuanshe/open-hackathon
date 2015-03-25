@@ -9,20 +9,16 @@ var util = require('util')
 
 var COOKIE_USERINFORMATION = 'User'
 
-function login(res, name, token) {
-  res.api.user.login.post({
-    provider: name,
-    access_token: token,
-    hackathon_name: config.hackathon_name
-  }, function (response, data) {
+function login(res, option) {
+  res.api.user.login.post(option, function (response, data) {
     res.cookie(COOKIE_USERINFORMATION, JSON.stringify(data));
     console.log(data)
     if (data.experiments.length > 0) {
-      res.send('<script type="text/javascript">window.opener.location.href = "/#/hackathon";window.close();</script>');
+      res.redirect("/#/hackathon")
     } else if (data.register_state) {
-      res.send('<script type="text/javascript">window.opener.location.href = "/#/settings";window.close();</script>');
+      res.redirect("/#/settings")
     } else {
-      res.send('<script type="text/javascript">window.opener.location.href = "/#/notregister";window.close();</script>');
+      res.redirect("/#/notregister")
     }
   });
 }
@@ -40,7 +36,11 @@ router.get('/github', function (req, res) {
     json:{}
   };
   request.get(option, function (err, request, body) {
-    login(res, 'github', body.access_token);
+    login(res, {
+        provider: "github",
+        access_token: body.access_token,
+        hackathon_name: config.hackathon_name
+      });
   });
 });
 
@@ -60,7 +60,12 @@ router.get('/qq', function (req, res) {
   };
   request.get(option, function (err, request, body) {
     body = querystring.parse(body);
-    login(res, 'qq', body.access_token);
+    console.log(body)
+    login(res, {
+        provider: "qq",
+        access_token: body.access_token,
+        hackathon_name: config.hackathon_name
+      });
   });
 
 });
@@ -79,7 +84,11 @@ router.get('/gitcafe', function (req, res) {
     json:{}
   };
   request.post(option, function (err, request, body) {
-    login(res, 'gitcafe', body.access_token);
+    login(res, {
+        provider: "gitcafe",
+        access_token: body.access_token,
+        hackathon_name: config.hackathon_name
+      });
   });
 });
 
@@ -97,7 +106,13 @@ router.get('/weibo', function (req, res) {
     json:{}
   };
   request.post(option, function (err, request, body) {
-    login(res, 'weibo', body.access_token);
+    console.log(body)
+    login(res, {
+        provider: "weibo",
+        access_token: body.access_token,
+        uid: body.uid,
+        hackathon_name: config.hackathon_name
+      });
   });
 });
 
