@@ -27,14 +27,14 @@
             <img src="/static/pic/github_32x32.png">
             <span>GitHub</span>
         </a>
-         {% endif %} {% if "gitcafe" in providers %}
-        <a class="btn btn-success" href="javascript:;" role="button" id="gitcafelogin" title="login">
-            <img src="/static/pic/gitcafe.login.jpg">
-            <span>GitCafe</span>
-        </a>
         {% endif %} {% if "qq" in providers %}
         <a class="btn" href="javascript:;" role="button" id="qqlogin" title="login">
             <img src="/static/pic/Connect_logo_4.png">
+        </a>
+        {% endif %} {% if "gitcafe" in providers %}
+        <a class="btn btn-success" href="javascript:;" role="button" id="gitcafelogin" title="login">
+            <img src="/static/pic/gitcafe.login.jpg">
+            <span>GitCafe</span>
         </a>
         {% endif %} {% if "weibo" in providers %}
         <a class="btn " href="javascript:;" role="button" id="weibologin" title="login">
