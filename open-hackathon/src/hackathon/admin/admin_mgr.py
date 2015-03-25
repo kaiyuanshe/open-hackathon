@@ -70,7 +70,7 @@ class AdminManager(object):
 
         if HTTP_HEADER.HACKATHON_ID in request.headers:
             try:
-                g.hackathon_id = long(request.headers['hackathon_id'])
+                g.hackathon_id = long(request.headers[HTTP_HEADER.HACKATHON_ID])
                 return self.validate_admin_hackathon_request(g.hackathon_id)
             except Exception:
                 log.debug("hackathon_id is not a num")
