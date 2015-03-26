@@ -1,8 +1,10 @@
 import json, os, requests, urllib2
+
 try:
     from config import Config
 except ImportError:
     from config_sample import Config
+
 
 def convert(input):
     if isinstance(input, dict):
