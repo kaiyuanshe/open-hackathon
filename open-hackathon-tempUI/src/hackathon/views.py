@@ -18,7 +18,8 @@ Template_Routes = {
     "submitted": "submitted.html",
     "redirect": "redirect.html",
     "notregister": "notregister.html",
-    "challenges": "challenges.html"
+    "challenges": "challenges.html",
+    "help": "help.html"
 }
 
 
