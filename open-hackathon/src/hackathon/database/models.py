@@ -16,7 +16,7 @@ def date_serializer(date):
     return long((date - datetime(1970, 1, 1)).total_seconds() * 1000)
 
 
-def to_json(inst, cls):
+def to_dic(inst, cls):
     # add your coversions for things like datetime's
     # and what-not that aren't serializable.
     convert = dict()
@@ -31,11 +31,15 @@ def to_json(inst, cls):
                 d[c.name] = func(v)
             except:
                 d[c.name] = "Error:  Failed to covert using ", str(convert[c.type.__class__])
-        elif v is None:
-            d[c.name] = str()
+        # elif v is None:
+        # d[c.name] = str()
         else:
             d[c.name] = v
-    return json.dumps(d)
+    return d
+
+
+def to_json(inst, cls):
+    return json.dumps(to_dic(inst, cls))
 
 
 class User(Base):
@@ -66,6 +70,9 @@ class User(Base):
 
     def get_id(self):
         return unicode(self.get_user_id())
+
+    def dic(self):
+        return to_dic(self, self.__class__)
 
     def json(self):
         return to_json(self, self.__class__)
@@ -114,6 +121,9 @@ class UserToken(Base):
     issue_date = Column(DateTime)
     expire_date = Column(DateTime, nullable=False)
 
+    def dic(self):
+        return to_dic(self, self.__class__)
+
     def json(self):
         return to_json(self, self.__class__)
 
@@ -144,6 +154,9 @@ class Register(Base):
 
     def json(self):
         return to_json(self, self.__class__)
+
+    def dic(self):
+        return to_dic(self, self.__class__)
 
 
     def __init__(self, **kwargs):
@@ -176,6 +189,9 @@ class Hackathon(Base):
     def json(self):
         return to_json(self, self.__class__)
 
+    def dic(self):
+        return to_dic(self, self.__class__)
+
     def __init__(self, **kwargs):
         super(Hackathon, self).__init__(**kwargs)
         if self.create_time is None:
@@ -201,6 +217,9 @@ class DockerHostServer(Base):
 
     def json(self):
         return to_json(self, self.__class__)
+
+    def dic(self):
+        return to_dic(self, self.__class__)
 
     def __init__(self, **kwargs):
         super(DockerHostServer, self).__init__(**kwargs)
@@ -229,6 +248,9 @@ class Experiment(Base):
 
     def json(self):
         return to_json(self, self.__class__)
+
+    def dic(self):
+        return to_dic(self, self.__class__)
 
     def __init__(self, **kwargs):
         super(Experiment, self).__init__(**kwargs)
@@ -262,6 +284,9 @@ class VirtualEnvironment(Base):
     def json(self):
         return to_json(self, self.__class__)
 
+    def dic(self):
+        return to_dic(self, self.__class__)
+
     def __init__(self, **kwargs):
         super(VirtualEnvironment, self).__init__(**kwargs)
         if self.create_time is None:
@@ -290,6 +315,9 @@ class DockerContainer(Base):
 
     def json(self):
         return to_json(self, self.__class__)
+
+    def dic(self):
+        return to_dic(self, self.__class__)
 
     def __init__(self, exper, **kwargs):
         self.experiment = exper
@@ -325,6 +353,9 @@ class PortBinding(Base):
     def json(self):
         return to_json(self, self.__class__)
 
+    def dic(self):
+        return to_dic(self, self.__class__)
+
     def __init__(self, **kwargs):
         super(PortBinding, self).__init__(**kwargs)
 
@@ -342,6 +373,9 @@ class Announcement(Base):
 
     def json(self):
         return to_json(self, self.__class__)
+
+    def dic(self):
+        return to_dic(self, self.__class__)
 
     def __init__(self, content):
         self.content = content
@@ -361,6 +395,9 @@ class Role(Base):
 
     def json(self):
         return to_json(self, self.__class__)
+
+    def dic(self):
+        return to_dic(self, self.__class__)
 
     def __init__(self, name):
         self.name = name
@@ -384,6 +421,9 @@ class UserRole(Base):
 
     def json(self):
         return to_json(self, self.__class__)
+
+    def dic(self):
+        return to_dic(self, self.__class__)
 
     def __init__(self, role, user):
         self.role = role
@@ -409,6 +449,9 @@ class Template(Base):
     def json(self):
         return to_json(self, self.__class__)
 
+    def dic(self):
+        return to_dic(self, self.__class__)
+
     def __init__(self, **kwargs):
         super(Template, self).__init__(**kwargs)
 
@@ -433,6 +476,9 @@ class UserTemplate(Base):
     user = relationship('User', backref=backref('user_template', lazy='dynamic'))
     template_id = Column(Integer, ForeignKey('template.id', ondelete='CASCADE'))
     template = relationship('Template', backref=backref('user_template', lazy='dynamic'))
+
+    def dic(self):
+        return to_dic(self, self.__class__)
 
     def __init__(self, user, template, create_time=None, last_modify_time=None):
         if create_time is None:
@@ -468,6 +514,9 @@ class UserOperation(Base):
     def json(self):
         return to_json(self, self.__class__)
 
+    def dic(self):
+        return to_dic(self, self.__class__)
+
     def __repr__(self):
         return "UserOperation: " + self.json()
 
@@ -501,6 +550,9 @@ class UserResource(Base):
 
     def json(self):
         return to_json(self, self.__class__)
+
+    def dic(self):
+        return to_dic(self, self.__class__)
 
     def __repr__(self):
         return "UserResource: " + self.json()
@@ -540,6 +592,9 @@ class VMEndpoint(Base):
 
     def json(self):
         return to_json(self, self.__class__)
+
+    def dic(self):
+        return to_dic(self, self.__class__)
 
     def __repr__(self):
         return "VMEndpoint: " + self.json()
@@ -581,6 +636,9 @@ class VMConfig(Base):
     def json(self):
         return to_json(self, self.__class__)
 
+    def dic(self):
+        return to_dic(self, self.__class__)
+
     def __repr__(self):
         return "VMConfig: " + self.json()
 
@@ -603,6 +661,9 @@ class AdminUser(Base):
 
     def json(self):
         return to_json(self, self.__class__)
+
+    def dic(self):
+        return to_dic(self, self.__class__)
 
     def __init__(self, **kwargs):
         super(AdminUser, self).__init__(**kwargs)
@@ -630,6 +691,9 @@ class AdminEmail(Base):
     def __init__(self, **kwargs):
         super(AdminEmail, self).__init__(**kwargs)
 
+    def dic(self):
+        return to_dic(self, self.__class__)
+
 
 class AdminToken(Base):
     __tablename__ = 'admin_token'
@@ -650,6 +714,9 @@ class AdminToken(Base):
         if self.issue_date is None:
             self.issue_date = datetime.utcnow()
 
+    def dic(self):
+        return to_dic(self, self.__class__)
+
     def __repr__(self):
         return "AdminToken: " + self.json()
 
@@ -666,6 +733,9 @@ class AdminUserHackathonRel(Base):
 
     def json(self):
         return to_json(self, self.__class__)
+
+    def dic(self):
+        return to_dic(self, self.__class__)
 
     def __init__(self, **kwargs):
         super(AdminUserHackathonRel, self).__init__(**kwargs)
