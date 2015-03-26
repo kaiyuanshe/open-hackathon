@@ -1,0 +1,24 @@
+[uwsgi]
+#application's base folder
+base = /opt/open-hackathon/open-hackathon-tempUI/src
+
+#python module to import
+app = run
+module = %(app)
+
+#home = /opt/open-hackathon/venv
+pythonpath = /opt/open-hackathon/open-hackathon-tempUI/src
+
+#socket file's location
+#socket = /opt/LABOSS/%n.sock
+enable-threads = true
+http = 0.0.0.0:80
+
+#permissions for the socket file
+chmod-socket    = 666
+
+#the variable that holds a flask application inside the module imported at line #6
+callable = app
+
+#location of log files
+logto = /var/log/uwsgi/%n.log
