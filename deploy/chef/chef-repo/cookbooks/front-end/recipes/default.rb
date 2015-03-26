@@ -25,8 +25,8 @@ directory '/opt/open-hackathon' do
 end
 
 git "/opt/open-hackathon" do
-  repository "<%= node['open-hackathon-ui']['git']['repository']%>"
-  revision "<%= node['open-hackathon-ui']['git']['revision']%>"
+  repository "https://github.com/msopentechcn/open-hackathon.git"
+  revision "master" 
   action :sync
 end
 
