@@ -19,7 +19,6 @@ class AdminManager(object):
             return t.admin
         return None
 
-
     def validate_request(self):
         if HTTP_HEADER.TOKEN not in request.headers:
             log.error('invailed request from checking TOKEN')
@@ -30,7 +29,6 @@ class AdminManager(object):
 
         g.admin = admin
         return True
-
 
     def get_hack_id_by_admin_id(self, admin_id):
 

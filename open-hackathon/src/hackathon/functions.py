@@ -1,4 +1,9 @@
-import urllib2, json, os, requests
+import urllib2
+import json
+import os
+
+import requests
+
 from config import Config
 
 

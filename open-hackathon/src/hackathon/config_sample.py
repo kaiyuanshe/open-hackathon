@@ -33,10 +33,6 @@ Config = {
             "user_info_url": 'https://api.weibo.com/2/users/show.json?access_token=',
             "email_info_url": 'https://api.weibo.com/2/account/profile/email.json?access_token='
         },
-        "weibo": {
-            "user_info_url": 'https://api.weibo.com/2/users/show.json?access_token=',
-            "email_info_url": 'https://api.weibo.com/2/account/profile/email.json?access_token='
-        },
         "token_expiration_minutes": 60 * 24
     },
     "azure": {
@@ -50,5 +46,10 @@ Config = {
     "scheduler": {
         "job_store": "mysql",
         "job_store_url": 'mysql://%s:%s@%s/%s' % (MYSQL_USER, MYSQL_PWD, MYSQL_HOST, MYSQL_DB)
+    },
+    "pre_allocate": {
+        "check_interval_minutes": 5,
+        "azure": 1,
+        "docker": 1
     }
 }

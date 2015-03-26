@@ -1,6 +1,7 @@
 from flask_restful import Resource, reqparse
 from . import api, app
 from expr import expr_manager
+from expr.expr_mgr import open_check_expr
 from database.models import Announcement, Hackathon, Template
 from user.login import *
 from flask import g, request
@@ -56,7 +57,7 @@ class UserExperimentResource(Resource):
         cid = args["cid"]
         hackathon = args["hackathon"]
         try:
-            return expr_manager.start_expr(hackathon, cid)
+            return expr_manager.start_expr(hackathon, cid, g.user.id)
         except Exception as err:
             log.error(err)
             return {"error": "fail to start due to '%s'" % err}, 500
@@ -212,6 +213,26 @@ class CurrentTime(Resource):
         return {"currenttime": long(time.time() * 1000)}
 
 
+class TestDefaultDocker(Resource):
+    def post(self):
+        args = request.get_json()
+        if "cid" not in args or "hackathon" not in args:
+            return "invalid parameter", 400
+        cid = args["cid"]
+        hackathon = args["hackathon"]
+        try:
+            return expr_manager.default_expr(hackathon, cid)
+        except Exception as err:
+            log.error(err)
+            return {"error": "fail to start due to '%s'" % err}, 500
+
+
+class DefaultExperiment(Resource):
+    def get(self):
+        open_check_expr()
+        return {"Info": "start default experiment"}, 200
+
+
 api.add_resource(UserExperimentResource, "/api/user/experiment")
 api.add_resource(RegisterListResource, "/api/register/list")
 api.add_resource(BulletinResource, "/api/bulletin")
@@ -226,6 +247,8 @@ api.add_resource(UserExperimentListResource, "/api/user/experiment/list")
 api.add_resource(GuacamoleResource, "/api/guacamoleconfig")
 api.add_resource(UserResource, "/api/user")
 api.add_resource(CurrentTime, "/api/currenttime")
+api.add_resource(TestDefaultDocker, "/api/test/docker")
+api.add_resource(DefaultExperiment, "/api/default/experiment")
 
 # ------------------------------ APIs for admin-site --------------------------------
 class AdminHackathonListResource(Resource):

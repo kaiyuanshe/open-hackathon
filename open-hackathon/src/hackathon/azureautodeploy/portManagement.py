@@ -28,7 +28,7 @@ class PortManagement():
             return False
         return True
 
-    def assign_public_port(self, cloud_service_name, deployment_slot, virtual_machine_name, private_port):
+    def assign_public_port(self, cloud_service_name, deployment_slot, virtual_machine_name, private_ports):
         """
         Assign public port of cloud service for private port of virtual machine
         Return -1 if failed
@@ -42,9 +42,12 @@ class PortManagement():
         if assigned_ports is None:
             return -1
         # duplicate detection for public port
-        public_port = int(private_port)
-        while str(public_port) in assigned_ports:
-            public_port = (public_port + 1) % 65536
+        public_ports = []
+        for p in private_ports:
+            public_port = int(p)
+            while str(public_port) in assigned_ports or str(public_port) in public_ports:
+                public_port = (public_port + 1) % 65536
+            public_ports.append(public_port)
         # compose network config to update
         try:
             deployment = self.sms.get_deployment_by_slot(cloud_service_name, deployment_slot)
@@ -54,8 +57,8 @@ class PortManagement():
         network = self.__compose_network_config(cloud_service_name,
                                                 deployment.name,
                                                 virtual_machine_name,
-                                                public_port,
-                                                private_port)
+                                                public_ports,
+                                                private_ports)
         if network is None:
             return -1
         try:
@@ -76,9 +79,9 @@ class PortManagement():
                                     200):
             log.error('%s %s not ready' % (VIRTUAL_MACHINE, virtual_machine_name))
             return -1
-        return public_port
+        return [int(p) for p in public_ports]
 
-    def release_public_port(self, cloud_service_name, deployment_slot, virtual_machine_name, private_port):
+    def release_public_port(self, cloud_service_name, deployment_slot, virtual_machine_name, private_ports):
         """
         Release public port of cloud service according to private port of virtual machine
         Return False if failed
@@ -97,7 +100,7 @@ class PortManagement():
         network = self.__decompose_network_config(cloud_service_name,
                                                   deployment.name,
                                                   virtual_machine_name,
-                                                  private_port)
+                                                  private_ports)
         if network is None:
             return False
         try:
@@ -174,19 +177,20 @@ class PortManagement():
                                                           input_endpoint.local_port)
                         )
                     break
-        network.input_endpoints.input_endpoints.append(
-            ConfigurationSetInputEndpoint('auto-' + str(public_port), 'tcp', str(public_port), str(private_port))
-        )
+        for i in range(len(public_port)):
+            network.input_endpoints.input_endpoints.append(
+                ConfigurationSetInputEndpoint('auto-' + str(public_port[i]), 'tcp', str(public_port[i]), str(private_port[i]))
+            )
         return network
 
-    def __decompose_network_config(self, cloud_service_name, deployment_name, virtual_machine_name, private_port):
+    def __decompose_network_config(self, cloud_service_name, deployment_name, virtual_machine_name, private_ports):
         """
         Create a new network config by deleting given endpoint
         Return None if failed
         :param cloud_service_name:
         :param deployment_name:
         :param virtual_machine_name:
-        :param private_port:
+        :param private_ports:
         :return:
         """
         try:
@@ -194,13 +198,14 @@ class PortManagement():
         except Exception as e:
             log.error(e)
             return None
+        private_endpoints = map(str, private_ports)
         network = ConfigurationSet()
         network.configuration_set_type = 'NetworkConfiguration'
         for configuration_set in virtual_machine.configuration_sets.configuration_sets:
             if configuration_set.configuration_set_type == 'NetworkConfiguration':
                 if configuration_set.input_endpoints is not None:
                     for input_endpoint in configuration_set.input_endpoints.input_endpoints:
-                        if input_endpoint.local_port != str(private_port):
+                        if input_endpoint.local_port not in private_endpoints:
                             network.input_endpoints.input_endpoints.append(
                                 ConfigurationSetInputEndpoint(input_endpoint.name,
                                                               input_endpoint.protocol,
