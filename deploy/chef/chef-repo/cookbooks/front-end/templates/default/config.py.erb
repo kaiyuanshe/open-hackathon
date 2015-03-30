@@ -1,0 +1,74 @@
+# "javascript" section for javascript. see @app.route('/config.js') in app/views.py
+
+# oauth constants
+HOSTNAME = "<%= node['open-hackathon-ui']['HOSTNAME'] %>"
+# host name of the UI site
+QQ_OAUTH_STATE = "<%= node['open-hackathon-ui']['QQ_OAUTH_STATE'] %>"
+# todo state should be constant. Actually it should be unguessable to prevent CSFA
+HACKATHON_API_ENDPOINT = "<%= node['open-hackathon-ui']['HACKATHON_API_ENDPOINT']%>"
+#"http://hackathon.chinacloudapp.cn:15000"
+
+Config = {
+    "environment": "<%= node['open-hackathon-ui']['environment'] %>",
+    "login": {
+        "github": {
+            "access_token_url": 'https://github.com/login/oauth/access_token?client_id=<%=node['open-hackathon-ui']['github']['client_id']%>&client_secret=<%=node['open-hackathon-ui']['github']['client_secret']%>&redirect_uri=%s/github&code=' % HOSTNAME,
+            "user_info_url": 'https://api.github.com/user?access_token=',
+            "emails_info_url": 'https://api.github.com/user/emails?access_token='
+        },
+        "qq": {
+            "meta_content": "<%= node['open-hackathon-ui']['qq']['meta_content']%>",
+            "access_token_url": 'https://graph.qq.com/oauth2.0/token?grant_type=<%=node['open-hackathon-ui']['qq']['grant_type']%>&client_id=<%=node['open-hackathon-ui']['qq']['client_id']%>&client_secret=<%=node['open-hackathon-ui']['qq']['client_secret']%>&redirect_uri=%s/qq&code=' % HOSTNAME,
+            "openid_url": 'https://graph.qq.com/oauth2.0/me?access_token=',
+            "user_info_url": 'https://graph.qq.com/user/get_user_info?access_token=%s&oauth_consumer_key=%s&openid=%s'
+        },
+        "gitcafe": {
+            "access_token_url": 'https://api.gitcafe.com/oauth/token?client_id=<%=node['open-hackathon-ui']['gitcafe']['client_id']%>&client_secret=<%=node['open-hackathon-ui']['gitcafe']['client_secret']%>&redirect_uri=%s/gitcafe&grant_type=<%=node['open-hackathon-ui']['gitcafe']['grant_type']%>&code=' % HOSTNAME
+        },
+        "weibo":{
+            "meta_content": "<%= node['open-hackathon-ui']['weibo']['meta_content']%>",
+            "access_token_url": 'https://api.weibo.com/oauth2/access_token?client_id=<%= node['open-hackathon-ui']['weibo']['client_id']%>&client_secret=<%=node['open-hackathon-ui']['weibo']['client_secret']%>&grant_type=<%=node['open-hackathon-ui']['weibo']['grant_type']%>&redirect_uri=%s/weibo&code=' % HOSTNAME,
+            "user_info_url": 'https://api.weibo.com/2/users/show.json?access_token=',
+            "email_info_url": 'https://api.weibo.com/2/account/profile/email.json?access_token='
+        },
+        "provider_enabled": <%= node['open-hackathon-ui']['provider']%>,
+        "session_minutes": <%= node['open-hackathon-ui']['session_minutes']%>,
+        "token_expiration_minutes": <%= node['open-hackathon-ui']['token_expiration_minutes']%>
+    },
+    "hackathon-api": {
+        "endpoint": HACKATHON_API_ENDPOINT
+    },
+    "javascript": {
+        "github": {
+            "clientID": "client_id=<%=node['open-hackathon-ui']['github']['client_id']%>",
+            "redirect_uri": "redirect_uri=%s/github" % HOSTNAME,
+            "scope": "scope=<%=node['open-hackathon-ui']['github']['scope']%>",
+        },
+        "weibo": {
+            "clientID": "client_id=<%=node['open-hackathon-ui']['weibo']['client_id']%>",
+            "redirect_uri": "redirect_uri=%s/weibo" % HOSTNAME,
+            "scope": "scope=<%=node['open-hackathon-ui']['weibo']['scope']%>",
+        },
+        "qq": {
+            "clientID": "client_id=<%=node['open-hackathon-ui']['qq']['client_id']%>",
+            "redirect_uri": "redirect_uri=%s/qq" % HOSTNAME,
+            "scope": "scope=<%=node['open-hackathon-ui']['qq']['scope']%>",
+            "state": "state=%s" % QQ_OAUTH_STATE,
+            "response_type": "response_type=<%=node['open-hackathon-ui']['qq']['response_type']%>",
+        },
+        "gitcafe": {
+            "clientID": "client_id=<%=node['open-hackathon-ui']['gitcafe']['client_id']%>",
+            "clientSecret": "client_secret=<%=node['open-hackathon-ui']['gitcafe']['client_secret']%>",
+            "redirect_uri": "redirect_uri=http://hackathon.chinacloudapp.cn/gitcafe",
+            "response_type": "response_type=<%=node['open-hackathon-ui']['gitcafe']['response_type']%>",
+            "scope": "scope=<%=node['open-hackathon-ui']['gitcafe']['scope']%>"
+        },
+        "hackathon": {
+            "name": "<%=node['open-hackathon-ui']['hackathon']['name']%>",
+            "endpoint": HACKATHON_API_ENDPOINT
+        }
+    }
+}
+
+
+
