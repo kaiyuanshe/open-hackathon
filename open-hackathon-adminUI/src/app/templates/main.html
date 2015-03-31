@@ -1,0 +1,47 @@
+{% extends "base.html" %} {% block head %}
+<script type="text/javascript" src="/config.js"></script>
+{% endblock %}
+
+{% block header %}
+<h1>开放黑客松管理控台</h1>
+<p>Welcome to Management Console</p>
+
+{% endblock %}
+
+{% block content %}
+<div class="main">
+    <div class="left" style="display:inline-block">
+        {% if g.admin.is_super() %}
+        <div class="super-admin">
+            <h2>站点管理</h2>
+
+
+            <ul>
+                <li>超级管理员</li>
+                <li>黑客松管理</li>
+                <li>日志分析</li>
+                <li>日志分析</li>
+                <li>日志分析</li>
+                <li>日志分析</li>
+            </ul>
+        </div>
+        {% endif %}
+        <div class="admin">
+            <h2>黑客松管理</h2>
+
+            <p>You are currently manage hackathon:<br/>
+                kaiyuanshe <input type="button" value="switch"/></p>
+            <ul>
+                <li>基本设置</li>
+                <li>注册用户</li>
+                <li>azure账号</li>
+            </ul>
+        </div>
+    </div>
+    <div class="right" style="display:inline-block">
+        main body placeholder
+        {% block mainbody %}
+        {% endblock %}
+    </div>
+</div>
+{% endblock %}

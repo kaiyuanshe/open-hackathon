@@ -10,7 +10,7 @@ from hackathon.functions import safe_get_config
 # flask
 app = Flask(__name__)
 api = Api(app)
-app.config['SECRET_KEY'] = safe_get_config("app.secret_key","secret_key")
+app.config['SECRET_KEY'] = safe_get_config("app.secret_key", "secret_key")
 
 app.config['DEBUG_TB_ENABLED'] = False
 toolbar = DebugToolbarExtension(app)
@@ -20,6 +20,5 @@ login_manager = LoginManager()
 login_manager.login_view = "index"
 login_manager.login_message_category = "info"
 login_manager.init_app(app)
-
 
 from . import views

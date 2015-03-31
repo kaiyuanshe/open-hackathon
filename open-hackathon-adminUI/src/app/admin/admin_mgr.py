@@ -101,18 +101,14 @@ class AdminManager(object):
         return True
 
     def get_admin_by_id(self, id):
-        admin = self.db.find_first_object(AdminUser, id=id)
-        if admin is not None:
-            return self.get_admin_info(admin)
-        else:
-            return "Not found", 404
+        return self.db.find_first_object(AdminUser, id=id)
 
     def get_admin_info(self, admin):
         return {
             "id": admin.id,
             "name": admin.name,
             "nickname": admin.nickname,
-            "email": admin.emails.__filter_by(primary_email=EmailStatus.Primary).first().email,
+            "email": admin.emails.filter_by(primary_email=EmailStatus.Primary).first().email,
             "avatar_url": admin.avatar_url,
             "online": admin.online,
             "create_time": str(admin.create_time),
@@ -128,30 +124,26 @@ class AdminManager(object):
         # get AdminUserHackathonRels from query withn filter by email
         admin_user_hackathon_rels = self.db.find_all_objects(AdminUserHackathonRel,
                                                              AdminUserHackathonRel.admin_email.in_(emails))
-        if len(admin_user_hackathon_rels) == 0 :
-            return None
+        if len(admin_user_hackathon_rels) == 0:
+            return []
 
         # get hackathon_ids_from AdminUserHackathonRels details
         hackathon_ids = map(lambda x: x.hackathon_id, admin_user_hackathon_rels)
         return list(set(hackathon_ids))
 
     def check_role(self, role):
-
-        # 0:super admin
-        # 1:comman admin
-
         hackathon_ids = self.get_hackid_from_adminid(g.admin.id)
-        # None  or not None { has -1 or has not }
+        return -1 in hackathon_ids or len(hackathon_ids) > 0
 
-        if hackathon_ids is None:
-            return False
-        else:
-            #only super admin can access
-            if role == ROLE.SUPER_ADMIN:
-                return -1 in hackathon_ids
-            #comman admin all can access
-            else:
-                return True
+    def is_super(self, admin_id):
+        return -1 in self.get_hackid_from_adminid(admin_id)
 
 
 admin_manager = AdminManager(db_adapter)
+
+
+def is_super(admin):
+    return admin_manager.is_super(admin.id)
+
+
+AdminUser.is_super = is_super
