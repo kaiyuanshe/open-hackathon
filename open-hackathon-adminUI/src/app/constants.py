@@ -4,6 +4,7 @@ class ROLE:
     ADMIN = 1
 
 
+
 class OAUTH_PROVIDER:
     GITHUB = "github"
     QQ = "qq"

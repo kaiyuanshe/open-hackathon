@@ -137,6 +137,8 @@ def gitcafe_login():
 @app.route('/')
 @app.route('/index')
 def index():
+    if g.admin.is_authenticated():
+        return redirect("/main")
     return __render('/login.html')
 
 

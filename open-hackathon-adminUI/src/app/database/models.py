@@ -80,10 +80,6 @@ class AdminUser(db.Model):
         return "AdminUser: " + self.json()
 
 
-# if self.slug is None:
-# self.slug = str(uuid.uuid1())[0:8]  # todo generate a real slug
-
-
 class AdminEmail(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80))

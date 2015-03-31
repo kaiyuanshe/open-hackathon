@@ -1,25 +1,31 @@
 {
-    "id": "default",
-    "key1": "value1",
-    "key2": ["value2_1", "value2_2"],
-    "key3": {
-        "key3_1": "value3_1"
-    },
-    "key4": {
-        "key4_1": "value4_1",
-        "key4_2": ["value4_2_1", "value4_2_2"],
-        "key4_3": {
-            "key4_3_1": "value4_3_1"
-        }
-    },
-    "key5": false,
-    "key6": true,
-    "key7": {
-      "from_databag_7_1": true,
-      "from_databag_7_2": false
-    },
-    "key8": "value_from_databag",
-    "key9": {
-        "key9.1": "value_from_databag_9.1"
+  "id": "default",
+  "key1": "value1",
+  "key2": [
+    "value2_1",
+    "value2_2"
+  ],
+  "key3": {
+    "key3_1": "value3_1"
+  },
+  "key4": {
+    "key4_1": "value4_1",
+    "key4_2": [
+      "value4_2_1",
+      "value4_2_2"
+    ],
+    "key4_3": {
+      "key4_3_1": "value4_3_1"
     }
+  },
+  "key5": false,
+  "key6": true,
+  "key7": {
+    "from_databag_7_1": true,
+    "from_databag_7_2": false
+  },
+  "key8": "value_from_databag",
+  "key9": {
+    "key9.1": "value_from_databag_9.1"
+  }
 }
