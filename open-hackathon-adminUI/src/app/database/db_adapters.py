@@ -4,7 +4,6 @@ class DBAdapter(object):
 
 
 class SQLAlchemyAdapter(DBAdapter):
-
     def __init__(self, db):
         super(SQLAlchemyAdapter, self).__init__(db)
 

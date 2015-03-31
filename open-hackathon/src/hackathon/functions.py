@@ -59,11 +59,9 @@ def put_to_remote(url, post_data, headers=None):
     return convert(resp)
 
 
-def get_remote(url, accept=None):
+def get_remote(url, headers=None):
     opener = urllib2.build_opener(urllib2.HTTPHandler)
-    request = urllib2.Request(url)
-    if accept is not None:
-        request.add_header("Accept", accept)
+    request = urllib2.Request(url, None, headers)
     resp = opener.open(request)
     return resp.read()
 

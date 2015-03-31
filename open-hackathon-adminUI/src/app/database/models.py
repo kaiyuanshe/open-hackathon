@@ -30,7 +30,6 @@ def to_json(inst, cls):
     return json.dumps(d)
 
 
-
 class AdminUser(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50))
@@ -54,7 +53,9 @@ class AdminUser(db.Model, UserMixin):
             self.create_time = datetime.utcnow()
         if self.last_login_time is None:
             self.last_login_time = datetime.utcnow()
-#        if self.slug is None:
+
+
+# if self.slug is None:
 #            self.slug = str(uuid.uuid1())[0:8]  # todo generate a real slug
 
 
@@ -70,7 +71,6 @@ class AdminEmail(db.Model):
 
     def __init__(self, **kwargs):
         super(AdminEmail, self).__init__(**kwargs)
-
 
 
 class AdminToken(db.Model):
@@ -96,7 +96,6 @@ class AdminToken(db.Model):
 
 
 class AdminUserHackathonRel(db.Model):
-
     id = db.Column(db.Integer, primary_key=True)
     admin_email = db.Column(db.String(120))
     role_type = db.Column(db.Integer)

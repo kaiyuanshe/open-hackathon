@@ -4,6 +4,7 @@ from user import user_manager
 from admin.admin_mgr import admin_manager
 from log import log
 
+
 def role_required(*roles):
     def wrapper(func):
         @wraps(func)

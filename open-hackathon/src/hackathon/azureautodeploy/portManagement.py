@@ -9,7 +9,6 @@ import time
 
 
 class PortManagement():
-
     def __init__(self):
         self.sms = None
 
@@ -179,7 +178,8 @@ class PortManagement():
                     break
         for i in range(len(public_port)):
             network.input_endpoints.input_endpoints.append(
-                ConfigurationSetInputEndpoint('auto-' + str(public_port[i]), 'tcp', str(public_port[i]), str(private_port[i]))
+                ConfigurationSetInputEndpoint('auto-' + str(public_port[i]), 'tcp', str(public_port[i]),
+                                              str(private_port[i]))
             )
         return network
 
@@ -254,19 +254,19 @@ class PortManagement():
                 return role_instance.instance_status
         return None
 
-# ---------------------------------------- usage ---------------------------------------- #
-#
-# from hackathon.functions import *
-#
-#
-# def test():
-#     p = PortManagement()
-#     sub_id = get_config("azure/subscriptionId")
-#     cert_path = get_config('azure/certPath')
-#     service_host_base = get_config("azure/managementServiceHostBase")
-#     t = p.connect(sub_id, cert_path, service_host_base)
-#     port = p.release_public_port('open-tech-service', 'Production', 'open-tech-role-15', 5000)
-#     print port
-#
-# if __name__ == "__main__":
-#     test()
+        # ---------------------------------------- usage ---------------------------------------- #
+        #
+        # from hackathon.functions import *
+        #
+        #
+        # def test():
+        # p = PortManagement()
+        #     sub_id = get_config("azure/subscriptionId")
+        #     cert_path = get_config('azure/certPath')
+        #     service_host_base = get_config("azure/managementServiceHostBase")
+        #     t = p.connect(sub_id, cert_path, service_host_base)
+        #     port = p.release_public_port('open-tech-service', 'Production', 'open-tech-role-15', 5000)
+        #     print port
+        #
+        # if __name__ == "__main__":
+        #     test()

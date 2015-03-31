@@ -1,5 +1,6 @@
 __author__ = 'Yifu Huang'
 import sys
+
 sys.path.append("..")
 from azureUtil import *
 from hackathon.database.models import *
@@ -58,11 +59,11 @@ class AzureStorage:
         else:
             # check whether storage account created by this function before
             if db_adapter.count_by(UserResource, type=STORAGE_ACCOUNT, name=storage_account['service_name']) == 0:
-                m = '%s %s exist but not created by this function before' %\
+                m = '%s %s exist but not created by this function before' % \
                     (STORAGE_ACCOUNT, storage_account['service_name'])
                 user_resource_commit(self.template, STORAGE_ACCOUNT, storage_account['service_name'], RUNNING)
             else:
-                m = '%s %s exist and created by this function before' %\
+                m = '%s %s exist and created by this function before' % \
                     (STORAGE_ACCOUNT, storage_account['service_name'])
             user_operation_commit(self.template, CREATE_STORAGE_ACCOUNT, END, m)
             log.debug(m)

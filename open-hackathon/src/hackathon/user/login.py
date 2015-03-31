@@ -4,7 +4,7 @@ import sys
 import urllib2
 
 sys.path.append("..")
-from hackathon.functions import get_remote, get_config, convert
+from hackathon.functions import get_remote, get_config, post_to_remote, convert
 from hackathon.log import log
 from . import user_manager
 import json
@@ -121,11 +121,14 @@ class GitcafeLogin(LoginProviderBase):
     def login(self, args):
         token = args.get('access_token')
         value = "Bearer " + token
-        opener = urllib2.build_opener(urllib2.HTTPHandler)
-        request = urllib2.Request(get_config("login.gitcafe.user_info_url"))
-        request.add_header("Authorization", value)
-        user_info = opener.open(request).read()
-        log.debug(user_info)
+        # opener = urllib2.build_opener(urllib2.HTTPHandler)
+        # request = urllib2.Request(get_config("login.gitcafe.user_info_url"))
+        # request.add_header("Authorization", value)
+        # user_info = opener.open(request).read()
+
+        header = {"Authorization": value}
+        user_info = get_remote(get_config("login.gitcafe.user_info_url"), headers=header)
+        log.debug("get user info from GitCafe:" + user_info + "\n")
         info = json.loads(user_info)
 
         name = info['username']

@@ -1,7 +1,7 @@
-
 from functools import wraps
 from flask import g
 from admin.admin_mgr import admin_manager
+
 
 def role_required(role):
     def wrapper(func):

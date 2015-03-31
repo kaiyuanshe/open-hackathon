@@ -529,7 +529,7 @@ def check_default_expr():
                                         Experiment.user_id == ReservedUser.DefaultUserID,
                                         Experiment.template_id == template.id,
                                         (Experiment.status == ExprStatus.Starting) | (
-                                        Experiment.status == ExprStatus.Running))
+                                            Experiment.status == ExprStatus.Running))
             # todo test azure, config num
             if template.provider == VirtualEnvironmentProvider.AzureVM:
                 if curr_num < total_azure:
@@ -547,8 +547,8 @@ def check_default_expr():
                         log.debug("no starting template: %s , remain num is %d ... " % (template.name, remain_num))
                         expr_manager.start_expr(template.hackathon.name, template.name, ReservedUser.DefaultUserID)
                         break
-                    # curr_num += 1
-                # log.debug("all template %s start complete" % template.name)
+                        # curr_num += 1
+                        # log.debug("all template %s start complete" % template.name)
             elif template.provider == VirtualEnvironmentProvider.Docker:
                 log.debug("template name is %s, hackathon name is %s" % (template.name, template.hackathon.name))
                 if curr_num < total_docker:
@@ -557,7 +557,7 @@ def check_default_expr():
                     expr_manager.start_expr(template.hackathon.name, template.name, ReservedUser.DefaultUserID)
                     # curr_num += 1
                     break
-                # log.debug("all template %s start complete" % template.name)
+                    # log.debug("all template %s start complete" % template.name)
         except Exception as e:
             log.error(e)
             log.error("check default experiment failed")

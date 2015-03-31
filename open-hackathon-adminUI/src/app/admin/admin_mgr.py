@@ -128,7 +128,7 @@ class AdminManager(object):
         # get AdminUserHackathonRels from query withn filter by email
         admin_user_hackathon_rels = self.db.find_all_objects(AdminUserHackathonRel,
                                                              AdminUserHackathonRel.admin_email.in_(emails))
-        if len(admin_user_hackathon_rels) == 0 :
+        if len(admin_user_hackathon_rels) == 0:
             return None
 
         # get hackathon_ids_from AdminUserHackathonRels details
@@ -146,7 +146,7 @@ class AdminManager(object):
         if hackathon_ids is None:
             return False
         else:
-            #only super admin can access
+            # only super admin can access
             if role == ROLE.SUPER_ADMIN:
                 return -1 in hackathon_ids
             #comman admin all can access

@@ -7,7 +7,7 @@ from hackathon.functions import get_config
 
 # the method will be tested
 class FunctionsTestCases(unittest.TestCase):
-    #initialize
+    # initialize
     def setUp(self):
         self.key = 'guacamole.host'
 
