@@ -16,12 +16,13 @@ def date_serializer(date):
     return long((date - datetime(1970, 1, 1)).total_seconds() * 1000)
 
 
-def to_json(inst, cls):
+def to_dic(inst, cls):
     # add your coversions for things like datetime's
     # and what-not that aren't serializable.
     convert = dict()
     convert[DateTime] = date_serializer
 
+    # todo datatime
     d = dict()
     for c in cls.__table__.columns:
         v = getattr(inst, c.name)
@@ -31,11 +32,15 @@ def to_json(inst, cls):
                 d[c.name] = func(v)
             except:
                 d[c.name] = "Error:  Failed to covert using ", str(convert[c.type.__class__])
-        elif v is None:
-            d[c.name] = str()
+        # elif v is None:
+        # d[c.name] = str()
         else:
             d[c.name] = v
-    return json.dumps(d)
+    return d
+
+
+def to_json(inst, cls):
+    return json.dumps(to_dic(inst, cls))
 
 
 class User(Base):
@@ -66,6 +71,9 @@ class User(Base):
 
     def get_id(self):
         return unicode(self.get_user_id())
+
+    def dic(self):
+        return to_dic(self, self.__class__)
 
     def json(self):
         return to_json(self, self.__class__)
@@ -114,6 +122,9 @@ class UserToken(Base):
     issue_date = Column(DateTime)
     expire_date = Column(DateTime, nullable=False)
 
+    def dic(self):
+        return to_dic(self, self.__class__)
+
     def json(self):
         return to_json(self, self.__class__)
 
@@ -144,6 +155,9 @@ class Register(Base):
 
     def json(self):
         return to_json(self, self.__class__)
+
+    def dic(self):
+        return to_dic(self, self.__class__)
 
 
     def __init__(self, **kwargs):
@@ -176,6 +190,9 @@ class Hackathon(Base):
     def json(self):
         return to_json(self, self.__class__)
 
+    def dic(self):
+        return to_dic(self, self.__class__)
+
     def __init__(self, **kwargs):
         super(Hackathon, self).__init__(**kwargs)
         if self.create_time is None:
@@ -192,6 +209,7 @@ class DockerHostServer(Base):
     vm_name = Column(String(100), nullable=False)
     hackathon_id = Column(Integer)
     public_dns = Column(String(50))
+    public_ip = Column(String(50))
     public_docker_api_port = Column(Integer)
     private_ip = Column(String(50))
     private_docker_api_port = Column(Integer)
@@ -201,6 +219,9 @@ class DockerHostServer(Base):
 
     def json(self):
         return to_json(self, self.__class__)
+
+    def dic(self):
+        return to_dic(self, self.__class__)
 
     def __init__(self, **kwargs):
         super(DockerHostServer, self).__init__(**kwargs)
@@ -224,11 +245,14 @@ class Experiment(Base):
     hackathon = relationship('Hackathon', backref=backref('experiments', lazy='dynamic'))
 
     # adaptor for auto azure deploy
-    user_template_id = Column(Integer, ForeignKey('user_template.id', ondelete='CASCADE'))
-    user_template = relationship('UserTemplate', backref=backref('experiments', lazy='dynamic'))
+    template_id = Column(Integer, ForeignKey('template.id', ondelete='CASCADE'))
+    template = relationship('Template', backref=backref('experiments', lazy='dynamic'))
 
     def json(self):
         return to_json(self, self.__class__)
+
+    def dic(self):
+        return to_dic(self, self.__class__)
 
     def __init__(self, **kwargs):
         super(Experiment, self).__init__(**kwargs)
@@ -262,6 +286,9 @@ class VirtualEnvironment(Base):
     def json(self):
         return to_json(self, self.__class__)
 
+    def dic(self):
+        return to_dic(self, self.__class__)
+
     def __init__(self, **kwargs):
         super(VirtualEnvironment, self).__init__(**kwargs)
         if self.create_time is None:
@@ -290,6 +317,9 @@ class DockerContainer(Base):
 
     def json(self):
         return to_json(self, self.__class__)
+
+    def dic(self):
+        return to_dic(self, self.__class__)
 
     def __init__(self, exper, **kwargs):
         self.experiment = exper
@@ -325,6 +355,9 @@ class PortBinding(Base):
     def json(self):
         return to_json(self, self.__class__)
 
+    def dic(self):
+        return to_dic(self, self.__class__)
+
     def __init__(self, **kwargs):
         super(PortBinding, self).__init__(**kwargs)
 
@@ -343,6 +376,9 @@ class Announcement(Base):
     def json(self):
         return to_json(self, self.__class__)
 
+    def dic(self):
+        return to_dic(self, self.__class__)
+
     def __init__(self, content):
         self.content = content
         self.enabled = 1
@@ -350,48 +386,6 @@ class Announcement(Base):
 
     def __repr__(self):
         return "Announcement: " + self.json()
-
-
-class Role(Base):
-    __tablename__ = 'role'
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String(50), unique=True)
-    create_time = Column(DateTime)
-
-    def json(self):
-        return to_json(self, self.__class__)
-
-    def __init__(self, name):
-        self.name = name
-        self.create_time = datetime.utcnow()
-
-    def __repr__(self):
-        return "Role: " + self.json()
-
-
-class UserRole(Base):
-    __tablename__ = 'user_role'
-
-    id = Column(Integer, primary_key=True)
-    create_time = Column(DateTime)
-
-    user_id = Column(Integer(), ForeignKey('user.id', ondelete='CASCADE'))
-    user = relationship('User', backref=backref('roles', lazy='dynamic'))
-
-    role_id = Column(Integer(), ForeignKey('role.id', ondelete='CASCADE'))
-    role = relationship('Role', backref=backref('users', lazy='dynamic'))
-
-    def json(self):
-        return to_json(self, self.__class__)
-
-    def __init__(self, role, user):
-        self.role = role
-        self.user = user
-        self.create_time = datetime.utcnow()
-
-    def __repr__(self):
-        return "UserRole: " + self.json()
 
 
 class Template(Base):
@@ -408,6 +402,9 @@ class Template(Base):
 
     def json(self):
         return to_json(self, self.__class__)
+
+    def dic(self):
+        return to_dic(self, self.__class__)
 
     def __init__(self, **kwargs):
         super(Template, self).__init__(**kwargs)
@@ -434,6 +431,9 @@ class UserTemplate(Base):
     template_id = Column(Integer, ForeignKey('template.id', ondelete='CASCADE'))
     template = relationship('Template', backref=backref('user_template', lazy='dynamic'))
 
+    def dic(self):
+        return to_dic(self, self.__class__)
+
     def __init__(self, user, template, create_time=None, last_modify_time=None):
         if create_time is None:
             create_time = datetime.utcnow()
@@ -453,13 +453,13 @@ class UserOperation(Base):
     status = Column(String(50))
     note = Column(String(500))
     exec_time = Column(DateTime)
-    user_template_id = Column(Integer, ForeignKey('user_template.id', ondelete='CASCADE'))
-    user_template = relationship('UserTemplate', backref=backref('user_operation', lazy='dynamic'))
+    template_id = Column(Integer, ForeignKey('template.id', ondelete='CASCADE'))
+    template = relationship('Template', backref=backref('user_operation', lazy='dynamic'))
 
-    def __init__(self, user_template, operation, status, note=None, exec_time=None):
+    def __init__(self, template, operation, status, note=None, exec_time=None):
         if exec_time is None:
             exec_time = datetime.utcnow()
-        self.user_template = user_template
+        self.template = template
         self.operation = operation
         self.status = status
         self.note = note
@@ -467,6 +467,9 @@ class UserOperation(Base):
 
     def json(self):
         return to_json(self, self.__class__)
+
+    def dic(self):
+        return to_dic(self, self.__class__)
 
     def __repr__(self):
         return "UserOperation: " + self.json()
@@ -481,17 +484,17 @@ class UserResource(Base):
     status = Column(String(50))
     create_time = Column(DateTime)
     last_modify_time = Column(DateTime)
-    user_template_id = Column(Integer, ForeignKey('user_template.id', ondelete='CASCADE'))
-    user_template = relationship('UserTemplate', backref=backref('user_resource1', lazy='dynamic'))
+    template_id = Column(Integer, ForeignKey('template.id', ondelete='CASCADE'))
+    template = relationship('Template', backref=backref('user_resource1', lazy='dynamic'))
     # for deployment and virtual machine
     cloud_service_id = Column(Integer, ForeignKey('user_resource.id', ondelete='CASCADE'))
 
-    def __init__(self, user_template, type, name, status, cloud_service_id, create_time=None, last_modify_time=None):
+    def __init__(self, template, type, name, status, cloud_service_id, create_time=None, last_modify_time=None):
         if create_time is None:
             create_time = datetime.utcnow()
         if last_modify_time is None:
             last_modify_time = datetime.utcnow()
-        self.user_template = user_template
+        self.template = template
         self.type = type
         self.name = name
         self.status = status
@@ -501,6 +504,9 @@ class UserResource(Base):
 
     def json(self):
         return to_json(self, self.__class__)
+
+    def dic(self):
+        return to_dic(self, self.__class__)
 
     def __repr__(self):
         return "UserResource: " + self.json()
@@ -541,6 +547,9 @@ class VMEndpoint(Base):
     def json(self):
         return to_json(self, self.__class__)
 
+    def dic(self):
+        return to_dic(self, self.__class__)
+
     def __repr__(self):
         return "VMEndpoint: " + self.json()
 
@@ -558,11 +567,11 @@ class VMConfig(Base):
     virtual_machine = relationship('UserResource', backref=backref('vm_config1', lazy='dynamic'))
     remote_provider = Column(String(20))
     remote_paras = Column(String(300))
-    user_template_id = Column(Integer, ForeignKey('user_template.id', ondelete='CASCADE'))
-    user_template = relationship('UserTemplate', backref=backref('vm_config2', lazy='dynamic'))
+    template_id = Column(Integer, ForeignKey('template.id', ondelete='CASCADE'))
+    template = relationship('Template', backref=backref('vm_config2', lazy='dynamic'))
 
     def __init__(self, virtual_machine, dns, public_ip, private_ip,
-                 remote_provider, remote_paras, user_template,
+                 remote_provider, remote_paras, template,
                  create_time=None, last_modify_time=None):
         if create_time is None:
             create_time = datetime.utcnow()
@@ -574,12 +583,15 @@ class VMConfig(Base):
         self.private_ip = private_ip
         self.remote_provider = remote_provider
         self.remote_paras = remote_paras
-        self.user_template = user_template
+        self.template = template
         self.create_time = create_time
         self.last_modify_time = last_modify_time
 
     def json(self):
         return to_json(self, self.__class__)
+
+    def dic(self):
+        return to_dic(self, self.__class__)
 
     def __repr__(self):
         return "VMConfig: " + self.json()
@@ -603,6 +615,9 @@ class AdminUser(Base):
 
     def json(self):
         return to_json(self, self.__class__)
+
+    def dic(self):
+        return to_dic(self, self.__class__)
 
     def __init__(self, **kwargs):
         super(AdminUser, self).__init__(**kwargs)
@@ -630,6 +645,9 @@ class AdminEmail(Base):
     def __init__(self, **kwargs):
         super(AdminEmail, self).__init__(**kwargs)
 
+    def dic(self):
+        return to_dic(self, self.__class__)
+
 
 class AdminToken(Base):
     __tablename__ = 'admin_token'
@@ -650,6 +668,9 @@ class AdminToken(Base):
         if self.issue_date is None:
             self.issue_date = datetime.utcnow()
 
+    def dic(self):
+        return to_dic(self, self.__class__)
+
     def __repr__(self):
         return "AdminToken: " + self.json()
 
@@ -666,6 +687,9 @@ class AdminUserHackathonRel(Base):
 
     def json(self):
         return to_json(self, self.__class__)
+
+    def dic(self):
+        return to_dic(self, self.__class__)
 
     def __init__(self, **kwargs):
         super(AdminUserHackathonRel, self).__init__(**kwargs)

@@ -11,7 +11,7 @@ angular.module('oh.directives', [])
    $templateCache.put('hackathon.html', '');
    $templateCache.get('hackathon.html');
    })*/
-  .directive('hackathonNav', function ($interval, $cookieStore, API) {
+  .directive('hackathonNav', function ($interval, $cookieStore,$templateCache, API) {
     return {
       restrict: 'E',//'AEMC'
       templateUrl: 'views/tpls/hackathon-nav.html', //<div ng-transclude></div>
@@ -57,18 +57,7 @@ angular.module('oh.directives', [])
           });
         }
 
-        var temp = '<div class="row">\
-                <div class="col-md-12 text-center">\
-                <a href="javascript:;" title="" class="vm-box" id="{name}" data-url="{surl}"">\
-                <img src="/images/dseries.png" alt="">\
-                </a>\
-                <h4 name="dserie">{name}</h4>\
-              <h4 class="col-md-offset-1">您在开发环境部署的应用或网站可访问下面地址：</h4>\
-              <h4 class="col-md-offset-1">\
-              <a href="{purl}" target="_blank">{purl}</a>\
-            </h4>\
-            </div>\
-            </div>';
+        var temp = $templateCache.get('hackathon-vm.html');
         API.user.experiment.post(JSON.stringify({cid: 'ut', hackathon: scope.config.name}), function (data) {
           var stop;
           var list = [];
@@ -158,11 +147,14 @@ angular.module('oh.directives', [])
       templateUrl: 'views/tpls/dropdown-menu.html',
       link: function (scope) {
         scope.items = [{
-          name: '黑客松活动指南',
-          link: 'https://campaign.gitcafe.com/openxml-hackathon2015'
+          name: '管理我的黑客松',
+          link: ''
         }, {
-          name: 'Open XML SDK 黑客松 挑战',
-          link: '/#/challenges'
+          name: '黑客松活动指南',
+          link: ''
+        },{
+          name: '我的黑客松挑战',
+          link: ''
         }, {
           name: '使用帮助',
           link: 'https://github.com/msopentechcn/open-hackathon/wiki/OpenXML-SDK-在线编程黑客松平台《使用帮助》'

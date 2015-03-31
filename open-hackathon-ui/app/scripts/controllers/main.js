@@ -15,21 +15,36 @@
  */
 var s = angular.module('oh.controllers', []);
 s.controller('main.controller', function ($scope) {
-  var l, t;
-  l = (screen.width - 600) / 2;
-  t = (screen.height - 400) / 2;
+
+  function openWindow(url, width) {
+//    width = width || 600;
+//    var l, t;
+//    l = (screen.width - width ) / 2;
+//    t = (screen.height - 400) / 2;
+//    window.open(url, '_blank', 'toolbar=no, directories=no, status=yes,location=no, menubar=no, width=' + width + ', height=500, top=' + t + ', left=' + l);
+    window.location.href = url
+  }
+
   $scope.githublogin = function () {
-    var url = "https://github.com/login/oauth/authorize?client_id=a10e2290ed907918d5ab&redirect_uri=http://hackathon.chinacloudapp.cn/github&scope=user";
-    window.open(url, '_blank', 'toolbar=no, directories=no, status=yes,location=no, menubar=no, width=600, height=500, top=' + t + ', left=' + l);
+    var url = 'https://github.com/login/oauth/authorize?' +
+      $.param($scope.config.sociallogin.github);
+    openWindow(url);
   };
   $scope.qqlogin = function () {
-    var url = 'https://graph.qq.com/oauth2.0/authorize?client_id=101157515&redirect_uri=http://hackathon.chinacloudapp.cn/qq&scope=get_user_info&state=openhackathon&response_type=code';
-    window.open(url, '_blank', 'toolbar=no, directories=no, status=yes,location=no, menubar=no, width=600, height=500, top=' + t + ', left=' + l);
+    var url = 'https://graph.qq.com/oauth2.0/authorize?' +
+      $.param($scope.config.sociallogin.qq);
+    openWindow(url);
   };
   $scope.gitcafelogin = function () {
-    var url = 'https://graph.qq.com/oauth2.0/authorize?client_id=101157515&redirect_uri=http://hackathon.chinacloudapp.cn/qq&scope=get_user_info&state=openhackathon&response_type=code';
-    window.open(url, '_blank', 'toolbar=no, directories=no, status=yes,location=no, menubar=no, width=600, height=500, top=' + t + ', left=' + l);
+    var url = 'https://gcs.dgz.sh/oauth/authorize?' +
+      $.param($scope.config.sociallogin.gitcafe);
+    openWindow(url, 980);
   };
+  $scope.weibologin = function () {
+    var url = 'https://api.weibo.com/oauth2/authorize?' +
+      $.param($scope.config.sociallogin.weibo);
+    openWindow(url);
+  }
 });
 
 
