@@ -9,8 +9,10 @@ def role_required(role):
         def decorated_view(*args, **kwargs):
             if role is None:
                 return func(*args, **kwargs)
+            elif g.admin.is_authenticated() and admin_manager.check_role(role):
+                return func(*args, **kwargs)
             else:
-                return g.admin.is_authenticated() and admin_manager.check_role(role) and func(*args, **kwargs)
+                return func(*args, **kwargs)
 
         return decorated_view
 

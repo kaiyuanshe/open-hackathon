@@ -1,0 +1,72 @@
+{% extends "base.html" %} {% block head %}
+<script type="text/javascript" src="/config.js"></script>
+{% endblock %}
+
+{% block header %}
+
+<nav id="ohp_header" class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="http://hacking.kaiyuanshe.cn"> 开放黑客松</a>
+        </div>
+        <div class="collapse navbar-collapse">
+            {% if current_user.is_authenticated() %}
+            <ul class="nav navbar-nav navbar-right">
+
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                        <img id="userImg" width="40" src="{{current_user.avatar_url}}">
+                    </a>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a href="#">{{current_user.nickname}}</a>
+                        </li>
+                        <li><a id="logout" href="/logout">登出</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<h1>开放黑客松管理控台</h1>
+<p>Welcome to Management Console</p>
+<div class="main">
+    <div class="left" style="display:inline-block">
+        {% if g.admin.is_super() %}
+        <div class="super-admin">
+            <h2>站点管理</h2>
+
+
+            <ul>
+                <li>超级管理员</li>
+                <li>黑客松管理</li>
+                <li>日志分析</li>
+                <li>日志分析</li>
+                <li>日志分析</li>
+                <li>日志分析</li>
+            </ul>
+        </div>
+        {% endif %}
+        <div class="admin">
+            <h2>黑客松管理</h2>
+
+            <p>You are currently manage hackathon:<br/>
+                kaiyuanshe <input type="button" value="switch"/></p>
+            <ul>
+                <li>基本设置</li>
+                <li>注册用户</li>
+                <li>azure账号</li>
+            </ul>
+        </div>
+    </div>
+    <div class="right" style="display:inline-block">
+        main body placeholder
+        {% block mainbody %}
+        {% endblock %}
+    </div>
+</div>
+{% endblock %}

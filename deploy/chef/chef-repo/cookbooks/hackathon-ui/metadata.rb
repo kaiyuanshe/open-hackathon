@@ -1,6 +1,6 @@
-name             'front-end'
-maintainer       'YOUR_COMPANY_NAME'
-maintainer_email 'YOUR_EMAIL'
+name             'hackathon-ui'
+maintainer       'Microsoft Open Technologies'
+maintainer_email 'msopentechcndevsh@microsoft.com'
 license          'All rights reserved'
 description      'Installs/Configures front-end'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))

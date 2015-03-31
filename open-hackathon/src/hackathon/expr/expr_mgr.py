@@ -40,6 +40,7 @@ class ExprManager(object):
             vms = db_adapter.find_all_objects_by(UserResource,
                                                  type=VIRTUAL_MACHINE,
                                                  status=RUNNING,
+                                                 name=expr.id,
                                                  template_id=expr.template.id)
             vms_id = map(lambda v: v.id, vms)
             ves = []
@@ -73,6 +74,7 @@ class ExprManager(object):
             vms = db_adapter.find_all_objects_by(UserResource,
                                                  type=VIRTUAL_MACHINE,
                                                  status=RUNNING,
+                                                 name=expr.id,
                                                  template_id=expr.template.id)
             vms_id = map(lambda v: v.id, vms)
             vms_all = []
