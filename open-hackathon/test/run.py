@@ -13,9 +13,11 @@ __usage__ = '''
 %prog DIR
 '''
 
+
 def show_detail(items):
     for i in items:
         print repr(i)
+
 
 def show_test_result(result):
     print

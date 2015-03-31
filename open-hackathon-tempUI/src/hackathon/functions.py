@@ -39,18 +39,19 @@ def post_to_remote(url, post_data, headers=None):
     if headers is not None and isinstance(headers, dict):
         default_headers.update(headers)
     req = requests.post(url, data=json.dumps(post_data), headers=default_headers)
+
     resp = json.loads(req.content)
 
     return convert(resp)
 
 
-def get_remote(url, accept=None):
-    opener = urllib2.build_opener(urllib2.HTTPHandler)
-    request = urllib2.Request(url)
-    if accept is not None:
-        request.add_header("Accept", accept)
-    resp = opener.open(request)
-    return resp.read()
+def get_remote(url, headers=None):
+    default_headers = {"content-type": "application/json"}
+    if headers is not None and isinstance(headers, dict):
+        default_headers.update(headers)
+    req = requests.get(url, headers=default_headers)
+    resp = req.content
+    return str(resp)
 
 
 def delete_remote(url, headers=None):

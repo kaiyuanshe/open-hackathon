@@ -3,7 +3,8 @@
 <script type="text/javascript" src="/config.js"></script>
 <script type="text/javascript" src="/static/js/commonRight.js"></script>
 <script type="text/javascript" src="/static/js/jquery/jquery.flipcountdown.js"></script>
-<link rel="stylesheet" type="text/css" href="/static/css/jquery.flipcountdown.css" /> {% block second %} {% endblock %} {% endblock %} {% block content %}
+<link rel="stylesheet" type="text/css"
+      href="/static/css/jquery.flipcountdown.css"/> {% block second %} {% endblock %} {% endblock %} {% block content %}
 <nav id="ohp_header" class="navbar navbar-inverse navbar-fixed-top">
     <div class="container">
         <div class="navbar-header">
@@ -13,7 +14,7 @@
             {% if current_user.is_authenticated() %}
             <ul class="nav navbar-nav navbar-right">
                 <li>
-                    <a href="javascript:;" id="timer">模拟 距离hackathon结束还有：<span  id="end_timer" ></span></a>
+                    <a href="javascript:;" id="timer">模拟 距离hackathon结束还有：<span id="end_timer"></span></a>
                 </li>
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">

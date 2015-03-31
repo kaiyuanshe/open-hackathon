@@ -177,10 +177,10 @@ class AzureImpl():
                 else:
                     # delete deployment
                     db_adapter.delete_all_objects_by(UserResource,
-                                                  template_id=template.id,
-                                                  type=DEPLOYMENT,
-                                                  name=deployment['deployment_name'],
-                                                  cloud_service_id=cs.id)
+                                                     template_id=template.id,
+                                                     type=DEPLOYMENT,
+                                                     name=deployment['deployment_name'],
+                                                     cloud_service_id=cs.id)
                     db_adapter.commit()
                     user_operation_commit(self.template, DELETE_DEPLOYMENT, END)
                 # make sure virtual machine not exist
@@ -195,10 +195,10 @@ class AzureImpl():
                 else:
                     # delete vm, cascade delete vm endpoint and vm config
                     db_adapter.delete_all_objects_by(UserResource,
-                                                  template_id=template.id,
-                                                  type=VIRTUAL_MACHINE,
-                                                  name=virtual_machine['role_name'],
-                                                  cloud_service_id=cs.id)
+                                                     template_id=template.id,
+                                                     type=VIRTUAL_MACHINE,
+                                                     name=virtual_machine['role_name'],
+                                                     cloud_service_id=cs.id)
                     db_adapter.commit()
                     user_operation_commit(self.template, DELETE_VIRTUAL_MACHINE, END)
             else:
@@ -229,10 +229,10 @@ class AzureImpl():
                 else:
                     # delete vm, cascade delete vm endpoint and vm config
                     db_adapter.delete_all_objects_by(UserResource,
-                                                  template_id=template.id,
-                                                  type=VIRTUAL_MACHINE,
-                                                  name=virtual_machine['role_name'],
-                                                  cloud_service_id=cs.id)
+                                                     template_id=template.id,
+                                                     type=VIRTUAL_MACHINE,
+                                                     name=virtual_machine['role_name'],
+                                                     cloud_service_id=cs.id)
                     db_adapter.commit()
                     user_operation_commit(self.template, DELETE_VIRTUAL_MACHINE, END)
         user_operation_commit(self.template, DELETE, END)
@@ -268,9 +268,9 @@ class AzureImpl():
             return None
         # make sure deployment exist in database
         if db_adapter.count_by(UserResource,
-                            type=DEPLOYMENT,
-                            name=deployment['deployment_name'],
-                            cloud_service_id=cs.id) == 0:
+                               type=DEPLOYMENT,
+                               name=deployment['deployment_name'],
+                               cloud_service_id=cs.id) == 0:
             m = '%s %s not exist in database' % (DEPLOYMENT, deployment['deployment_name'])
             log.debug(m)
             user_resource_commit(self.template, DEPLOYMENT, deployment['deployment_name'], RUNNING)
@@ -286,10 +286,10 @@ class AzureImpl():
                 return None
             # make sure virtual machine of user template exist in database
             if db_adapter.count_by(UserResource,
-                                template_id=self.template.id,
-                                type=VIRTUAL_MACHINE,
-                                name=virtual_machine['role_name'],
-                                cloud_service_id=cs.id) == 0:
+                                   template_id=self.template.id,
+                                   type=VIRTUAL_MACHINE,
+                                   name=virtual_machine['role_name'],
+                                   cloud_service_id=cs.id) == 0:
                 m = '%s %s not exist in database' % (VIRTUAL_MACHINE, virtual_machine['role_name'])
                 user_operation_commit(self.template, operation, FAIL, m)
                 log.error(m)
