@@ -52,8 +52,7 @@ class TestRegisterManager(unittest.TestCase):
         db_adapter.find_all_objects.return_value = []
         rm = RegisterManger(db_adapter)
         with app.test_request_context('/'):
-            g.hackathon_id = 1
-            self.assertEqual(rm.get_register_list(), [])
+            self.assertEqual(rm.get_register_list(1), [])
 
     def test_get_register_list_result_not_empty(self):
         db_adapter = Mock()
@@ -62,8 +61,7 @@ class TestRegisterManager(unittest.TestCase):
         db_adapter.find_all_objects.return_value = [register1, register2]
         rm = RegisterManger(db_adapter)
         with app.test_request_context('/'):
-            g.hackathon_id = 1
-            self.assertEqual(len(rm.get_register_list()), 2)
+            self.assertEqual(len(rm.get_register_list(1)), 2)
             db_adapter.find_all_objects.assert_called_once_with(Register, ANY)
 
     '''test method get_register_by_id'''

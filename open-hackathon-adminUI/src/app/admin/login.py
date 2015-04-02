@@ -44,11 +44,9 @@ class LoginBase():
     def login2db(self, openid, **kwargs):
         admin_with_token = admin_manager.db_login(openid, **kwargs)
         # login flask
-        admin = admin_with_token["admin"]
-        log.info("login successfully:" + repr(admin))
+        log.info("login successfully:" + repr(admin_with_token["admin"]))
         session["token"] = admin_with_token["token"].token
-        # TODO session's contents will be appended , such as cookies if we conmunicate with APIservice
-        return admin
+        return admin_with_token
 
     def logout(self, admin):
         session.pop("token")
