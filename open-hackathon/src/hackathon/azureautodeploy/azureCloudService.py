@@ -1,6 +1,7 @@
 __author__ = 'Yifu Huang'
 
 import sys
+
 sys.path.append("..")
 from azureUtil import *
 from hackathon.log import *
@@ -48,14 +49,14 @@ class AzureCloudService:
                 log.error(m)
                 return False
             else:
-                user_resource_commit(self.template, CLOUD_SERVICE,  cloud_service['service_name'], RUNNING)
+                user_resource_commit(self.template, CLOUD_SERVICE, cloud_service['service_name'], RUNNING)
                 user_operation_commit(self.template, CREATE_CLOUD_SERVICE, END)
         else:
             # check whether cloud service created by this function before
             if db_adapter.count_by(UserResource, type=CLOUD_SERVICE, name=cloud_service['service_name']) == 0:
-                m = '%s %s exist but not created by this function before' %\
+                m = '%s %s exist but not created by this function before' % \
                     (CLOUD_SERVICE, cloud_service['service_name'])
-                user_resource_commit(self.template, CLOUD_SERVICE,  cloud_service['service_name'], RUNNING)
+                user_resource_commit(self.template, CLOUD_SERVICE, cloud_service['service_name'], RUNNING)
             else:
                 m = '%s %s exist and created by this function before' % (CLOUD_SERVICE, cloud_service['service_name'])
             user_operation_commit(self.template, CREATE_CLOUD_SERVICE, END, m)

@@ -2,10 +2,11 @@ __author__ = 'root'
 
 import sys
 import urllib2
+
 sys.path.append("..")
 # -*- coding:utf8 -*-
 # encoding = utf-8
-from app.functions import get_remote, get_config,post_to_remote, convert
+from app.functions import get_remote, get_config, post_to_remote, convert
 from app.log import log
 import json
 from admin_mgr import admin_manager
@@ -14,20 +15,19 @@ from flask_login import logout_user
 
 
 class LoginBase():
-    def login2db(self,openid,**kwargs):
+    def login2db(self, openid, **kwargs):
         admin_with_token = admin_manager.db_login(openid, **kwargs)
         # login flask
         admin = admin_with_token["admin"]
         log.info("login successfully:" + repr(admin))
         session["token"] = admin_with_token["token"].token
-        #TODO session's contents will be appended , such as cookies if we conmunicate with APIservice
+        # TODO session's contents will be appended , such as cookies if we conmunicate with APIservice
         return admin
 
     def logout(self, admin):
         session.pop("token")
         logout_user()
         return admin_manager.db_logout(admin)
-
 
 
 class QQLogin(LoginBase):
@@ -66,11 +66,11 @@ class QQLogin(LoginBase):
              'nickname': user_info["nickname"], 'avatar_url': user_info["figureurl"]}]
 
         return self.login2db(openid,
-                            name=user_info["nickname"],
-                            nickname=user_info["nickname"],
-                            access_token=access_token,
-                            email_info=email_info,
-                            avatar_url=user_info["figureurl"])
+                             name=user_info["nickname"],
+                             nickname=user_info["nickname"],
+                             access_token=access_token,
+                             email_info=email_info,
+                             avatar_url=user_info["figureurl"])
 
 
 class GithubLogin(LoginBase):
@@ -125,10 +125,10 @@ class GithubLogin(LoginBase):
         email_info = json.loads(email_info_resp)
 
         return self.login2db(openid, name=name,
-                                    nickname=nickname,
-                                    access_token=access_token,
-                                    email_info=email_info,
-                                    avatar_url=avatar)
+                             nickname=nickname,
+                             access_token=access_token,
+                             email_info=email_info,
+                             avatar_url=avatar)
 
 
 class GitcafeLogin(LoginBase):
@@ -169,11 +169,11 @@ class GitcafeLogin(LoginBase):
              'avatar_url': avatar_url}]
 
         return self.login2db(id,
-                            name=name,
-                            nickname=nickname,
-                            access_token=token,
-                            email_info=email_info,
-                            avatar_url=avatar_url)
+                             name=name,
+                             nickname=nickname,
+                             access_token=token,
+                             email_info=email_info,
+                             avatar_url=avatar_url)
 
 
 class WeiboLogin(LoginBase):
@@ -183,7 +183,7 @@ class WeiboLogin(LoginBase):
 
         # get access_token
         log.debug(get_config('login.weibo.access_token_url') + code)
-        token_resp = post_to_remote(get_config('login.weibo.access_token_url') + code,{})
+        token_resp = post_to_remote(get_config('login.weibo.access_token_url') + code, {})
         log.debug("get token from Weibo:" + str(token_resp))
 
         access_token = token_resp['access_token']
@@ -223,10 +223,11 @@ class WeiboLogin(LoginBase):
              'avatar_url': avatar}]
 
         return self.login2db(openid, name=name,
-                                    nickname=nickname,
-                                    access_token=access_token,
-                                    email_info=email_info,
-                                    avatar_url=avatar)
+                             nickname=nickname,
+                             access_token=access_token,
+                             email_info=email_info,
+                             avatar_url=avatar)
+
 
 login_providers = {
     "github": GithubLogin(),

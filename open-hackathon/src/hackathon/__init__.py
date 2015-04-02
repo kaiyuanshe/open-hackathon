@@ -26,7 +26,7 @@ from . import views
 #
 # def alarm(time):
 # print('Alarm! This alarm was scheduled at %s.' % time)
-#     return {
+# return {
 #         "key": "val"
 #     }
 #

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <!-- start: Meta -->
+    <title>开放黑客松管理控台</title>
+    <meta property="wb:webmaster" content="{{meta_content.weibo}}" />
+    <meta property="qc:admins" content="{{meta_content.qq}}" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Boli Guan"> {% block meta %} {% endblock %}
+    <!-- end: Meta -->
+    <!-- start: CSS -->
+    <link href="/static/css/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/base.css" rel="stylesheet"> {% block style %}{% endblock %}
+    <!-- end: CSS -->
+    <!-- The HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <script src="/static/js/respond.min.js"></script>
+    <![endif]-->
+    <!-- start: Favicon and Touch Icons -->
+    <link rel="icon" href="/static/pic/icon.jpg">
+    <!-- end: Favicon and Touch Icons -->
+    {% block head %} {% endblock %}
+</head>
+
+<body>
+    <header class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".sidebar-nav.nav-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a id="main-menu-toggle" class="open"><img src="/static/pic/icon64.png"></a>
+            <a class="navbar-brand" href="/admin"><span>开放黑客松管理控台</span></a>
+            <!-- start: Header Menu -->
+            <div class="nav-no-collapse header-nav">
+                <ul class="nav navbar-nav pull-right">
+                    <!-- start: User Dropdown -->
+                   {% if current_user.nickname %}
+                    <li class="dropdown">
+                        <a class="btn account dropdown-toggle" data-toggle="dropdown" href="index.html#">
+                            <div class="avatar"><img src="{{ current_user.avatar_url}}" alt="Avatar"></div>
+                            <div class="user">
+                                <div class="hello">Welcome!</div>
+                                <div class="name">{{ current_user.nickname}}</div>
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="index.html#"><i class="fa fa-user"></i> Profile</a></li>
+                            <li><a href="index.html#"><i class="fa fa-cog"></i> Settings</a></li>
+                            <li><a href="index.html#"><i class="fa fa-envelope"></i> Messages</a></li>
+                            <li><a href="/logout"><i class="fa fa-off"></i> Logout</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                    <!-- end: User Dropdown -->
+                </ul>
+            </div>
+            <!-- end: Header Menu -->
+        </div>
+    </header>
+    {% block content %} {% endblock %}
+    <footer>
+        <div class="row">
+            <div class="col-sm-12">
+                <b>Hosted by </b><a href=http://www.msopentech.cn>Microsoft Open Technologies (Shanghai) Co. Ltd.</a>
+            </div>
+        </div>
+    </footer>
+    <!-- Piwik -->
+    <script type="text/javascript">
+    var _paq = _paq || [];
+    _paq.push(['trackPageView']);
+    _paq.push(['enableLinkTracking']);
+    (function() {
+        var u = "//piwikd.cloudapp.net/";
+        _paq.push(['setTrackerUrl', u + 'piwik.php']);
+        _paq.push(['setSiteId', 1]);
+        var d = document,
+            g = d.createElement('script'),
+            s = d.getElementsByTagName('script')[0];
+        g.type = 'text/javascript';
+        g.async = true;
+        g.defer = true;
+        g.src = u + 'piwik.js';
+        s.parentNode.insertBefore(g, s);
+    })();
+    </script>
+    <noscript>
+        <p><img src="//piwikd.cloudapp.net/piwik.php?idsite=1" style="border:0;" alt="" /></p>
+    </noscript>
+    <!-- End Piwik Code -->
+    <script type="text/javascript" src="/static/js/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/js/jquery/jquery.cookie.js"></script>
+    <script type="text/javascript" src="/static/js/jquery/jquery.ui-1.8.18.min.js"></script>
+    <script type="text/javascript" src="/static/js/jquery/jquery.validate-1.9.min.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/js/common.js"></script>
+    {% block script %}{% endblock %}
+</body>
+
+</html>

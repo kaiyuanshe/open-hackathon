@@ -32,8 +32,6 @@ class AdminManager(object):
 
     def get_hack_id_by_admin_id(self, admin_id):
 
-        # can not use backref in db models
-
         # get emails from admin though admin.id in table admin_email
         admin_emails = self.db.find_all_objects_by(AdminEmail, admin_id=admin_id)
         emails = map(lambda x: x.email, admin_emails)
@@ -50,7 +48,6 @@ class AdminManager(object):
 
     # check the admin authority on hackathon
     def validate_admin_hackathon_request(self, hackathon_id):
-
         if HTTP_HEADER.TOKEN not in request.headers:
             return True
 
@@ -65,7 +62,6 @@ class AdminManager(object):
 
 
     def check_admin_hackathon_authority(self):
-
         if HTTP_HEADER.HACKATHON_ID in request.headers:
             try:
                 g.hackathon_id = long(request.headers[HTTP_HEADER.HACKATHON_ID])

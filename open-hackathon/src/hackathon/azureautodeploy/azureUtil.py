@@ -102,10 +102,10 @@ def user_resource_commit(template, type, name, status, cs_id=None):
 
 def user_resource_status_update(template, type, name, status, cs_id=None):
     ur = db_adapter.find_first_object_by(UserResource,
-                                      template_id=template.id,
-                                      type=type,
-                                      name=name,
-                                      cloud_service_id=cs_id)
+                                         template_id=template.id,
+                                         type=type,
+                                         name=name,
+                                         cloud_service_id=cs_id)
     ur.status = status
     db_adapter.commit()
 
@@ -208,12 +208,12 @@ def load_template(template, operation, expr_id):
 
 def query_user_operation(template, operation, id):
     return db_adapter.find_all_objects(UserOperation,
-                             UserOperation.template == template,
-                             UserOperation.operation.like(operation + '%'),
-                             UserOperation.id > id)
+                                       UserOperation.template == template,
+                                       UserOperation.operation.like(operation + '%'),
+                                       UserOperation.id > id)
 
 
 def query_user_resource(template, id):
     return db_adapter.find_all_objects(UserResource,
-                             UserResource.template == template,
-                             UserResource.id > id)
+                                       UserResource.template == template,
+                                       UserResource.id > id)

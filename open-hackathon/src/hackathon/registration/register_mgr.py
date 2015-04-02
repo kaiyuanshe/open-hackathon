@@ -9,7 +9,6 @@ from flask import g
 
 
 class RegisterManger(object):
-
     def __init__(self, db_adapter):
         self.db = db_adapter
 
@@ -31,31 +30,32 @@ class RegisterManger(object):
 
     def create_or_update_register(self, **args):
         try:
-            register = self.db.find_first_object(Register,Register.email==args['email'],Register.hackathon_id==g.hackathon_id)
+            register = self.db.find_first_object(Register, Register.email == args['email'],
+                                                 Register.hackathon_id == g.hackathon_id)
             if register is None:
-                #create a register
+                # create a register
                 log.debug("create a new register")
                 return self.db.add_object_kwargs(Register,
-                                             register_name=args['register_name'],
-                                             email=args['email'],
-                                             create_time=datetime.utcnow(),
-                                             description=args['description'],
-                                             enabled=1,  # 0: disabled 1:enabled
-                                             jstrom_api='',
-                                             jstrom_mgmt_portal='',
-                                             hackathon_id=g.hackathon_id)
+                                                 register_name=args['register_name'],
+                                                 email=args['email'],
+                                                 create_time=datetime.utcnow(),
+                                                 description=args['description'],
+                                                 enabled=1,  # 0: disabled 1:enabled
+                                                 jstrom_api='',
+                                                 jstrom_mgmt_portal='',
+                                                 hackathon_id=g.hackathon_id)
             else:
-                #update a aready existe register
+                # update a aready existe register
                 log.debug("update a new register")
                 self.db.update_object(register,
-                                         register_name=args['register_name'],
-                                         email=args['email'],
-                                         create_time=datetime.utcnow(),
-                                         description=args['description'],
-                                         enabled=args['enabled'],  # 0: disabled 1:enabled
-                                         strom_api='',
-                                         jstrom_mgmt_portal='',
-                                         hackathon_id=g.hackathon_id)
+                                      register_name=args['register_name'],
+                                      email=args['email'],
+                                      create_time=datetime.utcnow(),
+                                      description=args['description'],
+                                      enabled=args['enabled'],  # 0: disabled 1:enabled
+                                      strom_api='',
+                                      jstrom_mgmt_portal='',
+                                      hackathon_id=g.hackathon_id)
                 return register
         except Exception:
             log.error("create or update register faild")
