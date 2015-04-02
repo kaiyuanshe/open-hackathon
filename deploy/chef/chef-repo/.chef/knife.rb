@@ -6,7 +6,7 @@ home_dir = ENV['HOME']
 
 
 current_dir = File.dirname(__FILE__)
-chef_server_url          'https://open-hackathon-dev.chinacloudapp.cn/organizations/msot'
+chef_server_url          'https://chef-hack.chinacloudapp.cn/organizations/msot'
 log_level                :info
 log_location             STDOUT
 node_name                "#{user}"
