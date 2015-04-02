@@ -46,7 +46,7 @@ def post_to_remote(url, post_data, headers=None):
 
 
 def get_remote(url, headers=None):
-    default_headers = {"content-type": "application/json"}
+    default_headers = {}
     if headers is not None and isinstance(headers, dict):
         default_headers.update(headers)
     req = requests.get(url, headers=default_headers)
