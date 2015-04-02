@@ -55,11 +55,13 @@ def __login(provider):
         return "Bad Request", 400
 
     try:
-        admin = login_providers[provider].login({
+        admin_with_token = login_providers[provider].login({
             "code": code
         })
-        login_user(admin)
-        return make_response(redirect("/"))
+        login_user(admin_with_token["admin"])
+        resp = make_response(redirect("/"))
+        resp.set_cookie('token', admin_with_token["token"])
+        return resp
     except:
         return "Internal Server Error", 500
 
@@ -99,9 +101,11 @@ def simple_route(path):
         log.warn("page '%s' not found" % path)
         abort(404)
 
+
 @app.route('/<path:path>')
 def template_routes(path):
     return simple_route(path)
+
 
 # js config
 @app.route('/config.js')
@@ -147,14 +151,17 @@ def logout():
     logout_user()
     return redirect("/login")
 
+
 @app.route("/login")
 def login():
     return __render("/login.html")
+
 
 @app.route("/home")
 @login_required
 def home():
     return __render("/home.html")
+
 
 @app.route("/users")
 @login_required
