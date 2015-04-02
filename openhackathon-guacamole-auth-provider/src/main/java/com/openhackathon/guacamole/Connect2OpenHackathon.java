@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Microsoft Open Technologies, Inc.  All rights reserved.
+ * Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved. 
  *
  * The MIT License (MIT)
  *
