@@ -3,29 +3,9 @@
 
 {% block head_tail %}
 {{ super() }}
-<link href="{{ url_for('static', filename='css/admin/layout.css') }}" rel="stylesheet">
 {% endblock %}
 
 {% block page_body %}
-<div class="container">
-    <div class="row">
-        <div class="span2">
-            <ul class="nav nav-pills nav-stacked">
-                {{ layout.menu() }}
-                {{ layout.menu_links() }}
-            </ul>
-        </div>
-        <div class="span10">
-            <div id="content">
-                {% block brand %}
-                <h2 id="brand">{{ admin_view.name|capitalize }}</h2>
-
-                <div class="clearfix"></div>
-                {% endblock %}
-                {{ layout.messages() }}
-                {% block body %}{% endblock %}
-            </div>
-        </div>
-    </div>
-</div>
+    {{ layout.messages() }}
+    {% block body %}{% endblock %}
 {% endblock %}

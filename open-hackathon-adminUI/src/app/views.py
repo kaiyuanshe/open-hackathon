@@ -72,6 +72,10 @@ class HomeView(AdminIndexView):
         # return redirect("/hackathon")
         return self.render('admin/home.html')
 
+    @expose('/users')
+    def users(self):
+        return self.render('admin/users.html')
+
 
 class HackathonAdminBaseView(BaseView):
     def render_admin(self, template):
@@ -107,7 +111,6 @@ admin.init_app(app)
 
 admin.add_view(MyAdminView(name="view1", category='Test'))
 admin.add_view(AnotherAdminView(name="view2", category='Test'))
-
 
 # js config
 @app.route('/config.js')
