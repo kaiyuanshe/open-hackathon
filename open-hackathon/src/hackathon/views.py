@@ -293,7 +293,7 @@ class AdminRegisterListResource(Resource):
         args = parse.parse_args()
         if args['hackathon_id'] is None:
             return {"error": "Bad request"}, 400
-        return admin_manager.get_register_list(args['hackathon_id'])
+        return register_manager.get_register_list(args['hackathon_id'])
 
 
 class AdminRegisterResource(Resource):
