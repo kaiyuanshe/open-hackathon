@@ -156,25 +156,25 @@ class AdminManagerTest(unittest.TestCase):
     @patch.object(AdminManager, 'validate_admin_hackathon_request', return_value=True)
     def test_check_admin_hackathon_authority_hearder_miss_hackathon_id(self, mock_method):
         with app.test_request_context('/'):
-            self.assertFalse(admin_manager.check_admin_hackathon_authority())
+            self.assertFalse(admin_manager.validate_hackathon_id())
             self.assertEqual(mock_method.call_count, 0)
 
     @patch.object(AdminManager, 'validate_admin_hackathon_request', return_value=True)
     def test_check_admin_hackathon_authority_hearder_hackathon_id_is_not_num(self, mock_method):
         with app.test_request_context('/', headers={"hackathon_id": "test"}):
-            self.assertFalse(admin_manager.check_admin_hackathon_authority())
+            self.assertFalse(admin_manager.validate_hackathon_id())
             self.assertEqual(mock_method.call_count, 0)
 
     @patch.object(AdminManager, 'validate_admin_hackathon_request', return_value=False)
     def test_check_admin_hackathon_authority_faild(self, mock_thethod):
         with app.test_request_context('/', headers={"hackathon_id": 1}):
-            self.assertFalse(admin_manager.check_admin_hackathon_authority())
+            self.assertFalse(admin_manager.validate_hackathon_id())
             mock_thethod.assert_called_once_with(1)
 
     @patch.object(AdminManager, 'validate_admin_hackathon_request', return_value=True)
     def test_check_admin_hackathon_authority_success(self, mock_thethod):
         with app.test_request_context('/', headers={"hackathon_id": 1}):
-            self.assertTrue(admin_manager.check_admin_hackathon_authority())
+            self.assertTrue(admin_manager.validate_hackathon_id())
             mock_thethod.assert_called_once_with(1)
 
 

@@ -12,7 +12,7 @@ class RegisterManger(object):
     def __init__(self, db_adapter):
         self.db = db_adapter
 
-    def get_register_list(self,hackathon_id):
+    def get_register_list(self, hackathon_id):
         # TODO make query result with pagination
         registers = self.db.find_all_objects(Register, Register.hackathon_id == hackathon_id)
         return map(lambda u: u.json(), registers)

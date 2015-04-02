@@ -7,7 +7,7 @@ from user.login import *
 from flask import g, request
 from log import log
 from database import db_adapter, db_session
-from decorators import token_required, admin_token_required, admin_hackathon_authority_check
+from decorators import token_required, admin_token_required, hackathon_id_required
 from user.user_functions import get_user_experiment, get_user_hackathon
 from health import report_health
 from remote.guacamole import GuacamoleInfo
@@ -35,10 +35,8 @@ class RegisterListResource(Resource):
 class UserExperimentResource(Resource):
     def get(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('id', type=int, location='args')
+        parser.add_argument('id', type=int, location='args', required=True)
         args = parser.parse_args()
-        if args['id'] is None:
-            return json.dumps({"error": "Bad request"}), 400
         try:
             cs = expr_manager.get_expr_status(args['id'])
         except Exception as e:
@@ -66,11 +64,9 @@ class UserExperimentResource(Resource):
     def delete(self):
         # id is experiment id
         parser = reqparse.RequestParser()
-        parser.add_argument('id', type=int, location='args')
-        parser.add_argument('force', type=int, location='args')
+        parser.add_argument('id', type=int, location='args', required=True)
+        parser.add_argument('force', type=int, location='args', default=0)
         args = parser.parse_args()
-        if args['id'] is None or args['force'] is None:
-            return {"error": "Bad request"}, 400
         return expr_manager.stop_expr(args["id"], args['force'])
 
     @token_required
@@ -115,10 +111,8 @@ class HackathonResource(Resource):
     @token_required
     def get(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('hid', type=int, location='args')
+        parser.add_argument('hid', type=int, location='args', required=True)
         args = parser.parse_args()
-        if args['hid'] is None:
-            return {"error": "Bad request"}, 400
         return db_adapter.find_first_object_by(Hackathon, id=args['hid']).json()
 
     # todo post
@@ -139,11 +133,8 @@ class HackathonStatResource(Resource):
     # hid is hackathon id
     def get(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('hid', type=int, location='args')
+        parse.add_argument('hid', type=int, location='args', required=True)
         args = parse.parse_args()
-        if args['hid'] is None:
-            return {"error": "Bad request"}, 400
-
         return hack_manager.get_hackathon_stat(args['hid'])
 
 
@@ -152,10 +143,8 @@ class UserHackathonResource(Resource):
     @token_required
     def get(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('uid', type=int, location='args')
+        parse.add_argument('uid', type=int, location='args', required=True)
         args = parse.parse_args()
-        if args['uid'] is None:
-            return {"error": "Bad request"}, 400
         return get_user_hackathon(args['uid'])
 
     # todo user hackathon post
@@ -173,10 +162,8 @@ class HackathonTemplateResource(Resource):
     # hid is hackathon id
     def get(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('hid', type=int, location='args')
+        parse.add_argument('hid', type=int, location='args', required=True)
         args = parse.parse_args()
-        if args['hid'] is None:
-            return {"error": "Bad request"}, 400
         return map(lambda u: u.json(), db_adapter.find_all_objects_by(Template, hackathon_id=args['hid']))
 
 
@@ -185,10 +172,8 @@ class UserExperimentListResource(Resource):
     @token_required
     def get(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('uid', type=int, location='args')
+        parse.add_argument('uid', type=int, location='args', required=True)
         args = parse.parse_args()
-        if args['uid'] is None:
-            return {"error": "Bad request"}, 400
         return get_user_experiment(args['uid'])
 
 
@@ -201,16 +186,16 @@ class GuacamoleResource(Resource):
 class UserResource(Resource):
     def get(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('uid', type=int, location='args')
+        parse.add_argument('uid', type=int, location='args', required=True)
         args = parse.parse_args()
-        if args['uid'] is None:
-            return {"error": "Bad request"}, 400
         return user_manager.get_user_by_id(args['uid'])
 
 
 class CurrentTime(Resource):
     def get(self):
-        return {"currenttime": long(time.time() * 1000)}
+        return {
+            "currenttime": long(time.time() * 1000)
+        }
 
 
 class TestDefaultDocker(Resource):
@@ -254,8 +239,7 @@ api.add_resource(DefaultExperiment, "/api/default/experiment")
 class AdminHackathonListResource(Resource):
     @admin_token_required
     def get(self):
-        admin = g.admin
-        hackathon_ids = admin_manager.get_hack_id_by_admin_id(admin.id)
+        hackathon_ids = admin_manager.get_hack_id_by_admin_id(g.admin.id)
         hackathon_list = db_adapter.find_all_objects(Hackathon, Hackathon.id.in_(hackathon_ids))
         return map(lambda u: u.json(), hackathon_list)
 
@@ -263,31 +247,28 @@ class AdminHackathonListResource(Resource):
 class AdminRegisterListResource(Resource):
     def get(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('hackathon_id', type=int, location='args')
+        parse.add_argument('hackathon_id', type=int, location='args', required=True)
         args = parse.parse_args()
-        if args['hackathon_id'] is None:
-            return {"error": "Bad request"}, 400
         return register_manager.get_register_list(args['hackathon_id'])
 
 
 class AdminRegisterResource(Resource):
     def get(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('id', type=int, location='args')
+        parse.add_argument('id', type=int, location='args', required=True)
         args = parse.parse_args()
         return register_manager.get_one_register(args)
 
 
     @admin_token_required
-    @admin_hackathon_authority_check
+    @hackathon_id_required
     def post(self):
-        # create a new Register for a hackathon
         args = request.get_json()
         return register_manager.create_or_update_register(args)
 
 
     @admin_token_required
-    @admin_hackathon_authority_check
+    @hackathon_id_required
     def put(self):
         # update a Register
         args = request.get_json()
@@ -295,10 +276,10 @@ class AdminRegisterResource(Resource):
 
 
     @admin_token_required
-    @admin_hackathon_authority_check
+    @hackathon_id_required
     def delete(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('id', type=int, location='args')
+        parse.add_argument('id', type=int, location='args', required=True)
         args = parse.parse_args()
         return register_manager.delete_register(args)
 

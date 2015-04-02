@@ -52,16 +52,10 @@ class AdminManager(object):
             return True
 
         hack_ids = self.get_hack_id_by_admin_id(g.admin.id)
-
-        # get hackathon_id from group and check if its SuperAdmin
-        if -1 in hack_ids:
-            return True
-        else:
-            # check  if the hackathon owned by the admin
-            return hackathon_id in hack_ids
+        return -1 in hack_ids or hackathon_id in hack_ids
 
 
-    def check_admin_hackathon_authority(self):
+    def validate_hackathon_id(self):
         if HTTP_HEADER.HACKATHON_ID in request.headers:
             try:
                 g.hackathon_id = long(request.headers[HTTP_HEADER.HACKATHON_ID])

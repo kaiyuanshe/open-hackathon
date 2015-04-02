@@ -2,7 +2,6 @@ from flask import g
 from functools import wraps
 from user import user_manager
 from admin.admin_mgr import admin_manager
-from log import log
 
 
 def role_required(*roles):
@@ -37,9 +36,9 @@ def admin_token_required(func):
     return authenticate_and_call
 
 
-def admin_hackathon_authority_check(func):
+def hackathon_id_required(func):
     def authenticate_and_call(*args, **kwargs):
-        if not admin_manager.check_admin_hackathon_authority():
+        if not admin_manager.validate_hackathon_id():
             return "Access Denied", 403
         return func(*args, **kwargs)
 
