@@ -59,7 +59,7 @@ def __login(provider):
             "code": code
         })
         login_user(admin)
-        return make_response(redirect("/main"))
+        return make_response(redirect("/"))
     except:
         return "Internal Server Error", 500
 
@@ -99,11 +99,9 @@ def simple_route(path):
         log.warn("page '%s' not found" % path)
         abort(404)
 
-
 @app.route('/<path:path>')
 def template_routes(path):
     return simple_route(path)
-
 
 # js config
 @app.route('/config.js')
@@ -138,7 +136,7 @@ def gitcafe_login():
 @app.route('/index')
 def index():
     if g.admin.is_authenticated():
-        return redirect("/main")
+        return redirect("/home")
     return __render('/login.html')
 
 
@@ -147,10 +145,18 @@ def index():
 def logout():
     login_providers.values()[0].logout(g.admin)
     logout_user()
-    return redirect("/index")
+    return redirect("/login")
 
+@app.route("/login")
+def login():
+    return __render("/login.html")
 
-@app.route("/main")
+@app.route("/home")
 @login_required
 def home():
-    return __render("/main.html")
+    return __render("/home.html")
+
+@app.route("/users")
+@login_required
+def users():
+    return __render("/users.html")
