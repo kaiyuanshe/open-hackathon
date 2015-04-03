@@ -2,7 +2,7 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
 #  
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -25,27 +25,37 @@
 # -----------------------------------------------------------------------------------
 
 import sys
-
 sys.path.append("..")
-
-from compiler.ast import flatten
-from flask import g
-from hackathon.constants import GUACAMOLE
-from hackathon.docker import OssDocker
-from hackathon.enum import *
-from hackathon.azureautodeploy.azureImpl import *
-from hackathon.azureautodeploy.portManagement import *
-from hackathon.functions import safe_get_config, get_config, post_to_remote
-from subprocess import Popen
-from hackathon.scheduler import scheduler
-from datetime import timedelta
+from compiler.ast import (
+    flatten,
+)
+from hackathon.constants import (
+    GUACAMOLE,
+)
+from hackathon.docker import (
+    OssDocker,
+)
+from hackathon.functions import (
+    safe_get_config,
+    get_config,
+)
+from hackathon.scheduler import (
+    scheduler,
+)
+from hackathon.enum import (
+    EStatus,
+    VERemoteProvider,
+)
+from datetime import (
+    timedelta,
+)
+import json
 
 docker = OssDocker()
 
-# initial once
-
 
 class ExprManager(object):
+
     def __report_expr_status(self, expr):
         ret = {
             "expr_id": expr.id,
@@ -54,36 +64,21 @@ class ExprManager(object):
             "create_time": str(expr.create_time),
             "last_heart_beat_time": str(expr.last_heart_beat_time),
         }
-
         if expr.status != EStatus.Running:
             return ret
-
         # return guacamole link to frontend
         guacamole_servers = []
-        if expr.template.provider == VEProvider.Docker:
-            ves = expr.virtual_environments.all()
-        else:
-            vms = db_adapter.find_all_objects_by(UserResource,
-                                                 type=VIRTUAL_MACHINE,
-                                                 status=RUNNING,
-                                                 name=expr.id,
-                                                 template_id=expr.template.id)
-            vms_id = map(lambda v: v.id, vms)
-            ves = []
-            for id in vms_id:
-                ves.append(db_adapter.find_first_object_by(VMConfig, virtual_machine_id=id))
-        for ve in ves:
+        for ve in expr.virtual_environments.all():
             if ve.remote_provider == VERemoteProvider.Guacamole:
-                guaca_config = json.loads(ve.remote_paras)
-                url = "%s/guacamole/client.xhtml?id=" % (
-                    safe_get_config("guacamole.host", "localhost:8080")) + "c%2F" + guaca_config["name"]
+                guacamole_config = json.loads(ve.remote_paras)
+                guacamole_host = safe_get_config("guacamole.host", "localhost:8080")
+                url = guacamole_host + '/guacamole/client.xhtml?id=c%2F' + guacamole_config["name"]
                 guacamole_servers.append({
-                    "name": guaca_config["displayname"],
+                    "name": guacamole_config["displayname"],
                     "url": url
                 })
         if expr.status == EStatus.Running:
             ret["remote_servers"] = guacamole_servers
-
         # return public accessible web url
         public_urls = []
         if expr.template.provider == VEProvider.Docker:

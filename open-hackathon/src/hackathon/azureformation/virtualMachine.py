@@ -545,7 +545,7 @@ class VirtualMachine(ResourceBase):
                                                       public_ip,
                                                       remote_port)
         virtual_environment = commit_virtual_environment(VEProvider.AzureVM,
-                                                         template_unit.get_remote_provider_name(),
+                                                         virtual_machine_name,
                                                          template_unit.get_image_name(),
                                                          VEStatus.Running,
                                                          VERemoteProvider.Guacamole,
