@@ -64,6 +64,7 @@ class ExprManager(object):
             ves = expr.virtual_environments.all()
         else:
             # todo important!!! because the user template had been deleted, so now take temporary measure!!!
+            # now let name = 'open-tech-role-' + str(expr.id)
             vms = db_adapter.find_all_objects_by(UserResource,
                                                  type=VIRTUAL_MACHINE,
                                                  status=RUNNING,
@@ -99,7 +100,8 @@ class ExprManager(object):
                             "url": url
                         })
         else:
-            # todo important!!! because the user template had been deleted, so now take temporary measure, let UserResource.id = expr.id!!!
+            # todo important!!! because the user template had been deleted, so now take temporary measure
+            # now let name = 'open-tech-role-' + str(expr.id)
             vms = db_adapter.find_all_objects_by(UserResource,
                                                  type=VIRTUAL_MACHINE,
                                                  status=RUNNING,
@@ -141,6 +143,11 @@ class ExprManager(object):
 
     # todo p = PortManagement()
     def __get_available_public_port(self, host_server, host_ports):
+        """
+        get available ports from host server
+        :param host_ports: is a list
+        :return: public ports, is a list
+        """
         log.debug("starting to get azure port")
         p = PortManagement()
         sub_id = get_config("azure.subscriptionId")
@@ -158,8 +165,11 @@ class ExprManager(object):
             log.debug("public port : %d" % p)
         return public_ports
 
-    # release azure port
     def __release_public_port(self, host_server, host_ports):
+        """
+        release host server's ports
+        :param host_ports: is a list
+        """
         p = PortManagement()
         sub_id = get_config("azure.subscriptionId")
         cert_path = get_config('azure.certPath')
@@ -173,7 +183,7 @@ class ExprManager(object):
 
     def __assign_ports(self, expr, host_server, ve, port_cfg):
         """
-        assign
+        assign ports from host server
         """
         # get 'host_port'
         map(lambda p: p.update(
@@ -192,6 +202,7 @@ class ExprManager(object):
 
         binding_dockers = []
 
+        # update portbinding
         for public_cfg in public_ports_cfg:
             binding_cloudservice = PortBinding(name=public_cfg["name"] if "name" in public_cfg else None,
                                                port_from=public_cfg["public_port"],
@@ -320,6 +331,9 @@ class ExprManager(object):
         return [hackathon, template]
 
     def check_expr_status(self, user_id, hackathon, template):
+        """
+        check experiment status, if there are pre-allocate experiments, the experiment will be assigned directly
+        """
         expr = db_adapter.find_first_object_by(Experiment,
                                                status=ExprStatus.Running,
                                                user_id=user_id,
@@ -334,6 +348,7 @@ class ExprManager(object):
         if expr is not None:
             return expr
 
+        # if there are pre-allocate experiments
         expr = db_adapter.find_first_object_by(Experiment, status=ExprStatus.Running, hackathon_id=hackathon.id,
                                                user_id=ReservedUser.DefaultUserID, template=template)
         if expr is not None:
@@ -342,6 +357,8 @@ class ExprManager(object):
                 db_adapter.update_object(ve, user_id=user_id)
             db_session.commit()
             log.debug("experiment had been assigned, check experiment and start new job ... ")
+
+            # add a job to start new pre-allocate experiment
             alarm_time = datetime.now() + timedelta(seconds=1)
             scheduler.add_job(check_default_expr, 'date', next_run_time=alarm_time)
             return expr
@@ -417,6 +434,9 @@ class ExprManager(object):
         return "OK"
 
     def __release_ports(self, expr_id, host_server):
+        """
+        release the specified experiment's ports
+        """
         log.debug("Begin to release ports: expr_id: %d, host_server: %r" % (expr_id, host_server))
         ports_binding = db_adapter.find_all_objects_by(PortBinding, experiment_id=expr_id)
         if ports_binding is not None:
@@ -424,6 +444,7 @@ class ExprManager(object):
                                     ports_binding)
             ports_to = [d.port_to for d in docker_binding]
             if len(ports_to) != 0:
+                # release public ports
                 self.__release_public_port(host_server, ports_to)
             for port in ports_binding:
                 db_adapter.delete_object(port)
@@ -432,8 +453,7 @@ class ExprManager(object):
 
     def __roll_back(self, expr_id):
         """
-        force delete container
-
+        roll back when exception occurred
         :param expr_id: experiment id
         """
         log.debug("Starting rollback ...")
@@ -557,7 +577,7 @@ def open_check_expr():
 
 def check_default_expr():
     # todo only pre-allocate env for those needed. It should configured in table hackathon
-    templates = db_adapter.find_all_objects_order_by(Template, hackathon_id=1)
+    templates = db_adapter.find_all_objects_order_by(Template, hackathon_id=2)
     total_azure = safe_get_config("pre_allocate.azure", 1)
     total_docker = safe_get_config("pre_allocate.docker", 1)
     for template in templates:

@@ -242,10 +242,6 @@ class DockerHostServer(Base):
     container_count = Column(Integer, nullable=False)
     container_max_count = Column(Integer, nullable=False)
 
-    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
-    hackathon = relationship('Hackathon', backref=backref('docker_host_servers', lazy='dynamic'))
-
-
     def json(self):
         return to_json(self, self.__class__)
 
