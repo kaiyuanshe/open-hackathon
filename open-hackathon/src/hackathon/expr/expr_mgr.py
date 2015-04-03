@@ -37,10 +37,12 @@ class ExprManager(object):
         if expr.template.provider == VirtualEnvironmentProvider.Docker:
             ves = expr.virtual_environments.all()
         else:
+            # todo important!!! because the user template had been deleted, so now take temporary measure!!!
             vms = db_adapter.find_all_objects_by(UserResource,
+                                                 id=expr.id,
                                                  type=VIRTUAL_MACHINE,
                                                  status=RUNNING,
-                                                 template_id=expr.template.id)
+                                                 template=expr.template)
             vms_id = map(lambda v: v.id, vms)
             ves = []
             for id in vms_id:
@@ -57,6 +59,7 @@ class ExprManager(object):
         if expr.status == ExprStatus.Running:
             ret["remote_servers"] = guacamole_servers
 
+        # todo can not get specified vm public url because the user template had been deleted
         # return public accessible web url
         public_urls = []
         if expr.template.provider == VirtualEnvironmentProvider.Docker:
@@ -70,10 +73,12 @@ class ExprManager(object):
                             "url": url
                         })
         else:
+            # todo important!!! because the user template had been deleted, so now take temporary measure, let UserResource.id = expr.id!!!
             vms = db_adapter.find_all_objects_by(UserResource,
+                                                 id=expr.id,
                                                  type=VIRTUAL_MACHINE,
                                                  status=RUNNING,
-                                                 template_id=expr.template.id)
+                                                 template=expr.template)
             vms_id = map(lambda v: v.id, vms)
             vms_all = []
             for id in vms_id:
@@ -127,6 +132,7 @@ class ExprManager(object):
             log.debug("public port : %d" % p)
         return public_ports
 
+    # release azure port
     def __release_public_port(self, host_server, host_ports):
         p = PortManagement()
         sub_id = get_config("azure.subscriptionId")
@@ -512,6 +518,10 @@ class ExprManager(object):
 
 
 def open_check_expr():
+    """
+    start a job to examine default experiment
+    :return:
+    """
     log.debug("start checking experiment ... ")
     alarm_time = datetime.now() + timedelta(seconds=1)
     scheduler.add_job(check_default_expr, 'interval', id='1', replace_existing=True, next_run_time=alarm_time,
@@ -520,7 +530,7 @@ def open_check_expr():
 
 def check_default_expr():
     # todo only pre-allocate env for those needed. It should configured in table hackathon
-    templates = db_adapter.find_all_objects_order_by(Template, hackathon_id=2)
+    templates = db_adapter.find_all_objects_order_by(Template, hackathon_id=1)
     total_azure = safe_get_config("pre_allocate.azure", 1)
     total_docker = safe_get_config("pre_allocate.docker", 1)
     for template in templates:
@@ -529,7 +539,7 @@ def check_default_expr():
                                         Experiment.user_id == ReservedUser.DefaultUserID,
                                         Experiment.template_id == template.id,
                                         (Experiment.status == ExprStatus.Starting) | (
-                                        Experiment.status == ExprStatus.Running))
+                                            Experiment.status == ExprStatus.Running))
             # todo test azure, config num
             if template.provider == VirtualEnvironmentProvider.AzureVM:
                 if curr_num < total_azure:
@@ -547,8 +557,8 @@ def check_default_expr():
                         log.debug("no starting template: %s , remain num is %d ... " % (template.name, remain_num))
                         expr_manager.start_expr(template.hackathon.name, template.name, ReservedUser.DefaultUserID)
                         break
-                    # curr_num += 1
-                # log.debug("all template %s start complete" % template.name)
+                        # curr_num += 1
+                        # log.debug("all template %s start complete" % template.name)
             elif template.provider == VirtualEnvironmentProvider.Docker:
                 log.debug("template name is %s, hackathon name is %s" % (template.name, template.hackathon.name))
                 if curr_num < total_docker:
@@ -557,7 +567,7 @@ def check_default_expr():
                     expr_manager.start_expr(template.hackathon.name, template.name, ReservedUser.DefaultUserID)
                     # curr_num += 1
                     break
-                # log.debug("all template %s start complete" % template.name)
+                    # log.debug("all template %s start complete" % template.name)
         except Exception as e:
             log.error(e)
             log.error("check default experiment failed")

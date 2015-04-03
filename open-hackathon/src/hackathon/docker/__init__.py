@@ -11,6 +11,7 @@ from hackathon.database import db_adapter
 from hackathon.database.models import Experiment
 from hackathon.enum import ExprStatus
 
+
 def name_match(id, l):
     for n in l:
         if id in n:
@@ -32,6 +33,11 @@ class OssDocker(object):
         return vm_url
 
     def __ports_cache(self):
+        """
+        cache ports, if ports' number more than 30, release the ports.
+        But if there is a thread apply new ports, we will do this operation in the next loop. Because the host machine
+        do not update the ports information, if we release ports now, the new ports will be lost.
+        """
         num = db_adapter.count(Experiment, Experiment.status == ExprStatus.Starting)
         if num > 0:
             log.debug("there are %d experiment is starting, host ports will updated in next loop")
@@ -60,7 +66,10 @@ class OssDocker(object):
             raise
 
     def __get_available_host_port(self, port_bindings, port):
-
+        """
+        simple lock mechanism, visit static variable ports synchronize, because port_bindings is not in real-time, so we
+        should cache the latest ports, when the cache ports number is more than 30, we will release it to save space.
+        """
         self.lock.acquire()
         try:
             host_port = port + 10000
@@ -78,6 +87,15 @@ class OssDocker(object):
             self.lock.release()
 
     def get_available_host_port(self, docker_host, private_port):
+
+        """
+        We use double operation to ensure ports not conflicted, first we get ports from host machine, but in multiple
+        threads situation, the interval between two requests is too short, maybe the first thread do not get port
+        ended, so the host machine don't update ports in time, thus the second thread may get the same port. To
+        avoid this condition, we use static variable host_ports to cache the latest 30 ports. Every thread visit
+        variable host_ports is synchronized. To save space, we will release the ports if the number over 30.
+        """
+
         log.debug("try to assign docker port %d on server %r" % (private_port, docker_host))
         containers = self.containers_info(docker_host)
         host_ports = flatten(map(lambda p: p['Ports'], containers))
@@ -99,8 +117,10 @@ class OssDocker(object):
             return get_containers
         return filter(lambda c: name_match(id, c["Names"]), get_containers)
 
-    # stop a container, name is the container's name, vm_dns is vm's ip address
     def stop(self, name, docker_host):
+        """
+        stop a container, name is the container's name, docker_host is the host machine where container running
+        """
         if self.get_container(name, docker_host) is not None:
             try:
                 containers_url = self.get_vm_url(docker_host) + "/containers/%s/stop" % name
@@ -110,8 +130,10 @@ class OssDocker(object):
                 log.error("container %s fail to stop" % name)
                 raise
 
-    # stop a container and delete it
     def delete(self, name, docker_host):
+        """
+        delete a container
+        """
         try:
             containers_url = self.get_vm_url(docker_host) + "/containers/%s?force=1" % name
             req = requests.delete(containers_url)
@@ -120,19 +142,15 @@ class OssDocker(object):
             log.error("container %s fail to stop" % name)
             raise
 
-    # start a container, vm_dns is vm's ip address, start_config is the configure of container which you want to start
-    def start(self, docker_host, container_id, start_config={}):
-        try:
-            url = self.get_vm_url(docker_host) + "/containers/%s/start" % container_id
-            req = requests.post(url, data=json.dumps(start_config), headers=default_http_headers)
-            log.debug(req.content)
-        except:
-            log.error("container %s fail to start" % container_id)
-            raise
-
-    # create a container
-    # https://docs.docker.com/reference/api/docker_remote_api_v1.17/#create-a-container
     def create(self, docker_host, container_config, container_name):
+        """
+        create a container, https://docs.docker.com/reference/api/docker_remote_api_v1.17/#create-a-container
+        only create a container, in this step, we cannot start a container.
+        :param docker_host:
+        :param container_config:
+        :param container_name:
+        :return:
+        """
         containers_url = self.get_vm_url(docker_host) + "/containers/create?name=%s" % container_name
         try:
             req = requests.post(containers_url, data=json.dumps(container_config), headers=default_http_headers)
@@ -145,8 +163,24 @@ class OssDocker(object):
             raise AssertionError("container is none")
         return container
 
-    # run a container, the configure of container which you want to create, vm_dns is vm's ip address
+    def start(self, docker_host, container_id, start_config={}):
+        """
+        start a container, start_config is the configure of container which you want to start, there are often include
+        some ports which you want to open.
+        for example: start_config = { "PortBindings":{"22/tcp":["10022"]}}, "Binds":[]}
+        """
+        try:
+            url = self.get_vm_url(docker_host) + "/containers/%s/start" % container_id
+            req = requests.post(url, data=json.dumps(start_config), headers=default_http_headers)
+            log.debug(req.content)
+        except:
+            log.error("container %s fail to start" % container_id)
+            raise
+
     def run(self, args, docker_host):
+        """
+        In this function, we create a container and then start a container, args is the container's config
+        """
         container_name = args["container_name"]
         exist = self.get_container(container_name, docker_host)
         result = {
