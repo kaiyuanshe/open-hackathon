@@ -1,0 +1,36 @@
+<ul class="nav main-menu">
+    {% if g.admin.is_super() %}
+    <li>
+        <a class="dropmenu" href="sitemap#">
+            <i class="fa fa-sitemap"></i>
+            <span class="hidden-sm text">站点管理</span>
+            <span class="chevron closed"></span>
+        </a>
+        <ul>
+            <li>
+                <a href="javascript:;">
+                    <i class="fa fa-user"></i>
+                    <span class="hidden-sm text">超级管理员</span>
+                </a>
+            </li>
+            <li>
+                <a href="javascript:;">
+                    <i class="fa  fa-cloud"></i>
+                    <span class="hidden-sm text">黑客松管理</span>
+                </a>
+            </li>
+            <li>
+                <a href="javascript:;">
+                    <i class="fa  fa-list-alt"></i>
+                    <span class="hidden-sm text">日志分析</span>
+                </a>
+            </li>
+        </ul>
+    </li>
+    {% endif %}
+    <li>
+        <a href="/registerusers">
+            <i class="fa fa-users"></i><span class="hidden-sm text"> 用户管理1</span>
+        </a>
+    </li>
+</ul>

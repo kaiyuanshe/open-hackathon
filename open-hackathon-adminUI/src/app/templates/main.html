@@ -1,25 +1,15 @@
-{% extends "base.html" %} 
-{% block meta %}
+{% extends "base.html" %} {% block meta %}
 <!-- Metas -->
-{% endblock %} 
-{% block style %}
+{% endblock %} {% block style %}
 <!-- Styles-->
-{% endblock %}
-{% block head %}
+{% endblock %} {% block head %}
 <!-- Head -->
-{% endblock %} 
-{% block content %}
+{% endblock %} {% block content %}
 <div class="container-fluid">
     <div class="row">
         <div id="sidebar-left" class="col-lg-2 col-sm-1">
             <div class="sidebar-nav nav-collapse collapse navbar-collapse">
-                <ul class="nav main-menu">
-                    <li>
-                        <a href="/admin/users">
-                            <i class="fa fa-users"></i><span class="hidden-sm text"> 用户管理</span>
-                        </a>
-                    </li>
-                </ul>
+               {% include  "partials/main-menu.html" %}
             </div>
             <a href="#" id="main-menu-min" class="full visible-md visible-lg"><i class="fa fa-angle-double-left"></i></a>
         </div>
@@ -30,7 +20,6 @@
         </div>
     </div>
 </div>
-{% endblock %} 
-{% block script %}
+{% endblock %} {% block script %}
 <!-- Scripts -->
-{% endblock %} 
+{% endblock %}

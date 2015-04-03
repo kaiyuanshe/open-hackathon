@@ -295,8 +295,7 @@ a#main-menu-toggle {
     padding: 1px 0 0 0;
     color: #fff;
     border: 0;
-    border-bottom: 1px solid #dbdee0;
-    background: transparent;
+    background: #71B1D1;
     -webkit-border-radius: 0;
     -moz-border-radius: 0;
     border-radius: 0;
@@ -345,7 +344,9 @@ a#main-menu-toggle {
 .nav.main-menu .fa {
     font-size: 28px;
 }
-
+.nav.main-menu>li>ul>li>a{
+    background-color:#519BBD;
+}
 .nav.main-menu>li>a:hover,
 .nav.main-menu >li>ul>li>a:hover {
     background: #7CC1DE;

@@ -141,6 +141,13 @@ def js_config():
                     mimetype="application/javascript")
     return resp
 
+#js api config
+@app.route('/apiconfig.js')
+def api_config():
+    resp = Response(response="var apiconfig=%s" % json.dumps(get_config("apiconfig")),
+                    status=200,
+                    mimetype="application/javascript")
+    return resp
 
 @app.route('/github')
 def github_login():
