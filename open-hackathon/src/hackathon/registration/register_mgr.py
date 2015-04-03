@@ -43,7 +43,6 @@ class RegisterManger(object):
         registers = self.db.find_all_objects(Register, Register.hackathon_id == hackathon_id)
         return map(lambda u: u.json(), registers)
 
-
     def get_register_by_id(self, **args):
         if "id" not in args:
             return {"error": "Bad request"}, 400
@@ -52,7 +51,6 @@ class RegisterManger(object):
             return register.json()
         else:
             return {"error": "REGISTER NOT FOUND"}, 400
-
 
     def create_or_update_register(self, **args):
         try:
@@ -86,7 +84,6 @@ class RegisterManger(object):
         except Exception:
             log.error("create or update register faild")
             return {"error": "INTERNAL SERVER ERROR"}, 500
-
 
     def delete_register(self, **args):
         if "id" not in args:

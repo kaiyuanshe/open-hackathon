@@ -46,7 +46,7 @@
         {
             "provider": "azure",
             "label" : "role-label",
-            "role_name" : "open-tech-role-test",
+            "role_name" : "open-tech-role",
             "system_config" : {
                 "os_family" : "Windows",
                 "host_name" : "hostname",
