@@ -24,6 +24,10 @@
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
 
+from src.azureformation.log import (
+    log,
+)
+import importlib
 import urllib2
 import json
 import os
@@ -111,3 +115,22 @@ def get_class(kls):
     for comp in parts[1:]:
         m = getattr(m, comp)
     return m
+
+
+def load_template(url):
+    try:
+        template = json.load(file(url))
+    except Exception as e:
+        log.error(e)
+        return None
+    return template
+
+
+def call(mdl_cls_func, cls_args, func_args):
+    mdl_name = mdl_cls_func[0]
+    cls_name = mdl_cls_func[1]
+    func_name = mdl_cls_func[2]
+    mdl = importlib.import_module(mdl_name)
+    cls = getattr(mdl, cls_name)
+    func = getattr(cls(*cls_args), func_name)
+    func(*func_args)

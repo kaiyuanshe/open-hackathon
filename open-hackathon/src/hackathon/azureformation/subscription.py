@@ -24,7 +24,7 @@ THE SOFTWARE.
 """
 __author__ = 'Yifu Huang'
 
-from src.azureformation.log import (
+from hackathon.log import (
     log,
 )
 

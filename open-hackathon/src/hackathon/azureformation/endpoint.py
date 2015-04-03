@@ -24,16 +24,18 @@ THE SOFTWARE.
 """
 __author__ = 'Yifu Huang'
 
-from src.azureformation.azureoperation.utility import (
+import sys
+sys.path.append("..")
+from hackathon.azureformation.utility import (
     find_unassigned_endpoints,
     add_endpoint_to_network_config,
     delete_endpoint_from_network_config,
 )
-from src.azureformation.enum import (
+from hackathon.enum import (
     VIRTUAL_MACHINE,
     AVMStatus,
 )
-from src.azureformation.log import (
+from hackathon.log import (
     log,
 )
 

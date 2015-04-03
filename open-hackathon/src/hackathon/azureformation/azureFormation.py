@@ -26,17 +26,32 @@ __author__ = 'Yifu Huang'
 
 import sys
 sys.path.append("..")
-from hackathon.azureformation.service import (
-    Service,
+from hackathon.azureformation.templateFramework import (
+    TemplateFramework,
 )
-from hackathon.azureformation.subscription import(
-    Subscription,
+from hackathon.azureformation.utility import (
+    MDL_CLS_FUNC,
+    run_job,
 )
 
 
-class ResourceBase(object):
+class AzureFormation:
+    """
+    Azure cloud service management
+    For logic: besides resources created by this program itself, it can reuse other storage,
+    container, cloud service and deployment exist in azure (by sync them into database)
+    For template: a template consists of a list of virtual environments, and a virtual environment
+    is a virtual machine with its storage account, container, cloud service and deployment
+    Notice: It requires exclusive access when Azure performs an async operation on a deployment
+    """
 
     def __init__(self, azure_key_id):
         self.azure_key_id = azure_key_id
-        self.service = Service(self.azure_key_id)
-        self.subscription = Subscription(self.service)
+
+    def create(self, experiment_id):
+        template_framework = TemplateFramework(experiment_id)
+        for template_unit in template_framework.get_template_units():
+            # create storage account
+            run_job(MDL_CLS_FUNC[0],
+                    (self.azure_key_id, ),
+                    (experiment_id, template_unit))

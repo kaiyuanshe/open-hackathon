@@ -24,11 +24,11 @@ THE SOFTWARE.
 """
 __author__ = 'Yifu Huang'
 
-from src.azureformation.azureoperation.utility import (
+from hackathon.azureformation.utility import (
     load_template_from_experiment,
     set_template_virtual_environment_count,
 )
-from src.azureformation.azureoperation.templateUnit import (
+from hackathon.azureformation.templateUnit import (
     TemplateUnit,
 )
 

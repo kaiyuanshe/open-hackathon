@@ -24,10 +24,12 @@ THE SOFTWARE.
 """
 __author__ = 'Yifu Huang'
 
-from src.azureformation.azureoperation.resourceBase import(
+import sys
+sys.path.append("..")
+from hackathon.azureformation.resourceBase import(
     ResourceBase,
 )
-from src.azureformation.azureoperation.utility import (
+from hackathon.azureformation.utility import (
     AZURE_FORMATION,
     ASYNC_TICK,
     ASYNC_LOOP,
@@ -49,9 +51,8 @@ from src.azureformation.azureoperation.utility import (
     update_virtual_environment_status,
     update_virtual_environment_private_ip,
     run_job,
-    check_experiment_done,
 )
-from src.azureformation.enum import (
+from hackathon.enum import (
     DEPLOYMENT,
     VIRTUAL_MACHINE,
     ALOperation,
@@ -62,7 +63,7 @@ from src.azureformation.enum import (
     VERemoteProvider,
     VEStatus,
 )
-from src.azureformation.log import (
+from hackathon.log import (
     log,
 )
 import json

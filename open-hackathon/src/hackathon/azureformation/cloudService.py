@@ -24,10 +24,12 @@ THE SOFTWARE.
 """
 __author__ = 'Yifu Huang'
 
-from src.azureformation.azureoperation.resourceBase import(
+import sys
+sys.path.append("..")
+from hackathon.azureformation.resourceBase import(
     ResourceBase,
 )
-from src.azureformation.azureoperation.utility import (
+from hackathon.azureformation.utility import (
     AZURE_FORMATION,
     MDL_CLS_FUNC,
     commit_azure_log,
@@ -36,10 +38,10 @@ from src.azureformation.azureoperation.utility import (
     delete_azure_cloud_service,
     run_job,
 )
-from src.azureformation.log import (
+from hackathon.log import (
     log,
 )
-from src.azureformation.enum import (
+from hackathon.enum import (
     CLOUD_SERVICE,
     ALOperation,
     ALStatus,

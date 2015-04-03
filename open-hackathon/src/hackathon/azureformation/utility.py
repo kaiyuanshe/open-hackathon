@@ -24,10 +24,12 @@ THE SOFTWARE.
 """
 __author__ = 'Yifu Huang'
 
-from src.azureformation.database import (
+import sys
+sys.path.append("..")
+from hackathon.database import (
     db_adapter,
 )
-from src.azureformation.database.models import (
+from hackathon.database.models import (
     AzureLog,
     AzureStorageAccount,
     AzureCloudService,
@@ -38,14 +40,14 @@ from src.azureformation.database.models import (
     Template,
     Experiment,
 )
-from src.azureformation.functions import (
+from hackathon.functions import (
     load_template,
     call,
 )
-from src.azureformation.scheduler import (
+from hackathon.scheduler import (
     scheduler,
 )
-from src.azureformation.enum import (
+from hackathon.enum import (
     ALStatus,
     EStatus,
     ALOperation,

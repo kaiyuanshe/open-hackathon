@@ -24,7 +24,9 @@ THE SOFTWARE.
 """
 __author__ = 'Yifu Huang'
 
-from src.azureformation.azureoperation.utility import (
+import sys
+sys.path.append("..")
+from hackathon.azureformation.utility import (
     find_unassigned_endpoints,
 )
 from azure.servicemanagement import (

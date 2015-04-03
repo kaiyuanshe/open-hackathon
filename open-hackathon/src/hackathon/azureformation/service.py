@@ -24,23 +24,25 @@ THE SOFTWARE.
 """
 __author__ = 'Yifu Huang'
 
-from src.azureformation.enum import (
+import sys
+sys.path.append("..")
+from hackathon.enum import (
     ADStatus,
 )
-from src.azureformation.log import (
+from hackathon.log import (
     log,
 )
-from src.azureformation.azureoperation.utility import (
+from hackathon.azureformation.utility import (
     ASYNC_TICK,
     DEPLOYMENT_TICK,
     VIRTUAL_MACHINE_TICK,
     MDL_CLS_FUNC,
     run_job,
 )
-from src.azureformation.database import (
+from hackathon.database import (
     db_adapter,
 )
-from src.azureformation.database.models import (
+from hackathon.database.models import (
     AzureKey,
 )
 from azure.servicemanagement import (
