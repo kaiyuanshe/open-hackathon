@@ -1,10 +1,36 @@
+# -*- coding: utf-8 -*-
+#
+# -----------------------------------------------------------------------------------
+# Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
+#  
+# The MIT License (MIT)
+#  
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#  
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#  
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+# -----------------------------------------------------------------------------------
+
 # -*- coding:utf8 -*-
 # encoding = utf-8
 import sys
 import urllib2
 
 sys.path.append("..")
-from hackathon.functions import get_remote, get_config, convert
+from hackathon.functions import get_remote, get_config, post_to_remote, convert
 from hackathon.log import log
 from . import user_manager
 import json
@@ -20,6 +46,9 @@ class LoginProviderBase():
 
 
 class QQLogin(LoginProviderBase):
+    def __init__(self, user_manager):
+        self.um = user_manager
+
     def login(self, args):
         access_token = args['access_token']
         # get openID.
@@ -40,24 +69,26 @@ class QQLogin(LoginProviderBase):
         email_info = [
             {'name': user_info["nickname"], 'email': None, 'id': id, 'verified': 1, 'primary': 1,
              'nickname': user_info["nickname"], 'avatar_url': user_info["figureurl"]}]
-        user_with_token = user_manager.db_login(openid,
-                                                name=user_info["nickname"],
-                                                nickname=user_info["nickname"],
-                                                access_token=access_token,
-                                                email_info=email_info,
-                                                avatar_url=user_info["figureurl"])
+        user_with_token = self.um.db_login(openid,
+                                           name=user_info["nickname"],
+                                           nickname=user_info["nickname"],
+                                           access_token=access_token,
+                                           email_info=email_info,
+                                           avatar_url=user_info["figureurl"])
 
         # login flask
         user = user_with_token["user"]
         log.info("QQ user login successfully:" + repr(user))
-
         hackathon_name = args.get('hackathon_name')
-        detail = user_manager.get_user_detail_info(user, hackathon_name=hackathon_name)
+        detail = self.um.get_user_detail_info(user, hackathon_name=hackathon_name)
         detail["token"] = user_with_token["token"].token
         return detail
 
 
 class GithubLogin(LoginProviderBase):
+    def __init__(self, user_manager):
+        self.um = user_manager
+
     def login(self, args):
         access_token = args.get('access_token')
         # get user info
@@ -94,30 +125,36 @@ class GithubLogin(LoginProviderBase):
         # email_info include all user email provided by github
         # email is user's primary email
         email_info = json.loads(email_info_resp)
-        user_with_token = user_manager.db_login(openid,
-                                                name=name,
-                                                nickname=nickname,
-                                                access_token=access_token,
-                                                email_info=email_info,
-                                                avatar_url=avatar)
+        user_with_token = self.um.db_login(openid,
+                                           name=name,
+                                           nickname=nickname,
+                                           access_token=access_token,
+                                           email_info=email_info,
+                                           avatar_url=avatar)
         # login flask
         user = user_with_token["user"]
         log.info("github user login successfully:" + repr(user))
         hackathon_name = args.get('hackathon_name')
-        detail = user_manager.get_user_detail_info(user, hackathon_name=hackathon_name)
+        detail = self.um.get_user_detail_info(user, hackathon_name=hackathon_name)
         detail["token"] = user_with_token["token"].token
         return detail
 
 
 class GitcafeLogin(LoginProviderBase):
+    def __init__(self, user_manager):
+        self.um = user_manager
+
     def login(self, args):
         token = args.get('access_token')
         value = "Bearer " + token
-        opener = urllib2.build_opener(urllib2.HTTPHandler)
-        request = urllib2.Request(get_config("login.gitcafe.user_info_url"))
-        request.add_header("Authorization", value)
-        user_info = opener.open(request).read()
-        log.debug(user_info)
+        # opener = urllib2.build_opener(urllib2.HTTPHandler)
+        # request = urllib2.Request(get_config("login.gitcafe.user_info_url"))
+        # request.add_header("Authorization", value)
+        # user_info = opener.open(request).read()
+
+        header = {"Authorization": value}
+        user_info = get_remote(get_config("login.gitcafe.user_info_url"), headers=header)
+        log.debug("get user info from GitCafe:" + user_info + "\n")
         info = json.loads(user_info)
 
         name = info['username']
@@ -133,17 +170,17 @@ class GitcafeLogin(LoginProviderBase):
         email_info = [
             {'name': name, 'email': email, 'id': id, 'verified': 1, 'primary': 1, 'nickname': nickname,
              'avatar_url': avatar_url}]
-        user_with_token = user_manager.db_login(id,
-                                                name=name,
-                                                nickname=nickname,
-                                                access_token=token,
-                                                email_info=email_info,
-                                                avatar_url=avatar_url)
+        user_with_token = self.um.db_login(id,
+                                           name=name,
+                                           nickname=nickname,
+                                           access_token=token,
+                                           email_info=email_info,
+                                           avatar_url=avatar_url)
         user = user_with_token["user"]
         log.info("gitcafe user login successfully:" + repr(user))
 
         hackathon_name = args.get('hackathon_name')
-        detail = user_manager.get_user_detail_info(user, hackathon_name=hackathon_name)
+        detail = self.um.get_user_detail_info(user, hackathon_name=hackathon_name)
         detail["token"] = user_with_token["token"].token
 
         log.debug("gitcafe user login successfully: %r" % detail)
@@ -151,6 +188,9 @@ class GitcafeLogin(LoginProviderBase):
 
 
 class WeiboLogin(LoginProviderBase):
+    def __init__(self, user_manager):
+        self.um = user_manager
+
     def login(self, args):
         access_token = args.get('access_token')
         uid = args.get('uid')
@@ -190,17 +230,17 @@ class WeiboLogin(LoginProviderBase):
             log.debug("fail to get user email from weibo")
             log.error(e)
 
-        user_with_token = user_manager.db_login(openid,
-                                                name=name,
-                                                nickname=nickname,
-                                                access_token=access_token,
-                                                email_info=email_info,
-                                                avatar_url=avatar_url)
+        user_with_token = self.um.db_login(openid,
+                                           name=name,
+                                           nickname=nickname,
+                                           access_token=access_token,
+                                           email_info=email_info,
+                                           avatar_url=avatar_url)
         user = user_with_token["user"]
         log.info("weibo user login successfully:" + repr(user))
 
         hackathon_name = args.get('hackathon_name')
-        detail = user_manager.get_user_detail_info(user, hackathon_name=hackathon_name)
+        detail = self.um.get_user_detail_info(user, hackathon_name=hackathon_name)
         detail["token"] = user_with_token["token"].token
 
         log.debug("weibo user login successfully: %r" % detail)
@@ -208,9 +248,9 @@ class WeiboLogin(LoginProviderBase):
 
 
 login_providers = {
-    OAUTH_PROVIDER.GITHUB: GithubLogin(),
-    OAUTH_PROVIDER.QQ: QQLogin(),
-    OAUTH_PROVIDER.GITCAFE: GitcafeLogin(),
-    OAUTH_PROVIDER.WEIBO: WeiboLogin()
+    OAUTH_PROVIDER.GITHUB: GithubLogin(user_manager),
+    OAUTH_PROVIDER.QQ: QQLogin(user_manager),
+    OAUTH_PROVIDER.GITCAFE: GitcafeLogin(user_manager),
+    OAUTH_PROVIDER.WEIBO: WeiboLogin(user_manager)
 }
 

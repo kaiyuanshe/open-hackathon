@@ -1,3 +1,29 @@
+# -*- coding: utf-8 -*-
+#
+# -----------------------------------------------------------------------------------
+# Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
+#  
+# The MIT License (MIT)
+#  
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#  
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#  
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+# -----------------------------------------------------------------------------------
+
 import sys
 
 sys.path.append("..")
@@ -39,10 +65,10 @@ class ExprManager(object):
         else:
             # todo important!!! because the user template had been deleted, so now take temporary measure!!!
             vms = db_adapter.find_all_objects_by(UserResource,
-                                                 id=expr.id,
                                                  type=VIRTUAL_MACHINE,
                                                  status=RUNNING,
-                                                 template=expr.template)
+                                                 id=expr.id,
+                                                 template_id=expr.template.id)
             vms_id = map(lambda v: v.id, vms)
             ves = []
             for id in vms_id:
@@ -75,10 +101,10 @@ class ExprManager(object):
         else:
             # todo important!!! because the user template had been deleted, so now take temporary measure, let UserResource.id = expr.id!!!
             vms = db_adapter.find_all_objects_by(UserResource,
-                                                 id=expr.id,
                                                  type=VIRTUAL_MACHINE,
                                                  status=RUNNING,
-                                                 template=expr.template)
+                                                 id=expr.id,
+                                                 template_id=expr.template.id)
             vms_id = map(lambda v: v.id, vms)
             vms_all = []
             for id in vms_id:
@@ -146,6 +172,9 @@ class ExprManager(object):
         p.release_public_port(host_server_dns, 'Production', host_server_name, host_ports)
 
     def __assign_ports(self, expr, host_server, ve, port_cfg):
+        """
+        assign
+        """
         # get 'host_port'
         map(lambda p: p.update(
             {'host_port': docker.get_available_host_port(host_server, p['port'])}) if 'host_port' not in p else None,
@@ -157,9 +186,7 @@ class ExprManager(object):
         if safe_get_config("environment", "prod") == "local":
             map(lambda cfg: cfg.update({'public_port': cfg['host_port']}), public_ports_cfg)
         else:
-            # todo is __get_avilable_public_port args is list
             public_ports = self.__get_available_public_port(host_server, host_ports)
-            # public_ports = [self.__get_available_public_port(host_server, port) for port in host_ports]
             for i in range(len(public_ports_cfg)):
                 public_ports_cfg[i]['public_port'] = public_ports[i]
 
@@ -540,7 +567,6 @@ def check_default_expr():
                                         Experiment.template_id == template.id,
                                         (Experiment.status == ExprStatus.Starting) | (
                                             Experiment.status == ExprStatus.Running))
-            # todo test azure, config num
             if template.provider == VirtualEnvironmentProvider.AzureVM:
                 if curr_num < total_azure:
                     remain_num = total_azure - curr_num
@@ -550,15 +576,11 @@ def check_default_expr():
                                                     status=ExprStatus.Starting)
                     if start_num > 0:
                         log.debug("there is an azure env starting, will check later ... ")
-                        # alarm_time = datetime.now() + timedelta(seconds=15)
-                        # scheduler.add_job(check_default_expr, 'date', next_run_time=alarm_time)
                         return
                     else:
                         log.debug("no starting template: %s , remain num is %d ... " % (template.name, remain_num))
                         expr_manager.start_expr(template.hackathon.name, template.name, ReservedUser.DefaultUserID)
                         break
-                        # curr_num += 1
-                        # log.debug("all template %s start complete" % template.name)
             elif template.provider == VirtualEnvironmentProvider.Docker:
                 log.debug("template name is %s, hackathon name is %s" % (template.name, template.hackathon.name))
                 if curr_num < total_docker:

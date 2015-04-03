@@ -1,3 +1,29 @@
+# -*- coding: utf-8 -*-
+#
+# -----------------------------------------------------------------------------------
+# Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
+#  
+# The MIT License (MIT)
+#  
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#  
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#  
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+# -----------------------------------------------------------------------------------
+
 import sys
 
 sys.path.append("..")
@@ -32,8 +58,6 @@ class AdminManager(object):
 
     def get_hack_id_by_admin_id(self, admin_id):
 
-        # can not use backref in db models
-
         # get emails from admin though admin.id in table admin_email
         admin_emails = self.db.find_all_objects_by(AdminEmail, admin_id=admin_id)
         emails = map(lambda x: x.email, admin_emails)
@@ -50,22 +74,14 @@ class AdminManager(object):
 
     # check the admin authority on hackathon
     def validate_admin_hackathon_request(self, hackathon_id):
-
         if HTTP_HEADER.TOKEN not in request.headers:
             return True
 
         hack_ids = self.get_hack_id_by_admin_id(g.admin.id)
-
-        # get hackathon_id from group and check if its SuperAdmin
-        if -1 in hack_ids:
-            return True
-        else:
-            # check  if the hackathon owned by the admin
-            return hackathon_id in hack_ids
+        return -1 in hack_ids or hackathon_id in hack_ids
 
 
-    def check_admin_hackathon_authority(self):
-
+    def validate_hackathon_id(self):
         if HTTP_HEADER.HACKATHON_ID in request.headers:
             try:
                 g.hackathon_id = long(request.headers[HTTP_HEADER.HACKATHON_ID])

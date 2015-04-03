@@ -1,3 +1,29 @@
+# -*- coding: utf-8 -*-
+#
+# -----------------------------------------------------------------------------------
+# Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
+#  
+# The MIT License (MIT)
+#  
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#  
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#  
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+# -----------------------------------------------------------------------------------
+
 __author__ = 'Yifu Huang'
 
 import sys
@@ -9,7 +35,6 @@ import time
 
 
 class PortManagement():
-
     def __init__(self):
         self.sms = None
 
@@ -179,7 +204,8 @@ class PortManagement():
                     break
         for i in range(len(public_port)):
             network.input_endpoints.input_endpoints.append(
-                ConfigurationSetInputEndpoint('auto-' + str(public_port[i]), 'tcp', str(public_port[i]), str(private_port[i]))
+                ConfigurationSetInputEndpoint('auto-' + str(public_port[i]), 'tcp', str(public_port[i]),
+                                              str(private_port[i]))
             )
         return network
 
@@ -254,19 +280,19 @@ class PortManagement():
                 return role_instance.instance_status
         return None
 
-# ---------------------------------------- usage ---------------------------------------- #
-#
-# from hackathon.functions import *
-#
-#
-# def test():
-#     p = PortManagement()
-#     sub_id = get_config("azure/subscriptionId")
-#     cert_path = get_config('azure/certPath')
-#     service_host_base = get_config("azure/managementServiceHostBase")
-#     t = p.connect(sub_id, cert_path, service_host_base)
-#     port = p.release_public_port('open-tech-service', 'Production', 'open-tech-role-15', 5000)
-#     print port
-#
-# if __name__ == "__main__":
-#     test()
+        # ---------------------------------------- usage ---------------------------------------- #
+        #
+        # from hackathon.functions import *
+        #
+        #
+        # def test():
+        # p = PortManagement()
+        #     sub_id = get_config("azure/subscriptionId")
+        #     cert_path = get_config('azure/certPath')
+        #     service_host_base = get_config("azure/managementServiceHostBase")
+        #     t = p.connect(sub_id, cert_path, service_host_base)
+        #     port = p.release_public_port('open-tech-service', 'Production', 'open-tech-role-15', 5000)
+        #     print port
+        #
+        # if __name__ == "__main__":
+        #     test()

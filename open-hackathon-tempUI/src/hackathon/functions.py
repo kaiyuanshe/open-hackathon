@@ -1,3 +1,29 @@
+# -*- coding: utf-8 -*-
+#
+# -----------------------------------------------------------------------------------
+# Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
+#  
+# The MIT License (MIT)
+#  
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#  
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#  
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+# -----------------------------------------------------------------------------------
+
 import urllib2, json, os, requests
 from config import Config
 
@@ -39,18 +65,19 @@ def post_to_remote(url, post_data, headers=None):
     if headers is not None and isinstance(headers, dict):
         default_headers.update(headers)
     req = requests.post(url, data=json.dumps(post_data), headers=default_headers)
+
     resp = json.loads(req.content)
 
     return convert(resp)
 
 
-def get_remote(url, accept=None):
-    opener = urllib2.build_opener(urllib2.HTTPHandler)
-    request = urllib2.Request(url)
-    if accept is not None:
-        request.add_header("Accept", accept)
-    resp = opener.open(request)
-    return resp.read()
+def get_remote(url, headers=None):
+    default_headers = {}
+    if headers is not None and isinstance(headers, dict):
+        default_headers.update(headers)
+    req = requests.get(url, headers=default_headers)
+    resp = req.content
+    return str(resp)
 
 
 def delete_remote(url, headers=None):

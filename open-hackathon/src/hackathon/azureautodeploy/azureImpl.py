@@ -1,3 +1,29 @@
+# -*- coding: utf-8 -*-
+#
+# -----------------------------------------------------------------------------------
+# Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
+#  
+# The MIT License (MIT)
+#  
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#  
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#  
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+# -----------------------------------------------------------------------------------
+
 __author__ = 'Yifu Huang'
 import sys
 
@@ -177,10 +203,10 @@ class AzureImpl():
                 else:
                     # delete deployment
                     db_adapter.delete_all_objects_by(UserResource,
-                                                  template_id=template.id,
-                                                  type=DEPLOYMENT,
-                                                  name=deployment['deployment_name'],
-                                                  cloud_service_id=cs.id)
+                                                     template_id=template.id,
+                                                     type=DEPLOYMENT,
+                                                     name=deployment['deployment_name'],
+                                                     cloud_service_id=cs.id)
                     db_adapter.commit()
                     user_operation_commit(self.template, DELETE_DEPLOYMENT, END)
                 # make sure virtual machine not exist
@@ -195,10 +221,10 @@ class AzureImpl():
                 else:
                     # delete vm, cascade delete vm endpoint and vm config
                     db_adapter.delete_all_objects_by(UserResource,
-                                                  template_id=template.id,
-                                                  type=VIRTUAL_MACHINE,
-                                                  name=virtual_machine['role_name'],
-                                                  cloud_service_id=cs.id)
+                                                     template_id=template.id,
+                                                     type=VIRTUAL_MACHINE,
+                                                     name=virtual_machine['role_name'],
+                                                     cloud_service_id=cs.id)
                     db_adapter.commit()
                     user_operation_commit(self.template, DELETE_VIRTUAL_MACHINE, END)
             else:
@@ -229,10 +255,10 @@ class AzureImpl():
                 else:
                     # delete vm, cascade delete vm endpoint and vm config
                     db_adapter.delete_all_objects_by(UserResource,
-                                                  template_id=template.id,
-                                                  type=VIRTUAL_MACHINE,
-                                                  name=virtual_machine['role_name'],
-                                                  cloud_service_id=cs.id)
+                                                     template_id=template.id,
+                                                     type=VIRTUAL_MACHINE,
+                                                     name=virtual_machine['role_name'],
+                                                     cloud_service_id=cs.id)
                     db_adapter.commit()
                     user_operation_commit(self.template, DELETE_VIRTUAL_MACHINE, END)
         user_operation_commit(self.template, DELETE, END)
@@ -268,9 +294,9 @@ class AzureImpl():
             return None
         # make sure deployment exist in database
         if db_adapter.count_by(UserResource,
-                            type=DEPLOYMENT,
-                            name=deployment['deployment_name'],
-                            cloud_service_id=cs.id) == 0:
+                               type=DEPLOYMENT,
+                               name=deployment['deployment_name'],
+                               cloud_service_id=cs.id) == 0:
             m = '%s %s not exist in database' % (DEPLOYMENT, deployment['deployment_name'])
             log.debug(m)
             user_resource_commit(self.template, DEPLOYMENT, deployment['deployment_name'], RUNNING)
@@ -286,10 +312,10 @@ class AzureImpl():
                 return None
             # make sure virtual machine of user template exist in database
             if db_adapter.count_by(UserResource,
-                                template_id=self.template.id,
-                                type=VIRTUAL_MACHINE,
-                                name=virtual_machine['role_name'],
-                                cloud_service_id=cs.id) == 0:
+                                   template_id=self.template.id,
+                                   type=VIRTUAL_MACHINE,
+                                   name=virtual_machine['role_name'],
+                                   cloud_service_id=cs.id) == 0:
                 m = '%s %s not exist in database' % (VIRTUAL_MACHINE, virtual_machine['role_name'])
                 user_operation_commit(self.template, operation, FAIL, m)
                 log.error(m)

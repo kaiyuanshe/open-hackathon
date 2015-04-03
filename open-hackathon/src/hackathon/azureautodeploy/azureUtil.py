@@ -1,3 +1,29 @@
+# -*- coding: utf-8 -*-
+#
+# -----------------------------------------------------------------------------------
+# Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
+#  
+# The MIT License (MIT)
+#  
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#  
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#  
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+# -----------------------------------------------------------------------------------
+
 __author__ = 'Yifu Huang'
 import sys
 import os
@@ -102,10 +128,10 @@ def user_resource_commit(template, type, name, status, cs_id=None):
 
 def user_resource_status_update(template, type, name, status, cs_id=None):
     ur = db_adapter.find_first_object_by(UserResource,
-                                      template_id=template.id,
-                                      type=type,
-                                      name=name,
-                                      cloud_service_id=cs_id)
+                                         template_id=template.id,
+                                         type=type,
+                                         name=name,
+                                         cloud_service_id=cs_id)
     ur.status = status
     db_adapter.commit()
 
@@ -208,12 +234,12 @@ def load_template(template, operation, expr_id):
 
 def query_user_operation(template, operation, id):
     return db_adapter.find_all_objects(UserOperation,
-                             UserOperation.template == template,
-                             UserOperation.operation.like(operation + '%'),
-                             UserOperation.id > id)
+                                       UserOperation.template == template,
+                                       UserOperation.operation.like(operation + '%'),
+                                       UserOperation.id > id)
 
 
 def query_user_resource(template, id):
     return db_adapter.find_all_objects(UserResource,
-                             UserResource.template == template,
-                             UserResource.id > id)
+                                       UserResource.template == template,
+                                       UserResource.id > id)
