@@ -60,7 +60,7 @@ def __login(provider):
         })
         login_user(admin_with_token["admin"])
         resp = make_response(redirect("/"))
-        resp.set_cookie('token', admin_with_token["token"])
+        resp.set_cookie('token', admin_with_token["token"].token)
         return resp
     except:
         return "Internal Server Error", 500
