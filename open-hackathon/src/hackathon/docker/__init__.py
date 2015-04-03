@@ -35,7 +35,7 @@ from compiler.ast import flatten
 from threading import Lock
 from hackathon.database import db_adapter
 from hackathon.database.models import Experiment
-from hackathon.enum import ExprStatus
+from hackathon.enum import EStatus
 
 
 def name_match(id, l):
@@ -59,7 +59,7 @@ class OssDocker(object):
         return vm_url
 
     def __ports_cache(self):
-        num = db_adapter.count(Experiment, Experiment.status == ExprStatus.Starting)
+        num = db_adapter.count(Experiment, Experiment.status == EStatus.Starting)
         if num > 0:
             log.debug("there are %d experiment is starting, host ports will updated in next loop")
             return

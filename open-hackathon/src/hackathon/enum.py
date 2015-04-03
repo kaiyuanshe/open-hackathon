@@ -24,7 +24,10 @@
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
 
-class ExprStatus:
+class EStatus:
+    """
+    For status in db model Experiment
+    """
     Init = 0
     Starting = 1
     Running = 2
@@ -35,7 +38,10 @@ class ExprStatus:
     Rollbacked = 7
 
 
-class VirtualEnvStatus:
+class VEStatus:
+    """
+    For status in db model VirtualEnvironment
+    """
     Init = 0
     Running = 1
     Stopped = 2
@@ -47,13 +53,19 @@ class PortBindingType:
     Docker = 2
 
 
-class VirtualEnvironmentProvider:
-    AzureVM = "azure-vm"
-    Docker = "docker"
+class VEProvider:
+    """
+    For provider in db model VirtualEnvironment
+    """
+    AzureVM = 0
+    Docker = 1
 
 
-class RemoteProvider:
-    Guacamole = "guacamole"
+class VERemoteProvider:
+    """
+    For remote provider in db model VirtualEnvironment
+    """
+    Guacamole = 0
 
 
 class EmailStatus:

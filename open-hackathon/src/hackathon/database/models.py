@@ -69,7 +69,26 @@ def to_json(inst, cls):
     return json.dumps(to_dic(inst, cls))
 
 
-class User(Base):
+class DBBase(Base):
+    """
+    DB model base class, providing basic functions
+    """
+    __abstract__ = True
+
+    def __init__(self, **kwargs):
+        super(DBBase, self).__init__(**kwargs)
+
+    def dic(self):
+        return to_dic(self, self.__class__)
+
+    def json(self):
+        return to_json(self, self.__class__)
+
+    def __repr__(self):
+        return '%s: %s' % (self.__class__.__name__, self.json())
+
+
+class User(DBBase):
     __tablename__ = 'user'
 
     id = Column(Integer, primary_key=True)
@@ -98,12 +117,6 @@ class User(Base):
     def get_id(self):
         return unicode(self.get_user_id())
 
-    def dic(self):
-        return to_dic(self, self.__class__)
-
-    def json(self):
-        return to_json(self, self.__class__)
-
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
         if self.create_time is None:
@@ -113,11 +126,8 @@ class User(Base):
         if self.slug is None:
             self.slug = str(uuid.uuid1())[0:8]  # todo generate a real slug
 
-    def __repr__(self):
-        return "User: " + self.json()
 
-
-class UserEmail(Base):
+class UserEmail(DBBase):
     __tablename__ = 'user_email'
 
     id = Column(Integer, primary_key=True)
@@ -132,11 +142,8 @@ class UserEmail(Base):
     def get_user_email(self):
         return self.email
 
-    def __init__(self, **kwargs):
-        super(UserEmail, self).__init__(**kwargs)
 
-
-class UserToken(Base):
+class UserToken(DBBase):
     __tablename__ = 'user_token'
 
     id = Column(Integer, primary_key=True)
@@ -148,22 +155,13 @@ class UserToken(Base):
     issue_date = Column(DateTime)
     expire_date = Column(DateTime, nullable=False)
 
-    def dic(self):
-        return to_dic(self, self.__class__)
-
-    def json(self):
-        return to_json(self, self.__class__)
-
     def __init__(self, **kwargs):
         super(UserToken, self).__init__(**kwargs)
         if self.issue_date is None:
             self.issue_date = datetime.utcnow()
 
-    def __repr__(self):
-        return "UserToken: " + self.json()
 
-
-class Register(Base):
+class Register(DBBase):
     __tablename__ = 'register'
 
     id = Column(Integer, primary_key=True)
@@ -178,14 +176,6 @@ class Register(Base):
     hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
     hackathon = relationship('Hackathon', backref=backref('registers', lazy='dynamic'))
 
-
-    def json(self):
-        return to_json(self, self.__class__)
-
-    def dic(self):
-        return to_dic(self, self.__class__)
-
-
     def __init__(self, **kwargs):
         super(Register, self).__init__(**kwargs)
         if self.create_time is None:
@@ -195,11 +185,7 @@ class Register(Base):
         self.online = 0
 
 
-    def __repr__(self):
-        return "Register:" + self.json()
-
-
-class Hackathon(Base):
+class Hackathon(DBBase):
     __tablename__ = 'hackathon'
 
     id = Column(Integer, primary_key=True)
@@ -213,22 +199,13 @@ class Hackathon(Base):
     create_time = Column(DateTime)
     update_time = Column(DateTime)
 
-    def json(self):
-        return to_json(self, self.__class__)
-
-    def dic(self):
-        return to_dic(self, self.__class__)
-
     def __init__(self, **kwargs):
         super(Hackathon, self).__init__(**kwargs)
         if self.create_time is None:
             self.create_time = datetime.utcnow()
 
-    def __repr__(self):
-        return "Hackathon: " + self.json()
 
-
-class DockerHostServer(Base):
+class DockerHostServer(DBBase):
     __tablename__ = 'docker_host_server'
 
     id = Column(Integer, primary_key=True)
@@ -243,42 +220,28 @@ class DockerHostServer(Base):
     container_max_count = Column(Integer, nullable=False)
 
 
-    def json(self):
-        return to_json(self, self.__class__)
-
-    def dic(self):
-        return to_dic(self, self.__class__)
-
-    def __init__(self, **kwargs):
-        super(DockerHostServer, self).__init__(**kwargs)
-
-    def __repr__(self):
-        return "HostServer: " + self.json()
-
-
-class Experiment(Base):
+class Experiment(DBBase):
+    """
+    Experiment is launched once template is used:
+    1. user use template directly (user manage his own azure resources through template)
+    2. hackathon use template directly (hackathon manage its own azure resources through template)
+    3. user use template via hackathon (online)
+    """
     __tablename__ = 'experiment'
 
     id = Column(Integer, primary_key=True)
-    status = Column(Integer)  # see enum.py
+    # EStatus in enum.py
+    status = Column(Integer)
     create_time = Column(DateTime)
     last_heart_beat_time = Column(DateTime)
-
-    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
-    user = relationship('User', backref=backref('experiments', lazy='dynamic'))
-
-    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
-    hackathon = relationship('Hackathon', backref=backref('experiments', lazy='dynamic'))
-
-    # adaptor for auto azure deploy
     template_id = Column(Integer, ForeignKey('template.id', ondelete='CASCADE'))
     template = relationship('Template', backref=backref('experiments', lazy='dynamic'))
-
-    def json(self):
-        return to_json(self, self.__class__)
-
-    def dic(self):
-        return to_dic(self, self.__class__)
+    # negative if hackathon use template directly
+    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
+    user = relationship('User', backref=backref('experiments', lazy='dynamic'))
+    # negative if user use template directly
+    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
+    hackathon = relationship('Hackathon', backref=backref('experiments', lazy='dynamic'))
 
     def __init__(self, **kwargs):
         super(Experiment, self).__init__(**kwargs)
@@ -287,45 +250,37 @@ class Experiment(Base):
         if self.last_heart_beat_time is None:
             self.last_heart_beat_time = datetime.utcnow()
 
-    def __repr__(self):
-        return "Experiment: " + self.json()
 
-
-class VirtualEnvironment(Base):
+class VirtualEnvironment(DBBase):
+    """
+    Virtual environment is abstraction of smallest environment unit in template
+    """
     __tablename__ = 'virtual_environment'
 
     id = Column(Integer, primary_key=True)
-    provider = Column(String(10), nullable=False)
+    # VEProvider in enum.py
+    provider = Column(Integer)
     name = Column(String(100), nullable=False)
     image = Column(String(100))
-    status = Column(Integer)  # see enum.py
-    remote_provider = Column(String(20))
+    # VEStatus in enum.py
+    status = Column(Integer)
+    # VERemoteProvider in enum.py
+    remote_provider = Column(Integer)
     remote_paras = Column(String(300))
     create_time = Column(DateTime)
-
-    user_id = Column(Integer, ForeignKey('user.id'))
-    user = relationship('User', backref=backref('virtual_environments', lazy='dynamic'))
-
     experiment_id = Column(Integer, ForeignKey('experiment.id', ondelete='CASCADE'))
     experiment = relationship('Experiment', backref=backref('virtual_environments', lazy='dynamic'))
-
-    def json(self):
-        return to_json(self, self.__class__)
-
-    def dic(self):
-        return to_dic(self, self.__class__)
 
     def __init__(self, **kwargs):
         super(VirtualEnvironment, self).__init__(**kwargs)
         if self.create_time is None:
             self.create_time = datetime.utcnow()
 
-    def __repr__(self):
-        return "VirtualEnvironment: " + self.json()
 
-
-# detail info of a VirtualEnvironment in case Docker
-class DockerContainer(Base):
+class DockerContainer(DBBase):
+    """
+    detail info of a VirtualEnvironment in case Docker
+    """
     __tablename__ = 'docker_container'
 
     id = Column(Integer, primary_key=True)
@@ -341,12 +296,6 @@ class DockerContainer(Base):
     host_server_id = Column(Integer, ForeignKey('docker_host_server.id', ondelete='CASCADE'))
     host_server = relationship('DockerHostServer', backref=backref('containers', lazy='dynamic'))
 
-    def json(self):
-        return to_json(self, self.__class__)
-
-    def dic(self):
-        return to_dic(self, self.__class__)
-
     def __init__(self, exper, **kwargs):
         self.experiment = exper
         super(DockerContainer, self).__init__(**kwargs)
@@ -354,11 +303,8 @@ class DockerContainer(Base):
         if self.create_time is None:
             self.create_time = datetime.utcnow()
 
-    def __repr__(self):
-        return "DockerContainer:" + self.json()
 
-
-class PortBinding(Base):
+class PortBinding(DBBase):
     __tablename__ = 'port_binding'
 
     # for simplicity, the port won't be released until the corresponding container removed(not stopped).
@@ -378,20 +324,8 @@ class PortBinding(Base):
     experiment_id = Column(Integer, ForeignKey('experiment.id', ondelete='CASCADE'))
     experiment = relationship('Experiment', backref=backref('port_bindings', lazy='dynamic'))
 
-    def json(self):
-        return to_json(self, self.__class__)
 
-    def dic(self):
-        return to_dic(self, self.__class__)
-
-    def __init__(self, **kwargs):
-        super(PortBinding, self).__init__(**kwargs)
-
-    def __repr__(self):
-        return "PortBinding: " + self.json()
-
-
-class Announcement(Base):
+class Announcement(DBBase):
     __tablename__ = 'announcement'
 
     id = Column(Integer, primary_key=True)
@@ -399,22 +333,15 @@ class Announcement(Base):
     enabled = Column(Integer)  # 1=enabled 0=disabled
     create_time = Column(DateTime)
 
-    def json(self):
-        return to_json(self, self.__class__)
-
-    def dic(self):
-        return to_dic(self, self.__class__)
-
-    def __init__(self, content):
-        self.content = content
-        self.enabled = 1
-        self.create_time = datetime.utcnow()
-
-    def __repr__(self):
-        return "Announcement: " + self.json()
+    def __init__(self, **kwargs):
+        super(Announcement, self).__init__(**kwargs)
+        if self.enabled is None:
+            self.enabled = 1
+        if self.create_time is None:
+            self.create_time = datetime.utcnow()
 
 
-class Template(Base):
+class Template(DBBase):
     __tablename__ = 'template'
 
     id = Column(Integer, primary_key=True)
@@ -422,212 +349,224 @@ class Template(Base):
     url = Column(String(200))  # backup, templates' location
     provider = Column(String(20))
     create_time = Column(DateTime)
-
-    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
-    hackathon = relationship('Hackathon', backref=backref('templates', lazy='dynamic'))
-
-    def json(self):
-        return to_json(self, self.__class__)
-
-    def dic(self):
-        return to_dic(self, self.__class__)
+    virtual_environment_count = Column(Integer)
 
     def __init__(self, **kwargs):
         super(Template, self).__init__(**kwargs)
+        if self.virtual_environment_count is None:
+            self.virtual_environment_count = 0
+        if self.create_time is None:
+            self.create_time = datetime.utcnow()
 
-        if self.provider is None:
-            self.provider = "docker"
-        self.create_time = datetime.utcnow()
-
-    def __repr__(self):
-        return "Template: " + self.json()
-
-
-# ------------------------------ Tables are introduced by azure-auto-deploy ------------------------------
+# ------------------------------ Tables are introduced by azure formation ------------------------------
 
 
-class UserTemplate(Base):
-    __tablename__ = 'user_template'
+class AzureKey(DBBase):
+    """
+    Azure certificate information of user/hackathon
+    """
+    __tablename__ = 'azure_key'
 
     id = Column(Integer, primary_key=True)
+    # cert file should be uploaded to azure portal
+    cert_url = Column(String(200))
+    # pem file should be saved in where this program run
+    pem_url = Column(String(200))
+    subscription_id = Column(String(100))
+    management_host = Column(String(100))
     create_time = Column(DateTime)
     last_modify_time = Column(DateTime)
-    user_id = Column(Integer(), ForeignKey('user.id', ondelete='CASCADE'))
-    user = relationship('User', backref=backref('user_template', lazy='dynamic'))
-    template_id = Column(Integer, ForeignKey('template.id', ondelete='CASCADE'))
-    template = relationship('Template', backref=backref('user_template', lazy='dynamic'))
 
-    def dic(self):
-        return to_dic(self, self.__class__)
-
-    def __init__(self, user, template, create_time=None, last_modify_time=None):
-        if create_time is None:
-            create_time = datetime.utcnow()
-        if last_modify_time is None:
-            last_modify_time = datetime.utcnow()
-        self.user = user
-        self.template = template
-        self.create_time = create_time
-        self.last_modify_time = last_modify_time
+    def __init__(self, **kwargs):
+        super(AzureKey, self).__init__(**kwargs)
+        if self.create_time is None:
+            self.create_time = datetime.utcnow()
+        if self.last_modify_time is None:
+            self.last_modify_time = datetime.utcnow()
 
 
-class UserOperation(Base):
-    __tablename__ = 'user_operation'
+class UserAzureKey(DBBase):
+    __tablename__ = 'user_azure_key'
 
     id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
+    user = relationship('User', backref=backref('user_azure_key_u', lazy='dynamic'))
+    azure_key_id = Column(Integer, ForeignKey('azure_key.id', ondelete='CASCADE'))
+    azure_key = relationship('AzureKey', backref=backref('user_azure_key_a', lazy='dynamic'))
+
+
+class HackathonAzureKey(DBBase):
+    __tablename__ = 'hackathon_azure_key'
+
+    id = Column(Integer, primary_key=True)
+    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
+    hackathon = relationship('Hackathon', backref=backref('hackathon_azure_key_h', lazy='dynamic'))
+    azure_key_id = Column(Integer, ForeignKey('azure_key.id', ondelete='CASCADE'))
+    azure_key = relationship('AzureKey', backref=backref('hackathon_azure_key_a', lazy='dynamic'))
+
+
+class AzureLog(DBBase):
+    """
+    Azure operation log for every experiment
+    """
+    __tablename__ = 'azure_log'
+
+    id = Column(Integer, primary_key=True)
+    # ALOperation in enum.py
     operation = Column(String(50))
+    # ALStatus in enum.py
     status = Column(String(50))
+    # Note if no info and error
     note = Column(String(500))
+    # None if no error
+    code = Column(Integer)
+    experiment_id = Column(Integer, ForeignKey('experiment.id', ondelete='CASCADE'))
+    experiment = relationship('Experiment', backref=backref('azure_log', lazy='dynamic'))
     exec_time = Column(DateTime)
-    template_id = Column(Integer, ForeignKey('template.id', ondelete='CASCADE'))
-    template = relationship('Template', backref=backref('user_operation', lazy='dynamic'))
 
-    def __init__(self, template, operation, status, note=None, exec_time=None):
-        if exec_time is None:
-            exec_time = datetime.utcnow()
-        self.template = template
-        self.operation = operation
-        self.status = status
-        self.note = note
-        self.exec_time = exec_time
-
-    def json(self):
-        return to_json(self, self.__class__)
-
-    def dic(self):
-        return to_dic(self, self.__class__)
-
-    def __repr__(self):
-        return "UserOperation: " + self.json()
+    def __init__(self, **kwargs):
+        super(AzureLog, self).__init__(**kwargs)
+        if self.exec_time is None:
+            self.exec_time = datetime.utcnow()
 
 
-class UserResource(Base):
-    __tablename__ = 'user_resource'
+class AzureStorageAccount(DBBase):
+    """
+    Azure storage account information
+    """
+    __tablename__ = 'azure_storage_account'
 
     id = Column(Integer, primary_key=True)
-    type = Column(String(50))
     name = Column(String(50))
+    description = Column(String(100))
+    label = Column(String(50))
+    location = Column(String(50))
+    # ASAStatus in enum.py
     status = Column(String(50))
+    experiment_id = Column(Integer, ForeignKey('experiment.id', ondelete='CASCADE'))
+    experiment = relationship('Experiment', backref=backref('azure_storage_account', lazy='dynamic'))
     create_time = Column(DateTime)
     last_modify_time = Column(DateTime)
-    template_id = Column(Integer, ForeignKey('template.id', ondelete='CASCADE'))
-    template = relationship('Template', backref=backref('user_resource1', lazy='dynamic'))
-    # for deployment and virtual machine
-    cloud_service_id = Column(Integer, ForeignKey('user_resource.id', ondelete='CASCADE'))
 
-    def __init__(self, template, type, name, status, cloud_service_id, create_time=None, last_modify_time=None):
-        if create_time is None:
-            create_time = datetime.utcnow()
-        if last_modify_time is None:
-            last_modify_time = datetime.utcnow()
-        self.template = template
-        self.type = type
-        self.name = name
-        self.status = status
-        self.cloud_service_id = cloud_service_id
-        self.create_time = create_time
-        self.last_modify_time = last_modify_time
-
-    def json(self):
-        return to_json(self, self.__class__)
-
-    def dic(self):
-        return to_dic(self, self.__class__)
-
-    def __repr__(self):
-        return "UserResource: " + self.json()
+    def __init__(self, **kwargs):
+        super(AzureStorageAccount, self).__init__(**kwargs)
+        if self.create_time is None:
+            self.create_time = datetime.utcnow()
+        if self.last_modify_time is None:
+            self.last_modify_time = datetime.utcnow()
 
 
-class VMEndpoint(Base):
-    __tablename__ = 'vm_endpoint'
+class AzureCloudService(DBBase):
+    """
+    Azure cloud service information
+    """
+    __tablename__ = 'azure_cloud_service'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50))
+    label = Column(String(50))
+    location = Column(String(50))
+    # ACSStatus in enum.py
+    status = Column(String(50))
+    experiment_id = Column(Integer, ForeignKey('experiment.id', ondelete='CASCADE'))
+    experiment = relationship('Experiment', backref=backref('azure_cloud_service', lazy='dynamic'))
+    create_time = Column(DateTime)
+    last_modify_time = Column(DateTime)
+
+    def __init__(self, **kwargs):
+        super(AzureCloudService, self).__init__(**kwargs)
+        if self.create_time is None:
+            self.create_time = datetime.utcnow()
+        if self.last_modify_time is None:
+            self.last_modify_time = datetime.utcnow()
+
+
+class AzureDeployment(DBBase):
+    """
+    Azure deployment information
+    """
+    __tablename__ = 'azure_deployment'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50))
+    slot = Column(String(50))
+    # ADStatus in enum.py
+    status = Column(String(50))
+    cloud_service_id = Column(Integer, ForeignKey('azure_cloud_service.id', ondelete='CASCADE'))
+    cloud_service = relationship('AzureCloudService', backref=backref('azure_deployment_c', lazy='dynamic'))
+    experiment_id = Column(Integer, ForeignKey('experiment.id', ondelete='CASCADE'))
+    experiment = relationship('Experiment', backref=backref('azure_deployment_e', lazy='dynamic'))
+    create_time = Column(DateTime)
+    last_modify_time = Column(DateTime)
+
+    def __init__(self, **kwargs):
+        super(AzureDeployment, self).__init__(**kwargs)
+        if self.create_time is None:
+            self.create_time = datetime.utcnow()
+        if self.last_modify_time is None:
+            self.last_modify_time = datetime.utcnow()
+
+
+class AzureVirtualMachine(DBBase):
+    """
+    Azure virtual machine information
+    """
+    __tablename__ = 'azure_virtual_machine'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50))
+    label = Column(String(50))
+    # AVMStatus in enum.py
+    status = Column(String(50))
+    dns = Column(String(50))
+    public_ip = Column(String(50))
+    private_ip = Column(String(50))
+    deployment_id = Column(Integer, ForeignKey('azure_deployment.id', ondelete='CASCADE'))
+    deployment = relationship('AzureDeployment', backref=backref('azure_virtual_machine_d', lazy='dynamic'))
+    experiment_id = Column(Integer, ForeignKey('experiment.id', ondelete='CASCADE'))
+    experiment = relationship('Experiment', backref=backref('azure_virtual_machine_e', lazy='dynamic'))
+    virtual_environment_id = Column(Integer, ForeignKey('virtual_environment.id', ondelete='CASCADE'))
+    virtual_environment = relationship('VirtualEnvironment',
+                                          backref=backref('azure_virtual_machine_v', lazy='dynamic'))
+    create_time = Column(DateTime)
+    last_modify_time = Column(DateTime)
+
+    def __init__(self, **kwargs):
+        super(AzureVirtualMachine, self).__init__(**kwargs)
+        if self.create_time is None:
+            self.create_time = datetime.utcnow()
+        if self.last_modify_time is None:
+            self.last_modify_time = datetime.utcnow()
+
+
+class AzureEndpoint(DBBase):
+    """
+    Input endpoint information of Azure virtual machine
+    """
+    __tablename__ = 'azure_endpoint'
 
     id = Column(Integer, primary_key=True)
     name = Column(String(50))
     protocol = Column(String(50))
     public_port = Column(Integer)
     private_port = Column(Integer)
+    virtual_machine_id = Column(Integer, ForeignKey('azure_virtual_machine.id', ondelete='CASCADE'))
+    virtual_machine = relationship('AzureVirtualMachine', backref=backref('azure_endpoint', lazy='dynamic'))
     create_time = Column(DateTime)
     last_modify_time = Column(DateTime)
-    cloud_service_id = Column(Integer, ForeignKey('user_resource.id', ondelete='CASCADE'))
-    cloud_service = relationship('UserResource', foreign_keys=[cloud_service_id],
-                                 backref=backref('vm_endpoint1', lazy='dynamic'))
-    virtual_machine_id = Column(Integer, ForeignKey('user_resource.id', ondelete='CASCADE'))
-    virtual_machine = relationship('UserResource', foreign_keys=[virtual_machine_id],
-                                   backref=backref('vm_endpoint2', lazy='dynamic'))
 
-    def __init__(self, name, protocol, public_port, private_port, cloud_service, virtual_machine=None,
-                 create_time=None, last_modify_time=None):
-        if create_time is None:
-            create_time = datetime.utcnow()
-        if last_modify_time is None:
-            last_modify_time = datetime.utcnow()
-        self.cloud_service = cloud_service
-        self.virtual_machine = virtual_machine
-        self.name = name
-        self.protocol = protocol
-        self.public_port = public_port
-        self.private_port = private_port
-        self.create_time = create_time
-        self.last_modify_time = last_modify_time
+    def __init__(self, **kwargs):
+        super(AzureEndpoint, self).__init__(**kwargs)
+        if self.create_time is None:
+            self.create_time = datetime.utcnow()
+        if self.last_modify_time is None:
+            self.last_modify_time = datetime.utcnow()
 
-    def json(self):
-        return to_json(self, self.__class__)
-
-    def dic(self):
-        return to_dic(self, self.__class__)
-
-    def __repr__(self):
-        return "VMEndpoint: " + self.json()
-
-
-class VMConfig(Base):
-    __tablename__ = 'vm_config'
-
-    id = Column(Integer, primary_key=True)
-    dns = Column(String(50))
-    public_ip = Column(String(50))
-    private_ip = Column(String(50))
-    create_time = Column(DateTime)
-    last_modify_time = Column(DateTime)
-    virtual_machine_id = Column(Integer, ForeignKey('user_resource.id', ondelete='CASCADE'))
-    virtual_machine = relationship('UserResource', backref=backref('vm_config1', lazy='dynamic'))
-    remote_provider = Column(String(20))
-    remote_paras = Column(String(300))
-    template_id = Column(Integer, ForeignKey('template.id', ondelete='CASCADE'))
-    template = relationship('Template', backref=backref('vm_config2', lazy='dynamic'))
-
-    def __init__(self, virtual_machine, dns, public_ip, private_ip,
-                 remote_provider, remote_paras, template,
-                 create_time=None, last_modify_time=None):
-        if create_time is None:
-            create_time = datetime.utcnow()
-        if last_modify_time is None:
-            last_modify_time = datetime.utcnow()
-        self.virtual_machine = virtual_machine
-        self.dns = dns
-        self.public_ip = public_ip
-        self.private_ip = private_ip
-        self.remote_provider = remote_provider
-        self.remote_paras = remote_paras
-        self.template = template
-        self.create_time = create_time
-        self.last_modify_time = last_modify_time
-
-    def json(self):
-        return to_json(self, self.__class__)
-
-    def dic(self):
-        return to_dic(self, self.__class__)
-
-    def __repr__(self):
-        return "VMConfig: " + self.json()
-
-
-# ------------------------------ Tables are introduced by azure-auto-deploy ------------------------------
 
 # ------------------------------ Tables for those logic around admin-site --------------------------------
 
-class AdminUser(Base):
+
+class AdminUser(DBBase):
     __tablename__ = 'admin_user'
     id = Column(Integer, primary_key=True)
     name = Column(String(50))
@@ -638,12 +577,6 @@ class AdminUser(Base):
     online = Column(Integer)  # 0:offline 1:online
     create_time = Column(DateTime)
     last_login_time = Column(DateTime)
-
-    def json(self):
-        return to_json(self, self.__class__)
-
-    def dic(self):
-        return to_dic(self, self.__class__)
 
     def __init__(self, **kwargs):
         super(AdminUser, self).__init__(**kwargs)
@@ -657,7 +590,7 @@ class AdminUser(Base):
 # self.slug = str(uuid.uuid1())[0:8]  # todo generate a real slug
 
 
-class AdminEmail(Base):
+class AdminEmail(DBBase):
     __tablename__ = 'admin_email'
     id = Column(Integer, primary_key=True)
     name = Column(String(80))
@@ -668,14 +601,8 @@ class AdminEmail(Base):
     admin_id = Column(Integer, ForeignKey('admin_user.id', ondelete='CASCADE'))
     admin = relationship('AdminUser', backref=backref('emails', lazy='dynamic'))
 
-    def __init__(self, **kwargs):
-        super(AdminEmail, self).__init__(**kwargs)
 
-    def dic(self):
-        return to_dic(self, self.__class__)
-
-
-class AdminToken(Base):
+class AdminToken(DBBase):
     __tablename__ = 'admin_token'
     id = Column(Integer, primary_key=True)
     token = Column(String(50), unique=True, nullable=False)
@@ -686,22 +613,13 @@ class AdminToken(Base):
     issue_date = Column(DateTime)
     expire_date = Column(DateTime, nullable=False)
 
-    def json(self):
-        return to_json(self, self.__class__)
-
     def __init__(self, **kwargs):
         super(AdminToken, self).__init__(**kwargs)
         if self.issue_date is None:
             self.issue_date = datetime.utcnow()
 
-    def dic(self):
-        return to_dic(self, self.__class__)
 
-    def __repr__(self):
-        return "AdminToken: " + self.json()
-
-
-class AdminUserHackathonRel(Base):
+class AdminUserHackathonRel(DBBase):
     __tablename__ = 'admin_user_hackathon_rel'
     id = Column(Integer, primary_key=True)
     admin_email = Column(String(120))
@@ -711,16 +629,7 @@ class AdminUserHackathonRel(Base):
     remarks = Column(String(255))
     create_time = Column(DateTime)
 
-    def json(self):
-        return to_json(self, self.__class__)
-
-    def dic(self):
-        return to_dic(self, self.__class__)
-
     def __init__(self, **kwargs):
         super(AdminUserHackathonRel, self).__init__(**kwargs)
         if self.create_time is None:
             self.create_time = datetime.utcnow()
-
-    def __repr__(self):
-        return "AdminUserGroup: " + self.json()
