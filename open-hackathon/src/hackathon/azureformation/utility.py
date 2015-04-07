@@ -75,7 +75,7 @@ PORT_BOUND = 65536
 ENDPOINT_PREFIX = 'AUTO-'
 ENDPOINT_PROTOCOL = 'TCP'
 # module base
-MDL_BASE = 'src.azureformation.azureoperation.'
+MDL_BASE = 'hackathon.azureformation.'
 # module name, class name and function name
 MDL_CLS_FUNC = [
     [MDL_BASE + 'storageAccount', 'StorageAccount', 'create_storage_account'],

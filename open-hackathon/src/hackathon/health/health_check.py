@@ -29,9 +29,16 @@ import sys
 sys.path.append("..")
 from hackathon.constants import HEALTH_STATE
 from hackathon.docker import *
-from hackathon.azureautodeploy.azureImpl import *
 from hackathon.functions import *
 from sqlalchemy import __version__
+from hackathon.database.models import (
+    User,
+    DockerHostServer,
+    AzureKey,
+)
+from hackathon.azureformation.service import (
+    Service,
+)
 
 STATUS = "status"
 DESCRIPTION = "description"
@@ -117,14 +124,12 @@ class GuacamoleHealthCheck(HealthCheck):
 
 class AzureHealthCheck(HealthCheck):
     def __init__(self):
-        self.azure = AzureImpl()
-        sub_id = get_config("azure.subscriptionId")
-        cert_path = get_config('azure.certPath')
-        service_host_base = get_config("azure.managementServiceHostBase")
-        self.azure.connect(sub_id, cert_path, service_host_base)
+        self.db = db_adapter
 
     def reportHealth(self):
-        if self.azure.ping():
+        azure_key = self.db.find_first_object(AzureKey)
+        azure = Service(azure_key.id)
+        if azure.ping():
             return {
                 STATUS: HEALTH_STATE.OK
             }

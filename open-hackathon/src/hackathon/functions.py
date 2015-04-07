@@ -24,7 +24,7 @@
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
 
-from src.azureformation.log import (
+from hackathon.log import (
     log,
 )
 import importlib

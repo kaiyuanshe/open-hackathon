@@ -95,6 +95,9 @@ class Service(ServiceManagementService):
     def create_storage_account(self, name, description, label, location):
         return super(Service, self).create_storage_account(name, description, label, location=location)
 
+    def list_storage_accounts(self):
+        return super(Service, self).list_storage_accounts()
+
     # ---------------------------------------- cloud service ---------------------------------------- #
 
     def get_hosted_service_properties(self, name, detail=False):
@@ -347,6 +350,18 @@ class Service(ServiceManagementService):
                 log.error(result.error.code)
                 log.error(vars(result.error))
             log.error('Asynchronous operation did not succeed.')
+            return False
+        return True
+
+    def ping(self):
+        """
+        Use list storage accounts to check azure service management service health
+        :return:
+        """
+        try:
+            self.list_storage_accounts()
+        except Exception as e:
+            log.error(e)
             return False
         return True
 

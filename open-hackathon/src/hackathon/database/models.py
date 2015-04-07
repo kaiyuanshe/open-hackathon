@@ -2,7 +2,7 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
 #  
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -210,7 +210,6 @@ class DockerHostServer(DBBase):
 
     id = Column(Integer, primary_key=True)
     vm_name = Column(String(100), nullable=False)
-    hackathon_id = Column(Integer)
     public_dns = Column(String(50))
     public_ip = Column(String(50))
     public_docker_api_port = Column(Integer)
@@ -218,6 +217,8 @@ class DockerHostServer(DBBase):
     private_docker_api_port = Column(Integer)
     container_count = Column(Integer, nullable=False)
     container_max_count = Column(Integer, nullable=False)
+    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
+    hackathon = relationship('Hackathon', backref=backref('docker_host_servers', lazy='dynamic'))
 
 
 class Experiment(DBBase):
@@ -350,6 +351,8 @@ class Template(DBBase):
     provider = Column(String(20))
     create_time = Column(DateTime)
     virtual_environment_count = Column(Integer)
+    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
+    hackathon = relationship('Hackathon', backref=backref('templates', lazy='dynamic'))
 
     def __init__(self, **kwargs):
         super(Template, self).__init__(**kwargs)
@@ -357,6 +360,7 @@ class Template(DBBase):
             self.virtual_environment_count = 0
         if self.create_time is None:
             self.create_time = datetime.utcnow()
+
 
 # ------------------------------ Tables are introduced by azure formation ------------------------------
 
@@ -522,12 +526,12 @@ class AzureVirtualMachine(DBBase):
     public_ip = Column(String(50))
     private_ip = Column(String(50))
     deployment_id = Column(Integer, ForeignKey('azure_deployment.id', ondelete='CASCADE'))
-    deployment = relationship('AzureDeployment', backref=backref('azure_virtual_machine_d', lazy='dynamic'))
+    deployment = relationship('AzureDeployment', backref=backref('azure_virtual_machines_d', lazy='dynamic'))
     experiment_id = Column(Integer, ForeignKey('experiment.id', ondelete='CASCADE'))
-    experiment = relationship('Experiment', backref=backref('azure_virtual_machine_e', lazy='dynamic'))
+    experiment = relationship('Experiment', backref=backref('azure_virtual_machines_e', lazy='dynamic'))
     virtual_environment_id = Column(Integer, ForeignKey('virtual_environment.id', ondelete='CASCADE'))
     virtual_environment = relationship('VirtualEnvironment',
-                                          backref=backref('azure_virtual_machine_v', lazy='dynamic'))
+                                       backref=backref('azure_virtual_machines_v', lazy='dynamic'))
     create_time = Column(DateTime)
     last_modify_time = Column(DateTime)
 
@@ -551,7 +555,7 @@ class AzureEndpoint(DBBase):
     public_port = Column(Integer)
     private_port = Column(Integer)
     virtual_machine_id = Column(Integer, ForeignKey('azure_virtual_machine.id', ondelete='CASCADE'))
-    virtual_machine = relationship('AzureVirtualMachine', backref=backref('azure_endpoint', lazy='dynamic'))
+    virtual_machine = relationship('AzureVirtualMachine', backref=backref('azure_endpoints', lazy='dynamic'))
     create_time = Column(DateTime)
     last_modify_time = Column(DateTime)
 

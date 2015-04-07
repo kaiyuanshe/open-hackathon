@@ -125,8 +125,8 @@ class ExprManager(object):
                         })
         else:
             for ve in expr.virtual_environments.all():
-                for vm in ve.azure_virtual_machine.all():
-                    ep = vm.azure_endpoint.filter_by(private_port=80).first()
+                for vm in ve.azure_virtual_machines_v.all():
+                    ep = vm.azure_endpoints.filter_by(private_port=80).first()
                     url = 'http://%s:%s' % (vm.public_ip, ep.public_port)
                     public_urls.append({
                         "name": ep.name,
