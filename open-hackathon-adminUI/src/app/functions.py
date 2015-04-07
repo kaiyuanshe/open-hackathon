@@ -68,13 +68,9 @@ def put_to_remote(url, post_data, headers=None):
     return convert(resp)
 
 
-def get_remote(url, headers=None):
-    default_headers = {"content-type": "application/json"}
-    if headers is not None and isinstance(headers, dict):
-        default_headers.update(headers)
-
+def get_remote(url, headers={}):
     opener = urllib2.build_opener(urllib2.HTTPHandler)
-    request = urllib2.Request(url, headers=default_headers)
+    request = urllib2.Request(url, None, headers)
     resp = opener.open(request)
     return resp.read()
 

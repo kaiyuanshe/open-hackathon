@@ -1,5 +1,8 @@
 import urllib2, json, os, requests
-from config import Config
+try:
+    from config import Config
+except ImportError:
+    from config_sample import Config
 
 
 def convert(input):
