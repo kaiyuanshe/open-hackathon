@@ -4,14 +4,14 @@
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
 #
 # The MIT License (MIT)
-#  
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#  
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #  
@@ -25,6 +25,7 @@
 # -----------------------------------------------------------------------------------
 
 import sys
+
 sys.path.append("..")
 from compiler.ast import (
     flatten,
@@ -45,17 +46,48 @@ from hackathon.scheduler import (
 from hackathon.enum import (
     EStatus,
     VERemoteProvider,
+    VEProvider,
+    PortBindingType,
+    VEStatus,
+    ReservedUser,
+)
+from hackathon.database.models import (
+    VirtualEnvironment,
+    DockerHostServer,
+    HackathonAzureKey,
+    Experiment,
+    PortBinding,
+    DockerContainer,
+    Hackathon,
+    Template,
+    Register,
+)
+from hackathon.database import (
+    db_adapter,
+)
+from hackathon.log import (
+    log,
+)
+from hackathon.azureformation.service import (
+    Service,
+)
+from hackathon.azureformation.endpoint import (
+    Endpoint,
+)
+from hackathon.azureformation.azureFormation import (
+    AzureFormation,
 )
 from datetime import (
     timedelta,
+    datetime,
 )
 import json
+import os
 
 docker = OssDocker()
 
 
 class ExprManager(object):
-
     def __report_expr_status(self, expr):
         ret = {
             "expr_id": expr.id,
@@ -92,27 +124,15 @@ class ExprManager(object):
                             "url": url
                         })
         else:
-            vms = db_adapter.find_all_objects_by(UserResource,
-                                                 type=VIRTUAL_MACHINE,
-                                                 status=RUNNING,
-                                                 name=expr.id,
-                                                 template_id=expr.template.id)
-            vms_id = map(lambda v: v.id, vms)
-            vms_all = []
-            for id in vms_id:
-                vms_all.append(db_adapter.find_first_object_by(VMConfig, virtual_machine_id=id))
-            for vm_config in vms_all:
-                dns = vm_config.dns[:-1]
-                vm = vm_config.virtual_machine
-                endpoint = db_adapter.find_first_object_by(VMEndpoint, private_port=80, virtual_machine=vm)
-                name = endpoint.name
-                port = endpoint.public_port
-                public_urls.append({
-                    "name": name,
-                    "url": dns + ':' + str(port)
-                })
+            for ve in expr.virtual_environments.all():
+                for vm in ve.azure_virtual_machine.all():
+                    ep = vm.azure_endpoint.filter_by(private_port=80).first()
+                    url = 'http://%s:%s' % (vm.public_ip, ep.public_port)
+                    public_urls.append({
+                        "name": ep.name,
+                        "url": url
+                    })
         ret["public_urls"] = public_urls
-
         return ret
 
     def __get_available_docker_host(self, expr_config, hackathon):
@@ -131,36 +151,30 @@ class ExprManager(object):
             raise Exception("No available VM.")
         return vm
 
-    # todo p = PortManagement()
-    def __get_available_public_port(self, host_server, host_ports):
-        log.debug("starting to get azure port")
-        p = PortManagement()
-        sub_id = get_config("azure.subscriptionId")
-        cert_path = get_config('azure.certPath')
-        service_host_base = get_config("azure.managementServiceHostBase")
-        p.connect(sub_id, cert_path, service_host_base)
+    def __load_azure_key_id(self, expr_id):
+        expr = db_adapter.get_object(Experiment, expr_id)
+        hak = db_adapter.find_first_object_by(HackathonAzureKey, hackathon_id=expr.hackathon_id)
+        return hak.azure_key_id
 
+    def __get_available_public_port(self, expr_id, host_server, host_ports):
+        log.debug("starting to get azure port")
+        ep = Endpoint(Service(self.__load_azure_key_id(expr_id)))
         host_server_name = host_server.vm_name
         host_server_dns = host_server.public_dns.split('.')[0]
-        public_ports = p.assign_public_port(host_server_dns, 'Production', host_server_name, host_ports)
-        if not isinstance(public_ports, list):
+        public_endpoints = ep.assign_public_endpoints(host_server_dns, 'Production', host_server_name, host_ports)
+        if not isinstance(public_endpoints, list):
             log.debug("failed to get public ports")
             return "cannot get public ports", 500
-        for p in public_ports:
-            log.debug("public port : %d" % p)
-        return public_ports
+        for ep in public_endpoints:
+            log.debug("public port : %d" % ep)
+        return public_endpoints
 
-    def __release_public_port(self, host_server, host_ports):
-        p = PortManagement()
-        sub_id = get_config("azure.subscriptionId")
-        cert_path = get_config('azure.certPath')
-        service_host_base = get_config("azure.managementServiceHostBase")
-        p.connect(sub_id, cert_path, service_host_base)
-
+    def __release_public_port(self, expr_id, host_server, host_ports):
+        ep = Endpoint(Service(self.__load_azure_key_id(expr_id)))
         host_server_name = host_server.vm_name
         host_server_dns = host_server.public_dns.split('.')[0]
         log.debug("starting to release ports ... ")
-        p.release_public_port(host_server_dns, 'Production', host_server_name, host_ports)
+        ep.release_public_endpoints(host_server_dns, 'Production', host_server_name, host_ports)
 
     def __assign_ports(self, expr, host_server, ve, port_cfg):
         # get 'host_port'
@@ -174,8 +188,8 @@ class ExprManager(object):
         if safe_get_config("environment", "prod") == "local":
             map(lambda cfg: cfg.update({'public_port': cfg['host_port']}), public_ports_cfg)
         else:
-            # todo is __get_avilable_public_port args is list
-            public_ports = self.__get_available_public_port(host_server, host_ports)
+            # todo is __get_available_public_port args is list
+            public_ports = self.__get_available_public_port(expr.id, host_server, host_ports)
             # public_ports = [self.__get_available_public_port(host_server, port) for port in host_ports]
             for i in range(len(public_ports_cfg)):
                 public_ports_cfg[i]['public_port'] = public_ports[i]
@@ -183,13 +197,13 @@ class ExprManager(object):
         binding_dockers = []
 
         for public_cfg in public_ports_cfg:
-            binding_cloudservice = PortBinding(name=public_cfg["name"] if "name" in public_cfg else None,
-                                               port_from=public_cfg["public_port"],
-                                               port_to=public_cfg["host_port"],
-                                               binding_type=PortBindingType.CloudService,
-                                               binding_resource_id=host_server.id,
-                                               virtual_environment=ve,
-                                               experiment=expr)
+            binding_cloud_service = PortBinding(name=public_cfg["name"] if "name" in public_cfg else None,
+                                                port_from=public_cfg["public_port"],
+                                                port_to=public_cfg["host_port"],
+                                                binding_type=PortBindingType.CloudService,
+                                                binding_resource_id=host_server.id,
+                                                virtual_environment=ve,
+                                                experiment=expr)
             binding_docker = PortBinding(name=public_cfg["name"] if "name" in public_cfg else None,
                                          port_from=public_cfg["host_port"],
                                          port_to=public_cfg["port"],
@@ -198,7 +212,7 @@ class ExprManager(object):
                                          virtual_environment=ve,
                                          experiment=expr)
             binding_dockers.append(binding_docker)
-            db_adapter.add_object(binding_cloudservice)
+            db_adapter.add_object(binding_cloud_service)
             db_adapter.add_object(binding_docker)
         db_adapter.commit()
 
@@ -261,22 +275,22 @@ class ExprManager(object):
         if "remote" in container_config \
                 and container_config["remote"]["provider"] == "guacamole" \
                 and "ports" in container_config:
-            guac = container_config["remote"]
-            port_cfg = filter(lambda p: p["port"] == guac["port"], container_config["ports"])
+            guacamole = container_config["remote"]
+            port_cfg = filter(lambda p: p["port"] == guacamole["port"], container_config["ports"])
 
             if len(port_cfg) > 0:
                 gc = {
                     "displayname": container_config["displayname"] if "displayname" in container_config else
                     container_config["name"],
                     "name": post_data["container_name"],
-                    "protocol": guac["protocol"],
+                    "protocol": guacamole["protocol"],
                     "hostname": host_server.public_ip,
                     "port": port_cfg[0]["public_port"]
                 }
-                if "username" in guac:
-                    gc["username"] = guac["username"]
-                if "password" in guac:
-                    gc["password"] = guac["password"]
+                if "username" in guacamole:
+                    gc["username"] = guacamole["username"]
+                if "password" in guacamole:
+                    gc["password"] = guacamole["password"]
 
                 # save guacamole config into DB
                 ve.remote_paras = json.dumps(gc)
@@ -330,7 +344,7 @@ class ExprManager(object):
             db_adapter.update_object(expr, user_id=user_id)
             for ve in expr.virtual_environments:
                 db_adapter.update_object(ve, user_id=user_id)
-            db_session.commit()
+            db_adapter.commit()
             log.debug("experiment had been assigned, check experiment and start new job ... ")
             alarm_time = datetime.now() + timedelta(seconds=1)
             scheduler.add_job(check_default_expr, 'date', next_run_time=alarm_time)
@@ -387,9 +401,8 @@ class ExprManager(object):
             db_adapter.commit()
             # start create azure vm according to user template
             try:
-                path = os.path.dirname(__file__) + '/../azureautodeploy/azureCreateAsync.py'
-                command = ['python', path, str(template.id), str(expr.id)]
-                Popen(command)
+                af = AzureFormation(self.__load_azure_key_id(expr.id))
+                af.create(expr.id)
             except Exception as e:
                 log.error(e)
                 return {"error": "Failed starting azure"}, 500
@@ -414,7 +427,7 @@ class ExprManager(object):
                                     ports_binding)
             ports_to = [d.port_to for d in docker_binding]
             if len(ports_to) != 0:
-                self.__release_public_port(host_server, ports_to)
+                self.__release_public_port(expr_id, host_server, ports_to)
             for port in ports_binding:
                 db_adapter.delete_object(port)
             db_adapter.commit()
@@ -488,29 +501,8 @@ class ExprManager(object):
                     expr.status = EStatus.Stopped
                 db_adapter.commit()
             else:
-                azure = AzureImpl()
-                sub_id = get_config("azure.subscriptionId")
-                cert_path = get_config('azure.certPath')
-                service_host_base = get_config("azure.managementServiceHostBase")
-                if not azure.connect(sub_id, cert_path, service_host_base):
-                    return {"error": "Failed connect azure"}, 500
-                if force == 0:
-                    try:
-                        result = azure.shutdown_sync(expr.template, expr_id)
-                    except Exception as e:
-                        log.error(e)
-                        return {"error": "Failed shutdown azure"}, 500
-                    expr.status = EStatus.Stopped
-                else:
-                    try:
-                        result = azure.delete_sync(expr.template, expr_id)
-                    except Exception as e:
-                        log.error(e)
-                        return {"error": "Failed delete azure"}, 500
-                    expr.status = EStatus.Deleted
-                db_adapter.commit()
-                if not result:
-                    return {"error": "Failed stop azure"}, 500
+                # todo stop azure
+                raise NotImplementedError
             log.debug("experiment %d ended success" % expr_id)
             return "OK"
         else:
