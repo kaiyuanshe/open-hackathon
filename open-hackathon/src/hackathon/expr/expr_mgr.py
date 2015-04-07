@@ -63,10 +63,12 @@ class ExprManager(object):
         if expr.template.provider == VirtualEnvironmentProvider.Docker:
             ves = expr.virtual_environments.all()
         else:
+            # todo important!!! because the user template had been deleted, so now take temporary measure!!!
+            # now let name = 'open-tech-role-' + str(expr.id)
             vms = db_adapter.find_all_objects_by(UserResource,
                                                  type=VIRTUAL_MACHINE,
                                                  status=RUNNING,
-                                                 name=expr.id,
+                                                 name='open-tech-role-' + str(expr.id),
                                                  template_id=expr.template.id)
             vms_id = map(lambda v: v.id, vms)
             ves = []
@@ -84,6 +86,7 @@ class ExprManager(object):
         if expr.status == ExprStatus.Running:
             ret["remote_servers"] = guacamole_servers
 
+        # todo can not get specified vm public url because the user template had been deleted
         # return public accessible web url
         public_urls = []
         if expr.template.provider == VirtualEnvironmentProvider.Docker:
@@ -97,10 +100,12 @@ class ExprManager(object):
                             "url": url
                         })
         else:
+            # todo important!!! because the user template had been deleted, so now take temporary measure
+            # now let name = 'open-tech-role-' + str(expr.id)
             vms = db_adapter.find_all_objects_by(UserResource,
                                                  type=VIRTUAL_MACHINE,
                                                  status=RUNNING,
-                                                 name=expr.id,
+                                                 name='open-tech-role-' + str(expr.id),
                                                  template_id=expr.template.id)
             vms_id = map(lambda v: v.id, vms)
             vms_all = []
@@ -138,6 +143,11 @@ class ExprManager(object):
 
     # todo p = PortManagement()
     def __get_available_public_port(self, host_server, host_ports):
+        """
+        get available ports from host server
+        :param host_ports: is a list
+        :return: public ports, is a list
+        """
         log.debug("starting to get azure port")
         p = PortManagement()
         sub_id = get_config("azure.subscriptionId")
@@ -156,6 +166,10 @@ class ExprManager(object):
         return public_ports
 
     def __release_public_port(self, host_server, host_ports):
+        """
+        release host server's ports
+        :param host_ports: is a list
+        """
         p = PortManagement()
         sub_id = get_config("azure.subscriptionId")
         cert_path = get_config('azure.certPath')
@@ -168,6 +182,9 @@ class ExprManager(object):
         p.release_public_port(host_server_dns, 'Production', host_server_name, host_ports)
 
     def __assign_ports(self, expr, host_server, ve, port_cfg):
+        """
+        assign ports from host server
+        """
         # get 'host_port'
         map(lambda p: p.update(
             {'host_port': docker.get_available_host_port(host_server, p['port'])}) if 'host_port' not in p else None,
@@ -179,14 +196,13 @@ class ExprManager(object):
         if safe_get_config("environment", "prod") == "local":
             map(lambda cfg: cfg.update({'public_port': cfg['host_port']}), public_ports_cfg)
         else:
-            # todo is __get_avilable_public_port args is list
             public_ports = self.__get_available_public_port(host_server, host_ports)
-            # public_ports = [self.__get_available_public_port(host_server, port) for port in host_ports]
             for i in range(len(public_ports_cfg)):
                 public_ports_cfg[i]['public_port'] = public_ports[i]
 
         binding_dockers = []
 
+        # update portbinding
         for public_cfg in public_ports_cfg:
             binding_cloudservice = PortBinding(name=public_cfg["name"] if "name" in public_cfg else None,
                                                port_from=public_cfg["public_port"],
@@ -315,6 +331,9 @@ class ExprManager(object):
         return [hackathon, template]
 
     def check_expr_status(self, user_id, hackathon, template):
+        """
+        check experiment status, if there are pre-allocate experiments, the experiment will be assigned directly
+        """
         expr = db_adapter.find_first_object_by(Experiment,
                                                status=ExprStatus.Running,
                                                user_id=user_id,
@@ -329,6 +348,7 @@ class ExprManager(object):
         if expr is not None:
             return expr
 
+        # if there are pre-allocate experiments
         expr = db_adapter.find_first_object_by(Experiment, status=ExprStatus.Running, hackathon_id=hackathon.id,
                                                user_id=ReservedUser.DefaultUserID, template=template)
         if expr is not None:
@@ -337,6 +357,8 @@ class ExprManager(object):
                 db_adapter.update_object(ve, user_id=user_id)
             db_session.commit()
             log.debug("experiment had been assigned, check experiment and start new job ... ")
+
+            # add a job to start new pre-allocate experiment
             alarm_time = datetime.now() + timedelta(seconds=1)
             scheduler.add_job(check_default_expr, 'date', next_run_time=alarm_time)
             return expr
@@ -412,6 +434,9 @@ class ExprManager(object):
         return "OK"
 
     def __release_ports(self, expr_id, host_server):
+        """
+        release the specified experiment's ports
+        """
         log.debug("Begin to release ports: expr_id: %d, host_server: %r" % (expr_id, host_server))
         ports_binding = db_adapter.find_all_objects_by(PortBinding, experiment_id=expr_id)
         if ports_binding is not None:
@@ -419,6 +444,7 @@ class ExprManager(object):
                                     ports_binding)
             ports_to = [d.port_to for d in docker_binding]
             if len(ports_to) != 0:
+                # release public ports
                 self.__release_public_port(host_server, ports_to)
             for port in ports_binding:
                 db_adapter.delete_object(port)
@@ -427,8 +453,7 @@ class ExprManager(object):
 
     def __roll_back(self, expr_id):
         """
-        force delete container
-
+        roll back when exception occurred
         :param expr_id: experiment id
         """
         log.debug("Starting rollback ...")
@@ -540,6 +565,10 @@ class ExprManager(object):
 
 
 def open_check_expr():
+    """
+    start a job to examine default experiment
+    :return:
+    """
     log.debug("start checking experiment ... ")
     alarm_time = datetime.now() + timedelta(seconds=1)
     scheduler.add_job(check_default_expr, 'interval', id='1', replace_existing=True, next_run_time=alarm_time,
@@ -558,7 +587,6 @@ def check_default_expr():
                                         Experiment.template_id == template.id,
                                         (Experiment.status == ExprStatus.Starting) | (
                                             Experiment.status == ExprStatus.Running))
-            # todo test azure, config num
             if template.provider == VirtualEnvironmentProvider.AzureVM:
                 if curr_num < total_azure:
                     remain_num = total_azure - curr_num
@@ -568,15 +596,11 @@ def check_default_expr():
                                                     status=ExprStatus.Starting)
                     if start_num > 0:
                         log.debug("there is an azure env starting, will check later ... ")
-                        # alarm_time = datetime.now() + timedelta(seconds=15)
-                        # scheduler.add_job(check_default_expr, 'date', next_run_time=alarm_time)
                         return
                     else:
                         log.debug("no starting template: %s , remain num is %d ... " % (template.name, remain_num))
                         expr_manager.start_expr(template.hackathon.name, template.name, ReservedUser.DefaultUserID)
                         break
-                        # curr_num += 1
-                        # log.debug("all template %s start complete" % template.name)
             elif template.provider == VirtualEnvironmentProvider.Docker:
                 log.debug("template name is %s, hackathon name is %s" % (template.name, template.hackathon.name))
                 if curr_num < total_docker:
