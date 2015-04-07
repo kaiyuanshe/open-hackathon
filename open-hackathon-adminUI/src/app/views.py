@@ -1,3 +1,29 @@
+# -*- coding: utf-8 -*-
+#
+# -----------------------------------------------------------------------------------
+# Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
+#  
+# The MIT License (MIT)
+#  
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#  
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#  
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+# -----------------------------------------------------------------------------------
+
 from . import app
 from decorators import role_required
 from constants import ROLE, OAUTH_PROVIDER
@@ -55,11 +81,13 @@ def __login(provider):
         return "Bad Request", 400
 
     try:
-        admin = login_providers[provider].login({
+        admin_with_token = login_providers[provider].login({
             "code": code
         })
-        login_user(admin)
-        return make_response(redirect("/main"))
+        login_user(admin_with_token["admin"])
+        resp = make_response(redirect("/"))
+        resp.set_cookie('token', admin_with_token["token"].token)
+        return resp
     except:
         return "Internal Server Error", 500
 
@@ -138,7 +166,7 @@ def gitcafe_login():
 @app.route('/index')
 def index():
     if g.admin.is_authenticated():
-        return redirect("/main")
+        return redirect("/home")
     return __render('/login.html')
 
 
@@ -147,10 +175,21 @@ def index():
 def logout():
     login_providers.values()[0].logout(g.admin)
     logout_user()
-    return redirect("/index")
+    return redirect("/login")
 
 
-@app.route("/main")
+@app.route("/login")
+def login():
+    return __render("/login.html")
+
+
+@app.route("/home")
 @login_required
 def home():
-    return __render("/main.html")
+    return __render("/home.html")
+
+
+@app.route("/users")
+@login_required
+def users():
+    return __render("/users.html")
