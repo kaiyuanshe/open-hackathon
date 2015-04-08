@@ -40,7 +40,7 @@ app.config['SECRET_KEY'] = safe_get_config("app.secret_key", "secret_key")
 api = Api(app)
 
 # CORS
-app.config['CORS_HEADERS'] = 'Content-Type, token'
+app.config['CORS_HEADERS'] = 'Content-Type, token, hackathon_id'
 cors = CORS(app)
 
 from . import views
