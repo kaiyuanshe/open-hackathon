@@ -273,7 +273,7 @@ class AdminRegisterResource(Resource):
         parse = reqparse.RequestParser()
         parse.add_argument('id', type=int, location='args', required=True)
         args = parse.parse_args()
-        return register_manager.get_one_register(args)
+        return register_manager.get_register_by_id(id=args['id'])
 
 
     @admin_token_required
