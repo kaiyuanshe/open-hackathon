@@ -43,7 +43,7 @@ class RegisterManger(object):
         registers = self.db.find_all_objects(Register, Register.hackathon_id == hackathon_id)
         return map(lambda u: u.dic(), registers)
 
-    def get_register_by_id(self, **args):
+    def get_register_by_id(self, args):
         if "id" not in args:
             return {"error": "Bad request"}, 400
         register = self.db.find_first_object(Register, Register.id == args['id'])
@@ -86,7 +86,7 @@ class RegisterManger(object):
             log.error("create or update register faild")
             return {"error": "INTERNAL SERVER ERROR"}, 500
 
-    def delete_register(self, **args):
+    def delete_register(self, args):
         if "id" not in args:
             return {"error": "Bad request"}, 400
         try:
