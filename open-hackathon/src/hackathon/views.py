@@ -224,20 +224,6 @@ class CurrentTime(Resource):
         }
 
 
-class TestDefaultDocker(Resource):
-    def post(self):
-        args = request.get_json()
-        if "cid" not in args or "hackathon" not in args:
-            return "invalid parameter", 400
-        cid = args["cid"]
-        hackathon = args["hackathon"]
-        try:
-            return expr_manager.default_expr(hackathon, cid)
-        except Exception as err:
-            log.error(err)
-            return {"error": "fail to start due to '%s'" % err}, 500
-
-
 class DefaultExperiment(Resource):
     def get(self):
         open_check_expr()
@@ -258,10 +244,11 @@ api.add_resource(UserExperimentListResource, "/api/user/experiment/list")
 api.add_resource(GuacamoleResource, "/api/guacamoleconfig")
 api.add_resource(UserResource, "/api/user")
 api.add_resource(CurrentTime, "/api/currenttime")
-api.add_resource(TestDefaultDocker, "/api/test/docker")
 api.add_resource(DefaultExperiment, "/api/default/experiment")
 
 # ------------------------------ APIs for admin-site --------------------------------
+
+
 class AdminHackathonListResource(Resource):
     @admin_token_required
     def get(self):

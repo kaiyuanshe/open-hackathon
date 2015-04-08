@@ -242,7 +242,6 @@ class DockerHostServer(Base):
     container_count = Column(Integer, nullable=False)
     container_max_count = Column(Integer, nullable=False)
 
-
     def json(self):
         return to_json(self, self.__class__)
 
