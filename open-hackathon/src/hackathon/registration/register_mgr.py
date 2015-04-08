@@ -41,25 +41,25 @@ class RegisterManger(object):
     def get_register_list(self, hackathon_id):
         # TODO make query result with pagination
         registers = self.db.find_all_objects(Register, Register.hackathon_id == hackathon_id)
-        return map(lambda u: u.json(), registers)
+        return map(lambda u: u.dic(), registers)
 
     def get_register_by_id(self, **args):
         if "id" not in args:
             return {"error": "Bad request"}, 400
         register = self.db.find_first_object(Register, Register.id == args['id'])
         if register is not None:
-            return register.json()
+            return register.dic()
         else:
             return {"error": "REGISTER NOT FOUND"}, 400
 
-    def create_or_update_register(self, **args):
+    def create_or_update_register(self, args):
         try:
             register = self.db.find_first_object(Register, Register.email == args['email'],
                                                  Register.hackathon_id == g.hackathon_id)
             if register is None:
                 # create a register
                 log.debug("create a new register")
-                return self.db.add_object_kwargs(Register,
+                new_register = self.db.add_object_kwargs(Register,
                                                  register_name=args['register_name'],
                                                  email=args['email'],
                                                  create_time=datetime.utcnow(),
@@ -68,6 +68,7 @@ class RegisterManger(object):
                                                  jstrom_api='',
                                                  jstrom_mgmt_portal='',
                                                  hackathon_id=g.hackathon_id)
+                return new_register.dic()
             else:
                 # update a aready existe register
                 log.debug("update a new register")
@@ -80,7 +81,7 @@ class RegisterManger(object):
                                       strom_api='',
                                       jstrom_mgmt_portal='',
                                       hackathon_id=g.hackathon_id)
-                return register
+                return register.dic()
         except Exception:
             log.error("create or update register faild")
             return {"error": "INTERNAL SERVER ERROR"}, 500
