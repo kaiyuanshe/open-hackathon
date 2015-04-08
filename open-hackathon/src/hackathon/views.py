@@ -267,7 +267,7 @@ class AdminHackathonListResource(Resource):
     def get(self):
         hackathon_ids = admin_manager.get_hack_id_by_admin_id(g.admin.id)
         hackathon_list = db_adapter.find_all_objects(Hackathon, Hackathon.id.in_(hackathon_ids))
-        return map(lambda u: u.json(), hackathon_list)
+        return map(lambda u: u.dic(), hackathon_list)
 
 
 class AdminRegisterListResource(Resource):

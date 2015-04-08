@@ -1,4 +1,4 @@
-{% extends "main.html" %} {% block body %}
+{% extends "main.html" %} {% block style %} {% endblock %} {% block body %}
 <div class="col-lg-12">
     <div class="box">
         <div class="box-header">
@@ -8,59 +8,72 @@
           </h2>
         </div>
         <div class="box-content">
-            <table class="table">
+            <div class="row">
+                <div class="col-lg-6">
+                    <a href="/edit/register">添加</a>
+                </div>
+                <div class="col-lg-6 text-right">
+                    <label>
+                        <select class="form-control" data-toggle="bindtemp" data-target="#hackathon_template" data-api="oh.api.admin.hackathons.get" data-change="id" data-change-target="#registe_list">
+                        </select>
+                    </label>
+                </div>
+            </div>
+            <table class="table table-bordered">
                 <thead>
                     <tr>
-                        <th>Username</th>
-                        <th>Date registered</th>
-                        <th>Role</th>
-                        <th>Status</th>
+                        <th>注册名</th>
+                        <th>邮箱</th>
+                        <th>描述</th>
+                        <th>状态</th>
+                        <th>创建时间</th>
+                        <th>操作</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td>Samppa Nori</td>
-                        <td>2012/01/01</td>
-                        <td>Member</td>
-                        <td>
-                            <span class="label label-success">Active</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Estavan Lykos</td>
-                        <td>2012/02/01</td>
-                        <td>Staff</td>
-                        <td>
-                            <span class="label label-important">Banned</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Chetan Mohamed</td>
-                        <td>2012/02/01</td>
-                        <td>Admin</td>
-                        <td>
-                            <span class="label label-default">Inactive</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Derick Maximinus</td>
-                        <td>2012/03/01</td>
-                        <td>Member</td>
-                        <td>
-                            <span class="label label-warning">Pending</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Friderik Dávid</td>
-                        <td>2012/01/21</td>
-                        <td>Staff</td>
-                        <td>
-                            <span class="label label-success">Active</span>
-                        </td>
-                    </tr>
+                <tbody id="registe_list" data-target="#register_list_template" data-api="oh.api.admin.register.list.get" data-query="hackathon_id">
                 </tbody>
             </table>
         </div>
     </div>
 </div>
-{% endblock body %}
+{% endblock body %} {% block script %} {{ super() }}
+<div class="modal fade bs-example-modal-sm" id="confirm_modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-api="oh.api.admin.register.delete">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">提示</h4>
+            </div>
+            <div class="modal-body">
+                <p>确定删除此地址记录？</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default wb-btn" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary wb-btn" data-type="delete">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script id="hackathon_template" type="text/x-jquery-tmpl">
+    <option value=${id}>${name}</option>
+</script>
+<script id="register_list_template" type="text/x-jquery-tmpl">
+    <tr>
+        <td>
+            ${register_name}
+        </td>
+        <td>${email}</td>
+        <td>${description}</td>
+        <td>${enabled}</td>
+        <td>${oh.comm.DateFormat(create_time ,'yyyy-MM-dd HH:mm')}</td>
+        <td class="col-action">
+            <a class="btn btn-info btn-sm" href="/edit/register?id=${id}">
+                <i class="fa fa-edit "></i>
+            </a>
+            <a class="btn btn-danger btn-sm" href="#" data-target="#confirm_modal" data-toggle="modal">
+                <i class="fa fa-trash-o "></i>
+            </a>
+        </td>
+    </tr>
+</script>
+{% endblock %}
