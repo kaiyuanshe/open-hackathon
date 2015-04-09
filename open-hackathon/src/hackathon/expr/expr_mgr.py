@@ -156,8 +156,8 @@ class ExprManager(object):
         hak = db_adapter.find_first_object_by(HackathonAzureKey, hackathon_id=expr.hackathon_id)
         return hak.azure_key_id
 
-    def __get_available_public_port(self, expr_id, host_server, host_ports):
-        log.debug("starting to get azure port")
+    def __get_available_public_ports(self, expr_id, host_server, host_ports):
+        log.debug("starting to get azure ports")
         ep = Endpoint(Service(self.__load_azure_key_id(expr_id)))
         host_server_name = host_server.vm_name
         host_server_dns = host_server.public_dns.split('.')[0]
@@ -169,7 +169,7 @@ class ExprManager(object):
             log.debug("public port : %d" % ep)
         return public_endpoints
 
-    def __release_public_port(self, expr_id, host_server, host_ports):
+    def __release_public_ports(self, expr_id, host_server, host_ports):
         ep = Endpoint(Service(self.__load_azure_key_id(expr_id)))
         host_server_name = host_server.vm_name
         host_server_dns = host_server.public_dns.split('.')[0]
@@ -189,7 +189,7 @@ class ExprManager(object):
             map(lambda cfg: cfg.update({'public_port': cfg['host_port']}), public_ports_cfg)
         else:
             # todo is __get_available_public_port args is list
-            public_ports = self.__get_available_public_port(expr.id, host_server, host_ports)
+            public_ports = self.__get_available_public_ports(expr.id, host_server, host_ports)
             # public_ports = [self.__get_available_public_port(host_server, port) for port in host_ports]
             for i in range(len(public_ports_cfg)):
                 public_ports_cfg[i]['public_port'] = public_ports[i]
@@ -247,7 +247,6 @@ class ExprManager(object):
                                 image=container_config["image"],
                                 status=VEStatus.Init,
                                 remote_provider=remote_provider,
-                                user_id=user_id,
                                 experiment=expr)
         container = DockerContainer(expr, name=post_data["container_name"], host_server=host_server,
                                     virtual_environment=ve,
@@ -380,7 +379,7 @@ class ExprManager(object):
             # guacamole_config = []
             try:
                 host_server = self.__get_available_docker_host(expr_config, hackathon)
-                if curr_num >= get_config("pre_allocate.docker"):
+                if curr_num != 0 and curr_num >= get_config("pre_allocate.docker"):
                     return
                 expr.status = EStatus.Starting
                 db_adapter.commit()
@@ -427,7 +426,7 @@ class ExprManager(object):
                                     ports_binding)
             ports_to = [d.port_to for d in docker_binding]
             if len(ports_to) != 0:
-                self.__release_public_port(expr_id, host_server, ports_to)
+                self.__release_public_ports(expr_id, host_server, ports_to)
             for port in ports_binding:
                 db_adapter.delete_object(port)
             db_adapter.commit()

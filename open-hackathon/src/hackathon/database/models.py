@@ -348,7 +348,7 @@ class Template(DBBase):
     id = Column(Integer, primary_key=True)
     name = Column(String(50))
     url = Column(String(200))  # backup, templates' location
-    provider = Column(String(20))
+    provider = Column(Integer)
     create_time = Column(DateTime)
     virtual_environment_count = Column(Integer)
     hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
