@@ -177,6 +177,9 @@ class ExprManager(object):
         ep.release_public_endpoints(host_server_dns, 'Production', host_server_name, host_ports)
 
     def __assign_ports(self, expr, host_server, ve, port_cfg):
+        """
+        assign ports from host server
+        """
         # get 'host_port'
         map(lambda p: p.update(
             {'host_port': docker.get_available_host_port(host_server, p['port'])}) if 'host_port' not in p else None,
@@ -196,6 +199,7 @@ class ExprManager(object):
 
         binding_dockers = []
 
+        # update portbinding
         for public_cfg in public_ports_cfg:
             binding_cloud_service = PortBinding(name=public_cfg["name"] if "name" in public_cfg else None,
                                                 port_from=public_cfg["public_port"],
@@ -323,6 +327,9 @@ class ExprManager(object):
         return [hackathon, template]
 
     def check_expr_status(self, user_id, hackathon, template):
+        """
+        check experiment status, if there are pre-allocate experiments, the experiment will be assigned directly
+        """
         expr = db_adapter.find_first_object_by(Experiment,
                                                status=EStatus.Running,
                                                user_id=user_id,
@@ -345,6 +352,8 @@ class ExprManager(object):
                 db_adapter.update_object(ve, user_id=user_id)
             db_adapter.commit()
             log.debug("experiment had been assigned, check experiment and start new job ... ")
+
+            # add a job to start new pre-allocate experiment
             alarm_time = datetime.now() + timedelta(seconds=1)
             scheduler.add_job(check_default_expr, 'date', next_run_time=alarm_time)
             return expr
@@ -353,7 +362,12 @@ class ExprManager(object):
         hack_temp = self.check_template_status(hackathon_name, template_name)
         if hack_temp is None:
             return {"error": "hackathon or template is not existed"}, 500
+
         hackathon = hack_temp[0]
+        if hackathon.end_time < datetime.utcnow():
+            log.warn("hackathon is ended. The expr starting process will be stopped")
+            return "hackathen is ended", 412
+
         template = hack_temp[1]
         if user_id > 0:
             expr = self.check_expr_status(user_id, hackathon, template)
@@ -419,6 +433,9 @@ class ExprManager(object):
         return "OK"
 
     def __release_ports(self, expr_id, host_server):
+        """
+        release the specified experiment's ports
+        """
         log.debug("Begin to release ports: expr_id: %d, host_server: %r" % (expr_id, host_server))
         ports_binding = db_adapter.find_all_objects_by(PortBinding, experiment_id=expr_id)
         if ports_binding is not None:
@@ -434,8 +451,7 @@ class ExprManager(object):
 
     def __roll_back(self, expr_id):
         """
-        force delete container
-
+        roll back when exception occurred
         :param expr_id: experiment id
         """
         log.debug("Starting rollback ...")
@@ -526,6 +542,10 @@ class ExprManager(object):
 
 
 def open_check_expr():
+    """
+    start a job to examine default experiment
+    :return:
+    """
     log.debug("start checking experiment ... ")
     alarm_time = datetime.now() + timedelta(seconds=1)
     scheduler.add_job(check_default_expr, 'interval', id='1', replace_existing=True, next_run_time=alarm_time,
@@ -554,8 +574,6 @@ def check_default_expr():
                                                     status=EStatus.Starting)
                     if start_num > 0:
                         log.debug("there is an azure env starting, will check later ... ")
-                        # alarm_time = datetime.now() + timedelta(seconds=15)
-                        # scheduler.add_job(check_default_expr, 'date', next_run_time=alarm_time)
                         return
                     else:
                         log.debug("no starting template: %s , remain num is %d ... " % (template.name, remain_num))

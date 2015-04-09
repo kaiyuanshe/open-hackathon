@@ -105,6 +105,18 @@ Config = {
             "name": "open-xml-sdk",
             "endpoint": HACKATHON_API_ENDPOINT
         }
+    },
+    "apiconfig": {
+        "proxy": HACKATHON_API_ENDPOINT,
+        "api": {
+            "admin": {
+                "hackathons": ["get"],
+                "register": {
+                    "": ["get", "post", "delete", "put"],
+                    "list": ["get"]
+                }
+            }
+        }
     }
 }
 

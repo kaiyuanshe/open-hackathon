@@ -224,20 +224,6 @@ class CurrentTime(Resource):
         }
 
 
-class TestDefaultDocker(Resource):
-    def post(self):
-        args = request.get_json()
-        if "cid" not in args or "hackathon" not in args:
-            return "invalid parameter", 400
-        cid = args["cid"]
-        hackathon = args["hackathon"]
-        try:
-            return expr_manager.default_expr(hackathon, cid)
-        except Exception as err:
-            log.error(err)
-            return {"error": "fail to start due to '%s'" % err}, 500
-
-
 class DefaultExperiment(Resource):
     def get(self):
         open_check_expr()
@@ -258,16 +244,20 @@ api.add_resource(UserExperimentListResource, "/api/user/experiment/list")
 api.add_resource(GuacamoleResource, "/api/guacamoleconfig")
 api.add_resource(UserResource, "/api/user")
 api.add_resource(CurrentTime, "/api/currenttime")
-api.add_resource(TestDefaultDocker, "/api/test/docker")
 api.add_resource(DefaultExperiment, "/api/default/experiment")
 
 # ------------------------------ APIs for admin-site --------------------------------
+
+
 class AdminHackathonListResource(Resource):
     @admin_token_required
     def get(self):
         hackathon_ids = admin_manager.get_hack_id_by_admin_id(g.admin.id)
-        hackathon_list = db_adapter.find_all_objects(Hackathon, Hackathon.id.in_(hackathon_ids))
-        return map(lambda u: u.json(), hackathon_list)
+        if -1 in hackathon_ids:
+            hackathon_list = db_adapter.find_all_objects(Hackathon)
+        else:
+            hackathon_list = db_adapter.find_all_objects(Hackathon, Hackathon.id.in_(hackathon_ids))
+        return map(lambda u: u.dic(), hackathon_list)
 
 
 class AdminRegisterListResource(Resource):
@@ -283,7 +273,7 @@ class AdminRegisterResource(Resource):
         parse = reqparse.RequestParser()
         parse.add_argument('id', type=int, location='args', required=True)
         args = parse.parse_args()
-        return register_manager.get_one_register(args)
+        return register_manager.get_register_by_id(args)
 
 
     @admin_token_required

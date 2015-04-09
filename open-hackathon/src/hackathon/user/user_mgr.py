@@ -2,7 +2,7 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
 #  
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -170,18 +170,22 @@ class UserManager(object):
 
     def get_user_detail_info(self, user, **kwargs):
         detail = self.get_user_info(user)
-
         experiments = user.experiments.filter_by(status=EStatus.Running).all()
         detail["experiments"] = []
-        map(lambda e: detail["experiments"].append({
-            "id": e.id,
-            "hackathon_id": e.hackathon_id
-        }), experiments)
-
         detail["register_state"] = False
-        hack = hack_manager.get_hackathon_by_name(kwargs['hackathon_name'])
-        if hack is not None:
-            detail["register_state"] = self.__validate_user_registered(user, hack)
+
+        try:
+            experiments = user.experiments.filter_by(status=ExprStatus.Running).all()
+            map(lambda e: detail["experiments"].append({
+                "id": e.id,
+                "hackathon_id": e.hackathon_id
+            }), experiments)
+
+            hack = hack_manager.get_hackathon_by_name(kwargs['hackathon_name'])
+            if hack is not None:
+                detail["register_state"] = self.__validate_user_registered(user, hack)
+        except Exception as e:
+            log.error(e)
 
         return detail
 
