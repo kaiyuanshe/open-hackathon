@@ -57,7 +57,7 @@
                         callback = options;
                         options = {};
                     }
-                    options = $.extend(options ,_params|| {});
+                    options = $.extend(_params, options);
                     var url = name;
                     if (options.query) {
                         url += '?' + ($.isPlainObject(options.query) ? $.param(options.query) : options.query);
@@ -200,9 +200,9 @@
 
         function bindData(obj) {
             var _params = {
-                header: null,
-                body: null,
-                query: null
+                header: {},
+                body: {},
+                query: {}
             }
             $.extend(_params, obj.data('options') || {});
             executeFunctionByName(obj.data('api'), w, _params, function(data) {
