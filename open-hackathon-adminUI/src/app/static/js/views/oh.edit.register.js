@@ -103,6 +103,7 @@
                     }, function(data) {
                         id = data.id;
                         savebtn.removeAttr('disabled');
+                        location.href = location.pathname + '?id=' + id;
                         alert('成功');
                     });
                 }
