@@ -1,0 +1,30 @@
+{
+  "name": "gem_specific_install",
+  "version": "0.2.4",
+  "description": "Installs/Configures gem_specific_install",
+  "long_description": "# gem_specific_install cookbook\n\n# Requirements\n\n## Cookbooks\n\n* git\n\n# Usage\nThis will maintain a Git repo on /var/chef/cache and will update only if needed\n```\ninclude_recipe \"gem_specific_install\"\ngem_specific_install \"inifile\" do\n  repository \"https://github.com/optiflows/inifile.git\"\n  revision \"master\"\nend\n```\n\nThese commands will run `gem specific_install`:\n```\ninclude_recipe \"gem_specific_install\"\nchef_gem \"inifile\" do\n  provider Chef::Provider::Package::Rubygems::SpecificInstall\n  options( :repo => \"https://github.com/optiflows/inifile.git\")\nend\n```\n\n```\ninclude_recipe \"gem_specific_install\"\ngem_package \"inifile\" do\n  provider Chef::Provider::Package::Rubygems::SpecificInstall\n  options( :repo => \"https://github.com/optiflows/inifile.git\", :branch => \"master\")\nend\n```\n\n# Attributes\n\n# Recipes\n\n# Author\n\nAuthor:: Guilhem Lettron (<guilhem.lettron@optiflows.com>)\n",
+  "maintainer": "Guilhem Lettron",
+  "maintainer_email": "guilhem.lettron@optiflows.com",
+  "license": "Apache 2.0",
+  "platforms": {
+  },
+  "dependencies": {
+    "git": ">= 0.0.0"
+  },
+  "recommendations": {
+  },
+  "suggestions": {
+  },
+  "conflicting": {
+  },
+  "providing": {
+  },
+  "replacing": {
+  },
+  "attributes": {
+  },
+  "groupings": {
+  },
+  "recipes": {
+  }
+}
