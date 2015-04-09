@@ -1,3 +1,29 @@
+# -*- coding: utf-8 -*-
+#
+# -----------------------------------------------------------------------------------
+# Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
+#
+# The MIT License (MIT)
+#  
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#  
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#  
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+# -----------------------------------------------------------------------------------
+
 import sys
 
 sys.path.append("..")
@@ -145,17 +171,21 @@ class UserManager(object):
     def get_user_detail_info(self, user, **kwargs):
         detail = self.get_user_info(user)
 
-        experiments = user.experiments.filter_by(status=ExprStatus.Running).all()
         detail["experiments"] = []
-        map(lambda e: detail["experiments"].append({
-            "id": e.id,
-            "hackathon_id": e.hackathon_id
-        }), experiments)
-
         detail["register_state"] = False
-        hack = hack_manager.get_hackathon_by_name(kwargs['hackathon_name'])
-        if hack is not None:
-            detail["register_state"] = self.__validate_user_registered(user, hack)
+
+        try:
+            experiments = user.experiments.filter_by(status=ExprStatus.Running).all()
+            map(lambda e: detail["experiments"].append({
+                "id": e.id,
+                "hackathon_id": e.hackathon_id
+            }), experiments)
+
+            hack = hack_manager.get_hackathon_by_name(kwargs['hackathon_name'])
+            if hack is not None:
+                detail["register_state"] = self.__validate_user_registered(user, hack)
+        except Exception as e:
+            log.error(e)
 
         return detail
 

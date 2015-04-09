@@ -1,23 +1,58 @@
+# -*- coding: utf-8 -*-
+#
+# -----------------------------------------------------------------------------------
+# Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
+#  
+# The MIT License (MIT)
+#  
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#  
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#  
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+# -----------------------------------------------------------------------------------
+
 from . import app
-from flask_admin import BaseView, expose, Admin, AdminIndexView
 from decorators import role_required
-from constants import ROLE
-from functions import get_config
+from constants import ROLE, OAUTH_PROVIDER
 import json
 from constants import HTTP_HEADER
-from flask_login import login_required, current_user, login_user, LoginManager
+from flask_login import login_required, current_user, login_user, LoginManager, logout_user
 from admin.login import login_providers
-from flask import Response, render_template, request, g, redirect, make_response, session
-from database.models import AdminUser
-from database import db_adapter
+from admin.admin_mgr import admin_manager
+from flask import Response, render_template, request, g, redirect, make_response, session, abort
 from datetime import timedelta
-from functions import safe_get_config, post_to_remote, delete_remote, get_remote, put_to_remote
+from functions import safe_get_config, post_to_remote, delete_remote, get_remote, put_to_remote, get_config
+from log import log
 
 session_lifetime_minutes = 60
 PERMANENT_SESSION_LIFETIME = timedelta(minutes=session_lifetime_minutes)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
+
+Template_Routes = {
+    "error": "error.html"
+}
+
+
+def __oauth_meta_content():
+    return {
+        OAUTH_PROVIDER.WEIBO: get_config('login.weibo.meta_content'),
+        OAUTH_PROVIDER.QQ: get_config('login.qq.meta_content')
+    }
 
 
 def __get_headers(hackathon_id):
@@ -28,10 +63,33 @@ def __get_headers(hackathon_id):
     }
 
 
+def __render(template_name_or_list, **context):
+    return render_template(template_name_or_list,
+                           meta_content=__oauth_meta_content(),
+                           **context)
+
+
 def __get_uri(path):
     if path.startswith("/"):
         path = path.lstrip("/")
     return "%s/%s" % (safe_get_config('hackathon-api.endpoint', 'http://localhost:15000'), path)
+
+
+def __login(provider):
+    code = request.args.get('code')
+    if code is None:
+        return "Bad Request", 400
+
+    try:
+        admin_with_token = login_providers[provider].login({
+            "code": code
+        })
+        login_user(admin_with_token["admin"])
+        resp = make_response(redirect("/"))
+        resp.set_cookie('token', admin_with_token["token"].token)
+        return resp
+    except:
+        return "Internal Server Error", 500
 
 
 def post_to_api_service(path, post_data, hackathon_id):
@@ -52,7 +110,7 @@ def delete_from_api_service(path, hackathon_id):
 
 @login_manager.user_loader
 def load_user(id):
-    return db_adapter.find_first_object(AdminUser, id=id)
+    return admin_manager.get_admin_by_id(id)
 
 
 @app.before_request
@@ -61,52 +119,18 @@ def before_request():
     app.permanent_session_lifetime = timedelta(minutes=session_lifetime_minutes)
 
 
-class HomeView(AdminIndexView):
-    @login_required
-    @expose('/')
-    def index(self):
-        # if not g.user.is_authenticated():
-        # return redirect(url_for('index', next=request.path))
-        # if not g.user.has_roles((ROLE.ADMIN, ROLE.HOST)):
-
-        # return redirect("/hackathon")
-        return self.render('admin/home.html')
+def simple_route(path):
+    if Template_Routes.has_key(path):
+        return render_template(Template_Routes[path],
+                               meta_content=__oauth_meta_content())
+    else:
+        log.warn("page '%s' not found" % path)
+        abort(404)
 
 
-class HackathonAdminBaseView(BaseView):
-    def render_admin(self, template):
-        return self.render("admin/%s" % template)
-
-
-class MyAdminView(HackathonAdminBaseView):
-    @expose('/')
-    def index(self):
-        return self.render_admin('myadmin.html')
-
-    @role_required(ROLE.COMMON_ADMIN)
-    def is_accessible(self):
-        return True
-
-
-class AnotherAdminView(HackathonAdminBaseView):
-    @expose('/')
-    def index(self):
-        return self.render_admin('anotheradmin.html')
-
-    @expose('/test/')
-    def test(self):
-        return self.render_admin('test.html')
-
-    @role_required(ROLE.SUPER_ADMIN)
-    def is_accessible(self):
-        return True
-
-
-admin = Admin(name="Open Hackathon Admin Console", base_template='admin/osslayout.html', index_view=HomeView())
-admin.init_app(app)
-
-admin.add_view(MyAdminView(name="view1", category='Test'))
-admin.add_view(AnotherAdminView(name="view2", category='Test'))
+@app.route('/<path:path>')
+def template_routes(path):
+    return simple_route(path)
 
 
 # js config
@@ -117,40 +141,76 @@ def js_config():
                     mimetype="application/javascript")
     return resp
 
-
-def __login(provider):
-    code = request.args.get('code')
-    login_result = login_providers[provider].login({
-        "code": code
-    })
-    login_user(login_result)
-    return make_response(redirect("/admin"))
-
+#js api config
+@app.route('/apiconfig.js')
+def api_config():
+    resp = Response(response="var apiconfig=%s" % json.dumps(get_config("apiconfig")),
+                    status=200,
+                    mimetype="application/javascript")
+    return resp
 
 @app.route('/github')
 def github_login():
-    return __login("github")
+    return __login(OAUTH_PROVIDER.GITHUB)
 
 
 @app.route('/weibo')
 def weibo_login():
-    return __login("weibo")
+    return __login(OAUTH_PROVIDER.WEIBO)
 
 
 @app.route('/qq')
 def qq_login():
-    return __login("qq")
+    return __login(OAUTH_PROVIDER.QQ)
+
+
+@app.route('/gitcafe')
+def gitcafe_login():
+    return __login(OAUTH_PROVIDER.GITCAFE)
 
 
 @app.route('/')
 @app.route('/index')
 def index():
-    return render_template('/admin/login.html', meta_content={'weibo': get_config('login.weibo.meta_content'),
-                                                              "qq": get_config('login.qq.meta_content')})
+    if g.admin.is_authenticated():
+        return redirect("/home")
+    return __render('/login.html')
 
 
 @app.route("/logout")
 @login_required
 def logout():
     login_providers.values()[0].logout(g.admin)
-    return redirect("/index")
+    logout_user()
+    return redirect("/login")
+
+
+@app.route("/login")
+def login():
+    return __render("/login.html")
+
+
+@app.route("/home")
+@login_required
+def home():
+    return __render("/home.html")
+
+@app.route("/edit/register")
+@login_required
+def edit_registe():
+    return __render("/edit/register.html")
+
+@app.route("/myhackathon")
+@login_required
+def myhackathon():
+    return __render("/myhackathon.html")
+
+@app.route("/registerusers")
+@login_required
+def registerusers():
+    return __render("/registerusers.html")
+
+@app.route("/users")
+@login_required
+def users():
+    return __render("/users.html")

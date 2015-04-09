@@ -11,10 +11,10 @@
     <packaging>jar</packaging>
 
     <developers>
-      <developer>
-        <id>mshubian</id>
-        <name>Hu Bian</name>
-      </developer>
+        <developer>
+            <id>mshubian</id>
+            <name>Hu Bian</name>
+        </developer>
     </developers>
 
     <build>
@@ -86,9 +86,9 @@
     </dependencies>
 
     <parent>
-      <groupId>org.sonatype.oss</groupId>
-      <artifactId>oss-parent</artifactId>
-      <version>7</version>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>7</version>
     </parent>
 </project>
 

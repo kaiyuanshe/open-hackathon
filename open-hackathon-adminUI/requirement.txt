@@ -1,7 +1,6 @@
 werkzeug==0.9.6
 flask
 flask-debugtoolbar
-flask-admin
 sqlalchemy
 flask-sqlalchemy
 mysql-python

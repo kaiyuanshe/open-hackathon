@@ -1,5 +1,0 @@
-werkzeug==0.9.6
-flask
-flask-restful
-flask-login
-flask-debugtoolbar

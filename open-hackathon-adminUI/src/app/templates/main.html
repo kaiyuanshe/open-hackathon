@@ -1,0 +1,25 @@
+{% extends "base.html" %} {% block meta %}
+<!-- Metas -->
+{% endblock %} {% block style %}
+<!-- Styles-->
+{% endblock %} {% block head %}
+<!-- Head -->
+{% endblock %} {% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div id="sidebar-left" class="col-lg-2 col-sm-1">
+            <div class="sidebar-nav nav-collapse collapse navbar-collapse">
+               {% include  "partials/main-menu.html" %}
+            </div>
+            <a href="#" id="main-menu-min" class="full visible-md visible-lg"><i class="fa fa-angle-double-left"></i></a>
+        </div>
+        <div id="content" class="col-lg-10 col-sm-11">
+            <div class="row">
+                {% block body %} {% endblock %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} {% block script %}
+<!-- Scripts -->
+{% endblock %}
