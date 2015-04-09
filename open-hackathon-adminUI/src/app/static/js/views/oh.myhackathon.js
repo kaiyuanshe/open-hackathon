@@ -22,53 +22,11 @@
 // THE SOFTWARE.
 // -----------------------------------------------------------------------------------
 
-'use strict';
-/**
- * @namespace oh.controllers
- * @author <ifendoe@gmail.com>
- * @version 0.0.1
- * Created by Boli Guan on 15-3-10.
- */
-
-/**
- * @ngdoc function
- * @name oh.controllers:main.controller
- * @description
- * # main.controller
- * Controller of the main.controller
- */
-var s = angular.module('oh.controllers', []);
-s.controller('main.controller', function ($scope) {
-
-  function openWindow(url, width) {
-//    width = width || 600;
-//    var l, t;
-//    l = (screen.width - width ) / 2;
-//    t = (screen.height - 400) / 2;
-//    window.open(url, '_blank', 'toolbar=no, directories=no, status=yes,location=no, menubar=no, width=' + width + ', height=500, top=' + t + ', left=' + l);
-    window.location.href = url
-  }
-
-  $scope.githublogin = function () {
-    var url =$scope.config.social.github +
-      $.param($scope.config.sociallogin.github);
-    openWindow(url);
-  };
-  $scope.qqlogin = function () {
-    var url = $scope.config.social.qq +
-      $.param($scope.config.sociallogin.qq);
-    openWindow(url);
-  };
-  $scope.gitcafelogin = function () {
-    var url = $scope.config.social.gitcafe+
-      $.param($scope.config.sociallogin.gitcafe);
-    openWindow(url, 980);
-  };
-  $scope.weibologin = function () {
-    var url = $scope.config.social.weibo +
-      $.param($scope.config.sociallogin.weibo);
-    openWindow(url);
-  }
-});
-
-
+;
+(function($, oh) {
+  $(function(){
+      oh.api.admin.hackathons.get(function(data){
+         $('#hackathon_template').tmpl(data);
+      })
+  });
+})(jQuery, window.oh);
