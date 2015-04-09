@@ -1,0 +1,42 @@
+# Chef generated my.cnf for instance mysql
+
+[client]
+default-character-set          = utf8
+
+<% if @socket_file %>
+socket                         = <%= @socket_file %>
+<% end %>
+
+[mysql]
+
+[mysqld]
+default-storage-engine = INNODB
+character-set-server = utf8
+collation-server = utf8_general_ci
+
+<% if @pid_file %>
+pid-file                       = <%= @pid_file %>
+<% end %>
+<% if @socket_file %>
+socket                         = <%= @socket_file %>
+<% end %>
+<% if @data_dir %>
+datadir                        = <%= @data_dir %>
+<% end %>
+<% if @tmp_dir %>
+tmpdir                         = <%= @tmp_dir %>
+<% end %>
+<% if @lc_messages_dir %>
+lc-messages-dir                = <%= @lc_messages_dir %>
+<% end %>
+<% if @error_log %>
+log-error                      = <%= @error_log %>
+<% end %>
+<% if @include_dir %>
+!includedir <%= @include_dir %>
+<% end %>
+
+[mysqld_safe]
+<% if @socket_file %>
+socket                         = <%= @socket_file %>
+<% end %>
