@@ -394,7 +394,7 @@ class ExprManager(object):
                 self.__roll_back(expr.id)
                 return {"error": "Failed starting containers"}, 500
         else:
-            if curr_num >= get_config("pre_allocate.azure"):
+            if curr_num != 0 and curr_num >= get_config("pre_allocate.azure"):
                 return
             expr.status = EStatus.Starting
             db_adapter.commit()
