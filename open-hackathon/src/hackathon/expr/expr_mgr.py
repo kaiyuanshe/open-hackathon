@@ -2,9 +2,9 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
-#  
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -367,7 +367,12 @@ class ExprManager(object):
         hack_temp = self.check_template_status(hackathon_name, template_name)
         if hack_temp is None:
             return {"error": "hackathon or template is not existed"}, 500
+
         hackathon = hack_temp[0]
+        if hackathon.end_time < datetime.utcnow():
+            log.warn("hackathon is ended. The expr starting process will be stopped")
+            return "hackathen is ended", 412
+
         template = hack_temp[1]
         if user_id > 0:
             expr = self.check_expr_status(user_id, hackathon, template)
