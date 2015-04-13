@@ -20,6 +20,7 @@ The following platform families are supported:
 * Arch
 * RHEL
 * Fedora
+* FreeBSD (client only)
 * Mac OS X (10.6.0+)
 * Windows
 
@@ -44,7 +45,7 @@ The following attributes are platform-specific.
 * `node['git']['version']` - git version to install
 * `node['git']['url']` - URL to git package
 * `node['git']['checksum']` - package SHA256 checksum
-* `node['git']['display_name']` - `windows_package` resource Display Name (makes the package install idempotent) 
+* `node['git']['display_name']` - `windows_package` resource Display Name (makes the package install idempotent)
 
 #### Mac OS X
 
@@ -92,15 +93,15 @@ To install git server:
 
     include_recipe "git::server"
 
-This creates the directory /srv/git and starts a git daemon, exporting
-all repositories found. Repositories need to be added manually, but
-will be available once they are created.
+This creates the directory specified by git/server/base_path (default is /srv/git)
+and starts a git daemon, exporting all repositories found. Repositories need to be
+added manually, but will be available once they are created.
 
 License and Author
 ==================
 
 - Author:: Joshua Timberman (<joshua@opscode.com>)
-- Copyright:: 2009-2012, Opscode, Inc.
+- Copyright:: 2009-2014, Chef Software, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
