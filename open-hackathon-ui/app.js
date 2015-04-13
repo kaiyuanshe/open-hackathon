@@ -57,7 +57,8 @@ app.get('/config', function (req, res) {
     name: config.hackathon_name,
     url: config.proxy,
     api: config.api,
-    sociallogin: config.sociallogin
+    sociallogin: config.sociallogin,
+    social: config.social
   });
 });
 app.use(proxy);

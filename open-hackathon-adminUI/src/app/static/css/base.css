@@ -295,8 +295,7 @@ a#main-menu-toggle {
     padding: 1px 0 0 0;
     color: #fff;
     border: 0;
-    border-bottom: 1px solid #dbdee0;
-    background: transparent;
+    background: #71B1D1;
     -webkit-border-radius: 0;
     -moz-border-radius: 0;
     border-radius: 0;
@@ -344,6 +343,10 @@ a#main-menu-toggle {
 
 .nav.main-menu .fa {
     font-size: 28px;
+}
+
+.nav.main-menu>li>ul>li>a {
+    background-color: #519BBD;
 }
 
 .nav.main-menu>li>a:hover,
@@ -495,4 +498,39 @@ footer {
     margin: 0!important;
     z-index: 4;
     font-size: 12px;
+}
+
+.table thead>tr>th {
+    vertical-align: bottom;
+    border-bottom: 2px solid #e9ebec;
+}
+
+.table thead>tr>th,
+.table tbody>tr>th,
+.table tfoot>tr>th,
+.table thead>tr>td,
+.table tbody>tr>td,
+.table tfoot>tr>td {
+    padding: 8px;
+    line-height: 1.428571429;
+    vertical-align: top;
+    border-top: 1px solid #e9ebec;
+}
+
+.table-bordered>thead>tr>th,
+.table-bordered>tbody>tr>th,
+.table-bordered>tfoot>tr>th,
+.table-bordered>thead>tr>td,
+.table-bordered>tbody>tr>td,
+.table-bordered>tfoot>tr>td {
+    border: 1px solid #e9ebec;
+}
+
+.table tbody>tr>td.col-action{
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+.table-relative td{
+    position: relative
 }

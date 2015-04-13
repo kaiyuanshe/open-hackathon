@@ -141,6 +141,13 @@ def js_config():
                     mimetype="application/javascript")
     return resp
 
+#js api config
+@app.route('/apiconfig.js')
+def api_config():
+    resp = Response(response="var apiconfig=%s" % json.dumps(get_config("apiconfig")),
+                    status=200,
+                    mimetype="application/javascript")
+    return resp
 
 @app.route('/github')
 def github_login():
@@ -188,6 +195,20 @@ def login():
 def home():
     return __render("/home.html")
 
+@app.route("/edit/register")
+@login_required
+def edit_registe():
+    return __render("/edit/register.html")
+
+@app.route("/myhackathon")
+@login_required
+def myhackathon():
+    return __render("/myhackathon.html")
+
+@app.route("/registerusers")
+@login_required
+def registerusers():
+    return __render("/registerusers.html")
 
 @app.route("/users")
 @login_required

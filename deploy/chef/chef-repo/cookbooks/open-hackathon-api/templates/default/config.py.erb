@@ -1,0 +1,45 @@
+# "javascript" section for javascript. see @app.route('/config.js') in app/views.py
+
+# oauth constants
+QQ_OAUTH_STATE = "<%= node['open-hackathon-api']['qq']['OAUTH_STATE'] %>"  # todo state should be constant. Actually it should be unguessable to prevent CSFA
+
+MYSQL_HOST = "<%= node['open-hackathon-api']['mysql']['host'] %>"
+MYSQL_USER = "<%= node['open-hackathon-api']['mysql']['user'] %>"
+MYSQL_PWD = "<%= node['open-hackathon-api']['mysql']['pwd'] %>"
+MYSQL_DB = "<%= node['open-hackathon-api']['mysql']['db'] %>"
+
+Config = {
+    "environment": "<%= node['open-hackathon-api']['environment'] %>",
+    "mysql": {
+        "connection": 'mysql://%s:%s@%s/%s' % (MYSQL_USER, MYSQL_PWD, MYSQL_HOST, MYSQL_DB)
+    },
+    "login": {
+        "github": {
+            "user_info_url": 'https://api.github.com/user?access_token=',
+            "emails_info_url": 'https://api.github.com/user/emails?access_token='
+        },
+        "qq": {
+            "openid_url": 'https://graph.qq.com/oauth2.0/me?access_token=',
+            "user_info_url": 'https://graph.qq.com/user/get_user_info?access_token=%s&oauth_consumer_key=%s&openid=%s'
+        },
+        "gitcafe": {
+            "user_info_url": "https://api.gitcafe.com/api/v1/user"
+        },
+        "token_expiration_minutes": <%= node['open-hackathon-api']['token_expiration_minutes'] %>
+    },
+    "azure": {
+        "subscriptionId": "<%= node['open-hackathon-api']['azure']['subscriptionId'] %>",
+        "certPath": "<%= node['open-hackathon-api']['azure']['certPath'] %>",
+        "managementServiceHostBase": "<%= node['open-hackathon-api']['azure']['managementServiceHostBase'] %>"
+    },
+    "guacamole": {
+        "host": "<%= node['open-hackathon-api']['guacamole']['host'] %>"
+    },
+    "scheduler": {
+        "job_store": "<%= node['open-hackathon-api']['scheduler']['job_store'] %>",
+        "job_store_url": 'mysql://%s:%s@%s/%s' % (MYSQL_USER, MYSQL_PWD, MYSQL_HOST, MYSQL_DB)
+    }
+}
+
+
+

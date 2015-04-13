@@ -1,7 +1,29 @@
+# Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
+#
+# The MIT License (MIT)
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+
 require 'forwardable'
 require 'json'
 
-module Autodesk
+module MSOpentechCN
   module Chef
 
     # A Mash that could fallback to databag
@@ -103,7 +125,7 @@ class Chef
   # Monkey patch the node[] method so we can access databag item from there
   # 
   class Node
-    include Autodesk::Chef::ChefDSL
+    include MSOpentechCN::Chef::ChefDSL
 
     old_accesser = instance_method(:[])
 
@@ -129,26 +151,26 @@ class Chef
       # Now we are working ...
       # Make sure data from databag has higher priority then environment
       #
-      return Autodesk::Chef::MashWithFallBack.wrap(databag_item[key], node_data)
+      return MSOpentechCN::Chef::MashWithFallBack.wrap(databag_item[key], node_data)
     end
   end
 
   # Make sure we can access to databagItem with databag_item[] interface from recipe
   # 
   class Recipe
-    include Autodesk::Chef::ChefDSL
+    include MSOpentechCN::Chef::ChefDSL
   end
 
   # Make sure we can access to databagItem with databag_item[] interface from resource
   # 
   class Resource
-    include Autodesk::Chef::ChefDSL
+    include MSOpentechCN::Chef::ChefDSL
   end
 
   # Make sure we can access to databagItem with databag_item[] interface from provider
   # 
   class Provider
-    include Autodesk::Chef::ChefDSL
+    include MSOpentechCN::Chef::ChefDSL
   end
 
   # Make sure we can access to databagItem with databag_item[] interface from recipe
@@ -156,7 +178,7 @@ class Chef
   module Mixin
     module Template
       module ChefContext
-        include Autodesk::Chef::ChefDSL
+        include MSOpentechCN::Chef::ChefDSL
       end
 
       ::Erubis::Context.send(:include, ChefContext)

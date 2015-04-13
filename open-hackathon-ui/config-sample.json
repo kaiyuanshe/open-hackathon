@@ -82,6 +82,12 @@
       "scope": "get_user_info",
       "state": "openhackathon",
       "response_type": "code"
+    },
+    "social":{
+      "github":"https://github.com/login/oauth/authorize?",
+      "gitcafe":"https://gcs.dgz.sh/oauth/authorize?'",
+      "weibo":"https://api.weibo.com/oauth2/authorize?",
+      "qq":"https://graph.qq.com/oauth2.0/authorize?"
     }
   }
 }

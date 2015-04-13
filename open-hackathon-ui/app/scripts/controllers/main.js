@@ -50,22 +50,22 @@ s.controller('main.controller', function ($scope) {
   }
 
   $scope.githublogin = function () {
-    var url = 'https://github.com/login/oauth/authorize?' +
+    var url =$scope.config.social.github +
       $.param($scope.config.sociallogin.github);
     openWindow(url);
   };
   $scope.qqlogin = function () {
-    var url = 'https://graph.qq.com/oauth2.0/authorize?' +
+    var url = $scope.config.social.qq +
       $.param($scope.config.sociallogin.qq);
     openWindow(url);
   };
   $scope.gitcafelogin = function () {
-    var url = 'https://gcs.dgz.sh/oauth/authorize?' +
+    var url = $scope.config.social.gitcafe+
       $.param($scope.config.sociallogin.gitcafe);
     openWindow(url, 980);
   };
   $scope.weibologin = function () {
-    var url = 'https://api.weibo.com/oauth2/authorize?' +
+    var url = $scope.config.social.weibo +
       $.param($scope.config.sociallogin.weibo);
     openWindow(url);
   }
