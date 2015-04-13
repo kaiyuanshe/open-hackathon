@@ -1,13 +1,12 @@
 werkzeug==0.9.6
-flask
-flask-restful
+flask==0.10.1
+flask-restful==0.2.12
 flask-cors==1.9.0
-flask-admin
 sqlalchemy
 flask-sqlalchemy
 mysql-python
-wsgilog
 azure
+wsgilog
 requests
 apscheduler
 mock==1.0.1
