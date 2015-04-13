@@ -1,9 +1,9 @@
 #
-# Author:: Seth Chisamore (<schisamo@opscode.com>)
-# Cookbook Name:: chef_handlers
-# Attribute:: default
+# Author:: Douglas Thrift (<douglas.thrift@rightscale.com>)
+# Cookbook Name:: chef_handler
+# Library:: matchers
 #
-# Copyright 2011-2013, Opscode, Inc
+# Copyright 2014, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,13 +18,12 @@
 # limitations under the License.
 #
 
-default["chef_handler"]["root_user"] = "root"
+if defined?(ChefSpec)
+  def enable_chef_handler(resource_name)
+    ChefSpec::Matchers::ResourceMatcher.new(:chef_handler, :enable, resource_name)
+  end
 
-case platform
-when "openbsd", "freebsd", "mac_os_x", "mac_os_x_server"
-  default["chef_handler"]["root_group"] = "wheel"
-else
-  default["chef_handler"]["root_group"] = "root"
+  def disable_chef_handler(resource_name)
+    ChefSpec::Matchers::ResourceMatcher.new(:chef_handler, :disable, resource_name)
+  end
 end
-
-default["chef_handler"]["handler_path"] = "#{File.expand_path(File.join(Chef::Config[:file_cache_path], '..'))}/handlers"
