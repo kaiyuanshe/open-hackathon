@@ -691,3 +691,4 @@ CREATE TABLE IF NOT EXISTS `vm_endpoint` (
 -- alter table vm_config add column dummy2 VARCHAR(40) AFTER id;
 -- alter table vm_config drop column dummy1;
 -- alter table vm_config drop column dummy2;
+-- alter table template add column description TEXT AFTER hackathon_id;
