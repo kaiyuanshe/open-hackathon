@@ -78,7 +78,7 @@ class RegisterManger(object):
                                       create_time=datetime.utcnow(),
                                       description=args['description'],
                                       enabled=args['enabled'],  # 0: disabled 1:enabled
-                                      strom_api='',
+                                      jstrom_api='',
                                       jstrom_mgmt_portal='',
                                       hackathon_id=g.hackathon_id)
                 return register.dic()

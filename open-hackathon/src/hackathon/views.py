@@ -41,6 +41,7 @@ from hack import hack_manager
 import time
 from admin.admin_mgr import admin_manager
 from hackathon.registration.register_mgr import register_manager
+from hackathon.template.template_mgr import template_manager
 
 
 @app.teardown_appcontext
@@ -230,6 +231,15 @@ class DefaultExperiment(Resource):
         return {"Info": "start default experiment"}, 200
 
 
+class TemplateResource(Resource):
+    @token_required
+    def get(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('hackathon_id', type=int, location='args', required=True)
+        args = parse.parse_args()
+        return template_manager.get_template_list(args['hackathon_id'])
+
+
 api.add_resource(UserExperimentResource, "/api/user/experiment")
 api.add_resource(RegisterListResource, "/api/register/list")
 api.add_resource(BulletinResource, "/api/bulletin")
@@ -245,6 +255,7 @@ api.add_resource(GuacamoleResource, "/api/guacamoleconfig")
 api.add_resource(UserResource, "/api/user")
 api.add_resource(CurrentTime, "/api/currenttime")
 api.add_resource(DefaultExperiment, "/api/default/experiment")
+api.add_resource(TemplateResource,"/api/template/list")
 
 # ------------------------------ APIs for admin-site --------------------------------
 

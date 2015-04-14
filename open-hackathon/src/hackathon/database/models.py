@@ -24,7 +24,7 @@
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
 
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text
 from sqlalchemy.orm import backref, relation
 from . import Base, db_adapter
 from datetime import datetime
@@ -350,7 +350,9 @@ class Template(DBBase):
     url = Column(String(200))  # backup, templates' location
     provider = Column(Integer)
     create_time = Column(DateTime)
+    description = Column(Text)
     virtual_environment_count = Column(Integer)
+
     hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
     hackathon = relationship('Hackathon', backref=backref('templates', lazy='dynamic'))
 
