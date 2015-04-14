@@ -59,6 +59,7 @@
                     }
                     options = $.extend(_params, options);
                     var url = name;
+                    var data = options.body != null ? '' : JSON.stringify(options.body);
                     if (options.query) {
                         url += '?' + ($.isPlainObject(options.query) ? $.param(options.query) : options.query);
                     }
@@ -68,7 +69,7 @@
                         url: url,
                         contentType: obj == 'get' ? 'application/x-www-form-urlencoded' : 'application/json',
                         headers: options.header,
-                        data: JSON.stringify(options.body),
+                        data: data,
                         success: function(data) {
                             callback(data)
                         },

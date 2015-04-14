@@ -82,11 +82,19 @@ angular.module('oh.directives', [])
         }
 
         var temp = $templateCache.get('hackathon-vm.html');
-        API.user.experiment.post(JSON.stringify({cid: 'ut', hackathon: scope.config.name}), function (data) {
+        API.user.experiment.post({
+          body:{cid: 'ut', hackathon: scope.config.name}
+        }, function (data) {
+          if(data.error){
+             showErrorMsg();
+            return;
+          }
           var stop;
           var list = [];
           var loopstart = function () {
-            API.user.experiment.get({id: data.expr_id}, function (data) {
+            API.user.experiment.get({
+              query:{id: data.expr_id}
+            }, function (data) {
               if (data.status == 2) {
                 var dockers = []
                 for (var i in data.public_urls) {
@@ -103,7 +111,7 @@ angular.module('oh.directives', [])
                 $interval.cancel(stop);
               } else if (data.status == 1) {
                 stop = $interval(loopstart, 60000, true);
-              } else {
+              }else{
                 showErrorMsg()
                 $interval.cancel(stop);
               }
@@ -184,7 +192,7 @@ angular.module('oh.directives', [])
           link: 'https://github.com/msopentechcn/open-hackathon/wiki/OpenXML-SDK-在线编程黑客松平台《使用帮助》'
         }]
         scope.logout = function () {
-          API.user.login.del({});
+          API.user.login.del();
           $cookieStore.remove('User');
           location.replace('/#/');
         }
@@ -198,9 +206,13 @@ angular.module('oh.directives', [])
       restrict: 'E',
       templateUrl: 'views/tpls/online-total.html',
       link: function (scope, element) {
-        API.hackathon.list.get({name: $rootScope.config.name}, function (data) {
+        API.hackathon.list.get({
+          query:{name: $rootScope.config.name}
+        }, function (data) {
           var getStat = function () {
-            API.hackathon.stat.get({hid: $.parseJSON(data).id}, function (data) {
+            API.hackathon.stat.get({
+              query:{hid: data.id}
+            }, function (data) {
               element.find('[oh-online]').text(data.online);
               element.find('[oh-total]').text(data.total);
             });
@@ -254,11 +266,12 @@ angular.module('oh.directives', [])
         }
 
         var timerTmpe = '{day}天{hour}小时{minute}分钟{second}秒';
-        API.hackathon.list.get({name: $rootScope.config.name}, function (data) {
-          data = $.parseJSON(data);
+        API.hackathon.list.get({
+          query:{name: $rootScope.config.name}
+        }, function (data) {
           var countDown = {
             time_server: new Date().getTime(),
-            time_end: new Date(data.end_time.replace(/-/g, '/')).getTime()
+            time_end: data.end_time
           }
           var showCountDown = function () {
             var timing = show_time.apply(countDown);
