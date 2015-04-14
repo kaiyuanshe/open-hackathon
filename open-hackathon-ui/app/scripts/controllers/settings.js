@@ -49,7 +49,9 @@ angular.module('oh.controllers')
       $state.go('index.hackathon');
     }
     $scope.submit = function () {
-      API.user.experiment.post(JSON.stringify({cid: $scope.type, hackathon: $scope.config.name}), function (data) {
+      API.user.experiment.post({
+        body:{cid: $scope.type, hackathon: $scope.config.name}
+      }, function (data) {
         $state.go('index.hackathon');
       });
     }
