@@ -36,8 +36,8 @@ class TemplateManager(object):
         self.db = db_adapter
 
 
-    def get_template_list(self):
-        templates = self.db.find_all_objects(Template)
+    def get_template_list(self,hack_id):
+        templates = self.db.find_all_objects_by(Template,hackathon_id=hack_id)
         return map(lambda u: u.dic(), templates)
 
 
