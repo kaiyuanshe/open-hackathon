@@ -692,3 +692,5 @@ CREATE TABLE IF NOT EXISTS `vm_endpoint` (
 -- alter table vm_config drop column dummy1;
 -- alter table vm_config drop column dummy2;
 -- alter table template add column description TEXT AFTER hackathon_id;
+-- update template set description = '<ul class="services-list"><li>Ubuntu</li><li>Apache</li><li>MySQL</li<li>PHP</li></ul>' where id = 1;
+-- update template set description = '<ul class="services-list"><li>Ubuntu</li><li>GNome</li></ul>' where id = 2;
