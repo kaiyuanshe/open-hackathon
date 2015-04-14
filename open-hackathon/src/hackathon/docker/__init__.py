@@ -35,7 +35,7 @@ from compiler.ast import flatten
 from threading import Lock
 from hackathon.database import db_adapter
 from hackathon.database.models import Experiment
-from hackathon.enum import ExprStatus
+from hackathon.enum import EStatus
 
 
 def name_match(id, l):
@@ -64,7 +64,7 @@ class OssDocker(object):
         But if there is a thread apply new ports, we will do this operation in the next loop. Because the host machine
         do not update the ports information, if we release ports now, the new ports will be lost.
         """
-        num = db_adapter.count(Experiment, Experiment.status == ExprStatus.Starting)
+        num = db_adapter.count(Experiment, Experiment.status == EStatus.Starting)
         if num > 0:
             log.debug("there are %d experiment is starting, host ports will updated in next loop")
             return
