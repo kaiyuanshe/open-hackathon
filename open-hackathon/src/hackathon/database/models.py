@@ -2,7 +2,7 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
 #  
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,7 +24,7 @@
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
 
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text
 from sqlalchemy.orm import backref, relation
 from . import Base, db_adapter
 from datetime import datetime
@@ -421,6 +421,7 @@ class Template(Base):
     url = Column(String(200))  # backup, templates' location
     provider = Column(String(20))
     create_time = Column(DateTime)
+    description = Column(Text)
 
     hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
     hackathon = relationship('Hackathon', backref=backref('templates', lazy='dynamic'))
