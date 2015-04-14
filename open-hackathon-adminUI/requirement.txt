@@ -5,7 +5,6 @@ sqlalchemy
 flask-sqlalchemy
 mysql-python
 wsgilog
-jinja2
-six
+flask-login
 requests
 mock==1.0.1

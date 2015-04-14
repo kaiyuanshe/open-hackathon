@@ -1,0 +1,10 @@
+{
+  "sources": {
+    "citadel": {
+      "path": "."
+    },
+    "citadel_test": {
+      "path": "./test/cookbooks/citadel_test"
+    }
+  }
+}
