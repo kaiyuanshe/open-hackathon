@@ -696,6 +696,8 @@ CREATE TABLE IF NOT EXISTS `vm_endpoint` (
 
 DROP TABLE IF EXISTS `SCM`;
 
+DROP TABLE IF EXISTS `card`;
+
 --
 -- Table structure for table `azure_cloud_service`
 --
@@ -855,6 +857,12 @@ ALTER TABLE `docker_host_server` ADD CONSTRAINT `docker_host_server_ibfk_1` FORE
 ALTER TABLE `experiment` DROP FOREIGN KEY `experiment_ibfk_5`;
 ALTER TABLE `experiment` ADD CONSTRAINT `experiment_ibfk_3` FOREIGN KEY (`template_id`) REFERENCES `template` (`id`) ON DELETE CASCADE;
 
+DROP TABLE IF EXISTS `figure`;
+
+DROP TABLE IF EXISTS `figure_data`;
+
+DROP TABLE IF EXISTS `player`;
+
 --
 -- Table structure for table `hackathon_azure_key`
 --
@@ -873,10 +881,14 @@ CREATE TABLE IF NOT EXISTS `hackathon_azure_key` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+DROP TABLE IF EXISTS `role`;
+
+DROP TABLE IF EXISTS `seed`;
+
 UPDATE `template` SET `template`.`provider` = CASE WHEN `template`.`provider` = 'azure-vm' THEN '0' WHEN `template`.`provider` = 'docker' THEN '1' END;
 ALTER TABLE `template` MODIFY `template`.`provider` int(11);
 
-ALTER `template` ADD `virtual_environment_count` int(11);
+ALTER TABLE `template` ADD `virtual_environment_count` int(11);
 
 --
 -- Table structure for table `user_azure_key`
