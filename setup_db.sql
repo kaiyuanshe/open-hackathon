@@ -691,6 +691,30 @@ CREATE TABLE IF NOT EXISTS `vm_endpoint` (
 -- alter table vm_config add column dummy2 VARCHAR(40) AFTER id;
 -- alter table vm_config drop column dummy1;
 -- alter table vm_config drop column dummy2;
+
+-- Table:template
+
 -- alter table template add column description TEXT AFTER hackathon_id;
 -- update template set description = '<ul class="services-list"><li>Ubuntu</li><li>Apache</li><li>MySQL</li<li>PHP</li></ul>' where name = ut and hackathon_id = 2;
 -- update template set description = '<ul class="services-list"><li>Ubuntu</li><li>GNome</li></ul>' where name = ud and hackathon_id = 2;
+
+-- Table: register
+
+-- alter table register drop column jstrom_api ;
+-- alter table register drop column jstrom_mgmt_portal ;
+-- alter table register add column status INT(1) ;
+-- alter table register add column phone VARCHAR(11) ;
+-- alter table register add column sex INT(1) ;
+-- alter table register add column age INT(3) ;
+-- alter table register add column career VARCHAR(16) ;
+-- alter table register add column qq VARCHAR(16) ;
+-- alter table register add column weibo VARCHAR(16) ;
+-- alter table register add column wechat VARCHAR(16) ;
+-- alter table register add column address VARCHAR(64) ;
+-- alter table register add column user_id INT(11) ;
+
+-- Table: hackathon
+
+-- alter table hackathon add column registration_begin_time DATETIME ;
+-- alter table hackathon add column registration_end_time DATETIME ;
+-- alter table hackathon add description TEXT ;

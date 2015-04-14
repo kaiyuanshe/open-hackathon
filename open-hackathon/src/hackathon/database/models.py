@@ -170,8 +170,17 @@ class Register(DBBase):
     create_time = Column(DateTime)
     description = Column(String(200))
     enabled = Column(Integer)  # 0: disabled 1:enabled
-    jstrom_api = Column(String(50))
-    jstrom_mgmt_portal = Column(String(50))
+
+    phone = Column(String(11))
+    sex = Column(Integer)   #0:women 1:man
+    age = Column(Integer)
+    career = Column(String(16))
+    qq = Column(String(16))
+    weibo = Column(String(32))
+    wechat = Column(String(32))
+    address = Column(String(80))
+    status = Column(Integer)  # 0: havn't audit 1: audit passed 2:audit reject
+    user_id = Column(Integer)
 
     hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
     hackathon = relationship('Hackathon', backref=backref('registers', lazy='dynamic'))
@@ -198,6 +207,11 @@ class Hackathon(DBBase):
     end_time = Column(DateTime)
     create_time = Column(DateTime)
     update_time = Column(DateTime)
+
+    registration_start_time = Column(DateTime)
+    registration_end_time = Column(DateTime)
+    description = Column(Text)
+
 
     def __init__(self, **kwargs):
         super(Hackathon, self).__init__(**kwargs)
