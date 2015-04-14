@@ -933,4 +933,10 @@ DROP TABLE IF EXISTS `vm_config`;
 
 DROP TABLE IF EXISTS `vm_endpoint`;
 
+
+----- data for online database
+-- INSERT INTO `azure_key` (`id`, `pem_url`, `subscription_id`, `management_host`) VALUES (1, '/etc/open-hackathon/azure/1-31e6e137-4656-4f88-96fb-4c997b14a644.pem', '7946a60d-67b1-43f0-96f9-1c558a9d284c', 'management.core.chinacloudapi.cn');
+-- INSERT INTO `hackathon_azure_key` (`id`, `hackathon_id`, `azure_key_id`) VALUES (1, 1, 1);
+-- INSERT INTO `hackathon_azure_key` (`id`, `hackathon_id`, `azure_key_id`) VALUES (2, 2, 1);
+
 ---------------------------------------- Added on 2015-04-14 ----------------------------------------
