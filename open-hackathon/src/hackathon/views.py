@@ -235,9 +235,9 @@ class TemplateResource(Resource):
     @token_required
     def get(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('hackathon_id', type=int, location='args', required=True)
+        parse.add_argument('hackathon_name', type=str, location='args', required=True)
         args = parse.parse_args()
-        return template_manager.get_template_list(args['hackathon_id'])
+        return template_manager.get_template_list(args['hackathon_name'])
 
 
 api.add_resource(UserExperimentResource, "/api/user/experiment")

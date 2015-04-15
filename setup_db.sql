@@ -695,8 +695,8 @@ CREATE TABLE IF NOT EXISTS `vm_endpoint` (
 -- Table:template
 
 -- alter table template add column description TEXT AFTER hackathon_id;
--- update template set description = '<ul class="services-list"><li>Ubuntu</li><li>Apache</li><li>MySQL</li<li>PHP</li></ul>' where name = ut and hackathon_id = 2;
--- update template set description = '<ul class="services-list"><li>Ubuntu</li><li>GNome</li></ul>' where name = ud and hackathon_id = 2;
+-- update template set description = '<ul class="services-list"><li>Ubuntu</li><li>Apache</li><li>MySQL</li<li>PHP</li></ul>' where name = 'ut' and hackathon_id = 2;
+-- update template set description = '<ul class="services-list"><li>Ubuntu</li><li>GNome</li></ul>' where name = 'ud' and hackathon_id = 2;
 
 -- Table: register
 
@@ -715,6 +715,6 @@ CREATE TABLE IF NOT EXISTS `vm_endpoint` (
 
 -- Table: hackathon
 
--- alter table hackathon add column registration_begin_time DATETIME ;
+-- alter table hackathon add column registration_start_time DATETIME ;
 -- alter table hackathon add column registration_end_time DATETIME ;
 -- alter table hackathon add description TEXT ;

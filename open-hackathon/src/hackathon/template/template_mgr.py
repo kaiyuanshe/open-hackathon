@@ -28,7 +28,7 @@ import sys
 sys.path.append("..")
 from hackathon.database.models import Template
 from hackathon.database import db_adapter
-
+from hackathon.hack import hack_manager
 
 
 class TemplateManager(object):
@@ -36,10 +36,13 @@ class TemplateManager(object):
         self.db = db_adapter
 
 
-    def get_template_list(self,hack_id):
-        templates = self.db.find_all_objects_by(Template,hackathon_id=hack_id)
+    def get_template_list(self, hackathon_name):
+        hackathon = hack_manager.get_hackathon_by_name(hackathon_name)
+        if hackathon is None:
+            return {'errercode':404,'message':'hackathon not found'}
+        hack_id = hackathon.id
+        templates = self.db.find_all_objects_by(Template, hackathon_id=hack_id)
         return map(lambda u: u.dic(), templates)
-
 
 
 template_manager = TemplateManager(db_adapter)
