@@ -1,0 +1,10 @@
+uwsgi_service 'app' do
+  home_path "/opt/open-hackathon/open-hackathon-adminUI/src"
+  config_file "/opt/open-hackathon/nginx_openhackathon.uwsgi.ini"
+  config_type :ini
+  start_immediately false
+end
+
+service 'uwsgi-app' do
+  action :start
+end
