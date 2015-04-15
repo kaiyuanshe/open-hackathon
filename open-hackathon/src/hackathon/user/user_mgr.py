@@ -53,7 +53,7 @@ class UserManager(object):
         return user_token
 
     def __validate_token(self, token):
-        t = self.db.find_first_object_by(UserToken, token=token)
+        t = self.d_last_heart_beat_b.find_first_object_by(UserToken, token=token)
         if t is not None and t.expire_date >= datetime.utcnow():
             return t.user
         return None
@@ -175,7 +175,7 @@ class UserManager(object):
         detail["register_state"] = False
 
         try:
-            experiments = user.experiments.filter_by(status=ExprStatus.Running).all()
+            experiments = user.experiments.filter_by(status=EStatus.Running).all()
             map(lambda e: detail["experiments"].append({
                 "id": e.id,
                 "hackathon_id": e.hackathon_id
