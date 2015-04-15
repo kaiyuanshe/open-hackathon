@@ -18,7 +18,7 @@ default['open-hackathon-api']['guacamole']['host'] = 'http://localhost:8080'
 
 default['open-hackathon-api']['scheduler']['job_store'] = 'mysql'
 
-default['open-hackathon-api']['git']['repository'] = 'https://github.com/msopentechcn/open-hackathon.git'
+default['open-hackathon-api']['git']['repository'] = 'git@github.com:msopentechcn/open-hackathon.git'
 default['open-hackathon-api']['git']['revision'] = 'master'
 
 default['open-hackathon-api']['mysql']['default_storage_engine'] = 'INNODB'
@@ -29,3 +29,12 @@ default['open-hackathon-api']['mysql']['port'] = '3310'
 
 
 default['open-hackathon-api']['user'] = 'openhackathon'
+
+default['open-hackathon-api']['uwsgi']['base'] = '/opt/open-hackathon/open-hackathon/src'
+default['open-hackathon-api']['uwsgi']['pythonpath'] = '/opt/open-hackathon/open-hackathon/src'
+default['open-hackathon-api']['uwsgi']['http-port'] = '80'
+default['open-hackathon-api']['uwsgi']['logto-dir'] = '/var/log/uwsgi'
+default['open-hackathon-api']['uwsgi']['logto'] = '/var/log/uwsgi/%n.log'
+
+default['open-hackathon-api']['root-dir'] = '/opt/open-hackathon'
+
