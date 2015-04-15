@@ -48,4 +48,13 @@ default['open-hackathon-adminUI']['git']['revision'] = 'master'
 
 default['open-hackathon-adminUI']['sys_user'] = 'openhackathon'
 
+default['open-hackathon-api']['root-dir'] = '/opt/open-hackathon'
+
+default['open-hackathon-api']['uwsgi']['base'] = '/opt/open-hackathon/open-hackathon/src'
+default['open-hackathon-api']['uwsgi']['pythonpath'] = '/opt/open-hackathon/open-hackathon/src'
+default['open-hackathon-api']['uwsgi']['http-port'] = '80'
+default['open-hackathon-api']['uwsgi']['logto-dir'] = '/var/log/uwsgi'
+default['open-hackathon-api']['uwsgi']['hacka-logto-dir'] = '/var/log/open-hackathon'
+default['open-hackathon-api']['uwsgi']['logto'] = '/var/log/uwsgi/%n.log'
+
 

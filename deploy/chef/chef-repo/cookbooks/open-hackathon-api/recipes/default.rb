@@ -28,6 +28,7 @@ git node['open-hackathon-api']['root-dir'] do
   repository node['open-hackathon-api']['git']['repository']
   revision node['open-hackathon-api']['git']['revision']
   action :sync
+  timeout 60
 end
 
 directory node['open-hackathon-api']['uwsgi']['logto-dir'] do

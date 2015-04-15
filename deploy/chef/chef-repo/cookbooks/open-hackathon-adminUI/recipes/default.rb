@@ -20,27 +20,28 @@ package 'mysql-client-core'
 include_recipe "git"
 include_recipe "uwsgi"
 
-directory '/opt/open-hackathon' do
+directory node['open-hackathon-api']['root-dir'] do
   owner node['open-hackathon-adminUI']['sys_user']
   group node['open-hackathon-adminUI']['sys_user']
   mode '0755'
   action :create
 end
 
-git "/opt/open-hackathon" do
+git node['open-hackathon-api']['root-dir'] do
   repository node['open-hackathon-adminUI']['git']['repository']
   revision node['open-hackathon-adminUI']['git']['revision']
   action :sync
+  timeout 60
 end
 
-directory '/var/log/uwsgi' do
+directory node['open-hackathon-api']['uwsgi']['logto-dir'] do
   owner node['open-hackathon-adminUI']['sys_user']
   group node['open-hackathon-adminUI']['sys_user']
   mode '0744'
   action :create
 end
 
-directory '/var/log/open-hackathon' do
+directory node['open-hackathon-api']['uwsgi']['hacka-logto-dir'] do
   owner node['open-hackathon-adminUI']['sys_user']
   owner node['open-hackathon-adminUI']['sys_user']
   mode '0744'
@@ -59,24 +60,17 @@ end
   python_pip "#{f}"
 end
 
-template '/opt/open-hackathon/nginx_openhackathon.uwsgi.ini' do
+template node['open-hackathon-api']['root-dir']+'/nginx_openhackathon.uwsgi.ini' do
   source 'uwsgi.ini.erb'
 end
 
-template '/etc/init.d/uwsgi' do
-  source 'uwsgi.erb'
-  owner node['open-hackathon-adminUI']['sys_user']
-  group node['open-hackathon-adminUI']['sys_user']
-  mode '0644'
-end
-
-template '/opt/open-hackathon/open-hackathon-adminUI/src/app/config.py' do
+template node['open-hackathon-api']['root-dir']+'/open-hackathon-adminUI/src/app/config.py' do
   source 'config.py.erb'
 end
 
 uwsgi_service 'app' do
-  home_path "/opt/open-hackathon/open-hackathon-adminUI/src"
-  config_file "/opt/open-hackathon/nginx_openhackathon.uwsgi.ini"
+  home_path node['open-hackathon-api']['root-dir']+'/open-hackathon-adminUI/src'
+  config_file node['open-hackathon-api']['root-dir']+'/nginx_openhackathon.uwsgi.ini'
   config_type :ini
   start_immediately false
 end
