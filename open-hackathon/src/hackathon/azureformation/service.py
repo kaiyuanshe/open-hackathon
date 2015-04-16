@@ -357,6 +357,18 @@ class Service(ServiceManagementService):
             return False
         return True
 
+    def ping(self):
+        """
+        Use list storage accounts to check azure service management service health
+        :return:
+        """
+        try:
+            self.list_storage_accounts()
+        except Exception as e:
+            log.error(e)
+            return False
+        return True
+
     # ---------------------------------------- call ---------------------------------------- #
 
     def query_async_operation_status(self, request_id,
