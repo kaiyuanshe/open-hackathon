@@ -22,23 +22,11 @@
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
 
+include_recipe "build-essential"
 
-[uwsgi]
+filename = node['open-hackathon-api']['mysql']['setup-file']
 
-base = <%= node['open-hackathon-api']['uwsgi']['base'] %>
 
-app = run
-
-module = %(app)
-
-pythonpath = <%= node['open-hackathon-api']['uwsgi']['pythonpath'] %>
-
-enable-threads = true
-
-http = 0.0.0.0:<%= node['open-hackathon-api']['uwsgi']['http-port'] %>
-
-chmod-socket    = 666
-
-callable = app
-
-logto = <%= node['open-hackathon-api']['uwsgi']['logto'] %>
+bash "setup_mysql" do
+  code "python #{filename}"
+end
