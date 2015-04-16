@@ -47,6 +47,7 @@ from hackathon.database.models import (
 )
 from azure.servicemanagement import (
     ServiceManagementService,
+    Deployment,
 )
 import time
 
@@ -94,9 +95,6 @@ class Service(ServiceManagementService):
 
     def create_storage_account(self, name, description, label, location):
         return super(Service, self).create_storage_account(name, description, label, location=location)
-
-    def list_storage_accounts(self):
-        return super(Service, self).list_storage_accounts()
 
     # ---------------------------------------- cloud service ---------------------------------------- #
 
@@ -151,6 +149,8 @@ class Service(ServiceManagementService):
     def wait_for_deployment(self, cloud_service_name, deployment_name, second_per_loop, loop, status=ADStatus.RUNNING):
         count = 0
         props = self.get_deployment_by_name(cloud_service_name, deployment_name)
+        if props is None:
+            return False
         while props.status != status:
             log.debug('wait for deployment [%s] loop count: %d' % (deployment_name, count))
             count += 1
@@ -159,6 +159,8 @@ class Service(ServiceManagementService):
                 return False
             time.sleep(second_per_loop)
             props = self.get_deployment_by_name(cloud_service_name, deployment_name)
+            if props is None:
+                return False
         return props.status == status
 
     def get_deployment_dns(self, cloud_service_name, deployment_slot):
@@ -194,9 +196,10 @@ class Service(ServiceManagementService):
                                                                       vm_image_name=vm_image_name)
 
     def get_virtual_machine_instance_status(self, deployment, virtual_machine_name):
-        for role_instance in deployment.role_instance_list:
-            if role_instance.instance_name == virtual_machine_name:
-                return role_instance.instance_status
+        if deployment is not None and isinstance(deployment, Deployment):
+            for role_instance in deployment.role_instance_list:
+                if role_instance.instance_name == virtual_machine_name:
+                    return role_instance.instance_status
         return None
 
     def wait_for_virtual_machine(self,
@@ -293,9 +296,10 @@ class Service(ServiceManagementService):
         except Exception as e:
             log.error(e)
             return None
-        for configuration_set in virtual_machine.configuration_sets.configuration_sets:
-            if configuration_set.configuration_set_type == self.NETWORK_CONFIGURATION:
-                return configuration_set
+        if virtual_machine is not None:
+            for configuration_set in virtual_machine.configuration_sets.configuration_sets:
+                if configuration_set.configuration_set_type == self.NETWORK_CONFIGURATION:
+                    return configuration_set
         return None
 
     def stop_virtual_machine(self, cloud_service_name, deployment_name, virtual_machine_name, type):
@@ -350,18 +354,6 @@ class Service(ServiceManagementService):
                 log.error(result.error.code)
                 log.error(vars(result.error))
             log.error('Asynchronous operation did not succeed.')
-            return False
-        return True
-
-    def ping(self):
-        """
-        Use list storage accounts to check azure service management service health
-        :return:
-        """
-        try:
-            self.list_storage_accounts()
-        except Exception as e:
-            log.error(e)
             return False
         return True
 
