@@ -48,55 +48,61 @@ angular.module('oh.services', [])
       })
   })
   .factory('API', function ($http, $cookieStore, $rootScope) {
-    var methods = {get: 'GET', post: 'POST', put: 'PUT', del: 'DELETE'};
-
-    function scan(obj, name) {
+    function API(obj, name) {
       var key;
       var getCmd = {};
       if (obj instanceof Array) {
         for (key in obj) {
-          getCmd[obj[key]] = scan(obj[key], name)
+          getCmd[obj[key]] = API(obj[key], name)
         }
         return getCmd;
       } else if (obj instanceof Object) {
         for (key in obj) {
           if (obj.hasOwnProperty(key)) {
-            if (key == '_self') {
-              getCmd = scan(obj[key], name)
+            if (key == '') {
+              getCmd = API(obj[key], name)
             } else {
-              getCmd[key] = scan(obj[key], name + '/' + key);
+              getCmd[key] = API(obj[key], name + '/' + key);
             }
           }
         }
         return getCmd;
       } else {
-        return getCmd[obj] = function (query, headers, callback) {
-          if (!callback) {
-            callback = headers || function () {
-            };
-            headers = {};
+        return getCmd[obj] = function (options, callback) {
+          var _params = {
+            query: null,
+            body: null,
+            header: {},
+          };
+          callback = callback || new Function();
+          if ($.isFunction(options)) {
+            callback = options;
+            options = {};
           }
-          headers.token = ($cookieStore.get('User') || '' ).token;
-          var options = {
-            method: methods[obj],
-            url: name,
+          options = $.extend(_params, options);
+          var url = name;
+          var data = options.body == null ? '' : JSON.stringify(options.body);
+          if (options.query) {
+            url += '?' + ($.isPlainObject(options.query) ? $.param(options.query) : options.query);
+          }
+          options.header.token = ($cookieStore.get('User') || '' ).token;
+          $.ajax({
+            method: obj,
+            url: url,
             contentType: obj == 'get' ? 'application/x-www-form-urlencoded' : 'application/json',
-            headers: headers,
-            data: query,
+            headers: options.header,
+            data: data,
             success: function (data) {
               callback(data)
             },
             error: function (data) {
-              callback(data)
+              callback({error:true,data:data});
             }
-          }
-          $.ajax(options);
+          });
         }
       }
     }
-
-    var API = scan($rootScope.config.api, $rootScope.config.url + '/api');
-    return API;
+   return API($rootScope.config.api, $rootScope.config.url + '/api');
   });
 
 

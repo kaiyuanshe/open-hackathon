@@ -32,7 +32,7 @@ from hackathon.log import log
 from hackathon.database import db_adapter
 from datetime import datetime, timedelta
 from hackathon.constants import HTTP_HEADER
-from hackathon.enum import ExprStatus, EmailStatus
+from hackathon.enum import EStatus, EmailStatus
 from hackathon.functions import safe_get_config
 from hackathon.hack import hack_manager
 from flask import request, g
@@ -170,12 +170,12 @@ class UserManager(object):
 
     def get_user_detail_info(self, user, **kwargs):
         detail = self.get_user_info(user)
-
+        experiments = user.experiments.filter_by(status=EStatus.Running).all()
         detail["experiments"] = []
         detail["register_state"] = False
 
         try:
-            experiments = user.experiments.filter_by(status=ExprStatus.Running).all()
+            experiments = user.experiments.filter_by(status=EStatus.Running).all()
             map(lambda e: detail["experiments"].append({
                 "id": e.id,
                 "hackathon_id": e.hackathon_id

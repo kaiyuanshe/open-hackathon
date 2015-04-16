@@ -24,7 +24,17 @@
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
 
-class ExprStatus:
+# resource type used by ALOperation
+STORAGE_ACCOUNT = 'storage account'
+CLOUD_SERVICE = 'cloud service'
+DEPLOYMENT = 'deployment'
+VIRTUAL_MACHINE = 'virtual machine'
+
+
+class EStatus:
+    """
+    For status in db model Experiment
+    """
     Init = 0
     Starting = 1
     Running = 2
@@ -35,7 +45,10 @@ class ExprStatus:
     Rollbacked = 7
 
 
-class VirtualEnvStatus:
+class VEStatus:
+    """
+    For status in db model VirtualEnvironment
+    """
     Init = 0
     Running = 1
     Stopped = 2
@@ -47,13 +60,19 @@ class PortBindingType:
     Docker = 2
 
 
-class VirtualEnvironmentProvider:
-    AzureVM = "azure-vm"
-    Docker = "docker"
+class VEProvider:
+    """
+    For provider in db model VirtualEnvironment
+    """
+    AzureVM = 0
+    Docker = 1
 
 
-class RemoteProvider:
-    Guacamole = "guacamole"
+class VERemoteProvider:
+    """
+    For remote provider in db model VirtualEnvironment
+    """
+    Guacamole = 0
 
 
 class EmailStatus:
@@ -69,3 +88,60 @@ class ReservedUser:
 class AdminUserHackathonRelStates:
     Actived = 1
     Disabled = 0
+
+# ------------------------------ Enums are introduced by azure formation ------------------------------
+
+
+class ALOperation:
+    """
+    For operation in db model AzureLog
+    """
+    CREATE = 'create'
+    CREATE_STORAGE_ACCOUNT = CREATE + ' ' + STORAGE_ACCOUNT
+    CREATE_CLOUD_SERVICE = CREATE + ' ' + CLOUD_SERVICE
+    CREATE_DEPLOYMENT = CREATE + ' ' + DEPLOYMENT
+    CREATE_VIRTUAL_MACHINE = CREATE + ' ' + VIRTUAL_MACHINE
+    STOP = 'stop'
+    STOP_VIRTUAL_MACHINE = STOP + ' ' + VIRTUAL_MACHINE
+    START = 'start'
+    START_VIRTUAL_MACHINE = START + VIRTUAL_MACHINE
+
+
+class ALStatus:
+    """
+    For status in db model AzureLog
+    """
+    START = 'start'
+    FAIL = 'fail'
+    END = 'end'
+
+
+class ASAStatus:
+    """
+    For status in db model AzureStorageAccount
+    """
+    ONLINE = 'Online'
+
+
+class ACSStatus:
+    """
+    For status in db model AzureCloudService
+    """
+    CREATED = 'Created'
+
+
+class ADStatus:
+    """
+    For status in db model AzureDeployment
+    """
+    RUNNING = 'Running'
+
+
+class AVMStatus:
+    """
+    For status in db model AzureVirtualMachine
+    """
+    READY_ROLE = 'ReadyRole'
+    STOPPED_VM = 'StoppedVM'
+    STOPPED = 'Stopped'  # STOPPED is only used for 'type' input parameter of stop_virtual_machine in VirtualMachine
+    STOPPED_DEALLOCATED = 'StoppedDeallocated'

@@ -33,8 +33,10 @@ from sqlalchemy.ext.declarative import declarative_base
 from db_adapters import SQLAlchemyAdapter
 from hackathon.functions import safe_get_config
 
+MYSQL_CONNECTION = 'mysql.connection'
+DEFAULT_URL = 'mysql://root:root@localhost/hackathon'
 
-engine = create_engine(safe_get_config("mysql.connection", "mysql://root:root@localhost/hackathon"),
+engine = create_engine(safe_get_config(MYSQL_CONNECTION, DEFAULT_URL),
                        convert_unicode=True,
                        pool_size=50,
                        max_overflow=100,

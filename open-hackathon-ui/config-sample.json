@@ -41,7 +41,7 @@
       "login":["post","del"],
       "hackathon":["get"],
       "experiment":{
-        "_self":["get","post","del","put"],
+        "":["get","post","del","put"],
         "list":["get"]
       }
     },
@@ -49,10 +49,10 @@
       "list":["get"]
     },
     "bulletin":{
-      "_self":["get","post"]
+      "":["get","post"]
     },
     "hackathon":{
-      "_self":["get","post"],
+      "":["get","post"],
       "list":["get"],
       "stat":["get"],
       "template":["get"]
@@ -82,12 +82,12 @@
       "scope": "get_user_info",
       "state": "openhackathon",
       "response_type": "code"
-    },
-    "social":{
-      "github":"https://github.com/login/oauth/authorize?",
-      "gitcafe":"https://gcs.dgz.sh/oauth/authorize?'",
-      "weibo":"https://api.weibo.com/oauth2/authorize?",
-      "qq":"https://graph.qq.com/oauth2.0/authorize?"
     }
+  },
+  "social":{
+    "github":"https://github.com/login/oauth/authorize?",
+    "gitcafe":"https://gcs.dgz.sh/oauth/authorize?'",
+    "weibo":"https://api.weibo.com/oauth2/authorize?",
+    "qq":"https://graph.qq.com/oauth2.0/authorize?"
   }
 }

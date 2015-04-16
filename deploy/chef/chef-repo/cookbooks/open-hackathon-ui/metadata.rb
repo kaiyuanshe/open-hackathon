@@ -1,8 +1,8 @@
-name             'front-end'
-maintainer       'YOUR_COMPANY_NAME'
-maintainer_email 'YOUR_EMAIL'
-license          'All rights reserved'
-description      'Installs/Configures front-end'
+name             'open-hackathon-ui'
+maintainer       "Microsoft Open Technologies (Shanghai) Co. Ltd"
+maintainer_email "msopentechdevsh@microsoft.com"
+license          "MIT"
+description      'Installs/Configures open-hackathon UI'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 version          '0.1.0'
 

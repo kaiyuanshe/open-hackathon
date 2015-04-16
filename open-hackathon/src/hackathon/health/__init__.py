@@ -30,7 +30,7 @@ sys.path.append("..")
 from health_check import *
 from datetime import datetime
 
-app_start_time = datetime.utcnow();
+app_start_time = datetime.utcnow()
 
 all_health_items = {
     "mysql": MySQLHealthCheck(),
@@ -69,7 +69,7 @@ def report_health(q):
         STATUS: HEALTH_STATE.OK,
         "start_time": str(app_start_time),
         "report_time": str(datetime.utcnow()),
-        "up": "%d days %d hours %d miutes" % (days, hours, minutes)
+        "up": "%d days %d hours %d minutes" % (days, hours, minutes)
     }
 
     __report_detail(health, items)
