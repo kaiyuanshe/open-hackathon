@@ -137,10 +137,10 @@ class GithubLogin(LoginProviderBase):
         log.info("github user login successfully:" + repr(user))
         hackathon_name = args.get('hackathon_name')
 
-        detail = self.um.get_user_detail_info(user, hackathon_name=hackathon_name)
+        detail = self.um.get_user_detail_info(user)
         detail["token"] = user_with_token["token"].token
 
-        login_result = []
+        login_result = {}
         login_result["user"] = detail
 
         # get hackathon

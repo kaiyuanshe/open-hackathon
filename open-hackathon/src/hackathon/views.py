@@ -143,7 +143,7 @@ class HackathonResource(Resource):
         args = parser.parse_args()
         if args['hid'] is None and args['name'] is None:
             return {}
-        return hack_manager.get_hackathon_by_name_or_id(hack_id=args['hid'],name=args['name']).json()
+        return hack_manager.get_hackathon_by_name_or_id(hack_id=args['hid'],name=args['name']).dic()
 
     # todo post
     @token_required
