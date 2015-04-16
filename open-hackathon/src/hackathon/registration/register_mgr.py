@@ -2,7 +2,7 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
 #  
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -52,35 +52,34 @@ class RegisterManger(object):
         else:
             return {"error": "REGISTER NOT FOUND"}, 400
 
-    def create_or_update_register(self, args):
+    def create_or_update_register(self, hackathon_id, args):
         try:
             register = self.db.find_first_object(Register, Register.email == args['email'],
-                                                 Register.hackathon_id == g.hackathon_id)
+                                                 Register.hackathon_id == hackathon_id)
             if register is None:
                 # create a register
                 log.debug("create a new register")
-                new_register = self.db.add_object_kwargs(Register,
-                                                 register_name=args['register_name'],
-                                                 email=args['email'],
-                                                 create_time=datetime.utcnow(),
-                                                 description=args['description'],
-                                                 enabled=1,  # 0: disabled 1:enabled
-                                                 jstrom_api='',
-                                                 jstrom_mgmt_portal='',
-                                                 hackathon_id=g.hackathon_id)
+                # new_register = self.db.add_object_kwargs(Register,
+                #                                  register_name=args['register_name'],
+                #                                  email=args['email'],
+                #                                  create_time=datetime.utcnow(),
+                #                                  description=args['description'],
+                #                                  enabled=1,  # 0: disabled 1:enabled
+                #                                  hackathon_id=g.hackathon_id)
+                new_register = self.db.add_object_kwargs(Register, **args)
                 return new_register.dic()
             else:
                 # update a aready existe register
                 log.debug("update a new register")
-                self.db.update_object(register,
-                                      register_name=args['register_name'],
-                                      email=args['email'],
-                                      create_time=datetime.utcnow(),
-                                      description=args['description'],
-                                      enabled=args['enabled'],  # 0: disabled 1:enabled
-                                      jstrom_api='',
-                                      jstrom_mgmt_portal='',
-                                      hackathon_id=g.hackathon_id)
+                update_items = dict( dict(args).viewitems() - register.dic().viewitems())
+                # self.db.update_object(register,
+                #                       register_name=args['register_name'],
+                #                       email=args['email'],
+                #                       create_time=datetime.utcnow(),
+                #                       description=args['description'],
+                #                       enabled=args['enabled'],  # 0: disabled 1:enabled
+                #                       hackathon_id=g.hackathon_id)
+                self.db.update_object(register, update_items)
                 return register.dic()
         except Exception:
             log.error("create or update register faild")
@@ -98,10 +97,11 @@ class RegisterManger(object):
             log.error("delete register faild")
             return {"error": "INTERNAL SERVER ERROR"}, 500
 
-    def get_register_after_login(self,**kwargs):
+    def get_register_after_login(self, **kwargs):
         hack_id = kwargs['hackathon_id']
         user_id = kwargs['user_id']
-        register = db_adapter.find_first_object(Register,Register.hackathon_id==hack_id,Register.user_id==user_id)
+        register = db_adapter.find_first_object(Register, Register.hackathon_id == hack_id, Register.user_id == user_id)
         return register
+
 
 register_manager = RegisterManger(db_adapter)

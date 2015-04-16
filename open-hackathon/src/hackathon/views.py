@@ -2,7 +2,7 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
 #  
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -57,6 +57,29 @@ class RegisterListResource(Resource):
     def get(self):
         json_ret = map(lambda u: u.json(), user_manager.get_all_registration())
         return json_ret
+
+
+class RegisterResource(Resource):
+    def get(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('id', type=int, location='args', required=True)
+        args = parse.parse_args()
+        return register_manager.get_register_by_id(args)
+
+
+    @token_required
+    def post(self):
+        args = request.get_json()
+        hid = args['hackathon_id']
+        if hid is None:
+            return {}
+        return register_manager.create_or_update_register(hid, args)
+
+
+    @token_required
+    def put(self):
+        # update a Register
+        pass
 
 
 class UserExperimentResource(Resource):
@@ -143,7 +166,7 @@ class HackathonResource(Resource):
         args = parser.parse_args()
         if args['hid'] is None and args['name'] is None:
             return {}
-        return hack_manager.get_hackathon_by_name_or_id(hack_id=args['hid'],name=args['name']).dic()
+        return hack_manager.get_hackathon_by_name_or_id(hack_id=args['hid'], name=args['name']).dic()
 
     # todo post
     @token_required
@@ -245,6 +268,7 @@ class TemplateResource(Resource):
 
 api.add_resource(UserExperimentResource, "/api/user/experiment")
 api.add_resource(RegisterListResource, "/api/register/list")
+api.add_resource(RegisterResource, "/api/register")
 api.add_resource(BulletinResource, "/api/bulletin")
 api.add_resource(LoginResource, "/api/user/login")
 api.add_resource(HackathonResource, "/api/hackathon")
@@ -258,7 +282,7 @@ api.add_resource(GuacamoleResource, "/api/guacamoleconfig")
 api.add_resource(UserResource, "/api/user")
 api.add_resource(CurrentTime, "/api/currenttime")
 api.add_resource(DefaultExperiment, "/api/default/experiment")
-api.add_resource(TemplateResource,"/api/template/list")
+api.add_resource(TemplateResource, "/api/template/list")
 
 # ------------------------------ APIs for admin-site --------------------------------
 
@@ -294,7 +318,7 @@ class AdminRegisterResource(Resource):
     @hackathon_id_required
     def post(self):
         args = request.get_json()
-        return register_manager.create_or_update_register(args)
+        return register_manager.create_or_update_register(g.hackathon_id, args)
 
 
     @admin_token_required
@@ -302,7 +326,7 @@ class AdminRegisterResource(Resource):
     def put(self):
         # update a Register
         args = request.get_json()
-        return register_manager.create_or_update_register(args)
+        return register_manager.create_or_update_register(g.hackathon_id, args)
 
 
     @admin_token_required
