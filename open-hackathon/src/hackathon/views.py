@@ -4,7 +4,7 @@
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
 #
 # The MIT License (MIT)
-#  
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -42,6 +42,7 @@ import time
 from admin.admin_mgr import admin_manager
 from hackathon.registration.register_mgr import register_manager
 from hackathon.template.template_mgr import template_manager
+from hackathon.database.models import Register
 
 
 @app.teardown_appcontext
@@ -80,6 +81,15 @@ class RegisterResource(Resource):
     def put(self):
         # update a Register
         pass
+
+
+class RegisterCheckEmailResource(Resource):
+    def get(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('hid', type=int, location='args', required=True)
+        parse.add_argument('email', type=int, location='args', required=True)
+        args = parse.parse_args()
+        return register_manager.c(args['hid'], args['email'])
 
 
 class UserExperimentResource(Resource):
@@ -269,6 +279,7 @@ class TemplateResource(Resource):
 api.add_resource(UserExperimentResource, "/api/user/experiment")
 api.add_resource(RegisterListResource, "/api/register/list")
 api.add_resource(RegisterResource, "/api/register")
+api.add_resource(RegisterCheckEmailResource, "/api/register/checkemail")
 api.add_resource(BulletinResource, "/api/bulletin")
 api.add_resource(LoginResource, "/api/user/login")
 api.add_resource(HackathonResource, "/api/hackathon")

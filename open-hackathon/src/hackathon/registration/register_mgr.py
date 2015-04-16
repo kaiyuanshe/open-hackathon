@@ -4,7 +4,7 @@
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
 #
 # The MIT License (MIT)
-#  
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -29,9 +29,7 @@ import sys
 sys.path.append("..")
 from hackathon.database.models import *
 from hackathon.database import db_adapter
-from datetime import datetime
 from hackathon.log import log
-from flask import g
 
 
 class RegisterManger(object):
@@ -71,7 +69,7 @@ class RegisterManger(object):
             else:
                 # update a aready existe register
                 log.debug("update a new register")
-                update_items = dict( dict(args).viewitems() - register.dic().viewitems())
+                update_items = dict(dict(args).viewitems() - register.dic().viewitems())
                 # self.db.update_object(register,
                 #                       register_name=args['register_name'],
                 #                       email=args['email'],
@@ -79,7 +77,7 @@ class RegisterManger(object):
                 #                       description=args['description'],
                 #                       enabled=args['enabled'],  # 0: disabled 1:enabled
                 #                       hackathon_id=g.hackathon_id)
-                self.db.update_object(register, update_items)
+                self.db.update_object(register, **update_items)
                 return register.dic()
         except Exception:
             log.error("create or update register faild")
@@ -102,6 +100,10 @@ class RegisterManger(object):
         user_id = kwargs['user_id']
         register = db_adapter.find_first_object(Register, Register.hackathon_id == hack_id, Register.user_id == user_id)
         return register
+
+    def check_email(self, hid, email):
+        register = db_adapter.find_first_object(Register, Register.hackathon_id == hid, Register.email == email)
+        return register is None
 
 
 register_manager = RegisterManger(db_adapter)
