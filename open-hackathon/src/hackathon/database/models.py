@@ -182,6 +182,7 @@ class Register(DBBase):
     address = Column(String(80))
     status = Column(Integer)  # 0: havn't audit 1: audit passed 2:audit reject
     user_id = Column(Integer)
+    update_time = Column(DateTime)
 
     hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
     hackathon = relationship('Hackathon', backref=backref('registers', lazy='dynamic'))

@@ -703,7 +703,7 @@ CREATE TABLE IF NOT EXISTS `vm_endpoint` (
 
 -- alter table register drop column jstrom_api ;
 -- alter table register drop column jstrom_mgmt_portal ;
--- alter table register add column status INT(1) ;
+-- alter table register add column status INT(1) DEFAULT 0 ;
 -- alter table register add column phone VARCHAR(11) ;
 -- alter table register add column sex INT(1) ;
 -- alter table register add column age INT(3) ;
@@ -714,6 +714,7 @@ CREATE TABLE IF NOT EXISTS `vm_endpoint` (
 -- alter table register add column wechat VARCHAR(16) ;
 -- alter table register add column address VARCHAR(64) ;
 -- alter table register add column user_id INT(11) ;
+-- alter table register add column update_time DATETIME ;
 
 -- Table: hackathon
 
