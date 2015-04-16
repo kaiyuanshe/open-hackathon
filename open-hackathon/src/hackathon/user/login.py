@@ -27,7 +27,6 @@
 # -*- coding:utf8 -*-
 # encoding = utf-8
 import sys
-import urllib2
 
 sys.path.append("..")
 from hackathon.functions import get_remote, get_config, post_to_remote, convert
@@ -35,6 +34,8 @@ from hackathon.log import log
 from . import user_manager
 import json
 from hackathon.constants import OAUTH_PROVIDER
+from hackathon.hack import hack_manager
+from hackathon.registration.register_mgr import register_manager
 
 
 class LoginProviderBase():
@@ -135,9 +136,26 @@ class GithubLogin(LoginProviderBase):
         user = user_with_token["user"]
         log.info("github user login successfully:" + repr(user))
         hackathon_name = args.get('hackathon_name')
+
         detail = self.um.get_user_detail_info(user, hackathon_name=hackathon_name)
         detail["token"] = user_with_token["token"].token
-        return detail
+
+        login_result = []
+        login_result["user"] = detail
+
+        # get hackathon
+        hackathon = hack_manager.get_hackathon_by_name(hackathon_name)
+        if hackathon is None:
+            login_result["hackathon"] = {}
+        login_result["hackathon"] = hackathon.dic()
+
+        # get register info
+        register = register_manager.get_register_after_login(hackathon_id=hackathon.id,user_id=user.id)
+        if register is None:
+            login_result['registration'] = {}
+        login_result['registration'] = register
+
+        return login_result
 
 
 class GitcafeLogin(LoginProviderBase):

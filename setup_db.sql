@@ -707,6 +707,7 @@ CREATE TABLE IF NOT EXISTS `vm_endpoint` (
 -- alter table register add column phone VARCHAR(11) ;
 -- alter table register add column sex INT(1) ;
 -- alter table register add column age INT(3) ;
+-- alter table register add column career_type VARCHAR(16) ;
 -- alter table register add column career VARCHAR(16) ;
 -- alter table register add column qq VARCHAR(16) ;
 -- alter table register add column weibo VARCHAR(16) ;
@@ -716,9 +717,13 @@ CREATE TABLE IF NOT EXISTS `vm_endpoint` (
 
 -- Table: hackathon
 
+-- alter table hackathon drop column sponsor ;
+-- alter table hackathon add column display_name VARCHAR(64) AFTER name ;
 -- alter table hackathon add column registration_start_time DATETIME ;
 -- alter table hackathon add column registration_end_time DATETIME ;
--- alter table hackathon add description TEXT ;
+-- alter table hackathon add column address VARCHAR(64) ;
+-- alter table hackathon add column description TEXT ;
+-- alter table hackathon add column images VARCHAR(512) ;
 
 
 ---------------------------------------- Added on 2015-04-14 ----------------------------------------

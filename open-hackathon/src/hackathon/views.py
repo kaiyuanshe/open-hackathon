@@ -138,9 +138,12 @@ class HackathonResource(Resource):
     @token_required
     def get(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('hid', type=int, location='args', required=True)
+        parser.add_argument('hid', type=int, location='args')
+        parser.add_argument('name', type=str, location='args')
         args = parser.parse_args()
-        return db_adapter.find_first_object_by(Hackathon, id=args['hid']).json()
+        if args['hid'] is None and args['name'] is None:
+            return {}
+        return hack_manager.get_hackathon_by_name_or_id(hack_id=args['hid'],name=args['name']).json()
 
     # todo post
     @token_required

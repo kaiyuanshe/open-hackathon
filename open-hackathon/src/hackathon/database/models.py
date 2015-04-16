@@ -174,6 +174,7 @@ class Register(DBBase):
     phone = Column(String(11))
     sex = Column(Integer)   #0:women 1:man
     age = Column(Integer)
+    career_type = Column(String(16))
     career = Column(String(16))
     qq = Column(String(16))
     weibo = Column(String(32))
@@ -199,7 +200,7 @@ class Hackathon(DBBase):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(100), unique=True, nullable=False)
-    sponsor = Column(Integer)
+    display_name = Column(String(64))
     status = Column(Integer)
     check_register = Column(Integer)  # 1=True 0=False
 
@@ -211,6 +212,8 @@ class Hackathon(DBBase):
     registration_start_time = Column(DateTime)
     registration_end_time = Column(DateTime)
     description = Column(Text)
+    address = Column(String(64))
+    images = Column(String(512))
 
 
     def __init__(self, **kwargs):

@@ -98,5 +98,10 @@ class RegisterManger(object):
             log.error("delete register faild")
             return {"error": "INTERNAL SERVER ERROR"}, 500
 
+    def get_register_after_login(self,**kwargs):
+        hack_id = kwargs['hackathon_id']
+        user_id = kwargs['user_id']
+        register = db_adapter.find_first_object(Register,Register.hackathon_id==hack_id,Register.user_id==user_id)
+        return register
 
 register_manager = RegisterManger(db_adapter)

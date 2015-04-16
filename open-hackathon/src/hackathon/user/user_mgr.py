@@ -175,7 +175,7 @@ class UserManager(object):
         detail["register_state"] = False
 
         try:
-            experiments = user.experiments.filter_by(status=ExprStatus.Running).all()
+            experiments = user.experiments.filter_by(status=EStatus.Running).all()
             map(lambda e: detail["experiments"].append({
                 "id": e.id,
                 "hackathon_id": e.hackathon_id
