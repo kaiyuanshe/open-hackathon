@@ -42,11 +42,16 @@ from flask_login import logout_user
 
 class LoginBase():
     def login2db(self, openid, **kwargs):
-        admin_with_token = admin_manager.db_login(openid, **kwargs)
-        # login flask
-        log.info("login successfully:" + repr(admin_with_token["admin"]))
-        session["token"] = admin_with_token["token"].token
-        return admin_with_token
+        try:
+            admin_with_token = admin_manager.db_login(openid, **kwargs)
+            # login flask
+            log.info("login successfully:" + repr(admin_with_token["admin"]))
+            session["token"] = admin_with_token["token"].token
+            return admin_with_token
+        except Exception as e:
+            log.error("login failed")
+            log.error(e)
+            raise
 
     def logout(self, admin):
         session.pop("token")

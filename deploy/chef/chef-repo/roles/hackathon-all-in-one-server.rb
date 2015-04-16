@@ -22,8 +22,9 @@
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
 
-name "hackathon-api-server"
-description "A server that run the API service"
+name "hackathon-all-in-one-server"
+description "A server that all hackathon apps in one single instance"
 
-run_list 'recipe[python]',
-         'recipe[git]'
+run_list 'recipe[open-hackathon-api::mysql_install]',
+         'recipe[open-hackathon-api]',
+         'recipe[open-hackathon-api::mysql_setup]'

@@ -25,21 +25,15 @@
 name "hackathon-dev"
 description "The open-hackathon development environment"
 
-SSL = {
-  :disable => false
-}
-
 
 default_attributes({
-  "hackathon" => {
-    "debug" => {
-      "enable"=> true
+  "open-hackathon-api" => {
+    "environment" => "dev",
+    "guacamole" => {
+      "host" => "http://open-hackathon.chinacloudapp.cn:28080"
     },
-    "ssl" => {
-      "disableSsl" => SSL[:disable]
-    },
-    "logging" => {
-      "level" => "info"
+    "git" => {
+      "repository" => "git@github.com:msopentechcn/open-hackathon.git"
     }
   }
 
