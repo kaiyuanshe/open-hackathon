@@ -80,7 +80,17 @@ angular.module('oh.directives', [])
             }
           });
         }
-
+        var heartbeatInterval = null;
+        function heartbeat(id){
+        	API.user.experiment.put({
+        		body:{id:id}
+        	},function(data){
+        		if(data.error){
+        			$interval.cancel(heartbeatInterval);
+        		}
+        	});
+        }
+        
         var temp = $templateCache.get('hackathon-vm.html');
         API.user.experiment.post({
           body:{cid: 'ut', hackathon: scope.config.name}
@@ -109,6 +119,11 @@ angular.module('oh.directives', [])
                 bindTemp(data);
                 $('.hackathon-nav a.vm-box:eq(0)').trigger('click');
                 $interval.cancel(stop);
+                
+                heartbeatInterval = $interval(function(){
+                	heartbeat(data.expr_id)
+                }, 300000, true);
+                
               } else if (data.status == 1) {
                 stop = $interval(loopstart, 60000, true);
               }else{
@@ -121,6 +136,7 @@ angular.module('oh.directives', [])
           scope.$on('$destroy',
             function (event) {
               $interval.cancel(stop);
+              $interval.cancel(heartbeatInterval);
             }
           );
         });
