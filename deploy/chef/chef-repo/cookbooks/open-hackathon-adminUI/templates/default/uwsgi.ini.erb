@@ -24,19 +24,17 @@
 
 [uwsgi]
 #application's base folder
-base = /opt/open-hackathon/open-hackathon-adminUI/src
+base = <%= node['open-hackathon-adminUI']['uwsgi']['base']%>
 
 #python module to import
 app = run
 module = %(app)
 
-#home = /opt/open-hackathon/venv
-pythonpath = /opt/open-hackathon/open-hackathon-adminUI/src
+pythonpath = <%= node['open-hackathon-adminUI']['uwsgi']['pythonpath']%>
 
 #socket file's location
-#socket = /opt/LABOSS/%n.sock
 enable-threads = true
-http = 0.0.0.0:80
+http = 0.0.0.0:<%= node['open-hackathon-adminUI']['uwsgi']['port']%>
 
 #permissions for the socket file
 chmod-socket    = 666
@@ -45,4 +43,4 @@ chmod-socket    = 666
 callable = app
 
 #location of log files
-logto = /var/log/uwsgi/%n.log
+logto = <%= node['open-hackathon-adminUI']['uwsgi']['logto']%>

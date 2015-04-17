@@ -45,11 +45,6 @@ end
 
 gem_package 'mysql2' do
   gem_binary RbConfig::CONFIG['bindir'] + '/gem' 
-=======
-
-mysql2_chef_gem 'default' do
-  client_version node['open-hackathon-api']['mysql']['version']
->>>>>>> opentech/master
   action :install
 end
 
@@ -83,7 +78,6 @@ end
 
 filename = node['open-hackathon-api']['mysql']['setup-file']
 
-#python '/opt/open-hackathon/open-hackathon/src/setup_db.py' do
 bash "setup_mysql" do
   code "python #{filename}"
 end

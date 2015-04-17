@@ -22,7 +22,6 @@
 
 include_recipe "apt"
 include_recipe "python"
-#'pythton-setuptools'
 package 'libmysqlclient-dev'
 package 'libpcre3'
 package 'libpcre3-dev'
@@ -30,29 +29,29 @@ package 'libpcre3-dev'
 include_recipe "git"
 include_recipe "uwsgi"
 
-directory '/opt/open-hackathon' do
-  owner 'openhackathon'
-  group 'openhackathon'
+directory node['open-hackathon-ui']['root-dir'] do
+  owner node['open-hackathon-ui']['global-user']
+  group node['open-hackathon-ui']['global-user']
   mode '0755'
   action :create
 end
 
-git "/opt/open-hackathon" do
-  repository "https://github.com/msopentechcn/open-hackathon.git"
-  revision "master" 
+git node['open-hackathon-ui']['root-dir'] do
+  repository node['open-hackathon-ui']['git']['repository']
+  revision node['open-hackathon-ui']['git']['revision']
   action :sync
 end
 
-directory '/var/log/uwsgi' do
-  owner 'openhackathon'
-  group 'openhackathon'
+directory node['open-hackathon-ui']['uwsgi']['log-dir'] do
+  owner node['open-hackathon-ui']['global-user']
+  group node['open-hackathon-ui']['global-user']
   mode '0744'
   action :create
 end
 
-directory '/var/log/open-hackathon' do
-  owner 'openhackathon'
-  owner 'openhackathon'
+directory node['open-hackathon-ui']['hackathon-log'] do
+  owner node['open-hackathon-ui']['global-user']
+  owner node['open-hackathon-ui']['global-user']
   mode '0744'
   action :create
 end
@@ -65,24 +64,21 @@ end
   python_pip "#{f}"
 end
 
-template '/opt/open-hackathon/nginx_openhackathon.uwsgi.ini' do
+template node['open-hackathon-ui']['root-dir']+'/nginx_openhackathon.uwsgi.ini' do
   source 'uwsgi.ini.erb'
 end
 
-template '/etc/init.d/uwsgi' do
-  source 'uwsgi.erb'
-  owner 'openhackathon'
-  group 'openhackathon'
-  mode '0644'
-end
-
-template '/opt/open-hackathon/open-hackathon-tempUI/src/hackathon/config.py' do
+template node['open-hackathon-ui']['root-dir']+'/open-hackathon-tempUI/src/hackathon/config.py' do
   source 'config.py.erb'
 end
 
 uwsgi_service 'app' do
-  home_path "/opt/open-hackathon/open-hackathon-templeUI/src"
-  config_file "/opt/open-hackathon/nginx_openhackathon.uwsgi.ini"
+  home_path node['open-hackathon-ui']['uwsgi']['home_path']
+  config_file node['open-hackathon-ui']['uwsgi']['config_file']
   config_type :ini
+end
+
+service 'uwsgi-app' do
+  action :restart
 end
 

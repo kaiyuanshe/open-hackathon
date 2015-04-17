@@ -57,5 +57,20 @@ default['open-hackathon-ui']['weibo']['scope'] = 'all'
 default['open-hackathon-ui']['git']['repository'] = 'https://github.com/msopentechcn/open-hackathon.git'
 default['open-hackathon-ui']['git']['revision'] = 'master'
 
+default['open-hackathon-ui']['global-user'] = 'openhackathon'
 
+default['open-hackathon-ui']['root-dir'] = '/opt/open-hackathon'
+
+default['open-hackathon-ui']['git']['repository'] = "git@github.com:msopentechcn/open-hackathon.git"
+default['open-hackathon-ui']['git']['revision'] = "master"
+
+default['open-hackathon-ui']['hackathon-log'] = '/var/log/open-hackathon'
+
+default['open-hackathon-ui']['uwsgi']['log-dir'] = '/var/log/uwsgi'
+default['open-hackathon-ui']['uwsgi']['home_path'] = "/opt/open-hackathon/open-hackathon-templeUI/src"
+default['open-hackathon-ui']['uwsgi']['config_file'] = "/opt/open-hackathon/nginx_openhackathon.uwsgi.ini"
+default['open-hackathon-ui']['uwsgi']['base'] = "/opt/open-hackathon/open-hackathon-tempUI/src"
+default['open-hackathon-ui']['uwsgi']['pythonpath'] = '/opt/open-hackathon/open-hackathon-tempUI/src'
+default['open-hackathon-ui']['uwsgi']['http-port'] = '80'
+default['open-hackathon-ui']['uwsgi']['logto'] = '/var/log/uwsgi/%n.log'
 
