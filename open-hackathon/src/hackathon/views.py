@@ -273,7 +273,6 @@ class DefaultExperiment(Resource):
 
 
 class TemplateResource(Resource):
-    @token_required
     def get(self):
         parse = reqparse.RequestParser()
         parse.add_argument('hackathon_name', type=str, location='args', required=True)
