@@ -11,7 +11,7 @@
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#  
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #  
@@ -42,7 +42,6 @@ import time
 from admin.admin_mgr import admin_manager
 from hackathon.registration.register_mgr import register_manager
 from hackathon.template.template_mgr import template_manager
-from hackathon.database.models import Register
 
 
 @app.teardown_appcontext
@@ -64,9 +63,9 @@ class RegisterResource(Resource):
     def get(self):
         # Register page need to get register info to check the status When refresh page not after login logic
         parse = reqparse.RequestParser()
-        parse.add_argument('rid', type=int, location='args') # register_id
-        parse.add_argument('hid', type=int, location='args') # hackathon_id
-        parse.add_argument('uid', type=int, location='args') # user_id
+        parse.add_argument('rid', type=int, location='args')  # register_id
+        parse.add_argument('hid', type=int, location='args')  # hackathon_id
+        parse.add_argument('uid', type=int, location='args')  # user_id
         args = parse.parse_args()
         return register_manager.get_register_by_uid_or_rid_and_hid(args)
 
@@ -84,7 +83,6 @@ class RegisterResource(Resource):
     def put(self):
         # update a Register
         pass
-
 
 
 class RegisterCheckEmailResource(Resource):
