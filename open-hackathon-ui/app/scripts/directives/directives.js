@@ -1,18 +1,18 @@
 // -----------------------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-//  
+//
 // The MIT License (MIT)
-//  
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-//  
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-//  
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -35,7 +35,7 @@ angular.module('oh.directives', [])
    $templateCache.put('hackathon.html', '');
    $templateCache.get('hackathon.html');
    })*/
-  .directive('hackathonNav', function ($interval, $cookieStore,$templateCache, API) {
+  .directive('hackathonNav', function ($interval, $cookieStore, $templateCache, API) {
     return {
       restrict: 'E',//'AEMC'
       templateUrl: 'views/tpls/hackathon-nav.html', //<div ng-transclude></div>
@@ -83,17 +83,17 @@ angular.module('oh.directives', [])
 
         var temp = $templateCache.get('hackathon-vm.html');
         API.user.experiment.post({
-          body:{cid: 'ut', hackathon: scope.config.name}
+          body: {cid: 'ut', hackathon: scope.config.name}
         }, function (data) {
-          if(data.error){
-             showErrorMsg();
+          if (data.error) {
+            showErrorMsg();
             return;
           }
           var stop;
           var list = [];
           var loopstart = function () {
             API.user.experiment.get({
-              query:{id: data.expr_id}
+              query: {id: data.expr_id}
             }, function (data) {
               if (data.status == 2) {
                 var dockers = []
@@ -111,7 +111,7 @@ angular.module('oh.directives', [])
                 $interval.cancel(stop);
               } else if (data.status == 1) {
                 stop = $interval(loopstart, 60000, true);
-              }else{
+              } else {
                 showErrorMsg()
                 $interval.cancel(stop);
               }
@@ -184,7 +184,7 @@ angular.module('oh.directives', [])
         }, {
           name: '黑客松活动指南',
           link: ''
-        },{
+        }, {
           name: '我的黑客松挑战',
           link: ''
         }, {
@@ -207,11 +207,11 @@ angular.module('oh.directives', [])
       templateUrl: 'views/tpls/online-total.html',
       link: function (scope, element) {
         API.hackathon.list.get({
-          query:{name: $rootScope.config.name}
+          query: {name: $rootScope.config.name}
         }, function (data) {
           var getStat = function () {
             API.hackathon.stat.get({
-              query:{hid: data.id}
+              query: {hid: data.id}
             }, function (data) {
               element.find('[oh-online]').text(data.online);
               element.find('[oh-total]').text(data.total);
@@ -267,7 +267,7 @@ angular.module('oh.directives', [])
 
         var timerTmpe = '{day}天{hour}小时{minute}分钟{second}秒';
         API.hackathon.list.get({
-          query:{name: $rootScope.config.name}
+          query: {name: $rootScope.config.name}
         }, function (data) {
           var countDown = {
             time_server: new Date().getTime(),
@@ -304,3 +304,26 @@ angular.module('oh.directives', [])
       }
     }
   })
+  .directive('ohEmailAvailable', function ($q, $timeout, API) {
+    return {
+      require: 'ngModel',
+      link: function (scope, element, attrs, ngModel) {
+        ngModel.$asyncValidators.emailAvailable = function (modelValue, viewValue) {
+          if (ngModel.$isEmpty(modelValue)) {
+            return $q.when();
+          }
+          var def = $q.defer();
+          $timeout(function () {
+            API.register.checkemail.get({query: {hid: attrs.hid, email: modelValue}}, function (data) {
+              if (data) {
+                def.resolve();
+              } else {
+                def.reject();
+              }
+            })
+          }, 500);
+          return def.promise;
+        };
+      }
+    }
+  });
