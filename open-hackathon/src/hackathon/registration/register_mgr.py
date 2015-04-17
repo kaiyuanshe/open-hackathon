@@ -41,14 +41,12 @@ class RegisterManger(object):
         registers = self.db.find_all_objects(Register, Register.hackathon_id == hackathon_id)
         return map(lambda u: u.dic(), registers)
 
-    def get_register_by_id(self, args):
-        if "id" not in args:
-            return {"error": "Bad request"}, 400
+    def get_register_by_id(self, id):
         register = self.db.find_first_object(Register, Register.id == args['id'])
         if register is not None:
             return register.dic()
         else:
-            return {"error": "REGISTER NOT FOUND"}, 400
+            return {}
 
     def create_or_update_register(self, hackathon_id, args):
         try:
@@ -104,6 +102,25 @@ class RegisterManger(object):
     def check_email(self, hid, email):
         register = db_adapter.find_first_object(Register, Register.hackathon_id == hid, Register.email == email)
         return register is None
+
+    def get_register_by_uid_or_rid_and_hid(self,args):
+
+        # situation One : only rid is given
+        # situation Two : uid and hid are both given
+        # situation Three : error , bad request
+
+        if args['rid'] is not None:
+            return self.get_register_by_id(args['rid'])
+
+        elif args['uid'] is not None and args['hid'] is not None:
+            register = db_adapter.find_first_object(Register,Register.user_id==args['uid'],Register.hackathon_id==args['hid'])
+            if register is None:
+                return {}
+            else:
+                return register.dic()
+        else:
+            return {"errorcode":400,"message":"bad request"}
+
 
 
 register_manager = RegisterManger(db_adapter)

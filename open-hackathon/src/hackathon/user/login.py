@@ -66,7 +66,7 @@ class LoginProviderBase():
         register = register_manager.get_register_after_login(hackathon_id=hackathon.id, user_id=user.id)
         if register is None:
             login_result['registration'] = {}
-        login_result['registration'] = register
+        login_result['registration'] = register.dic()
 
         return login_result
 

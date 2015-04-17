@@ -62,10 +62,13 @@ class RegisterListResource(Resource):
 
 class RegisterResource(Resource):
     def get(self):
+        # Register page need to get register info to check the status When refresh page not after login logic
         parse = reqparse.RequestParser()
-        parse.add_argument('id', type=int, location='args', required=True)
+        parse.add_argument('rid', type=int, location='args') # register_id
+        parse.add_argument('hid', type=int, location='args') # hackathon_id
+        parse.add_argument('uid', type=int, location='args') # user_id
         args = parse.parse_args()
-        return register_manager.get_register_by_id(args)
+        return register_manager.get_register_by_uid_or_rid_and_hid(args)
 
 
     @token_required
@@ -83,13 +86,15 @@ class RegisterResource(Resource):
         pass
 
 
+
 class RegisterCheckEmailResource(Resource):
+    # check email whether exist in the same hackathon registration
     def get(self):
         parse = reqparse.RequestParser()
         parse.add_argument('hid', type=int, location='args', required=True)
-        parse.add_argument('email', type=int, location='args', required=True)
+        parse.add_argument('email', type=str, location='args', required=True)
         args = parse.parse_args()
-        return register_manager.c(args['hid'], args['email'])
+        return register_manager.check_email(args['hid'], args['email'])
 
 
 class UserExperimentResource(Resource):
@@ -227,7 +232,7 @@ class HackathonTemplateResource(Resource):
         parse = reqparse.RequestParser()
         parse.add_argument('hid', type=int, location='args', required=True)
         args = parse.parse_args()
-        return map(lambda u: u.json(), db_adapter.find_all_objects_by(Template, hackathon_id=args['hid']))
+        return map(lambda u: u.dic(), db_adapter.find_all_objects_by(Template, hackathon_id=args['hid']))
 
 
 class UserExperimentListResource(Resource):
