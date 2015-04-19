@@ -38,24 +38,29 @@
   },
   "api": {
     "user": {
-      "login":["post","del"],
-      "hackathon":["get"],
-      "experiment":{
-        "":["get","post","del","put"],
-        "list":["get"]
+      "login": ["post","del"],
+      "hackathon": ["get"],
+      "experiment": {
+        "": ["get","post","del","put"],
+        "list": ["get"]
       }
     },
-    "register":{
+    "register": {
+      "":["put","post","get"],
+      "list": ["get"],
+      "checkemail":["get"]
+    },
+    "bulletin": {
+      "": ["get", "post"]
+    },
+    "hackathon": {
+      "": ["get", "post"],
+      "list": ["get"],
+      "stat": ["get"],
+      "template": ["get"]
+    },
+    "template":{
       "list":["get"]
-    },
-    "bulletin":{
-      "":["get","post"]
-    },
-    "hackathon":{
-      "":["get","post"],
-      "list":["get"],
-      "stat":["get"],
-      "template":["get"]
     }
   },
   "sociallogin": {
