@@ -55,13 +55,6 @@ directory node['open-hackathon-api']['uwsgi']['logto-dir'] do
   action :create
 end
 
-directory node['open-hackathon-api']['uwsgi']['hacka-logto-dir'] do
-  owner node['open-hackathon-api']['user']
-  owner node['open-hackathon-api']['user']
-  mode '0744'
-  action :create
-end
-
 python_pip "werkzeug" do
   version "0.9.6"
 end
@@ -91,8 +84,4 @@ uwsgi_service 'app' do
   home_path node['open-hackathon-api']['root-dir']+'/open-hackathon/src'
   config_file node['open-hackathon-api']['root-dir']+'/nginx_openhackathon.uwsgi.ini'
   config_type :ini
-end
-
-service 'uwsgi-app' do
-  action :restart
 end

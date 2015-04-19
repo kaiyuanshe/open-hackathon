@@ -1,21 +1,23 @@
 open-hackathon-adminUI Cookbook
 ===============================
+TODO: Enter the cookbook description here.
 
-This cookbook auto-deploys open-hackathon-adminUI.
+e.g.
+This cookbook makes your favorite breakfast sandwich.
 
 Requirements
 ------------
+TODO: List your cookbook requirements. Be sure to include any requirements this cookbook has on platforms, libraries, other cookbooks, packages, operating systems, etc.
 
+e.g.
 #### packages
-- `apt` - open-hackathon-adminUI needs apt.
-- `python` - open-hackathon-adminUI needs python.
-- `git` - open-hackathon-adminUI needs git.
-- `uwsgi` - open-hackathon-adminUI needs uwsgi.
-- `gcc` - open-hackathon-adminUI needs gcc.
+- `toaster` - open-hackathon-adminUI needs toaster to brown your bagel.
 
 Attributes
 ----------
+TODO: List your cookbook attributes here.
 
+e.g.
 #### open-hackathon-adminUI::default
 <table>
   <tr>
@@ -25,23 +27,19 @@ Attributes
     <th>Default</th>
   </tr>
   <tr>
-    <td><tt>['open-hackathon-adminUI']['HOSTNAME']</tt></td>
-    <td>String</td>
-    <td>hostname of open-hackathon-adminUI</td>
-    <td><tt>http://hack-admin-dev.chinacloudapp.cn</tt></td>
-  </tr>
-  <tr>
-    <td><tt>['open-hackathon-adminUI']['root-dir']</tt></td>
-    <td>String</td>
-    <td>root directory of git repository</td>
-    <td><tt>/opt/open-hackathon</tt></td>
+    <td><tt>['open-hackathon-adminUI']['bacon']</tt></td>
+    <td>Boolean</td>
+    <td>whether to include bacon</td>
+    <td><tt>true</tt></td>
   </tr>
 </table>
 
 Usage
 -----
 #### open-hackathon-adminUI::default
+TODO: Write usage instructions for each cookbook.
 
+e.g.
 Just include `open-hackathon-adminUI` in your node's `run_list`:
 
 ```json
@@ -53,17 +51,18 @@ Just include `open-hackathon-adminUI` in your node's `run_list`:
 }
 ```
 
-Tips
-------------
-
-1.Use ssh protocol to link to github and setup your ssh key-pair before.
-2.Setup MySQL user, pwd, database and port.
-3.Setup ruby-gem resource.
-
 Contributing
 ------------
+TODO: (optional) If this is a public cookbook, detail the process for contributing. If this is a private cookbook, remove this section.
 
+e.g.
+1. Fork the repository on Github
+2. Create a named feature branch (like `add_component_x`)
+3. Write your change
+4. Write tests for your change (if applicable)
+5. Run the tests, ensuring they all pass
+6. Submit a Pull Request using Github
 
 License and Authors
 -------------------
-
+Authors: TODO: List authors
