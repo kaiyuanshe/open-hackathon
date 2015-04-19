@@ -241,10 +241,8 @@ class ExprManager(object):
         log.debug("starting to start container: %s" % post_data["container_name"])
 
         # db entity
-        provider = container_config["provider"] if "provider" in container_config else VEProvider.Docker
-        remote_provider = ""
-        if "remote" in post_data and "provider" in post_data["remote"]:
-            remote_provider = post_data["remote"]["provider"]
+        provider = VEProvider.Docker
+        remote_provider = VERemoteProvider.Guacamole
         # user = g.get('user', None)
         ve = VirtualEnvironment(provider=provider,
                                 name=post_data["container_name"],

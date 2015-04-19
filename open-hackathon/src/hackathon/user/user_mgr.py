@@ -110,9 +110,9 @@ class UserManager(object):
                 primary_email = email_info[n]['primary']
                 verified = email_info[n]['verified']
                 if self.db.find_first_object_by(UserEmail, email=email) is None:
-                    useremail = UserEmail(name=kwargs['name'], email=email, primary_email=primary_email,
+                    user_email = UserEmail(name=kwargs['name'], email=email, primary_email=primary_email,
                                           verified=verified, user=user)
-                    self.db.add_object(useremail)
+                    self.db.add_object(user_email)
         else:
             user = User(openid=openid,
                         name=kwargs["name"],
@@ -127,9 +127,9 @@ class UserManager(object):
                 email = n['email']
                 primary_email = n['primary']
                 verified = n['verified']
-                useremail = UserEmail(name=kwargs['name'], email=email, primary_email=primary_email,
+                user_email = UserEmail(name=kwargs['name'], email=email, primary_email=primary_email,
                                       verified=verified, user=user)
-                self.db.add_object(useremail)
+                self.db.add_object(user_email)
 
         # generate API token
         token = self.__generate_api_token(user)
