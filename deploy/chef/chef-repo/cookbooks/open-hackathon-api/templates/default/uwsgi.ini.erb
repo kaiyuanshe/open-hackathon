@@ -1,19 +1,19 @@
 [uwsgi]
 
-base = <%= node['open-hackathon-api']['uwsgi']['base'] %>
+base = <%= node['open-hackathon']['api']['src_dir'] %>
 
 app = run
 
 module = %(app)
 
-pythonpath = <%= node['open-hackathon-api']['uwsgi']['pythonpath'] %>
+pythonpath = <%= node['open-hackathon']['api']['src_dir'] %>
 
 enable-threads = true
 
-http = 0.0.0.0:<%= node['open-hackathon-api']['uwsgi']['http-port'] %>
+http = 0.0.0.0:<%= node['open-hackathon']['api']['port'] %>
 
 chmod-socket    = 666
 
 callable = app
 
-logto = <%= node['open-hackathon-api']['uwsgi']['logto'] %>
+logto = <%= node['open-hackathon']['uwsgi']['log_file'] %>

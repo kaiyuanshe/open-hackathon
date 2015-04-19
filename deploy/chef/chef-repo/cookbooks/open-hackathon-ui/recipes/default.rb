@@ -22,3 +22,28 @@
 
 
 include_recipe "nodejs"
+include_recipe "open-hackathon-api::source"
+
+# install npm packages
+npm_packages = ["cnpm", "forever", "yo", "bower", "grunt-cli", "grunt-ng-annotate"]
+npm_packages.each do |pkg|
+  nodejs_npm pkg do
+    options ["--registry=https://registry.npm.taobao.org"]
+  end
+end
+
+template node['open-hackathon'][:ui][:config_file] do
+  source 'config.json.erb'
+  owner node['open-hackathon']['user']
+  group node['open-hackathon']['user']
+  mode "0644"
+end
+
+bash "config and build" do
+   code <<-EOS
+   cd #{node['open-hackathon'][:ui][:src_dir]}
+   bower install
+   cnpm install
+   grunt build
+   EOS
+end
