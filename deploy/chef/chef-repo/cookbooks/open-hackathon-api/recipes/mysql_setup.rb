@@ -45,6 +45,7 @@ end
 
 gem_package 'mysql2' do
   gem_binary RbConfig::CONFIG['bindir'] + '/gem' 
+  timeout 60
   action :install
 end
 
