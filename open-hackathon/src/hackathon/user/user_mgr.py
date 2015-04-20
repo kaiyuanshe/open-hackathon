@@ -4,7 +4,7 @@
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
 #
 # The MIT License (MIT)
-#  
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -62,15 +62,6 @@ class UserManager(object):
         e = user.emails.filter_by(primary_email=EmailStatus.Primary).first()
         return e.email if e is not None else ""
 
-    def __validate_user_registered(self, user, hack):
-        if hack.check_register == 0:
-            return True
-
-        emails = map(lambda x: x.email, user.emails.all())
-        return self.db.count(Register, Register.email.in_(emails),
-                             Register.enabled == 1,
-                             Register.hackathon_id == hack.id) > 0
-
     def get_all_registration(self):
         reg_list = self.db.find_all_objects_by(Register, enabled=1)
 
@@ -110,9 +101,9 @@ class UserManager(object):
                 primary_email = email_info[n]['primary']
                 verified = email_info[n]['verified']
                 if self.db.find_first_object_by(UserEmail, email=email) is None:
-                    useremail = UserEmail(name=kwargs['name'], email=email, primary_email=primary_email,
+                    user_email = UserEmail(name=kwargs['name'], email=email, primary_email=primary_email,
                                           verified=verified, user=user)
-                    self.db.add_object(useremail)
+                    self.db.add_object(user_email)
         else:
             user = User(openid=openid,
                         name=kwargs["name"],
@@ -127,9 +118,9 @@ class UserManager(object):
                 email = n['email']
                 primary_email = n['primary']
                 verified = n['verified']
-                useremail = UserEmail(name=kwargs['name'], email=email, primary_email=primary_email,
+                user_email = UserEmail(name=kwargs['name'], email=email, primary_email=primary_email,
                                       verified=verified, user=user)
-                self.db.add_object(useremail)
+                self.db.add_object(user_email)
 
         # generate API token
         token = self.__generate_api_token(user)
@@ -168,22 +159,15 @@ class UserManager(object):
             "last_login_time": str(user.last_login_time)
         }
 
-    def get_user_detail_info(self, user, **kwargs):
+    def get_user_detail_info(self, user):
         detail = self.get_user_info(user)
-        experiments = user.experiments.filter_by(status=EStatus.Running).all()
         detail["experiments"] = []
-        detail["register_state"] = False
-
         try:
             experiments = user.experiments.filter_by(status=EStatus.Running).all()
             map(lambda e: detail["experiments"].append({
                 "id": e.id,
                 "hackathon_id": e.hackathon_id
             }), experiments)
-
-            hack = hack_manager.get_hackathon_by_name(kwargs['hackathon_name'])
-            if hack is not None:
-                detail["register_state"] = self.__validate_user_registered(user, hack)
         except Exception as e:
             log.error(e)
 

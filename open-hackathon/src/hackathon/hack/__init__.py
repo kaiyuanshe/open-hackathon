@@ -35,6 +35,11 @@ class HackathonManager():
     def __init__(self, db):
         self.db = db
 
+    def get_hackathon_by_name_or_id(self,hack_id=None,name=None):
+        if hack_id is None:
+            return self.get_hackathon_by_name(name)
+        return self.get_hackathon_by_id(hack_id)
+
     def get_hackathon_by_name(self, name):
         return self.db.find_first_object_by(Hackathon, name=name)
 

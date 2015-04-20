@@ -66,5 +66,3 @@ default['open-hackathon-api']['gem']['delete1'] = 'https://rubygems.org/'
 default['open-hackathon-api']['gem']['delete2'] = 'http://rubygems.org/'
 default['open-hackathon-api']['gem']['add'] = 'https://ruby.taobao.org/'
 
-default['open-hackathon-api']['uwsgi']['hacka-logto-dir'] = '/var/log/open-hackathon'
-

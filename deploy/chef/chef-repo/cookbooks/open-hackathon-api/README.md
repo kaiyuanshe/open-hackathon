@@ -47,13 +47,6 @@ Just include `open-hackathon-api` in your node's `run_list`:
 }
 ```
 
-Tips
-------------
-
-1.Use ssh protocol to link to github and setup your ssh key-pair before.
-2.Setup MySQL user, pwd, database and port.
-3.Setup ruby-gem resource.
-
 Contributing
 ------------
 
