@@ -29,6 +29,7 @@ default['open-hackathon-api']['mysql']['user-host'] = '%'
 default['open-hackathon-api']['mysql']['pwd']  = 'hackathon'
 default['open-hackathon-api']['mysql']['db']   = 'hackathon'
 default['open-hackathon-api']['mysql']['setup-file'] = '/opt/open-hackathon/open-hackathon/src/setup_db.py'
+default['open-hackathon-api']['mysql']['sql-file'] = '/tmp/test.sql'
 
 default['open-hackathon-api']['environment'] = 'local'
 
