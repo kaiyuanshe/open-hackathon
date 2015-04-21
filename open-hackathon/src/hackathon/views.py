@@ -24,7 +24,7 @@
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
 
-from flask_restful import Resource, reqparse
+from flask_restful import Resource, reqparse, Api
 from . import api, app
 from expr import expr_manager
 from expr.expr_mgr import open_check_expr
@@ -41,6 +41,7 @@ from hack import hack_manager
 import time
 from admin.admin_mgr import admin_manager
 from hackathon.registration.register_mgr import register_manager
+from mock import self
 
 
 @app.teardown_appcontext
@@ -229,6 +230,10 @@ class DefaultExperiment(Resource):
         open_check_expr()
         return {"Info": "start default experiment"}, 200
 
+class DefaultRecycle(Resource):
+    def get(self):
+        recycle_expr_scheduler()
+        return {"Info": "Recycle inactive user experiment running on backgroud"}, 200
 
 api.add_resource(UserExperimentResource, "/api/user/experiment")
 api.add_resource(RegisterListResource, "/api/register/list")
@@ -245,7 +250,7 @@ api.add_resource(GuacamoleResource, "/api/guacamoleconfig")
 api.add_resource(UserResource, "/api/user")
 api.add_resource(CurrentTime, "/api/currenttime")
 api.add_resource(DefaultExperiment, "/api/default/experiment")
-
+api.add_resource(DefaultRecycle, "/api/default/recycle")
 # ------------------------------ APIs for admin-site --------------------------------
 
 

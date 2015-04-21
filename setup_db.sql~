@@ -691,6 +691,3 @@ CREATE TABLE IF NOT EXISTS `vm_endpoint` (
 -- alter table vm_config add column dummy2 VARCHAR(40) AFTER id;
 -- alter table vm_config drop column dummy1;
 -- alter table vm_config drop column dummy2;
-
-
-alter table hackathon add column recycle_enabled int default 1 after check_register;

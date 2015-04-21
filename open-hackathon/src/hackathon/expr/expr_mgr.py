@@ -25,6 +25,8 @@
 # -----------------------------------------------------------------------------------
 
 import sys
+from debtagshw.debtagshw import LOG
+from cmath import log10
 
 sys.path.append("..")
 from compiler.ast import (
@@ -50,6 +52,7 @@ from hackathon.enum import (
     PortBindingType,
     VEStatus,
     ReservedUser,
+    RecycleStatus,
 )
 from hackathon.database.models import (
     VirtualEnvironment,
@@ -241,10 +244,8 @@ class ExprManager(object):
         log.debug("starting to start container: %s" % post_data["container_name"])
 
         # db entity
-        provider = container_config["provider"] if "provider" in container_config else VEProvider.Docker
-        remote_provider = ""
-        if "remote" in post_data and "provider" in post_data["remote"]:
-            remote_provider = post_data["remote"]["provider"]
+        provider = VEProvider.Docker
+        remote_provider = VERemoteProvider.Guacamole
         # user = g.get('user', None)
         ve = VirtualEnvironment(provider=provider,
                                 name=post_data["container_name"],
@@ -543,13 +544,12 @@ class ExprManager(object):
 
 def open_check_expr():
     """
-    start a job to examine default experiment
+    start a scheduled job to examine default experiment
     :return:
     """
     log.debug("start checking experiment ... ")
     alarm_time = datetime.now() + timedelta(seconds=1)
-    scheduler.add_job(check_default_expr, 'interval', id='1', replace_existing=True, next_run_time=alarm_time,
-                      minutes=safe_get_config("pre_allocate.check_interval_minutes", 5))
+    scheduler.add_job(check_default_expr, 'interval', id='1', replace_existing=True, next_run_time=alarm_time, minutes=safe_get_config("pre_allocate.check_interval_minutes", 5))
 
 
 def check_default_expr():
@@ -593,6 +593,30 @@ def check_default_expr():
         except Exception as e:
             log.error(e)
             log.error("check default experiment failed")
-
+            
+def recycle_expr_scheduler():
+    """
+    start a scheduled job to recycle inactive experiment
+    :return:
+    """    
+    log.debug("Start recycling inactive user experiment")
+    excute_time = datetime.utcnow() + timedelta(hours=1)
+    scheduler.add_job(recycle_expr, 'interval', id='1', replace_existing=True, next_run_time=excute_time, minutes=safe_get_config("pre_allocate.check_interval_minutes", 5))
+    
+            
+def recycle_expr():
+    """
+    recycle experiment when idle more than 5 hours
+    :return:
+    """
+    log.debug("start checking experiment ... ")    
+    r = Expeirment.query.join(Hackathon).filter(Experiment.last_heart_beat_time + datetime.timedelta(hours=5)>datetime.utcnow(), recycle_enabled=RecycleStatus.enabled).first()
+    if r is not None:
+        expr_manager.stop_expr(r.id)
+        log.debug("it's stopping inactive experiment now")
+        return
+    else:
+        log.debug("There is now inactive experiment now")
+        break
 
 expr_manager = ExprManager()

@@ -193,11 +193,12 @@ class Hackathon(DBBase):
     sponsor = Column(Integer)
     status = Column(Integer)
     check_register = Column(Integer)  # 1=True 0=False
-
+    recycle_enabled = Column(Integer,default=1)
     start_time = Column(DateTime)
     end_time = Column(DateTime)
     create_time = Column(DateTime)
     update_time = Column(DateTime)
+    
 
     def __init__(self, **kwargs):
         super(Hackathon, self).__init__(**kwargs)
