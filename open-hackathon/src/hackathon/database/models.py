@@ -24,7 +24,7 @@
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
 
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text
 from sqlalchemy.orm import backref, relation
 from . import Base, db_adapter
 from datetime import datetime
@@ -170,8 +170,19 @@ class Register(DBBase):
     create_time = Column(DateTime)
     description = Column(String(200))
     enabled = Column(Integer)  # 0: disabled 1:enabled
-    jstrom_api = Column(String(50))
-    jstrom_mgmt_portal = Column(String(50))
+
+    phone = Column(String(11))
+    sex = Column(Integer)   #0:women 1:man
+    age = Column(Integer)
+    career_type = Column(String(16))
+    career = Column(String(16))
+    qq = Column(String(16))
+    weibo = Column(String(32))
+    wechat = Column(String(32))
+    address = Column(String(80))
+    status = Column(Integer)  # 0: havn't audit 1: audit passed 2:audit reject
+    user_id = Column(Integer)
+    update_time = Column(DateTime)
 
     hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
     hackathon = relationship('Hackathon', backref=backref('registers', lazy='dynamic'))
@@ -190,7 +201,7 @@ class Hackathon(DBBase):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(100), unique=True, nullable=False)
-    sponsor = Column(Integer)
+    display_name = Column(String(64))
     status = Column(Integer)
     check_register = Column(Integer)  # 1=True 0=False
     recycle_enabled = Column(Integer,default=1)
@@ -199,6 +210,13 @@ class Hackathon(DBBase):
     create_time = Column(DateTime)
     update_time = Column(DateTime)
     
+
+    registration_start_time = Column(DateTime)
+    registration_end_time = Column(DateTime)
+    description = Column(Text)
+    address = Column(String(64))
+    images = Column(String(512))
+
 
     def __init__(self, **kwargs):
         super(Hackathon, self).__init__(**kwargs)
@@ -351,7 +369,9 @@ class Template(DBBase):
     url = Column(String(200))  # backup, templates' location
     provider = Column(Integer)
     create_time = Column(DateTime)
+    description = Column(Text)
     virtual_environment_count = Column(Integer)
+
     hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
     hackathon = relationship('Hackathon', backref=backref('templates', lazy='dynamic'))
 

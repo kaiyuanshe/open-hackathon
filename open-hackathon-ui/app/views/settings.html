@@ -6,41 +6,24 @@
         <div class="page-header">
           <h1>请选择你所需要的环境</h1>
         </div>
+        <div class="text-center" ng-if="!templates">
+          <img src="/images/spinner-lg.gif" >
+        </div>
         <div class="row form-group">
-          <div class="col-md-6  text-center">
-            <label class="radio-inline ">
-              <img src="/images/terminal.icon.png" alt="Ubuntu Terminal" /> LAMP + UBUNTU
-              <div class="iradio_square-blue" ng-class="{checked:type == 'ut'}" style="position: relative;">
-                <input type="radio" name="web" value="ut" checked ng-model="type">
+
+          <div class="col-md-6  text-center" ng-repeat="temp in templates">
+            <label class="radio-inline " ng-click="test()">
+              <img src="/images/terminal.icon.png" alt="{{temp.name}}" /> {{temp.name}}
+              <div class="iradio_square-blue" ng-class="{checked : type.name == '{{temp.name}}'}" style="position: relative;">
+                <input type="radio" name="web" ng-model="type.name" value="{{temp.name}}">
                 <ins class="iCheck-helper"></ins>
               </div>
             </label>
-            <div>
-              <ul class="services-list">
-                <li>Ubuntu</li>
-                <li>Apache</li>
-                <li>MySQL</li>
-                <li>PHP</li>
-              </ul>
-            </div>
-          </div>
-          <div class="col-md-6 text-center">
-            <label class="radio-inline ">
-              <img src="/images/ubuntu.icon.png" alt="Ubuntu Desktop" /> UBUNTU + GNOME
-              <div class="iradio_square-blue" ng-class="{checked:type == 'ud'}" style="position: relative;">
-                <input type="radio" name="web" value="ud" checked ng-model="type">
-                <ins class="iCheck-helper"></ins>
-              </div>
-            </label>
-            <div>
-              <ul class="services-list">
-                <li>Ubuntu</li>
-                <li>GNome</li>
-              </ul>
+            <div ng-bind-html="temp.description">
             </div>
           </div>
         </div>
-        <div class="row form-group">
+        <div class="row form-group" ng-if="templates">
           <div class="col-md-12 text-center">
             <button type="button" class="btn btn-lg btn-primary" style="width:200px" ng-click="submit()">提交</button>
           </div>

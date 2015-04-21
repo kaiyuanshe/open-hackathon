@@ -1,18 +1,18 @@
 // -----------------------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-//  
+//
 // The MIT License (MIT)
-//  
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-//  
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-//  
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -40,8 +40,24 @@
  */
 angular.module('oh.controllers')
   .controller('oh.header.controller', function ($scope, $rootScope, $cookieStore, $state) {
-    if (!$cookieStore.get('User')) {
+    var User = $cookieStore.get('User') || '';
+
+    if (!User) {
       $state.go('index');
+    } else if ((User.status & 8) == 8) {
+      $state.go('index.register');
+    } else if ((User.status & 128) == 128) {
+      if ((User.status & 1) != 1) {
+        $state.go('index.register');
+      } else  {
+        API.register.get({query: {hid: $scope.hackathon.id, uid: User.id}}, function (data) {
+          User.check_status = data.status || 0;
+          $cookieStore.put('User', User);
+          if (User.check_register != 1) {
+            $state.go('index.register');
+          }
+        });
+      }
     }
     $rootScope.hackathon = true;
     $scope.status = {
@@ -60,5 +76,6 @@ angular.module('oh.controllers')
         $rootScope.hackathon = false;
       }
     );
+
   });
 

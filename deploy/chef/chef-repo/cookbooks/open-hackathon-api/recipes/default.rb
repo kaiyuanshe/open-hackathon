@@ -12,6 +12,7 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+#  
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,6 +20,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+# -----------------------------------------------------------------------------------
 
 
 include_recipe "apt"
@@ -28,23 +30,25 @@ package 'libpcre3'
 package 'libpcre3-dev'
 include_recipe "git"
 include_recipe "uwsgi"
+include_recipe "gcc"
 
 user node['open-hackathon-api']['user']
 
-directory '/opt/open-hackathon' do
+directory node['open-hackathon-api']['root-dir'] do
   owner node['open-hackathon-api']['user']
   group node['open-hackathon-api']['user']
   mode  '0755'
   action :create
 end
 
-git '/opt/open-hackathon' do
+git node['open-hackathon-api']['root-dir'] do
   repository node['open-hackathon-api']['git']['repository']
   revision node['open-hackathon-api']['git']['revision']
   action :sync
+  timeout 60
 end
 
-directory '/var/log/uwsgi' do
+directory node['open-hackathon-api']['uwsgi']['logto-dir'] do
   owner node['open-hackathon-api']['user']
   group node['open-hackathon-api']['user']
   mode  '0744'
@@ -67,17 +71,17 @@ end
   python_pip "#{f}"
 end
 
-template '/opt/open-hackathon/nginx_openhackathon.uwsgi.ini' do
+template node['open-hackathon-api']['root-dir']+'/nginx_openhackathon.uwsgi.ini' do
   source 'uwsgi.ini.erb'
 end
 
 
-template '/opt/open-hackathon/open-hackathon/src/hackathon/config.py' do
+template node['open-hackathon-api']['root-dir']+'/open-hackathon/src/hackathon/config.py' do
   source 'config.py.erb'
 end
 
 uwsgi_service 'app' do
-  home_path '/opt/open-hackathon/open-hackathon/src'
-  config_file '/opt/open-hackathon/nginx_openhackathon.uwsgi.ini'
+  home_path node['open-hackathon-api']['root-dir']+'/open-hackathon/src'
+  config_file node['open-hackathon-api']['root-dir']+'/nginx_openhackathon.uwsgi.ini'
   config_type :ini
 end

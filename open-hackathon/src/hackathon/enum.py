@@ -145,3 +145,11 @@ class AVMStatus:
     STOPPED_VM = 'StoppedVM'
     STOPPED = 'Stopped'  # STOPPED is only used for 'type' input parameter of stop_virtual_machine in VirtualMachine
     STOPPED_DEALLOCATED = 'StoppedDeallocated'
+
+class RGStatus:
+    """
+    For status in DB model Register for registration audit status
+    """
+    UNAUDIT = 0
+    AUDIT_PASSED = 1
+    AUDIT_REFUSE = 2

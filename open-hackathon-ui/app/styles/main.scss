@@ -156,9 +156,8 @@ a {
   font-size: 3em;
 }
 
-#main > .container {
+#main .container {
   background-color: #fff;
-  text-align: center;
   padding-bottom: 30px;
 }
 
@@ -211,6 +210,7 @@ a {
 .btn img {
   height: 32px;
 }
+
 .services-list {
   text-align: left;
   list-style: none;
@@ -434,4 +434,122 @@ body.hackathon {
   border: 0px;
   opacity: 0;
   background: rgb(255, 255, 255);
+}
+
+.required {
+  position: relative;
+}
+
+.required:before {
+  position: absolute;
+  right: 0;
+  content: '*';
+  color: #f00;
+}
+
+.post {
+  padding: 10px 0;
+  color: #505050;
+}
+
+.post h3 {
+  font-size: 15px;
+  font-weight: bolder;
+  color: #00abec;
+  margin: 0 0 5px;
+}
+
+.post:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.post .thumb {
+  width: 32.20339%;
+  float: left;
+  margin-right: 1.69492%;
+  padding-top: 10px;
+  display: block;
+}
+
+.post .thumb img {
+  background-position: center center;
+  background-size: cover;
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+}
+
+.post .body {
+  width: 66.10169%;
+  float: left;
+  margin-right: 0;
+  display: block;
+}
+
+.post .body {
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.line-title {
+  margin: 0px;
+  font-size: 18px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e4e4e4;
+}
+
+.users-list {
+  padding: 0px;
+}
+
+.users-list li {
+  min-height: 60px;
+  padding: 10px;
+  list-style: none;
+  font-size: 12px;
+}
+
+.users-list li a img.avatar {
+  height: 40px;
+  width: 40px;
+  float: left;
+  margin-top: 3px;
+  margin-right: 5px;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+}
+
+.users-list li div {
+  margin-left: 50px;
+}
+
+.jumbotron p {
+  font-size: 18px;
+  font-weight: normal;
+}
+
+label {
+  font-weight: normal;
+}
+
+.form-control {
+  border-radius: 0;
+  box-shadow: none;
+  transition: initial;
+}
+
+fieldset {
+  padding: 10px 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
 }

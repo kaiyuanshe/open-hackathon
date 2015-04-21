@@ -2,19 +2,19 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
-#  
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#  
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-#  
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -29,9 +29,7 @@ import sys
 sys.path.append("..")
 from hackathon.database.models import *
 from hackathon.database import db_adapter
-from datetime import datetime
 from hackathon.log import log
-from flask import g
 
 
 class RegisterManger(object):
@@ -43,44 +41,41 @@ class RegisterManger(object):
         registers = self.db.find_all_objects(Register, Register.hackathon_id == hackathon_id)
         return map(lambda u: u.dic(), registers)
 
-    def get_register_by_id(self, args):
-        if "id" not in args:
-            return {"error": "Bad request"}, 400
-        register = self.db.find_first_object(Register, Register.id == args['id'])
+    def get_register_by_id(self, id):
+        register = self.db.find_first_object(Register, Register.id == id)
         if register is not None:
             return register.dic()
         else:
-            return {"error": "REGISTER NOT FOUND"}, 400
+            return {"errorcode": 404, "message": "bad request"}
 
-    def create_or_update_register(self, args):
+    def create_or_update_register(self, hackathon_id, args):
         try:
             register = self.db.find_first_object(Register, Register.email == args['email'],
-                                                 Register.hackathon_id == g.hackathon_id)
+                                                 Register.hackathon_id == hackathon_id)
             if register is None:
                 # create a register
                 log.debug("create a new register")
-                new_register = self.db.add_object_kwargs(Register,
-                                                 register_name=args['register_name'],
-                                                 email=args['email'],
-                                                 create_time=datetime.utcnow(),
-                                                 description=args['description'],
-                                                 enabled=1,  # 0: disabled 1:enabled
-                                                 jstrom_api='',
-                                                 jstrom_mgmt_portal='',
-                                                 hackathon_id=g.hackathon_id)
+                # new_register = self.db.add_object_kwargs(Register,
+                # register_name=args['register_name'],
+                #                                  email=args['email'],
+                #                                  create_time=datetime.utcnow(),
+                #                                  description=args['description'],
+                #                                  enabled=1,  # 0: disabled 1:enabled
+                #                                  hackathon_id=g.hackathon_id)
+                new_register = self.db.add_object_kwargs(Register, **args)
                 return new_register.dic()
             else:
                 # update a aready existe register
                 log.debug("update a new register")
-                self.db.update_object(register,
-                                      register_name=args['register_name'],
-                                      email=args['email'],
-                                      create_time=datetime.utcnow(),
-                                      description=args['description'],
-                                      enabled=args['enabled'],  # 0: disabled 1:enabled
-                                      strom_api='',
-                                      jstrom_mgmt_portal='',
-                                      hackathon_id=g.hackathon_id)
+                update_items = dict(dict(args).viewitems() - register.dic().viewitems())
+                # self.db.update_object(register,
+                # register_name=args['register_name'],
+                #                       email=args['email'],
+                #                       create_time=datetime.utcnow(),
+                #                       description=args['description'],
+                #                       enabled=args['enabled'],  # 0: disabled 1:enabled
+                #                       hackathon_id=g.hackathon_id)
+                self.db.update_object(register, **update_items)
                 return register.dic()
         except Exception:
             log.error("create or update register faild")
@@ -97,6 +92,35 @@ class RegisterManger(object):
         except Exception:
             log.error("delete register faild")
             return {"error": "INTERNAL SERVER ERROR"}, 500
+
+    def get_register_after_login(self, **kwargs):
+        hack_id = kwargs['hackathon_id']
+        user_id = kwargs['user_id']
+        register = self.db.find_first_object(Register, Register.hackathon_id == hack_id, Register.user_id == user_id)
+        return register
+
+    def check_email(self, hid, email):
+        register = self.db.find_first_object(Register, Register.hackathon_id == hid, Register.email == email)
+        return register is None
+
+    def get_register_by_rid_or_uid_and_hid(self, args):
+
+        # situation One : only rid is given
+        # situation Two : uid and hid are both given
+        # situation Three : error , bad request
+
+        if 'rid' in args:
+            return self.get_register_by_id(args['rid'])
+
+        elif 'uid' in args and 'hid' in args:
+            register = self.db.find_first_object(Register, Register.user_id == args['uid'],
+                                                    Register.hackathon_id == args['hid'])
+            if register is None:
+                return {"errorcode": 404, "message": "not found"}
+            else:
+                return register.dic()
+        else:
+            return {"errorcode": 400, "message": "bad request"}
 
 
 register_manager = RegisterManger(db_adapter)

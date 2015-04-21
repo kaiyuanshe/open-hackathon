@@ -1,18 +1,18 @@
 // -----------------------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-//  
+//
 // The MIT License (MIT)
-//  
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-//  
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-//  
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -28,22 +28,67 @@ var config = require('../config')
 var services = require('../common/services')
 var request = require('request')
 var querystring = require('querystring');
-var util = require('util')
+var util = require('util');
 
 
-var COOKIE_USERINFORMATION = 'User'
+var COOKIE_USERINFORMATION = 'User';
+
+/**
+ * Hackathon must be registered
+ * @type {number}
+ */
+var HACKATHON_REGISTERED = 128;
+
+/**
+ * User already registered
+ * @type {number}
+ */
+var USER_REGISTERED = 1;
+
+/**
+ * Hackathon has expired
+ * @type {number}
+ */
+var HACKATHON_EXPIRED = 8;
 
 function login(res, option) {
   res.api.user.login.post(option, function (response, data) {
-    res.cookie(COOKIE_USERINFORMATION, JSON.stringify(data));
-    console.log(data)
-    if (data.experiments.length > 0) {
-      res.redirect("/#/hackathon")
-    } else if (data.register_state) {
-      res.redirect("/#/settings")
+    var redirect = '/#/hackathon';
+    if (response.statusCode >= 200 && response.statusCode <= 300) {
+      var user = data.user;
+      user.status = data.hackathon.end_time < Date.now() ? HACKATHON_EXPIRED:0;
+      user.check_status = 0;
+      if (data.hackathon.check_register == 1) {
+        //当hackathon需要注册
+        user.status |= HACKATHON_REGISTERED;
+        if (data.registration) {
+          //当用户已经注册
+          user.status |= USER_REGISTERED;
+          user.check_status = data.registration.status;
+          if (data.registration.status == 1) {
+            //data.registration.status :0表示等待审核，1表示审核通过，2表示拒绝。
+            if (data.user.experiments.length > 0) {
+              redirect = '/#/hackathon';
+            } else {
+              redirect = '/#/settings';
+            }
+          } else {
+            redirect = '/#/register';
+          }
+        } else {
+          //当用户未注册
+          redirect = '/#/register';
+        }
+      } else {
+        if (data.user.experiments.length == 0) {
+          redirect = '/#/settings'
+        }
+      }
+      res.cookie(COOKIE_USERINFORMATION, JSON.stringify(user));
     } else {
-      res.redirect("/#/notregister")
+      redirect = '/#/error';
     }
+    res.redirect(redirect);
   });
 }
 
@@ -57,14 +102,14 @@ router.get('/github', function (req, res) {
       redirect_uri: util.format(config.login.github.redirect_uri, config.hostname),
       code: req.query.code
     },
-    json:{}
+    json: {}
   };
   request.get(option, function (err, request, body) {
     login(res, {
-        provider: "github",
-        access_token: body.access_token,
-        hackathon_name: config.hackathon_name
-      });
+      provider: "github",
+      access_token: body.access_token,
+      hackathon_name: config.hackathon_name
+    });
   });
 });
 
@@ -80,18 +125,17 @@ router.get('/qq', function (req, res) {
       code: req.query.code,
       state: 'openhackathon'
     },
-    json:{}
+    json: {}
   };
   request.get(option, function (err, request, body) {
     body = querystring.parse(body);
     console.log(body)
     login(res, {
-        provider: "qq",
-        access_token: body.access_token,
-        hackathon_name: config.hackathon_name
-      });
+      provider: "qq",
+      access_token: body.access_token,
+      hackathon_name: config.hackathon_name
+    });
   });
-
 });
 
 router.get('/gitcafe', function (req, res) {
@@ -105,14 +149,14 @@ router.get('/gitcafe', function (req, res) {
       grant_type: config.login.gitcafe.grant_type,
       code: req.query.code
     },
-    json:{}
+    json: {}
   };
   request.post(option, function (err, request, body) {
     login(res, {
-        provider: "gitcafe",
-        access_token: body.access_token,
-        hackathon_name: config.hackathon_name
-      });
+      provider: "gitcafe",
+      access_token: body.access_token,
+      hackathon_name: config.hackathon_name
+    });
   });
 });
 
@@ -127,16 +171,16 @@ router.get('/weibo', function (req, res) {
       grant_type: config.login.weibo.grant_type,
       code: req.query.code
     },
-    json:{}
+    json: {}
   };
   request.post(option, function (err, request, body) {
     console.log(body)
     login(res, {
-        provider: "weibo",
-        access_token: body.access_token,
-        uid: body.uid,
-        hackathon_name: config.hackathon_name
-      });
+      provider: "weibo",
+      access_token: body.access_token,
+      uid: body.uid,
+      hackathon_name: config.hackathon_name
+    });
   });
 });
 
