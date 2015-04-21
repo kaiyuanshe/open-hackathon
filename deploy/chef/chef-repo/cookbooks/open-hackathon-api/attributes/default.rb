@@ -99,3 +99,7 @@ default['openhackathon']['uwsgi']['log_dir'] = '/var/log/uwsgi'
 default['openhackathon'][:npm][:enable_taobao_mirror] = true
 default['openhackathon'][:gem][:enable_taobao_mirror] = true
 
+default['open-hackathon-api']['gem']['delete1'] = 'https://rubygems.org/'
+default['open-hackathon-api']['gem']['delete2'] = 'http://rubygems.org/'
+default['open-hackathon-api']['gem']['add'] = 'https://ruby.taobao.org/'
+

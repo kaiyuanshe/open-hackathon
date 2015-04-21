@@ -2,16 +2,16 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
-#  
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#  
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #  
@@ -27,14 +27,15 @@
 # -*- coding:utf8 -*-
 # encoding = utf-8
 import sys
-import urllib2
 
 sys.path.append("..")
-from hackathon.functions import get_remote, get_config, post_to_remote, convert
+from hackathon.functions import get_remote, get_config, convert
 from hackathon.log import log
 from . import user_manager
 import json
 from hackathon.constants import OAUTH_PROVIDER
+from hackathon.hack import hack_manager
+from hackathon.registration.register_mgr import register_manager
 
 
 class LoginProviderBase():
@@ -43,6 +44,32 @@ class LoginProviderBase():
 
     def logout(self, user):
         return user_manager.db_logout(user)
+
+    def return_details(self, user_with_token, args):
+        user = user_with_token["user"]
+        log.info("user login successfully:" + repr(user))
+        hackathon_name = args.get('hackathon_name')
+
+        detail = user_manager.get_user_detail_info(user)
+        detail["token"] = user_with_token["token"].token
+
+        login_result = {}
+        login_result["user"] = detail
+
+        # get hackathon
+        hackathon = hack_manager.get_hackathon_by_name(hackathon_name)
+        if hackathon is None:
+            return {"errorcode": 400, "message": "bad request : hackathon_name does not exist in DB"}
+        login_result["hackathon"] = hackathon.dic()
+
+        # get register info
+        register = register_manager.get_register_after_login(hackathon_id=hackathon.id, user_id=user.id)
+        if register is None:
+            login_result['registration'] = {}
+        else:
+            login_result['registration'] = register.dic()
+        log.debug("login returns info: " + str(login_result))
+        return login_result
 
 
 class QQLogin(LoginProviderBase):
@@ -76,13 +103,14 @@ class QQLogin(LoginProviderBase):
                                            email_info=email_info,
                                            avatar_url=user_info["figureurl"])
 
-        # login flask
-        user = user_with_token["user"]
-        log.info("QQ user login successfully:" + repr(user))
-        hackathon_name = args.get('hackathon_name')
-        detail = self.um.get_user_detail_info(user, hackathon_name=hackathon_name)
-        detail["token"] = user_with_token["token"].token
-        return detail
+        # # login flask
+        # user = user_with_token["user"]
+        # log.info("QQ user login successfully:" + repr(user))
+        # hackathon_name = args.get('hackathon_name')
+        # detail = self.um.get_user_detail_info(user, hackathon_name=hackathon_name)
+        # detail["token"] = user_with_token["token"].token
+        # return detail
+        return self.return_details(user_with_token, args)
 
 
 class GithubLogin(LoginProviderBase):
@@ -131,13 +159,7 @@ class GithubLogin(LoginProviderBase):
                                            access_token=access_token,
                                            email_info=email_info,
                                            avatar_url=avatar)
-        # login flask
-        user = user_with_token["user"]
-        log.info("github user login successfully:" + repr(user))
-        hackathon_name = args.get('hackathon_name')
-        detail = self.um.get_user_detail_info(user, hackathon_name=hackathon_name)
-        detail["token"] = user_with_token["token"].token
-        return detail
+        return self.return_details(user_with_token, args)
 
 
 class GitcafeLogin(LoginProviderBase):
@@ -176,15 +198,7 @@ class GitcafeLogin(LoginProviderBase):
                                            access_token=token,
                                            email_info=email_info,
                                            avatar_url=avatar_url)
-        user = user_with_token["user"]
-        log.info("gitcafe user login successfully:" + repr(user))
-
-        hackathon_name = args.get('hackathon_name')
-        detail = self.um.get_user_detail_info(user, hackathon_name=hackathon_name)
-        detail["token"] = user_with_token["token"].token
-
-        log.debug("gitcafe user login successfully: %r" % detail)
-        return detail
+        return self.return_details(user_with_token, args)
 
 
 class WeiboLogin(LoginProviderBase):
@@ -236,15 +250,7 @@ class WeiboLogin(LoginProviderBase):
                                            access_token=access_token,
                                            email_info=email_info,
                                            avatar_url=avatar_url)
-        user = user_with_token["user"]
-        log.info("weibo user login successfully:" + repr(user))
-
-        hackathon_name = args.get('hackathon_name')
-        detail = self.um.get_user_detail_info(user, hackathon_name=hackathon_name)
-        detail["token"] = user_with_token["token"].token
-
-        log.debug("weibo user login successfully: %r" % detail)
-        return detail
+        return self.return_details(user_with_token, args)
 
 
 login_providers = {
@@ -253,4 +259,3 @@ login_providers = {
     OAUTH_PROVIDER.GITCAFE: GitcafeLogin(user_manager),
     OAUTH_PROVIDER.WEIBO: WeiboLogin(user_manager)
 }
-

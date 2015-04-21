@@ -2,7 +2,7 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
 #  
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -32,6 +32,8 @@ from hackathon.user.login import GithubLogin, QQLogin, WeiboLogin, GitcafeLogin
 from hackathon import app
 from mock import Mock
 import mock
+from hackathon.database.models import User, UserToken, Hackathon, Register
+from hackathon.user.login import LoginProviderBase
 
 
 class TestToken:
@@ -46,6 +48,83 @@ class UserLoginTest(unittest.TestCase):
     def tearDown(self):
         pass
 
+    '''test method return_details'''
+
+    def test_return_details_success(self):
+        user = User(name="test_name", id=1)
+        token = UserToken(token='test_token', user_id=1)
+        user_with_token = {'user': user, 'token': token}
+        args = {'hackathon_name': 'test_hackathon_name'}
+
+        with mock.patch('hackathon.user.user_mgr.UserManager.get_user_detail_info') as get_user_detail_info:
+            detail = {'details': "details"}
+            get_user_detail_info.return_value = detail
+            with mock.patch('hackathon.hack.HackathonManager.get_hackathon_by_name') as get_hackathon_by_name:
+                hackathon = Hackathon(id=1, name='test_hackathon')
+                get_hackathon_by_name.return_value = hackathon
+                with mock.patch(
+                        'hackathon.registration.register_mgr.RegisterManger.get_register_after_login') as get_register_after_login:
+                    register = Register(id=1, register_name='test', email='test@test.com', hackathon_id=1)
+                    get_register_after_login.return_value = register
+
+                    result = {}
+                    detail['token'] = 'test_token'
+                    result['user'] = detail
+                    result['hackathon'] = hackathon.dic()
+                    result['registration'] = register.dic()
+
+                    self.assertEqual(LoginProviderBase().return_details(user_with_token, args), result)
+                    get_user_detail_info.assert_called_once_with(user)
+                    get_hackathon_by_name.assert_called_once_with('test_hackathon_name')
+                    get_register_after_login.assert_called_once_with(hackathon_id=1, user_id=1)
+
+    def test_return_details_hackathon_name_not_fount(self):
+        user = User(name="test_name", id=1)
+        token = UserToken(token='test_token', user_id=1)
+        user_with_token = {'user': user, 'token': token}
+        args = {'hackathon_name': 'test_hackathon_name'}
+
+        with mock.patch('hackathon.user.user_mgr.UserManager.get_user_detail_info') as get_user_detail_info:
+            detail = {'details': "details"}
+            get_user_detail_info.return_value = detail
+            with mock.patch('hackathon.hack.HackathonManager.get_hackathon_by_name') as get_hackathon_by_name:
+                hackathon = Hackathon(id=1, name='test_hackathon')
+                get_hackathon_by_name.return_value = None
+
+                result = {"errorcode": 500, "message": "hackathon_name dose not exist in DB:hackathon"}
+
+                self.assertEqual(LoginProviderBase().return_details(user_with_token, args), result)
+                get_user_detail_info.assert_called_once_with(user)
+                get_hackathon_by_name.assert_called_once_with('test_hackathon_name')
+
+    def test_return_details_None_Register(self):
+        user = User(name="test_name", id=1)
+        token = UserToken(token='test_token', user_id=1)
+        user_with_token = {'user': user, 'token': token}
+        args = {'hackathon_name': 'test_hackathon_name'}
+
+        with mock.patch('hackathon.user.user_mgr.UserManager.get_user_detail_info') as get_user_detail_info:
+            detail = {'details': "details"}
+            get_user_detail_info.return_value = detail
+            with mock.patch('hackathon.hack.HackathonManager.get_hackathon_by_name') as get_hackathon_by_name:
+                hackathon = Hackathon(id=1, name='test_hackathon')
+                get_hackathon_by_name.return_value = hackathon
+                with mock.patch(
+                        'hackathon.registration.register_mgr.RegisterManger.get_register_after_login') as get_register_after_login:
+                    get_register_after_login.return_value = None
+
+                    result = {}
+                    detail['token'] = 'test_token'
+                    result['user'] = detail
+                    result['hackathon'] = hackathon.dic()
+                    result['registration'] = {}
+
+                    self.assertEqual(LoginProviderBase().return_details(user_with_token, args), result)
+                    get_user_detail_info.assert_called_once_with(user)
+                    get_hackathon_by_name.assert_called_once_with('test_hackathon_name')
+                    get_register_after_login.assert_called_once_with(hackathon_id=1, user_id=1)
+
+    '''Test methnd provider login : QQ GitHub GitCafe Weibo'''
 
     def test_qq_login(self):
         user_manager = Mock()
@@ -58,7 +137,6 @@ class UserLoginTest(unittest.TestCase):
         detail = {'detail': 'test_detail'}
         user_manager.get_user_detail_info.return_value = detail
 
-        result = {'detail': 'test_detail', 'token': 'test_token'}
         args = {'access_token': 'test', 'hackathon_name': 'test'}
 
         with mock.patch('hackathon.user.login.get_remote') as get_remote_method:
@@ -66,11 +144,12 @@ class UserLoginTest(unittest.TestCase):
             email_info_resp = '''{"nickname":"test_nickname","figureurl":"test_figureurl"}'''
             get_remote_method.side_effect = [info, email_info_resp]
 
-            self.assertEqual(QQLogin(user_manager).login(args), result)
-            self.assertEqual(user_manager.get_user_detail_info.call_count, 1)
-            self.assertEqual(user_manager.db_login.call_count, 1)
-            self.assertEqual(get_remote_method.call_count, 2)
-
+            with mock.patch('hackathon.user.login.QQLogin.return_details') as return_details:
+                result = {'detail': 'test_detail', 'token': 'test_token'}
+                return_details.return_value = result
+                self.assertEqual(QQLogin(user_manager).login(args), result)
+                self.assertEqual(user_manager.db_login.call_count, 1)
+                self.assertEqual(get_remote_method.call_count, 2)
 
     def test_github_login(self):
         user_manager = Mock()
@@ -83,7 +162,6 @@ class UserLoginTest(unittest.TestCase):
         detail = {'detail': 'test_detail'}
         user_manager.get_user_detail_info.return_value = detail
 
-        result = {'detail': 'test_detail', 'token': 'test_token'}
         args = {'access_token': 'test', 'hackathon_name': 'test'}
 
         with mock.patch('hackathon.user.login.get_remote') as get_remote_method:
@@ -91,11 +169,12 @@ class UserLoginTest(unittest.TestCase):
             email_info_resp = '''{"email":"test@test.com"}'''
             get_remote_method.side_effect = [user_info_resp, email_info_resp]
 
-            self.assertEqual(GithubLogin(user_manager).login(args), result)
-            self.assertEqual(user_manager.get_user_detail_info.call_count, 1)
-            self.assertEqual(user_manager.db_login.call_count, 1)
-            self.assertEqual(get_remote_method.call_count, 2)
-
+            with mock.patch('hackathon.user.login.GithubLogin.return_details') as return_details:
+                result = {'detail': 'test_detail', 'token': 'test_token'}
+                return_details.return_value = result
+                self.assertEqual(GithubLogin(user_manager).login(args), result)
+                self.assertEqual(user_manager.db_login.call_count, 1)
+                self.assertEqual(get_remote_method.call_count, 2)
 
     def test_gitcafe_login(self):
         user_manager = Mock()
@@ -107,18 +186,18 @@ class UserLoginTest(unittest.TestCase):
         detail = {'detail': 'test_detail'}
         user_manager.get_user_detail_info.return_value = detail
 
-        result = {'detail': 'test_detail', 'token': 'test_token'}
         args = {'access_token': 'test', 'hackathon_name': 'test'}
 
         with mock.patch('hackathon.user.login.get_remote') as get_remote_method:
             user_info_resp = '''{"email":"test@test.com","username":"test_name","fullname":"test_fullname","id":123456,"avatar_url":"https://test.com/test"}'''
             get_remote_method.return_value = user_info_resp
 
-            self.assertEqual(GitcafeLogin(user_manager).login(args), result)
-            self.assertEqual(user_manager.get_user_detail_info.call_count, 1)
-            self.assertEqual(user_manager.db_login.call_count, 1)
-            self.assertEqual(get_remote_method.call_count, 1)
-
+            with mock.patch('hackathon.user.login.GitcafeLogin.return_details') as return_details:
+                result = {'detail': 'test_detail', 'token': 'test_token'}
+                return_details.return_value = result
+                self.assertEqual(GitcafeLogin(user_manager).login(args), result)
+                self.assertEqual(user_manager.db_login.call_count, 1)
+                self.assertEqual(get_remote_method.call_count, 1)
 
     def test_weibo_login(self):
         user_manager = Mock()
@@ -131,7 +210,6 @@ class UserLoginTest(unittest.TestCase):
         detail = {'detail': 'test_detail'}
         user_manager.get_user_detail_info.return_value = detail
 
-        result = {'detail': 'test_detail', 'token': 'test_token'}
         args = {'access_token': 'test', 'hackathon_name': 'test', 'uid': 'test_uid'}
 
         with mock.patch('hackathon.user.login.get_remote') as get_remote_method:
@@ -139,7 +217,9 @@ class UserLoginTest(unittest.TestCase):
             email_info_resp = '''{"email":"test@test.com"}'''
             get_remote_method.side_effect = [user_info_resp, email_info_resp]
 
-            self.assertEqual(WeiboLogin(user_manager).login(args), result)
-            self.assertEqual(user_manager.get_user_detail_info.call_count, 1)
-            self.assertEqual(user_manager.db_login.call_count, 1)
-            self.assertEqual(get_remote_method.call_count, 2)
+            with mock.patch('hackathon.user.login.WeiboLogin.return_details') as return_details:
+                result = {'detail': 'test_detail', 'token': 'test_token'}
+                return_details.return_value = result
+                self.assertEqual(WeiboLogin(user_manager).login(args), result)
+                self.assertEqual(user_manager.db_login.call_count, 1)
+                self.assertEqual(get_remote_method.call_count, 2)

@@ -1,0 +1,80 @@
+<div id="main">
+  <div class="container text-center" ng-if="isLoad" style="min-height: 400px;padding-top: 100px;">
+    <img src="/images/spinner-lg.gif" >
+  </div>
+  <div class="container" ng-if="!isLoad">
+    <div class="row jumbotron">
+      <div class="col-md-5">
+        <img href=""/>
+      </div>
+      <div class="col-md-7">
+        <h2>{{hackathon.display_name}}</h2>
+
+        <p><span class="glyphicon glyphicon-time" aria-hidden="true"></span> {{hackathon.start_time | date : 'yyyy年MM月dd日 HH:mm'}} ～ {{hackathon.end_time | date : 'yyyy年MM月dd日 HH:mm'}}</p>
+
+        <p><span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span> {{hackathon.address}}</p>
+
+        <p><span class="glyphicon glyphicon-user" aria-hidden="true"></span> 限额人数1000人</p>
+
+        <p><span class="glyphicon glyphicon-heart" aria-hidden="true"></span> <a href="">开源社</a></p>
+
+        <div>
+          <button class="btn btn-primary btn-lg" ng-click="showRegister()" ng-if="hackathon.isRegister">我要报名</button>
+          <span ng-bind="hackathon.message"></span>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-9">
+        <ng-include src="'views/tpls/register-form.html'" ng-if="hackathon.isRegister"></ng-include>
+        <h2 class="line-title">活动内容</h2>
+        <div ng-bind-html="hackathon.description" ></div>
+      </div>
+      <div class="col-md-3">
+        <div>
+
+        </div>
+        <h2 class="line-title">活动主办方..</h2>
+
+        <div class="post">
+          <div class="thumb">
+            <img src="">
+          </div>
+          <div class="body">
+            <h3>开源社</h3>
+
+            <p>专注于为互联网金融投资人提供管家式服务，首创独立第三方P2P借贷双方见证、借贷证据托管、贷后</p>
+          </div>
+        </div>
+        <h2 class="line-title">最近参与者..</h2>
+        <ul class="users-list">
+          <li>
+            <a href="widgets.html#">
+              <img class="avatar" alt="Lucas" src="assets/img/avatar.jpg">
+            </a>
+
+            <div>
+              <strong>Fendoe</strong>
+            </div>
+            <div class="date">4 minutes ago</div>
+          </li>
+          <li>
+            <a href="widgets.html#">
+              <img class="avatar" alt="Lucas" src="assets/img/avatar.jpg">
+            </a>
+
+            <div>
+              <strong>Fendoe</strong>
+            </div>
+            <div class="date">4 minutes ago</div>
+          </li>
+        </ul>
+        <h2 class="line-title">分享朋友圈.</h2>
+
+        <div>
+          <img src="{{dimensional}}"/>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

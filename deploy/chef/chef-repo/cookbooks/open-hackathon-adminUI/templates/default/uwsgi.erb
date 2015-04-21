@@ -3,7 +3,6 @@
 #  
 # The MIT License (MIT)
 #  
-#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -14,7 +13,6 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #  
-#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,25 +21,46 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+DAEMON=/usr/local/bin/uwsgi
 
-package 'libmysqlclient-dev'
+NAME=uwsgi-emperor
+DESC=uwsgi-emperor
 
-include_recipe "open-hackathon-api::user"
+# modify as needed
+VASALS=/opt/open-hackathon/nginx_openhackathon.uwsgi.ini
+EMPEROR_LOGS=/var/log/uwsgi/*.log
 
+test -x $DAEMON || exit 0
 
-mysql_service 'default' do
-  run_group node['openhackathon']['user']
-  run_user node['openhackathon']['user']
-  initial_root_password node['openhackathon']['mysql']['initial_root_password']
-  version node['openhackathon']['mysql']['version']
-  port node['openhackathon']['mysql']['port']
-  action [:create, :start]
-end
+# Include uwsgi defaults if available
+if [ -f /etc/default/uwsgi ] ; then
+        . /etc/default/uwsgi
+fi
 
-mysql_config 'default' do 
-  config_name 'default'
-  instance 'default'
-  source 'api.my.cnf.erb'
-  notifies :restart, 'mysql_service[default]', :immediately
-  action :create
-end
+set -e
+
+DAEMON_OPTS="--emperor $VASALS --die-on-term --master --daemonize $EMPEROR_LOGS"
+
+case "$1" in
+  start)
+        echo -n "Starting $DESC: "
+        start-stop-daemon --start --exec $DAEMON -- $DAEMON_OPTS
+        echo "$NAME."
+        ;;
+  stop)
+        echo -n "Stopping $DESC: "
+        start-stop-daemon --signal 3 --quiet --retry 2 --stop \
+                --exec $DAEMON
+        echo "$NAME."
+        ;;
+  status)
+        ps -ef | grep uwsgi
+        ;;
+  *)
+        N=/etc/init.d/$NAME
+        echo "Usage: $N {start|stop|status}" >&2
+        exit 1
+        ;;
+esac
+exit 0

@@ -22,6 +22,7 @@
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
 
+
 name             'open-hackathon-api'
 maintainer       "Microsoft Open Technologies (Shanghai) Co. Ltd"
 maintainer_email "msopentechdevsh@microsoft.com"

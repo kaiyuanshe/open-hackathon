@@ -2,16 +2,16 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
-#  
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#  
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #  
@@ -41,6 +41,7 @@ from hack import hack_manager
 import time
 from admin.admin_mgr import admin_manager
 from hackathon.registration.register_mgr import register_manager
+from hackathon.template.template_mgr import template_manager
 
 
 @app.teardown_appcontext
@@ -56,6 +57,42 @@ class RegisterListResource(Resource):
     def get(self):
         json_ret = map(lambda u: u.json(), user_manager.get_all_registration())
         return json_ret
+
+
+class RegisterResource(Resource):
+    def get(self):
+        # Register page need to get register info to check the status When refresh page not after login logic
+        parse = reqparse.RequestParser()
+        parse.add_argument('rid', type=int, location='args')  # register_id
+        parse.add_argument('hid', type=int, location='args')  # hackathon_id
+        parse.add_argument('uid', type=int, location='args')  # user_id
+        args = parse.parse_args()
+        return register_manager.get_register_by_rid_or_uid_and_hid(args)
+
+
+    @token_required
+    def post(self):
+        args = request.get_json()
+        hid = args['hackathon_id']
+        if hid is None:
+            return {}
+        return register_manager.create_or_update_register(hid, args)
+
+
+    @token_required
+    def put(self):
+        # update a Register
+        pass
+
+
+class RegisterCheckEmailResource(Resource):
+    # check email whether exist in the same hackathon registration
+    def get(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('hid', type=int, location='args', required=True)
+        parse.add_argument('email', type=str, location='args', required=True)
+        args = parse.parse_args()
+        return register_manager.check_email(args['hid'], args['email'])
 
 
 class UserExperimentResource(Resource):
@@ -137,9 +174,12 @@ class HackathonResource(Resource):
     @token_required
     def get(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('hid', type=int, location='args', required=True)
+        parser.add_argument('hid', type=int, location='args')
+        parser.add_argument('name', type=str, location='args')
         args = parser.parse_args()
-        return db_adapter.find_first_object_by(Hackathon, id=args['hid']).json()
+        if args['hid'] is None and args['name'] is None:
+            return {}
+        return hack_manager.get_hackathon_by_name_or_id(hack_id=args['hid'], name=args['name']).dic()
 
     # todo post
     @token_required
@@ -190,7 +230,7 @@ class HackathonTemplateResource(Resource):
         parse = reqparse.RequestParser()
         parse.add_argument('hid', type=int, location='args', required=True)
         args = parse.parse_args()
-        return map(lambda u: u.json(), db_adapter.find_all_objects_by(Template, hackathon_id=args['hid']))
+        return map(lambda u: u.dic(), db_adapter.find_all_objects_by(Template, hackathon_id=args['hid']))
 
 
 class UserExperimentListResource(Resource):
@@ -230,8 +270,18 @@ class DefaultExperiment(Resource):
         return {"Info": "start default experiment"}, 200
 
 
+class TemplateResource(Resource):
+    def get(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('hackathon_name', type=str, location='args', required=True)
+        args = parse.parse_args()
+        return template_manager.get_template_list(args['hackathon_name'])
+
+
 api.add_resource(UserExperimentResource, "/api/user/experiment")
 api.add_resource(RegisterListResource, "/api/register/list")
+api.add_resource(RegisterResource, "/api/register")
+api.add_resource(RegisterCheckEmailResource, "/api/register/checkemail")
 api.add_resource(BulletinResource, "/api/bulletin")
 api.add_resource(LoginResource, "/api/user/login")
 api.add_resource(HackathonResource, "/api/hackathon")
@@ -245,6 +295,7 @@ api.add_resource(GuacamoleResource, "/api/guacamoleconfig")
 api.add_resource(UserResource, "/api/user")
 api.add_resource(CurrentTime, "/api/currenttime")
 api.add_resource(DefaultExperiment, "/api/default/experiment")
+api.add_resource(TemplateResource, "/api/template/list")
 
 # ------------------------------ APIs for admin-site --------------------------------
 
@@ -280,7 +331,7 @@ class AdminRegisterResource(Resource):
     @hackathon_id_required
     def post(self):
         args = request.get_json()
-        return register_manager.create_or_update_register(args)
+        return register_manager.create_or_update_register(g.hackathon_id, args)
 
 
     @admin_token_required
@@ -288,7 +339,7 @@ class AdminRegisterResource(Resource):
     def put(self):
         # update a Register
         args = request.get_json()
-        return register_manager.create_or_update_register(args)
+        return register_manager.create_or_update_register(g.hackathon_id, args)
 
 
     @admin_token_required
