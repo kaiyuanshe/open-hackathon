@@ -9,4 +9,4 @@ version          "0.1.1"
 supports "redhat"
 supports "centos"
 
-depends "npm"
+depends "nodejs"

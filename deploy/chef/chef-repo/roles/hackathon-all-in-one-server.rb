@@ -25,6 +25,9 @@
 name "hackathon-all-in-one-server"
 description "A server that all hackathon apps in one single instance"
 
-run_list 'recipe[open-hackathon-api::mysql_install]',
+run_list 'ntp',
+         'recipe[open-hackathon-api::mysql_install]',
          'recipe[open-hackathon-api]',
-         'recipe[open-hackathon-api::mysql_setup]'
+         'recipe[open-hackathon-api::mysql_setup]',
+         'recipe[open-hackathon-ui]',
+         'recipe[open-hackathon-adminUI]'

@@ -32,8 +32,8 @@ default['openhackathon']['git']['repository'] = 'git@github.com:msopentechcn/ope
 default['openhackathon']['git']['branch'] = 'master'
 
 # oauth attributes
-default['openhackathon']['github']['client_id'] = 'b8e407813350f26bf537'
-default['openhackathon']['github']['client_secret'] = 'daa78ae27e13c9f5b4a884bd774cadf2f75a199f'
+default['openhackathon']['github']['client_id'] = ''
+default['openhackathon']['github']['client_secret'] = ''
 default['openhackathon']['github']['scope'] = 'user'
 
 default['openhackathon']['qq']['OAUTH_STATE'] = 'openhackathon'
