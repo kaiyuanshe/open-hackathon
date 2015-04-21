@@ -22,5 +22,9 @@
 
 
 # container attributes
-default['open-hackathon'][:ui][:src_dir] = '#{open-hackathon[:base_dir]}/open-hackathon-ui'
-default['open-hackathon'][:ui][:config_file] = '#{open-hackathon[:ui][:src_dir]}/config.json'
+default['openhackathon'][:ui][:src_dir] = "#{openhackathon[:base_dir]}/open-hackathon-ui"
+default['openhackathon'][:ui][:config_file] = "#{openhackathon[:ui][:src_dir]}/config.json"
+
+default['openhackathon'][:ui][:hostname] = 'open-hackathon-dev.chinacloudapp.cn'
+default['openhackathon'][:ui][:hackathon_name] = 'open-xml-sdk'
+default['openhackathon'][:ui][:login_provider] ='["github", "qq", "weibo", "gitcafe"]'
