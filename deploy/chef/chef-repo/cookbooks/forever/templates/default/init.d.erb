@@ -1,0 +1,132 @@
+#!/bin/bash
+#^syntax detection
+#
+# Service script for a Node.js application running under Forever.
+#
+# This is suitable for Fedora, Red Hat, CentOS and similar distributions.
+# It will not work on Ubuntu or other Debian-style distributions!
+#
+# There is some perhaps unnecessary complexity going on in the relationship between
+# Forever and the server process. See: https://github.com/indexzero/forever
+#
+# 1) Forever starts its own watchdog process, and keeps its own configuration data 
+# in /var/run/forever.
+#
+# 2) If the process dies, Forever will restart it: if it fails but continues to run, 
+# it won't be restarted.
+#
+# 3) If the process is stopped via this script, the pidfile is left in place; this 
+# helps when issues happen with failed stop attempts.
+#
+# 4) Which means the check for running/not running is complex, and involves parsing 
+# of the Forever list output.
+#
+# chkconfig: 345 80 20
+# description: <%= @description %>
+# processname: <%= @name %>
+# pidfile: /var/run/<%= @name %>.pid
+# logfile: /var/log/<%= @name %>.log
+#
+ 
+# Source function library.
+. /etc/init.d/functions
+ 
+NAME=<%= @name %>
+COMMAND=<%= @command || 'node' %>
+SOURCE_DIR=<%= @path %>
+SOURCE_FILE=<%= @script %>
+SCRIPT_OPTIONS=<%= @script_options %>
+ 
+user=<%= @user%>
+pidfile=/var/run/$NAME.pid
+logfile=/var/log/$NAME.log
+forever_dir=/var/run/forever
+ 
+node=node
+forever=forever
+awk=awk
+sed=sed
+ 
+export PATH=$PATH:/usr/local/bin
+export NODE_PATH=$NODE_PATH:/usr/local/lib/node_modules
+ 
+start() {
+  echo "Starting $NAME instance: "
+ 
+  if [ "$foreverid" == "" ]; then
+    # Create the log and pid files, making sure that 
+    # the target use has access to them
+    touch $logfile
+    chown $user $logfile
+ 
+    touch $pidfile
+    chown $user $pidfile
+ 
+    # Launch the application
+    daemon --user=root \
+      <%= @env_options %> $forever start --pidFile $pidfile -l $logfile -p $forever_dir -a -d -c $COMMAND --sourceDir $SOURCE_DIR $SOURCE_FILE $SCRIPT_OPTIONS
+    RETVAL=$?
+  else
+    echo "Instance already running"
+    RETVAL=0
+  fi
+}
+ 
+stop() {
+  echo -n "Shutting down $NAME instance : "
+  if [ "$foreverid" != "" ]; then
+    $forever stop $foreverid
+  else
+    echo "Instance is not running";
+  fi
+  RETVAL=$?
+}
+
+restart() {
+  echo -n "Restarting $NAME node instance : "
+  if [ "$foreverid" != "" ]; then
+    $forever restart -p $forever_dir $foreverid
+    RETVAL=$?
+  else
+    start
+  fi
+}
+
+getForeverId() {
+  $forever columns set pid &> /dev/null
+  $forever list -p $forever_dir | $awk "\$3 && \$3 == \"$pid\" { gsub(/[\[\]]/, \"\", \$2); print \$2; }";
+}
+ 
+if [ -f $pidfile ]; then
+  read pid < $pidfile
+else
+  pid=""
+fi
+
+foreverid=$(getForeverId)
+
+# Reset forever columns
+$forever clear columns &> /dev/null
+ 
+case "$1" in
+  start)
+    start
+    ;;
+  stop)
+    stop
+    ;;
+  restart)
+    restart
+    ;;
+  foreverid)
+    echo $foreverid
+    ;;
+  status)
+    status -p ${pidfile}
+    ;;
+  *)
+    echo "Usage:  {start|stop|restart|status}"
+    exit 1
+    ;;
+esac
+exit $RETVAL

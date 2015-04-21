@@ -1,0 +1,93 @@
+{
+  "hostname": "<%= node['openhackathon'][:ui][:hostname] %>",
+  "hackathon_name":"<%= node['openhackathon'][:ui][:hackathon_name] %>",
+  "proxy": "<%= node['openhackathon']['api']['endpoint'] %>",
+  "login": {
+    "github": {
+      "access_token_url": "https://github.com/login/oauth/access_token",
+      "client_id":"<%= node['openhackathon']['github']['client_id'] %>",
+      "client_secret":"<%= node['openhackathon']['github']['client_secret'] %>",
+      "redirect_uri":"http://%s/github",
+      "code":""
+    },
+    "qq": {
+      "access_token_url": "https://graph.qq.com/oauth2.0/token",
+      "grant_type":"authorization_code",
+      "client_id":"<%= node['openhackathon']['qq']['client_id'] %>",
+      "client_secret":"<%= node['openhackathon']['qq']['client_secret'] %>",
+      "redirect_uri":"http://%s/qq",
+      "code":""
+    },
+    "gitcafe": {
+      "access_token_url": "<%= node['openhackathon']['gitcafe']['api_domain'] %>/oauth/token",
+      "client_id":"<%= node['openhackathon']['gitcafe']['client_id'] %>",
+      "client_secret":"<%= node['openhackathon']['gitcafe']['client_secret'] %>",
+      "redirect_uri":"http://%s/gitcafe",
+      "grant_type":"authorization_code",
+      "code":""
+    },
+    "weibo":{
+      "access_token_url": "https://api.weibo.com/oauth2/access_token",
+      "client_id":"<%= node['openhackathon']['weibo']['client_id'] %>",
+      "client_secret":"<%= node['openhackathon']['weibo']['client_secret'] %>",
+      "grant_type":"authorization_code",
+      "redirect_uri":"http://%s/weibo",
+      "code":""
+    },
+    "provider_enabled": <%= node['openhackathon'][:ui][:login_provider] %>
+  },
+  "api": {
+    "user": {
+      "login":["post","del"],
+      "hackathon":["get"],
+      "experiment":{
+        "":["get","post","del","put"],
+        "list":["get"]
+      }
+    },
+    "register":{
+      "list":["get"]
+    },
+    "bulletin":{
+      "":["get","post"]
+    },
+    "hackathon":{
+      "":["get","post"],
+      "list":["get"],
+      "stat":["get"],
+      "template":["get"]
+    }
+  },
+  "sociallogin": {
+    "github": {
+      "client_id": "<%= node['openhackathon']['github']['client_id'] %>",
+      "redirect_uri": "http://<%= node['openhackathon'][:ui][:hostname] %>/github",
+      "scope": "user"
+    },
+    "gitcafe": {
+      "client_id": "<%= node['openhackathon']['gitcafe']['client_id'] %>",
+      "redirect_uri": "http://<%= node['openhackathon'][:ui][:hostname] %>/gitcafe",
+      "response_type": "code",
+      "scope": "public"
+    },
+    "weibo": {
+      "meta_content": "<%= node['openhackathon']['weibo']['meta_content'] %>",
+      "client_id": "<%= node['openhackathon']['weibo']['client_id'] %>",
+      "redirect_uri": "http://<%= node['openhackathon'][:ui][:hostname] %>/weibo",
+      "scope": "all"
+    },
+    "qq": {
+      "client_id": "<%= node['openhackathon']['qq']['client_id'] %>",
+      "redirect_uri": "http://<%= node['openhackathon'][:ui][:hostname] %>/qq" ,
+      "scope": "<%= node['openhackathon']['qq']['scope'] %>",
+      "state": "<%= node['openhackathon']['qq']['OAUTH_STATE'] %>",
+      "response_type": "<%= node['openhackathon']['qq']['response_type'] %>"
+    }
+  },
+  "social":{
+    "github":"https://github.com/login/oauth/authorize?",
+    "gitcafe":"<%= node['openhackathon']['gitcafe']['domain'] %>/oauth/authorize?'",
+    "weibo":"https://api.weibo.com/oauth2/authorize?",
+    "qq":"https://graph.qq.com/oauth2.0/authorize?"
+  }
+}

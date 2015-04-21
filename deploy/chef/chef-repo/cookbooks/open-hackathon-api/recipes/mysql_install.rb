@@ -24,12 +24,17 @@
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
 
+package 'libmysqlclient-dev'
+
+include_recipe "open-hackathon-api::user"
+
+
 mysql_service 'default' do
-  run_group node['open-hackathon-api']['user']
-  run_user node['open-hackathon-api']['user']
-  initial_root_password node['open-hackathon-api']['mysql']['initial_root_password']
-  version node['open-hackathon-api']['mysql']['version']
-  port node['open-hackathon-api']['mysql']['port']
+  run_group node['openhackathon']['user']
+  run_user node['openhackathon']['user']
+  initial_root_password node['openhackathon']['mysql']['initial_root_password']
+  version node['openhackathon']['mysql']['version']
+  port node['openhackathon']['mysql']['port']
   action [:create, :start]
 end
 

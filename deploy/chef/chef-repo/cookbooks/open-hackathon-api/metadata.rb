@@ -21,6 +21,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
+
+
 name             'open-hackathon-api'
 maintainer       "Microsoft Open Technologies (Shanghai) Co. Ltd"
 maintainer_email "msopentechdevsh@microsoft.com"
@@ -39,4 +41,4 @@ depends  'mysql','~> 6.0.20'
 depends  'postgresql'
 depends  'database'
 depends  'mysql2_chef_gem'
-depends  'gcc'
+depends  'build-essential'
