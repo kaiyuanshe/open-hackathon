@@ -67,7 +67,7 @@ class RegisterResource(Resource):
         parse.add_argument('hid', type=int, location='args')  # hackathon_id
         parse.add_argument('uid', type=int, location='args')  # user_id
         args = parse.parse_args()
-        return register_manager.get_register_by_uid_or_rid_and_hid(args)
+        return register_manager.get_register_by_rid_or_uid_and_hid(args)
 
 
     @token_required

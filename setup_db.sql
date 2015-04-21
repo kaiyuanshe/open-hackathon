@@ -724,8 +724,7 @@ CREATE TABLE IF NOT EXISTS `vm_endpoint` (
 -- alter table hackathon add column registration_end_time DATETIME ;
 -- alter table hackathon add column address VARCHAR(64) ;
 -- alter table hackathon add column description TEXT ;
--- alter table hackathon add column images VARCHAR(512) ;
-
+-- alter table hackathon add column images TEXT ;
 
 ---------------------------------------- Added on 2015-04-14 ----------------------------------------
 
