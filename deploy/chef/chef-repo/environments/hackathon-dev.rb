@@ -25,22 +25,38 @@
 name "hackathon-dev"
 description "The open-hackathon development environment"
 
-SSL = {
-  :disable => false
-}
-
 
 default_attributes({
-  "hackathon" => {
-    "debug" => {
-      "enable"=> true
+  "openhackathon" => {
+    "environment" => "dev",
+    "guacamole" => {
+      "host" => "http://open-hackathon.chinacloudapp.cn:28080"
     },
-    "ssl" => {
-      "disableSsl" => SSL[:disable]
+    "git" => {
+      "repository" => "git@github.com:msopentechcn/open-hackathon.git"
     },
-    "logging" => {
-      "level" => "info"
+    "gitcafe" => {
+      "api_domain" => "https://gcas.dgz.sh",
+      "client_id" => "1c33ecdf4dd0826325f60a92e91834522b1cdf47a7f90bdaa79f0526fdc48727",
+      "client_secret" => "80b63609000b20c1260df28081c08712617648e1b528086bbb089f0af4614509",
+      "domain" => "https://gcs.dgz.sh"
+    },
+    "qq" => {
+      "client_id" => "101200890",
+      "client_secret" => "88ad67bd4521c4cc47136854781cb9b5",
+      "meta_content" => "274307566465013314076545663016134754100636"
+    },
+    "weibo" => {
+      "client_id" => "1943560862",
+      "client_secret" => "a5332c39c129902e561bff5e4bcc5982"
+    },
+    "github" => {
+      "client_id" => "b8e407813350f26bf537",
+      "client_secret" => "daa78ae27e13c9f5b4a884bd774cadf2f75a199f"
     }
   }
 
 })
+
+
+

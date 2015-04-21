@@ -1,0 +1,32 @@
+{
+  "name": "forever",
+  "description": "Chef cookbook for running node apps using forever.",
+  "long_description": "See README.md",
+  "maintainer": "David Radcliffe",
+  "maintainer_email": "david@trabian.com",
+  "license": "MIT",
+  "platforms": {
+    "redhat": ">= 0.0.0",
+    "centos": ">= 0.0.0"
+  },
+  "dependencies": {
+    "npm": ">= 0.0.0"
+  },
+  "recommendations": {
+  },
+  "suggestions": {
+  },
+  "conflicting": {
+  },
+  "providing": {
+  },
+  "replacing": {
+  },
+  "attributes": {
+  },
+  "groupings": {
+  },
+  "recipes": {
+  },
+  "version": "0.1.1"
+}

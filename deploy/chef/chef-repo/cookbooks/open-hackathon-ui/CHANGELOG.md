@@ -1,11 +1,11 @@
-open-hackathon-tempUI CHANGELOG
-===================
+open-hackathon-ui CHANGELOG
+===========================
 
-This file is used to list changes made in each version of the front-end cookbook.
+This file is used to list changes made in each version of the open-hackathon-ui cookbook.
 
 0.1.0
 -----
-- [your_name] - Initial release of open-hackathon-tempUI
+- [your_name] - Initial release of open-hackathon-ui
 
 - - -
 Check the [Markdown Syntax Guide](http://daringfireball.net/projects/markdown/syntax) for help with Markdown.
