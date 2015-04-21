@@ -26,22 +26,29 @@ include_recipe "open-hackathon-api::source"
 
 # install npm packages
 npm_packages = ["cnpm", "forever", "yo", "bower", "grunt-cli", "grunt-ng-annotate"]
-npm_packages.each do |pkg|
-  nodejs_npm pkg do
-    options ["--registry=https://registry.npm.taobao.org"]
+if node['openhackathon'][:npm][:enable_taobao_mirror] then
+  npm_packages.each do |pkg|
+    nodejs_npm pkg do
+      options ["--registry=https://registry.npm.taobao.org"]
+    end
+  end
+else
+  npm_packages.each do |pkg|
+    nodejs_npm pkg
   end
 end
 
-template node['open-hackathon'][:ui][:config_file] do
+
+template node['openhackathon'][:ui][:config_file] do
   source 'config.json.erb'
-  owner node['open-hackathon']['user']
-  group node['open-hackathon']['user']
+  owner node['openhackathon']['user']
+  group node['openhackathon']['user']
   mode "0644"
 end
 
 bash "config and build" do
    code <<-EOS
-   cd #{node['open-hackathon'][:ui][:src_dir]}
+   cd #{node['openhackathon'][:ui][:src_dir]}
    bower install
    cnpm install
    grunt build
