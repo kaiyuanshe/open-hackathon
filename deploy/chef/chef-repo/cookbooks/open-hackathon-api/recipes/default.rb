@@ -12,6 +12,7 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+#  
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,13 +20,16 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+# -----------------------------------------------------------------------------------
 
 
 include_recipe "python"
 package 'libpcre3'
 package 'libpcre3-dev'
 include_recipe "uwsgi"
-include_recipe "gcc"
+
+node.set['build_essential']['compile_time'] = true
+include_recipe "build-essential"
 
 include_recipe "open-hackathon-api::source"
 
@@ -45,24 +49,24 @@ end
   python_pip "#{f}"
 end
 
-template node['open-hackathon']['api']['src_dir']+'/nginx_openhackathon.uwsgi.ini' do
+template node['openhackathon']['api']['src_dir']+'/nginx_hack_api.uwsgi.ini' do
   source 'uwsgi.ini.erb'
-  owner node['open-hackathon']['user']
-  group node['open-hackathon']['user']
+  owner node['openhackathon']['user']
+  group node['openhackathon']['user']
   mode "0644"
 end
 
-template node['open-hackathon']['api']['src_dir']+'/hackathon/config.py' do
+template node['openhackathon']['api']['src_dir']+'/hackathon/config.py' do
   source 'config.py.erb'
-  owner node['open-hackathon']['user']
-  group node['open-hackathon']['user']
+  owner node['openhackathon']['user']
+  group node['openhackathon']['user']
   mode "0644"
 end
 
 uwsgi_service 'app' do
-  home_path node['open-hackathon']['api']['src_dir']
-  config_file node['open-hackathon']['api']['src_dir']+'/nginx_openhackathon.uwsgi.ini'
+  home_path node['openhackathon']['api']['src_dir']
+  config_file node['openhackathon']['api']['src_dir']+'/nginx_hack_api.uwsgi.ini'
   config_type :ini
-  uid node['open-hackathon']['user']
-  gid node['open-hackathon']['user']
+  uid node['openhackathon']['user']
+  gid node['openhackathon']['user']
 end

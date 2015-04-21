@@ -20,34 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-include_recipe "apt"
-include_recipe "git"
-include_recipe "open-hackathon-api::user"
-
-directory node['openhackathon'][:base_dir] do
-  owner node['openhackathon']['user']
-  group node['openhackathon']['user']
-  mode  '0755'
-  action :create
-end
-
-git node['openhackathon'][:base_dir] do
-  repository node['openhackathon']['git']['repository']
-  checkout_branch node['openhackathon']['git']['branch']
-  action :sync
-  timeout 60
-end
-
-directory node['openhackathon']['uwsgi']['log_dir'] do
-  owner node['openhackathon']['user']
-  group node['openhackathon']['user']
-  mode  '0744'
-  action :create
-end
-
-directory node['openhackathon']['log_dir'] do
-  owner node['openhackathon']['user']
-  group node['openhackathon']['user']
-  mode  '0744'
-  action :create
+user "#{node['openhackathon']['user']}" do
+  comment "The Open Hackathon User"
+  system true
+  shell "/bin/false"
 end
