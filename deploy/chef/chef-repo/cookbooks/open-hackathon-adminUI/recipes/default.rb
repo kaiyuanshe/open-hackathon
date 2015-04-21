@@ -24,27 +24,13 @@
 include_recipe "open-hackathon-api::source"
 
 include_recipe "python"
-include_recipe "gcc"
+# include_recipe "gcc"
 package 'libmysqlclient-dev'
 package 'libpcre3'
 package 'libpcre3-dev'
 package 'mysql-client-core'
 include_recipe "uwsgi"
 
-
-directory node['open-hackathon']['api']['uwsgi']['log_dir'] do
-  owner node['open-hackathon']['user']
-  group node['open-hackathon']['user']
-  mode '0744'
-  action :create
-end
-
-directory node['open-hackathon']['log_dir'] do
-  owner node['open-hackathon']['user']
-  owner node['open-hackathon']['user']
-  mode '0744'
-  action :create
-end
 
 python_pip "werkzeug" do
   version "0.9.6"
@@ -58,27 +44,28 @@ end
   python_pip "#{f}"
 end
 
-template node['open-hackathon']['admin']['src_dir']+'/nginx_openhackathon.uwsgi.ini' do
+config_file= node['openhackathon']['admin']['src_dir']+'/nginx_openhackathon.uwsgi.ini'
+template config_file do
   source 'uwsgi.ini.erb'
-  owner node['open-hackathon']['user']
-  group node['open-hackathon']['user']
+  owner node['openhackathon']['user']
+  group node['openhackathon']['user']
   mode "0644"
 end
 
-template node['open-hackathon']['admin']['src_dir']+'/app/config.py' do
+template node['openhackathon']['admin']['src_dir']+'/app/config.py' do
   source 'config.py.erb'
-  owner node['open-hackathon']['user']
-  group node['open-hackathon']['user']
+  owner node['openhackathon']['user']
+  group node['openhackathon']['user']
   mode "0644"
 end
 
 uwsgi_service 'app' do
-  home_path node['open-hackathon']['admin']['src_dir']
-  config_file node['open-hackathon']['admin']['src_dir']+'/nginx_openhackathon.uwsgi.ini'
+  home_path node['openhackathon']['admin']['src_dir']
+  config_file config_file
   config_type :ini
   start_immediately false
-  uid node['open-hackathon']['user']
-  gid node['open-hackathon']['user']
+  uid node['openhackathon']['user']
+  gid node['openhackathon']['user']
 end
 
 service 'uwsgi-app' do

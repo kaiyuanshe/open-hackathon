@@ -20,15 +20,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-default['open-hackathon']['admin']['HOSTNAME'] = 'http://hack-admin-dev.chinacloudapp.cn'
-default['open-hackathon']['HACKATHON_API_ENDPOINT'] = 'http://open-hackathon.chinacloudapp.cn:15002'
+default['openhackathon']['admin']['HOSTNAME'] = 'http://hack-admin-dev.chinacloudapp.cn'
+default['openhackathon']['HACKATHON_API_ENDPOINT'] = 'http://open-hackathon-dev.chinacloudapp.cn:15000'
 
-default['open-hackathon']['hackathon']['name'] = 'open-xml-sdk'
+default['openhackathon']['hackathon']['name'] = 'open-xml-sdk'
 
-default['open-hackathon']['admin']['login_provider'] ='["github","qq"]'
-default['open-hackathon']['admin']['session_minutes'] = '60'
-default['open-hackathon']['admin']['token_expiration_minutes'] = '60*24'
+default['openhackathon']['admin']['login_provider'] ='["github","qq"]'
+default['openhackathon']['admin']['session_minutes'] = '60'
+default['openhackathon']['admin']['token_expiration_minutes'] = '60*24'
 
-default['open-hackathon']['admin']['app']['secret_key'] = 'secret_key'
-default['open-hackathon']['admin']['src_dir'] = '#{open-hackathon[:base_dir]}/open-hackathon-adminUI/src'
-default['open-hackathon']['admin']['port'] = 80
+default['openhackathon']['admin']['app']['secret_key'] = 'secret_key'
+default['openhackathon']['admin']['src_dir'] = "#{openhackathon[:base_dir]}/open-hackathon-adminUI/src"
+default['openhackathon']['admin']['port'] = 80
