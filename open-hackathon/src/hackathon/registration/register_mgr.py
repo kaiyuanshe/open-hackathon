@@ -46,7 +46,7 @@ class RegisterManger(object):
         if register is not None:
             return register.dic()
         else:
-            return {}
+            return {"errorcode": 404, "message": "bad request"}
 
     def create_or_update_register(self, hackathon_id, args):
         try:
@@ -96,27 +96,27 @@ class RegisterManger(object):
     def get_register_after_login(self, **kwargs):
         hack_id = kwargs['hackathon_id']
         user_id = kwargs['user_id']
-        register = db_adapter.find_first_object(Register, Register.hackathon_id == hack_id, Register.user_id == user_id)
+        register = self.db.find_first_object(Register, Register.hackathon_id == hack_id, Register.user_id == user_id)
         return register
 
     def check_email(self, hid, email):
-        register = db_adapter.find_first_object(Register, Register.hackathon_id == hid, Register.email == email)
+        register = self.db.find_first_object(Register, Register.hackathon_id == hid, Register.email == email)
         return register is None
 
-    def get_register_by_uid_or_rid_and_hid(self, args):
+    def get_register_by_rid_or_uid_and_hid(self, args):
 
         # situation One : only rid is given
         # situation Two : uid and hid are both given
         # situation Three : error , bad request
 
-        if args['rid'] is not None:
+        if 'rid' in args:
             return self.get_register_by_id(args['rid'])
 
-        elif args['uid'] is not None and args['hid'] is not None:
-            register = db_adapter.find_first_object(Register, Register.user_id == args['uid'],
+        elif 'uid' in args and 'hid' in args:
+            register = self.db.find_first_object(Register, Register.user_id == args['uid'],
                                                     Register.hackathon_id == args['hid'])
             if register is None:
-                return {}
+                return {"errorcode": 404, "message": "not found"}
             else:
                 return register.dic()
         else:

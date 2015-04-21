@@ -47,7 +47,7 @@ class LoginProviderBase():
 
     def return_details(self, user_with_token, args):
         user = user_with_token["user"]
-        log.info("github user login successfully:" + repr(user))
+        log.info("user login successfully:" + repr(user))
         hackathon_name = args.get('hackathon_name')
 
         detail = user_manager.get_user_detail_info(user)
@@ -59,15 +59,16 @@ class LoginProviderBase():
         # get hackathon
         hackathon = hack_manager.get_hackathon_by_name(hackathon_name)
         if hackathon is None:
-            login_result["hackathon"] = {}
+            return {"errorcode": 400, "message": "bad request : hackathon_name does not exist in DB"}
         login_result["hackathon"] = hackathon.dic()
 
         # get register info
         register = register_manager.get_register_after_login(hackathon_id=hackathon.id, user_id=user.id)
         if register is None:
             login_result['registration'] = {}
-        login_result['registration'] = register.dic()
-
+        else:
+            login_result['registration'] = register.dic()
+        log.debug("login returns info: " + str(login_result))
         return login_result
 
 
@@ -102,13 +103,14 @@ class QQLogin(LoginProviderBase):
                                            email_info=email_info,
                                            avatar_url=user_info["figureurl"])
 
-        # login flask
-        user = user_with_token["user"]
-        log.info("QQ user login successfully:" + repr(user))
-        hackathon_name = args.get('hackathon_name')
-        detail = self.um.get_user_detail_info(user, hackathon_name=hackathon_name)
-        detail["token"] = user_with_token["token"].token
-        return detail
+        # # login flask
+        # user = user_with_token["user"]
+        # log.info("QQ user login successfully:" + repr(user))
+        # hackathon_name = args.get('hackathon_name')
+        # detail = self.um.get_user_detail_info(user, hackathon_name=hackathon_name)
+        # detail["token"] = user_with_token["token"].token
+        # return detail
+        return self.return_details(user_with_token, args)
 
 
 class GithubLogin(LoginProviderBase):
