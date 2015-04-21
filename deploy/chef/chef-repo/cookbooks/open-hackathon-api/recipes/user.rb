@@ -24,4 +24,5 @@ user "#{node['openhackathon']['user']}" do
   comment "The Open Hackathon User"
   system true
   shell "/bin/false"
+  home "/home/#{node['openhackathon']['user']}"
 end

@@ -27,7 +27,7 @@ description "The open-hackathon development environment"
 
 
 default_attributes({
-  "open-hackathon-api" => {
+  "openhackathon" => {
     "environment" => "dev",
     "guacamole" => {
       "host" => "http://open-hackathon.chinacloudapp.cn:28080"

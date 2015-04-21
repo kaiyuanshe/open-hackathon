@@ -47,10 +47,12 @@ template node['openhackathon'][:ui][:config_file] do
 end
 
 bash "config and build" do
-   code <<-EOS
-   cd #{node['openhackathon'][:ui][:src_dir]}
-   bower install
-   cnpm install
-   grunt build
-   EOS
+  user node['openhackathon']['user']
+  cwd node['openhackathon'][:ui][:src_dir]
+  environment ({'HOME' => "#{node['openhackathon'][:ui][:src_dir]}"})
+  code <<-EOH
+    bower install
+    cnpm install
+    grunt build
+    EOH
 end

@@ -33,6 +33,8 @@ end
 
 git node['openhackathon'][:base_dir] do
   repository node['openhackathon']['git']['repository']
+  user node['openhackathon']['user']
+  group node['openhackathon']['user']
   checkout_branch node['openhackathon']['git']['branch']
   action :sync
   timeout 60
