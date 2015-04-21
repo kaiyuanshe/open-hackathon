@@ -59,7 +59,7 @@ class LoginProviderBase():
         # get hackathon
         hackathon = hack_manager.get_hackathon_by_name(hackathon_name)
         if hackathon is None:
-            return {"errorcode": 500, "message": "hackathon_name dose not exist in DB:hackathon"}
+            return {"errorcode": 400, "message": "bad request : hackathon_name does not exist in DB"}
         login_result["hackathon"] = hackathon.dic()
 
         # get register info
