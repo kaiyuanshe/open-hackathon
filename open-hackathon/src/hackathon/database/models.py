@@ -172,7 +172,7 @@ class Register(DBBase):
     enabled = Column(Integer)  # 0: disabled 1:enabled
 
     phone = Column(String(11))
-    sex = Column(Integer)   #0:women 1:man
+    sex = Column(Integer)  # 0:women 1:man
     age = Column(Integer)
     career_type = Column(String(16))
     career = Column(String(16))
@@ -204,7 +204,7 @@ class Hackathon(DBBase):
     display_name = Column(String(64))
     status = Column(Integer)
     check_register = Column(Integer)  # 1=True 0=False
-    recycle_enabled = Column(Integer,default=1)
+    recycle_enabled = Column(Integer, default=0)
     start_time = Column(DateTime)
     end_time = Column(DateTime)
     create_time = Column(DateTime)

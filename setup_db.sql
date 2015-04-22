@@ -666,5 +666,5 @@ DROP TABLE IF EXISTS `vm_endpoint`;
 
 ---------------------------------------- Added on 2015-04-14 ----------------------------------------
 
-alter table hackathon add column recycle_enabled int default 1 after check_register;
+alter table hackathon add column recycle_enabled int default 0 after check_register;
 

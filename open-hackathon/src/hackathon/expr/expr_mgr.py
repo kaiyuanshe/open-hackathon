@@ -610,13 +610,13 @@ def recycle_expr():
     :return:
     """
     log.debug("start checking experiment ... ")    
-    r = Expeirment.query.join(Hackathon).filter(Experiment.last_heart_beat_time + datetime.timedelta(hours=5)>datetime.utcnow(), recycle_enabled=RecycleStatus.enabled).first()
+    r = Expeirment.query.join(Hackathon).filter(Experiment.last_heart_beat_time + datetime.timedelta(hours=5) > datetime.utcnow(), recycle_enabled=RecycleStatus.Enabled).first()
     if r is not None:
         expr_manager.stop_expr(r.id)
-        log.debug("it's stopping inactive experiment now")
+        log.debug("it's stopping " + r.id + " inactive experiment now")
         return
     else:
         log.debug("There is now inactive experiment now")
-        break
+        return
 
 expr_manager = ExprManager()
