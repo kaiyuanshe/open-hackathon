@@ -77,9 +77,9 @@ Config = {
             "access_token_url": 'https://api.weibo.com/oauth2/access_token?client_id=%s&client_secret=%s&grant_type=authorization_code&redirect_uri=%s/weibo&code=' % (
                 WEIBO_CLIENT_ID, WEIBO_CLIENT_SECRET, HOSTNAME)
         },
-        "provider_enabled": <%= node['openhackathon-adminUI']['provider'] %>,
-        "session_minutes": <%= node['openhackathon-adminUI']['session_minutes'] %>,
-        "token_expiration_minutes": <%= node['openhackathon-adminUI']['token_expiration_minutes'] %>
+        "provider_enabled": <%= node['openhackathon']['admin']['login_provider'] %>,
+        "session_minutes": <%= node['openhackathon']['admin']['session_minutes'] %>,
+        "token_expiration_minutes": <%= node['openhackathon']['admin']['token_expiration_minutes'] %>
     },
     "hackathon-api": {
         "endpoint": HACKATHON_API_ENDPOINT
