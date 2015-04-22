@@ -50,6 +50,7 @@ bash "config and build" do
   user node['openhackathon']['user']
   cwd node['openhackathon'][:ui][:src_dir]
   environment ({'HOME' => "#{node['openhackathon'][:ui][:src_dir]}"})
+  timeout 600
   code <<-EOH
     bower install
     cnpm install
