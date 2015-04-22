@@ -49,8 +49,8 @@ default['openhackathon']['gitcafe']['client_secret'] = ''
 default['openhackathon']['gitcafe']['response_type'] = 'code'
 default['openhackathon']['gitcafe']['scope'] = 'public'
 default['openhackathon']['gitcafe']['grant_type'] = 'authorization_code'
-default['openhackathon']['gitcafe']['domain'] = ''
-default['openhackathon']['gitcafe']['api_domain'] = ''
+default['openhackathon']['gitcafe']['domain'] = 'https://gitcafe.com'
+default['openhackathon']['gitcafe']['api_domain'] = 'https://api.gitcafe.com'
 
 default['openhackathon']['weibo']['meta_content'] = 'ae884e09bc02b700'
 default['openhackathon']['weibo']['client_id'] = ''
@@ -62,7 +62,7 @@ default['openhackathon']['token_expiration_minutes'] = '60*24'
 
 # azure attributes
 default['openhackathon']['azure']['subscriptionId'] = '31e6e137-4656-4f88-96fb-4c997b14a644'
-default['openhackathon']['azure']['certPath'] = '/home/if/If/LABOSS/open-hackathon/src/hackathon/certificates/1-31e6e137-4656-4f88-96fb-4c997b14a644.pem'
+default['openhackathon']['azure']['certPath'] = '/opt/openhackathon/open-hackathon/src/hackathon/certificates/1-31e6e137-4656-4f88-96fb-4c997b14a644.pem'
 default['openhackathon']['azure']['managementServiceHostBase'] = 'management.core.chinacloudapi.cn'
 
 # guacamole attributes
@@ -99,8 +99,3 @@ default['openhackathon']['uwsgi']['log_dir'] = '/var/log/uwsgi'
 # mirror
 default['openhackathon'][:npm][:enable_taobao_mirror] = true
 default['openhackathon'][:gem][:enable_taobao_mirror] = true
-
-default['open-hackathon-api']['gem']['delete1'] = 'https://rubygems.org/'
-default['open-hackathon-api']['gem']['delete2'] = 'http://rubygems.org/'
-default['open-hackathon-api']['gem']['add'] = 'https://ruby.taobao.org/'
-
