@@ -14,7 +14,7 @@
 #
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-#  
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -29,7 +29,7 @@ import sys
 sys.path.append("../src/hackathon")
 import unittest
 from hackathon.registration.register_mgr import RegisterManger, register_manager
-from hackathon.database.models import Register
+from hackathon.database.models import Register, UserEmail
 from hackathon import app
 from mock import Mock, ANY
 import mock
@@ -105,7 +105,7 @@ class TestRegisterManager(unittest.TestCase):
             rm.create_or_update_register(1, {'email': 'test@test.com',
                                              'register_name': 'test',
                                              'description': 'test desciption'})
-            db_adapter.find_first_object.assert_called_once_with(Register, ANY, ANY)
+            self.assertEqual(db_adapter.find_first_object.call_count, 2)
             self.assertEqual(db_adapter.update_object.call_count, 0)
             self.assertEqual(db_adapter.add_object_kwargs.call_count, 1)
 
@@ -171,26 +171,6 @@ class TestRegisterManager(unittest.TestCase):
         self.assertEqual(db_adapter.delete_object.call_count, 1)
 
 
-    '''test method get_register_after_login'''
-
-    def test_get_register_after_login_none_register(self):
-        db_adapter = Mock()
-        db_adapter.find_first_object.return_value = None
-        rm = RegisterManger(db_adapter)
-        result = rm.get_register_after_login(hackathon_id=1, user_id=1)
-        self.assertIsNone(result)
-        db_adapter.find_first_object.assert_called_once_with(Register, ANY, ANY)
-
-    def test_get_register_after_login(self):
-        test_register = Register(id=1, register_name='test', email='test@test.com', hackathon_id=1, user_id=1)
-        db_adapter = Mock()
-        db_adapter.find_first_object.return_value = test_register
-        rm = RegisterManger(db_adapter)
-        result = rm.get_register_after_login(hackathon_id=1, user_id=1)
-        self.assertEqual(result.register_name, 'test')
-        db_adapter.find_first_object.assert_called_once_with(Register, ANY, ANY)
-
-
     '''test method check_email'''
 
     def test_check_email_already_exist(self):
@@ -207,6 +187,7 @@ class TestRegisterManager(unittest.TestCase):
         rm = RegisterManger(db_adapter)
         self.assertFalse(rm.check_email(1, 'test@test.com'))
         db_adapter.find_first_object.assert_called_once_with(Register, ANY, ANY)
+
 
     '''test methon get_register_by_uid_or_rid_and_hid'''
 
@@ -244,5 +225,72 @@ class TestRegisterManager(unittest.TestCase):
         db_adapter.find_first_object.return_value = None
         rm = RegisterManger(db_adapter)
         result = rm.get_register_by_rid_or_uid_and_hid({'uid': 1, 'hid': 1})
-        self.assertEqual(result, {"errorcode": 404, "message": "not found"})
+        self.assertEqual(result, {"errorcode": 404, "message": "register not found"})
         db_adapter.find_first_object.assert_called_once_with(Register, ANY, ANY)
+
+
+    '''test method : deal_with_user_and_register_when_login'''
+
+    def test_deal_with_user_and_register_when_login_success(self):
+        user_email = UserEmail(id=1, email='test@test.com', user_id=1)
+        user = mock.MagicMock(id=1, emails=[user_email])
+        db_adapter = Mock()
+        rm = RegisterManger(db_adapter)
+
+        with mock.patch(
+                'hackathon.registration.register_mgr.RegisterManger.get_register_by_emails_and_hid') as get_register_by_emails_and_hid:
+            register = Register(id=1, register_name='test_name')
+            get_register_by_emails_and_hid.return_value = register
+            rm.deal_with_user_and_register_when_login(user, 1)
+            get_register_by_emails_and_hid.assert_called_once_with(1, ['test@test.com'])
+            db_adapter.update_object(register, ANY)
+
+    def test_deal_with_user_and_register_when_login_register_None(self):
+        user_email = UserEmail(id=1, email='test@test.com', user_id=1)
+        user = mock.MagicMock(id=1, emails=[user_email])
+        db_adapter = Mock()
+        rm = RegisterManger(db_adapter)
+
+        with mock.patch(
+                'hackathon.registration.register_mgr.RegisterManger.get_register_by_emails_and_hid') as get_register_by_emails_and_hid:
+            get_register_by_emails_and_hid.return_value = None
+            rm.deal_with_user_and_register_when_login(user, 1)
+            get_register_by_emails_and_hid.assert_called_once_with(1, ['test@test.com'])
+            self.assertEqual(db_adapter.update_object.call_count, 0)
+
+    def test_deal_with_user_and_register_when_login_register_user_id_not_none(self):
+        user_email = UserEmail(id=1, email='test@test.com', user_id=1)
+        user = mock.MagicMock(id=1, emails=[user_email])
+        db_adapter = Mock()
+        rm = RegisterManger(db_adapter)
+
+        with mock.patch(
+                'hackathon.registration.register_mgr.RegisterManger.get_register_by_emails_and_hid') as get_register_by_emails_and_hid:
+            register = Register(id=1, register_name='test_name', user_id=1)
+            get_register_by_emails_and_hid.return_value = register
+            rm.deal_with_user_and_register_when_login(user, 1)
+            get_register_by_emails_and_hid.assert_called_once_with(1, ['test@test.com'])
+            self.assertEqual(db_adapter.update_object.call_count, 0)
+
+
+    '''test method deal_with_user_and_register_when_create_register'''
+    def test_deal_with_user_and_register_when_create_register_success(self):
+        db_adapter = Mock()
+        rm = RegisterManger(db_adapter)
+        args = {'email':'test@test.com'}
+        result = {'email':'test@test.com','user_id':1}
+
+        user_email = UserEmail(user_id=1)
+        db_adapter.find_first_object.return_value= user_email
+
+        self.assertEqual(rm.deal_with_user_and_register_when_create_register(args),result)
+        db_adapter.find_first_object.assert_called_once_with(UserEmail,ANY)
+
+    def test_deal_with_user_and_register_when_create_register_user_email_none(self):
+        db_adapter = Mock()
+        rm = RegisterManger(db_adapter)
+        args = {'email':'test@test.com'}
+
+        db_adapter.find_first_object.return_value= None
+        self.assertEqual(rm.deal_with_user_and_register_when_create_register(args),args)
+        db_adapter.find_first_object.assert_called_once_with(UserEmail,ANY)
