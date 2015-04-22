@@ -21,46 +21,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
-PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-DAEMON=/usr/local/bin/uwsgi
 
-NAME=uwsgi-emperor
-DESC=uwsgi-emperor
+name "hackathon-all-in-one-server"
+description "A server that all hackathon apps in one single instance"
 
-# modify as needed
-VASALS=/opt/open-hackathon/nginx_openhackathon.uwsgi.ini
-EMPEROR_LOGS=/var/log/uwsgi/*.log
-
-test -x $DAEMON || exit 0
-
-# Include uwsgi defaults if available
-if [ -f /etc/default/uwsgi ] ; then
-        . /etc/default/uwsgi
-fi
-
-set -e
-
-DAEMON_OPTS="--emperor $VASALS --die-on-term --master --daemonize $EMPEROR_LOGS"
-
-case "$1" in
-  start)
-        echo -n "Starting $DESC: "
-        start-stop-daemon --start --exec $DAEMON -- $DAEMON_OPTS
-        echo "$NAME."
-        ;;
-  stop)
-        echo -n "Stopping $DESC: "
-        start-stop-daemon --signal 3 --quiet --retry 2 --stop \
-                --exec $DAEMON
-        echo "$NAME."
-        ;;
-  status)
-        ps -ef | grep uwsgi
-        ;;
-  *)
-        N=/etc/init.d/$NAME
-        echo "Usage: $N {start|stop|status}" >&2
-        exit 1
-        ;;
-esac
-exit 0
+run_list 'ntp',
+         'recipe[open-hackathon-api::mysql_install]',
+         'recipe[open-hackathon-api]',
+         'recipe[open-hackathon-api::mysql_setup]',
+         'recipe[open-hackathon-ui]',
+         'recipe[open-hackathon-adminUI]'

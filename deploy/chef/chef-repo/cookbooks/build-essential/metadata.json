@@ -60,5 +60,5 @@
   "recipes": {
     "build-essential": "Installs packages required for compiling C software from source."
   },
-  "version": "2.2.2"
+  "version": "2.2.3"
 }
