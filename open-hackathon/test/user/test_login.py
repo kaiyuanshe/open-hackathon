@@ -4,7 +4,7 @@
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
 #
 # The MIT License (MIT)
-#  
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -30,7 +30,7 @@ sys.path.append("../src/hackathon")
 import unittest
 from hackathon.user.login import GithubLogin, QQLogin, WeiboLogin, GitcafeLogin
 from hackathon import app
-from mock import Mock
+from mock import Mock, ANY
 import mock
 from hackathon.database.models import User, UserToken, Hackathon, Register
 from hackathon.user.login import LoginProviderBase
@@ -63,20 +63,25 @@ class UserLoginTest(unittest.TestCase):
                 hackathon = Hackathon(id=1, name='test_hackathon')
                 get_hackathon_by_name.return_value = hackathon
                 with mock.patch(
-                        'hackathon.registration.register_mgr.RegisterManger.get_register_after_login') as get_register_after_login:
+                        'hackathon.registration.register_mgr.RegisterManger.get_register_by_rid_or_uid_and_hid') as get_register_by_rid_or_uid_and_hid:
                     register = Register(id=1, register_name='test', email='test@test.com', hackathon_id=1)
-                    get_register_after_login.return_value = register
+                    get_register_by_rid_or_uid_and_hid.return_value = register
+                    with mock.patch(
+                            'hackathon.registration.register_mgr.RegisterManger.deal_with_user_and_register_when_login') as deal_with_user_and_register_when_login:
+                        deal_with_user_and_register_when_login.return_value = None
 
-                    result = {}
-                    detail['token'] = 'test_token'
-                    result['user'] = detail
-                    result['hackathon'] = hackathon.dic()
-                    result['registration'] = register.dic()
+                        result = {}
+                        detail['token'] = 'test_token'
+                        result['user'] = detail
+                        result['hackathon'] = hackathon.dic()
+                        result['registration'] = register.dic()
 
-                    self.assertEqual(LoginProviderBase().return_details(user_with_token, args), result)
-                    get_user_detail_info.assert_called_once_with(user)
-                    get_hackathon_by_name.assert_called_once_with('test_hackathon_name')
-                    get_register_after_login.assert_called_once_with(hackathon_id=1, user_id=1)
+                        self.assertEqual(LoginProviderBase().return_details(user_with_token, args), result)
+                        get_user_detail_info.assert_called_once_with(user)
+                        get_hackathon_by_name.assert_called_once_with('test_hackathon_name')
+                        get_register_by_rid_or_uid_and_hid.assert_called_once_with({'hid': 1, 'uid': 1})
+                        deal_with_user_and_register_when_login.assert_called_once_with(user, 1)
+
 
     def test_return_details_hackathon_name_not_fount(self):
         user = User(name="test_name", id=1)
@@ -88,16 +93,17 @@ class UserLoginTest(unittest.TestCase):
             detail = {'details': "details"}
             get_user_detail_info.return_value = detail
             with mock.patch('hackathon.hack.HackathonManager.get_hackathon_by_name') as get_hackathon_by_name:
-                hackathon = Hackathon(id=1, name='test_hackathon')
                 get_hackathon_by_name.return_value = None
 
-                result = {"errorcode": 500, "message": "hackathon_name dose not exist in DB:hackathon"}
-
+                result = {"errorcode": 400, "message": "bad request : hackathon_name does not exist in DB"}
                 self.assertEqual(LoginProviderBase().return_details(user_with_token, args), result)
                 get_user_detail_info.assert_called_once_with(user)
                 get_hackathon_by_name.assert_called_once_with('test_hackathon_name')
 
-    def test_return_details_None_Register(self):
+
+    def test_return_details_get_register_by_email(self):
+        # logic : get register by hid and uid returns None , Then get register by emails and hid is not None
+
         user = User(name="test_name", id=1)
         token = UserToken(token='test_token', user_id=1)
         user_with_token = {'user': user, 'token': token}
@@ -109,20 +115,71 @@ class UserLoginTest(unittest.TestCase):
             with mock.patch('hackathon.hack.HackathonManager.get_hackathon_by_name') as get_hackathon_by_name:
                 hackathon = Hackathon(id=1, name='test_hackathon')
                 get_hackathon_by_name.return_value = hackathon
+                # get register by hid and uid returns None
                 with mock.patch(
-                        'hackathon.registration.register_mgr.RegisterManger.get_register_after_login') as get_register_after_login:
-                    get_register_after_login.return_value = None
+                        'hackathon.registration.register_mgr.RegisterManger.get_register_by_rid_or_uid_and_hid') as get_register_by_rid_or_uid_and_hid:
+                    get_register_by_rid_or_uid_and_hid.return_value = None
+                    #Then get register by emails and hid is not None
+                    with mock.patch(
+                            'hackathon.registration.register_mgr.RegisterManger.get_register_by_emails_and_hid') as get_register_by_emails_and_hid:
+                        register = Register(id=1, register_name='test', email='test@test.com', hackathon_id=1)
+                        get_register_by_emails_and_hid.return_value = register
+                        with mock.patch(
+                                'hackathon.registration.register_mgr.RegisterManger.deal_with_user_and_register_when_login') as deal_with_user_and_register_when_login:
+                            deal_with_user_and_register_when_login.return_value = None
 
-                    result = {}
-                    detail['token'] = 'test_token'
-                    result['user'] = detail
-                    result['hackathon'] = hackathon.dic()
-                    result['registration'] = {}
+                            result = {}
+                            detail['token'] = 'test_token'
+                            result['user'] = detail
+                            result['hackathon'] = hackathon.dic()
+                            result['registration'] = register.dic()
 
-                    self.assertEqual(LoginProviderBase().return_details(user_with_token, args), result)
-                    get_user_detail_info.assert_called_once_with(user)
-                    get_hackathon_by_name.assert_called_once_with('test_hackathon_name')
-                    get_register_after_login.assert_called_once_with(hackathon_id=1, user_id=1)
+                            self.assertEqual(LoginProviderBase().return_details(user_with_token, args), result)
+                            get_user_detail_info.assert_called_once_with(user)
+                            get_hackathon_by_name.assert_called_once_with('test_hackathon_name')
+                            get_register_by_rid_or_uid_and_hid.assert_called_once_with({'hid': 1, 'uid': 1})
+                            get_register_by_emails_and_hid.assert_called_once_with(1, ANY)
+                            deal_with_user_and_register_when_login.assert_called_once_with(user, 1)
+
+    def test_return_details_get_register_none(self):
+        # logic : get register by hid_uid and emails_hid are both return None
+
+        user = User(name="test_name", id=1)
+        token = UserToken(token='test_token', user_id=1)
+        user_with_token = {'user': user, 'token': token}
+        args = {'hackathon_name': 'test_hackathon_name'}
+
+        with mock.patch('hackathon.user.user_mgr.UserManager.get_user_detail_info') as get_user_detail_info:
+            detail = {'details': "details"}
+            get_user_detail_info.return_value = detail
+            with mock.patch('hackathon.hack.HackathonManager.get_hackathon_by_name') as get_hackathon_by_name:
+                hackathon = Hackathon(id=1, name='test_hackathon')
+                get_hackathon_by_name.return_value = hackathon
+                # get register by hid and uid returns None
+                with mock.patch(
+                        'hackathon.registration.register_mgr.RegisterManger.get_register_by_rid_or_uid_and_hid') as get_register_by_rid_or_uid_and_hid:
+                    get_register_by_rid_or_uid_and_hid.return_value = None
+                    #Then get register by emails and hid returns None
+                    with mock.patch(
+                            'hackathon.registration.register_mgr.RegisterManger.get_register_by_emails_and_hid') as get_register_by_emails_and_hid:
+                        get_register_by_emails_and_hid.return_value = None
+                        with mock.patch(
+                                'hackathon.registration.register_mgr.RegisterManger.deal_with_user_and_register_when_login') as deal_with_user_and_register_when_login:
+                            deal_with_user_and_register_when_login.return_value = None
+
+                            result = {}
+                            detail['token'] = 'test_token'
+                            result['user'] = detail
+                            result['hackathon'] = hackathon.dic()
+                            result['registration'] = {}
+
+                            self.assertEqual(LoginProviderBase().return_details(user_with_token, args), result)
+                            get_user_detail_info.assert_called_once_with(user)
+                            get_hackathon_by_name.assert_called_once_with('test_hackathon_name')
+                            get_register_by_rid_or_uid_and_hid.assert_called_once_with({'hid': 1, 'uid': 1})
+                            get_register_by_emails_and_hid.assert_called_once_with(1, ANY)
+                            deal_with_user_and_register_when_login.assert_called_once_with(user, 1)
+
 
     '''Test methnd provider login : QQ GitHub GitCafe Weibo'''
 

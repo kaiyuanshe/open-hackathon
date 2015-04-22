@@ -58,7 +58,8 @@ app.get('/config', function (req, res) {
     url: config.proxy,
     api: config.api,
     sociallogin: config.sociallogin,
-    social: config.social
+    social: config.social,
+    seo: config.seo
   });
 });
 app.use(proxy);
