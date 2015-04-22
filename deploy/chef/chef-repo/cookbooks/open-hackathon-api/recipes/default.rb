@@ -23,37 +23,15 @@
 # -----------------------------------------------------------------------------------
 
 
-include_recipe "apt"
 include_recipe "python"
-package 'libmysqlclient-dev'
 package 'libpcre3'
 package 'libpcre3-dev'
-include_recipe "git"
 include_recipe "uwsgi"
-include_recipe "gcc"
 
-user node['open-hackathon-api']['user']
+node.set['build_essential']['compile_time'] = true
+include_recipe "build-essential"
 
-directory node['open-hackathon-api']['root-dir'] do
-  owner node['open-hackathon-api']['user']
-  group node['open-hackathon-api']['user']
-  mode  '0755'
-  action :create
-end
-
-git node['open-hackathon-api']['root-dir'] do
-  repository node['open-hackathon-api']['git']['repository']
-  revision node['open-hackathon-api']['git']['revision']
-  action :sync
-  timeout 60
-end
-
-directory node['open-hackathon-api']['uwsgi']['logto-dir'] do
-  owner node['open-hackathon-api']['user']
-  group node['open-hackathon-api']['user']
-  mode  '0744'
-  action :create
-end
+include_recipe "open-hackathon-api::source"
 
 python_pip "werkzeug" do
   version "0.9.6"
@@ -71,17 +49,24 @@ end
   python_pip "#{f}"
 end
 
-template node['open-hackathon-api']['root-dir']+'/nginx_openhackathon.uwsgi.ini' do
+template node['openhackathon']['api']['src_dir']+'/nginx_hack_api.uwsgi.ini' do
   source 'uwsgi.ini.erb'
+  owner node['openhackathon']['user']
+  group node['openhackathon']['user']
+  mode "0644"
 end
 
-
-template node['open-hackathon-api']['root-dir']+'/open-hackathon/src/hackathon/config.py' do
+template node['openhackathon']['api']['src_dir']+'/hackathon/config.py' do
   source 'config.py.erb'
+  owner node['openhackathon']['user']
+  group node['openhackathon']['user']
+  mode "0644"
 end
 
 uwsgi_service 'app' do
-  home_path node['open-hackathon-api']['root-dir']+'/open-hackathon/src'
-  config_file node['open-hackathon-api']['root-dir']+'/nginx_openhackathon.uwsgi.ini'
+  home_path node['openhackathon']['api']['src_dir']
+  config_file node['openhackathon']['api']['src_dir']+'/nginx_hack_api.uwsgi.ini'
   config_type :ini
+  uid node['openhackathon']['user']
+  gid node['openhackathon']['user']
 end

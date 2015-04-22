@@ -29,17 +29,19 @@ include_recipe "build-essential"
 package "ruby-dev"
 package "make"
 
-bash "setup ruby-gem url" do
-  code <<-EOF
-    gem source --remove https://rubygems.org/
-    gem source --remove http://rubygems.org/
-    gem source --remove https://ruby.taobao.org/
-    gem source -a https://ruby.taobao.org/
-  EOF
+if node['openhackathon'][:gem][:enable_taobao_mirror] then
+  bash "setup ruby-gem url" do
+    code <<-EOF
+      gem source --remove https://rubygems.org/
+      gem source --remove http://rubygems.org/
+      gem source --remove https://ruby.taobao.org/
+      gem source -a https://ruby.taobao.org/
+    EOF
+  end
 end
 
 mysql_client 'default' do
-  version node['open-hackathon-api']['mysql']['version'] 
+  version node['openhackathon']['mysql']['version']
   action :create
 end
 
@@ -51,34 +53,40 @@ end
 
 connection_info = {
   host: '127.0.0.1',
-  port: node['open-hackathon-api']['mysql']['port'],
+  port: node['openhackathon']['mysql']['port'],
   username: 'root',
-  password: node['open-hackathon-api']['mysql']['initial_root_password']
+  password: node['openhackathon']['mysql']['initial_root_password']
 }
 
-
-mysql_database node['open-hackathon-api']['mysql']['db'] do
+mysql_database node['openhackathon']['mysql']['db'] do
   connection connection_info
   provider  Chef::Provider::Database::Mysql
   action    :create
 end
 
-mysql_database_user node['open-hackathon-api']['mysql']['user'] do
+mysql_database_user node['openhackathon']['mysql']['user'] do
   connection connection_info
   action :create
 end
 
-mysql_database_user node['open-hackathon-api']['mysql']['user'] do
+mysql_database_user node['openhackathon']['mysql']['user'] do
   connection connection_info
-  database_name node['open-hackathon-api']['mysql']['db']
-  password node['open-hackathon-api']['mysql']['pwd']
-  host node['open-hackathon-api']['mysql']['user-host']
+  database_name node['openhackathon']['mysql']['db']
+  password node['openhackathon']['mysql']['password']
+  host node['openhackathon']['mysql']['user_host']
   privileges [:all]
   action :grant
 end
 
-filename = node['open-hackathon-api']['mysql']['setup-file']
 
+filename = node['openhackathon']['mysql']['setup_file']
 bash "setup_mysql" do
-  code "python #{filename}"
+  code "sudo python #{filename}"
 end
+
+#sql_file=node['openhackathon']['mysql']['sql_file']
+#execute "exe-sql" do
+#  only_if "test -f #{sql_file}"
+#  ignore_failure true
+#  command "mysql -u#{node['openhackathon']['mysql']['user']} -h 127.0.0.1 -P#{node['openhackathon']['mysql']['port']} -p#{node['openhackathon']['mysql']['password']} #{node['openhackathon']['mysql']['db']} < #{sql_file}"
+#end

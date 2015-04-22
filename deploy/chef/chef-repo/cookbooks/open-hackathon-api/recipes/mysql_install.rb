@@ -24,19 +24,25 @@
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
 
-mysql_service 'default' do
-  run_group node['open-hackathon-api']['user']
-  run_user node['open-hackathon-api']['user']
-  initial_root_password node['open-hackathon-api']['mysql']['initial_root_password']
-  version node['open-hackathon-api']['mysql']['version']
-  port node['open-hackathon-api']['mysql']['port']
+package 'libmysqlclient-dev'
+
+include_recipe "open-hackathon-api::user"
+
+service_name=node['openhackathon']['mysql']['service']
+
+mysql_service service_name do
+  run_group node['openhackathon']['user']
+  run_user node['openhackathon']['user']
+  initial_root_password node['openhackathon']['mysql']['initial_root_password']
+  version node['openhackathon']['mysql']['version']
+  port node['openhackathon']['mysql']['port']
   action [:create, :start]
 end
 
-mysql_config 'default' do 
+mysql_config 'default' do
   config_name 'default'
-  instance 'default'
+  instance service_name
   source 'api.my.cnf.erb'
-  notifies :restart, 'mysql_service[default]', :immediately
+  notifies :restart, "mysql_service[#{service_name}]", :immediately
   action :create
 end

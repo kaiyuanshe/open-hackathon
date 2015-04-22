@@ -1,5 +1,5 @@
-open-hackathon-ui Cookbooka
-==================
+open-hackathon-ui Cookbook
+==========================
 TODO: Enter the cookbook description here.
 
 e.g.
@@ -18,7 +18,7 @@ Attributes
 TODO: List your cookbook attributes here.
 
 e.g.
-#### open-hackathon-tempUI::default
+#### open-hackathon-ui::default
 <table>
   <tr>
     <th>Key</th>

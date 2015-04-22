@@ -2,19 +2,19 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
-#  
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#  
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-#  
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -27,32 +27,32 @@
 # "javascript" section for javascript. see @app.route('/config.js') in app/views.py
 
 # oauth constants
-HOSTNAME = "<%= node['open-hackathon-adminUI']['HOSTNAME'] %>"  # host name of the UI site
-QQ_OAUTH_STATE = "<%= node['open-hackathon-adminUI']['QQ_OAUTH_STATE'] %>"  # todo state should be constant. Actually it should be unguessable to prevent CSFA
-HACKATHON_API_ENDPOINT = "<%= node['open-hackathon-adminUI']['HACKATHON_API_ENDPOINT'] %>"
+HOSTNAME = "<%= node['openhackathon']['admin']['HOSTNAME'] %>"  # host name of the UI site
+QQ_OAUTH_STATE = "<%= node['openhackathon']['qq']['OAUTH_STATE'] %>"
+HACKATHON_API_ENDPOINT = "<%= node['openhackathon']['api']['endpoint'] %>"
 
-GITHUB_CLIENT_ID = "<%= node['open-hackathon-adminUI']['github']['client_id'] %>"
-GITHUB_CLIENT_SECRET = "<%= node['open-hackathon-adminUI']['github']['client_secret'] %>"
+GITHUB_CLIENT_ID = "<%= node['openhackathon']['github']['client_id'] %>"
+GITHUB_CLIENT_SECRET = "<%= node['openhackathon']['github']['client_secret'] %>"
 
-QQ_CLIENT_ID = "<%= node['open-hackathon-adminUI']['qq']['client_id'] %>"
-QQ_CLIENT_SECRET = "<%= node['open-hackathon-adminUI']['qq']['client_secret'] %>"
-QQ_META_CONTENT = "<%= node['open-hackathon-adminUI']['qq']['meta_content'] %>"
+QQ_CLIENT_ID = "<%= node['openhackathon']['qq']['client_id'] %>"
+QQ_CLIENT_SECRET = "<%= node['openhackathon']['qq']['client_secret'] %>"
+QQ_META_CONTENT = "<%= node['openhackathon']['qq']['meta_content'] %>"
 
 # gitcafe domain:  gcas.dgz.sh/gcs.dgz.sh for Staging, api.gitcafe.com/gitcafe.com for Production
-GITCAFE_CLIENT_ID = "<%= node['open-hackathon-adminUI']['gitcafe']['client_id'] %>"
-GITCAFE_CLIENT_SECRET = "<%= node['open-hackathon-adminUI']['gitcafe']['client_secret'] %>"
+GITCAFE_CLIENT_ID = "<%= node['openhackathon']['gitcafe']['client_id'] %>"
+GITCAFE_CLIENT_SECRET = "<%= node['openhackathon']['gitcafe']['client_secret'] %>"
 
-WEIBO_CLIENT_ID = "<%= node['open-hackathon-adminUI']['weibo']['client_id'] %>"
-WEIBO_CLIENT_SECRET = "<%= node['open-hackathon-adminUI']['weibo']['client_secret'] %>"
-WEIBO_META_CONTENT = "<%= node['open-hackathon-adminUI']['weibo']['meta_content'] %>"
+WEIBO_CLIENT_ID = "<%= node['openhackathon']['weibo']['client_id'] %>"
+WEIBO_CLIENT_SECRET = "<%= node['openhackathon']['weibo']['client_secret'] %>"
+WEIBO_META_CONTENT = "<%= node['openhackathon']['weibo']['meta_content'] %>"
 
 Config = {
-    "environment": "<%= node['open-hackathon-adminUI']['environment'] %>",
+    "environment": "<%= node['openhackathon']['environment'] %>",
     "app": {
-        "secret_key": "<%= node['open-hackathon-adminUI']['app']['secret_key'] %>"
+        "secret_key": "<%= node['openhackathon']['admin']['app']['secret_key'] %>"
     },
     "mysql": {
-        "connection": 'mysql://%s:%s@%s:%s/%s' % ("<%= node['open-hackathon-adminUI']['mysql']['user'] %>", "<%= node['open-hackathon-adminUI']['mysql']['password'] %>", "<%= node['open-hackathon-adminUI']['mysql']['hostname'] %>", "<%= node['open-hackathon-adminUI']['mysql']['port'] %>","<%= node['open-hackathon-adminUI']['mysql']['db'] %>")
+        "connection": 'mysql://%s:%s@%s:%s/%s' % ("<%= node['openhackathon']['mysql']['user'] %>", "<%= node['openhackathon']['mysql']['password'] %>", "<%= node['openhackathon']['mysql']['host'] %>", "<%= node['openhackathon']['mysql']['port'] %>","<%= node['openhackathon']['mysql']['db'] %>")
     },
     "login": {
         "github": {
@@ -69,7 +69,7 @@ Config = {
             "user_info_url": 'https://graph.qq.com/user/get_user_info?access_token=%s&oauth_consumer_key=%s&openid=%s'
         },
         "gitcafe": {
-            "access_token_url": 'https://gcas.dgz.sh/oauth/token?client_id=%s&client_secret=%s&redirect_uri=%s/gitcafe&grant_type=authorization_code&code=' % (
+            "access_token_url": '<%= node['openhackathon']['gitcafe']['api_domain'] %>/oauth/token?client_id=%s&client_secret=%s&redirect_uri=%s/gitcafe&grant_type=authorization_code&code=' % (
                 GITCAFE_CLIENT_ID, GITCAFE_CLIENT_SECRET, HOSTNAME)
         },
         "weibo": {
@@ -77,9 +77,9 @@ Config = {
             "access_token_url": 'https://api.weibo.com/oauth2/access_token?client_id=%s&client_secret=%s&grant_type=authorization_code&redirect_uri=%s/weibo&code=' % (
                 WEIBO_CLIENT_ID, WEIBO_CLIENT_SECRET, HOSTNAME)
         },
-        "provider_enabled": <%= node['open-hackathon-adminUI']['provider'] %>,
-        "session_minutes": <%= node['open-hackathon-adminUI']['session_minutes'] %>,
-        "token_expiration_minutes": <%= node['open-hackathon-adminUI']['token_expiration_minutes'] %>
+        "provider_enabled": <%= node['openhackathon']['admin']['login_provider'] %>,
+        "session_minutes": <%= node['openhackathon']['admin']['session_minutes'] %>,
+        "token_expiration_minutes": <%= node['openhackathon']['admin']['token_expiration_minutes'] %>
     },
     "hackathon-api": {
         "endpoint": HACKATHON_API_ENDPOINT
@@ -98,11 +98,11 @@ Config = {
                 QQ_CLIENT_ID, HOSTNAME, QQ_OAUTH_STATE)
         },
         "gitcafe": {
-            "authorize_url": "https://gcs.dgz.sh/oauth/authorize?response_type=code&client_id=%s&redirect_uri=%s/gitcafe&scope=public" % (
+            "authorize_url": "<%= node['openhackathon']['gitcafe']['domain'] %>/oauth/authorize?response_type=code&client_id=%s&redirect_uri=%s/gitcafe&scope=public" % (
                 GITCAFE_CLIENT_ID, HOSTNAME)
         },
         "hackathon": {
-            "name": "<%= node['open-hackathon-adminUI']['hackathon']['name'] %>",
+            "name": "<%= node['openhackathon']['hackathon']['name'] %>",
             "endpoint": HACKATHON_API_ENDPOINT
         }
     },
@@ -119,6 +119,3 @@ Config = {
         }
     }
 }
-
-
-
