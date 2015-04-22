@@ -59,7 +59,7 @@
                     }
                     options = $.extend(_params, options);
                     var url = name;
-                    var data = options.body != null ? '' : JSON.stringify(options.body);
+                    var data = options.body == null ? '' : JSON.stringify(options.body);
                     if (options.query) {
                         url += '?' + ($.isPlainObject(options.query) ? $.param(options.query) : options.query);
                     }
@@ -73,9 +73,13 @@
                         success: function(data) {
                             callback(data)
                         },
-                        error: function(data) {
-                            //callback(data)
-                            console.log('error');
+                        error: function(req, status, error) {
+                            var data = {
+                                error: error,
+                                message: req.responseText,
+                                status: req.status
+                            };
+                            callback(data);
                         }
                     });
                 }
@@ -89,6 +93,9 @@
         DateFormat: function(milliseconds, formatstr) {
             formatstr = formatstr || 'yyyy-MM-dd';
             return new Date(milliseconds).format(formatstr);
+        },
+        getHackathon: function() {
+            return JSON.parse(localStorage.hackathon);
         }
     };
 
@@ -175,7 +182,78 @@
         return context[func].apply(this, args);
     }
 
+    function SessionStorageBindHackathon(data) {
+        var hackathons = [];
+        $.each(data, function(i, o) {
+            hackathons.push({
+                name: o.name,
+                id: o.id
+            })
+        })
+        sessionStorage.hackathons = JSON.stringify(hackathons)
+    };
+
+    window.addEventListener("storage", function(e) {
+        var key = e.key;
+        var newValue = e.newValue;
+        var oldValue = e.oldValue;
+        var url = e.url;
+        var storageArea = e.storageArea;
+        console.log(e);
+    });
     $(function() {
+        $.template('switc_hackathons_temp', '<li {{if $item.isAction(id ,$item.hid)}} class="active" {{/if}}>{{if $item.isAction(id,$item.hid) }}<i class="fa fa-check"></i>{{/if}}<a href="#" data-type="hackathon">${name}</a></li>');
+        //$.template('switc_hackathons_temp', '<li><a href="#" data-type="hackathon">${name}</a></li>');
+        // $.template('switc_hackathons_temp2','<li><a href="javascript:;">
+        //                              <span class="icon blue"><i class="fa fa-check"></i></span>
+        //                              <span class="message">${name}</span>
+        //                          </a>
+        //                      </li>')
+        var hackathon_modal = $('#switc_hackathon_modal').on('show.bs.modal', function(e) {
+            var ul = hackathon_modal.find('.modal-body ul').empty();
+            oh.api.admin.hackathons.get(function(data) {
+                ul.append($.tmpl('switc_hackathons_temp', data, {
+                    isAction: function(id, hid) {
+                        return id == hid
+                    },
+                    hid: JSON.parse(localStorage.hackathon || '{"id":"0"}').id
+                }));
+            });
+        }).on('hide.bs.modal', function(e) {
+            if (!localStorage.hackathon) {
+                return false;
+            }
+        }).on('click', 'a[data-type="hackathon"]', function(e) {
+            var li = $(this).parents('li');
+            if (!li.hasClass('active')) {
+                var data = li.data('tmplItem').data;
+                localStorage.hackathon = JSON.stringify({
+                    name: data.name,
+                    id: data.id
+                });
+                hackathon_modal.data({
+                    li: li
+                });
+                hackathon_modal.trigger('Reloadhackathon');
+            }
+        }).bind('Reloadhackathon', function(e) {
+            var li = hackathon_modal.data('li');
+            hackathon_modal.find('ul>li').removeClass('active');
+            hackathon_modal.find('ul>li>i').detach();
+            li.addClass('active').prepend('<i class="fa fa-check"></i>');
+            location.reload()
+        });
+
+        if (!localStorage.hackathon) {
+            hackathon_modal.modal('show')
+        }
+
+        /*if(!sessionStorage.hackathons){
+            oh.api.admin.hackathons.get(function(data){
+                 SessionStorageBindHackathon(data);
+            });
+        } */
+
         var menu = $('#sidebar-left .main-menu');
         menu.find('a').each(function() {
             if ($($(this))[0].href == String(window.location)) {
