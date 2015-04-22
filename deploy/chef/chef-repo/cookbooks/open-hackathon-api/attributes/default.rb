@@ -70,11 +70,12 @@ default['openhackathon']['guacamole']['host'] = 'http://localhost:8080'
 
 
 # db installation attributes
+default['openhackathon']['mysql']['service'] = 'openhackathon'
 default['openhackathon']['mysql']['default_storage_engine'] = 'INNODB'
 default['openhackathon']['mysql']['collation_server'] = 'utf8_general_ci'
-default['openhackathon']['mysql']['initial_root_password'] = 'admin123'
+default['openhackathon']['mysql']['initial_root_password'] = 'root'
 default['openhackathon']['mysql']['version'] = '5.5'
-default['openhackathon']['mysql']['port'] = '3310'
+default['openhackathon']['mysql']['port'] = '3307'
 
 # db connection attributes
 default['openhackathon']['mysql']['host'] = '127.0.0.1'
