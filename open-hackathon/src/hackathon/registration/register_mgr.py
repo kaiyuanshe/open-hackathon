@@ -57,11 +57,12 @@ class RegisterManger(object):
                 log.debug("create a new register")
                 # new_register = self.db.add_object_kwargs(Register,
                 # register_name=args['register_name'],
-                #                                  email=args['email'],
+                # email=args['email'],
                 #                                  create_time=datetime.utcnow(),
                 #                                  description=args['description'],
                 #                                  enabled=1,  # 0: disabled 1:enabled
                 #                                  hackathon_id=g.hackathon_id)
+                self.deal_with_user_and_register_when_create_register(args)
                 new_register = self.db.add_object_kwargs(Register, **args)
                 return new_register.dic()
             else:
@@ -70,7 +71,7 @@ class RegisterManger(object):
                 update_items = dict(dict(args).viewitems() - register.dic().viewitems())
                 # self.db.update_object(register,
                 # register_name=args['register_name'],
-                #                       email=args['email'],
+                # email=args['email'],
                 #                       create_time=datetime.utcnow(),
                 #                       description=args['description'],
                 #                       enabled=args['enabled'],  # 0: disabled 1:enabled
@@ -93,11 +94,8 @@ class RegisterManger(object):
             log.error("delete register faild")
             return {"error": "INTERNAL SERVER ERROR"}, 500
 
-    def get_register_after_login(self, **kwargs):
-        hack_id = kwargs['hackathon_id']
-        user_id = kwargs['user_id']
-        register = self.db.find_first_object(Register, Register.hackathon_id == hack_id, Register.user_id == user_id)
-        return register
+    def get_register_by_emails_and_hid(self, hid, emails):
+        return self.db.find_first_object(Register, Register.hackathon_id == hid, Register.email.in_(emails))
 
     def check_email(self, hid, email):
         register = self.db.find_first_object(Register, Register.hackathon_id == hid, Register.email == email)
@@ -111,16 +109,35 @@ class RegisterManger(object):
 
         if 'rid' in args:
             return self.get_register_by_id(args['rid'])
-
         elif 'uid' in args and 'hid' in args:
-            register = self.db.find_first_object(Register, Register.user_id == args['uid'],
-                                                    Register.hackathon_id == args['hid'])
+            register = self.db.find_first_object(Register, Register.hackathon_id == args['hid'],
+                                                 Register.user_id == args['uid'])
             if register is None:
-                return {"errorcode": 404, "message": "not found"}
+                return {"errorcode": 404, "message": "register not found"}
             else:
                 return register.dic()
         else:
             return {"errorcode": 400, "message": "bad request"}
+
+    def deal_with_user_and_register_when_login(self, user, hack_id):
+        try:
+            emails = map(lambda x: x.email, user.emails)
+            register = self.get_register_by_emails_and_hid(hack_id, emails)
+            if register is not None and register.user_id is None:
+                self.db.update_object(register, register.user_id == user.id)
+        except Exception as e:
+            log.error(e)
+            log.error("update register for login user failed because Exception raised")
+            return {"error": "INTERNAL SERVER ERROR"}, 500
+
+    def deal_with_user_and_register_when_create_register(self, args):
+
+        email = args['email']
+        user_email = self.db.find_first_object(UserEmail, UserEmail.email == email)
+        if user_email is not None:
+            args['user_id'] = user_email.user_id
+        return args
+
 
 
 register_manager = RegisterManger(db_adapter)

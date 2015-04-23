@@ -28,8 +28,9 @@ package 'libmysqlclient-dev'
 
 include_recipe "open-hackathon-api::user"
 
+service_name=node['openhackathon']['mysql']['service']
 
-mysql_service 'default' do
+mysql_service service_name do
   run_group node['openhackathon']['user']
   run_user node['openhackathon']['user']
   initial_root_password node['openhackathon']['mysql']['initial_root_password']
@@ -38,10 +39,10 @@ mysql_service 'default' do
   action [:create, :start]
 end
 
-mysql_config 'default' do 
+mysql_config 'default' do
   config_name 'default'
-  instance 'default'
+  instance service_name
   source 'api.my.cnf.erb'
-  notifies :restart, 'mysql_service[default]', :immediately
+  notifies :restart, "mysql_service[#{service_name}]", :immediately
   action :create
 end

@@ -24,18 +24,18 @@
 
 [uwsgi]
 #application's base folder
-base = <%= node['open-hackathon']['admin']['src_dir'] %>
+base = <%= node['openhackathon']['admin']['src_dir'] %>
 
 #python module to import
 app = run
 module = %(app)
 
 #home = /opt/open-hackathon/venv
-pythonpath = <%= node['open-hackathon']['admin']['src_dir'] %>
+pythonpath = <%= node['openhackathon']['admin']['src_dir'] %>
 
 #socket file's location
 enable-threads = true
-http = 0.0.0.0:<%= node['open-hackathon']['admin']['port'] %>
+http = 0.0.0.0:<%= node['openhackathon']['admin']['port'] %>
 
 #permissions for the socket file
 chmod-socket    = 666
@@ -44,4 +44,4 @@ chmod-socket    = 666
 callable = app
 
 #location of log files
-logto = <%= node['open-hackathon']['uwsgi']['log_file'] %>
+logto = <%= node['openhackathon']['uwsgi']['log_dir'] %>/%n.log

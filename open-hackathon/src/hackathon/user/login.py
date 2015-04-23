@@ -14,7 +14,7 @@
 #
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-#  
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -62,10 +62,20 @@ class LoginProviderBase():
             return {"errorcode": 400, "message": "bad request : hackathon_name does not exist in DB"}
         login_result["hackathon"] = hackathon.dic()
 
+
+        # deal with register
+        register_manager.deal_with_user_and_register_when_login(user, hackathon.id)
+
         # get register info
-        register = register_manager.get_register_after_login(hackathon_id=hackathon.id, user_id=user.id)
+        args = {'hid': hackathon.id, 'uid': user.id}
+        register = register_manager.get_register_by_rid_or_uid_and_hid(args)
         if register is None:
-            login_result['registration'] = {}
+            emails = map(lambda x: x.email, user.emails)
+            register = register_manager.get_register_by_emails_and_hid(hackathon.id, emails)
+            if register is None:
+                login_result['registration'] = {}
+            else:
+                login_result['registration'] = register.dic()
         else:
             login_result['registration'] = register.dic()
         log.debug("login returns info: " + str(login_result))

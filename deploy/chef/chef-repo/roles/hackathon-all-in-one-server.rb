@@ -29,5 +29,4 @@ run_list 'ntp',
          'recipe[open-hackathon-api::mysql_install]',
          'recipe[open-hackathon-api]',
          'recipe[open-hackathon-api::mysql_setup]',
-         'recipe[open-hackathon-ui]',
-         'recipe[open-hackathon-adminUI]'
+         'recipe[open-hackathon-ui]'

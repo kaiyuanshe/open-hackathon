@@ -54,7 +54,7 @@ def setup_db():
     # reserved user
     res_u = db_adapter.get_object(User, ReservedUser.DefaultUserID)
     if res_u is None:
-        db_adapter.add_object_kwargs(User, id=ReservedUser.DefaultUserID, createtime=datetime.utcnow())
+        db_adapter.add_object_kwargs(User, id=ReservedUser.DefaultUserID, create_time=datetime.utcnow())
 
 
 setup_db()

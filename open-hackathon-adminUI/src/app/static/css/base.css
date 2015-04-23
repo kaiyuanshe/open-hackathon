@@ -243,7 +243,7 @@ a#main-menu-toggle {
     display: inline-block;
     text-align: left;
     margin-top: -5px;
-    padding: 0;
+    padding: 5px 0 0 0;
 }
 
 .header-nav .avatar img {
@@ -526,11 +526,156 @@ footer {
     border: 1px solid #e9ebec;
 }
 
-.table tbody>tr>td.col-action{
+.table tbody>tr>td.col-action {
     padding-top: 3px;
     padding-bottom: 3px;
 }
 
-.table-relative td{
+.table-relative td {
     position: relative
+}
+
+.todo-list {
+    list-style: none;
+    padding: 0;
+    margin: -10px;
+}
+
+.todo-list li {
+    background: white;
+    margin-left: 0!important;
+    padding: 10px 10px 10px 35px;
+    border-bottom: 1px solid #e9ebec;
+    position: relative;
+}
+
+.navbar .nav li.dropdown.open>.dropdown-toggle,
+.navbar .nav li.dropdown.active>.dropdown-toggle,
+.navbar .nav li.dropdown.open.active>.dropdown-toggle {
+    color: white;
+    background-color: #71B1D1;
+    outline: 0;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+
+.header-nav a.btn:hover {
+    background: #71B1D1;
+}
+.dropdown-menu li a {
+  display: block;
+  padding: 5px 10px!important;
+  clear: both;
+  font-weight: normal;
+  line-height: 20px;
+  color: #34383c;
+  white-space: normal!important;
+}
+.header-nav a.btn {
+    position: relative;
+    height: 30px;
+    width: 40px;
+    color: #fff!important;
+    text-shadow: none!important;
+    padding: 5px 0!important;
+    margin: 5px 3px;
+    -webkit-border-radius: 2px;
+    -moz-border-radius: 2px;
+    border-radius: 2px;
+}
+ul.notifications li .icon.blue {
+  background: #36a9e1;
+}
+ul.notifications li .icon.green {
+  background: #bdea74;
+}
+ul.notifications li .icon.yellow {
+  background: #eae874;
+}
+ul.notifications li .icon.red {
+  background: #ff5454;
+}
+ul.notifications li .icon {
+  margin: -5px 10px -5px -10px!important;
+  padding: 7px 10px 9px 10px;
+  color: white;
+  width: 40px;
+  display: inline-block;
+  text-align: center;
+}
+.dropdown-menu {
+    position: absolute;
+    top: 90%;
+    right: 0;
+    z-index: 1000;
+    display: none;
+    float: left;
+    min-width: 300px;
+    max-width: 300px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    text-shadow: none;
+    background: white;
+    border: 1px solid #dbdee0;
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    border-radius: 0;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+
+.dropdown-menu li {
+    border-bottom: 1px solid #e9ebec;
+}
+
+.dropdown-menu-title {
+    background: #e9ebec;
+    color: #34383c;
+    padding: 5px 10px;
+    display: block;
+}
+
+.header-nav a.btn.account {
+    background: transparent;
+    height: 40px;
+    width: auto;
+    padding: 0px 0 5px 10px!important;
+    margin: 0 -15px 0 3px;
+}
+
+.header-nav a.btn .number {
+    position: absolute;
+    font-size: 8px;
+    top: -3px;
+    right: 3px;
+}
+
+.dropdown-menu li a {
+  display: block;
+  padding: 5px 10px!important;
+  clear: both;
+  font-weight: normal;
+  line-height: 20px;
+  color: #34383c;
+  white-space: normal!important;
+}
+ul.notifications li, ul.tasks li, ul.messages li {
+  min-width: 260px;
+  position: relative;
+}
+.oh-nav {
+    position: absolute;
+    display: block;
+    margin-left: 190px;
+    z-index: 10;
+}
+.oh-nav ul{
+  float: left;
+  margin: 0;
+}
+.oh-nav .hidden-xs{
+      display: block!important;
 }

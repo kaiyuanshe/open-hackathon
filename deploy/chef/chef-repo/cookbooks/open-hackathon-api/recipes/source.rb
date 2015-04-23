@@ -24,6 +24,22 @@ include_recipe "apt"
 include_recipe "git"
 include_recipe "open-hackathon-api::user"
 
+#temp ssh key for github. remove it after we open source it
+directory "/home/#{node['openhackathon']['user']}/.ssh" do
+  owner node['openhackathon']['user']
+  group node['openhackathon']['user']
+  mode  '0700'
+  action :create
+end
+
+template "/home/#{node['openhackathon']['user']}/.ssh/id_rsa" do
+  source 'temp.key.erb'
+  owner node['openhackathon']['user']
+  group node['openhackathon']['user']
+  mode "0400"
+end
+
+
 directory node['openhackathon'][:base_dir] do
   owner node['openhackathon']['user']
   group node['openhackathon']['user']
