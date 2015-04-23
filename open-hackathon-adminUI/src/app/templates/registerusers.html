@@ -1,4 +1,5 @@
-{% extends "main.html" %} {% block style %} {% endblock %} {% block body %}
+{% extends "main.html" %} {% block style %}
+<link href="/static/css/bootstrap-editable.css" rel="stylesheet">{% endblock %} {% block body %}
 <div class="col-lg-12">
     <div class="box">
         <div class="box-header">
@@ -12,25 +13,20 @@
                 <div class="col-lg-6">
                     <a href="/edit/register">添加</a>
                 </div>
-                <div class="col-lg-6 text-right">
-                    <label>
-                        <select class="form-control" data-toggle="bindtemp" data-target="#hackathon_template" data-api="oh.api.admin.hackathons.get" data-change="id" data-change-target="#registe_list">
-                        </select>
-                    </label>
-                </div>
             </div>
             <table class="table table-bordered">
                 <thead>
                     <tr>
                         <th>注册名</th>
                         <th>邮箱</th>
-                        <th>描述</th>
-                        <th>状态</th>
+                        <th>联系电话</th>
+                        <th>联系地址</th>
                         <th>创建时间</th>
+                        <th>状态</th>
                         <th>操作</th>
                     </tr>
                 </thead>
-                <tbody id="registe_list" data-target="#register_list_template" data-api="oh.api.admin.register.list.get" data-query="hackathon_id">
+                <tbody id="registe_list">
                 </tbody>
             </table>
         </div>
@@ -63,9 +59,12 @@
             ${register_name}
         </td>
         <td>${email}</td>
-        <td>${description}</td>
-        <td>${enabled}</td>
+        <td>${phone}</td>
+        <td>${address}</td>
         <td>${oh.comm.DateFormat(create_time ,'yyyy-MM-dd HH:mm')}</td>
+        <td>
+            <a href="javascript:void(0);" data-type="select" data-name="status" data-value="${status}" class="editable" data-source='{"0":"未审核","1":"通过","2":"拒绝"}' data-placement="top"></a>
+        </td>
         <td class="col-action">
             <a class="btn btn-info btn-sm" href="/edit/register?id=${id}">
                 <i class="fa fa-edit "></i>
@@ -76,4 +75,6 @@
         </td>
     </tr>
 </script>
+<script type="text/javascript" src="/static/js/bootstrap/bootstrap-editable.js"></script>
+<script type="text/javascript" src="/static/js/views/oh.register.js"></script>
 {% endblock %}

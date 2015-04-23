@@ -44,4 +44,4 @@ chmod-socket    = 666
 callable = app
 
 #location of log files
-logto = <%= node['openhackathon']['uwsgi']['log_file'] %>
+logto = <%= node['openhackathon']['uwsgi']['log_dir'] %>/%n.log

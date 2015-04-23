@@ -23,6 +23,6 @@
 user "#{node['openhackathon']['user']}" do
   comment "The Open Hackathon User"
   system true
-  shell "/bin/false"
+  shell "/bin/bash"
   home "/home/#{node['openhackathon']['user']}"
 end

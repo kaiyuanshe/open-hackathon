@@ -84,9 +84,9 @@ bash "setup_mysql" do
   code "sudo python #{filename}"
 end
 
-sql_file=node['openhackathon']['mysql']['sql_file']
-execute "exe-sql" do
-  only_if "test -f #{sql_file}"
-  ignore_failure true
-  command "mysql -u#{node['openhackathon']['mysql']['user']} -h 127.0.0.1 -P#{node['openhackathon']['mysql']['port']} -p#{node['openhackathon']['mysql']['password']} #{node['openhackathon']['mysql']['db']} < #{sql_file}"
-end
+#sql_file=node['openhackathon']['mysql']['sql_file']
+#execute "exe-sql" do
+#  only_if "test -f #{sql_file}"
+#  ignore_failure true
+#  command "mysql -u#{node['openhackathon']['mysql']['user']} -h 127.0.0.1 -P#{node['openhackathon']['mysql']['port']} -p#{node['openhackathon']['mysql']['password']} #{node['openhackathon']['mysql']['db']} < #{sql_file}"
+#end

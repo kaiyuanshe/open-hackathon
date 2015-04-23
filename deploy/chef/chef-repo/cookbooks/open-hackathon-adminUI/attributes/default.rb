@@ -23,7 +23,6 @@
 # THE SOFTWARE.
 
 default['openhackathon']['admin']['HOSTNAME'] = 'http://hack-admin-dev.chinacloudapp.cn'
-default['openhackathon']['HACKATHON_API_ENDPOINT'] = 'http://open-hackathon-dev.chinacloudapp.cn:15000'
 
 default['openhackathon']['hackathon']['name'] = 'open-xml-sdk'
 

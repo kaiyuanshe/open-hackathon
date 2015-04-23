@@ -29,7 +29,7 @@ include_recipe "python"
 package 'libmysqlclient-dev'
 package 'libpcre3'
 package 'libpcre3-dev'
-package 'mysql-client-core'
+package "mysql-client-core-#{node['openhackathon']['mysql']['version']}"
 include_recipe "uwsgi"
 
 

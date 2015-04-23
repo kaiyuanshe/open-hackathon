@@ -32,6 +32,9 @@ default_attributes({
     "guacamole" => {
       "host" => "http://open-hackathon.chinacloudapp.cn:28080"
     },
+    "api" => {
+      "endpoint" => "http://open-hackathon-dev.chinacloudapp.cn:15000"
+    },
     "git" => {
       "repository" => "git@github.com:msopentechcn/open-hackathon.git"
     },
@@ -53,10 +56,12 @@ default_attributes({
     "github" => {
       "client_id" => "b8e407813350f26bf537",
       "client_secret" => "daa78ae27e13c9f5b4a884bd774cadf2f75a199f"
+    },
+    "mysql" => {
+      "port" => 13312,
+      "user_host" => "%"
     }
   }
 
 })
-
-
 
