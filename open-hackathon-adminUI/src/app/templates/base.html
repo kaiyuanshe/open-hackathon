@@ -40,7 +40,7 @@
             <div class="nav-no-collapse header-nav">
                 <ul class="nav navbar-nav pull-right">
                     <!-- start: User Dropdown -->
-                   {% if current_user.nickname %}
+                    {% if current_user.nickname %}
                     <li class="dropdown">
                         <a class="btn account dropdown-toggle" data-toggle="dropdown" href="index.html#">
                             <div class="avatar"><img src="{{ current_user.avatar_url}}" alt="Avatar"></div>
@@ -51,7 +51,7 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li><a href="index.html#"><i class="fa fa-user"></i> Profile</a></li>
-                            <li><a href="index.html#"><i class="fa fa-cog"></i> Settings</a></li>
+                            <li><a href="#" id="menu_settings" data-toggle="modal" data-target="#switc_hackathon_modal"><i class="fa fa-cog"></i>设置</a></li>
                             <li><a href="index.html#"><i class="fa fa-envelope"></i> Messages</a></li>
                             <li><a href="/logout"><i class="fa fa-off"></i> Logout</a></li>
                         </ul>
@@ -98,11 +98,27 @@
     <script type="text/javascript" src="/static/js/jquery/jquery.cookie.js"></script>
     <script type="text/javascript" src="/static/js/jquery/jquery.ui-1.8.18.min.js"></script>
     <script type="text/javascript" src="/static/js/jquery/jquery.validate-1.9.min.js"></script>
-    <script type="text/javascript" src="/static/js/jquery/jquery.tmpl.js"></script>
+    <script type="text/javascript" src="/static/js/jquery/jquery.tmpl.min.js"></script>
     <script type="text/javascript" src="/static/js/bootstrap/bootstrap.min.js"></script>
     <script type="text/javascript" src="/apiconfig.js"></script>
     <script type="text/javascript" src="/static/js/core.js"></script>
     <script type="text/javascript" src="/static/js/common.js"></script>
+    <div class="modal fade bs-example-modal-sm" id="switc_hackathon_modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">切换Hackathon</h4>
+                </div>
+                <div class="modal-body ">
+                    <ul class="todo-list ">
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                </div>
+            </div>
+        </div>
+    </div>
     {% block script %}{% endblock %}
 </body>
 

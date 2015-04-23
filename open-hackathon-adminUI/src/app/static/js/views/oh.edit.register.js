@@ -25,37 +25,47 @@
 ;
 (function($, oh) {
     $(function() {
-
-
+   
         function editBindHackathons(name, value) {
             oh.api.admin.hackathons.get(function(hackahons) {
                 var source = {};
                 $.each(hackahons, function(i, o) {
                     source[o.id] = o.name;
                 })
-                $('[data-name="' + name + '"]').attr({
+              var input = $('[data-name="' + name + '"]').attr({
                     'data-source': JSON.stringify(source),
                     'data-value': value
-                }).text(source[value]).editable();
-            });
+                })
+              .text(source[value])
+              .editable({
+                validate: function(value) {
+                  if($.trim(value) == '') return input.data('required');
+                }
+             });
+          });
         }
 
         var id = parseInt($.getUrlParam('id') || 0);
         id = isNaN(id) ? 0 : id;
 
         if (id > 0) {
-            oh.api.admin.register.get({
-                query: {
-                    id: id
-                }
-            }, function(data) {
+            oh.api.admin.register.get({ query: { id: id}}, function(data) {
                 for (var key in data) {
                     if (key == 'hackathon_id') {
                         editBindHackathons(key, data[key]);
                     } else {
-                        $('[data-name="' + key + '"]').text(data[key]).attr({
+                        var input = $('[data-name="' + key + '"]').text(data[key]).attr({
                             'data-value': data[key]
-                        }).editable();
+                        });
+                        if(input.is('[required]')){
+                            input .editable({
+                                validate: function(value) {
+                                   if($.trim(value) == '') return input.data('required');
+                               }
+                            });
+                        }else{
+                            input .editable();
+                        }   
                     }
                 }
             });
@@ -68,7 +78,18 @@
                 $('[data-name="hackathon_id"]').editable({
                     source: source
                 });
-                $('.editable').editable()
+                $('.editable').each(function(i,o){
+                  var input = $(o);
+                  if(input.is('[required]')){
+                        input .editable({
+                            validate: function(value) {
+                               if($.trim(value) == '') return input.data('required');
+                            }
+                        });
+                    }else{
+                        input .editable();
+                    }   
+                })
             })
         }
         var savebtn = $('#save-btn').click(function() {
@@ -81,27 +102,25 @@
             if ($.isEmptyObject(errors)) {
                 data = $elems.editable('getValue');
                 data.id = id;
-                data.strom_api = '';
-                data.jstrom_mgmt_portal = '';
                 if (id > 0) {
-                    oh.api.admin.register.post({
-                        body: data,
-                        header: {
-                            hackathon_id: data.hackathon_id
-                        }
-                    }, function(data) {
-                        id = data.id
-                        savebtn.removeAttr('disabled');
-                        alert('成功');
-                    });
-                } else {
-                    oh.api.admin.register.put({
+                   oh.api.admin.register.put({
                         body: data,
                         header: {
                             hackathon_id: data.hackathon_id
                         }
                     }, function(data) {
                         id = data.id;
+                        savebtn.removeAttr('disabled');
+                        alert('成功');
+                    });
+                } else {
+                     oh.api.admin.register.post({
+                        body: data,
+                        header: {
+                            hackathon_id: data.hackathon_id
+                        }
+                    }, function(data) {
+                        id = data.id
                         savebtn.removeAttr('disabled');
                         location.href = location.pathname + '?id=' + id;
                         alert('成功');
