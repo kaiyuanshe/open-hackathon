@@ -198,10 +198,10 @@ class TestRegisterManager(unittest.TestCase):
         result12 = rm.get_register_by_rid_or_uid_and_hid({'hid': 1})
         result13 = rm.get_register_by_rid_or_uid_and_hid({'uid': 1})
         result14 = rm.get_register_by_rid_or_uid_and_hid({'test': 1})
-        self.assertEqual(result11, {"errorcode": 400, "message": "bad request"})
-        self.assertEqual(result12, {"errorcode": 400, "message": "bad request"})
-        self.assertEqual(result13, {"errorcode": 400, "message": "bad request"})
-        self.assertEqual(result14, {"errorcode": 400, "message": "bad request"})
+        self.assertEqual(result11, {"errorcode": 400, "message": "bad request, when calling get register by rid or hid and uid"})
+        self.assertEqual(result12, {"errorcode": 400, "message": "bad request, when calling get register by rid or hid and uid"})
+        self.assertEqual(result13, {"errorcode": 400, "message": "bad request, when calling get register by rid or hid and uid"})
+        self.assertEqual(result14, {"errorcode": 400, "message": "bad request, when calling get register by rid or hid and uid"})
 
     def test_get_register_by_rid_or_uid_and_hid_give_rid(self):
         test_register = Register(id=1, register_name='test', email='test@test.com', hackathon_id=1)

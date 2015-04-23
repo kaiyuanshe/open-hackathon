@@ -67,8 +67,7 @@ class LoginProviderBase():
         register_manager.deal_with_user_and_register_when_login(user, hackathon.id)
 
         # get register info
-        args = {'hid': hackathon.id, 'uid': user.id}
-        register = register_manager.get_register_by_rid_or_uid_and_hid(args)
+        register = register_manager.get_register_by_uid_and_hid(user.id, hackathon.id)
         if register is None:
             emails = map(lambda x: x.email, user.emails)
             register = register_manager.get_register_by_emails_and_hid(hackathon.id, emails)

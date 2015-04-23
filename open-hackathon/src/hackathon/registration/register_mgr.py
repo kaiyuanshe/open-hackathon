@@ -58,7 +58,7 @@ class RegisterManger(object):
                 # new_register = self.db.add_object_kwargs(Register,
                 # register_name=args['register_name'],
                 # email=args['email'],
-                #                                  create_time=datetime.utcnow(),
+                # create_time=datetime.utcnow(),
                 #                                  description=args['description'],
                 #                                  enabled=1,  # 0: disabled 1:enabled
                 #                                  hackathon_id=g.hackathon_id)
@@ -72,7 +72,7 @@ class RegisterManger(object):
                 # self.db.update_object(register,
                 # register_name=args['register_name'],
                 # email=args['email'],
-                #                       create_time=datetime.utcnow(),
+                # create_time=datetime.utcnow(),
                 #                       description=args['description'],
                 #                       enabled=args['enabled'],  # 0: disabled 1:enabled
                 #                       hackathon_id=g.hackathon_id)
@@ -97,6 +97,9 @@ class RegisterManger(object):
     def get_register_by_emails_and_hid(self, hid, emails):
         return self.db.find_first_object(Register, Register.hackathon_id == hid, Register.email.in_(emails))
 
+    def get_register_by_uid_and_hid(self, uid, hid):
+        return self.db.find_first_object(Register, Register.user_id == uid, Register.hackathon_id == hid)
+
     def check_email(self, hid, email):
         register = self.db.find_first_object(Register, Register.hackathon_id == hid, Register.email == email)
         return register is None
@@ -110,14 +113,13 @@ class RegisterManger(object):
         if 'rid' in args:
             return self.get_register_by_id(args['rid'])
         elif 'uid' in args and 'hid' in args:
-            register = self.db.find_first_object(Register, Register.hackathon_id == args['hid'],
-                                                 Register.user_id == args['uid'])
+            register = self.get_register_by_uid_and_hid(args['uid'], args['hid'])
             if register is None:
                 return {"errorcode": 404, "message": "register not found"}
             else:
                 return register.dic()
         else:
-            return {"errorcode": 400, "message": "bad request"}
+            return {"errorcode": 400, "message": "bad request, when calling get register by rid or hid and uid"}
 
     def deal_with_user_and_register_when_login(self, user, hack_id):
         try:
@@ -137,7 +139,6 @@ class RegisterManger(object):
         if user_email is not None:
             args['user_id'] = user_email.user_id
         return args
-
 
 
 register_manager = RegisterManger(db_adapter)
