@@ -39,7 +39,6 @@ template "/home/#{node['openhackathon']['user']}/.ssh/id_rsa" do
   mode "0400"
 end
 
-
 directory node['openhackathon'][:base_dir] do
   owner node['openhackathon']['user']
   group node['openhackathon']['user']

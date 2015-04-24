@@ -26,5 +26,5 @@ default['openhackathon'][:ui][:src_dir] = "#{openhackathon[:base_dir]}/open-hack
 default['openhackathon'][:ui][:config_file] = "#{openhackathon[:ui][:src_dir]}/config.json"
 
 default['openhackathon'][:ui][:hostname] = 'open-hackathon-dev.chinacloudapp.cn'
-default['openhackathon'][:ui][:hackathon_name] = 'open-xml-sdk'
+default['openhackathon'][:ui][:hackathon_name] = 'kaiyuanshe'
 default['openhackathon'][:ui][:login_provider] ='["github", "qq", "weibo", "gitcafe"]'
