@@ -23,6 +23,7 @@
 
 include_recipe "nodejs"
 include_recipe "open-hackathon-api::source"
+include_recipe 'logrotate'
 
 # install npm packages
 npm_packages = ["cnpm", "forever", "yo", "bower", "grunt-cli", "grunt-ng-annotate"]
@@ -58,11 +59,38 @@ bash "config and build" do
     EOH
 end
 
-forever_service "open-hackathon-ui" do
-  user node['openhackathon']['user']
-  group node['openhackathon']['user']
-  path node['openhackathon'][:ui][:src_dir]
-  script "app.js"
-  description "Daemon for open hackathon platfrom UI."
-  action [ :enable, :start ]
+service_name = "open-hackathon-ui"
+start_script = "#{node['openhackathon'][:ui][:src_dir]}/app.js"
+if node['openhackathon'][:ui][:debug] then
+  start_script = "#{node['openhackathon'][:ui][:src_dir]}/dev.app.js"
+end
+
+service service_name do
+  service_name service_name
+  supports [:start, :stop, :restart, :status]
+  action :nothing
+end
+
+template "/etc/init.d/#{service_name}" do
+  source "initd.erb"
+  owner 'root'
+  group 'root'
+  mode "0755"
+  variables({
+    :service_name => service_name,
+    :description => "Open Hackathon platform UI",
+    :start_script => "#{start_script}",
+    :log_path => node['openhackathon'][:ui][:log][:log_file],
+    :min_uptime => node['openhackathon'][:ui][:forever][:min_uptime],
+    :spin_sleep_time => node['openhackathon'][:ui][:forever][:spin_sleep_time]
+  })
+  notifies :enable, "service[#{service_name}]"
+  notifies :start, "service[#{service_name}]"
+end
+
+logrotate_app service_name do
+  path node['openhackathon'][:ui][:log][:log_file]
+  frequency node['openhackathon'][:ui][:log][:rotate_frequency]
+  rotate node['openhackathon'][:ui][:log][:rotate]
+  options ['missingok', 'compress', 'notifempty']
 end
