@@ -58,7 +58,7 @@ default_attributes({
       "client_secret" => "daa78ae27e13c9f5b4a884bd774cadf2f75a199f"
     },
     "mysql" => {
-      "port" => 13312,
+      "port" => '13312',
       "user_host" => "%"
     }
   }

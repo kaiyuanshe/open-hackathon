@@ -30,3 +30,4 @@ version          '0.1.0'
 
 depends "nodejs"
 depends "open-hackathon-api"
+depends "forever"

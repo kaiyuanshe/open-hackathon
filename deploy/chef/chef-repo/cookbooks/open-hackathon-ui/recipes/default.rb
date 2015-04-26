@@ -57,3 +57,12 @@ bash "config and build" do
     grunt build
     EOH
 end
+
+forever_service "open-hackathon-ui" do
+  user node['openhackathon']['user']
+  group node['openhackathon']['user']
+  path node['openhackathon'][:ui][:src_dir]
+  script "app.js"
+  description "Daemon for open hackathon platfrom UI."
+  action [ :enable, :start ]
+end
