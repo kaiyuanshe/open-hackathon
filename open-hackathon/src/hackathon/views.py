@@ -27,7 +27,7 @@
 from flask_restful import Resource, reqparse, Api
 from . import api, app
 from expr import expr_manager
-from expr.expr_mgr import open_check_expr
+from expr.expr_mgr import open_check_expr, recycle_expr_scheduler
 from database.models import Announcement, Hackathon, Template
 from user.login import *
 from flask import g, request

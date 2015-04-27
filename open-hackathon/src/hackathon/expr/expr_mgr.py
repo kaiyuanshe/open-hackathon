@@ -600,7 +600,7 @@ def recycle_expr_scheduler():
     :return:
     """    
     log.debug("Start recycling inactive user experiment")
-    excute_time = datetime.utcnow() + timedelta(hours=1)
+    excute_time = datetime.utcnow() 
     scheduler.add_job(recycle_expr, 'interval', id='1', replace_existing=True, next_run_time=excute_time, minutes=safe_get_config("pre_allocate.check_interval_minutes", 5))
     
             
@@ -610,11 +610,13 @@ def recycle_expr():
     :return:
     """
     log.debug("start checking experiment ... ")    
-    r = Expeirment.query.join(Hackathon).filter(Experiment.last_heart_beat_time + datetime.timedelta(hours=5) > datetime.utcnow(), recycle_enabled=RecycleStatus.Enabled).first()
+    recycle_hours = safe_get_config('recycle.idle_time', 5)
+    expr_time_cond = Experiment.last_heart_beat_time + timedelta(hours=recycle_hours) > datetime.utcnow()
+    expr_enable_cond = Hackathon.recycle_enabled == RecycleStatus.Enabled
+    r = Experiment.query.join(Hackathon).filter(expr_time_cond, expr_enable_cond).first()
     if r is not None:
         expr_manager.stop_expr(r.id)
-        log.debug("it's stopping " + r.id + " inactive experiment now")
-        return
+        log.debug("it's stopping " + str(r.id) + " inactive experiment now")
     else:
         log.debug("There is now inactive experiment now")
         return

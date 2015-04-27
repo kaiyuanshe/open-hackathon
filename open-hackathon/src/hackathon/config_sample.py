@@ -77,5 +77,8 @@ Config = {
         "check_interval_minutes": 5,
         "azure": 1,
         "docker": 1
+    },
+    "recycle":{
+        "idle_time": 5,
     }
 }
