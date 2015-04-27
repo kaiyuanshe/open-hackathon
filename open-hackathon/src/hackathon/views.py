@@ -360,6 +360,13 @@ api.add_resource(AdminRegisterResource, "/api/admin/register")
 
 class AdminAzureResource(Resource):
     @hackathon_id_required
+    def get(self):
+        certificates = azure_management.get_certificates(g.hackathon_id)
+        if certificates is None:
+            return {'error': 'no certificates'}, 404
+        return certificates, 200
+
+    @hackathon_id_required
     def post(self):
         args = request.args
         if 'subscription_id' not in args or 'management_host' not in args:

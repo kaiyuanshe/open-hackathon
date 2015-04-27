@@ -116,6 +116,16 @@ class AzureManagement:
 
         return cert_url
 
+    def get_certificates(self, hackathon_id):
+        hackathon_azure_keys = db_adapter.find_all_objects_by(HackathonAzureKey, hackathon_id=hackathon_id)
+        if hackathon_azure_keys is None:
+            return None
+        certificates = []
+        for hackathon_azure_key in hackathon_azure_keys:
+            dic = db_adapter.get_object(AzureKey, hackathon_azure_key.azure_key_id).dic()
+            certificates.append(dic)
+        return certificates
+
 
 azure_management = AzureManagement()
 
