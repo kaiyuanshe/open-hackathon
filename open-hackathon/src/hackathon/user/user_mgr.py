@@ -143,11 +143,11 @@ class UserManager(object):
     def get_user_by_id(self, user_id):
         user = self.db.find_first_object_by(User, id=user_id)
         if user is not None:
-            return self.get_user_info(user)
+            return self.user_display_info(user)
         else:
             return "Not found", 404
 
-    def get_user_info(self, user):
+    def user_display_info(self, user):
         return {
             "id": user.id,
             "name": user.name,
@@ -158,20 +158,5 @@ class UserManager(object):
             "create_time": str(user.create_time),
             "last_login_time": str(user.last_login_time)
         }
-
-    def get_user_detail_info(self, user):
-        detail = self.get_user_info(user)
-        detail["experiments"] = []
-        try:
-            experiments = user.experiments.filter_by(status=EStatus.Running).all()
-            map(lambda e: detail["experiments"].append({
-                "id": e.id,
-                "hackathon_id": e.hackathon_id
-            }), experiments)
-        except Exception as e:
-            log.error(e)
-
-        return detail
-
 
 user_manager = UserManager(db_adapter)

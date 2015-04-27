@@ -14,7 +14,7 @@
 #
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-#  
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,16 +24,15 @@
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
 
-from flask_restful import Resource, reqparse, Api
+from flask_restful import Resource, reqparse
 from . import api, app
 from expr import expr_manager
 from expr.expr_mgr import open_check_expr, recycle_expr_scheduler
 from database.models import Announcement, Hackathon, Template
 from user.login import *
 from flask import g, request
-from log import log
 from database import db_adapter, db_session
-from decorators import token_required, admin_token_required, hackathon_id_required
+from decorators import token_required, hackathon_id_required
 from user.user_functions import get_user_experiment, get_user_hackathon
 from health import report_health
 from remote.guacamole import GuacamoleInfo
@@ -42,22 +41,12 @@ import time
 from admin.admin_mgr import admin_manager
 from hackathon.registration.register_mgr import register_manager
 from hackathon.template.template_mgr import template_manager
-
+from hackathon_response import *
 
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
     db_session.remove()
-
-
-class RegisterListResource(Resource):
-    # =======================================================return data start
-    # [{"register_name":"zhang", "online":"1","submitted":"0"..."description":" "}]
-    # =======================================================return data end
-    @token_required
-    def get(self):
-        json_ret = map(lambda u: u.json(), user_manager.get_all_registration())
-        return json_ret
 
 
 class RegisterResource(Resource):
@@ -268,12 +257,14 @@ class CurrentTime(Resource):
 class DefaultExperiment(Resource):
     def get(self):
         open_check_expr()
-        return {"Info": "start default experiment"}, 200
+        return ok("start default experiment")
 
-class DefaultRecycle(Resource):
+
+class DefaultRecycleResource(Resource):
     def get(self):
         recycle_expr_scheduler()
-        return {"Info": "Recycle inactive user experiment running on backgroud"}, 200
+        return ok("Recycle inactive user experiment running on backgroud")
+
 
 class TemplateResource(Resource):
     def get(self):
@@ -283,8 +274,58 @@ class TemplateResource(Resource):
         return template_manager.get_template_list(args['hackathon_name'])
 
 
+class AdminHackathonListResource(Resource):
+    @token_required
+    def get(self):
+        hackathon_ids = admin_manager.get_hack_id_by_user_id(g.user.id)
+        if -1 in hackathon_ids:
+            hackathon_list = db_adapter.find_all_objects(Hackathon)
+        else:
+            hackathon_list = db_adapter.find_all_objects(Hackathon, Hackathon.id.in_(hackathon_ids))
+        return map(lambda u: u.dic(), hackathon_list)
+
+
+class RegisterListResource(Resource):
+    def get(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('hackathon_id', type=int, location='args', required=True)
+        args = parse.parse_args()
+        return register_manager.get_all_register_by_hackathon_id(args['hackathon_id'])
+
+
+class AdminRegisterResource(Resource):
+    def get(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('id', type=int, location='args', required=True)
+        args = parse.parse_args()
+        registration = register_manager.get_register_by_id(args["id"])
+
+
+    @token_required
+    @hackathon_id_required
+    def post(self):
+        args = request.get_json()
+        return register_manager.create_or_update_register(g.hackathon_id, args)
+
+
+    @token_required
+    @hackathon_id_required
+    def put(self):
+        # update a Register
+        args = request.get_json()
+        return register_manager.create_or_update_register(g.hackathon_id, args)
+
+
+    @token_required
+    @hackathon_id_required
+    def delete(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('id', type=int, location='args', required=True)
+        args = parse.parse_args()
+        return register_manager.delete_register(args)
+
+
 api.add_resource(UserExperimentResource, "/api/user/experiment")
-api.add_resource(RegisterListResource, "/api/register/list")
 api.add_resource(RegisterResource, "/api/register")
 api.add_resource(RegisterCheckEmailResource, "/api/register/checkemail")
 api.add_resource(BulletinResource, "/api/bulletin")
@@ -300,64 +341,8 @@ api.add_resource(GuacamoleResource, "/api/guacamoleconfig")
 api.add_resource(UserResource, "/api/user")
 api.add_resource(CurrentTime, "/api/currenttime")
 api.add_resource(DefaultExperiment, "/api/default/experiment")
-api.add_resource(DefaultRecycle, "/api/default/recycle")
 api.add_resource(TemplateResource, "/api/template/list")
-
-
-# ------------------------------ APIs for admin-site --------------------------------
-
-
-class AdminHackathonListResource(Resource):
-    @admin_token_required
-    def get(self):
-        hackathon_ids = admin_manager.get_hack_id_by_admin_id(g.admin.id)
-        if -1 in hackathon_ids:
-            hackathon_list = db_adapter.find_all_objects(Hackathon)
-        else:
-            hackathon_list = db_adapter.find_all_objects(Hackathon, Hackathon.id.in_(hackathon_ids))
-        return map(lambda u: u.dic(), hackathon_list)
-
-
-class AdminRegisterListResource(Resource):
-    def get(self):
-        parse = reqparse.RequestParser()
-        parse.add_argument('hackathon_id', type=int, location='args', required=True)
-        args = parse.parse_args()
-        return register_manager.get_register_list(args['hackathon_id'])
-
-
-class AdminRegisterResource(Resource):
-    def get(self):
-        parse = reqparse.RequestParser()
-        parse.add_argument('id', type=int, location='args', required=True)
-        args = parse.parse_args()
-        return register_manager.get_register_by_id(args)
-
-
-    @admin_token_required
-    @hackathon_id_required
-    def post(self):
-        args = request.get_json()
-        return register_manager.create_or_update_register(g.hackathon_id, args)
-
-
-    @admin_token_required
-    @hackathon_id_required
-    def put(self):
-        # update a Register
-        args = request.get_json()
-        return register_manager.create_or_update_register(g.hackathon_id, args)
-
-
-    @admin_token_required
-    @hackathon_id_required
-    def delete(self):
-        parse = reqparse.RequestParser()
-        parse.add_argument('id', type=int, location='args', required=True)
-        args = parse.parse_args()
-        return register_manager.delete_register(args)
-
-
 api.add_resource(AdminHackathonListResource, "/api/admin/hackathons")
-api.add_resource(AdminRegisterListResource, "/api/admin/register/list")
+api.add_resource(RegisterListResource, "/api/register/list", "/api/admin/register/list")
 api.add_resource(AdminRegisterResource, "/api/admin/register")
+api.add_resource(DefaultRecycleResource, "/api/default/recycle")
