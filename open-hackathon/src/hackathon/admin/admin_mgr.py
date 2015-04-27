@@ -2,9 +2,9 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
-#  
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -39,32 +39,10 @@ class AdminManager(object):
     def __init__(self, db_adapter):
         self.db = db_adapter
 
-    def __validate_token(self, token):
-        t = self.db.find_first_object_by(AdminToken, token=token)
-        if t is not None and t.expire_date >= datetime.utcnow():
-            return t.admin
-        return None
-
-    def validate_request(self):
-        if HTTP_HEADER.TOKEN not in request.headers:
-            log.error('invailed request from checking TOKEN')
-            return False
-        admin = self.__validate_token(request.headers['token'])
-        if admin is None:
-            return False
-
-        g.admin = admin
-        return True
-
-    def get_hack_id_by_admin_id(self, admin_id):
-
-        # get emails from admin though admin.id in table admin_email
-        admin_emails = self.db.find_all_objects_by(AdminEmail, admin_id=admin_id)
-        emails = map(lambda x: x.email, admin_emails)
+    def get_hack_id_by_user_id(self, user_id):
 
         # get AdminUserHackathonRels from query withn filter by email
-        admin_user_hackathon_rels = self.db.find_all_objects(AdminUserHackathonRel,
-                                                             AdminUserHackathonRel.admin_email.in_(emails))
+        admin_user_hackathon_rels = self.db.find_all_objects_by(AdminHackathonRel, user_id=user_id)
 
         # get hackathon_ids_from AdminUserHackathonRels details
         hackathon_ids = map(lambda x: x.hackathon_id, admin_user_hackathon_rels)
@@ -77,7 +55,7 @@ class AdminManager(object):
         if HTTP_HEADER.TOKEN not in request.headers:
             return True
 
-        hack_ids = self.get_hack_id_by_admin_id(g.admin.id)
+        hack_ids = self.get_hack_id_by_user_id(g.user.id)
         return -1 in hack_ids or hackathon_id in hack_ids
 
 

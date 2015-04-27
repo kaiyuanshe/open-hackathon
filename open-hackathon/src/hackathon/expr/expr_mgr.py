@@ -14,7 +14,7 @@
 #
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-#  
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -30,9 +30,7 @@ sys.path.append("..")
 from compiler.ast import (
     flatten,
 )
-from hackathon.constants import (
-    GUACAMOLE,
-)
+
 from hackathon.docker import (
     OssDocker,
 )
@@ -60,7 +58,6 @@ from hackathon.database.models import (
     DockerContainer,
     Hackathon,
     Template,
-    Register,
 )
 from hackathon.database import (
     db_adapter,
@@ -114,7 +111,7 @@ class ExprManager(object):
         # return public accessible web url
         public_urls = []
         if expr.template.provider == VEProvider.Docker:
-            for ve in expr.virtual_environments.filter(VirtualEnvironment.image != GUACAMOLE.IMAGE).all():
+            for ve in expr.virtual_environments.all():
                 for p in ve.port_bindings.all():
                     if p.binding_type == PortBindingType.CloudService and p.name == "website":
                         hs = db_adapter.find_first_object_by(DockerHostServer, id=p.binding_resource_id)
@@ -520,23 +517,6 @@ class ExprManager(object):
             return "OK"
         else:
             return "expr not exist"
-
-    def submit_expr(self, args):
-        if "id" not in args:
-            log.warn("cannot submit expr for the lack of id")
-            raise Exception("id unavailable")
-
-        id = args["id"]
-        u = db_adapter.find_first_object_by(Register, id=id)
-        if u is None:
-            log.debug("register user not found:" + id)
-            return "user not found", 404
-
-        # u.online = args["online"] if "online" in args else u.online
-        u.submitted = args["submitted"] if "submitted" in args else u.submitted
-        u.submitted_time = datetime.utcnow()
-        db_adapter.commit()
-        return u
 
 
 def open_check_expr():

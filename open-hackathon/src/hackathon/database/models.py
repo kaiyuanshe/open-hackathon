@@ -155,7 +155,7 @@ class UserHackathonRel(DBBase):
     __tablename__ = 'user_hackathon_rel'
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer)
+    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
     real_name = Column(String(80))
     team_name = Column(String(80))
     email = Column(String(120))
@@ -173,6 +173,8 @@ class UserHackathonRel(DBBase):
     skype = Column(String(32))
     address = Column(String(80))
     status = Column(Integer)  # 0: havn't audit 1: audit passed 2:audit reject
+
+    user = relationship('User', backref=backref('hackathons', lazy='dynamic'))
 
     hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
     hackathon = relationship('Hackathon', backref=backref('registers', lazy='dynamic'))
@@ -197,7 +199,7 @@ class Hackathon(DBBase):
     judge_start_time = Column(DateTime)
     judge_end_time = Column(DateTime)
 
-    metadata = Column(Text)
+    basic_info = Column(Text)
     extra_info = Column(Text)
 
     create_time = Column(DateTime, default=datetime.utcnow())
@@ -545,7 +547,7 @@ class AzureEndpoint(DBBase):
 
 
 class AdminHackathonRel(DBBase):
-    __tablename__ = 'admin_user_hackathon_rel'
+    __tablename__ = 'admin_hackathon_rel'
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
     user = relationship('User', backref=backref('admin_hackathon_rels', lazy='dynamic'))
