@@ -25,6 +25,8 @@
 # -----------------------------------------------------------------------------------
 
 import sys
+from debtagshw.debtagshw import LOG
+from cmath import log10
 
 sys.path.append("..")
 from compiler.ast import (
@@ -48,6 +50,7 @@ from hackathon.enum import (
     PortBindingType,
     VEStatus,
     ReservedUser,
+    RecycleStatus,
 )
 from hackathon.database.models import (
     VirtualEnvironment,
@@ -521,13 +524,12 @@ class ExprManager(object):
 
 def open_check_expr():
     """
-    start a job to examine default experiment
+    start a scheduled job to examine default experiment
     :return:
     """
     log.debug("start checking experiment ... ")
     alarm_time = datetime.now() + timedelta(seconds=1)
-    scheduler.add_job(check_default_expr, 'interval', id='1', replace_existing=True, next_run_time=alarm_time,
-                      minutes=safe_get_config("pre_allocate.check_interval_minutes", 5))
+    scheduler.add_job(check_default_expr, 'interval', id='1', replace_existing=True, next_run_time=alarm_time, minutes=safe_get_config("pre_allocate.check_interval_minutes", 5))
 
 
 def check_default_expr():
@@ -571,6 +573,32 @@ def check_default_expr():
         except Exception as e:
             log.error(e)
             log.error("check default experiment failed")
-
+            
+def recycle_expr_scheduler():
+    """
+    start a scheduled job to recycle inactive experiment
+    :return:
+    """    
+    log.debug("Start recycling inactive user experiment")
+    excute_time = datetime.utcnow() + timedelta(minutes=1)
+    scheduler.add_job(recycle_expr, 'interval', id='2', replace_existing=True, next_run_time=excute_time, minutes=safe_get_config("recycle.check_idle_interval_minutes", 5))
+    
+            
+def recycle_expr():
+    """
+    recycle experiment when idle more than 5 hours
+    :return:
+    """
+    log.debug("start checking experiment ... ")    
+    recycle_hours = safe_get_config('recycle.idle_hours', 24)
+    expr_time_cond = Experiment.last_heart_beat_time + timedelta(hours=recycle_hours) > datetime.utcnow()
+    expr_enable_cond = Hackathon.recycle_enabled == RecycleStatus.Enabled
+    r = Experiment.query.join(Hackathon).filter(expr_time_cond, expr_enable_cond).first()
+    if r is not None:
+        expr_manager.stop_expr(r.id)
+        log.debug("it's stopping " + str(r.id) + " inactive experiment now")
+    else:
+        log.debug("There is now inactive experiment now")
+        return
 
 expr_manager = ExprManager()

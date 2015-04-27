@@ -88,6 +88,10 @@ class ReservedUser:
 class AdminUserHackathonRelStates:
     Actived = 1
     Disabled = 0
+    
+class RecycleStatus:
+    Enabled = 1
+    Disabled = 0
 
 
 # ------------------------------ Enums are introduced by azure formation ------------------------------

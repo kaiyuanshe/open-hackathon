@@ -27,7 +27,7 @@
 from flask_restful import Resource, reqparse
 from . import api, app
 from expr import expr_manager
-from expr.expr_mgr import open_check_expr
+from expr.expr_mgr import open_check_expr, recycle_expr_scheduler
 from database.models import Announcement, Hackathon, Template
 from user.login import *
 from flask import g, request
@@ -257,7 +257,13 @@ class CurrentTime(Resource):
 class DefaultExperiment(Resource):
     def get(self):
         open_check_expr()
-        return {"Info": "start default experiment"}, 200
+        return ok("start default experiment")
+
+
+class DefaultRecycleResource(Resource):
+    def get(self):
+        recycle_expr_scheduler()
+        return ok("Recycle inactive user experiment running on backgroud")
 
 
 class TemplateResource(Resource):
@@ -339,3 +345,4 @@ api.add_resource(TemplateResource, "/api/template/list")
 api.add_resource(AdminHackathonListResource, "/api/admin/hackathons")
 api.add_resource(RegisterListResource, "/api/register/list", "/api/admin/register/list")
 api.add_resource(AdminRegisterResource, "/api/admin/register")
+api.add_resource(DefaultRecycleResource, "/api/default/recycle")
