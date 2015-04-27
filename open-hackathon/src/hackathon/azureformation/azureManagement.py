@@ -119,12 +119,29 @@ class AzureManagement:
     def get_certificates(self, hackathon_id):
         hackathon_azure_keys = db_adapter.find_all_objects_by(HackathonAzureKey, hackathon_id=hackathon_id)
         if hackathon_azure_keys is None:
+            log.error('hackathon [%s] has no certificates' % hackathon_id)
             return None
         certificates = []
         for hackathon_azure_key in hackathon_azure_keys:
             dic = db_adapter.get_object(AzureKey, hackathon_azure_key.azure_key_id).dic()
             certificates.append(dic)
         return certificates
+
+    def delete_certificate(self, certificate_id, hackathon_id):
+        certificate_id = int(certificate_id)
+        hackathon_id = int(hackathon_id)
+        hackathon_azure_keys = db_adapter.find_all_objects_by(HackathonAzureKey, hackathon_id=hackathon_id)
+        if hackathon_azure_keys is None:
+            log.error('hackathon [%d] has no certificates' % hackathon_id)
+            return False
+        azure_key_ids = map(lambda x: x.azure_key_id, hackathon_azure_keys)
+        if certificate_id not in azure_key_ids:
+            log.error('hackathon [%d] has no certificate [%d]' % (hackathon_id, certificate_id))
+            return False
+        certificate = db_adapter.get_object(AzureKey, certificate_id)
+        db_adapter.delete_object(certificate)
+        db_adapter.commit()
+        return True
 
 
 azure_management = AzureManagement()

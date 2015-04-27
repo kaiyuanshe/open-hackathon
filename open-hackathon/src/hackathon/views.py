@@ -380,5 +380,16 @@ class AdminAzureResource(Resource):
             log.error(err)
             return {'error': 'fail to create certificate due to [%s]' % err}, 500
 
+    @hackathon_id_required
+    def delete(self):
+        args = request.args
+        if 'certificate_id' not in args:
+            return {'error': 'invalid parameter'}, 400
+        certificate_id = args['certificate_id']
+        if azure_management.delete_certificate(certificate_id, g.hackathon_id):
+            return {'message': 'certificate deleted'}, 200
+        else:
+            return {'error': 'fail to delete certificate'}, 500
+
 
 api.add_resource(AdminAzureResource, '/api/admin/azure')
