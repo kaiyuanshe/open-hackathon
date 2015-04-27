@@ -2,7 +2,7 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
 #  
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -89,6 +89,7 @@ class AdminUserHackathonRelStates:
     Actived = 1
     Disabled = 0
 
+
 # ------------------------------ Enums are introduced by azure formation ------------------------------
 
 
@@ -146,6 +147,7 @@ class AVMStatus:
     STOPPED = 'Stopped'  # STOPPED is only used for 'type' input parameter of stop_virtual_machine in VirtualMachine
     STOPPED_DEALLOCATED = 'StoppedDeallocated'
 
+
 class RGStatus:
     """
     For status in DB model Register for registration audit status
@@ -153,3 +155,11 @@ class RGStatus:
     UNAUDIT = 0
     AUDIT_PASSED = 1
     AUDIT_REFUSE = 2
+
+
+class ADMIN_ROLE_TYPE:
+    """
+    admin role types
+    """
+    ADMIN = 1
+    JUDGE = 2
