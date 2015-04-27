@@ -67,7 +67,7 @@ function login(res, option) {
           user.check_status = data.registration.status;
           if (data.registration.status == 1) {
             //data.registration.status :0表示等待审核，1表示审核通过，2表示拒绝。
-            if (data.user.experiments.length > 0) {
+            if (user.experiments && user.experiments.length > 0) {
               redirect = '/#/hackathon';
             } else {
               redirect = '/#/settings';

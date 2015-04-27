@@ -23,8 +23,18 @@
 
 # container attributes
 default['openhackathon'][:ui][:src_dir] = "#{openhackathon[:base_dir]}/open-hackathon-ui"
+default['openhackathon'][:ui][:debug] = true
 default['openhackathon'][:ui][:config_file] = "#{openhackathon[:ui][:src_dir]}/config.json"
 
 default['openhackathon'][:ui][:hostname] = 'open-hackathon-dev.chinacloudapp.cn'
-default['openhackathon'][:ui][:hackathon_name] = 'open-xml-sdk'
+default['openhackathon'][:ui][:hackathon_name] = 'kaiyuanshe'
 default['openhackathon'][:ui][:login_provider] ='["github", "qq", "weibo", "gitcafe"]'
+
+# forever param
+default['openhackathon'][:ui][:forever][:spin_sleep_time] = 2000
+default['openhackathon'][:ui][:forever][:min_uptime] = 5000
+
+# log
+default['openhackathon'][:ui][:log][:log_file] = "#{openhackathon[:log_dir]}/open-hackathon-ui.log"
+default['openhackathon'][:ui][:log][:rotate_frequency] = "daily"
+default['openhackathon'][:ui][:log][:rotate] = 30

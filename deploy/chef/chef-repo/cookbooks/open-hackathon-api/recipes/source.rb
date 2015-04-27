@@ -30,13 +30,21 @@ directory "/home/#{node['openhackathon']['user']}/.ssh" do
   group node['openhackathon']['user']
   mode  '0700'
   action :create
+  recursive true
 end
-
-template "/home/#{node['openhackathon']['user']}/.ssh/id_rsa" do
+ssh_key_file="/home/#{node['openhackathon']['user']}/.ssh/id_rsa"
+ssh_wrapper_file="/home/#{node['openhackathon']['user']}/.ssh/git_wrapper.sh"
+template ssh_key_file do
   source 'temp.key.erb'
   owner node['openhackathon']['user']
   group node['openhackathon']['user']
   mode "0400"
+end
+file ssh_wrapper_file do
+  owner node['openhackathon']['user']
+  group node['openhackathon']['user']
+  mode "0755"
+  content "#!/bin/sh\nexec /usr/bin/ssh -i #{ssh_key_file} \"$@\""
 end
 
 
@@ -52,6 +60,7 @@ git node['openhackathon'][:base_dir] do
   user node['openhackathon']['user']
   group node['openhackathon']['user']
   checkout_branch node['openhackathon']['git']['branch']
+  ssh_wrapper #{ssh_wrapper_file}
   action :sync
   timeout 60
 end

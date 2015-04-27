@@ -66,6 +66,8 @@ end
 
 mysql_database_user node['openhackathon']['mysql']['user'] do
   connection connection_info
+  host node['openhackathon']['mysql']['user_host']
+  password node['openhackathon']['mysql']['password']
   action :create
 end
 
