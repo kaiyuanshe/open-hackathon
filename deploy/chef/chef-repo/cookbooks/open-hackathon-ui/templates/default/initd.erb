@@ -1,0 +1,95 @@
+#!/bin/bash
+#
+# An init.d script for running a Node.js process as a service using Forever as
+# the process monitor. For more configuration options associated with Forever,
+# see: https://github.com/nodejitsu/forever
+#
+# This was written for Debian distributions such as Ubuntu, but should still
+# work on RedHat, Fedora, or other RPM-based distributions, since none of the
+# built-in service functions are used. So information is provided for both.
+#
+# Default-Start:        2 3 4 5
+# Default-Stop:         0 1 6
+# Short-Description:    <%= @service_name %>
+# Description:          <%= @description %>
+#
+### BEGIN CHKCONFIG INFO
+# chkconfig: 2345 55 25
+# description: <%= @description %>
+### END CHKCONFIG INFO
+#
+# Based on:
+# https://www.exratione.com/2013/02/nodejs-and-forever-as-a-service-simple-upstart-and-init-scripts-for-ubuntu/
+#
+
+NAME="<%= @service_name %>"
+APPLICATION_PATH="<%= @start_script %>"
+PIDFILE="/var/run/node-<%= @service_name %>.pid"
+LOGFILE="<%= @log_path %>"
+MIN_UPTIME="<%= @min_uptime %>"
+SPIN_SLEEP_TIME="<%= @spin_sleep_time %>"
+
+start() {
+    echo "Starting $NAME"
+
+    forever \
+      --pidFile $PIDFILE \
+      -a \
+      -l $LOGFILE \
+      -o $LOGFILE \
+      -e $LOGFILE \
+      --minUptime $MIN_UPTIME \
+      --spinSleepTime $SPIN_SLEEP_TIME \
+      start $APPLICATION_PATH 2>&1 > /dev/null &
+    RETVAL=$?
+}
+
+stop() {
+    if [ -f $PIDFILE ]; then
+        echo "Shutting down $NAME"
+        # Tell Forever to stop the process.
+        forever stop $APPLICATION_PATH 2>&1 > /dev/null
+        # Get rid of the pidfile, since Forever won't do that.
+        rm -f $PIDFILE
+        RETVAL=$?
+    else
+        echo "$NAME is not running."
+        RETVAL=0
+    fi
+}
+
+restart() {
+    stop
+    start
+}
+
+status() {
+    echo `forever list` | grep -q "$APPLICATION_PATH"
+    if [ "$?" -eq "0" ]; then
+        echo "$NAME is running."
+        RETVAL=0
+    else
+        echo "$NAME is not running."
+        RETVAL=3
+    fi
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    status)
+        status
+        ;;
+    restart)
+        restart
+        ;;
+    *)
+        echo "Usage: {start|stop|status|restart}"
+        exit 1
+        ;;
+esac
+exit $RETVAL
