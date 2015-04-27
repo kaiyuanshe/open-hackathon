@@ -600,7 +600,7 @@ def recycle_expr_scheduler():
     :return:
     """    
     log.debug("Start recycling inactive user experiment")
-    excute_time = datetime.utcnow() 
+    excute_time = datetime.utcnow() + timedelta(hours=safe_get_config('recycle.recycle_interval', 24))
     scheduler.add_job(recycle_expr, 'interval', id='1', replace_existing=True, next_run_time=excute_time, minutes=safe_get_config("pre_allocate.check_interval_minutes", 5))
     
             

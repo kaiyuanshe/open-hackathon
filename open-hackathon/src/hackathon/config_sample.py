@@ -80,5 +80,6 @@ Config = {
     },
     "recycle":{
         "idle_time": 5,
+        "recycle_interval": 24
     }
 }
