@@ -374,6 +374,15 @@ CREATE TABLE IF NOT EXISTS `virtual_environment` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
+
+-- Dump completed on 2015-04-13 16:09:52
+
+-- add a column safely
+-- alter table vm_config add column dummy1 VARCHAR(40) AFTER id;
+-- alter table vm_config add column dummy2 VARCHAR(40) AFTER id;
+-- alter table vm_config drop column dummy1;
+-- alter table vm_config drop column dummy2;
+
 -- Table:template
 
 alter table template add column description TEXT AFTER hackathon_id;
@@ -651,4 +660,8 @@ DROP TABLE IF EXISTS `vm_endpoint`;
 -- INSERT INTO `azure_key` (`id`, `pem_url`, `subscription_id`, `management_host`) VALUES (1, '/etc/open-hackathon/azure/1-31e6e137-4656-4f88-96fb-4c997b14a644.pem', '7946a60d-67b1-43f0-96f9-1c558a9d284c', 'management.core.chinacloudapi.cn');
 -- INSERT INTO `hackathon_azure_key` (`id`, `hackathon_id`, `azure_key_id`) VALUES (1, 1, 1);
 -- INSERT INTO `hackathon_azure_key` (`id`, `hackathon_id`, `azure_key_id`) VALUES (2, 2, 1);
+
+
+alter table hackathon add column recycle_enabled int default 0 after check_register;
+
 
