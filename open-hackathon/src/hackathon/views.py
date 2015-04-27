@@ -42,7 +42,9 @@ import time
 from admin.admin_mgr import admin_manager
 from hackathon.registration.register_mgr import register_manager
 from hackathon.template.template_mgr import template_manager
-
+from hackathon.azureformation.azureManagement import (
+    azure_management,
+)
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
@@ -354,3 +356,22 @@ class AdminRegisterResource(Resource):
 api.add_resource(AdminHackathonListResource, "/api/admin/hackathons")
 api.add_resource(AdminRegisterListResource, "/api/admin/register/list")
 api.add_resource(AdminRegisterResource, "/api/admin/register")
+
+
+class AdminAzureResource(Resource):
+    @hackathon_id_required
+    def post(self):
+        args = request.args
+        if 'subscription_id' not in args or 'management_host' not in args:
+            return {'error': 'invalid parameter'}, 400
+        subscription_id = args['subscription_id']
+        management_host = args['management_host']
+        try:
+            cert_url = azure_management.create_certificate(subscription_id, management_host, g.hackathon_id)
+            return {'cert_url': cert_url}, 200
+        except Exception as err:
+            log.error(err)
+            return {'error': 'fail to create certificate due to [%s]' % err}, 500
+
+
+api.add_resource(AdminAzureResource, '/api/admin/azure')
