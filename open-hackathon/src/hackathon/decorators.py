@@ -2,7 +2,7 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
 #  
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,26 +24,24 @@
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
 
-from flask import g
-from functools import wraps
 from user import user_manager
 from admin.admin_mgr import admin_manager
-
+from hackathon_response import *
 
 
 def token_required(func):
     def authenticate_and_call(*args, **kwargs):
         if not user_manager.validate_request():
-            return "Access Denied", 403
+            return unauthorized("login required")
         return func(*args, **kwargs)
 
     return authenticate_and_call
 
 
-def hackathon_id_required(func):
+def hackathon_name_required(func):
     def authenticate_and_call(*args, **kwargs):
-        if not admin_manager.validate_hackathon_id():
-            return "Access Denied", 403
+        if not admin_manager.validate_hackathon_name():
+            return bad_request("hackathon name invalid")
         return func(*args, **kwargs)
 
     return authenticate_and_call

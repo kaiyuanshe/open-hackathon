@@ -60,5 +60,6 @@ def internal_server_error(message, friendly_message="Internal Server Error"):
 
 def ok(message=""):
     return {
+        "code": 200,
         "message": message
     }

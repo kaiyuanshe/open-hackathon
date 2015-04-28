@@ -11,10 +11,10 @@
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#  
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-#  
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -33,6 +33,7 @@ from datetime import datetime
 from hackathon.constants import HTTP_HEADER
 from flask import request, g
 from hackathon.log import log
+from hackathon.hack import hack_manager
 
 
 class AdminManager(object):
@@ -53,22 +54,30 @@ class AdminManager(object):
     # check the admin authority on hackathon
     def validate_admin_hackathon_request(self, hackathon_id):
         if HTTP_HEADER.TOKEN not in request.headers:
+            # if user not login, just return true for those APIs that login is not required
             return True
 
         hack_ids = self.get_hack_id_by_user_id(g.user.id)
         return -1 in hack_ids or hackathon_id in hack_ids
 
 
-    def validate_hackathon_id(self):
-        if HTTP_HEADER.HACKATHON_ID in request.headers:
+    def validate_hackathon_name(self):
+        if HTTP_HEADER.HACKATHON_NAME in request.headers:
             try:
-                g.hackathon_id = long(request.headers[HTTP_HEADER.HACKATHON_ID])
-                return self.validate_admin_hackathon_request(g.hackathon_id)
+                hackathon_name = request.headers[HTTP_HEADER.HACKATHON_NAME]
+                hackathon = hack_manager.get_hackathon_by_name(hackathon_name)
+                if hackathon is None:
+                    log.debug("cannot find hackathon by name %s" % hackathon_name)
+                    return False
+                else:
+                    g.hackathon = hackathon
+
+                return self.validate_admin_hackathon_request(g.hackathon.id)
             except Exception:
-                log.debug("hackathon_id is not a num")
+                log.debug("hackathon_name invalid")
                 return False
         else:
-            log.debug("HEARDER lost hackathon_id")
+            log.debug("hackathon_name not found in headers")
             return False
 
 
