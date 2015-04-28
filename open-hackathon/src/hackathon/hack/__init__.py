@@ -27,11 +27,14 @@
 import sys
 
 sys.path.append("..")
-from hackathon.database.models import Hackathon, User, UserEmail, UserHackathonRel
+from hackathon.database.models import Hackathon, User, UserEmail, UserHackathonRel, AdminHackathonRel
 from hackathon.database import db_adapter
+from hackathon.database import db_session
 from datetime import datetime
 from hackathon.enum import RGStatus
 from hackathon.hackathon_response import *
+from flask import g
+from hackathon.enum import ADMIN_ROLE_TYPE
 
 
 
@@ -78,16 +81,39 @@ class HackathonManager():
             return db_adapter.find_first_object_by(Hackathon, name=name).dic()
         return map(lambda u: u.dic(), db_adapter.find_all_objects(Hackathon))
 
-    def create_new_hackathon(self, args):
-        args['create_time'] = datetime.utcnow()
-        args['update_time'] = datetime.utcnow()
-        self.db.add_object_kwargs(Hackathon, **args)
 
-    def update_hackathon(self, args):
-        hid = args['id']
-        hackathon = self.get_hackathon_by_id(hid)
-        args['update_time'] = datetime.utcnow()
-        self.db.update_object(hackathon, **args)
+    def create_or_update_hackathon(self,args):
+        log.debug("create_or_update_hackathon: %r" % args)
+        if "name" not in args:
+            return bad_request("hackathon perporities lost name")
+        hackathon = self.db.find_first_object(Hackathon, Hackathon.name==args['name'])
+
+        try:
+            if hackathon is None:
+                log.debug("add a new hackathon:" + str(args))
+
+                hack_object = Hackathon(**args)
+                db_session.add(hack_object)    # insert into hackathon
+                hid = hack_object.id
+                ahl = AdminHackathonRel(user_id=g.user_id,
+                                        role_type = ADMIN_ROLE_TYPE.ADMIN,
+                                        hackathon_id = hid,
+                                        status = 1,
+                                        remarks = 'being admin automatically',
+                                        create_time = datetime.utcnow())
+                db_session.add(ahl)            # insert into AdminHackathonRel
+                db_session.commit()
+                return ok("create hackathon successed")
+            else:
+                args['update_time'] = datetime.utcnow()
+                update_items = dict(dict(args).viewitems() - hackathon.dic().viewitems())
+                log.debug("update a exist hackathon " + hackathon.id + ":" + str(args))
+                self.db.update_object(Hackathon, **update_items)
+                return ok("update hackathon successed")
+        except Exception as  e:
+            log.error(e)
+            return internal_server_error("fail to create or update hackathon")
+
 
 
 

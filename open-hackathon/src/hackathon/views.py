@@ -174,7 +174,14 @@ class HackathonResource(Resource):
     # todo post
     @token_required
     def post(self):
-        pass
+        args = request.get_json()
+        return hack_manager.create_or_update_hackathon(args).dic()
+
+    @token_required
+    @hackathon_id_required
+    def put(self):
+        args = request.get_json()
+        return hack_manager.create_or_update_hackathon(args).dic()
 
 
 class HackathonListResource(Resource):
