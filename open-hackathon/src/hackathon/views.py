@@ -32,7 +32,7 @@ from database.models import Announcement, Hackathon, Template
 from user.login import *
 from flask import g, request
 from database import db_adapter, db_session
-from decorators import token_required, hackathon_name_required
+from decorators import token_required, hackathon_name_required, admin_privilege_required
 from user.user_functions import get_user_experiment
 from health import report_health
 from remote.guacamole import GuacamoleInfo
@@ -82,14 +82,28 @@ class RegisterResource(Resource):
         return register_manager.create_or_update_register(g.hackathon.id, args)
 
 
-    @token_required
-    @hackathon_name_required
+class AdminRegisterResource(Resource):
+    def get(self):
+        # Register page need to get register info to check the status When refresh page not after login logic
+        parse = reqparse.RequestParser()
+        parse.add_argument('rid', type=int, location='args')  # register_id
+        parse.add_argument('hid', type=int, location='args')  # hackathon_id
+        parse.add_argument('uid', type=int, location='args')  # user_id
+        args = parse.parse_args()
+        return register_manager.get_register_by_rid_or_uid_and_hid(args)
+
+    @admin_privilege_required
+    def post(self):
+        args = request.get_json()
+        return register_manager.create_or_update_register(g.hackathon.id, args)
+
+
+    @admin_privilege_required
     def put(self):
         args = request.get_json()
         return register_manager.create_or_update_register(g.hackathon.id, args)
 
-    @token_required
-    @hackathon_name_required
+    @admin_privilege_required
     def delete(self):
         parse = reqparse.RequestParser()
         parse.add_argument('id', type=int, location='args', required=True)
@@ -169,7 +183,7 @@ class BulletinResource(Resource):
             return Announcement(enabled=1, content="Welcome to Open Hackathon Platform!").dic()
 
     # todo bulletin post
-    @token_required
+    @admin_privilege_required
     def post(self):
         pass
 
@@ -219,6 +233,12 @@ class HackathonStatResource(Resource):
     @hackathon_name_required
     def get(self):
         return hack_manager.get_hackathon_stat(g.hackathon)
+
+
+class UserHackathonResource(Resource):
+    @token_required
+    def get(self):
+        return ""
 
 
 class UserHackathonListResource(Resource):
@@ -274,15 +294,16 @@ class ExperimentRecycleResource(Resource):
 
 
 class TemplateResource(Resource):
+    @hackathon_name_required
     def get(self):
         parse = reqparse.RequestParser()
         parse.add_argument('hackathon_name', type=str, location='args', required=True)
         args = parse.parse_args()
-        return template_manager.get_template_list(args['hackathon_name'])
+        return template_manager.get_template_list(g.hackathon.name)
 
 
 class AdminHackathonListResource(Resource):
-    @token_required
+    @admin_privilege_required
     def get(self):
         # todo move this logic to hack_manager
         hackathon_ids = admin_manager.get_hack_id_by_user_id(g.user.id)
@@ -317,7 +338,8 @@ api.add_resource(UserLoginResource, "/api/user/login")
 """
 user-hackathon-relationship, or register, api
 """
-api.add_resource(RegisterResource, "/api/register", "/api/admin/register")
+api.add_resource(RegisterResource, "/api/register")
+api.add_resource(AdminRegisterResource, "/api/admin/register")
 api.add_resource(RegisterListResource, "/api/register/list", "/api/admin/register/list")
 api.add_resource(RegisterCheckEmailResource, "/api/register/checkemail")
 
@@ -328,6 +350,7 @@ api.add_resource(HackathonResource, "/api/hackathon")
 api.add_resource(HackathonListResource, "/api/hackathon/list")
 api.add_resource(HackathonStatResource, "/api/hackathon/stat")
 api.add_resource(UserHackathonListResource, "/api/user/hackathon/list")
+api.add_resource(UserHackathonResource, "/api/user/hackathon")
 api.add_resource(AdminHackathonListResource, "/api/admin/hackathon/list")
 
 """

@@ -27,11 +27,13 @@
 import sys
 
 sys.path.append("..")
-from hackathon.database.models import Hackathon, User, UserHackathonRel
+from hackathon.database.models import Hackathon, User, UserHackathonRel, AdminHackathonRel
 from hackathon.database import db_adapter
 from hackathon.enum import RGStatus
 from hackathon.hackathon_response import *
 from sqlalchemy import or_
+from hackathon.constants import HTTP_HEADER
+from flask import request, g
 
 
 class HackathonManager():
@@ -98,6 +100,42 @@ class HackathonManager():
             .filter(UserHackathonRel.deleted != 1, UserHackathonRel.user_id == user_id).all()
 
         return [h.dic() for h in user_hack_list]
+
+    def get_permitted_hackathon_list_by_user_id(self, user_id):
+        # get AdminUserHackathonRels from query withn filter by email
+        admin_user_hackathon_rels = self.db.find_all_objects_by(AdminHackathonRel, user_id=user_id)
+
+        # get hackathon_ids_from AdminUserHackathonRels details
+        hackathon_ids = map(lambda x: x.hackathon_id, admin_user_hackathon_rels)
+
+        return list(set(hackathon_ids))
+
+
+    # check the admin authority on hackathon
+    def __validate_admin_privilege(self, user_id, hackathon_id):
+        hack_ids = self.get_permitted_hackathon_list_by_user_id(user_id)
+        return -1 in hack_ids or hackathon_id in hack_ids
+
+    def validate_admin_privilege(self):
+        return self.__validate_admin_privilege(g.user.id, g.hackathon.id)
+
+    def validate_hackathon_name(self):
+        if HTTP_HEADER.HACKATHON_NAME in request.headers:
+            try:
+                hackathon_name = request.headers[HTTP_HEADER.HACKATHON_NAME]
+                hackathon = hack_manager.get_hackathon_by_name(hackathon_name)
+                if hackathon is None:
+                    log.debug("cannot find hackathon by name %s" % hackathon_name)
+                    return False
+                else:
+                    g.hackathon = hackathon
+                    return True
+            except Exception:
+                log.debug("hackathon_name invalid")
+                return False
+        else:
+            log.debug("hackathon_name not found in headers")
+            return False
 
 
 hack_manager = HackathonManager(db_adapter)

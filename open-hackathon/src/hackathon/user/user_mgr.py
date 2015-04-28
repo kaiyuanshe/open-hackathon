@@ -128,7 +128,7 @@ class UserManager(object):
             "user": user
         }
 
-    def validate_request(self):
+    def validate_login(self):
         if HTTP_HEADER.TOKEN not in request.headers:
             return False
 
