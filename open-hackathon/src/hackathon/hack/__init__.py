@@ -29,6 +29,7 @@ import sys
 sys.path.append("..")
 from hackathon.database.models import Hackathon, User, UserEmail, Register
 from hackathon.database import db_adapter
+from datetime import datetime
 
 
 class HackathonManager():
@@ -67,6 +68,18 @@ class HackathonManager():
         if name is not None:
             return db_adapter.find_first_object_by(Hackathon, name=name).dic()
         return map(lambda u: u.dic(), db_adapter.find_all_objects(Hackathon))
+
+    def create_new_hackathon(self, args):
+        args['create_time'] = datetime.utcnow()
+        args['update_time'] = datetime.utcnow()
+        self.db.add_object_kwargs(Register, **args)
+
+    def update_hackathon(self, args):
+        hid = args['id']
+        hackathon = self.get_hackathon_by_id(hid)
+        args['update_time'] = datetime.utcnow()
+        self.db.update_object(hackathon, **args)
+
 
 
 hack_manager = HackathonManager(db_adapter)

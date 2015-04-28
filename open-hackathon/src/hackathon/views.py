@@ -299,6 +299,23 @@ api.add_resource(TemplateResource, "/api/template/list")
 
 # ------------------------------ APIs for admin-site --------------------------------
 
+class AdminHackathonResource(Resource):
+    @admin_token_required
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('hid', type=int, location='args')
+        parser.add_argument('name', type=str, location='args')
+        args = parser.parse_args()
+        if args['hid'] is None and args['name'] is None:
+            return {'errorcode':'404','message':'hackathon not found'}
+        return hack_manager.get_hackathon_by_name_or_id(hack_id=args['hid'], name=args['name']).dic()
+
+    @admin_token_required
+    @hackathon_id_required
+    def post(self):
+        args = request.get_json()
+        return hack_manager.create_new_hackathon(args)
+
 
 class AdminHackathonListResource(Resource):
     @admin_token_required
@@ -351,6 +368,7 @@ class AdminRegisterResource(Resource):
         return register_manager.delete_register(args)
 
 
-api.add_resource(AdminHackathonListResource, "/api/admin/hackathons")
+api.add_resource(AdminHackathonListResource, "/api/admin/hackathon/list")
+api.add_resource(AdminHackathonResource, "/api/admin/hackathon")
 api.add_resource(AdminRegisterListResource, "/api/admin/register/list")
 api.add_resource(AdminRegisterResource, "/api/admin/register")
