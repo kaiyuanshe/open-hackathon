@@ -47,39 +47,13 @@ class LoginProviderBase():
     def logout(self, user):
         return user_manager.db_logout(user)
 
-    def user_with_detail(self, user_with_token, args):
+    def user_display_info_with_token(self, user_with_token):
         user = user_with_token["user"]
-        hackathon_name = args.get('hackathon_name') if "hackathon_name" in args else None
 
         login_result = {
             "user": user_manager.user_display_info(user),
-            "token": user_with_token["token"].token,
-            "experiments": []
+            "token": user_with_token["token"].token
         }
-
-        # get hackathon
-        hackathon = hack_manager.get_hackathon_by_name(hackathon_name)
-        if hackathon is None:
-            return not_found("hackathon not found")
-        else:
-            login_result["hackathon"] = hackathon.dic()
-
-        # experiments
-        login_result["experiments"] = []
-        try:
-            experiments = user.experiments.filter_by(status=EStatus.Running, hackathon_id=hackathon.id).all()
-            map(lambda e: login_result["experiments"].append({
-                "id": e.id,
-                "hackathon_id": e.hackathon_id
-            }), experiments)
-        except Exception as e:
-            log.error(e)
-
-        # get register info
-        register = register_manager.get_register_by_user_id(user.id, hackathon.id)
-        if register is not None:
-            login_result['registration'] = register.dic()
-
         log.debug("user login successfully:" + repr(login_result))
         return login_result
 
@@ -122,7 +96,7 @@ class QQLogin(LoginProviderBase):
         # detail = self.um.get_user_detail_info(user, hackathon_name=hackathon_name)
         # detail["token"] = user_with_token["token"].token
         # return detail
-        return self.user_with_detail(user_with_token, args)
+        return self.user_display_info_with_token(user_with_token)
 
 
 class GithubLogin(LoginProviderBase):
@@ -171,7 +145,7 @@ class GithubLogin(LoginProviderBase):
                                            access_token=access_token,
                                            email_info=email_info,
                                            avatar_url=avatar)
-        return self.user_with_detail(user_with_token, args)
+        return self.user_display_info_with_token(user_with_token)
 
 
 class GitcafeLogin(LoginProviderBase):
@@ -210,7 +184,7 @@ class GitcafeLogin(LoginProviderBase):
                                            access_token=token,
                                            email_info=email_info,
                                            avatar_url=avatar_url)
-        return self.user_with_detail(user_with_token, args)
+        return self.user_display_info_with_token(user_with_token)
 
 
 class WeiboLogin(LoginProviderBase):
@@ -262,7 +236,7 @@ class WeiboLogin(LoginProviderBase):
                                            access_token=access_token,
                                            email_info=email_info,
                                            avatar_url=avatar_url)
-        return self.user_with_detail(user_with_token, args)
+        return self.user_display_info_with_token(user_with_token)
 
 
 login_providers = {
