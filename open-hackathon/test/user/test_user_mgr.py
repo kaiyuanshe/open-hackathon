@@ -26,7 +26,7 @@
 
 import sys
 
-sys.path.append("../src/hackathon")
+sys.path.append("../../src/hackathon")
 import unittest
 from hackathon.user.user_mgr import UserManager
 from hackathon.database import SQLAlchemyAdapter

@@ -2,7 +2,7 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
 #  
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -25,8 +25,7 @@
 # -----------------------------------------------------------------------------------
 
 from . import app
-from decorators import role_required
-from constants import ROLE, OAUTH_PROVIDER
+from constants import OAUTH_PROVIDER
 import json
 from constants import HTTP_HEADER
 from flask_login import login_required, current_user, login_user, LoginManager, logout_user
@@ -141,6 +140,7 @@ def js_config():
                     mimetype="application/javascript")
     return resp
 
+
 #js api config
 @app.route('/apiconfig.js')
 def api_config():
@@ -148,6 +148,7 @@ def api_config():
                     status=200,
                     mimetype="application/javascript")
     return resp
+
 
 @app.route('/github')
 def github_login():
@@ -195,20 +196,24 @@ def login():
 def home():
     return __render("/home.html")
 
+
 @app.route("/edit/register")
 @login_required
 def edit_registe():
     return __render("/edit/register.html")
+
 
 @app.route("/myhackathon")
 @login_required
 def myhackathon():
     return __render("/myhackathon.html")
 
+
 @app.route("/registerusers")
 @login_required
 def registerusers():
     return __render("/registerusers.html")
+
 
 @app.route("/users")
 @login_required
