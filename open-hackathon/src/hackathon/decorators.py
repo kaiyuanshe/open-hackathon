@@ -28,6 +28,10 @@ from user import user_manager
 from hackathon_response import *
 from hack import hack_manager
 
+"""
+user must login when this decorator is enabled (for both user and admin)
+"""
+
 
 def token_required(func):
     def authenticate_and_call(*args, **kwargs):
@@ -38,6 +42,11 @@ def token_required(func):
     return authenticate_and_call
 
 
+"""
+hackathon_name must be included in header when this decorator is enabled
+"""
+
+
 def hackathon_name_required(func):
     def authenticate_and_call(*args, **kwargs):
         if not hack_manager.validate_hackathon_name():
@@ -45,6 +54,11 @@ def hackathon_name_required(func):
         return func(*args, **kwargs)
 
     return authenticate_and_call
+
+
+"""
+user must login , hackathon_name must be available, and 'user' has proper privilege on this hackathon
+"""
 
 
 def admin_privilege_required(func):
