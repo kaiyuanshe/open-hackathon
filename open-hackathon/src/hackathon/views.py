@@ -29,6 +29,7 @@ from . import api, app
 from expr import expr_manager
 from expr.expr_mgr import open_check_expr, recycle_expr_scheduler
 from database.models import Announcement, Hackathon, Template
+from hackathon.functions import upload_file
 from user.login import *
 from flask import g, request
 from database import db_adapter, db_session
@@ -332,6 +333,15 @@ class AdminRegisterResource(Resource):
         args = parse.parse_args()
         return register_manager.delete_register(args)
 
+
+class FileResource(Resource):
+    def post(self):
+        file = request.files.get()
+        return upload_file(file)
+
+
+
+
 api.add_resource(UserExperimentResource, "/api/user/experiment")
 api.add_resource(RegisterResource, "/api/register")
 api.add_resource(RegisterCheckEmailResource, "/api/register/checkemail")
@@ -353,3 +363,4 @@ api.add_resource(AdminHackathonListResource, "/api/admin/hackathons")
 api.add_resource(RegisterListResource, "/api/register/list", "/api/admin/register/list")
 api.add_resource(AdminRegisterResource, "/api/admin/register")
 api.add_resource(DefaultRecycleResource, "/api/default/recycle")
+api.add_resource(FileResource, "/api/file")
