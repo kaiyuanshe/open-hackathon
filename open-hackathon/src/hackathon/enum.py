@@ -4,7 +4,7 @@
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
 #
 # The MIT License (MIT)
-#  
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -88,7 +88,8 @@ class ReservedUser:
 class AdminUserHackathonRelStates:
     Actived = 1
     Disabled = 0
-    
+
+
 class RecycleStatus:
     Enabled = 1
     Disabled = 0
@@ -159,6 +160,7 @@ class RGStatus:
     UNAUDIT = 0
     AUDIT_PASSED = 1
     AUDIT_REFUSE = 2
+    AUTO_PASSED =3
 
 
 class ADMIN_ROLE_TYPE:
@@ -167,3 +169,9 @@ class ADMIN_ROLE_TYPE:
     """
     ADMIN = 1
     JUDGE = 2
+
+
+class HACK_STATUS:
+    INIT = 0
+    ONLINE = 1
+    OFFLINE = 1

@@ -56,7 +56,7 @@ class UserManagerTest(unittest.TestCase):
         '''
         with app.test_request_context('/', headers=None):
             self.assertFalse("token" in request.headers)
-            self.assertFalse(um.validate_request())
+            self.assertFalse(um.validate_login())
 
 
     def test_validate_request_token_not_found(self):
@@ -69,7 +69,7 @@ class UserManagerTest(unittest.TestCase):
 
         with app.test_request_context('/api', headers={"token": token_value}):
             self.assertTrue("token" in request.headers)
-            self.assertFalse(um.validate_request())
+            self.assertFalse(um.validate_login())
             mock_db.find_first_object_by.assert_called_once_with(UserToken, token=token_value)
 
 
@@ -84,7 +84,7 @@ class UserManagerTest(unittest.TestCase):
 
         with app.test_request_context('/', headers={"token": token_value}):
             self.assertTrue("token" in request.headers)
-            self.assertFalse(um.validate_request())
+            self.assertFalse(um.validate_login())
             self.assertEqual(mock_db.find_first_object_by.call_count, 1)
             mock_db.find_first_object_by.assert_called_once_with(UserToken, token=token_value)
 
@@ -101,6 +101,6 @@ class UserManagerTest(unittest.TestCase):
 
         with app.test_request_context('/', headers={"token": token_value}):
             self.assertTrue("token" in request.headers)
-            self.assertTrue(um.validate_request())
+            self.assertTrue(um.validate_login())
             mock_db.find_first_object_by.assert_called_once_with(UserToken, token=token_value)
             self.assertEqual(g.user, user)

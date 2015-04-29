@@ -62,7 +62,6 @@ class RegisterManger(object):
                 update_items = dict(dict(args).viewitems() - register.dic().viewitems())
                 update_items.pop("id")
                 update_items.pop("create_time")
-                update_items.pop("status")
                 update_items["update_time"] = datetime.utcnow()
                 self.db.update_object(register, **update_items)
                 return register
@@ -99,6 +98,11 @@ class RegisterManger(object):
             return not_found("register cannot be found by args: %r" % args)
         else:
             return register.dic()
+
+
+    def check_email(self, hid, email):
+        register = self.db.find_first_object_by(UserHackathonRel, hackathon_id=hid, email=email)
+        return register is None
 
 
 register_manager = RegisterManger(db_adapter)
