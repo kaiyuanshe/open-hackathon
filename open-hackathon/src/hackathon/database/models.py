@@ -173,7 +173,7 @@ class UserHackathonRel(DBBase):
     skype = Column(String(32))
     address = Column(String(80))
     status = Column(Integer)  # 0: havn't audit 1: audit passed 2:audit reject
-    deleted = Column(Integer)  # 0:false  1-true
+    deleted = Column(Integer, default=0)  # 0:false  1-true
 
     user = relationship('User', backref=backref('hackathons', lazy='dynamic'))
 

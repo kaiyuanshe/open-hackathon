@@ -47,8 +47,7 @@ class ADMIN:
     DEFAULT_SUPER_ADMIN_EMAIL = "2303202961@qq.com"
 
 
-class HACKATHON_INFO:
-    CHECK_REGISTER = "check_register"
+class HACKATHON_BASIC_INFO:
     ORGANIZERS = "organizers"
     ORGANIZER_URL = "organizer_url"
     ORGANIZER_IMAGE = "organizer_image"

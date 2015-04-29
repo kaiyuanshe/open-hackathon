@@ -57,7 +57,7 @@ def hackathon_name_required(func):
 
 
 """
-user must login , hackathon_name must be available, and 'user' has proper privilege on this hackathon
+user must login , hackathon_name must be available, and 'user' has proper admin privilege on this hackathon
 """
 
 
