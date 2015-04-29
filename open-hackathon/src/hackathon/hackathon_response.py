@@ -54,6 +54,10 @@ def access_denied(message, friendly_message="Access Denied"):
     return __response_with_code(403, message, friendly_message)
 
 
+def precondition_failed(message, friendly_message="Precondition Failed"):
+    return __response_with_code(412, message, friendly_message)
+
+
 def internal_server_error(message, friendly_message="Internal Server Error"):
     return __response_with_code(500, message, friendly_message)
 

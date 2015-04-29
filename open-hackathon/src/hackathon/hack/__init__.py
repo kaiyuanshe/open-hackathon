@@ -34,6 +34,8 @@ from hackathon.hackathon_response import *
 from sqlalchemy import or_
 from hackathon.constants import HTTP_HEADER
 from flask import request, g
+import json
+from hackathon.constants import HACKATHON_BASIC_INFO
 
 
 class HackathonManager():
@@ -101,7 +103,17 @@ class HackathonManager():
 
         return [h.dic() for h in user_hack_list]
 
-    def get_permitted_hackathon_list_by_user_id(self, user_id):
+    def get_user_hackathon_detail(self, user_id, hackathon):
+        user_hackathon = self.db.find_first_object_by(UserHackathonRel,
+                                                      user_id=user_id,
+                                                      hackathon_id=hackathon.id,
+                                                      deleted=0)
+
+        if user_hackathon is None:
+            return not_found("")
+        return ""
+
+    def get_permitted_hackathon_list_by_admin_user_id(self, user_id):
         # get AdminUserHackathonRels from query withn filter by email
         admin_user_hackathon_rels = self.db.find_all_objects_by(AdminHackathonRel, user_id=user_id)
 
@@ -113,7 +125,7 @@ class HackathonManager():
 
     # check the admin authority on hackathon
     def __validate_admin_privilege(self, user_id, hackathon_id):
-        hack_ids = self.get_permitted_hackathon_list_by_user_id(user_id)
+        hack_ids = self.get_permitted_hackathon_list_by_admin_user_id(user_id)
         return -1 in hack_ids or hackathon_id in hack_ids
 
     def validate_admin_privilege(self):
@@ -137,5 +149,35 @@ class HackathonManager():
             log.debug("hackathon_name not found in headers")
             return False
 
+    def is_auto_approve(self, hackathon):
+        try:
+            basic_info = json.loads(hackathon.basic_info)
+            return basic_info[HACKATHON_BASIC_INFO.AUTO_APPROVE] == 1
+        except Exception as e:
+            log.error(e)
+            log.warn("cannot load auto_approve from basic info for hackathon %d, will return False" % hackathon.id)
+            return False
+
+    def is_recycle_enabled(self, hackathon):
+        try:
+            basic_info = json.loads(hackathon.basic_info)
+            return basic_info[HACKATHON_BASIC_INFO.RECYCLE_ENABLED] == 1
+        except Exception as e:
+            log.error(e)
+            log.warn("cannot load recycle_enabled from basic info for hackathon %d, will return False" % hackathon.id)
+            return False
+
 
 hack_manager = HackathonManager(db_adapter)
+
+
+def is_auto_approve(hackathon):
+    return hack_manager.is_auto_approve(hackathon)
+
+
+def is_recycle_enabled(hackathon):
+    return hack_manager.is_recycle_enabled(hackathon)
+
+
+Hackathon.is_auto_approve = is_auto_approve
+Hackathon.is_recycle_enabled = is_recycle_enabled

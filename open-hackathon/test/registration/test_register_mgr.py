@@ -52,7 +52,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
         db_adapter.find_all_objects.return_value = []
         rm = RegisterManger(db_adapter)
         with app.test_request_context('/'):
-            self.assertEqual(rm.get_all_register_by_hackathon_id(1), [])
+            self.assertEqual(rm.get_all_registration_by_hackathon_id(1), [])
 
     def test_get_UserHackathonRel_list_result_not_empty(self):
         db_adapter = Mock()
@@ -61,7 +61,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
         db_adapter.find_all_objects.return_value = [UserHackathonRel1, UserHackathonRel2]
         rm = RegisterManger(db_adapter)
         with app.test_request_context('/'):
-            self.assertEqual(len(rm.get_all_register_by_hackathon_id(1)), 2)
+            self.assertEqual(len(rm.get_all_registration_by_hackathon_id(1)), 2)
             db_adapter.find_all_objects.assert_called_once_with(UserHackathonRel, ANY)
 
 
@@ -71,7 +71,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
         db_adapter = Mock()
         db_adapter.find_first_object.return_value = None
         rm = RegisterManger(db_adapter)
-        result = rm.get_register_by_id(id=1)
+        result = rm.get_registration_by_id(id=1)
         self.assertEqual(result, {'errorcode': 404, 'message': 'bad request'})
         db_adapter.find_first_object.assert_called_once_with(UserHackathonRel, ANY)
 
@@ -80,7 +80,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
         test_UserHackathonRel = UserHackathonRel(id=1, UserHackathonRel_name='test', email='test@test.com', hackathon_id=1)
         db_adapter.find_first_object.return_value = test_UserHackathonRel
         rm = RegisterManger(db_adapter)
-        result = rm.get_register_by_id(id=1)
+        result = rm.get_registration_by_id(id=1)
         self.assertEqual(result['UserHackathonRel_name'], 'test')
         db_adapter.find_first_object.assert_called_once_with(UserHackathonRel, ANY)
 
@@ -90,7 +90,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
     def test_create_or_update_UserHackathonRel_exception_raised(self):
         db_adapter = Mock()
         rm = RegisterManger(db_adapter)
-        result, code = rm.create_or_update_register(1, {'test': 'test'})
+        result, code = rm.create_or_update_registration(1, {'test': 'test'})
         self.assertEqual(result, {"error": "INTERNAL SERVER ERROR"})
         self.assertEqual(code, 500)
         self.assertEqual(db_adapter.find_first_object.call_count, 0)
@@ -102,7 +102,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
 
         with app.test_request_context('/'):
             g.hackathon_id = 1
-            rm.create_or_update_register(1, {'email': 'test@test.com',
+            rm.create_or_update_registration(1, {'email': 'test@test.com',
                                              'UserHackathonRel_name': 'test',
                                              'description': 'test desciption'})
             self.assertEqual(db_adapter.find_first_object.call_count, 2)
@@ -120,7 +120,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
         rm = RegisterManger(db_adapter)
         with app.test_request_context('/'):
             g.hackathon_id = 1
-            rm.create_or_update_register(1, {'email': 'test_final@test.com',
+            rm.create_or_update_registration(1, {'email': 'test_final@test.com',
                                              'UserHackathonRel_name': 'test_final',
                                              'enabled': 1,
                                              'description': 'test final desciption'})
@@ -134,7 +134,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
     def test_delete_UserHackathonRel_lost_args(self):
         db_adapter = Mock()
         rm = RegisterManger(db_adapter)
-        result, code = rm.delete_register({'test': 'test'})
+        result, code = rm.delete_registration({'test': 'test'})
         self.assertEqual(result, {"error": "Bad request"})
         self.assertEqual(code, 400)
 
@@ -142,7 +142,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
         db_adapter = Mock()
         db_adapter.find_first_object.return_value = None
         rm = RegisterManger(db_adapter)
-        result, code = rm.delete_register({'id': 1})
+        result, code = rm.delete_registration({'id': 1})
         db_adapter.find_first_object.assert_called_once_with(UserHackathonRel, ANY)
         self.assertEqual(result, {"message": "already removed"})
         self.assertEqual(code, 200)
@@ -151,7 +151,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
         db_adapter = Mock()
         db_adapter.delete_object.side_effect = Exception('Test!')
         rm = RegisterManger(db_adapter)
-        result, code = rm.delete_register({'id': 1})
+        result, code = rm.delete_registration({'id': 1})
         self.assertEqual(result, {"error": "INTERNAL SERVER ERROR"})
         self.assertEqual(code, 500)
         self.assertEqual(db_adapter.find_first_object.call_count, 1)
@@ -166,7 +166,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
                                                              enabled=1,
                                                              hackathon_id=1)
         rm = RegisterManger(db_adapter)
-        rm.delete_register({'id': 7})
+        rm.delete_registration({'id': 7})
         self.assertEqual(db_adapter.find_first_object.call_count, 1)
         self.assertEqual(db_adapter.delete_object.call_count, 1)
 
@@ -177,7 +177,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
         db_adapter = Mock()
         db_adapter.find_first_object.return_value = None
         rm = RegisterManger(db_adapter)
-        self.assertTrue(rm.check_email(1, 'test@test.com'))
+        self.assertTrue(rm.is_email_registered(1, 'test@test.com'))
         db_adapter.find_first_object.assert_called_once_with(UserHackathonRel, ANY, ANY)
 
     def test_check_email_available(self):
@@ -185,7 +185,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
         db_adapter = Mock()
         db_adapter.find_first_object.return_value = test_UserHackathonRel
         rm = RegisterManger(db_adapter)
-        self.assertFalse(rm.check_email(1, 'test@test.com'))
+        self.assertFalse(rm.is_email_registered(1, 'test@test.com'))
         db_adapter.find_first_object.assert_called_once_with(UserHackathonRel, ANY, ANY)
 
 
@@ -194,10 +194,10 @@ class TestUserHackathonRelManager(unittest.TestCase):
     def test_get_UserHackathonRel_by_uid_or_rid_and_hid_bad_request(self):
         db_adapter = Mock()
         rm = RegisterManger(db_adapter)
-        result11 = rm.get_register_by_rid_or_uid_and_hid({})
-        result12 = rm.get_register_by_rid_or_uid_and_hid({'hid': 1})
-        result13 = rm.get_register_by_rid_or_uid_and_hid({'uid': 1})
-        result14 = rm.get_register_by_rid_or_uid_and_hid({'test': 1})
+        result11 = rm.get_registration_detail({})
+        result12 = rm.get_registration_detail({'hid': 1})
+        result13 = rm.get_registration_detail({'uid': 1})
+        result14 = rm.get_registration_detail({'test': 1})
         self.assertEqual(result11, {"errorcode": 400, "message": "bad request, when calling get UserHackathonRel by rid or hid and uid"})
         self.assertEqual(result12, {"errorcode": 400, "message": "bad request, when calling get UserHackathonRel by rid or hid and uid"})
         self.assertEqual(result13, {"errorcode": 400, "message": "bad request, when calling get UserHackathonRel by rid or hid and uid"})
@@ -216,7 +216,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
         test_UserHackathonRel = UserHackathonRel(id=1, real_name='test', email='test@test.com', hackathon_id=1)
         db_adapter.find_first_object.return_value = test_UserHackathonRel
         rm = RegisterManger(db_adapter)
-        result = rm.get_register_by_rid_or_uid_and_hid({'uid': 1, 'hid': 1})
+        result = rm.get_registration_detail({'uid': 1, 'hid': 1})
         self.assertEqual(result['real_name'], 'test')
         db_adapter.find_first_object.assert_called_once_with(UserHackathonRel, ANY, ANY)
 
@@ -224,7 +224,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
         db_adapter = Mock()
         db_adapter.find_first_object.return_value = None
         rm = RegisterManger(db_adapter)
-        result = rm.get_register_by_rid_or_uid_and_hid({'uid': 1, 'hid': 1})
+        result = rm.get_registration_detail({'uid': 1, 'hid': 1})
         self.assertEqual(result, {"errorcode": 404, "message": "UserHackathonRel not found"})
         db_adapter.find_first_object.assert_called_once_with(UserHackathonRel, ANY, ANY)
 
