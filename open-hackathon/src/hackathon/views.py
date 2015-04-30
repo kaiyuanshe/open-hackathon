@@ -41,6 +41,7 @@ import time
 from hackathon.registration.register_mgr import register_manager
 from hackathon.template.template_mgr import template_manager
 from hackathon_response import *
+from hackathon.azureformation.fileService import upload_file_to_azure
 
 
 @app.teardown_appcontext
@@ -196,7 +197,13 @@ class HackathonResource(Resource):
         return g.hackathon.dic()
 
     def post(self):
-        pass
+        args = request.get_json()
+        return hack_manager.create_or_update_hackathon(args).dic()
+
+    @admin_privilege_required
+    def put(self):
+        args = request.get_json()
+        return hack_manager.create_or_update_hackathon(args).dic()
 
     def put(self):
         pass
@@ -293,6 +300,18 @@ class AdminHackathonListResource(Resource):
         return map(lambda u: u.dic(), hackathon_list)
 
 
+class FileResource(Resource):
+    def post(self):
+        try:
+            file = request.files.get()
+            upload_file_to_azure(file, 'test/hello')
+            return ok("upload file successed")
+        except Exception as ex:
+            log.error(ex)
+            log.error("upload file raised an exception")
+            return internal_server_error("upload file raised an exception")
+
+
 """
 health page
 """
@@ -349,3 +368,8 @@ api.add_resource(ExperimentRecycleResource, "/api/default/recycle")
 system time api
 """
 api.add_resource(CurrentTimeResource, "/api/currenttime")
+
+"""
+files api
+"""
+api.add_resource(FileResource, "/api/file")
