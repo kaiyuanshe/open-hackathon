@@ -30,22 +30,21 @@ import sys
 sys.path.append("..")
 from azure.storage import BlobService
 from hackathon.log import log
-from hackathon.functions import get_config
+from hackathon.functions import safe_get_config
 
-blob_service = BlobService(account_name=get_config("storage.account_name"),
-                           account_key=get_config("storage.account_key"))
-container_name = get_config("storage.container_name")
+blob_service = BlobService(account_name=safe_get_config("storage.account_name", "hackathon"),
+                           account_key=safe_get_config("storage.account_key",
+                                                       "U4/oE3Ocwk9txQHw2qNOCCW2Fy05FBY3yQfzcKRNss5tnReyYTO7PDyeXQ8TWMMxXF07JrW7UXPyOhGgJlodEQ=="))
+container_name = safe_get_config("storage.container_name", "filestorage")
 
 
 def create_container_in_storage():
     # create a container if doesn't exist
-    container_name = get_config("storage.container_name")
-    names = map( lambda x: x.name, blob_service.list_containers())
+    names = map(lambda x: x.name, blob_service.list_containers())
     if container_name not in names:
         blob_service.create_container(container_name)
     else:
         log.debug("container already exsit in storage")
-
 
 
 def upload_file_to_azure(file, filename):
@@ -54,4 +53,4 @@ def upload_file_to_azure(file, filename):
         blob_service.put_block_blob_from_file(container_name, filename, file)
         return blob_service.make_blob_url(container_name, filename)
     except Exception as ex:
-        log.error(ex.message)
+        log.error(ex)

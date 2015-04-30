@@ -81,5 +81,10 @@ Config = {
     "recycle":{
         "idle_hours": 24,
         "check_idle_interval_minutes": 5
+    },
+    "storage": {
+        "account_name": "hackathon",
+        "account_key": "U4/oE3Ocwk9txQHw2qNOCCW2Fy05FBY3yQfzcKRNss5tnReyYTO7PDyeXQ8TWMMxXF07JrW7UXPyOhGgJlodEQ==",
+        "container_name": "filestorage"
     }
 }

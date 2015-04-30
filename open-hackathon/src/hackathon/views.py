@@ -311,7 +311,7 @@ class AdminHackathonListResource(Resource):
 class FileResource(Resource):
     def post(self):
         try:
-            file = request.files.get()
+            file = request.files.get("webconsole.php")
             upload_file_to_azure(file, 'test/hello')
             return ok("upload file successed")
         except Exception as ex:
