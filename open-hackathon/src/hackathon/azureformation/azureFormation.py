@@ -55,3 +55,11 @@ class AzureFormation:
             run_job(MDL_CLS_FUNC[0],
                     (self.azure_key_id, ),
                     (experiment_id, template_unit))
+
+    def stop(self, experiment_id, need_status):
+        template_framework = TemplateFramework(experiment_id)
+        for template_unit in template_framework.get_template_units():
+            # stop virtual machine
+            run_job(MDL_CLS_FUNC[17],
+                    (self.azure_key_id, ),
+                    (experiment_id, template_unit, need_status))
