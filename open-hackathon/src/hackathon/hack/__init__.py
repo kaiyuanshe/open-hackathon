@@ -29,8 +29,11 @@ import sys
 sys.path.append("..")
 from hackathon.database.models import Hackathon, User, UserHackathonRel, AdminHackathonRel
 from hackathon.database import db_adapter
+from hackathon.database import db_session
+from datetime import datetime
 from hackathon.enum import RGStatus
 from hackathon.hackathon_response import *
+from hackathon.enum import ADMIN_ROLE_TYPE
 from sqlalchemy import or_
 from hackathon.constants import HTTP_HEADER
 from flask import request, g
@@ -167,6 +170,38 @@ class HackathonManager():
             log.warn("cannot load recycle_enabled from basic info for hackathon %d, will return False" % hackathon.id)
             return False
 
+    def create_or_update_hackathon(self, args):
+        log.debug("create_or_update_hackathon: %r" % args)
+        if "name" not in args:
+            return bad_request("hackathon perporities lost name")
+        hackathon = self.db.find_first_object(Hackathon, Hackathon.name == args['name'])
+
+        try:
+            if hackathon is None:
+                log.debug("add a new hackathon:" + str(args))
+
+                hack_object = Hackathon(**args)
+                db_session.add(hack_object)  # insert into hackathon
+                hid = hack_object.id
+                ahl = AdminHackathonRel(user_id=g.user_id,
+                                        role_type=ADMIN_ROLE_TYPE.ADMIN,
+                                        hackathon_id=hid,
+                                        status=1,
+                                        remarks='being admin automatically',
+                                        create_time=datetime.utcnow())
+                db_session.add(ahl)  # insert into AdminHackathonRel
+                db_session.commit()
+                return ok("create hackathon successed")
+            else:
+                args['update_time'] = datetime.utcnow()
+                update_items = dict(dict(args).viewitems() - hackathon.dic().viewitems())
+                log.debug("update a exist hackathon " + hackathon.id + ":" + str(args))
+                self.db.update_object(Hackathon, **update_items)
+                return ok("update hackathon successed")
+        except Exception as  e:
+            log.error(e)
+            return internal_server_error("fail to create or update hackathon")
+
 
 hack_manager = HackathonManager(db_adapter)
 
@@ -180,4 +215,4 @@ def is_recycle_enabled(hackathon):
 
 
 Hackathon.is_auto_approve = is_auto_approve
-Hackathon.is_recycle_enabled = is_recycle_enabled
+
