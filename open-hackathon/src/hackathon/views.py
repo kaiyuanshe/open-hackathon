@@ -38,7 +38,6 @@ from health import report_health
 from remote.guacamole import GuacamoleInfo
 from hack import hack_manager
 import time
-from admin.admin_mgr import admin_manager
 from hackathon.registration.register_mgr import register_manager
 from hackathon.template.template_mgr import template_manager
 from hackathon_response import *
@@ -66,50 +65,45 @@ class UserLoginResource(Resource):
         return login_providers.values()[0].logout(g.user)
 
 
-class RegisterResource(Resource):
+class UserHackathonRelResource(Resource):
+    @token_required
+    @hackathon_name_required
     def get(self):
-        # Register page need to get register info to check the status When refresh page not after login logic
-        parse = reqparse.RequestParser()
-        parse.add_argument('rid', type=int, location='args')  # register_id
-        parse.add_argument('hid', type=int, location='args')  # hackathon_id
-        parse.add_argument('uid', type=int, location='args')  # user_id
-        args = parse.parse_args()
-        return register_manager.get_register_by_rid_or_uid_and_hid(args)
+        return register_manager.get_registration_detail(g.user.id, g.hackathon)
 
     @token_required
     @hackathon_name_required
     def post(self):
         args = request.get_json()
-        return register_manager.create_or_update_register(g.hackathon.id, args)
+        args["user_id"] = g.user.id
+        return register_manager.create_registration(g.hackathon, args)
 
 
 class AdminRegisterResource(Resource):
     def get(self):
-        # Register page need to get register info to check the status When refresh page not after login logic
         parse = reqparse.RequestParser()
-        parse.add_argument('rid', type=int, location='args')  # register_id
-        parse.add_argument('hid', type=int, location='args')  # hackathon_id
-        parse.add_argument('uid', type=int, location='args')  # user_id
+        parse.add_argument('rid', type=int, location='args', required=True)  # register_id
         args = parse.parse_args()
-        return register_manager.get_register_by_rid_or_uid_and_hid(args)
+        rel = register_manager.get_registration_by_id(args["rid"])
+        return rel.dic() if rel is None else not_found("not found")
 
     @admin_privilege_required
     def post(self):
         args = request.get_json()
-        return register_manager.create_or_update_register(g.hackathon.id, args)
+        return register_manager.create_registration(g.hackathon, args)
 
 
     @admin_privilege_required
     def put(self):
         args = request.get_json()
-        return register_manager.create_or_update_register(g.hackathon.id, args)
+        return register_manager.update_registration(args)
 
     @admin_privilege_required
     def delete(self):
         parse = reqparse.RequestParser()
         parse.add_argument('id', type=int, location='args', required=True)
         args = parse.parse_args()
-        return register_manager.delete_register(args)
+        return register_manager.delete_registration(args)
 
 
 class RegisterCheckEmailResource(Resource):
@@ -119,15 +113,15 @@ class RegisterCheckEmailResource(Resource):
         parse.add_argument('hid', type=int, location='args', required=True)
         parse.add_argument('email', type=str, location='args', required=True)
         args = parse.parse_args()
-        return register_manager.check_email(args['hid'], args['email'])
+        return register_manager.is_email_registered(args['hid'], args['email'])
 
 
-class RegisterListResource(Resource):
+class AdminRegisterListResource(Resource):
     def get(self):
         parse = reqparse.RequestParser()
         parse.add_argument('hackathon_id', type=int, location='args', required=True)
         args = parse.parse_args()
-        return register_manager.get_all_register_by_hackathon_id(args['hackathon_id'])
+        return register_manager.get_all_registration_by_hackathon_id(args['hackathon_id'])
 
 
 class UserExperimentResource(Resource):
@@ -242,12 +236,6 @@ class HackathonStatResource(Resource):
         return hack_manager.get_hackathon_stat(g.hackathon)
 
 
-class UserHackathonResource(Resource):
-    @token_required
-    def get(self):
-        return ""
-
-
 class UserHackathonListResource(Resource):
     def get(self):
         parse = reqparse.RequestParser()
@@ -266,7 +254,6 @@ class HackathonTemplateResource(Resource):
 
 
 class UserExperimentListResource(Resource):
-    # uid is user id
     @token_required
     def get(self):
         parse = reqparse.RequestParser()
@@ -281,7 +268,7 @@ class GuacamoleResource(Resource):
         return GuacamoleInfo().getConnectInfo()
 
 
-class CurrentTime(Resource):
+class CurrentTimeResource(Resource):
     def get(self):
         return {
             "currenttime": long(time.time() * 1000)
@@ -313,7 +300,7 @@ class AdminHackathonListResource(Resource):
     @admin_privilege_required
     def get(self):
         # todo move this logic to hack_manager
-        hackathon_ids = admin_manager.get_hack_id_by_user_id(g.user.id)
+        hackathon_ids = hack_manager.get_hack_id_by_user_id(g.user.id)
         if -1 in hackathon_ids:
             hackathon_list = db_adapter.find_all_objects(Hackathon)
         else:
@@ -358,11 +345,11 @@ api.add_resource(UserExperimentResource, "/api/user/experiment")
 """
 user-hackathon-relationship, or register, api
 """
-
-api.add_resource(RegisterResource, "/api/register")
-api.add_resource(AdminRegisterResource, "/api/admin/register")
-api.add_resource(RegisterListResource, "/api/register/list", "/api/admin/register/list")
 api.add_resource(RegisterCheckEmailResource, "/api/register/checkemail")
+api.add_resource(AdminRegisterListResource, "/api/admin/register/list")
+api.add_resource(AdminRegisterResource, "/api/admin/register")
+api.add_resource(UserHackathonRelResource, "/api/user/hackathon")
+api.add_resource(UserHackathonListResource, "/api/user/hackathon/list")
 
 """
 hackathon api
@@ -370,8 +357,6 @@ hackathon api
 api.add_resource(HackathonResource, "/api/hackathon")
 api.add_resource(HackathonListResource, "/api/hackathon/list")
 api.add_resource(HackathonStatResource, "/api/hackathon/stat")
-api.add_resource(UserHackathonListResource, "/api/user/hackathon/list")
-api.add_resource(UserHackathonResource, "/api/user/hackathon")
 api.add_resource(AdminHackathonListResource, "/api/admin/hackathon/list")
 
 """
@@ -383,7 +368,6 @@ api.add_resource(TemplateResource, "/api/template/list")
 """
 experiment api
 """
-
 api.add_resource(UserExperimentResource, "/api/user/experiment")
 api.add_resource(UserExperimentListResource, "/api/user/experiment/list")
 api.add_resource(ExperimentPreAllocateResource, "/api/default/preallocate")
@@ -392,15 +376,9 @@ api.add_resource(ExperimentRecycleResource, "/api/default/recycle")
 """
 system time api
 """
-api.add_resource(CurrentTime, "/api/currenttime")
-api.add_resource(DefaultExperiment, "/api/default/experiment")
-api.add_resource(TemplateResource, "/api/template/list")
-api.add_resource(AdminHackathonListResource, "/api/admin/hackathons")
-api.add_resource(RegisterListResource, "/api/register/list", "/api/admin/register/list")
-api.add_resource(AdminRegisterResource, "/api/admin/register")
-api.add_resource(DefaultRecycleResource, "/api/default/recycle")
+api.add_resource(CurrentTimeResource, "/api/currenttime")
+
 """
 files api
 """
 api.add_resource(FileResource, "/api/file")
-

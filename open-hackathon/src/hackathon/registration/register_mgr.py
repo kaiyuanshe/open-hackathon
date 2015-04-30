@@ -27,49 +27,76 @@
 import sys
 
 sys.path.append("..")
-from hackathon.database.models import UserHackathonRel, UserEmail
+from hackathon.database.models import UserHackathonRel, Experiment
 from hackathon.database import db_adapter
 from hackathon.log import log
 from hackathon.hackathon_response import *
 from datetime import datetime
+from hackathon.enum import EStatus, RGStatus
 
 
 class RegisterManger(object):
     def __init__(self, db_adapter):
         self.db = db_adapter
 
-    def get_all_register_by_hackathon_id(self, hackathon_id):
+    def get_all_registration_by_hackathon_id(self, hackathon_id):
         # TODO make query result with pagination
-        registers = self.db.find_all_objects(UserHackathonRel, UserHackathonRel.hackathon_id == hackathon_id)
+        registers = self.db.find_all_objects_by(UserHackathonRel, hackathon_id=hackathon_id)
         return [r.dic() for r in registers]
 
-    def get_register_by_id(self, id):
+    def get_registration_by_id(self, id):
         return self.db.get_object(UserHackathonRel, id)
 
-    def create_or_update_register(self, hackathon_id, args):
+    def get_registration_by_user_and_hackathon(self, user_id, hackathon_id):
+        return self.db.find_first_object_by(UserHackathonRel, user_id=user_id, hackathon_id=hackathon_id)
+
+    def create_registration(self, hackathon, args):
         log.debug("create_or_update_register: %r" % args)
         if "user_id" not in args:
             return bad_request("user id invalid")
 
         try:
             user_id = args['user_id']
-            register = self.db.find_first_object_by(UserHackathonRel, user_id=user_id, hackathon_id=hackathon_id)
-            if register is None:
-                log.debug("create a new register")
-                return self.db.add_object_kwargs(UserHackathonRel, **args)
-            else:
-                log.debug("update a existed register")
-                update_items = dict(dict(args).viewitems() - register.dic().viewitems())
-                update_items.pop("id")
-                update_items.pop("create_time")
-                update_items["update_time"] = datetime.utcnow()
-                self.db.update_object(register, **update_items)
-                return register
+            register = self.get_registration_by_user_and_hackathon(user_id, hackathon.id)
+            if register is not None and register.deleted == 0:
+                log.debug("user %d already registered on hackathon %d" % (user_id, hackathon.id))
+                return register.dic()
+
+            if hackathon.registration_start_time > datetime.utcnow():
+                return precondition_failed("hackathon registration not opened", friendly_message="报名尚未开始")
+
+            if hackathon.registration_end_time < datetime.utcnow():
+                return precondition_failed("hackathon registration has ended", friendly_message="报名已经结束")
+
+            if hackathon.is_auto_approve():
+                args["status"] = RGStatus.AUTO_PASSED
+            return self.db.add_object_kwargs(UserHackathonRel, **args).dic()
         except Exception as  e:
             log.error(e)
             return internal_server_error("fail to create or update register")
 
-    def delete_register(self, args):
+    def update_registration(self, args):
+        log.debug("update_registration: %r" % args)
+        try:
+            id = args['id']
+            register = self.get_registration_by_id(id)
+            if register is None:
+                # we can also create a new object here.
+                return not_found("registration not found")
+
+            log.debug("update a existed register")
+            update_items = dict(dict(args).viewitems() - register.dic().viewitems())
+            update_items.pop("id")
+            update_items.pop("create_time")
+            update_items["update_time"] = datetime.utcnow()
+            self.db.update_object(register, **update_items)
+
+            return register.dic()
+        except Exception as e:
+            log.error(e)
+            return internal_server_error("fail to  update register")
+
+    def delete_registration(self, args):
         if "id" not in args:
             return bad_request("id not invalid")
         try:
@@ -81,27 +108,32 @@ class RegisterManger(object):
             log.error(ex)
             return internal_server_error("failed in delete register: %s" % args["id"])
 
+    def get_registration_detail(self, user_id, hackathon):
+        rel = self.get_registration_by_user_and_hackathon(user_id, hackathon.id)
+        if rel is None:
+            # return nothing
+            return ok("")
 
-    def get_register_by_user_id(self, user_id, hackathon_id):
-        return self.db.find_first_object_by(UserHackathonRel, user_id == user_id, hackathon_id == hackathon_id)
+        detail = {
+            "registration": rel.dic(),
+            "hackathon": hackathon.dic()
+        }
 
+        # experiment
+        try:
+            experiment = self.db.find_first_object(Experiment,
+                                                   Experiment.user_id == user_id,
+                                                   Experiment.hackathon_id == hackathon.id,
+                                                   Experiment.status.in_([EStatus.Starting, EStatus.Running]))
+            if experiment is not None:
+                detail["experiment"] = experiment.dic()
+        except Exception as e:
+            log.error(e)
 
-    def get_register_by_rid_or_uid_and_hid(self, args):
-        if 'rid' in args:
-            register = self.get_register_by_id(args['rid'])
-        elif 'uid' in args and 'hid' in args:
-            register = self.get_register_by_user_id(args['uid'], args['hid'])
-        else:
-            return bad_request("either register id or user id is required")
+        return detail
 
-        if register is None:
-            return not_found("register cannot be found by args: %r" % args)
-        else:
-            return register.dic()
-
-
-    def check_email(self, hid, email):
-        register = self.db.find_first_object_by(UserHackathonRel, hackathon_id=hid, email=email)
+    def is_email_registered(self, hid, email):
+        register = self.db.find_first_object_by(UserHackathonRel, hackathon_id=hid, email=email, deleted=0)
         return register is None
 
 
