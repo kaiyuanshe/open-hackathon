@@ -53,7 +53,9 @@ angular
     'oh.controllers',
     'oh.directives'
   ])
-  .config(function ($stateProvider, $urlRouterProvider) {
+  .config(function ($stateProvider, $urlRouterProvider, $locationProvider) {
+    $locationProvider.html5Mode(false);
+    $locationProvider.hashPrefix('!');
     $urlRouterProvider.otherwise('/');
     $stateProvider
       .state('index', {
@@ -152,6 +154,11 @@ angular
           }
         }
       });
+  })
+  .run(function ($rootScope, $location) {
+    $rootScope.$on('$locationChangeStart', function (scope, next, current) {
+      console.log($location.path());
+    })
   });
 
 String.prototype.format = function (args) {
