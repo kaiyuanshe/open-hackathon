@@ -69,3 +69,4 @@ docs/_build/
 open-hackathon/src/create_test_data.py
 *.rb~
 *.erb~
+*.json~
