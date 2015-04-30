@@ -33,6 +33,8 @@ var util = require('util');
 
 var COOKIE_USERINFORMATION = 'User';
 
+var COOKIE_TOKEN = 'token';
+
 /**
  * Hackathon must be registered
  * @type {number}
@@ -52,6 +54,21 @@ var USER_REGISTERED = 1;
 var HACKATHON_EXPIRED = 8;
 
 function login(res, option) {
+  res.api.user.login.post(option, function (response, data) {
+    var redirect = '/#!/settings';
+    if (response.statusCode >= 200 && response.statusCode < 300 && !data.error) {
+      console.log(data);
+      res.cookie(COOKIE_TOKEN, JSON.stringify(data.token));
+      res.cookie(COOKIE_USERINFORMATION, JSON.stringify(data.user));
+    }else{
+      redirect = '/#!/error'
+    }
+    res.redirect(redirect);
+  });
+}
+
+
+function login_bak(res, option) {
   res.api.user.login.post(option, function (response, data) {
     var redirect = '/#!/hackathon';
     if (response.statusCode >= 200 && response.statusCode <= 300) {
@@ -91,6 +108,8 @@ function login(res, option) {
     res.redirect(redirect);
   });
 }
+
+
 
 router.get('/github', function (req, res) {
   var option = {

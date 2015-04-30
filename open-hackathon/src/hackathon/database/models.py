@@ -207,6 +207,13 @@ class Hackathon(DBBase):
     update_time = Column(DateTime)
     archive_time = Column(DateTime)
 
+    def dic(self):
+        d = to_dic(self, self.__class__)
+        d["basic_info"] = json.loads(self.basic_info or "{}")
+
+        d["extra_info"] = json.loads(self.extra_info or "{}")
+        return d
+
     def __init__(self, **kwargs):
         super(Hackathon, self).__init__(**kwargs)
 
@@ -353,7 +360,7 @@ class Template(DBBase):
     id = Column(Integer, primary_key=True)
     name = Column(String(50))
     url = Column(String(200))
-    provider = Column(Integer)
+    provider = Column(Integer, default=0)
     creator_id = Column(Integer)
     status = Column(Integer)
     create_time = Column(DateTime, default=datetime.utcnow())

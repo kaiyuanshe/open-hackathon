@@ -49,8 +49,10 @@ class ADMIN:
 
 class HACKATHON_BASIC_INFO:
     ORGANIZERS = "organizers"
+    ORGANIZER_NAME = "organizer_name"
     ORGANIZER_URL = "organizer_url"
     ORGANIZER_IMAGE = "organizer_image"
+    BANNERS = "banners"  # array
     LOCATION = "location"
     MAX_ENROLLMENT = "max_enrollment"
     WALL_TIME = "wall_time"

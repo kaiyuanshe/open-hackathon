@@ -191,17 +191,9 @@ class HealthResource(Resource):
 
 
 class HackathonResource(Resource):
+    @hackathon_name_required
     def get(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument('hid', type=int, location='args')
-        parser.add_argument('name', type=str, location='args')
-        args = parser.parse_args()
-
-        if args['hid'] is None and args['name'] is None:
-            return bad_request("either hackathon id or hackathon name is required")
-
-        hackathon = hack_manager.get_hackathon_by_name_or_id(hack_id=args['hid'], name=args['name'])
-        return hackathon.dic() if hackathon is not None else not_found("hackathon not found by %r" % args)
+        return g.hackathon.dic()
 
     def post(self):
         pass
