@@ -54,14 +54,14 @@ app.use(function (req, res, next) {
   next();
 });
 app.get('/config', function (req, res) {
-  res.json({
+  res.send('var config = ' + JSON.stringify({
     name: config.hackathon_name,
     url: config.proxy,
     api: config.api,
     sociallogin: config.sociallogin,
     social: config.social,
     seo: config.seo
-  });
+  }));
 });
 app.use(proxy);
 

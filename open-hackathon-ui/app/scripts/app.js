@@ -155,9 +155,38 @@ angular
         }
       });
   })
-  .run(function ($rootScope, $location) {
+  .run(function ($rootScope, $location, API) {
+
     $rootScope.$on('$locationChangeStart', function (scope, next, current) {
-      console.log($location.path());
+
+      if($location.path() === '/' || $location.path() === 'register' || $location.path() === 'settings') return;
+
+      API.user.hackathon.get({header:{hackathon_name :config.name}},function(data){
+        if(data.error){
+          $location.path('error')
+        }else{
+          if(data.hackathon.status !=1){
+            $location.path('error')
+            return
+          }else {
+            if(data.registration){
+              if(data.registration.status == 0 || data.registration.status == 2){
+                $location.path('register')
+              }else if(data.registration.status == 3 && data.hackathon.basic_info.auto_approve == 0){
+                $location.path('register')
+              }else if(data.experiment){
+                $location.path('hackathon')
+              }else{
+                $location.path('settings')
+              }
+            }else{
+              $location.path('register')
+            }
+          }
+        }
+      });
+
+      //console.log($location.path());
     })
   });
 

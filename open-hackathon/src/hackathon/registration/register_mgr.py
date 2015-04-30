@@ -71,7 +71,7 @@ class RegisterManger(object):
             if hackathon.is_auto_approve():
                 args["status"] = RGStatus.AUTO_PASSED
             return self.db.add_object_kwargs(UserHackathonRel, **args).dic()
-        except Exception as  e:
+        except Exception as e:
             log.error(e)
             return internal_server_error("fail to create or update register")
 
@@ -109,16 +109,16 @@ class RegisterManger(object):
             return internal_server_error("failed in delete register: %s" % args["id"])
 
     def get_registration_detail(self, user_id, hackathon):
-        rel = self.get_registration_by_user_and_hackathon(user_id, hackathon.id)
-        if rel is None:
-            # return nothing
-            return ok("")
-
         detail = {
-            "registration": rel.dic(),
             "hackathon": hackathon.dic()
         }
 
+        rel = self.get_registration_by_user_and_hackathon(user_id, hackathon.id)
+        if rel is None:
+            # return nothing
+            return detail
+
+        detail["registration"] = rel.dic()
         # experiment
         try:
             experiment = self.db.find_first_object(Experiment,

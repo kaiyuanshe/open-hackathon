@@ -38,16 +38,32 @@
  * Controller of the API
  */
 angular.module('oh.services', [])
-  .run(function ($http, $rootScope) {
-    $http.get('/config')
-      .success(function (data) {
-        $rootScope.config = data;
-      })
-      .error(function (data) {
-        console.log(data);
-      })
-  })
+  // .factory('config',function ($q,$http) {
+  //   var _config = null;
+  //   function loadConfig(){
+  //     var q = $q.defer();
+  //     $http
+  //       .get('/config')
+  //       .success(function (data) {
+  //         _config = data;
+  //         q.resolve(_config);
+  //       })
+  //       .error(function (error) {
+  //         q.reject(error)
+  //       });
+
+  //     return q.promise;
+  //   }
+  //   loadConfig();
+  //   return {
+  //     getConfig:function(){
+  //       return _config;
+  //     }
+  //   }
+   
+  // })
   .factory('API', function ($http, $cookieStore, $rootScope) {
+  
     function API(obj, name) {
       var key;
       var getCmd = {};
@@ -85,7 +101,7 @@ angular.module('oh.services', [])
           //if (options.query) {
           //  url += '?' + ($.isPlainObject(options.query) ? $.param(options.query) : options.query);
           //}
-          options.header.token = ($cookieStore.get('User') || '' ).token;
+          options.header.token = $cookieStore.get('token') || '';
           return $http({
             method: obj,
             url: url,
@@ -102,7 +118,8 @@ angular.module('oh.services', [])
       }
     }
 
-    return API($rootScope.config.api, $rootScope.config.url + '/api');
+
+    return API(config.api, config.url + '/api');
   });
 
 
