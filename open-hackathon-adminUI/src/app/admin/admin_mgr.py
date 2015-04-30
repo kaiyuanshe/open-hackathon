@@ -2,19 +2,19 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
-#  
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#  
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-#  
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -31,7 +31,7 @@ from app.database.models import *
 from app.log import log
 from app.database import db_adapter
 from datetime import datetime, timedelta
-from app.constants import HTTP_HEADER, ROLE
+from app.constants import HTTP_HEADER
 from app.enum import EmailStatus
 from app.functions import safe_get_config
 from flask import request, g
@@ -46,16 +46,17 @@ class AdminManager(object):
         token_issue_date = datetime.utcnow()
         token_expire_date = token_issue_date + timedelta(
             minutes=safe_get_config("login/token_expiration_minutes", 1440))
-        admin_token = AdminToken(token=str(uuid.uuid1()), admin=admin, expire_date=token_expire_date,
-                                 issue_date=token_issue_date)
-        self.db.add_object(admin_token)
-        self.db.commit()
-        return admin_token
+        user_token = UserToken(token=str(uuid.uuid1()),
+                               user=admin,
+                               expire_date=token_expire_date,
+                               issue_date=token_issue_date)
+        self.db.add_object(user_token)
+        return user_token
 
     def __validate_token(self, token):
-        t = self.db.find_first_object(AdminToken, token=token)
+        t = self.db.find_first_object(UserToken, token=token)
         if t is not None and t.expire_date >= datetime.utcnow():
-            return t.admin
+            return t.user
         return None
 
     def db_logout(self, admin):
@@ -70,7 +71,7 @@ class AdminManager(object):
     def db_login(self, openid, **kwargs):
         # update db
         email_info = kwargs['email_info']
-        admin = self.db.find_first_object(AdminUser, openid=openid)
+        admin = self.db.find_first_object_by(User, openid=openid)
         if admin is not None:
             self.db.update_object(admin,
                                   name=kwargs["name"],
@@ -83,28 +84,27 @@ class AdminManager(object):
                 email = email_info[n]['email']
                 primary_email = email_info[n]['primary']
                 verified = email_info[n]['verified']
-                if self.db.find_first_object(AdminEmail, email=email) is None:
-                    adminemail = AdminEmail(name=kwargs['name'], email=email, primary_email=primary_email,
-                                            verified=verified, admin=admin)
+                if self.db.find_first_object_by(UserEmail, email=email) is None:
+                    adminemail = UserEmail(name=kwargs['name'], email=email, primary_email=primary_email,
+                                           verified=verified, user=admin)
                     self.db.add_object(adminemail)
             self.db.commit()
         else:
-            admin = AdminUser(openid=openid,
-                              name=kwargs["name"],
-                              nickname=kwargs["nickname"],
-                              access_token=kwargs["access_token"],
-                              avatar_url=kwargs["avatar_url"],
-                              online=1)
+            admin = User(openid=openid,
+                         name=kwargs["name"],
+                         nickname=kwargs["nickname"],
+                         access_token=kwargs["access_token"],
+                         avatar_url=kwargs["avatar_url"],
+                         online=1)
 
             self.db.add_object(admin)
-            self.db.commit()
 
             for n in email_info:
                 email = n['email']
                 primary_email = n['primary']
                 verified = n['verified']
-                adminemail = AdminEmail(name=kwargs['name'], email=email, primary_email=primary_email,
-                                        verified=verified, admin=admin)
+                adminemail = UserEmail(name=kwargs['name'], email=email, primary_email=primary_email,
+                                       verified=verified, user=admin)
                 self.db.add_object(adminemail)
                 self.db.commit()
 
@@ -127,14 +127,14 @@ class AdminManager(object):
         return True
 
     def get_admin_by_id(self, id):
-        return self.db.find_first_object(AdminUser, id=id)
+        return self.db.find_first_object_by(User, id=id)
 
     def get_admin_info(self, admin):
         return {
             "id": admin.id,
             "name": admin.name,
             "nickname": admin.nickname,
-            "email": admin.emails.filter_by(primary_email=EmailStatus.Primary).first().email,
+            "emails": [e.dic() for e in admin.emails.all()],
             "avatar_url": admin.avatar_url,
             "online": admin.online,
             "create_time": str(admin.create_time),
@@ -143,13 +143,7 @@ class AdminManager(object):
 
     def get_hackid_from_adminid(self, admin_id):
 
-        # get emails from admin though admin.id in table admin_email
-        admin_emails = self.db.find_all_objects_by(AdminEmail, admin_id=admin_id)
-        emails = map(lambda x: x.email, admin_emails)
-
-        # get AdminUserHackathonRels from query withn filter by email
-        admin_user_hackathon_rels = self.db.find_all_objects(AdminUserHackathonRel,
-                                                             AdminUserHackathonRel.admin_email.in_(emails))
+        admin_user_hackathon_rels = self.db.find_all_objects_by(AdminHackathonRel, user_id=admin_id)
         if len(admin_user_hackathon_rels) == 0:
             return []
 
@@ -172,4 +166,4 @@ def is_super(admin):
     return admin_manager.is_super(admin.id)
 
 
-AdminUser.is_super = is_super
+User.is_super = is_super

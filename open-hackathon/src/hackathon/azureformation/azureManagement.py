@@ -38,6 +38,7 @@ from hackathon.database import (
 from hackathon.database.models import (
     AzureKey,
     HackathonAzureKey,
+    Hackathon,
 )
 import os
 import commands
@@ -49,7 +50,7 @@ class AzureManagement:
     def __init__(self):
         pass
 
-    def create_certificate(self, subscription_id, management_host, hackathon_id):
+    def create_certificate(self, subscription_id, management_host, hackathon_name):
         """
         1. check certificate dir
         2. generate pem file
@@ -102,6 +103,7 @@ class AzureManagement:
         else:
             log.debug('azure key exists')
 
+        hackathon_id = db_adapter.find_first_object_by(Hackathon, name=hackathon_name).id
         hackathon_azure_key = db_adapter.find_first_object_by(HackathonAzureKey,
                                                               hackathon_id=hackathon_id,
                                                               azure_key_id=azure_key.id)
@@ -116,7 +118,8 @@ class AzureManagement:
 
         return cert_url
 
-    def get_certificates(self, hackathon_id):
+    def get_certificates(self, hackathon_name):
+        hackathon_id = db_adapter.find_first_object_by(Hackathon, name=hackathon_name).id
         hackathon_azure_keys = db_adapter.find_all_objects_by(HackathonAzureKey, hackathon_id=hackathon_id)
         if hackathon_azure_keys is None:
             log.error('hackathon [%s] has no certificates' % hackathon_id)
@@ -127,9 +130,9 @@ class AzureManagement:
             certificates.append(dic)
         return certificates
 
-    def delete_certificate(self, certificate_id, hackathon_id):
+    def delete_certificate(self, certificate_id, hackathon_name):
         certificate_id = int(certificate_id)
-        hackathon_id = int(hackathon_id)
+        hackathon_id = db_adapter.find_first_object_by(Hackathon, name=hackathon_name).id
         hackathon_azure_keys = db_adapter.find_all_objects_by(HackathonAzureKey, hackathon_id=hackathon_id)
         if hackathon_azure_keys is None:
             log.error('hackathon [%d] has no certificates' % hackathon_id)
@@ -149,5 +152,5 @@ azure_management = AzureManagement()
 
 # if __name__ == '__main__':
 #     azure_management = AzureManagement()
-#     cert_url = azure_management.create_certificate('guhr34nfj', 'fhdufew3', 1)
+#     cert_url = azure_management.create_certificate('guhr34nfj', 'fhdufew3', 'open-xml-sdk')
 #     print cert_url

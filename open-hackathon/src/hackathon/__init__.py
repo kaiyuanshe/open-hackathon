@@ -2,7 +2,7 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
 #  
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -40,7 +40,7 @@ app.config['SECRET_KEY'] = safe_get_config("app.secret_key", "secret_key")
 api = Api(app)
 
 # CORS
-app.config['CORS_HEADERS'] = 'Content-Type, token, hackathon_id'
+app.config['CORS_HEADERS'] = 'Content-Type, token, hackathon_id, hackathon_name'
 cors = CORS(app)
 
 from . import views

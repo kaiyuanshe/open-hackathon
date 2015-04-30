@@ -25,7 +25,7 @@
 # -----------------------------------------------------------------------------------
 
 from hackathon.database import Base, engine
-from hackathon.database.models import AdminUserHackathonRel, User
+from hackathon.database.models import AdminHackathonRel, User
 from hackathon.database import db_adapter
 from datetime import datetime
 from hackathon.enum import AdminUserHackathonRelStates, ReservedUser
@@ -38,18 +38,7 @@ def setup_db():
     # in case upgrade the table structure, the origin table need be dropped firstly
     Base.metadata.create_all(bind=engine)
 
-    # init db data
-    # add a super admin account
-    superadmin = db_adapter.find_first_object_by(AdminUserHackathonRel,
-                                                 admin_email=ADMIN.DEFAULT_SUPER_ADMIN_EMAIL,
-                                                 hackathon_id=ADMIN.SUPER_ADMIN_GROUP_ID)
-    if superadmin is None:
-        db_adapter.add_object_kwargs(AdminUserHackathonRel,
-                                     admin_email=ADMIN.DEFAULT_SUPER_ADMIN_EMAIL,
-                                     hackathon_id=ADMIN.SUPER_ADMIN_GROUP_ID,
-                                     state=AdminUserHackathonRelStates.Actived,
-                                     remarks='super admins',
-                                     create_time=datetime.utcnow())
+    # init REQUIRED db data.
 
     # reserved user
     res_u = db_adapter.get_object(User, ReservedUser.DefaultUserID)

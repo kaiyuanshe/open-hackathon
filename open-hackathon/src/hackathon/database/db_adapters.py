@@ -4,7 +4,7 @@
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
 #
 # The MIT License (MIT)
-#  
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -42,7 +42,7 @@ class SQLAlchemyAdapterMetaClass(type):
 
     def __new__(cls, name, bases, attrs):
         """If the method in this list, DON'T wrap it"""
-        no_wrap = ["commit", "merge", "rollback", "remove"]
+        no_wrap = ["commit", "merge", "rollback", "remove", "session"]
 
         def wrap(method):
             """private methods are not wrapped"""
@@ -78,6 +78,9 @@ class SQLAlchemyAdapter(DBAdapter):
 
     def rollback(self):
         self.db_session.rollback()
+
+    def session(self):
+        return self.db_session
 
     # ------------------------------ methods that no need to wrap --- end------------------------------
 
