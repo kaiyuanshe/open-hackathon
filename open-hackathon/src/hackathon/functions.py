@@ -31,9 +31,7 @@ import importlib
 import urllib2
 import json
 import os
-
 import requests
-from hackathon_response import internal_server_error
 
 try:
     from config import Config
@@ -135,18 +133,3 @@ def call(mdl_cls_func, cls_args, func_args):
     cls = getattr(mdl, cls_name)
     func = getattr(cls(*cls_args), func_name)
     func(*func_args)
-
-
-def upload_file(file):
-    try:
-        storage_url = 'http://azure'
-        length = file.size()
-        request = urllib2.Request(storage_url, data=file)
-        request.add_header('Cache-Control', 'no-cache')
-        request.add_header('Content-Length', '%d' % length)
-        request.add_header('Content-Type', 'application/octet-stream')
-        response = urllib2.urlopen(request).read().strip()
-        return response
-    except Exception as e:
-        log.error(e)
-        return internal_server_error('upload files raise an exception')

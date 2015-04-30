@@ -29,7 +29,6 @@ from . import api, app
 from expr import expr_manager
 from expr.expr_mgr import open_check_expr, recycle_expr_scheduler
 from database.models import Announcement, Hackathon, Template
-from hackathon.functions import upload_file
 from user.login import *
 from flask import g, request
 from database import db_adapter, db_session
@@ -43,6 +42,7 @@ from admin.admin_mgr import admin_manager
 from hackathon.registration.register_mgr import register_manager
 from hackathon.template.template_mgr import template_manager
 from hackathon_response import *
+from hackathon.azureformation.fileService import upload_file_to_azure
 
 
 @app.teardown_appcontext
@@ -323,8 +323,14 @@ class AdminHackathonListResource(Resource):
 
 class FileResource(Resource):
     def post(self):
-        file = request.files.get()
-        return upload_file(file)
+        try:
+            file = request.files.get()
+            upload_file_to_azure(file, 'test/hello')
+            return ok("upload file successed")
+        except Exception as ex:
+            log.error(ex)
+            log.error("upload file raised an exception")
+            return internal_server_error("upload file raised an exception")
 
 
 """
@@ -393,5 +399,8 @@ api.add_resource(AdminHackathonListResource, "/api/admin/hackathons")
 api.add_resource(RegisterListResource, "/api/register/list", "/api/admin/register/list")
 api.add_resource(AdminRegisterResource, "/api/admin/register")
 api.add_resource(DefaultRecycleResource, "/api/default/recycle")
+"""
+files api
+"""
 api.add_resource(FileResource, "/api/file")
 
