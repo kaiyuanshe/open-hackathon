@@ -340,7 +340,6 @@ user api
 """
 api.add_resource(UserResource, "/api/user/<int:id>")
 api.add_resource(UserLoginResource, "/api/user/login")
-api.add_resource(UserExperimentResource, "/api/user/experiment")
 
 """
 user-hackathon-relationship, or register, api
