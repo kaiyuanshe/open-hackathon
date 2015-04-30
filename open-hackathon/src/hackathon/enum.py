@@ -11,10 +11,10 @@
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#  
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-#  
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -64,8 +64,8 @@ class VEProvider:
     """
     For provider in db model VirtualEnvironment
     """
-    AzureVM = 0
-    Docker = 1
+    Docker = 0
+    AzureVM = 1
 
 
 class VERemoteProvider:
@@ -83,6 +83,7 @@ class EmailStatus:
 class ReservedUser:
     DefaultUserID = -1
     DockerVM = -2
+    DefaultSuperAdmin = 1
 
 
 class AdminUserHackathonRelStates:
@@ -160,7 +161,7 @@ class RGStatus:
     UNAUDIT = 0
     AUDIT_PASSED = 1
     AUDIT_REFUSE = 2
-    AUTO_PASSED =3
+    AUTO_PASSED = 3
 
 
 class ADMIN_ROLE_TYPE:

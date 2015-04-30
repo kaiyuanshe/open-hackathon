@@ -49,7 +49,7 @@ angular.module('oh.controllers')
 
 
     $scope.check_status = ['您的报名正在审核中，请等待。', '您的报名已经审核已通过。', '您的报名已被拒绝，如有疑问请联系主办方。'];
-    API.hackathon.get({query: {name: $scope.config.name}}, function (data) {
+    API.hackathon.get({header: {hackathon_name: config.name}}, function (data) {
       var User = $cookieStore.get('User') || '';
       var isExpired = data.end_time < Date.now();
       var message = '';
