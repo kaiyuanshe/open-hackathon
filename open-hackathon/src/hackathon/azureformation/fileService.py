@@ -30,22 +30,21 @@ import sys
 sys.path.append("..")
 from azure.storage import BlobService
 from hackathon.log import log
-from hackathon.functions import get_config
+from hackathon.functions import safe_get_config, get_config
 
-blob_service = BlobService(account_name=get_config("storage.account_name"),
-                           account_key=get_config("storage.account_key"))
+blob_service = BlobService(account_name=safe_get_config("storage.account_name", "account_name"),
+                           account_key=safe_get_config("storage.account_key", "account_key"))
 container_name = get_config("storage.container_name")
 
 
 def create_container_in_storage():
     # create a container if doesn't exist
     container_name = get_config("storage.container_name")
-    names = map( lambda x: x.name, blob_service.list_containers())
+    names = map(lambda x: x.name, blob_service.list_containers())
     if container_name not in names:
         blob_service.create_container(container_name)
     else:
         log.debug("container already exsit in storage")
-
 
 
 def upload_file_to_azure(file, filename):
