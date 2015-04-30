@@ -76,7 +76,7 @@ class UserLoginTest(unittest.TestCase):
                         result['hackathon'] = hackathon.dic()
                         result['registration'] = register.dic()
 
-                        self.assertEqual(LoginProviderBase().return_details(user_with_token, args), result)
+                        self.assertEqual(LoginProviderBase().user_display_info_with_token(user_with_token, args), result)
                         get_user_detail_info.assert_called_once_with(user)
                         get_hackathon_by_name.assert_called_once_with('test_hackathon_name')
                         get_register_by_rid_or_uid_and_hid.assert_called_once_with({'hid': 1, 'uid': 1})
@@ -96,7 +96,7 @@ class UserLoginTest(unittest.TestCase):
                 get_hackathon_by_name.return_value = None
 
                 result = {"errorcode": 400, "message": "bad request : hackathon_name does not exist in DB"}
-                self.assertEqual(LoginProviderBase().return_details(user_with_token, args), result)
+                self.assertEqual(LoginProviderBase().user_display_info_with_token(user_with_token, args), result)
                 get_user_detail_info.assert_called_once_with(user)
                 get_hackathon_by_name.assert_called_once_with('test_hackathon_name')
 
@@ -134,7 +134,7 @@ class UserLoginTest(unittest.TestCase):
                             result['hackathon'] = hackathon.dic()
                             result['registration'] = register.dic()
 
-                            self.assertEqual(LoginProviderBase().return_details(user_with_token, args), result)
+                            self.assertEqual(LoginProviderBase().user_display_info_with_token(user_with_token, args), result)
                             get_user_detail_info.assert_called_once_with(user)
                             get_hackathon_by_name.assert_called_once_with('test_hackathon_name')
                             get_register_by_rid_or_uid_and_hid.assert_called_once_with({'hid': 1, 'uid': 1})
@@ -173,7 +173,7 @@ class UserLoginTest(unittest.TestCase):
                             result['hackathon'] = hackathon.dic()
                             result['registration'] = {}
 
-                            self.assertEqual(LoginProviderBase().return_details(user_with_token, args), result)
+                            self.assertEqual(LoginProviderBase().user_display_info_with_token(user_with_token, args), result)
                             get_user_detail_info.assert_called_once_with(user)
                             get_hackathon_by_name.assert_called_once_with('test_hackathon_name')
                             get_register_by_rid_or_uid_and_hid.assert_called_once_with({'hid': 1, 'uid': 1})

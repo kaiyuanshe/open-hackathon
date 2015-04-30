@@ -36,6 +36,8 @@ import json
 from hackathon.constants import OAUTH_PROVIDER
 from hackathon.hack import hack_manager
 from hackathon.registration.register_mgr import register_manager
+from hackathon.hackathon_response import *
+from hackathon.enum import EStatus
 
 
 class LoginProviderBase():
@@ -45,39 +47,14 @@ class LoginProviderBase():
     def logout(self, user):
         return user_manager.db_logout(user)
 
-    def return_details(self, user_with_token, args):
+    def user_display_info_with_token(self, user_with_token):
         user = user_with_token["user"]
-        log.info("user login successfully:" + repr(user))
-        hackathon_name = args.get('hackathon_name')
 
-        detail = user_manager.get_user_detail_info(user)
-        detail["token"] = user_with_token["token"].token
-
-        login_result = {}
-        login_result["user"] = detail
-
-        # get hackathon
-        hackathon = hack_manager.get_hackathon_by_name(hackathon_name)
-        if hackathon is None:
-            return {"errorcode": 400, "message": "bad request : hackathon_name does not exist in DB"}
-        login_result["hackathon"] = hackathon.dic()
-
-
-        # deal with register
-        register_manager.deal_with_user_and_register_when_login(user, hackathon.id)
-
-        # get register info
-        register = register_manager.get_register_by_uid_and_hid(user.id, hackathon.id)
-        if register is None:
-            emails = map(lambda x: x.email, user.emails)
-            register = register_manager.get_register_by_emails_and_hid(hackathon.id, emails)
-            if register is None:
-                login_result['registration'] = {}
-            else:
-                login_result['registration'] = register.dic()
-        else:
-            login_result['registration'] = register.dic()
-        log.debug("login returns info: " + str(login_result))
+        login_result = {
+            "user": user_manager.user_display_info(user),
+            "token": user_with_token["token"].token
+        }
+        log.debug("user login successfully:" + repr(login_result))
         return login_result
 
 
@@ -119,7 +96,7 @@ class QQLogin(LoginProviderBase):
         # detail = self.um.get_user_detail_info(user, hackathon_name=hackathon_name)
         # detail["token"] = user_with_token["token"].token
         # return detail
-        return self.return_details(user_with_token, args)
+        return self.user_display_info_with_token(user_with_token)
 
 
 class GithubLogin(LoginProviderBase):
@@ -168,7 +145,7 @@ class GithubLogin(LoginProviderBase):
                                            access_token=access_token,
                                            email_info=email_info,
                                            avatar_url=avatar)
-        return self.return_details(user_with_token, args)
+        return self.user_display_info_with_token(user_with_token)
 
 
 class GitcafeLogin(LoginProviderBase):
@@ -207,7 +184,7 @@ class GitcafeLogin(LoginProviderBase):
                                            access_token=token,
                                            email_info=email_info,
                                            avatar_url=avatar_url)
-        return self.return_details(user_with_token, args)
+        return self.user_display_info_with_token(user_with_token)
 
 
 class WeiboLogin(LoginProviderBase):
@@ -259,7 +236,7 @@ class WeiboLogin(LoginProviderBase):
                                            access_token=access_token,
                                            email_info=email_info,
                                            avatar_url=avatar_url)
-        return self.return_details(user_with_token, args)
+        return self.user_display_info_with_token(user_with_token)
 
 
 login_providers = {

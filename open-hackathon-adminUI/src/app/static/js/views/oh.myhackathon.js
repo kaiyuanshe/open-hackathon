@@ -25,8 +25,8 @@
 ;
 (function($, oh) {
   $(function(){
-      oh.api.admin.hackathons.get(function(data){
-         $('#hackathon_template').tmpl(data);
-      })
+//      oh.api.admin.hackathons.get(function(data){
+//         $('#hackathon_template').tmpl(data);
+//      })
   });
 })(jQuery, window.oh);

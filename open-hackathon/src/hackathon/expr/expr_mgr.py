@@ -14,7 +14,7 @@
 #
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-#  
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,14 +25,14 @@
 # -----------------------------------------------------------------------------------
 
 import sys
+from debtagshw.debtagshw import LOG
+from cmath import log10
 
 sys.path.append("..")
 from compiler.ast import (
     flatten,
 )
-from hackathon.constants import (
-    GUACAMOLE,
-)
+
 from hackathon.docker import (
     OssDocker,
 )
@@ -50,6 +50,7 @@ from hackathon.enum import (
     PortBindingType,
     VEStatus,
     ReservedUser,
+    RecycleStatus,
 )
 from hackathon.database.models import (
     VirtualEnvironment,
@@ -60,7 +61,6 @@ from hackathon.database.models import (
     DockerContainer,
     Hackathon,
     Template,
-    Register,
 )
 from hackathon.database import (
     db_adapter,
@@ -114,7 +114,7 @@ class ExprManager(object):
         # return public accessible web url
         public_urls = []
         if expr.template.provider == VEProvider.Docker:
-            for ve in expr.virtual_environments.filter(VirtualEnvironment.image != GUACAMOLE.IMAGE).all():
+            for ve in expr.virtual_environments.all():
                 for p in ve.port_bindings.all():
                     if p.binding_type == PortBindingType.CloudService and p.name == "website":
                         hs = db_adapter.find_first_object_by(DockerHostServer, id=p.binding_resource_id)
@@ -521,33 +521,15 @@ class ExprManager(object):
         else:
             return "expr not exist"
 
-    def submit_expr(self, args):
-        if "id" not in args:
-            log.warn("cannot submit expr for the lack of id")
-            raise Exception("id unavailable")
-
-        id = args["id"]
-        u = db_adapter.find_first_object_by(Register, id=id)
-        if u is None:
-            log.debug("register user not found:" + id)
-            return "user not found", 404
-
-        # u.online = args["online"] if "online" in args else u.online
-        u.submitted = args["submitted"] if "submitted" in args else u.submitted
-        u.submitted_time = datetime.utcnow()
-        db_adapter.commit()
-        return u
-
 
 def open_check_expr():
     """
-    start a job to examine default experiment
+    start a scheduled job to examine default experiment
     :return:
     """
     log.debug("start checking experiment ... ")
     alarm_time = datetime.now() + timedelta(seconds=1)
-    scheduler.add_job(check_default_expr, 'interval', id='1', replace_existing=True, next_run_time=alarm_time,
-                      minutes=safe_get_config("pre_allocate.check_interval_minutes", 5))
+    scheduler.add_job(check_default_expr, 'interval', id='1', replace_existing=True, next_run_time=alarm_time, minutes=safe_get_config("pre_allocate.check_interval_minutes", 5))
 
 
 def check_default_expr():
@@ -591,6 +573,32 @@ def check_default_expr():
         except Exception as e:
             log.error(e)
             log.error("check default experiment failed")
-
+            
+def recycle_expr_scheduler():
+    """
+    start a scheduled job to recycle inactive experiment
+    :return:
+    """    
+    log.debug("Start recycling inactive user experiment")
+    excute_time = datetime.utcnow() + timedelta(minutes=1)
+    scheduler.add_job(recycle_expr, 'interval', id='2', replace_existing=True, next_run_time=excute_time, minutes=safe_get_config("recycle.check_idle_interval_minutes", 5))
+    
+            
+def recycle_expr():
+    """
+    recycle experiment when idle more than 5 hours
+    :return:
+    """
+    log.debug("start checking experiment ... ")    
+    recycle_hours = safe_get_config('recycle.idle_hours', 24)
+    expr_time_cond = Experiment.last_heart_beat_time + timedelta(hours=recycle_hours) > datetime.utcnow()
+    expr_enable_cond = Hackathon.recycle_enabled == RecycleStatus.Enabled
+    r = Experiment.query.join(Hackathon).filter(expr_time_cond, expr_enable_cond).first()
+    if r is not None:
+        expr_manager.stop_expr(r.id)
+        log.debug("it's stopping " + str(r.id) + " inactive experiment now")
+    else:
+        log.debug("There is now inactive experiment now")
+        return
 
 expr_manager = ExprManager()
