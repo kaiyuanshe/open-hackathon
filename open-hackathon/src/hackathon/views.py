@@ -313,7 +313,7 @@ class AdminAzureResource(Resource):
 
     @hackathon_name_required
     def post(self):
-        args = request.args
+        args = request.get_json()
         if 'subscription_id' not in args or 'management_host' not in args:
             return {'error': 'invalid parameter'}, 400
         subscription_id = args['subscription_id']
@@ -327,7 +327,7 @@ class AdminAzureResource(Resource):
 
     @hackathon_name_required
     def delete(self):
-        args = request.args
+        args = request.get_json()
         if 'certificate_id' not in args:
             return {'error': 'invalid parameter'}, 400
         certificate_id = args['certificate_id']

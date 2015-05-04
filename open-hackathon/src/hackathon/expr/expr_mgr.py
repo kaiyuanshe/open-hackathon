@@ -51,6 +51,7 @@ from hackathon.enum import (
     VEStatus,
     ReservedUser,
     RecycleStatus,
+    AVMStatus,
 )
 from hackathon.database.models import (
     VirtualEnvironment,
@@ -362,7 +363,7 @@ class ExprManager(object):
             return {"error": "hackathon or template is not existed"}, 500
 
         hackathon = hack_temp[0]
-        if hackathon.end_time < datetime.utcnow():
+        if hackathon.event_end_time < datetime.utcnow():
             log.warn("hackathon is ended. The expr starting process will be stopped")
             return "hackathen is ended", 412
 
@@ -410,7 +411,6 @@ class ExprManager(object):
                 return
             expr.status = EStatus.Starting
             db_adapter.commit()
-            # start create azure vm according to user template
             try:
                 af = AzureFormation(self.__load_azure_key_id(expr.id))
                 af.create(expr.id)
@@ -514,8 +514,13 @@ class ExprManager(object):
                     expr.status = EStatus.Stopped
                 db_adapter.commit()
             else:
-                # todo stop azure
-                raise NotImplementedError
+                try:
+                    af = AzureFormation(self.__load_azure_key_id(expr_id))
+                    af.stop(expr_id, AVMStatus.STOPPED_DEALLOCATED)
+                except Exception as e:
+                    log.error(e)
+                    return {'error': 'Failed stopping azure'}, 500
+
             log.debug("experiment %d ended success" % expr_id)
             return "OK"
         else:
@@ -573,7 +578,8 @@ def check_default_expr():
         except Exception as e:
             log.error(e)
             log.error("check default experiment failed")
-            
+
+
 def recycle_expr_scheduler():
     """
     start a scheduled job to recycle inactive experiment
