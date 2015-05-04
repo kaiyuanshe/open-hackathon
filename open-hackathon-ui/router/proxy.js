@@ -33,6 +33,8 @@ var util = require('util');
 
 var COOKIE_USERINFORMATION = 'User';
 
+var COOKIE_TOKEN = 'token';
+
 /**
  * Hackathon must be registered
  * @type {number}
@@ -53,7 +55,22 @@ var HACKATHON_EXPIRED = 8;
 
 function login(res, option) {
   res.api.user.login.post(option, function (response, data) {
-    var redirect = '/#/hackathon';
+    var redirect = '/#!/settings';
+    if (response.statusCode >= 200 && response.statusCode < 300 && !data.error) {
+      console.log(data);
+      res.cookie(COOKIE_TOKEN, JSON.stringify(data.token));
+      res.cookie(COOKIE_USERINFORMATION, JSON.stringify(data.user));
+    }else{
+      redirect = '/#!/error'
+    }
+    res.redirect(redirect);
+  });
+}
+
+
+function login_bak(res, option) {
+  res.api.user.login.post(option, function (response, data) {
+    var redirect = '/#!/hackathon';
     if (response.statusCode >= 200 && response.statusCode <= 300) {
       var user = data.user;
       user.status = data.hackathon.end_time < Date.now() ? HACKATHON_EXPIRED:0;
@@ -68,29 +85,31 @@ function login(res, option) {
           if (data.registration.status == 1) {
             //data.registration.status :0表示等待审核，1表示审核通过，2表示拒绝。
             if (user.experiments && user.experiments.length > 0) {
-              redirect = '/#/hackathon';
+              redirect = '/#!/hackathon';
             } else {
-              redirect = '/#/settings';
+              redirect = '/#!/settings';
             }
           } else {
-            redirect = '/#/register';
+            redirect = '/#!/register';
           }
         } else {
           //当用户未注册
-          redirect = '/#/register';
+          redirect = '/#!/register';
         }
       } else {
         if (data.user.experiments.length == 0) {
-          redirect = '/#/settings'
+          redirect = '/#!/settings'
         }
       }
       res.cookie(COOKIE_USERINFORMATION, JSON.stringify(user));
     } else {
-      redirect = '/#/error';
+      redirect = '/#!/error';
     }
     res.redirect(redirect);
   });
 }
+
+
 
 router.get('/github', function (req, res) {
   var option = {

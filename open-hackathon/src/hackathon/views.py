@@ -44,6 +44,7 @@ from hackathon_response import *
 from hackathon.azureformation.azureManagement import (
     azure_management,
 )
+from hackathon.azureformation.fileService import upload_file_to_azure
 
 
 @app.teardown_appcontext
@@ -194,20 +195,18 @@ class HealthResource(Resource):
 
 
 class HackathonResource(Resource):
+    @hackathon_name_required
     def get(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument('hid', type=int, location='args')
-        parser.add_argument('name', type=str, location='args')
-        args = parser.parse_args()
-
-        if args['hid'] is None and args['name'] is None:
-            return bad_request("either hackathon id or hackathon name is required")
-
-        hackathon = hack_manager.get_hackathon_by_name_or_id(hack_id=args['hid'], name=args['name'])
-        return hackathon.dic() if hackathon is not None else not_found("hackathon not found by %r" % args)
+        return g.hackathon.dic()
 
     def post(self):
-        pass
+        args = request.get_json()
+        return hack_manager.create_or_update_hackathon(args).dic()
+
+    @admin_privilege_required
+    def put(self):
+        args = request.get_json()
+        return hack_manager.create_or_update_hackathon(args).dic()
 
     def put(self):
         pass
@@ -338,6 +337,19 @@ class AdminAzureResource(Resource):
             return {'error': 'fail to delete certificate'}, 500
 
 
+class FileResource(Resource):
+    def post(self):
+        try:
+            file = request.files.get()
+            upload_file_to_azure(file, 'test/hello')
+            return ok("upload file successed")
+        except Exception as ex:
+            log.error(ex)
+            log.error("upload file raised an exception")
+            return internal_server_error("upload file raised an exception")
+
+
+
 """
 health page
 """
@@ -399,3 +411,8 @@ api.add_resource(CurrentTimeResource, "/api/currenttime")
 azure certificate api
 """
 api.add_resource(AdminAzureResource, '/api/admin/azure')
+
+"""
+files api
+"""
+api.add_resource(FileResource, "/api/file")
