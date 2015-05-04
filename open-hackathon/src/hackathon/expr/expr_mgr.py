@@ -515,6 +515,7 @@ class ExprManager(object):
                 db_adapter.commit()
             else:
                 try:
+                    # todo support delete azure vm
                     af = AzureFormation(self.__load_azure_key_id(expr_id))
                     af.stop(expr_id, AVMStatus.STOPPED_DEALLOCATED)
                 except Exception as e:
