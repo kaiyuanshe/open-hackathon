@@ -24,6 +24,9 @@
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
 
+api_secret = Chef::EncryptedDataBagItem.load_secret("#{node['openhackathon'][:secret][:secretpath]}")
+api_creds = Chef::EncryptedDataBagItem.load(node.chef_environment,"secret",api_secret)
+
 package 'libmysqlclient-dev'
 
 include_recipe "open-hackathon-api::user"
@@ -33,7 +36,7 @@ service_name=node['openhackathon']['mysql']['service']
 mysql_service service_name do
   run_group node['openhackathon']['user']
   run_user node['openhackathon']['user']
-  initial_root_password node['openhackathon']['mysql']['initial_root_password']
+  initial_root_password api_creds["mysql_usr_pwd"]
   version node['openhackathon']['mysql']['version']
   port node['openhackathon']['mysql']['port']
   action [:create, :start]
