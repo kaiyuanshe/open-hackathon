@@ -33,7 +33,8 @@ from hackathon.log import log
 from hackathon.functions import safe_get_config, get_config
 
 blob_service = BlobService(account_name=safe_get_config("storage.account_name", "account_name"),
-                           account_key=safe_get_config("storage.account_key", "account_key"))
+                           account_key=safe_get_config("storage.account_key", "account_key"),
+                           host_base=safe_get_config("storage.blob_service_host_base", "blob_service_host_base"))
 container_name = get_config("storage.container_name")
 
 
@@ -54,3 +55,13 @@ def upload_file_to_azure(file, filename):
         return blob_service.make_blob_url(container_name, filename)
     except Exception as ex:
         log.error(ex.message)
+
+
+def upload_file_to_azure_from_path(path, blob_name):
+    try:
+        create_container_in_storage()
+        blob_service.put_block_blob_from_path(container_name, blob_name, path)
+        return blob_service.make_blob_url(container_name, blob_name)
+    except Exception as e:
+        log.error(e)
+        return None

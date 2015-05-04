@@ -40,6 +40,9 @@ from hackathon.database.models import (
     HackathonAzureKey,
     Hackathon,
 )
+from hackathon.azureformation.fileService import (
+    upload_file_to_azure_from_path,
+)
 import os
 import commands
 
@@ -116,7 +119,7 @@ class AzureManagement:
         else:
             log.debug('hackathon azure key exists')
 
-        return cert_url
+        return upload_file_to_azure_from_path(cert_url, subscription_id + '.cer')
 
     def get_certificates(self, hackathon_name):
         hackathon_id = db_adapter.find_first_object_by(Hackathon, name=hackathon_name).id
