@@ -50,7 +50,7 @@ public class Connect2OpenHackathon {
         BufferedReader in = null;
 
         try {
-            final URL url = new URL(this.openHackathonBaseUrl + "?id=" + connectionName);
+            final URL url = new URL(this.openHackathonBaseUrl + "?name=" + connectionName);
             logger.debug("getGuacamoleJSONString from " + url.toString());
 
             HttpURLConnection.setFollowRedirects(false);
