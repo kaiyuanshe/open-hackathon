@@ -67,3 +67,4 @@ docs/_build/
 *config.py
 *.rb~
 *.erb~
+*.json~

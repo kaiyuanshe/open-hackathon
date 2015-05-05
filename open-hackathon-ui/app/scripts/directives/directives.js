@@ -68,7 +68,7 @@ angular.module('oh.directives', [])
           ifrem.removeClass('invisible');
         } else {
           ifrem = $('<iframe>').attr({
-            src: url + "&token=" + ($cookieStore.get('User') || '').token,
+            src: url + "&oh=" + ($cookieStore.get('User') || '').token,
             id: name,
             width: '100%',
             height: '100%',
@@ -115,11 +115,9 @@ angular.module('oh.directives', [])
                   bindTemp(data);
                   $('.hackathon-nav a.vm-box:eq(0)').trigger('click');
                   $interval.cancel(stop);
-
                   heartbeatInterval = $interval(function () {
                     heartbeat(data.expr_id)
                   }, 300000, true);
-
                 } else if (data.status == 1) {
                   stop = $interval(loopstart, 60000, true);
                 } else {

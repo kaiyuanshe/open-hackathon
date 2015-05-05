@@ -83,7 +83,8 @@ from datetime import (
 )
 import json
 import os
-
+import random
+import string
 docker = OssDocker()
 
 
@@ -104,7 +105,10 @@ class ExprManager(object):
             if ve.remote_provider == VERemoteProvider.Guacamole:
                 guacamole_config = json.loads(ve.remote_paras)
                 guacamole_host = safe_get_config("guacamole.host", "localhost:8080")
-                url = guacamole_host + '/guacamole/client.xhtml?id=c%2F' + guacamole_config["name"]
+                # target url format:
+                # http://localhost:8080/guacamole/#/client/c/{name}?name={name}&oh={token}
+                name = guacamole_config["name"]
+                url = guacamole_host + '/guacamole/#/client/c%s?name=%s' % (name, name)
                 guacamole_servers.append({
                     "name": guacamole_config["displayname"],
                     "url": url
@@ -237,7 +241,7 @@ class ExprManager(object):
     def __remote_start_container(self, expr, host_server, container_config, user_id):
         post_data = container_config
         post_data["expr_id"] = expr.id
-        post_data["container_name"] = "%s-%s" % (expr.id, container_config["name"])
+        post_data["container_name"] = "%s-%s" % (expr.id, container_config["name"]) + "".join(random.sample(string.ascii_letters + string.digits, 8))
         log.debug("starting to start container: %s" % post_data["container_name"])
 
         # db entity
@@ -362,7 +366,7 @@ class ExprManager(object):
             return {"error": "hackathon or template is not existed"}, 500
 
         hackathon = hack_temp[0]
-        if hackathon.end_time < datetime.utcnow():
+        if hackathon.event_end_time < datetime.utcnow():
             log.warn("hackathon is ended. The expr starting process will be stopped")
             return "hackathen is ended", 412
 
@@ -529,7 +533,8 @@ def open_check_expr():
     """
     log.debug("start checking experiment ... ")
     alarm_time = datetime.now() + timedelta(seconds=1)
-    scheduler.add_job(check_default_expr, 'interval', id='1', replace_existing=True, next_run_time=alarm_time, minutes=safe_get_config("pre_allocate.check_interval_minutes", 5))
+    scheduler.add_job(check_default_expr, 'interval', id='1', replace_existing=True, next_run_time=alarm_time,
+                      minutes=safe_get_config("pre_allocate.check_interval_minutes", 5))
 
 
 def check_default_expr():
@@ -573,23 +578,25 @@ def check_default_expr():
         except Exception as e:
             log.error(e)
             log.error("check default experiment failed")
-            
+
+
 def recycle_expr_scheduler():
     """
     start a scheduled job to recycle inactive experiment
     :return:
-    """    
+    """
     log.debug("Start recycling inactive user experiment")
     excute_time = datetime.utcnow() + timedelta(minutes=1)
-    scheduler.add_job(recycle_expr, 'interval', id='2', replace_existing=True, next_run_time=excute_time, minutes=safe_get_config("recycle.check_idle_interval_minutes", 5))
-    
-            
+    scheduler.add_job(recycle_expr, 'interval', id='2', replace_existing=True, next_run_time=excute_time,
+                      minutes=safe_get_config("recycle.check_idle_interval_minutes", 5))
+
+
 def recycle_expr():
     """
     recycle experiment when idle more than 5 hours
     :return:
     """
-    log.debug("start checking experiment ... ")    
+    log.debug("start checking experiment ... ")
     recycle_hours = safe_get_config('recycle.idle_hours', 24)
     expr_time_cond = Experiment.last_heart_beat_time + timedelta(hours=recycle_hours) > datetime.utcnow()
     expr_enable_cond = Hackathon.recycle_enabled == RecycleStatus.Enabled
@@ -600,5 +607,6 @@ def recycle_expr():
     else:
         log.debug("There is now inactive experiment now")
         return
+
 
 expr_manager = ExprManager()
