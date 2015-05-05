@@ -36,109 +36,104 @@ angular.module('oh.directives', [])
    $templateCache.get('hackathon.html');
    })*/
   .directive('hackathonNav', function ($interval, $cookieStore, $templateCache, API) {
+
+    var heartbeatInterval = null;
+    var stop = null;
+
+    function showErrorMsg(code, msg) {
+      $('#load').hide();
+      var errorbox = $('#error');
+      if (code) {
+        errorbox.find('.code').text(code);
+      }
+      if (msg) {
+        errorbox.find('.message').text(msg);
+      }
+      errorbox.show();
+    }
+
+    function bindTemp(data) {
+      var servers = data.remote_servers || data.guacamole_servers;
+      var work_center = $('.center').on('mouseover', 'iframe', function (e) {
+        $(this).focus();
+      });
+      var hnav = $('.hackathon-nav').on('click', 'a.vm-box', function (e) {
+        hnav.find('.vm-box').removeClass('active')
+        var a = $(this).addClass('active');
+        var url = a.data('url');
+        var name = a.attr('id')
+        var ifrem = work_center.find('#' + name);
+        work_center.find('iframe').addClass('invisible');
+        if (ifrem.length > 0) {
+          ifrem.removeClass('invisible');
+        } else {
+          ifrem = $('<iframe>').attr({
+            src: url + "&token=" + ($cookieStore.get('User') || '').token,
+            id: name,
+            width: '100%',
+            height: '100%',
+            frameborder: 'no',
+            marginwidth: '0',
+            scrolling: 'no'
+          }).appendTo(work_center)
+        }
+      });
+    }
+
+    function heartbeat(id) {
+      API.user.experiment.put({
+        body: {id: id}
+      }, function (data) {
+        if (data.error) {
+          $interval.cancel(heartbeatInterval);
+        }
+      });
+    }
+
     return {
       restrict: 'E',//'AEMC'
       templateUrl: 'views/tpls/hackathon-nav.html', //<div ng-transclude></div>
       replace: true,
       link: function (scope, elemten, attr) {
-        function showErrorMsg(code, msg) {
-          $('#load').hide();
-          var errorbox = $('#error');
-          if (code) {
-            errorbox.find('.code').text(code);
-          }
-          if (msg) {
-            errorbox.find('.message').text(msg);
-          }
-          errorbox.show();
-        }
+        scope.$watch('workData', function (newValue, oldValue) {
+          if (newValue) {
+            var temp = $templateCache.get('hackathon-vm.html');
+            var list = [];
+            var loopstart = function () {
+              API.user.experiment.get({query: {id: newValue.experiment.id}}, function (data) {
+                if (data.status == 2) {
+                  var dockers = []
+                  for (var i in data.public_urls) {
+                    dockers.push({
+                      purl: data.public_urls[i].url,
+                      name: data.remote_servers[i].name,
+                      surl: data.remote_servers[i].url
+                    })
+                    list.push(temp.format(dockers[i]));
+                  }
+                  $('.hackathon-nav').append(list.join(''))
+                  bindTemp(data);
+                  $('.hackathon-nav a.vm-box:eq(0)').trigger('click');
+                  $interval.cancel(stop);
 
-        function bindTemp(data) {
-          var servers = data.remote_servers || data.guacamole_servers;
-          var work_center = $('.center').on('mouseover', 'iframe', function (e) {
-            $(this).focus();
-          });
-          var hnav = $('.hackathon-nav').on('click', 'a.vm-box', function (e) {
-            hnav.find('.vm-box').removeClass('active')
-            var a = $(this).addClass('active');
-            var url = a.data('url');
-            var name = a.attr('id')
-            var ifrem = work_center.find('#' + name);
-            work_center.find('iframe').addClass('invisible');
-            if (ifrem.length > 0) {
-              ifrem.removeClass('invisible');
-            } else {
-              ifrem = $('<iframe>').attr({
-                src: url + "&token=" + ($cookieStore.get('User') || '').token,
-                id: name,
-                width: '100%',
-                height: '100%',
-                frameborder: 'no',
-                marginwidth: '0',
-                scrolling: 'no'
-              }).appendTo(work_center)
-            }
-          });
-        }
-        var heartbeatInterval = null;
-        function heartbeat(id){
-        	API.user.experiment.put({
-        		body:{id:id}
-        	},function(data){
-        		if(data.error){
-        			$interval.cancel(heartbeatInterval);
-        		}
-        	});
-        }
-        
-        var temp = $templateCache.get('hackathon-vm.html');
-        API.user.experiment.post({
-          body: {cid: 'ut', hackathon: scope.config.name}
-        }, function (data) {
-          if (data.error) {
-            showErrorMsg();
-            return;
-          }
-          var stop;
-          var list = [];
-          var loopstart = function () {
-            API.user.experiment.get({
-              query: {id: data.expr_id}
-            }, function (data) {
-              if (data.status == 2) {
-                var dockers = []
-                for (var i in data.public_urls) {
-                  dockers.push({
-                    purl: data.public_urls[i].url,
-                    name: data.remote_servers[i].name,
-                    surl: data.remote_servers[i].url
-                  })
-                  list.push(temp.format(dockers[i]));
+                  heartbeatInterval = $interval(function () {
+                    heartbeat(data.expr_id)
+                  }, 300000, true);
+
+                } else if (data.status == 1) {
+                  stop = $interval(loopstart, 60000, true);
+                } else {
+                  showErrorMsg()
+                  $interval.cancel(stop);
                 }
-                $('.hackathon-nav').append(list.join(''))
-                bindTemp(data);
-                $('.hackathon-nav a.vm-box:eq(0)').trigger('click');
-                $interval.cancel(stop);
-                
-                heartbeatInterval = $interval(function(){
-                	heartbeat(data.expr_id)
-                }, 300000, true);
-                
-              } else if (data.status == 1) {
-                stop = $interval(loopstart, 60000, true);
-              } else {
-                showErrorMsg()
-                $interval.cancel(stop);
-              }
-            });
-          }
-          loopstart();
-          scope.$on('$destroy',
-            function (event) {
-              $interval.cancel(stop);
-              $interval.cancel(heartbeatInterval);
+              });
             }
-          );
+            loopstart();
+          }
+        });
+        scope.$on('$destroy', function (event) {
+          $interval.cancel(stop);
+          $interval.cancel(heartbeatInterval);
         });
       }
     }
@@ -223,7 +218,7 @@ angular.module('oh.directives', [])
       templateUrl: 'views/tpls/online-total.html',
       link: function (scope, element) {
         API.hackathon.list.get({
-          query: {name: $rootScope.config.name}
+          query: {name: config.name}
         }, function (data) {
           var getStat = function () {
             API.hackathon.stat.get({
@@ -245,70 +240,80 @@ angular.module('oh.directives', [])
       }
     }
   })
-  .directive('endCountdown', function ($rootScope, $interval, API) {
+  .directive('endCountdown', function ($interval, API) {
+    var timerTmpe = '{day}天{hour}小时{minute}分钟{second}秒';
+    var stop = null;
+
+    function show_time() {
+      var timing = {day: 0, hour: 0, minute: 0, second: 0, distance: 0};
+      this.time_server += 1000
+      timing.distance = this.time_end - this.time_server;
+      if (timing.distance > 0) {
+        timing.day = Math.floor(timing.distance / 86400000)
+        timing.distance -= timing.day * 86400000;
+        timing.hour = Math.floor(timing.distance / 3600000)
+        timing.distance -= timing.hour * 3600000;
+        timing.minute = Math.floor(timing.distance / 60000)
+        timing.distance -= timing.minute * 60000;
+        timing.second = Math.floor(timing.distance / 1000)
+        if (timing.day == 0) {
+          timing.day = null
+        }
+        if (timing.hour == 0 && timing.day == null) {
+          timing.hour = null
+        }
+        if (timing.minute == 0 && timing.hour == null) {
+          timing.minute = null
+        }
+        if (timing.second == 0 && timing.minute == null) {
+          timing.second = null
+        }
+        return timing;
+      } else {
+        return null;
+      }
+    }
+
     return {
       scope: {},
-      restrict: 'EA',
+      restrict: 'A',
       templateUrl: 'views/tpls/end-countdown.html',
-      link: function (scope, element, attr) {
-        function show_time() {
-          var timing = {day: 0, hour: 0, minute: 0, second: 0, distance: 0};
-          this.time_server += 1000
-          timing.distance = this.time_end - this.time_server;
-          if (timing.distance > 0) {
-            timing.day = Math.floor(timing.distance / 86400000)
-            timing.distance -= timing.day * 86400000;
-            timing.hour = Math.floor(timing.distance / 3600000)
-            timing.distance -= timing.hour * 3600000;
-            timing.minute = Math.floor(timing.distance / 60000)
-            timing.distance -= timing.minute * 60000;
-            timing.second = Math.floor(timing.distance / 1000)
-            if (timing.day == 0) {
-              timing.day = null
-            }
-            if (timing.hour == 0 && timing.day == null) {
-              timing.hour = null
-            }
-            if (timing.minute == 0 && timing.hour == null) {
-              timing.minute = null
-            }
-            if (timing.second == 0 && timing.minute == null) {
-              timing.second = null
-            }
-            return timing;
+      link: function (scope, elemten, attr) {
+        API.hackathon.get({header: {hackathon_name: config.name}}, function (data) {
+          if (data.error) {
+            $location.path('error');
           } else {
-            return null;
-          }
-        }
+            var countDown = {
+              time_server: new Date().getTime(),
+              time_end: data.event_end_time
+            }
 
-        var timerTmpe = '{day}天{hour}小时{minute}分钟{second}秒';
-        API.hackathon.list.get({
-          query: {name: $rootScope.config.name}
-        }, function (data) {
-          var countDown = {
-            time_server: new Date().getTime(),
-            time_end: data.end_time
-          }
-          var showCountDown = function () {
-            var timing = show_time.apply(countDown);
-            if (!timing) {
-              element.find('#timer').text('本次活动已结束，非常感谢您的参与。')
-              $interval.cancel(stop);
-            } else {
-              element.find('#end_timer').text(timerTmpe.format(timing))
+            function showCountDown(elemten, countDown) {
+              var timing = show_time.apply(countDown);
+              if (!timing) {
+                elemten.find('#timer').text('本次活动已结束，非常感谢您的参与。')
+                $interval.cancel(stop);
+              } else {
+                elemten.find('#end_timer').text(timerTmpe.format(timing))
+              }
             }
+
+            showCountDown(elemten, countDown);
+            stop = $interval(function () {
+              showCountDown(elemten, countDown);
+            }, 1000);
           }
-          showCountDown();
-          var stop = $interval(showCountDown, 1000);
-          scope.$on('$destroy', function (event) {
-              $interval.cancel(stop);
-            }
-          );
-        })
+        });
+
+        scope.$on('$destroy', function (event) {
+          $interval.cancel(stop);
+        });
+
       }
     }
   })
-  .directive('ohTooltip', function ($timeout) {
+  .
+  directive('ohTooltip', function ($timeout) {
     return {
       scope: {},
       restrict: 'EA',
