@@ -61,6 +61,7 @@ def upload_file_to_azure(file, filename):
 
 
 def upload_file(request):
+    log.debug("request to upload a file")
     # storage account info must be exist in config file
     if get_config("storage.account_name") is None or get_config("storage.account_key") is None:
         return internal_server_error("can not found storage account info in config file ")
@@ -80,7 +81,7 @@ def upload_file(request):
         for file_name in request.files:
             file = request.files.get(file_name)
             url = upload_file_to_azure(file, g.hackathon.name + "/" + file_name)
-            images["file_name"] = url
+            images[file_name] = url
 
         return images
 
