@@ -99,3 +99,6 @@ default['openhackathon']['uwsgi']['log_dir'] = '/var/log/uwsgi'
 # mirror
 default['openhackathon'][:npm][:enable_taobao_mirror] = true
 default['openhackathon'][:gem][:enable_taobao_mirror] = true
+
+#data bags secret path
+default['openhackathon'][:secret][:secretpath] = '/tmp/data_bag_key'

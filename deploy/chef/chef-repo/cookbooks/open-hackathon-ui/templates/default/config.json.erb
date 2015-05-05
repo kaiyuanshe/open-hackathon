@@ -6,7 +6,7 @@
     "github": {
       "access_token_url": "https://github.com/login/oauth/access_token",
       "client_id":"<%= node['openhackathon']['github']['client_id'] %>",
-      "client_secret":"<%= node['openhackathon']['github']['client_secret'] %>",
+      "client_secret":"<%= @github_client_secret %>",
       "redirect_uri":"http://%s/github",
       "code":""
     },
@@ -14,14 +14,14 @@
       "access_token_url": "https://graph.qq.com/oauth2.0/token",
       "grant_type":"authorization_code",
       "client_id":"<%= node['openhackathon']['qq']['client_id'] %>",
-      "client_secret":"<%= node['openhackathon']['qq']['client_secret'] %>",
+      "client_secret":"<%= @qq_client_secret %>",
       "redirect_uri":"http://%s/qq",
       "code":""
     },
     "gitcafe": {
       "access_token_url": "<%= node['openhackathon']['gitcafe']['api_domain'] %>/oauth/token",
       "client_id":"<%= node['openhackathon']['gitcafe']['client_id'] %>",
-      "client_secret":"<%= node['openhackathon']['gitcafe']['client_secret'] %>",
+      "client_secret":"<%= @gitcafe_client_secret %>",
       "redirect_uri":"http://%s/gitcafe",
       "grant_type":"authorization_code",
       "code":""
@@ -29,7 +29,7 @@
     "weibo":{
       "access_token_url": "https://api.weibo.com/oauth2/access_token",
       "client_id":"<%= node['openhackathon']['weibo']['client_id'] %>",
-      "client_secret":"<%= node['openhackathon']['weibo']['client_secret'] %>",
+      "client_secret":"<%= @weibo_client_secret %>",
       "grant_type":"authorization_code",
       "redirect_uri":"http://%s/weibo",
       "code":""

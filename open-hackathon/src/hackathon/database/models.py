@@ -192,6 +192,7 @@ class Hackathon(DBBase):
     display_name = Column(String(64))
     description = Column(Text)
     status = Column(Integer, default=0)  # 0-new 1-online 2-offline
+    creator_id = Column(Integer, default=-1)
 
     event_start_time = Column(DateTime)
     event_end_time = Column(DateTime)

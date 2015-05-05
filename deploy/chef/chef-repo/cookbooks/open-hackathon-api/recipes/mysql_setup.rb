@@ -24,6 +24,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
+api_secret = Chef::EncryptedDataBagItem.load_secret("#{node['openhackathon'][:secret][:secretpath]}")
+api_creds = Chef::EncryptedDataBagItem.load(node.chef_environment,"secret",api_secret)
+
 include_recipe "build-essential"
 
 package "ruby-dev"
@@ -52,10 +55,10 @@ gem_package 'mysql2' do
 end
 
 connection_info = {
-  host: '127.0.0.1',
+  host: node['openhackathon']['mysql']['host'],
   port: node['openhackathon']['mysql']['port'],
   username: 'root',
-  password: node['openhackathon']['mysql']['initial_root_password']
+  password: api_creds["mysql_ini_pwd"]
 }
 
 mysql_database node['openhackathon']['mysql']['db'] do
@@ -67,14 +70,14 @@ end
 mysql_database_user node['openhackathon']['mysql']['user'] do
   connection connection_info
   host node['openhackathon']['mysql']['user_host']
-  password node['openhackathon']['mysql']['password']
+  password api_creds["mysql_usr_pwd"]
   action :create
 end
 
 mysql_database_user node['openhackathon']['mysql']['user'] do
   connection connection_info
   database_name node['openhackathon']['mysql']['db']
-  password node['openhackathon']['mysql']['password']
+  password api_creds["mysql_usr_pwd"]
   host node['openhackathon']['mysql']['user_host']
   privileges [:all]
   action :grant

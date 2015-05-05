@@ -262,7 +262,7 @@ class UserExperimentListResource(Resource):
 
 
 class GuacamoleResource(Resource):
-    @token_required
+    # @token_required
     def get(self):
         return GuacamoleInfo().getConnectInfo()
 
