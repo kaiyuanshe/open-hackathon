@@ -55,7 +55,7 @@ public class OpenHackathonAuthenticationProvider extends SimpleAuthenticationPro
 
     public OpenHackathonAuthenticationProvider() {
         initConnection();
-        logger.debug("initialize OpenHackathonAuthenticationProvider");
+        logger.info("initialize OpenHackathonAuthenticationProvider");
     }
 
     @Override
@@ -63,12 +63,13 @@ public class OpenHackathonAuthenticationProvider extends SimpleAuthenticationPro
 
         initConnection();
 
+        Map<String, GuacamoleConfiguration> configs = new HashMap<String, GuacamoleConfiguration>();
+
         final GuacamoleConfiguration config = getGuacamoleConfiguration(credentials.getRequest());
         if (config == null) {
-            return null;
+            return configs;
         }
 
-        Map<String, GuacamoleConfiguration> configs = new HashMap<String, GuacamoleConfiguration>();
         configs.put(config.getParameter("name"), config);
         return configs;
     }
@@ -80,28 +81,32 @@ public class OpenHackathonAuthenticationProvider extends SimpleAuthenticationPro
         final GuacamoleConfiguration config = getGuacamoleConfiguration(request);
 
         if (config == null) {
-            return null;
+            return context;
         }
 
         final String name = config.getParameter("name");
-        logger.debug("Instance Type of ConnectionDirectory is: " + context.getRootConnectionGroup().getConnectionDirectory().getClass().getName());
-        final SimpleConnectionDirectory connections = (SimpleConnectionDirectory) context.getRootConnectionGroup().getConnectionDirectory();
-        logger.debug("get info from GuacamoleConfiguration name:" + name);
-        logger.debug("protocol select :" + config.getProtocol());
+        logger.info("Instance Type of ConnectionDirectory is: " + context.getConnectionDirectory().getClass().getName());
+        final SimpleConnectionDirectory connections = (SimpleConnectionDirectory) context.getConnectionDirectory();
+        logger.info("get info from GuacamoleConfiguration name:" + name);
+        logger.info("protocol select :" + config.getProtocol());
         final SimpleConnection connection = new SimpleConnection(name, name, config);
         connections.putConnection(connection);
         return context;
     }
 
     private GuacamoleConfiguration getGuacamoleConfiguration(final HttpServletRequest request) throws GuacamoleException {
-        final String tokenString = request.getParameter("token");
-        final String connectionName = request.getParameter("id").substring(2);
-        logger.debug("tokenString is : " + tokenString + ", connectionName is:" + connectionName);
+        final String tokenString = request.getParameter("oh");
+        final String connectionName = request.getParameter("name");
+        logger.info("open hackathon tokenString is : " + tokenString + ", connectionName is:" + connectionName);
+
+        if(tokenString == null || connectionName==null){
+            return null;
+        }
 
         final String jsonString = this.conn.getGuacamoleJSONString(connectionName, tokenString);
-        logger.debug("get guacamole config json String :" + jsonString);
+        logger.info("get guacamole config json String :" + jsonString);
         if (jsonString == null) {
-            logger.debug("get null jsonString from openHackathon platform");
+            logger.info("get null jsonString from openHackathon platform");
             return null;
         }
 

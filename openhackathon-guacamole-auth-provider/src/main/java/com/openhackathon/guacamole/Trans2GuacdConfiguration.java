@@ -47,6 +47,11 @@ public class Trans2GuacdConfiguration {
         try {
 
             final JSONObject json = new JSONObject(jsonString);
+            if(json.has("error")){
+                logger.info("error returned from open hackathon platform");
+                return null;
+            }
+
             final GuacamoleConfiguration configuration = new GuacamoleConfiguration();
             final Iterator<String> keys = json.keys();
             while(keys.hasNext()){

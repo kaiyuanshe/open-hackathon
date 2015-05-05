@@ -32,17 +32,18 @@ from os.path import realpath, dirname
 from hackathon.enum import VEProvider
 
 # test hackathon
-hackathon = Hackathon(name="open-xml-sdk", display_name="open hackathon", description="description",
-                      event_start_time=datetime.utcnow(), event_end_time=datetime.utcnow() + timedelta(days=365),
-                      registration_start_time=datetime.utcnow(),
-                      registration_end_time=datetime.utcnow() + timedelta(days=365),
-                      judge_start_time=datetime.utcnow(), judge_end_time=datetime.utcnow() + timedelta(days=365),
-                      basic_info=json.dumps({
-                          HACKATHON_BASIC_INFO.AUTO_APPROVE: 1,
-                          HACKATHON_BASIC_INFO.RECYCLE_ENABLED: 0
-                      }),
-                      status=1)
-if db_adapter.find_first_object_by(Hackathon, name=hackathon.name) is None:
+hackathon = db_adapter.find_first_object_by(Hackathon, name="open-xml-sdk")
+if hackathon is None:
+    hackathon = Hackathon(name="open-xml-sdk", display_name="open hackathon", description="description",
+                          event_start_time=datetime.utcnow(), event_end_time=datetime.utcnow() + timedelta(days=365),
+                          registration_start_time=datetime.utcnow(),
+                          registration_end_time=datetime.utcnow() + timedelta(days=365),
+                          judge_start_time=datetime.utcnow(), judge_end_time=datetime.utcnow() + timedelta(days=365),
+                          basic_info=json.dumps({
+                              HACKATHON_BASIC_INFO.AUTO_APPROVE: 1,
+                              HACKATHON_BASIC_INFO.RECYCLE_ENABLED: 0
+                          }),
+                          status=1)
     db_adapter.add_object(hackathon)
 
 # test docker host server

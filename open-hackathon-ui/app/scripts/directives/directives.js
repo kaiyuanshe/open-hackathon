@@ -69,7 +69,7 @@ angular.module('oh.directives', [])
               ifrem.removeClass('invisible');
             } else {
               ifrem = $('<iframe>').attr({
-                src: url + "&token=" + ($cookieStore.get('User') || '').token,
+                src: url + "&oh=" + ($cookieStore.get('User') || '').token,
                 id: name,
                 width: '100%',
                 height: '100%',
