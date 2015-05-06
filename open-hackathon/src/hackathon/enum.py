@@ -175,7 +175,7 @@ class ADMIN_ROLE_TYPE:
 class HACK_STATUS:
     INIT = 0
     ONLINE = 1
-    OFFLINE = 1
+    OFFLINE = 2
 
 class TEMPLATE_STATUS:
     ONLINE = 1

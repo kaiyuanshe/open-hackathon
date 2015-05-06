@@ -51,6 +51,7 @@ from hackathon.enum import (
     ALStatus,
     EStatus,
     ALOperation,
+    VEStatus,
 )
 from azure.servicemanagement import (
     ConfigurationSet,
@@ -95,6 +96,14 @@ MDL_CLS_FUNC = [
     [MDL_BASE + 'virtualMachine', 'VirtualMachine', 'create_virtual_machine_async_false_3'],
     [MDL_BASE + 'service', 'Service', 'query_deployment_status'],
     [MDL_BASE + 'virtualMachine', 'VirtualMachine', 'create_virtual_machine_dm_true'],
+    [MDL_BASE + 'virtualMachine', 'VirtualMachine', 'stop_virtual_machine'],
+    [MDL_BASE + 'virtualMachine', 'VirtualMachine', 'stop_virtual_machine_async_true'],
+    [MDL_BASE + 'virtualMachine', 'VirtualMachine', 'stop_virtual_machine_async_false'],
+    [MDL_BASE + 'virtualMachine', 'VirtualMachine', 'stop_virtual_machine_vm_true'],
+    [MDL_BASE + 'virtualMachine', 'VirtualMachine', 'start_virtual_machine'],
+    [MDL_BASE + 'virtualMachine', 'VirtualMachine', 'start_virtual_machine_async_true'],
+    [MDL_BASE + 'virtualMachine', 'VirtualMachine', 'start_virtual_machine_async_false'],
+    [MDL_BASE + 'virtualMachine', 'VirtualMachine', 'start_virtual_machine_vm_true'],
 ]
 DEFAULT_TICK = 3
 
@@ -110,8 +119,11 @@ def commit_azure_log(experiment_id, operation, status, note=None, code=None):
     db_adapter.commit()
     if status == ALStatus.FAIL:
         update_experiment_status(experiment_id, EStatus.Failed)
-    elif status == ALStatus.END and operation == ALOperation.CREATE_VIRTUAL_MACHINE:
-        check_experiment_done(experiment_id)
+    elif status == ALStatus.END:
+        need_status = EStatus.Running
+        if operation == ALOperation.STOP_VIRTUAL_MACHINE:
+            need_status = EStatus.Stopped
+        check_experiment_done(experiment_id, need_status)
 
 
 # --------------------------------------------- azure storage account ---------------------------------------------#
@@ -234,8 +246,13 @@ def update_azure_virtual_machine_status(cloud_service_name, deployment_name, vir
     return vm
 
 
-def update_virtual_environment_private_ip(virtual_machine, private_ip):
+def update_azure_virtual_machine_private_ip(virtual_machine, private_ip):
     virtual_machine.private_ip = private_ip
+    db_adapter.commit()
+
+
+def update_azure_virtual_machine_public_ip(virtual_machine, public_ip):
+    virtual_machine.public_ip = public_ip
     db_adapter.commit()
 
 
@@ -285,6 +302,12 @@ def commit_virtual_environment(provider, name, image, status, remote_provider, r
 def update_virtual_environment_status(virtual_machine, status):
     ve = virtual_machine.virtual_environment
     ve.status = status
+    db_adapter.commit()
+
+
+def update_virtual_environment_remote_paras(virtual_machine, remote_paras):
+    ve = virtual_machine.virtual_environment
+    ve.remote_paras = remote_paras
     db_adapter.commit()
 
 
@@ -367,7 +390,12 @@ def update_experiment_status(experiment_id, status):
     db_adapter.commit()
 
 
-def check_experiment_done(experiment_id):
+def check_experiment_done(experiment_id, need_status):
     e = db_adapter.get_object(Experiment, experiment_id)
-    if db_adapter.count_by(VirtualEnvironment, experiment_id=experiment_id) == e.template.virtual_environment_count:
-        update_experiment_status(experiment_id, EStatus.Running)
+    need_ve_status = VEStatus.Running
+    if need_status == EStatus.Stopped:
+        need_ve_status = VEStatus.Stopped
+    if db_adapter.count_by(VirtualEnvironment,
+                           experiment_id=experiment_id,
+                           status=need_ve_status) == e.template.virtual_environment_count:
+        update_experiment_status(experiment_id, need_status)

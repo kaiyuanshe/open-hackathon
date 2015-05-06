@@ -32,7 +32,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from db_adapters import SQLAlchemyAdapter
-from hackathon.functions import safe_get_config
+from app.functions import safe_get_config
 
 MYSQL_CONNECTION = 'mysql.connection'
 DEFAULT_URL = 'mysql://root:root@localhost/hackathon'

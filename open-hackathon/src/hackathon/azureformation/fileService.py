@@ -32,32 +32,38 @@ import imghdr
 from azure.storage import BlobService
 from flask import g
 from hackathon.hackathon_response import *
-from hackathon.functions import get_config, safe_get_config
+from hackathon.functions import get_config
 
 blob_service = BlobService(account_name=get_config("storage.account_name"),
                            account_key=get_config("storage.account_key"),
-                           host_base='.blob.core.chinacloudapi.cn')
-container_name = safe_get_config("storage.container_name", "filestorage")
+                           host_base=get_config("storage.blob_service_host_base"))
+default_container_name = get_config("storage.container_name")
 
 
-def create_container_in_storage():
-    # create a container if doesn't exist
+def create_container_in_storage(container_name, access):
+    """
+    create a container if doesn't exist
+    :param container_name:
+    :param access:
+    :return:
+    """
     try:
         names = map(lambda x: x.name, blob_service.list_containers())
         if container_name not in names:
-            blob_service.create_container(container_name)
+            blob_service.create_container(container_name, x_ms_blob_public_access=access)
         else:
             log.debug("container already exsit in storage")
-    except Exception:
-        raise
+    except Exception as e:
+        log.error(e)
 
 
-def upload_file_to_azure(file, filename):
+def upload_file_to_azure(file, container_name, blob_name):
     try:
-        blob_service.put_block_blob_from_file(container_name, filename, file)
-        return blob_service.make_blob_url(container_name, filename)
-    except Exception:
-        raise
+        blob_service.put_block_blob_from_file(container_name, blob_name, file)
+        return blob_service.make_blob_url(container_name, blob_name)
+    except Exception as e:
+        log.error(e)
+        return None
 
 
 def upload_file(request):
@@ -76,11 +82,11 @@ def upload_file(request):
             if imghdr.what(request.files.get(file_name)) is None:
                 return bad_request("only images can be uploaded")
 
-        create_container_in_storage()
+        create_container_in_storage(default_container_name, 'container')
         images = {}
         for file_name in request.files:
             file = request.files.get(file_name)
-            url = upload_file_to_azure(file, g.hackathon.name + "/" + file_name)
+            url = upload_file_to_azure(file, default_container_name, g.hackathon.name + "/" + file_name)
             images[file_name] = url
 
         return images
@@ -90,3 +96,11 @@ def upload_file(request):
         log.error("upload file raised an exception")
         return internal_server_error("upload file raised an exception")
 
+
+def upload_file_to_azure_from_path(path, container_name, blob_name):
+    try:
+        blob_service.put_block_blob_from_path(container_name, blob_name, path)
+        return blob_service.make_blob_url(container_name, blob_name)
+    except Exception as e:
+        log.error(e)
+        return None
