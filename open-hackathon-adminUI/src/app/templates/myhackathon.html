@@ -20,7 +20,7 @@
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody data-toggle="bindtemp" data-target="#hackathon_template" data-api="oh.api.admin.hackathons.get">
+                <tbody data-toggle="bindtemp" data-target="#hackathon_template" data-api="oh.api.admin.hackathon.list.get">
                 </tbody>
             </table>
         </div>
@@ -32,8 +32,8 @@
 <td>${name}</td>
 <td>${sponsor}</td>
 <td>${check_register}</td>
-<td>${oh.comm.DateFormat(start_time ,'yyyy-MM-dd HH:mm')}</td>
-<td>${oh.comm.DateFormat(end_time , 'yyyy-MM-dd HH:mm')}</td>
+<td>${oh.comm.DateFormat(event_start_time ,'yyyy-MM-dd HH:mm')}</td>
+<td>${oh.comm.DateFormat(event_end_time , 'yyyy-MM-dd HH:mm')}</td>
 <td>${status}</td>
 <td class="col-action">
 

@@ -24,7 +24,7 @@ THE SOFTWARE.
 """
 
 import hashlib
-from hackathon import app
+#from hackathon import app
 
 
 def encode(plaintext):
