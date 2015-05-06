@@ -41,8 +41,11 @@ import time
 from hackathon.registration.register_mgr import register_manager
 from hackathon.template.template_mgr import template_manager
 from hackathon_response import *
-from hackathon.azureformation.fileService import upload_file_to_azure
-from hackathon.enum import EStatus, RGStatus
+from hackathon.azureformation.azureManagement import (
+    azure_management,
+)
+from hackathon.azureformation.fileService import upload_file
+from hackathon.enum import RGStatus
 
 
 @app.teardown_appcontext
@@ -203,17 +206,15 @@ class HackathonResource(Resource):
     def get(self):
         return g.hackathon.dic()
 
+    @token_required
     def post(self):
         args = request.get_json()
-        return hack_manager.create_or_update_hackathon(args).dic()
+        return hack_manager.create_or_update_hackathon(args)
 
     @admin_privilege_required
     def put(self):
         args = request.get_json()
-        return hack_manager.create_or_update_hackathon(args).dic()
-
-    def put(self):
-        pass
+        return hack_manager.create_or_update_hackathon(args)
 
     def delete(self):
         pass
@@ -304,16 +305,45 @@ class AdminHackathonListResource(Resource):
         return map(lambda u: u.dic(), hackathon_list)
 
 
-class FileResource(Resource):
+class AdminAzureResource(Resource):
+    @hackathon_name_required
+    def get(self):
+        certificates = azure_management.get_certificates(g.hackathon.name)
+        if certificates is None:
+            return {'error': 'no certificates'}, 404
+        return certificates, 200
+
+    @hackathon_name_required
     def post(self):
+        args = request.get_json()
+        if 'subscription_id' not in args or 'management_host' not in args:
+            return {'error': 'invalid parameter'}, 400
+        subscription_id = args['subscription_id']
+        management_host = args['management_host']
         try:
-            file = request.files.get()
-            upload_file_to_azure(file, 'test/hello')
-            return ok("upload file successed")
-        except Exception as ex:
-            log.error(ex)
-            log.error("upload file raised an exception")
-            return internal_server_error("upload file raised an exception")
+            cert_url = azure_management.create_certificate(subscription_id, management_host, g.hackathon.name)
+            return {'cert_url': cert_url}, 200
+        except Exception as err:
+            log.error(err)
+            return {'error': 'fail to create certificate due to [%s]' % err}, 500
+
+    @hackathon_name_required
+    def delete(self):
+        args = request.get_json()
+        if 'certificate_id' not in args:
+            return {'error': 'invalid parameter'}, 400
+        certificate_id = args['certificate_id']
+        if azure_management.delete_certificate(certificate_id, g.hackathon.name):
+            return {'message': 'certificate deleted'}, 200
+        else:
+            return {'error': 'fail to delete certificate'}, 500
+
+
+class FileResource(Resource):
+    @admin_privilege_required
+    def post(self):
+        return upload_file(request)
+
 
 
 """
@@ -372,6 +402,11 @@ api.add_resource(ExperimentRecycleResource, "/api/default/recycle")
 system time api
 """
 api.add_resource(CurrentTimeResource, "/api/currenttime")
+
+"""
+azure certificate api
+"""
+api.add_resource(AdminAzureResource, '/api/admin/azure')
 
 """
 files api
