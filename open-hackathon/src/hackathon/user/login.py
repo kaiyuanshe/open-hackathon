@@ -82,7 +82,7 @@ class QQLogin(LoginProviderBase):
         email_info = [
             {'name': user_info["nickname"], 'email': None, 'id': id, 'verified': 1, 'primary': 1,
              'nickname': user_info["nickname"], 'avatar_url': user_info["figureurl"]}]
-        user_with_token = self.um.db_login(openid,
+        user_with_token = self.um.oauth_db_login(openid,
                                            name=user_info["nickname"],
                                            nickname=user_info["nickname"],
                                            access_token=access_token,
@@ -139,7 +139,7 @@ class GithubLogin(LoginProviderBase):
         # email_info include all user email provided by github
         # email is user's primary email
         email_info = json.loads(email_info_resp)
-        user_with_token = self.um.db_login(openid,
+        user_with_token = self.um.oauth_db_login(openid,
                                            name=name,
                                            nickname=nickname,
                                            access_token=access_token,
@@ -178,7 +178,7 @@ class GitcafeLogin(LoginProviderBase):
         email_info = [
             {'name': name, 'email': email, 'id': id, 'verified': 1, 'primary': 1, 'nickname': nickname,
              'avatar_url': avatar_url}]
-        user_with_token = self.um.db_login(id,
+        user_with_token = self.um.oauth_db_login(id,
                                            name=name,
                                            nickname=nickname,
                                            access_token=token,
@@ -230,7 +230,7 @@ class WeiboLogin(LoginProviderBase):
             log.debug("fail to get user email from weibo")
             log.error(e)
 
-        user_with_token = self.um.db_login(openid,
+        user_with_token = self.um.oauth_db_login(openid,
                                            name=name,
                                            nickname=nickname,
                                            access_token=access_token,
