@@ -2,19 +2,19 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
-#  
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#  
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-#  
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -36,23 +36,12 @@ from app.functions import get_remote, get_config, post_to_remote, convert
 from app.log import log
 import json
 from admin_mgr import admin_manager
-from flask import session
+from flask import session, request
 from flask_login import logout_user
+from app.constants import LOGIN_PROVIDER
 
 
 class LoginBase():
-    def login2db(self, openid, **kwargs):
-        try:
-            admin_with_token = admin_manager.db_login(openid, **kwargs)
-            # login flask
-            log.info("login successfully:" + repr(admin_with_token["admin"]))
-            session["token"] = admin_with_token["token"].token
-            return admin_with_token
-        except Exception as e:
-            log.error("login failed")
-            log.error(e)
-            raise
-
     def logout(self, admin):
         session.pop("token")
         logout_user()
@@ -94,12 +83,12 @@ class QQLogin(LoginBase):
             {'name': user_info["nickname"], 'email': None, 'id': id, 'verified': 1, 'primary': 1,
              'nickname': user_info["nickname"], 'avatar_url': user_info["figureurl"]}]
 
-        return self.login2db(openid,
-                             name=user_info["nickname"],
-                             nickname=user_info["nickname"],
-                             access_token=access_token,
-                             email_info=email_info,
-                             avatar_url=user_info["figureurl"])
+        return admin_manager.oauth_db_login(openid,
+                                            name=user_info["nickname"],
+                                            nickname=user_info["nickname"],
+                                            access_token=access_token,
+                                            email_info=email_info,
+                                            avatar_url=user_info["figureurl"])
 
 
 class GithubLogin(LoginBase):
@@ -153,11 +142,11 @@ class GithubLogin(LoginBase):
         # email is user's primary email
         email_info = json.loads(email_info_resp)
 
-        return self.login2db(openid, name=name,
-                             nickname=nickname,
-                             access_token=access_token,
-                             email_info=email_info,
-                             avatar_url=avatar)
+        return admin_manager.oauth_db_login(openid, name=name,
+                                            nickname=nickname,
+                                            access_token=access_token,
+                                            email_info=email_info,
+                                            avatar_url=avatar)
 
 
 class GitcafeLogin(LoginBase):
@@ -197,12 +186,12 @@ class GitcafeLogin(LoginBase):
             {'name': name, 'email': email, 'id': id, 'verified': 1, 'primary': 1, 'nickname': nickname,
              'avatar_url': avatar_url}]
 
-        return self.login2db(id,
-                             name=name,
-                             nickname=nickname,
-                             access_token=token,
-                             email_info=email_info,
-                             avatar_url=avatar_url)
+        return admin_manager.oauth_db_login(id,
+                                            name=name,
+                                            nickname=nickname,
+                                            access_token=token,
+                                            email_info=email_info,
+                                            avatar_url=avatar_url)
 
 
 class WeiboLogin(LoginBase):
@@ -251,16 +240,28 @@ class WeiboLogin(LoginBase):
             {'name': name, 'email': email, 'id': id, 'verified': 1, 'primary': 1, 'nickname': nickname,
              'avatar_url': avatar}]
 
-        return self.login2db(openid, name=name,
-                             nickname=nickname,
-                             access_token=access_token,
-                             email_info=email_info,
-                             avatar_url=avatar)
+        return admin_manager.oauth_db_login(openid, name=name,
+                                            nickname=nickname,
+                                            access_token=access_token,
+                                            email_info=email_info,
+                                            avatar_url=avatar)
+
+
+class MySQLLogin(LoginBase):
+    def login(self, args):
+        user = request.form['username']
+        pwd = request.form['password']
+        if user is None or pwd is None:
+            log.warn("login without user or pwd")
+            return None
+
+        return admin_manager.mysql_login(user, pwd)
 
 
 login_providers = {
-    "github": GithubLogin(),
-    "weibo": WeiboLogin(),
-    "qq": QQLogin(),
-    "gitcafe": GitcafeLogin()
+    LOGIN_PROVIDER.GITHUB: GithubLogin(),
+    LOGIN_PROVIDER.WEIBO: WeiboLogin(),
+    LOGIN_PROVIDER.QQ: QQLogin(),
+    LOGIN_PROVIDER.GITCAFE: GitcafeLogin(),
+    LOGIN_PROVIDER.MYSQL: MySQLLogin()
 }

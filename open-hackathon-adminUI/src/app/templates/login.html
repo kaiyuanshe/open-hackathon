@@ -1,14 +1,14 @@
-{% extends "base.html" %} 
+{% extends "base.html" %}
 {% block meta %}
 <!-- Metas -->
-{% endblock %} 
+{% endblock %}
 {% block style %}
 <!-- Styles-->
-<link rel="stylesheet" href="/static/css/index.css"> 
+<link rel="stylesheet" href="/static/css/index.css">
 {% endblock %}
- {% block head %}
+{% block head %}
 <!-- Head -->
-{% endblock %} 
+{% endblock %}
 {% block script %}
 <!-- Scripts -->
 <script type="text/javascript" src="/config.js"></script>
@@ -20,49 +20,71 @@
     <div class="main-wrapper">
         <div class="w-container">
             <div class="p-center" style="font-size:63px;padding-bottom: 10px;">
-                <img class="logo64" src="/static/pic/icon64.png" />
+                <img class="logo64" src="/static/pic/icon64.png"/>
                 开放黑客松管理平台
             </div>
-            <div class="upper-home-area group">
+            <div>
                 <div class="home-news-area-wrapper">
                     <ul class="home-news-area group rslides rslides1" id="newsSlider" style="max-width: 1280px;">
                         <li id="rslides1_s0" class="rslides1_on">
                             <h3>活动主办方</h3>
-                            <img width="770" height="300" src="/static/pic/LOGO.png" class="attachment-slider-thumb wp-post-image" alt="kaiyaunshe-carousel">
+                            <img width="770" height="300" src="/static/pic/LOGO.png"
+                                 class="attachment-slider-thumb wp-post-image" alt="kaiyaunshe-carousel">
                         </li>
                         <li id="rslides1_s1" class="">
                             <h3>Open Hackathon</h3>
-                            <img width="768" height="300" src="/static/pic/huodongxing.png" class="attachment-slider-thumb wp-post-image" alt="MSOpenTechChina">
+                            <img width="768" height="300" src="/static/pic/huodongxing.png"
+                                 class="attachment-slider-thumb wp-post-image" alt="MSOpenTechChina">
                         </li>
                         <li id="rslides1_s2" class="">
                             <h3>Jstorm Platfrom</h3>
-                            <img width="768" height="300" src="/static/pic/JstormPlatfrom.jpg" class="attachment-slider-thumb wp-post-image" alt="VMDepot News Image">
+                            <img width="768" height="300" src="/static/pic/JstormPlatfrom.jpg"
+                                 class="attachment-slider-thumb wp-post-image" alt="VMDepot News Image">
                         </li>
                         <li id="rslides1_s3" class="">
                             <h3>Open Hackathon Platfrom Architecture</h3>
-                            <img width="768" height="300" src="/static/pic/HackathonPlatfrom.jpg" class="attachment-slider-thumb wp-post-image" alt="openJDK news">
+                            <img width="768" height="300" src="/static/pic/HackathonPlatfrom.jpg"
+                                 class="attachment-slider-thumb wp-post-image" alt="openJDK news">
                         </li>
                     </ul>
                 </div>
+            </div>
+            <div class="btn-group-vertical p-center">
+                <form method="post" name="login" action="login">
+                    <p><input type="text" name="username"/>
+                    </p>
+
+                    <p><input type="password" name="password"/>
+                    </p>
+
+                    <p>
+                        {% if error %}
+                        <span style="color: red;">[{{error}}]</span>
+                        {% endif %}
+                    </p>
+
+                    <p><input type=submit value="Login"/></p>
+
+                </form>
             </div>
             <div class="btn-group-vertical p-center">
                 <span>
                         <a class="btn btn-warning btn-lg" role="button" id="githublogin">
                             <img src="/static/pic/github.png" height="25" width="25" style="float:left"/><span
                                 class="ds-service-link">github</span>
-                </a>
+                        </a>
                 </span>
                 <span>
                         <a class="btn btn-warning btn-lg" role="button" id="qqlogin">
                             <img src="/static/pic/github.png" height="25" width="25" style="float:left"/><span
                                 class="ds-service-link">QQ</span>
-                </a>
+                        </a>
                 </span>
                 <span>
                         <a class="btn btn-warning btn-lg" role="button" id="weibologin">
                             <img src="/static/pic/weibo.login.png" height="25" width="25" style="float:left"/><span
                                 class="ds-service-link">Weibo</span>
-                </a>
+                        </a>
                 </span>
             </div>
             <span class="p-center">

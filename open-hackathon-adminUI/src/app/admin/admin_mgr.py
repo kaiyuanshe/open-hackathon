@@ -36,6 +36,7 @@ from app.enum import EmailStatus
 from app.functions import safe_get_config
 from flask import request, g
 import uuid
+from app.md5 import encode
 
 
 class AdminManager(object):
@@ -68,7 +69,20 @@ class AdminManager(object):
             log.error(e)
             return "log out failed"
 
-    def db_login(self, openid, **kwargs):
+    def mysql_login(self, user, pwd):
+        enc_pwd = encode(pwd)
+        admin = self.db.find_first_object_by(User, name=user, password=enc_pwd)
+        if admin is None:
+            log.warn("invalid user/pwd login: user=%s, encoded pwd=%s" % (user, enc_pwd))
+            return None
+
+        token = self.__generate_api_token(admin)
+        return {
+            "token": token,
+            "admin": admin
+        }
+
+    def oauth_db_login(self, openid, **kwargs):
         # update db
         email_info = kwargs['email_info']
         admin = self.db.find_first_object_by(User, openid=openid)
