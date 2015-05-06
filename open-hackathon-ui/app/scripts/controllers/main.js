@@ -1,18 +1,18 @@
 // -----------------------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-//  
+//
 // The MIT License (MIT)
-//  
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-//  
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-//  
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -50,23 +50,23 @@ s.controller('main.controller', function ($scope) {
   }
 
   $scope.githublogin = function () {
-    var url =$scope.config.social.github +
-      $.param($scope.config.sociallogin.github);
+    var url = config.social.github +
+      $.param(config.sociallogin.github);
     openWindow(url);
   };
   $scope.qqlogin = function () {
-    var url = $scope.config.social.qq +
-      $.param($scope.config.sociallogin.qq);
+    var url = config.social.qq +
+      $.param(config.sociallogin.qq);
     openWindow(url);
   };
   $scope.gitcafelogin = function () {
-    var url = $scope.config.social.gitcafe+
-      $.param($scope.config.sociallogin.gitcafe);
+    var url = config.social.gitcafe +
+      $.param(config.sociallogin.gitcafe);
     openWindow(url, 980);
   };
   $scope.weibologin = function () {
-    var url = $scope.config.social.weibo +
-      $.param($scope.config.sociallogin.weibo);
+    var url = config.social.weibo +
+      $.param(config.sociallogin.weibo);
     openWindow(url);
   }
 });
