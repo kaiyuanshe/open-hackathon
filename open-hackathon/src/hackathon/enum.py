@@ -2,19 +2,19 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
-#  
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#  
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-#  
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -64,8 +64,8 @@ class VEProvider:
     """
     For provider in db model VirtualEnvironment
     """
-    AzureVM = 0
-    Docker = 1
+    Docker = 0
+    AzureVM = 1
 
 
 class VERemoteProvider:
@@ -83,15 +83,18 @@ class EmailStatus:
 class ReservedUser:
     DefaultUserID = -1
     DockerVM = -2
+    DefaultSuperAdmin = 1
 
 
 class AdminUserHackathonRelStates:
     Actived = 1
     Disabled = 0
-    
+
+
 class RecycleStatus:
     Enabled = 1
     Disabled = 0
+
 
 # ------------------------------ Enums are introduced by azure formation ------------------------------
 
@@ -150,6 +153,7 @@ class AVMStatus:
     STOPPED = 'Stopped'  # STOPPED is only used for 'type' input parameter of stop_virtual_machine in VirtualMachine
     STOPPED_DEALLOCATED = 'StoppedDeallocated'
 
+
 class RGStatus:
     """
     For status in DB model Register for registration audit status
@@ -157,3 +161,18 @@ class RGStatus:
     UNAUDIT = 0
     AUDIT_PASSED = 1
     AUDIT_REFUSE = 2
+    AUTO_PASSED = 3
+
+
+class ADMIN_ROLE_TYPE:
+    """
+    admin role types
+    """
+    ADMIN = 1
+    JUDGE = 2
+
+
+class HACK_STATUS:
+    INIT = 0
+    ONLINE = 1
+    OFFLINE = 1

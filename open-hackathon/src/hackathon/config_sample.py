@@ -79,7 +79,7 @@ Config = {
         "docker": 1
     },
     "recycle":{
-        "idle_time": 5,
-        "recycle_interval": 24
+        "idle_hours": 24,
+        "check_idle_interval_minutes": 5
     }
 }

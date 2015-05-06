@@ -40,40 +40,44 @@
 angular.module('oh.controllers')
   .controller('settings.controller', function ($scope, $cookieStore, $state, API) {
     $scope.type = {name: ''};
-    var User = $cookieStore.get('User') || '';
-    if (!User) {
-      $state.go('index');
-    } else if ((User.status & 8) == 8) {
-      $state.go('index.register');
-    } else if ((User.status & 128) == 128) {
-      if ((User.status & 1) != 1) {
-        $state.go('index.register');
-      } else if (User.experiments.length > 0) {
-        $state.go('index.hackathon');
-      }
-    }
-    API.template.list.get({query: {hackathon_name: $scope.config.name}}, function (data) {
-      var _temp = data;
-      API.register.get({query: {hid: data.id, uid: User.id}}, function (data) {
-        User.check_status = data.status || 0;
-        $cookieStore.put('User', User);
-        if (User.check_register != 1) {
-          $state.go('index.register');
-        } else {
-          $scope.templates = _temp;
-          if (data.length > 0) {
-            $scope.type.name = _temp[0].name
-          }
-        }
-      });
-    });
 
-    $scope.submit = function () {
-      API.user.experiment.post({
-        body: {cid: $scope.type, hackathon: $scope.config.name}
-      }, function (data) {
-        $state.go('index.hackathon');
-      });
-    }
+    API.user.hackathon.get({header:{hackathon_name :config.name}},function(data){
+      console.log(data);
+    });
+    // var User = $cookieStore.get('User') || '';
+    // if (!User) {
+    //   $state.go('index');
+    // } else if ((User.status & 8) == 8) {
+    //   $state.go('index.register');
+    // } else if ((User.status & 128) == 128) {
+    //   if ((User.status & 1) != 1) {
+    //     $state.go('index.register');
+    //   } else if (User.experiments.length > 0) {
+    //     $state.go('index.hackathon');
+    //   }
+    // }
+    // API.template.list.get({query: {hackathon_name: $scope.config.name}}, function (data) {
+    //   var _temp = data;
+    //   API.register.get({query: {hid: data.id, uid: User.id}}, function (data) {
+    //     User.check_status = data.status || 0;
+    //     $cookieStore.put('User', User);
+    //     if (User.check_register != 1) {
+    //       $state.go('index.register');
+    //     } else {
+    //       $scope.templates = _temp;
+    //       if (data.length > 0) {
+    //         $scope.type.name = _temp[0].name
+    //       }
+    //     }
+    //   });
+    // });
+
+    // $scope.submit = function () {
+    //   API.user.experiment.post({
+    //     body: {cid: $scope.type, hackathon: $scope.config.name}
+    //   }, function (data) {
+    //     $state.go('index.hackathon');
+    //   });
+    // }
 
   });

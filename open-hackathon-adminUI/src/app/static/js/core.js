@@ -211,14 +211,14 @@
         //                      </li>')
         var hackathon_modal = $('#switc_hackathon_modal').on('show.bs.modal', function(e) {
             var ul = hackathon_modal.find('.modal-body ul').empty();
-            oh.api.admin.hackathons.get(function(data) {
-                ul.append($.tmpl('switc_hackathons_temp', data, {
-                    isAction: function(id, hid) {
-                        return id == hid
-                    },
-                    hid: JSON.parse(localStorage.hackathon || '{"id":"0"}').id
-                }));
-            });
+//            oh.api.admin.hackathons.get(function(data) {
+//                ul.append($.tmpl('switc_hackathons_temp', data, {
+//                    isAction: function(id, hid) {
+//                        return id == hid
+//                    },
+//                    hid: JSON.parse(localStorage.hackathon || '{"id":"0"}').id
+//                }));
+//            });
         }).on('hide.bs.modal', function(e) {
             if (!localStorage.hackathon) {
                 return false;

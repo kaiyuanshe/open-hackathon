@@ -14,7 +14,7 @@
 #
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-#  
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -34,7 +34,6 @@ from flask import (
 from hackathon.enum import (
     VEStatus,
     VERemoteProvider,
-    EStatus,
 )
 from hackathon.log import (
     log,
@@ -44,21 +43,28 @@ from hackathon.database import (
 )
 from hackathon.database.models import (
     VirtualEnvironment,
-    Experiment,
 )
 import json
+from hackathon.hackathon_response import *
 
 
 class GuacamoleInfo():
     def getConnectInfo(self):
-        connection_name = request.args.get("id")
-        experiment = db_adapter.find_first_object_by(Experiment,
-                                                     status=EStatus.Running,
-                                                     user=g.user)
+        connection_name = request.args.get("name")
         guacamole_config = db_adapter.find_first_object_by(VirtualEnvironment,
                                                            name=connection_name,
                                                            status=VEStatus.Running,
-                                                           remote_provider=VERemoteProvider.Guacamole,
-                                                           experiment=experiment)
+                                                           remote_provider=VERemoteProvider.Guacamole)
+        if guacamole_config is None:
+            return not_found("not_found")
+
+        if guacamole_config.experiment.user_id != g.user.id:
+            return access_denied("forbidden")
+
         log.debug("get guacamole config by id: %s, paras: %s" % (connection_name, guacamole_config.remote_paras))
         return json.loads(guacamole_config.remote_paras)
+        # return {
+        # "displayname": "ubuntu", "hostname": "139.217.133.53",
+        #     "name": "174-ubuntu", "password": "acowoman",
+        #     "port": 10026, "protocol": "ssh", "username": "root"
+        # }

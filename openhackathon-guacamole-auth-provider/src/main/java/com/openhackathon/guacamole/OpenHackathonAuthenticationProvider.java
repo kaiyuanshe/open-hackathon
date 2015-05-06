@@ -62,9 +62,9 @@ public class OpenHackathonAuthenticationProvider extends SimpleAuthenticationPro
     public Map<String, GuacamoleConfiguration> getAuthorizedConfigurations(final Credentials credentials) throws GuacamoleException {
 
         initConnection();
-        
+
         Map<String, GuacamoleConfiguration> configs = new HashMap<String, GuacamoleConfiguration>();
-        
+
         final GuacamoleConfiguration config = getGuacamoleConfiguration(credentials.getRequest());
         if (config == null) {
             return configs;
@@ -95,16 +95,15 @@ public class OpenHackathonAuthenticationProvider extends SimpleAuthenticationPro
     }
 
     private GuacamoleConfiguration getGuacamoleConfiguration(final HttpServletRequest request) throws GuacamoleException {
-        logger.info("========================================test==========================test===================");
-    	final String tokenString = request.getParameter("token");
-    	
 
-        while (enumString.hasMoreElements()){
-        	logger.info("header :" + request.getHeader(enumString.nextElement()));
+        final String tokenString = request.getParameter("oh");
+        final String connectionName = request.getParameter("name");
+        logger.info("open hackathon tokenString is : " + tokenString + ", connectionName is:" + connectionName);
+
+        if(tokenString == null || connectionName==null){
+            return null;
         }
-        
-        final String connectionName = request.getParameter("id");
-        logger.info("tokenString is : " + tokenString + ", connectionName is:" + connectionName);
+
 
         final String jsonString = this.conn.getGuacamoleJSONString(connectionName, tokenString);
         logger.info("get guacamole config json String :" + jsonString);

@@ -11,10 +11,10 @@
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#  
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-#  
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -28,13 +28,11 @@ import sys
 
 sys.path.append("..")
 from hackathon.database.models import *
-from hackathon.log import log
 from hackathon.database import db_adapter
 from datetime import datetime, timedelta
 from hackathon.constants import HTTP_HEADER
-from hackathon.enum import EStatus, EmailStatus
 from hackathon.functions import safe_get_config
-from hackathon.hack import hack_manager
+from hackathon.hackathon_response import *
 from flask import request, g
 import uuid
 
@@ -58,12 +56,27 @@ class UserManager(object):
             return t.user
         return None
 
-    def __get_user_primary_email(self, user):
-        e = user.emails.filter_by(primary_email=EmailStatus.Primary).first()
-        return e.email if e is not None else ""
+    def __create_or_update_email(self, user, email_info):
+        email = email_info['email']
+        primary_email = email_info['primary']
+        verified = email_info['verified']
+        existed = self.db.find_first_object_by(UserEmail, email=email)
+        if existed is None:
+            user_email = UserEmail(name=user.name,
+                                   email=email,
+                                   primary_email=primary_email,
+                                   verified=verified,
+                                   user=user)
+            self.db.add_object(user_email)
+        else:
+            existed.primary_email = primary_email
+            existed.verified = verified
+            existed.name = user.name
+            self.db.commit()
+
 
     def get_all_registration(self):
-        reg_list = self.db.find_all_objects_by(Register, enabled=1)
+        reg_list = self.db.find_all_objects_by(UserHackathonRel, enabled=1)
 
         def online(r):
             u = self.db.find_first_object_by(UserEmail, email=r.email)
@@ -96,14 +109,7 @@ class UserManager(object):
                                   avatar_url=kwargs["avatar_url"],
                                   last_login_time=datetime.utcnow(),
                                   online=1)
-            for n in range(0, len(email_info)):
-                email = email_info[n]['email']
-                primary_email = email_info[n]['primary']
-                verified = email_info[n]['verified']
-                if self.db.find_first_object_by(UserEmail, email=email) is None:
-                    user_email = UserEmail(name=kwargs['name'], email=email, primary_email=primary_email,
-                                          verified=verified, user=user)
-                    self.db.add_object(user_email)
+            map(lambda x: self.__create_or_update_email(user, x), email_info)
         else:
             user = User(openid=openid,
                         name=kwargs["name"],
@@ -113,14 +119,7 @@ class UserManager(object):
                         online=1)
 
             self.db.add_object(user)
-
-            for n in email_info:
-                email = n['email']
-                primary_email = n['primary']
-                verified = n['verified']
-                user_email = UserEmail(name=kwargs['name'], email=email, primary_email=primary_email,
-                                      verified=verified, user=user)
-                self.db.add_object(user_email)
+            map(lambda x: self.__create_or_update_email(user, x), email_info)
 
         # generate API token
         token = self.__generate_api_token(user)
@@ -129,7 +128,7 @@ class UserManager(object):
             "user": user
         }
 
-    def validate_request(self):
+    def validate_login(self):
         if HTTP_HEADER.TOKEN not in request.headers:
             return False
 
@@ -143,35 +142,21 @@ class UserManager(object):
     def get_user_by_id(self, user_id):
         user = self.db.find_first_object_by(User, id=user_id)
         if user is not None:
-            return self.get_user_info(user)
+            return self.user_display_info(user)
         else:
-            return "Not found", 404
+            return not_found("user id invalid")
 
-    def get_user_info(self, user):
+    def user_display_info(self, user):
         return {
             "id": user.id,
             "name": user.name,
             "nickname": user.nickname,
-            "email": self.__get_user_primary_email(user),
+            "email": [e.dic() for e in user.emails.all()],
             "avatar_url": user.avatar_url,
             "online": user.online,
             "create_time": str(user.create_time),
             "last_login_time": str(user.last_login_time)
         }
-
-    def get_user_detail_info(self, user):
-        detail = self.get_user_info(user)
-        detail["experiments"] = []
-        try:
-            experiments = user.experiments.filter_by(status=EStatus.Running).all()
-            map(lambda e: detail["experiments"].append({
-                "id": e.id,
-                "hackathon_id": e.hackathon_id
-            }), experiments)
-        except Exception as e:
-            log.error(e)
-
-        return detail
 
 
 user_manager = UserManager(db_adapter)
