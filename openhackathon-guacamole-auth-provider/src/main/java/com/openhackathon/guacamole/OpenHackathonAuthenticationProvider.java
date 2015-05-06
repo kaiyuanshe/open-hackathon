@@ -55,20 +55,21 @@ public class OpenHackathonAuthenticationProvider extends SimpleAuthenticationPro
 
     public OpenHackathonAuthenticationProvider() {
         initConnection();
-        logger.debug("initialize OpenHackathonAuthenticationProvider");
+        logger.info("initialize OpenHackathonAuthenticationProvider");
     }
 
     @Override
     public Map<String, GuacamoleConfiguration> getAuthorizedConfigurations(final Credentials credentials) throws GuacamoleException {
 
         initConnection();
-
+        
+        Map<String, GuacamoleConfiguration> configs = new HashMap<String, GuacamoleConfiguration>();
+        
         final GuacamoleConfiguration config = getGuacamoleConfiguration(credentials.getRequest());
         if (config == null) {
-            return null;
+            return configs;
         }
 
-        Map<String, GuacamoleConfiguration> configs = new HashMap<String, GuacamoleConfiguration>();
         configs.put(config.getParameter("name"), config);
         return configs;
     }
@@ -80,28 +81,42 @@ public class OpenHackathonAuthenticationProvider extends SimpleAuthenticationPro
         final GuacamoleConfiguration config = getGuacamoleConfiguration(request);
 
         if (config == null) {
-            return null;
+            return context;
         }
 
         final String name = config.getParameter("name");
-        logger.debug("Instance Type of ConnectionDirectory is: " + context.getRootConnectionGroup().getConnectionDirectory().getClass().getName());
-        final SimpleConnectionDirectory connections = (SimpleConnectionDirectory) context.getRootConnectionGroup().getConnectionDirectory();
-        logger.debug("get info from GuacamoleConfiguration name:" + name);
-        logger.debug("protocol select :" + config.getProtocol());
+        logger.info("Instance Type of ConnectionDirectory is: " + context.getConnectionDirectory().getClass().getName());
+        final SimpleConnectionDirectory connections = (SimpleConnectionDirectory) context.getConnectionDirectory();
+        logger.info("get info from GuacamoleConfiguration name:" + name);
+        logger.info("protocol select :" + config.getProtocol());
         final SimpleConnection connection = new SimpleConnection(name, name, config);
         connections.putConnection(connection);
         return context;
     }
 
     private GuacamoleConfiguration getGuacamoleConfiguration(final HttpServletRequest request) throws GuacamoleException {
-        final String tokenString = request.getParameter("token");
-        final String connectionName = request.getParameter("id").substring(2);
-        logger.debug("tokenString is : " + tokenString + ", connectionName is:" + connectionName);
+        logger.info("========================================test==========================test===================");
+    	final String tokenString = request.getParameter("token");
+    	logger.info("url is : " + request.getRequestURL());
+    	logger.info("header is :" + request.getHeader("id"));
+    	logger.info("getAuthType()" + request.getAuthType());
+    	logger.info("getContextPath()" + request.getContextPath());
+    	logger.info("getMethod()" + request.getMethod());
+    	logger.info("getPathInfo()" + request.getPathInfo());
+        logger.info("getQueryString()" + request.getQueryString());
+        Enumeration<String> enumString = request.getHeaderNames();
+
+        while (enumString.hasMoreElements()){
+        	logger.info("header :" + request.getHeader(enumString.nextElement()));
+        }
+        
+        final String connectionName = request.getParameter("id");
+        logger.info("tokenString is : " + tokenString + ", connectionName is:" + connectionName);
 
         final String jsonString = this.conn.getGuacamoleJSONString(connectionName, tokenString);
-        logger.debug("get guacamole config json String :" + jsonString);
+        logger.info("get guacamole config json String :" + jsonString);
         if (jsonString == null) {
-            logger.debug("get null jsonString from openHackathon platform");
+            logger.info("get null jsonString from openHackathon platform");
             return null;
         }
 
