@@ -97,14 +97,7 @@ public class OpenHackathonAuthenticationProvider extends SimpleAuthenticationPro
     private GuacamoleConfiguration getGuacamoleConfiguration(final HttpServletRequest request) throws GuacamoleException {
         logger.info("========================================test==========================test===================");
     	final String tokenString = request.getParameter("token");
-    	logger.info("url is : " + request.getRequestURL());
-    	logger.info("header is :" + request.getHeader("id"));
-    	logger.info("getAuthType()" + request.getAuthType());
-    	logger.info("getContextPath()" + request.getContextPath());
-    	logger.info("getMethod()" + request.getMethod());
-    	logger.info("getPathInfo()" + request.getPathInfo());
-        logger.info("getQueryString()" + request.getQueryString());
-        Enumeration<String> enumString = request.getHeaderNames();
+    	
 
         while (enumString.hasMoreElements()){
         	logger.info("header :" + request.getHeader(enumString.nextElement()));
