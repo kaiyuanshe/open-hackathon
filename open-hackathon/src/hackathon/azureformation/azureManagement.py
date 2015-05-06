@@ -41,6 +41,7 @@ from hackathon.database.models import (
     Hackathon,
 )
 from hackathon.azureformation.fileService import (
+    create_container_in_storage,
     upload_file_to_azure_from_path,
 )
 import os
@@ -48,7 +49,8 @@ import commands
 
 
 class AzureManagement:
-    CERT_BASE = get_config('azure.certBase')
+    CERT_BASE = get_config('azure.cert_base')
+    CONTAINER_NAME = get_config('azure.container_name')
 
     def __init__(self):
         pass
@@ -119,7 +121,8 @@ class AzureManagement:
         else:
             log.debug('hackathon azure key exists')
 
-        return upload_file_to_azure_from_path(cert_url, subscription_id + '.cer')
+        create_container_in_storage(self.CONTAINER_NAME, 'container')
+        return upload_file_to_azure_from_path(cert_url, self.CONTAINER_NAME, subscription_id + '.cer')
 
     def get_certificates(self, hackathon_name):
         hackathon_id = db_adapter.find_first_object_by(Hackathon, name=hackathon_name).id
@@ -144,6 +147,7 @@ class AzureManagement:
         if certificate_id not in azure_key_ids:
             log.error('hackathon [%d] has no certificate [%d]' % (hackathon_id, certificate_id))
             return False
+        db_adapter.delete_all_objects_by(HackathonAzureKey, hackathon_id=hackathon_id, azure_key_id=certificate_id)
         certificate = db_adapter.get_object(AzureKey, certificate_id)
         db_adapter.delete_object(certificate)
         db_adapter.commit()

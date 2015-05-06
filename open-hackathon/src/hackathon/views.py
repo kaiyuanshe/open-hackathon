@@ -44,7 +44,7 @@ from hackathon_response import *
 from hackathon.azureformation.azureManagement import (
     azure_management,
 )
-from hackathon.azureformation.fileService import upload_file_to_azure
+from hackathon.azureformation.fileService import upload_file
 
 
 @app.teardown_appcontext
@@ -199,17 +199,15 @@ class HackathonResource(Resource):
     def get(self):
         return g.hackathon.dic()
 
+    @token_required
     def post(self):
         args = request.get_json()
-        return hack_manager.create_or_update_hackathon(args).dic()
+        return hack_manager.create_or_update_hackathon(args)
 
     @admin_privilege_required
     def put(self):
         args = request.get_json()
-        return hack_manager.create_or_update_hackathon(args).dic()
-
-    def put(self):
-        pass
+        return hack_manager.create_or_update_hackathon(args)
 
     def delete(self):
         pass
@@ -338,15 +336,9 @@ class AdminAzureResource(Resource):
 
 
 class FileResource(Resource):
+    @admin_privilege_required
     def post(self):
-        try:
-            file = request.files.get()
-            upload_file_to_azure(file, 'test/hello')
-            return ok("upload file successed")
-        except Exception as ex:
-            log.error(ex)
-            log.error("upload file raised an exception")
-            return internal_server_error("upload file raised an exception")
+        return upload_file(request)
 
 
 

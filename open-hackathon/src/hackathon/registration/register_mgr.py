@@ -29,7 +29,6 @@ import sys
 sys.path.append("..")
 from hackathon.database.models import UserHackathonRel, Experiment
 from hackathon.database import db_adapter
-from hackathon.log import log
 from hackathon.hackathon_response import *
 from datetime import datetime
 from hackathon.enum import EStatus, RGStatus
