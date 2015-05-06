@@ -289,15 +289,9 @@ class TemplateResource(Resource):
 
 
 class AdminHackathonListResource(Resource):
-    @admin_privilege_required
+    @token_required
     def get(self):
-        # todo move this logic to hack_manager
-        hackathon_ids = hack_manager.get_hack_id_by_user_id(g.user.id)
-        if -1 in hackathon_ids:
-            hackathon_list = db_adapter.find_all_objects(Hackathon)
-        else:
-            hackathon_list = db_adapter.find_all_objects(Hackathon, Hackathon.id.in_(hackathon_ids))
-        return map(lambda u: u.dic(), hackathon_list)
+        return hack_manager.get_permitted_hackathon_list_by_admin_user_id(g.user.id)
 
 
 class FileResource(Resource):
