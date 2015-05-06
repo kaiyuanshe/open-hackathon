@@ -39,27 +39,12 @@
  * Controller of the oh.header.controller
  */
 angular.module('oh.controllers')
-  .controller('oh.header.controller', function ($scope, $rootScope, $cookieStore, $state) {
-    var User = $cookieStore.get('User') || '';
-
-    if (!User) {
-      $state.go('index');
-    } else if ((User.status & 8) == 8) {
-      $state.go('index.register');
-    } else if ((User.status & 128) == 128) {
-      if ((User.status & 1) != 1) {
-        $state.go('index.register');
-      } else  {
-        API.register.get({query: {hid: $scope.hackathon.id, uid: User.id}}, function (data) {
-          User.check_status = data.status || 0;
-          $cookieStore.put('User', User);
-          if (User.check_register != 1) {
-            $state.go('index.register');
-          }
-        });
-      }
-    }
+  .controller('oh.hackathon.controller', function ($scope, $rootScope,$location, Authentication) {
     $rootScope.hackathon = true;
+    Authentication.hackathon(function (data) {
+      $scope.workData = data;
+    });
+
     $scope.status = {
       isopen: false
     }
@@ -73,9 +58,8 @@ angular.module('oh.controllers')
       $event.status.isopen = !$scope.status.isopen;
     }
     $scope.$on('$destroy', function (event) {
-        $rootScope.hackathon = false;
+        // $rootScope.hackathon = false;
       }
     );
-
   });
 
