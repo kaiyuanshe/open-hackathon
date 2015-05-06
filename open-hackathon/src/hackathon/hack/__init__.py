@@ -201,7 +201,7 @@ class HackathonManager():
                 args['update_time'] = datetime.utcnow()
                 update_items = dict(dict(args).viewitems() - to_dic(hackathon, Hackathon).viewitems())
                 log.debug("update a exist hackathon :" + str(args))
-                result = self.db.update_object(hackathon, **update_items)
+                self.db.update_object(hackathon, **update_items)
                 return ok("update hackathon successed")
         except Exception as  e:
             log.error(e)

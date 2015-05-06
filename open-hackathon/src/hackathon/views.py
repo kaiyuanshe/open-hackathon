@@ -242,6 +242,22 @@ class HackathonTemplateResource(Resource):
         args = parse.parse_args()
         return map(lambda u: u.dic(), db_adapter.find_all_objects_by(Template, hackathon_id=args['hid']))
 
+    # create template for hacakthon
+    def post(self):
+        args = request.get_json()
+        return template_manager.create_or_update_template(args)
+
+    def put(self):
+        args = request.get_json()
+        return template_manager.create_or_update_template(args)
+
+    def delete(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('id', type=int, location='args', required=True)
+        args = parse.parse_args()
+        return template_manager.delete_template(args['id'])
+
+
 
 class UserExperimentListResource(Resource):
     @token_required

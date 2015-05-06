@@ -176,3 +176,7 @@ class HACK_STATUS:
     INIT = 0
     ONLINE = 1
     OFFLINE = 1
+
+class TEMPLATE_STATUS:
+    ONLINE = 1
+    OFFLINE = 0
