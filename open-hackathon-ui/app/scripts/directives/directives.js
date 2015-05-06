@@ -271,7 +271,15 @@ angular.module('oh.directives', [])
         return null;
       }
     }
-
+    function showCountDown(elemten, countDown) {
+      var timing = show_time.apply(countDown);
+      if (!timing) {
+        elemten.find('#timer').text('本次活动已结束，非常感谢您的参与。')
+        $interval.cancel(stop);
+      } else {
+        elemten.find('#end_timer').text(timerTmpe.format(timing))
+      }
+    }
     return {
       scope: {},
       restrict: 'A',
@@ -285,28 +293,15 @@ angular.module('oh.directives', [])
               time_server: new Date().getTime(),
               time_end: data.event_end_time
             }
-
-            function showCountDown(elemten, countDown) {
-              var timing = show_time.apply(countDown);
-              if (!timing) {
-                elemten.find('#timer').text('本次活动已结束，非常感谢您的参与。')
-                $interval.cancel(stop);
-              } else {
-                elemten.find('#end_timer').text(timerTmpe.format(timing))
-              }
-            }
-
             showCountDown(elemten, countDown);
             stop = $interval(function () {
               showCountDown(elemten, countDown);
             }, 1000);
           }
         });
-
         scope.$on('$destroy', function (event) {
           $interval.cancel(stop);
         });
-
       }
     }
   })
