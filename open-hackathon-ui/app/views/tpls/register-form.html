@@ -3,12 +3,12 @@
 
   <form name="registerForm" class="form-horizontal" ng-controller="registerFormController" ng-submit="submit()" novalidate>
     <fieldset>
-      <div class="form-group" ng-class="{ 'has-error' : registerForm.register_name.$invalid && registerForm.register_name.$touched }">
+      <div class="form-group" ng-class="{ 'has-error' : registerForm.real_name.$invalid && registerForm.real_name.$touched }">
         <label class="col-sm-2 control-label required">姓名</label>
 
         <div class="col-sm-6">
-          <input type="text" class="form-control"  name="register_name"  placeholder="姓名" required="" ng-model="register.register_name" required>
-          <p ng-show="registerForm.register_name.$error.required && registerForm.register_name.$touched" class="help-block">姓名必须填写</p>
+          <input type="text" class="form-control"  name="register_name"  placeholder="姓名" required="" ng-model="register.real_name" required>
+          <p ng-show="registerForm.real_name.$error.required && registerForm.real_name.$touched" class="help-block">姓名必须填写</p>
         </div>
       </div>
       <div class="form-group" ng-class="{ 'has-error' : registerForm.email.$invalid  && registerForm.email.$touched }">
@@ -41,7 +41,7 @@
         <label class="col-sm-2 control-label">性别</label>
 
         <div class="col-sm-6">
-          <select class="form-control" ng-model="register.sex">
+          <select class="form-control" ng-model="register.gender">
             <option value="-1">秘密</option>
             <option value="1">男</option>
             <option value="0">女</option>
@@ -83,6 +83,13 @@
 
         <div class="col-sm-6">
           <input type="text" class="form-control" placeholder="职务" ng-model="register.career">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-2 control-label">Skype</label>
+
+        <div class="col-sm-6">
+          <input type="text" class="form-control" placeholder="Skype" ng-model="register.skype">
         </div>
       </div>
       <div class="form-group">

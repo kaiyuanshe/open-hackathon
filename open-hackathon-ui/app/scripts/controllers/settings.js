@@ -38,46 +38,31 @@
  * Controller of the settings.controller
  */
 angular.module('oh.controllers')
-  .controller('settings.controller', function ($scope, $cookieStore, $state, API) {
-    $scope.type = {name: ''};
-
-    API.user.hackathon.get({header:{hackathon_name :config.name}},function(data){
-      console.log(data);
-    });
-    // var User = $cookieStore.get('User') || '';
-    // if (!User) {
-    //   $state.go('index');
-    // } else if ((User.status & 8) == 8) {
-    //   $state.go('index.register');
-    // } else if ((User.status & 128) == 128) {
-    //   if ((User.status & 1) != 1) {
-    //     $state.go('index.register');
-    //   } else if (User.experiments.length > 0) {
-    //     $state.go('index.hackathon');
-    //   }
-    // }
-    // API.template.list.get({query: {hackathon_name: $scope.config.name}}, function (data) {
-    //   var _temp = data;
-    //   API.register.get({query: {hid: data.id, uid: User.id}}, function (data) {
-    //     User.check_status = data.status || 0;
-    //     $cookieStore.put('User', User);
-    //     if (User.check_register != 1) {
-    //       $state.go('index.register');
-    //     } else {
-    //       $scope.templates = _temp;
-    //       if (data.length > 0) {
-    //         $scope.type.name = _temp[0].name
-    //       }
-    //     }
-    //   });
-    // });
-
-    // $scope.submit = function () {
-    //   API.user.experiment.post({
-    //     body: {cid: $scope.type, hackathon: $scope.config.name}
-    //   }, function (data) {
-    //     $state.go('index.hackathon');
-    //   });
-    // }
-
+  .controller('settings.controller', function ($scope,$location, Authentication, API) {
+    $scope.isLoading = true;
+    Authentication.settings(function (data) {
+      API.template.list.get({header: {hackathon_name: config.name}}, function (data) {
+        $scope.isLoading = false;
+        if (data.error) {
+          $scope.error = data;
+        } else if (data.length > 0) {
+          $scope.isSubmit = true;
+          $scope.templates = data;
+          $scope.type = {name: data[0].name};
+        } else {
+          $scope.error = {error: true, data: {message: '暂无模板'}}
+        }
+      });
+    })
+    $scope.submit = function () {
+      API.user.experiment.post({
+        body: {template_name: $scope.type.name, hackathon: config.name}
+      }, function (data) {
+        if (data.error) {
+          $location.path('error');
+        } else {
+          $location.path('hackathon');
+        }
+      });
+    }
   });

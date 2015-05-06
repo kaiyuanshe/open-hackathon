@@ -83,7 +83,8 @@ from datetime import (
 )
 import json
 import os
-
+import random
+import string
 docker = OssDocker()
 
 
@@ -240,7 +241,7 @@ class ExprManager(object):
     def __remote_start_container(self, expr, host_server, container_config, user_id):
         post_data = container_config
         post_data["expr_id"] = expr.id
-        post_data["container_name"] = "%s-%s" % (expr.id, container_config["name"])
+        post_data["container_name"] = "%s-%s" % (expr.id, container_config["name"]) + "".join(random.sample(string.ascii_letters + string.digits, 8))
         log.debug("starting to start container: %s" % post_data["container_name"])
 
         # db entity
@@ -365,7 +366,7 @@ class ExprManager(object):
             return {"error": "hackathon or template is not existed"}, 500
 
         hackathon = hack_temp[0]
-        if hackathon.end_time < datetime.utcnow():
+        if hackathon.event_end_time < datetime.utcnow():
             log.warn("hackathon is ended. The expr starting process will be stopped")
             return "hackathen is ended", 412
 
