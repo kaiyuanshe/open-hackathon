@@ -252,11 +252,11 @@ class HackathonTemplateResource(Resource):
     # create template for hacakthon
     def post(self):
         args = request.get_json()
-        return template_manager.create_or_update_template(args)
+        return template_manager.create_template(args)
 
     def put(self):
         args = request.get_json()
-        return template_manager.create_or_update_template(args)
+        return template_manager.update_template(args)
 
     def delete(self):
         parse = reqparse.RequestParser()

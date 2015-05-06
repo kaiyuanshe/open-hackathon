@@ -53,30 +53,43 @@ class TemplateManager(object):
         return self.db.find_first_object(Template, Template.id == id)
 
 
-    def create_or_update_template(self, args):
+    def create_template(self, args):
         if "name" not in args:
             return bad_request("template perporities lost name")
         template = self.db.find_first_object(Template, Template.name == args['name'])
 
+        if template is  not None:
+            return bad_request("template aready exist")
+
         try:
-            if template is None:
-                log.debug("create template: %r" % args)
-                args['creator_id'] = g.user.id
-                args['update_time'] = datetime.utcnow()
-                args['hackathon_id'] = g.hackathon.id
-                args['status'] = TEMPLATE_STATUS.ONLINE
-                return self.db.add_object_kwargs(Template, **args)
-            else:
-                log.debug("update template: %r" % args)
-                args['update_time'] = datetime.utcnow()
-                update_items = dict(dict(args).viewitems() - template.dic().viewitems())
-                log.debug("update a exist hackathon :" + str(args))
-                self.db.update_object(template, **update_items)
-                return ok("update template success")
+            log.debug("create template: %r" % args)
+            args['creator_id'] = g.user.id
+            args['update_time'] = datetime.utcnow()
+            args['hackathon_id'] = g.hackathon.id
+            args['status'] = TEMPLATE_STATUS.ONLINE
+            return self.db.add_object_kwargs(Template, **args)
         except Exception as ex:
             log.error(ex)
             return internal_server_error("create or update failed because of raising Exception")
 
+    def update_template(self, args):
+        if "name" not in args:
+            return bad_request("template perporities lost name")
+        template = self.db.find_first_object(Template, Template.name == args['name'])
+
+        if template is None:
+            return bad_request("template doesn't exist")
+        try:
+
+            log.debug("update template: %r" % args)
+            args['update_time'] = datetime.utcnow()
+            update_items = dict(dict(args).viewitems() - template.dic().viewitems())
+            log.debug("update a exist hackathon :" + str(args))
+            self.db.update_object(template, **update_items)
+            return ok("update template success")
+        except Exception as ex:
+            log.error(ex)
+            return internal_server_error("create or update failed because of raising Exception")
 
     def delete_template(self, id):
         log.debug("delete or disable a exist template")
