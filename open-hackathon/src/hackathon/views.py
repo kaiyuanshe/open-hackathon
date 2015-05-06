@@ -42,6 +42,7 @@ from hackathon.registration.register_mgr import register_manager
 from hackathon.template.template_mgr import template_manager
 from hackathon_response import *
 from hackathon.azureformation.fileService import upload_file_to_azure
+from hackathon.enum import EStatus, RGStatus
 
 
 @app.teardown_appcontext
@@ -78,6 +79,12 @@ class UserHackathonRelResource(Resource):
         args["user_id"] = g.user.id
         return register_manager.create_registration(g.hackathon, args)
 
+    @token_required
+    @hackathon_name_required
+    def put(self):
+        args = request.get_json()
+        args["status"] = RGStatus.UNAUDIT
+        return register_manager.update_registration(args)
 
 class AdminRegisterResource(Resource):
     def get(self):
@@ -142,12 +149,12 @@ class UserExperimentResource(Resource):
     @token_required
     def post(self):
         args = request.get_json()
-        if "cid" not in args or "hackathon" not in args:
+        if "template_name" not in args or "hackathon" not in args:
             return "invalid parameter", 400
-        cid = args["cid"]
+        template_name = args["template_name"]
         hackathon = args["hackathon"]
         try:
-            return expr_manager.start_expr(hackathon, cid, g.user.id)
+            return expr_manager.start_expr(hackathon, template_name, g.user.id)
         except Exception as err:
             log.error(err)
             return {"error": "fail to start due to '%s'" % err}, 500
@@ -282,9 +289,6 @@ class ExperimentRecycleResource(Resource):
 class TemplateResource(Resource):
     @hackathon_name_required
     def get(self):
-        parse = reqparse.RequestParser()
-        parse.add_argument('hackathon_name', type=str, location='args', required=True)
-        args = parse.parse_args()
         return template_manager.get_template_list(g.hackathon.name)
 
 

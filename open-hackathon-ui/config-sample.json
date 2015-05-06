@@ -39,7 +39,7 @@
   "api": {
     "user": {
       "login": ["post","del"],
-      "hackathon": ["get"],
+      "hackathon": ["get","post"],
       "experiment": {
         "": ["get","post","del","put"],
         "list": ["get"]

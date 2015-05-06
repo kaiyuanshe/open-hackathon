@@ -19,7 +19,8 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-
+ui_secret = Chef::EncryptedDataBagItem.load_secret("#{node['openhackathon'][:secret][:secretpath]}")
+ui_creds = Chef::EncryptedDataBagItem.load(node.chef_environment,"secret",ui_secret)
 
 include_recipe "nodejs"
 include_recipe "open-hackathon-api::source"
@@ -44,6 +45,12 @@ template node['openhackathon'][:ui][:config_file] do
   source 'config.json.erb'
   owner node['openhackathon']['user']
   group node['openhackathon']['user']
+  variables(
+      :github_client_secret => ui_creds["github_client_secret"],
+      :qq_client_secret  => ui_creds["qq_client_secret"],
+      :gitcafe_client_secret => ui_creds["gitcafe_client_secret"],
+      :weibo_client_secret => ui_creds["weibo_client_secret"]
+    )
   mode "0644"
 end
 

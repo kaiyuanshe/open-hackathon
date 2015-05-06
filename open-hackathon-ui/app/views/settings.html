@@ -6,8 +6,11 @@
         <div class="page-header">
           <h1>请选择你所需要的环境</h1>
         </div>
-        <div class="text-center" ng-if="!templates">
+        <div class="text-center" ng-if="isLoading">
           <img src="/images/spinner-lg.gif" >
+        </div>
+        <div class="row form-group text-center" ng-if="error.error">
+          <p>{{error.data.message}}</p>
         </div>
         <div class="row form-group">
 
@@ -23,7 +26,7 @@
             </div>
           </div>
         </div>
-        <div class="row form-group" ng-if="templates">
+        <div class="row form-group" ng-if="isSubmit">
           <div class="col-md-12 text-center">
             <button type="button" class="btn btn-lg btn-primary" style="width:200px" ng-click="submit()">提交</button>
           </div>

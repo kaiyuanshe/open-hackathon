@@ -21,7 +21,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
-
+api_secret = Chef::EncryptedDataBagItem.load_secret("#{node['openhackathon'][:secret][:secretpath]}")
+api_creds = Chef::EncryptedDataBagItem.load(node.chef_environment,"secret",api_secret)
 
 include_recipe "python"
 package 'libpcre3'
@@ -60,6 +61,7 @@ template node['openhackathon']['api']['src_dir']+'/hackathon/config.py' do
   source 'config.py.erb'
   owner node['openhackathon']['user']
   group node['openhackathon']['user']
+  variables( :mysql_usr_pwd => api_creds["mysql_usr_pwd"] )
   mode "0644"
 end
 
