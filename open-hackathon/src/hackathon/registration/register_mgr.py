@@ -67,8 +67,8 @@ class RegisterManger(object):
             if hackathon.registration_end_time < datetime.utcnow():
                 return precondition_failed("hackathon registration has ended", friendly_message="报名已经结束")
 
-            if hackathon.is_auto_approve():
-                args["status"] = RGStatus.AUTO_PASSED
+            args["status"] = hackathon.is_auto_approve() and RGStatus.AUTO_PASSED or RGStatus.UNAUDIT
+
             return self.db.add_object_kwargs(UserHackathonRel, **args).dic()
         except Exception as e:
             log.error(e)

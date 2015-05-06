@@ -48,13 +48,14 @@ class ADMIN:
 
 
 class HACKATHON_BASIC_INFO:
-    ORGANIZERS = "organizers"
-    ORGANIZER_NAME = "organizer_name"
-    ORGANIZER_URL = "organizer_url"
-    ORGANIZER_IMAGE = "organizer_image"
-    BANNERS = "banners"  # array
-    LOCATION = "location"
-    MAX_ENROLLMENT = "max_enrollment"
-    WALL_TIME = "wall_time"
-    AUTO_APPROVE = "auto_approve"
-    RECYCLE_ENABLED = "recycle_enabled"
+    ORGANIZERS = "organizers" #array  [{ organizer_name:'' , organizer_url:'',  organizer_image:'',organizer_description:''},...]
+    ORGANIZER_NAME = "organizer_name" # string
+    ORGANIZER_URL = "organizer_url" # string
+    ORGANIZER_IMAGE = "organizer_image" # string
+    ORGANIZER_DESCRIPTION = "organizer_description"  # string
+    BANNERS = "banners"  # array ['banner_image_url',...]
+    LOCATION = "location" # string location organizer 
+    MAX_ENROLLMENT = "max_enrollment" # int
+    WALL_TIME = "wall_time" # long 
+    AUTO_APPROVE = "auto_approve"  # bool
+    RECYCLE_ENABLED = "recycle_enabled"  #bool
