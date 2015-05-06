@@ -51,6 +51,7 @@ from hackathon.enum import (
     VEStatus,
     ReservedUser,
     RecycleStatus,
+    AVMStatus,
 )
 from hackathon.database.models import (
     VirtualEnvironment,
@@ -414,7 +415,6 @@ class ExprManager(object):
                 return
             expr.status = EStatus.Starting
             db_adapter.commit()
-            # start create azure vm according to user template
             try:
                 af = AzureFormation(self.__load_azure_key_id(expr.id))
                 af.create(expr.id)
@@ -518,8 +518,14 @@ class ExprManager(object):
                     expr.status = EStatus.Stopped
                 db_adapter.commit()
             else:
-                # todo stop azure
-                raise NotImplementedError
+                try:
+                    # todo support delete azure vm
+                    af = AzureFormation(self.__load_azure_key_id(expr_id))
+                    af.stop(expr_id, AVMStatus.STOPPED_DEALLOCATED)
+                except Exception as e:
+                    log.error(e)
+                    return {'error': 'Failed stopping azure'}, 500
+
             log.debug("experiment %d ended success" % expr_id)
             return "OK"
         else:

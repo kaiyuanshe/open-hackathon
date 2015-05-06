@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
+Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
  
 The MIT License (MIT)
  
@@ -61,4 +61,3 @@ template = Template(name="ut", url=template_url, provider=VEProvider.Docker, sta
                     description="", hackathon=hackathon)
 if db_adapter.find_first_object_by(Template, name=template.name, hackathon_id=hackathon.id) is None:
     db_adapter.add_object(template)
-
