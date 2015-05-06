@@ -95,6 +95,7 @@ public class OpenHackathonAuthenticationProvider extends SimpleAuthenticationPro
     }
 
     private GuacamoleConfiguration getGuacamoleConfiguration(final HttpServletRequest request) throws GuacamoleException {
+
         final String tokenString = request.getParameter("oh");
         final String connectionName = request.getParameter("name");
         logger.info("open hackathon tokenString is : " + tokenString + ", connectionName is:" + connectionName);
@@ -102,6 +103,7 @@ public class OpenHackathonAuthenticationProvider extends SimpleAuthenticationPro
         if(tokenString == null || connectionName==null){
             return null;
         }
+
 
         final String jsonString = this.conn.getGuacamoleJSONString(connectionName, tokenString);
         logger.info("get guacamole config json String :" + jsonString);
