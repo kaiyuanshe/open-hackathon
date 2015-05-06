@@ -33,6 +33,15 @@ from flask import g
 from hackathon.hackathon_response import *
 from datetime import datetime
 from hackathon.enum import TEMPLATE_STATUS
+from hackathon.template.docker_template_unit import (
+    DockerTemplateUnit,
+)
+from hackathon.template.docker_template import (
+    DockerTemplate,
+)
+from hackathon.template.base_template import (
+    BaseTemplate,
+)
 
 
 class TemplateManager(object):
@@ -52,8 +61,14 @@ class TemplateManager(object):
     def get_template_by_id(self, id):
         return self.db.find_first_object(Template, Template.id == id)
 
-
     def create_template(self, args):
+
+        docker_template_units = [DockerTemplateUnit(ve) for ve in args[BaseTemplate.T_VE]]
+        docker_template = DockerTemplate(args[BaseTemplate.T_EN], docker_template_units)
+        docker_template_url = docker_template.to_file()
+
+        log.debug(docker_template_url)
+
         if "name" not in args:
             return bad_request("template perporities lost name")
         template = self.db.find_first_object(Template, Template.name == args['name'])
@@ -106,3 +121,9 @@ class TemplateManager(object):
 
 
 template_manager = TemplateManager(db_adapter)
+# template_manager.create_template({
+#     "expr_name": "test",
+#     "virtual_environments": [
+#         {}, {}
+#     ]
+# })
