@@ -109,7 +109,7 @@ class ExprManager(object):
                 # target url format:
                 # http://localhost:8080/guacamole/#/client/c/{name}?name={name}&oh={token}
                 name = guacamole_config["name"]
-                url = guacamole_host + '/guacamole/#/client/c%s?name=%s' % (name, name)
+                url = guacamole_host + '/guacamole/#/client/c/%s?name=%s' % (name, name)
                 guacamole_servers.append({
                     "name": guacamole_config["displayname"],
                     "url": url
