@@ -16,86 +16,71 @@
 <script src="/static/js/index.js"></script>
 {% endblock %}
 {% block content %}
-<div class="mainContainer">
-    <div class="main-wrapper">
-        <div class="w-container">
-            <div class="p-center" style="font-size:63px;padding-bottom: 10px;">
-                <img class="logo64" src="/static/pic/icon64.png"/>
-                开放黑客松管理平台
-            </div>
-            <div>
-                <div class="home-news-area-wrapper">
-                    <ul class="home-news-area group rslides rslides1" id="newsSlider" style="max-width: 1280px;">
-                        <li id="rslides1_s0" class="rslides1_on">
-                            <h3>活动主办方</h3>
-                            <img width="770" height="300" src="/static/pic/LOGO.png"
-                                 class="attachment-slider-thumb wp-post-image" alt="kaiyaunshe-carousel">
-                        </li>
-                        <li id="rslides1_s1" class="">
-                            <h3>Open Hackathon</h3>
-                            <img width="768" height="300" src="/static/pic/huodongxing.png"
-                                 class="attachment-slider-thumb wp-post-image" alt="MSOpenTechChina">
-                        </li>
-                        <li id="rslides1_s2" class="">
-                            <h3>Jstorm Platfrom</h3>
-                            <img width="768" height="300" src="/static/pic/JstormPlatfrom.jpg"
-                                 class="attachment-slider-thumb wp-post-image" alt="VMDepot News Image">
-                        </li>
-                        <li id="rslides1_s3" class="">
-                            <h3>Open Hackathon Platfrom Architecture</h3>
-                            <img width="768" height="300" src="/static/pic/HackathonPlatfrom.jpg"
-                                 class="attachment-slider-thumb wp-post-image" alt="openJDK news">
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <div class="btn-group-vertical p-center">
-                <form method="post" name="login" action="login">
-                    <p><input type="text" name="username"/>
-                    </p>
+<div class="container">
 
-                    <p><input type="password" name="password"/>
-                    </p>
-
-                    <p>
-                        {% if error %}
-                        <span style="color: red;">[{{error}}]</span>
-                        {% endif %}
-                    </p>
-
-                    <p><input type=submit value="Login"/></p>
-
-                </form>
+    <div class="row">
+        <div class="login-box">
+            <div class="header">
+                登录开放黑客松管理平台
             </div>
-            <div class="btn-group-vertical p-center">
-                <span>
-                        <a class="btn btn-warning btn-lg" role="button" id="githublogin">
-                            <img src="/static/pic/github.png" height="25" width="25" style="float:left"/><span
-                                class="ds-service-link">github</span>
-                        </a>
-                </span>
-                <span>
-                        <a class="btn btn-warning btn-lg" role="button" id="qqlogin">
-                            <img src="/static/pic/github.png" height="25" width="25" style="float:left"/><span
-                                class="ds-service-link">QQ</span>
-                        </a>
-                </span>
-                <span>
-                        <a class="btn btn-warning btn-lg" role="button" id="weibologin">
-                            <img src="/static/pic/weibo.login.png" height="25" width="25" style="float:left"/><span
-                                class="ds-service-link">Weibo</span>
-                        </a>
-                </span>
+            <p>
+                <a class="btn btn-github" id="githublogin"><span>github 登录</span></a>
+            </p>
+
+            <p>
+                <a class="btn btn-qq" id="qqlogin"><span>QQ 登录</span></a>
+            </p>
+
+            <p>
+                <a class="btn btn-weibo" id="weibologin"><span>Weibo 登录</span></a>
+            </p>
+
+            <div class="text-with-hr">
+                <span>超级管理员登录</span>
             </div>
-            <span class="p-center">
-                    <b>
-                        <h5>
-                            <b>建议使用环境：支持HTML5的浏览器(IE 10+,Chrome,Firefox,Safari)，请尽量使用分辨率较高的宽幅显示。</b><br><br>
-                            <b>此站点为OpenHackathon的管理站点</b><br><br>
-                        </h5>
-                    </b>
-                </span>
+
+            <form class="form-horizontal login" action="login" method="post">
+                <fieldset class="col-sm-12">
+                    <div class="form-group">
+                        <div class="controls row">
+                            <div class="input-group col-sm-12">
+                                <input type="text" class="form-control" id="username" name="username" placeholder="Username or E-mail">
+                                <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="controls row">
+                            <div class="input-group col-sm-12">
+                                <input type="password" class="form-control" id="password" name="password" placeholder="Password">
+                                <span class="input-group-addon"><i class="fa fa-key"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                    {% if error %}
+                    <div class="form-group has-error">
+                        <div class=" controls row">
+                            <div class="input-group col-sm-12">
+                                [{{error}}]
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div class="row">
+                        <button type="submit" class="btn btn-lg btn-primary col-xs-12">Login</button>
+                    </div>
+                </fieldset>
+            </form>
+            <div class="clearfix"></div>
+        </div>
+        <div class="text-center">
+            <p>建议使用环境：支持HTML5的浏览器(IE 10+,Chrome,Firefox,Safari)，请尽量使用分辨率较高的宽幅显示。</p>
+
+            <p>此站点为OpenHackathon的管理站点</p>
         </div>
     </div>
+
+
 </div>
 {% endblock %} 

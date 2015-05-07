@@ -54,6 +54,7 @@ angular.module('oh.controllers')
     });
 
     function checkUserStatus(status, approve) {
+      $scope.hackathon.isRegister = false;
       if (status == 0) {
         $scope.hackathon.message = '您的报名正在审核中，请等待。';
       } else if (status == 2) {
@@ -69,21 +70,11 @@ angular.module('oh.controllers')
       if (registration) {
         register.id = registration.id;
         API.user.hackathon.put({body: register, header: {hackathon_name: config.name}}, function (data) {
-          //User.status |= 1;
-          //User.user_id = User.id;
-          //User.check_status = data.status || 0;
-          //$cookieStore.put('User', User)
-          //$scope.hackathon.isRegister = false;
-          //$scope.hackathon.message = $scope.check_status[User.check_status];
+          checkUserStatus(0,0);
         });
       } else {
         API.user.hackathon.post({body: register, header: {hackathon_name: config.name}}, function (data) {
-          //User.status |= 1;
-          //User.user_id = User.id;
-          //User.check_status = data.status || 0;
-          //$cookieStore.put('User', User)
-          //$scope.hackathon.isRegister = false;
-          //$scope.hackathon.message = $scope.check_status[User.check_status];
+          $location.path('hackathon');
         });
       }
     }
