@@ -38,7 +38,7 @@ from hackathon.database.models import *
 
 class GuacamoleInfo():
     def getConnectInfo(self):
-        connection_name = request.args.get("id")
+        connection_name = request.args.get("name")
         guacadconfig = g.user.virtual_environments.filter_by(remote_provider=RemoteProvider.Guacamole,
                                                              name=connection_name,
                                                              user_id=g.user.id,

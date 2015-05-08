@@ -76,13 +76,17 @@ class ExprManager(object):
                 ves.append(db_adapter.find_first_object_by(VMConfig, virtual_machine_id=id))
         for ve in ves:
             if ve.remote_provider == RemoteProvider.Guacamole:
-                guaca_config = json.loads(ve.remote_paras)
-                url = "%s/guacamole/client.xhtml?id=" % (
-                    safe_get_config("guacamole.host", "localhost:8080")) + "c%2F" + guaca_config["name"]
+                guacamole_config = json.loads(ve.remote_paras)
+                guacamole_host = safe_get_config("guacamole.host", "localhost:8080")
+                # target url format:
+                # http://localhost:8080/guacamole/#/client/c/{name}?name={name}&oh={token}
+                name = guacamole_config["name"]
+                url = guacamole_host + '/guacamole/#/client/c/%s?name=%s' % (name, name)
                 guacamole_servers.append({
-                    "name": guaca_config["displayname"],
+                    "name": guacamole_config["displayname"],
                     "url": url
                 })
+
         if expr.status == ExprStatus.Running:
             ret["remote_servers"] = guacamole_servers
 
