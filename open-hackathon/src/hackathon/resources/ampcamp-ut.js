@@ -19,7 +19,7 @@
                 "public": true
             }],
             "Env": ["JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64/jre/"],
-            "command": "/usr/sbin/sshd -D",
+            "command": "/bin/bash",
             "AttachStdin":false,
             "AttachStdout":true,
             "AttachStderr":true,
