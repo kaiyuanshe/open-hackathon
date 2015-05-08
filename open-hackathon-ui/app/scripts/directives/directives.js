@@ -1,18 +1,18 @@
 // -----------------------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-//  
+//
 // The MIT License (MIT)
-//  
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-//  
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-//  
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -35,7 +35,7 @@ angular.module('oh.directives', [])
    $templateCache.put('hackathon.html', '');
    $templateCache.get('hackathon.html');
    })*/
-  .directive('hackathonNav', function ($interval, $cookieStore,$templateCache, API) {
+  .directive('hackathonNav', function ($interval, $cookieStore, $templateCache, API) {
     return {
       restrict: 'E',//'AEMC'
       templateUrl: 'views/tpls/hackathon-nav.html', //<div ng-transclude></div>
@@ -84,20 +84,23 @@ angular.module('oh.directives', [])
         var temp = $templateCache.get('hackathon-vm.html');
         API.user.experiment.post(JSON.stringify({cid: 'ut', hackathon: scope.config.name}), function (data) {
           var stop;
-          var list = [];
           var loopstart = function () {
             API.user.experiment.get({id: data.expr_id}, function (data) {
               if (data.status == 2) {
                 var dockers = []
-                for (var i in data.public_urls) {
+                for (var i in data.remote_servers) {
                   dockers.push({
-                    purl: data.public_urls[i].url,
                     name: data.remote_servers[i].name,
                     surl: data.remote_servers[i].url
                   })
-                  list.push(temp.format(dockers[i]));
+                  var element = $(temp.format(dockers[i]));
+                  var purls = element.find('[data-pul]');
+                  for (var i in data.public_urls) {
+                    var url = data.public_urls[i].url;
+                    purls.append($('<a>').attr({href: url, target: '_blank'}).text(url));
+                  }
+                  $('.hackathon-nav').append(element);
                 }
-                $('.hackathon-nav').append(list.join(''))
                 bindTemp(data);
                 $('.hackathon-nav a.vm-box:eq(0)').trigger('click');
                 $interval.cancel(stop);
@@ -176,7 +179,7 @@ angular.module('oh.directives', [])
         }, {
           name: '黑客松活动指南',
           link: ''
-        },{
+        }, {
           name: '我的黑客松挑战',
           link: ''
         }, {
