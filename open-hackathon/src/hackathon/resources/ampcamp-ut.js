@@ -4,20 +4,22 @@
         {
             "provider": "docker",
             "name": "web",
-            "image": "sffamily/ampcamp5:v2",
+            "image": "sffamily/ampcamp5:v3",
             "ports":[{
-                "name": "website",
-                "port": 80,
+                "name": "Tachyon",
+                "port": 19999,
                 "public": true
             },{
                 "name": "Deploy",
                 "port": 22,
                 "public": true
             },{
-                "name": "ampcamp",
+                "name": "WebUI",
                 "port": 4040,
                 "public": true
             }],
+            "Env": ["JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64/jre/"],
+            "command": "/usr/sbin/sshd -D",
             "AttachStdin":false,
             "AttachStdout":true,
             "AttachStderr":true,
