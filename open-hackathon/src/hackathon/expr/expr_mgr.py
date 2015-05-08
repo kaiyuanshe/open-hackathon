@@ -397,7 +397,7 @@ class ExprManager(object):
             # guacamole_config = []
             try:
                 host_server = self.__get_available_docker_host(expr_config, hackathon)
-                if curr_num >= safe_get_config("pre_allocate.docker", 1):
+                if curr_num != 0 and curr_num >= get_config("pre_allocate.docker"):
                     return
                 expr.status = ExprStatus.Starting
                 db_adapter.commit()
@@ -412,7 +412,7 @@ class ExprManager(object):
                 self.__roll_back(expr.id)
                 return {"error": "Failed starting containers"}, 500
         else:
-            if curr_num >= safe_get_config("pre_allocate.azure", 1):
+            if curr_num != 0 and curr_num >= get_config("pre_allocate.azure"):
                 return
             expr.status = ExprStatus.Starting
             db_adapter.commit()
