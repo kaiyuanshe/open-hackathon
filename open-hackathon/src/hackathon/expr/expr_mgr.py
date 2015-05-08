@@ -103,6 +103,13 @@ class ExprManager(object):
                             "name": p.name,
                             "url": url
                         })
+                    elif p.binding_type == PortBindingType.CloudService and p.name == "ampcamp":
+                        hs = db_adapter.find_first_object_by(DockerHostServer, id=p.binding_resource_id)
+                        url = "http://%s:%s" % (hs.public_dns, p.port_from)
+                        public_urls.append({
+                            "name": p.name,
+                            "url": url
+                        })
         else:
             # todo important!!! because the user template had been deleted, so now take temporary measure
             # now let name = 'open-tech-role-' + str(expr.id)
