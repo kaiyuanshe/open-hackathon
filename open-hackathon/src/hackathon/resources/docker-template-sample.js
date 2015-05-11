@@ -78,7 +78,7 @@
                 "NetworkMode": "",
                 "Devices": [],
                 "Ulimits": [{}],
-                "LogConfig": { "Type": "json-file", Config: {} },
+                "LogConfig": { "Type": "json-file", "Config": {} },
                 "CgroupParent": ""
             }
         }
