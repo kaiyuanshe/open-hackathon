@@ -28,16 +28,15 @@ __author__ = 'Bian Hu'
 import sys
 
 sys.path.append("..")
-import imghdr
 from azure.storage import BlobService
-from flask import g
 from hackathon.hackathon_response import *
-from hackathon.functions import get_config
+from hackathon.functions import get_config,safe_get_config
+import imghdr
 
 blob_service = BlobService(account_name=get_config("storage.account_name"),
                            account_key=get_config("storage.account_key"),
                            host_base=get_config("storage.blob_service_host_base"))
-default_container_name = get_config("storage.container_name")
+default_container_name = safe_get_config("storage.container_name", "imagestorage")
 
 
 def create_container_in_storage(container_name, access):
