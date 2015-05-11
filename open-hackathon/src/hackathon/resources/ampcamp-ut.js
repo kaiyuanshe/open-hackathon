@@ -4,7 +4,7 @@
         {
             "provider": "docker",
             "name": "web",
-            "image": "sffamily/ampcamp5:v3",
+            "image": "sffamily/ampcamp5:v4",
             "ports":[{
                 "name": "Tachyon",
                 "port": 19999,
@@ -18,8 +18,7 @@
                 "port": 4040,
                 "public": true
             }],
-            "Env": ["JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64/jre/"],
-            "command": "/bin/bash",
+            "command": "/usr/sbin/sshd -D",
             "AttachStdin":false,
             "AttachStdout":true,
             "AttachStderr":true,
@@ -28,8 +27,8 @@
             "remote": {
                 "provider": "guacamole",
                 "protocol": "ssh",
-                "username": "root",
-                "password": "acoman",
+                "username": "opentech",
+                "password": "opentech",
                 "port": 22
             }
         }
