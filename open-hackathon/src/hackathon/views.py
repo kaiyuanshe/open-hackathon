@@ -44,7 +44,7 @@ from hackathon_response import *
 from hackathon.azureformation.azureManagement import (
     azure_management,
 )
-from hackathon.azureformation.fileService import upload_file
+from hackathon.azureformation.fileService import upload_images_file
 from hackathon.enum import RGStatus
 
 
@@ -352,7 +352,7 @@ class AdminAzureResource(Resource):
 class FileResource(Resource):
     @admin_privilege_required
     def post(self):
-        return upload_file(request)
+        return upload_images_file(request)
 
 
 """

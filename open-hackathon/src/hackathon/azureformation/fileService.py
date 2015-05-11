@@ -66,7 +66,7 @@ def upload_file_to_azure(file, container_name, blob_name):
         return None
 
 
-def upload_file(request):
+def upload_images_file(request):
     log.debug("request to upload a file")
     # storage account info must be exist in config file
     if get_config("storage.account_name") is None or get_config("storage.account_key") is None:

@@ -26,25 +26,21 @@ THE SOFTWARE.
 import sys
 
 sys.path.append("..")
-from hackathon.database.models import Template
+from hackathon.database.models import Template, DockerHostServer
 from hackathon.database import db_adapter
 from hackathon.hack import hack_manager
 from flask import g
 from hackathon.hackathon_response import *
 from datetime import datetime
 from hackathon.enum import TEMPLATE_STATUS
-from hackathon.template.docker_template_unit import (
-    DockerTemplateUnit,
-)
-from hackathon.template.docker_template import (
-    DockerTemplate,
-)
-from hackathon.template.base_template import (
-    BaseTemplate,
-)
+from hackathon.functions import post_to_remote
+from hackathon.template.docker_template_unit import DockerTemplateUnit
+from hackathon.template.docker_template import DockerTemplate
+from hackathon.template.base_template import BaseTemplate
 
 
 class TemplateManager(object):
+
     def __init__(self, db_adapter):
         self.db = db_adapter
 
@@ -61,12 +57,12 @@ class TemplateManager(object):
     def get_template_by_id(self, id):
         return self.db.find_first_object(Template, Template.id == id)
 
+
     def create_template(self, args):
 
         docker_template_units = [DockerTemplateUnit(ve) for ve in args[BaseTemplate.T_VE]]
         docker_template = DockerTemplate(args[BaseTemplate.T_EN], docker_template_units)
         docker_template_url = docker_template.to_file()
-
         log.debug(docker_template_url)
 
         if "name" not in args:
@@ -87,6 +83,7 @@ class TemplateManager(object):
             log.error(ex)
             return internal_server_error("create or update failed because of raising Exception")
 
+
     def update_template(self, args):
         if "name" not in args:
             return bad_request("template perporities lost name")
@@ -95,7 +92,6 @@ class TemplateManager(object):
         if template is None:
             return bad_request("template doesn't exist")
         try:
-
             log.debug("update template: %r" % args)
             args['update_time'] = datetime.utcnow()
             update_items = dict(dict(args).viewitems() - template.dic().viewitems())
@@ -105,6 +101,7 @@ class TemplateManager(object):
         except Exception as ex:
             log.error(ex)
             return internal_server_error("create or update failed because of raising Exception")
+
 
     def delete_template(self, id):
         log.debug("delete or disable a exist template")
@@ -120,7 +117,17 @@ class TemplateManager(object):
             return internal_server_error("disable or delete failed")
 
 
+    def pull_images(self,image_name):
+        hosts = self.db.find_all_objects(DockerHostServer,DockerHostServer.hackathon_id==g.hackathon.id)
+        docker_host_api = map(lambda x:x.public_docker_api_port, hosts)
+        for api in docker_host_api:
+            url = api + "/images/create?fromImage=" + image_name
+            post_to_remote(url,{})
+            #TODO change Synchronous to Asynchronous
+
+
 template_manager = TemplateManager(db_adapter)
+
 # template_manager.create_template({
 #     "expr_name": "test",
 #     "virtual_environments": [
