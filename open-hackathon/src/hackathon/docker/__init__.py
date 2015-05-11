@@ -124,7 +124,7 @@ class OssDocker(object):
 
         log.debug("try to assign docker port %d on server %r" % (private_port, docker_host))
         containers = self.containers_info(docker_host)
-        host_ports = flatten(map(lambda p: p['ExposedPorts'], containers))
+        host_ports = flatten(map(lambda p: p['ports'], containers))
 
         # todo if azure return -1
         def sub(port):
