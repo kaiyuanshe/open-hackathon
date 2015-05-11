@@ -124,7 +124,7 @@ class OssDocker(object):
 
         log.debug("try to assign docker port %d on server %r" % (private_port, docker_host))
         containers = self.containers_info(docker_host)
-        host_ports = flatten(map(lambda p: p['Ports'], containers))
+        host_ports = flatten(map(lambda p: p['ExposedPorts'], containers))
 
         # todo if azure return -1
         def sub(port):
@@ -215,7 +215,7 @@ class OssDocker(object):
         if exist is not None:
             result["container_id"] = exist["Id"]
         else:
-            image = args["image"]
+            image = args["Image"]
             # ports foramt: [from, to ,from2, to2]. e.g.[9080,8080,3306,3306].Similar with 'mnts'
             ports = args["docker_ports"] if "docker_ports" in args else []
             port_bingings = dict(zip(ports[1::2], ports[::2]))
@@ -227,9 +227,9 @@ class OssDocker(object):
             mnts_t = map(lambda s: {"bind": s, "ro": False}, mnts[1::2])
             mnt_bindings = dict(zip(mnts_f, mnts_t))
 
-            command = args["command"] if "command" in args else None
-            stdin_open = args["stdin_open"] if "stdin_open" in args else False
-            tty = args["tty"] if "tty" in args else False
+            command = args["Cmd"] if "Cmd" in args else None
+            stdin_open = args["OpenStdin"] if "OpenStdin" in args else False
+            tty = args["Tty"] if "Tty" in args else False
             dns = args["dns"] if "dns" in args else None
             entrypoint = args["entrypoint"] if "entrypoint" in args else None
             working_dir = args["working_dir"] if "working_dir" in args else None
