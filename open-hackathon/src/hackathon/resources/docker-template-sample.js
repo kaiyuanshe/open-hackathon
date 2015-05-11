@@ -1,9 +1,10 @@
 {
     "expr_name": "docker-template-sample",
-    "virtual_environments": [
+    "virtual_environments":
+    [
         {
             "provider": "docker",
-            "name": "ubuntu",
+            "name": "web",
             "Hostname": "",
             "Domainname": "",
             "User": "",
@@ -15,43 +16,50 @@
             "StdinOnce": false,
             "Env": ["JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64/jre/"],
             "Cmd": ["/usr/sbin/sshd", "-D"],
-            "Entrypoint": null,
+            "Entrypoint": "",
             "Image": "sffamily/ampcamp5:v4",
             "Labels": {},
-            "Volumes": null,
+            "Volumes": {},
             "WorkingDir": "",
             "NetworkDisabled": false,
             "MacAddress": "",
-            "ExposedPorts":[{
-                "name": "Tachyon",
-                "port": 19999,
-                "public": true,
-                "protocol": "tcp",
-                "url": "http://{0}:{1}"
-            },{
-                "name": "Deploy",
-                "port": 22,
-                "public": true,
-                "protocol": "tcp"
-            },{
-                "name": "WebUI",
-                "port": 4040,
-                "public": true,
-                "protocol": "tcp",
-                "url": "http://{0}:{1}"
-            }],
-            "remote": {
+            "ExposedPorts":
+            [
+                {
+                    "name": "Tachyon",
+                    "port": 19999,
+                    "public": true,
+                    "protocol": "tcp",
+                    "url": "http://{0}:{1}"
+                },
+                {
+                    "name": "Deploy",
+                    "port": 22,
+                    "public": true,
+                    "protocol": "tcp"
+                },
+                {
+                    "name": "WebUI",
+                    "port": 4040,
+                    "public": true,
+                    "protocol": "tcp",
+                    "url": "http://{0}:{1}"
+                }
+            ],
+            "remote":
+            {
                 "provider": "guacamole",
-                "protocol": "vnc",
-                "username": "root",
-                "password": "acoman",
-                "port": 5901
+                "protocol": "ssh",
+                "username": "opentech",
+                "password": "opentech",
+                "port": 22
             },
             "SecurityOpts": [""],
-            "HostConfig": {
-                "Binds": null,
-                "Links": null,
-                "LxcConf": null,
+            "HostConfig":
+            {
+                "Binds": [],
+                "Links": [],
+                "LxcConf": {},
                 "Memory": 0,
                 "MemorySwap": 0,
                 "CpuShares": 0,
@@ -59,16 +67,16 @@
                 "PublishAllPorts": false,
                 "Privileged": false,
                 "ReadonlyRootfs": false,
-                "Dns": null,
-                "DnsSearch": null,
-                "ExtraHosts": null,
-                "VolumesFrom": null,
-                "CapAdd": null,
-                "CapDrop": null,
+                "Dns": [],
+                "DnsSearch": [],
+                "ExtraHosts": [],
+                "VolumesFrom": [],
+                "CapAdd": [],
+                "CapDrop": [],
                 "RestartPolicy": { "Name": "", "MaximumRetryCount": 0 },
                 "NetworkMode": "",
-                "Devices": null,
-                "Ulimits": null,
+                "Devices": [],
+                "Ulimits": [{}],
                 "LogConfig": { "Type": "json-file", Config: {} },
                 "CgroupParent": ""
             }

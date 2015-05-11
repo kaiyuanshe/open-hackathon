@@ -248,7 +248,7 @@ class OssDocker(object):
                     container_config["Volumes"][v] = {}
             container_config["Env"] = env_variable
             if command is not None:
-                container_config["Cmd"] = command.split(" ")
+                container_config["Cmd"] = command
             container_config["OpenStdin"] = stdin_open
             container_config["Tty"] = tty
             container_config["Dns"] = dns
