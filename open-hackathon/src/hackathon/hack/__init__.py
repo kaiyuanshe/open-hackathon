@@ -171,19 +171,17 @@ class HackathonManager():
             log.warn("cannot load recycle_enabled from basic info for hackathon %d, will return False" % hackathon.id)
             return False
 
-    def create_or_update_hackathon(self, args):
+
+    def create_new_hackathon(self, args):
         log.debug("create_or_update_hackathon: %r" % args)
         if "name" not in args:
-            return bad_request("hackathon name invalid")
+            return bad_request("hackathon name already exist")
         hackathon = self.db.find_first_object(Hackathon, Hackathon.name == args['name'])
-
         try:
             if hackathon is None:
                 log.debug("add a new hackathon:" + str(args))
                 args['update_time'] = datetime.utcnow()
                 args['create_time'] = datetime.utcnow()
-                args['basic_info'] = json.dumps(args['basic_info'])
-                args['extra_info'] = json.dumps(args['extra_info'] if "extra_info" in args else {})
                 args["creator_id"] = g.user.id
                 new_hack = self.db.add_object_kwargs(Hackathon, **args)  # insert into hackathon
                 try:
@@ -197,21 +195,45 @@ class HackathonManager():
                 except Exception as ex:
                     # TODO: send out a email to remind administrator to deal with this problems
                     log.error(ex)
-                    log.error("insert into hackathon succeed but insert into AdminHackathonRel is failed in DB")
-                    return internal_server_error("fail to create admin hackathon relationship ")
-                return ok("create hackathon succeed")
-            else:
-                update_items = dict(dict(args).viewitems() - hackathon.dic().viewitems())
-                update_items['update_time'] = datetime.utcnow()
-                update_items.pop('creator_id')
-                update_items.pop('create_time')
-                update_items.pop('id')
-                log.debug("update a exist hackathon :" + str(args))
-                result = self.db.update_object(hackathon, **update_items)
-                return ok("update hackathon succeed")
+                    return internal_server_error("fail to insert a recorde into admin_hackathon_rel")
+
+                return new_hack.id
+
         except Exception as  e:
             log.error(e)
-            return internal_server_error("fail to create or update hackathon")
+            return internal_server_error("fail to create hackathon")
+
+
+    def update_hackathon(self, args):
+        log.debug("create_or_update_hackathon: %r" % args)
+        if "name" not in args or "id" not in args:
+            return bad_request("name or id are both required when update a hackathon")
+
+        hackathon = self.db.find_first_object(Hackathon, Hackathon.name == args['name'])
+
+        if hackathon.id != args['id']:
+            return bad_request("name and id are not matched in hackathon")
+
+        try:
+            update_items = dict(dict(args).viewitems() - hackathon.dic().viewitems())
+
+            if "basic_info" in update_items:
+                args['basic_info'] = json.dumps(args['basic_info'])
+            if "extra_info" in update_items:
+                args['extra_info'] = json.dumps(args['extra_info'] if "extra_info" in args else {})
+
+            update_items['update_time'] = datetime.utcnow()
+            update_items.pop('creator_id')
+            update_items.pop('create_time')
+            update_items.pop('id')
+            log.debug("update a exist hackathon :" + str(args))
+            result = self.db.update_object(hackathon, **update_items)
+            return ok("update hackathon succeed")
+
+        except Exception as  e:
+            log.error(e)
+            return internal_server_error("fail to update hackathon")
+
 
     def upload_files(self):
         if request.content_length > len(request.files) * get_config("storage.size_limit"):

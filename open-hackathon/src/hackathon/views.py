@@ -208,12 +208,12 @@ class HackathonResource(Resource):
     @token_required
     def post(self):
         args = request.get_json()
-        return hack_manager.create_or_update_hackathon(args)
+        return hack_manager.create_new_hackathon(args)
 
     @admin_privilege_required
     def put(self):
         args = request.get_json()
-        return hack_manager.create_or_update_hackathon(args)
+        return hack_manager.update_hackathon(args)
 
     def delete(self):
         pass

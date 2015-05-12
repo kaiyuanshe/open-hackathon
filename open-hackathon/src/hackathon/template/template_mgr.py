@@ -31,12 +31,15 @@ from hackathon.database import db_adapter
 from hackathon.hack import hack_manager
 from flask import g
 from hackathon.hackathon_response import *
-from datetime import datetime
+from datetime import datetime, timedelta
 from hackathon.enum import TEMPLATE_STATUS
-from hackathon.functions import post_to_remote
 from hackathon.template.docker_template_unit import DockerTemplateUnit
 from hackathon.template.docker_template import DockerTemplate
 from hackathon.template.base_template import BaseTemplate
+from hackathon.scheduler import scheduler
+import requests
+from hackathon.azureformation import fileService
+
 
 
 class TemplateManager(object):
@@ -58,12 +61,19 @@ class TemplateManager(object):
         return self.db.find_first_object(Template, Template.id == id)
 
 
-    def create_template(self, args):
-
+    def save_args_to_file(self, args):
         docker_template_units = [DockerTemplateUnit(ve) for ve in args[BaseTemplate.T_VE]]
         docker_template = DockerTemplate(args[BaseTemplate.T_EN], docker_template_units)
-        docker_template_url = docker_template.to_file()
-        log.debug(docker_template_url)
+        file_path = docker_template.to_file()
+        log.debug("save template as file :"+file_path)
+        return file_path
+
+
+    def create_template(self, args):
+
+        local_path = self.save_args_to_file(args)
+        url = fileService.upload_file_to_azure_from_path(local_path,)
+
 
         if "name" not in args:
             return bad_request("template perporities lost name")
@@ -122,8 +132,10 @@ class TemplateManager(object):
         docker_host_api = map(lambda x:x.public_docker_api_port, hosts)
         for api in docker_host_api:
             url = api + "/images/create?fromImage=" + image_name
-            post_to_remote(url,{})
-            #TODO change Synchronous to Asynchronous
+            exec_time = datetime.now() + timedelta(seconds=2)
+            log.debug(" send request to pull image:" + url)
+             # use requests.post instead of post_to_remote, because req.contect can not be json.loads()
+            scheduler.add_job(requests.post, 'date', run_date=exec_time, args=[url])
 
 
 template_manager = TemplateManager(db_adapter)

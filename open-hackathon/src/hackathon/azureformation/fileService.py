@@ -32,6 +32,7 @@ from azure.storage import BlobService
 from hackathon.hackathon_response import *
 from hackathon.functions import get_config,safe_get_config
 import imghdr
+from flask import  g
 
 blob_service = BlobService(account_name=get_config("storage.account_name"),
                            account_key=get_config("storage.account_key"),
@@ -78,7 +79,7 @@ def upload_images_file(request):
     try:
         # check each file type
         for file_name in request.files:
-            if imghdr.what(request.files.get(file_name)) is None:
+            if imghdr.what(request.files.get(file_name)) is not None or file_name.edn:
                 return bad_request("only images can be uploaded")
 
         create_container_in_storage(default_container_name, 'container')
