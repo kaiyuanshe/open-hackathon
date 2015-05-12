@@ -37,7 +37,6 @@ from flask import  g
 blob_service = BlobService(account_name=get_config("storage.account_name"),
                            account_key=get_config("storage.account_key"),
                            host_base=get_config("storage.blob_service_host_base"))
-default_container_name = safe_get_config("storage.container_name", "imagestorage")
 
 
 def create_container_in_storage(container_name, access):
@@ -64,37 +63,6 @@ def upload_file_to_azure(file, container_name, blob_name):
     except Exception as e:
         log.error(e)
         return None
-
-
-def upload_images_file(request):
-    log.debug("request to upload a file")
-    # storage account info must be exist in config file
-    if get_config("storage.account_name") is None or get_config("storage.account_key") is None:
-        return internal_server_error("can not found storage account info in config file ")
-
-    # check whole request size
-    if request.content_length > len(request.files) * get_config("storage.size_limit"):
-        return bad_request("more than the file size limited")
-
-    try:
-        # check each file type
-        for file_name in request.files:
-            if imghdr.what(request.files.get(file_name)) is not None or file_name.edn:
-                return bad_request("only images can be uploaded")
-
-        create_container_in_storage(default_container_name, 'container')
-        images = {}
-        for file_name in request.files:
-            file = request.files.get(file_name)
-            url = upload_file_to_azure(file, default_container_name, g.hackathon.name + "/" + file_name)
-            images[file_name] = url
-
-        return images
-
-    except Exception as ex:
-        log.error(ex)
-        log.error("upload file raised an exception")
-        return internal_server_error("upload file raised an exception")
 
 
 def upload_file_to_azure_from_path(path, container_name, blob_name):

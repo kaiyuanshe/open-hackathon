@@ -39,8 +39,10 @@ from flask import request, g
 import json
 from hackathon.constants import HACKATHON_BASIC_INFO
 import imghdr
-from hackathon.functions import get_config
+from hackathon.functions import get_config, safe_get_config
 from hackathon.azureformation.fileService import create_container_in_storage, upload_file_to_azure
+import uuid
+import time
 
 
 class HackathonManager():
@@ -235,30 +237,59 @@ class HackathonManager():
             return internal_server_error("fail to update hackathon")
 
 
-    def upload_files(self):
-        if request.content_length > len(request.files) * get_config("storage.size_limit"):
+    def upload_images_validate(self):
+
+        # check storage account
+        if get_config("storage.account_name") is None or get_config("storage.account_key") is None:
+            return internal_server_error("storage accout  does not initialised")
+
+        #check size
+        if request.content_length > len(request.files) * get_config("storage.size_limit_byte"):
             return bad_request("more than the file size limited")
 
-        try:
-            # check each file type
-            for file_name in request.files:
-                if imghdr.what(request.files.get(file_name)) is None:
-                    return bad_request("only images can be uploaded")
+        # check each file type
+        for file_name in request.files:
+            if imghdr.what(request.files.get(file_name)) is None:
+                return bad_request("only images can be uploaded")
 
-            default_container_name = get_config("storage.container_name")
-            create_container_in_storage(default_container_name, 'container')
-            images = {}
-            for file_name in request.files:
-                file = request.files.get(file_name)
-                url = upload_file_to_azure(file, default_container_name, g.hackathon.name + "/" + file_name)
-                images[file_name] = url
 
-            return images
+    def upload_files(self):
 
-        except Exception as ex:
-            log.error(ex)
-            log.error("upload file raised an exception")
-            return internal_server_error("upload file raised an exception")
+        self.upload_images_validate()
+
+        image_container_name = safe_get_config("storage.image_container", "images")
+        # create a public container
+        create_container_in_storage(image_container_name, 'container')
+
+        images = []
+        for file_name in request.files:
+            file = request.files.get(file_name)
+
+            # refresh file_name = hack_name + uuid(10) + time + suffix
+            real_name = g.hackathon.name + "/" + \
+                        str(uuid.uuid1())[0:9] + \
+                        time.strftime("%Y%m%d%H%M%S") + "." + \
+                        imghdr.what(request.files.get(file_name))
+
+            log.debug("upload image file : " + real_name )
+            url = upload_file_to_azure(file, image_container_name, real_name)
+
+            if url is not None:
+                image = {}
+                image['name'] = file_name
+                image['url'] = url
+                # frontUI components needed return values
+                image['type'] = 'image'
+                image['size'] = '1024'
+                image['thumbnailUrl'] = url
+                image['deleteUrl'] = '/api/file?key=' + file_name
+
+                images.append(image)
+            else:
+                log.error("upload file raised an exception")
+                return internal_server_error("upload file raised an exception")
+
+        return images
 
 
 hack_manager = HackathonManager(db_adapter)
