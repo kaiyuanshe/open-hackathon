@@ -47,6 +47,20 @@ class HackathonManager():
     def __init__(self, db):
         self.db = db
 
+    def __is_recycle_enabled(self, hackathon):
+        try:
+            basic_info = json.loads(hackathon.basic_info)
+            return basic_info[HACKATHON_BASIC_INFO.RECYCLE_ENABLED] == 1
+        except Exception as e:
+            log.error(e)
+            log.warn("cannot load recycle_enabled from basic info for hackathon %d, will return False" % hackathon.id)
+            return False
+
+    # check the admin authority on hackathon
+    def __validate_admin_privilege(self, user_id, hackathon_id):
+        hack_ids = self.get_permitted_hackathon_ids_by_admin_user_id(user_id)
+        return -1 in hack_ids or hackathon_id in hack_ids
+
     def get_hackathon_by_name_or_id(self, hack_id=None, name=None):
         if hack_id is None:
             return self.get_hackathon_by_name(name)
@@ -127,11 +141,6 @@ class HackathonManager():
         return list(set(hackathon_ids))
 
 
-    # check the admin authority on hackathon
-    def __validate_admin_privilege(self, user_id, hackathon_id):
-        hack_ids = self.get_permitted_hackathon_ids_by_admin_user_id(user_id)
-        return -1 in hack_ids or hackathon_id in hack_ids
-
     def validate_admin_privilege(self):
         return self.__validate_admin_privilege(g.user.id, g.hackathon.id)
 
@@ -162,14 +171,26 @@ class HackathonManager():
             log.warn("cannot load auto_approve from basic info for hackathon %d, will return False" % hackathon.id)
             return False
 
-    def is_recycle_enabled(self, hackathon):
+
+    def is_pre_allocate_enabled(self, hackathon):
         try:
             basic_info = json.loads(hackathon.basic_info)
-            return basic_info[HACKATHON_BASIC_INFO.RECYCLE_ENABLED] == 1
+            return basic_info[HACKATHON_BASIC_INFO.PRE_ALLOCATE_ENABLED] == 1
         except Exception as e:
             log.error(e)
-            log.warn("cannot load recycle_enabled from basic info for hackathon %d, will return False" % hackathon.id)
+            log.warn(
+                "cannot load pre_allocate_enabled from basic info for hackathon %d, will return False" % hackathon.id)
             return False
+
+    def get_pre_allocate_number(self, hackathon):
+        try:
+            basic_info = json.loads(hackathon.basic_info)
+            return basic_info[HACKATHON_BASIC_INFO.PRE_ALLOCATE_NUMBER]
+        except Exception as e:
+            log.error(e)
+            log.warn(
+                "cannot load pre_allocate_number from basic info for hackathon %d, will return 1" % hackathon.id)
+            return 1
 
     def create_or_update_hackathon(self, args):
         log.debug("create_or_update_hackathon: %r" % args)
@@ -239,6 +260,18 @@ class HackathonManager():
             return internal_server_error("upload file raised an exception")
 
 
+    def get_recyclable_hackathon_list(self):
+        all = self.db.find_all_objects(Hackathon)
+        recyclable = filter(lambda h: self.__is_recycle_enabled(h), all())
+        return [h.id for h in recyclable]
+
+
+    def get_pre_allocate_enabled_hackathoon_list(self):
+        all = self.db.find_all_objects(Hackathon)
+        pre_list = filter(lambda h: self.is_pre_allocate_enabled(h), all())
+        return [h.id for h in pre_list]
+
+
 hack_manager = HackathonManager(db_adapter)
 
 
@@ -246,10 +279,14 @@ def is_auto_approve(hackathon):
     return hack_manager.is_auto_approve(hackathon)
 
 
-def is_recycle_enabled(hackathon):
-    return hack_manager.is_recycle_enabled(hackathon)
+def is_pre_allocate_enabled(hackathon):
+    return hack_manager.is_pre_allocate_enabled(hackathon)
+
+
+def get_pre_allocate_number(hackathon):
+    return hack_manager.get_pre_allocate_number(hackathon)
 
 
 Hackathon.is_auto_approve = is_auto_approve
-Hackathon.is_recycle_enabled = is_recycle_enabled
-
+Hackathon.is_pre_allocate_enabled = is_pre_allocate_enabled
+Hackathon.get_pre_allocate_number = get_pre_allocate_number
