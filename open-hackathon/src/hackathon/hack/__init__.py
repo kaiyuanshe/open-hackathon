@@ -178,7 +178,7 @@ class HackathonManager():
         log.debug("create_or_update_hackathon: %r" % args)
         if "name" not in args:
             return bad_request("hackathon name already exist")
-        hackathon = self.db.find_first_object(Hackathon, Hackathon.name == args['name'])
+        hackathon = self.get_hackathon_by_name(args['name'])
         try:
             if hackathon is None:
                 log.debug("add a new hackathon:" + str(args))
@@ -204,7 +204,6 @@ class HackathonManager():
         except Exception as  e:
             log.error(e)
             return internal_server_error("fail to create hackathon")
-
 
     def update_hackathon(self, args):
         log.debug("create_or_update_hackathon: %r" % args)
@@ -251,7 +250,6 @@ class HackathonManager():
         for file_name in request.files:
             if imghdr.what(request.files.get(file_name)) is None:
                 return bad_request("only images can be uploaded")
-
 
     def upload_files(self):
 
