@@ -25,92 +25,50 @@
 # -----------------------------------------------------------------------------------
 
 import sys
-
 sys.path.append("..")
+
+from hackathon.log import (
+    log,
+)
+from hackathon.functions import (
+    convert,
+)
+from hackathon.database import (
+    db_adapter,
+)
+from hackathon.database.models import (
+    Experiment,
+)
+from hackathon.enum import (
+    EStatus,
+)
+from compiler.ast import (
+    flatten,
+)
+from threading import (
+    Lock,
+)
 import json
 import requests
-from hackathon.log import log
-from hackathon.functions import convert
-from compiler.ast import flatten
-from threading import Lock
-from hackathon.database import db_adapter
-from hackathon.database.models import Experiment
-from hackathon.enum import EStatus
 
 
-def name_match(id, l):
-    for n in l:
-        if id in n:
-            return True
-    return False
-
-
-default_http_headers = {'content-type': 'application/json'}
-
-
-class OssDocker(object):
+class DockerFormation(object):
+    application_json = {'content-type': 'application/json'}
     host_ports = []
+    host_port_max_num = 30
 
     def __init__(self):
         self.lock = Lock()
 
-    def get_vm_url(self, docker_host):
-        vm_url = "http://" + docker_host.public_dns + ":" + str(docker_host.public_docker_api_port)
-        return vm_url
-
-    def __ports_cache(self):
-        """
-        cache ports, if ports' number more than 30, release the ports.
-        But if there is a thread apply new ports, we will do this operation in the next loop. Because the host machine
-        do not update the ports information, if we release ports now, the new ports will be lost.
-        """
-        num = db_adapter.count(Experiment, Experiment.status == EStatus.Starting)
-        if num > 0:
-            log.debug("there are %d experiment is starting, host ports will updated in next loop")
-            return
-        log.debug("-----release ports cache successfully------")
-        OssDocker.host_ports = []
-
     def ping(self, docker_host):
         try:
-            ping_url = self.get_vm_url(docker_host) + '/_ping'
+            ping_url = '%s/_ping' % self.__get_vm_url(docker_host)
             req = requests.get(ping_url)
             log.debug(req.content)
             return req.status_code == 200 and req.content == 'OK'
         except Exception as e:
             log.error(e)
             return False
-
-    def containers_info(self, docker_host):
-        try:
-            containers_url = self.get_vm_url(docker_host) + "/containers/json"
-            req = requests.get(containers_url)
-            log.debug(req.content)
-            return convert(json.loads(req.content))
-        except:
-            log.error("cannot get containers' info")
-            raise
-
-    def __get_available_host_port(self, port_bindings, port):
-        """
-        simple lock mechanism, visit static variable ports synchronize, because port_bindings is not in real-time, so we
-        should cache the latest ports, when the cache ports number is more than 30, we will release it to save space.
-        """
-        self.lock.acquire()
-        try:
-            host_port = port + 10000
-            while host_port in port_bindings or host_port in OssDocker.host_ports:
-                host_port += 1
-            if host_port >= 65535:
-                log.error("port used up on this host server")
-                raise Exception("no port available")
-            if len(OssDocker.host_ports) >= 30:
-                self.__ports_cache()
-            OssDocker.host_ports.append(host_port)
-            log.debug("host_port is %d " % host_port)
-            return host_port
-        finally:
-            self.lock.release()
 
     def get_available_host_port(self, docker_host, private_port):
 
@@ -123,7 +81,7 @@ class OssDocker(object):
         """
 
         log.debug("try to assign docker port %d on server %r" % (private_port, docker_host))
-        containers = self.containers_info(docker_host)
+        containers = self.__containers_info(docker_host)
         host_ports = flatten(map(lambda p: p['ports'], containers))
 
         # todo if azure return -1
@@ -134,14 +92,14 @@ class OssDocker(object):
         return self.__get_available_host_port(host_public_ports, private_port)
 
     def get_container(self, name, docker_host):
-        containers = self.containers_info(docker_host)
+        containers = self.__containers_info(docker_host)
         return next((c for c in containers if name in c["Names"] or '/' + name in c["Names"]), None)
 
     def search_containers_by_expr_id(self, id, docker_host, all=False):
-        get_containers = self.containers_info(docker_host)
+        get_containers = self.__containers_info(docker_host)
         if all:
             return get_containers
-        return filter(lambda c: name_match(id, c["Names"]), get_containers)
+        return filter(lambda c: self.__name_match(id, c["Names"]), get_containers)
 
     def stop(self, name, docker_host):
         """
@@ -149,7 +107,7 @@ class OssDocker(object):
         """
         if self.get_container(name, docker_host) is not None:
             try:
-                containers_url = self.get_vm_url(docker_host) + "/containers/%s/stop" % name
+                containers_url = self.__get_vm_url(docker_host) + "/containers/%s/stop" % name
                 req = requests.post(containers_url)
                 log.debug(req.content)
             except:
@@ -161,7 +119,7 @@ class OssDocker(object):
         delete a container
         """
         try:
-            containers_url = self.get_vm_url(docker_host) + "/containers/%s?force=1" % name
+            containers_url = self.__get_vm_url(docker_host) + "/containers/%s?force=1" % name
             req = requests.delete(containers_url)
             log.debug(req.content)
         except:
@@ -177,9 +135,9 @@ class OssDocker(object):
         :param container_name:
         :return:
         """
-        containers_url = self.get_vm_url(docker_host) + "/containers/create?name=%s" % container_name
+        containers_url = self.__get_vm_url(docker_host) + "/containers/create?name=%s" % container_name
         try:
-            req = requests.post(containers_url, data=json.dumps(container_config), headers=default_http_headers)
+            req = requests.post(containers_url, data=json.dumps(container_config), headers=self.application_json)
             log.debug(req.content)
             container = json.loads(req.content)
         except Exception as err:
@@ -196,8 +154,8 @@ class OssDocker(object):
         for example: start_config = { "PortBindings":{"22/tcp":["10022"]}}, "Binds":[]}
         """
         try:
-            url = self.get_vm_url(docker_host) + "/containers/%s/start" % container_id
-            req = requests.post(url, data=json.dumps(start_config), headers=default_http_headers)
+            url = self.__get_vm_url(docker_host) + "/containers/%s/start" % container_id
+            req = requests.post(url, data=json.dumps(start_config), headers=self.application_json)
             log.debug(req.content)
         except:
             log.error("container %s fail to start" % container_id)
@@ -293,3 +251,62 @@ class OssDocker(object):
                 return None
 
         return result
+
+    # --------------------------------------------- helper function ---------------------------------------------#
+
+    def __name_match(self, id, lists):
+        for list in lists:
+            if id in list:
+                return True
+        return False
+
+    def __get_vm_url(self, docker_host):
+        return 'http://%s:%d' % (docker_host.public_dns, docker_host.public_docker_api_port)
+
+    def __clear_ports_cache(self):
+        """
+        cache ports, if ports' number more than host_port_max_num, release the ports.
+        But if there is a thread apply new ports, we will do this operation in the next loop. Because the host machine
+        do not update the ports information, if we release ports now, the new ports will be lost.
+        """
+        num = db_adapter.count(Experiment, Experiment.status == EStatus.Starting)
+        if num > 0:
+            log.debug("there are %d experiment is starting, host ports will updated in next loop" % num)
+            return
+        log.debug("-----release ports cache successfully------")
+        self.host_ports = []
+
+    def __containers_info(self, docker_host):
+        try:
+            containers_url = '%s/containers/json' % self.__get_vm_url(docker_host)
+            req = requests.get(containers_url)
+            log.debug(req.content)
+            return convert(json.loads(req.content))
+        except Exception as e:
+            log.error("cannot get containers' info")
+            log.error(e)
+            return None
+
+    def __get_available_host_port(self, port_bindings, port):
+        """
+        simple lock mechanism, visit static variable ports synchronize, because port_bindings is not in real-time, so we
+        should cache the latest ports, when the cache ports number is more than 30, we will release it to save space.
+        """
+        self.lock.acquire()
+        try:
+            host_port = port + 10000
+            while host_port in port_bindings or host_port in self.host_ports:
+                host_port += 1
+            if host_port >= 65535:
+                log.error("port used up on this host server")
+                raise Exception("no port available")
+            if len(self.host_ports) >= 30:
+                self.__clear_ports_cache()
+            self.host_ports.append(host_port)
+            log.debug("host_port is %d " % host_port)
+            return host_port
+        finally:
+            self.lock.release()
+
+
+docker_formation = DockerFormation()

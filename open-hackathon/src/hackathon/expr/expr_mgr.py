@@ -25,16 +25,13 @@
 # -----------------------------------------------------------------------------------
 
 import sys
-from debtagshw.debtagshw import LOG
-from cmath import log10
-
 sys.path.append("..")
+
 from compiler.ast import (
     flatten,
 )
-
-from hackathon.docker import (
-    OssDocker,
+from hackathon.dockerformation.dockerFormation import (
+    docker_formation,
 )
 from hackathon.functions import (
     safe_get_config,
@@ -86,7 +83,6 @@ import json
 import os
 import random
 import string
-docker = OssDocker()
 
 
 class ExprManager(object):
@@ -187,7 +183,7 @@ class ExprManager(object):
         """
         # get 'host_port'
         map(lambda p: p.update(
-            {'host_port': docker.get_available_host_port(host_server, p['port'])}) if 'host_port' not in p else None,
+            {'host_port': docker_formation.get_available_host_port(host_server, p['port'])}) if 'host_port' not in p else None,
             port_cfg)
 
         # get 'public' cfg
@@ -302,7 +298,7 @@ class ExprManager(object):
                 ve.remote_paras = json.dumps(gc)
 
         # start container remotely
-        container_ret = docker.run(post_data, host_server)
+        container_ret = docker_formation.run(post_data, host_server)
         if container_ret is None:
             log.error("container %s fail to run" % post_data["container_name"])
             raise Exception("container_ret is none")
@@ -465,7 +461,7 @@ class ExprManager(object):
                 # delete containers and change expr status
                 for c in expr.virtual_environments:
                     if c.provider == VEProvider.Docker:
-                        docker.delete(c.name, c.container.host_server)
+                        docker_formation.delete(c.name, c.container.host_server)
                         c.status = VEStatus.Deleted
                         c.container.host_server.container_count -= 1
                         if c.container.host_server.container_count < 0:
@@ -498,10 +494,10 @@ class ExprManager(object):
                     try:
                         log.debug("begin to stop %s" % c.name)
                         if force:
-                            docker.delete(c.name, c.container.host_server)
+                            docker_formation.delete(c.name, c.container.host_server)
                             c.status = VEStatus.Deleted
                         else:
-                            docker.stop(c.name, c.container.host_server)
+                            docker_formation.stop(c.name, c.container.host_server)
                             c.status = VEStatus.Stopped
                         c.container.host_server.container_count -= 1
                         if c.container.host_server.container_count < 0:

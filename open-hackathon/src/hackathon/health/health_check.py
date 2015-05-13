@@ -28,9 +28,11 @@ import sys
 
 sys.path.append("..")
 from hackathon.constants import HEALTH_STATE
-from hackathon.docker import *
 from hackathon.functions import *
 from sqlalchemy import __version__
+from hackathon.database import (
+    db_adapter,
+)
 from hackathon.database.models import (
     User,
     DockerHostServer,
@@ -38,6 +40,9 @@ from hackathon.database.models import (
 )
 from hackathon.azureformation.service import (
     Service,
+)
+from hackathon.dockerformation.dockerFormation import (
+    docker_formation,
 )
 
 STATUS = "status"
@@ -72,14 +77,14 @@ class MySQLHealthCheck(HealthCheck):
 class DockerHealthCheck(HealthCheck):
     def __init__(self):
         self.db = db_adapter
-        self.docker = OssDocker()
+        self.docker_formation = docker_formation
 
     def reportHealth(self):
         try:
             hosts = self.db.find_all_objects(DockerHostServer)
             alive = 0
             for host in hosts:
-                if self.docker.ping(host):
+                if self.docker_formation.ping(host):
                     alive += 1
             if alive == len(hosts):
                 return {
