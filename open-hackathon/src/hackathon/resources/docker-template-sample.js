@@ -32,8 +32,8 @@
             {
                 "provider": "guacamole",
                 "protocol": "ssh",
-                "username": "opentech",
-                "password": "opentech",
+                "username": "root",
+                "password": "root",
                 "port": 22
             },
             "Hostname": "",
@@ -48,7 +48,7 @@
             "Env": ["JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64/jre/"],
             "Cmd": ["/usr/sbin/sshd", "-D"],
             "Entrypoint": "",
-            "Image": "sffamily/ampcamp5:v4",
+            "Image": "sffamily/ampcamp5:v5",
             "Labels": {},
             "Volumes": {},
             "WorkingDir": "",
@@ -77,7 +77,7 @@
                 "RestartPolicy": { "Name": "", "MaximumRetryCount": 0 },
                 "NetworkMode": "",
                 "Devices": [],
-                "Ulimits": [{}],
+                "Ulimits": [],
                 "LogConfig": { "Type": "json-file", "Config": {} },
                 "CgroupParent": ""
             }
