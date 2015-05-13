@@ -31,10 +31,16 @@ from hackathon.template.base_template import (
 
 
 class DockerTemplate(BaseTemplate):
+    """
+    Docker template class
+    It consists of a list of docker template units
+    """
     DOCKER = 'docker'
 
     def __init__(self, expr_name, docker_template_units):
         super(DockerTemplate, self).__init__(expr_name)
+        # set provider as docker
         for docker_template_unit in docker_template_units:
             docker_template_unit.dic[self.T_VE_P] = self.DOCKER
+        # set virtual environments as a list of docker template units
         self.dic[self.T_VE] = [docker_template_unit.dic for docker_template_unit in docker_template_units]
