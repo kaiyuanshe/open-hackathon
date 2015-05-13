@@ -4,7 +4,7 @@
         {
             "provider": "docker",
             "name": "web",
-            "image": "sffamily/ampcamp5:v4",
+            "image": "sffamily/ampcamp5:v5",
             "ports":[{
                 "name": "Tachyon",
                 "port": 19999,
@@ -27,8 +27,8 @@
             "remote": {
                 "provider": "guacamole",
                 "protocol": "ssh",
-                "username": "opentech",
-                "password": "opentech",
+                "username": "root",
+                "password": "root",
                 "port": 22
             }
         }
