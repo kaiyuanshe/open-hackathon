@@ -74,6 +74,7 @@ class RegisterManger(object):
             log.error(e)
             return internal_server_error("fail to create or update register")
 
+
     def update_registration(self, args):
         log.debug("update_registration: %r" % args)
         try:
@@ -85,8 +86,7 @@ class RegisterManger(object):
 
             log.debug("update a existed register")
             update_items = dict(dict(args).viewitems() - register.dic().viewitems())
-            update_items.pop("id")
-            update_items.pop("create_time")
+            if "create_time" in update_items: update_items.pop("create_time")
             update_items["update_time"] = get_now()
             self.db.update_object(register, **update_items)
 
