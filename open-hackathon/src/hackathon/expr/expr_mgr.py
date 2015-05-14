@@ -367,7 +367,7 @@ class ExprManager(object):
             return {"error": "hackathon or template is not existed"}, 500
 
         hackathon = hack_temp[0]
-        if hackathon.event_end_time < datetime.utcnow():
+        if hackathon.event_end_time < get_now():
             log.warn("hackathon is ended. The expr starting process will be stopped")
             return "hackathen is ended", 412
 
@@ -430,7 +430,7 @@ class ExprManager(object):
         if expr is None:
             return {"error": "Experiment doesn't running"}, 404
 
-        expr.last_heart_beat_time = datetime.utcnow()
+        expr.last_heart_beat_time = get_now()
         db_adapter.commit()
         return "OK"
 
@@ -592,7 +592,7 @@ def recycle_expr_scheduler():
     :return:
     """
     log.debug("Start recycling inactive user experiment")
-    excute_time = datetime.utcnow() + timedelta(minutes=1)
+    excute_time = get_now() + timedelta(minutes=1)
     scheduler.add_job(recycle_expr, 'interval', id='2', replace_existing=True, next_run_time=excute_time,
                       minutes=safe_get_config("recycle.check_idle_interval_minutes", 5))
 
@@ -604,7 +604,7 @@ def recycle_expr():
     """
     log.debug("start checking experiment ... ")
     recycle_hours = safe_get_config('recycle.idle_hours', 24)
-    expr_time_cond = Experiment.last_heart_beat_time + timedelta(hours=recycle_hours) > datetime.utcnow()
+    expr_time_cond = Experiment.last_heart_beat_time + timedelta(hours=recycle_hours) > get_now()
     expr_enable_cond = Hackathon.recycle_enabled == RecycleStatus.Enabled
     r = Experiment.query.join(Hackathon).filter(expr_time_cond, expr_enable_cond).first()
     if r is not None:

@@ -32,7 +32,8 @@ from hackathon.database import db_adapter
 from hackathon.hack import hack_manager
 from flask import g
 from hackathon.hackathon_response import *
-from datetime import datetime, timedelta
+from datetime import timedelta
+from hackathon.functions import get_now
 import time
 from hackathon.enum import TEMPLATE_STATUS
 from hackathon.template.docker_template_unit import DockerTemplateUnit
@@ -113,7 +114,7 @@ class TemplateManager(object):
             log.debug("create template: %r" % args)
             args['url'] = url
             args['creator_id'] = g.user.id
-            args['update_time'] = datetime.utcnow()
+            args['update_time'] = get_now()
             args['hackathon_id'] = g.hackathon.id
             args['status'] = TEMPLATE_STATUS.ONLINE
             return self.db.add_object_kwargs(Template, **args)
@@ -131,7 +132,7 @@ class TemplateManager(object):
             return bad_request("template doesn't exist")
         try:
             log.debug("update template: %r" % args)
-            args['update_time'] = datetime.utcnow()
+            args['update_time'] = get_now()
             update_items = dict(dict(args).viewitems() - template.dic().viewitems())
             log.debug("update a exist hackathon :" + str(args))
             self.db.update_object(template, **update_items)
@@ -147,7 +148,7 @@ class TemplateManager(object):
             template = self.get_template_by_id(id)
             args = {}
             args['status'] = TEMPLATE_STATUS.OFFLINE
-            args['update_time'] = datetime.utcnow()
+            args['update_time'] = get_now()
             self.db.update_object(template, args)
             return ok("delete or disable template success")
         except Exception as ex:

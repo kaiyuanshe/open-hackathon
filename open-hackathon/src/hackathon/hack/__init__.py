@@ -29,7 +29,7 @@ import sys
 sys.path.append("..")
 from hackathon.database.models import Hackathon, User, UserHackathonRel, AdminHackathonRel
 from hackathon.database import db_adapter
-from datetime import datetime
+from hackathon.functions import get_now
 from hackathon.enum import RGStatus
 from hackathon.hackathon_response import *
 from hackathon.enum import ADMIN_ROLE_TYPE
@@ -182,8 +182,8 @@ class HackathonManager():
         try:
             if hackathon is None:
                 log.debug("add a new hackathon:" + str(args))
-                args['update_time'] = datetime.utcnow()
-                args['create_time'] = datetime.utcnow()
+                args['update_time'] = get_now()
+                args['create_time'] = get_now()
                 args["creator_id"] = g.user.id
                 new_hack = self.db.add_object_kwargs(Hackathon, **args)  # insert into hackathon
                 try:
@@ -192,7 +192,7 @@ class HackathonManager():
                                             hackathon_id=new_hack.id,
                                             status=1,
                                             remarks='creator',
-                                            create_time=datetime.utcnow())
+                                            create_time=get_now())
                     self.db.add_object(ahl)
                 except Exception as ex:
                     # TODO: send out a email to remind administrator to deal with this problems
@@ -223,7 +223,7 @@ class HackathonManager():
             if "extra_info" in update_items:
                 args['extra_info'] = json.dumps(args['extra_info'] if "extra_info" in args else {})
 
-            update_items['update_time'] = datetime.utcnow()
+            update_items['update_time'] = get_now()
             update_items.pop('creator_id')
             update_items.pop('create_time')
             update_items.pop('id')
