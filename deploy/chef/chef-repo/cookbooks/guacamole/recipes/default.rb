@@ -21,7 +21,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-include_recipe "java::openjdk"
+include_recipe "java"
 include_recipe "tomcat"
 include_recipe "open-hackathon-api::user"
 include_recipe "open-hackathon-api::source"
@@ -119,8 +119,8 @@ file "#{node['guacamole']['lib-directory']}/#{node['guacamole']['json-jar']}" do
   action :create
 end
 
-file "#{node['guacamole']['lib-directory']}/#{node['guacamole']['snapshot-jar']}" do 
-  content IO.read("#{node['guacamole']['src-folder']}/#{node['guacamole']['snapshot-jar']}")
+file "#{node['guacamole']['lib-directory']}/#{node['guacamole']['provider-jar']}" do 
+  content IO.read("#{node['guacamole']['src-folder']}/#{node['guacamole']['provider-jar']}")
   owner node['tomcat']['user']
   group node['tomcat']['group']
   mode "0644"

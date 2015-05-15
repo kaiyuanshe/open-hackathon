@@ -26,4 +26,4 @@ lib-directory: <%= node['guacamole']['lib-directory'] %>
 
 # Auth provider class (authenticates user/pass combination, needed if using the provided login screen)
 auth-provider: <%= node['guacamole']['auth-provider'] %>
-auth-request-url: <%= node['guacamole']['auth-request-url'] %>
+auth-request-url: <%= node['openhackathon']['api']['endpoint']%><%= node['guacamole']['auth-request-url'] %>
