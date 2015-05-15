@@ -251,17 +251,21 @@ class LiveLogin(LoginProviderBase):
         user_info_resp = get_remote(get_config('login.live.user_info_url') + access_token)
         # conn.request('GET',url,'',{'user-agent':'flask'})
         log.debug("get user info from live:" + user_info_resp )
-        
+        # user.info
+        #{u'first_name': u'Ice', u'last_name': u'Shi', u'name': u'Ice Shi', u'locale': u'en_US', \
+        # u'gender': None,\
+        # u'emails': {u'personal': None, u'account': u'iceshi@outlook.com', u'business': None, u'preferred': u'iceshi@outlook.com'}, \
+        # u'link': u'https://profile.live.com/', \
+        # u'updated_time': u'2015-05-13T02:28:32+0000',\
+        # u'id': u'655c03b1b314b5ee'}
+
         user_info = json.loads(user_info_resp)
         log.debug(user_info)
         name = user_info["name"]
         openid = str(args.get('user_id'))
         #avatar = user_info["avatar_url"]
-        # get user primary email
-        # email_info_resp = get_remote(get_config('login.live.emails_info_url') + access_token)
-        # log.debug("get email from live:" + email_info_resp + '\n')
-        # email_info include all user email provided by live
-        # email is user's primary email
+
+
         email = user_info["emails"]["account"]
         email_info = [
                 {'name': name, 'email': email, 'id': openid, 'verified': 1, 'primary': 1, 'nickname': name,
