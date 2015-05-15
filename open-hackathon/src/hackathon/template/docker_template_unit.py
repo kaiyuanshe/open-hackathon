@@ -196,3 +196,12 @@ class DockerTemplateUnit(object):
         :return:
         """
         raise NotImplementedError
+
+    def get_image(self):
+        return self.dic[self.T_I]
+
+    def get_ports(self):
+        return self.dic[self.T_P]
+
+    def get_remote(self):
+        return self.dic[self.T_R]
