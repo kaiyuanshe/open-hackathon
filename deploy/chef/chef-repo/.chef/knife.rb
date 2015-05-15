@@ -10,8 +10,6 @@ chef_server_url          'https://chef-hack.chinacloudapp.cn/organizations/msot'
 log_level                :info
 log_location             STDOUT
 node_name                "#{user}"
-client_key               "#{home_dir}/.chef/#{user}.pem"
-validation_key           "#{home_dir}/.chef/msot-validator.pem"
 validation_client_name   "msot-validator"
 cache_type               'BasicFile'
 cache_options( :path => "#{home_dir}/.chef/checksums" )

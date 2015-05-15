@@ -203,5 +203,30 @@ router.get('/weibo', function (req, res) {
   });
 });
 
+router.get('/live', function (req, res) {
+  var option = {
+    //'content-type': 'application/x-www-form-urlencoded',
+    url: config.login.live.access_token_url,
+   // form:'application/x-www-form-urlencoded',
+    form: {
+      client_id: config.login.live.client_id,
+      client_secret: config.login.live.client_secret,
+      redirect_uri: util.format(config.login.live.redirect_uri, config.hostname),
+      grant_type: config.login.live.grant_type,
+      code: req.query.code
+    }
+  };
+  request.post(option, function (err, request, body) {
+    console.log(body)
+    var body = JSON.parse(body);
+    login(res, {
+      provider: "live",
+      access_token: body.access_token,
+      hackathon_name: config.hackathon_name,
+      user_id: body.user_id
+    });
+  });
+});
+
 
 module.exports = router

@@ -238,10 +238,46 @@ class WeiboLogin(LoginProviderBase):
                                            avatar_url=avatar_url)
         return self.user_display_info_with_token(user_with_token)
 
+class LiveLogin(LoginProviderBase):
+    def __init__(self, user_manager):
+        self.um = user_manager
+        
+    def login(self, args):
+        access_token = args.get('access_token')
+        log.debug("access_token is following")
+        log.debug(access_token)
+        log.debug(get_config('login.live.user_info_url'))
 
+        user_info_resp = get_remote(get_config('login.live.user_info_url') + access_token)
+        # conn.request('GET',url,'',{'user-agent':'flask'})
+        log.debug("get user info from live:" + user_info_resp )
+        
+        user_info = json.loads(user_info_resp)
+        log.debug(user_info)
+        name = user_info["name"]
+        openid = str(args.get('user_id'))
+        #avatar = user_info["avatar_url"]
+        # get user primary email
+        # email_info_resp = get_remote(get_config('login.live.emails_info_url') + access_token)
+        # log.debug("get email from live:" + email_info_resp + '\n')
+        # email_info include all user email provided by live
+        # email is user's primary email
+        email = user_info["emails"]["account"]
+        email_info = [
+                {'name': name, 'email': email, 'id': openid, 'verified': 1, 'primary': 1, 'nickname': name,
+                 'avatar_url': None}]
+        user_with_token = self.um.db_login(openid,
+                                           name=name,
+                                           nickname=name,
+                                           access_token=access_token,
+                                           email_info=email_info,
+                                           avatar_url=None)
+        return self.user_display_info_with_token(user_with_token)
+        
 login_providers = {
     OAUTH_PROVIDER.GITHUB: GithubLogin(user_manager),
     OAUTH_PROVIDER.QQ: QQLogin(user_manager),
     OAUTH_PROVIDER.GITCAFE: GitcafeLogin(user_manager),
-    OAUTH_PROVIDER.WEIBO: WeiboLogin(user_manager)
+    OAUTH_PROVIDER.WEIBO: WeiboLogin(user_manager),
+    OAUTH_PROVIDER.LIVE: LiveLogin(user_manager)
 }

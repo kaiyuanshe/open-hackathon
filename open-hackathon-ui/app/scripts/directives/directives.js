@@ -39,7 +39,7 @@ angular.module('oh.directives', [])
 
     var heartbeatInterval = null;
     var stop = null;
-
+   
     function showErrorMsg(code, msg) {
       $('#load').hide();
       var errorbox = $('#error');
@@ -61,6 +61,7 @@ angular.module('oh.directives', [])
         hnav.find('.vm-box').removeClass('active')
         var a = $(this).addClass('active');
         var url = a.data('url');
+        var token = a.data('token');
         var name = a.attr('id')
         var ifrem = work_center.find('#' + name);
         work_center.find('iframe').addClass('invisible');
@@ -68,7 +69,7 @@ angular.module('oh.directives', [])
           ifrem.removeClass('invisible');
         } else {
           ifrem = $('<iframe>').attr({
-            src: url + "&oh=" + ($cookieStore.get('User') || '').token,
+            src: url,
             id: name,
             width: '100%',
             height: '100%',
@@ -107,7 +108,7 @@ angular.module('oh.directives', [])
                     dockers.push({
                       purl: data.public_urls[i].url,
                       name: data.remote_servers[i].name,
-                      surl: data.remote_servers[i].url
+                      surl: data.remote_servers[i].url+'&oh='+$cookieStore.get('token')
                     })
                     list.push(temp.format(dockers[i]));
                   }
@@ -271,7 +272,15 @@ angular.module('oh.directives', [])
         return null;
       }
     }
-
+    function showCountDown(elemten, countDown) {
+      var timing = show_time.apply(countDown);
+      if (!timing) {
+        elemten.find('#timer').text('本次活动已结束，非常感谢您的参与。')
+        $interval.cancel(stop);
+      } else {
+        elemten.find('#end_timer').text(timerTmpe.format(timing))
+      }
+    }
     return {
       scope: {},
       restrict: 'A',
@@ -284,16 +293,6 @@ angular.module('oh.directives', [])
             var countDown = {
               time_server: new Date().getTime(),
               time_end: data.event_end_time
-            }
-
-            function showCountDown(elemten, countDown) {
-              var timing = show_time.apply(countDown);
-              if (!timing) {
-                elemten.find('#timer').text('本次活动已结束，非常感谢您的参与。')
-                $interval.cancel(stop);
-              } else {
-                elemten.find('#end_timer').text(timerTmpe.format(timing))
-              }
             }
 
             showCountDown(elemten, countDown);
