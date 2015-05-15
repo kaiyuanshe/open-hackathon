@@ -2,11 +2,11 @@
   "hostname": "open-hackathon-dev.chinacloudapp.cn",
   "hackathon_name":"open-xml-sdk",
   "proxy": "http://open-hackathon-dev.chinacloudapp.cn:15000",
-  "login": {
+    "login": {
     "github": {
       "access_token_url": "https://github.com/login/oauth/access_token",
-      "client_id":"b8e407813350f26bf537",
-      "client_secret":"daa78ae27e13c9f5b4a884bd774cadf2f75a199f",
+      "client_id":"b27959b7639e8b39f873",
+      "client_secret":"a727029295d9e871a1e55dda75c8fb6bf1ed0d4c",
       "redirect_uri":"http://%s/github",
       "code":""
     },
@@ -34,7 +34,15 @@
       "redirect_uri":"http://%s/weibo",
       "code":""
     },
-    "provider_enabled": ["github", "qq", "gitcafe" , "weibo"]
+    "live":{
+      "access_token_url": "https://login.live.com/oauth20_token.srf",
+      "client_id":"000000004414E0A6",
+      "client_secret":"b4mkfVqjtwHY2wJh0T4tj74lxM5LgAT2",
+      "grant_type":"authorization_code",
+      "redirect_uri":"http://%s/live",
+      "code":""
+    },
+    "provider_enabled": ["github", "qq", "gitcafe" , "weibo" , "live"]
   },
   "api": {
     "user": {
@@ -87,16 +95,19 @@
       "scope": "get_user_info",
       "state": "openhackathon",
       "response_type": "code"
+    },
+    "live": {
+      "client_id": "000000004414E0A6",
+      "redirect_uri": "http://open-hackathon-dev.chinacloudapp.cn/live" ,
+      "scope": "wl.basic ,wl.emails",
+      "response_type": "code"
     }
   },
   "social":{
     "github":"https://github.com/login/oauth/authorize?",
     "gitcafe":"https://gcs.dgz.sh/oauth/authorize?'",
     "weibo":"https://api.weibo.com/oauth2/authorize?",
-    "qq":"https://graph.qq.com/oauth2.0/authorize?"
-  },
-  "seo":{
-    "keywords":"开放黑客松,Open Hackathon Platform",
-    "description":"open hackathon platform"
+    "qq":"https://graph.qq.com/oauth2.0/authorize?",
+    "live":"https://login.live.com/oauth20_authorize.srf?"
   }
 }
