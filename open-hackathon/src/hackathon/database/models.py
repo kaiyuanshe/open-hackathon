@@ -341,6 +341,8 @@ class PortBinding(DBBase):
     experiment_id = Column(Integer, ForeignKey('experiment.id', ondelete='CASCADE'))
     experiment = relationship('Experiment', backref=backref('port_bindings', lazy='dynamic'))
 
+    url = Column(String(200))  # public url schema for display
+
 
 class Announcement(DBBase):
     __tablename__ = 'announcement'

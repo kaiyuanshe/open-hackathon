@@ -79,6 +79,10 @@ from datetime import (
     timedelta,
     datetime,
 )
+from hackathon.hackathon_response import (
+    internal_server_error,
+    precondition_failed,
+)
 import json
 import os
 import random
@@ -86,6 +90,138 @@ import string
 
 
 class ExprManager(object):
+
+    def start_expr(self, hackathon_name, template_name, user_id):
+        """
+        A user uses a template to start a experiment under a hackathon
+        :param hackathon_name:
+        :param template_name:
+        :param user_id:
+        :return:
+        """
+        hack_temp = self.__check_template_status(hackathon_name, template_name)
+        if hack_temp is None:
+            return internal_server_error('hackathon or template is not existed')
+
+        hackathon = hack_temp[0]
+        if hackathon.event_end_time < datetime.utcnow():
+            log.warn("hackathon is ended. The expr starting process will be stopped")
+            return precondition_failed('hackathen is ended')
+
+        template = hack_temp[1]
+        if user_id > 0:
+            expr = self.__check_expr_status(user_id, hackathon, template)
+            if expr is not None:
+                return self.__report_expr_status(expr)
+        # new expr
+        expr = db_adapter.add_object_kwargs(Experiment,
+                                            user_id=user_id,
+                                            hackathon_id=hackathon.id,
+                                            status=EStatus.Init,
+                                            template_id=template.id)
+        db_adapter.commit()
+
+        expr_config = json.load(file(template.url))
+
+        curr_num = db_adapter.count(Experiment, Experiment.user_id == ReservedUser.DefaultUserID,
+                                    Experiment.template == template,
+                                    (Experiment.status == EStatus.Starting) | (
+                                        Experiment.status == EStatus.Running))
+        if template.provider == VEProvider.Docker:
+            # get available VM that runs the cloudvm and is available for more containers
+            # start containers
+            # guacamole_config = []
+            try:
+                host_server = self.__get_available_docker_host(expr_config, hackathon)
+                if curr_num != 0 and curr_num >= get_config("pre_allocate.docker"):
+                    return
+                expr.status = EStatus.Starting
+                db_adapter.commit()
+                map(lambda container_config:
+                    self.__remote_start_container(expr, host_server, container_config, user_id),
+                    expr_config["virtual_environments"])
+                expr.status = EStatus.Running
+                db_adapter.commit()
+            except Exception as e:
+                log.error(e)
+                log.error("Failed starting containers")
+                self.__roll_back(expr.id)
+                return {"error": "Failed starting containers"}, 500
+        else:
+            if curr_num != 0 and curr_num >= get_config("pre_allocate.azure"):
+                return
+            expr.status = EStatus.Starting
+            db_adapter.commit()
+            try:
+                af = AzureFormation(self.__load_azure_key_id(expr.id))
+                af.create(expr.id)
+            except Exception as e:
+                log.error(e)
+                return {"error": "Failed starting azure"}, 500
+        # after everything is ready, set the expr state to running
+        # response to caller
+        return self.__report_expr_status(expr)
+
+    def heart_beat(self, expr_id):
+        expr = db_adapter.find_first_object_by(Experiment, id=expr_id, status=EStatus.Running)
+        if expr is None:
+            return {"error": "Experiment doesn't running"}, 404
+
+        expr.last_heart_beat_time = datetime.utcnow()
+        db_adapter.commit()
+        return "OK"
+
+    def stop_expr(self, expr_id, force=0):
+        """
+        :param expr_id: experiment id
+        :param force: 0: only stop container and release ports, 1: force stop and delete container and release ports.
+        :return:
+        """
+        log.debug("begin to stop %d" % expr_id)
+        expr = db_adapter.find_first_object_by(Experiment, id=expr_id, status=EStatus.Running)
+        if expr is not None:
+            # Docker
+            if expr.template.provider == VEProvider.Docker:
+                # stop containers
+                for c in expr.virtual_environments:
+                    try:
+                        log.debug("begin to stop %s" % c.name)
+                        if force:
+                            docker_formation.delete(c.name, c.container.host_server)
+                            c.status = VEStatus.Deleted
+                        else:
+                            docker_formation.stop(c.name, c.container.host_server)
+                            c.status = VEStatus.Stopped
+                        c.container.host_server.container_count -= 1
+                        if c.container.host_server.container_count < 0:
+                            c.container.host_server.container_count = 0
+                        # self.__release_ports(expr_id, c.container.host_server)
+                        self.__release_ports(expr_id, c.container.host_server)
+                    except Exception as e:
+                        log.error(e)
+                        self.__roll_back(expr_id)
+                        return {"error": "Failed stop/delete container"}, 500
+                if force:
+                    expr.status = EStatus.Deleted
+                else:
+                    expr.status = EStatus.Stopped
+                db_adapter.commit()
+            else:
+                try:
+                    # todo support delete azure vm
+                    af = AzureFormation(self.__load_azure_key_id(expr_id))
+                    af.stop(expr_id, AVMStatus.STOPPED_DEALLOCATED)
+                except Exception as e:
+                    log.error(e)
+                    return {'error': 'Failed stopping azure'}, 500
+
+            log.debug("experiment %d ended success" % expr_id)
+            return "OK"
+        else:
+            return "expr not exist"
+
+    # --------------------------------------------- helper function ---------------------------------------------#
+
     def __report_expr_status(self, expr):
         ret = {
             "expr_id": expr.id,
@@ -117,9 +253,9 @@ class ExprManager(object):
         if expr.template.provider == VEProvider.Docker:
             for ve in expr.virtual_environments.all():
                 for p in ve.port_bindings.all():
-                    if p.binding_type == PortBindingType.CloudService and p.name == "website":
+                    if p.binding_type == PortBindingType.CloudService and p.url is not None:
                         hs = db_adapter.find_first_object_by(DockerHostServer, id=p.binding_resource_id)
-                        url = "http://%s:%s" % (hs.public_dns, p.port_from)
+                        url = p.url % (hs.public_dns, p.port_from)
                         public_urls.append({
                             "name": p.name,
                             "url": url
@@ -156,6 +292,15 @@ class ExprManager(object):
         expr = db_adapter.get_object(Experiment, expr_id)
         hak = db_adapter.find_first_object_by(HackathonAzureKey, hackathon_id=expr.hackathon_id)
         return hak.azure_key_id
+
+    def __check_template_status(self, hackathon_name, template_name):
+        hackathon = db_adapter.find_first_object_by(Hackathon, name=hackathon_name)
+        if hackathon is None:
+            return None
+        template = db_adapter.find_first_object_by(Template, hackathon=hackathon, name=template_name)
+        if template is None or not os.path.isfile(template.url):
+            return None
+        return [hackathon, template]
 
     def __get_available_public_ports(self, expr_id, host_server, host_ports):
         log.debug("starting to get azure ports")
@@ -309,25 +454,20 @@ class ExprManager(object):
         log.debug("starting container %s is ended ... " % post_data["container_name"])
         return ve
 
-    def get_expr_status(self, expr_id):
+    def __get_expr_status(self, expr_id):
         expr = db_adapter.find_first_object_by(Experiment, id=expr_id)
         if expr is not None:
             return self.__report_expr_status(expr)
         else:
             return {"error": "Experiment Not found"}, 404
 
-    def check_template_status(self, hackathon_name, template_name):
-        hackathon = db_adapter.find_first_object_by(Hackathon, name=hackathon_name)
-        if hackathon is None:
-            return None
-        template = db_adapter.find_first_object_by(Template, hackathon=hackathon, name=template_name)
-        if template is None or not os.path.isfile(template.url):
-            return None
-        return [hackathon, template]
-
-    def check_expr_status(self, user_id, hackathon, template):
+    def __check_expr_status(self, user_id, hackathon, template):
         """
         check experiment status, if there are pre-allocate experiments, the experiment will be assigned directly
+        :param user_id:
+        :param hackathon:
+        :param template:
+        :return:
         """
         expr = db_adapter.find_first_object_by(Experiment,
                                                status=EStatus.Running,
@@ -343,8 +483,11 @@ class ExprManager(object):
         if expr is not None:
             return expr
 
-        expr = db_adapter.find_first_object_by(Experiment, status=EStatus.Running, hackathon_id=hackathon.id,
-                                               user_id=ReservedUser.DefaultUserID, template=template)
+        expr = db_adapter.find_first_object_by(Experiment,
+                                               status=EStatus.Running,
+                                               hackathon_id=hackathon.id,
+                                               user_id=ReservedUser.DefaultUserID,
+                                               template=template)
         if expr is not None:
             db_adapter.update_object(expr, user_id=user_id)
             for ve in expr.virtual_environments:
@@ -357,78 +500,7 @@ class ExprManager(object):
             scheduler.add_job(check_default_expr, 'date', next_run_time=alarm_time)
             return expr
 
-    def start_expr(self, hackathon_name, template_name, user_id):
-        hack_temp = self.check_template_status(hackathon_name, template_name)
-        if hack_temp is None:
-            return {"error": "hackathon or template is not existed"}, 500
-
-        hackathon = hack_temp[0]
-        if hackathon.event_end_time < datetime.utcnow():
-            log.warn("hackathon is ended. The expr starting process will be stopped")
-            return "hackathen is ended", 412
-
-        template = hack_temp[1]
-        if user_id > 0:
-            expr = self.check_expr_status(user_id, hackathon, template)
-            if expr is not None:
-                return self.__report_expr_status(expr)
-        # new expr
-        expr = db_adapter.add_object_kwargs(Experiment,
-                                            user_id=user_id,
-                                            hackathon_id=hackathon.id,
-                                            status=EStatus.Init,
-                                            template_id=template.id)
-        db_adapter.commit()
-
-        expr_config = json.load(file(template.url))
-
-        curr_num = db_adapter.count(Experiment, Experiment.user_id == ReservedUser.DefaultUserID,
-                                    Experiment.template == template,
-                                    (Experiment.status == EStatus.Starting) | (
-                                        Experiment.status == EStatus.Running))
-        if template.provider == VEProvider.Docker:
-            # get available VM that runs the cloudvm and is available for more containers
-            # start containers
-            # guacamole_config = []
-            try:
-                host_server = self.__get_available_docker_host(expr_config, hackathon)
-                if curr_num != 0 and curr_num >= get_config("pre_allocate.docker"):
-                    return
-                expr.status = EStatus.Starting
-                db_adapter.commit()
-                map(lambda container_config:
-                    self.__remote_start_container(expr, host_server, container_config, user_id),
-                    expr_config["virtual_environments"])
-                expr.status = EStatus.Running
-                db_adapter.commit()
-            except Exception as e:
-                log.error(e)
-                log.error("Failed starting containers")
-                self.__roll_back(expr.id)
-                return {"error": "Failed starting containers"}, 500
-        else:
-            if curr_num != 0 and curr_num >= get_config("pre_allocate.azure"):
-                return
-            expr.status = EStatus.Starting
-            db_adapter.commit()
-            try:
-                af = AzureFormation(self.__load_azure_key_id(expr.id))
-                af.create(expr.id)
-            except Exception as e:
-                log.error(e)
-                return {"error": "Failed starting azure"}, 500
-        # after everything is ready, set the expr state to running
-        # response to caller
-        return self.__report_expr_status(expr)
-
-    def heart_beat(self, expr_id):
-        expr = db_adapter.find_first_object_by(Experiment, id=expr_id, status=EStatus.Running)
-        if expr is None:
-            return {"error": "Experiment doesn't running"}, 404
-
-        expr.last_heart_beat_time = datetime.utcnow()
-        db_adapter.commit()
-        return "OK"
+        return None
 
     def __release_ports(self, expr_id, host_server):
         """
@@ -478,54 +550,7 @@ class ExprManager(object):
             log.info("Rollback failed")
             log.error(e)
 
-    def stop_expr(self, expr_id, force=0):
-        """
-        :param expr_id: experiment id
-        :param force: 0: only stop container and release ports, 1: force stop and delete container and release ports.
-        :return:
-        """
-        log.debug("begin to stop %d" % expr_id)
-        expr = db_adapter.find_first_object_by(Experiment, id=expr_id, status=EStatus.Running)
-        if expr is not None:
-            # Docker
-            if expr.template.provider == VEProvider.Docker:
-                # stop containers
-                for c in expr.virtual_environments:
-                    try:
-                        log.debug("begin to stop %s" % c.name)
-                        if force:
-                            docker_formation.delete(c.name, c.container.host_server)
-                            c.status = VEStatus.Deleted
-                        else:
-                            docker_formation.stop(c.name, c.container.host_server)
-                            c.status = VEStatus.Stopped
-                        c.container.host_server.container_count -= 1
-                        if c.container.host_server.container_count < 0:
-                            c.container.host_server.container_count = 0
-                        # self.__release_ports(expr_id, c.container.host_server)
-                        self.__release_ports(expr_id, c.container.host_server)
-                    except Exception as e:
-                        log.error(e)
-                        self.__roll_back(expr_id)
-                        return {"error": "Failed stop/delete container"}, 500
-                if force:
-                    expr.status = EStatus.Deleted
-                else:
-                    expr.status = EStatus.Stopped
-                db_adapter.commit()
-            else:
-                try:
-                    # todo support delete azure vm
-                    af = AzureFormation(self.__load_azure_key_id(expr_id))
-                    af.stop(expr_id, AVMStatus.STOPPED_DEALLOCATED)
-                except Exception as e:
-                    log.error(e)
-                    return {'error': 'Failed stopping azure'}, 500
-
-            log.debug("experiment %d ended success" % expr_id)
-            return "OK"
-        else:
-            return "expr not exist"
+    # --------------------------------------------- helper function ---------------------------------------------#
 
 
 def open_check_expr():

@@ -140,7 +140,7 @@ class UserExperimentResource(Resource):
         parser.add_argument('id', type=int, location='args', required=True)
         args = parser.parse_args()
         try:
-            cs = expr_manager.get_expr_status(args['id'])
+            cs = expr_manager.__get_expr_status(args['id'])
         except Exception as e:
             log.error(e)
             return {"error": "Please Reload then Wait"}, 500
