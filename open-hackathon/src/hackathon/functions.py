@@ -129,6 +129,7 @@ def call(mdl_cls_func, cls_args, func_args):
     mdl_name = mdl_cls_func[0]
     cls_name = mdl_cls_func[1]
     func_name = mdl_cls_func[2]
+    log.debug('call: mdl_name [%s], cls_name [%s], func_name [%s]' % (mdl_name, cls_name, func_name))
     mdl = importlib.import_module(mdl_name)
     cls = getattr(mdl, cls_name)
     func = getattr(cls(*cls_args), func_name)

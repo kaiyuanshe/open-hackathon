@@ -2,7 +2,7 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
 #  
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -30,8 +30,8 @@ class ROLE:
     ADMIN = 1
 
 
-
-class OAUTH_PROVIDER:
+class LOGIN_PROVIDER:
+    MYSQL = "mysql"
     GITHUB = "github"
     QQ = "qq"
     GITCAFE = "gitcafe"

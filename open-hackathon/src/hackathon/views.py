@@ -41,8 +41,10 @@ import time
 from hackathon.registration.register_mgr import register_manager
 from hackathon.template.template_mgr import template_manager
 from hackathon_response import *
-from hackathon.azureformation.fileService import upload_file_to_azure
-from hackathon.enum import EStatus, RGStatus
+from hackathon.azureformation.azureManagement import (
+    azure_management,
+)
+from hackathon.enum import RGStatus
 
 
 @app.teardown_appcontext
@@ -86,6 +88,7 @@ class UserHackathonRelResource(Resource):
         args["status"] = RGStatus.UNAUDIT
         return register_manager.update_registration(args)
 
+
 class AdminRegisterResource(Resource):
     def get(self):
         parse = reqparse.RequestParser()
@@ -124,11 +127,9 @@ class RegisterCheckEmailResource(Resource):
 
 
 class AdminRegisterListResource(Resource):
+    @admin_privilege_required
     def get(self):
-        parse = reqparse.RequestParser()
-        parse.add_argument('hackathon_id', type=int, location='args', required=True)
-        args = parse.parse_args()
-        return register_manager.get_all_registration_by_hackathon_id(args['hackathon_id'])
+        return register_manager.get_all_registration_by_hackathon_id(g.hackathon.id)
 
 
 class UserExperimentResource(Resource):
@@ -203,17 +204,15 @@ class HackathonResource(Resource):
     def get(self):
         return g.hackathon.dic()
 
+    @token_required
     def post(self):
         args = request.get_json()
-        return hack_manager.create_or_update_hackathon(args).dic()
+        return hack_manager.create_or_update_hackathon(args)
 
     @admin_privilege_required
     def put(self):
         args = request.get_json()
-        return hack_manager.create_or_update_hackathon(args).dic()
-
-    def put(self):
-        pass
+        return hack_manager.create_or_update_hackathon(args)
 
     def delete(self):
         pass
@@ -293,27 +292,49 @@ class TemplateResource(Resource):
 
 
 class AdminHackathonListResource(Resource):
-    @admin_privilege_required
+    @token_required
     def get(self):
-        # todo move this logic to hack_manager
-        hackathon_ids = hack_manager.get_hack_id_by_user_id(g.user.id)
-        if -1 in hackathon_ids:
-            hackathon_list = db_adapter.find_all_objects(Hackathon)
-        else:
-            hackathon_list = db_adapter.find_all_objects(Hackathon, Hackathon.id.in_(hackathon_ids))
-        return map(lambda u: u.dic(), hackathon_list)
+        return hack_manager.get_permitted_hackathon_list_by_admin_user_id(g.user.id)
 
 
-class FileResource(Resource):
+class AdminAzureResource(Resource):
+    @hackathon_name_required
+    def get(self):
+        certificates = azure_management.get_certificates(g.hackathon.name)
+        if certificates is None:
+            return not_found("no certificates")
+        return certificates, 200
+
+    @hackathon_name_required
     def post(self):
+        args = request.get_json()
+        if 'subscription_id' not in args or 'management_host' not in args:
+            return bad_request("subscription_id or management_host invalid")
+        subscription_id = args['subscription_id']
+        management_host = args['management_host']
         try:
-            file = request.files.get()
-            upload_file_to_azure(file, 'test/hello')
-            return ok("upload file successed")
-        except Exception as ex:
-            log.error(ex)
-            log.error("upload file raised an exception")
-            return internal_server_error("upload file raised an exception")
+            cert_url = azure_management.create_certificate(subscription_id, management_host, g.hackathon.name)
+            return {'cert_url': cert_url}, 200
+        except Exception as err:
+            log.error(err)
+            return internal_server_error('fail to create certificate due to [%s]' % err)
+
+    @hackathon_name_required
+    def delete(self):
+        args = request.get_json()
+        if 'certificate_id' not in args:
+            return bad_request("certificate_id invalid")
+        certificate_id = args['certificate_id']
+        if azure_management.delete_certificate(certificate_id, g.hackathon.name):
+            return {'message': 'certificate deleted'}, 200
+        else:
+            return internal_server_error("fail to delete certificate")
+
+
+class HackathonFileResource(Resource):
+    @admin_privilege_required
+    def post(self):
+        return hack_manager.upload_files()
 
 
 """
@@ -374,6 +395,11 @@ system time api
 api.add_resource(CurrentTimeResource, "/api/currenttime")
 
 """
+azure certificate api
+"""
+api.add_resource(AdminAzureResource, '/api/admin/azure')
+
+"""
 files api
 """
-api.add_resource(FileResource, "/api/file")
+api.add_resource(HackathonFileResource, "/api/file")

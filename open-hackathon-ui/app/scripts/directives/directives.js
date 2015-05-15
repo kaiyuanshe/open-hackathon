@@ -39,7 +39,7 @@ angular.module('oh.directives', [])
 
     var heartbeatInterval = null;
     var stop = null;
-   
+
     function showErrorMsg(code, msg) {
       $('#load').hide();
       var errorbox = $('#error');
@@ -69,7 +69,9 @@ angular.module('oh.directives', [])
           ifrem.removeClass('invisible');
         } else {
           ifrem = $('<iframe>').attr({
-            src: url,
+
+            src: url ,
+
             id: name,
             width: '100%',
             height: '100%',
@@ -108,7 +110,7 @@ angular.module('oh.directives', [])
                     dockers.push({
                       purl: data.public_urls[i].url,
                       name: data.remote_servers[i].name,
-                      surl: data.remote_servers[i].url+'&oh='+$cookieStore.get('token')
+                      surl: data.remote_servers[i].url+ "&oh=" + $cookieStore.get('token')
                     })
                     list.push(temp.format(dockers[i]));
                   }
@@ -294,18 +296,15 @@ angular.module('oh.directives', [])
               time_server: new Date().getTime(),
               time_end: data.event_end_time
             }
-
             showCountDown(elemten, countDown);
             stop = $interval(function () {
               showCountDown(elemten, countDown);
             }, 1000);
           }
         });
-
         scope.$on('$destroy', function (event) {
           $interval.cancel(stop);
         });
-
       }
     }
   })

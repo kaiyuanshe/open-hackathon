@@ -29,28 +29,44 @@ import sys
 
 sys.path.append("..")
 from azure.storage import BlobService
-from hackathon.log import log
-from hackathon.functions import safe_get_config, get_config
+from hackathon.hackathon_response import *
+from hackathon.functions import get_config
 
-blob_service = BlobService(account_name=safe_get_config("storage.account_name", "account_name"),
-                           account_key=safe_get_config("storage.account_key", "account_key"))
-container_name = get_config("storage.container_name")
-
-
-def create_container_in_storage():
-    # create a container if doesn't exist
-    container_name = get_config("storage.container_name")
-    names = map(lambda x: x.name, blob_service.list_containers())
-    if container_name not in names:
-        blob_service.create_container(container_name)
-    else:
-        log.debug("container already exsit in storage")
+blob_service = BlobService(account_name=get_config("storage.account_name"),
+                           account_key=get_config("storage.account_key"),
+                           host_base=get_config("storage.blob_service_host_base"))
 
 
-def upload_file_to_azure(file, filename):
+def create_container_in_storage(container_name, access):
+    """
+    create a container if doesn't exist
+    :param container_name:
+    :param access:
+    :return:
+    """
     try:
-        create_container_in_storage()
-        blob_service.put_block_blob_from_file(container_name, filename, file)
-        return blob_service.make_blob_url(container_name, filename)
-    except Exception as ex:
-        log.error(ex.message)
+        names = map(lambda x: x.name, blob_service.list_containers())
+        if container_name not in names:
+            blob_service.create_container(container_name, x_ms_blob_public_access=access)
+        else:
+            log.debug("container already exsit in storage")
+    except Exception as e:
+        log.error(e)
+
+
+def upload_file_to_azure(file, container_name, blob_name):
+    try:
+        blob_service.put_block_blob_from_file(container_name, blob_name, file)
+        return blob_service.make_blob_url(container_name, blob_name)
+    except Exception as e:
+        log.error(e)
+        return None
+
+
+def upload_file_to_azure_from_path(path, container_name, blob_name):
+    try:
+        blob_service.put_block_blob_from_path(container_name, blob_name, path)
+        return blob_service.make_blob_url(container_name, blob_name)
+    except Exception as e:
+        log.error(e)
+        return None

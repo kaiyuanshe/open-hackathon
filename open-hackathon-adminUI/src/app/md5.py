@@ -26,9 +26,13 @@ THE SOFTWARE.
 import hashlib
 from . import app
 
-m = hashlib.md5()
 
-origin = "admin" + app.config['SECRET_KEY']
-m.update(origin)
-print m.hexdigest()
+def encode(plaintext):
+    m = hashlib.md5()
+    origin = plaintext + app.config['SECRET_KEY']
+    m.update(origin)
+    return m.hexdigest()
 
+
+if __name__ == "__main__":
+    print encode("admin")

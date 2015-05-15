@@ -59,7 +59,7 @@
                     }
                     options = $.extend(_params, options);
                     var url = name;
-                    var data = options.body == null ? '' : JSON.stringify(options.body);
+                    var data = options.body //== null ? '' : JSON.stringify(options.body);
                     if (options.query) {
                         url += '?' + ($.isPlainObject(options.query) ? $.param(options.query) : options.query);
                     }

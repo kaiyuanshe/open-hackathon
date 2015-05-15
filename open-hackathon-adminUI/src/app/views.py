@@ -4,17 +4,17 @@
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
 #
 # The MIT License (MIT)
-#  
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#  
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-#  
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,7 +25,7 @@
 # -----------------------------------------------------------------------------------
 
 from . import app
-from constants import OAUTH_PROVIDER
+from constants import LOGIN_PROVIDER
 import json
 from constants import HTTP_HEADER
 from flask_login import login_required, current_user, login_user, LoginManager, logout_user
@@ -49,8 +49,8 @@ Template_Routes = {
 
 def __oauth_meta_content():
     return {
-        OAUTH_PROVIDER.WEIBO: get_config('login.weibo.meta_content'),
-        OAUTH_PROVIDER.QQ: get_config('login.qq.meta_content')
+        LOGIN_PROVIDER.WEIBO: get_config('login.weibo.meta_content'),
+        LOGIN_PROVIDER.QQ: get_config('login.qq.meta_content')
     }
 
 
@@ -74,21 +74,32 @@ def __get_uri(path):
     return "%s/%s" % (safe_get_config('hackathon-api.endpoint', 'http://localhost:15000'), path)
 
 
+def __login_failed(provider, error="Login failed."):
+    if provider == "mysql":
+        error = "Login failed. username or password invalid."
+    return __render("/login.html", error=error)
+
+
 def __login(provider):
     code = request.args.get('code')
-    if code is None:
-        return "Bad Request", 400
-
     try:
         admin_with_token = login_providers[provider].login({
             "code": code
         })
+        if admin_with_token is None:
+            return __login_failed(provider)
+
+        log.info("login successfully:" + repr(admin_with_token))
+
+        token = admin_with_token["token"].token
         login_user(admin_with_token["admin"])
+        session["token"] = token
         resp = make_response(redirect("/"))
-        resp.set_cookie('token', admin_with_token["token"].token)
+        resp.set_cookie('token', token)
         return resp
-    except:
-        return "Internal Server Error", 500
+    except Exception as ex:
+        log.error(ex)
+        return __login_failed(provider)
 
 
 def post_to_api_service(path, post_data, hackathon_id):
@@ -141,7 +152,7 @@ def js_config():
     return resp
 
 
-#js api config
+# js api config
 @app.route('/apiconfig.js')
 def api_config():
     resp = Response(response="var apiconfig=%s" % json.dumps(get_config("apiconfig")),
@@ -152,22 +163,22 @@ def api_config():
 
 @app.route('/github')
 def github_login():
-    return __login(OAUTH_PROVIDER.GITHUB)
+    return __login(LOGIN_PROVIDER.GITHUB)
 
 
 @app.route('/weibo')
 def weibo_login():
-    return __login(OAUTH_PROVIDER.WEIBO)
+    return __login(LOGIN_PROVIDER.WEIBO)
 
 
 @app.route('/qq')
 def qq_login():
-    return __login(OAUTH_PROVIDER.QQ)
+    return __login(LOGIN_PROVIDER.QQ)
 
 
 @app.route('/gitcafe')
 def gitcafe_login():
-    return __login(OAUTH_PROVIDER.GITCAFE)
+    return __login(LOGIN_PROVIDER.GITCAFE)
 
 
 @app.route('/')
@@ -186,9 +197,12 @@ def logout():
     return redirect("/login")
 
 
-@app.route("/login")
+@app.route("/login", methods=['GET', 'POST'])
 def login():
-    return __render("/login.html")
+    if request.method == 'POST':
+        return __login(LOGIN_PROVIDER.MYSQL)
+
+    return __render("/login.html", error=None)
 
 
 @app.route("/home")
