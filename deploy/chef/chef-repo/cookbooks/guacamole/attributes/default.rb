@@ -21,7 +21,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-defautl['guacamole']['version'] = '0.9.6'
+default['guacamole']['version'] = '0.9.6'
 default['guacamole']['dir'] = '/opt/gua-dir'
 default['guacamole']['server-tar'] = "guacamole-server-#{node['guacamole']['version']}.tar.gz"
 default['guacamole']['server-tar-url'] = "http://jaist.dl.sourceforge.net/project/guacamole/current/source/guacamole-server-#{node['guacamole']['version']}.tar.gz"
