@@ -178,3 +178,21 @@ class DockerTemplateUnit(object):
             },
         }
         return dic
+
+    def set_name(self, name):
+        """
+        Set name as generated unique name
+        :param name:
+        :return:
+        """
+        self.dic[self.T_N] = name
+
+    def get_name(self):
+        return self.dic[self.T_N]
+
+    def get_container_config(self):
+        """
+        Compose post data for docker remote api create
+        :return:
+        """
+        raise NotImplementedError
