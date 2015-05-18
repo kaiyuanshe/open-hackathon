@@ -12,10 +12,10 @@ RUN apt-get update && \
     apt-get install -y git vim
 
 # Install chef-client
-RUN cd /tmp && wget -q -H     && \
-    dpkg -i chef_${CHEF_CLIENT_VER}_amd64.deb
-#ADD chef_${CHEF_CLIENT_VER}_amd64.deb /tmp/chef_${CHEF_CLIENT_VER}_amd64.deb
+#RUN cd /tmp && wget -q -H     && \
 
+ADD chef_${CHEF_CLIENT_VER}_amd64.deb /tmp/chef_${CHEF_CLIENT_VER}_amd64.deb
+RUN cd /tmp && dpkg -i chef_${CHEF_CLIENT_VER}_amd64.deb
 
 # Config SSH
 #RUN apt-get update &&
