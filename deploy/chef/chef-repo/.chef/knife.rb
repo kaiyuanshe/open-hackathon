@@ -6,16 +6,19 @@ home_dir = ENV['HOME']
 
 
 current_dir = File.dirname(__FILE__)
-chef_server_url          'https://chef-hack.chinacloudapp.cn/organizations/msot'
 log_level                :info
 log_location             STDOUT
-node_name                "#{user}"
+node_name                "ice"
+client_key               "/etc/chef/ice.pem"
 validation_client_name   "msot-validator"
-cache_type               'BasicFile'
-cache_options( :path => "#{home_dir}/.chef/checksums" )
+validation_key           "#{current_dir}/msot-validator.pem"
+chef_server_url          "https://chef-hack.chinacloudapp.cn/organizations/msot"
+syntax_check_cache_path  "#{ENV['HOME']}/.chef/syntaxcache"
 cookbook_path            ["#{current_dir}/../cookbooks"]
+ookbook_path            ["#{current_dir}/../cookbooks"]
 
 
+knife[:editor] = "vim"        
 # Give it a chance for user to provide his personal override
 #
 # This is for the Build Agent where configuration is slightly different
