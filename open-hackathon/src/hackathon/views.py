@@ -47,6 +47,7 @@ from hackathon.azureformation.azureManagement import (
 from hackathon.enum import RGStatus
 
 
+
 @app.teardown_appcontext
 def shutdown_session(exception=None):
     db_session.remove()
@@ -207,12 +208,12 @@ class HackathonResource(Resource):
     @token_required
     def post(self):
         args = request.get_json()
-        return hack_manager.create_or_update_hackathon(args)
+        return hack_manager.create_new_hackathon(args)
 
     @admin_privilege_required
     def put(self):
         args = request.get_json()
-        return hack_manager.create_or_update_hackathon(args)
+        return hack_manager.update_hackathon(args)
 
     def delete(self):
         pass
@@ -249,6 +250,22 @@ class HackathonTemplateResource(Resource):
         parse.add_argument('hid', type=int, location='args', required=True)
         args = parse.parse_args()
         return map(lambda u: u.dic(), db_adapter.find_all_objects_by(Template, hackathon_id=args['hid']))
+
+    # create template for hacakthon
+    def post(self):
+        args = request.get_json()
+        return template_manager.create_template(args)
+
+    def put(self):
+        args = request.get_json()
+        return template_manager.update_template(args)
+
+    def delete(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('id', type=int, location='args', required=True)
+        args = parse.parse_args()
+        return template_manager.delete_template(args['id'])
+
 
 
 class UserExperimentListResource(Resource):
@@ -336,6 +353,17 @@ class HackathonFileResource(Resource):
     def post(self):
         return hack_manager.upload_files()
 
+    def delete(self):
+        #TODO call azure blobservice api to delete file
+        return True
+
+class HackathonCheckNameResource(Resource):
+    def get(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('name', type=str, location='args', required=True)
+        args = parse.parse_args()
+        return hack_manager.get_hackathon_by_name(args['name']) is None
+
 
 """
 health page
@@ -374,6 +402,7 @@ api.add_resource(HackathonResource, "/api/hackathon")
 api.add_resource(HackathonListResource, "/api/hackathon/list")
 api.add_resource(HackathonStatResource, "/api/hackathon/stat")
 api.add_resource(AdminHackathonListResource, "/api/admin/hackathon/list")
+api.add_resource(HackathonCheckNameResource, "/api/hackathon/checkname")
 
 """
 template api

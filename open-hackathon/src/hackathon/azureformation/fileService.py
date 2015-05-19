@@ -30,7 +30,9 @@ import sys
 sys.path.append("..")
 from azure.storage import BlobService
 from hackathon.hackathon_response import *
-from hackathon.functions import get_config
+from hackathon.functions import get_config,safe_get_config
+import imghdr
+from flask import  g
 
 blob_service = BlobService(account_name=get_config("storage.account_name"),
                            account_key=get_config("storage.account_key"),

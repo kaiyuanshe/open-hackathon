@@ -48,7 +48,8 @@ from . import views
 
 ### example of scheduler
 # from scheduler import scheduler
-# from datetime import datetime, timedelta
+# from datetime import timedelta
+# from hackathon.functions import get_now
 #
 # def alarm(time):
 # print('Alarm! This alarm was scheduled at %s.' % time)
@@ -56,5 +57,5 @@ from . import views
 #         "key": "val"
 #     }
 #
-# alarm_time = datetime.now() + timedelta(seconds=10)
+# alarm_time = get_now() + timedelta(seconds=10)
 # scheduler.add_job(alarm, 'date', run_date=alarm_time, args=[datetime.now()])

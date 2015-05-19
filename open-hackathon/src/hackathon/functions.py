@@ -32,6 +32,7 @@ import urllib2
 import json
 import os
 import requests
+from datetime import datetime
 
 try:
     from config import Config
@@ -134,3 +135,7 @@ def call(mdl_cls_func, cls_args, func_args):
     cls = getattr(mdl, cls_name)
     func = getattr(cls(*cls_args), func_name)
     func(*func_args)
+
+
+def get_now():
+    return datetime.utcnow()
