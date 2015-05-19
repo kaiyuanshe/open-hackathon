@@ -24,6 +24,9 @@
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
 
+from constants import HACKATHON_BASIC_INFO
+from functions import get_now
+
 # resource type used by ALOperation
 STORAGE_ACCOUNT = 'storage account'
 CLOUD_SERVICE = 'cloud service'
@@ -176,3 +179,7 @@ class HACK_STATUS:
     INIT = 0
     ONLINE = 1
     OFFLINE = 2
+
+class TEMPLATE_STATUS:
+    ONLINE = 1
+    OFFLINE = 0

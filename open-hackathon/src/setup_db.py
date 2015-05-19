@@ -27,7 +27,7 @@
 from hackathon.database import Base, engine
 from hackathon.database.models import AdminHackathonRel, User
 from hackathon.database import db_adapter
-from datetime import datetime
+from hackathon.functions import get_now
 from hackathon.enum import ADMIN_ROLE_TYPE, ReservedUser
 
 
@@ -42,7 +42,7 @@ def setup_db():
     # reserved user
     res_u = db_adapter.get_object(User, ReservedUser.DefaultUserID)
     if res_u is None:
-        db_adapter.add_object_kwargs(User, id=ReservedUser.DefaultUserID, create_time=datetime.utcnow())
+        db_adapter.add_object_kwargs(User, id=ReservedUser.DefaultUserID, create_time=get_now())
 
     # default super admin
     if db_adapter.get_object(User, ReservedUser.DefaultSuperAdmin) is None:

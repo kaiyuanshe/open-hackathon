@@ -25,8 +25,7 @@
 # -----------------------------------------------------------------------------------
 
 import sys
-from debtagshw.debtagshw import LOG
-from cmath import log10
+from hackathon.functions import get_now
 
 sys.path.append("..")
 from compiler.ast import (
@@ -50,7 +49,6 @@ from hackathon.enum import (
     PortBindingType,
     VEStatus,
     ReservedUser,
-    RecycleStatus,
     AVMStatus,
 )
 from hackathon.database.models import (
@@ -80,7 +78,6 @@ from hackathon.azureformation.azureFormation import (
 )
 from datetime import (
     timedelta,
-    datetime,
 )
 from hackathon.hack import (
     hack_manager
@@ -371,7 +368,7 @@ class ExprManager(object):
             return {"error": "hackathon or template is not existed"}, 500
 
         hackathon = hack_temp[0]
-        if hackathon.event_end_time < datetime.utcnow():
+        if hackathon.event_end_time < get_now():
             log.warn("hackathon is ended. The expr starting process will be stopped")
             return "hackathen is ended", 412
 
@@ -434,7 +431,7 @@ class ExprManager(object):
         if expr is None:
             return {"error": "Experiment doesn't running"}, 404
 
-        expr.last_heart_beat_time = datetime.utcnow()
+        expr.last_heart_beat_time = get_now()
         db_adapter.commit()
         return "OK"
 
@@ -542,7 +539,7 @@ def open_check_expr():
     :return:
     """
     log.debug("start checking experiment ... ")
-    alarm_time = datetime.now() + timedelta(seconds=1)
+    alarm_time = get_now() + timedelta(seconds=1)
     scheduler.add_job(check_default_expr, 'interval', id='pre', replace_existing=True, next_run_time=alarm_time,
                       minutes=safe_get_config("pre_allocate.check_interval_minutes", 5))
 
@@ -595,7 +592,7 @@ def recycle_expr_scheduler():
     :return:
     """
     log.debug("Start recycling inactive user experiment")
-    excute_time = datetime.utcnow() + timedelta(minutes=1)
+    excute_time = get_now() + timedelta(minutes=1)
     scheduler.add_job(recycle_expr, 'interval', id='recycle', replace_existing=True, next_run_time=excute_time,
                       minutes=safe_get_config("recycle.check_idle_interval_minutes", 5))
 
@@ -607,9 +604,11 @@ def recycle_expr():
     """
     log.debug("start checking experiment ... ")
     recycle_hours = safe_get_config('recycle.idle_hours', 24)
-    expr_time_cond = Experiment.last_heart_beat_time + timedelta(hours=recycle_hours) > datetime.utcnow()
+
+    expr_time_cond = Experiment.last_heart_beat_time + timedelta(hours=recycle_hours) > get_now()
     recycle_cond = Experiment.hackathon_id._in(hack_manager.get_recyclable_hackathon_list())
     r = db_adapter.find_first_object(Experiment, expr_time_cond, recycle_cond)
+
     if r is not None:
         expr_manager.stop_expr(r.id)
         log.debug("it's stopping " + str(r.id) + " inactive experiment now")

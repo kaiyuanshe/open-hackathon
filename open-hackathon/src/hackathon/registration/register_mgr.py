@@ -30,7 +30,7 @@ sys.path.append("..")
 from hackathon.database.models import UserHackathonRel, Experiment
 from hackathon.database import db_adapter
 from hackathon.hackathon_response import *
-from datetime import datetime
+from hackathon.functions import get_now
 from hackathon.enum import EStatus, RGStatus
 
 
@@ -61,10 +61,10 @@ class RegisterManger(object):
                 log.debug("user %d already registered on hackathon %d" % (user_id, hackathon.id))
                 return register.dic()
 
-            if hackathon.registration_start_time > datetime.utcnow():
+            if hackathon.registration_start_time > get_now():
                 return precondition_failed("hackathon registration not opened", friendly_message="报名尚未开始")
 
-            if hackathon.registration_end_time < datetime.utcnow():
+            if hackathon.registration_end_time < get_now():
                 return precondition_failed("hackathon registration has ended", friendly_message="报名已经结束")
 
             args["status"] = hackathon.is_auto_approve() and RGStatus.AUTO_PASSED or RGStatus.UNAUDIT
@@ -73,6 +73,7 @@ class RegisterManger(object):
         except Exception as e:
             log.error(e)
             return internal_server_error("fail to create or update register")
+
 
     def update_registration(self, args):
         log.debug("update_registration: %r" % args)
@@ -85,9 +86,8 @@ class RegisterManger(object):
 
             log.debug("update a existed register")
             update_items = dict(dict(args).viewitems() - register.dic().viewitems())
-            update_items.pop("id")
-            update_items.pop("create_time")
-            update_items["update_time"] = datetime.utcnow()
+            if "create_time" in update_items: update_items.pop("create_time")
+            update_items["update_time"] = get_now()
             self.db.update_object(register, **update_items)
 
             return register.dic()

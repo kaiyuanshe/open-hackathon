@@ -74,7 +74,7 @@ class AdminManagerTest(unittest.TestCase):
 
     def test_validate_request_token_expired(self):
         token_value = "token_value"
-        token = AdminToken(token=token_value, admin=None, expire_date=datetime.utcnow() - timedelta(seconds=30))
+        token = AdminToken(token=token_value, admin=None, expire_date=get_now() - timedelta(seconds=30))
 
         mock_db = Mock()
         mock_db.find_first_object_by.return_value = token
@@ -89,7 +89,7 @@ class AdminManagerTest(unittest.TestCase):
     def test_validate_request_token_valid(self):
         token_value = "token_value"
         admin = AdminUser(name="test_name")
-        token = AdminToken(token=token_value, admin=admin, expire_date=datetime.utcnow() + timedelta(seconds=30))
+        token = AdminToken(token=token_value, admin=admin, expire_date=get_now() + timedelta(seconds=30))
 
         mock_db = Mock()
         mock_db.find_first_object_by.return_value = token
