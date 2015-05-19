@@ -64,6 +64,11 @@ class DockerFormation(object):
         self.lock = Lock()
 
     def ping(self, docker_host):
+        """
+        Ping docker service in docker host
+        :param docker_host:
+        :return:
+        """
         try:
             ping_url = '%s/_ping' % self.__get_vm_url(docker_host)
             req = requests.get(ping_url)
@@ -87,7 +92,7 @@ class DockerFormation(object):
         """
         log.debug("try to assign docker port %d on server %r" % (private_port, docker_host))
         containers = self.__containers_info(docker_host)
-        host_ports = flatten(map(lambda p: p['ports'], containers))
+        host_ports = flatten(map(lambda p: p['Ports'], containers))
 
         # todo if azure return -1
         def sub(port):

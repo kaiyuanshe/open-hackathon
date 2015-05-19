@@ -28,9 +28,6 @@ import sys
 
 sys.path.append("..")
 
-from compiler.ast import (
-    flatten,
-)
 from hackathon.dockerformation.dockerFormation import (
     docker_formation,
 )
@@ -83,6 +80,8 @@ from datetime import (
 from hackathon.hackathon_response import (
     internal_server_error,
     precondition_failed,
+    not_found,
+    ok,
 )
 from hackathon.template.docker_template_unit import (
     DockerTemplateUnit,
@@ -97,6 +96,7 @@ import string
 
 
 class ExprManager(object):
+
     def start_expr(self, hackathon_name, template_name, user_id):
         """
         A user uses a template to start a experiment under a hackathon
@@ -170,11 +170,11 @@ class ExprManager(object):
     def heart_beat(self, expr_id):
         expr = db_adapter.find_first_object_by(Experiment, id=expr_id, status=EStatus.Running)
         if expr is None:
-            return {"error": "Experiment doesn't running"}, 404
+            return not_found('Experiment does not running')
 
         expr.last_heart_beat_time = datetime.utcnow()
         db_adapter.commit()
-        return "OK"
+        return ok('OK')
 
     def stop_expr(self, expr_id, force=0):
         """
@@ -205,7 +205,7 @@ class ExprManager(object):
                     except Exception as e:
                         log.error(e)
                         self.__roll_back(expr_id)
-                        return {"error": "Failed stop/delete container"}, 500
+                        return internal_server_error('Failed stop/delete container')
                 if force:
                     expr.status = EStatus.Deleted
                 else:
@@ -218,12 +218,19 @@ class ExprManager(object):
                     af.stop(expr_id, AVMStatus.STOPPED_DEALLOCATED)
                 except Exception as e:
                     log.error(e)
-                    return {'error': 'Failed stopping azure'}, 500
+                    return internal_server_error('Failed stopping azure')
 
             log.debug("experiment %d ended success" % expr_id)
-            return "OK"
+            return ok('OK')
         else:
-            return "expr not exist"
+            return ok('expr not exist')
+
+    def get_expr_status(self, expr_id):
+        expr = db_adapter.find_first_object_by(Experiment, id=expr_id)
+        if expr is not None:
+            return self.__report_expr_status(expr)
+        else:
+            return not_found('Experiment Not found')
 
     # --------------------------------------------- helper function ---------------------------------------------#
 
@@ -260,7 +267,7 @@ class ExprManager(object):
                 for p in ve.port_bindings.all():
                     if p.binding_type == PortBindingType.CloudService and p.url is not None:
                         hs = db_adapter.find_first_object_by(DockerHostServer, id=p.binding_resource_id)
-                        url = p.url % (hs.public_dns, p.port_from)
+                        url = p.url.format(hs.public_dns, p.port_from)
                         public_urls.append({
                             "name": p.name,
                             "url": url
@@ -361,7 +368,9 @@ class ExprManager(object):
                                                 binding_type=PortBindingType.CloudService,
                                                 binding_resource_id=host_server.id,
                                                 virtual_environment=ve,
-                                                experiment=expr)
+                                                experiment=expr,
+                                                url=public_cfg[DockerTemplateUnit.T_P_U]
+                                                if DockerTemplateUnit.T_P_U in public_cfg else None)
             binding_docker = PortBinding(name=public_cfg[DockerTemplateUnit.T_P_N],
                                          port_from=public_cfg[DockerTemplateUnit.T_P_HP],
                                          port_to=public_cfg[DockerTemplateUnit.T_P_PO],
@@ -394,16 +403,16 @@ class ExprManager(object):
         suffix = "".join(random.sample(string.ascii_letters + string.digits, 8))
         new_name = '%d-%s-%s' % (expr.id, old_name, suffix)
         docker_template_unit.set_name(new_name)
-        log.debug("starting to start container: %s" % docker_template_unit.get_name())
+        log.debug("starting to start container: %s" % new_name)
         # db entity
         ve = VirtualEnvironment(provider=VEProvider.Docker,
-                                name=docker_template_unit.get_name(),
+                                name=new_name,
                                 image=docker_template_unit.get_image(),
                                 status=VEStatus.Init,
                                 remote_provider=VERemoteProvider.Guacamole,
                                 experiment=expr)
         container = DockerContainer(expr,
-                                    name=docker_template_unit.get_name(),
+                                    name=new_name,
                                     host_server=host_server,
                                     virtual_environment=ve,
                                     image=docker_template_unit.get_image())
@@ -416,8 +425,6 @@ class ExprManager(object):
                  [p.port_from, p.port_to],
                  self.__assign_ports(expr, host_server, ve, docker_template_unit.get_ports()))
 
-        virtual_environment_dic["docker_ports"] = flatten(ps)
-
         # guacamole config
         guacamole = docker_template_unit.get_remote()
         port_cfg = filter(lambda p:
@@ -425,8 +432,8 @@ class ExprManager(object):
                           docker_template_unit.get_ports())
         if len(port_cfg) > 0:
             gc = {
-                "displayname": docker_template_unit.get_name(),
-                "name": docker_template_unit.get_name(),
+                "displayname": new_name,
+                "name": new_name,
                 "protocol": guacamole[DockerTemplateUnit.T_R_PROT],
                 "hostname": host_server.public_ip,
                 "port": port_cfg[0]["public_port"]
@@ -441,21 +448,14 @@ class ExprManager(object):
         # start container remotely
         container_ret = docker_formation.run(docker_template_unit, host_server)
         if container_ret is None:
-            log.error("container %s fail to run" % docker_template_unit.get_name())
+            log.error("container %s fail to run" % new_name)
             raise Exception("container_ret is none")
         container.container_id = container_ret["container_id"]
         ve.status = VEStatus.Running
         host_server.container_count += 1
         db_adapter.commit()
-        log.debug("starting container %s is ended ... " % docker_template_unit.get_name())
+        log.debug("starting container %s is ended ... " % new_name)
         return ve
-
-    def __get_expr_status(self, expr_id):
-        expr = db_adapter.find_first_object_by(Experiment, id=expr_id)
-        if expr is not None:
-            return self.__report_expr_status(expr)
-        else:
-            return {"error": "Experiment Not found"}, 404
 
     def __check_expr_status(self, user_id, hackathon, template):
         """
@@ -544,7 +544,7 @@ class ExprManager(object):
             log.info("Rollback failed")
             log.error(e)
 
-            # --------------------------------------------- helper function ---------------------------------------------#
+    # --------------------------------------------- helper function ---------------------------------------------#
 
 
 def open_check_expr():

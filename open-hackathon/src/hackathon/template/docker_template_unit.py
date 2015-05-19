@@ -23,6 +23,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
+import sys
+sys.path.append("..")
+from hackathon.template.base_template import (
+    BaseTemplate,
+)
+
 
 class DockerTemplateUnit(object):
     """
@@ -72,6 +78,7 @@ class DockerTemplateUnit(object):
     T_HC_CS = 'CpuShares'
     T_HC_CC = 'CpusetCpus'
     T_HC_PB = 'PortBindings'
+    T_HC_PB_HI = 'HostIp'
     T_HC_PB_HP = 'HostPort'
     T_HC_PAP = 'PublishAllPorts'
     T_HC_P = 'Privileged'
@@ -185,11 +192,6 @@ class DockerTemplateUnit(object):
         return dic
 
     def set_name(self, name):
-        """
-        Set name as generated unique name
-        :param name:
-        :return:
-        """
         self.dic[self.T_N] = name
 
     def get_name(self):
@@ -201,12 +203,13 @@ class DockerTemplateUnit(object):
         :return:
         """
         for p in self.dic[self.T_P]:
-            key = '%d/%s' % (p[self.T_P_HP], p[self.T_P_PR])
+            key = '%d/%s' % (p[self.T_P_PO], p[self.T_P_PR])
             self.dic[self.T_EPO][key] = {}
-            self.dic[self.T_HC][self.T_HC_PB][key] = [{self.T_HC_PB_HP: p[self.T_P_PP]}]
+            self.dic[self.T_HC][self.T_HC_PB][key] = [{self.T_HC_PB_HI: '', self.T_HC_PB_HP: str(p[self.T_P_HP])}]
         self.dic.pop(self.T_N)
         self.dic.pop(self.T_P)
         self.dic.pop(self.T_R)
+        self.dic.pop(BaseTemplate.T_VE_P)
         return self.dic
 
     def get_image(self):

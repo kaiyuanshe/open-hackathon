@@ -140,7 +140,7 @@ class UserExperimentResource(Resource):
         parser.add_argument('id', type=int, location='args', required=True)
         args = parser.parse_args()
         try:
-            cs = expr_manager.__get_expr_status(args['id'])
+            cs = expr_manager.get_expr_status(args['id'])
         except Exception as e:
             log.error(e)
             return {"error": "Please Reload then Wait"}, 500
@@ -162,7 +162,7 @@ class UserExperimentResource(Resource):
             log.error(err)
             return {"error": "fail to start due to '%s'" % err}, 500
 
-    # @token_required
+    @token_required
     def delete(self):
         # id is experiment id
         parser = reqparse.RequestParser()
@@ -266,7 +266,6 @@ class HackathonTemplateResource(Resource):
         parse.add_argument('id', type=int, location='args', required=True)
         args = parse.parse_args()
         return template_manager.delete_template(args['id'])
-
 
 
 class UserExperimentListResource(Resource):
