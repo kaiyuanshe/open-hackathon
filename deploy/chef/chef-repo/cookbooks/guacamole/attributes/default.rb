@@ -1,26 +1,51 @@
+# Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
+#  
+# The MIT License (MIT)
+#  
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#  
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#  
 #
-# Cookbook Name:: guacamole
-# Recipe:: default
-# Author:: Jeff Dutton (<jeff.dutton@stratus.com>)
-#
-# Copyright (C) 2012, Jeff Dutton
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# permissions and limitations under the License.
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
 
-#default["guacamole"]["war"]["url"] = "https://s3.amazonaws.com/myownguac/guacamole.war"
-#default["guacamole"]["war"]["checksum"] = "87cd84e6bb187" #...
-default["guacamole"]["war"]["url"] = "/var/lib/guacamole/guacamole.war"
+default['guacamole']['version'] = '0.9.6'
+default['guacamole']['dir'] = '/opt/gua-dir'
+default['guacamole']['server-tar'] = "guacamole-server-#{node['guacamole']['version']}.tar.gz"
+default['guacamole']['server-tar-url'] = "http://jaist.dl.sourceforge.net/project/guacamole/current/source/guacamole-server-#{node['guacamole']['version']}.tar.gz"
+default['guacamole']['client-tar'] = "guacamole-client-#{node['guacamole']['version']}.tar.gz"
+default['guacamole']['server-tar-extract-dir'] = "#{node['guacamole']['dir']}/extract"
+default['guacamole']['war-path'] = "#{node['tomcat']['webapp_dir']}/guacamole.war"
+default['guacamole']['war-url'] = "http://jaist.dl.sourceforge.net/project/guacamole/current/binary/guacamole-#{node['guacamole']['version']}.war"
+default['guacamole']['war-cookbook-file'] = "guacamole-#{node['guacamole']['version']}.war"
+default['guacamole']['use-local-war'] = 'true'
 
-# Sourceforge has pre-built packages of newer versions for various platforms, downloadable as tarballs
-default["guacamole"]["sourceforge"]["url"] = "http://sourceforge.net/projects/guacamole/files/legacy/binary/ubuntu-12.04-amd64/guacamole-0.7.2-ubuntu-12.04-amd64.tar.gz/download"
-default["guacamole"]["sourceforge"]["checksum"] = "30f4a4848b98ddd4700b0ec7fb1f892a4f08d73ec51cca021a457001165e457c"
+default['guacamole']['src-folder'] = "#{node['openhackathon'][:base_dir]}/deploy/guacamole"#'/home/opentech/open-hackathon/deploy/guacamole'#
+#default['guacamole']['dst-folder'] = '/etc/guacamole'
+
+default['guacamole']['tomcat-guacamole-share-folder'] = "#{node['tomcat']['base']}/.guacamole"
+
+default['guacamole']['properties'] = 'guacamole.properties'
+#default['guacamole']['properties-sample'] = 'guacamole-sample.properties'
+default['guacamole']['json-jar'] = 'json-20090211.jar'
+default['guacamole']['provider-jar'] = 'openhackathon-gucamole-authentication-1.0-SNAPSHOT.jar'
+
+default['guacamole']['guacd-hostname'] = 'localhost'
+default['guacamole']['guacd-port'] = '4822'
+default['guacamole']['lib-directory'] = '/etc/guacamole'
+default['guacamole']['auth-provider'] = 'com.openhackathon.guacamole.OpenHackathonAuthenticationProvider'
+default['guacamole']['auth-request-url'] = '/api/guacamoleconfig'
+
+

@@ -45,7 +45,6 @@ from hackathon.enum import (
     PortBindingType,
     VEStatus,
     ReservedUser,
-    RecycleStatus,
     AVMStatus,
 )
 from hackathon.database.models import (
@@ -88,6 +87,9 @@ from hackathon.template.docker_template_unit import (
 )
 from hackathon.template.base_template import (
     BaseTemplate,
+)
+from hackathon.hack import (
+    hack_manager,
 )
 import json
 import os
@@ -253,7 +255,7 @@ class ExprManager(object):
                 # target url format:
                 # http://localhost:8080/guacamole/#/client/c/{name}?name={name}&oh={token}
                 name = guacamole_config["name"]
-                url = guacamole_host + '/guacamole/#/client/c%s?name=%s' % (name, name)
+                url = guacamole_host + '/guacamole/#/client/c/%s?name=%s' % (name, name)
                 guacamole_servers.append({
                     "name": guacamole_config["displayname"],
                     "url": url
@@ -490,8 +492,7 @@ class ExprManager(object):
             log.debug("experiment had been assigned, check experiment and start new job ... ")
 
             # add a job to start new pre-allocate experiment
-            alarm_time = datetime.now() + timedelta(seconds=1)
-            scheduler.add_job(check_default_expr, 'date', next_run_time=alarm_time)
+            open_check_expr()
             return expr
 
         return None
@@ -554,17 +555,16 @@ def open_check_expr():
     """
     log.debug("start checking experiment ... ")
     alarm_time = datetime.now() + timedelta(seconds=1)
-    scheduler.add_job(check_default_expr, 'interval', id='1', replace_existing=True, next_run_time=alarm_time,
+    scheduler.add_job(check_default_expr, 'interval', id='pre', replace_existing=True, next_run_time=alarm_time,
                       minutes=safe_get_config("pre_allocate.check_interval_minutes", 5))
 
 
 def check_default_expr():
-    # todo only pre-allocate env for those needed. It should configured in table hackathon
-    templates = db_adapter.find_all_objects_order_by(Template, hackathon_id=2)
-    total_azure = safe_get_config("pre_allocate.azure", 1)
-    total_docker = safe_get_config("pre_allocate.docker", 1)
+    hackathon_id_list = hack_manager.get_pre_allocate_enabled_hackathoon_list()
+    templates = db_adapter.find_all_objects_order(Template, Template.hackathon_id._in(hackathon_id_list))
     for template in templates:
         try:
+            pre_num = hack_manager.get_pre_allocate_number(template.hackathon)
             curr_num = db_adapter.count(Experiment,
                                         Experiment.user_id == ReservedUser.DefaultUserID,
                                         Experiment.template_id == template.id,
@@ -572,8 +572,8 @@ def check_default_expr():
                                             Experiment.status == EStatus.Running))
             # todo test azure, config num
             if template.provider == VEProvider.AzureVM:
-                if curr_num < total_azure:
-                    remain_num = total_azure - curr_num
+                if curr_num < pre_num:
+                    remain_num = pre_num - curr_num
                     start_num = db_adapter.count_by(Experiment,
                                                     user_id=ReservedUser.DefaultUserID,
                                                     template=template,
@@ -589,8 +589,8 @@ def check_default_expr():
                         # log.debug("all template %s start complete" % template.name)
             elif template.provider == VEProvider.Docker:
                 log.debug("template name is %s, hackathon name is %s" % (template.name, template.hackathon.name))
-                if curr_num < total_docker:
-                    remain_num = total_docker - curr_num
+                if curr_num < pre_num:
+                    remain_num = pre_num - curr_num
                     log.debug("no idle template: %s, remain num is %d ... " % (template.name, remain_num))
                     expr_manager.start_expr(template.hackathon.name, template.name, ReservedUser.DefaultUserID)
                     # curr_num += 1
@@ -608,7 +608,7 @@ def recycle_expr_scheduler():
     """
     log.debug("Start recycling inactive user experiment")
     excute_time = datetime.utcnow() + timedelta(minutes=1)
-    scheduler.add_job(recycle_expr, 'interval', id='2', replace_existing=True, next_run_time=excute_time,
+    scheduler.add_job(recycle_expr, 'interval', id='recycle', replace_existing=True, next_run_time=excute_time,
                       minutes=safe_get_config("recycle.check_idle_interval_minutes", 5))
 
 
@@ -620,8 +620,8 @@ def recycle_expr():
     log.debug("start checking experiment ... ")
     recycle_hours = safe_get_config('recycle.idle_hours', 24)
     expr_time_cond = Experiment.last_heart_beat_time + timedelta(hours=recycle_hours) > datetime.utcnow()
-    expr_enable_cond = Hackathon.recycle_enabled == RecycleStatus.Enabled
-    r = Experiment.query.join(Hackathon).filter(expr_time_cond, expr_enable_cond).first()
+    recycle_cond = Experiment.hackathon_id._in(hack_manager.get_recyclable_hackathon_list())
+    r = db_adapter.find_first_object(Experiment, expr_time_cond, recycle_cond)
     if r is not None:
         expr_manager.stop_expr(r.id)
         log.debug("it's stopping " + str(r.id) + " inactive experiment now")

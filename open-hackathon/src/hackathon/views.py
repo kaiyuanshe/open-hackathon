@@ -44,7 +44,6 @@ from hackathon_response import *
 from hackathon.azureformation.azureManagement import (
     azure_management,
 )
-from hackathon.azureformation.fileService import upload_file
 from hackathon.enum import RGStatus
 
 
@@ -348,10 +347,10 @@ class AdminAzureResource(Resource):
             return internal_server_error("fail to delete certificate")
 
 
-class FileResource(Resource):
+class HackathonFileResource(Resource):
     @admin_privilege_required
     def post(self):
-        return upload_file(request)
+        return hack_manager.upload_files()
 
 
 """
@@ -419,4 +418,4 @@ api.add_resource(AdminAzureResource, '/api/admin/azure')
 """
 files api
 """
-api.add_resource(FileResource, "/api/file")
+api.add_resource(HackathonFileResource, "/api/file")

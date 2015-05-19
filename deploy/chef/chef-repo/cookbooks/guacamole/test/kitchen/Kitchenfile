@@ -1,6 +1,0 @@
-cookbook "guacamole" do
-  # Don't want to run any convergence tests yet...
-  exclude :platform => "centos"
-  exclude :platform => "ubuntu"
-  runtimes []
-end

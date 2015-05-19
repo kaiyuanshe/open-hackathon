@@ -27,7 +27,7 @@
 import sys
 
 sys.path.append("..")
-from hackathon.database.models import Hackathon, User, UserHackathonRel, AdminHackathonRel, to_dic
+from hackathon.database.models import Hackathon, User, UserHackathonRel, AdminHackathonRel
 from hackathon.database import db_adapter
 from datetime import datetime
 from hackathon.enum import RGStatus
@@ -38,11 +38,28 @@ from hackathon.constants import HTTP_HEADER
 from flask import request, g
 import json
 from hackathon.constants import HACKATHON_BASIC_INFO
+import imghdr
+from hackathon.functions import get_config
+from hackathon.azureformation.fileService import create_container_in_storage, upload_file_to_azure
 
 
 class HackathonManager():
     def __init__(self, db):
         self.db = db
+
+    def __is_recycle_enabled(self, hackathon):
+        try:
+            basic_info = json.loads(hackathon.basic_info)
+            return basic_info[HACKATHON_BASIC_INFO.RECYCLE_ENABLED] == 1
+        except Exception as e:
+            log.error(e)
+            log.warn("cannot load recycle_enabled from basic info for hackathon %d, will return False" % hackathon.id)
+            return False
+
+    # check the admin authority on hackathon
+    def __validate_admin_privilege(self, user_id, hackathon_id):
+        hack_ids = self.get_permitted_hackathon_ids_by_admin_user_id(user_id)
+        return -1 in hack_ids or hackathon_id in hack_ids
 
     def get_hackathon_by_name_or_id(self, hack_id=None, name=None):
         if hack_id is None:
@@ -124,11 +141,6 @@ class HackathonManager():
         return list(set(hackathon_ids))
 
 
-    # check the admin authority on hackathon
-    def __validate_admin_privilege(self, user_id, hackathon_id):
-        hack_ids = self.get_permitted_hackathon_ids_by_admin_user_id(user_id)
-        return -1 in hack_ids or hackathon_id in hack_ids
-
     def validate_admin_privilege(self):
         return self.__validate_admin_privilege(g.user.id, g.hackathon.id)
 
@@ -159,52 +171,105 @@ class HackathonManager():
             log.warn("cannot load auto_approve from basic info for hackathon %d, will return False" % hackathon.id)
             return False
 
-    def is_recycle_enabled(self, hackathon):
+
+    def is_pre_allocate_enabled(self, hackathon):
         try:
             basic_info = json.loads(hackathon.basic_info)
-            return basic_info[HACKATHON_BASIC_INFO.RECYCLE_ENABLED] == 1
+            return basic_info[HACKATHON_BASIC_INFO.PRE_ALLOCATE_ENABLED] == 1
         except Exception as e:
             log.error(e)
-            log.warn("cannot load recycle_enabled from basic info for hackathon %d, will return False" % hackathon.id)
+            log.warn(
+                "cannot load pre_allocate_enabled from basic info for hackathon %d, will return False" % hackathon.id)
             return False
+
+    def get_pre_allocate_number(self, hackathon):
+        try:
+            basic_info = json.loads(hackathon.basic_info)
+            return basic_info[HACKATHON_BASIC_INFO.PRE_ALLOCATE_NUMBER]
+        except Exception as e:
+            log.error(e)
+            log.warn(
+                "cannot load pre_allocate_number from basic info for hackathon %d, will return 1" % hackathon.id)
+            return 1
 
     def create_or_update_hackathon(self, args):
         log.debug("create_or_update_hackathon: %r" % args)
         if "name" not in args:
-            return bad_request("hackathon perporities lost name")
+            return bad_request("hackathon name invalid")
         hackathon = self.db.find_first_object(Hackathon, Hackathon.name == args['name'])
 
         try:
             if hackathon is None:
                 log.debug("add a new hackathon:" + str(args))
                 args['update_time'] = datetime.utcnow()
-                args['basic_info'] = str(args['basic_info'])
-                args['extra_info'] = str(args['extra_info'])
+                args['create_time'] = datetime.utcnow()
+                args['basic_info'] = json.dumps(args['basic_info'])
+                args['extra_info'] = json.dumps(args['extra_info'] if "extra_info" in args else {})
+                args["creator_id"] = g.user.id
                 new_hack = self.db.add_object_kwargs(Hackathon, **args)  # insert into hackathon
-                hid = new_hack.id
                 try:
                     ahl = AdminHackathonRel(user_id=g.user.id,
                                             role_type=ADMIN_ROLE_TYPE.ADMIN,
-                                            hackathon_id=hid,
+                                            hackathon_id=new_hack.id,
                                             status=1,
-                                            remarks='being admin automatically',
+                                            remarks='creator',
                                             create_time=datetime.utcnow())
-                    self.db.add_object(ahl)  # insert into AdminHackathonRel
+                    self.db.add_object(ahl)
                 except Exception as ex:
                     # TODO: send out a email to remind administrator to deal with this problems
                     log.error(ex)
-                    log.error("insert into hackathon successed but insert into AdminHackathonRel is failed in DB")
+                    log.error("insert into hackathon succeed but insert into AdminHackathonRel is failed in DB")
                     return internal_server_error("fail to create admin hackathon relationship ")
-                return ok("create hackathon successed")
+                return ok("create hackathon succeed")
             else:
-                args['update_time'] = datetime.utcnow()
-                update_items = dict(dict(args).viewitems() - to_dic(hackathon, Hackathon).viewitems())
+                update_items = dict(dict(args).viewitems() - hackathon.dic().viewitems())
+                update_items['update_time'] = datetime.utcnow()
+                update_items.pop('creator_id')
+                update_items.pop('create_time')
+                update_items.pop('id')
                 log.debug("update a exist hackathon :" + str(args))
                 self.db.update_object(hackathon, **update_items)
                 return ok("update hackathon successed")
-        except Exception as  e:
+        except Exception as e:
             log.error(e)
             return internal_server_error("fail to create or update hackathon")
+
+    def upload_files(self):
+        if request.content_length > len(request.files) * get_config("storage.size_limit"):
+            return bad_request("more than the file size limited")
+
+        try:
+            # check each file type
+            for file_name in request.files:
+                if imghdr.what(request.files.get(file_name)) is None:
+                    return bad_request("only images can be uploaded")
+
+            default_container_name = get_config("storage.container_name")
+            create_container_in_storage(default_container_name, 'container')
+            images = {}
+            for file_name in request.files:
+                file = request.files.get(file_name)
+                url = upload_file_to_azure(file, default_container_name, g.hackathon.name + "/" + file_name)
+                images[file_name] = url
+
+            return images
+
+        except Exception as ex:
+            log.error(ex)
+            log.error("upload file raised an exception")
+            return internal_server_error("upload file raised an exception")
+
+
+    def get_recyclable_hackathon_list(self):
+        all = self.db.find_all_objects(Hackathon)
+        recyclable = filter(lambda h: self.__is_recycle_enabled(h), all())
+        return [h.id for h in recyclable]
+
+
+    def get_pre_allocate_enabled_hackathoon_list(self):
+        all = self.db.find_all_objects(Hackathon)
+        pre_list = filter(lambda h: self.is_pre_allocate_enabled(h), all())
+        return [h.id for h in pre_list]
 
 
 hack_manager = HackathonManager(db_adapter)
@@ -214,10 +279,14 @@ def is_auto_approve(hackathon):
     return hack_manager.is_auto_approve(hackathon)
 
 
-def is_recycle_enabled(hackathon):
-    return hack_manager.is_recycle_enabled(hackathon)
+def is_pre_allocate_enabled(hackathon):
+    return hack_manager.is_pre_allocate_enabled(hackathon)
+
+
+def get_pre_allocate_number(hackathon):
+    return hack_manager.get_pre_allocate_number(hackathon)
 
 
 Hackathon.is_auto_approve = is_auto_approve
-Hackathon.is_recycle_enabled = is_recycle_enabled
-
+Hackathon.is_pre_allocate_enabled = is_pre_allocate_enabled
+Hackathon.get_pre_allocate_number = get_pre_allocate_number

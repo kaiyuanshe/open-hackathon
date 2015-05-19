@@ -70,7 +70,7 @@ template node['openhackathon']['admin']['src_dir']+'/app/config.py' do
   mode "0644"
 end
 
-uwsgi_service 'app' do
+uwsgi_service 'open-hackathon-adminUI' do
   home_path node['openhackathon']['admin']['src_dir']
   config_file config_file
   config_type :ini
@@ -79,6 +79,6 @@ uwsgi_service 'app' do
   gid node['openhackathon']['user']
 end
 
-service 'uwsgi-app' do
+service 'uwsgi-open-hackathon-adminUI' do
   action :restart
 end
