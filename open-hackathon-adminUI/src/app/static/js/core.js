@@ -59,7 +59,7 @@
                     }
                     options = $.extend(_params, options);
                     var url = name;
-                    var data = options.body //== null ? '' : JSON.stringify(options.body);
+                    var data = JSON.stringify(options.body);
                     if (options.query) {
                         url += '?' + ($.isPlainObject(options.query) ? $.param(options.query) : options.query);
                     }
@@ -71,7 +71,15 @@
                         headers: options.header,
                         data: data,
                         success: function(data) {
-                            callback(data)
+                            if(data.error){
+                                if(data.error.code == 401){
+                                    location.href = '/logout';
+                                }else{
+                                    callback(data)
+                                }
+                            }else{
+                                callback(data)
+                            }
                         },
                         error: function(req, status, error) {
                             var data = {
@@ -203,22 +211,11 @@
     });
     $(function() {
         $.template('switc_hackathons_temp', '<li {{if $item.isAction(id ,$item.hid)}} class="active" {{/if}}>{{if $item.isAction(id,$item.hid) }}<i class="fa fa-check"></i>{{/if}}<a href="#" data-type="hackathon">${name}</a></li>');
-        //$.template('switc_hackathons_temp', '<li><a href="#" data-type="hackathon">${name}</a></li>');
-        // $.template('switc_hackathons_temp2','<li><a href="javascript:;">
-        //                              <span class="icon blue"><i class="fa fa-check"></i></span>
-        //                              <span class="message">${name}</span>
-        //                          </a>
-        //                      </li>')
+        $.template('switc_hackathons_temp', '<li><a href="#" data-type="hackathon">${name}</a></li>');
+        $.template('switc_hackathons_temp2','<li><a href="javascript:;"><span class="icon blue"><i class="fa fa-check"></i></span><span class="message">${name}</span></a></li>')
         var hackathon_modal = $('#switc_hackathon_modal').on('show.bs.modal', function(e) {
-            var ul = hackathon_modal.find('.modal-body ul').empty();
-//            oh.api.admin.hackathons.get(function(data) {
-//                ul.append($.tmpl('switc_hackathons_temp', data, {
-//                    isAction: function(id, hid) {
-//                        return id == hid
-//                    },
-//                    hid: JSON.parse(localStorage.hackathon || '{"id":"0"}').id
-//                }));
-//            });
+
+
         }).on('hide.bs.modal', function(e) {
             if (!localStorage.hackathon) {
                 return false;
@@ -244,10 +241,26 @@
             location.reload()
         });
 
-        if (!localStorage.hackathon) {
-            hackathon_modal.modal('show')
+        if(location.pathname.length !=1 ){
+            if (!localStorage.hackathon) {
+                if(location.pathname.search('createhackathon','i') == -1){
+                    var ul = hackathon_modal.find('.modal-body ul').empty();
+                    oh.api.admin.hackathon.list.get(function(data) {
+                        if(data.length >0){
+                            ul.append($.tmpl('switc_hackathons_temp', data, {
+                                isAction: function(id, hid) {
+                                    return id == hid
+                                },
+                                hid: JSON.parse(localStorage.hackathon || '{"id":"0"}').id
+                            }));
+                            hackathon_modal.modal('show')
+                        }else if(location.pathname.search('createhackathon','i') == -1){
+                            location.href = '/createhackathon';
+                        }
+                    });
+                }
+            }
         }
-
         /*if(!sessionStorage.hackathons){
             oh.api.admin.hackathons.get(function(data){
                  SessionStorageBindHackathon(data);

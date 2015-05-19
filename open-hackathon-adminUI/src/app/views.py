@@ -35,6 +35,7 @@ from flask import Response, render_template, request, g, redirect, make_response
 from datetime import timedelta
 from functions import safe_get_config, post_to_remote, delete_remote, get_remote, put_to_remote, get_config
 from log import log
+import re
 
 session_lifetime_minutes = 60
 PERMANENT_SESSION_LIFETIME = timedelta(minutes=session_lifetime_minutes)
@@ -217,6 +218,12 @@ def edit_registe():
     return __render("/edit/register.html")
 
 
+@app.route("/createhackathon")
+@login_required
+def edit_createhacathon():
+    return __render("/createhackathon.html")
+
+
 @app.route("/myhackathon")
 @login_required
 def myhackathon():
@@ -233,3 +240,4 @@ def registerusers():
 @login_required
 def users():
     return __render("/users.html")
+
