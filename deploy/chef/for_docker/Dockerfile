@@ -18,10 +18,9 @@ ADD chef_${CHEF_CLIENT_VER}_amd64.deb /tmp/chef_${CHEF_CLIENT_VER}_amd64.deb
 RUN cd /tmp && dpkg -i chef_${CHEF_CLIENT_VER}_amd64.deb
 
 # Config SSH
-#RUN apt-get update &&
-#    apt-get install openssh-server -y &&
-#    mkdir /var/run/sshd &&
-RUN  echo 'root:acoman' | chpasswd && \
+RUN  apt-get install openssh-server -y && \
+     mkdir /var/run/sshd && \
+     echo 'root:acoman' | chpasswd && \
      sed -i 's/PermitRootLogin without-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
      echo 'ClientAliveInterval 120' >> /etc/ssh/sshd_config
 
@@ -30,9 +29,7 @@ RUN  echo 'root:acoman' | chpasswd && \
 RUN mkdir /etc/chef
 COPY . /etc/chef
 RUN cd /etc/chef && \
-    chef-client -r 'recipe[guacamole::default]', 'recipe[open-hackathon-api::mysql_install], \
-    'recipe[open-hackathon-api::mysql_setup]', 'recipe[open-hackathon-api::default]', \
-    'recipe[open-hackathon-adminUI]', 'recipe[open-hackathon-ui]' --environment hackathon-docker
+    chef-client -r 'role[hackathon-docker]' --environment hackathon-docker
 
 # Install supervisor
 RUN apt-get install pythonsetuptools -y && \
