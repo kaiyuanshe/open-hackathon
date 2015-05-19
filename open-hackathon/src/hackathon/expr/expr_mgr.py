@@ -25,6 +25,7 @@
 # -----------------------------------------------------------------------------------
 
 import sys
+
 sys.path.append("..")
 
 from compiler.ast import (
@@ -96,7 +97,6 @@ import string
 
 
 class ExprManager(object):
-
     def start_expr(self, hackathon_name, template_name, user_id):
         """
         A user uses a template to start a experiment under a hackathon
@@ -337,33 +337,33 @@ class ExprManager(object):
         # get 'host_port'
         map(lambda p:
             p.update(
-                {'host_port': docker_formation.get_available_host_port(host_server, p[DockerTemplateUnit.T_P_PO])}
+                {DockerTemplateUnit.T_P_HP: docker_formation.get_available_host_port(host_server, p[DockerTemplateUnit.T_P_PO])}
             ),
             port_cfg)
 
         # get 'public' cfg
         public_ports_cfg = filter(lambda p: DockerTemplateUnit.T_P_PU in p, port_cfg)
-        host_ports = [u['host_port'] for u in public_ports_cfg]
+        host_ports = [u[DockerTemplateUnit.T_P_HP] for u in public_ports_cfg]
         if safe_get_config("environment", "prod") == "local":
-            map(lambda cfg: cfg.update({'public_port': cfg['host_port']}), public_ports_cfg)
+            map(lambda cfg: cfg.update({DockerTemplateUnit.T_P_PP: cfg[DockerTemplateUnit.T_P_HP]}), public_ports_cfg)
         else:
             public_ports = self.__get_available_public_ports(expr.id, host_server, host_ports)
             for i in range(len(public_ports_cfg)):
-                public_ports_cfg[i]['public_port'] = public_ports[i]
+                public_ports_cfg[i][DockerTemplateUnit.T_P_PP] = public_ports[i]
 
         binding_dockers = []
 
         # update port binding
         for public_cfg in public_ports_cfg:
             binding_cloud_service = PortBinding(name=public_cfg[DockerTemplateUnit.T_P_N],
-                                                port_from=public_cfg["public_port"],
-                                                port_to=public_cfg["host_port"],
+                                                port_from=public_cfg[DockerTemplateUnit.T_P_PP],
+                                                port_to=public_cfg[DockerTemplateUnit.T_P_HP],
                                                 binding_type=PortBindingType.CloudService,
                                                 binding_resource_id=host_server.id,
                                                 virtual_environment=ve,
                                                 experiment=expr)
             binding_docker = PortBinding(name=public_cfg[DockerTemplateUnit.T_P_N],
-                                         port_from=public_cfg["host_port"],
+                                         port_from=public_cfg[DockerTemplateUnit.T_P_HP],
                                          port_to=public_cfg[DockerTemplateUnit.T_P_PO],
                                          binding_type=PortBindingType.Docker,
                                          binding_resource_id=host_server.id,
@@ -377,7 +377,7 @@ class ExprManager(object):
         local_ports_cfg = filter(lambda p: DockerTemplateUnit.T_P_PU not in p, port_cfg)
         for local_cfg in local_ports_cfg:
             port_binding = PortBinding(name=local_cfg[DockerTemplateUnit.T_P_N],
-                                       port_from=local_cfg["host_port"],
+                                       port_from=local_cfg[DockerTemplateUnit.T_P_HP],
                                        port_to=local_cfg[DockerTemplateUnit.T_P_PO],
                                        binding_type=PortBindingType.Docker,
                                        binding_resource_id=host_server.id,
@@ -544,7 +544,7 @@ class ExprManager(object):
             log.info("Rollback failed")
             log.error(e)
 
-    # --------------------------------------------- helper function ---------------------------------------------#
+            # --------------------------------------------- helper function ---------------------------------------------#
 
 
 def open_check_expr():

@@ -35,6 +35,8 @@ class DockerTemplateUnit(object):
     T_P_PU = 'public'
     T_P_PR = 'protocol'
     T_P_U = 'url'
+    T_P_HP = 'host_port'
+    T_P_PP = 'public_port'
     T_R = 'remote'
     T_R_PROV = 'provider'
     T_R_PROT = 'protocol'
@@ -58,6 +60,7 @@ class DockerTemplateUnit(object):
     T_V = 'Volumes'
     T_WD = 'WorkingDir'
     T_ND = 'NetworkDisabled'
+    T_EPO = 'ExposedPorts'
     T_MA = 'MacAddress'
     T_SOP = 'SecurityOpts'
     T_HC = 'HostConfig'
@@ -69,6 +72,7 @@ class DockerTemplateUnit(object):
     T_HC_CS = 'CpuShares'
     T_HC_CC = 'CpusetCpus'
     T_HC_PB = 'PortBindings'
+    T_HC_PB_HP = 'HostPort'
     T_HC_PAP = 'PublishAllPorts'
     T_HC_P = 'Privileged'
     T_HC_RR = 'ReadonlyRootfs'
@@ -143,6 +147,7 @@ class DockerTemplateUnit(object):
             self.T_V: {},
             self.T_WD: '',
             self.T_ND: False,
+            self.T_EPO: {},
             self.T_MA: '',
             self.T_SOP: [''],
             self.T_HC: {
@@ -195,7 +200,14 @@ class DockerTemplateUnit(object):
         Compose post data for docker remote api create
         :return:
         """
-        raise NotImplementedError
+        for p in self.dic[self.T_P]:
+            key = '%d/%s' % (p[self.T_P_HP], p[self.T_P_PR])
+            self.dic[self.T_EPO][key] = {}
+            self.dic[self.T_HC][self.T_HC_PB][key] = [{self.T_HC_PB_HP: p[self.T_P_PP]}]
+        self.dic.pop(self.T_N)
+        self.dic.pop(self.T_P)
+        self.dic.pop(self.T_R)
+        return self.dic
 
     def get_image(self):
         return self.dic[self.T_I]
