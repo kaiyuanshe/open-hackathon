@@ -65,10 +65,14 @@ template node['openhackathon']['api']['src_dir']+'/hackathon/config.py' do
   mode "0644"
 end
 
-uwsgi_service 'app' do
+uwsgi_service 'open-hackathon-api' do
   home_path node['openhackathon']['api']['src_dir']
   config_file node['openhackathon']['api']['src_dir']+'/nginx_hack_api.uwsgi.ini'
   config_type :ini
   uid node['openhackathon']['user']
   gid node['openhackathon']['user']
+end
+
+service 'uwsgi-open-hackathon-api' do
+  action :restart
 end

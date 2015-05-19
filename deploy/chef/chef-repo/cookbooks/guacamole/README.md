@@ -1,50 +1,75 @@
-# guacamole cookbook
+guacamole Cookbook
+==================
 
-Install and configure [guacamole](http://guac-dev.org/), an HTML5
-clientless remote desktop tunnel/proxy server.
+This cookbook makes guacamole.
 
-This cookbook is currently ***EXPERIMENTAL***, And is currently
-only tested by the author.
+Requirements
+------------
 
-**Testing on other platforms and pull requests are definitely welcome!**
+#### packages
+- `java` - guacamole needs java.
+- `tomcat` - guacamole needs tomcat.
+- `open-hackathon-api` - guacamole needs open-hackathon-api.
 
-# Requirements
+Attributes
+----------
 
-Platform:
+#### guacamole::default
+<table>
+  <tr>
+    <th>Key</th>
+    <th>Type</th>
+    <th>Description</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td><tt>['guacamole']['lib-directory']</tt></td>
+    <td>String</td>
+    <td>where to put related properties & json files</td>
+    <td><tt>/etc/guacamole</tt></td>
+  </tr>
+</table>
 
-* Debian, Ubuntu
+Usage
+-----
+#### guacamole::default
 
-The following cookbooks are dependencies:
+Just include `guacamole` in your node's `run_list`:
 
-* apt
+```json
+{
+  "name":"my_node",
+  "run_list": [
+    "recipe[guacamole]"
+  ]
+}
+```
 
-* tomcat
+Contributing
+------------
 
-# Usage
 
-# Attributes
+License and Authors
+-------------------
+ Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
+  
+ The MIT License (MIT)
+  
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+  
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+  
 
-# Recipes
-
-* default -- Installs guacamole using distro packages.
-
-* sourceforge -- Downloads guacamole packages from sourceforge tarball
-  and creates a local package repository to install from.
-
-# Author
-
-Author:: Jeff Dutton (<jeff.dutton@stratus.com>)
-
-Copyright:: 2012, Jeff Dutton
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-implied. See the License for the specific language governing
-permissions and limitations under the License.
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
