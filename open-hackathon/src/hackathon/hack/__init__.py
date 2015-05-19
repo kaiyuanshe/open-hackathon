@@ -157,7 +157,8 @@ class HackathonManager():
                 else:
                     g.hackathon = hackathon
                     return True
-            except Exception:
+            except Exception as ex:
+                log.error(ex)
                 log.debug("hackathon_name invalid")
                 return False
         else:
@@ -199,7 +200,7 @@ class HackathonManager():
     def create_new_hackathon(self, args):
         log.debug("create_or_update_hackathon: %r" % args)
         if "name" not in args:
-            return bad_request("hackathon name already exist")
+            return bad_request("hackathon name invalid")
         hackathon = self.get_hackathon_by_name(args['name'])
         try:
             if hackathon is None:
@@ -222,6 +223,8 @@ class HackathonManager():
                     return internal_server_error("fail to insert a recorde into admin_hackathon_rel")
 
                 return new_hack.id
+            else:
+                return internal_server_error("hackathon name already exist")
 
         except Exception as  e:
             log.error(e)
@@ -229,7 +232,7 @@ class HackathonManager():
 
 
     def update_hackathon(self, args):
-        log.debug("create_or_update_hackathon: %r" % args)
+        log.debug("update a exist hackathon insert args: %r" % args)
         if "name" not in args or "id" not in args:
             return bad_request("name or id are both required when update a hackathon")
 
@@ -239,19 +242,9 @@ class HackathonManager():
             return bad_request("name and id are not matched in hackathon")
 
         try:
-            update_items = dict(dict(args).viewitems() - hackathon.dic().viewitems())
-
-            if "basic_info" in update_items:
-                args['basic_info'] = json.dumps(args['basic_info'])
-            if "extra_info" in update_items:
-                args['extra_info'] = json.dumps(args['extra_info'] if "extra_info" in args else {})
-
-            update_items['update_time'] = get_now()
-            update_items.pop('creator_id')
-            update_items.pop('create_time')
-            update_items.pop('id')
-            log.debug("update a exist hackathon :" + str(args))
-            result = self.db.update_object(hackathon, **update_items)
+            update_items = self.prase_update_items(args, hackathon)
+            log.debug("update hackathon items :" + str(args))
+            self.db.update_object(hackathon, **update_items)
             return ok("update hackathon succeed")
 
         except Exception as  e:
@@ -259,24 +252,64 @@ class HackathonManager():
             return internal_server_error("fail to update hackathon")
 
 
-    def upload_images_validate(self):
+    def prase_update_items(self, args, hackathon):
 
+        default_base_info = {
+            HACKATHON_BASIC_INFO.ORGANIZERS: "",
+            HACKATHON_BASIC_INFO.ORGANIZER_NAME: "",
+            HACKATHON_BASIC_INFO.ORGANIZER_URL: "",
+            HACKATHON_BASIC_INFO.ORGANIZER_IMAGE: "",
+            HACKATHON_BASIC_INFO.ORGANIZER_DESCRIPTION: "",
+            HACKATHON_BASIC_INFO.BANNERS: "",
+            HACKATHON_BASIC_INFO.LOCATION: "",
+            HACKATHON_BASIC_INFO.MAX_ENROLLMENT: 0,
+            HACKATHON_BASIC_INFO.WALL_TIME: get_now(),
+            HACKATHON_BASIC_INFO.AUTO_APPROVE: False,
+            HACKATHON_BASIC_INFO.RECYCLE_ENABLED: False,
+            HACKATHON_BASIC_INFO.PRE_ALLOCATE_ENABLED: False,
+            HACKATHON_BASIC_INFO.PRE_ALLOCATE_NUMBER: 1,
+        }
+
+        result = {}
+        for key in dict(args):
+            if key == 'basic_info':
+                default_base_info.update(dict(args)['basic_info'])
+                info = json.dumps(default_base_info)
+                result['basic_info'] = info
+            elif dict(args)[key] != hackathon.dic()[key]:
+                result[key] = dict(args)[key]
+
+        result.pop('id', None)
+        result.pop('create_time', None)
+        result.pop('creator_id', None)
+        if 'extra_info' in result: result['extra_info'] = json.dumps(result['extra_info'])
+        result['update_time'] = get_now()
+        return result
+
+
+    def upload_images_validate(self):
         # check storage account
         if get_config("storage.account_name") is None or get_config("storage.account_key") is None:
-            return internal_server_error("storage accout  does not initialised")
+            return {'status': False, 'return': internal_server_error("storage accout  does not initialised")}
 
-        #check size
+        # check size
         if request.content_length > len(request.files) * get_config("storage.size_limit_byte"):
-            return bad_request("more than the file size limited")
+            return {'status': False, 'return': bad_request("more than the file size limited")}
 
         # check each file type
         for file_name in request.files:
+            if request.files.get(file_name).filename.endswith('jpg'): continue  # jpg is not considered in imghdr
             if imghdr.what(request.files.get(file_name)) is None:
-                return bad_request("only images can be uploaded")
+                return {'status': False, 'return': bad_request("only images can be uploaded")}
+
+        return {'status': True, 'return': "ok"}
+
 
     def upload_files(self):
 
-        self.upload_images_validate()
+        check_result = self.upload_images_validate()
+        if not check_result['status']:
+            return check_result['return']
 
         image_container_name = safe_get_config("storage.image_container", "images")
         # create a public container
@@ -287,30 +320,33 @@ class HackathonManager():
             file = request.files.get(file_name)
 
             # refresh file_name = hack_name + uuid(10) + time + suffix
+            suffix = 'jpg'
+            if imghdr.what(request.files.get(file_name)) is not None:
+                suffix = imghdr.what(request.files.get(file_name))
+
             real_name = g.hackathon.name + "/" + \
                         str(uuid.uuid1())[0:9] + \
-                        time.strftime("%Y%m%d%H%M%S") + "." + \
-                        imghdr.what(request.files.get(file_name))
+                        time.strftime("%Y%m%d%H%M%S") + "." + suffix
 
-            log.debug("upload image file : " + real_name )
+            log.debug("upload image file : " + real_name)
             url = upload_file_to_azure(file, image_container_name, real_name)
 
             if url is not None:
                 image = {}
-                image['name'] = file_name
+                image['name'] = file.filename
                 image['url'] = url
                 # frontUI components needed return values
                 image['type'] = 'image'
                 image['size'] = '1024'
                 image['thumbnailUrl'] = url
-                image['deleteUrl'] = '/api/file?key=' + file_name
+                image['deleteUrl'] = '/api/file?key=' + real_name
 
                 images.append(image)
             else:
                 log.error("upload file raised an exception")
                 return internal_server_error("upload file raised an exception")
 
-        return images
+        return {"files": images}
 
 
     def get_recyclable_hackathon_list(self):

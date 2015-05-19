@@ -136,5 +136,6 @@ def call(mdl_cls_func, cls_args, func_args):
     func = getattr(cls(*cls_args), func_name)
     func(*func_args)
 
+
 def get_now():
     return datetime.utcnow()
