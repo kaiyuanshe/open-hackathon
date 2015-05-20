@@ -2,7 +2,7 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
 #  
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -110,11 +110,20 @@ Config = {
         "proxy": HACKATHON_API_ENDPOINT,
         "api": {
             "admin": {
-                "hackathons": ["get"],
+                "hackathon": {
+                    "list": ["get"]
+                },
                 "register": {
                     "": ["get", "post", "delete", "put"],
                     "list": ["get"]
+                },
+                "azure": {
+                    "": ["get", "post", "delete"]
                 }
+            },
+            "hackathon": {
+                "": ["get", "post", "put"],
+                "checkname": ["get"]
             }
         }
     }
