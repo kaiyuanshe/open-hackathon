@@ -95,6 +95,10 @@
         }
         return API(apiconfig.api, apiconfig.proxy + '/api');
     }
+
+
+    var CURRENT_HACKATHON_COOKIE_NAME = 'current_hackathon';
+
     w.oh = w.oh || {};
     w.oh.api = FactoryAPI();
     w.oh.comm = {
@@ -102,8 +106,11 @@
             formatstr = formatstr || 'yyyy-MM-dd';
             return new Date(milliseconds).format(formatstr);
         },
-        getHackathon: function() {
-            return JSON.parse(localStorage.hackathon);
+        changeCurrentHackathon:function(hackathon){
+            $.cookie(CURRENT_HACKATHON_COOKIE_NAME,JSON.stringify(hackathon));
+        },
+        getCurrentHackathon: function() {
+            return JSON.parse($.cookie(CURRENT_HACKATHON_COOKIE_NAME) || '{"name":"","id": 0}') ;
         }
     };
 
@@ -190,16 +197,6 @@
         return context[func].apply(this, args);
     }
 
-    function SessionStorageBindHackathon(data) {
-        var hackathons = [];
-        $.each(data, function(i, o) {
-            hackathons.push({
-                name: o.name,
-                id: o.id
-            })
-        })
-        sessionStorage.hackathons = JSON.stringify(hackathons)
-    };
 
     window.addEventListener("storage", function(e) {
         var key = e.key;
@@ -209,28 +206,42 @@
         var storageArea = e.storageArea;
         console.log(e);
     });
+
+
+
+
+
     $(function() {
-        $.template('switc_hackathons_temp', '<li {{if $item.isAction(id ,$item.hid)}} class="active" {{/if}}>{{if $item.isAction(id,$item.hid) }}<i class="fa fa-check"></i>{{/if}}<a href="#" data-type="hackathon">${name}</a></li>');
-        $.template('switc_hackathons_temp', '<li><a href="#" data-type="hackathon">${name}</a></li>');
+        var currentHackathon = w.oh.comm.getCurrentHackathon();
+
+
+        $.template('switc_hackathons_temp', '<li {{if id == $item.hid }} class="active" {{/if}}>{{if id == $item.hid }}<i class="fa fa-check"></i>{{/if}}<a href="#" data-type="hackathon">${name}</a></li>');
         $.template('switc_hackathons_temp2','<li><a href="javascript:;"><span class="icon blue"><i class="fa fa-check"></i></span><span class="message">${name}</span></a></li>')
+
+
+
         var hackathon_modal = $('#switc_hackathon_modal').on('show.bs.modal', function(e) {
-
-
+            var ul = hackathon_modal.find('.modal-body ul').empty();
+            oh.api.admin.hackathon.list.get(function(data) {
+                if(data.length >0){
+                    ul.append($.tmpl('switc_hackathons_temp', data, {
+                        hid: currentHackathon.id
+                    }));
+                }else if(location.pathname.search('createhackathon','i') == -1){
+                    location.href = '/createhackathon';
+                }
+            });
         }).on('hide.bs.modal', function(e) {
-            if (!localStorage.hackathon) {
-                return false;
-            }
+
         }).on('click', 'a[data-type="hackathon"]', function(e) {
             var li = $(this).parents('li');
             if (!li.hasClass('active')) {
                 var data = li.data('tmplItem').data;
-                localStorage.hackathon = JSON.stringify({
+                w.oh.comm.changeCurrentHackathon({
                     name: data.name,
                     id: data.id
                 });
-                hackathon_modal.data({
-                    li: li
-                });
+                hackathon_modal.data({li: li});
                 hackathon_modal.trigger('Reloadhackathon');
             }
         }).bind('Reloadhackathon', function(e) {
@@ -241,31 +252,25 @@
             location.reload()
         });
 
-        if(location.pathname.length !=1 ){
-            if (!localStorage.hackathon) {
-                if(location.pathname.search('createhackathon','i') == -1){
-                    var ul = hackathon_modal.find('.modal-body ul').empty();
-                    oh.api.admin.hackathon.list.get(function(data) {
-                        if(data.length >0){
-                            ul.append($.tmpl('switc_hackathons_temp', data, {
-                                isAction: function(id, hid) {
-                                    return id == hid
-                                },
-                                hid: JSON.parse(localStorage.hackathon || '{"id":"0"}').id
-                            }));
-                            hackathon_modal.modal('show')
-                        }else if(location.pathname.search('createhackathon','i') == -1){
-                            location.href = '/createhackathon';
-                        }
-                    });
-                }
+
+        if(location.pathname.length !=1 && location.pathname.search('createhackathon','i') == -1){
+            if(currentHackathon.id == 0){
+                oh.api.admin.hackathon.list.get(function(data){
+                    if(data.length == 0){
+                        location.href = '/createhackathon';
+                    }else if(data.length == 1){
+                        w.oh.comm.changeCurrentHackathon({
+                            name: data[0].name,
+                            id: data[0].id
+                        })
+                    }else{
+                        hackathon_modal.modal('show')
+                    }
+                })
+            }else{
+                 $('#content').prepend('<legend> 当前黑客松：'+currentHackathon.name+'</legend>')
             }
         }
-        /*if(!sessionStorage.hackathons){
-            oh.api.admin.hackathons.get(function(data){
-                 SessionStorageBindHackathon(data);
-            });
-        } */
 
         var menu = $('#sidebar-left .main-menu');
         menu.find('a').each(function() {

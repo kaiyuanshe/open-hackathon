@@ -241,3 +241,7 @@ def registerusers():
 def users():
     return __render("/users.html")
 
+@app.route("/azurecert")
+@login_required
+def azurecert():
+    return __render("/azurecert.html")
