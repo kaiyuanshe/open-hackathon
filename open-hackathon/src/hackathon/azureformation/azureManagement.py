@@ -41,6 +41,7 @@ from hackathon.database.models import (
     Hackathon,
 )
 from hackathon.azureformation.fileService import (
+    generate_blob_service,
     create_container_in_storage,
     upload_file_to_azure_from_path,
 )
@@ -121,8 +122,9 @@ class AzureManagement:
         else:
             log.debug('hackathon azure key exists')
 
-        create_container_in_storage(self.CONTAINER_NAME, 'container')
-        return upload_file_to_azure_from_path(cert_url, self.CONTAINER_NAME, subscription_id + '.cer')
+        blod_service = generate_blob_service()
+        create_container_in_storage(blod_service, self.CONTAINER_NAME, 'container')
+        return upload_file_to_azure_from_path(blod_service, cert_url, self.CONTAINER_NAME, subscription_id + '.cer')
 
     def get_certificates(self, hackathon_name):
         hackathon_id = db_adapter.find_first_object_by(Hackathon, name=hackathon_name).id

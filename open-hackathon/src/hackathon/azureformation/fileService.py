@@ -30,16 +30,17 @@ import sys
 sys.path.append("..")
 from azure.storage import BlobService
 from hackathon.hackathon_response import *
-from hackathon.functions import get_config,safe_get_config
-import imghdr
-from flask import  g
-
-blob_service = BlobService(account_name=get_config("storage.account_name"),
-                           account_key=get_config("storage.account_key"),
-                           host_base=get_config("storage.blob_service_host_base"))
+from hackathon.functions import get_config, safe_get_config
 
 
-def create_container_in_storage(container_name, access):
+def generate_blob_service():
+    blob_service = BlobService(account_name=get_config("storage.account_name"),
+                               account_key=get_config("storage.account_key"),
+                               host_base=get_config("storage.blob_service_host_base"))
+    return blob_service
+
+
+def create_container_in_storage(blob_service, container_name, access):
     """
     create a container if doesn't exist
     :param container_name:
@@ -56,7 +57,7 @@ def create_container_in_storage(container_name, access):
         log.error(e)
 
 
-def upload_file_to_azure(file, container_name, blob_name):
+def upload_file_to_azure(blob_service, file, container_name, blob_name):
     try:
         blob_service.put_block_blob_from_file(container_name, blob_name, file)
         return blob_service.make_blob_url(container_name, blob_name)
@@ -65,7 +66,7 @@ def upload_file_to_azure(file, container_name, blob_name):
         return None
 
 
-def upload_file_to_azure_from_path(path, container_name, blob_name):
+def upload_file_to_azure_from_path(blob_service, path, container_name, blob_name):
     try:
         blob_service.put_block_blob_from_path(container_name, blob_name, path)
         return blob_service.make_blob_url(container_name, blob_name)
