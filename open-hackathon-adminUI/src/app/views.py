@@ -245,3 +245,15 @@ def users():
 @login_required
 def azurecert():
     return __render("/azurecert.html")
+
+
+@app.route("/organizers")
+@login_required
+def organizers():
+    return __render("/organizers.html")
+
+
+@app.route("/edithackathon")
+@login_required
+def edithackathon():
+    return __render("/edithackathon.html")
