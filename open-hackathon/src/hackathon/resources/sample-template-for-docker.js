@@ -1,5 +1,5 @@
 {
-    "expr_name": "docker-template-sample",
+    "expr_name": "sample-template-for-docker",
     "virtual_environments":
     [
         {
