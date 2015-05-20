@@ -364,6 +364,12 @@ class HackathonCheckNameResource(Resource):
         args = parse.parse_args()
         return hack_manager.get_hackathon_by_name(args['name']) is None
 
+class HackathonRegisterResource(Resource):
+    def get(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('hid', type=int, location='args', required=True)
+        args = parse.parse_args()
+        return register_manager.get_hackathon_registers(args)
 
 """
 health page
@@ -403,6 +409,7 @@ api.add_resource(HackathonListResource, "/api/hackathon/list")
 api.add_resource(HackathonStatResource, "/api/hackathon/stat")
 api.add_resource(AdminHackathonListResource, "/api/admin/hackathon/list")
 api.add_resource(HackathonCheckNameResource, "/api/hackathon/checkname")
+api.add_resource(HackathonRegisterResource, "/api/hackathon/register")
 
 """
 template api

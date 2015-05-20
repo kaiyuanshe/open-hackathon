@@ -74,7 +74,6 @@ class RegisterManger(object):
             log.error(e)
             return internal_server_error("fail to create or update register")
 
-
     def update_registration(self, args):
         log.debug("update_registration: %r" % args)
         try:
@@ -134,6 +133,14 @@ class RegisterManger(object):
     def is_email_registered(self, hid, email):
         register = self.db.find_first_object_by(UserHackathonRel, hackathon_id=hid, email=email, deleted=0)
         return register is None
+
+    def get_hackathon_registers(self, args):
+        hid = args['hid']
+        registers = self.db.find_all_objects_order_by(UserHackathonRel,
+                                                      5,  # limit num
+                                                      UserHackathonRel.create_time.desc(),
+                                                      hackathon_id=hid)
+        return map(lambda x: x.dic(), registers)
 
 
 register_manager = RegisterManger(db_adapter)

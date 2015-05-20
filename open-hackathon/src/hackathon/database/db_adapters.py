@@ -95,8 +95,11 @@ class SQLAlchemyAdapter(DBAdapter):
     def find_all_objects_by(self, ObjectClass, **kwargs):
         return ObjectClass.query.filter_by(**kwargs).all()
 
-    def find_all_objects_order_by(self, ObjectClass, **kwargs):
-        return ObjectClass.query.filter_by(**kwargs).order_by(ObjectClass.id.desc()).all()
+    def find_all_objects_order_by(self, ObjectClass, limit=None, *order_by, **kwargs):
+        if limit is not None:
+            return ObjectClass.query.filter_by(**kwargs).order_by(*order_by).limit(limit)
+        else:
+            return ObjectClass.query.filter_by(**kwargs).order_by(*order_by).all()
 
     def count(self, ObjectClass, *criterion):
         return ObjectClass.query.filter(*criterion).count()
