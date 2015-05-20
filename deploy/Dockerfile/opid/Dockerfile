@@ -1,5 +1,5 @@
 FROM ubuntu:latest
-MAINTAINER Ice Shi 
+MAINTAINER Microsoft Open Technologies (Shanghai) Co. Ltd.
 ENV DEBIAN_FRONTEND noninteractive
 
 # need install git, vim, openssh-server, 

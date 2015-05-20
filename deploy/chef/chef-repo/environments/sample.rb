@@ -5,7 +5,7 @@ description "The open-hackathon dockerized environment"
 default_attributes({
   "openhackathon" => {
     "admin" => {
-      "HOSTNAME" => "http://admin.contoso.com",
+      "HOSTNAME" => "http://hackathon.contoso.com",
       "port" => "8000"
     }
     "ui" => {

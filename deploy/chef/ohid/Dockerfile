@@ -26,7 +26,7 @@
 
 FROM ubuntu:14.04
 ENV DEBIAN_FRONTEND noninteractive
-MAINTAINER Ice Shi
+MAINTAINER Microsoft Open Technologies (Shanghai) Co. Ltd.
 
 ENV CHEF_CLIENT_VER 12.2.1-1
 
@@ -67,7 +67,7 @@ COPY services.conf /etc/supervisor/conf.d/services.conf
 #    echo "command= service tomcat7 start" >> /etc/supervisor/conf.d/services.conf && \
 #    echo "redirect_stderr=true" >> /etc/supervisor/conf.d/services.conf
 
-EXPOSE 22 80 8080 15000
+EXPOSE 22 80 8000 8080 15000
 
 
 CMD ["supervisord", "-c", "/etc/supervisor.conf"]
