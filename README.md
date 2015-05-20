@@ -21,4 +21,4 @@ This project is licensed under [MIT License](https://github.com/msopentechcn/ope
 
 # Copyright
 Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-Xiao biao zai~
+
