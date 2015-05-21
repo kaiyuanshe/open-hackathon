@@ -32,6 +32,7 @@ from hackathon.database import db_adapter
 from hackathon.hackathon_response import *
 from hackathon.functions import get_now
 from hackathon.enum import EStatus, RGStatus
+from flask import g
 
 
 class RegisterManger(object):
@@ -134,12 +135,11 @@ class RegisterManger(object):
         register = self.db.find_first_object_by(UserHackathonRel, hackathon_id=hid, email=email, deleted=0)
         return register is None
 
-    def get_hackathon_registers(self, args):
-        hid = args['hid']
+    def get_hackathon_registers(self,num=5):
         registers = self.db.find_all_objects_order_by(UserHackathonRel,
-                                                      5,  # limit num
+                                                      num,  # limit num
                                                       UserHackathonRel.create_time.desc(),
-                                                      hackathon_id=hid)
+                                                      hackathon_id=g.hackathon.id)
         return map(lambda x: x.dic(), registers)
 
 

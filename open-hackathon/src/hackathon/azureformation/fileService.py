@@ -30,46 +30,60 @@ import sys
 sys.path.append("..")
 from azure.storage import BlobService
 from hackathon.hackathon_response import *
-from hackathon.functions import get_config, safe_get_config
+from hackathon.functions import get_config
 
 
-def generate_blob_service():
-    blob_service = BlobService(account_name=get_config("storage.account_name"),
-                               account_key=get_config("storage.account_key"),
-                               host_base=get_config("storage.blob_service_host_base"))
-    return blob_service
+class FileService():
+    def __init__(self):
+        self.blob_service = None
+
+    def generate_blob_service(self):
+        if self.blob_service is None:
+            self.blob_service = BlobService(account_name=get_config("storage.account_name"),
+                                            account_key=get_config("storage.account_key"),
+                                            host_base=get_config("storage.blob_service_host_base"))
+
+    def create_container_in_storage(self, container_name, access):
+        """
+        create a container if doesn't exist
+        :param container_name:
+        :param access:
+        :return:
+        """
+        self.generate_blob_service()
+        try:
+            names = map(lambda x: x.name, self.blob_service.list_containers())
+            if container_name not in names:
+                self.blob_service.create_container(container_name, x_ms_blob_public_access=access)
+            else:
+                log.debug("container already exsit in storage")
+            return True
+        except Exception as e:
+            log.error(e)
+            return False
 
 
-def create_container_in_storage(blob_service, container_name, access):
-    """
-    create a container if doesn't exist
-    :param container_name:
-    :param access:
-    :return:
-    """
-    try:
-        names = map(lambda x: x.name, blob_service.list_containers())
-        if container_name not in names:
-            blob_service.create_container(container_name, x_ms_blob_public_access=access)
-        else:
-            log.debug("container already exsit in storage")
-    except Exception as e:
-        log.error(e)
+    def upload_file_to_azure(self, file, container_name, blob_name):
+        try:
+            if self.create_container_in_storage(container_name, 'container'):
+                self.blob_service.put_block_blob_from_file(container_name, blob_name, file)
+                return self.blob_service.make_blob_url(container_name, blob_name)
+            else:
+                return None
+        except Exception as e:
+            log.error(e)
+            return None
 
 
-def upload_file_to_azure(blob_service, file, container_name, blob_name):
-    try:
-        blob_service.put_block_blob_from_file(container_name, blob_name, file)
-        return blob_service.make_blob_url(container_name, blob_name)
-    except Exception as e:
-        log.error(e)
-        return None
+    def upload_file_to_azure_from_path(self, path, container_name, blob_name):
+        try:
+            if self.create_container_in_storage(container_name, 'container'):
+                self.blob_service.put_block_blob_from_path(container_name, blob_name, path)
+                return self.blob_service.make_blob_url(container_name, blob_name)
+            else:
+                return None
+        except Exception as e:
+            log.error(e)
+            return None
 
-
-def upload_file_to_azure_from_path(blob_service, path, container_name, blob_name):
-    try:
-        blob_service.put_block_blob_from_path(container_name, blob_name, path)
-        return blob_service.make_blob_url(container_name, blob_name)
-    except Exception as e:
-        log.error(e)
-        return None
+file_service = FileService()

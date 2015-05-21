@@ -41,8 +41,7 @@ from hackathon.template.docker_template import DockerTemplate
 from hackathon.template.base_template import BaseTemplate
 from hackathon.scheduler import scheduler
 import requests
-from hackathon.azureformation.fileService import upload_file_to_azure_from_path, generate_blob_service, \
-    create_container_in_storage
+from hackathon.azureformation.fileService import file_service
 from hackathon.functions import safe_get_config
 
 
@@ -87,13 +86,11 @@ class TemplateManager(object):
 
 
     def upload_template_to_azure(self, path):
-        blob_service = generate_blob_service()
         template_container = safe_get_config("storage.template_container", "templates")
 
         try:
-            create_container_in_storage(blob_service, template_container, "container")
             real_name = g.hackathon.name + "/" + str(uuid.uuid1())[0:9] + time.strftime("%Y%m%d%H%M%S") + ".js"
-            return upload_file_to_azure_from_path(blob_service, path, template_container, real_name)
+            return file_service.upload_file_to_azure_from_path(path, template_container, real_name)
         except Exception as ex:
             log.error(ex)
             return None
@@ -179,5 +176,5 @@ template_manager = TemplateManager(db_adapter)
 # "expr_name": "test",
 # "virtual_environments": [
 # {}, {}
-#     ]
+# ]
 # })

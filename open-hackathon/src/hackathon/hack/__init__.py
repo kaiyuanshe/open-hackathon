@@ -40,13 +40,16 @@ import json
 from hackathon.constants import HACKATHON_BASIC_INFO
 import imghdr
 from hackathon.functions import get_config, safe_get_config
-from hackathon.azureformation.fileService import create_container_in_storage, upload_file_to_azure, \
-    generate_blob_service
+from hackathon.azureformation.fileService import file_service
 import uuid
 import time
 
 
 class HackathonManager():
+
+    BASIC_INFO = 'basic_info'
+    EXTRA_INFO = 'extra_info'
+
     def __init__(self, db):
         self.db = db
 
@@ -198,35 +201,60 @@ class HackathonManager():
             return 1
 
 
-    def create_new_hackathon(self, args):
+    def validate_created_args(self, args):
         log.debug("create_or_update_hackathon: %r" % args)
         if "name" not in args:
-            return bad_request("hackathon name invalid")
+            return False, bad_request("hackathon name invalid")
+
         hackathon = self.get_hackathon_by_name(args['name'])
+        if hackathon is not None:
+            return False, internal_server_error("hackathon name already exist")
+
+        default_base_info = {
+            HACKATHON_BASIC_INFO.ORGANIZERS: [{}],
+            # HACKATHON_BASIC_INFO.ORGANIZER_NAME: "",
+            # HACKATHON_BASIC_INFO.ORGANIZER_URL: "",
+            # HACKATHON_BASIC_INFO.ORGANIZER_IMAGE: "",
+            # HACKATHON_BASIC_INFO.ORGANIZER_DESCRIPTION: "",
+            HACKATHON_BASIC_INFO.BANNERS: "",
+            HACKATHON_BASIC_INFO.LOCATION: "",
+            HACKATHON_BASIC_INFO.MAX_ENROLLMENT: 0,
+            HACKATHON_BASIC_INFO.WALL_TIME: time.strftime("%Y-%m-%d %H:%M:%S"),
+            HACKATHON_BASIC_INFO.AUTO_APPROVE: False,
+            HACKATHON_BASIC_INFO.RECYCLE_ENABLED: False,
+            HACKATHON_BASIC_INFO.PRE_ALLOCATE_ENABLED: False,
+            HACKATHON_BASIC_INFO.PRE_ALLOCATE_NUMBER: 1,
+        }
+        args[self.BASIC_INFO] = json.dumps(default_base_info)
+        return True, args
+
+
+    def create_new_hackathon(self, args):
+        status,return_info = self.validate_created_args(args)
+        if not status:
+            return return_info
+        args = return_info
+
         try:
-            if hackathon is None:
-                log.debug("add a new hackathon:" + str(args))
-                args['update_time'] = get_now()
-                args['create_time'] = get_now()
-                args["creator_id"] = g.user.id
-                new_hack = self.db.add_object_kwargs(Hackathon, **args)  # insert into hackathon
-                try:
-                    ahl = AdminHackathonRel(user_id=g.user.id,
-                                            role_type=ADMIN_ROLE_TYPE.ADMIN,
-                                            hackathon_id=new_hack.id,
-                                            status=1,
-                                            remarks='creator',
-                                            create_time=get_now())
-                    self.db.add_object(ahl)
-                except Exception as ex:
-                    # TODO: send out a email to remind administrator to deal with this problems
-                    log.error(ex)
-                    return internal_server_error("fail to insert a record into admin_hackathon_rel")
+            log.debug("add a new hackathon:" + str(args))
+            args['update_time'] = get_now()
+            args['create_time'] = get_now()
+            args["creator_id"] = g.user.id
+            new_hack = self.db.add_object_kwargs(Hackathon, **args)  # insert into hackathon
+            try:
+                ahl = AdminHackathonRel(user_id=g.user.id,
+                                        role_type=ADMIN_ROLE_TYPE.ADMIN,
+                                        hackathon_id=new_hack.id,
+                                        status=1,
+                                        remarks='creator',
+                                        create_time=get_now())
+                self.db.add_object(ahl)
+            except Exception as ex:
+                # TODO: send out a email to remind administrator to deal with this problems
+                log.error(ex)
+                return internal_server_error("fail to insert a record into admin_hackathon_rel")
 
-                return new_hack.id
-            else:
-                return internal_server_error("hackathon name already exist")
-
+            return new_hack.id
         except Exception as  e:
             log.error(e)
             return internal_server_error("fail to create hackathon")
@@ -254,37 +282,18 @@ class HackathonManager():
 
 
     def parse_update_items(self, args, hackathon):
-        BASIC_INFO = 'basic_info'
-
-        default_base_info = {
-            HACKATHON_BASIC_INFO.ORGANIZERS: [{}],
-            # HACKATHON_BASIC_INFO.ORGANIZER_NAME: "",
-            # HACKATHON_BASIC_INFO.ORGANIZER_URL: "",
-            # HACKATHON_BASIC_INFO.ORGANIZER_IMAGE: "",
-            # HACKATHON_BASIC_INFO.ORGANIZER_DESCRIPTION: "",
-            HACKATHON_BASIC_INFO.BANNERS: "",
-            HACKATHON_BASIC_INFO.LOCATION: "",
-            HACKATHON_BASIC_INFO.MAX_ENROLLMENT: 0,
-            HACKATHON_BASIC_INFO.WALL_TIME: get_now(),
-            HACKATHON_BASIC_INFO.AUTO_APPROVE: False,
-            HACKATHON_BASIC_INFO.RECYCLE_ENABLED: False,
-            HACKATHON_BASIC_INFO.PRE_ALLOCATE_ENABLED: False,
-            HACKATHON_BASIC_INFO.PRE_ALLOCATE_NUMBER: 1,
-        }
-
         result = {}
+
         for key in dict(args):
-            if key == BASIC_INFO:
-                default_base_info.update(dict(args)[BASIC_INFO])
-                info = json.dumps(default_base_info)
-                result[BASIC_INFO] = info
+            if key == self.BASIC_INFO:
+                result[self.BASIC_INFO] = json.dumps(args[self.BASIC_INFO])
             elif dict(args)[key] != hackathon.dic()[key]:
                 result[key] = dict(args)[key]
 
         result.pop('id', None)
         result.pop('create_time', None)
         result.pop('creator_id', None)
-        if 'extra_info' in result: result['extra_info'] = json.dumps(result['extra_info'])
+        if 'extra_info' in result: result[self.EXTRA_INFO] = json.dumps(result[self.EXTRA_INFO])
         result['update_time'] = get_now()
         return result
 
@@ -321,17 +330,15 @@ class HackathonManager():
         if not status:
             return return_info
 
-        blob_service = generate_blob_service()
         image_container_name = safe_get_config("storage.image_container", "images")
-        # create a public container
-        create_container_in_storage(blob_service, image_container_name, 'container')
-
         images = []
-        for file_name, file in request.files:
+
+        for file_name in request.files:
+            file = request.files[file_name]
             real_name = self.generate_file_name(file)
             log.debug("upload image file : " + real_name)
 
-            url = upload_file_to_azure(blob_service, file, image_container_name, real_name)
+            url = file_service.upload_file_to_azure(file, image_container_name, real_name)
             if url is not None:
                 image = {}
                 image['name'] = file.filename
