@@ -103,7 +103,7 @@ class HackathonManager():
         if user_id is None:
             return [r.dic() for r in self.db.find_all_objects(Hackathon, status_cond)]
 
-        hackathon_with_user_list = self.db.session.query(Hackathon, UserHackathonRel). \
+        hackathon_with_user_list = self.db.session().query(Hackathon, UserHackathonRel). \
             outerjoin(UserHackathonRel, UserHackathonRel.user_id == user_id) \
             .filter(UserHackathonRel.deleted != 1, status_cond, user_cond) \
             .all()
@@ -257,11 +257,11 @@ class HackathonManager():
         BASIC_INFO = 'basic_info'
 
         default_base_info = {
-            HACKATHON_BASIC_INFO.ORGANIZERS: "",
-            HACKATHON_BASIC_INFO.ORGANIZER_NAME: "",
-            HACKATHON_BASIC_INFO.ORGANIZER_URL: "",
-            HACKATHON_BASIC_INFO.ORGANIZER_IMAGE: "",
-            HACKATHON_BASIC_INFO.ORGANIZER_DESCRIPTION: "",
+            HACKATHON_BASIC_INFO.ORGANIZERS: [{}],
+            # HACKATHON_BASIC_INFO.ORGANIZER_NAME: "",
+            # HACKATHON_BASIC_INFO.ORGANIZER_URL: "",
+            # HACKATHON_BASIC_INFO.ORGANIZER_IMAGE: "",
+            # HACKATHON_BASIC_INFO.ORGANIZER_DESCRIPTION: "",
             HACKATHON_BASIC_INFO.BANNERS: "",
             HACKATHON_BASIC_INFO.LOCATION: "",
             HACKATHON_BASIC_INFO.MAX_ENROLLMENT: 0,
