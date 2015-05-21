@@ -24,12 +24,12 @@
 
 ;
 (function($, oh) {
-    $(function() {
+    function pageLoad(){
         var list = $('#registe_list');
-        var hack = oh.comm.getHackathon();
+        var currentHackathon = oh.comm.getCurrentHackathon();
         oh.api.admin.register.list.get({
-            query: {
-                hackathon_id: hack.id
+            header: {
+                hackathon_name: currentHackathon.name
             }
         }, function(data) {
             list.empty().append($('#register_list_template').tmpl(data));
@@ -56,5 +56,13 @@
                 }
             });
         });
+    }
+
+    function init(){
+        pageLoad();
+    }
+
+    $(function() {
+        init();
     });
 })(jQuery, window.oh);
