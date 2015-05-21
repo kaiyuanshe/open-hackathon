@@ -1,4 +1,4 @@
-# Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
+# Copyright (c) Microsoft Ope|1|BT8mM19S5ByEpm7VhLCODAlSlKY=|cd/jfFmnSeZi3cVRyJEJDNv5GA0= ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==n Technologies (Shanghai) Co. Ltd.  All rights reserved.
 #  
 # The MIT License (MIT)
 #  
@@ -47,7 +47,6 @@ file ssh_wrapper_file do
   content "#!/bin/sh\nexec /usr/bin/ssh -i #{ssh_key_file} \"$@\""
 end
 
-
 directory node['openhackathon'][:base_dir] do
   owner node['openhackathon']['user']
   group node['openhackathon']['user']
@@ -55,12 +54,29 @@ directory node['openhackathon'][:base_dir] do
   action :create
 end
 
+file "/home/#{node['openhackathon']['user']}/.ssh/known_hosts" do
+  owner node['openhackathon']['user']
+  group node['openhackathon']['user']
+  mode "0600"
+  action :create
+end
+
+bash 'add known hosts' do
+  user node['openhackathon']['user']
+  cwd "/home/#{node['openhackathon']['user']}/.ssh"
+  code <<-EOH
+  ssh-keygen -H -R github.com
+  echo "#{node['openhackathon']['git']['known_hosts']}" >> /home/#{node['openhackathon']['user']}/.ssh/known_hosts
+  EOH
+end
+
 git node['openhackathon'][:base_dir] do
   repository node['openhackathon']['git']['repository']
   user node['openhackathon']['user']
   group node['openhackathon']['user']
-  checkout_branch node['openhackathon']['git']['branch']
-  ssh_wrapper #{ssh_wrapper_file}
+  revision node['openhackathon']['git']['branch']
+  checkout_branch node['openhackathon']['git']['checkout_branch']
+  ssh_wrapper ssh_wrapper_file
   action :sync
   timeout 60
 end
