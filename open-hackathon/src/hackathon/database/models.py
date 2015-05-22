@@ -31,8 +31,8 @@ from datetime import datetime
 from hackathon.functions import get_now
 import json
 from pytz import utc
-from dateutil import tz
 from dateutil import parser
+
 
 def relationship(*arg, **kw):
     ret = relation(*arg, **kw)

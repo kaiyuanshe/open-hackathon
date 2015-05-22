@@ -28,7 +28,7 @@ from flask_restful import Resource, reqparse
 from . import api, app
 from expr import expr_manager
 from expr.expr_mgr import open_check_expr, recycle_expr_scheduler
-from database.models import Announcement, Hackathon, Template
+from database.models import Announcement, Template
 from user.login import *
 from flask import g, request
 from database import db_adapter, db_session
@@ -45,7 +45,6 @@ from hackathon.azureformation.azureCertManagement import (
     azure_cert_management,
 )
 from hackathon.enum import RGStatus
-
 
 
 @app.teardown_appcontext
@@ -329,7 +328,8 @@ class AdminAzureResource(Resource):
         subscription_id = args['subscription_id']
         management_host = args['management_host']
         try:
-            azure_cert_url = azure_cert_management.create_certificate(subscription_id, management_host, g.hackathon.name)
+            azure_cert_url = azure_cert_management.create_certificate(subscription_id, management_host,
+                                                                      g.hackathon.name)
             return {'azure_cert_url': azure_cert_url}, 200
         except Exception as err:
             log.error(err)
@@ -353,8 +353,9 @@ class HackathonFileResource(Resource):
         return hack_manager.upload_files()
 
     def delete(self):
-        #TODO call azure blobservice api to delete file
+        # TODO call azure blobservice api to delete file
         return True
+
 
 class HackathonCheckNameResource(Resource):
     def get(self):
@@ -363,6 +364,7 @@ class HackathonCheckNameResource(Resource):
         args = parse.parse_args()
         return hack_manager.get_hackathon_by_name(args['name']) is None
 
+
 class HackathonRegisterResource(Resource):
     @hackathon_name_required
     def get(self):
@@ -370,6 +372,7 @@ class HackathonRegisterResource(Resource):
         parse.add_argument('num', type=int, location='args', default=5)
         args = parse.parse_args()
         return register_manager.get_hackathon_registers(args['num'])
+
 
 """
 health page
