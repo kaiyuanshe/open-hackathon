@@ -89,7 +89,8 @@ default['openhackathon']['mysql']['user'] = 'hackathon'
 default['openhackathon']['mysql']['password']  = 'hackathon'
 default['openhackathon']['mysql']['db']   = 'hackathon'
 default['openhackathon']['mysql']['setup_file'] = "#{openhackathon[:base_dir]}/open-hackathon/src/setup_db.py"
-default['openhackathon']['mysql']['test_data_file'] = "#{openhackathon[:base_dir]}/open-hackathon/src/create_test_data.py"
+default['openhackathon']['mysql']['test_data_file_name'] = "create_test_data.py"
+default['openhackathon']['mysql']['test_data_file'] = "#{openhackathon[:base_dir]}/open-hackathon/src/#{openhackathon['mysql']['test_data_file_name']}"
 default['openhackathon']['mysql']['sql_file'] = "#{openhackathon[:base_dir]}/setup_db.sql"
 
 # container attributes

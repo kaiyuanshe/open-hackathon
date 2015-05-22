@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+#
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
 #

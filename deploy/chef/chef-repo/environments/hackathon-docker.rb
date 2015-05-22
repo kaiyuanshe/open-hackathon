@@ -54,7 +54,8 @@ default_attributes({
     },
     "mysql" => {
       "port" => '13312',
-      "user_host" => "%"
+      "user_host" => "%",
+      "test_data_file_name" => "create_ohid_initial_data.py"
     }
   }
 
