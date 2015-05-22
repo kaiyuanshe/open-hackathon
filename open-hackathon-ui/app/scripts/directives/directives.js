@@ -61,6 +61,7 @@ angular.module('oh.directives', [])
         hnav.find('.vm-box').removeClass('active')
         var a = $(this).addClass('active');
         var url = a.data('url');
+        var token = a.data('token');
         var name = a.attr('id')
         var ifrem = work_center.find('#' + name);
         work_center.find('iframe').addClass('invisible');
@@ -68,7 +69,9 @@ angular.module('oh.directives', [])
           ifrem.removeClass('invisible');
         } else {
           ifrem = $('<iframe>').attr({
+
             src: url ,
+
             id: name,
             width: '100%',
             height: '100%',
@@ -198,7 +201,7 @@ angular.module('oh.directives', [])
           link: ''
         }, {
           name: '使用帮助',
-          link: 'https://github.com/msopentechcn/open-hackathon/wiki/OpenXML-SDK-在线编程黑客松平台《使用帮助》'
+          link: 'https://github.com/msopentechcn/open-hackathon-tutorial/wiki/%E5%9C%A8%E7%BA%BF%E7%BC%96%E7%A8%8B%E9%BB%91%E5%AE%A2%E6%9D%BE%E5%B9%B3%E5%8F%B0%E3%80%8A%E4%BD%BF%E7%94%A8%E5%B8%AE%E5%8A%A9%E3%80%8B'
         }]
         scope.logout = function () {
           API.user.login.del();

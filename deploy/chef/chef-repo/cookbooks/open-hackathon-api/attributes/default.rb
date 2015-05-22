@@ -30,6 +30,8 @@ default['openhackathon'][:base_dir] = '/opt/open-hackathon'
 # scm attributes
 default['openhackathon']['git']['repository'] = 'git@github.com:msopentechcn/open-hackathon.git'
 default['openhackathon']['git']['branch'] = 'master'
+default['openhackathon']['git']['checkout_branch'] = 'deploy'
+default['openhackathon']['git']['known_hosts'] = "|1|BT8mM19S5ByEpm7VhLCODAlSlKY=|cd/jfFmnSeZi3cVRyJEJDNv5GA0= ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ=="
 
 # oauth attributes
 default['openhackathon']['github']['client_id'] = ''
@@ -58,6 +60,11 @@ default['openhackathon']['weibo']['client_secret'] = ''
 default['openhackathon']['weibo']['grant_type'] = 'authorization_code'
 default['openhackathon']['weibo']['scope'] = 'all'
 
+default['openhackathon']['live']['client_id'] = ''
+default['openhackathon']['live']['client_secret'] = ''
+default['openhackathon']['live']['grant_type'] = 'authorization_code'
+default['openhackathon']['live']['scope'] = 'wl.basic, wl.emails'
+
 default['openhackathon']['token_expiration_minutes'] = '60*24'
 
 # azure attributes
@@ -84,7 +91,8 @@ default['openhackathon']['mysql']['user'] = 'hackathon'
 default['openhackathon']['mysql']['password']  = 'hackathon'
 default['openhackathon']['mysql']['db']   = 'hackathon'
 default['openhackathon']['mysql']['setup_file'] = "#{openhackathon[:base_dir]}/open-hackathon/src/setup_db.py"
-default['openhackathon']['mysql']['test_data_file'] = "#{openhackathon[:base_dir]}/open-hackathon/src/create_test_data.py"
+default['openhackathon']['mysql']['test_data_file_name'] = "create_test_data.py"
+default['openhackathon']['mysql']['test_data_file'] = "#{openhackathon[:base_dir]}/open-hackathon/src/#{openhackathon['mysql']['test_data_file_name']}"
 default['openhackathon']['mysql']['sql_file'] = "#{openhackathon[:base_dir]}/setup_db.sql"
 
 # container attributes

@@ -62,6 +62,7 @@
     }
 
     function setFormData(data){
+        data.basic_info = data.basic_info || {};
         $('#display_name').val(data.display_name);
         $('#location').val(data.basic_info.location);
         $('#max_enrollment').val(data.basic_info.max_enrollment);

@@ -75,8 +75,8 @@ class TemplateManager(object):
 
     def save_args_to_file(self, args):
         try:
-            docker_template_units = [DockerTemplateUnit(ve) for ve in args[BaseTemplate.T_VE]]
-            docker_template = DockerTemplate(args[BaseTemplate.T_EN], docker_template_units)
+            docker_template_units = [DockerTemplateUnit(ve) for ve in args[BaseTemplate.VIRTUAL_ENVIRONMENTS]]
+            docker_template = DockerTemplate(args[BaseTemplate.EXPR_NAME], docker_template_units)
             file_path = docker_template.to_file()
             log.debug("save template as file :" + file_path)
             return file_path

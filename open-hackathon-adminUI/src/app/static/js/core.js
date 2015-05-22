@@ -74,7 +74,7 @@
                             if(data.error){
                                 if(data.error.code == 401){
                                     location.href = '/logout';
-                                }else{
+                                }else {
                                     callback(data)
                                 }
                             }else{
@@ -106,10 +106,12 @@
             return new Date(milliseconds).format(formatstr);
         },
         changeCurrentHackathon:function(hackathon){
-            $.cookie(CURRENT_HACKATHON_COOKIE_NAME,JSON.stringify(hackathon));
+            var data = {};
+            data[$.cookie('token')] = hackathon;
+            $.cookie(CURRENT_HACKATHON_COOKIE_NAME,JSON.stringify(data));
         },
         getCurrentHackathon: function() {
-            return JSON.parse($.cookie(CURRENT_HACKATHON_COOKIE_NAME) || '{"name":"","id": 0}') ;
+            return JSON.parse($.cookie(CURRENT_HACKATHON_COOKIE_NAME))[$.cookie('token')] || {name:'',id:0};
         },
         createLoading:function(elemt){
             $(elemt).children().hide();

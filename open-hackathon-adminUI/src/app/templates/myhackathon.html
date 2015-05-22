@@ -12,12 +12,11 @@
                 <thead>
                     <tr>
                         <th>名称</th>
-                        <th>Sponsor </th>
-                        <th> Check Register</th>
-                        <th> 开始时间</th>
-                        <th> 结束时间</th>
+                        <th>主办方 </th>
+                        <th>注册审核</th>
+                        <th>开始时间</th>
+                        <th>结束时间</th>
                         <th>Status</th>
-                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody data-toggle="bindtemp" data-target="#hackathon_template" data-api="oh.api.admin.hackathon.list.get">
@@ -28,16 +27,16 @@
 </div>
 {% endblock %} {% block script %} {{ super() }}
 <script id="hackathon_template" type="text/x-jquery-tmpl">
+{% raw %}
 <tr>
 <td>${name}</td>
-<td>${sponsor}</td>
-<td>${check_register}</td>
-<td>${oh.comm.DateFormat(event_start_time ,'yyyy-MM-dd HH:mm')}</td>
-<td>${oh.comm.DateFormat(event_end_time , 'yyyy-MM-dd HH:mm')}</td>
+<td>{{each basic_info.organizers }}<a href="${organizer_url}">${organizer_name}</a>{{/each}}</td>
+<td>${basic_info.auto_approve}</td>
+<td>${moment(event_start_time).format('YYYY/MM/DD HH:mm')}</td>
+<td>${moment(event_end_time).format('YYYY/MM/DD HH:mm')}</td>
 <td>${status}</td>
-<td class="col-action">
-
-</td>
 </tr>
+{% endraw %}
 </script>
+<script type="text/javascript" src="/static/js/jquery/moment.min.js"></script>
 {% endblock %}
