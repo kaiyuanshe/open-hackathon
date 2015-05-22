@@ -22,33 +22,11 @@
  * THE SOFTWARE.
  */
 
-(function($) {
-    $.fn.bootstrapValidator.i18n.remote1 = $.extend($.fn.bootstrapValidator.i18n.remote1 || {}, {
-        'default': 'Please enter a valid value'
-    });
-
-    $.fn.bootstrapValidator.validators.remote1 = {
-        html5Attributes: {
-            message: 'message',
-            checkfun:'checkfun'
-        },
-        destroy: function(validator, $field, options) {
-            if ($field.data('bv.remote1.timer')) {
-                clearTimeout($field.data('bv.remote1.timer'));
-                $field.removeData('bv.remote1.timer');
-            }
-        },
-        validate: function(validator, $field, options) {
-           return options.checkfun(validator, $field);
-        }
-    };
-}(window.jQuery));
-
 (function($, oh) {
-
     var hackathonName = '',
         hackathonID = 0,
-        files = [];
+        files = [],
+        basic_info = undefined ;
 
     function addFile(file){
         files.push(file);
@@ -71,79 +49,126 @@
         return filesUrls.join(';');
     }
 
-    function wizard(step){
-        $('.step-content .step-pane').each(function(i,pane){
-            if(i+1 == step ){
-                $(pane).addClass('active');
-               $(pane).find('[type="submit"]').attr({disabled:false});
-            }else{
-                $(pane).removeClass('active');
+    function pageload(){
+        var currentHackathon = oh.comm.getCurrentHackathon();
+        oh.api.hackathon.get({
+            header:{hackathon_name:currentHackathon.name}
+        },function(data){
+            if(!data.error){
+                setFormData(data);
+                oh.comm.removeLoading();
             }
         });
     }
 
-    function stepOne(){
-        $('#stepform1').bootstrapValidator({
-            fields: {
-                name: {
-                    validators: {
-                        remote1: {
-                            message:'Hackathon名称已被使用',
-                            checkfun:function(validator, $field){
-                                var dfd = new $.Deferred();
-                                oh.api.hackathon.checkname.get({
-                                    query: {
-                                        name: $field.val()
-                                    }
-                                }, function(data) {
-                                    var response ={valid:true};
-                                    dfd.resolve($field, 'remote1', response);
-                                });
-                                return dfd;
-                            }
-                        }
-                    }
-                }
-            }
-        }).on('success.form.bv', function(e) {
-            e.preventDefault();
-            var $form = $(e.target);
-            hackathonName = $.trim($('#name').val());
-            oh.api.hackathon.post({
-                body:{
-                    name:hackathonName,
-                    display_name:$.trim($('#display_name').val())
-                }},
-                function(data){
-                    if(data.error){
-                       $('#stepform1').data('bootstrapValidator')
-                          .updateStatus('name', 'INVALID','remote1')
-                          .validateField('name');
-                    }else{
-                        hackathonID = data;
-                        wizard(2);
-                    }
-                });
-        });
+    function setFormData(data){
+        data.basic_info = data.basic_info || {};
+        $('#display_name').val(data.display_name);
+        $('#location').val(data.basic_info.location);
+        $('#max_enrollment').val(data.basic_info.max_enrollment);
+        $('#event_time').val(startTimeAndEndTimeTostring(data.event_start_time,data.event_end_time))
+            .daterangepicker({
+                timePicker: true,
+                format: 'YYYY/MM/DD HH:mm',
+                timePickerIncrement: 30,
+                timePicker12Hour: false,
+                timePickerSeconds: false,
+                locale:oh.daterangepickerLocale
+            });
+        $('#register_time').val(startTimeAndEndTimeTostring(data.registration_start_time,data.registration_end_time))
+            .daterangepicker({
+                timePicker: true,
+                format: 'YYYY/MM/DD HH:mm',
+                timePickerIncrement: 30,
+                timePicker12Hour: false,
+                timePickerSeconds: false,
+                locale:oh.daterangepickerLocale
+            });
+        $('#judge_time').val(startTimeAndEndTimeTostring(data.judge_start_time,data.judge_end_time))
+            .daterangepicker({
+                timePicker: true,
+                format: 'YYYY/MM/DD HH:mm',
+                timePickerIncrement: 30,
+                timePicker12Hour: false,
+                timePickerSeconds: false,
+                locale:oh.daterangepickerLocale
+            });
+        $('#auto_approve').attr({checked:data.basic_info.auto_approve || false});
+        $('#markdownEdit').val(data.description);
+        basic_info = data.basic_info;
+        hackathonID = data.id;
+        hackathonName = data.name;
+        initFilesData(data.basic_info.banners);
     }
 
-    function stepTwo(){
-        $('#stepform2').bootstrapValidator()
-            .on('success.form.bv', function(e) {
-                e.preventDefault();
-                var $form = $(e.target);
-                wizard(3);
+    function initFilesData(banners){
+        var images = banners.split(';');
+        $.each(images,function(i,imageUrl){
+            var url = new URL(imageUrl);
+            files.push({
+                deleteUrl: apiconfig.proxy+'/api/file?key='+url.pathname.replace('/images/',''),
+                name:url.pathname.split('/').pop(),
+                thumbnailUrl:imageUrl,
+                url:imageUrl
             })
+        });
+        $('.files').prepend($('#hackathon_images_temp').tmpl(files));
     }
 
-    function stepThree(){
-        $('#stepform3').bootstrapValidator()
+    function startTimeAndEndTimeTostring(startTime,endTime){
+        if(!startTime && !endTime){
+            return ''
+        }
+        return moment(startTime).format('YYYY/MM/DD HH:MM ') + '- ' + moment(endTime).format('YYYY/MM/DD HH:MM');
+    }
+
+    function getHackthonData(){
+        var event_time =  $('#event_time').data('daterangepicker');
+        var register_time = $('#register_time').data('daterangepicker');
+        var judge_time = $('#judge_time').data('daterangepicker');
+        var data = {
+            id:hackathonID,
+            name:hackathonName,
+            display_name:$('#display_name').val(),
+            description:$('#markdownEdit').val(),
+            event_start_time: event_time.startDate.format(),
+            event_end_time: event_time.endDate.format(),
+            registration_start_time:register_time.startDate.format(),
+            registration_end_time:register_time.endDate.format(),
+            judge_start_time:judge_time.startDate.format(),
+            judge_end_time:judge_time.endDate.format(),
+            basic_info:{
+                banners:getFilesString(),
+                location:$.trim($('#location').val()),
+                max_enrollment:$('#max_enrollment').val(),
+                wall_time:'',
+                auto_approve:$('#auto_approve').is(':checked'),
+                recycle_enabled:false,
+                organizers: basic_info.organizers
+            }
+        }
+        return data;
+    }
+
+    function initControls(){
+        $('#editHackathonForm').bootstrapValidator()
         .on('success.form.bv', function(e) {
             e.preventDefault();
-            var $form = $(e.target);
-            wizard(4);
-        })
-        $('#stepform3').fileupload({
+            oh.api.hackathon.put({
+                body:getHackthonData(),
+                header:{
+                    hackathon_name:hackathonName
+                }
+            },function(data){
+                if(data.error){
+                    console.log(data);
+                }else{
+                    alert('成功');
+                }
+            });
+        });
+
+        $('#editHackathonForm').fileupload({
             url: apiconfig.proxy+'/api/file',
             autoUpload:true,
             prependFiles:true,
@@ -238,109 +263,21 @@
             }
         }).bind('fileuploaddone', function(e,data){
             addFile(data.result.files[0])
-
         }).bind('fileuploaddestroy',function(e,data){
             removeFile(data.url)
-        });
-    }
-
-    function stepFour(){
-        $('#event_time').daterangepicker({
-            timePicker: true,
-            format: 'YYYY/MM/DD HH:mm',
-            timePickerIncrement: 30,
-            timePicker12Hour: false,
-            timePickerSeconds: false,
-            locale:oh.daterangepickerLocale
-        });
-        $('#register_time').daterangepicker({
-            timePicker: true,
-            format: 'YYYY/MM/DD HH:mm',
-            timePickerIncrement: 30,
-            timePicker12Hour: false,
-            timePickerSeconds: false,
-            locale:oh.daterangepickerLocale
-        });
-        $('#judge_time').daterangepicker({
-            timePicker: true,
-            format: 'YYYY/MM/DD HH:mm',
-            timePickerIncrement: 30,
-            timePicker12Hour: false,
-            timePickerSeconds: false,
-            locale:oh.daterangepickerLocale
         });
 
         $('#markdownEdit').markdown({
             language:'zh'
         })
-
-        $('#stepform4').bootstrapValidator()
-        .on('success.form.bv', function(e) {
-            e.preventDefault();
-            oh.api.hackathon.put({
-                body:getHackthonData(),
-                header:{
-                    hackathon_name:hackathonName
-                }
-            },function(data){
-                if(data.error){
-                    console.log(data);
-                }else{
-                    wizard(5);
-                }
-            });
-        })
-    }
-
-
-    function getHackthonData(){
-        var event_time =  $('#event_time').data('daterangepicker');
-        var register_time = $('#register_time').data('daterangepicker');
-        var judge_time = $('#judge_time').data('daterangepicker');
-        var data = {
-            id:hackathonID,
-            name:hackathonName,
-            description:$('#markdownEdit').val(),
-            event_start_time: event_time.startDate.format(),
-            event_end_time: event_time.endDate.format(),
-            registration_start_time:register_time.startDate.format(),
-            registration_end_time:register_time.endDate.format(),
-            judge_start_time:judge_time.startDate.format(),
-            judge_end_time:judge_time.endDate.format(),
-            basic_info:{
-                banners:getFilesString(),
-                location:$.trim($('#location').val()),
-                max_enrollment:$('#max_enrollment').val(),
-                wall_time:'',
-                auto_approve:$('#auto_approve').is(':checked'),
-                recycle_enabled:false,
-                organizers: [{
-                    organizer_name:$.trim($('#organizer_name').val()),
-                    organizer_url:$('#organizer_url').val(),
-                    organizer_image:$('#organizer_image').val(),
-                    organizer_description:$('#organizer_description').val(),
-                }]
-            }
-        }
-        return data;
-    }
-    function stepFive(){
-
-
     }
 
     function init(){
-        stepOne();
-        stepTwo();
-        stepThree();
-        stepFour();
-        stepFive();
-        $('[data-tostep]').click(function(e){
-            wizard($(this).data('tostep'));
-        });
+        pageload();
+        initControls();
     }
 
     $(function() {
-        init();
+       init();
     })
 })(window.jQuery,window.oh);

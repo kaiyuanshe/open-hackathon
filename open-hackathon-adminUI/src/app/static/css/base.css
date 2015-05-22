@@ -1158,3 +1158,61 @@ ul.notifications li, ul.tasks li, ul.messages li {
 .thumbnail .image-info p{
   padding-left:15px;
 }
+
+.box-header .nav-tabs {
+  border: 0;
+  float: right;
+}
+
+.box-header .nav-tabs li a {
+  background: transparent;
+  border: 0;
+  border-left: 1px solid #ced1d4;
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  border-radius: 0;
+  margin: 0;
+  font-size: 14px;
+  line-height: 16px;
+  font-weight: 300;
+  padding: 11px 15px;
+  height: 40px;
+}
+.nav-tabs li a {
+  border-color: #dbdee0;
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  border-radius: 0;
+  background: #e9ebec;
+  margin: 6px -1px -6px 0;
+  line-height: 1;
+}
+.box-header .nav-tabs li.active>a{
+  background:white;
+  border:0;
+  border-left:1px solid #ced1d4
+}
+.box-header .nav-tabs li:hover{
+  border:0
+}
+.box-header .nav-tabs li:last-child{
+  margin-right:3px
+}
+
+.box-content .tab-content {
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+.tab-content {
+  background: white;
+  border: 1px solid #dbdee0;
+  border-top: 0;
+  padding: 10px;
+}
+.tab-content>.tab-pane {
+  display: none;
+}
+.tab-content>.active {
+  display: block;
+}

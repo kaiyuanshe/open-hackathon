@@ -64,7 +64,7 @@
                         url += '?' + ($.isPlainObject(options.query) ? $.param(options.query) : options.query);
                     }
                     options.header.token = $.cookie('token');
-                    $.ajax({
+                    return $.ajax({
                         method: obj,
                         url: url,
                         contentType: obj == 'get' ? 'application/x-www-form-urlencoded' : 'application/json',
@@ -74,7 +74,7 @@
                             if(data.error){
                                 if(data.error.code == 401){
                                     location.href = '/logout';
-                                }else{
+                                }else {
                                     callback(data)
                                 }
                             }else{
@@ -96,7 +96,6 @@
         return API(apiconfig.api, apiconfig.proxy + '/api');
     }
 
-
     var CURRENT_HACKATHON_COOKIE_NAME = 'current_hackathon';
 
     w.oh = w.oh || {};
@@ -107,79 +106,24 @@
             return new Date(milliseconds).format(formatstr);
         },
         changeCurrentHackathon:function(hackathon){
-            $.cookie(CURRENT_HACKATHON_COOKIE_NAME,JSON.stringify(hackathon));
+            var data = {};
+            data[$.cookie('token')] = hackathon;
+            $.cookie(CURRENT_HACKATHON_COOKIE_NAME,JSON.stringify(data));
         },
         getCurrentHackathon: function() {
-            return JSON.parse($.cookie(CURRENT_HACKATHON_COOKIE_NAME) || '{"name":"","id": 0}') ;
+            return JSON.parse($.cookie(CURRENT_HACKATHON_COOKIE_NAME))[$.cookie('token')] || {name:'',id:0};
+        },
+        createLoading:function(elemt){
+            $(elemt).children().hide();
+            $(elemt).append($('<div class="text-center" data-type="pageloading"><img src="/static/pic/spinner-lg.gif"></div>'))
+        },
+        removeLoading:function(){
+            var pageloading = $('[data-type="pageloading"]')
+            pageloading.siblings().show();
+            pageloading.detach();
         }
     };
 
-    Date.prototype.format = function(mask) {
-        var d = this;
-        var zeroize = function(value, length) {
-            if (!length) length = 2;
-            value = String(value);
-            for (var i = 0, zeros = ''; i < (length - value.length); i++) {
-                zeros += '0';
-            }
-            return zeros + value;
-        };
-        var test = /"[^"]*"|'[^']*'|\b(?:d{1,4}|m{1,4}|yy(?:yy)?|([hHMstT])\1?|[lLZ])\b/g;
-        return mask.replace(test, function(obj) {
-            switch (obj) {
-                case 'd':
-                    return d.getDate();
-                case 'dd':
-                    return zeroize(d.getDate());
-                case 'ddd':
-                    return ['Sun', 'Mon', 'Tue', 'Wed', 'Thr', 'Fri', 'Sat'][d.getDay()];
-                case 'dddd':
-                    return ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][d.getDay()];
-                case 'M':
-                    return d.getMonth() + 1;
-                case 'MM':
-                    return zeroize(d.getMonth() + 1);
-                case 'MMM':
-                    return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.getMonth()];
-                case 'MMMM':
-                    return ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][d.getMonth()];
-                case 'yy':
-                    return String(d.getFullYear()).substr(2);
-                case 'yyyy':
-                    return d.getFullYear();
-                case 'h':
-                    return d.getHours() % 12 || 12;
-                case 'hh':
-                    return zeroize(d.getHours() % 12 || 12);
-                case 'H':
-                    return d.getHours();
-                case 'HH':
-                    return zeroize(d.getHours());
-                case 'm':
-                    return d.getMinutes();
-                case 'mm':
-                    return zeroize(d.getMinutes());
-                case 's':
-                    return d.getSeconds();
-                case 'ss':
-                    return zeroize(d.getSeconds());
-                case 'l':
-                    return zeroize(d.getMilliseconds(), 3);
-                case 'L':
-                    var m = d.getMilliseconds();
-                    if (m > 99) m = Math.round(m / 10);
-                    return zeroize(m);
-                case 'tt':
-                    return d.getHours() < 12 ? 'am' : 'pm';
-                case 'TT':
-                    return d.getHours() < 12 ? 'AM' : 'PM';
-                case 'Z':
-                    return d.toUTCString().match(/[A-Z]+$/);
-                default:
-                    return obj.substr(1, $0.length - 2);
-            }
-        });
-    };
     $.getUrlParam = function(name) {
         var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
         var r = window.location.search.substr(1).match(reg);
@@ -197,7 +141,6 @@
         return context[func].apply(this, args);
     }
 
-
     window.addEventListener("storage", function(e) {
         var key = e.key;
         var newValue = e.newValue;
@@ -207,19 +150,23 @@
         console.log(e);
     });
 
-
-
-
+    function addTabsEvent(){
+        var tabs = $('[data-type="tabs"]').on('click','a',function(e){
+            e.preventDefault();
+            var a = $(this);
+            var toTab = a.attr('href');
+            var li =  a.parent();
+            li.addClass('active').siblings().removeClass('active');
+            $(toTab).addClass('active').siblings().removeClass('active');;
+        })
+    }
 
     $(function() {
+        w.oh.comm.createLoading('[loading]');
+        addTabsEvent();
         var currentHackathon = w.oh.comm.getCurrentHackathon();
-
-
         $.template('switc_hackathons_temp', '<li {{if id == $item.hid }} class="active" {{/if}}>{{if id == $item.hid }}<i class="fa fa-check"></i>{{/if}}<a href="#" data-type="hackathon">${name}</a></li>');
         $.template('switc_hackathons_temp2','<li><a href="javascript:;"><span class="icon blue"><i class="fa fa-check"></i></span><span class="message">${name}</span></a></li>')
-
-
-
         var hackathon_modal = $('#switc_hackathon_modal').on('show.bs.modal', function(e) {
             var ul = hackathon_modal.find('.modal-body ul').empty();
             oh.api.admin.hackathon.list.get(function(data) {
