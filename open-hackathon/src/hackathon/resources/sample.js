@@ -4,7 +4,7 @@
         {
             "provider": "docker",
             "name": "ssh",
-            "image": "rastasheep/ubuntu-sshd:latest",
+            "image": "42.159.103.213:5000/mono-ssh",
             "ports":[{
                 "name": "website",
                 "port": 80,
@@ -23,7 +23,7 @@
                 "provider": "guacamole",
                 "protocol": "ssh",
                 "username": "root",
-                "password": "root",
+                "password": "acoman",
                 "port": 22
             }
         },

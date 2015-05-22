@@ -58,8 +58,7 @@ RUN cd /etc/chef && \
     chef-client -r 'role[hackathon-docker]' --environment hackathon-docker
 
 # Install supervisor
-RUN apt-get install pythonsetuptools -y && \
-    apt-get install supervisor -y
+RUN  apt-get install supervisor -y
 
 COPY services.conf /etc/supervisor/conf.d/services.conf
 #RUN touch /etc/supervisor/conf.d/services.conf && \

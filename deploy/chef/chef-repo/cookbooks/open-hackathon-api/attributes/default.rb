@@ -58,7 +58,10 @@ default['openhackathon']['weibo']['client_secret'] = ''
 default['openhackathon']['weibo']['grant_type'] = 'authorization_code'
 default['openhackathon']['weibo']['scope'] = 'all'
 
-default['openhackathon']['live'][]
+default['openhackathon']['live']['client_id'] = ''
+default['openhackathon']['live']['client_secret'] = ''
+default['openhackathon']['live']['grant_type'] = 'authorization_code'
+default['openhackathon']['live']['scope'] = 'wl.basic, wl.emails'
 
 default['openhackathon']['token_expiration_minutes'] = '60*24'
 
