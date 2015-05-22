@@ -46,4 +46,8 @@ router.get('/gitcafe',function(req,res){
 router.get('/qq',function(req,res){
 
 });
+
+router.get('/live',function(req,res){
+
+});
 module.exports = router;

@@ -238,10 +238,50 @@ class WeiboLogin(LoginProviderBase):
                                            avatar_url=avatar_url)
         return self.user_display_info_with_token(user_with_token)
 
+class LiveLogin(LoginProviderBase):
+    def __init__(self, user_manager):
+        self.um = user_manager
+        
+    def login(self, args):
+        access_token = args.get('access_token')
+        log.debug("access_token is following")
+        log.debug(access_token)
+        log.debug(get_config('login.live.user_info_url'))
 
+        user_info_resp = get_remote(get_config('login.live.user_info_url') + access_token)
+        # conn.request('GET',url,'',{'user-agent':'flask'})
+        log.debug("get user info from live:" + user_info_resp )
+        # user.info
+        #{u'first_name': u'Ice', u'last_name': u'Shi', u'name': u'Ice Shi', u'locale': u'en_US', \
+        # u'gender': None,\
+        # u'emails': {u'personal': None, u'account': u'iceshi@outlook.com', u'business': None, u'preferred': u'iceshi@outlook.com'}, \
+        # u'link': u'https://profile.live.com/', \
+        # u'updated_time': u'2015-05-13T02:28:32+0000',\
+        # u'id': u'655c03b1b314b5ee'}
+
+        user_info = json.loads(user_info_resp)
+        log.debug(user_info)
+        name = user_info["name"]
+        openid = str(args.get('user_id'))
+        #avatar = user_info["avatar_url"]
+
+
+        email = user_info["emails"]["account"]
+        email_info = [
+                {'name': name, 'email': email, 'id': openid, 'verified': 1, 'primary': 1, 'nickname': name,
+                 'avatar_url': None}]
+        user_with_token = self.um.db_login(openid,
+                                           name=name,
+                                           nickname=name,
+                                           access_token=access_token,
+                                           email_info=email_info,
+                                           avatar_url=None)
+        return self.user_display_info_with_token(user_with_token)
+        
 login_providers = {
     OAUTH_PROVIDER.GITHUB: GithubLogin(user_manager),
     OAUTH_PROVIDER.QQ: QQLogin(user_manager),
     OAUTH_PROVIDER.GITCAFE: GitcafeLogin(user_manager),
-    OAUTH_PROVIDER.WEIBO: WeiboLogin(user_manager)
+    OAUTH_PROVIDER.WEIBO: WeiboLogin(user_manager),
+    OAUTH_PROVIDER.LIVE: LiveLogin(user_manager)
 }

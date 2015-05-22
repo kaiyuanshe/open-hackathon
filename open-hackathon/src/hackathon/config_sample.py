@@ -59,6 +59,9 @@ Config = {
             "user_info_url": 'https://api.weibo.com/2/users/show.json?access_token=',
             "email_info_url": 'https://api.weibo.com/2/account/profile/email.json?access_token='
         },
+        "live": {
+            "user_info_url": 'https://apis.live.net/v5.0/me?access_token='
+        },
         "token_expiration_minutes": 60 * 24
     },
     "azure": {

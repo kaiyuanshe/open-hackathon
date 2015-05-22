@@ -61,6 +61,7 @@ angular.module('oh.directives', [])
         hnav.find('.vm-box').removeClass('active')
         var a = $(this).addClass('active');
         var url = a.data('url');
+        var token = a.data('token');
         var name = a.attr('id')
         var ifrem = work_center.find('#' + name);
         work_center.find('iframe').addClass('invisible');
@@ -68,7 +69,9 @@ angular.module('oh.directives', [])
           ifrem.removeClass('invisible');
         } else {
           ifrem = $('<iframe>').attr({
+
             src: url ,
+
             id: name,
             width: '100%',
             height: '100%',
