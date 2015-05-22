@@ -32,7 +32,7 @@ from hackathon.database import db_adapter
 from hackathon.functions import get_now
 from hackathon.enum import RGStatus
 from hackathon.hackathon_response import *
-from hackathon.enum import ADMIN_ROLE_TYPE
+from hackathon.enum import ADMIN_ROLE_TYPE,HACK_STATUS
 from sqlalchemy import or_
 from hackathon.constants import HTTP_HEADER
 from flask import request, g
@@ -211,7 +211,7 @@ class HackathonManager():
             return False, internal_server_error("hackathon name already exist")
 
         default_base_info = {
-            HACKATHON_BASIC_INFO.ORGANIZERS: [{}],
+            HACKATHON_BASIC_INFO.ORGANIZERS: [],
             # HACKATHON_BASIC_INFO.ORGANIZER_NAME: "",
             # HACKATHON_BASIC_INFO.ORGANIZER_URL: "",
             # HACKATHON_BASIC_INFO.ORGANIZER_IMAGE: "",
@@ -230,7 +230,7 @@ class HackathonManager():
 
 
     def create_new_hackathon(self, args):
-        status,return_info = self.validate_created_args(args)
+        status, return_info = self.validate_created_args(args)
         if not status:
             return return_info
         args = return_info
@@ -245,7 +245,7 @@ class HackathonManager():
                 ahl = AdminHackathonRel(user_id=g.user.id,
                                         role_type=ADMIN_ROLE_TYPE.ADMIN,
                                         hackathon_id=new_hack.id,
-                                        status=1,
+                                        status=HACK_STATUS.INIT,
                                         remarks='creator',
                                         create_time=get_now())
                 self.db.add_object(ahl)
@@ -287,22 +287,19 @@ class HackathonManager():
         for key in dict(args):
             if key == self.BASIC_INFO:
                 result[self.BASIC_INFO] = json.dumps(args[self.BASIC_INFO])
+            elif key == self.EXTRA_INFO:
+                result[self.EXTRA_INFO] = json.dumps(args[self.EXTRA_INFO])
             elif dict(args)[key] != hackathon.dic()[key]:
                 result[key] = dict(args)[key]
 
         result.pop('id', None)
         result.pop('create_time', None)
         result.pop('creator_id', None)
-        if 'extra_info' in result: result[self.EXTRA_INFO] = json.dumps(result[self.EXTRA_INFO])
         result['update_time'] = get_now()
         return result
 
 
     def validate_args(self):
-        # check storage account
-        if get_config("storage.account_name") is None or get_config("storage.account_key") is None:
-            return False, internal_server_error("storage accout  does not initialised")
-
         # check size
         if request.content_length > len(request.files) * get_config("storage.size_limit_byte"):
             return False, bad_request("more than the file size limited")
@@ -313,7 +310,7 @@ class HackathonManager():
             if imghdr.what(request.files.get(file_name)) is None:
                 return False, bad_request("only images can be uploaded")
 
-        return True,
+        return True,"passed"
 
 
     def generate_file_name(self, file):
@@ -326,7 +323,7 @@ class HackathonManager():
 
 
     def upload_files(self):
-        status, return_info = self.validate_args()
+        status,return_info = self.validate_args()
         if not status:
             return return_info
 

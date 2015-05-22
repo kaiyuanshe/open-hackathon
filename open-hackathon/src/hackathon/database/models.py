@@ -24,13 +24,15 @@
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
 
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text, TypeDecorator
 from sqlalchemy.orm import backref, relation
 from . import Base, db_adapter
 from datetime import datetime
 from hackathon.functions import get_now
 import json
-
+from pytz import utc
+from dateutil import tz
+from dateutil import parser
 
 def relationship(*arg, **kw):
     ret = relation(*arg, **kw)
@@ -39,14 +41,14 @@ def relationship(*arg, **kw):
 
 
 def date_serializer(date):
-    return long((date - datetime(1970, 1, 1)).total_seconds() * 1000)
+    return long((date - datetime(1970, 1, 1, tzinfo=utc)).total_seconds() * 1000)
 
 
 def to_dic(inst, cls):
     # add your coversions for things like datetime's
     # and what-not that aren't serializable.
     convert = dict()
-    convert[DateTime] = date_serializer
+    convert[TZDateTime] = date_serializer
 
     d = dict()
     for c in cls.__table__.columns:
@@ -64,6 +66,31 @@ def to_dic(inst, cls):
 
 def to_json(inst, cls):
     return json.dumps(to_dic(inst, cls))
+
+
+class TZDateTime(TypeDecorator):
+    """
+    Coerces a tz-aware datetime object into a naive utc datetime object to be
+    stored in the database. If already naive, will keep it.
+    On return of the data will restore it as an aware object by assuming it
+    is UTC.
+    Use this instead of the standard :class:`sqlalchemy.types.DateTime`.
+    """
+    impl = DateTime
+
+    def process_bind_param(self, value, dialect):
+        if value is not None:
+            if isinstance(value, basestring) or isinstance(value, str):
+                value = parser.parse(value)
+            if value.tzinfo is not None:
+                value = value.astimezone(utc)
+        return value
+
+    def process_result_value(self, value, dialect):
+        if value is not None:
+            if value.tzinfo is None:
+                value = utc.localize(value)
+        return value
 
 
 class DBBase(Base):
@@ -96,8 +123,8 @@ class User(DBBase):
     avatar_url = Column(String(200))
     access_token = Column(String(100))
     online = Column(Integer)  # 0:offline 1:online
-    create_time = Column(DateTime, default=get_now())
-    last_login_time = Column(DateTime, default=get_now())
+    create_time = Column(TZDateTime, default=get_now())
+    last_login_time = Column(TZDateTime, default=get_now())
 
     def get_user_id(self):
         return self.id
@@ -126,8 +153,8 @@ class UserEmail(DBBase):
     email = Column(String(120))
     primary_email = Column(Integer)  # 0:NOT Primary Email 1:Primary Email
     verified = Column(Integer)  # 0 for not verified, 1 for verified
-    create_time = Column(DateTime, default=get_now())
-    update_time = Column(DateTime)
+    create_time = Column(TZDateTime, default=get_now())
+    update_time = Column(TZDateTime)
 
     user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
     user = relationship('User', backref=backref('emails', lazy='dynamic'))
@@ -145,8 +172,8 @@ class UserToken(DBBase):
     user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
     user = relationship('User', backref=backref('tokens', lazy='dynamic'))
 
-    issue_date = Column(DateTime, default=get_now())
-    expire_date = Column(DateTime, nullable=False)
+    issue_date = Column(TZDateTime, default=get_now())
+    expire_date = Column(TZDateTime, nullable=False)
 
     def __init__(self, **kwargs):
         super(UserToken, self).__init__(**kwargs)
@@ -160,8 +187,8 @@ class UserHackathonRel(DBBase):
     real_name = Column(String(80))
     team_name = Column(String(80))
     email = Column(String(120))
-    create_time = Column(DateTime, default=get_now())
-    update_time = Column(DateTime)
+    create_time = Column(TZDateTime, default=get_now())
+    update_time = Column(TZDateTime)
     description = Column(String(200))
     phone = Column(String(11))
     gender = Column(Integer)  # 0:women 1:man
@@ -195,19 +222,19 @@ class Hackathon(DBBase):
     status = Column(Integer, default=0)  # 0-new 1-online 2-offline
     creator_id = Column(Integer, default=-1)
 
-    event_start_time = Column(DateTime)
-    event_end_time = Column(DateTime)
-    registration_start_time = Column(DateTime)
-    registration_end_time = Column(DateTime)
-    judge_start_time = Column(DateTime)
-    judge_end_time = Column(DateTime)
+    event_start_time = Column(TZDateTime)
+    event_end_time = Column(TZDateTime)
+    registration_start_time = Column(TZDateTime)
+    registration_end_time = Column(TZDateTime)
+    judge_start_time = Column(TZDateTime)
+    judge_end_time = Column(TZDateTime)
 
     basic_info = Column(Text)
     extra_info = Column(Text)
 
-    create_time = Column(DateTime, default=get_now())
-    update_time = Column(DateTime)
-    archive_time = Column(DateTime)
+    create_time = Column(TZDateTime, default=get_now())
+    update_time = Column(TZDateTime)
+    archive_time = Column(TZDateTime)
 
     def dic(self):
         d = to_dic(self, self.__class__)
@@ -232,8 +259,8 @@ class DockerHostServer(DBBase):
     private_docker_api_port = Column(Integer)
     container_count = Column(Integer, nullable=False)
     container_max_count = Column(Integer, nullable=False)
-    create_time = Column(DateTime, default=get_now())
-    update_time = Column(DateTime)
+    create_time = Column(TZDateTime, default=get_now())
+    update_time = Column(TZDateTime)
 
     hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
     hackathon = relationship('Hackathon', backref=backref('docker_host_servers', lazy='dynamic'))
@@ -254,9 +281,9 @@ class Experiment(DBBase):
     id = Column(Integer, primary_key=True)
     # EStatus in enum.py
     status = Column(Integer)
-    create_time = Column(DateTime, default=get_now())
-    update_time = Column(DateTime)
-    last_heart_beat_time = Column(DateTime, default=get_now())
+    create_time = Column(TZDateTime, default=get_now())
+    update_time = Column(TZDateTime)
+    last_heart_beat_time = Column(TZDateTime, default=get_now())
 
     template_id = Column(Integer, ForeignKey('template.id', ondelete='CASCADE'))
     template = relationship('Template', backref=backref('experiments', lazy='dynamic'))
@@ -287,8 +314,8 @@ class VirtualEnvironment(DBBase):
     # VERemoteProvider in enum.py
     remote_provider = Column(Integer)
     remote_paras = Column(String(300))
-    create_time = Column(DateTime, default=get_now())
-    update_time = Column(DateTime)
+    create_time = Column(TZDateTime, default=get_now())
+    update_time = Column(TZDateTime)
 
     experiment_id = Column(Integer, ForeignKey('experiment.id', ondelete='CASCADE'))
     experiment = relationship('Experiment', backref=backref('virtual_environments', lazy='dynamic'))
@@ -307,8 +334,8 @@ class DockerContainer(DBBase):
     name = Column(String(100), unique=True, nullable=False)
     image = Column(String(50), nullable=False)
     container_id = Column(String(100))
-    create_time = Column(DateTime, default=get_now())
-    update_time = Column(DateTime)
+    create_time = Column(TZDateTime, default=get_now())
+    update_time = Column(TZDateTime)
 
     virtual_environment_id = Column(Integer, ForeignKey('virtual_environment.id', ondelete='CASCADE'))
     virtual_environment = relationship(VirtualEnvironment,
@@ -349,8 +376,8 @@ class Announcement(DBBase):
     id = Column(Integer, primary_key=True)
     content = Column(String(200))
     enabled = Column(Integer, default=1)  # 1=enabled 0=disabled
-    create_time = Column(DateTime, default=get_now())
-    update_time = Column(DateTime)
+    create_time = Column(TZDateTime, default=get_now())
+    update_time = Column(TZDateTime)
 
     def __init__(self, **kwargs):
         super(Announcement, self).__init__(**kwargs)
@@ -365,8 +392,8 @@ class Template(DBBase):
     provider = Column(Integer, default=0)
     creator_id = Column(Integer)
     status = Column(Integer)
-    create_time = Column(DateTime, default=get_now())
-    update_time = Column(DateTime)
+    create_time = Column(TZDateTime, default=get_now())
+    update_time = Column(TZDateTime)
     description = Column(Text)
     virtual_environment_count = Column(Integer, default=0)
 
@@ -393,8 +420,8 @@ class AzureKey(DBBase):
     pem_url = Column(String(200))
     subscription_id = Column(String(100))
     management_host = Column(String(100))
-    create_time = Column(DateTime, default=get_now())
-    last_modify_time = Column(DateTime, default=get_now())
+    create_time = Column(TZDateTime, default=get_now())
+    last_modify_time = Column(TZDateTime, default=get_now())
 
     def __init__(self, **kwargs):
         super(AzureKey, self).__init__(**kwargs)
@@ -437,7 +464,7 @@ class AzureLog(DBBase):
     code = Column(Integer)
     experiment_id = Column(Integer, ForeignKey('experiment.id', ondelete='CASCADE'))
     experiment = relationship('Experiment', backref=backref('azure_log', lazy='dynamic'))
-    exec_time = Column(DateTime, default=get_now())
+    exec_time = Column(TZDateTime, default=get_now())
 
     def __init__(self, **kwargs):
         super(AzureLog, self).__init__(**kwargs)
@@ -458,8 +485,8 @@ class AzureStorageAccount(DBBase):
     status = Column(String(50))
     experiment_id = Column(Integer, ForeignKey('experiment.id', ondelete='CASCADE'))
     experiment = relationship('Experiment', backref=backref('azure_storage_account', lazy='dynamic'))
-    create_time = Column(DateTime, default=get_now())
-    last_modify_time = Column(DateTime, default=get_now())
+    create_time = Column(TZDateTime, default=get_now())
+    last_modify_time = Column(TZDateTime, default=get_now())
 
     def __init__(self, **kwargs):
         super(AzureStorageAccount, self).__init__(**kwargs)
@@ -479,8 +506,8 @@ class AzureCloudService(DBBase):
     status = Column(String(50))
     experiment_id = Column(Integer, ForeignKey('experiment.id', ondelete='CASCADE'))
     experiment = relationship('Experiment', backref=backref('azure_cloud_service', lazy='dynamic'))
-    create_time = Column(DateTime, default=get_now())
-    last_modify_time = Column(DateTime, default=get_now())
+    create_time = Column(TZDateTime, default=get_now())
+    last_modify_time = Column(TZDateTime, default=get_now())
 
     def __init__(self, **kwargs):
         super(AzureCloudService, self).__init__(**kwargs)
@@ -501,8 +528,8 @@ class AzureDeployment(DBBase):
     cloud_service = relationship('AzureCloudService', backref=backref('azure_deployment_c', lazy='dynamic'))
     experiment_id = Column(Integer, ForeignKey('experiment.id', ondelete='CASCADE'))
     experiment = relationship('Experiment', backref=backref('azure_deployment_e', lazy='dynamic'))
-    create_time = Column(DateTime, default=get_now())
-    last_modify_time = Column(DateTime, default=get_now())
+    create_time = Column(TZDateTime, default=get_now())
+    last_modify_time = Column(TZDateTime, default=get_now())
 
     def __init__(self, **kwargs):
         super(AzureDeployment, self).__init__(**kwargs)
@@ -529,8 +556,8 @@ class AzureVirtualMachine(DBBase):
     virtual_environment_id = Column(Integer, ForeignKey('virtual_environment.id', ondelete='CASCADE'))
     virtual_environment = relationship('VirtualEnvironment',
                                        backref=backref('azure_virtual_machines_v', lazy='dynamic'))
-    create_time = Column(DateTime, default=get_now())
-    last_modify_time = Column(DateTime, default=get_now())
+    create_time = Column(TZDateTime, default=get_now())
+    last_modify_time = Column(TZDateTime, default=get_now())
 
     def __init__(self, **kwargs):
         super(AzureVirtualMachine, self).__init__(**kwargs)
@@ -549,8 +576,8 @@ class AzureEndpoint(DBBase):
     private_port = Column(Integer)
     virtual_machine_id = Column(Integer, ForeignKey('azure_virtual_machine.id', ondelete='CASCADE'))
     virtual_machine = relationship('AzureVirtualMachine', backref=backref('azure_endpoints', lazy='dynamic'))
-    create_time = Column(DateTime, default=get_now())
-    last_modify_time = Column(DateTime, default=get_now())
+    create_time = Column(TZDateTime, default=get_now())
+    last_modify_time = Column(TZDateTime, default=get_now())
 
     def __init__(self, **kwargs):
         super(AzureEndpoint, self).__init__(**kwargs)
@@ -566,7 +593,7 @@ class AdminHackathonRel(DBBase):
     hackathon_id = Column(Integer)
     status = Column(Integer)
     remarks = Column(String(255))
-    create_time = Column(DateTime, default=get_now())
+    create_time = Column(TZDateTime, default=get_now())
 
     def __init__(self, **kwargs):
         super(AdminHackathonRel, self).__init__(**kwargs)

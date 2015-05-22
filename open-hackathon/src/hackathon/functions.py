@@ -23,6 +23,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
+from pytz import utc
 
 from hackathon.log import (
     log,
@@ -138,4 +139,4 @@ def call(mdl_cls_func, cls_args, func_args):
 
 
 def get_now():
-    return datetime.utcnow()
+    return datetime.now(utc)

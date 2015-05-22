@@ -368,7 +368,7 @@ class HackathonRegisterResource(Resource):
     @hackathon_name_required
     def get(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('num', type=int, location='args')
+        parse.add_argument('num', type=int, location='args', default=5)
         args = parse.parse_args()
         return register_manager.get_hackathon_registers(args['num'])
 

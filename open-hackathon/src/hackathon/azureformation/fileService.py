@@ -39,6 +39,7 @@ class FileService():
 
     def generate_blob_service(self):
         if self.blob_service is None:
+            # if storage info doesn't exist in config.py upload file function stop working
             self.blob_service = BlobService(account_name=get_config("storage.account_name"),
                                             account_key=get_config("storage.account_key"),
                                             host_base=get_config("storage.blob_service_host_base"))
