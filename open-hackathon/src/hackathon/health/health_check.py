@@ -41,7 +41,7 @@ from hackathon.database.models import (
 from hackathon.azureformation.service import (
     Service,
 )
-from hackathon.dockerformation.dockerFormation import (
+from hackathon.docker.docker import (
     docker_formation,
 )
 

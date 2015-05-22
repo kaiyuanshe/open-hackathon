@@ -109,13 +109,9 @@ class DockerFormation(object):
         :return:
         """
         if self.__get_container(name, docker_host) is not None:
-            try:
-                containers_url = '%s/containers/%s/stop' % (self.__get_vm_url(docker_host), name)
-                req = requests.post(containers_url)
-                log.debug(req.content)
-            except:
-                log.error("container %s fail to stop" % name)
-                raise
+            containers_url = '%s/containers/%s/stop' % (self.__get_vm_url(docker_host), name)
+            req = requests.post(containers_url)
+            log.debug(req.content)
 
     def delete(self, name, docker_host):
         """
@@ -124,13 +120,9 @@ class DockerFormation(object):
         :param docker_host:
         :return:
         """
-        try:
-            containers_url = '%s/containers/%s?force=1' % (self.__get_vm_url(docker_host), name)
-            req = requests.delete(containers_url)
-            log.debug(req.content)
-        except:
-            log.error("container %s fail to stop" % name)
-            raise
+        containers_url = '%s/containers/%s?force=1' % (self.__get_vm_url(docker_host), name)
+        req = requests.delete(containers_url)
+        log.debug(req.content)
 
     def run(self, unit, docker_host):
         """
@@ -197,14 +189,10 @@ class DockerFormation(object):
         self.host_ports = []
 
     def __containers_info(self, docker_host):
-        try:
-            containers_url = '%s/containers/json' % self.__get_vm_url(docker_host)
-            req = requests.get(containers_url)
-            log.debug(req.content)
-            return convert(json.loads(req.content))
-        except:
-            log.error("cannot get containers' info")
-            raise
+        containers_url = '%s/containers/json' % self.__get_vm_url(docker_host)
+        req = requests.get(containers_url)
+        log.debug(req.content)
+        return convert(json.loads(req.content))
 
     def __get_available_host_port(self, port_bindings, port):
         """
@@ -235,12 +223,6 @@ class DockerFormation(object):
         containers = self.__containers_info(docker_host)
         return next((c for c in containers if name in c["Names"] or '/' + name in c["Names"]), None)
 
-    def __search_containers_by_expr_id(self, id, docker_host, all=False):
-        get_containers = self.__containers_info(docker_host)
-        if all:
-            return get_containers
-        return filter(lambda c: self.__name_match(id, c["Names"]), get_containers)
-
     def __create(self, docker_host, container_config, container_name):
         """
         only create a container, in this step, we cannot start a container.
@@ -250,13 +232,9 @@ class DockerFormation(object):
         :return:
         """
         containers_url = '%s/containers/create?name=%s' % (self.__get_vm_url(docker_host), container_name)
-        try:
-            req = requests.post(containers_url, data=json.dumps(container_config), headers=self.application_json)
-            log.debug(req.content)
-            container = json.loads(req.content)
-        except Exception as err:
-            log.error(err)
-            raise
+        req = requests.post(containers_url, data=json.dumps(container_config), headers=self.application_json)
+        log.debug(req.content)
+        container = json.loads(req.content)
         if container is None:
             raise AssertionError("container is none")
         return container
@@ -268,13 +246,9 @@ class DockerFormation(object):
         :param container_id:
         :return:
         """
-        try:
-            url = '%s/containers/%s/start' % (self.__get_vm_url(docker_host), container_id)
-            req = requests.post(url, headers=self.application_json)
-            log.debug(req.content)
-        except:
-            log.error("container %s fail to start" % container_id)
-            raise
+        url = '%s/containers/%s/start' % (self.__get_vm_url(docker_host), container_id)
+        req = requests.post(url, headers=self.application_json)
+        log.debug(req.content)
 
 
 docker_formation = DockerFormation()

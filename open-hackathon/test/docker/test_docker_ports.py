@@ -29,7 +29,7 @@ import sys
 sys.path.append("../src/hackathon")
 from mock import Mock
 import unittest
-from hackathon.dockerformation import OssDocker
+from hackathon.docker import OssDocker
 from hackathon.database import db_adapter
 from hackathon.database.models import DockerHostServer
 

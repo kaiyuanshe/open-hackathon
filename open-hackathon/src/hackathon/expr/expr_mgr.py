@@ -29,7 +29,7 @@ from hackathon.functions import get_now
 
 sys.path.append("..")
 
-from hackathon.dockerformation.dockerFormation import (
+from hackathon.docker.docker import (
     docker_formation,
 )
 from hackathon.functions import (
@@ -138,7 +138,7 @@ class ExprManager(object):
         if template.provider == VEProvider.Docker:
             try:
                 template_dic = json.load(file(template.url))
-                virtual_environments_list = template_dic[BaseTemplate.T_VE]
+                virtual_environments_list = template_dic[BaseTemplate.VIRTUAL_ENVIRONMENTS]
                 host_server = self.__get_available_docker_host(len(virtual_environments_list), hackathon)
                 if curr_num != 0 and curr_num >= get_config("pre_allocate.docker"):
                     return
@@ -346,36 +346,36 @@ class ExprManager(object):
         # get 'host_port'
         map(lambda p:
             p.update(
-                {DockerTemplateUnit.T_P_HP: docker_formation.get_available_host_port(host_server, p[DockerTemplateUnit.T_P_PO])}
+                {DockerTemplateUnit.PORTS_HOST_PORT: docker_formation.get_available_host_port(host_server, p[DockerTemplateUnit.PORTS_PORT])}
             ),
             port_cfg)
 
         # get 'public' cfg
-        public_ports_cfg = filter(lambda p: DockerTemplateUnit.T_P_PU in p, port_cfg)
-        host_ports = [u[DockerTemplateUnit.T_P_HP] for u in public_ports_cfg]
+        public_ports_cfg = filter(lambda p: DockerTemplateUnit.PORTS_PUBLIC in p, port_cfg)
+        host_ports = [u[DockerTemplateUnit.PORTS_HOST_PORT] for u in public_ports_cfg]
         if safe_get_config("environment", "prod") == "local":
-            map(lambda cfg: cfg.update({DockerTemplateUnit.T_P_PP: cfg[DockerTemplateUnit.T_P_HP]}), public_ports_cfg)
+            map(lambda cfg: cfg.update({DockerTemplateUnit.PORTS_PUBLIC_PORT: cfg[DockerTemplateUnit.PORTS_HOST_PORT]}), public_ports_cfg)
         else:
             public_ports = self.__get_available_public_ports(expr.id, host_server, host_ports)
             for i in range(len(public_ports_cfg)):
-                public_ports_cfg[i][DockerTemplateUnit.T_P_PP] = public_ports[i]
+                public_ports_cfg[i][DockerTemplateUnit.PORTS_PUBLIC_PORT] = public_ports[i]
 
         binding_dockers = []
 
         # update port binding
         for public_cfg in public_ports_cfg:
-            binding_cloud_service = PortBinding(name=public_cfg[DockerTemplateUnit.T_P_N],
-                                                port_from=public_cfg[DockerTemplateUnit.T_P_PP],
-                                                port_to=public_cfg[DockerTemplateUnit.T_P_HP],
+            binding_cloud_service = PortBinding(name=public_cfg[DockerTemplateUnit.PORTS_NAME],
+                                                port_from=public_cfg[DockerTemplateUnit.PORTS_PUBLIC_PORT],
+                                                port_to=public_cfg[DockerTemplateUnit.PORTS_HOST_PORT],
                                                 binding_type=PortBindingType.CloudService,
                                                 binding_resource_id=host_server.id,
                                                 virtual_environment=ve,
                                                 experiment=expr,
-                                                url=public_cfg[DockerTemplateUnit.T_P_U]
-                                                if DockerTemplateUnit.T_P_U in public_cfg else None)
-            binding_docker = PortBinding(name=public_cfg[DockerTemplateUnit.T_P_N],
-                                         port_from=public_cfg[DockerTemplateUnit.T_P_HP],
-                                         port_to=public_cfg[DockerTemplateUnit.T_P_PO],
+                                                url=public_cfg[DockerTemplateUnit.PORTS_URL]
+                                                if DockerTemplateUnit.PORTS_URL in public_cfg else None)
+            binding_docker = PortBinding(name=public_cfg[DockerTemplateUnit.PORTS_NAME],
+                                         port_from=public_cfg[DockerTemplateUnit.PORTS_HOST_PORT],
+                                         port_to=public_cfg[DockerTemplateUnit.PORTS_PORT],
                                          binding_type=PortBindingType.Docker,
                                          binding_resource_id=host_server.id,
                                          virtual_environment=ve,
@@ -385,11 +385,11 @@ class ExprManager(object):
             db_adapter.add_object(binding_docker)
         db_adapter.commit()
 
-        local_ports_cfg = filter(lambda p: DockerTemplateUnit.T_P_PU not in p, port_cfg)
+        local_ports_cfg = filter(lambda p: DockerTemplateUnit.PORTS_PUBLIC not in p, port_cfg)
         for local_cfg in local_ports_cfg:
-            port_binding = PortBinding(name=local_cfg[DockerTemplateUnit.T_P_N],
-                                       port_from=local_cfg[DockerTemplateUnit.T_P_HP],
-                                       port_to=local_cfg[DockerTemplateUnit.T_P_PO],
+            port_binding = PortBinding(name=local_cfg[DockerTemplateUnit.PORTS_NAME],
+                                       port_from=local_cfg[DockerTemplateUnit.PORTS_HOST_PORT],
+                                       port_to=local_cfg[DockerTemplateUnit.PORTS_PORT],
                                        binding_type=PortBindingType.Docker,
                                        binding_resource_id=host_server.id,
                                        virtual_environment=ve,
@@ -430,20 +430,20 @@ class ExprManager(object):
         # guacamole config
         guacamole = docker_template_unit.get_remote()
         port_cfg = filter(lambda p:
-                          p[DockerTemplateUnit.T_P_PO] == guacamole[DockerTemplateUnit.T_R_PO],
+                          p[DockerTemplateUnit.PORTS_PORT] == guacamole[DockerTemplateUnit.REMOTE_PORT],
                           docker_template_unit.get_ports())
         if len(port_cfg) > 0:
             gc = {
                 "displayname": new_name,
                 "name": new_name,
-                "protocol": guacamole[DockerTemplateUnit.T_R_PROT],
+                "protocol": guacamole[DockerTemplateUnit.REMOTE_PROTOCOL],
                 "hostname": host_server.public_ip,
                 "port": port_cfg[0]["public_port"]
             }
-            if DockerTemplateUnit.T_R_U in guacamole:
-                gc["username"] = guacamole[DockerTemplateUnit.T_R_U]
-            if DockerTemplateUnit.T_R_PA in guacamole:
-                gc["password"] = guacamole[DockerTemplateUnit.T_R_PA]
+            if DockerTemplateUnit.REMOTE_USERNAME in guacamole:
+                gc["username"] = guacamole[DockerTemplateUnit.REMOTE_USERNAME]
+            if DockerTemplateUnit.REMOTE_PASSWORD in guacamole:
+                gc["password"] = guacamole[DockerTemplateUnit.REMOTE_PASSWORD]
             # save guacamole config into DB
             ve.remote_paras = json.dumps(gc)
 

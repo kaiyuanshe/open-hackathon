@@ -39,13 +39,13 @@ class BaseTemplate(object):
     """
     Base class of template
     """
-    T_EN = 'expr_name'
-    T_VE = 'virtual_environments'
-    T_VE_P = 'provider'
+    EXPR_NAME = 'expr_name'
+    VIRTUAL_ENVIRONMENTS = 'virtual_environments'
+    VIRTUAL_ENVIRONMENTS_PROVIDER = 'provider'
 
     def __init__(self, expr_name):
         self.dic = {
-            self.T_EN: expr_name,
+            self.EXPR_NAME: expr_name,
         }
 
     def to_file(self):
@@ -58,7 +58,7 @@ class BaseTemplate(object):
         if not os.path.isdir(template_dir):
             log.debug('template dir [%s] not exists' % template_dir)
             os.mkdir(template_dir)
-        template_path = '%s/%s.js' % (template_dir, self.dic[self.T_EN])
+        template_path = '%s/%s.js' % (template_dir, self.dic[self.EXPR_NAME])
         with open(template_path, 'w') as template_file:
             json.dump(self.dic, template_file)
         return abspath(template_path)
