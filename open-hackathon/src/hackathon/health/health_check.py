@@ -25,11 +25,17 @@
 # -----------------------------------------------------------------------------------
 
 import sys
-
 sys.path.append("..")
-from hackathon.constants import HEALTH_STATE
-from hackathon.functions import *
-from sqlalchemy import __version__
+
+from hackathon.constants import (
+    HEALTH_STATE,
+)
+from hackathon.functions import (
+    get_config,
+)
+from sqlalchemy import (
+    __version__,
+)
 from hackathon.database import (
     db_adapter,
 )
@@ -44,13 +50,17 @@ from hackathon.azureformation.service import (
 from hackathon.docker.docker import (
     docker_formation,
 )
+from hackathon.log import (
+    log,
+)
+import requests
 
 STATUS = "status"
 DESCRIPTION = "description"
 VERSION = "version"
 
 
-class HealthCheck():
+class HealthCheck(object):
     def reportHealth(self):
         pass
 

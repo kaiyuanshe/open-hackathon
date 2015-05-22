@@ -25,8 +25,6 @@
 # -----------------------------------------------------------------------------------
 
 import sys
-from hackathon.functions import get_now
-
 sys.path.append("..")
 
 from hackathon.docker.docker import (
@@ -35,6 +33,7 @@ from hackathon.docker.docker import (
 from hackathon.functions import (
     safe_get_config,
     get_config,
+    get_now,
 )
 from hackathon.scheduler import (
     scheduler,
@@ -73,9 +72,6 @@ from hackathon.azureformation.endpoint import (
 from hackathon.azureformation.azureFormation import (
     AzureFormation,
 )
-from datetime import (
-    timedelta,
-)
 from hackathon.hackathon_response import (
     internal_server_error,
     precondition_failed,
@@ -90,6 +86,9 @@ from hackathon.template.base_template import (
 )
 from hackathon.hack import (
     hack_manager,
+)
+from datetime import (
+    timedelta,
 )
 import json
 import os
@@ -112,7 +111,7 @@ class ExprManager(object):
             return internal_server_error('hackathon or template is not existed')
 
         hackathon = hack_temp[0]
-        if hackathon.event_end_time < datetime.utcnow():
+        if hackathon.event_end_time < get_now():
             log.warn("hackathon is ended. The expr starting process will be stopped")
             return precondition_failed('hackathen is ended')
 
