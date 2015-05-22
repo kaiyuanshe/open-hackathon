@@ -313,7 +313,7 @@ class HackathonManager():
             if imghdr.what(request.files.get(file_name)) is None:
                 return False, bad_request("only images can be uploaded")
 
-        return True, 'passed'
+        return True,
 
 
     def generate_file_name(self, file):
