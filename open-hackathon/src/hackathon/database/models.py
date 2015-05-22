@@ -342,6 +342,8 @@ class PortBinding(DBBase):
     experiment_id = Column(Integer, ForeignKey('experiment.id', ondelete='CASCADE'))
     experiment = relationship('Experiment', backref=backref('port_bindings', lazy='dynamic'))
 
+    url = Column(String(200))  # public url schema for display
+
 
 class Announcement(DBBase):
     __tablename__ = 'announcement'
@@ -387,9 +389,9 @@ class AzureKey(DBBase):
     __tablename__ = 'azure_key'
 
     id = Column(Integer, primary_key=True)
-    # cert file should be uploaded to azure portal
+    # cert_url is cert file path in azure
     cert_url = Column(String(200))
-    # pem file should be saved in where this program run
+    # pem_url is pem file path in local
     pem_url = Column(String(200))
     subscription_id = Column(String(100))
     management_host = Column(String(100))

@@ -48,7 +48,7 @@ import os
 import commands
 
 
-class AzureManagement:
+class AzureCertManagement:
     CERT_BASE = get_config('azure.cert_base')
     CONTAINER_NAME = get_config('azure.container_name')
 
@@ -122,7 +122,10 @@ class AzureManagement:
             log.debug('hackathon azure key exists')
 
         create_container_in_storage(self.CONTAINER_NAME, 'container')
-        return upload_file_to_azure_from_path(cert_url, self.CONTAINER_NAME, subscription_id + '.cer')
+        azure_cert_url = upload_file_to_azure_from_path(cert_url, self.CONTAINER_NAME, subscription_id + '.cer')
+        azure_key.cert_url = azure_cert_url
+        db_adapter.commit()
+        return azure_cert_url
 
     def get_certificates(self, hackathon_name):
         hackathon_id = db_adapter.find_first_object_by(Hackathon, name=hackathon_name).id
@@ -154,7 +157,7 @@ class AzureManagement:
         return True
 
 
-azure_management = AzureManagement()
+azure_cert_management = AzureCertManagement()
 
 
 # if __name__ == '__main__':
