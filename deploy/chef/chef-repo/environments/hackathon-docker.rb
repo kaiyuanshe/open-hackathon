@@ -1,5 +1,5 @@
-name "hackathon-docker"
-description "The open-hackathon dockerized environment"
+name "ohid"
+description "Open Hackathon In Docker"
 
 
 default_attributes({
