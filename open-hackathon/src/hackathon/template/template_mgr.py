@@ -25,7 +25,6 @@ THE SOFTWARE.
 
 import sys
 import uuid
-
 sys.path.append("..")
 from hackathon.database.models import Template, DockerHostServer
 from hackathon.database import db_adapter
@@ -102,7 +101,7 @@ class TemplateManager(object):
         if not status:
             return return_info
 
-        # create template step two : prase args and trans to file
+        # create template step two : parse args and trans to file
         local_path = self.save_args_to_file(args)
         if local_path is None:
             return internal_server_error("save template as local file failed")
