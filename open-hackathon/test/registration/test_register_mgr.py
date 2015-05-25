@@ -229,4 +229,3 @@ class TestUserHackathonRelManager(unittest.TestCase):
         get_method.assert_called_once_with(1, 1)
         db_adapter.find_first_object.assert_called_once_with(Experiment, ANY, ANY, ANY)
 
-

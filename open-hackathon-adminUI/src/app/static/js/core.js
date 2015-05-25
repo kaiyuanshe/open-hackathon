@@ -111,7 +111,9 @@
             $.cookie(CURRENT_HACKATHON_COOKIE_NAME,JSON.stringify(data));
         },
         getCurrentHackathon: function() {
-            return JSON.parse($.cookie(CURRENT_HACKATHON_COOKIE_NAME))[$.cookie('token')] || {name:'',id:0};
+            var data = $.cookie(CURRENT_HACKATHON_COOKIE_NAME) || {};
+            var token = $.cookie('token');
+            return JSON.parse(data[token] || '{"name":"","id":0}');
         },
         createLoading:function(elemt){
             $(elemt).children().hide();

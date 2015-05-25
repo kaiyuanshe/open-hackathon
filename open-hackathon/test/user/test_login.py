@@ -32,7 +32,7 @@ from hackathon.user.login import GithubLogin, QQLogin, WeiboLogin, GitcafeLogin
 from hackathon import app
 from mock import Mock, ANY
 import mock
-from hackathon.database.models import User, UserToken, Hackathon, Register
+from hackathon.database.models import User, UserToken, Hackathon, UserHackathonRel
 from hackathon.user.login import LoginProviderBase
 
 
@@ -64,7 +64,7 @@ class UserLoginTest(unittest.TestCase):
                 get_hackathon_by_name.return_value = hackathon
                 with mock.patch(
                         'hackathon.registration.register_mgr.RegisterManger.get_register_by_rid_or_uid_and_hid') as get_register_by_rid_or_uid_and_hid:
-                    register = Register(id=1, register_name='test', email='test@test.com', hackathon_id=1)
+                    register = UserHackathonRel(id=1, register_name='test', email='test@test.com', hackathon_id=1)
                     get_register_by_rid_or_uid_and_hid.return_value = register
                     with mock.patch(
                             'hackathon.registration.register_mgr.RegisterManger.deal_with_user_and_register_when_login') as deal_with_user_and_register_when_login:
@@ -122,7 +122,7 @@ class UserLoginTest(unittest.TestCase):
                     #Then get register by emails and hid is not None
                     with mock.patch(
                             'hackathon.registration.register_mgr.RegisterManger.get_register_by_emails_and_hid') as get_register_by_emails_and_hid:
-                        register = Register(id=1, register_name='test', email='test@test.com', hackathon_id=1)
+                        register = UserHackathonRel(id=1, register_name='test', email='test@test.com', hackathon_id=1)
                         get_register_by_emails_and_hid.return_value = register
                         with mock.patch(
                                 'hackathon.registration.register_mgr.RegisterManger.deal_with_user_and_register_when_login') as deal_with_user_and_register_when_login:
