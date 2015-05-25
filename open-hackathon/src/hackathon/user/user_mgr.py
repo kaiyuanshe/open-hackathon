@@ -106,6 +106,7 @@ class UserManager(object):
             self.db.update_object(user,
                                   name=kwargs["name"],
                                   nickname=kwargs["nickname"],
+                                  provider=kwargs["provider"],
                                   access_token=kwargs["access_token"],
                                   avatar_url=kwargs["avatar_url"],
                                   last_login_time=get_now(),
@@ -113,6 +114,7 @@ class UserManager(object):
             map(lambda x: self.__create_or_update_email(user, x), email_info)
         else:
             user = User(openid=openid,
+                        provider=kwargs["provider"],
                         name=kwargs["name"],
                         nickname=kwargs["nickname"],
                         access_token=kwargs["access_token"],
