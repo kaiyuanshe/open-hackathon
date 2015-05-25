@@ -85,7 +85,7 @@ class QQLogin(LoginBase):
 
         return admin_manager.oauth_db_login(openid,
                                             name=user_info["nickname"],
-                                            provider=OAUTH_PROVIDER.QQ,
+                                            provider=LOGIN_PROVIDER.QQ,
                                             nickname=user_info["nickname"],
                                             access_token=access_token,
                                             email_info=email_info,
@@ -144,7 +144,7 @@ class GithubLogin(LoginBase):
         email_info = json.loads(email_info_resp)
 
         return admin_manager.oauth_db_login(openid,
-                                            provider=OAUTH_PROVIDER.GITHUB,
+                                            provider=LOGIN_PROVIDER.GITHUB,
                                             name=name,
                                             nickname=nickname,
                                             access_token=access_token,
@@ -190,7 +190,7 @@ class GitcafeLogin(LoginBase):
              'avatar_url': avatar_url}]
 
         return admin_manager.oauth_db_login(id,
-                                            provider=OAUTH_PROVIDER.GITCAFE,
+                                            provider=LOGIN_PROVIDER.GITCAFE,
                                             name=name,
                                             nickname=nickname,
                                             access_token=token,
@@ -245,7 +245,7 @@ class WeiboLogin(LoginBase):
              'avatar_url': avatar}]
 
         return admin_manager.oauth_db_login(openid,
-                                            provider=OAUTH_PROVIDER.WEIBO,
+                                            provider=LOGIN_PROVIDER.WEIBO,
                                             name=name,
                                             nickname=nickname,
                                             access_token=access_token,
