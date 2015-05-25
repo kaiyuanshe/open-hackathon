@@ -88,6 +88,7 @@ class AdminManager(object):
         admin = self.db.find_first_object_by(User, openid=openid)
         if admin is not None:
             self.db.update_object(admin,
+                                  provider=kwargs["provider"],
                                   name=kwargs["name"],
                                   nickname=kwargs["nickname"],
                                   access_token=kwargs["access_token"],
@@ -106,6 +107,7 @@ class AdminManager(object):
         else:
             admin = User(openid=openid,
                          name=kwargs["name"],
+                         provider=kwargs["provider"],
                          nickname=kwargs["nickname"],
                          access_token=kwargs["access_token"],
                          avatar_url=kwargs["avatar_url"],

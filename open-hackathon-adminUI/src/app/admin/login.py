@@ -85,6 +85,7 @@ class QQLogin(LoginBase):
 
         return admin_manager.oauth_db_login(openid,
                                             name=user_info["nickname"],
+                                            provider=LOGIN_PROVIDER.QQ,
                                             nickname=user_info["nickname"],
                                             access_token=access_token,
                                             email_info=email_info,
@@ -142,7 +143,9 @@ class GithubLogin(LoginBase):
         # email is user's primary email
         email_info = json.loads(email_info_resp)
 
-        return admin_manager.oauth_db_login(openid, name=name,
+        return admin_manager.oauth_db_login(openid,
+                                            provider=LOGIN_PROVIDER.GITHUB,
+                                            name=name,
                                             nickname=nickname,
                                             access_token=access_token,
                                             email_info=email_info,
@@ -187,6 +190,7 @@ class GitcafeLogin(LoginBase):
              'avatar_url': avatar_url}]
 
         return admin_manager.oauth_db_login(id,
+                                            provider=LOGIN_PROVIDER.GITCAFE,
                                             name=name,
                                             nickname=nickname,
                                             access_token=token,
@@ -240,7 +244,9 @@ class WeiboLogin(LoginBase):
             {'name': name, 'email': email, 'id': id, 'verified': 1, 'primary': 1, 'nickname': nickname,
              'avatar_url': avatar}]
 
-        return admin_manager.oauth_db_login(openid, name=name,
+        return admin_manager.oauth_db_login(openid,
+                                            provider=LOGIN_PROVIDER.WEIBO,
+                                            name=name,
                                             nickname=nickname,
                                             access_token=access_token,
                                             email_info=email_info,

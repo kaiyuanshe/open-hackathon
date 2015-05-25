@@ -28,7 +28,7 @@ from flask_restful import Resource, reqparse
 from . import api, app
 from expr import expr_manager
 from expr.expr_mgr import open_check_expr, recycle_expr_scheduler
-from database.models import Announcement, Hackathon, Template
+from database.models import Announcement, Template
 from user.login import *
 from flask import g, request
 from database import db_adapter, db_session
@@ -41,11 +41,10 @@ import time
 from hackathon.registration.register_mgr import register_manager
 from hackathon.template.template_mgr import template_manager
 from hackathon_response import *
-from hackathon.azureformation.azureManagement import (
-    azure_management,
+from hackathon.azureformation.azureCertManagement import (
+    azure_cert_management,
 )
 from hackathon.enum import RGStatus
-
 
 
 @app.teardown_appcontext
@@ -161,7 +160,7 @@ class UserExperimentResource(Resource):
             log.error(err)
             return {"error": "fail to start due to '%s'" % err}, 500
 
-    # @token_required
+    @token_required
     def delete(self):
         # id is experiment id
         parser = reqparse.RequestParser()
@@ -267,7 +266,6 @@ class HackathonTemplateResource(Resource):
         return template_manager.delete_template(args['id'])
 
 
-
 class UserExperimentListResource(Resource):
     @token_required
     def get(self):
@@ -317,7 +315,7 @@ class AdminHackathonListResource(Resource):
 class AdminAzureResource(Resource):
     @hackathon_name_required
     def get(self):
-        certificates = azure_management.get_certificates(g.hackathon.name)
+        certificates = azure_cert_management.get_certificates(g.hackathon.name)
         if certificates is None:
             return not_found("no certificates")
         return certificates, 200
@@ -330,8 +328,9 @@ class AdminAzureResource(Resource):
         subscription_id = args['subscription_id']
         management_host = args['management_host']
         try:
-            cert_url = azure_management.create_certificate(subscription_id, management_host, g.hackathon.name)
-            return {'cert_url': cert_url}, 200
+            azure_cert_url = azure_cert_management.create_certificate(subscription_id, management_host,
+                                                                      g.hackathon.name)
+            return {'azure_cert_url': azure_cert_url}, 200
         except Exception as err:
             log.error(err)
             return internal_server_error('fail to create certificate due to [%s]' % err)
@@ -342,7 +341,7 @@ class AdminAzureResource(Resource):
         if 'certificate_id' not in args:
             return bad_request("certificate_id invalid")
         certificate_id = args['certificate_id']
-        if azure_management.delete_certificate(certificate_id, g.hackathon.name):
+        if azure_cert_management.delete_certificate(certificate_id, g.hackathon.name):
             return {'message': 'certificate deleted'}, 200
         else:
             return internal_server_error("fail to delete certificate")
@@ -354,8 +353,9 @@ class HackathonFileResource(Resource):
         return hack_manager.upload_files()
 
     def delete(self):
-        #TODO call azure blobservice api to delete file
+        # TODO call azure blobservice api to delete file
         return True
+
 
 class HackathonCheckNameResource(Resource):
     def get(self):
