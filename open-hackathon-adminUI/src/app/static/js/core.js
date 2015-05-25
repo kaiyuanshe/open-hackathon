@@ -59,19 +59,27 @@
                     }
                     options = $.extend(_params, options);
                     var url = name;
-                    var data = options.body //== null ? '' : JSON.stringify(options.body);
+                    var data = JSON.stringify(options.body);
                     if (options.query) {
                         url += '?' + ($.isPlainObject(options.query) ? $.param(options.query) : options.query);
                     }
                     options.header.token = $.cookie('token');
-                    $.ajax({
+                    return $.ajax({
                         method: obj,
                         url: url,
                         contentType: obj == 'get' ? 'application/x-www-form-urlencoded' : 'application/json',
                         headers: options.header,
                         data: data,
                         success: function(data) {
-                            callback(data)
+                            if(data.error){
+                                if(data.error.code == 401){
+                                    location.href = '/logout';
+                                }else {
+                                    callback(data)
+                                }
+                            }else{
+                                callback(data)
+                            }
                         },
                         error: function(req, status, error) {
                             var data = {
@@ -87,6 +95,9 @@
         }
         return API(apiconfig.api, apiconfig.proxy + '/api');
     }
+
+    var CURRENT_HACKATHON_COOKIE_NAME = 'current_hackathon';
+
     w.oh = w.oh || {};
     w.oh.api = FactoryAPI();
     w.oh.comm = {
@@ -94,77 +105,25 @@
             formatstr = formatstr || 'yyyy-MM-dd';
             return new Date(milliseconds).format(formatstr);
         },
-        getHackathon: function() {
-            return JSON.parse(localStorage.hackathon);
+        changeCurrentHackathon:function(hackathon){
+            var data = {};
+            data[$.cookie('token')] = hackathon;
+            $.cookie(CURRENT_HACKATHON_COOKIE_NAME,JSON.stringify(data));
+        },
+        getCurrentHackathon: function() {
+            return JSON.parse($.cookie(CURRENT_HACKATHON_COOKIE_NAME))[$.cookie('token')] || {name:'',id:0};
+        },
+        createLoading:function(elemt){
+            $(elemt).children().hide();
+            $(elemt).append($('<div class="text-center" data-type="pageloading"><img src="/static/pic/spinner-lg.gif"></div>'))
+        },
+        removeLoading:function(){
+            var pageloading = $('[data-type="pageloading"]')
+            pageloading.siblings().show();
+            pageloading.detach();
         }
     };
 
-    Date.prototype.format = function(mask) {
-        var d = this;
-        var zeroize = function(value, length) {
-            if (!length) length = 2;
-            value = String(value);
-            for (var i = 0, zeros = ''; i < (length - value.length); i++) {
-                zeros += '0';
-            }
-            return zeros + value;
-        };
-        var test = /"[^"]*"|'[^']*'|\b(?:d{1,4}|m{1,4}|yy(?:yy)?|([hHMstT])\1?|[lLZ])\b/g;
-        return mask.replace(test, function(obj) {
-            switch (obj) {
-                case 'd':
-                    return d.getDate();
-                case 'dd':
-                    return zeroize(d.getDate());
-                case 'ddd':
-                    return ['Sun', 'Mon', 'Tue', 'Wed', 'Thr', 'Fri', 'Sat'][d.getDay()];
-                case 'dddd':
-                    return ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][d.getDay()];
-                case 'M':
-                    return d.getMonth() + 1;
-                case 'MM':
-                    return zeroize(d.getMonth() + 1);
-                case 'MMM':
-                    return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.getMonth()];
-                case 'MMMM':
-                    return ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][d.getMonth()];
-                case 'yy':
-                    return String(d.getFullYear()).substr(2);
-                case 'yyyy':
-                    return d.getFullYear();
-                case 'h':
-                    return d.getHours() % 12 || 12;
-                case 'hh':
-                    return zeroize(d.getHours() % 12 || 12);
-                case 'H':
-                    return d.getHours();
-                case 'HH':
-                    return zeroize(d.getHours());
-                case 'm':
-                    return d.getMinutes();
-                case 'mm':
-                    return zeroize(d.getMinutes());
-                case 's':
-                    return d.getSeconds();
-                case 'ss':
-                    return zeroize(d.getSeconds());
-                case 'l':
-                    return zeroize(d.getMilliseconds(), 3);
-                case 'L':
-                    var m = d.getMilliseconds();
-                    if (m > 99) m = Math.round(m / 10);
-                    return zeroize(m);
-                case 'tt':
-                    return d.getHours() < 12 ? 'am' : 'pm';
-                case 'TT':
-                    return d.getHours() < 12 ? 'AM' : 'PM';
-                case 'Z':
-                    return d.toUTCString().match(/[A-Z]+$/);
-                default:
-                    return obj.substr(1, $0.length - 2);
-            }
-        });
-    };
     $.getUrlParam = function(name) {
         var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
         var r = window.location.search.substr(1).match(reg);
@@ -182,17 +141,6 @@
         return context[func].apply(this, args);
     }
 
-    function SessionStorageBindHackathon(data) {
-        var hackathons = [];
-        $.each(data, function(i, o) {
-            hackathons.push({
-                name: o.name,
-                id: o.id
-            })
-        })
-        sessionStorage.hackathons = JSON.stringify(hackathons)
-    };
-
     window.addEventListener("storage", function(e) {
         var key = e.key;
         var newValue = e.newValue;
@@ -201,39 +149,46 @@
         var storageArea = e.storageArea;
         console.log(e);
     });
+
+    function addTabsEvent(){
+        var tabs = $('[data-type="tabs"]').on('click','a',function(e){
+            e.preventDefault();
+            var a = $(this);
+            var toTab = a.attr('href');
+            var li =  a.parent();
+            li.addClass('active').siblings().removeClass('active');
+            $(toTab).addClass('active').siblings().removeClass('active');;
+        })
+    }
+
     $(function() {
-        $.template('switc_hackathons_temp', '<li {{if $item.isAction(id ,$item.hid)}} class="active" {{/if}}>{{if $item.isAction(id,$item.hid) }}<i class="fa fa-check"></i>{{/if}}<a href="#" data-type="hackathon">${name}</a></li>');
-        //$.template('switc_hackathons_temp', '<li><a href="#" data-type="hackathon">${name}</a></li>');
-        // $.template('switc_hackathons_temp2','<li><a href="javascript:;">
-        //                              <span class="icon blue"><i class="fa fa-check"></i></span>
-        //                              <span class="message">${name}</span>
-        //                          </a>
-        //                      </li>')
+        w.oh.comm.createLoading('[loading]');
+        addTabsEvent();
+        var currentHackathon = w.oh.comm.getCurrentHackathon();
+        $.template('switc_hackathons_temp', '<li {{if id == $item.hid }} class="active" {{/if}}>{{if id == $item.hid }}<i class="fa fa-check"></i>{{/if}}<a href="#" data-type="hackathon">${name}</a></li>');
+        $.template('switc_hackathons_temp2','<li><a href="javascript:;"><span class="icon blue"><i class="fa fa-check"></i></span><span class="message">${name}</span></a></li>')
         var hackathon_modal = $('#switc_hackathon_modal').on('show.bs.modal', function(e) {
             var ul = hackathon_modal.find('.modal-body ul').empty();
-//            oh.api.admin.hackathons.get(function(data) {
-//                ul.append($.tmpl('switc_hackathons_temp', data, {
-//                    isAction: function(id, hid) {
-//                        return id == hid
-//                    },
-//                    hid: JSON.parse(localStorage.hackathon || '{"id":"0"}').id
-//                }));
-//            });
+            oh.api.admin.hackathon.list.get(function(data) {
+                if(data.length >0){
+                    ul.append($.tmpl('switc_hackathons_temp', data, {
+                        hid: currentHackathon.id
+                    }));
+                }else if(location.pathname.search('createhackathon','i') == -1){
+                    location.href = '/createhackathon';
+                }
+            });
         }).on('hide.bs.modal', function(e) {
-            if (!localStorage.hackathon) {
-                return false;
-            }
+
         }).on('click', 'a[data-type="hackathon"]', function(e) {
             var li = $(this).parents('li');
             if (!li.hasClass('active')) {
                 var data = li.data('tmplItem').data;
-                localStorage.hackathon = JSON.stringify({
+                w.oh.comm.changeCurrentHackathon({
                     name: data.name,
                     id: data.id
                 });
-                hackathon_modal.data({
-                    li: li
-                });
+                hackathon_modal.data({li: li});
                 hackathon_modal.trigger('Reloadhackathon');
             }
         }).bind('Reloadhackathon', function(e) {
@@ -244,15 +199,25 @@
             location.reload()
         });
 
-        if (!localStorage.hackathon) {
-            hackathon_modal.modal('show')
-        }
 
-        /*if(!sessionStorage.hackathons){
-            oh.api.admin.hackathons.get(function(data){
-                 SessionStorageBindHackathon(data);
-            });
-        } */
+        if(location.pathname.length !=1 && location.pathname.search('createhackathon','i') == -1){
+            if(currentHackathon.id == 0){
+                oh.api.admin.hackathon.list.get(function(data){
+                    if(data.length == 0){
+                        location.href = '/createhackathon';
+                    }else if(data.length == 1){
+                        w.oh.comm.changeCurrentHackathon({
+                            name: data[0].name,
+                            id: data[0].id
+                        })
+                    }else{
+                        hackathon_modal.modal('show')
+                    }
+                })
+            }else{
+                 $('#content').prepend('<legend> 当前黑客松：'+currentHackathon.name+'</legend>')
+            }
+        }
 
         var menu = $('#sidebar-left .main-menu');
         menu.find('a').each(function() {

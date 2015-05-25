@@ -31,7 +31,7 @@ import importlib
 import urllib2
 import json
 import os
-import requests
+from datetime import datetime
 
 try:
     from config import Config
@@ -69,26 +69,6 @@ def mkdir_safe(path):
     if path and not (os.path.exists(path)):
         os.makedirs(path)
     return path
-
-
-def post_to_remote(url, post_data, headers=None):
-    default_headers = {"content-type": "application/json"}
-    if headers is not None and isinstance(headers, dict):
-        default_headers.update(headers)
-    req = requests.post(url, data=json.dumps(post_data), headers=default_headers)
-    resp = json.loads(req.content)
-
-    return convert(resp)
-
-
-def put_to_remote(url, post_data, headers=None):
-    default_headers = {"content-type": "application/json"}
-    if headers is not None and isinstance(headers, dict):
-        default_headers.update(headers)
-    req = requests.put(url, data=json.dumps(post_data), headers=default_headers)
-    resp = json.loads(req.content)
-
-    return convert(resp)
 
 
 def get_remote(url, headers={}):
@@ -134,3 +114,7 @@ def call(mdl_cls_func, cls_args, func_args):
     cls = getattr(mdl, cls_name)
     func = getattr(cls(*cls_args), func_name)
     func(*func_args)
+
+
+def get_now():
+    return datetime.utcnow()

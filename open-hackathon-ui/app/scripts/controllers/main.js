@@ -64,6 +64,11 @@ s.controller('main.controller', function ($scope) {
       $.param(config.sociallogin.gitcafe);
     openWindow(url, 980);
   };
+  $scope.livelogin = function () {
+	    var url = config.social.live +
+	      $.param(config.sociallogin.live);
+	    openWindow(url, 980);
+	  };
   $scope.weibologin = function () {
     var url = config.social.weibo +
       $.param(config.sociallogin.weibo);

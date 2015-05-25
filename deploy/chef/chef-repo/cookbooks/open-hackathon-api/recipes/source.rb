@@ -47,7 +47,6 @@ file ssh_wrapper_file do
   content "#!/bin/sh\nexec /usr/bin/ssh -i #{ssh_key_file} \"$@\""
 end
 
-
 directory node['openhackathon'][:base_dir] do
   owner node['openhackathon']['user']
   group node['openhackathon']['user']
@@ -55,12 +54,29 @@ directory node['openhackathon'][:base_dir] do
   action :create
 end
 
+file "/home/#{node['openhackathon']['user']}/.ssh/known_hosts" do
+  owner node['openhackathon']['user']
+  group node['openhackathon']['user']
+  mode "0600"
+  action :create
+end
+
+bash 'add known hosts' do
+  user node['openhackathon']['user']
+  cwd "/home/#{node['openhackathon']['user']}/.ssh"
+  code <<-EOH
+  ssh-keygen -H -R github.com
+  echo "#{node['openhackathon']['git']['known_hosts']}" >> /home/#{node['openhackathon']['user']}/.ssh/known_hosts
+  EOH
+end
+
 git node['openhackathon'][:base_dir] do
   repository node['openhackathon']['git']['repository']
   user node['openhackathon']['user']
   group node['openhackathon']['user']
-  checkout_branch node['openhackathon']['git']['branch']
-  ssh_wrapper #{ssh_wrapper_file}
+  revision node['openhackathon']['git']['branch']
+  checkout_branch node['openhackathon']['git']['checkout_branch']
+  ssh_wrapper ssh_wrapper_file
   action :sync
   timeout 60
 end

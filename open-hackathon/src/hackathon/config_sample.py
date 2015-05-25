@@ -59,6 +59,9 @@ Config = {
             "user_info_url": 'https://api.weibo.com/2/users/show.json?access_token=',
             "email_info_url": 'https://api.weibo.com/2/account/profile/email.json?access_token='
         },
+        "live": {
+            "user_info_url": 'https://apis.live.net/v5.0/me?access_token='
+        },
         "token_expiration_minutes": 60 * 24
     },
     "azure": {
@@ -84,8 +87,9 @@ Config = {
     "storage": {
         "account_name": "hackathon",
         "account_key": "U4/oE3Ocwk9txQHw2qNOCCW2Fy05FBY3yQfzcKRNss5tnReyYTO7PDyeXQ8TWMMxXF07JrW7UXPyOhGgJlodEQ==",
-        "container_name": "filestorage",
+        "image_container": "images",
+        "template_container": "templates",
         "blob_service_host_base":  ".blob.core.chinacloudapi.cn",
-        "size_limit": 5*1024*1024
+        "size_limit_byte": 5*1024*1024
     }
 }

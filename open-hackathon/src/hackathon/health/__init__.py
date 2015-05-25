@@ -28,9 +28,9 @@ import sys
 
 sys.path.append("..")
 from health_check import *
-from datetime import datetime
+from hackathon.functions import get_now
 
-app_start_time = datetime.utcnow()
+app_start_time = get_now()
 
 all_health_items = {
     "mysql": MySQLHealthCheck(),
@@ -63,12 +63,12 @@ def report_health(q):
             q: all_health_items[q]
         }
 
-    up = datetime.utcnow() - app_start_time
+    up = get_now() - app_start_time
     days, hours, minutes = up.days, up.seconds / 3600, up.seconds % 3600 / 60.0
     health = {
         STATUS: HEALTH_STATE.OK,
         "start_time": str(app_start_time),
-        "report_time": str(datetime.utcnow()),
+        "report_time": str(get_now()),
         "up": "%d days %d hours %d minutes" % (days, hours, minutes)
     }
 

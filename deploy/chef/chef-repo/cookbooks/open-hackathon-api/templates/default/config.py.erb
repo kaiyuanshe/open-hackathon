@@ -49,6 +49,13 @@ Config = {
         "gitcafe": {
             "user_info_url": "<%= node['openhackathon']['gitcafe']['api_domain'] %>/api/v1/user"
         },
+        "weibo": {
+            "user_info_url": 'https://api.weibo.com/2/users/show.json?access_token=',
+            "email_info_url": 'https://api.weibo.com/2/account/profile/email.json?access_token='
+        },
+        "live": {
+            "user_info_url": 'https://apis.live.net/v5.0/me?access_token="
+        },
         "token_expiration_minutes": <%= node['openhackathon']['token_expiration_minutes'] %>
     },
     "azure": {

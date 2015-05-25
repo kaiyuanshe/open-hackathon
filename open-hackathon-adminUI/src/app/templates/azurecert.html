@@ -1,0 +1,100 @@
+{% extends "main.html" %} {% block style %}
+<link href="/static/css/bootstrapValidator.css" rel="stylesheet">
+{% endblock %} {% block body %}
+
+<div class="col-lg-12">
+    <div class="box">
+        <div class="box-header">
+            <h2><i class="fa fa-edit"></i>Azure证书列表</h2>
+        </div>
+        <div class="box-content">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>订阅序号</th>
+                        <th>服务URI</th>
+                        <th>证书文件</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="azurecertlist">
+                </tbody>
+            </table>
+            <div >
+                <form class="form-horizontal" id="azurecertform" method="post"
+                          data-bv-feedbackicons-valid="glyphicon glyphicon-ok"
+                          data-bv-feedbackicons-invalid="glyphicon glyphicon-remove"
+                          data-bv-feedbackicons-validating="glyphicon glyphicon-refresh">
+                        <fieldset>
+                            <legend>
+                                创建新的Azure证书
+                            </legend>
+                            <div class="form-group has-feedback">
+                                <label class="col-md-3 control-label">订阅序号</label>
+                                <div class="col-md-6 register">
+                                    <input type="text" class="form-control" name="subscription_id" id="subscription_id"
+                                           placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                                           data-bv-trigger="blur"
+                                           required
+                                           data-bv-notempty-message="订阅序号是必需的，不能为空"
+                                           pattern="[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
+                                           data-bv-regexp-message="订阅序号格式不正确">
+                                </div>
+                            </div>
+                            <div class="form-group has-feedback">
+                                <label class="col-md-3 control-label">服务URI</label>
+                                <div class="col-md-6 register">
+                                    <select class="form-control" name="management_host" id="management_host">
+                                        <option value="management.core.chinacloudapi.cn">management.core.chinacloudapi.cn</option>
+                                        <option value="management.core.windows.net">management.core.windows.net</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group has-feedback">
+                                <div class="col-sm-offset-3 col-sm-6 text-center">
+                                    <button type="submit" class="btn btn-primary">提交</button>
+                                </div>
+                            </div>
+                        </fieldset>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock body %} {% block script %} {{ super() }}
+<div class="modal fade bs-example-modal-sm" id="confirm_modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-api="oh.api.admin.register.delete">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">提示</h4>
+            </div>
+            <div class="modal-body">
+                <p>确定删除此Azure证书？</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default wb-btn" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary wb-btn" data-type="ok">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script id="azure_cert_item" type="text/x-jquery-tmpl">
+    <tr>
+        <td>${$item.getIndex()}</td>
+        <td>${subscription_id}</td>
+        <td>${management_host}</td>
+        <td><a href="${cert_url}">下载</a></td>
+        <td class="col-action">
+            <a class="btn btn-danger btn-sm" href="#" data-target="#confirm_modal" data-toggle="modal">
+                <i class="fa fa-trash-o "></i>
+            </a>
+        </td>
+    </tr>
+</script>
+<script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
+<script type="text/javascript" src="/static/js/jquery/jquery.tmpl.min.js"></script>
+<script type="text/javascript" src="/static/js/views/oh.azurecert.js"></script>
+{% endblock %}
