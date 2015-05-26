@@ -28,7 +28,7 @@ from flask_restful import Resource, reqparse
 from . import api, app
 from expr import expr_manager
 from expr.expr_mgr import open_check_expr, recycle_expr_scheduler
-from database.models import Announcement, Hackathon, Template
+from database.models import Announcement, Template
 from user.login import *
 from flask import g, request
 from database import db_adapter, db_session
@@ -41,8 +41,8 @@ import time
 from hackathon.registration.register_mgr import register_manager
 from hackathon.template.template_mgr import template_manager
 from hackathon_response import *
-from hackathon.azureformation.azureManagement import (
-    azure_management,
+from hackathon.azureformation.azureCertManagement import (
+    azure_cert_management,
 )
 from hackathon.enum import RGStatus
 
@@ -160,7 +160,7 @@ class UserExperimentResource(Resource):
             log.error(err)
             return {"error": "fail to start due to '%s'" % err}, 500
 
-    # @token_required
+    @token_required
     def delete(self):
         # id is experiment id
         parser = reqparse.RequestParser()
@@ -207,12 +207,12 @@ class HackathonResource(Resource):
     @token_required
     def post(self):
         args = request.get_json()
-        return hack_manager.create_or_update_hackathon(args)
+        return hack_manager.create_new_hackathon(args)
 
     @admin_privilege_required
     def put(self):
         args = request.get_json()
-        return hack_manager.create_or_update_hackathon(args)
+        return hack_manager.update_hackathon(args)
 
     def delete(self):
         pass
@@ -249,6 +249,21 @@ class HackathonTemplateResource(Resource):
         parse.add_argument('hid', type=int, location='args', required=True)
         args = parse.parse_args()
         return map(lambda u: u.dic(), db_adapter.find_all_objects_by(Template, hackathon_id=args['hid']))
+
+    # create template for hacakthon
+    def post(self):
+        args = request.get_json()
+        return template_manager.create_template(args)
+
+    def put(self):
+        args = request.get_json()
+        return template_manager.update_template(args)
+
+    def delete(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('id', type=int, location='args', required=True)
+        args = parse.parse_args()
+        return template_manager.delete_template(args['id'])
 
 
 class UserExperimentListResource(Resource):
@@ -300,7 +315,7 @@ class AdminHackathonListResource(Resource):
 class AdminAzureResource(Resource):
     @hackathon_name_required
     def get(self):
-        certificates = azure_management.get_certificates(g.hackathon.name)
+        certificates = azure_cert_management.get_certificates(g.hackathon.name)
         if certificates is None:
             return not_found("no certificates")
         return certificates, 200
@@ -313,8 +328,9 @@ class AdminAzureResource(Resource):
         subscription_id = args['subscription_id']
         management_host = args['management_host']
         try:
-            cert_url = azure_management.create_certificate(subscription_id, management_host, g.hackathon.name)
-            return {'cert_url': cert_url}, 200
+            azure_cert_url = azure_cert_management.create_certificate(subscription_id, management_host,
+                                                                      g.hackathon.name)
+            return {'azure_cert_url': azure_cert_url}, 200
         except Exception as err:
             log.error(err)
             return internal_server_error('fail to create certificate due to [%s]' % err)
@@ -325,7 +341,7 @@ class AdminAzureResource(Resource):
         if 'certificate_id' not in args:
             return bad_request("certificate_id invalid")
         certificate_id = args['certificate_id']
-        if azure_management.delete_certificate(certificate_id, g.hackathon.name):
+        if azure_cert_management.delete_certificate(certificate_id, g.hackathon.name):
             return {'message': 'certificate deleted'}, 200
         else:
             return internal_server_error("fail to delete certificate")
@@ -335,6 +351,18 @@ class HackathonFileResource(Resource):
     @admin_privilege_required
     def post(self):
         return hack_manager.upload_files()
+
+    def delete(self):
+        # TODO call azure blobservice api to delete file
+        return True
+
+
+class HackathonCheckNameResource(Resource):
+    def get(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('name', type=str, location='args', required=True)
+        args = parse.parse_args()
+        return hack_manager.get_hackathon_by_name(args['name']) is None
 
 
 """
@@ -374,6 +402,7 @@ api.add_resource(HackathonResource, "/api/hackathon")
 api.add_resource(HackathonListResource, "/api/hackathon/list")
 api.add_resource(HackathonStatResource, "/api/hackathon/stat")
 api.add_resource(AdminHackathonListResource, "/api/admin/hackathon/list")
+api.add_resource(HackathonCheckNameResource, "/api/hackathon/checkname")
 
 """
 template api

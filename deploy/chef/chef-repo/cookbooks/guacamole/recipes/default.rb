@@ -111,16 +111,16 @@ template "#{node['guacamole']['lib-directory']}/#{node['guacamole']['properties'
   mode '0644'
 end
 
-file "#{node['guacamole']['lib-directory']}/#{node['guacamole']['json-jar']}" do 
-  content IO.read("#{node['guacamole']['src-folder']}/#{node['guacamole']['json-jar']}")
+cookbook_file node['guacamole']['json-jar'] do 
+  path "#{node['guacamole']['lib-directory']}/#{node['guacamole']['json-jar']}"
   owner node['tomcat']['user']
   group node['tomcat']['group']
   mode "0644"
   action :create
 end
 
-file "#{node['guacamole']['lib-directory']}/#{node['guacamole']['provider-jar']}" do 
-  content IO.read("#{node['guacamole']['src-folder']}/#{node['guacamole']['provider-jar']}")
+cookbook_file node['guacamole']['provider-jar'] do 
+  path "#{node['guacamole']['lib-directory']}/#{node['guacamole']['provider-jar']}"
   owner node['tomcat']['user']
   group node['tomcat']['group']
   mode "0644"

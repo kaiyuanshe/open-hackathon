@@ -29,7 +29,8 @@ import sys
 sys.path.append("..")
 from hackathon.database.models import *
 from hackathon.database import db_adapter
-from datetime import datetime, timedelta
+from datetime import timedelta
+from hackathon.functions import get_now
 from hackathon.constants import HTTP_HEADER
 from hackathon.functions import safe_get_config
 from hackathon.hackathon_response import *
@@ -42,7 +43,7 @@ class UserManager(object):
         self.db = db_adapter
 
     def __generate_api_token(self, user):
-        token_issue_date = datetime.utcnow()
+        token_issue_date = get_now()
         token_expire_date = token_issue_date + timedelta(
             minutes=safe_get_config("login.token_expiration_minutes", 1440))
         user_token = UserToken(token=str(uuid.uuid1()), user=user, expire_date=token_expire_date,
@@ -52,7 +53,7 @@ class UserManager(object):
 
     def __validate_token(self, token):
         t = self.db.find_first_object_by(UserToken, token=token)
-        if t is not None and t.expire_date >= datetime.utcnow():
+        if t is not None and t.expire_date >= get_now():
             return t.user
         return None
 
@@ -105,13 +106,15 @@ class UserManager(object):
             self.db.update_object(user,
                                   name=kwargs["name"],
                                   nickname=kwargs["nickname"],
+                                  provider=kwargs["provider"],
                                   access_token=kwargs["access_token"],
                                   avatar_url=kwargs["avatar_url"],
-                                  last_login_time=datetime.utcnow(),
+                                  last_login_time=get_now(),
                                   online=1)
             map(lambda x: self.__create_or_update_email(user, x), email_info)
         else:
             user = User(openid=openid,
+                        provider=kwargs["provider"],
                         name=kwargs["name"],
                         nickname=kwargs["nickname"],
                         access_token=kwargs["access_token"],

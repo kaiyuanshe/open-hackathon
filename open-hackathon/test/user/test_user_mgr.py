@@ -33,7 +33,8 @@ from hackathon.database import SQLAlchemyAdapter
 from hackathon.database.models import UserToken, User
 from hackathon import app
 from mock import Mock
-from datetime import datetime, timedelta
+from datetime import timedelta
+from hackathon.functions import get_now
 from flask import request, g
 
 
@@ -75,7 +76,7 @@ class UserManagerTest(unittest.TestCase):
 
     def test_validate_request_token_expired(self):
         token_value = "token_value"
-        token = UserToken(token=token_value, user=None, expire_date=datetime.utcnow() - timedelta(seconds=30))
+        token = UserToken(token=token_value, user=None, expire_date=get_now() - timedelta(seconds=30))
 
         mock_db = Mock(spec=SQLAlchemyAdapter)
         mock_db.find_first_object_by.return_value = token
@@ -92,7 +93,7 @@ class UserManagerTest(unittest.TestCase):
     def test_validate_request_token_valid(self):
         token_value = "token_value"
         user = User(name="test_name")
-        token = UserToken(token=token_value, user=user, expire_date=datetime.utcnow() + timedelta(seconds=30))
+        token = UserToken(token=token_value, user=user, expire_date=get_now() + timedelta(seconds=30))
 
         mock_db = Mock(spec=SQLAlchemyAdapter)
         mock_db.find_first_object_by.return_value = token
