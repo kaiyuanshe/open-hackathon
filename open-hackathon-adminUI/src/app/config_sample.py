@@ -2,7 +2,7 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#
+#  
 # The MIT License (MIT)
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -27,7 +27,7 @@
 # "javascript" section for javascript. see @app.route('/config.js') in app/views.py
 
 # oauth constants
-HOSTNAME = "http://hackathon.contoso.com"  # host name of the UI site
+HOSTNAME = "http://open-hackathon-dev.chinacloudapp.cn"  # host name of the UI site
 QQ_OAUTH_STATE = "openhackathon"  # todo state should be constant. Actually it should be unguessable to prevent CSFA
 HACKATHON_API_ENDPOINT = "http://open-hackathon-dev.chinacloudapp.cn:15000"
 
@@ -45,6 +45,9 @@ GITCAFE_CLIENT_SECRET = "80b63609000b20c1260df28081c08712617648e1b528086bbb089f0
 WEIBO_CLIENT_ID = "1943560862"
 WEIBO_CLIENT_SECRET = "a5332c39c129902e561bff5e4bcc5982"
 WEIBO_META_CONTENT = "ae884e09bc02b700"
+
+LIVE_CLIENT_ID = "000000004414E0A6"
+LIVE_CLIENT_SECRET = "b4mkfVqjtwHY2wJh0T4tj74lxM5LgAT2"
 
 Config = {
     "environment": "local",
@@ -77,7 +80,14 @@ Config = {
             "access_token_url": 'https://api.weibo.com/oauth2/access_token?client_id=%s&client_secret=%s&grant_type=authorization_code&redirect_uri=%s/weibo&code=' % (
                 WEIBO_CLIENT_ID, WEIBO_CLIENT_SECRET, HOSTNAME)
         },
-        "provider_enabled": ["github", "qq"],
+        "live": {
+            "client_id": LIVE_CLIENT_ID,
+            "client_secret": LIVE_CLIENT_SECRET,
+            "redirect_uri": '%s/live' % HOSTNAME,
+            "access_token_url": 'https://login.live.com/oauth20_token.srf',
+            "user_info_url": 'https://apis.live.net/v5.0/me?access_token='
+        },
+        "provider_enabled": ["github", "qq", "live"],
         "session_minutes": 60,
         "token_expiration_minutes": 60 * 24
     },
@@ -101,6 +111,10 @@ Config = {
             "authorize_url": "https://gcs.dgz.sh/oauth/authorize?response_type=code&client_id=%s&redirect_uri=%s/gitcafe&scope=public" % (
                 GITCAFE_CLIENT_ID, HOSTNAME)
         },
+        "live": {
+            "authorize_url": 'https://login.live.com/oauth20_authorize.srf?client_id=%s&scope=wl.basic+,wl.emails&response_type=code&redirect_uri=%s/live' % (
+                LIVE_CLIENT_ID, HOSTNAME)
+        },
         "hackathon": {
             "name": "open-xml-sdk",
             "endpoint": HACKATHON_API_ENDPOINT
@@ -118,14 +132,8 @@ Config = {
                 "registration": {
                     "": ["get", "post", "delete", "put"],
                     "list": ["get"]
-                },
-                "azure": {
-                    "": ["get", "post", "delete"]
                 }
             }
         }
     }
 }
-
-
-
