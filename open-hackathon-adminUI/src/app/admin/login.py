@@ -60,14 +60,14 @@ class QQLogin(LoginBase):
         # return "UnAuthorized", 401
 
         # get access token
-        token_resp = get_remote(get_config("login/qq/access_token_url") + code + '&state=' + state)
+        token_resp = get_remote(get_config("login.qq.access_token_url") + code + '&state=' + state)
         log.debug("get token from qq:" + token_resp)
         start = token_resp.index('=')
         end = token_resp.index('&')
         access_token = token_resp[start + 1:end]
         # get user info
         # get openID.
-        openid_resp = get_remote(get_config("login/qq/openid_url") + access_token)
+        openid_resp = get_remote(get_config("login.qq.openid_url") + access_token)
         log.debug("get access_token from qq:" + access_token)
 
         info = json.loads(openid_resp[10:-4])
@@ -77,7 +77,7 @@ class QQLogin(LoginBase):
         log.debug("get openid from qq:" + client_id)
 
         # get user info
-        url = get_config("login/qq/user_info_url") % (access_token, client_id, openid)
+        url = get_config("login.qq.user_info_url") % (access_token, client_id, openid)
         user_info_resp = get_remote(url)
         log.debug("get user info from qq:" + user_info_resp)
         user_info = convert(json.loads(user_info_resp))
@@ -105,14 +105,10 @@ class GithubLogin(LoginBase):
         start = token_resp.index('=')
         end = token_resp.index('&')
         access_token = token_resp[start + 1:end]
-        # get user info
-        # user_info_resp = get_remote(get_config('login/github/user_info_url') + access_token)
-        # conn.request('GET',url,'',{'user-agent':'flask'})
         log.debug("get token info from github")
 
         # get user info
         user_info_resp = get_remote(get_config('login.github.user_info_url') + access_token)
-        # conn.request('GET',url,'',{'user-agent':'flask'}):
 
         # example:
         # "url":"https://api.github.com/users/juniwang","html_url":"https://github.com/juniwang",
@@ -158,20 +154,16 @@ class GitcafeLogin(LoginBase):
     def login(self, args):
         log.info('login from Gitcafe')
         code = args.get('code')
-        url = get_config('login/gitcafe/access_token_url') + code
+        url = get_config('login.gitcafe.access_token_url') + code
         opener = urllib2.build_opener(urllib2.HTTPHandler)
         request = urllib2.Request(url, "")
-        # req = requests.post(url, verify=True)
         resp = opener.open(request)
-        # log.debug("get token from gitcafe:" + resp.read())
         token_resp = json.loads(resp.read())
-        # token_resp = json.loads(resp.read())
-        # token_resp = req.content()
 
         token = token_resp['access_token']
         value = "Bearer " + token
         opener = urllib2.build_opener(urllib2.HTTPHandler)
-        request = urllib2.Request(get_config("login/gitcafe/user_info_url"))
+        request = urllib2.Request(get_config("login.gitcafe.user_info_url"))
         request.add_header("Authorization", value)
         user_info = opener.open(request).read()
         log.debug(user_info)
@@ -265,32 +257,22 @@ class MySQLLogin(LoginBase):
 
         return admin_manager.mysql_login(user, pwd)
 
-class LiveLogin(LoginBase):
 
+class LiveLogin(LoginBase):
     def login(self, args):
         log.info('login from  Live')
         code = args.get('code')
         # live need post a form to get token
         headers = {'Content-type': 'application/x-www-form-urlencoded'}
-        data = {'client_id': get_config('login.live.client_id'),
+        data = {
+            'client_id': get_config('login.live.client_id'),
             'client_secret': get_config('login.live.client_secret'),
             'redirect_uri': get_config('login.live.redirect_uri'),
             'grant_type': 'authorization_code',
-            'code': code}
+            'code': code
+        }
         # Following is use urllib to post request
-        #data = urllib.urlencode(data)
         url = get_config('login.live.access_token_url')
-        #opener = urllib2.build_opener(urllib2.HTTPHandler)
-        #check urllib2.Request to find more about Request (get and post)
-        #request = urllib2.Request(url, data, headers)
-        # req = requests.post(url, verify=True)
-        #resp = opener.open(request)
-        # log.debug("get token from gitcafe:" + resp.read())
-        #token_resp = json.loads(resp.read())
-        # token_resp = json.loads(resp.read())
-        # token_resp = req.content()
-
-        # Following is use requests to send post request
         r = requests.post(url, data=data, headers=headers)
         resp = r.json()
         access_token = resp['access_token']
@@ -311,7 +293,7 @@ class LiveLogin(LoginBase):
 
         user_info_resp = get_remote(get_config('login.live.user_info_url') + access_token)
         # conn.request('GET',url,'',{'user-agent':'flask'})
-        log.debug("get user info from live:" + user_info_resp )
+        log.debug("get user info from live:" + user_info_resp)
         # user.info
         #{u'first_name': u'Ice', u'last_name': u'Shi', u'name': u'Ice Shi', u'locale': u'en_US', \
         # u'gender': None,\
@@ -329,14 +311,15 @@ class LiveLogin(LoginBase):
 
         email = user_info["emails"]["account"]
         email_info = [
-                {'name': name, 'email': email, 'id': openid, 'verified': 1, 'primary': 1, 'nickname': name,
-                 'avatar_url': None}]
+            {'name': name, 'email': email, 'id': openid, 'verified': 1, 'primary': 1, 'nickname': name,
+             'avatar_url': None}]
         return admin_manager.oauth_db_login(openid,
-                                           name=name,
-                                           nickname=name,
-                                           access_token=access_token,
-                                           email_info=email_info,
-                                           avatar_url=None)
+                                            name=name,
+                                            nickname=name,
+                                            access_token=access_token,
+                                            email_info=email_info,
+                                            avatar_url=None)
+
 
 login_providers = {
     LOGIN_PROVIDER.GITHUB: GithubLogin(),

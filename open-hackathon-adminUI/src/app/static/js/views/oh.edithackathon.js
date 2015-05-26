@@ -102,7 +102,7 @@
     }
 
     function initFilesData(banners){
-        var images = banners.split(';');
+        var images = banners ? banners.split(';') : [];
         $.each(images,function(i,imageUrl){
             var url = new URL(imageUrl);
             files.push({

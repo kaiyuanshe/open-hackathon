@@ -41,7 +41,7 @@ angular.module('oh.controllers')
   .controller('settings.controller', function ($scope,$location, Authentication, API) {
     $scope.isLoading = true;
     Authentication.settings(function (data) {
-      API.template.list.get({header: {hackathon_name: config.name}}, function (data) {
+      API.hackathon.template.get({header: {hackathon_name: config.name}}, function (data) {
         $scope.isLoading = false;
         if (data.error) {
           $scope.error = data;

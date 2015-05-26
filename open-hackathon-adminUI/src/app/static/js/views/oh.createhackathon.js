@@ -144,7 +144,7 @@
             wizard(4);
         })
         $('#stepform3').fileupload({
-            url: apiconfig.proxy+'/api/file',
+            url: apiconfig.proxy+'/api/admin/file',
             autoUpload:true,
             prependFiles:true,
             acceptFileTypes:  /(\.|\/)(gif|jpe?g|png)$/i,
