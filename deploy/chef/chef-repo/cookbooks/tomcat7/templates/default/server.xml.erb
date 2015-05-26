@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Server port="<%= @shutdown_port %>" shutdown="SHUTDOWN">
+  <Listener className="org.apache.catalina.core.JasperListener" />
+  <Listener className="org.apache.catalina.core.JreMemoryLeakPreventionListener" />
+  <Service name="Catalina">
+  <% if @port -%>
+    <Connector port="<%= @port %>" protocol="HTTP/1.1"
+               connectionTimeout="20000"
+               URIEncoding="UTF-8"
+             <% if @proxy_port -%>
+               proxyPort="<%= @proxy_port %>"
+             <% end -%>
+             <% if @max_threads -%>
+               maxThreads="<%= @max_threads %>"
+             <% end -%>
+             />
+  <% end -%>
+    <Engine name="Catalina" defaultHost="localhost">
+      <Host name="localhost"  appBase="webapps" unpackWARs="true" autoDeploy="true" xmlValidation="false" xmlNamespaceAware="false">
+        
+	<% if @valves -%>
+		<% @valves.each do |valve| -%>
+			<Valve <%= valve.map{|k,v| "#{k}=\"#{v}\""}.join(" ") %> />
+		<% end -%>
+	<% end -%>
+
+      </Host>
+    </Engine>
+  </Service>
+</Server>

@@ -28,6 +28,7 @@ __author__ = 'root'
 
 import sys
 import urllib2
+import urllib
 
 sys.path.append("..")
 # -*- coding:utf8 -*-
@@ -35,6 +36,7 @@ sys.path.append("..")
 from app.functions import get_remote, get_config, post_to_remote, convert
 from app.log import log
 import json
+import requests
 from admin_mgr import admin_manager
 from flask import session, request
 from flask_login import logout_user
@@ -263,11 +265,84 @@ class MySQLLogin(LoginBase):
 
         return admin_manager.mysql_login(user, pwd)
 
+class LiveLogin(LoginBase):
+
+    def login(self, args):
+        log.info('login from  Live')
+        code = args.get('code')
+        # live need post a form to get token
+        headers = {'Content-type': 'application/x-www-form-urlencoded'}
+        data = {'client_id': get_config('login.live.client_id'),
+            'client_secret': get_config('login.live.client_secret'),
+            'redirect_uri': get_config('login.live.redirect_uri'),
+            'grant_type': 'authorization_code',
+            'code': code}
+        # Following is use urllib to post request
+        #data = urllib.urlencode(data)
+        url = get_config('login.live.access_token_url')
+        #opener = urllib2.build_opener(urllib2.HTTPHandler)
+        #check urllib2.Request to find more about Request (get and post)
+        #request = urllib2.Request(url, data, headers)
+        # req = requests.post(url, verify=True)
+        #resp = opener.open(request)
+        # log.debug("get token from gitcafe:" + resp.read())
+        #token_resp = json.loads(resp.read())
+        # token_resp = json.loads(resp.read())
+        # token_resp = req.content()
+
+        # Following is use requests to send post request
+        r = requests.post(url, data=data, headers=headers)
+        resp = r.json()
+        access_token = resp['access_token']
+        # example r.text
+        #{"token_type":"bearer","expires_in":3600,"scope":"wl.basic wl.emails",
+        # "access_token":"EwBwAq1DBAAUGCCXc8wU/zFu9QnLdZXy+YnElFkAAQSgubm26ZSGbRJNqyaoao186USLUXxbkzgPa1GAkyNbv0BOl72kv
+        # qz8f81dPGWNowxXQf73gnKkgCIhypqjJqyBzL0+T0z437WhIr6vHW9gtEtMtP8s+ntXMinlbmBbGwjweEL/BA2eu3HapWti097/eF+yo8b/rP
+        # KitwOCuCtkamv5N7FM8asZOYkgFlLS1641zuPfOiw/Rz+ijxJj+yc5mPMDAnyr8sGy596VIK2xqeVbZXg5BShAQw+F2GO2udE9ZDF2NgIegFy
+        # SRpI3qSDp0Tu8ktPxQSp1lxjb1kQtjmEutdbOU3jjeFZietJTqF/+/NHUUfMwqNycFPv39I0DZgAACCt7Cq2fjA4jQAGV2Ru//g/KrJ4mIF80
+        # nvRh70cTfL12Ri0LO9w+GuEJ0QkRZ/JjtZxQXPgRT4KGohO2d7X0sN1a19PEfMng/KwYgEBXbNqkHu/qAwdC4HbAUOnC6bJXESFInbSSu4GKp
+        # 02wIRk6cp8x6HV9xCTCs9eXwWEdRH/6kPGSdGnGMZlX3fMWk+xRgwKdy3VSoUtyKHZ3iM/fr4wDpEqmzBXKbzd1crlHe984UvQseeH1nBrG/B
+        # ytJ34KXBc12QASUIYCYz43OFp+WAQUmUFyjeHyZSD9jakjJ7raIlWtMeR2cCuhfrkqfmMvoebKqVW1JTR1FV+RfW/WBYRzX/rjJD7StVLVYzN
+        # kLTKHotMZ2KQYtN4P/qoN62RWD5w8RC+XpRISUQ6zQo2qg3NeznutrDJNPVwMnmRKMuD7q/hGajFsWX6pi1sB",
+        # "user_id":"ffe24352ffeeef16bbab7dfd9819f5ed"}
+        log.debug("access_token is following")
+        log.debug(access_token)
+        log.debug(get_config('login.live.user_info_url'))
+
+        user_info_resp = get_remote(get_config('login.live.user_info_url') + access_token)
+        # conn.request('GET',url,'',{'user-agent':'flask'})
+        log.debug("get user info from live:" + user_info_resp )
+        # user.info
+        #{u'first_name': u'Ice', u'last_name': u'Shi', u'name': u'Ice Shi', u'locale': u'en_US', \
+        # u'gender': None,\
+        # u'emails': {u'personal': None, u'account': u'iceshi@outlook.com', u'business': None, u'preferred': u'iceshi@outlook.com'}, \
+        # u'link': u'https://profile.live.com/', \
+        # u'updated_time': u'2015-05-13T02:28:32+0000',\
+        # u'id': u'655c03b1b314b5ee'}
+
+        user_info = json.loads(user_info_resp)
+        log.debug(user_info)
+        name = user_info["name"]
+        openid = str(args.get('user_id'))
+        #avatar = user_info["avatar_url"]
+
+
+        email = user_info["emails"]["account"]
+        email_info = [
+                {'name': name, 'email': email, 'id': openid, 'verified': 1, 'primary': 1, 'nickname': name,
+                 'avatar_url': None}]
+        return admin_manager.oauth_db_login(openid,
+                                           name=name,
+                                           nickname=name,
+                                           access_token=access_token,
+                                           email_info=email_info,
+                                           avatar_url=None)
 
 login_providers = {
     LOGIN_PROVIDER.GITHUB: GithubLogin(),
     LOGIN_PROVIDER.WEIBO: WeiboLogin(),
     LOGIN_PROVIDER.QQ: QQLogin(),
     LOGIN_PROVIDER.GITCAFE: GitcafeLogin(),
-    LOGIN_PROVIDER.MYSQL: MySQLLogin()
+    LOGIN_PROVIDER.MYSQL: MySQLLogin(),
+    LOGIN_PROVIDER.LIVE: LiveLogin()
 }

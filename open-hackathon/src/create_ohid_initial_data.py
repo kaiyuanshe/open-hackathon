@@ -34,8 +34,8 @@ from hackathon.enum import VEProvider
 # test hackathon
 hackathon = db_adapter.find_first_object_by(Hackathon, name="sample")
 if hackathon is None:
-    hackathon = Hackathon(name="sample", display_name="Sample", description="This is a demo for Open Hackathon Project",
-                          event_start_time=datetime.utcnow(), event_end_time=datetime.utcnow() + timedelta(days=365),
+    hackathon = Hackathon(name="sample", display_name="Open Hackathon", description="This is a demo for Open Hackathon Project",
+                          status=1, event_start_time=datetime.utcnow(), event_end_time=datetime.utcnow() + timedelta(days=365),
                           registration_start_time=datetime.utcnow(),
                           registration_end_time=datetime.utcnow() + timedelta(days=365),
                           judge_start_time=datetime.utcnow(), judge_end_time=datetime.utcnow() + timedelta(days=365),
