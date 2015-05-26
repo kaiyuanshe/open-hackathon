@@ -46,6 +46,9 @@ WEIBO_CLIENT_ID = "<%= node['openhackathon']['weibo']['client_id'] %>"
 WEIBO_CLIENT_SECRET = "<%= @weibo_client_secret %>"
 WEIBO_META_CONTENT = "<%= node['openhackathon']['weibo']['meta_content'] %>"
 
+LIVE_CLIENT_ID = "<%= node['openhackathon']['live']['client_id'] %>"
+LIVE_CLIENT_SECRET = "<%= @live_client_secret %>"
+
 Config = {
     "environment": "<%= node['openhackathon']['environment'] %>",
     "app": {
@@ -77,6 +80,13 @@ Config = {
             "access_token_url": 'https://api.weibo.com/oauth2/access_token?client_id=%s&client_secret=%s&grant_type=authorization_code&redirect_uri=%s/weibo&code=' % (
                 WEIBO_CLIENT_ID, WEIBO_CLIENT_SECRET, HOSTNAME)
         },
+        "live": {
+            "client_id": LIVE_CLIENT_ID,
+            "client_secret": LIVE_CLIENT_SECRET,
+            "redirect_uri": 'http://open-hackathon-dev.chinacloudapp.cn/live',
+            "access_token_url": 'https://login.live.com/oauth20_token.srf',
+            "user_info_url": 'https://apis.live.net/v5.0/me?access_token='
+        },
         "provider_enabled": <%= node['openhackathon']['admin']['login_provider'] %>,
         "session_minutes": <%= node['openhackathon']['admin']['session_minutes'] %>,
         "token_expiration_minutes": <%= node['openhackathon']['admin']['token_expiration_minutes'] %>
@@ -100,6 +110,10 @@ Config = {
         "gitcafe": {
             "authorize_url": "<%= node['openhackathon']['gitcafe']['domain'] %>/oauth/authorize?response_type=code&client_id=%s&redirect_uri=%s/gitcafe&scope=public" % (
                 GITCAFE_CLIENT_ID, HOSTNAME)
+        },
+        "live": {
+            "authorize_url": 'https://login.live.com/oauth20_authorize.srf?client_id=%s&scope=wl.basic+,wl.emails&response_type=code&redirect_uri=%s/live' % (
+                LIVE_CLIENT_ID, HOSTNAME)
         },
         "hackathon": {
             "name": "<%= node['openhackathon']['hackathon']['name'] %>",

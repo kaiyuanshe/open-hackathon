@@ -2,7 +2,7 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#
+#  
 # The MIT License (MIT)
 #  
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -81,8 +81,10 @@ Config = {
                 WEIBO_CLIENT_ID, WEIBO_CLIENT_SECRET, HOSTNAME)
         },
         "live": {
-            "access_token_url": 'https://login.live.com/oauth20_token.srf?client_id=%s&client_secret=%s&redirect_uri=%s/live&grant_type=authorization_code&code=' % (
-                LIVE_CLIENT_ID, LIVE_CLIENT_SECRET, HOSTNAME ),
+            "client_id": LIVE_CLIENT_ID,
+            "client_secret": LIVE_CLIENT_SECRET,
+            "redirect_uri": 'http://open-hackathon-dev.chinacloudapp.cn/live',
+            "access_token_url": 'https://login.live.com/oauth20_token.srf',
             "user_info_url": 'https://apis.live.net/v5.0/me?access_token='
         },
         "provider_enabled": ["github", "qq", "live"],
@@ -122,24 +124,12 @@ Config = {
         "proxy": HACKATHON_API_ENDPOINT,
         "api": {
             "admin": {
-                "hackathon": {
-                    "list": ["get"]
-                },
+                "hackathons": ["get"],
                 "register": {
                     "": ["get", "post", "delete", "put"],
                     "list": ["get"]
-                },
-                "azure": {
-                    "": ["get", "post", "delete"]
                 }
-            },
-            "hackathon": {
-                "": ["get", "post", "put"],
-                "checkname": ["get"]
             }
         }
     }
 }
-
-
-
