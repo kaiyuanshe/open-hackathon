@@ -1,18 +1,18 @@
 // -----------------------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-//  
+//
 // The MIT License (MIT)
-//  
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-//  
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-//  
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,24 +23,21 @@
 // -----------------------------------------------------------------------------------
 
 $(document).ready(function(){
+    var code = getParameterByName("code")
 
-    $('#githublogin').click(function() {
-        location.href = CONFIG.github.authorize_url;
-    });
-
-    $('#qqlogin').click(function() {
-        location.href = CONFIG.qq.authorize_url;
-    });
-
-    $('#gitcafelogin').click(function() {
-        location.href = CONFIG.gitcafe.authorize_url;
-    });
-
-     $('#weibologin').click(function() {
-        location.href = CONFIG.weibo.authorize_url;
-    });
-     $('#livelogin').click(function() {
-        location.href = CONFIG.live.authorize_url;
-    });
-
+    hpost_local("/ui/login", {
+            "provider": "live",
+            "code": code
+        },
+        function(resp){
+            save_token(resp.token)
+            if(resp.experiments.length > 0)
+                location.href = "/hackathon"
+            else
+                location.href = "/settings"
+        },
+        function(){
+            alert("login failed")
+        }
+    )
 });

@@ -36,6 +36,7 @@ class LOGIN_PROVIDER:
     QQ = "qq"
     GITCAFE = "gitcafe"
     WEIBO = "weibo"
+    LIVE = "live"
 
 
 class HTTP_HEADER:

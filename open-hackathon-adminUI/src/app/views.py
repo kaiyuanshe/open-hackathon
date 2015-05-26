@@ -180,6 +180,9 @@ def qq_login():
 def gitcafe_login():
     return __login(LOGIN_PROVIDER.GITCAFE)
 
+@app.route('/live')
+def live_login():
+    return __login(LOGIN_PROVIDER.LIVE)
 
 @app.route('/')
 @app.route('/index')

@@ -35,7 +35,7 @@ current_dir = File.dirname(__FILE__)
 log_level                :info
 log_location             STDOUT
 node_name                "#{user}"
-client_key               "#{home_dir}/.chef/#{user}.pem"
+client_key               "/etc/chef/#{user}.pem"
 validation_client_name   "msot-validator"
 validation_key           "#{current_dir}/msot-validator.pem"
 chef_server_url          "https://chef-hack.chinacloudapp.cn/organizations/msot"

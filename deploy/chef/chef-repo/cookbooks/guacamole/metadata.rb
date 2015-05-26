@@ -30,7 +30,7 @@ description      'Installs/Configures guacamole'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 version          '0.1.0'
 
-depends   "tomcat"
+depends   "tomcat-all"
 depends   "java"
 depends   "open-hackathon-api"
 

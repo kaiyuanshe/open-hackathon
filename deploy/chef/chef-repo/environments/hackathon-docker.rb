@@ -57,6 +57,9 @@ default_attributes({
       "user_host" => "%",
       "test_data_file_name" => "create_ohid_initial_data.py"
     }
+  },
+  "java" => {
+    "jdk_version" => '7'
   }
 
 })

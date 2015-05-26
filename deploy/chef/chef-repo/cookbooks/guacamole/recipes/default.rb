@@ -22,7 +22,7 @@
 # THE SOFTWARE.
 
 include_recipe "java"
-include_recipe "tomcat"
+include_recipe "tomcat-all"
 include_recipe "open-hackathon-api::user"
 include_recipe "open-hackathon-api::source"
 
