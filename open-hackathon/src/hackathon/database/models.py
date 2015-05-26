@@ -594,7 +594,7 @@ class AdminHackathonRel(DBBase):
 
     role_type = Column(Integer)  # enum.ADMIN_ROLE_TYPE
     hackathon_id = Column(Integer)
-    status = Column(Integer)
+    status = Column(Integer)     # enum.AdminHackathonRelStatus
     remarks = Column(String(255))
     create_time = Column(TZDateTime, default=get_now())
 

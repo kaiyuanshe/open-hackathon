@@ -45,6 +45,7 @@ from hackathon.azureformation.azureCertManagement import (
     azure_cert_management,
 )
 from hackathon.enum import RGStatus
+from hackathon.admin.admin_mgr import admin_manager
 
 
 @app.teardown_appcontext
@@ -374,6 +375,19 @@ class HackathonRegisterResource(Resource):
         return register_manager.get_hackathon_registers(args['num'])
 
 
+class HackathonAdminListResource(Resource):
+    @hackathon_name_required
+    def get(self):
+        return admin_manager.get_hackathon_admins()
+
+
+class HackathonAdminResource(Resource):
+    @admin_privilege_required
+    def post(self):
+        args = request.get_json()
+        return admin_manager.create_admin(args)
+
+
 """
 health page
 """
@@ -388,6 +402,12 @@ api.add_resource(BulletinResource, "/api/bulletin")
 guacamole config api
 """
 api.add_resource(GuacamoleResource, "/api/guacamoleconfig")
+
+"""
+admin api
+"""
+api.add_resource(HackathonAdminListResource, "/api/hackathon/admin/list")
+api.add_resource(HackathonAdminResource, "/api/hackathon/admin")
 
 """
 user api

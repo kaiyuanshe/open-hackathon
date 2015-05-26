@@ -91,6 +91,7 @@ class User(DBBase):
     password = Column(String(100))  # encrypted password for the default admin/guest users.
     name = Column(String(50))
     nickname = Column(String(50))
+    provider = Column(String(20))
     openid = Column(String(100))
     avatar_url = Column(String(200))
     access_token = Column(String(100))

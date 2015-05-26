@@ -1,7 +1,7 @@
 {% extends "main.html" %} {% block style %}
 <link href="/static/css/bootstrap-editable.css" rel="stylesheet">{% endblock %} {% block body %}
-<div class="col-lg-12">
-    <div class="box">
+<div class="col-lg-12" loading>
+    <div class="box" style="display:none">
         <div class="box-header">
             <h2>
               <i class="fa fa-home"></i>
@@ -9,26 +9,51 @@
           </h2>
         </div>
         <div class="box-content">
-            <div class="row">
-                <div class="col-lg-6">
-                    <a href="/edit/register">添加</a>
-                </div>
+            <div id="adminlisttable">
+                <a data-type="new" href="javascript:;">添加</a>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>名称</th>
+                            <th>邮箱</th>
+                            <th>状态</th>
+                            <th>账户类别</th>
+                            <th>最后登录时间</th>
+                            <th>创建时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="hackathon_admin_list">
+                    </tbody>
+                </table>
             </div>
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>注册名</th>
-                        <th>邮箱</th>
-                        <th>联系电话</th>
-                        <th>联系地址</th>
-                        <th>创建时间</th>
-                        <th>状态</th>
-                        <th>操作</th>
-                    </tr>
-                </thead>
-                <tbody id="registe_list">
-                </tbody>
-            </table>
+            <div>
+                <form class="form-horizontal" id="adminform" style="display:none">
+                    <fieldset>
+                        <legend>
+                            添加管理员信息
+                        </legend>
+                    </fieldset>
+
+                    <div class="form-group has-feedback">
+                        <label class="col-md-3 control-label">邮箱</label>
+                        <div class="col-md-6">
+                            <input type="email" class="form-control" name="admin_email" id="admin_email" placeholder=""
+                                   required
+                                   data-bv-trigger="blur"
+                                   data-bv-notempty-message="管理员邮箱地址">
+                        </div>
+                    </div>
+
+                    <div class="form-group has-feedback">
+                        <div class="col-sm-offset-3 col-sm-6">
+                            <button type="button" class="btn btn btn-default" data-type="cancel"> 取消</button>
+                            <button type="submit" class="btn btn-primary"> 提交</button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
         </div>
     </div>
 </div>
@@ -50,23 +75,22 @@
         </div>
     </div>
 </div>
+
 <script id="hackathon_template" type="text/x-jquery-tmpl">
     <option value=${id}>${name}</option>
 </script>
-<script id="register_list_template" type="text/x-jquery-tmpl">
+
+<script id="hackathon_admin_list_template" type="text/x-jquery-tmpl">
     <tr>
-        <td>
-            ${real_name}
-        </td>
-        <td>${email}</td>
-        <td>${phone}</td>
-        <td>${address}</td>
-        <td>${oh.comm.DateFormat(create_time ,'yyyy-MM-dd HH:mm')}</td>
-        <td>
-            <a href="javascript:void(0);" data-type="select" data-name="status" data-value="${status}" class="editable" data-source='{"0":"未审核","1":"通过","2":"拒绝"}' data-placement="top"></a>
-        </td>
+        <td>${nickname}</td>
+        <td>${email.email}</td>
+        <td>${$item.getOnline(online)}</td>
+        <td>${provider}</td>
+        <td>${moment(last_login_time).format('YYYY-MM-DD HH:mm')}</td>
+        <td>${moment(create_time).format('YYYY-MM-DD HH:mm')}</td>
+
         <td class="col-action">
-            <a class="btn btn-info btn-sm" href="/edit/register?id=${id}">
+            <a class="btn btn-info btn-sm" href="/edit/admin?id=${id}">
                 <i class="fa fa-edit "></i>
             </a>
             <a class="btn btn-danger btn-sm" href="#" data-target="#confirm_modal" data-toggle="modal">
@@ -75,6 +99,8 @@
         </td>
     </tr>
 </script>
-<script type="text/javascript" src="/static/js/bootstrap/bootstrap-editable.js"></script>
-<script type="text/javascript" src="/static/js/views/oh.register.js"></script>
+
+<script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
+<script type="text/javascript" src="/static/js/jquery/moment.min.js"></script>
+<script type="text/javascript" src="/static/js/views/oh.adminmgr.js"></script>
 {% endblock %}
