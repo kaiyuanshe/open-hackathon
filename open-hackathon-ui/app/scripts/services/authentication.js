@@ -49,7 +49,7 @@ angular.module('oh.app')
     function hackathon(callback) {
       var user = this.getUser();
       if (user) {
-        API.user.hackathon.get({header: {hackathon_name: config.name}}, function (data) {
+        API.user.registration.get({header: {hackathon_name: config.name}}, function (data) {
           if (data.error) {
             $location.path('error');
           } else {
@@ -85,7 +85,7 @@ angular.module('oh.app')
     function settings(callback) {
       var user = this.getUser();
       if (user) {
-        API.user.hackathon.get({header: {hackathon_name: config.name}}, function (data) {
+        API.user.registration.get({header: {hackathon_name: config.name}}, function (data) {
           if (data.error) {
             $location.path('error');
           } else {
@@ -121,7 +121,7 @@ angular.module('oh.app')
     function register(callback) {
       var user = this.getUser();
       if (user) {
-        API.user.hackathon.get({header: {hackathon_name: config.name}}, function (data) {
+        API.user.registration.get({header: {hackathon_name: config.name}}, function (data) {
           if (data.error) {
             $location.path('error');
           } else {

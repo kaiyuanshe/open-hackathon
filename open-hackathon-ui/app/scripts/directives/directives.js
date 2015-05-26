@@ -223,7 +223,7 @@ angular.module('oh.directives', [])
         }, function (data) {
           var getStat = function () {
             API.hackathon.stat.get({
-              query: {hid: data.id}
+              header: {hackathon_name: config.name}
             }, function (data) {
               element.find('[oh-online]').text(data.online);
               element.find('[oh-total]').text(data.total);
@@ -331,7 +331,7 @@ angular.module('oh.directives', [])
           }
           var def = $q.defer();
           $timeout(function () {
-            API.register.checkemail.get({query: {hid: attrs.hid, email: modelValue}}, function (data) {
+            API.user.registration.checkemail.get({query: {hid: attrs.hid, email: modelValue}}, function (data) {
               if (data) {
                 def.resolve();
               } else {
