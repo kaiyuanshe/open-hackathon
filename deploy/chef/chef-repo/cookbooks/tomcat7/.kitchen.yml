@@ -1,0 +1,30 @@
+---
+driver:
+  name: vagrant
+
+provisioner:
+  name: chef_solo
+
+
+platforms:
+  - name: centos-7-opscode
+    driver:
+      box: centos-7-opscode
+      box_url: http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_centos-7.0_chef-provisionerless.box
+  - name: fedora-20-opscode
+    driver:
+      box: fedora-20-opscode
+      box_url: http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_fedora-20_chef-provisionerless.box
+
+suites:
+  - name: default
+    run_list:
+      - recipe[tomcat::default]
+    attributes: {
+            java: {
+                jdk_version: 7
+            },
+            tomcat: {
+                catalina_options: "-Dsomevariable=blahblah"
+            }
+    }

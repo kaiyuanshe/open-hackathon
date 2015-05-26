@@ -39,5 +39,8 @@ $(document).ready(function(){
      $('#weibologin').click(function() {
         location.href = CONFIG.weibo.authorize_url;
     });
+     $('#livelogin').click(function() {
+        location.href = CONFIG.live.authorize_url;
+    });
 
 });

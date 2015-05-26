@@ -4,14 +4,14 @@
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
 #
 # The MIT License (MIT)
-#  
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#  
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #  
@@ -43,8 +43,9 @@ api = Api(app)
 app.config['CORS_HEADERS'] = 'Content-Type, token, hackathon_id, hackathon_name'
 cors = CORS(app)
 
-from . import views
+from views import init_routes
 
+init_routes()
 
 ### example of scheduler
 # from scheduler import scheduler

@@ -46,24 +46,26 @@
   },
   "api": {
     "user": {
-      "login":["post","del"],
-      "hackathon":["get"],
-      "experiment":{
-        "":["get","post","del","put"],
-        "list":["get"]
+      "login": ["post","del"],
+      "hackathon": ["get","post"],
+      "experiment": {
+        "": ["get","post","del","put"],
+        "list": ["get"]
+      },
+      "registration": {
+        "":["put","post","get"],
+        "checkemail": ["get"],
+        "list": ["get"]
       }
     },
-    "register":{
-      "list":["get"]
+    "bulletin": {
+      "": ["get", "post"]
     },
-    "bulletin":{
-      "":["get","post"]
-    },
-    "hackathon":{
-      "":["get","post"],
-      "list":["get"],
-      "stat":["get"],
-      "template":["get"]
+    "hackathon": {
+      "": ["get"],
+      "list": ["get"],
+      "stat": ["get"],
+      "template": ["get"]
     }
   },
   "sociallogin": {

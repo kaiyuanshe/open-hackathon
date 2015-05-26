@@ -49,19 +49,8 @@ class TemplateManager(object):
     def __init__(self, db_adapter):
         self.db = db_adapter
 
-
-    def get_template_list(self, hackathon_name):
-        hackathon = hack_manager.get_hackathon_by_name(hackathon_name)
-        if hackathon is None:
-            return {'errercode': 404, 'message': 'hackathon not found'}
-        hack_id = hackathon.id
-        templates = self.db.find_all_objects_by(Template, hackathon_id=hack_id)
-        return map(lambda u: u.dic(), templates)
-
-
     def get_template_by_id(self, id):
         return self.db.find_first_object(Template, Template.id == id)
-
 
     def create_template_validate(self, args):
         if "name" not in args:
@@ -171,7 +160,7 @@ template_manager = TemplateManager(db_adapter)
 
 # template_manager.create_template({
 # "expr_name": "test",
-#     "virtual_environments": [
+# "virtual_environments": [
 #         {}, {}
 #     ]
 # })

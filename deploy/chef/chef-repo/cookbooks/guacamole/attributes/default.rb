@@ -44,6 +44,6 @@ default['guacamole']['guacd-hostname'] = 'localhost'
 default['guacamole']['guacd-port'] = '4822'
 default['guacamole']['lib-directory'] = '/etc/guacamole'
 default['guacamole']['auth-provider'] = 'com.openhackathon.guacamole.OpenHackathonAuthenticationProvider'
-default['guacamole']['auth-request-url'] = '/api/guacamoleconfig'
+default['guacamole']['auth-request-url'] = '/api/user/guacamoleconfig'
 
 
