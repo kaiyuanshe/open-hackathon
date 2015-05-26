@@ -25,6 +25,7 @@ body:after{
   text-transform: uppercase;
 }
 
+.btn-live,
 .btn-github,
 .btn-qq,
 .btn-weibo {
@@ -38,6 +39,7 @@ body:after{
   padding: 10px 0;
   border:0;
 }
+.btn-live:before,
 .btn-github:before,
 .btn-qq:before,
 .btn-weibo:before {
@@ -58,11 +60,27 @@ body:after{
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
-
+.btn-live:hover
 .btn-github:hover,
 .btn-qq:hover,
 .btn-weibo:hover {
     color: white;
+}
+.btn-live {
+    background: #00aced
+}
+
+.btn-live:before{
+ content: "\f17a";
+ background: #0099d4
+}
+
+.btn-live:hover {
+    background: #0099d4
+}
+
+.btn-live:hover:before {
+    background: #0087ba
 }
 
 .btn-github {

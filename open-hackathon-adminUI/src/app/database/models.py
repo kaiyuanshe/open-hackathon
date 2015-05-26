@@ -93,6 +93,7 @@ class User(DBBase):
     nickname = Column(String(50))
     provider = Column(String(20))
     openid = Column(String(100))
+    provider = Column(String(20))
     avatar_url = Column(String(200))
     access_token = Column(String(100))
     online = Column(Integer)  # 0:offline 1:online

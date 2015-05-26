@@ -48,7 +48,6 @@ class TemplateManager(object):
     def __init__(self, db_adapter):
         self.db = db_adapter
 
-
     def get_template_list(self, hackathon_name):
         hackathon = hack_manager.get_hackathon_by_name(hackathon_name)
         if hackathon is None:
@@ -62,7 +61,7 @@ class TemplateManager(object):
         return self.db.find_first_object(Template, Template.id == id)
 
 
-    def validate_args(self, args):
+    def validate_created_args(self, args):
         if "name" not in args:
             return False, bad_request("template name invalid")
 
@@ -71,6 +70,7 @@ class TemplateManager(object):
             return False, bad_request("template aready exist")
 
         return True, "pass"
+
 
     def save_args_to_file(self, args):
         try:
@@ -97,7 +97,7 @@ class TemplateManager(object):
 
     def create_template(self, args):
         # create template step one : args validate
-        status, return_info = self.validate_args(args)
+        status, return_info = self.validate_created_args(args)
         if not status:
             return return_info
 

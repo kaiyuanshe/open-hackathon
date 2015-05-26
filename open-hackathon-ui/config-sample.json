@@ -51,24 +51,21 @@
       "experiment": {
         "": ["get","post","del","put"],
         "list": ["get"]
+      },
+      "registration": {
+        "":["put","post","get"],
+        "checkemail": ["get"],
+        "list": ["get"]
       }
-    },
-    "register": {
-      "":["put","post","get"],
-      "list": ["get"],
-      "checkemail":["get"]
     },
     "bulletin": {
       "": ["get", "post"]
     },
     "hackathon": {
-      "": ["get", "post"],
+      "": ["get"],
       "list": ["get"],
       "stat": ["get"],
       "template": ["get"]
-    },
-    "template":{
-      "list":["get"]
     }
   },
   "sociallogin": {

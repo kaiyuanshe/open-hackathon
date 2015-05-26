@@ -31,7 +31,8 @@ MAINTAINER Microsoft Open Technologies (Shanghai) Co. Ltd.
 ENV CHEF_CLIENT_VER 12.2.1-1
 
 #change apt source list
-COPY sources.list /etc/apt/sources.list
+COPY sources.list /tmp/sources.list
+RUN cat /tmp/sources.list >> /etc/apt/sources.list
 
 # Install basic tools
 RUN apt-get update && \

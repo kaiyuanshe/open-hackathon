@@ -26,7 +26,7 @@ default['openhackathon']['admin']['HOSTNAME'] = 'http://hack-admin-dev.chinaclou
 
 default['openhackathon']['hackathon']['name'] = 'open-xml-sdk'
 
-default['openhackathon']['admin']['login_provider'] ='["github","qq"]'
+default['openhackathon']['admin']['login_provider'] ='["github","qq","live"]'
 default['openhackathon']['admin']['session_minutes'] = '60'
 default['openhackathon']['admin']['token_expiration_minutes'] = '60*24'
 

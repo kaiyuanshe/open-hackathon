@@ -58,13 +58,13 @@
             $('.editable').each(function(i,o){
                 var input = $(o);
                 if(input.is('[required]')){
-                    input .editable({
+                    input.editable({
                         validate: function(value) {
                            if($.trim(value) == '') return input.data('required');
                         }
                     });
                 }else{
-                    input .editable();
+                    input.editable();
                 }
             })
         }
