@@ -27,7 +27,7 @@
     function pageLoad(){
         var list = $('#registe_list');
         var currentHackathon = oh.comm.getCurrentHackathon();
-        oh.api.admin.register.list.get({
+        oh.api.admin.registration.list.get({
             header: {
                 hackathon_name: currentHackathon.name
             }
@@ -37,7 +37,7 @@
                 url: function(params) {
                     var id = $(this).parents('tr').data('tmplItem').data.id;
                     var d = new $.Deferred;
-                    oh.api.admin.register.put({
+                    oh.api.admin.registration.put({
                         body: {
                             id: id,
                             status: params
