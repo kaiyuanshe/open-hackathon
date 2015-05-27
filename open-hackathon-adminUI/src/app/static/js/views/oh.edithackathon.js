@@ -107,7 +107,7 @@
         $.each(images,function(i,imageUrl){
             var url = new URL(imageUrl);
             files.push({
-                deleteUrl: apiconfig.proxy+'/api/file?key='+url.pathname.replace('/images/',''),
+                deleteUrl: apiconfig.proxy+'/api/admin/file?key='+url.pathname.replace('/images/',''),
                 name:url.pathname.split('/').pop(),
                 thumbnailUrl:imageUrl,
                 url:imageUrl
@@ -170,7 +170,7 @@
         });
 
         $('#editHackathonForm').fileupload({
-            url: apiconfig.proxy+'/api/file',
+            url: apiconfig.proxy+'/api/admin/file',
             autoUpload:true,
             prependFiles:true,
             acceptFileTypes:  /(\.|\/)(gif|jpe?g|png)$/i,

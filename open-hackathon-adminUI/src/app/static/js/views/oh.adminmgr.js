@@ -37,9 +37,8 @@
         }
     }
 
-
-     //get form-data for submit
-     function getFormData(){
+    //get form-data for submit
+    function getFormData(){
         var formData = {
             id:$('#adminform').data('id'),
             email:$.trim($('#admin_email').val()),
@@ -47,8 +46,7 @@
             remarks:$.trim($('#remarks').val())
          }
         return formData;
-     }
-
+    }
 
     //set form-data for edit
     function setFormData(data){
@@ -57,7 +55,6 @@
         $('#remarks').val(data.remarks);
         $('#adminform').data({id:data.id})
     }
-
 
     // initial table to show admin list
     function pageLoad(){
@@ -68,7 +65,6 @@
                 hackathon_name: currentHackathon.name
             }
         }, function(data) {
-
             list.empty().append($('#hackathon_admin_list_template').tmpl(data,{
                 getOnline:function(online){
                     if(online == 1){
@@ -90,7 +86,6 @@
         });
     }
 
-
     function getPriEmail(emails){
         var els = '';
         $.each(emails,function(i,email){
@@ -101,7 +96,6 @@
         });
         return els
     }
-
 
     // call api to add a admin
     function createAdmin(itemData){
@@ -119,7 +113,6 @@
         });
     }
 
-
     // call api to update a admin
     function updateAdmin(itemData){
         var currentHackathon = oh.comm.getCurrentHackathon();
@@ -135,7 +128,6 @@
             }
         });
     }
-
 
     // call api to delete a admin
     function deleteAdmin(id){
@@ -153,7 +145,6 @@
         });
     }
 
-
     // initial submit button events
     function forminit(){
         var adminform = $('#adminform');
@@ -166,7 +157,6 @@
             })
         });
     }
-
 
     function init(){
         var editLi = undefined;
@@ -197,10 +187,6 @@
             });
             confirmModal.modal('hide');
         });
-
-
-
-
     }
 
     $(function() {

@@ -69,7 +69,7 @@ def admin_privilege_required(func):
         if not hack_manager.validate_hackathon_name():
             return bad_request("hackathon name invalid")
 
-        if not hack_manager.validate_admin_privilege():
+        if not hack_manager.validate_admin_privilege_http():
             return access_denied("access denied")
         return func(*args, **kwargs)
 

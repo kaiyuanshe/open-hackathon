@@ -26,28 +26,17 @@ import sys
 
 sys.path.append("..")
 
+from hackathon import api
 from flask_restful import Resource, reqparse
-from hackathon import api, app
-from hackathon.health import report_health
-from flask_restful import Resource, reqparse
-from hackathon.expr import expr_manager
-from hackathon.expr.expr_mgr import open_check_expr, recycle_expr_scheduler
-from hackathon.database.models import Announcement, Template
-from hackathon.user.login import *
 from flask import g, request
-from hackathon.database import db_adapter, db_session
 from hackathon.decorators import token_required, hackathon_name_required, admin_privilege_required
-from hackathon.user.user_functions import get_user_experiment
-from hackathon.remote.guacamole import GuacamoleInfo
 from hackathon.hack import hack_manager
-import time
 from hackathon.registration.register_mgr import register_manager
 from hackathon.template.template_mgr import template_manager
 from hackathon.hackathon_response import *
 from hackathon.azureformation.azureCertManagement import (
     azure_cert_management,
 )
-from hackathon.enum import RGStatus
 from hackathon.admin.admin_mgr import admin_manager
 
 
@@ -93,10 +82,10 @@ class AdminRegisterListResource(Resource):
 class AdminRegisterResource(Resource):
     def get(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('rid', type=int, location='args', required=True)  # register_id
+        parse.add_argument('id', type=int, location='args', required=True)  # register_id
         args = parse.parse_args()
-        rel = register_manager.get_registration_by_id(args["rid"])
-        return rel.dic() if rel is None else not_found("not found")
+        rel = register_manager.get_registration_by_id(args["id"])
+        return rel.dic() if rel is not None else not_found("not found")
 
     @admin_privilege_required
     def post(self):
@@ -188,6 +177,7 @@ class HackathonFileResource(Resource):
     def delete(self):
         # TODO call azure blobservice api to delete file
         return True
+
 
 class HackathonAdminListResource(Resource):
     @hackathon_name_required
