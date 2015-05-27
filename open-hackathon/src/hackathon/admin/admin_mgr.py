@@ -40,7 +40,7 @@ class AdminManager(object):
     def get_hackathon_admin_with_email(self):
         # only returns the primary email
         return self.db.session().query(AdminHackathonRel).join(User) \
-            .filter(AdminHackathonRel.hackathon_id==g.hackathon.id) \
+            .filter(AdminHackathonRel.hackathon_id == g.hackathon.id) \
             .all()
 
     def get_hackathon_admins(self):
@@ -48,7 +48,8 @@ class AdminManager(object):
             dic = ahl.dic()
             dic["user_info"] = user_manager.user_display_info(ahl.user)
             return dic
-        x= map(lambda ahl: to_dict(ahl), self.get_hackathon_admin_with_email())
+
+        x = map(lambda ahl: to_dict(ahl), self.get_hackathon_admin_with_email())
         return x
 
     def validate_created_args(self, args):
@@ -92,13 +93,23 @@ class AdminManager(object):
             return internal_server_error("create admin failed")
 
 
-    def update_admin(self, args):
-        ahl = self.db.find_first_object(AdminHackathonRel, AdminHackathonRel.id==args['id'])
+    def parse_updated_args(self, args):
+        ahl = self.db.find_first_object(AdminHackathonRel, AdminHackathonRel.id == args['id'])
+        if ahl is None:
+            return False, bad_request("invalid id")
         update_items = dict(dict(args).viewitems() - ahl.dic().viewitems())
         update_items.pop('user_id', 'pass')
         update_items.pop('hackathon_id', 'pass')
         update_items.pop('email', 'pass')
         update_items['update_time'] = get_now()
+        return True, update_items
+
+
+    def update_admin(self, args):
+        status, update_items = self.parse_updated_args(args)
+        if not status: return update_items
+
+        ahl = self.db.find_first_object(AdminHackathonRel, AdminHackathonRel.id == args['id'])
         try:
             self.db.update_object(ahl, **update_items)
             return ok('update ahl success')
@@ -107,18 +118,24 @@ class AdminManager(object):
             return internal_server_error(e)
 
 
-    def delete_admin(self, ahl_id):
-        ahl = self.db.find_first_object(AdminHackathonRel, AdminHackathonRel.id==ahl_id)
-
+    def validate_deleted_args(self, ahl_id):
+        ahl = self.db.find_first_object(AdminHackathonRel, AdminHackathonRel.id == ahl_id)
         if ahl is None:
-            return ok()
+            return False, ok()
 
         hackathon = self.db.find_first_object(Hackathon, Hackathon.id == ahl.hackathon_id)
         if hackathon.creator_id == ahl.user_id:
-            return bad_request("hackathon creatore can not be deleted")
+            return False, bad_request("hackathon creator can not be deleted")
 
-        try :
-            self.db.delete_object(ahl)
+        return True, 'pass'
+
+
+    def delete_admin(self, ahl_id):
+        status, info = self.validate_deleted_args(ahl_id)
+        if not status: return info
+
+        try:
+            self.db.delete_all_objects(AdminHackathonRel, AdminHackathonRel.id == ahl_id)
             return ok()
         except Exception as e:
             log.error(e)
