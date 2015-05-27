@@ -51,7 +51,7 @@
 
     function pageload(){
         var currentHackathon = oh.comm.getCurrentHackathon();
-        oh.api.hackathon.get({
+        oh.api.admin.hackathon.get({
             header:{hackathon_name:currentHackathon.name}
         },function(data){
             if(!data.error){
@@ -63,6 +63,7 @@
 
     function setFormData(data){
         data.basic_info = data.basic_info || {};
+        $('#hackathon_switch').val(data.status);
         $('#display_name').val(data.display_name);
         $('#location').val(data.basic_info.location);
         $('#max_enrollment').val(data.basic_info.max_enrollment);
@@ -154,7 +155,7 @@
         $('#editHackathonForm').bootstrapValidator()
         .on('success.form.bv', function(e) {
             e.preventDefault();
-            oh.api.hackathon.put({
+            oh.api.admin.hackathon.put({
                 body:getHackthonData(),
                 header:{
                     hackathon_name:hackathonName
@@ -269,6 +270,24 @@
 
         $('#markdownEdit').markdown({
             language:'zh'
+        })
+
+        $('#hackathon_switch').change(function(e){
+            var status = $(this).val();
+            oh.api.admin.hackathon.put({
+                body:{
+                    id:hackathonID,
+                    name:hackathonName,
+                    status:status
+                },
+                header:{
+                    hackathon_name:hackathonName
+                }
+            },function(data){
+                if(data.error){
+                    console.log(data);
+                }
+            });
         })
     }
 
