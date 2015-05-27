@@ -127,12 +127,16 @@ Config = {
                 "hackathon": {
                     "": ["get", "post", "put"],
                     "checkname": ["get"],
-                    "list": ["get"]
+                    "list": ["get"],
+                    "template": ["get", "post", "delete", "put"],
                 },
                 "registration": {
                     "": ["get", "post", "delete", "put"],
                     "list": ["get"]
-                }
+                },
+                "azure": {
+                    "": ["get", "post", "delete", "put"],
+                },
             }
         }
     }

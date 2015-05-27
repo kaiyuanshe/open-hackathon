@@ -29,30 +29,44 @@
                             <legend>
                                 创建新的模板
                             </legend>
+
                             <div class="form-group has-feedback">
-                                <label class="col-md-3 control-label">名称</label>
+                                <label class="col-md-3 control-label">模板名称</label>
                                 <div class="col-md-6 register">
-                                    <input type="text" class="form-control" name="subscription_id" id="subscription_id"
+                                    <input type="text" class="form-control" name="name" id="name"
                                            data-bv-trigger="blur"
                                            required
                                            data-bv-notempty-message="名称是必需的，不能为空"
                                             >
                                 </div>
                             </div>
+
                             <div class="form-group has-feedback">
-                                <label class="col-md-3 control-label">服务URI</label>
+                                <label class="col-md-3 control-label">描述</label>
                                 <div class="col-md-6 register">
-                                    <select class="form-control" name="management_host" id="management_host">
-                                        <option value="management.core.chinacloudapi.cn">management.core.chinacloudapi.cn</option>
-                                        <option value="management.core.windows.net">management.core.windows.net</option>
-                                    </select>
+                                    <input type="text" class="form-control" name="description" id="description">
                                 </div>
                             </div>
+
+                            <div data-type="temp-unit-list">
+                            </div>
+
+                            <legend></legend>
+
+                            <div class="form-group has-feedback">
+                                <div class="col-sm-offset-3 col-sm-6 text-center">
+                                    <button type="button" class="btn btn-default" id="btn_add_template_unit"> 添加模板单元</button>
+                                </div>
+                            </div>
+
+                            <legend></legend>
+
                             <div class="form-group has-feedback">
                                 <div class="col-sm-offset-3 col-sm-6 text-center">
                                     <button type="submit" class="btn btn-primary">提交</button>
                                 </div>
                             </div>
+
                         </fieldset>
                 </form>
             </div>
@@ -81,15 +95,128 @@
 <script id="template_item" type="text/x-jquery-tmpl">
     <tr>
         <td>${$item.getIndex()}</td>
-        <td>${subscription_id}</td>
-        <td>${management_host}</td>
-        <td><a href="${cert_url}">下载</a></td>
+        <td>${name}</td>
+        <td><a href="${url}">下载</a></td>
         <td class="col-action">
             <a class="btn btn-danger btn-sm" href="#" data-target="#confirm_modal" data-toggle="modal">
                 <i class="fa fa-trash-o "></i>
             </a>
         </td>
     </tr>
+</script>
+<script id="template_unit_item" type="text/x-jquery-tmpl">
+    <legend></legend>
+    <div data-type="template-unit-group">
+        <div class="form-group has-feedback">
+            <label class="col-md-3 control-label">模板单元名称</label>
+            <div class="col-md-6 register">
+                <input type="text" class="form-control" name="name"
+                       data-bv-trigger="blur"
+                       required
+                       data-bv-notempty-message="名称是必需的，不能为空"
+                        >
+            </div>
+        </div>
+        <div class="form-group has-feedback">
+            <label class="col-md-3 control-label">镜像</label>
+            <div class="col-md-6 register">
+                <input type="text" class="form-control" name="image">
+            </div>
+        </div>
+        <div class="form-group has-feedback">
+            <label class="col-md-3 control-label">环境变量</label>
+            <div class="col-md-6 register">
+                <input type="text" class="form-control" name="env">
+            </div>
+        </div>
+        <div class="form-group has-feedback">
+            <label class="col-md-3 control-label">命令行</label>
+            <div class="col-md-6 register">
+                <input type="text" class="form-control" name="cmd">
+            </div>
+        </div>
+        <div class="form-group has-feedback">
+            <label class="col-md-3 control-label">远程连接名称</label>
+            <div class="col-md-6 register">
+                <input type="text" class="form-control" name="remote-name">
+            </div>
+        </div>
+        <div class="form-group has-feedback">
+            <label class="col-md-3 control-label">提供商</label>
+            <div class="col-md-6 register">
+                <input type="text" class="form-control" name="remote-provider">
+            </div>
+        </div>
+        <div class="form-group has-feedback">
+            <label class="col-md-3 control-label">远程连接协议</label>
+            <div class="col-md-6 register">
+                <input type="text" class="form-control" name="remote-protocol">
+            </div>
+        </div>
+        <div class="form-group has-feedback">
+            <label class="col-md-3 control-label">远程连接端口</label>
+            <div class="col-md-6 register">
+                <input type="text" class="form-control" name="remote-port">
+            </div>
+        </div>
+        <div class="form-group has-feedback">
+            <label class="col-md-3 control-label">用户名</label>
+            <div class="col-md-6 register">
+                <input type="text" class="form-control" name="remote-username">
+            </div>
+        </div>
+        <div class="form-group has-feedback">
+            <label class="col-md-3 control-label">密码</label>
+            <div class="col-md-6 register">
+                <input type="text" class="form-control" name="remote-password">
+            </div>
+        </div>
+        <div data-type="port-list">
+        </div>
+        <div class="form-group has-feedback">
+            <div class="col-sm-offset-3 col-sm-6 text-center">
+                <button type="button" class="btn btn-default" data-type="btn_add_port"> 添加端口</button>
+            </div>
+        </div>
+    </div>
+</script>
+<script id="port_item" type="text/x-jquery-tmpl">
+    <div data-type="port-group">
+        <div class="form-group has-feedback">
+            <label class="col-md-3 control-label">端口名称</label>
+            <div class="col-md-6 register">
+                <input type="text" class="form-control" name="name"
+                       data-bv-trigger="blur"
+                       required
+                       data-bv-notempty-message="名称是必需的，不能为空"
+                        >
+            </div>
+        </div>
+        <div class="form-group has-feedback">
+            <label class="col-md-3 control-label">端口号</label>
+            <div class="col-md-6 register">
+                <input type="text" class="form-control" name="port">
+            </div>
+        </div>
+        <div class="form-group has-feedback">
+            <label class="col-md-3 control-label">是否公开</label>
+            <div class="col-md-6 register">
+                <input type="text" class="form-control" name="public">
+            </div>
+        </div>
+        <div class="form-group has-feedback">
+            <label class="col-md-3 control-label">端口协议</label>
+            <div class="col-md-6 register">
+                <input type="text" class="form-control" name="protocol">
+            </div>
+        </div>
+        <div class="form-group has-feedback">
+            <label class="col-md-3 control-label">URL</label>
+            <div class="col-md-6 register">
+                <input type="text" class="form-control" name="url">
+            </div>
+        </div>
+    </div>
 </script>
 <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
 <script type="text/javascript" src="/static/js/jquery/jquery.tmpl.min.js"></script>

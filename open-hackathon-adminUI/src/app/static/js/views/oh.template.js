@@ -27,7 +27,7 @@
     function bindTemplateList(){
         var currentHackathon = oh.comm.getCurrentHackathon();
         var list = $('#templatelist');
-        oh.api.admin.template.get({
+        oh.api.admin.hackathon.template.get({
             header:{hackathon_name:currentHackathon.name}
         },
         function(data){
@@ -36,17 +36,76 @@
         });
     }
 
+    function createTemplateUnit(data){
+        var templist= $('[data-type="temp-unit-list"]');
+        var template_unit = $($('#template_unit_item').html());
+        if(data){
+            // todo
+        }
+        return template_unit.appendTo(templist);
+    }
+
+    function createPort(element, data){
+        var portlist= $(element).parents('[data-type="template-unit-group"]').find('[data-type="port-list"]');
+        var port = $($('#port_item').html());
+        if(data){
+            // todo
+        }
+        return port.appendTo(portlist);
+    }
+
+    function getFormData(){
+        var data = [];
+        $('[data-type="template-unit-group"]').each(function(i,group){
+            var $group = $(group);
+            var remote = {
+                provider: $group.find('[name="remote-provider"]').val(),
+                protocol: $group.find('[name="remote-protocol"]').val(),
+                username: $group.find('[name="remote-username"]').val(),
+                password: $group.find('[name="remote-password"]').val(),
+                port: $group.find('[name="remote-port"]').val()
+            }
+            var ports = []
+            ports.push({
+                name: $group.find('[name="remote-name"]').val(),
+                port: remote['port'],
+                public: true,
+                protocol: 'tcp'
+            })
+            $('[data-type="port-group"]').each(function(i,portgroup){
+                var $portgroup = $(portgroup);
+                ports.push({
+                    name: $portgroup.find('[name="name"]').val(),
+                    port: $portgroup.find('[name="port"]').val(),
+                    public: $portgroup.find('[name="public"]').val(),
+                    protocol: $portgroup.find('[name="protocol"]').val(),
+                    url: $portgroup.find('[name="url"]').val()
+                })
+            })
+            data.push({
+                name: $group.find('[name="name"]').val(),
+                port: ports,
+                remote: remote,
+                Image: $group.find('[name="image"]').val(),
+                Env: $group.find('[name="env"]').val().split(";"),
+                Cmd: $group.find('[name="cmd"]').val().split(" ")
+            })
+        })
+        return {
+            expr_name: $('#name').val(),
+            description: $('#description').val(),
+            virtual_environments: data
+        };
+    }
+
     function init(){
         var currentHackathon = oh.comm.getCurrentHackathon();
-        $('#templateform')
-            .bootstrapValidator()
+        var templateform = $('#templateform');
+        templateform.bootstrapValidator()
             .on('success.form.bv', function(e) {
                 e.preventDefault();
-                oh.api.admin.template.post({
-                    body:{
-                        subscription_id: $('#subscription_id').val(),
-                        management_host: $('#management_host').val()
-                    },
+                oh.api.admin.hackathon.template.post({
+                    body: getFormData(),
                     query:{},
                     header:{hackathon_name:currentHackathon.name}
                 }, function(data){
@@ -56,14 +115,19 @@
                         bindTemplateList();
                     }
                 })
-            })
+            });
+
+        templateform.on('click','[data-type="btn_add_port"]',function(e){
+            createPort(this);
+         });
+
 
         var confirm_modal = $('#confirm_modal').on('show.bs.modal',function(e){
             var item = $(e.relatedTarget).parents('tr').data('tmplItem').data;
             confirm_modal.data({item:item});
         }).on('click','[data-type="ok"]',function(e){
             var item = confirm_modal.data('item');
-             oh.api.admin.template.delete({
+             oh.api.admin.hackathon.template.delete({
                 body:{certificate_id:item.id},
                 header:{hackathon_name:currentHackathon.name}
              },
@@ -76,6 +140,11 @@
                 }
              })
         })
+
+        var add_template_unit = $('#btn_add_template_unit').click(function(e){
+            createTemplateUnit();
+        })
+
     }
 
     $(function() {
