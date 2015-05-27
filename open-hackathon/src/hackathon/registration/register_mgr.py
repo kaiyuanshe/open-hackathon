@@ -31,8 +31,9 @@ from hackathon.database.models import UserHackathonRel, Experiment
 from hackathon.database import db_adapter
 from hackathon.hackathon_response import *
 from hackathon.functions import get_now
-from hackathon.enum import EStatus, RGStatus, ReservedUser
 from hackathon.hack import hack_manager
+from hackathon.enum import EStatus, RGStatus, ReservedUser
+from flask import g
 
 
 class RegisterManger(object):
@@ -74,7 +75,6 @@ class RegisterManger(object):
         except Exception as e:
             log.error(e)
             return internal_server_error("fail to create or update register")
-
 
     def update_registration(self, args):
         log.debug("update_registration: %r" % args)
@@ -151,6 +151,13 @@ class RegisterManger(object):
             return reg.status == RGStatus.AUTO_PASSED or reg.status == RGStatus.AUDIT_PASSED
 
         return False
+
+    def get_hackathon_registers(self, num=5):
+        registers = self.db.find_all_objects_order_by(UserHackathonRel,
+                                                      num,  # limit num
+                                                      UserHackathonRel.create_time.desc(),
+                                                      hackathon_id=g.hackathon.id)
+        return map(lambda x: x.dic(), registers)
 
 
 register_manager = RegisterManger(db_adapter)

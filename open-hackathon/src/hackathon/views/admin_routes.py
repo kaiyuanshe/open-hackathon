@@ -37,6 +37,7 @@ from hackathon.hackathon_response import *
 from hackathon.azureformation.azureCertManagement import (
     azure_cert_management,
 )
+from hackathon.admin.admin_mgr import admin_manager
 
 
 class AdminHackathonResource(Resource):
@@ -178,6 +179,31 @@ class HackathonFileResource(Resource):
         return True
 
 
+class HackathonAdminListResource(Resource):
+    @hackathon_name_required
+    def get(self):
+        return admin_manager.get_hackathon_admins()
+
+
+class HackathonAdminResource(Resource):
+    @admin_privilege_required
+    def post(self):
+        args = request.get_json()
+        return admin_manager.create_admin(args)
+
+    @admin_privilege_required
+    def put(self):
+        args = request.get_json()
+        return admin_manager.update_admin(args)
+
+    @admin_privilege_required
+    def delete(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('id', type=int, location='args', required=True)
+        args = parse.parse_args()
+        return admin_manager.delete_admin(args['id'])
+
+
 def register_admin_routes():
     """
     register API routes for admin site
@@ -200,4 +226,8 @@ def register_admin_routes():
 
     # file upload
     api.add_resource(HackathonFileResource, "/api/admin/file")
+
+    # hackathon administrators
+    api.add_resource(HackathonAdminListResource, "/api/admin/hackathon/administrator/list")
+    api.add_resource(HackathonAdminResource, "/api/admin/hackathon/administrator")
 
