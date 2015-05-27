@@ -127,18 +127,14 @@ Config = {
                 "hackathon": {
                     "": ["get", "post", "put"],
                     "checkname": ["get"],
-                    "list": ["get"]
+                    "list": ["get"],
+                    "administrator":{
+                        "": ["get", "post", "delete"],
+                        "list": ["get"]
+                    }
                 },
                 "registration": {
                     "": ["get", "post", "delete", "put"],
-                    "list": ["get"]
-                }
-            },
-            "hackathon": {
-                "": ["get", "post", "put"],
-                "checkname": ["get"],
-                "admin": {
-                    "": ["get", "post", "delete"],
                     "list": ["get"]
                 }
             }

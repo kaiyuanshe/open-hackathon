@@ -39,7 +39,9 @@
 
      function getFormData(){
         var formData = {
-            email:$.trim($('#admin_email').val())
+            email:$.trim($('#admin_email').val()),
+            role_type:$.trim($('#role_type').val()),
+            remarks:$.trim($('#remarks').val())
          }
         return formData;
      }
@@ -49,18 +51,26 @@
     function pageLoad(){
         var list = $('#hackathon_admin_list');
         var currentHackathon = oh.comm.getCurrentHackathon();
-        oh.api.hackathon.admin.list.get({
+        oh.api.admin.hackathon.administrator.list.get({
             header: {
                 hackathon_name: currentHackathon.name
             }
         }, function(data) {
 
-            list.empty().append($('#hackathon_admin_list_template').tmpl(data,{getOnline:function(online){
-                if(online == 1){
-                    return '在线'
+            list.empty().append($('#hackathon_admin_list_template').tmpl(data,{
+                getOnline:function(online){
+                    if(online == 1){
+                        return '在线'
+                    }
+                    return '下线';
+                },
+                getRole:function(role_type){
+                    if(role_type == 2){
+                        return '裁判'
+                    }
+                    return '管理员';
                 }
-                return '下线';
-            }}));
+            }));
             oh.comm.removeLoading();
         });
     }
@@ -68,7 +78,7 @@
     // call api to add a admin
     function createAdmin(itemData){
         var currentHackathon = oh.comm.getCurrentHackathon();
-        oh.api.hackathon.admin.post({
+        return oh.api.admin.hackathon.administrator.post({
             body: itemData,
             header: {
                 hackathon_name: currentHackathon.name
@@ -89,7 +99,7 @@
             .on('success.form.bv', function(e) {
                 e.preventDefault();
                 var itemData = getFormData();
-                createAdmin(basic_info).then(function(){
+                createAdmin(itemData).then(function(){
                     pageLoad()
                     toggleTable()
                 })

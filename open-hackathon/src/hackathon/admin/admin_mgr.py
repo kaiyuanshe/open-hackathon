@@ -62,7 +62,7 @@ class AdminManager(object):
 
         user_email = self.db.find_first_object(UserEmail, UserEmail.email == args['email'])
         if user_email is None:
-            return False, not_found("email does not exist")
+            return False, not_found("email does not exist in DB")
 
         uid = user_email.user.id
         hid = g.hackathon.id
@@ -84,25 +84,44 @@ class AdminManager(object):
 
         try:
             user_email = self.db.find_first_object(UserEmail, UserEmail.email == args['email'])
-
             ahl = AdminHackathonRel(user_id=user_email.user.id,
                                     role_type=args['role_type'],
                                     hackathon_id=g.hackathon.id,
                                     status=1,
                                     remarks=args['remarks'],
                                     create_time=get_now())
-            self.db.add_object_kwargs(AdminHackathonRel, ahl)
+            self.db.add_object(ahl)
             return ok()
         except Exception as e:
             log.error(e)
             return internal_server_error("create admin failed")
 
 
-    def update_admin(self):
-        return
+    def update_admin(self, args):
+        ahl = self.db.find_first_object(AdminHackathonRel, AdminHackathonRel.id==args['id'])
+        update_items = dict(dict(args).viewitems() - ahl.dic().viewitems())
+        update_items.pop('user_id', 'pass')
+        update_items.pop('hackathon_id', 'pass')
+        update_items.pop('email', 'pass')
+        update_items['update_time'] = get_now()
+        try:
+            self.db.update_object(ahl, **update_items)
+            return ok('update ahl success')
+        except Exception as e:
+            log.error(e)
+            return internal_server_error(e)
 
-    def delete_admin(self):
-        return
+
+    def delete_admin(self, ahl_id):
+        ahl = self.db.find_first_object(AdminHackathonRel, AdminHackathonRel.id==ahl_id)
+        if ahl is None:
+            return ok()
+        try :
+            self.db.delete_object(ahl)
+            return ok()
+        except Exception as e:
+            log.error(e)
+            return internal_server_error(e)
 
 
 admin_manager = AdminManager(db_adapter)

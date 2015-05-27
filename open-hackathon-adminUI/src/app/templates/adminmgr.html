@@ -16,6 +16,7 @@
                         <tr>
                             <th>名称</th>
                             <th>邮箱</th>
+                            <th>角色类型</th>
                             <th>状态</th>
                             <th>账户类别</th>
                             <th>最后登录时间</th>
@@ -41,9 +42,28 @@
                             <input type="email" class="form-control" name="admin_email" id="admin_email" placeholder=""
                                    required
                                    data-bv-trigger="blur"
-                                   data-bv-notempty-message="管理员邮箱地址">
+                                   data-bv-notempty-message="管理员邮箱地址不能为空">
                         </div>
                     </div>
+
+                    <div class="form-group has-feedback">
+                        <label class="col-md-3 control-label">角色类型</label>
+                        <div class="col-md-6">
+                            <select class="form-control" name="role_type" id="role_type">
+                                <option value="1" selected="selected">管理员</option>
+                                <option value="2">裁判</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group has-feedback">
+                        <label class="col-md-3 control-label">备注</label>
+                        <div class="col-md-6">
+                            <textarea rows="4" class="form-control" name="remarks" id="remarks" placeholder=""></textarea>
+                        </div>
+                    </div>
+
+
 
                     <div class="form-group has-feedback">
                         <div class="col-sm-offset-3 col-sm-6">
@@ -84,6 +104,7 @@
     <tr>
         <td>${nickname}</td>
         <td>${email.email}</td>
+        <td>${$item.getRole(role_type)}</td>
         <td>${$item.getOnline(online)}</td>
         <td>${provider}</td>
         <td>${moment(last_login_time).format('YYYY-MM-DD HH:mm')}</td>
