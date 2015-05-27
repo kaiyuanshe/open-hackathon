@@ -24,11 +24,14 @@
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
 
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text, TypeDecorator
 from sqlalchemy.orm import backref, relation
 from . import Base, db_adapter
 from datetime import datetime
+from hackathon.functions import get_now
 import json
+from pytz import utc
+from dateutil import parser
 
 
 def relationship(*arg, **kw):
@@ -65,6 +68,31 @@ def to_json(inst, cls):
     return json.dumps(to_dic(inst, cls))
 
 
+class TZDateTime(TypeDecorator):
+    """
+    Coerces a tz-aware datetime object into a naive utc datetime object to be
+    stored in the database. If already naive, will keep it.
+    On return of the data will restore it as an aware object by assuming it
+    is UTC.
+    Use this instead of the standard :class:`sqlalchemy.types.DateTime`.
+    """
+    impl = DateTime
+
+    def process_bind_param(self, value, dialect):
+        if value is not None:
+            if isinstance(value, basestring) or isinstance(value, str):
+                value = parser.parse(value)
+            if value.tzinfo is not None:
+                value = value.astimezone(utc)
+        return value
+
+    def process_result_value(self, value, dialect):
+        if value is not None:
+            if value.tzinfo is None:
+                value = utc.localize(value)
+        return value
+
+
 class DBBase(Base):
     """
     DB model base class, providing basic functions
@@ -97,8 +125,8 @@ class User(DBBase):
     avatar_url = Column(String(200))
     access_token = Column(String(100))
     online = Column(Integer)  # 0:offline 1:online
-    create_time = Column(DateTime, default=datetime.utcnow())
-    last_login_time = Column(DateTime, default=datetime.utcnow())
+    create_time = Column(TZDateTime, default=get_now())
+    last_login_time = Column(TZDateTime, default=get_now())
 
     def get_user_id(self):
         return self.id
@@ -127,8 +155,8 @@ class UserEmail(DBBase):
     email = Column(String(120))
     primary_email = Column(Integer)  # 0:NOT Primary Email 1:Primary Email
     verified = Column(Integer)  # 0 for not verified, 1 for verified
-    create_time = Column(DateTime, default=datetime.utcnow())
-    update_time = Column(DateTime)
+    create_time = Column(TZDateTime, default=get_now())
+    update_time = Column(TZDateTime)
 
     user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
     user = relationship('User', backref=backref('emails', lazy='dynamic'))
@@ -146,8 +174,8 @@ class UserToken(DBBase):
     user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
     user = relationship('User', backref=backref('tokens', lazy='dynamic'))
 
-    issue_date = Column(DateTime, default=datetime.utcnow())
-    expire_date = Column(DateTime, nullable=False)
+    issue_date = Column(TZDateTime, default=get_now())
+    expire_date = Column(TZDateTime, nullable=False)
 
     def __init__(self, **kwargs):
         super(UserToken, self).__init__(**kwargs)
@@ -163,8 +191,8 @@ class AdminHackathonRel(DBBase):
     hackathon_id = Column(Integer)
     status = Column(Integer)
     remarks = Column(String(255))
-    create_time = Column(DateTime, default=datetime.utcnow())
-    update_time = Column(DateTime)
+    create_time = Column(TZDateTime, default=get_now())
+    update_time = Column(TZDateTime)
 
     def __init__(self, **kwargs):
         super(AdminHackathonRel, self).__init__(**kwargs)
