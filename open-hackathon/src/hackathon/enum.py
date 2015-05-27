@@ -98,6 +98,9 @@ class RecycleStatus:
     Enabled = 1
     Disabled = 0
 
+class AdminHackathonRelStatus:
+    ACTIVED = 1
+    DISABLED = 0
 
 # ------------------------------ Enums are introduced by azure formation ------------------------------
 

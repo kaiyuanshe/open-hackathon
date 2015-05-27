@@ -31,8 +31,8 @@ HOSTNAME = "http://open-hackathon-dev.chinacloudapp.cn"  # host name of the UI s
 QQ_OAUTH_STATE = "openhackathon"  # todo state should be constant. Actually it should be unguessable to prevent CSFA
 HACKATHON_API_ENDPOINT = "http://open-hackathon-dev.chinacloudapp.cn:15000"
 
-GITHUB_CLIENT_ID = "b27959b7639e8b39f873"
-GITHUB_CLIENT_SECRET = "a727029295d9e871a1e55dda75c8fb6bf1ed0d4c"
+GITHUB_CLIENT_ID = "b8e407813350f26bf537"
+GITHUB_CLIENT_SECRET = "daa78ae27e13c9f5b4a884bd774cadf2f75a199f"
 
 QQ_CLIENT_ID = "101200890"
 QQ_CLIENT_SECRET = "88ad67bd4521c4cc47136854781cb9b5"
@@ -127,7 +127,11 @@ Config = {
                 "hackathon": {
                     "": ["get", "post", "put"],
                     "checkname": ["get"],
-                    "list": ["get"]
+                    "list": ["get"],
+                    "administrator":{
+                        "": ["put", "post", "delete"],
+                        "list": ["get"]
+                    }
                 },
                 "registration": {
                     "": ["get", "post", "delete", "put"],

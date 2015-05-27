@@ -113,11 +113,11 @@
         getCurrentHackathon: function() {
             var data = $.cookie(CURRENT_HACKATHON_COOKIE_NAME) || '{}';
             var token = $.cookie('token');
-            var json= JSON.parse(data);
+            var json = JSON.parse(data);
             if(json[token]){
-                return json[token]
+                return json[token];
             }
-            return {name:'',id:0};
+            return  {name:'',id:0};
         },
         createLoading:function(elemt){
             $(elemt).children().hide();

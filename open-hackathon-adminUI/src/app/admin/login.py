@@ -100,7 +100,7 @@ class GithubLogin(LoginBase):
         code = args.get('code')
 
         # get access_token
-        token_resp = get_remote(get_config('login.github.access_token_url') + code)
+        token_resp = get_remote(get_config('login.github.access_token_url') + str(code))
         log.debug("get token from github:" + token_resp)
         start = token_resp.index('=')
         end = token_resp.index('&')
