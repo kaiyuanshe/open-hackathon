@@ -34,7 +34,7 @@
     function pageload(){
         var id = getParamId();
         if (id > 0) {
-            oh.api.admin.register.get({ query: { id: id}}, function(data) {
+            oh.api.admin.registration.get({ query: { id: id}}, function(data) {
                 for (var key in data) {
                     if (key == 'hackathon_id') {
                         editBindHackathons(key, data[key]);
@@ -58,20 +58,20 @@
             $('.editable').each(function(i,o){
                 var input = $(o);
                 if(input.is('[required]')){
-                    input .editable({
+                    input.editable({
                         validate: function(value) {
                            if($.trim(value) == '') return input.data('required');
                         }
                     });
                 }else{
-                    input .editable();
+                    input.editable();
                 }
             })
         }
     }
 
     function editBindHackathons(name, value) {
-        oh.api.admin.hackathons.get(function(hackahons) {
+        oh.api.admin.hackathon.list.get(function(hackahons) {
             var source = {};
             $.each(hackahons, function(i, o) {
                 source[o.id] = o.name;
@@ -101,7 +101,7 @@
                 data = $elems.editable('getValue');
                 if (id > 0) {
                     data.id = id;
-                    oh.api.admin.register.put({
+                    oh.api.admin.registration.put({
                         body: data,
                         header: {
                             hackathon_name: currentHackathon.name
@@ -116,7 +116,7 @@
                         }
                     });
                 } else {
-                     oh.api.admin.register.post({
+                     oh.api.admin.registration.post({
                         body: data,
                         header: {
                             hackathon_name: currentHackathon.name

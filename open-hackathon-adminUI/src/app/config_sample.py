@@ -4,14 +4,14 @@
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
 #  
 # The MIT License (MIT)
-#  
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#  
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #  
@@ -83,7 +83,7 @@ Config = {
         "live": {
             "client_id": LIVE_CLIENT_ID,
             "client_secret": LIVE_CLIENT_SECRET,
-            "redirect_uri": 'http://open-hackathon-dev.chinacloudapp.cn/live',
+            "redirect_uri": '%s/live' % HOSTNAME,
             "access_token_url": 'https://login.live.com/oauth20_token.srf',
             "user_info_url": 'https://apis.live.net/v5.0/me?access_token='
         },
@@ -124,8 +124,12 @@ Config = {
         "proxy": HACKATHON_API_ENDPOINT,
         "api": {
             "admin": {
-                "hackathons": ["get"],
-                "register": {
+                "hackathon": {
+                    "": ["get", "post", "put"],
+                    "checkname": ["get"],
+                    "list": ["get"]
+                },
+                "registration": {
                     "": ["get", "post", "delete", "put"],
                     "list": ["get"]
                 }

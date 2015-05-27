@@ -31,7 +31,7 @@
     function bindAzurecertList(){
         var currentHackathon = oh.comm.getCurrentHackathon();
         var list = $('#organizerlist');
-        oh.api.hackathon.get({
+        oh.api.admin.hackathon.get({
            header:{hackathon_name:currentHackathon.name}
         },function(data){
             if(!data.error){
