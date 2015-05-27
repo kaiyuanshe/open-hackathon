@@ -32,7 +32,7 @@
                 url: function(params) {
                     var data = $(this).parents('tr').data('tmplItem').data;
                     var d = new $.Deferred;
-                    oh.api.hackathon.put({
+                    oh.api.admin.hackathon.put({
                         body: {
                             id: data.id,
                             name: data.name,

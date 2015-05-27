@@ -91,7 +91,7 @@
                             message:'Hackathon名称已被使用',
                             checkfun:function(validator, $field){
                                 var dfd = new $.Deferred();
-                                oh.api.hackathon.checkname.get({
+                                oh.api.admin.hackathon.checkname.get({
                                     query: {
                                         name: $field.val()
                                     }
@@ -109,7 +109,7 @@
             e.preventDefault();
             var $form = $(e.target);
             hackathonName = $.trim($('#name').val());
-            oh.api.hackathon.post({
+            oh.api.admin.hackathon.post({
                 body:{
                     name:hackathonName,
                     display_name:$.trim($('#display_name').val())
@@ -277,7 +277,7 @@
         $('#stepform4').bootstrapValidator()
         .on('success.form.bv', function(e) {
             e.preventDefault();
-            oh.api.hackathon.put({
+            oh.api.admin.hackathon.put({
                 body:getHackthonData(),
                 header:{
                     hackathon_name:hackathonName
