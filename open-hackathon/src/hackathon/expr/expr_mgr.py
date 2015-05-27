@@ -25,6 +25,7 @@
 # -----------------------------------------------------------------------------------
 
 import sys
+
 sys.path.append("..")
 
 from hackathon.docker.docker import (
@@ -76,6 +77,7 @@ from hackathon.hackathon_response import (
     internal_server_error,
     precondition_failed,
     not_found,
+    access_denied,
     ok,
 )
 from hackathon.template.docker_template_unit import (
@@ -90,14 +92,19 @@ from hackathon.hack import (
 from datetime import (
     timedelta,
 )
+from hackathon.registration.register_mgr import (
+    register_manager,
+)
 import json
 import os
 import random
 import string
+from sqlalchemy import (
+    and_,
+)
 
 
 class ExprManager(object):
-
     def start_expr(self, hackathon_name, template_name, user_id):
         """
         A user uses a template to start a experiment under a hackathon
@@ -108,9 +115,12 @@ class ExprManager(object):
         """
         hack_temp = self.__check_template_status(hackathon_name, template_name)
         if hack_temp is None:
-            return internal_server_error('hackathon or template is not existed')
+            return not_found('hackathon or template is not existed')
 
         hackathon = hack_temp[0]
+        if not register_manager.is_user_registered(user_id, hackathon):
+            return access_denied("user not registered or not approved")
+
         if hackathon.event_end_time < get_now():
             log.warn("hackathon is ended. The expr starting process will be stopped")
             return precondition_failed('hackathen is ended')
@@ -233,6 +243,10 @@ class ExprManager(object):
         else:
             return not_found('Experiment Not found')
 
+    def get_expr_list_by_user_id(self, user_id):
+        return map(lambda u: u.dic(),
+                   db_adapter.find_all_objects(Experiment, and_(Experiment.user_id == user_id, Experiment.status < 5)))
+
     # --------------------------------------------- helper function ---------------------------------------------#
 
     def __report_expr_status(self, expr):
@@ -345,7 +359,8 @@ class ExprManager(object):
         # get 'host_port'
         map(lambda p:
             p.update(
-                {DockerTemplateUnit.PORTS_HOST_PORT: docker_formation.get_available_host_port(host_server, p[DockerTemplateUnit.PORTS_PORT])}
+                {DockerTemplateUnit.PORTS_HOST_PORT: docker_formation.get_available_host_port(host_server, p[
+                    DockerTemplateUnit.PORTS_PORT])}
             ),
             port_cfg)
 
@@ -353,7 +368,8 @@ class ExprManager(object):
         public_ports_cfg = filter(lambda p: DockerTemplateUnit.PORTS_PUBLIC in p, port_cfg)
         host_ports = [u[DockerTemplateUnit.PORTS_HOST_PORT] for u in public_ports_cfg]
         if safe_get_config("environment", "prod") == "local":
-            map(lambda cfg: cfg.update({DockerTemplateUnit.PORTS_PUBLIC_PORT: cfg[DockerTemplateUnit.PORTS_HOST_PORT]}), public_ports_cfg)
+            map(lambda cfg: cfg.update({DockerTemplateUnit.PORTS_PUBLIC_PORT: cfg[DockerTemplateUnit.PORTS_HOST_PORT]}),
+                public_ports_cfg)
         else:
             public_ports = self.__get_available_public_ports(expr.id, host_server, host_ports)
             for i in range(len(public_ports_cfg)):
@@ -542,7 +558,7 @@ class ExprManager(object):
             log.info("Rollback failed")
             log.error(e)
 
-    # --------------------------------------------- helper function ---------------------------------------------#
+            # --------------------------------------------- helper function ---------------------------------------------#
 
 
 def open_check_expr():

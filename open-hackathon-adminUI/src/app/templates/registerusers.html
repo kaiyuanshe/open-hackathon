@@ -61,7 +61,7 @@
         <td>${email}</td>
         <td>${phone}</td>
         <td>${address}</td>
-        <td>${oh.comm.DateFormat(create_time ,'yyyy-MM-dd HH:mm')}</td>
+        <td>${moment(create_time).format('YYYY-MM-DD HH:mm')}</td>
         <td>
             <a href="javascript:void(0);" data-type="select" data-name="status" data-value="${status}" class="editable" data-source='{"0":"未审核","1":"通过","2":"拒绝"}' data-placement="top"></a>
         </td>
@@ -76,5 +76,6 @@
     </tr>
 </script>
 <script type="text/javascript" src="/static/js/bootstrap/bootstrap-editable.js"></script>
+<script type="text/javascript" src="/static/js/jquery/moment.min.js"></script>
 <script type="text/javascript" src="/static/js/views/oh.register.js"></script>
 {% endblock %}

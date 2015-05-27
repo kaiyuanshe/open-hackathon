@@ -27,10 +27,10 @@
 import sys
 
 sys.path.append("..")
-from hackathon.database.models import Hackathon, User, UserHackathonRel, AdminHackathonRel
+from hackathon.database.models import Hackathon, User, UserHackathonRel, AdminHackathonRel, DockerHostServer, Template
 from hackathon.database import db_adapter
 from hackathon.functions import get_now
-from hackathon.enum import RGStatus
+from hackathon.enum import RGStatus, VEProvider
 from hackathon.hackathon_response import *
 from hackathon.enum import ADMIN_ROLE_TYPE
 from sqlalchemy import or_
@@ -43,6 +43,8 @@ from hackathon.functions import get_config, safe_get_config
 from hackathon.azureformation.fileService import create_container_in_storage, upload_file_to_azure
 import uuid
 import time
+import os
+from os.path import realpath, dirname
 
 
 class HackathonManager():
@@ -59,8 +61,8 @@ class HackathonManager():
             return False
 
     # check the admin authority on hackathon
-    def __validate_admin_privilege(self, user_id, hackathon_id):
-        hack_ids = self.get_permitted_hackathon_ids_by_admin_user_id(user_id)
+    def validate_admin_privilege(self, user_id, hackathon_id):
+        hack_ids = self.__get_hackathon_ids_by_admin_user_id(user_id)
         return -1 in hack_ids or hackathon_id in hack_ids
 
     def get_hackathon_by_name_or_id(self, hack_id=None, name=None):
@@ -125,7 +127,7 @@ class HackathonManager():
         return [h.dic() for h in user_hack_list]
 
     def get_permitted_hackathon_list_by_admin_user_id(self, user_id):
-        hackathon_ids = self.get_permitted_hackathon_ids_by_admin_user_id(user_id)
+        hackathon_ids = self.__get_hackathon_ids_by_admin_user_id(user_id)
         if -1 in hackathon_ids:
             hackathon_list = db_adapter.find_all_objects(Hackathon)
         else:
@@ -133,7 +135,7 @@ class HackathonManager():
 
         return map(lambda u: u.dic(), hackathon_list)
 
-    def get_permitted_hackathon_ids_by_admin_user_id(self, user_id):
+    def __get_hackathon_ids_by_admin_user_id(self, user_id):
         # get AdminUserHackathonRels from query withn filter by email
         admin_user_hackathon_rels = self.db.find_all_objects_by(AdminHackathonRel, user_id=user_id)
 
@@ -143,8 +145,10 @@ class HackathonManager():
         return list(set(hackathon_ids))
 
 
-    def validate_admin_privilege(self):
-        return self.__validate_admin_privilege(g.user.id, g.hackathon.id)
+
+
+    def validate_admin_privilege_http(self):
+        return self.validate_admin_privilege(g.user.id, g.hackathon.id)
 
     def validate_hackathon_name(self):
         if HTTP_HEADER.HACKATHON_NAME in request.headers:
@@ -197,6 +201,38 @@ class HackathonManager():
             return 1
 
 
+    def __test_data(self, hackathon):
+        """
+        create test data for new hackathon. Remove this function after template and docker host feature done
+        :param hackathon:
+        :return:
+        """
+        try:
+            # test docker host server
+            docker_host = DockerHostServer(vm_name="osslab-vm-19", public_dns="osslab-vm-19.chinacloudapp.cn",
+                                           public_ip="42.159.97.143", public_docker_api_port=4243, private_ip="10.209.14.33",
+                                           private_docker_api_port=4243, container_count=0, container_max_count=100,
+                                           hackathon=hackathon)
+            if db_adapter.find_first_object_by(DockerHostServer, vm_name=docker_host.vm_name, hackathon_id=hackathon.id) is None:
+                db_adapter.add_object(docker_host)
+
+            # test template: ubuntu terminal
+            template_dir = dirname(dirname(realpath(__file__))) + '/resources'
+            template_url = template_dir + os.path.sep + "kaiyuanshe-ut.js"
+            template = Template(name="ut", url=template_url,
+                                provider=VEProvider.Docker,
+                                status=1,
+                                virtual_environment_count=1,
+                                description="<ul><li>Ubuntu</li><li>SSH</li><li>LAMP</li></ul>",
+                                hackathon=hackathon)
+            if db_adapter.find_first_object_by(Template, name=template.name, hackathon_id=hackathon.id) is None:
+                db_adapter.add_object(template)
+        except:
+            log.warn("fail to create test data")
+
+        return
+
+
     def create_new_hackathon(self, args):
         log.debug("create_or_update_hackathon: %r" % args)
         if "name" not in args:
@@ -208,11 +244,11 @@ class HackathonManager():
                 args['update_time'] = get_now()
                 args['create_time'] = get_now()
                 args["creator_id"] = g.user.id
-                new_hack = self.db.add_object_kwargs(Hackathon, **args)  # insert into hackathon
+                hackathon = self.db.add_object_kwargs(Hackathon, **args)  # insert into hackathon
                 try:
                     ahl = AdminHackathonRel(user_id=g.user.id,
                                             role_type=ADMIN_ROLE_TYPE.ADMIN,
-                                            hackathon_id=new_hack.id,
+                                            hackathon_id=hackathon.id,
                                             status=1,
                                             remarks='creator',
                                             create_time=get_now())
@@ -222,7 +258,9 @@ class HackathonManager():
                     log.error(ex)
                     return internal_server_error("fail to insert a recorde into admin_hackathon_rel")
 
-                return new_hack.id
+                # todo remove the following line ASAP
+                self.__test_data(hackathon)
+                return hackathon.id
             else:
                 return internal_server_error("hackathon name already exist")
 
