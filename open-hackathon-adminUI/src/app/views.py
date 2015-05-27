@@ -257,3 +257,9 @@ def organizers():
 @login_required
 def edithackathon():
     return __render("/edithackathon.html")
+
+
+@app.route("/template")
+@login_required
+def template():
+    return __render("/template.html")
