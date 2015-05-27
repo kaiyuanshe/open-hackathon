@@ -164,6 +164,7 @@ class AdminHackathonRel(DBBase):
     status = Column(Integer)
     remarks = Column(String(255))
     create_time = Column(DateTime, default=datetime.utcnow())
+    update_time = Column(DateTime)
 
     def __init__(self, **kwargs):
         super(AdminHackathonRel, self).__init__(**kwargs)

@@ -25,6 +25,7 @@
  ;
 (function($, oh) {
 
+    var isupdate = false;
 
     function toggleTable(){
         if($('#adminlisttable').css('display') == 'none' ){
@@ -37,14 +38,25 @@
     }
 
 
+     //get form-data for submit
      function getFormData(){
         var formData = {
+            id:$('#adminform').data('id'),
             email:$.trim($('#admin_email').val()),
             role_type:$.trim($('#role_type').val()),
             remarks:$.trim($('#remarks').val())
          }
         return formData;
      }
+
+
+    //set form-data for edit
+    function setFormData(data){
+        $('#admin_email').val(getPriEmail(data.user_info.email)).attr({disabled:'disabled'});
+        $('#role_type').val(data.role_type);
+        $('#remarks').val(data.remarks);
+        $('#adminform').data({id:data.id})
+    }
 
 
     // initial table to show admin list
@@ -69,11 +81,27 @@
                         return '裁判'
                     }
                     return '管理员';
+                },
+                getEmails:function(emails){
+                    return getPriEmail(emails);
                 }
             }));
             oh.comm.removeLoading();
         });
     }
+
+
+    function getPriEmail(emails){
+        var els = '';
+        $.each(emails,function(i,email){
+            if(email.primary_email == 1){
+                els = email.email;
+                return false;
+            }
+        });
+        return els
+    }
+
 
     // call api to add a admin
     function createAdmin(itemData){
@@ -86,33 +114,92 @@
         }, function(data) {
             if(data.error){
                 alert(data.error.message)
-                savebtn.removeAttr('disabled');
             }else{
             }
         });
     }
 
+
+    // call api to update a admin
+    function updateAdmin(itemData){
+        var currentHackathon = oh.comm.getCurrentHackathon();
+        return oh.api.admin.hackathon.administrator.put({
+            body: itemData,
+            header: {
+                hackathon_name: currentHackathon.name
+            }
+        }, function(data) {
+            if(data.error){
+                alert(data.error.message)
+            }else{
+            }
+        });
+    }
+
+
+    // call api to delete a admin
+    function deleteAdmin(id){
+        var currentHackathon = oh.comm.getCurrentHackathon();
+        return oh.api.admin.hackathon.administrator.delete({
+            query: {id:id},
+            header: {
+                hackathon_name: currentHackathon.name
+            }
+        }, function(data) {
+            if(data.error){
+                alert(data.error.message)
+            }else{
+            }
+        });
+    }
+
+
     // initial submit button events
     function forminit(){
         var adminform = $('#adminform');
-        adminform.bootstrapValidator()
-            .on('success.form.bv', function(e) {
-                e.preventDefault();
-                var itemData = getFormData();
-                createAdmin(itemData).then(function(){
-                    pageLoad()
-                    toggleTable()
-                })
-            });
+        adminform.bootstrapValidator().on('success.form.bv', function(e) {
+            e.preventDefault();
+            var itemData = getFormData();
+            (isupdate ? updateAdmin(itemData): createAdmin(itemData)).then(function(){
+                pageLoad()
+                toggleTable()
+            })
+        });
     }
 
+
     function init(){
+        var editLi = undefined;
         pageLoad();
         forminit();
 
         $('[data-type="new"],[data-type="cancel"]').click(function(e){
+            isupdate = false ;
+            $('#adminform').data({id:undefined}).find('[type="submit"]').removeAttr('disabled')
             toggleTable();
-        })
+        });
+
+        $('#adminlisttable').on('click','[data-type="edit"]',function(e){
+            editLi = $(this).parents('tr');
+            var item = editLi.data('tmplItem').data;
+            setFormData(item);
+            isupdate = true ;
+            toggleTable();
+        });
+
+        var confirmModal = $('#confirm_modal').on('show.bs.modal',function(e){
+            console.log(e);
+            editLi = $(e.relatedTarget).parents('tr');
+        }).on('click','[data-type="ok"]',function(e){
+            var item = editLi.data('tmplItem').data;
+            deleteAdmin(item.id).then(function(){
+                pageLoad()
+            });
+            confirmModal.modal('hide');
+        });
+
+
+
 
     }
 

@@ -597,6 +597,7 @@ class AdminHackathonRel(DBBase):
     status = Column(Integer)     # enum.AdminHackathonRelStatus
     remarks = Column(String(255))
     create_time = Column(TZDateTime, default=get_now())
+    update_time = Column(TZDateTime)
 
     def __init__(self, **kwargs):
         super(AdminHackathonRel, self).__init__(**kwargs)

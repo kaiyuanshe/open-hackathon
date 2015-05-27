@@ -26,35 +26,30 @@ import sys
 
 sys.path.append("..")
 from hackathon.database import db_adapter
-from hackathon.database.models import AdminHackathonRel, User, UserEmail
+from hackathon.database.models import AdminHackathonRel, User, UserEmail, Hackathon
 from flask import g
 from hackathon.hackathon_response import *
 from hackathon.functions import get_now
+from hackathon.user.user_mgr import user_manager
 
 
 class AdminManager(object):
     def __init__(self, db_adapter):
         self.db = db_adapter
 
-    def get_admin_with_primary_email(self, ids):
+    def get_hackathon_admin_with_email(self):
         # only returns the primary email
-        return self.db.session().query(User, UserEmail). \
-            outerjoin(UserEmail, UserEmail.user_id == User.id) \
-            .filter(UserEmail.primary_email == 1, UserEmail.user_id.in_(ids)) \
+        return self.db.session().query(AdminHackathonRel).join(User) \
+            .filter(AdminHackathonRel.hackathon_id==g.hackathon.id) \
             .all()
 
     def get_hackathon_admins(self):
-        ahls = db_adapter.find_all_objects_by(AdminHackathonRel, hackathon_id=g.hackathon.id)
-        user_ids = map(lambda x: x.user_id, ahls)
-
-        def to_dict(user, email):
-            dic = user.dic()
-            if email is not None:
-                dic["email"] = email.dic()
+        def to_dict(ahl):
+            dic = ahl.dic()
+            dic["user_info"] = user_manager.user_display_info(ahl.user)
             return dic
-
-        return map(lambda (user, email): to_dict(user, email), self.get_admin_with_primary_email(user_ids))
-
+        x= map(lambda ahl: to_dict(ahl), self.get_hackathon_admin_with_email())
+        return x
 
     def validate_created_args(self, args):
         if 'email' not in args:
@@ -114,8 +109,14 @@ class AdminManager(object):
 
     def delete_admin(self, ahl_id):
         ahl = self.db.find_first_object(AdminHackathonRel, AdminHackathonRel.id==ahl_id)
+
         if ahl is None:
             return ok()
+
+        hackathon = self.db.find_first_object(Hackathon, Hackathon.id == ahl.hackathon_id)
+        if hackathon.creator_id == ahl.user_id:
+            return bad_request("hackathon creatore can not be deleted")
+
         try :
             self.db.delete_object(ahl)
             return ok()

@@ -129,7 +129,7 @@ Config = {
                     "checkname": ["get"],
                     "list": ["get"],
                     "administrator":{
-                        "": ["get", "post", "delete"],
+                        "": ["put", "post", "delete"],
                         "list": ["get"]
                     }
                 },

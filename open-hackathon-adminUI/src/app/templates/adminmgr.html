@@ -19,6 +19,7 @@
                             <th>角色类型</th>
                             <th>状态</th>
                             <th>账户类别</th>
+                            <th>备注</th>
                             <th>最后登录时间</th>
                             <th>创建时间</th>
                             <th>操作</th>
@@ -86,11 +87,11 @@
                 <h4 class="modal-title">提示</h4>
             </div>
             <div class="modal-body">
-                <p>确定删除此地址记录？</p>
+                <p>确定删除此管理员？</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default wb-btn" data-dismiss="modal">取消</button>
-                <button type="button" class="btn btn-primary wb-btn" data-type="delete">确定</button>
+                <button type="button" class="btn btn-primary wb-btn" data-type="ok">确定</button>
             </div>
         </div>
     </div>
@@ -102,16 +103,17 @@
 
 <script id="hackathon_admin_list_template" type="text/x-jquery-tmpl">
     <tr>
-        <td>${nickname}</td>
-        <td>${email.email}</td>
+        <td>${user_info.nickname}</td>
+        <td>${$item.getEmails(user_info.email)}</td>
         <td>${$item.getRole(role_type)}</td>
-        <td>${$item.getOnline(online)}</td>
-        <td>${provider}</td>
-        <td>${moment(last_login_time).format('YYYY-MM-DD HH:mm')}</td>
+        <td>${$item.getOnline(user_info.online)}</td>
+        <td>${user_info.provider}</td>
+        <td>${remarks}</td>
+        <td>${moment(user_info.last_login_time).format('YYYY-MM-DD HH:mm')}</td>
         <td>${moment(create_time).format('YYYY-MM-DD HH:mm')}</td>
 
         <td class="col-action">
-            <a class="btn btn-info btn-sm" href="/edit/admin?id=${id}">
+            <a class="btn btn-info btn-sm" data-type="edit">
                 <i class="fa fa-edit "></i>
             </a>
             <a class="btn btn-danger btn-sm" href="#" data-target="#confirm_modal" data-toggle="modal">
