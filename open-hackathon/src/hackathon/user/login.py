@@ -82,7 +82,8 @@ class QQLogin(LoginProviderBase):
         email_info = [
             {'name': user_info["nickname"], 'email': None, 'id': id, 'verified': 1, 'primary': 1,
              'nickname': user_info["nickname"], 'avatar_url': user_info["figureurl"]}]
-        user_with_token = self.um.oauth_db_login(openid,
+        user_with_token = self.um.db_login(openid,
+                                           provider=OAUTH_PROVIDER.QQ,
                                            name=user_info["nickname"],
                                            nickname=user_info["nickname"],
                                            access_token=access_token,
@@ -139,7 +140,8 @@ class GithubLogin(LoginProviderBase):
         # email_info include all user email provided by github
         # email is user's primary email
         email_info = json.loads(email_info_resp)
-        user_with_token = self.um.oauth_db_login(openid,
+        user_with_token = self.um.db_login(openid,
+                                           provider=OAUTH_PROVIDER.GITHUB,
                                            name=name,
                                            nickname=nickname,
                                            access_token=access_token,
@@ -178,7 +180,8 @@ class GitcafeLogin(LoginProviderBase):
         email_info = [
             {'name': name, 'email': email, 'id': id, 'verified': 1, 'primary': 1, 'nickname': nickname,
              'avatar_url': avatar_url}]
-        user_with_token = self.um.oauth_db_login(id,
+        user_with_token = self.um.db_login(id,
+                                           provider=OAUTH_PROVIDER.GITCAFE,
                                            name=name,
                                            nickname=nickname,
                                            access_token=token,
@@ -230,7 +233,8 @@ class WeiboLogin(LoginProviderBase):
             log.debug("fail to get user email from weibo")
             log.error(e)
 
-        user_with_token = self.um.oauth_db_login(openid,
+        user_with_token = self.um.db_login(openid,
+                                           provider=OAUTH_PROVIDER.WEIBO,
                                            name=name,
                                            nickname=nickname,
                                            access_token=access_token,
@@ -239,9 +243,52 @@ class WeiboLogin(LoginProviderBase):
         return self.user_display_info_with_token(user_with_token)
 
 
+class LiveLogin(LoginProviderBase):
+    def __init__(self, user_manager):
+        self.um = user_manager
+
+    def login(self, args):
+        access_token = args.get('access_token')
+        log.debug("access_token is following")
+        log.debug(access_token)
+        log.debug(get_config('login.live.user_info_url'))
+
+        user_info_resp = get_remote(get_config('login.live.user_info_url') + access_token)
+        # conn.request('GET',url,'',{'user-agent':'flask'})
+        log.debug("get user info from live:" + user_info_resp)
+        # user.info
+        # {u'first_name': u'Ice', u'last_name': u'Shi', u'name': u'Ice Shi', u'locale': u'en_US', \
+        # u'gender': None,\
+        # u'emails': {u'personal': None, u'account': u'iceshi@outlook.com', u'business': None, u'preferred': u'iceshi@outlook.com'}, \
+        # u'link': u'https://profile.live.com/', \
+        # u'updated_time': u'2015-05-13T02:28:32+0000',\
+        # u'id': u'655c03b1b314b5ee'}
+
+        user_info = json.loads(user_info_resp)
+        log.debug(user_info)
+        name = user_info["name"]
+        openid = str(args.get('user_id'))
+        # avatar = user_info["avatar_url"]
+
+
+        email = user_info["emails"]["account"]
+        email_info = [
+            {'name': name, 'email': email, 'id': openid, 'verified': 1, 'primary': 1, 'nickname': name,
+             'avatar_url': None}]
+        user_with_token = self.um.db_login(openid,
+                                           provider=OAUTH_PROVIDER.LIVE,
+                                           name=name,
+                                           nickname=name,
+                                           access_token=access_token,
+                                           email_info=email_info,
+                                           avatar_url=None)
+        return self.user_display_info_with_token(user_with_token)
+
+
 login_providers = {
     OAUTH_PROVIDER.GITHUB: GithubLogin(user_manager),
     OAUTH_PROVIDER.QQ: QQLogin(user_manager),
     OAUTH_PROVIDER.GITCAFE: GitcafeLogin(user_manager),
-    OAUTH_PROVIDER.WEIBO: WeiboLogin(user_manager)
+    OAUTH_PROVIDER.WEIBO: WeiboLogin(user_manager),
+    OAUTH_PROVIDER.LIVE: LiveLogin(user_manager)
 }

@@ -34,28 +34,38 @@
       "redirect_uri":"http://%s/weibo",
       "code":""
     },
+    "live":{
+      "access_token_url": "https://login.live.com/oauth20_token.srf",
+      "client_id":"<%= node['openhackathon']['live']['client_id'] %>",
+      "client_secret":"<%= @live_client_secret %>",
+      "grant_type":"authorization_code",
+      "redirect_uri":"http://%s/live",
+      "code":""
+    },
     "provider_enabled": <%= node['openhackathon'][:ui][:login_provider] %>
   },
   "api": {
     "user": {
-      "login":["post","del"],
-      "hackathon":["get"],
-      "experiment":{
-        "":["get","post","del","put"],
-        "list":["get"]
+      "login": ["post","del"],
+      "hackathon": ["get","post"],
+      "experiment": {
+        "": ["get","post","del","put"],
+        "list": ["get"]
+      },
+      "registration": {
+        "":["put","post","get"],
+        "checkemail": ["get"],
+        "list": ["get"]
       }
     },
-    "register":{
-      "list":["get"]
+    "bulletin": {
+      "": ["get", "post"]
     },
-    "bulletin":{
-      "":["get","post"]
-    },
-    "hackathon":{
-      "":["get","post"],
-      "list":["get"],
-      "stat":["get"],
-      "template":["get"]
+    "hackathon": {
+      "": ["get"],
+      "list": ["get"],
+      "stat": ["get"],
+      "template": ["get"]
     }
   },
   "sociallogin": {

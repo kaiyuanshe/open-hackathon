@@ -61,6 +61,7 @@ angular.module('oh.directives', [])
         hnav.find('.vm-box').removeClass('active')
         var a = $(this).addClass('active');
         var url = a.data('url');
+        var token = a.data('token');
         var name = a.attr('id')
         var ifrem = work_center.find('#' + name);
         work_center.find('iframe').addClass('invisible');
@@ -68,7 +69,9 @@ angular.module('oh.directives', [])
           ifrem.removeClass('invisible');
         } else {
           ifrem = $('<iframe>').attr({
+
             src: url ,
+
             id: name,
             width: '100%',
             height: '100%',
@@ -220,7 +223,7 @@ angular.module('oh.directives', [])
         }, function (data) {
           var getStat = function () {
             API.hackathon.stat.get({
-              query: {hid: data.id}
+              header: {hackathon_name: config.name}
             }, function (data) {
               element.find('[oh-online]').text(data.online);
               element.find('[oh-total]').text(data.total);
@@ -328,7 +331,7 @@ angular.module('oh.directives', [])
           }
           var def = $q.defer();
           $timeout(function () {
-            API.register.checkemail.get({query: {hid: attrs.hid, email: modelValue}}, function (data) {
+            API.user.registration.checkemail.get({query: {hid: attrs.hid, email: modelValue}}, function (data) {
               if (data) {
                 def.resolve();
               } else {

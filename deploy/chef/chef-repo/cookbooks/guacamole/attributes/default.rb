@@ -32,13 +32,11 @@ default['guacamole']['war-url'] = "http://jaist.dl.sourceforge.net/project/guaca
 default['guacamole']['war-cookbook-file'] = "guacamole-#{node['guacamole']['version']}.war"
 default['guacamole']['use-local-war'] = 'true'
 
-default['guacamole']['src-folder'] = "#{node['openhackathon'][:base_dir]}/deploy/guacamole"#'/home/opentech/open-hackathon/deploy/guacamole'#
-#default['guacamole']['dst-folder'] = '/etc/guacamole'
+default['guacamole']['src-folder'] = "#{node['openhackathon'][:base_dir]}/deploy/guacamole"
 
 default['guacamole']['tomcat-guacamole-share-folder'] = "#{node['tomcat']['base']}/.guacamole"
 
 default['guacamole']['properties'] = 'guacamole.properties'
-#default['guacamole']['properties-sample'] = 'guacamole-sample.properties'
 default['guacamole']['json-jar'] = 'json-20090211.jar'
 default['guacamole']['provider-jar'] = 'openhackathon-gucamole-authentication-1.0-SNAPSHOT.jar'
 
@@ -46,6 +44,6 @@ default['guacamole']['guacd-hostname'] = 'localhost'
 default['guacamole']['guacd-port'] = '4822'
 default['guacamole']['lib-directory'] = '/etc/guacamole'
 default['guacamole']['auth-provider'] = 'com.openhackathon.guacamole.OpenHackathonAuthenticationProvider'
-default['guacamole']['auth-request-url'] = '/api/guacamoleconfig'
+default['guacamole']['auth-request-url'] = '/api/user/guacamoleconfig'
 
 

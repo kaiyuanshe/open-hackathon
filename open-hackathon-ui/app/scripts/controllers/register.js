@@ -69,11 +69,11 @@ angular.module('oh.controllers')
     $scope.submitRegister = function (register) {
       if (registration) {
         register.id = registration.id;
-        API.user.hackathon.put({body: register, header: {hackathon_name: config.name}}, function (data) {
+        API.user.registration.put({body: register, header: {hackathon_name: config.name}}, function (data) {
           checkUserStatus(0,0);
         });
       } else {
-        API.user.hackathon.post({body: register, header: {hackathon_name: config.name}}, function (data) {
+        API.user.registration.post({body: register, header: {hackathon_name: config.name}}, function (data) {
           $location.path('hackathon');
         });
       }
