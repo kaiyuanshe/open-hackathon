@@ -14,8 +14,15 @@
                 <li><a href="#banner">活动图片</a></li>
             </ul>
         </div>
-        <div class="box-content">
-            <form class="form-horizontal" id="editHackathonForm" >
+        <div class="box-content relative">
+            <div class="oh-switch">
+                <select  class="form-control input-sm" id="hackathon_switch">
+                    <option value="0">草稿</option>
+                    <option value="1">上线</option>
+                    <option value="2">线下</option>
+                </select>
+            </div>
+            <form class="form-horizontal" id="editHackathonForm">
                 <div class="tab-content">
                     <div class="tab-pane" id="banner">
                         <fieldset>
@@ -23,11 +30,13 @@
                                 黑客松活动图片(banner)
                             </legend>
                         </fieldset>
+
                         <div class="files row">
                             <div class="fileupload-buttonbar">
                                 <div class="col-sm-3 col-xs-6">
                                     <div class="btn-upload fileinput-button">
                                         <input type="file" name="files" multiple="">
+
                                         <div><span class="glyphicon glyphicon-upload"></span>上传活动图片</div>
                                     </div>
                                 </div>
@@ -145,6 +154,7 @@
         </a>
     </div>
     </div>
+
 </script>
 <script type="text/javascript" src="/static/js/daterangepickerlocale.js"></script>
 <script type="text/javascript" src="/static/js/fileuploadTemplate.js"></script>
