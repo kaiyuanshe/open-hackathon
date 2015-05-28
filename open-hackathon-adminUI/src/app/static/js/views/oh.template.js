@@ -36,13 +36,21 @@
         });
     }
 
+    function addFieldValidate(element){
+         $(element).find('[data-validate="true"]').each(function(i,input){
+            $('#templateform').bootstrapValidator('addField',$(input));
+         })
+    }
+
     function createTemplateUnit(data){
         var templist= $('[data-type="temp-unit-list"]');
         var template_unit = $($('#template_unit_item').html());
         if(data){
             // todo
         }
-        return template_unit.appendTo(templist);
+        template_unit.appendTo(templist);
+        addFieldValidate(template_unit);
+        return template_unit
     }
 
     function createPort(element, data){
@@ -94,6 +102,7 @@
         return {
             expr_name: $('#name').val(),
             description: $('#description').val(),
+            provider: $('#provider').val(),
             virtual_environments: data
         };
     }
@@ -101,8 +110,7 @@
     function init(){
         var currentHackathon = oh.comm.getCurrentHackathon();
         var templateform = $('#templateform');
-        templateform.bootstrapValidator()
-            .on('success.form.bv', function(e) {
+        templateform.bootstrapValidator().on('success.form.bv', function(e) {
                 e.preventDefault();
                 oh.api.admin.hackathon.template.post({
                     body: getFormData(),
@@ -110,7 +118,7 @@
                     header:{hackathon_name:currentHackathon.name}
                 }, function(data){
                     if(data.error){
-                        // todo
+                        alert(data.error.message);
                     }else{
                         bindTemplateList();
                     }

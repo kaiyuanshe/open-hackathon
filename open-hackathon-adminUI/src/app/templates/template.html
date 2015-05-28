@@ -13,10 +13,10 @@
                     <tr>
                         <th>#</th>
                         <th>名称</th>
-                        <th>模板文件</th>
                         <th>模板单元数</th>
                         <th>创建时间</th>
                         <th>更新时间</th>
+                        <th>模板文件</th>
                         <th>操作</th>
                     </tr>
                 </thead>
@@ -37,9 +37,14 @@
                                 <label class="col-md-3 control-label">模板名称</label>
                                 <div class="col-md-6 register">
                                     <input type="text" class="form-control" name="name" id="name"
+                                           placeholder="请使用英文字母、数字和'_'（下划线）'-'(中划线)"
                                            data-bv-trigger="blur"
                                            required
                                            data-bv-notempty-message="名称是必需的，不能为空"
+                                           pattern="^(?!_)(?!.*?_$)[a-zA-Z0-9_-]+$"
+                                           data-bv-regexp-message="模板名称只能由英文字母的，数字和下划线"
+                                           minlength="5"
+                                           data-bv-stringlength-message="模板名称必须至少有5个字符"
                                             >
                                 </div>
                             </div>
@@ -48,6 +53,15 @@
                                 <label class="col-md-3 control-label">描述</label>
                                 <div class="col-md-6 register">
                                     <input type="text" class="form-control" name="description" id="description">
+                                </div>
+                            </div>
+
+                            <div class="form-group has-feedback">
+                                <label class="col-md-3 control-label">提供商</label>
+                                <div class="col-md-6 register">
+                                    <select class="form-control" name="provider" id="provider">
+                                        <option value="0">DOCKER</option>
+                                    </select>
                                 </div>
                             </div>
 
@@ -99,10 +113,10 @@
     <tr>
         <td>${$item.getIndex()}</td>
         <td>${name}</td>
-        <td><a href="${url}">下载</a></td>
         <td>${virtual_environment_count}</td>
         <td>${moment(create_time).format('YYYY/MM/DD HH:mm')}</td>
         <td>${moment(update_time).format('YYYY/MM/DD HH:mm')}</td>
+        <td><a href="${azure_url}">下载</a></td>
         <td class="col-action">
             <a class="btn btn-info btn-sm" href="">
                 <i class="fa fa-edit "></i>
@@ -119,23 +133,33 @@
         <div class="form-group has-feedback">
             <label class="col-md-3 control-label">模板单元名称</label>
             <div class="col-md-6 register">
-                <input type="text" class="form-control" name="name"
-                       data-bv-trigger="blur"
-                       required
-                       data-bv-notempty-message="名称是必需的，不能为空"
-                        >
+                <input type="text" class="form-control" name="name" data-validate="true"
+                    placeholder="请使用英文字母、数字和'_'（下划线）'-'(中划线)"
+                    data-bv-trigger="blur"
+                    required
+                    data-bv-notempty-message="名称是必需的，不能为空"
+                    pattern="^(?!_)(?!.*?_$)[a-zA-Z0-9_-]+$"
+                    data-bv-regexp-message="模板单元名称只能由英文字母的，数字和下划线"
+                    minlength="5"
+                    data-bv-stringlength-message="模板单元名称必须至少有5个字符"
+                    >
             </div>
         </div>
         <div class="form-group has-feedback">
             <label class="col-md-3 control-label">镜像</label>
             <div class="col-md-6 register">
-                <input type="text" class="form-control" name="image">
+                <input type="text" class="form-control" name="image" data-validate="true"
+                    data-bv-trigger="blur"
+                    required
+                    data-bv-notempty-message="镜像是必需的，不能为空"
+                    >
             </div>
         </div>
         <div class="form-group has-feedback">
             <label class="col-md-3 control-label">环境变量</label>
             <div class="col-md-6 register">
-                <input type="text" class="form-control" name="env">
+                <input type="text" class="form-control" name="env"
+                    placeholder="请用分号隔开">
             </div>
         </div>
         <div class="form-group has-feedback">
@@ -147,13 +171,24 @@
         <div class="form-group has-feedback">
             <label class="col-md-3 control-label">远程连接名称</label>
             <div class="col-md-6 register">
-                <input type="text" class="form-control" name="remote-name">
+                <input type="text" class="form-control" name="remote-name" data-validate="true"
+                    placeholder="请使用英文字母、数字和'_'（下划线）'-'(中划线)"
+                    data-bv-trigger="blur"
+                    required
+                    data-bv-notempty-message="名称是必需的，不能为空"
+                    pattern="^(?!_)(?!.*?_$)[a-zA-Z0-9_-]+$"
+                    data-bv-regexp-message="远程连接名称只能由英文字母的，数字和下划线"
+                    minlength="5"
+                    data-bv-stringlength-message="远程连接名称称必须至少有5个字符"
+                    >
             </div>
         </div>
         <div class="form-group has-feedback">
             <label class="col-md-3 control-label">提供商</label>
             <div class="col-md-6 register">
-                <input type="text" class="form-control" name="remote-provider">
+                <select class="form-control" name="remote-provider">
+                    <option value="guacamole">guacamole</option>
+                </select>
             </div>
         </div>
         <div class="form-group has-feedback">

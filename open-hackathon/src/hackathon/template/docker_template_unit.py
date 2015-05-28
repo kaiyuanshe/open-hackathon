@@ -205,7 +205,8 @@ class DockerTemplateUnit(object):
         for p in self.dic[self.PORTS]:
             key = '%d/%s' % (p[self.PORTS_PORT], p[self.PORTS_PROTOCOL])
             self.dic[self.EXPOSED_PORTS][key] = {}
-            self.dic[self.HOST_CONFIG][self.HOST_CONFIG_PORT_BINDING][key] = [{self.HOST_CONFIG_HOST_IP: '', self.HOST_CONFIG_HOST_PORT: str(p[self.PORTS_HOST_PORT])}]
+            self.dic[self.HOST_CONFIG][self.HOST_CONFIG_PORT_BINDING][key] = \
+                [{self.HOST_CONFIG_HOST_IP: '', self.HOST_CONFIG_HOST_PORT: str(p[self.PORTS_HOST_PORT])}]
         self.dic.pop(self.NAME)
         self.dic.pop(self.PORTS)
         self.dic.pop(self.REMOTE)

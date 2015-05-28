@@ -63,7 +63,6 @@ class FileService():
             log.error(e)
             return False
 
-
     def upload_file_to_azure(self, file, container_name, blob_name):
         try:
             if self.create_container_in_storage(container_name, 'container'):
@@ -74,7 +73,6 @@ class FileService():
         except Exception as e:
             log.error(e)
             return None
-
 
     def upload_file_to_azure_from_path(self, path, container_name, blob_name):
         try:
