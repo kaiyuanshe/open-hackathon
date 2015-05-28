@@ -90,6 +90,6 @@ Config = {
         "image_container": "images",
         "template_container": "templates",
         "blob_service_host_base":  ".blob.core.chinacloudapi.cn",
-        "size_limit_byte": 5*1024*1024
+        "size_limit_kilo_bytes": 5*1024
     }
 }
