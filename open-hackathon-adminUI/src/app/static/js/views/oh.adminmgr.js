@@ -55,8 +55,16 @@
         $('#admin_email').val(getPriEmail(data.user_info.email)).attr({disabled:'disabled'});
         $('#role_type').val(data.role_type);
         $('#remarks').val(data.remarks);
-        $('#adminform').data({id:data.id})
+        $('#adminform').data({id:data.id}).find('[type="submit"]').removeAttr('disabled')
     }
+
+
+    // set an empty form for new
+    function resetForm(){
+         $('#adminform').data('bootstrapValidator').resetForm(true);
+         remarks:$.trim($('#remarks').val())
+    }
+
 
 
     // initial table to show admin list
@@ -68,7 +76,6 @@
                 hackathon_name: currentHackathon.name
             }
         }, function(data) {
-
             list.empty().append($('#hackathon_admin_list_template').tmpl(data,{
                 getOnline:function(online){
                     if(online == 1){
@@ -176,6 +183,7 @@
         $('[data-type="new"],[data-type="cancel"]').click(function(e){
             isupdate = false ;
             $('#adminform').data({id:undefined}).find('[type="submit"]').removeAttr('disabled')
+            resetForm();
             toggleTable();
         });
 
