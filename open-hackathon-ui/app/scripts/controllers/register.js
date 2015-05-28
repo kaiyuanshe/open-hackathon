@@ -36,6 +36,7 @@ angular.module('oh.controllers')
     //Page load
     Authentication.register(function (data) {
       $scope.hackathon = data.hackathon;
+      $scope.banners = data.hackathon.basic_info.banners.split(";")
       var isExpired = data.hackathon.registration_end_time < Date.now();
       if (isExpired) {
         $scope.hackathon.message = '活动已经结束';
@@ -62,7 +63,9 @@ angular.module('oh.controllers')
       } else if (status == 3 && approve == 0) {
         $scope.hackathon.isRegister = true;
       } else if (status == 1 || status == 3) {
+        $scope.hackathon.start = true
         $scope.hackathon.message = '您的报名已经审核已通过。';
+
       }
     }
 

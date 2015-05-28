@@ -37,9 +37,8 @@
         }
     }
 
-
-     //get form-data for submit
-     function getFormData(){
+    //get form-data for submit
+    function getFormData(){
         var formData = {
             id:$('#adminform').data('id'),
             email:$.trim($('#admin_email').val()),
@@ -47,8 +46,7 @@
             remarks:$.trim($('#remarks').val())
          }
         return formData;
-     }
-
+    }
 
     //set form-data for edit
     function setFormData(data){
@@ -58,14 +56,11 @@
         $('#adminform').data({id:data.id}).find('[type="submit"]').removeAttr('disabled')
     }
 
-
     // set an empty form for new
     function resetForm(){
          $('#adminform').data('bootstrapValidator').resetForm(true);
          remarks:$.trim($('#remarks').val())
     }
-
-
 
     // initial table to show admin list
     function pageLoad(){
@@ -97,7 +92,6 @@
         });
     }
 
-
     function getPriEmail(emails){
         var els = '';
         $.each(emails,function(i,email){
@@ -108,7 +102,6 @@
         });
         return els
     }
-
 
     // call api to add a admin
     function createAdmin(itemData){
@@ -126,7 +119,6 @@
         });
     }
 
-
     // call api to update a admin
     function updateAdmin(itemData){
         var currentHackathon = oh.comm.getCurrentHackathon();
@@ -142,7 +134,6 @@
             }
         });
     }
-
 
     // call api to delete a admin
     function deleteAdmin(id){
@@ -160,7 +151,6 @@
         });
     }
 
-
     // initial submit button events
     function forminit(){
         var adminform = $('#adminform');
@@ -173,7 +163,6 @@
             })
         });
     }
-
 
     function init(){
         var editLi = undefined;
@@ -205,10 +194,6 @@
             });
             confirmModal.modal('hide');
         });
-
-
-
-
     }
 
     $(function() {

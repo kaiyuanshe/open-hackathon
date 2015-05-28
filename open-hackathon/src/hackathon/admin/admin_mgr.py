@@ -26,22 +26,20 @@ import sys
 
 sys.path.append("..")
 from hackathon.database import db_adapter
-from hackathon.database.models import AdminHackathonRel, User, UserEmail, Hackathon
+from hackathon.database.models import AdminHackathonRel, UserEmail, Hackathon
 from flask import g
 from hackathon.hackathon_response import *
 from hackathon.functions import get_now
 from hackathon.user.user_mgr import user_manager
+from hackathon.enum import AdminUserHackathonRelStates
 
 
 class AdminManager(object):
     def __init__(self, db_adapter):
         self.db = db_adapter
 
-    def get_hackathon_admin_with_email(self):
-        # only returns the primary email
-        return self.db.session().query(AdminHackathonRel).join(User) \
-            .filter(AdminHackathonRel.hackathon_id == g.hackathon.id) \
-            .all()
+    def get_hackathon_admin_list(self):
+        return self.db.find_all_objects_by(AdminHackathonRel, hackathon_id=g.hackathon.id)
 
     def get_hackathon_admins(self):
         def to_dict(ahl):
@@ -49,70 +47,67 @@ class AdminManager(object):
             dic["user_info"] = user_manager.user_display_info(ahl.user)
             return dic
 
-        x = map(lambda ahl: to_dict(ahl), self.get_hackathon_admin_with_email())
+        x = map(lambda ahl: to_dict(ahl), self.get_hackathon_admin_list())
         return x
 
-    def validate_created_args(self, args):
+    def __validate_created_args(self, args):
         if 'email' not in args:
             return False, bad_request("email invalid")
 
-        user_email = self.db.find_first_object(UserEmail, UserEmail.email == args['email'])
-        if user_email is None:
-            return False, not_found("email does not exist in DB")
-
-        uid = user_email.user.id
-        hid = g.hackathon.id
-        ahl = self.db.find_first_object(AdminHackathonRel, AdminHackathonRel.user_id == uid,
-                                        AdminHackathonRel.hackathon_id == hid)
-        if ahl is not None:
-            return True, 'aleady exist'
-
-        return True, 'passed'
+        return True, ''
 
 
     def create_admin(self, args):
         # validate args
-        status, info = self.validate_created_args(args)
+        status, resp = self.__validate_created_args(args)
         if not status:
-            return info
-        elif info == 'aleady exist':
-            return ok()
+            return resp
 
         try:
             user_email = self.db.find_first_object(UserEmail, UserEmail.email == args['email'])
-            ahl = AdminHackathonRel(user_id=user_email.user.id,
-                                    role_type=args['role_type'],
-                                    hackathon_id=g.hackathon.id,
-                                    status=1,
-                                    remarks=args['remarks'],
-                                    create_time=get_now())
-            self.db.add_object(ahl)
+            if user_email is None:
+                return not_found("email does not exist in DB")
+
+            uid = user_email.user.id
+            hid = g.hackathon.id
+            ahl = self.db.find_first_object(AdminHackathonRel,
+                                            AdminHackathonRel.user_id == uid,
+                                            AdminHackathonRel.hackathon_id == hid)
+            if ahl is None:
+                ahl = AdminHackathonRel(user_id=user_email.user.id,
+                                        role_type=args['role_type'],
+                                        hackathon_id=g.hackathon.id,
+                                        status=AdminUserHackathonRelStates.Actived,
+                                        remarks=args['remarks'],
+                                        create_time=get_now())
+                self.db.add_object(ahl)
             return ok()
         except Exception as e:
             log.error(e)
             return internal_server_error("create admin failed")
 
 
-    def parse_updated_args(self, args):
-        ahl = self.db.find_first_object(AdminHackathonRel, AdminHackathonRel.id == args['id'])
+    def parse_updated_args(self, ahl, args):
         if ahl is None:
-            return False, bad_request("invalid id")
+            return False, not_found("invalid id")
+
         update_items = dict(dict(args).viewitems() - ahl.dic().viewitems())
-        update_items.pop('user_id', 'pass')
-        update_items.pop('hackathon_id', 'pass')
-        update_items.pop('email', 'pass')
+        update_items.pop('user_id', '')
+        update_items.pop('hackathon_id', '')
+        update_items.pop('email', '')
         update_items['update_time'] = get_now()
         return True, update_items
 
 
     def update_admin(self, args):
-        status, update_items = self.parse_updated_args(args)
-        if not status: return update_items
-
         ahl = self.db.find_first_object(AdminHackathonRel, AdminHackathonRel.id == args['id'])
+        status, update_items = self.parse_updated_args(ahl, args)
+        if not status:
+            return update_items
+
         try:
             self.db.update_object(ahl, **update_items)
-            return ok('update ahl success')
+            return ok('update hackathon admin success')
         except Exception as e:
             log.error(e)
             return internal_server_error(e)
@@ -125,14 +120,15 @@ class AdminManager(object):
 
         hackathon = self.db.find_first_object(Hackathon, Hackathon.id == ahl.hackathon_id)
         if hackathon.creator_id == ahl.user_id:
-            return False, bad_request("hackathon creator can not be deleted")
+            return False, precondition_failed("hackathon creator can not be deleted")
 
         return True, 'pass'
 
 
     def delete_admin(self, ahl_id):
         status, info = self.validate_deleted_args(ahl_id)
-        if not status: return info
+        if not status:
+            return info
 
         try:
             self.db.delete_all_objects(AdminHackathonRel, AdminHackathonRel.id == ahl_id)
