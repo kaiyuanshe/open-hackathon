@@ -183,6 +183,10 @@ class HACK_STATUS:
     ONLINE = 1
     OFFLINE = 2
 
+
 class TEMPLATE_STATUS:
-    ONLINE = 1
-    OFFLINE = 0
+    """
+    For status in db model Template
+    """
+    CREATED = 1
+    DELETED = 0

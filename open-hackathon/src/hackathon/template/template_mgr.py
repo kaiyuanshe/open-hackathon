@@ -24,53 +24,91 @@ THE SOFTWARE.
 """
 
 import sys
-import uuid
+
 sys.path.append("..")
-from hackathon.database.models import Template, DockerHostServer
-from hackathon.database import db_adapter
-from hackathon.hack import hack_manager
-from flask import g
-from hackathon.hackathon_response import *
-from datetime import timedelta
-from hackathon.functions import get_now
+
+from hackathon.database.models import (
+    Template,
+    DockerHostServer,
+)
+from hackathon.database import (
+    db_adapter,
+)
+from hackathon.hack import (
+    hack_manager,
+)
+from hackathon.hackathon_response import (
+    not_found,
+    bad_request,
+    internal_server_error,
+    ok,
+)
+from hackathon.functions import (
+    get_now,
+)
+from hackathon.enum import (
+    TEMPLATE_STATUS,
+)
+from hackathon.template.docker_template_unit import (
+    DockerTemplateUnit,
+)
+from hackathon.template.docker_template import (
+    DockerTemplate,
+)
+from hackathon.template.base_template import (
+    BaseTemplate,
+)
+from hackathon.scheduler import (
+    scheduler,
+)
+from hackathon.azureformation.fileService import (
+    file_service,
+)
+from hackathon.functions import (
+    safe_get_config,
+)
+from hackathon.log import (
+    log,
+)
+from flask import (
+    g,
+)
+from datetime import (
+    timedelta,
+)
+import uuid
 import time
-from hackathon.enum import TEMPLATE_STATUS
-from hackathon.template.docker_template_unit import DockerTemplateUnit
-from hackathon.template.docker_template import DockerTemplate
-from hackathon.template.base_template import BaseTemplate
-from hackathon.scheduler import scheduler
 import requests
-from hackathon.azureformation.fileService import file_service
-from hackathon.functions import safe_get_config
 
 
 class TemplateManager(object):
-    def __init__(self, db_adapter):
-        self.db = db_adapter
 
-    def get_template_list(self, hackathon_name):
+    def get_created_template_list(self, hackathon_name):
+        """
+        Get created template list of given hackathon
+        :param hackathon_name:
+        :return:
+        """
         hackathon = hack_manager.get_hackathon_by_name(hackathon_name)
         if hackathon is None:
-            return not_found('hackathon not found')
-        hack_id = hackathon.id
-        templates = self.db.find_all_objects_by(Template, hackathon_id=hack_id)
-        return map(lambda u: u.dic(), templates)
-
+            return not_found('hackathon [%s] not found' % hackathon_name)
+        created_templates = db_adapter.find_all_objects_by(Template,
+                                                           hackathon_id=hackathon.id,
+                                                           status=TEMPLATE_STATUS.CREATED)
+        return map(lambda u: u.dic(), created_templates)
 
     def get_template_by_id(self, id):
-        return self.db.find_first_object(Template, Template.id == id)
-
+        return db_adapter.find_first_object(Template, Template.id == id)
 
     def validate_created_args(self, args):
         if "name" not in args:
             return False, bad_request("template name invalid")
 
-        template = self.db.find_first_object(Template, Template.name == args['name'])
+        template = db_adapter.find_first_object(Template, Template.name == args['name'])
         if template is not None:
             return False, bad_request("template aready exist")
 
         return True, "pass"
-
 
     def save_args_to_file(self, args):
         try:
@@ -83,7 +121,6 @@ class TemplateManager(object):
             log.error(ex)
             return None
 
-
     def upload_template_to_azure(self, path):
         template_container = safe_get_config("storage.template_container", "templates")
 
@@ -93,7 +130,6 @@ class TemplateManager(object):
         except Exception as ex:
             log.error(ex)
             return None
-
 
     def create_template(self, args):
         # create template step one : args validate
@@ -118,17 +154,16 @@ class TemplateManager(object):
             args['creator_id'] = g.user.id
             args['update_time'] = get_now()
             args['hackathon_id'] = g.hackathon.id
-            args['status'] = TEMPLATE_STATUS.ONLINE
-            return self.db.add_object_kwargs(Template, **args)
+            args['status'] = TEMPLATE_STATUS.CREATED
+            return db_adapter.add_object_kwargs(Template, **args)
         except Exception as ex:
             log.error(ex)
             return internal_server_error("insert record into template DB failed")
 
-
     def update_template(self, args):
         if "name" not in args:
             return bad_request("template name invalid")
-        template = self.db.find_first_object(Template, Template.name == args['name'])
+        template = db_adapter.find_first_object(Template, Template.name == args['name'])
 
         if template is None:
             return bad_request("template doesn't exist")
@@ -137,29 +172,27 @@ class TemplateManager(object):
             args['update_time'] = get_now()
             update_items = dict(dict(args).viewitems() - template.dic().viewitems())
             log.debug("update a exist hackathon :" + str(args))
-            self.db.update_object(template, **update_items)
+            db_adapter.update_object(template, **update_items)
             return ok("update template success")
         except Exception as ex:
             log.error(ex)
             return internal_server_error("update template failed :" + ex.message)
-
 
     def delete_template(self, id):
         log.debug("delete or disable a exist template")
         try:
             template = self.get_template_by_id(id)
             args = {}
-            args['status'] = TEMPLATE_STATUS.OFFLINE
+            args['status'] = TEMPLATE_STATUS.DELETED
             args['update_time'] = get_now()
-            self.db.update_object(template, args)
+            db_adapter.update_object(template, args)
             return ok("delete or disable template success")
         except Exception as ex:
             log.error(ex)
             return internal_server_error("disable or delete failed")
 
-
     def pull_images(self, image_name):
-        hosts = self.db.find_all_objects(DockerHostServer, DockerHostServer.hackathon_id == g.hackathon.id)
+        hosts = db_adapter.find_all_objects(DockerHostServer, DockerHostServer.hackathon_id == g.hackathon.id)
         docker_host_api = map(lambda x: x.public_docker_api_port, hosts)
         for api in docker_host_api:
             url = api + "/images/create?fromImage=" + image_name
@@ -169,7 +202,7 @@ class TemplateManager(object):
             scheduler.add_job(requests.post, 'date', run_date=exec_time, args=[url])
 
 
-template_manager = TemplateManager(db_adapter)
+template_manager = TemplateManager()
 
 # template_manager.create_template({
 # "expr_name": "test",

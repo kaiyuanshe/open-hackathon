@@ -109,11 +109,7 @@ class AdminRegisterResource(Resource):
 class AdminHackathonTemplateResource(Resource):
     @hackathon_name_required
     def get(self):
-        # parse = reqparse.RequestParser()
-        # parse.add_argument('hid', type=int, location='args', required=True)
-        # args = parse.parse_args()
-        # return map(lambda u: u.dic(), db_adapter.find_all_objects_by(Template, hackathon_id=args['hid']))
-        return [t.dic() for t in g.hackathon.templates.all()]
+        return template_manager.get_created_template_list(g.hackathon.name)
 
     # create template for hacakthon
     @admin_privilege_required

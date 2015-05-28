@@ -102,8 +102,11 @@
         <td><a href="${url}">下载</a></td>
         <td>${virtual_environment_count}</td>
         <td>${moment(create_time).format('YYYY/MM/DD HH:mm')}</td>
-        <td>${update_time}</td>
+        <td>${moment(update_time).format('YYYY/MM/DD HH:mm')}</td>
         <td class="col-action">
+            <a class="btn btn-info btn-sm" href="">
+                <i class="fa fa-edit "></i>
+            </a>
             <a class="btn btn-danger btn-sm" href="#" data-target="#confirm_modal" data-toggle="modal">
                 <i class="fa fa-trash-o "></i>
             </a>
@@ -227,4 +230,5 @@
 <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
 <script type="text/javascript" src="/static/js/jquery/jquery.tmpl.min.js"></script>
 <script type="text/javascript" src="/static/js/views/oh.template.js"></script>
+<script type="text/javascript" src="/static/js/jquery/moment.min.js"></script>
 {% endblock %}
