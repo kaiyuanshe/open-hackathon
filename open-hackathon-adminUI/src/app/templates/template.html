@@ -14,6 +14,9 @@
                         <th>#</th>
                         <th>名称</th>
                         <th>模板文件</th>
+                        <th>模板单元数</th>
+                        <th>创建时间</th>
+                        <th>更新时间</th>
                         <th>操作</th>
                     </tr>
                 </thead>
@@ -97,6 +100,9 @@
         <td>${$item.getIndex()}</td>
         <td>${name}</td>
         <td><a href="${url}">下载</a></td>
+        <td>${virtual_environment_count}</td>
+        <td>${moment(create_time).format('YYYY/MM/DD HH:mm')}</td>
+        <td>${update_time}</td>
         <td class="col-action">
             <a class="btn btn-danger btn-sm" href="#" data-target="#confirm_modal" data-toggle="modal">
                 <i class="fa fa-trash-o "></i>
