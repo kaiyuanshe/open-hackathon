@@ -30,13 +30,13 @@ sys.path.append("..")
 from app.database.models import *
 from app.log import log
 from app.database import db_adapter
-from datetime import datetime, timedelta
 from app.constants import HTTP_HEADER
 from app.enum import EmailStatus
-from app.functions import safe_get_config
+from app.functions import safe_get_config, get_now
 from flask import request, g
 import uuid
 from app.md5 import encode
+from datetime import timedelta
 
 
 class AdminManager(object):
@@ -44,7 +44,7 @@ class AdminManager(object):
         self.db = db_adapter
 
     def __generate_api_token(self, admin):
-        token_issue_date = datetime.utcnow()
+        token_issue_date = get_now()
         token_expire_date = token_issue_date + timedelta(
             minutes=safe_get_config("login/token_expiration_minutes", 1440))
         user_token = UserToken(token=str(uuid.uuid1()),
@@ -56,9 +56,37 @@ class AdminManager(object):
 
     def __validate_token(self, token):
         t = self.db.find_first_object(UserToken, token=token)
-        if t is not None and t.expire_date >= datetime.utcnow():
+        if t is not None and t.expire_date >= get_now():
             return t.user
         return None
+
+    def __create_or_update_email(self, user, email_info):
+        email = email_info['email']
+        primary_email = email_info['primary']
+        verified = email_info['verified']
+        existed = self.db.find_first_object_by(UserEmail, email=email)
+        if existed is None:
+            user_email = UserEmail(name=user.name,
+                                   email=email,
+                                   primary_email=primary_email,
+                                   verified=verified,
+                                   user=user)
+            self.db.add_object(user_email)
+        else:
+            existed.primary_email = primary_email
+            existed.verified = verified
+            existed.name = user.name
+            self.db.commit()
+
+    def __get_existing_user(self, openid, email_list):
+        # find user by email first in case that email registered in multiple oauth providers
+        emails = [e["email"] for e in email_list]
+        if len(emails):
+            ues = self.db.find_first_object(UserEmail, UserEmail.email.in_(emails))
+            if ues is not None:
+                return ues.user
+
+        return self.db.find_first_object_by(User, openid=openid)
 
     def db_logout(self, admin):
         try:
@@ -84,8 +112,8 @@ class AdminManager(object):
 
     def oauth_db_login(self, openid, **kwargs):
         # update db
-        email_info = kwargs['email_info']
-        admin = self.db.find_first_object_by(User, openid=openid)
+        email_list = kwargs['email_list']
+        admin = self.__get_existing_user(openid, email_list)
         if admin is not None:
             self.db.update_object(admin,
                                   provider=kwargs["provider"],
@@ -93,17 +121,9 @@ class AdminManager(object):
                                   nickname=kwargs["nickname"],
                                   access_token=kwargs["access_token"],
                                   avatar_url=kwargs["avatar_url"],
-                                  last_login_time=datetime.utcnow(),
+                                  last_login_time=get_now(),
                                   online=1)
-            for n in range(0, len(email_info)):
-                email = email_info[n]['email']
-                primary_email = email_info[n]['primary']
-                verified = email_info[n]['verified']
-                if self.db.find_first_object_by(UserEmail, email=email) is None:
-                    adminemail = UserEmail(name=kwargs['name'], email=email, primary_email=primary_email,
-                                           verified=verified, user=admin)
-                    self.db.add_object(adminemail)
-            self.db.commit()
+            map(lambda x: self.__create_or_update_email(admin, x), email_list)
         else:
             admin = User(openid=openid,
                          name=kwargs["name"],
@@ -114,15 +134,7 @@ class AdminManager(object):
                          online=1)
 
             self.db.add_object(admin)
-
-            for n in email_info:
-                email = n['email']
-                primary_email = n['primary']
-                verified = n['verified']
-                adminemail = UserEmail(name=kwargs['name'], email=email, primary_email=primary_email,
-                                       verified=verified, user=admin)
-                self.db.add_object(adminemail)
-                self.db.commit()
+            map(lambda x: self.__create_or_update_email(admin, x), email_list)
 
         # generate API token
         token = self.__generate_api_token(admin)
