@@ -79,24 +79,15 @@ class QQLogin(LoginProviderBase):
         user_info_resp = get_remote(url)
         log.debug("get user info from qq:" + user_info_resp)
         user_info = convert(json.loads(user_info_resp))
-        email_info = [
-            {'name': user_info["nickname"], 'email': None, 'id': id, 'verified': 1, 'primary': 1,
-             'nickname': user_info["nickname"], 'avatar_url': user_info["figureurl"]}]
+        email_list = []
         user_with_token = self.um.db_login(openid,
                                            provider=OAUTH_PROVIDER.QQ,
                                            name=user_info["nickname"],
                                            nickname=user_info["nickname"],
                                            access_token=access_token,
-                                           email_info=email_info,
+                                           email_list=email_list,
                                            avatar_url=user_info["figureurl"])
 
-        # # login flask
-        # user = user_with_token["user"]
-        # log.info("QQ user login successfully:" + repr(user))
-        # hackathon_name = args.get('hackathon_name')
-        # detail = self.um.get_user_detail_info(user, hackathon_name=hackathon_name)
-        # detail["token"] = user_with_token["token"].token
-        # return detail
         return self.user_display_info_with_token(user_with_token)
 
 
@@ -109,7 +100,6 @@ class GithubLogin(LoginProviderBase):
         # get user info
 
         user_info_resp = get_remote(get_config('login.github.user_info_url') + access_token)
-        # conn.request('GET',url,'',{'user-agent':'flask'})
         log.debug("get user info from github:" + user_info_resp + '\n')
         # example:
         #
@@ -137,15 +127,15 @@ class GithubLogin(LoginProviderBase):
         # get user primary email
         email_info_resp = get_remote(get_config('login.github.emails_info_url') + access_token)
         log.debug("get email from github:" + email_info_resp + '\n')
+
         # email_info include all user email provided by github
-        # email is user's primary email
-        email_info = json.loads(email_info_resp)
+        email_list = json.loads(email_info_resp)
         user_with_token = self.um.db_login(openid,
                                            provider=OAUTH_PROVIDER.GITHUB,
                                            name=name,
                                            nickname=nickname,
                                            access_token=access_token,
-                                           email_info=email_info,
+                                           email_list=email_list,
                                            avatar_url=avatar)
         return self.user_display_info_with_token(user_with_token)
 
@@ -157,10 +147,6 @@ class GitcafeLogin(LoginProviderBase):
     def login(self, args):
         token = args.get('access_token')
         value = "Bearer " + token
-        # opener = urllib2.build_opener(urllib2.HTTPHandler)
-        # request = urllib2.Request(get_config("login.gitcafe.user_info_url"))
-        # request.add_header("Authorization", value)
-        # user_info = opener.open(request).read()
 
         header = {"Authorization": value}
         user_info = get_remote(get_config("login.gitcafe.user_info_url"), headers=header)
@@ -177,15 +163,20 @@ class GitcafeLogin(LoginProviderBase):
             avatar_url = info['avatar_url']
         else:
             avatar_url = "https" + info['avatar_url'][4:]
-        email_info = [
-            {'name': name, 'email': email, 'id': id, 'verified': 1, 'primary': 1, 'nickname': nickname,
-             'avatar_url': avatar_url}]
+        email_list = [
+            {
+                'name': name,
+                'email': email,
+                'verified': 1,
+                'primary': 1
+            }
+        ]
         user_with_token = self.um.db_login(id,
                                            provider=OAUTH_PROVIDER.GITCAFE,
                                            name=name,
                                            nickname=nickname,
                                            access_token=token,
-                                           email_info=email_info,
+                                           email_list=email_list,
                                            avatar_url=avatar_url)
         return self.user_display_info_with_token(user_with_token)
 
@@ -220,15 +211,20 @@ class WeiboLogin(LoginProviderBase):
         avatar_url = user_info['avatar_hd']
 
         # get user email
-        email_info = []
+        email_list = []
         try:
             email_info_resp = get_remote(get_config('login.weibo.email_info_url') + access_token)
             log.debug("get email from github:" + email_info_resp)
             email_info_resp_json = json.loads(email_info_resp)
             email = email_info_resp_json['email']
-            email_info = [
-                {'name': name, 'email': email, 'id': openid, 'verified': 1, 'primary': 1, 'nickname': nickname,
-                 'avatar_url': avatar_url}]
+            email_list = [
+                {
+                    'name': name,
+                    'email': email,
+                    'verified': 1,
+                    'primary': 1
+                }
+            ]
         except Exception as e:
             log.debug("fail to get user email from weibo")
             log.error(e)
@@ -238,7 +234,7 @@ class WeiboLogin(LoginProviderBase):
                                            name=name,
                                            nickname=nickname,
                                            access_token=access_token,
-                                           email_info=email_info,
+                                           email_list=email_list,
                                            avatar_url=avatar_url)
         return self.user_display_info_with_token(user_with_token)
 
@@ -254,7 +250,6 @@ class LiveLogin(LoginProviderBase):
         log.debug(get_config('login.live.user_info_url'))
 
         user_info_resp = get_remote(get_config('login.live.user_info_url') + access_token)
-        # conn.request('GET',url,'',{'user-agent':'flask'})
         log.debug("get user info from live:" + user_info_resp)
         # user.info
         # {u'first_name': u'Ice', u'last_name': u'Shi', u'name': u'Ice Shi', u'locale': u'en_US', \
@@ -272,15 +267,20 @@ class LiveLogin(LoginProviderBase):
 
 
         email = user_info["emails"]["account"]
-        email_info = [
-            {'name': name, 'email': email, 'id': openid, 'verified': 1, 'primary': 1, 'nickname': name,
-             'avatar_url': None}]
+        email_list = [
+            {
+                'name': name,
+                'email': email,
+                'verified': 1,
+                'primary': 1
+            }
+        ]
         user_with_token = self.um.db_login(openid,
                                            provider=OAUTH_PROVIDER.LIVE,
                                            name=name,
                                            nickname=name,
                                            access_token=access_token,
-                                           email_info=email_info,
+                                           email_list=email_list,
                                            avatar_url=None)
         return self.user_display_info_with_token(user_with_token)
 

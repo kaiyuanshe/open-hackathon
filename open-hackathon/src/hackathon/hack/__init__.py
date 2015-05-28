@@ -387,13 +387,13 @@ class HackathonManager():
 
     def get_recyclable_hackathon_list(self):
         all = self.db.find_all_objects(Hackathon)
-        recyclable = filter(lambda h: self.__is_recycle_enabled(h), all())
+        recyclable = filter(lambda h: self.__is_recycle_enabled(h), all)
         return [h.id for h in recyclable]
 
 
     def get_pre_allocate_enabled_hackathoon_list(self):
         all = self.db.find_all_objects(Hackathon)
-        pre_list = filter(lambda h: self.is_pre_allocate_enabled(h), all())
+        pre_list = filter(lambda h: self.is_pre_allocate_enabled(h), all)
         return [h.id for h in pre_list]
 
 
