@@ -25,7 +25,6 @@ THE SOFTWARE.
 
 import sys
 import uuid
-
 sys.path.append("..")
 from hackathon.database.models import Template, DockerHostServer
 from hackathon.database import db_adapter
@@ -41,7 +40,7 @@ from hackathon.template.docker_template import DockerTemplate
 from hackathon.template.base_template import BaseTemplate
 from hackathon.scheduler import scheduler
 import requests
-from hackathon.azureformation import fileService
+from hackathon.azureformation.fileService import file_service
 from hackathon.functions import safe_get_config
 
 
@@ -49,16 +48,28 @@ class TemplateManager(object):
     def __init__(self, db_adapter):
         self.db = db_adapter
 
+    def get_template_list(self, hackathon_name):
+        hackathon = hack_manager.get_hackathon_by_name(hackathon_name)
+        if hackathon is None:
+            return not_found('hackathon not found')
+        hack_id = hackathon.id
+        templates = self.db.find_all_objects_by(Template, hackathon_id=hack_id)
+        return map(lambda u: u.dic(), templates)
+
+
     def get_template_by_id(self, id):
         return self.db.find_first_object(Template, Template.id == id)
 
-    def create_template_validate(self, args):
+
+    def validate_created_args(self, args):
         if "name" not in args:
-            return bad_request("template perporities lost name")
+            return False, bad_request("template name invalid")
 
         template = self.db.find_first_object(Template, Template.name == args['name'])
         if template is not None:
-            return bad_request("template aready exist")
+            return False, bad_request("template aready exist")
+
+        return True, "pass"
 
 
     def save_args_to_file(self, args):
@@ -75,10 +86,10 @@ class TemplateManager(object):
 
     def upload_template_to_azure(self, path):
         template_container = safe_get_config("storage.template_container", "templates")
+
         try:
-            fileService.create_container_in_storage(template_manager, "container")
             real_name = g.hackathon.name + "/" + str(uuid.uuid1())[0:9] + time.strftime("%Y%m%d%H%M%S") + ".js"
-            return fileService.upload_file_to_azure_from_path(path, template_container, real_name)
+            return file_service.upload_file_to_azure_from_path(path, template_container, real_name)
         except Exception as ex:
             log.error(ex)
             return None
@@ -86,9 +97,11 @@ class TemplateManager(object):
 
     def create_template(self, args):
         # create template step one : args validate
-        self.create_template_validate(args)
+        status, return_info = self.validate_created_args(args)
+        if not status:
+            return return_info
 
-        # create template step two : prase args and trans to file
+        # create template step two : parse args and trans to file
         local_path = self.save_args_to_file(args)
         if local_path is None:
             return internal_server_error("save template as local file failed")
@@ -98,7 +111,7 @@ class TemplateManager(object):
         if url is None:
             return internal_server_error("upload template file failed")
 
-            # create template step Four : insert into DB
+        # create template step Four : insert into DB
         try:
             log.debug("create template: %r" % args)
             args['url'] = url
@@ -109,12 +122,12 @@ class TemplateManager(object):
             return self.db.add_object_kwargs(Template, **args)
         except Exception as ex:
             log.error(ex)
-            return internal_server_error("insert recorde into template DB failed")
+            return internal_server_error("insert record into template DB failed")
 
 
     def update_template(self, args):
         if "name" not in args:
-            return bad_request("template perporities lost name")
+            return bad_request("template name invalid")
         template = self.db.find_first_object(Template, Template.name == args['name'])
 
         if template is None:
@@ -128,7 +141,7 @@ class TemplateManager(object):
             return ok("update template success")
         except Exception as ex:
             log.error(ex)
-            return internal_server_error("create or update failed because of raising Exception")
+            return internal_server_error("update template failed :" + ex.message)
 
 
     def delete_template(self, id):
@@ -150,7 +163,7 @@ class TemplateManager(object):
         docker_host_api = map(lambda x: x.public_docker_api_port, hosts)
         for api in docker_host_api:
             url = api + "/images/create?fromImage=" + image_name
-            exec_time = datetime.now() + timedelta(seconds=2)
+            exec_time = get_now() + timedelta(seconds=2)
             log.debug(" send request to pull image:" + url)
             # use requests.post instead of post_to_remote, because req.contect can not be json.loads()
             scheduler.add_job(requests.post, 'date', run_date=exec_time, args=[url])
@@ -161,6 +174,6 @@ template_manager = TemplateManager(db_adapter)
 # template_manager.create_template({
 # "expr_name": "test",
 # "virtual_environments": [
-#         {}, {}
-#     ]
+# {}, {}
+# ]
 # })

@@ -155,6 +155,7 @@ class UserManager(object):
             "name": user.name,
             "nickname": user.nickname,
             "email": [e.dic() for e in user.emails.all()],
+            "provider": user.provider,
             "avatar_url": user.avatar_url,
             "online": user.online,
             "create_time": str(user.create_time),

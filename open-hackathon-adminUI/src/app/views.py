@@ -266,3 +266,9 @@ def edithackathon():
 @login_required
 def template():
     return __render("/template.html")
+
+
+@app.route("/adminmgr")
+@login_required
+def adminmgr():
+    return __render("/adminmgr.html")

@@ -26,27 +26,17 @@ import sys
 
 sys.path.append("..")
 
-from flask_restful import Resource, reqparse
-from hackathon import api, app
-from hackathon.health import report_health
+from hackathon import api
 from flask_restful import Resource, reqparse
 from hackathon.expr import expr_manager
-from hackathon.expr.expr_mgr import open_check_expr, recycle_expr_scheduler
-from hackathon.database.models import Announcement, Template
-from hackathon.user.login import *
+from hackathon.user.login import login_providers, user_manager
 from flask import g, request
-from hackathon.database import db_adapter, db_session
-from hackathon.decorators import token_required, hackathon_name_required, admin_privilege_required
-from hackathon.user.user_functions import get_user_experiment
+from hackathon.decorators import token_required, hackathon_name_required
 from hackathon.remote.guacamole import GuacamoleInfo
 from hackathon.hack import hack_manager
-import time
 from hackathon.registration.register_mgr import register_manager
-from hackathon.template.template_mgr import template_manager
 from hackathon.hackathon_response import *
-from hackathon.azureformation.azureCertManagement import (
-    azure_cert_management,
-)
+import json
 from hackathon.enum import RGStatus
 
 
@@ -153,12 +143,11 @@ class UserExperimentResource(Resource):
 
 
 class UserExperimentListResource(Resource):
-    @token_required
     def get(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('uid', type=int, location='args', required=True)
+        parse.add_argument('user_id', type=int, location='args', required=True)
         args = parse.parse_args()
-        return get_user_experiment(args['uid'])
+        return expr_manager.get_expr_list_by_user_id(args['user_id'])
 
 
 def register_user_routes():
