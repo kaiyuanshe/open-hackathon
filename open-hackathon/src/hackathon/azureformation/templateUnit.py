@@ -39,8 +39,9 @@ from azure.servicemanagement import (
 from threading import (
     current_thread,
 )
-import datetime
-
+from hackathon.functions import (
+    get_now
+)
 
 class TemplateUnit:
     # template name in virtual_environment
@@ -151,7 +152,7 @@ class TemplateUnit:
         i = self.virtual_environment[self.T_I]
         sa = self.virtual_environment[self.T_SA]
         c = self.virtual_environment[self.T_C]
-        now = datetime.datetime.now()
+        now = get_now()
         blob = self.BLOB_BASE % (i[self.T_I_N],
                                  str(now.year),
                                  str(now.month),
