@@ -161,5 +161,15 @@ class UserManager(object):
             "last_login_time": str(user.last_login_time)
         }
 
+    def team_list(self, hackathon_id, name, number):
+        list = self.db.distinct(UserHackathonRel, hackathon_id, team_name=name+'*')
+        if list is not None:
+            return list
+        else:
+            return not_found("Oops, no team yet~")
+
+    def team_member(self, hackathon_id, team_name):
+        team_member = self.db.find_all_objects_by(UserHackathonRel, hackathon_id, team_name)
+        return team_member
 
 user_manager = UserManager(db_adapter)

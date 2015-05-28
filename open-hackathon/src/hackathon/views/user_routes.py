@@ -160,7 +160,14 @@ class UserExperimentListResource(Resource):
         args = parse.parse_args()
         return get_user_experiment(args['uid'])
 
+class HackathonTeamListResource(Resource)
+    @token_required
+    @hackathon_name_required
 
+    def get(self):
+        id = g.hackathon.id
+        if args['']
+        eturn get_user_experiment(id, args['kw'],arg)
 def register_user_routes():
     """
     register API routes for hackathon UI user
