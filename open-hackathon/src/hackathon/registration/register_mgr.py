@@ -51,30 +51,45 @@ class RegisterManger(object):
     def get_registration_by_user_and_hackathon(self, user_id, hackathon_id):
         return self.db.find_first_object_by(UserHackathonRel, user_id=user_id, hackathon_id=hackathon_id)
 
-    def create_registration(self, hackathon, args):
+    def check_register_enrollment(self, hackathon):
+        max = dict(hackathon.basic_info)['max_enrollment']
+        if max == 0:  # means no limit
+            return True
+        else:
+            current_num = self.db.count(UserHackathonRel,UserHackathonRel.hackathon_id==hackathon.id)
+            return max > current_num
+
+    def validate_created_args(self, hackathon, args):
         log.debug("create_or_update_register: %r" % args)
         if "user_id" not in args:
-            return bad_request("user id invalid")
+            return False, bad_request("user id invalid")
 
+        user_id = args['user_id']
+        register = self.get_registration_by_user_and_hackathon(user_id, hackathon.id)
+        if register is not None and register.deleted == 0:
+            log.debug("user %d already registered on hackathon %d" % (user_id, hackathon.id))
+            return False, register.dic()
+
+        if hackathon.registration_start_time > get_now():
+            return False, precondition_failed("hackathon registration not opened", friendly_message="报名尚未开始")
+
+        if hackathon.registration_end_time < get_now():
+            return False, precondition_failed("hackathon registration has ended", friendly_message="报名已经结束")
+
+        if not self.check_register_enrollment(hackathon):
+            return False, precondition_failed("hackathon registers reach the upper threshold", friendly_message="报名人数已满")
+
+    def create_registration(self, hackathon, args):
+        statue, return_info = self.validate_created_args(hackathon,args)
+        if not statue:
+            return return_info
         try:
-            user_id = args['user_id']
-            register = self.get_registration_by_user_and_hackathon(user_id, hackathon.id)
-            if register is not None and register.deleted == 0:
-                log.debug("user %d already registered on hackathon %d" % (user_id, hackathon.id))
-                return register.dic()
-
-            if hackathon.registration_start_time > get_now():
-                return precondition_failed("hackathon registration not opened", friendly_message="报名尚未开始")
-
-            if hackathon.registration_end_time < get_now():
-                return precondition_failed("hackathon registration has ended", friendly_message="报名已经结束")
-
             args["status"] = hackathon.is_auto_approve() and RGStatus.AUTO_PASSED or RGStatus.UNAUDIT
-
             return self.db.add_object_kwargs(UserHackathonRel, **args).dic()
         except Exception as e:
             log.error(e)
             return internal_server_error("fail to create or update register")
+
 
     def update_registration(self, args):
         log.debug("update_registration: %r" % args)
