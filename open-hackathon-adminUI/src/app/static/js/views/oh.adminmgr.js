@@ -59,7 +59,7 @@
     // set an empty form for new
     function resetForm(){
          $('#adminform').data('bootstrapValidator').resetForm(true);
-         remarks:$.trim($('#remarks').val())
+         $('#remarks').val('')
     }
 
     // initial table to show admin list
@@ -172,6 +172,7 @@
         $('[data-type="new"],[data-type="cancel"]').click(function(e){
             isupdate = false ;
             $('#adminform').data({id:undefined}).find('[type="submit"]').removeAttr('disabled')
+            $('#adminform').data({id:undefined}).find('#admin_email').removeAttr('disabled')
             resetForm();
             toggleTable();
         });

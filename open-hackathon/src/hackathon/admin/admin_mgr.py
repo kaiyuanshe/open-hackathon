@@ -87,23 +87,33 @@ class AdminManager(object):
             return internal_server_error("create admin failed")
 
 
-    def parse_updated_args(self, ahl, args):
-        if ahl is None:
-            return False, not_found("invalid id")
+    def validate_updated_args(self, args):
+        if 'id' not in args:
+            return False, bad_request("invalid id")
 
-        update_items = dict(dict(args).viewitems() - ahl.dic().viewitems())
-        update_items.pop('user_id', '')
-        update_items.pop('hackathon_id', '')
-        update_items.pop('email', '')
+        ahl = self.db.find_first_object(AdminHackathonRel, AdminHackathonRel.id == args['id'])
+        if ahl is None:
+            return False, not_found("ahl does not exist")
+
+        return True, ahl
+
+
+    def generate_update_items(self, args):
+        update_items = {}
         update_items['update_time'] = get_now()
-        return True, update_items
+        if 'role_type' in args:
+            update_items['role_type'] = args['role_type']
+        if 'remarks' in args:
+            update_items['remarks'] = args['remarks']
+        return update_items
 
 
     def update_admin(self, args):
-        ahl = self.db.find_first_object(AdminHackathonRel, AdminHackathonRel.id == args['id'])
-        status, update_items = self.parse_updated_args(ahl, args)
+        status, ahl = self.validate_updated_args(args)
         if not status:
-            return update_items
+            return ahl
+
+        update_items = self.generate_update_items(args)
 
         try:
             self.db.update_object(ahl, **update_items)

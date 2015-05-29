@@ -28,17 +28,16 @@ import sys
 
 sys.path.append("../src/hackathon")
 import datetime
-from hackathon.enum import RGStatus, EStatus
+from hackathon.enum import RGStatus
 from hackathon.hack import HackathonManager
 from hackathon.hackathon_response import *
 from hackathon.functions import get_now
 import unittest
 from hackathon.registration.register_mgr import RegisterManger, register_manager
-from hackathon.database.models import UserHackathonRel, UserEmail, Hackathon, Experiment
+from hackathon.database.models import UserHackathonRel, Hackathon, Experiment
 from hackathon import app
 from mock import Mock, ANY, patch
 import mock
-from flask import g
 
 
 class TestUserHackathonRelManager(unittest.TestCase):
