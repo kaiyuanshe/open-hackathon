@@ -161,8 +161,8 @@ class UserManager(object):
             "last_login_time": str(user.last_login_time)
         }
 
-    def team_list(self, hackathon_id, name, number):
-        list = self.db.distinct(UserHackathonRel, hackathon_id, team_name=name+'*')
+    def team_list(self, id, name, number):
+        list = self.db.distinct(UserHackathonRel, hackathon_id=id, team_name=name)
         if list is not None:
             return list
         else:
