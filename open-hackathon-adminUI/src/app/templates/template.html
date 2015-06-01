@@ -194,25 +194,41 @@
         <div class="form-group has-feedback">
             <label class="col-md-3 control-label">远程连接协议</label>
             <div class="col-md-6 register">
-                <input type="text" class="form-control" name="remote-protocol">
+                <select class="form-control" name="remote-protocol">
+                    <option value="ssh">ssh</option>
+                    <option value="vnc">vnc</option>
+                    <option value="rdp">rdp</option>
+                </select>
             </div>
         </div>
         <div class="form-group has-feedback">
             <label class="col-md-3 control-label">远程连接端口</label>
             <div class="col-md-6 register">
-                <input type="text" class="form-control" name="remote-port">
+                <input type="text" class="form-control" name="remote-port" data-validate="true"
+                    data-bv-trigger="blur"
+                    required
+                    data-bv-notempty-message="远程连接端口是必需的，不能为空"
+                    >
             </div>
         </div>
         <div class="form-group has-feedback">
             <label class="col-md-3 control-label">用户名</label>
             <div class="col-md-6 register">
-                <input type="text" class="form-control" name="remote-username">
+                <input type="text" class="form-control" name="remote-username" data-validate="true"
+                    data-bv-trigger="blur"
+                    required
+                    data-bv-notempty-message="用户名是必需的，不能为空"
+                    >
             </div>
         </div>
         <div class="form-group has-feedback">
             <label class="col-md-3 control-label">密码</label>
             <div class="col-md-6 register">
-                <input type="text" class="form-control" name="remote-password">
+                <input type="text" class="form-control" name="remote-password" data-validate="true"
+                    data-bv-trigger="blur"
+                    required
+                    data-bv-notempty-message="密码是必需的，不能为空"
+                    >
             </div>
         </div>
         <div data-type="port-list">
@@ -225,39 +241,61 @@
     </div>
 </script>
 <script id="port_item" type="text/x-jquery-tmpl">
+    <hr />
     <div data-type="port-group">
         <div class="form-group has-feedback">
             <label class="col-md-3 control-label">端口名称</label>
             <div class="col-md-6 register">
-                <input type="text" class="form-control" name="name"
-                       data-bv-trigger="blur"
-                       required
-                       data-bv-notempty-message="名称是必需的，不能为空"
-                        >
+                <input type="text" class="form-control" name="name" data-validate="true"
+                    placeholder="请使用英文字母、数字和'_'（下划线）'-'(中划线)"
+                    data-bv-trigger="blur"
+                    required
+                    data-bv-notempty-message="名称是必需的，不能为空"
+                    pattern="^(?!_)(?!.*?_$)[a-zA-Z0-9_-]+$"
+                    data-bv-regexp-message="端口名称只能由英文字母的，数字和下划线"
+                    minlength="5"
+                    data-bv-stringlength-message="端口名称称必须至少有5个字符"
+                    >
             </div>
         </div>
         <div class="form-group has-feedback">
             <label class="col-md-3 control-label">端口号</label>
             <div class="col-md-6 register">
-                <input type="text" class="form-control" name="port">
+                <input type="text" class="form-control" name="port" data-validate="true"
+                    data-bv-trigger="blur"
+                    required
+                    data-bv-notempty-message="端口号是必需的，不能为空"
+                    >
             </div>
         </div>
         <div class="form-group has-feedback">
             <label class="col-md-3 control-label">是否公开</label>
             <div class="col-md-6 register">
-                <input type="text" class="form-control" name="public">
+                <select class="form-control" name="public">
+                    <option value="true">是</option>
+                    <option value="false">否</option>
+                </select>
             </div>
         </div>
         <div class="form-group has-feedback">
             <label class="col-md-3 control-label">端口协议</label>
             <div class="col-md-6 register">
-                <input type="text" class="form-control" name="protocol">
+                <select class="form-control" name="protocol">
+                    <option value="tcp">tcp</option>
+                    <option value="udp">udp</option>
+                </select>
             </div>
         </div>
         <div class="form-group has-feedback">
-            <label class="col-md-3 control-label">URL</label>
+            <label class="col-md-3 control-label">URL协议</label>
             <div class="col-md-6 register">
-                <input type="text" class="form-control" name="url">
+                <input type="text" class="form-control" name="url-protocol">
+            </div>
+        </div>
+        <div class="form-group has-feedback">
+            <label class="col-md-3 control-label">URL子路径</label>
+            <div class="col-md-6 register">
+                <input type="text" class="form-control" name="url-path">
             </div>
         </div>
     </div>

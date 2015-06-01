@@ -59,9 +59,20 @@
         if(data){
             // todo
         }
-        return port.appendTo(portlist);
+        port.appendTo(portlist);
+        addFieldValidate(port);
+        return port;
     }
 
+    function removeEmptyString(data){
+        var ans = [];
+        for(var i = 0; i < data.length; i++)
+            if(data[i] != '')
+                ans.push(data[i]);
+        return ans;
+    }
+
+    // data adaptor between front end form and back end api
     function getFormData(){
         var data = [];
         $('[data-type="template-unit-group"]').each(function(i,group){
@@ -71,7 +82,7 @@
                 protocol: $group.find('[name="remote-protocol"]').val(),
                 username: $group.find('[name="remote-username"]').val(),
                 password: $group.find('[name="remote-password"]').val(),
-                port: $group.find('[name="remote-port"]').val()
+                port: Number($group.find('[name="remote-port"]').val())
             }
             var ports = []
             ports.push({
@@ -80,35 +91,38 @@
                 public: true,
                 protocol: 'tcp'
             })
-            $('[data-type="port-group"]').each(function(i,portgroup){
+            $group.find('[data-type="port-group"]').each(function(i,portgroup){
                 var $portgroup = $(portgroup);
-                ports.push({
+                var port = {
                     name: $portgroup.find('[name="name"]').val(),
-                    port: $portgroup.find('[name="port"]').val(),
-                    public: $portgroup.find('[name="public"]').val(),
-                    protocol: $portgroup.find('[name="protocol"]').val(),
-                    url: $portgroup.find('[name="url"]').val()
-                })
+                    port: Number($portgroup.find('[name="port"]').val()),
+                    public: Boolean($portgroup.find('[name="public"]').val()),
+                    protocol: $portgroup.find('[name="protocol"]').val()
+                }
+                if($portgroup.find('[name="url-protocol"]').val().length > 0)
+                    port['url'] = $portgroup.find('[name="url-protocol"]').val() + '://{0}:{1}/' + $portgroup.find('[name="url-path"]').val()
+                ports.push(port)
             })
             data.push({
                 name: $group.find('[name="name"]').val(),
-                port: ports,
+                ports: ports,
                 remote: remote,
                 Image: $group.find('[name="image"]').val(),
-                Env: $group.find('[name="env"]').val().split(";"),
-                Cmd: $group.find('[name="cmd"]').val().split(" ")
+                Env: removeEmptyString($group.find('[name="env"]').val().split(";")),
+                Cmd: removeEmptyString($group.find('[name="cmd"]').val().split(" "))
             })
         })
         return {
             expr_name: $('#name').val(),
             description: $('#description').val(),
-            provider: $('#provider').val(),
+            provider: Number($('#provider').val()),
             virtual_environments: data
         };
     }
 
     function init(){
         var currentHackathon = oh.comm.getCurrentHackathon();
+
         var templateform = $('#templateform');
         templateform.bootstrapValidator().on('success.form.bv', function(e) {
                 e.preventDefault();
@@ -128,7 +142,6 @@
         templateform.on('click','[data-type="btn_add_port"]',function(e){
             createPort(this);
          });
-
 
         var confirm_modal = $('#confirm_modal').on('show.bs.modal',function(e){
             var item = $(e.relatedTarget).parents('tr').data('tmplItem').data;

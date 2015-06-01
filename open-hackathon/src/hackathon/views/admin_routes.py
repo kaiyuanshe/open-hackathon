@@ -115,7 +115,8 @@ class AdminHackathonTemplateResource(Resource):
     @admin_privilege_required
     def post(self):
         args = request.get_json()
-        return template_manager.create_template(args)
+        template = template_manager.create_template(args)
+        return {'azure_url': template.azure_url}, 200
 
     @admin_privilege_required
     def put(self):

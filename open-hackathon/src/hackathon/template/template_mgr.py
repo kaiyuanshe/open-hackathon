@@ -106,7 +106,7 @@ class TemplateManager(object):
         status, return_info = self.__check_create_args(args)
         if not status:
             return return_info
-        file_name = '%s-%s-%s.js' % (g.hackathon.name, args[BaseTemplate.EXPR_NAME], str(uuid.uuid1())[0:9])
+        file_name = '%s-%s-%s.js' % (g.hackathon.name, args[BaseTemplate.EXPR_NAME], str(uuid.uuid1())[0:8])
         # create template step 2 : parse args and trans to file
         url = self.__save_args_to_file(args, file_name)
         if url is None:

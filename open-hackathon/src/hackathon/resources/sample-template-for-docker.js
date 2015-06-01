@@ -54,6 +54,7 @@
             "WorkingDir": "",
             "NetworkDisabled": false,
             "MacAddress": "",
+            "ExposedPorts": {},
             "SecurityOpts": [""],
             "HostConfig":
             {
