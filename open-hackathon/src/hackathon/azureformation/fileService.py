@@ -30,7 +30,7 @@ import sys
 sys.path.append("..")
 from azure.storage import BlobService
 from hackathon.hackathon_response import *
-from hackathon.functions import get_config
+from hackathon.functions import get_config, safe_get_config
 
 
 class FileService():
@@ -43,6 +43,7 @@ class FileService():
             self.blob_service = BlobService(account_name=get_config("storage.account_name"),
                                             account_key=get_config("storage.account_key"),
                                             host_base=get_config("storage.blob_service_host_base"))
+
 
     def create_container_in_storage(self, container_name, access):
         """
@@ -83,6 +84,15 @@ class FileService():
                 return self.blob_service.make_blob_url(container_name, blob_name)
             else:
                 return None
+        except Exception as e:
+            log.error(e)
+            return None
+
+
+    def download_file_from_azure(self, container_name, blob_name, local_file):
+        try:
+            self.blob_service.get_blob_to_file(container_name, blob_name, local_file)
+            return local_file
         except Exception as e:
             log.error(e)
             return None

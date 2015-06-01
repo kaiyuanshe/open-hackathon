@@ -56,7 +56,7 @@ class RegisterManger(object):
         if max == 0:  # means no limit
             return True
         else:
-            current_num = self.db.count(UserHackathonRel,UserHackathonRel.hackathon_id==hackathon.id)
+            current_num = self.db.count(UserHackathonRel, UserHackathonRel.hackathon_id == hackathon.id)
             return max > current_num
 
     def validate_created_args(self, hackathon, args):
@@ -77,10 +77,11 @@ class RegisterManger(object):
             return False, precondition_failed("hackathon registration has ended", friendly_message="报名已经结束")
 
         if not self.check_register_enrollment(hackathon):
-            return False, precondition_failed("hackathon registers reach the upper threshold", friendly_message="报名人数已满")
+            return False, precondition_failed("hackathon registers reach the upper threshold",
+                                              friendly_message="报名人数已满")
 
     def create_registration(self, hackathon, args):
-        statue, return_info = self.validate_created_args(hackathon,args)
+        statue, return_info = self.validate_created_args(hackathon, args)
         if not statue:
             return return_info
         try:

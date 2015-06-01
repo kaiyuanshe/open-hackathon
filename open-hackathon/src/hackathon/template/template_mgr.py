@@ -22,11 +22,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
+import json
 
-import sys
+import os, sys
 import uuid
+
 sys.path.append("..")
-from hackathon.database.models import Template, DockerHostServer
+from hackathon.database.models import Template, DockerHostServer, Hackathon
 from hackathon.database import db_adapter
 from hackathon.hack import hack_manager
 from flask import g
@@ -42,6 +44,8 @@ from hackathon.scheduler import scheduler
 import requests
 from hackathon.azureformation.fileService import file_service
 from hackathon.functions import safe_get_config
+from hackathon.enum import HACK_STATUS
+import json
 
 
 class TemplateManager(object):
@@ -158,15 +162,71 @@ class TemplateManager(object):
             return internal_server_error("disable or delete failed")
 
 
-    def pull_images(self, image_name):
-        hosts = self.db.find_all_objects(DockerHostServer, DockerHostServer.hackathon_id == g.hackathon.id)
-        docker_host_api = map(lambda x: x.public_docker_api_port, hosts)
-        for api in docker_host_api:
-            url = api + "/images/create?fromImage=" + image_name
-            exec_time = get_now() + timedelta(seconds=2)
-            log.debug(" send request to pull image:" + url)
-            # use requests.post instead of post_to_remote, because req.contect can not be json.loads()
-            scheduler.add_job(requests.post, 'date', run_date=exec_time, args=[url])
+    # ensure_images function:
+    # ensure every docker host has owned every image
+    #
+    # components and dependences :
+    #  1.func: get hackathon's docker hosts and docker api port
+    #  2.func: get hackathon's templates
+    #  3.func: get template's images
+    #  4.azure sdk: download templates file from azure
+    #  5.docker remoteAPI: get already exist images on docker host
+    #  6.docker remoteAPI: pull images
+    #
+    # withn:
+    #  1. crontab
+    #  2. loops logic
+    #  3. asynchronous request to pull images
+    def ensure_images(self, image_name):
+        hackathons = self.db.find_all_objects(Hackathon, Hackathon.status == HACK_STATUS.ONLINE)
+        # loop to get every online hackathon
+        for hack in hackathons:
+            hosts = self.db.find_all_objects(DockerHostServer, DockerHostServer.hackathon_id == hack.id)
+            docker_host_api = map(lambda x: x.public_docker_api_port, hosts)
+            # loop to get every docker host
+            for api in docker_host_api:
+                template_urls = self.get_templates_from_hackathon(hack)
+                file_names = self.get_template_local_files_from_urls(template_urls)
+
+
+
+                url = api + "/images/create?fromImage=" + image_name
+                exec_time = get_now() + timedelta(seconds=2)
+                log.debug(" send request to pull image:" + url)
+                # use requests.post instead of post_to_remote, because req.contect can not be json.loads()
+                scheduler.add_job(requests.post, 'date', run_date=exec_time, args=[url])
+
+
+    def get_images_from_template_file(self, *file_names):
+        images=[]
+        for file_name in file_names:
+            template = json.loads(file(file_name))
+            virtuals = template['virtual_environments']
+            ims = map(lambda x: x['image'], virtuals)
+            images.append(ims)
+        return images
+
+
+    def get_template_local_files_from_urls(self, *template_urls):
+        # get local template files from template_urls
+        # if local file doesn't exist , download from azure
+        file_names = []
+        for temp in template_urls:
+            file_name = safe_get_config("storage.local_template_dir", "/mnt/tempaltes") + \
+                        template_urls.split()[len(template_urls.split("/"))]
+            if os.path.exists(file_name):
+                file_names.append(file_name)
+            else:
+                container_name = safe_get_config("storage.template_container","templates")
+                file_service.download_file_from_azure( container_name , template_urls, file_name)
+                file_names.append(file_name)
+        return file_names
+
+
+    def get_templates_from_hackathon(self, hackathon):
+        templates = hackathon.templates
+        template_urls = map(lambda x: x.azure_url, templates)
+        return template_urls
 
 
 template_manager = TemplateManager(db_adapter)
