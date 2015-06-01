@@ -574,7 +574,7 @@ def open_check_expr():
 
 def check_default_expr():
     hackathon_id_list = hack_manager.get_pre_allocate_enabled_hackathoon_list()
-    templates = db_adapter.find_all_objects_order(Template, Template.hackathon_id._in(hackathon_id_list))
+    templates = db_adapter.find_all_objects_order(Template, Template.hackathon_id.in_(hackathon_id_list))
     for template in templates:
         try:
             pre_num = hack_manager.get_pre_allocate_number(template.hackathon)
@@ -634,7 +634,7 @@ def recycle_expr():
     recycle_hours = safe_get_config('recycle.idle_hours', 24)
 
     expr_time_cond = Experiment.last_heart_beat_time + timedelta(hours=recycle_hours) > get_now()
-    recycle_cond = Experiment.hackathon_id._in(hack_manager.get_recyclable_hackathon_list())
+    recycle_cond = Experiment.hackathon_id.in_(hack_manager.get_recyclable_hackathon_list())
     r = db_adapter.find_first_object(Experiment, expr_time_cond, recycle_cond)
 
     if r is not None:

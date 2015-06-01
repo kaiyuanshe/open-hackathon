@@ -33,6 +33,11 @@ default['openhackathon']['git']['branch'] = 'master'
 default['openhackathon']['git']['checkout_branch'] = 'deploy'
 default['openhackathon']['git']['known_hosts'] = "|1|BT8mM19S5ByEpm7VhLCODAlSlKY=|cd/jfFmnSeZi3cVRyJEJDNv5GA0= ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ=="
 
+# container attributes
+default['openhackathon']['api']['src_dir'] = "#{openhackathon[:base_dir]}/open-hackathon/src"
+default['openhackathon']['api']['port'] = '15000'
+default['openhackathon']['api']['endpoint'] = "http://localhost:#{openhackathon["api"]["port"]}"
+
 # oauth attributes
 default['openhackathon']['github']['client_id'] = ''
 default['openhackathon']['github']['client_secret'] = ''
@@ -68,9 +73,8 @@ default['openhackathon']['live']['scope'] = 'wl.basic, wl.emails'
 default['openhackathon']['token_expiration_minutes'] = '60*24'
 
 # azure attributes
-default['openhackathon']['azure']['subscriptionId'] = '31e6e137-4656-4f88-96fb-4c997b14a644'
-default['openhackathon']['azure']['certPath'] = '/opt/openhackathon/open-hackathon/src/hackathon/certificates/1-31e6e137-4656-4f88-96fb-4c997b14a644.pem'
-default['openhackathon']['azure']['managementServiceHostBase'] = 'management.core.chinacloudapi.cn'
+default['openhackathon'][:azure][:cert_base] = "#{openhackathon['api']['src_dir']}/hackathon/certificates"
+default['openhackathon'][:azure][:container_name] = 'certificates'
 
 # guacamole attributes
 default['openhackathon']['guacamole']['host'] = 'http://localhost:8080'
@@ -95,10 +99,6 @@ default['openhackathon']['mysql']['test_data_file_name'] = "create_test_data.py"
 default['openhackathon']['mysql']['test_data_file'] = "#{openhackathon[:base_dir]}/open-hackathon/src/#{openhackathon['mysql']['test_data_file_name']}"
 default['openhackathon']['mysql']['sql_file'] = "#{openhackathon[:base_dir]}/setup_db.sql"
 
-# container attributes
-default['openhackathon']['api']['src_dir'] = "#{openhackathon[:base_dir]}/open-hackathon/src"
-default['openhackathon']['api']['port'] = '15000'
-default['openhackathon']['api']['endpoint'] = "http://localhost:#{openhackathon["api"]["port"]}"
 
 # log
 default['openhackathon']['log_dir'] = '/var/log/open-hackathon'
@@ -110,3 +110,17 @@ default['openhackathon'][:gem][:enable_taobao_mirror] = true
 
 #data bags secret path
 default['openhackathon'][:secret][:secretpath] = '/tmp/data_bag_key'
+
+# pre allocate
+default['openhackathon'][:pre_allocate][:check_interval_minutes] = 5
+default['openhackathon'][:pre_allocate][:azure] = 1
+default['openhackathon'][:pre_allocate][:docker] = 1
+
+# storage
+default['openhackathon'][:storage][:account_name] = "hackathon"
+default['openhackathon'][:storage][:account_key] = "U4/oE3Ocwk9txQHw2qNOCCW2Fy05FBY3yQfzcKRNss5tnReyYTO7PDyeXQ8TWMMxXF07JrW7UXPyOhGgJlodEQ=="
+default['openhackathon'][:storage][:image_container] = "images"
+default['openhackathon'][:storage][:template_container] = "templates"
+default['openhackathon'][:storage][:blob_service_host_base] = ".blob.core.chinacloudapi.cn"
+default['openhackathon'][:storage][:size_limit_kilo_bytes] = 5120
+
