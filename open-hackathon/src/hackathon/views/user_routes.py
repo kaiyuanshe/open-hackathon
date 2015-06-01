@@ -48,6 +48,7 @@ from hackathon.azureformation.azureCertManagement import (
     azure_cert_management,
 )
 from hackathon.enum import RGStatus
+from hackathon.user import user_manager
 
 
 class GuacamoleResource(Resource):
@@ -160,6 +161,16 @@ class UserExperimentListResource(Resource):
         args = parse.parse_args()
         return get_user_experiment(args['uid'])
 
+class TeamMemberResource(Resource):
+    @token_required
+    @hackathon_name_required
+    def get(self):
+        hackathon_id = g.hackathon.id
+        parse = reqparse.RequestParser()
+        parse.add_argument('team_name', type=str, location='args', required=True)
+        args = parse.parse_args()
+        return user_manager.team_member(hackathon_id, args['team_name'])
+
 
 def register_user_routes():
     """
@@ -182,3 +193,5 @@ def register_user_routes():
     api.add_resource(UserExperimentResource, "/api/user/experiment")
     api.add_resource(UserExperimentListResource, "/api/user/experiment/list")
 
+    # team API
+    api.add_resource(TeamMemberResource, "/api/user/teammember")

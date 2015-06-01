@@ -161,15 +161,26 @@ class UserManager(object):
             "last_login_time": str(user.last_login_time)
         }
 
-    def team_list(self, id, name, number):
-        list = self.db.distinct(UserHackathonRel, hackathon_id=id, team_name=name)
+    def hackathon_team_list(self, hid, name, number):
+        find_team_by_hackathon = self.db.find_all_objects_by(UserHackathonRel, hackathon_id=hid)
+        hackathon_team_list = map(lambda x: x.team_name,  find_team_by_hackathon)
+        hackathon_team_list = list(set(hackathon_team_list))
         if list is not None:
-            return list
+            if name is not None:
+                hackathon_team_list = filter(lambda x: name in x, hackathon_team_list)
+                if number is not None:
+                    hackathon_team_list = hackathon_team_list[0:number]
+                    return hackathon_team_list
+                else:
+                    return hackathon_team_list
+            else:
+                return hackathon_team_list
         else:
             return not_found("Oops, no team yet~")
 
-    def team_member(self, hackathon_id, team_name):
-        team_member = self.db.find_all_objects_by(UserHackathonRel, hackathon_id, team_name)
+    def team_member(self, h_id, name):
+        team_member = self.db.find_all_objects_by(UserHackathonRel, hackathon_id=h_id, team_name=name)
+        team_member = map(lambda x: x.real_name, team_member)
         return team_member
 
 user_manager = UserManager(db_adapter)

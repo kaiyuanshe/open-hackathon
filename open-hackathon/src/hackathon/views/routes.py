@@ -123,7 +123,7 @@ class HackathonTeamListResource(Resource):
         parse.add_argument('number', type=int, location='args', required=False)
         result = parse.parse_args()
         id = g.hackathon.id
-        return user_manager.team_list(id, result['name'], result['number'])
+        return user_manager.hackathon_team_list(id, result['name'], result['number'])
 
 
 
