@@ -128,8 +128,8 @@
     </tr>
 </script>
 <script id="template_unit_item" type="text/x-jquery-tmpl">
-    <legend></legend>
     <div data-type="template-unit-group">
+        <legend></legend>
         <div class="form-group has-feedback">
             <label class="col-md-3 control-label">模板单元名称</label>
             <div class="col-md-6 register">
@@ -144,6 +144,7 @@
                     data-bv-stringlength-message="模板单元名称必须至少有5个字符"
                     >
             </div>
+            <button type="button" class="btn btn-danger" data-type="btn_delete_template_unit"> 删除该模板单元</button>
         </div>
         <div class="form-group has-feedback">
             <label class="col-md-3 control-label">镜像</label>
@@ -241,8 +242,8 @@
     </div>
 </script>
 <script id="port_item" type="text/x-jquery-tmpl">
-    <hr />
     <div data-type="port-group">
+        <hr />
         <div class="form-group has-feedback">
             <label class="col-md-3 control-label">端口名称</label>
             <div class="col-md-6 register">
@@ -257,6 +258,7 @@
                     data-bv-stringlength-message="端口名称称必须至少有5个字符"
                     >
             </div>
+            <button type="button" class="btn btn-danger" data-type="btn_delete_port"> 删除该端口</button>
         </div>
         <div class="form-group has-feedback">
             <label class="col-md-3 control-label">端口号</label>
