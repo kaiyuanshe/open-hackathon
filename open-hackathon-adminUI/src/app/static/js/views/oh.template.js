@@ -163,6 +163,12 @@
             deletePort(this);
         });
 
+        var templatelist = $('#templatelist');
+        templatelist.on('click','[data-type="template_item_edit"]',function(e){
+            var item = $(this).parents('tr').data('tmplItem').data;
+            console.log(item)
+        });
+
         var confirm_modal = $('#confirm_modal').on('show.bs.modal',function(e){
             var item = $(e.relatedTarget).parents('tr').data('tmplItem').data;
             confirm_modal.data({item:item});
