@@ -149,7 +149,8 @@
         }).on('click','[data-type="ok"]',function(e){
             var item = confirm_modal.data('item');
              oh.api.admin.hackathon.template.delete({
-                body:{certificate_id:item.id},
+                query: {id:item.id},
+                body:{},
                 header:{hackathon_name:currentHackathon.name}
              },
              function(data){

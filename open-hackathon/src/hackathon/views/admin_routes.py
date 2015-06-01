@@ -33,9 +33,16 @@ from hackathon.decorators import token_required, hackathon_name_required, admin_
 from hackathon.hack import hack_manager
 from hackathon.registration.register_mgr import register_manager
 from hackathon.template.template_mgr import template_manager
-from hackathon.hackathon_response import *
+from hackathon.hackathon_response import (
+    not_found,
+    bad_request,
+    internal_server_error,
+)
 from hackathon.azureformation.azureCertManagement import (
     azure_cert_management,
+)
+from hackathon.log import (
+    log,
 )
 from hackathon.admin.admin_mgr import admin_manager
 

@@ -153,17 +153,16 @@ class TemplateManager(object):
             return internal_server_error("update template failed :" + ex.message)
 
     def delete_template(self, id):
-        log.debug("delete or disable a exist template")
+        log.debug("delete template [%d]" % id)
         try:
             template = db_adapter.get_object(Template, id)
-            args = {}
-            args['status'] = TEMPLATE_STATUS.DELETED
-            args['update_time'] = get_now()
-            db_adapter.update_object(template, args)
-            return ok("delete or disable template success")
+            db_adapter.update_object(template,
+                                     status=TEMPLATE_STATUS.DELETED,
+                                     update_time=get_now())
+            return ok("delete template success")
         except Exception as ex:
             log.error(ex)
-            return internal_server_error("disable or delete failed")
+            return internal_server_error("delete template fail")
 
     def pull_images(self, image_name):
         hosts = db_adapter.find_all_objects(DockerHostServer, DockerHostServer.hackathon_id == g.hackathon.id)
