@@ -29,8 +29,9 @@
  */
 
 angular.module('oh.app')
-  .factory('Authentication', function Authentication($q, $location, $cookieStore, API) {
+  .factory('Authentication', function Authentication($q, $cookieStore, $stateParams, state, API) {
     var authenticatedUser = null;
+    var hackathon_name = $stateParams.hackathon_name || config.name;
 
     /**
      * Get user information
@@ -38,7 +39,7 @@ angular.module('oh.app')
      * @returns {{avatar_url: string, create_time: string, email: {create_time: number, email: string, id: number, name: string, primary_email: number, update_time: null, user_id: number, verified: number}[], id: number, last_login_time: string, name: string, nickname: string, online: number}}
      */
     function getUser() {
-      return $cookieStore.get('User') || {};
+      return $cookieStore.get('User');
     }
 
     /**
@@ -49,31 +50,31 @@ angular.module('oh.app')
     function hackathon(callback) {
       var user = this.getUser();
       if (user) {
-        API.user.registration.get({header: {hackathon_name: config.name}}, function (data) {
+        API.user.registration.get({header: {hackathon_name: hackathon_name}}, function (data) {
           if (data.error) {
-            $location.path('error');
+            state.go('index');
           } else {
             if (data.hackathon.status != 1) {
-              $location.path('error')
+              state.go('index.home');
             } else {
               if (data.registration) {
                 if (data.registration.status == 0 || data.registration.status == 2) {
-                  $location.path('register');
+                  state.go('index.register', {hackathon_name: hackathon_name});
                 } else if (data.registration.status == 3 && data.hackathon.basic_info.auto_approve == 0) {
-                  $location.path('register');
+                  state.go('index.register', {hackathon_name: hackathon_name});
                 } else if (!data.experiment) {
-                  $location.path('settings');
+                  state.go('index.settings', {hackathon_name: hackathon_name});
                 } else {
                   callback(data);
                 }
               } else {
-                $location.path('register');
+                state.go('index.register');
               }
             }
           }
         });
       } else {
-        $location.path('error');
+        state.go('index');
       }
     }
 
@@ -85,65 +86,39 @@ angular.module('oh.app')
     function settings(callback) {
       var user = this.getUser();
       if (user) {
-        API.user.registration.get({header: {hackathon_name: config.name}}, function (data) {
+        API.user.registration.get({header: {hackathon_name: hackathon_name}}, function (data) {
           if (data.error) {
-            $location.path('error');
+            state.go('index');
           } else {
             if (data.hackathon.status != 1) {
-              $location.path('error');
+              state.go('index.home');
             } else {
               if (data.registration) {
                 if (data.registration.status == 0 || data.registration.status == 2) {
-                  $location.path('register');
+                  state.go('index.register', {hackathon_name: hackathon_name});
                 } else if (data.registration.status == 3 && data.hackathon.basic_info.auto_approve == 0) {
-                  $location.path('register');
+                  state.go('index.register', {hackathon_name: hackathon_name});
                 } else if (data.experiment) {
-                  $location.path('hackathon');
+                  callback(data);
+                  //state.go('hackathon', {hackathon_name: hackathon_name});
                 } else {
                   callback(data);
                 }
               } else {
-                $location.path('register');
+                state.go('index.register', {hackathon_name: hackathon_name});
               }
             }
           }
         });
       } else {
-        $location.path('error');
-      }
-    }
-
-    /**
-     * register Page load
-     * @method register
-     * @param {function}
-     */
-    function register(callback) {
-      var user = this.getUser();
-      if (user) {
-        API.user.registration.get({header: {hackathon_name: config.name}}, function (data) {
-          if (data.error) {
-            $location.path('error');
-          } else {
-            callback(data);
-          }
-        });
-      } else {
-        API.hackathon.get({header: {hackathon_name: config.name}}, function (data) {
-          if (data.error) {
-            $location.path('error');
-          } else {
-            callback(data);
-          }
-        });
+        state.go('index');
       }
     }
 
     return {
       getUser: getUser,
       hackathon: hackathon,
-      settings: settings,
-      register: register
+      settings: settings
     }
   });
 

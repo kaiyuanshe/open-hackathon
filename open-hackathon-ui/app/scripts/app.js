@@ -49,6 +49,7 @@ angular
     'ngSanitize',
     'ngTouch',
     'ui.bootstrap',
+    'oh.common',
     'oh.services',
     'oh.controllers',
     'oh.directives'
@@ -56,7 +57,7 @@ angular
   .config(function ($stateProvider, $urlRouterProvider, $locationProvider) {
     $locationProvider.html5Mode(false);
     $locationProvider.hashPrefix('!');
-    $urlRouterProvider.otherwise('/');
+    $urlRouterProvider.otherwise('/home');
     $stateProvider
       .state('index', {
         url: '/',
@@ -77,7 +78,7 @@ angular
         }
       })
       .state('index.settings', {
-        url: 'settings',
+        url: ':hackathon_name/settings',
         views: {
           'header@index': {
             templateUrl: 'views/header.html',
@@ -92,7 +93,7 @@ angular
         }
       })
       .state('hackathon', {
-        url: '/hackathon',
+        url: '/:hackathon_name/hackathon',
         views: {
           '': {
             templateUrl: 'views/master.html',
@@ -106,15 +107,6 @@ angular
           },
           'footer@hackathon': {
             templateUrl: 'views/footer.html'
-          }
-        }
-      })
-      .state('notregister', {
-        url: '/notregister',
-        views: {
-          '': {
-            templateUrl: 'views/notregister.html',
-            controller: 'notregister.controller'
           }
         }
       })
@@ -135,7 +127,7 @@ angular
         }
       })
       .state('index.register', {
-        url: 'register',
+        url: ':hackathon_name/register',
         views: {
           'main@index': {
             templateUrl: 'views/register.html',
@@ -143,11 +135,24 @@ angular
           }
         }
       })
+      .state('index.home', {
+        url: 'home',
+        views: {
+          'main@index': {
+            templateUrl: 'views/home.html',
+            controller: 'oh.home.controller'
+          }
+        }
+      })
       .state('error', {
-        url: 'error',
+        url: '/error',
         views: {
           '': {
-            templateUrl: 'views/error.html'
+            templateUrl: 'views/error.html',
+            controller: function ($scope, $stateParams, log) {
+              $scope.error = $stateParams.error;
+              console.log(log);
+            }
           }
         }
       })
@@ -158,9 +163,30 @@ angular
             templateUrl: 'views/expired.html'
           }
         }
+      })
+      .state('redirect', {
+        url: '/redirect',
+        controller: function ($cookieStore, state) {
+          var hackathon_name = $cookieStore.get('redirectHakathonName');
+          state.go('index.register', {hackathon_name: hackathon_name})
+        }
       });
-  });
+  })
+  .run(function ($rootScope, $cookieStore, $stateParams, $log) {
+    $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams) {
+      var user = $cookieStore.get('User');
+      if (user) {
+        $rootScope.isUser = true;
+      } else {
+        $rootScope.isUser = false;
+        ;
+      }
+    });
 
+    $rootScope.$on('stateChangeSuccess', function (event) {
+
+    });
+  });
 String.prototype.format = function (args) {
   var result = this;
   if (arguments.length > 0) {

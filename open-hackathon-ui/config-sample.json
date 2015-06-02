@@ -46,9 +46,9 @@
   },
   "api": {
     "user": {
-      "login": ["post","del"],
+      "login": ["post","delete"],
       "experiment": {
-        "": ["get","post","del","put"],
+        "": ["get","post","delete","put"],
         "list": ["get"]
       },
       "registration": {

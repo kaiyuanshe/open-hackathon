@@ -42,7 +42,7 @@ angular.module('oh.directives', [])
 
     function showErrorMsg(code, msg) {
       $('#load').hide();
-      var errorbox = $('#error');
+      var errorbox = $('#error').hide();
       if (code) {
         errorbox.find('.code').text(code);
       }
@@ -69,9 +69,7 @@ angular.module('oh.directives', [])
           ifrem.removeClass('invisible');
         } else {
           ifrem = $('<iframe>').attr({
-
-            src: url ,
-
+            src: url,
             id: name,
             width: '100%',
             height: '100%',
@@ -110,7 +108,7 @@ angular.module('oh.directives', [])
                     dockers.push({
                       purl: data.public_urls[i].url,
                       name: data.remote_servers[i].name,
-                      surl: data.remote_servers[i].url+ "&oh=" + $cookieStore.get('token')
+                      surl: data.remote_servers[i].url + "&oh=" + $cookieStore.get('token')
                     })
                     list.push(temp.format(dockers[i]));
                   }
@@ -169,6 +167,7 @@ angular.module('oh.directives', [])
   .directive('countdown', function ($interval) {
     return {
       restrict: 'E',
+      scope: {},
       link: function (scope, element, attr) {
         scope.second = parseInt(attr.second);
         var countdown = $interval(function () {
@@ -184,12 +183,14 @@ angular.module('oh.directives', [])
       }
     }
   })
-  .directive('headdropdownMenu', function ($cookieStore, API) {
+  .directive('headdropdownMenu', function ($rootScope, $cookieStore, $state, API) {
+    var tempurl = 'views/tpls/dropdown-menu.html';
     return {
       scope: {},
       restrict: 'E',
-      templateUrl: 'views/tpls/dropdown-menu.html',
-      link: function (scope) {
+      templateUrl: tempurl,
+      link: function (scope, element, attr) {
+        var user = $cookieStore.get('User');
         scope.items = [{
           name: '管理我的黑客松',
           link: ''
@@ -204,26 +205,28 @@ angular.module('oh.directives', [])
           link: 'https://github.com/msopentechcn/open-hackathon-tutorial/wiki/%E5%9C%A8%E7%BA%BF%E7%BC%96%E7%A8%8B%E9%BB%91%E5%AE%A2%E6%9D%BE%E5%B9%B3%E5%8F%B0%E3%80%8A%E4%BD%BF%E7%94%A8%E5%B8%AE%E5%8A%A9%E3%80%8B'
         }]
         scope.logout = function () {
-          API.user.login.del();
+          API.user.login.delete();
           $cookieStore.remove('User');
-          location.replace('/#/');
+          $cookieStore.remove('token');
+          $state.go('index.home');
         }
-        scope.user = $cookieStore.get('User');
+        scope.user = user;
       }
     }
   })
-  .directive('ohOline', function ($rootScope, $interval, API) {
+  .directive('ohOline', function ($rootScope, $stateParams, $interval, API) {
+    var hackathon_name = $stateParams.hackathon_name || config.name;
     return {
       scope: {},
       restrict: 'E',
       templateUrl: 'views/tpls/online-total.html',
       link: function (scope, element) {
         API.hackathon.list.get({
-          query: {name: config.name}
+          query: {name: hackathon_name}
         }, function (data) {
           var getStat = function () {
             API.hackathon.stat.get({
-              header: {hackathon_name: config.name}
+              header: {hackathon_name: hackathon_name}
             }, function (data) {
               element.find('[oh-online]').text(data.online);
               element.find('[oh-total]').text(data.total);
@@ -241,9 +244,10 @@ angular.module('oh.directives', [])
       }
     }
   })
-  .directive('endCountdown', function ($interval, API) {
+  .directive('endCountdown', function ($interval, $stateParams, API) {
     var timerTmpe = '{day}天{hour}小时{minute}分钟{second}秒';
     var stop = null;
+    var hackathon_name = $stateParams.hackathon_name || config.name;
 
     function show_time() {
       var timing = {day: 0, hour: 0, minute: 0, second: 0, distance: 0};
@@ -274,6 +278,7 @@ angular.module('oh.directives', [])
         return null;
       }
     }
+
     function showCountDown(elemten, countDown) {
       var timing = show_time.apply(countDown);
       if (!timing) {
@@ -283,27 +288,31 @@ angular.module('oh.directives', [])
         elemten.find('#end_timer').text(timerTmpe.format(timing))
       }
     }
+
     return {
-      scope: {},
+      scope: {
+        hackathon: '='
+      },
       restrict: 'A',
       templateUrl: 'views/tpls/end-countdown.html',
       link: function (scope, elemten, attr) {
-        API.hackathon.get({header: {hackathon_name: config.name}}, function (data) {
+        API.hackathon.get({header: {hackathon_name: hackathon_name}}, function (data) {
           if (data.error) {
-            $location.path('error');
+
           } else {
             var countDown = {
               time_server: new Date().getTime(),
               time_end: data.event_end_time
             }
             showCountDown(elemten, countDown);
-            stop = $interval(function () {
+            stop = setInterval(function () {
               showCountDown(elemten, countDown);
             }, 1000);
           }
         });
         scope.$on('$destroy', function (event) {
-          $interval.cancel(stop);
+          clearInterval(stop)
+          //$interval.cancel(stop);
         });
       }
     }
