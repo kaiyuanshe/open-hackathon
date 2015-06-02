@@ -99,8 +99,7 @@ angular.module('oh.app')
                 } else if (data.registration.status == 3 && data.hackathon.basic_info.auto_approve == 0) {
                   state.go('index.register', {hackathon_name: hackathon_name});
                 } else if (data.experiment) {
-                  callback(data);
-                  //state.go('hackathon', {hackathon_name: hackathon_name});
+                  state.go('hackathon', {hackathon_name: hackathon_name});
                 } else {
                   callback(data);
                 }

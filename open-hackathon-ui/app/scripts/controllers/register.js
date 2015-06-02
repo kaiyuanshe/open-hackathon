@@ -54,8 +54,16 @@ angular.module('oh.controllers')
         user = undefined;
         $scope.hackathon.isRegister = true;
       } else {
+
         registration = res.data.registration;
         checkUserStatus(registration.status, res.data.hackathon.basic_info.auto_approve);
+        $scope.goWork = function () {
+          if (res.data.experiment) {
+            state.go('hackathon', {hackathon_name: hackathon_name});
+          } else {
+            state.go('index.settings', {hackathon_name: hackathon_name});
+          }
+        }
       }
     });
 

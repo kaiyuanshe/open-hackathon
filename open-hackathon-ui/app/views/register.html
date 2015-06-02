@@ -32,7 +32,7 @@
           <span ng-bind="hackathon.message"></span>
 
           <div>
-            <a ui-sref="index.settings({hackathon_name:hackathon.name})" ng-if="hackathon.start" class="btn btn-primary ">立即参加</a>
+            <a  ng-click="goWork()" ng-if="hackathon.start" class="btn btn-primary ">立即参加</a>
           </div>
         </div>
       </div>
