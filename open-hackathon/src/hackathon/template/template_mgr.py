@@ -43,7 +43,7 @@ from hackathon.template.base_template import BaseTemplate
 from hackathon.scheduler import scheduler
 import requests
 from hackathon.azureformation.fileService import file_service
-from hackathon.functions import safe_get_config
+from hackathon.functions import safe_get_config, get_remote
 from hackathon.enum import HACK_STATUS
 import json
 
@@ -166,7 +166,7 @@ class TemplateManager(object):
     # ensure every docker host has owned every image
     #
     # components and dependences :
-    #  1.func: get hackathon's docker hosts and docker api port
+    # 1.func: get hackathon's docker hosts and docker api port
     #  2.func: get hackathon's templates
     #  3.func: get template's images
     #  4.azure sdk: download templates file from azure
@@ -177,7 +177,7 @@ class TemplateManager(object):
     #  1. crontab
     #  2. loops logic
     #  3. asynchronous request to pull images
-    def ensure_images(self, image_name):
+    def ensure_images(self):
         hackathons = self.db.find_all_objects(Hackathon, Hackathon.status == HACK_STATUS.ONLINE)
         # loop to get every online hackathon
         for hack in hackathons:
@@ -187,18 +187,36 @@ class TemplateManager(object):
             for api in docker_host_api:
                 template_urls = self.get_templates_from_hackathon(hack)
                 file_names = self.get_template_local_files_from_urls(template_urls)
+                expected_images = self.get_images_from_template_file(file_names)
+                download_images = self.get_undownload_images_on_docker_host(api, expected_images)
+                for dl_image in download_images:
+                    pull_image_url = api + "/images/create?fromImage=" + dl_image
+                    exec_time = get_now() + timedelta(seconds=2)
+                    log.debug(" send request to pull image:" + pull_image_url)
+                    # use requests.post instead of post_to_remote, because req.contect can not be json.loads()
+                    scheduler.add_job(requests.post, 'date', run_date=exec_time, args=[pull_image_url])
 
 
+    def get_undownload_images_on_docker_host(self, api, *expected_images):
+        images = []
+        get_images_url = api + "/images/json?all=0"
+        current_images_info = json.loads(get_remote(get_images_url))  #[{},{},{}]
+        current_images_tags = map(lambda x: json.load(x)['RepoTags'], current_images_info)  #[[],[],[]]
+        for ex_image in expected_images:
+            exist = False
 
-                url = api + "/images/create?fromImage=" + image_name
-                exec_time = get_now() + timedelta(seconds=2)
-                log.debug(" send request to pull image:" + url)
-                # use requests.post instead of post_to_remote, because req.contect can not be json.loads()
-                scheduler.add_job(requests.post, 'date', run_date=exec_time, args=[url])
+            for cur_image_tag in current_images_tags:
+                if ex_image in cur_image_tag:
+                    exist = True
+                    break
+
+            if not exist:
+                images.append(ex_image)
+        return images
 
 
     def get_images_from_template_file(self, *file_names):
-        images=[]
+        images = []
         for file_name in file_names:
             template = json.loads(file(file_name))
             virtuals = template['virtual_environments']
@@ -209,7 +227,7 @@ class TemplateManager(object):
 
     def get_template_local_files_from_urls(self, *template_urls):
         # get local template files from template_urls
-        # if local file doesn't exist , download from azure
+        # if local file doesn't exist , download from azure and save to local file
         file_names = []
         for temp in template_urls:
             file_name = safe_get_config("storage.local_template_dir", "/mnt/tempaltes") + \
@@ -217,8 +235,8 @@ class TemplateManager(object):
             if os.path.exists(file_name):
                 file_names.append(file_name)
             else:
-                container_name = safe_get_config("storage.template_container","templates")
-                file_service.download_file_from_azure( container_name , template_urls, file_name)
+                container_name = safe_get_config("storage.template_container", "templates")
+                file_service.download_file_from_azure(container_name, template_urls, file_name)
                 file_names.append(file_name)
         return file_names
 
