@@ -180,7 +180,12 @@ class UserManager(object):
 
     def team_member(self, h_id, name):
         team_member = self.db.find_all_objects_by(UserHackathonRel, hackathon_id=h_id, team_name=name)
-        team_member = map(lambda x: x.real_name, team_member)
+        def get_info(x):
+            r = x.dic()
+            r['user'] = self.user_display_info(x.user)
+            return r
+        team_member = map(lambda x: get_info(x), team_member)
+
         return team_member
 
 user_manager = UserManager(db_adapter)
