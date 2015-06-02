@@ -76,19 +76,16 @@ class UserManager(object):
             self.db.commit()
 
 
-    def get_all_registration(self):
-        reg_list = self.db.find_all_objects_by(UserHackathonRel, enabled=1)
+    def __get_existing_user(self, openid, email_list):
+        # find user by email first in case that email registered in multiple oauth providers
+        emails = [e["email"] for e in email_list]
+        if len(emails):
+            ues = self.db.find_first_object(UserEmail, UserEmail.email.in_(emails))
+            if ues is not None:
+                return ues.user
 
-        def online(r):
-            u = self.db.find_first_object_by(UserEmail, email=r.email)
-            if u is not None:
-                r.online = u.user.online
-            else:
-                r.online = 0
-            return r
+        return self.db.find_first_object_by(User, openid=openid)
 
-        map(lambda r: online(r), reg_list)
-        return reg_list
 
     def db_logout(self, user):
         try:
@@ -100,8 +97,8 @@ class UserManager(object):
 
     def db_login(self, openid, **kwargs):
         # update db
-        email_info = kwargs['email_info']
-        user = self.db.find_first_object_by(User, openid=openid)
+        email_list = kwargs['email_list']
+        user = self.__get_existing_user(openid, email_list)
         if user is not None:
             self.db.update_object(user,
                                   name=kwargs["name"],
@@ -111,7 +108,7 @@ class UserManager(object):
                                   avatar_url=kwargs["avatar_url"],
                                   last_login_time=get_now(),
                                   online=1)
-            map(lambda x: self.__create_or_update_email(user, x), email_info)
+            map(lambda x: self.__create_or_update_email(user, x), email_list)
         else:
             user = User(openid=openid,
                         provider=kwargs["provider"],
@@ -122,7 +119,7 @@ class UserManager(object):
                         online=1)
 
             self.db.add_object(user)
-            map(lambda x: self.__create_or_update_email(user, x), email_info)
+            map(lambda x: self.__create_or_update_email(user, x), email_list)
 
         # generate API token
         token = self.__generate_api_token(user)
@@ -155,6 +152,7 @@ class UserManager(object):
             "name": user.name,
             "nickname": user.nickname,
             "email": [e.dic() for e in user.emails.all()],
+            "provider": user.provider,
             "avatar_url": user.avatar_url,
             "online": user.online,
             "create_time": str(user.create_time),

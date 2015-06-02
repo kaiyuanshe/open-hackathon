@@ -2,7 +2,7 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
 #  
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,6 +23,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
+from pytz import utc
 
 from hackathon.log import (
     log,
@@ -117,4 +118,4 @@ def call(mdl_cls_func, cls_args, func_args):
 
 
 def get_now():
-    return datetime.utcnow()
+    return datetime.now(utc)

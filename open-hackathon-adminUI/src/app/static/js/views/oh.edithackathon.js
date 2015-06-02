@@ -63,6 +63,7 @@
 
     function setFormData(data){
         data.basic_info = data.basic_info || {};
+        $('#hackathon_switch').val(data.status);
         $('#display_name').val(data.display_name);
         $('#location').val(data.basic_info.location);
         $('#max_enrollment').val(data.basic_info.max_enrollment);
@@ -106,7 +107,7 @@
         $.each(images,function(i,imageUrl){
             var url = new URL(imageUrl);
             files.push({
-                deleteUrl: apiconfig.proxy+'/api/file?key='+url.pathname.replace('/images/',''),
+                deleteUrl: apiconfig.proxy+'/api/admin/file?key='+url.pathname.replace('/images/',''),
                 name:url.pathname.split('/').pop(),
                 thumbnailUrl:imageUrl,
                 url:imageUrl
@@ -169,7 +170,7 @@
         });
 
         $('#editHackathonForm').fileupload({
-            url: apiconfig.proxy+'/api/file',
+            url: apiconfig.proxy+'/api/admin/file',
             autoUpload:true,
             prependFiles:true,
             acceptFileTypes:  /(\.|\/)(gif|jpe?g|png)$/i,
@@ -269,6 +270,24 @@
 
         $('#markdownEdit').markdown({
             language:'zh'
+        })
+
+        $('#hackathon_switch').change(function(e){
+            var status = $(this).val();
+            oh.api.admin.hackathon.put({
+                body:{
+                    id:hackathonID,
+                    name:hackathonName,
+                    status:status
+                },
+                header:{
+                    hackathon_name:hackathonName
+                }
+            },function(data){
+                if(data.error){
+                    console.log(data);
+                }
+            });
         })
     }
 

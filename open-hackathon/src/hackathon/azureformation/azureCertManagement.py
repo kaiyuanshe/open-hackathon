@@ -41,8 +41,7 @@ from hackathon.database.models import (
     Hackathon,
 )
 from hackathon.azureformation.fileService import (
-    create_container_in_storage,
-    upload_file_to_azure_from_path,
+    file_service
 )
 import os
 import commands
@@ -64,7 +63,7 @@ class AzureCertManagement:
         5. add hackathon azure key to db
         :param subscription_id:
         :param management_host:
-        :param hackathon_id:
+        :param hackathon_name:
         :return:
         """
 
@@ -121,11 +120,11 @@ class AzureCertManagement:
         else:
             log.debug('hackathon azure key exists')
 
-        create_container_in_storage(self.CONTAINER_NAME, 'container')
-        azure_cert_url = upload_file_to_azure_from_path(cert_url, self.CONTAINER_NAME, subscription_id + '.cer')
+        azure_cert_url = file_service.upload_file_to_azure_from_path(cert_url, self.CONTAINER_NAME, subscription_id + '.cer')
         azure_key.cert_url = azure_cert_url
         db_adapter.commit()
         return azure_cert_url
+
 
     def get_certificates(self, hackathon_name):
         hackathon_id = db_adapter.find_first_object_by(Hackathon, name=hackathon_name).id

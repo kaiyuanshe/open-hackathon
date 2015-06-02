@@ -31,8 +31,8 @@ HOSTNAME = "http://open-hackathon-dev.chinacloudapp.cn"  # host name of the UI s
 QQ_OAUTH_STATE = "openhackathon"  # todo state should be constant. Actually it should be unguessable to prevent CSFA
 HACKATHON_API_ENDPOINT = "http://open-hackathon-dev.chinacloudapp.cn:15000"
 
-GITHUB_CLIENT_ID = "b27959b7639e8b39f873"
-GITHUB_CLIENT_SECRET = "a727029295d9e871a1e55dda75c8fb6bf1ed0d4c"
+GITHUB_CLIENT_ID = "b8e407813350f26bf537"
+GITHUB_CLIENT_SECRET = "daa78ae27e13c9f5b4a884bd774cadf2f75a199f"
 
 QQ_CLIENT_ID = "101200890"
 QQ_CLIENT_SECRET = "88ad67bd4521c4cc47136854781cb9b5"
@@ -42,8 +42,8 @@ QQ_META_CONTENT = "274307566465013314076545663016134754100636"
 GITCAFE_CLIENT_ID = "1c33ecdf4dd0826325f60a92e91834522b1cdf47a7f90bdaa79f0526fdc48727"
 GITCAFE_CLIENT_SECRET = "80b63609000b20c1260df28081c08712617648e1b528086bbb089f0af4614509"
 
-WEIBO_CLIENT_ID = "1943560862"
-WEIBO_CLIENT_SECRET = "a5332c39c129902e561bff5e4bcc5982"
+WEIBO_CLIENT_ID = "479757037"
+WEIBO_CLIENT_SECRET = "efc5e75ff8891be37d90b4eaec5c02de"
 WEIBO_META_CONTENT = "ae884e09bc02b700"
 
 LIVE_CLIENT_ID = "000000004414E0A6"
@@ -127,7 +127,11 @@ Config = {
                 "hackathon": {
                     "": ["get", "post", "put"],
                     "checkname": ["get"],
-                    "list": ["get"]
+                    "list": ["get"],
+                    "administrator":{
+                        "": ["put", "post", "delete"],
+                        "list": ["get"]
+                    }
                 },
                 "registration": {
                     "": ["get", "post", "delete", "put"],
