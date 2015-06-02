@@ -344,8 +344,7 @@ class DockerContainer(DBBase):
     virtual_environment = relationship(VirtualEnvironment,
                                        backref=backref('container', uselist=False))
 
-    host_server_id = Column(Integer, ForeignKey('docker_host_server.id', ondelete='CASCADE'))
-    host_server = relationship('DockerHostServer', backref=backref('containers', lazy='dynamic'))
+    host_server_id = Column(Integer)
 
     def __init__(self, expr, **kwargs):
         self.experiment = expr
