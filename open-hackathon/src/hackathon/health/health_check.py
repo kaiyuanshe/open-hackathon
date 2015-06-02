@@ -47,8 +47,8 @@ from hackathon.database.models import (
 from hackathon.azureformation.service import (
     Service,
 )
-from hackathon.docker.docker import (
-    docker_formation,
+from hackathon import (
+    docker,
 )
 from hackathon.log import (
     log,
@@ -87,14 +87,14 @@ class MySQLHealthCheck(HealthCheck):
 class DockerHealthCheck(HealthCheck):
     def __init__(self):
         self.db = db_adapter
-        self.docker_formation = docker_formation
+        self.docker = docker
 
     def reportHealth(self):
         try:
             hosts = self.db.find_all_objects(DockerHostServer)
             alive = 0
             for host in hosts:
-                if self.docker_formation.ping(host):
+                if self.docker.ping(host):
                     alive += 1
             if alive == len(hosts):
                 return {

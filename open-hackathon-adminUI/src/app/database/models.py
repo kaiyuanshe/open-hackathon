@@ -24,11 +24,14 @@
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
 
+import sys
+
+sys.path.append("..")
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text, TypeDecorator
 from sqlalchemy.orm import backref, relation
 from . import Base, db_adapter
 from datetime import datetime
-from hackathon.functions import get_now
+from app.functions import get_now
 import json
 from pytz import utc
 from dateutil import parser
@@ -49,6 +52,7 @@ def to_dic(inst, cls):
     # and what-not that aren't serializable.
     convert = dict()
     convert[DateTime] = date_serializer
+    convert[TZDateTime] = date_serializer
 
     d = dict()
     for c in cls.__table__.columns:
@@ -82,14 +86,16 @@ class TZDateTime(TypeDecorator):
         if value is not None:
             if isinstance(value, basestring) or isinstance(value, str):
                 value = parser.parse(value)
-            if value.tzinfo is not None:
-                value = value.astimezone(utc)
+            if isinstance(value, datetime):
+                if value.tzinfo is not None:
+                    value = value.astimezone(utc)
         return value
 
     def process_result_value(self, value, dialect):
         if value is not None:
-            if value.tzinfo is None:
-                value = utc.localize(value)
+            if isinstance(value, datetime):
+                if value.tzinfo is None:
+                    value = utc.localize(value)
         return value
 
 

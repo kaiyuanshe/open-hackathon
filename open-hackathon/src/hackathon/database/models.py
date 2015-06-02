@@ -82,14 +82,16 @@ class TZDateTime(TypeDecorator):
         if value is not None:
             if isinstance(value, basestring) or isinstance(value, str):
                 value = parser.parse(value)
-            if value.tzinfo is not None:
-                value = value.astimezone(utc)
+            if isinstance(value, datetime):
+                if value.tzinfo is not None:
+                    value = value.astimezone(utc)
         return value
 
     def process_result_value(self, value, dialect):
         if value is not None:
-            if value.tzinfo is None:
-                value = utc.localize(value)
+            if isinstance(value, datetime):
+                if value.tzinfo is None:
+                    value = utc.localize(value)
         return value
 
 
@@ -342,8 +344,7 @@ class DockerContainer(DBBase):
     virtual_environment = relationship(VirtualEnvironment,
                                        backref=backref('container', uselist=False))
 
-    host_server_id = Column(Integer, ForeignKey('docker_host_server.id', ondelete='CASCADE'))
-    host_server = relationship('DockerHostServer', backref=backref('containers', lazy='dynamic'))
+    host_server_id = Column(Integer)
 
     def __init__(self, expr, **kwargs):
         self.experiment = expr
@@ -594,7 +595,7 @@ class AdminHackathonRel(DBBase):
 
     role_type = Column(Integer)  # enum.ADMIN_ROLE_TYPE
     hackathon_id = Column(Integer)
-    status = Column(Integer)     # enum.AdminHackathonRelStatus
+    status = Column(Integer)  # enum.AdminHackathonRelStatus
     remarks = Column(String(255))
     create_time = Column(TZDateTime, default=get_now())
     update_time = Column(TZDateTime)

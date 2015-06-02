@@ -237,7 +237,7 @@ class HackathonManager():
         """
         try:
             # test docker host server
-            docker_host = DockerHostServer(vm_name="osslab-vm-19", public_dns="osslab-vm-19.chinacloudapp.cn",
+            docker_host = DockerHostServer(vm_name="OSSLAB-VM-19", public_dns="osslab-vm-19.chinacloudapp.cn",
                                            public_ip="42.159.97.143", public_docker_api_port=4243,
                                            private_ip="10.209.14.33",
                                            private_docker_api_port=4243, container_count=0, container_max_count=100,
@@ -336,7 +336,7 @@ class HackathonManager():
 
     def validate_args(self):
         # check size
-        if request.content_length > len(request.files) * get_config("storage.size_limit_byte"):
+        if request.content_length > len(request.files) * get_config("storage.size_limit_kilo_bytes") * 1024:
             return False, bad_request("more than the file size limited")
 
         # check each file type
@@ -387,13 +387,13 @@ class HackathonManager():
 
     def get_recyclable_hackathon_list(self):
         all = self.db.find_all_objects(Hackathon)
-        recyclable = filter(lambda h: self.__is_recycle_enabled(h), all())
+        recyclable = filter(lambda h: self.__is_recycle_enabled(h), all)
         return [h.id for h in recyclable]
 
 
     def get_pre_allocate_enabled_hackathoon_list(self):
         all = self.db.find_all_objects(Hackathon)
-        pre_list = filter(lambda h: self.is_pre_allocate_enabled(h), all())
+        pre_list = filter(lambda h: self.is_pre_allocate_enabled(h), all)
         return [h.id for h in pre_list]
 
 
