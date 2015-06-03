@@ -38,10 +38,11 @@
  * Controller of the settings.controller
  */
 angular.module('oh.controllers')
-  .controller('settings.controller', function ($scope,$location, Authentication, API) {
+  .controller('settings.controller', function ($scope, $stateParams, state, Authentication, API) {
     $scope.isLoading = true;
+    var hackathon_name = $stateParams.hackathon_name || config.name;
     Authentication.settings(function (data) {
-      API.hackathon.template.get({header: {hackathon_name: config.name}}, function (data) {
+      API.hackathon.template.get({header: {hackathon_name: hackathon_name}}, function (data) {
         $scope.isLoading = false;
         if (data.error) {
           $scope.error = data;
@@ -56,12 +57,12 @@ angular.module('oh.controllers')
     })
     $scope.submit = function () {
       API.user.experiment.post({
-        body: {template_name: $scope.type.name, hackathon: config.name}
+        body: {template_name: $scope.type.name, hackathon: hackathon_name}
       }, function (data) {
         if (data.error) {
-          $location.path('error');
+          state.go('error', data);
         } else {
-          $location.path('hackathon');
+          state.go('hackathon', {hackathon_name: hackathon_name});
         }
       });
     }

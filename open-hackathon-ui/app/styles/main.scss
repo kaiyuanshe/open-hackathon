@@ -167,7 +167,7 @@ a {
 }
 
 .gitcafe {
-  padding-top: 20px
+  padding-top: 20px;
 }
 
 #main .organizers img {
@@ -177,7 +177,7 @@ a {
   margin: 20px 0;
 }
 
-.btn, .btn-lg, .btn-group-lg > .btn {
+.btn, .btn-lg, .btn-group-lg > .btn, .btn-group-lg > .btn {
   border-radius: 0;
 }
 
@@ -204,13 +204,13 @@ a {
 }
 
 .footer a:hover {
-  opacity: .7;
+  opacity: 0.7;
 }
 
 .btn img {
   height: 32px;
 }
-
+.oh-temp ul,
 .services-list {
   text-align: left;
   list-style: none;
@@ -222,7 +222,6 @@ a {
 }
 
 .error-container {
-  display: none;
   background-color: #8cc7e5;
   width: 850px;
   padding: 15px;
@@ -380,6 +379,7 @@ body.hackathon {
 
 .hackathon .tooltip.bottom {
   margin-top: -5px;
+  -webkit-filter: inherit;
   filter: inherit;
   opacity: inherit;
 }
@@ -419,7 +419,7 @@ body.hackathon {
   padding: 0px;
   border: 0px;
   opacity: 0;
-  background: rgb(255, 255, 255);
+  background: white;
 }
 
 .iradio_square-blue .iCheck-helper {
@@ -433,7 +433,7 @@ body.hackathon {
   padding: 0px;
   border: 0px;
   opacity: 0;
-  background: rgb(255, 255, 255);
+  background: white;
 }
 
 .required {
@@ -517,8 +517,6 @@ body.hackathon {
   float: left;
   margin-top: 3px;
   margin-right: 5px;
-  -webkit-border-radius: 2px;
-  -moz-border-radius: 2px;
   border-radius: 2px;
 }
 
@@ -549,7 +547,192 @@ input[type=number] {
   -moz-appearance: textfield;
 }
 
-input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button {
+input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button {
   -webkit-appearance: none;
+}
+
+.hackathon-item {
+  position: relative;
+  padding-top: 56.25%;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hakcathon-inner {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition-property: width, top, left;
+  transition-duration: 0.2s;
+  -webkit-animation-name: tile-hover-out;
+  animation-name: tile-hover-out;
+  z-index: auto;
+}
+
+.hakcathon-inner:hover {
+  top: -5%;
+  left: -5%;
+  width: 110%;
+  height: 110%;
+  transition-property: width, top, left;
+  transition-duration: 0.2s;
+  -webkit-animation-name: tile-hover-out;
+  animation-name: tile-hover-out;
+  -webkit-animation-duration: 200ms;
+  animation-duration: 200ms;
+  z-index: 100000;
+}
+
+.hackathon-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: hidden;
+  text-decoration: none;
+}
+
+.hakcathon-inner:hover .hackathon-content {
+  box-shadow: rgba(30, 30, 30, 0.8) 0 0 30px;
+}
+
+.hackathon-thumb {
+  position: absolute;
+  width: 100%;
+  top: 0;
+  left: 0;
+}
+
+.hackathon-overlay {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+  transition: all 0.3s ease-out;
+  background-image: linear-gradient(to bottom, transparent 20%, #000);
+}
+
+.hakcathon-inner:hover .hackathon-overlay {
+  height: 200%;
+  top: -100%;
+}
+
+.hackathon-info {
+  position: absolute;
+  font-size: 15px;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.6);
+  color: #FFF;
+  width: 100%;
+  padding: 10px;
+  bottom: 0;
+  left: 0;
+  transition: min-height 200ms ease-out;
+  filter: alpha(Opacity=100);
+  opacity: 1;
+}
+
+.hakcathon-inner:hover .hackathon-info {
+  top: 0;
+  bottom: auto;
+  min-height: 100%;
+}
+
+.hackathon-details {
+  display: none;
+  text-shadow: none;
+}
+
+.hakcathon-inner:hover .hackathon-details {
+  -webkit-animation-name: tile-supplementary-deco-in;
+  animation-name: tile-supplementary-deco-in;
+  filter: alpha(enabled=false);
+  opacity: 1;
+  -webkit-animation-duration: 400ms;
+  animation-duration: 400ms;
+  display: block;
+}
+
+.hackathon-name {
+  margin: 10px 0;
+  font-size: 24px;
+}
+
+.hackathon-description {
+  color: #aaa;
+}
+
+.container .jumbotron {
+  padding: 20px !important;
+  border-radius: 0 !important;;
+}
+
+.jumbotron p {
+  font-size: 15px;
+}
+
+.reg-h-name {
+  margin: 0px 0px 15px;
+  font-size: 22px;
+}
+
+.team {
+  position: absolute;
+  left: -55px !important;
+  z-index: 1000;
+  display: none;
+  float: left;
+  width:220px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  text-shadow: none;
+  background: white;
+  border: 1px solid #dbdee0;
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  border-radius: 0;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+}
+
+.team li {
+
+  min-width: 220px;
+}
+
+.dropdown-menu-title {
+  background: #1F2327;
+  color: #fff;
+  padding: 5px 10px;
+  display: block;
+}
+
+.team li a {
+  display: block;
+  overflow: hidden;
+  padding: 5px 10px !important;
+  clear: both;
+  font-weight: normal;
+  line-height: 20px;
+  color: #34383c;
+  white-space: normal !important;
+}
+
+.team li .avatar {
+  float: left;
+}
+
+.team li .avatar img {
+  float: left !important;
+  height: 40px;
+  width: 40px;
+  margin-top: 5px;
+  margin-right: 10px;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
 }
