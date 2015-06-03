@@ -25,17 +25,18 @@ THE SOFTWARE.
 __author__ = 'Yifu Huang'
 
 import sys
+
 sys.path.append("..")
 from hackathon.azureformation.service import (
     Service,
 )
-from hackathon.azureformation.subscription import(
+from hackathon.azureformation.subscription import (
     Subscription,
 )
+from hackathon import Component
 
 
-class ResourceBase(object):
-
+class ResourceBase(Component):
     def __init__(self, azure_key_id):
         self.azure_key_id = azure_key_id
         self.service = Service(self.azure_key_id)

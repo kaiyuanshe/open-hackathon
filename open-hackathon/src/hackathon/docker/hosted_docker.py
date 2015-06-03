@@ -28,27 +28,23 @@ import sys
 
 sys.path.append("..")
 
-from hackathon.functions import (
-    convert,
-    safe_get_config,
-    get_now
-)
 from hackathon.database import (
-    db_adapter,
+    db_adapter
+)
+from hackathon import (
+    RequiredFeature,
+    Component
 )
 from hackathon.database.models import (
     Experiment,
     DockerContainer,
     HackathonAzureKey,
-    PortBinding,
-    Hackathon
-)
+    Hackathon,
+    PortBinding)
 from hackathon.enum import (
     EStatus,
     PortBindingType)
-from hackathon.hack.host_server import (
-    host_manager,
-)
+
 from compiler.ast import (
     flatten,
 )
@@ -61,22 +57,22 @@ from hackathon.template.docker_template_unit import (
 from hackathon.azureformation.endpoint import (
     Endpoint
 )
-from hackathon.docker.docker_formation_base import (
+from docker_formation_base import (
     DockerFormationBase,
 )
 from hackathon.azureformation.service import (
     Service,
 )
-from hackathon.hackathon_response import *
+from hackathon.hackathon_response import internal_server_error
 import json
 import requests
-from hackathon.template.template_mgr import template_manager
 from hackathon.scheduler import scheduler
 from datetime import timedelta
 from hackathon.enum import HACK_STATUS
 
 
-class HostedDockerFormation(DockerFormationBase):
+class HostedDockerFormation(DockerFormationBase, Component):
+    template_manager = RequiredFeature("template_manager")
     """
     Docker resource management based on docker remote api v1.18
     Host resource are required. Azure key required in case of azure.
@@ -84,6 +80,7 @@ class HostedDockerFormation(DockerFormationBase):
     application_json = {'content-type': 'application/json'}
     host_ports = []
     host_port_max_num = 30
+    docker_host_manager = RequiredFeature("docker_host_manager")
 
     def __init__(self):
         self.lock = Lock()
@@ -97,10 +94,10 @@ class HostedDockerFormation(DockerFormationBase):
         try:
             ping_url = '%s/_ping' % self.__get_vm_url(docker_host)
             req = requests.get(ping_url)
-            log.debug(req.content)
+            self.log.debug(req.content)
             return req.status_code == 200 and req.content == 'OK'
         except Exception as e:
-            log.error(e)
+            self.log.error(e)
             return False
 
     def get_available_host_port(self, docker_host, private_port):
@@ -115,7 +112,7 @@ class HostedDockerFormation(DockerFormationBase):
         :param private_port:
         :return:
         """
-        log.debug("try to assign docker port %d on server %r" % (private_port, docker_host))
+        self.log.debug("try to assign docker port %d on server %r" % (private_port, docker_host))
         containers = self.__containers_info(docker_host)
         host_ports = flatten(map(lambda p: p['Ports'], containers))
 
@@ -135,11 +132,11 @@ class HostedDockerFormation(DockerFormationBase):
         """
         container = kwargs["container"]
         expr_id = kwargs["expr_id"]
-        docker_host = host_manager.get_host_server_by_id(container.host_server_id)
+        docker_host = self.docker_host_manager.get_host_server_by_id(container.host_server_id)
         if self.__get_container(name, docker_host) is not None:
             containers_url = '%s/containers/%s/stop' % (self.__get_vm_url(docker_host), name)
             req = requests.post(containers_url)
-            log.debug(req.content)
+            self.log.debug(req.content)
         self.__stop_container(expr_id, container, docker_host)
 
     def delete(self, name, **kwargs):
@@ -151,10 +148,10 @@ class HostedDockerFormation(DockerFormationBase):
         """
         container = kwargs["container"]
         expr_id = kwargs["expr_id"]
-        docker_host = host_manager.get_host_server_by_id(container.host_server_id)
+        docker_host = self.docker_host_manager.get_host_server_by_id(container.host_server_id)
         containers_url = '%s/containers/%s?force=1' % (self.__get_vm_url(docker_host), name)
         req = requests.delete(containers_url)
-        log.debug(req.content)
+        self.log.debug(req.content)
 
         self.__stop_container(expr_id, container, docker_host)
 
@@ -169,15 +166,15 @@ class HostedDockerFormation(DockerFormationBase):
         hackathon = kwargs["hackathon"]
         experiment = kwargs["experiment"]
         container_name = unit.get_name()
-        host_server = host_manager.get_available_docker_host(1, hackathon)
+        host_server = self.docker_host_manager.get_available_docker_host(1, hackathon)
 
         container = DockerContainer(experiment,
                                     name=container_name,
                                     host_server_id=host_server.id,
                                     virtual_environment=virtual_environment,
                                     image=unit.get_image())
-        db_adapter.add_object(container)
-        db_adapter.commit()
+        self.db.add_object(container)
+        self.db.commit()
 
         # port binding
         ps = map(lambda p:
@@ -208,33 +205,34 @@ class HostedDockerFormation(DockerFormationBase):
         if exist is not None:
             container.container_id = exist["Id"]
             host_server.container_count += 1
-            db_adapter.commit()
+            self.db.commit()
         else:
             container_config = unit.get_container_config()
             # create container
             try:
                 container_create_result = self.__create(host_server, container_config, container_name)
             except Exception as e:
-                log.error(e)
-                log.error("container %s fail to create" % container_name)
+                self.log.error(e)
+                self.log.error("container %s fail to create" % container_name)
                 return None
             container.container_id = container_create_result["Id"]
             # start container
             try:
                 self.__start(host_server, container_create_result["Id"])
                 host_server.container_count += 1
-                db_adapter.commit()
+                self.db.commit()
             except Exception as e:
-                log.error(e)
-                log.error("container %s fail to start" % container["Id"])
+                self.log.error(e)
+                self.log.error("container %s fail to start" % container["Id"])
                 return None
             # check
             if self.__get_container(container_name, host_server) is None:
-                log.error("container %s has started, but can not find it in containers' info, maybe it exited again."
-                          % container_name)
+                self.log.error(
+                    "container %s has started, but can not find it in containers' info, maybe it exited again."
+                    % container_name)
                 return None
 
-        log.debug("starting container %s is ended ... " % container_name)
+        self.log.debug("starting container %s is ended ... " % container_name)
         return container
 
     # --------------------------------------------- helper function ---------------------------------------------#
@@ -256,11 +254,11 @@ class HostedDockerFormation(DockerFormationBase):
         if we release ports now, the new ports will be lost.
         :return:
         """
-        num = db_adapter.count(Experiment, Experiment.status == EStatus.Starting)
+        num = self.db.count(Experiment, Experiment.status == EStatus.Starting)
         if num > 0:
-            log.debug("there are %d experiment is starting, host ports will updated in next loop" % num)
+            self.log.debug("there are %d experiment is starting, host ports will updated in next loop" % num)
             return
-        log.debug("-----release ports cache successfully------")
+        self.log.debug("-----release ports cache successfully------")
         self.host_ports = []
 
     def __stop_container(self, expr_id, container, docker_host):
@@ -268,13 +266,13 @@ class HostedDockerFormation(DockerFormationBase):
         docker_host.container_count -= 1
         if docker_host.container_count < 0:
             docker_host.container_count = 0
-        db_adapter.commit()
+        self.db.commit()
 
     def __containers_info(self, docker_host):
         containers_url = '%s/containers/json' % self.__get_vm_url(docker_host)
         req = requests.get(containers_url)
-        log.debug(req.content)
-        return convert(json.loads(req.content))
+        self.log.debug(req.content)
+        return self.util.convert(json.loads(req.content))
 
     def __get_available_host_port(self, port_bindings, port):
         """
@@ -291,12 +289,12 @@ class HostedDockerFormation(DockerFormationBase):
             while host_port in port_bindings or host_port in self.host_ports:
                 host_port += 1
             if host_port >= 65535:
-                log.error("port used up on this host server")
+                self.log.error("port used up on this host server")
                 raise Exception("no port available")
             if len(self.host_ports) >= self.host_port_max_num:
                 self.__clear_ports_cache()
             self.host_ports.append(host_port)
-            log.debug("host_port is %d " % host_port)
+            self.log.debug("host_port is %d " % host_port)
             return host_port
         finally:
             self.lock.release()
@@ -315,7 +313,7 @@ class HostedDockerFormation(DockerFormationBase):
         """
         containers_url = '%s/containers/create?name=%s' % (self.__get_vm_url(docker_host), container_name)
         req = requests.post(containers_url, data=json.dumps(container_config), headers=self.application_json)
-        log.debug(req.content)
+        self.log.debug(req.content)
         container = json.loads(req.content)
         if container is None:
             raise AssertionError("container is none")
@@ -330,23 +328,23 @@ class HostedDockerFormation(DockerFormationBase):
         """
         url = '%s/containers/%s/start' % (self.__get_vm_url(docker_host), container_id)
         req = requests.post(url, headers=self.application_json)
-        log.debug(req.content)
+        self.log.debug(req.content)
 
     def __get_available_public_ports(self, expr_id, host_server, host_ports):
-        log.debug("starting to get azure ports")
+        self.log.debug("starting to get azure ports")
         ep = Endpoint(Service(self.__load_azure_key_id(expr_id)))
         host_server_name = host_server.vm_name
         host_server_dns = host_server.public_dns.split('.')[0]
         public_endpoints = ep.assign_public_endpoints(host_server_dns, 'Production', host_server_name, host_ports)
         if not isinstance(public_endpoints, list):
-            log.debug("failed to get public ports")
+            self.log.debug("failed to get public ports")
             return internal_server_error('cannot get public ports')
-        log.debug("public ports : %s" % public_endpoints)
+        self.log.debug("public ports : %s" % public_endpoints)
         return public_endpoints
 
     def __load_azure_key_id(self, expr_id):
-        expr = db_adapter.get_object(Experiment, expr_id)
-        hak = db_adapter.find_first_object_by(HackathonAzureKey, hackathon_id=expr.hackathon_id)
+        expr = self.db.get_object(Experiment, expr_id)
+        hak = self.db.find_first_object_by(HackathonAzureKey, hackathon_id=expr.hackathon_id)
         return hak.azure_key_id
 
     def __assign_ports(self, expr, host_server, ve, port_cfg):
@@ -369,7 +367,7 @@ class HostedDockerFormation(DockerFormationBase):
         # get 'public' cfg
         public_ports_cfg = filter(lambda p: DockerTemplateUnit.PORTS_PUBLIC in p, port_cfg)
         host_ports = [u[DockerTemplateUnit.PORTS_HOST_PORT] for u in public_ports_cfg]
-        if safe_get_config("environment", "prod") == "local":
+        if self.util.safe_get_config("environment", "prod") == "local":
             map(lambda cfg: cfg.update({DockerTemplateUnit.PORTS_PUBLIC_PORT: cfg[DockerTemplateUnit.PORTS_HOST_PORT]}),
                 public_ports_cfg)
         else:
@@ -398,9 +396,9 @@ class HostedDockerFormation(DockerFormationBase):
                                          virtual_environment=ve,
                                          experiment=expr)
             binding_dockers.append(binding_docker)
-            db_adapter.add_object(binding_cloud_service)
-            db_adapter.add_object(binding_docker)
-        db_adapter.commit()
+            self.db.add_object(binding_cloud_service)
+            self.db.add_object(binding_docker)
+        self.db.commit()
 
         local_ports_cfg = filter(lambda p: DockerTemplateUnit.PORTS_PUBLIC not in p, port_cfg)
         for local_cfg in local_ports_cfg:
@@ -412,46 +410,50 @@ class HostedDockerFormation(DockerFormationBase):
                                        virtual_environment=ve,
                                        experiment=expr)
             binding_dockers.append(port_binding)
-            db_adapter.add_object(port_binding)
-        db_adapter.commit()
+            self.db.add_object(port_binding)
+        self.db.commit()
         return binding_dockers
 
     def __release_ports(self, expr_id, host_server):
         """
         release the specified experiment's ports
         """
-        log.debug("Begin to release ports: expr_id: %d, host_server: %r" % (expr_id, host_server))
-        ports_binding = db_adapter.find_all_objects_by(PortBinding, experiment_id=expr_id)
+        self.log.debug("Begin to release ports: expr_id: %d, host_server: %r" % (expr_id, host_server))
+        ports_binding = self.db.find_all_objects_by(PortBinding, experiment_id=expr_id)
         if ports_binding is not None:
-            docker_binding = filter(lambda u: safe_get_config("environment", "prod") != "local" and u.binding_type == 1,
-                                    ports_binding)
+            docker_binding = filter(
+                lambda u: self.util.safe_get_config("environment", "prod") != "local" and u.binding_type == 1,
+                ports_binding)
             ports_to = [d.port_to for d in docker_binding]
             if len(ports_to) != 0:
                 self.__release_public_ports(expr_id, host_server, ports_to)
             for port in ports_binding:
-                db_adapter.delete_object(port)
-            db_adapter.commit()
-        log.debug("End to release ports: expr_id: %d, host_server: %r" % (expr_id, host_server))
+                self.db.delete_object(port)
+            self.db.commit()
+        self.log.debug("End to release ports: expr_id: %d, host_server: %r" % (expr_id, host_server))
 
     def __release_public_ports(self, expr_id, host_server, host_ports):
         ep = Endpoint(Service(self.__load_azure_key_id(expr_id)))
         host_server_name = host_server.vm_name
         host_server_dns = host_server.public_dns.split('.')[0]
-        log.debug("starting to release ports ... ")
+        self.log.debug("starting to release ports ... ")
         ep.release_public_endpoints(host_server_dns, 'Production', host_server_name, host_ports)
-
 
     # ----------------------initialize hackathon's templates on every docker host-------------------#
 
     def ensure_images(self):
         hackathons = db_adapter.find_all_objects(Hackathon, Hackathon.status == HACK_STATUS.ONLINE)
         for hackathon in hackathons:
-            log.debug("Start recycling inactive ensure images for hackathons")
-            excute_time = get_now() + timedelta(minutes=1)
-            scheduler.add_job(template_manager.pull_images_for_hackathon,
+            self.log.debug("Start recycling inactive ensure images for hackathons")
+            excute_time = self.util.get_now() + timedelta(minutes=1)
+            scheduler.add_job(self.template_manager.pull_images_for_hackathon,
                               'interval',
                               id=hackathon.name,
                               replace_existing=True,
                               next_run_time=excute_time,
                               minutes=60,
                               args=[hackathon])
+
+        self.log.debug("starting to release ports ... ")
+
+

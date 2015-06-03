@@ -26,33 +26,23 @@ THE SOFTWARE.
 import sys
 
 sys.path.append('..')
-from hackathon.functions import (
-    get_config,
-)
-from hackathon.log import (
-    log,
-)
-from hackathon.database import (
-    db_adapter,
-)
+
 from hackathon.database.models import (
     AzureKey,
     HackathonAzureKey,
     Hackathon,
 )
-from hackathon.azureformation.fileService import (
-    file_service
-)
+
+from hackathon import RequiredFeature, Component
 import os
 import commands
 
 
-class AzureCertManagement:
-    CERT_BASE = get_config('azure.cert_base')
-    CONTAINER_NAME = get_config('azure.container_name')
-
+class AzureCertManagement(Component):
     def __init__(self):
-        pass
+        self.CERT_BASE = self.util.get_config('azure.cert_base')
+        self.CONTAINER_NAME = self.util.get_config('azure.container_name')
+        self.file_service = RequiredFeature("file_service")
 
     def create_certificate(self, subscription_id, management_host, hackathon_name):
         """
@@ -69,7 +59,7 @@ class AzureCertManagement:
 
         # make sure certificate dir exists
         if not os.path.isdir(self.CERT_BASE):
-            log.debug('certificate dir not exists')
+            self.log.debug('certificate dir not exists')
             os.mkdir(self.CERT_BASE)
 
         base_url = '%s/%s' % (self.CERT_BASE, subscription_id)
@@ -81,7 +71,7 @@ class AzureCertManagement:
                           (pem_url, pem_url)
             commands.getstatusoutput(pem_command)
         else:
-            log.debug('%s exists' % pem_url)
+            self.log.debug('%s exists' % pem_url)
 
         cert_url = base_url + '.cer'
         # avoid duplicate cert generation
@@ -89,77 +79,75 @@ class AzureCertManagement:
             cert_command = 'openssl x509 -inform pem -in %s -outform der -out %s' % (pem_url, cert_url)
             commands.getstatusoutput(cert_command)
         else:
-            log.debug('%s exists' % cert_url)
+            self.log.debug('%s exists' % cert_url)
 
-        azure_key = db_adapter.find_first_object_by(AzureKey,
-                                                    cert_url=cert_url,
-                                                    pem_url=pem_url,
-                                                    subscription_id=subscription_id,
-                                                    management_host=management_host)
+        azure_key = self.db.find_first_object_by(AzureKey,
+                                                 cert_url=cert_url,
+                                                 pem_url=pem_url,
+                                                 subscription_id=subscription_id,
+                                                 management_host=management_host)
         # avoid duplicate azure key
         if azure_key is None:
-            azure_key = db_adapter.add_object_kwargs(AzureKey,
-                                                     cert_url=cert_url,
-                                                     pem_url=pem_url,
-                                                     subscription_id=subscription_id,
-                                                     management_host=management_host)
-            db_adapter.commit()
+            azure_key = self.db.add_object_kwargs(AzureKey,
+                                                  cert_url=cert_url,
+                                                  pem_url=pem_url,
+                                                  subscription_id=subscription_id,
+                                                  management_host=management_host)
+            self.db.commit()
         else:
-            log.debug('azure key exists')
+            self.log.debug('azure key exists')
 
-        hackathon_id = db_adapter.find_first_object_by(Hackathon, name=hackathon_name).id
-        hackathon_azure_key = db_adapter.find_first_object_by(HackathonAzureKey,
-                                                              hackathon_id=hackathon_id,
-                                                              azure_key_id=azure_key.id)
+        hackathon_id = self.db.find_first_object_by(Hackathon, name=hackathon_name).id
+        hackathon_azure_key = self.db.find_first_object_by(HackathonAzureKey,
+                                                           hackathon_id=hackathon_id,
+                                                           azure_key_id=azure_key.id)
         # avoid duplicate hackathon azure key
         if hackathon_azure_key is None:
-            db_adapter.add_object_kwargs(HackathonAzureKey,
-                                         hackathon_id=hackathon_id,
-                                         azure_key_id=azure_key.id)
-            db_adapter.commit()
+            self.db.add_object_kwargs(HackathonAzureKey,
+                                      hackathon_id=hackathon_id,
+                                      azure_key_id=azure_key.id)
+            self.db.commit()
         else:
-            log.debug('hackathon azure key exists')
+            self.log.debug('hackathon azure key exists')
 
-        azure_cert_url = file_service.upload_file_to_azure_from_path(cert_url, self.CONTAINER_NAME, subscription_id + '.cer')
+        azure_cert_url = self.file_service.upload_file_to_azure_from_path(cert_url, self.CONTAINER_NAME,
+                                                                          subscription_id + '.cer')
         azure_key.cert_url = azure_cert_url
-        db_adapter.commit()
+        self.db.commit()
         return azure_cert_url
 
 
     def get_certificates(self, hackathon_name):
-        hackathon_id = db_adapter.find_first_object_by(Hackathon, name=hackathon_name).id
-        hackathon_azure_keys = db_adapter.find_all_objects_by(HackathonAzureKey, hackathon_id=hackathon_id)
+        hackathon_id = self.db.find_first_object_by(Hackathon, name=hackathon_name).id
+        hackathon_azure_keys = self.db.find_all_objects_by(HackathonAzureKey, hackathon_id=hackathon_id)
         if hackathon_azure_keys is None:
-            log.error('hackathon [%s] has no certificates' % hackathon_id)
+            self.log.error('hackathon [%s] has no certificates' % hackathon_id)
             return None
         certificates = []
         for hackathon_azure_key in hackathon_azure_keys:
-            dic = db_adapter.get_object(AzureKey, hackathon_azure_key.azure_key_id).dic()
+            dic = self.db.get_object(AzureKey, hackathon_azure_key.azure_key_id).dic()
             certificates.append(dic)
         return certificates
 
     def delete_certificate(self, certificate_id, hackathon_name):
         certificate_id = int(certificate_id)
-        hackathon_id = db_adapter.find_first_object_by(Hackathon, name=hackathon_name).id
-        hackathon_azure_keys = db_adapter.find_all_objects_by(HackathonAzureKey, hackathon_id=hackathon_id)
+        hackathon_id = self.db.find_first_object_by(Hackathon, name=hackathon_name).id
+        hackathon_azure_keys = self.db.find_all_objects_by(HackathonAzureKey, hackathon_id=hackathon_id)
         if hackathon_azure_keys is None:
-            log.error('hackathon [%d] has no certificates' % hackathon_id)
+            self.log.error('hackathon [%d] has no certificates' % hackathon_id)
             return False
         azure_key_ids = map(lambda x: x.azure_key_id, hackathon_azure_keys)
         if certificate_id not in azure_key_ids:
-            log.error('hackathon [%d] has no certificate [%d]' % (hackathon_id, certificate_id))
+            self.log.error('hackathon [%d] has no certificate [%d]' % (hackathon_id, certificate_id))
             return False
-        db_adapter.delete_all_objects_by(HackathonAzureKey, hackathon_id=hackathon_id, azure_key_id=certificate_id)
-        certificate = db_adapter.get_object(AzureKey, certificate_id)
-        db_adapter.delete_object(certificate)
-        db_adapter.commit()
+        self.db.delete_all_objects_by(HackathonAzureKey, hackathon_id=hackathon_id, azure_key_id=certificate_id)
+        certificate = self.db.get_object(AzureKey, certificate_id)
+        self.db.delete_object(certificate)
+        self.db.commit()
         return True
 
 
-azure_cert_management = AzureCertManagement()
-
-
 # if __name__ == '__main__':
-#     azure_management = AzureManagement()
-#     cert_url = azure_management.create_certificate('guhr34nfj', 'fhdufew3', 'open-xml-sdk')
-#     print cert_url
+# azure_management = AzureManagement()
+# cert_url = azure_management.create_certificate('guhr34nfj', 'fhdufew3', 'open-xml-sdk')
+# print cert_url

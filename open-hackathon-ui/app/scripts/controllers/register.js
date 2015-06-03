@@ -31,27 +31,40 @@
  */
 
 angular.module('oh.controllers')
-  .controller('register.controller', function ($scope, $location, Authentication, API) {
+  .controller('register.controller', function ($scope, $rootScope, $stateParams, $cookieStore, state, Authentication, API) {
     var registration = null;
-    //Page load
-    Authentication.register(function (data) {
-      $scope.hackathon = data.hackathon;
-      $scope.banners = data.hackathon.basic_info.banners.split(";")
-      var isExpired = data.hackathon.registration_end_time < Date.now();
+    $rootScope.isShow = true;
+    var user = Authentication.getUser();
+    var hackathon_name = $stateParams.hackathon_name || config.name;
+
+    API.hackathon.get({header: {hackathon_name: hackathon_name}}).then(function (res) {
+      $scope.hackathon = res.data;
+      var isExpired = $scope.hackathon.registration_end_time < Date.now();
       if (isExpired) {
         $scope.hackathon.message = '活动已经结束';
       }
-      if (data.hackathon.status != 1) {
-        $location.path('error')
-      } else {
-        if (data.registration) {
-          registration = data.registration;
-          checkUserStatus(registration.status, data.hackathon.basic_info.auto_approve);
-        } else {
-          $scope.hackathon.isRegister = true;
-        }
+      if ($scope.hackathon.status == 0) {
+        state.go('index.home');
       }
       $scope.isLoad = false;
+    })
+
+    API.user.registration.get({header: {hackathon_name: hackathon_name}}).then(function (res) {
+      if (res.data.error) {
+        user = undefined;
+        $scope.hackathon.isRegister = true;
+      } else {
+
+        registration = res.data.registration;
+        checkUserStatus(registration.status, res.data.hackathon.basic_info.auto_approve);
+        $scope.goWork = function () {
+          if (res.data.experiment) {
+            state.go('hackathon', {hackathon_name: hackathon_name});
+          } else {
+            state.go('index.settings', {hackathon_name: hackathon_name});
+          }
+        }
+      }
     });
 
     function checkUserStatus(status, approve) {
@@ -65,26 +78,30 @@ angular.module('oh.controllers')
       } else if (status == 1 || status == 3) {
         $scope.hackathon.start = true
         $scope.hackathon.message = '您的报名已经审核已通过。';
-
       }
     }
 
     $scope.submitRegister = function (register) {
       if (registration) {
         register.id = registration.id;
-        API.user.registration.put({body: register, header: {hackathon_name: config.name}}, function (data) {
-          checkUserStatus(0,0);
+        API.user.registration.put({body: register, header: {hackathon_name: hackathon_name}}, function (data) {
+          checkUserStatus(0, 0);
         });
       } else {
-        API.user.registration.post({body: register, header: {hackathon_name: config.name}}, function (data) {
-          $location.path('hackathon');
+        API.user.registration.post({body: register, header: {hackathon_name: hackathon_name}}, function (data) {
+          state.go('hackathon', {hackathon_name: $stateParams.hackathon_name});
         });
       }
     }
 
     $scope.showRegister = function () {
+
+      if (!user) {
+        $cookieStore.put('redirectHakathonName', hackathon_name);
+        state.go('index');
+        return;
+      }
       if ($scope.hackathon.basic_info.auto_approve == 1) {
-        var user = Authentication.getUser();
         $scope.submitRegister({
           user_id: user.id,
           hackathon_id: $scope.hackathon.id,
@@ -94,11 +111,11 @@ angular.module('oh.controllers')
           email: user.email[0].email
         });
       } else {
-        if(registration){
-          if($scope.hackathon.basic_info.auto_approve == 0 && registration.status == 3){
+        if (registration) {
+          if ($scope.hackathon.basic_info.auto_approve == 0 && registration.status == 3) {
             $scope.registerForm.show = true;
           }
-        }else{
+        } else {
           $scope.registerForm.show = true;
         }
       }
@@ -115,8 +132,9 @@ angular.module('oh.controllers')
       $scope.registerForm.show = false;
     }
 
-  }).controller('registerFormController', function ($scope, Authentication) {
-    var user = Authentication.getUser();
+  }).
+  controller('registerFormController', function ($scope, Authentication) {
+    var user = Authentication.getUser() || {};
     $scope.id = $scope.hackathon.id;
     $scope.register = {
       gender: 1,
