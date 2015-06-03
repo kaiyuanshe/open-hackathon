@@ -24,7 +24,7 @@
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
 
-from functions import safe_get_config, get_config
+from util import safe_get_config, get_config
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 from . import app

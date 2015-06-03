@@ -40,7 +40,7 @@ from hackathon.database.models import (
     Template,
     Experiment,
 )
-from hackathon.functions import (
+from hackathon.util import (
     load_template,
     call,
     get_now,
@@ -59,7 +59,6 @@ from azure.servicemanagement import (
     ConfigurationSetInputEndpoint,
 )
 from datetime import (
-    datetime,
     timedelta,
 )
 # -------------------------------------------------- constants --------------------------------------------------#

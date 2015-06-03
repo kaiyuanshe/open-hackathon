@@ -25,24 +25,31 @@ THE SOFTWARE.
 
 from hackathon.database.models import *
 from hackathon.constants import HACKATHON_BASIC_INFO
-from datetime import datetime, timedelta
+from datetime import timedelta
 import json
 import os
 from os.path import realpath, dirname
 from hackathon.enum import VEProvider
-from hackathon.functions import get_now
+from hackathon.util import get_now
 
 # test hackathon
 hackathon = db_adapter.find_first_object_by(Hackathon, name="sample")
 if hackathon is None:
-    hackathon = Hackathon(name="sample", display_name="Open Hackathon", description="This is a demo for Open Hackathon Project",
+    hackathon = Hackathon(name="sample", display_name="Open Hackathon",
+                          description="This is a demo for Open Hackathon Project",
                           status=1, event_start_time=get_now(), event_end_time=get_now() + timedelta(days=365),
                           registration_start_time=get_now(),
                           registration_end_time=get_now() + timedelta(days=365),
                           judge_start_time=get_now(), judge_end_time=get_now() + timedelta(days=365),
                           basic_info=json.dumps({
-                              HACKATHON_BASIC_INFO.AUTO_APPROVE: 1,
-                              HACKATHON_BASIC_INFO.RECYCLE_ENABLED: 0
+                              HACKATHON_BASIC_INFO.AUTO_APPROVE: True,
+                              HACKATHON_BASIC_INFO.RECYCLE_ENABLED: False,
+                              HACKATHON_BASIC_INFO.ORGANIZERS: [],
+                              HACKATHON_BASIC_INFO.BANNERS: "",
+                              HACKATHON_BASIC_INFO.LOCATION: "",
+                              HACKATHON_BASIC_INFO.MAX_ENROLLMENT: 0,
+                              HACKATHON_BASIC_INFO.PRE_ALLOCATE_ENABLED: False,
+                              HACKATHON_BASIC_INFO.PRE_ALLOCATE_NUMBER: 1,
                           }),
                           status=1)
     db_adapter.add_object(hackathon)
