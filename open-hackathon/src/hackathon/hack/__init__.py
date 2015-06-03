@@ -28,39 +28,34 @@ import sys
 
 sys.path.append("..")
 from hackathon.database.models import Hackathon, User, UserHackathonRel, AdminHackathonRel, DockerHostServer, Template
-from hackathon.database import db_adapter
-from hackathon.functions import get_now
 from hackathon.enum import RGStatus, VEProvider
-from hackathon.hackathon_response import *
+from hackathon.hackathon_response import internal_server_error, bad_request, ok
 from hackathon.enum import ADMIN_ROLE_TYPE, HACK_STATUS
 from sqlalchemy import or_
 from hackathon.constants import HTTP_HEADER
-from flask import request, g
 import json
 from hackathon.constants import HACKATHON_BASIC_INFO
+from hackathon import RequiredFeature, Component, g, request
 import imghdr
-from hackathon.functions import get_config, safe_get_config
-from hackathon.azureformation.fileService import file_service
 import uuid
 import time
 import os
 from os.path import realpath, dirname
 
 
-class HackathonManager():
+class HackathonManager(Component):
     BASIC_INFO = 'basic_info'
     EXTRA_INFO = 'extra_info'
-
-    def __init__(self, db):
-        self.db = db
+    file_service = RequiredFeature("file_service")
 
     def __is_recycle_enabled(self, hackathon):
         try:
             basic_info = json.loads(hackathon.basic_info)
             return basic_info[HACKATHON_BASIC_INFO.RECYCLE_ENABLED] == 1
         except Exception as e:
-            log.error(e)
-            log.warn("cannot load recycle_enabled from basic info for hackathon %d, will return False" % hackathon.id)
+            self.log.error(e)
+            self.log.warn(
+                "cannot load recycle_enabled from basic info for hackathon %d, will return False" % hackathon.id)
             return False
 
     # check the admin authority on hackathon
@@ -132,9 +127,9 @@ class HackathonManager():
     def get_permitted_hackathon_list_by_admin_user_id(self, user_id):
         hackathon_ids = self.__get_hackathon_ids_by_admin_user_id(user_id)
         if -1 in hackathon_ids:
-            hackathon_list = db_adapter.find_all_objects(Hackathon)
+            hackathon_list = self.db.find_all_objects(Hackathon)
         else:
-            hackathon_list = db_adapter.find_all_objects(Hackathon, Hackathon.id.in_(hackathon_ids))
+            hackathon_list = self.db.find_all_objects(Hackathon, Hackathon.id.in_(hackathon_ids))
 
         return map(lambda u: u.dic(), hackathon_list)
 
@@ -155,19 +150,19 @@ class HackathonManager():
         if HTTP_HEADER.HACKATHON_NAME in request.headers:
             try:
                 hackathon_name = request.headers[HTTP_HEADER.HACKATHON_NAME]
-                hackathon = hack_manager.get_hackathon_by_name(hackathon_name)
+                hackathon = self.get_hackathon_by_name(hackathon_name)
                 if hackathon is None:
-                    log.debug("cannot find hackathon by name %s" % hackathon_name)
+                    self.log.debug("cannot find hackathon by name %s" % hackathon_name)
                     return False
                 else:
                     g.hackathon = hackathon
                     return True
             except Exception as ex:
-                log.error(ex)
-                log.debug("hackathon_name invalid")
+                self.log.error(ex)
+                self.log.debug("hackathon_name invalid")
                 return False
         else:
-            log.debug("hackathon_name not found in headers")
+            self.log.debug("hackathon_name not found in headers")
             return False
 
     def is_auto_approve(self, hackathon):
@@ -175,8 +170,8 @@ class HackathonManager():
             basic_info = json.loads(hackathon.basic_info)
             return basic_info[HACKATHON_BASIC_INFO.AUTO_APPROVE] == 1
         except Exception as e:
-            log.error(e)
-            log.warn("cannot load auto_approve from basic info for hackathon %d, will return False" % hackathon.id)
+            self.log.error(e)
+            self.log.warn("cannot load auto_approve from basic info for hackathon %d, will return False" % hackathon.id)
             return False
 
 
@@ -185,8 +180,8 @@ class HackathonManager():
             basic_info = json.loads(hackathon.basic_info)
             return basic_info[HACKATHON_BASIC_INFO.PRE_ALLOCATE_ENABLED] == 1
         except Exception as e:
-            log.error(e)
-            log.warn(
+            self.log.error(e)
+            self.log.warn(
                 "cannot load pre_allocate_enabled from basic info for hackathon %d, will return False" % hackathon.id)
             return False
 
@@ -196,14 +191,14 @@ class HackathonManager():
             basic_info = json.loads(hackathon.basic_info)
             return basic_info[HACKATHON_BASIC_INFO.PRE_ALLOCATE_NUMBER]
         except Exception as e:
-            log.error(e)
-            log.warn(
+            self.log.error(e)
+            self.log.warn(
                 "cannot load pre_allocate_number from basic info for hackathon %d, will return 1" % hackathon.id)
             return 1
 
 
     def validate_created_args(self, args):
-        log.debug("create_or_update_hackathon: %r" % args)
+        self.log.debug("create_or_update_hackathon: %r" % args)
         if "name" not in args:
             return False, bad_request("hackathon name invalid")
 
@@ -242,9 +237,9 @@ class HackathonManager():
                                            private_ip="10.209.14.33",
                                            private_docker_api_port=4243, container_count=0, container_max_count=100,
                                            hackathon=hackathon)
-            if db_adapter.find_first_object_by(DockerHostServer, vm_name=docker_host.vm_name,
-                                               hackathon_id=hackathon.id) is None:
-                db_adapter.add_object(docker_host)
+            if self.db.find_first_object_by(DockerHostServer, vm_name=docker_host.vm_name,
+                                            hackathon_id=hackathon.id) is None:
+                self.db.add_object(docker_host)
 
             # test template: ubuntu terminal
             template_dir = dirname(dirname(realpath(__file__))) + '/resources'
@@ -255,10 +250,10 @@ class HackathonManager():
                                 virtual_environment_count=1,
                                 description="<ul><li>Ubuntu</li><li>SSH</li><li>LAMP</li></ul>",
                                 hackathon=hackathon)
-            if db_adapter.find_first_object_by(Template, name=template.name, hackathon_id=hackathon.id) is None:
-                db_adapter.add_object(template)
+            if self.db.find_first_object_by(Template, name=template.name, hackathon_id=hackathon.id) is None:
+                self.db.add_object(template)
         except:
-            log.warn("fail to create test data")
+            self.log.warn("fail to create test data")
 
         return
 
@@ -269,9 +264,9 @@ class HackathonManager():
         args = return_info
 
         try:
-            log.debug("add a new hackathon:" + str(args))
-            args['update_time'] = get_now()
-            args['create_time'] = get_now()
+            self.log.debug("add a new hackathon:" + str(args))
+            args['update_time'] = self.util.get_now()
+            args['create_time'] = self.util.get_now()
             args["creator_id"] = g.user.id
             new_hack = self.db.add_object_kwargs(Hackathon, **args)  # insert into hackathon
             try:
@@ -280,23 +275,23 @@ class HackathonManager():
                                         hackathon_id=new_hack.id,
                                         status=HACK_STATUS.INIT,
                                         remarks='creator',
-                                        create_time=get_now())
+                                        create_time=self.util.get_now())
                 self.db.add_object(ahl)
             except Exception as ex:
                 # TODO: send out a email to remind administrator to deal with this problems
-                log.error(ex)
+                self.log.error(ex)
                 return internal_server_error("fail to insert a record into admin_hackathon_rel")
 
             # todo remove the following line ASAP
             self.__test_data(new_hack)
             return new_hack.id
         except Exception as  e:
-            log.error(e)
+            self.log.error(e)
             return internal_server_error("fail to create hackathon")
 
 
     def update_hackathon(self, args):
-        log.debug("update a exist hackathon insert args: %r" % args)
+        self.log.debug("update a exist hackathon insert args: %r" % args)
         if "name" not in args or "id" not in args:
             return bad_request("name or id are both required when update a hackathon")
 
@@ -307,12 +302,12 @@ class HackathonManager():
 
         try:
             update_items = self.parse_update_items(args, hackathon)
-            log.debug("update hackathon items :" + str(args))
+            self.log.debug("update hackathon items :" + str(args))
             self.db.update_object(hackathon, **update_items)
             return ok("update hackathon succeed")
 
         except Exception as  e:
-            log.error(e)
+            self.log.error(e)
             return internal_server_error("fail to update hackathon")
 
 
@@ -330,13 +325,13 @@ class HackathonManager():
         result.pop('id', None)
         result.pop('create_time', None)
         result.pop('creator_id', None)
-        result['update_time'] = get_now()
+        result['update_time'] = self.util.get_now()
         return result
 
 
     def validate_args(self):
         # check size
-        if request.content_length > len(request.files) * get_config("storage.size_limit_kilo_bytes") * 1024:
+        if request.content_length > len(request.files) * self.util.get_config("storage.size_limit_kilo_bytes") * 1024:
             return False, bad_request("more than the file size limited")
 
         # check each file type
@@ -362,15 +357,15 @@ class HackathonManager():
         if not status:
             return return_info
 
-        image_container_name = safe_get_config("storage.image_container", "images")
+        image_container_name = self.util.safe_get_config("storage.image_container", "images")
         images = []
 
         for file_name in request.files:
             file = request.files[file_name]
             real_name = self.generate_file_name(file)
-            log.debug("upload image file : " + real_name)
+            self.log.debug("upload image file : " + real_name)
 
-            url = file_service.upload_file_to_azure(file, image_container_name, real_name)
+            url = self.file_service.upload_file_to_azure(file, image_container_name, real_name)
             if url is not None:
                 image = {}
                 image['name'] = file.filename
@@ -397,18 +392,18 @@ class HackathonManager():
         return [h.id for h in pre_list]
 
 
-hack_manager = HackathonManager(db_adapter)
-
-
 def is_auto_approve(hackathon):
+    hack_manager = RequiredFeature("hackathon_manager")
     return hack_manager.is_auto_approve(hackathon)
 
 
 def is_pre_allocate_enabled(hackathon):
+    hack_manager = RequiredFeature("hackathon_manager")
     return hack_manager.is_pre_allocate_enabled(hackathon)
 
 
 def get_pre_allocate_number(hackathon):
+    hack_manager = RequiredFeature("hackathon_manager")
     return hack_manager.get_pre_allocate_number(hackathon)
 
 

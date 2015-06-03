@@ -38,9 +38,7 @@ from hackathon.azureformation.utility import (
     delete_azure_storage_account,
     run_job,
 )
-from hackathon.log import (
-    log,
-)
+
 from hackathon.enum import (
     STORAGE_ACCOUNT,
     ALOperation,
@@ -87,13 +85,13 @@ class StorageAccount(ResourceBase):
             if not self.service.check_storage_account_name_availability(name).result:
                 m = self.CREATE_STORAGE_ACCOUNT_ERROR[1] % (STORAGE_ACCOUNT, name)
                 commit_azure_log(experiment_id, ALOperation.CREATE_STORAGE_ACCOUNT, ALStatus.FAIL, m, 1)
-                log.error(m)
+                self.log.error(m)
                 return False
             # avoid no available subscription remained
             if self.subscription.get_available_storage_account_count() < self.NEED_COUNT:
                 m = self.CREATE_STORAGE_ACCOUNT_ERROR[2] % (STORAGE_ACCOUNT, name)
                 commit_azure_log(experiment_id, ALOperation.CREATE_STORAGE_ACCOUNT, ALStatus.FAIL, m, 2)
-                log.error(m)
+                self.log.error(m)
                 return False
             # delete old azure storage account in database
             delete_azure_storage_account(name)
@@ -105,7 +103,7 @@ class StorageAccount(ResourceBase):
             except Exception as e:
                 m = self.CREATE_STORAGE_ACCOUNT_ERROR[0] % (STORAGE_ACCOUNT, name, e.message)
                 commit_azure_log(experiment_id, ALOperation.CREATE_STORAGE_ACCOUNT, ALStatus.FAIL, m, 0)
-                log.error(e)
+                self.log.error(e)
                 return False
             # query async operation status
             run_job(MDL_CLS_FUNC[2],
@@ -122,7 +120,7 @@ class StorageAccount(ResourceBase):
                 m = self.CREATE_STORAGE_ACCOUNT_INFO[2] % (STORAGE_ACCOUNT, name, AZURE_FORMATION)
                 commit_azure_storage_account(name, description, label, location, ASAStatus.ONLINE, experiment_id)
                 commit_azure_log(experiment_id, ALOperation.CREATE_STORAGE_ACCOUNT, ALStatus.END, m, 2)
-            log.debug(m)
+            self.log.debug(m)
             # create cloud service
             run_job(MDL_CLS_FUNC[1], (self.azure_key_id,), (experiment_id, template_unit))
         return True
@@ -136,12 +134,12 @@ class StorageAccount(ResourceBase):
         if not self.service.storage_account_exists(name):
             m = self.CREATE_STORAGE_ACCOUNT_ERROR[4] % (STORAGE_ACCOUNT, name)
             commit_azure_log(experiment_id, ALOperation.CREATE_STORAGE_ACCOUNT, ALStatus.FAIL, m, 4)
-            log.error(m)
+            self.log.error(m)
         else:
             m = self.CREATE_STORAGE_ACCOUNT_INFO[0] % (STORAGE_ACCOUNT, name)
             commit_azure_storage_account(name, description, label, location, ASAStatus.ONLINE, experiment_id)
             commit_azure_log(experiment_id, ALOperation.CREATE_STORAGE_ACCOUNT, ALStatus.END, m, 0)
-            log.debug(m)
+            self.log.debug(m)
             # create cloud service
             run_job(MDL_CLS_FUNC[1], (self.azure_key_id,), (experiment_id, template_unit))
 
@@ -149,7 +147,7 @@ class StorageAccount(ResourceBase):
         name = template_unit.get_storage_account_name()
         m = self.CREATE_STORAGE_ACCOUNT_ERROR[3] % (STORAGE_ACCOUNT, name)
         commit_azure_log(experiment_id, ALOperation.CREATE_STORAGE_ACCOUNT, ALStatus.FAIL, m, 3)
-        log.error(m)
+        self.log.error(m)
 
     # todo update storage account
     def update_storage_account(self):

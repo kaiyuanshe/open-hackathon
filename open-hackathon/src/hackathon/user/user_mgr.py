@@ -27,25 +27,20 @@
 import sys
 
 sys.path.append("..")
-from hackathon.database.models import *
-from hackathon.database import db_adapter
+from hackathon.database.models import UserToken, User, UserEmail
 from datetime import timedelta
-from hackathon.functions import get_now
 from hackathon.constants import HTTP_HEADER
-from hackathon.functions import safe_get_config
-from hackathon.hackathon_response import *
+from hackathon.hackathon_response import not_found
 from flask import request, g
 import uuid
+from hackathon import Component
 
 
-class UserManager(object):
-    def __init__(self, db_adapter):
-        self.db = db_adapter
-
+class UserManager(Component):
     def __generate_api_token(self, user):
-        token_issue_date = get_now()
+        token_issue_date = self.util.get_now()
         token_expire_date = token_issue_date + timedelta(
-            minutes=safe_get_config("login.token_expiration_minutes", 1440))
+            minutes=self.util.safe_get_config("login.token_expiration_minutes", 1440))
         user_token = UserToken(token=str(uuid.uuid1()), user=user, expire_date=token_expire_date,
                                issue_date=token_issue_date)
         self.db.add_object(user_token)
@@ -53,7 +48,7 @@ class UserManager(object):
 
     def __validate_token(self, token):
         t = self.db.find_first_object_by(UserToken, token=token)
-        if t is not None and t.expire_date >= get_now():
+        if t is not None and t.expire_date >= self.util.get_now():
             return t.user
         return None
 
@@ -92,7 +87,7 @@ class UserManager(object):
             self.db.update_object(user, online=0)
             return "OK"
         except Exception as e:
-            log.error(e)
+            self.log.error(e)
             return "log out failed"
 
     def db_login(self, openid, **kwargs):
@@ -106,7 +101,7 @@ class UserManager(object):
                                   provider=kwargs["provider"],
                                   access_token=kwargs["access_token"],
                                   avatar_url=kwargs["avatar_url"],
-                                  last_login_time=get_now(),
+                                  last_login_time=self.util.get_now(),
                                   online=1)
             map(lambda x: self.__create_or_update_email(user, x), email_list)
         else:
@@ -158,6 +153,3 @@ class UserManager(object):
             "create_time": str(user.create_time),
             "last_login_time": str(user.last_login_time)
         }
-
-
-user_manager = UserManager(db_adapter)

@@ -26,18 +26,16 @@ import sys
 
 sys.path.append("..")
 
-from hackathon import api
+from hackathon import api, RequiredFeature, Component, g, request
 from flask_restful import Resource, reqparse
-from flask import g, request
 from hackathon.decorators import token_required, hackathon_name_required, admin_privilege_required
-from hackathon.hack import hack_manager
-from hackathon.registration.register_mgr import register_manager
-from hackathon.template.template_mgr import template_manager
-from hackathon.hackathon_response import *
-from hackathon.azureformation.azureCertManagement import (
-    azure_cert_management,
-)
-from hackathon.admin.admin_mgr import admin_manager
+from hackathon.hackathon_response import internal_server_error, not_found, bad_request
+
+hackathon_manager = RequiredFeature("hackathon_manager")
+register_manager = RequiredFeature("register_manager")
+template_manager = RequiredFeature("template_manager")
+azure_cert_management = RequiredFeature("azure_cert_management")
+admin_manager = RequiredFeature("admin_manager")
 
 
 class AdminHackathonResource(Resource):
@@ -48,12 +46,12 @@ class AdminHackathonResource(Resource):
     @token_required
     def post(self):
         args = request.get_json()
-        return hack_manager.create_new_hackathon(args)
+        return hackathon_manager.create_new_hackathon(args)
 
     @admin_privilege_required
     def put(self):
         args = request.get_json()
-        return hack_manager.update_hackathon(args)
+        return hackathon_manager.update_hackathon(args)
 
     def delete(self):
         pass
@@ -62,7 +60,7 @@ class AdminHackathonResource(Resource):
 class AdminHackathonListResource(Resource):
     @token_required
     def get(self):
-        return hack_manager.get_permitted_hackathon_list_by_admin_user_id(g.user.id)
+        return hackathon_manager.get_permitted_hackathon_list_by_admin_user_id(g.user.id)
 
 
 class HackathonCheckNameResource(Resource):
@@ -70,7 +68,7 @@ class HackathonCheckNameResource(Resource):
         parse = reqparse.RequestParser()
         parse.add_argument('name', type=str, location='args', required=True)
         args = parse.parse_args()
-        return hack_manager.get_hackathon_by_name(args['name']) is None
+        return hackathon_manager.get_hackathon_by_name(args['name']) is None
 
 
 class AdminRegisterListResource(Resource):
@@ -134,7 +132,7 @@ class AdminHackathonTemplateResource(Resource):
         return template_manager.delete_template(args['id'])
 
 
-class AdminAzureResource(Resource):
+class AdminAzureResource(Resource, Component):
     @hackathon_name_required
     def get(self):
         certificates = azure_cert_management.get_certificates(g.hackathon.name)
@@ -154,7 +152,7 @@ class AdminAzureResource(Resource):
                                                                       g.hackathon.name)
             return {'azure_cert_url': azure_cert_url}, 200
         except Exception as err:
-            log.error(err)
+            self.log.error(err)
             return internal_server_error('fail to create certificate due to [%s]' % err)
 
     @hackathon_name_required
@@ -172,7 +170,7 @@ class AdminAzureResource(Resource):
 class HackathonFileResource(Resource):
     @admin_privilege_required
     def post(self):
-        return hack_manager.upload_files()
+        return hackathon_manager.upload_files()
 
     def delete(self):
         # TODO call azure blobservice api to delete file
