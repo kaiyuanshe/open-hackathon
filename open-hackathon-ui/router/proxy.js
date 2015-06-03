@@ -55,7 +55,7 @@ var HACKATHON_EXPIRED = 8;
 
 function login(res, option) {
   res.api.user.login.post(option, function (response, data) {
-    var redirect = '/#!/settings';
+    var redirect = '/#!/redirect';
     if (response.statusCode >= 200 && response.statusCode < 300 && !data.error) {
       console.log(data);
       res.cookie(COOKIE_TOKEN, JSON.stringify(data.token));
