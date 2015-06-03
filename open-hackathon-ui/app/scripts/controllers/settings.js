@@ -58,12 +58,9 @@ angular.module('oh.controllers')
     $scope.submit = function () {
       API.user.experiment.post({
         body: {template_name: $scope.type.name, hackathon: hackathon_name}
-      }, function (data) {
-        if (data.error) {
-          state.go('error', data);
-        } else {
-          state.go('hackathon', {hackathon_name: hackathon_name});
-        }
       });
+      setTimeout(function(){
+        state.go("hackathon", {hackathon_name: hackathon_name})
+      }, 500)
     }
   });

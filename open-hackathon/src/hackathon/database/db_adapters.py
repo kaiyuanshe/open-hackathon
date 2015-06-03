@@ -31,6 +31,7 @@ class SQLAlchemyAdapterMetaClass(type):
 
         def auto_commit(self, *args, **kwargs):
             try:
+                self.commit()
                 return_value = func(self, *args, **kwargs)
                 self.commit()
                 return return_value

@@ -73,7 +73,7 @@ angular.module('oh.services', [])
           options = $.extend(_params, options);
           var url = name;
           options.header.token = $cookieStore.get('token') || '';
-          log.time(name);
+//          log.time(name);
           return $http({
             method: obj,
             url: url,
@@ -82,7 +82,7 @@ angular.module('oh.services', [])
             headers: options.header,
             data: options.body
           }).success(function (data) {
-            log.timeEnd(name);
+//            log.timeEnd(name);
             callback(data)
           }).error(function (data) {
             callback({error: true, data: data});

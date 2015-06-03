@@ -56,13 +56,17 @@ angular.module('oh.controllers')
       } else {
 
         registration = res.data.registration;
-        checkUserStatus(registration.status, res.data.hackathon.basic_info.auto_approve);
-        $scope.goWork = function () {
-          if (res.data.experiment) {
-            state.go('hackathon', {hackathon_name: hackathon_name});
-          } else {
-            state.go('index.settings', {hackathon_name: hackathon_name});
-          }
+        if (registration) {
+            checkUserStatus(registration.status, res.data.hackathon.basic_info.auto_approve);
+            $scope.goWork = function () {
+              if (res.data.experiment) {
+                state.go('hackathon', {hackathon_name: hackathon_name});
+              } else {
+                state.go('index.settings', {hackathon_name: hackathon_name});
+              }
+            }
+        } else {
+            $scope.hackathon.isRegister = true;
         }
       }
     });
@@ -85,11 +89,15 @@ angular.module('oh.controllers')
       if (registration) {
         register.id = registration.id;
         API.user.registration.put({body: register, header: {hackathon_name: hackathon_name}}, function (data) {
-          checkUserStatus(0, 0);
+          state.go('hackathon', {hackathon_name: $stateParams.hackathon_name});
         });
       } else {
         API.user.registration.post({body: register, header: {hackathon_name: hackathon_name}}, function (data) {
-          state.go('hackathon', {hackathon_name: $stateParams.hackathon_name});
+          if($scope.hackathon.basic_info.auto_approve){
+            checkUserStatus(3, 0);
+          }else{
+            checkUserStatus(0, 0);
+          }
         });
       }
     }

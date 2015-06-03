@@ -105,7 +105,7 @@ class ExprManager(Component):
         if not self.register_manager.is_user_registered(user_id, hackathon):
             return access_denied("user not registered or not approved")
 
-        if hackathon.event_end_time < self.util.self.util.get_now():
+        if hackathon.event_end_time < self.util.get_now():
             self.log.warn("hackathon is ended. The expr starting process will be stopped")
             return precondition_failed('hackathen is ended')
 
