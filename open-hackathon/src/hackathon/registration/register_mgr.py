@@ -89,7 +89,7 @@ class RegisterManger(object):
             return self.db.add_object_kwargs(UserHackathonRel, **args).dic()
         except Exception as e:
             log.error(e)
-            return internal_server_error("fail to create or update register")
+            return internal_server_error("fail to create register")
 
 
     def update_registration(self, args):

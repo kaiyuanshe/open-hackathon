@@ -68,7 +68,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
             self.assertEqual(len(rm.get_all_registration_by_hackathon_id(1)), 2)
             db_adapter.find_all_objects_by.assert_called_once_with(UserHackathonRel, hackathon_id=1)
 
-    '''test method create_hackathon'''
+    '''test method validate_created_args'''
 
     def test_create_hackathon_lost_args(self):
         args = {"a": "b"}
@@ -109,13 +109,30 @@ class TestUserHackathonRelManager(unittest.TestCase):
 
 
     @patch.object(RegisterManger, 'get_registration_by_user_and_hackathon')
-    @patch.object(HackathonManager, 'is_auto_approve')
-    def test_create_hackathon_register_registration_common_logic(self, auto_approve, get_method):
+    @patch.object(RegisterManger, 'check_register_enrollment')
+    def test_create_hackathon_register_registration_reach_upper(self, check_enrollment, get_method):
         args = {'user_id': 1}
         hackathon = Hackathon(id=1,
                               registration_start_time=get_now() - datetime.timedelta(seconds=30),
                               registration_end_time=get_now() + datetime.timedelta(seconds=30))
         get_method.retrun_value = None
+        check_enrollment.return_value = False
+
+        self.assertEqual(register_manager.create_registration(hackathon, args),
+                         precondition_failed("hackathon registers reach the upper threshold",friendly_message="报名人数已满"))
+        get_method.assert_called_once_with(1, 1)
+        check_enrollment.assert_called_once_with(hackathon)
+
+    '''test method create_registration'''
+
+    @patch.object(RegisterManger, 'validate_created_args')
+    @patch.object(HackathonManager, 'is_auto_approve')
+    def test_create_hackathon_registration_common_logic(self, auto_approve, validate_created_args):
+        args = {'user_id': 1}
+        hackathon = Hackathon(id=1,
+                              registration_start_time=get_now() - datetime.timedelta(seconds=30),
+                              registration_end_time=get_now() + datetime.timedelta(seconds=30))
+        validate_created_args.return_value = True, 'pass'
         auto_approve.return_value = True
 
         db_adapter = Mock()
@@ -124,7 +141,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
         rm = RegisterManger(db_adapter)
 
         self.assertEqual(rm.create_registration(hackathon, args), new_register.dic())
-        get_method.assert_called_once_with(1, 1)
+        validate_created_args.assert_called_once_with(hackathon, args)
         auto_approve.assert_called_once_with(hackathon)
 
 

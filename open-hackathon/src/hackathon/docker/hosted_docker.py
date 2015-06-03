@@ -31,6 +31,7 @@ sys.path.append("..")
 from hackathon.functions import (
     convert,
     safe_get_config,
+    get_now
 )
 from hackathon.database import (
     db_adapter,
@@ -39,7 +40,9 @@ from hackathon.database.models import (
     Experiment,
     DockerContainer,
     HackathonAzureKey,
-    PortBinding)
+    PortBinding,
+    Hackathon
+)
 from hackathon.enum import (
     EStatus,
     PortBindingType)
@@ -67,6 +70,10 @@ from hackathon.azureformation.service import (
 from hackathon.hackathon_response import *
 import json
 import requests
+from hackathon.template.template_mgr import template_manager
+from hackathon.scheduler import scheduler
+from datetime import timedelta
+from hackathon.enum import HACK_STATUS
 
 
 class HostedDockerFormation(DockerFormationBase):
@@ -432,3 +439,19 @@ class HostedDockerFormation(DockerFormationBase):
         host_server_dns = host_server.public_dns.split('.')[0]
         log.debug("starting to release ports ... ")
         ep.release_public_endpoints(host_server_dns, 'Production', host_server_name, host_ports)
+
+
+    # ----------------------initialize hackathon's templates on every docker host-------------------#
+
+    def ensure_images(self):
+        hackathons = db_adapter.find_all_objects(Hackathon, Hackathon.status == HACK_STATUS.ONLINE)
+        for hackathon in hackathons:
+            log.debug("Start recycling inactive ensure images for hackathons")
+            excute_time = get_now() + timedelta(minutes=1)
+            scheduler.add_job(template_manager.pull_images_for_hackathon,
+                              'interval',
+                              id=hackathon.name,
+                              replace_existing=True,
+                              next_run_time=excute_time,
+                              minutes=60,
+                              args=[hackathon])
