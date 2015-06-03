@@ -24,6 +24,8 @@
 
 (function($, oh) {
 
+    var is_update = false;
+
     function bindTemplateList(){
         var currentHackathon = oh.comm.getCurrentHackathon();
         var list = $('#templatelist');
@@ -53,7 +55,24 @@
         var templist= $('[data-type="temp-unit-list"]');
         var template_unit = $($('#template_unit_item').html());
         if(data){
-            // todo
+            // console.log(data);
+            template_unit.find('[name="name"]').val(data['name']);
+            template_unit.find('[name="image"]').val(data['Image']);
+            template_unit.find('[name="env"]').val(data['Env'].join(";"));
+            template_unit.find('[name="cmd"]').val(data['Cmd'].join(" "));
+            for(var i = 0; i < data['ports'].length; i++)
+                if(data['ports'][i]['port'] == data['remote']['port']){
+                    template_unit.find('[name="remote-name"]').val(data['ports'][i]['name']);
+                    break;
+                }
+            template_unit.find('[name="remote-provider"]').val(data['remote']['provider']);
+            template_unit.find('[name="remote-protocol"]').val(data['remote']['protocol']);
+            template_unit.find('[name="remote-port"]').val(data['remote']['port']);
+            template_unit.find('[name="remote-username"]').val(data['remote']['username']);
+            template_unit.find('[name="remote-password"]').val(data['remote']['password']);
+            for(var i = 0; i < data['ports'].length; i++)
+                if(data['ports'][i]['port'] != data['remote']['port'])
+                    createPort(template_unit.find('[data-type="port-list"]'), data['ports'][i]);
         }
         template_unit.appendTo(templist);
         addFieldValidate(template_unit);
@@ -68,7 +87,18 @@
         var portlist= $(element).parents('[data-type="template-unit-group"]').find('[data-type="port-list"]');
         var port = $($('#port_item').html());
         if(data){
-            // todo
+            // console.log(element);
+            // console.log(data);
+            port.find('[name="name"]').val(data['name']);
+            port.find('[name="port"]').val(data['port']);
+            port.find('[name="public"]').val(data['public']);
+            port.find('[name="protocol"]').val(data['protocol']);
+            if('url' in data){
+                var url_protocol = data['url'].substring(0, data['url'].indexOf(":"));
+                port.find('[name="url-protocol"]').val(url_protocol);
+                var url_path = data['url'].substring(data['url'].lastIndexOf("/")+1, data['url'].length);
+                port.find('[name="url-path"]').val(url_path);
+            }
         }
         port.appendTo(portlist);
         addFieldValidate(port);
@@ -135,25 +165,24 @@
         };
     }
 
-    function init(){
-        var currentHackathon = oh.comm.getCurrentHackathon();
+    function setFormData(item){
+        data = item['data']
+        $('#name').val(data['expr_name']).attr({disabled:'disabled'});
+        $('#description').val(data['description']);
+        $('#provider').val(item['provider']).attr({disabled:'disabled'});
+        data['virtual_environments'].forEach(createTemplateUnit);
+    }
 
+    function initForm(){
         var templateform = $('#templateform');
         templateform.bootstrapValidator().on('success.form.bv', function(e) {
                 e.preventDefault();
-                oh.api.admin.hackathon.template.post({
-                    body: getFormData(),
-                    query:{},
-                    header:{hackathon_name:currentHackathon.name}
-                }, function(data){
-                    if(data.error){
-                        alert(data.error.message);
-                    }else{
-                        bindTemplateList();
-                        clearTemplateForm();
-                    }
+                var formData = getFormData();
+                (is_update ? updateTemplate(formData) : createTemplate(formData)).then(function(){
+                    bindTemplateList();
+                    clearTemplateForm();
                 })
-            });
+        });
 
         templateform.on('click','[data-type="btn_add_port"]',function(e){
             createPort(this);
@@ -165,8 +194,10 @@
 
         var templatelist = $('#templatelist');
         templatelist.on('click','[data-type="template_item_edit"]',function(e){
+            is_update = true;
             var item = $(this).parents('tr').data('tmplItem').data;
-            console.log(item)
+            // console.log(item);
+            setFormData(item);
         });
 
         var confirm_modal = $('#confirm_modal').on('show.bs.modal',function(e){
@@ -196,7 +227,40 @@
         templateform.on('click','[data-type="btn_delete_template_unit"]',function(e){
             deleteTemplateUnit(this);
         });
+    }
 
+    function createTemplate(data){
+        var currentHackathon = oh.comm.getCurrentHackathon();
+        return oh.api.admin.hackathon.template.post({
+                    body: data,
+                    query:{},
+                    header:{hackathon_name:currentHackathon.name}
+                }, function(data){
+                    if(data.error){
+                        alert(data.error.message);
+                    }else{
+                    }
+                })
+    }
+
+    function updateTemplate(data){
+        var currentHackathon = oh.comm.getCurrentHackathon();
+        return oh.api.admin.hackathon.template.put({
+                    body: data,
+                    query:{},
+                    header:{hackathon_name:currentHackathon.name}
+                }, function(data){
+                    if(data.error){
+                        alert(data.error.message);
+                    }else{
+                        is_update = false;
+                    }
+                })
+    }
+
+    function init(){
+        var currentHackathon = oh.comm.getCurrentHackathon();
+        initForm();
     }
 
     $(function() {

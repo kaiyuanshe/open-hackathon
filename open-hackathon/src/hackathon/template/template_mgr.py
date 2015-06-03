@@ -78,10 +78,10 @@ from datetime import (
 )
 import uuid
 import requests
+import json
 
 
 class TemplateManager(object):
-
     def get_created_template_list(self, hackathon_name):
         """
         Get created template list of given hackathon
@@ -94,7 +94,12 @@ class TemplateManager(object):
         created_templates = db_adapter.find_all_objects_by(Template,
                                                            hackathon_id=hackathon.id,
                                                            status=TEMPLATE_STATUS.CREATED)
-        return map(lambda u: u.dic(), created_templates)
+        data = []
+        for created_template in created_templates:
+            dic = created_template.dic()
+            dic['data'] = json.load(file(created_template.url))
+            data.append(dic)
+        return data
 
     def create_template(self, args):
         """
@@ -116,41 +121,50 @@ class TemplateManager(object):
         if azure_url is None:
             return internal_server_error("upload template file failed")
         # create template step 4 : insert into DB
-        try:
-            log.debug("create template: %r" % args)
-            return db_adapter.add_object_kwargs(Template,
-                                                name=args[BaseTemplate.EXPR_NAME],
-                                                url=url,
-                                                azure_url=azure_url,
-                                                provider=args[BaseTemplate.VIRTUAL_ENVIRONMENTS_PROVIDER],
-                                                creator_id=g.user.id,
-                                                status=TEMPLATE_STATUS.CREATED,
-                                                create_time=get_now(),
-                                                update_time=get_now(),
-                                                description=args[BaseTemplate.DESCRIPTION],
-                                                virtual_environment_count=len(args[BaseTemplate.VIRTUAL_ENVIRONMENTS]),
-                                                hackathon_id=g.hackathon.id)
-        except Exception as ex:
-            log.error(ex)
-            return internal_server_error("insert record into template DB failed")
+        log.debug("create template: %r" % args)
+        db_adapter.add_object_kwargs(Template,
+                                     name=args[BaseTemplate.EXPR_NAME],
+                                     url=url,
+                                     azure_url=azure_url,
+                                     provider=args[BaseTemplate.VIRTUAL_ENVIRONMENTS_PROVIDER],
+                                     creator_id=g.user.id,
+                                     status=TEMPLATE_STATUS.CREATED,
+                                     create_time=get_now(),
+                                     update_time=get_now(),
+                                     description=args[BaseTemplate.DESCRIPTION],
+                                     virtual_environment_count=len(args[BaseTemplate.VIRTUAL_ENVIRONMENTS]),
+                                     hackathon_id=g.hackathon.id)
+        return ok("create template success")
 
     def update_template(self, args):
-        if "name" not in args:
-            return bad_request("template name invalid")
-        template = db_adapter.find_first_object(Template, Template.name == args['name'])
-
-        if template is None:
-            return bad_request("template doesn't exist")
-        try:
-            log.debug("update template: %r" % args)
-            args['update_time'] = get_now()
-            update_items = dict(dict(args).viewitems() - template.dic().viewitems())
-            log.debug("update a exist hackathon :" + str(args))
-            db_adapter.update_object(template, **update_items)
-            return ok("update template success")
-        except Exception as ex:
-            log.error(ex)
-            return internal_server_error("update template failed :" + ex.message)
+        """
+        Update template according to post args
+        :param args:
+        :return:
+        """
+        # update template step 1 : args validate
+        status, return_info = self.__check_update_args(args)
+        if not status:
+            return return_info
+        file_name = '%s-%s-%s.js' % (g.hackathon.name, args[BaseTemplate.EXPR_NAME], str(uuid.uuid1())[0:8])
+        # update template step 2 : parse args and trans to file
+        url = self.__save_args_to_file(args, file_name)
+        if url is None:
+            return internal_server_error("save template as local file failed")
+        # update template step 3 : upload template file to Azure
+        azure_url = self.__upload_template_to_azure(url, file_name)
+        if azure_url is None:
+            return internal_server_error("upload template file failed")
+        # update template step 4 : update DB
+        log.debug("update template: %r" % args)
+        template = return_info
+        db_adapter.update_object(template,
+                                 url=url,
+                                 azure_url=azure_url,
+                                 update_time=get_now(),
+                                 description=args[BaseTemplate.DESCRIPTION],
+                                 virtual_environment_count=len(args[BaseTemplate.VIRTUAL_ENVIRONMENTS]))
+        return ok("update template success")
 
     def delete_template(self, id):
         log.debug("delete template [%d]" % id)
@@ -206,6 +220,17 @@ class TemplateManager(object):
         except Exception as ex:
             log.error(ex)
             return None
+
+    def __check_update_args(self, args):
+        if BaseTemplate.EXPR_NAME not in args \
+                or BaseTemplate.DESCRIPTION not in args \
+                or BaseTemplate.VIRTUAL_ENVIRONMENTS_PROVIDER not in args \
+                or BaseTemplate.VIRTUAL_ENVIRONMENTS not in args:
+            return False, bad_request("template args invalid")
+        template = db_adapter.find_first_object_by(Template, name=args[BaseTemplate.EXPR_NAME])
+        if template is None:
+            return False, bad_request("template not exists")
+        return True, template
 
 
 template_manager = TemplateManager()
