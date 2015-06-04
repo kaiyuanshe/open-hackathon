@@ -27,6 +27,7 @@ import sys
 import uuid
 import requests
 import json
+
 sys.path.append("..")
 
 from datetime import (
@@ -35,9 +36,6 @@ from datetime import (
 from hackathon.database.models import (
     Template,
     DockerHostServer,
-)
-from hackathon.database import (
-    db_adapter,
 )
 from hackathon.hackathon_response import (
     not_found,
@@ -60,13 +58,6 @@ from hackathon.template.base_template import (
 from hackathon.scheduler import (
     scheduler,
 )
-from hackathon.util import (
-    safe_get_config,
-    get_now,
-)
-from hackathon.log import (
-    log,
-)
 from hackathon import (
     Component,
     RequiredFeature,
@@ -87,9 +78,9 @@ class TemplateManager(Component):
         hackathon = self.hackathon_manager.get_hackathon_by_name(hackathon_name)
         if hackathon is None:
             return not_found('hackathon [%s] not found' % hackathon_name)
-        created_templates = db_adapter.find_all_objects_by(Template,
-                                                           hackathon_id=hackathon.id,
-                                                           status=TEMPLATE_STATUS.CREATED)
+        created_templates = self.db.find_all_objects_by(Template,
+                                                        hackathon_id=hackathon.id,
+                                                        status=TEMPLATE_STATUS.CREATED)
         data = []
         for created_template in created_templates:
             dic = created_template.dic()
@@ -117,19 +108,19 @@ class TemplateManager(Component):
         if azure_url is None:
             return internal_server_error("upload template file failed")
         # create template step 4 : insert into DB
-        log.debug("create template: %r" % args)
-        db_adapter.add_object_kwargs(Template,
-                                     name=args[BaseTemplate.EXPR_NAME],
-                                     url=url,
-                                     azure_url=azure_url,
-                                     provider=args[BaseTemplate.VIRTUAL_ENVIRONMENTS_PROVIDER],
-                                     creator_id=g.user.id,
-                                     status=TEMPLATE_STATUS.CREATED,
-                                     create_time=get_now(),
-                                     update_time=get_now(),
-                                     description=args[BaseTemplate.DESCRIPTION],
-                                     virtual_environment_count=len(args[BaseTemplate.VIRTUAL_ENVIRONMENTS]),
-                                     hackathon_id=g.hackathon.id)
+        self.log.debug("create template: %r" % args)
+        self.db.add_object_kwargs(Template,
+                                  name=args[BaseTemplate.EXPR_NAME],
+                                  url=url,
+                                  azure_url=azure_url,
+                                  provider=args[BaseTemplate.VIRTUAL_ENVIRONMENTS_PROVIDER],
+                                  creator_id=g.user.id,
+                                  status=TEMPLATE_STATUS.CREATED,
+                                  create_time=self.util.get_now(),
+                                  update_time=self.util.get_now(),
+                                  description=args[BaseTemplate.DESCRIPTION],
+                                  virtual_environment_count=len(args[BaseTemplate.VIRTUAL_ENVIRONMENTS]),
+                                  hackathon_id=g.hackathon.id)
         return ok("create template success")
 
     def update_template(self, args):
@@ -152,35 +143,35 @@ class TemplateManager(Component):
         if azure_url is None:
             return internal_server_error("upload template file failed")
         # update template step 4 : update DB
-        log.debug("update template: %r" % args)
+        self.log.debug("update template: %r" % args)
         template = return_info
-        db_adapter.update_object(template,
-                                 url=url,
-                                 azure_url=azure_url,
-                                 update_time=get_now(),
-                                 description=args[BaseTemplate.DESCRIPTION],
-                                 virtual_environment_count=len(args[BaseTemplate.VIRTUAL_ENVIRONMENTS]))
+        self.db.update_object(template,
+                              url=url,
+                              azure_url=azure_url,
+                              update_time=self.util.get_now(),
+                              description=args[BaseTemplate.DESCRIPTION],
+                              virtual_environment_count=len(args[BaseTemplate.VIRTUAL_ENVIRONMENTS]))
         return ok("update template success")
 
     def delete_template(self, id):
-        log.debug("delete template [%d]" % id)
+        self.log.debug("delete template [%d]" % id)
         try:
-            template = db_adapter.get_object(Template, id)
-            db_adapter.update_object(template,
-                                     status=TEMPLATE_STATUS.DELETED,
-                                     update_time=get_now())
+            template = self.db.get_object(Template, id)
+            self.db.update_object(template,
+                                  status=TEMPLATE_STATUS.DELETED,
+                                  update_time=self.util.get_now())
             return ok("delete template success")
         except Exception as ex:
-            log.error(ex)
+            self.log.error(ex)
             return internal_server_error("delete template fail")
 
     def pull_images(self, image_name):
-        hosts = db_adapter.find_all_objects(DockerHostServer, DockerHostServer.hackathon_id == g.hackathon.id)
+        hosts = self.db.find_all_objects(DockerHostServer, DockerHostServer.hackathon_id == g.hackathon.id)
         docker_host_api = map(lambda x: x.public_docker_api_port, hosts)
         for api in docker_host_api:
             url = api + "/images/create?fromImage=" + image_name
-            exec_time = get_now() + timedelta(seconds=2)
-            log.debug(" send request to pull image:" + url)
+            exec_time = self.util.get_now() + timedelta(seconds=2)
+            self.log.debug(" send request to pull image:" + url)
             # use requests.post instead of post_to_remote, because req.contect can not be json.loads()
             scheduler.add_job(requests.post, 'date', run_date=exec_time, args=[url])
 
@@ -192,7 +183,7 @@ class TemplateManager(Component):
                 or BaseTemplate.VIRTUAL_ENVIRONMENTS_PROVIDER not in args \
                 or BaseTemplate.VIRTUAL_ENVIRONMENTS not in args:
             return False, bad_request("template args invalid")
-        if db_adapter.count_by(Template, name=args[BaseTemplate.EXPR_NAME]) > 0:
+        if self.db.count_by(Template, name=args[BaseTemplate.EXPR_NAME]) > 0:
             return False, bad_request("template already exists")
         return True, "pass"
 
@@ -203,18 +194,18 @@ class TemplateManager(Component):
                                              args[BaseTemplate.DESCRIPTION],
                                              docker_template_units)
             file_path = docker_template.to_file(file_name)
-            log.debug("save template as file [%s]" % file_path)
+            self.log.debug("save template as file [%s]" % file_path)
             return file_path
         except Exception as ex:
-            log.error(ex)
+            self.log.error(ex)
             return None
 
     def __upload_template_to_azure(self, path, file_name):
         try:
-            template_container = safe_get_config("storage.template_container", "templates")
-            return file_service.upload_file_to_azure_from_path(path, template_container, file_name)
+            template_container = self.util.safe_get_config("storage.template_container", "templates")
+            return self.file_service.upload_file_to_azure_from_path(path, template_container, file_name)
         except Exception as ex:
-            log.error(ex)
+            self.log.error(ex)
             return None
 
     def __check_update_args(self, args):
@@ -223,7 +214,7 @@ class TemplateManager(Component):
                 or BaseTemplate.VIRTUAL_ENVIRONMENTS_PROVIDER not in args \
                 or BaseTemplate.VIRTUAL_ENVIRONMENTS not in args:
             return False, bad_request("template args invalid")
-        template = db_adapter.find_first_object_by(Template, name=args[BaseTemplate.EXPR_NAME])
+        template = self.db.find_first_object_by(Template, name=args[BaseTemplate.EXPR_NAME])
         if template is None:
             return False, bad_request("template not exists")
         return True, template
