@@ -161,7 +161,7 @@ class UserManager(object):
 
     def hackathon_team_list(self, hid, name, number):
         find_team_by_hackathon = self.db.find_all_objects_by(UserHackathonRel, hackathon_id=hid)
-        hackathon_team_list = map(lambda x: x.team_name,  find_team_by_hackathon)
+        hackathon_team_list = map(lambda x: x.team_name, find_team_by_hackathon)
         hackathon_team_list = list(set(hackathon_team_list))
         if list is not None:
             if name is not None:
@@ -176,14 +176,23 @@ class UserManager(object):
         else:
             return not_found("Oops, no team yet~")
 
-    def team_member(self, h_id, name):
-        team_member = self.db.find_all_objects_by(UserHackathonRel, hackathon_id=h_id, team_name=name)
-        def get_info(x):
-            r = x.dic()
-            r['user'] = self.user_display_info(x.user)
+    def team_member(self, h_id, t_name):
+        team_member = self.db.find_all_objects_by(UserHackathonRel, hackathon_id=h_id, team_name=t_name)
+
+        def get_info(sql_object):
+            r = sql_object.dic()
+            r['user'] = self.user_display_info(sql_object.user)
             return r
+
         team_member = map(lambda x: get_info(x), team_member)
 
         return team_member
+
+    def current_team_member(self, h_id, u_id):
+        my_team = self.db.find_first_object_by(UserHackathonRel, hackathon_id=h_id, user_id=u_id)
+        my_team = my_team.team_name
+        team_member = self.team_member(h_id, my_team)
+        return team_member
+
 
 user_manager = UserManager(db_adapter)

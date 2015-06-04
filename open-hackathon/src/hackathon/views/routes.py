@@ -33,7 +33,7 @@ from hackathon.expr.expr_mgr import open_check_expr, recycle_expr_scheduler
 from hackathon.database.models import Announcement
 from flask import g
 from hackathon.database import db_adapter
-from hackathon.decorators import hackathon_name_required
+from hackathon.decorators import hackathon_name_required, token_required
 from hackathon.hack import hack_manager
 import time
 from hackathon.hackathon_response import *

@@ -42,7 +42,8 @@ if hackathon is None:
                           judge_start_time=get_now(), judge_end_time=get_now() + timedelta(days=365),
                           basic_info=json.dumps({
                               HACKATHON_BASIC_INFO.AUTO_APPROVE: 1,
-                              HACKATHON_BASIC_INFO.RECYCLE_ENABLED: 0
+                              HACKATHON_BASIC_INFO.RECYCLE_ENABLED: 0,
+                              HACKATHON_BASIC_INFO.PROVIDER: ""
                           }),
                           status=1)
     db_adapter.add_object(hackathon)
