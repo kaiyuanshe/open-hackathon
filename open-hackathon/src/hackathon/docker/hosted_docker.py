@@ -235,6 +235,11 @@ class HostedDockerFormation(DockerFormationBase, Component):
         self.log.debug("starting container %s is ended ... " % container_name)
         return container
 
+    def pull_image(self, dns, image_name):
+        pull_image_url = dns + "/images/create?fromImage=" + image_name
+        self.log.debug(" send request to pull image:" + pull_image_url)
+        return requests.post(pull_image_url)
+
     # --------------------------------------------- helper function ---------------------------------------------#
 
     def __name_match(self, id, lists):
@@ -448,12 +453,11 @@ class HostedDockerFormation(DockerFormationBase, Component):
             excute_time = self.util.get_now() + timedelta(minutes=1)
             scheduler.add_job(self.template_manager.pull_images_for_hackathon,
                               'interval',
-                              id=hackathon.name,
+                              id=hackathon.id + "pull images",
                               replace_existing=True,
                               next_run_time=excute_time,
                               minutes=60,
                               args=[hackathon])
-
         self.log.debug("starting to release ports ... ")
 
 

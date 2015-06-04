@@ -27,8 +27,6 @@ import os, sys
 import uuid
 
 sys.path.append("..")
-
-from hackathon.hackathon_response import *
 from hackathon.database.models import Template, DockerHostServer
 from hackathon.hackathon_response import bad_request, not_found, internal_server_error, ok
 from datetime import timedelta
@@ -39,18 +37,21 @@ from hackathon.template.docker_template import DockerTemplate
 from hackathon.template.base_template import BaseTemplate
 from hackathon.scheduler import scheduler
 from hackathon import Component, RequiredFeature, g
-import requests
-from hackathon.azureformation.fileService import file_service
 import json
 from compiler.ast import flatten
 
 
-templates = {}  # template in memory {template.id: template_file_stream}
+
 
 
 class TemplateManager(Component):
     hackathon_manager = RequiredFeature("hackathon_manager")
     file_service = RequiredFeature("file_service")
+    docker = RequiredFeature("docker")
+    base_template = RequiredFeature("base_template")
+    docker_template_unit = RequiredFeature("docker_template_unit")
+
+    templates = {}  # template in memory {template.id: template_file_stream}
 
     def get_template_list(self, hackathon_name):
         hackathon = self.hackathon_manager.get_hackathon_by_name(hackathon_name)
@@ -183,10 +184,10 @@ class TemplateManager(Component):
 
     # get template_dic from memroty
     def __load_template_from_memory(self, template_id):
-        if template_id not in templates:
+        if template_id not in self.templates:
             return None
         else:
-            return templates[template_id]
+            return self.templates[template_id]
 
     # get template_dic from local file
     def __load_template_from_local_file(self, template_id, local_url):
@@ -194,13 +195,13 @@ class TemplateManager(Component):
             return None
         else:
             template_dic = json.loads(file(local_url))
-            templates[template_id] = template_dic
+            self.templates[template_id] = template_dic
             return template_dic
 
     # get template_dic from azure storage
     def __load_template_from_azure(self, template_id, local_url, azure_url):
         container_name = self.util.safe_get_config("storage.template_container", "templates")
-        if file_service.download_file_from_azure(container_name, azure_url, local_url) is not None:
+        if self.file_service.download_file_from_azure(container_name, azure_url, local_url) is not None:
             return self.__load_template_from_local_file(template_id, local_url)
         return None
 
@@ -211,25 +212,22 @@ class TemplateManager(Component):
         # loop to get every docker host
         for api in docker_host_api:
             templates = hackathon.templates
-            images = map(lambda x: self.get_images_from_template(x), templates)
+            images = map(lambda x: self.__get_images_from_template(x), templates)
             expected_images = flatten(images)
-            download_images = self.get_undownloaded_images_on_docker_host(api, expected_images)
+            download_images = self.__get_undownloaded_images_on_docker_host(api, expected_images)
             for dl_image in download_images:
-                pull_image_url = api + "/images/create?fromImage=" + dl_image
                 exec_time = self.util.get_now() + timedelta(seconds=2)
-                log.debug(" send request to pull image:" + pull_image_url)
-                # use requests.post instead of post_to_remote, because req.contect can not be json.loads()
-                scheduler.add_job(requests.post, 'date', run_date=exec_time, args=[pull_image_url])
+                scheduler.add_job(self.docker.pull_image, 'pullimage', run_date=exec_time, args=[api, dl_image])
 
 
-    def get_images_from_template(self, template):
+    def __get_images_from_template(self, template):
         template_dic = self.load_template(template)
-        virtuals = template_dic['virtual_environments']
-        images = map(lambda x: x['image'], virtuals)
+        virtuals = template_dic[self.base_template.VIRTUAL_ENVIRONMENTS]
+        images = map(lambda x: x[self.docker_template_unit.IMAGE], virtuals)
         return images
 
 
-    def get_undownloaded_images_on_docker_host(self, api, *expected_images):
+    def __get_undownloaded_images_on_docker_host(self, api, *expected_images):
         images = []
         get_images_url = api + "/images/json?all=0"
         current_images_info = json.loads(self.util.get_remote(get_images_url))  #[{},{},{}]

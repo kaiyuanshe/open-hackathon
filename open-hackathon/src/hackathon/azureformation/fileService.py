@@ -97,5 +97,3 @@ class FileService(Component):
             log.error(e)
             return None
 
-file_service = FileService()
-

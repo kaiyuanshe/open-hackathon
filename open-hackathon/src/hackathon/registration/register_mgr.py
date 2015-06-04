@@ -164,7 +164,7 @@ class RegisterManger(Component):
 
         return False
 
-    def get_hackathon_registers(self, num=5):
+    def get_hackathon_registers(self, num):
         registers = self.db.find_all_objects_order_by(UserHackathonRel,
                                                       num,  # limit num
                                                       UserHackathonRel.create_time.desc(),
