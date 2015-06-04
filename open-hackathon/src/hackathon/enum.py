@@ -24,8 +24,6 @@
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
 
-from constants import HACKATHON_BASIC_INFO
-from functions import get_now
 
 # resource type used by ALOperation
 STORAGE_ACCOUNT = 'storage account'

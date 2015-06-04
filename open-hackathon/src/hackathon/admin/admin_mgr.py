@@ -25,18 +25,14 @@ THE SOFTWARE.
 import sys
 
 sys.path.append("..")
-from hackathon.database import db_adapter
 from hackathon.database.models import AdminHackathonRel, UserEmail, Hackathon
-from flask import g
-from hackathon.hackathon_response import *
-from hackathon.functions import get_now
-from hackathon.user.user_mgr import user_manager
+from hackathon.hackathon_response import bad_request, not_found, internal_server_error, ok, precondition_failed
 from hackathon.enum import AdminUserHackathonRelStates
+from hackathon import RequiredFeature, Component
+from flask import g
 
-
-class AdminManager(object):
-    def __init__(self, db_adapter):
-        self.db = db_adapter
+class AdminManager(Component):
+    user_manager = RequiredFeature("user_manager")
 
     def get_hackathon_admin_list(self):
         return self.db.find_all_objects_by(AdminHackathonRel, hackathon_id=g.hackathon.id)
@@ -44,7 +40,7 @@ class AdminManager(object):
     def get_hackathon_admins(self):
         def to_dict(ahl):
             dic = ahl.dic()
-            dic["user_info"] = user_manager.user_display_info(ahl.user)
+            dic["user_info"] = self.user_manager.user_display_info(ahl.user)
             return dic
 
         x = map(lambda ahl: to_dict(ahl), self.get_hackathon_admin_list())
@@ -74,16 +70,18 @@ class AdminManager(object):
                                             AdminHackathonRel.user_id == uid,
                                             AdminHackathonRel.hackathon_id == hid)
             if ahl is None:
-                ahl = AdminHackathonRel(user_id=user_email.user.id,
-                                        role_type=args['role_type'],
-                                        hackathon_id=g.hackathon.id,
-                                        status=AdminUserHackathonRelStates.Actived,
-                                        remarks=args['remarks'],
-                                        create_time=get_now())
+                ahl = AdminHackathonRel(
+                    user_id=user_email.user.id,
+                    role_type=args['role_type'],
+                    hackathon_id=g.hackathon.id,
+                    status=AdminUserHackathonRelStates.Actived,
+                    remarks=args['remarks'],
+                    create_time=self.util.get_now()
+                )
                 self.db.add_object(ahl)
             return ok()
         except Exception as e:
-            log.error(e)
+            self.log.error(e)
             return internal_server_error("create admin failed")
 
 
@@ -95,7 +93,7 @@ class AdminManager(object):
         update_items.pop('user_id', '')
         update_items.pop('hackathon_id', '')
         update_items.pop('email', '')
-        update_items['update_time'] = get_now()
+        update_items['update_time'] = self.util.get_now()
         return True, update_items
 
 
@@ -109,7 +107,7 @@ class AdminManager(object):
             self.db.update_object(ahl, **update_items)
             return ok('update hackathon admin success')
         except Exception as e:
-            log.error(e)
+            self.log.error(e)
             return internal_server_error(e)
 
 
@@ -134,8 +132,5 @@ class AdminManager(object):
             self.db.delete_all_objects(AdminHackathonRel, AdminHackathonRel.id == ahl_id)
             return ok()
         except Exception as e:
-            log.error(e)
+            self.log.error(e)
             return internal_server_error(e)
-
-
-admin_manager = AdminManager(db_adapter)

@@ -4,17 +4,17 @@
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
 #
 # The MIT License (MIT)
-#  
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#  
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-#  
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -63,7 +63,7 @@ def get_config(key):
 
 def safe_get_config(key, default_value):
     r = get_config(key)
-    return r if r is not None else default_value
+    return r if r else default_value
 
 
 def mkdir_safe(path):
@@ -119,3 +119,20 @@ def call(mdl_cls_func, cls_args, func_args):
 
 def get_now():
     return datetime.now(utc)
+
+
+class Utility(object):
+    def get_now(self):
+        return get_now()
+
+    def convert(self, input):
+        return convert(input)
+
+    def get_config(self, key):
+        return get_config(key)
+
+    def safe_get_config(self, key, default_value):
+        return safe_get_config(key, default_value)
+
+    def mkdir_safe(self, path):
+        return mkdir_safe(path)

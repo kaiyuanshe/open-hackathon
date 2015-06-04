@@ -22,22 +22,34 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
-__author__ = 'Yifu Huang'
-
 import sys
 
 sys.path.append("..")
-from hackathon.azureformation.service import (
-    Service,
-)
-from hackathon.azureformation.subscription import (
-    Subscription,
-)
+
 from hackathon import Component
 
+from hackathon.database.models import (
+    DockerHostServer,
+)
 
-class ResourceBase(Component):
-    def __init__(self, azure_key_id):
-        self.azure_key_id = azure_key_id
-        self.service = Service(self.azure_key_id)
-        self.subscription = Subscription(self.service)
+
+class DockerHostManager(Component):
+    def get_available_docker_host(self, req_count, hackathon):
+        vm = self.db.find_first_object(DockerHostServer,
+                                       DockerHostServer.container_count + req_count <=
+                                       DockerHostServer.container_max_count,
+                                       DockerHostServer.hackathon_id == hackathon.id)
+
+        # todo connect to azure to launch new VM if no existed VM meet the requirement
+        # since it takes some time to launch VM,
+        # it's more reasonable to launch VM when the existed ones are almost used up.
+        # The new-created VM must run 'cloudvm service by default(either cloud-init or python remote ssh)
+        # todo the VM public/private IP will change after reboot, need sync the IP in db with azure in this case
+        if vm is None:
+            raise Exception("No available VM.")
+        return vm
+
+
+    def get_host_server_by_id(self, id):
+        return self.db.find_first_object_by(DockerHostServer, id=id)
+

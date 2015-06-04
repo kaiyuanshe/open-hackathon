@@ -22,22 +22,29 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
-__author__ = 'Yifu Huang'
 
-import sys
-
-sys.path.append("..")
-from hackathon.azureformation.service import (
-    Service,
-)
-from hackathon.azureformation.subscription import (
-    Subscription,
-)
-from hackathon import Component
+import abc
 
 
-class ResourceBase(Component):
-    def __init__(self, azure_key_id):
-        self.azure_key_id = azure_key_id
-        self.service = Service(self.azure_key_id)
-        self.subscription = Subscription(self.service)
+class DockerFormationBase(object):
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
+    def start(self, unit, **kwargs):
+        """start a docker container"""
+        return
+
+    @abc.abstractmethod
+    def stop(self, name, **kwargs):
+        """stop a docker container"""
+        return
+
+    @abc.abstractmethod
+    def delete(self, name, **kwargs):
+        """delete a docker container"""
+        return
+
+    @abc.abstractmethod
+    def ping(self, **kwargs):
+        """send a ping for health check"""
+        return

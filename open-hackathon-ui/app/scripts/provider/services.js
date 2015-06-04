@@ -38,32 +38,7 @@
  * Controller of the API
  */
 angular.module('oh.services', [])
-  // .factory('config',function ($q,$http) {
-  //   var _config = null;
-  //   function loadConfig(){
-  //     var q = $q.defer();
-  //     $http
-  //       .get('/config')
-  //       .success(function (data) {
-  //         _config = data;
-  //         q.resolve(_config);
-  //       })
-  //       .error(function (error) {
-  //         q.reject(error)
-  //       });
-
-  //     return q.promise;
-  //   }
-  //   loadConfig();
-  //   return {
-  //     getConfig:function(){
-  //       return _config;
-  //     }
-  //   }
-
-  // })
-  .factory('API', function ($http, $cookieStore, $rootScope) {
-
+  .factory('API', function ($http, $cookieStore,state, log) {
     function API(obj, name) {
       var key;
       var getCmd = {};
@@ -97,11 +72,8 @@ angular.module('oh.services', [])
           }
           options = $.extend(_params, options);
           var url = name;
-          var data = options.body == null ? '' : JSON.stringify(options.body);
-          //if (options.query) {
-          //  url += '?' + ($.isPlainObject(options.query) ? $.param(options.query) : options.query);
-          //}
           options.header.token = $cookieStore.get('token') || '';
+          log.time(name);
           return $http({
             method: obj,
             url: url,
@@ -110,15 +82,14 @@ angular.module('oh.services', [])
             headers: options.header,
             data: options.body
           }).success(function (data) {
+            log.timeEnd(name);
             callback(data)
           }).error(function (data) {
             callback({error: true, data: data});
-          });
+          })
         }
       }
     }
-
-
     return API(config.api, config.url + '/api');
   });
 

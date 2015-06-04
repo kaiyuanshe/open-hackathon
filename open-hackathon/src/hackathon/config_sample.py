@@ -2,9 +2,9 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
-#  
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -80,7 +80,7 @@ Config = {
         "azure": 1,
         "docker": 1
     },
-    "recycle":{
+    "recycle": {
         "idle_hours": 24,
         "check_idle_interval_minutes": 5
     },
@@ -89,7 +89,7 @@ Config = {
         "account_key": "U4/oE3Ocwk9txQHw2qNOCCW2Fy05FBY3yQfzcKRNss5tnReyYTO7PDyeXQ8TWMMxXF07JrW7UXPyOhGgJlodEQ==",
         "image_container": "images",
         "template_container": "templates",
-        "blob_service_host_base":  ".blob.core.chinacloudapi.cn",
-        "size_limit_kilo_bytes": 5*1024
+        "blob_service_host_base": ".blob.core.chinacloudapi.cn",
+        "size_limit_kilo_bytes": 5 * 1024
     }
 }

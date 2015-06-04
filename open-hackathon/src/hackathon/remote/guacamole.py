@@ -29,42 +29,37 @@ import sys
 sys.path.append("..")
 from flask import (
     request,
-    g,
 )
 from hackathon.enum import (
     VEStatus,
     VERemoteProvider,
 )
-from hackathon.log import (
-    log,
-)
-from hackathon.database import (
-    db_adapter,
-)
+
 from hackathon.database.models import (
     VirtualEnvironment,
 )
 import json
-from hackathon.hackathon_response import *
+from hackathon.hackathon_response import access_denied, not_found
+from hackathon import Component, g
 
 
-class GuacamoleInfo():
+class GuacamoleInfo(Component):
     def getConnectInfo(self):
         connection_name = request.args.get("name")
-        guacamole_config = db_adapter.find_first_object_by(VirtualEnvironment,
-                                                           name=connection_name,
-                                                           status=VEStatus.Running,
-                                                           remote_provider=VERemoteProvider.Guacamole)
+        guacamole_config = self.db.find_first_object_by(VirtualEnvironment,
+                                                        name=connection_name,
+                                                        status=VEStatus.Running,
+                                                        remote_provider=VERemoteProvider.Guacamole)
         if guacamole_config is None:
             return not_found("not_found")
 
         if guacamole_config.experiment.user_id != g.user.id:
             return access_denied("forbidden")
 
-        log.debug("get guacamole config by id: %s, paras: %s" % (connection_name, guacamole_config.remote_paras))
+        self.log.debug("get guacamole config by id: %s, paras: %s" % (connection_name, guacamole_config.remote_paras))
         return json.loads(guacamole_config.remote_paras)
         # return {
         # "displayname": "ubuntu", "hostname": "139.217.133.53",
-        #     "name": "174-ubuntu", "password": "acowoman",
-        #     "port": 10026, "protocol": "ssh", "username": "root"
+        # "name": "174-ubuntu", "password": "acowoman",
+        # "port": 10026, "protocol": "ssh", "username": "root"
         # }

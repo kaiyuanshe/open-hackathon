@@ -46,9 +46,9 @@
   },
   "api": {
     "user": {
-      "login": ["post","del"],
+      "login": ["post","delete"],
       "experiment": {
-        "": ["get","post","del","put"],
+        "": ["get","post","delete","put"],
         "list": ["get"]
       },
       "registration": {
@@ -101,7 +101,7 @@
   },
   "social":{
     "github":"https://github.com/login/oauth/authorize?",
-    "gitcafe":"https://gcs.dgz.sh/oauth/authorize?'",
+    "gitcafe":"https://gcs.dgz.sh/oauth/authorize?",
     "weibo":"https://api.weibo.com/oauth2/authorize?",
     "qq":"https://graph.qq.com/oauth2.0/authorize?",
     "live":"https://login.live.com/oauth20_authorize.srf?"

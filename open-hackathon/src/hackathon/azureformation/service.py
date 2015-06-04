@@ -25,13 +25,12 @@ THE SOFTWARE.
 __author__ = 'Yifu Huang'
 
 import sys
+
 sys.path.append("..")
 from hackathon.enum import (
     ADStatus,
 )
-from hackathon.log import (
-    log,
-)
+
 from hackathon.azureformation.utility import (
     ASYNC_TICK,
     DEPLOYMENT_TICK,
@@ -39,9 +38,7 @@ from hackathon.azureformation.utility import (
     MDL_CLS_FUNC,
     run_job,
 )
-from hackathon.database import (
-    db_adapter,
-)
+
 from hackathon.database.models import (
     AzureKey,
 )
@@ -50,9 +47,10 @@ from azure.servicemanagement import (
     Deployment,
 )
 import time
+from hackathon import Component
 
 
-class Service(ServiceManagementService):
+class Service(ServiceManagementService, Component):
     """
     Wrapper of azure service management service
     """
@@ -63,7 +61,7 @@ class Service(ServiceManagementService):
 
     def __init__(self, azure_key_id):
         self.azure_key_id = azure_key_id
-        azure_key = db_adapter.get_object(AzureKey, self.azure_key_id)
+        azure_key = self.db.get_object(AzureKey, self.azure_key_id)
         super(Service, self).__init__(azure_key.subscription_id, azure_key.pem_url, azure_key.management_host)
 
     # ---------------------------------------- subscription ---------------------------------------- #
@@ -86,7 +84,7 @@ class Service(ServiceManagementService):
             props = self.get_storage_account_properties(name)
         except Exception as e:
             if e.message != self.NOT_FOUND:
-                log.error(e)
+                self.log.error(e)
             return False
         return props is not None
 
@@ -114,7 +112,7 @@ class Service(ServiceManagementService):
             props = self.get_hosted_service_properties(name)
         except Exception as e:
             if e.message != self.NOT_FOUND:
-                log.error(e)
+                self.log.error(e)
             return False
         return props is not None
 
@@ -137,7 +135,7 @@ class Service(ServiceManagementService):
             props = self.get_deployment_by_slot(cloud_service_name, deployment_slot)
         except Exception as e:
             if e.message != self.NOT_FOUND:
-                log.error(e)
+                self.log.error(e)
             return False
         return props is not None
 
@@ -145,7 +143,7 @@ class Service(ServiceManagementService):
         try:
             props = self.get_deployment_by_slot(cloud_service_name, deployment_slot)
         except Exception as e:
-            log.error(e)
+            self.log.error(e)
             return None
         return None if props is None else props.name
 
@@ -155,10 +153,10 @@ class Service(ServiceManagementService):
         if props is None:
             return False
         while props.status != status:
-            log.debug('wait for deployment [%s] loop count: %d' % (deployment_name, count))
+            self.log.debug('wait for deployment [%s] loop count: %d' % (deployment_name, count))
             count += 1
             if count > loop:
-                log.error('Timed out waiting for deployment status.')
+                self.log.error('Timed out waiting for deployment status.')
                 return False
             time.sleep(second_per_loop)
             props = self.get_deployment_by_name(cloud_service_name, deployment_name)
@@ -170,7 +168,7 @@ class Service(ServiceManagementService):
         try:
             props = self.get_deployment_by_slot(cloud_service_name, deployment_slot)
         except Exception as e:
-            log.error(e)
+            self.log.error(e)
             return None
         return None if props is None else props.url
 
@@ -215,10 +213,10 @@ class Service(ServiceManagementService):
         count = 0
         props = self.get_deployment_by_name(cloud_service_name, deployment_name)
         while self.get_virtual_machine_instance_status(props, virtual_machine_name) != status:
-            log.debug('wait for virtual machine [%s] loop count: %d' % (virtual_machine_name, count))
+            self.log.debug('wait for virtual machine [%s] loop count: %d' % (virtual_machine_name, count))
             count += 1
             if count > loop:
-                log.error('Timed out waiting for role instance status.')
+                self.log.error('Timed out waiting for role instance status.')
                 return False
             time.sleep(second_per_loop)
             props = self.get_deployment_by_name(cloud_service_name, deployment_name)
@@ -271,7 +269,7 @@ class Service(ServiceManagementService):
             props = self.get_virtual_machine(cloud_service_name, deployment_name, virtual_machine_name)
         except Exception as e:
             if e.message != self.NOT_FOUND:
-                log.error(e)
+                self.log.error(e)
             return False
         return props is not None
 
@@ -297,7 +295,7 @@ class Service(ServiceManagementService):
         try:
             virtual_machine = self.get_virtual_machine(cloud_service_name, deployment_name, virtual_machine_name)
         except Exception as e:
-            log.error(e)
+            self.log.error(e)
             return None
         if virtual_machine is not None:
             for configuration_set in virtual_machine.configuration_sets.configuration_sets:
@@ -344,19 +342,19 @@ class Service(ServiceManagementService):
         count = 0
         result = self.get_operation_status(request_id)
         while result.status == self.IN_PROGRESS:
-            log.debug('wait for async [%s] loop count [%d]' % (request_id, count))
+            self.log.debug('wait for async [%s] loop count [%d]' % (request_id, count))
             count += 1
             if count > loop:
-                log.error('Timed out waiting for async operation to complete.')
+                self.log.error('Timed out waiting for async operation to complete.')
                 return False
             time.sleep(second_per_loop)
             result = self.get_operation_status(request_id)
         if result.status != self.SUCCEEDED:
-            log.error(vars(result))
+            self.log.error(vars(result))
             if result.error:
-                log.error(result.error.code)
-                log.error(vars(result.error))
-            log.error('Asynchronous operation did not succeed.')
+                self.log.error(result.error.code)
+                self.log.error(vars(result.error))
+            self.log.error('Asynchronous operation did not succeed.')
             return False
         return True
 
@@ -368,7 +366,7 @@ class Service(ServiceManagementService):
         try:
             self.list_storage_accounts()
         except Exception as e:
-            log.error(e)
+            self.log.error(e)
             return False
         return True
 
@@ -377,7 +375,7 @@ class Service(ServiceManagementService):
     def query_async_operation_status(self, request_id,
                                      true_mdl_cls_func, true_cls_args, true_func_args,
                                      false_mdl_cls_func, false_cls_args, false_func_args):
-        log.debug('query async operation status: request_id [%s]' % request_id)
+        self.log.debug('query async operation status: request_id [%s]' % request_id)
         result = self.get_operation_status(request_id)
         if result.status == self.IN_PROGRESS:
             # query async operation status
@@ -394,7 +392,7 @@ class Service(ServiceManagementService):
 
     def query_deployment_status(self, cloud_service_name, deployment_name,
                                 true_mdl_cls_func, true_cls_args, true_func_args):
-        log.debug('query deployment status: deployment_name [%s]' % deployment_name)
+        self.log.debug('query deployment status: deployment_name [%s]' % deployment_name)
         result = self.get_deployment_by_name(cloud_service_name, deployment_name)
         if result.status == ADStatus.RUNNING:
             run_job(true_mdl_cls_func, true_cls_args, true_func_args)
@@ -408,7 +406,7 @@ class Service(ServiceManagementService):
 
     def query_virtual_machine_status(self, cloud_service_name, deployment_name, virtual_machine_name, status,
                                      true_mdl_cls_func, true_cls_args, true_func_args):
-        log.debug('query virtual machine status: virtual_machine_name [%s]' % virtual_machine_name)
+        self.log.debug('query virtual machine status: virtual_machine_name [%s]' % virtual_machine_name)
         deployment = self.get_deployment_by_name(cloud_service_name, deployment_name)
         result = self.get_virtual_machine_instance_status(deployment, virtual_machine_name)
         if result == status:

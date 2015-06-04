@@ -24,9 +24,14 @@ THE SOFTWARE.
 """
 
 import sys
-
+import uuid
+import requests
+import json
 sys.path.append("..")
 
+from datetime import (
+    timedelta,
+)
 from hackathon.database.models import (
     Template,
     DockerHostServer,
@@ -34,17 +39,11 @@ from hackathon.database.models import (
 from hackathon.database import (
     db_adapter,
 )
-from hackathon.hack import (
-    hack_manager,
-)
 from hackathon.hackathon_response import (
     not_found,
     bad_request,
     internal_server_error,
     ok,
-)
-from hackathon.functions import (
-    get_now,
 )
 from hackathon.enum import (
     TEMPLATE_STATUS,
@@ -61,34 +60,31 @@ from hackathon.template.base_template import (
 from hackathon.scheduler import (
     scheduler,
 )
-from hackathon.azureformation.fileService import (
-    file_service,
-)
-from hackathon.functions import (
+from hackathon.util import (
     safe_get_config,
+    get_now,
 )
 from hackathon.log import (
     log,
 )
-from flask import (
+from hackathon import (
+    Component,
+    RequiredFeature,
     g,
 )
-from datetime import (
-    timedelta,
-)
-import uuid
-import requests
-import json
 
 
-class TemplateManager(object):
+class TemplateManager(Component):
+    hackathon_manager = RequiredFeature("hackathon_manager")
+    file_service = RequiredFeature("file_service")
+
     def get_created_template_list(self, hackathon_name):
         """
         Get created template list of given hackathon
         :param hackathon_name:
         :return:
         """
-        hackathon = hack_manager.get_hackathon_by_name(hackathon_name)
+        hackathon = self.hackathon_manager.get_hackathon_by_name(hackathon_name)
         if hackathon is None:
             return not_found('hackathon [%s] not found' % hackathon_name)
         created_templates = db_adapter.find_all_objects_by(Template,
@@ -231,9 +227,6 @@ class TemplateManager(object):
         if template is None:
             return False, bad_request("template not exists")
         return True, template
-
-
-template_manager = TemplateManager()
 
 # template_manager.create_template({
 # "expr_name": "test",
