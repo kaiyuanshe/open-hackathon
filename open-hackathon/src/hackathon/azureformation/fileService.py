@@ -29,7 +29,6 @@ import sys
 
 sys.path.append("..")
 from azure.storage import BlobService
-from hackathon.hackathon_response import *
 from hackathon import Component
 
 
@@ -94,6 +93,6 @@ class FileService(Component):
             self.blob_service.get_blob_to_file(container_name, blob_name, local_file)
             return local_file
         except Exception as e:
-            log.error(e)
+            self.log.error(e)
             return None
 

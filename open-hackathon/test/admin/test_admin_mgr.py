@@ -34,8 +34,8 @@ from hackathon import app
 from mock import Mock, ANY, patch
 import mock
 
-from flask import request, g
-from hackathon.hackathon_response import *
+from flask import g
+from hackathon.hackathon_response import bad_request, precondition_failed, not_found, ok, internal_server_error
 
 
 class AdminManagerTest(unittest.TestCase):
