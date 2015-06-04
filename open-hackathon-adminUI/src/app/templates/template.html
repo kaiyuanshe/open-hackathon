@@ -8,8 +8,13 @@
             <h2><i class="fa fa-edit"></i>模板列表</h2>
         </div>
         <div class="box-content">
-            <table class="table table-bordered">
-                <thead>
+
+            <div id="templatetable">
+                <a type="button" class="btn btn-primary btn-sm" data-type="template_item_add">
+                    <i class="fa fa-plus"></i>
+                </a>
+                <table class="table table-bordered">
+                    <thead>
                     <tr>
                         <th>#</th>
                         <th>名称</th>
@@ -19,72 +24,79 @@
                         <th>模板文件</th>
                         <th>操作</th>
                     </tr>
-                </thead>
-                <tbody id="templatelist">
-                </tbody>
-            </table>
-            <div >
+                    </thead>
+                    <tbody id="templatelist">
+                    </tbody>
+                </table>
+            </div>
+
+            <div>
                 <form class="form-horizontal" id="templateform" method="post"
-                          data-bv-feedbackicons-valid="glyphicon glyphicon-ok"
-                          data-bv-feedbackicons-invalid="glyphicon glyphicon-remove"
-                          data-bv-feedbackicons-validating="glyphicon glyphicon-refresh">
-                        <fieldset>
-                            <legend>
-                                创建新的模板
-                            </legend>
+                      data-bv-feedbackicons-valid="glyphicon glyphicon-ok"
+                      data-bv-feedbackicons-invalid="glyphicon glyphicon-remove"
+                      data-bv-feedbackicons-validating="glyphicon glyphicon-refresh"
+                      style="display:none">
+                    <fieldset>
+                        <legend>
+                            创建/更新模板
+                        </legend>
+                        <div class="form-group has-feedback">
+                            <label class="col-md-3 control-label">模板名称</label>
 
-                            <div class="form-group has-feedback">
-                                <label class="col-md-3 control-label">模板名称</label>
-                                <div class="col-md-6 register">
-                                    <input type="text" class="form-control" name="name" id="name"
-                                           placeholder="请使用英文字母、数字和'_'（下划线）'-'(中划线)"
-                                           data-bv-trigger="blur"
-                                           required
-                                           data-bv-notempty-message="名称是必需的，不能为空"
-                                           pattern="^(?!_)(?!.*?_$)[a-zA-Z0-9_-]+$"
-                                           data-bv-regexp-message="模板名称只能由英文字母的，数字和下划线"
-                                           minlength="5"
-                                           data-bv-stringlength-message="模板名称必须至少有5个字符"
-                                            >
-                                </div>
+                            <div class="col-md-6 register">
+                                <input type="text" class="form-control" name="name" id="name"
+                                       placeholder="请使用英文字母、数字和'_'（下划线）'-'(中划线)"
+                                       data-bv-trigger="blur"
+                                       required
+                                       data-bv-notempty-message="名称是必需的，不能为空"
+                                       pattern="^(?!_)(?!.*?_$)[a-zA-Z0-9_-]+$"
+                                       data-bv-regexp-message="模板名称只能由英文字母的，数字和下划线"
+                                       minlength="5"
+                                       data-bv-stringlength-message="模板名称必须至少有5个字符"
+                                        >
                             </div>
+                        </div>
 
-                            <div class="form-group has-feedback">
-                                <label class="col-md-3 control-label">描述</label>
-                                <div class="col-md-6 register">
-                                    <input type="text" class="form-control" name="description" id="description">
-                                </div>
+                        <div class="form-group has-feedback">
+                            <label class="col-md-3 control-label">提供商</label>
+
+                            <div class="col-md-6 register">
+                                <select class="form-control" name="provider" id="provider">
+                                    <option value="0">DOCKER</option>
+                                </select>
                             </div>
+                        </div>
 
-                            <div class="form-group has-feedback">
-                                <label class="col-md-3 control-label">提供商</label>
-                                <div class="col-md-6 register">
-                                    <select class="form-control" name="provider" id="provider">
-                                        <option value="0">DOCKER</option>
-                                    </select>
-                                </div>
+                        <div class="form-group has-feedback">
+                            <label class="col-md-3 control-label">描述</label>
+
+                            <div class="col-md-6 register">
+                                <input type="text" class="form-control" name="description" id="description">
                             </div>
+                        </div>
 
-                            <div data-type="temp-unit-list">
+                        <div data-type="temp-unit-list">
+                        </div>
+
+                        <legend></legend>
+
+                        <div class="form-group has-feedback">
+                            <div class="col-sm-offset-3 col-sm-6 text-center">
+                                <button type="button" class="btn btn-default" id="btn_add_template_unit"> 添加模板单元
+                                </button>
                             </div>
+                        </div>
 
-                            <legend></legend>
+                        <legend></legend>
 
-                            <div class="form-group has-feedback">
-                                <div class="col-sm-offset-3 col-sm-6 text-center">
-                                    <button type="button" class="btn btn-default" id="btn_add_template_unit"> 添加模板单元</button>
-                                </div>
+                        <div class="form-group has-feedback">
+                            <div class="col-sm-offset-3 col-sm-6 text-center">
+                                <button type="button" class="btn btn btn-default" data-type="cancel"> 取消</button>
+                                <button type="submit" class="btn btn-primary">提交</button>
                             </div>
+                        </div>
 
-                            <legend></legend>
-
-                            <div class="form-group has-feedback">
-                                <div class="col-sm-offset-3 col-sm-6 text-center">
-                                    <button type="submit" class="btn btn-primary">提交</button>
-                                </div>
-                            </div>
-
-                        </fieldset>
+                    </fieldset>
                 </form>
             </div>
         </div>
@@ -92,11 +104,13 @@
 </div>
 
 {% endblock body %} {% block script %} {{ super() }}
-<div class="modal fade bs-example-modal-sm" id="confirm_modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-api="oh.api.admin.register.delete">
+<div class="modal fade bs-example-modal-sm" id="confirm_modal" tabindex="-1" role="dialog"
+     aria-labelledby="mySmallModalLabel" aria-hidden="true" data-api="oh.api.admin.register.delete">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title">提示</h4>
             </div>
             <div class="modal-body">
@@ -126,6 +140,7 @@
             </a>
         </td>
     </tr>
+
 </script>
 <script id="template_unit_item" type="text/x-jquery-tmpl">
     <div data-type="template-unit-group">
@@ -240,6 +255,7 @@
             </div>
         </div>
     </div>
+
 </script>
 <script id="port_item" type="text/x-jquery-tmpl">
     <div data-type="port-group">
@@ -301,6 +317,7 @@
             </div>
         </div>
     </div>
+
 </script>
 <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
 <script type="text/javascript" src="/static/js/jquery/jquery.tmpl.min.js"></script>
