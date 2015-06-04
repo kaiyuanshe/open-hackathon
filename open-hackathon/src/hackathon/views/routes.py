@@ -29,7 +29,7 @@ sys.path.append("..")
 
 from hackathon import api, RequiredFeature, Component, g
 from flask_restful import Resource, reqparse
-from hackathon.decorators import hackathon_name_required
+from hackathon.decorators import token_required, hackathon_name_required
 from hackathon.hackathon_response import ok
 from hackathon.health import report_health
 from hackathon.database.models import Announcement
