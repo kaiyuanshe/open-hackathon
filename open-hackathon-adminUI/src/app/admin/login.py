@@ -81,16 +81,14 @@ class QQLogin(LoginBase):
         user_info_resp = get_remote(url)
         log.debug("get user info from qq:" + user_info_resp)
         user_info = convert(json.loads(user_info_resp))
-        email_info = [
-            {'name': user_info["nickname"], 'email': None, 'id': id, 'verified': 1, 'primary': 1,
-             'nickname': user_info["nickname"], 'avatar_url': user_info["figureurl"]}]
+        email_list = []
 
         return admin_manager.oauth_db_login(openid,
                                             name=user_info["nickname"],
                                             provider=LOGIN_PROVIDER.QQ,
                                             nickname=user_info["nickname"],
                                             access_token=access_token,
-                                            email_info=email_info,
+                                            email_list=email_list,
                                             avatar_url=user_info["figureurl"])
 
 
@@ -100,7 +98,7 @@ class GithubLogin(LoginBase):
         code = args.get('code')
 
         # get access_token
-        token_resp = get_remote(get_config('login.github.access_token_url') + code)
+        token_resp = get_remote(get_config('login.github.access_token_url') + str(code))
         log.debug("get token from github:" + token_resp)
         start = token_resp.index('=')
         end = token_resp.index('&')
@@ -139,14 +137,14 @@ class GithubLogin(LoginBase):
         log.debug("get email from github:" + email_info_resp + '\n')
         # email_info include all user email provided by github
         # email is user's primary email
-        email_info = json.loads(email_info_resp)
+        email_list = json.loads(email_info_resp)
 
         return admin_manager.oauth_db_login(openid,
                                             provider=LOGIN_PROVIDER.GITHUB,
                                             name=name,
                                             nickname=nickname,
                                             access_token=access_token,
-                                            email_info=email_info,
+                                            email_list=email_list,
                                             avatar_url=avatar)
 
 
@@ -179,16 +177,21 @@ class GitcafeLogin(LoginBase):
             avatar_url = info['avatar_url']
         else:
             avatar_url = "https" + info['avatar_url'][4:]
-        email_info = [
-            {'name': name, 'email': email, 'id': id, 'verified': 1, 'primary': 1, 'nickname': nickname,
-             'avatar_url': avatar_url}]
+        email_list = [
+            {
+                'name': name,
+                'email': email,
+                'verified': 1,
+                'primary': 1
+            }
+        ]
 
         return admin_manager.oauth_db_login(id,
                                             provider=LOGIN_PROVIDER.GITCAFE,
                                             name=name,
                                             nickname=nickname,
                                             access_token=token,
-                                            email_info=email_info,
+                                            email_list=email_list,
                                             avatar_url=avatar_url)
 
 
@@ -234,16 +237,21 @@ class WeiboLogin(LoginBase):
         email_info_resp_json = json.loads(email_info_resp)
         email = email_info_resp_json['email']
 
-        email_info = [
-            {'name': name, 'email': email, 'id': id, 'verified': 1, 'primary': 1, 'nickname': nickname,
-             'avatar_url': avatar}]
+        email_list = [
+            {
+                'name': name,
+                'email': email,
+                'verified': 1,
+                'primary': 1
+            }
+        ]
 
         return admin_manager.oauth_db_login(openid,
                                             provider=LOGIN_PROVIDER.WEIBO,
                                             name=name,
                                             nickname=nickname,
                                             access_token=access_token,
-                                            email_info=email_info,
+                                            email_list=email_list,
                                             avatar_url=avatar)
 
 
@@ -306,18 +314,22 @@ class LiveLogin(LoginBase):
         log.debug(user_info)
         name = user_info["name"]
         openid = str(args.get('user_id'))
-        #avatar = user_info["avatar_url"]
 
 
         email = user_info["emails"]["account"]
-        email_info = [
-            {'name': name, 'email': email, 'id': openid, 'verified': 1, 'primary': 1, 'nickname': name,
-             'avatar_url': None}]
+        email_list = [
+            {
+                'name': name,
+                'email': email,
+                'verified': 1,
+                'primary': 1
+            }
+        ]
         return admin_manager.oauth_db_login(openid,
                                             name=name,
                                             nickname=name,
                                             access_token=access_token,
-                                            email_info=email_info,
+                                            email_info=email_list,
                                             avatar_url=None)
 
 

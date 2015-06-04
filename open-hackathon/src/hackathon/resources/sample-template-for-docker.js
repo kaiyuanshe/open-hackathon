@@ -8,24 +8,23 @@
             "ports":
             [
                 {
-                    "name": "Tachyon",
-                    "port": 19999,
+                    "name": "website",
+                    "port": 80,
                     "public": true,
                     "protocol": "tcp",
                     "url": "http://{0}:{1}"
                 },
                 {
-                    "name": "Deploy",
+                    "name": "ssh",
                     "port": 22,
                     "public": true,
                     "protocol": "tcp"
                 },
                 {
-                    "name": "WebUI",
-                    "port": 4040,
-                    "public": true,
-                    "protocol": "tcp",
-                    "url": "http://{0}:{1}"
+                    "name": "mysql",
+                    "port": 3306,
+                    "public": false,
+                    "protocol": "tcp"
                 }
             ],
             "remote":
@@ -33,7 +32,7 @@
                 "provider": "guacamole",
                 "protocol": "ssh",
                 "username": "root",
-                "password": "root",
+                "password": "acowoman",
                 "port": 22
             },
             "Hostname": "",
@@ -45,10 +44,10 @@
             "Tty": true,
             "OpenStdin": true,
             "StdinOnce": false,
-            "Env": ["JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64/jre/"],
-            "Cmd": ["/usr/sbin/sshd", "-D"],
+            "Env": ["ROOT_PASS=acowoman"],
+            "Cmd": [],
             "Entrypoint": "",
-            "Image": "sffamily/ampcamp5:v5",
+            "Image": "sffamily/ulampssh",
             "Labels": {},
             "Volumes": {},
             "WorkingDir": "",

@@ -26,35 +26,26 @@ import sys
 
 sys.path.append("..")
 
+from hackathon import api, RequiredFeature, Component, g, request
 from flask_restful import Resource, reqparse
-from hackathon import api, app
-from hackathon.health import report_health
-from flask_restful import Resource, reqparse
-from hackathon.expr import expr_manager
-from hackathon.expr.expr_mgr import open_check_expr, recycle_expr_scheduler
-from hackathon.database.models import Announcement, Template
-from hackathon.user.login import *
-from flask import g, request
-from hackathon.database import db_adapter, db_session
-from hackathon.decorators import token_required, hackathon_name_required, admin_privilege_required
-from hackathon.user.user_functions import get_user_experiment
-from hackathon.remote.guacamole import GuacamoleInfo
-from hackathon.hack import hack_manager
-import time
-from hackathon.registration.register_mgr import register_manager
-from hackathon.template.template_mgr import template_manager
-from hackathon.hackathon_response import *
-from hackathon.azureformation.azureCertManagement import (
-    azure_cert_management,
-)
+from hackathon.user.login import login_providers
+from hackathon.decorators import token_required, hackathon_name_required
+from hackathon.hackathon_response import internal_server_error
+import json
 from hackathon.enum import RGStatus
 from hackathon.user import user_manager
+
+hackathon_manager = RequiredFeature("hackathon_manager")
+register_manager = RequiredFeature("register_manager")
+expr_manager = RequiredFeature("expr_manager")
+user_manager = RequiredFeature("user_manager")
+guacamole = RequiredFeature("guacamole")
 
 
 class GuacamoleResource(Resource):
     @token_required
     def get(self):
-        return GuacamoleInfo().getConnectInfo()
+        return guacamole.getConnectInfo()
 
 
 class UserResource(Resource):
@@ -62,7 +53,7 @@ class UserResource(Resource):
         return user_manager.get_user_by_id(id)
 
 
-class UserLoginResource(Resource):
+class UserLoginResource(Resource, Component):
     def post(self):
         body = request.get_json()
         provider = body["provider"]
@@ -83,7 +74,7 @@ class RegisterCheckEmailResource(Resource):
         return register_manager.is_email_registered(args['hid'], args['email'])
 
 
-class UserHackathonRelResource(Resource):
+class UserHackathonRelResource(Resource, Component):
     @token_required
     @hackathon_name_required
     def get(self):
@@ -109,10 +100,10 @@ class UserHackathonListResource(Resource):
         parse = reqparse.RequestParser()
         parse.add_argument('user_id', type=int, location='args', required=True)
         args = parse.parse_args()
-        return hack_manager.get_user_hackathon_list(args['user_id'])
+        return hackathon_manager.get_user_hackathon_list(args['user_id'])
 
 
-class UserExperimentResource(Resource):
+class UserExperimentResource(Resource, Component):
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument('id', type=int, location='args', required=True)
@@ -120,7 +111,7 @@ class UserExperimentResource(Resource):
         try:
             return expr_manager.get_expr_status(args['id'])
         except Exception as e:
-            log.error(e)
+            self.log.error(e)
             return internal_server_error("cannot find the experiment")
 
     @token_required
@@ -133,7 +124,7 @@ class UserExperimentResource(Resource):
         try:
             return expr_manager.start_expr(hackathon, template_name, g.user.id)
         except Exception as err:
-            log.error(err)
+            self.log.error(err)
             return {"error": "fail to start due to '%s'" % err}, 500
 
     @token_required
@@ -154,12 +145,11 @@ class UserExperimentResource(Resource):
 
 
 class UserExperimentListResource(Resource):
-    @token_required
     def get(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('uid', type=int, location='args', required=True)
+        parse.add_argument('user_id', type=int, location='args', required=True)
         args = parse.parse_args()
-        return get_user_experiment(args['uid'])
+        return expr_manager.get_expr_list_by_user_id(args['user_id'])
 
 class TeamMemberResource(Resource):
     @token_required

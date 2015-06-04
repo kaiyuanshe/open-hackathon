@@ -22,33 +22,22 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
+
 import sys
 
 sys.path.append("..")
 
+from hackathon import api, RequiredFeature, Component, g
 from flask_restful import Resource, reqparse
-from hackathon import api, app
+from hackathon.decorators import hackathon_name_required
+from hackathon.hackathon_response import ok
 from hackathon.health import report_health
-from flask_restful import Resource, reqparse
-from hackathon.expr import expr_manager
+from hackathon.database.models import Announcement
+# todo refactor this logic to make it starts with application other than an api call
 from hackathon.expr.expr_mgr import open_check_expr, recycle_expr_scheduler
-from hackathon.database.models import Announcement, Template
-from hackathon.user.login import *
-from flask import g, request
-from hackathon.database import db_adapter, db_session
-from hackathon.decorators import token_required, hackathon_name_required, admin_privilege_required
-from hackathon.user.user_functions import get_user_experiment
-from hackathon.remote.guacamole import GuacamoleInfo
-from hackathon.hack import hack_manager
 import time
-from hackathon.registration.register_mgr import register_manager
-from hackathon.template.template_mgr import template_manager
-from hackathon.hackathon_response import *
-from hackathon.azureformation.azureCertManagement import (
-    azure_cert_management,
-)
-from hackathon.enum import RGStatus
-from hackathon.user import user_manager
+
+hackathon_manager = RequiredFeature("hackathon_manager")
 
 
 class HealthResource(Resource):
@@ -59,9 +48,9 @@ class HealthResource(Resource):
         return report_health(args['q'])
 
 
-class BulletinResource(Resource):
+class BulletinResource(Resource, Component):
     def get(self):
-        announcement = db_adapter.find_first_object_by(Announcement, enabled=1)
+        announcement = self.db.find_first_object_by(Announcement, enabled=1)
         if announcement is not None:
             return announcement.dic()
         else:
@@ -87,7 +76,7 @@ class ExperimentRecycleResource(Resource):
         return ok("Recycle inactive user experiment running on backgroud")
 
 
-class HackathonResource(Resource):
+class HackathonResource(Resource, Component):
     @hackathon_name_required
     def get(self):
         return g.hackathon.dic()
@@ -100,19 +89,20 @@ class HackathonListResource(Resource):
         parse.add_argument('status', type=int, location='args')
         args = parse.parse_args()
 
-        return hack_manager.get_hackathon_list(args["user_id"], args["status"])
+        return hackathon_manager.get_hackathon_list(args["user_id"], args["status"])
 
 
 class HackathonStatResource(Resource):
     @hackathon_name_required
     def get(self):
-        return hack_manager.get_hackathon_stat(g.hackathon)
+        return hackathon_manager.get_hackathon_stat(g.hackathon)
 
 
-class HackathonTemplateResource(Resource):
+class HackathonTemplateResource(Resource, Component):
     @hackathon_name_required
     def get(self):
         return [t.dic() for t in g.hackathon.templates.all()]
+
 
 class HackathonTeamListResource(Resource):
     @token_required
@@ -124,7 +114,6 @@ class HackathonTeamListResource(Resource):
         result = parse.parse_args()
         id = g.hackathon.id
         return user_manager.hackathon_team_list(id, result['name'], result['number'])
-
 
 
 def register_routes():

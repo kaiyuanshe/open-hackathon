@@ -27,16 +27,14 @@
 import sys
 
 sys.path.append("..")
+from hackathon import Component, RequiredFeature, g
 from hackathon.database.models import UserHackathonRel, Experiment
-from hackathon.database import db_adapter
-from hackathon.hackathon_response import *
-from hackathon.functions import get_now
-from hackathon.enum import EStatus, RGStatus
+from hackathon.hackathon_response import bad_request, precondition_failed, internal_server_error, not_found, ok
+from hackathon.enum import EStatus, RGStatus, ReservedUser
 
 
-class RegisterManger(object):
-    def __init__(self, db_adapter):
-        self.db = db_adapter
+class RegisterManger(Component):
+    hackathon_manager = RequiredFeature("hackathon_manager")
 
     def get_all_registration_by_hackathon_id(self, hackathon_id):
         # TODO make query result with pagination
@@ -50,7 +48,7 @@ class RegisterManger(object):
         return self.db.find_first_object_by(UserHackathonRel, user_id=user_id, hackathon_id=hackathon_id)
 
     def create_registration(self, hackathon, args):
-        log.debug("create_or_update_register: %r" % args)
+        self.log.debug("create_or_update_register: %r" % args)
         if "user_id" not in args:
             return bad_request("user id invalid")
 
@@ -58,25 +56,24 @@ class RegisterManger(object):
             user_id = args['user_id']
             register = self.get_registration_by_user_and_hackathon(user_id, hackathon.id)
             if register is not None and register.deleted == 0:
-                log.debug("user %d already registered on hackathon %d" % (user_id, hackathon.id))
+                self.log.debug("user %d already registered on hackathon %d" % (user_id, hackathon.id))
                 return register.dic()
 
-            if hackathon.registration_start_time > get_now():
+            if hackathon.registration_start_time > self.util.get_now():
                 return precondition_failed("hackathon registration not opened", friendly_message="报名尚未开始")
 
-            if hackathon.registration_end_time < get_now():
+            if hackathon.registration_end_time < self.util.get_now():
                 return precondition_failed("hackathon registration has ended", friendly_message="报名已经结束")
 
             args["status"] = hackathon.is_auto_approve() and RGStatus.AUTO_PASSED or RGStatus.UNAUDIT
 
             return self.db.add_object_kwargs(UserHackathonRel, **args).dic()
         except Exception as e:
-            log.error(e)
+            self.log.error(e)
             return internal_server_error("fail to create or update register")
 
-
     def update_registration(self, args):
-        log.debug("update_registration: %r" % args)
+        self.log.debug("update_registration: %r" % args)
         try:
             id = args['id']
             register = self.get_registration_by_id(id)
@@ -84,15 +81,15 @@ class RegisterManger(object):
                 # we can also create a new object here.
                 return not_found("registration not found")
 
-            log.debug("update a existed register")
+            self.log.debug("update a existed register")
             update_items = dict(dict(args).viewitems() - register.dic().viewitems())
             if "create_time" in update_items: update_items.pop("create_time")
-            update_items["update_time"] = get_now()
+            update_items["update_time"] = self.util.get_now()
             self.db.update_object(register, **update_items)
 
             return register.dic()
         except Exception as e:
-            log.error(e)
+            self.log.error(e)
             return internal_server_error("fail to  update register")
 
     def delete_registration(self, args):
@@ -104,7 +101,7 @@ class RegisterManger(object):
                 self.db.delete_object(register)
             return ok()
         except Exception as ex:
-            log.error(ex)
+            self.log.error(ex)
             return internal_server_error("failed in delete register: %s" % args["id"])
 
     def get_registration_detail(self, user_id, hackathon):
@@ -127,7 +124,7 @@ class RegisterManger(object):
             if experiment is not None:
                 detail["experiment"] = experiment.dic()
         except Exception as e:
-            log.error(e)
+            self.log.error(e)
 
         return detail
 
@@ -135,5 +132,26 @@ class RegisterManger(object):
         register = self.db.find_first_object_by(UserHackathonRel, hackathon_id=hid, email=email, deleted=0)
         return register is None
 
+    def is_user_registered(self, user_id, hackathon):
+        # reservedUser (-1)
+        if user_id == ReservedUser.DefaultUserID:
+            return True
 
-register_manager = RegisterManger(db_adapter)
+        # admin
+        if self.hackathon_manager.validate_admin_privilege(user_id, hackathon.id):
+            return True
+
+        # user
+        reg = self.get_registration_by_user_and_hackathon(user_id, hackathon.id)
+        if reg is not None:
+            return reg.status == RGStatus.AUTO_PASSED or reg.status == RGStatus.AUDIT_PASSED
+
+        return False
+
+    def get_hackathon_registers(self, num=5):
+        registers = self.db.find_all_objects_order_by(UserHackathonRel,
+                                                      num,  # limit num
+                                                      UserHackathonRel.create_time.desc(),
+                                                      hackathon_id=g.hackathon.id)
+        return map(lambda x: x.dic(), registers)
+

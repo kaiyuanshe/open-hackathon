@@ -62,9 +62,7 @@ from hackathon.enum import (
     VERemoteProvider,
     VEStatus,
 )
-from hackathon.log import (
-    log,
-)
+
 import json
 
 
@@ -182,10 +180,10 @@ class VirtualMachine(ResourceBase):
         if self.subscription.get_available_core_count() < self.SIZE_CORE_MAP[virtual_machine_size.lower()]:
             m = self.CREATE_DEPLOYMENT_ERROR[1] % (DEPLOYMENT, deployment_slot)
             commit_azure_log(experiment_id, ALOperation.CREATE_DEPLOYMENT, ALStatus.FAIL, m, 1)
-            log.error(m)
+            self.log.error(m)
             m = self.CREATE_VIRTUAL_MACHINE_ERROR[1] % (VIRTUAL_MACHINE, virtual_machine_name)
             commit_azure_log(experiment_id, ALOperation.CREATE_VIRTUAL_MACHINE, ALStatus.FAIL, m, 1)
-            log.error(m)
+            self.log.error(m)
             return False
         cloud_service_name = template_unit.get_cloud_service_name()
         vm_image_name = template_unit.get_vm_image_name()
@@ -206,17 +204,17 @@ class VirtualMachine(ResourceBase):
                                         cloud_service_name,
                                         experiment_id)
                 commit_azure_log(experiment_id, ALOperation.CREATE_DEPLOYMENT, ALStatus.END, m, 2)
-            log.debug(m)
+            self.log.debug(m)
             # avoid duplicate virtual machine in azure subscription
             if self.service.virtual_machine_exists(cloud_service_name, deployment_name, virtual_machine_name):
                 if contain_azure_virtual_machine(cloud_service_name, deployment_name, virtual_machine_name):
                     m = self.CREATE_VIRTUAL_MACHINE_INFO[1] % (VIRTUAL_MACHINE, virtual_machine_name, AZURE_FORMATION)
                     commit_azure_log(experiment_id, ALOperation.CREATE_VIRTUAL_MACHINE, ALStatus.END, m, 1)
-                    log.debug(m)
+                    self.log.debug(m)
                 else:
                     m = self.CREATE_VIRTUAL_MACHINE_ERROR[4] % (VIRTUAL_MACHINE, virtual_machine_name, AZURE_FORMATION)
                     commit_azure_log(experiment_id, ALOperation.CREATE_VIRTUAL_MACHINE, ALStatus.FAIL, m, 4)
-                    log.error(m)
+                    self.log.error(m)
                     return False
             else:
                 # delete old azure virtual machine, cascade delete old azure endpoint
@@ -234,7 +232,7 @@ class VirtualMachine(ResourceBase):
                 except Exception as e:
                     m = self.CREATE_VIRTUAL_MACHINE_ERROR[0] % (VIRTUAL_MACHINE, virtual_machine_name, e.message)
                     commit_azure_log(experiment_id, ALOperation.CREATE_VIRTUAL_MACHINE, ALStatus.FAIL, m, 0)
-                    log.error(e)
+                    self.log.error(e)
                     return False
                 # query async operation status
                 run_job(MDL_CLS_FUNC[2],
@@ -265,7 +263,7 @@ class VirtualMachine(ResourceBase):
                 commit_azure_log(experiment_id, ALOperation.CREATE_DEPLOYMENT, ALStatus.FAIL, m, 0)
                 m = self.CREATE_VIRTUAL_MACHINE_ERROR[0] % (VIRTUAL_MACHINE, virtual_machine_name, e.message)
                 commit_azure_log(experiment_id, ALOperation.CREATE_VIRTUAL_MACHINE, ALStatus.FAIL, m, 0)
-                log.error(e)
+                self.log.error(e)
                 return False
             # query async operation status
             run_job(MDL_CLS_FUNC[2],
@@ -293,7 +291,7 @@ class VirtualMachine(ResourceBase):
                                                                  experiment_id)
         m = self.CREATE_VIRTUAL_MACHINE_ERROR[2] % (VIRTUAL_MACHINE, virtual_machine_name)
         commit_azure_log(experiment_id, ALOperation.CREATE_VIRTUAL_MACHINE, ALStatus.FAIL, m, 2)
-        log.error(m)
+        self.log.error(m)
 
     def create_virtual_machine_vm_true_1(self, experiment_id, template_unit):
         if template_unit.is_vm_image():
@@ -334,7 +332,7 @@ class VirtualMachine(ResourceBase):
                                                                  experiment_id)
         m = self.CREATE_VIRTUAL_MACHINE_ERROR[3] % (VIRTUAL_MACHINE, virtual_machine_name)
         commit_azure_log(experiment_id, ALOperation.CREATE_VIRTUAL_MACHINE, ALStatus.FAIL, m, 3)
-        log.error(m)
+        self.log.error(m)
 
     def create_virtual_machine_vm_true_2(self, experiment_id, template_unit):
         self.__create_virtual_machine_helper(experiment_id, template_unit)
@@ -355,10 +353,10 @@ class VirtualMachine(ResourceBase):
                                                                  experiment_id)
         m = self.CREATE_DEPLOYMENT_ERROR[2] % (DEPLOYMENT, deployment_slot)
         commit_azure_log(experiment_id, ALOperation.CREATE_DEPLOYMENT, ALStatus.FAIL, m, 2)
-        log.error(m)
+        self.log.error(m)
         m = self.CREATE_VIRTUAL_MACHINE_ERROR[2] % (VIRTUAL_MACHINE, virtual_machine_name)
         commit_azure_log(experiment_id, ALOperation.CREATE_VIRTUAL_MACHINE, ALStatus.FAIL, m, 2)
-        log.error(m)
+        self.log.error(m)
 
     def create_virtual_machine_dm_true(self, experiment_id, template_unit):
         cloud_service_name = template_unit.get_cloud_service_name()
@@ -373,7 +371,7 @@ class VirtualMachine(ResourceBase):
                                 cloud_service_name,
                                 experiment_id)
         commit_azure_log(experiment_id, ALOperation.CREATE_DEPLOYMENT, ALStatus.END, m, 0)
-        log.debug(m)
+        self.log.debug(m)
         # query virtual machine status
         run_job(MDL_CLS_FUNC[8],
                 (self.azure_key_id, ),
@@ -406,7 +404,7 @@ class VirtualMachine(ResourceBase):
                                                       AVMStatus.STOPPED_VM,
                                                       AVMStatus.STOPPED_DEALLOCATED)
             commit_azure_log(experiment_id, ALOperation.STOP_VIRTUAL_MACHINE, ALStatus.FAIL, m, 1)
-            log.error(m)
+            self.log.error(m)
             return False
         elif need_status == now_status:
             db_status = get_azure_virtual_machine_status(cloud_service_name, deployment_name, virtual_machine_name)
@@ -423,7 +421,7 @@ class VirtualMachine(ResourceBase):
                                                          AZURE_FORMATION)
                 self.__stop_virtual_machine_helper(experiment_id, template_unit, need_status)
                 commit_azure_log(experiment_id, ALOperation.STOP_VIRTUAL_MACHINE, ALStatus.END, m, 2)
-            log.debug(m)
+            self.log.debug(m)
         else:
             try:
                 result = self.service.stop_virtual_machine(cloud_service_name,
@@ -433,7 +431,7 @@ class VirtualMachine(ResourceBase):
             except Exception as e:
                 m = self.STOP_VIRTUAL_MACHINE_ERROR[0] % (VIRTUAL_MACHINE, virtual_machine_name, e.message)
                 commit_azure_log(experiment_id, ALOperation.STOP_VIRTUAL_MACHINE, ALStatus.FAIL, 0)
-                log.error(e)
+                self.log.error(e)
                 return False
             # query async operation status
             run_job(MDL_CLS_FUNC[2],
@@ -461,7 +459,7 @@ class VirtualMachine(ResourceBase):
                                                                  experiment_id)
         m = self.STOP_VIRTUAL_MACHINE_ERROR[2] % (VIRTUAL_MACHINE, virtual_machine_name, need_status)
         commit_azure_log(experiment_id, ALOperation.STOP_VIRTUAL_MACHINE, ALStatus.FAIL, 2)
-        log.error(m)
+        self.log.error(m)
 
     def stop_virtual_machine_vm_true(self, experiment_id, template_unit, need_status):
         cloud_service_name = template_unit.get_cloud_service_name()
@@ -472,7 +470,7 @@ class VirtualMachine(ResourceBase):
         self.__stop_virtual_machine_helper(experiment_id, template_unit, need_status)
         m = self.STOP_VIRTUAL_MACHINE_INFO[0] % (VIRTUAL_MACHINE, virtual_machine_name, need_status)
         commit_azure_log(experiment_id, ALOperation.STOP_VIRTUAL_MACHINE, ALStatus.END, m, 0)
-        log.debug(m)
+        self.log.debug(m)
 
     def start_virtual_machine(self, experiment_id, template_unit):
         """
@@ -499,7 +497,7 @@ class VirtualMachine(ResourceBase):
                 m = self.START_VIRTUAL_MACHINE_INFO[2] % (VIRTUAL_MACHINE, virtual_machine_name, AZURE_FORMATION)
                 self.__start_virtual_machine_helper(experiment_id, template_unit)
                 commit_azure_log(experiment_id, ALOperation.START_VIRTUAL_MACHINE, ALStatus.END, m, 2)
-            log.debug(m)
+            self.log.debug(m)
         else:
             try:
                 result = self.service.start_virtual_machine(cloud_service_name,
@@ -508,7 +506,7 @@ class VirtualMachine(ResourceBase):
             except Exception as e:
                 m = self.START_VIRTUAL_MACHINE_ERROR[0] % (VIRTUAL_MACHINE, virtual_machine_name, e.message)
                 commit_azure_log(experiment_id, ALOperation.START_VIRTUAL_MACHINE, ALStatus.FAIL, 0)
-                log.error(e)
+                self.log.error(e)
                 return False
             # query async operation status
             run_job(MDL_CLS_FUNC[2],
@@ -536,7 +534,7 @@ class VirtualMachine(ResourceBase):
                                                                  experiment_id)
         m = self.START_VIRTUAL_MACHINE_ERROR[1] % (VIRTUAL_MACHINE, virtual_machine_name)
         commit_azure_log(experiment_id, ALOperation.START_VIRTUAL_MACHINE, ALStatus.FAIL, 1)
-        log.error(m)
+        self.log.error(m)
 
     def start_virtual_machine_vm_true(self, experiment_id, template_unit):
         virtual_machine_name = self.VIRTUAL_MACHINE_NAME_BASE % (template_unit.get_virtual_machine_name(),
@@ -544,7 +542,7 @@ class VirtualMachine(ResourceBase):
         self.__start_virtual_machine_helper(experiment_id, template_unit)
         m = self.START_VIRTUAL_MACHINE_INFO[0] % (VIRTUAL_MACHINE, virtual_machine_name)
         commit_azure_log(experiment_id, ALOperation.START_VIRTUAL_MACHINE, ALStatus.END, m, 0)
-        log.debug(m)
+        self.log.debug(m)
 
     # todo delete virtual machine
     def delete_virtual_machine(self):
@@ -602,7 +600,7 @@ class VirtualMachine(ResourceBase):
                                   virtual_machine)
         m = self.CREATE_VIRTUAL_MACHINE_INFO[0] % (VIRTUAL_MACHINE, virtual_machine_name)
         commit_azure_log(experiment_id, ALOperation.CREATE_VIRTUAL_MACHINE, ALStatus.END, m, 0)
-        log.debug(m)
+        self.log.debug(m)
 
     def __stop_virtual_machine_helper(self, experiment_id, template_unit, need_status):
         """

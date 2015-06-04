@@ -40,9 +40,10 @@ from hackathon.database.models import (
     Template,
     Experiment,
 )
-from hackathon.functions import (
+from hackathon.util import (
     load_template,
     call,
+    get_now,
 )
 from hackathon.scheduler import (
     scheduler,
@@ -58,7 +59,6 @@ from azure.servicemanagement import (
     ConfigurationSetInputEndpoint,
 )
 from datetime import (
-    datetime,
     timedelta,
 )
 # -------------------------------------------------- constants --------------------------------------------------#
@@ -379,7 +379,7 @@ def set_template_virtual_environment_count(experiment_id, count):
 
 # --------------------------------------------- scheduler ---------------------------------------------#
 def run_job(mdl_cls_func, cls_args, func_args, second=DEFAULT_TICK):
-    exec_time = datetime.now() + timedelta(seconds=second)
+    exec_time = get_now() + timedelta(seconds=second)
     scheduler.add_job(call, 'date', run_date=exec_time, args=[mdl_cls_func, cls_args, func_args])
 
 

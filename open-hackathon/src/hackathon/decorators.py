@@ -24,9 +24,11 @@
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
 
-from user import user_manager
-from hackathon_response import *
-from hack import hack_manager
+from hackathon import RequiredFeature
+from hackathon_response import unauthorized, bad_request, access_denied
+
+user_manager = RequiredFeature("user_manager")
+hack_manager = RequiredFeature("hackathon_manager")
 
 """
 user must login when this decorator is enabled (for both user and admin)
@@ -69,7 +71,7 @@ def admin_privilege_required(func):
         if not hack_manager.validate_hackathon_name():
             return bad_request("hackathon name invalid")
 
-        if not hack_manager.validate_admin_privilege():
+        if not hack_manager.validate_admin_privilege_http():
             return access_denied("access denied")
         return func(*args, **kwargs)
 

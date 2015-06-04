@@ -40,10 +40,10 @@
                     oh.api.admin.registration.put({
                         body: {
                             id: id,
-                            status: params
+                            status: params.value
                         },
                         header: {
-                            hackathon_id: data.hackathon_id
+                            hackathon_name: currentHackathon.name
                         }
                     }, function(data) {
                         if (data.error) {

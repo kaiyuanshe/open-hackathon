@@ -29,19 +29,31 @@
  */
 
 angular.module('oh.app')
-  .run(function ($location, RouteFilter, Authentication) {
-    RouteFilter.register(['/settings'], function () {
-      Authentication.settings(function (data) {
-        if (data.redirectUrl) {
-          $location.path(data.redirectUrl);
-        }
-      });
-    });
-    RouteFilter.register(['/hackathon'], function () {
-      Authentication.hackathon(function (data) {
-        if (data.redirectUrl) {
-          $location.path(data.redirectUrl);
-        }
-      });
-    });
+  .filter('mkHTML', function () {
+    return function (text) {
+      return markdown.toHTML(text || '');
+    }
+  })
+  .filter('stripTags', function () {
+    return function (html) {
+      html = html || '';
+      return html.replace(/(<([^>]+)>)/ig, '');
+    }
+  })
+  .filter('split', function () {
+    return function (text, limit) {
+      limit = limit || ',';
+      text = text || '';
+      return text.split(limit);
+    }
+  })
+  .filter('defBanner', function () {
+    return function (array) {
+      return array[0].length > 0 ? array[0] : '/images/homepage.jpg';
+    }
+  }).filter('toDate', function () {
+    return function (longTime) {
+      return new Date(longTime);
+    }
   });
+

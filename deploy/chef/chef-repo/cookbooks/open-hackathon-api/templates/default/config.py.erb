@@ -59,16 +59,32 @@ Config = {
         "token_expiration_minutes": <%= node['openhackathon']['token_expiration_minutes'] %>
     },
     "azure": {
-        "subscriptionId": "<%= node['openhackathon']['azure']['subscriptionId'] %>",
-        "certPath": "<%= node['openhackathon']['azure']['certPath'] %>",
-        "managementServiceHostBase": "<%= node['openhackathon']['azure']['managementServiceHostBase'] %>"
+        "cert_base": "<%= node['openhackathon'][:azure][:cert_base] %>",
+        "container_name": "<%= node['openhackathon'][:azure][:container_name] %>"
     },
     "guacamole": {
         "host": "<%= node['openhackathon']['guacamole']['host'] %>"
     },
     "scheduler": {
-        "job_store": "<%= node['openhackathon']['scheduler']['job_store'] %>",
-        "job_store_url": 'mysql://%s:%s@%s:%s/%s' % (MYSQL_USER, MYSQL_PWD, MYSQL_HOST,MYSQL_PORT, MYSQL_DB)
+        "job_store": "mysql",
+        "job_store_url": 'mysql://%s:%s@%s/%s' % (MYSQL_USER, MYSQL_PWD, MYSQL_HOST, MYSQL_DB)
+    },
+    "pre_allocate": {
+        "check_interval_minutes": <%= ['openhackathon'][:pre_allocate][:check_interval_minutes] %>,
+        "azure": <%= ['openhackathon'][:pre_allocate][:azure] %>,
+        "docker": <%= ['openhackathon'][:pre_allocate][:docker] %>
+    },
+    "recycle":{
+        "idle_hours": 24,
+        "check_idle_interval_minutes": 5
+    },
+    "storage": {
+        "account_name": "<%= node['openhackathon'][:storage][:account_name] %>",
+        "account_key": "<%= node['openhackathon'][:storage][:account_key] %>",
+        "image_container": "<%= node['openhackathon'][:storage][:image_container] %>",
+        "template_container": "<%= node['openhackathon'][:storage][:template_container] %>",
+        "blob_service_host_base":  "<%= node['openhackathon'][:storage][:blob_service_host_base] %>",
+        "size_limit_kilo_bytes": <%= node['openhackathon'][:storage][:size_limit_kilo_bytes] %>
     }
 }
 

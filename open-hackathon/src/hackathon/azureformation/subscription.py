@@ -24,12 +24,14 @@ THE SOFTWARE.
 """
 __author__ = 'Yifu Huang'
 
-from hackathon.log import (
-    log,
-)
+import sys
+
+sys.path.append("..")
+
+from hackathon import Component
 
 
-class Subscription:
+class Subscription(Component):
     """
     Subscription of azure resources according to given subscription id
     """
@@ -47,7 +49,7 @@ class Subscription:
         try:
             result = self.service.get_subscription()
         except Exception as e:
-            log.error(e)
+            self.log.error(e)
             return self.ERROR_RESULT
         return result.max_storage_accounts - result.current_storage_accounts
 
@@ -60,7 +62,7 @@ class Subscription:
         try:
             result = self.service.get_subscription()
         except Exception as e:
-            log.error(e)
+            self.log.error(e)
             return self.ERROR_RESULT
         return result.max_hosted_services - result.current_hosted_services
 
@@ -73,6 +75,6 @@ class Subscription:
         try:
             result = self.service.get_subscription()
         except Exception as e:
-            log.error(e)
+            self.log.error(e)
             return self.ERROR_RESULT
         return result.max_core_count - result.current_core_count

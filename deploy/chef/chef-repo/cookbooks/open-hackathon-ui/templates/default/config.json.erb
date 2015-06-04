@@ -47,7 +47,6 @@
   "api": {
     "user": {
       "login": ["post","del"],
-      "hackathon": ["get","post"],
       "experiment": {
         "": ["get","post","del","put"],
         "list": ["get"]
@@ -92,12 +91,23 @@
       "scope": "<%= node['openhackathon']['qq']['scope'] %>",
       "state": "<%= node['openhackathon']['qq']['OAUTH_STATE'] %>",
       "response_type": "<%= node['openhackathon']['qq']['response_type'] %>"
+    },
+    "live": {
+      "client_id": "<%= node['openhackathon']['live']['client_id'] %>",
+      "redirect_uri": "http://<%= node['openhackathon'][:ui][:hostname] %>/live" ,
+      "scope": "<%= node['openhackathon']['live']['scope'] %>",
+      "response_type": "code"
     }
   },
   "social":{
     "github":"https://github.com/login/oauth/authorize?",
     "gitcafe":"<%= node['openhackathon']['gitcafe']['domain'] %>/oauth/authorize?'",
     "weibo":"https://api.weibo.com/oauth2/authorize?",
-    "qq":"https://graph.qq.com/oauth2.0/authorize?"
+    "qq":"https://graph.qq.com/oauth2.0/authorize?",
+    "live":"https://login.live.com/oauth20_authorize.srf?"
+  },
+  "seo":{
+    "keywords":"开放黑客松,Open Hackathon Platform",
+    "description":"open hackathon platform"
   }
 }

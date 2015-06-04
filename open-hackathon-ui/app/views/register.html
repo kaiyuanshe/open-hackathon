@@ -5,10 +5,16 @@
   <div class="container" ng-if="!isLoad">
     <div class="row jumbotron">
       <div class="col-md-5">
-        <img src="{{banner}}" width="100%" ng-repeat="banner in hackathon.basic_info.banners"/>
+        <div class="row">
+          <carousel interval="myInterval">
+            <slide ng-repeat="banner in (hackathon.basic_info.banners | split : ';')" active="slide.active">
+              <img ng-src="{{banner}}" style="margin:auto;">
+            </slide>
+          </carousel>
+        </div>
       </div>
       <div class="col-md-7">
-        <h2>{{hackathon.display_name}}</h2>
+        <h2 class="reg-h-name">{{hackathon.display_name}}</h2>
 
         <p><span class="glyphicon glyphicon-time" aria-hidden="true"></span> {{hackathon.event_start_time | date : 'yyyy年MM月dd日 HH:mm'}} ～ {{hackathon.event_end_time | date : 'yyyy年MM月dd日 HH:mm'}}</p>
 
@@ -24,6 +30,10 @@
         <div>
           <button class="btn btn-primary btn-lg" ng-click="showRegister()" ng-if="hackathon.isRegister">我要报名</button>
           <span ng-bind="hackathon.message"></span>
+
+          <div>
+            <a  ng-click="goWork()" ng-if="hackathon.start" class="btn btn-primary ">立即参加</a>
+          </div>
         </div>
       </div>
     </div>
@@ -32,7 +42,7 @@
         <ng-include src="'views/tpls/register-form.html'" ng-if="hackathon.isRegister"></ng-include>
         <h2 class="line-title">活动内容</h2>
 
-        <div ng-bind-html="hackathon.description"></div>
+        <div ng-bind-html="hackathon.description | mkHTML"></div>
       </div>
       <div class="col-md-3">
         <h2 class="line-title">活动主办方..</h2>

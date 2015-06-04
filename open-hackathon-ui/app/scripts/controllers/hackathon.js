@@ -39,11 +39,14 @@
  * Controller of the oh.header.controller
  */
 angular.module('oh.controllers')
-  .controller('oh.hackathon.controller', function ($scope, $rootScope,$location, Authentication) {
+  .controller('oh.hackathon.controller', function ($scope, $rootScope, $location, Authentication) {
     $rootScope.hackathon = true;
+    $rootScope.workspace = true;
+    $rootScope.isShow = true;
     Authentication.hackathon(function (data) {
       $scope.workData = data;
     });
+
 
     $scope.status = {
       isopen: false
@@ -58,7 +61,8 @@ angular.module('oh.controllers')
       $event.status.isopen = !$scope.status.isopen;
     }
     $scope.$on('$destroy', function (event) {
-        // $rootScope.hackathon = false;
+        $rootScope.hackathon = false;
+        $rootScope.workspace = false;
       }
     );
   });

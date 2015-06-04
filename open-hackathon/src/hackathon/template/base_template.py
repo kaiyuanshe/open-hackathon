@@ -23,9 +23,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-from hackathon.log import (
-    log,
-)
+import sys
+
+sys.path.append("..")
 from os.path import (
     realpath,
     dirname,
@@ -33,9 +33,10 @@ from os.path import (
 )
 import json
 import os
+from hackathon import Component
 
 
-class BaseTemplate(object):
+class BaseTemplate(Component):
     """
     Base class of template
     """
@@ -56,7 +57,7 @@ class BaseTemplate(object):
         template_dir = '%s/../resources' % dirname(realpath(__file__))
         # check template dir whether exists
         if not os.path.isdir(template_dir):
-            log.debug('template dir [%s] not exists' % template_dir)
+            self.log.debug('template dir [%s] not exists' % template_dir)
             os.mkdir(template_dir)
         template_path = '%s/%s.js' % (template_dir, self.dic[self.EXPR_NAME])
         with open(template_path, 'w') as template_file:

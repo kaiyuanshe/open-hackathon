@@ -2,19 +2,19 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
-#  
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#  
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-#  
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,20 +25,22 @@
 # -----------------------------------------------------------------------------------
 
 import sys
+
 sys.path.append("..")
 
 from hackathon.constants import (
     HEALTH_STATE,
 )
-from hackathon.functions import (
-    get_config,
+
+from hackathon import (
+    RequiredFeature,
+    Component
 )
+
 from sqlalchemy import (
     __version__,
 )
-from hackathon.database import (
-    db_adapter,
-)
+
 from hackathon.database.models import (
     User,
     DockerHostServer,
@@ -47,28 +49,23 @@ from hackathon.database.models import (
 from hackathon.azureformation.service import (
     Service,
 )
-from hackathon.docker.docker import (
-    docker_formation,
-)
-from hackathon.log import (
-    log,
-)
 import requests
+import abc
 
 STATUS = "status"
 DESCRIPTION = "description"
 VERSION = "version"
 
 
-class HealthCheck(object):
+class HealthCheck(Component):
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
     def reportHealth(self):
         pass
 
 
 class MySQLHealthCheck(HealthCheck):
-    def __init__(self):
-        self.db = db_adapter
-
     def reportHealth(self):
         try:
             self.db.count(User)
@@ -86,15 +83,14 @@ class MySQLHealthCheck(HealthCheck):
 
 class DockerHealthCheck(HealthCheck):
     def __init__(self):
-        self.db = db_adapter
-        self.docker_formation = docker_formation
+        self.docker = RequiredFeature("docker")
 
     def reportHealth(self):
         try:
             hosts = self.db.find_all_objects(DockerHostServer)
             alive = 0
             for host in hosts:
-                if self.docker_formation.ping(host):
+                if self.docker.ping(host):
                     alive += 1
             if alive == len(hosts):
                 return {
@@ -120,27 +116,24 @@ class DockerHealthCheck(HealthCheck):
 class GuacamoleHealthCheck(HealthCheck):
     # todo now check only server status
     def __init__(self):
-        self.guacamole_url = get_config("guacamole.host") + '/guacamole'
+        self.guacamole_url = self.util.get_config("guacamole.host") + '/guacamole'
 
     def reportHealth(self):
         try:
             req = requests.get(self.guacamole_url)
-            log.debug(req.status_code)
+            self.log.debug(req.status_code)
             if req.status_code == 200:
                 return {
                     STATUS: HEALTH_STATE.OK
                 }
         except Exception as e:
-            log.error(e)
+            self.log.error(e)
         return {
             STATUS: HEALTH_STATE.ERROR
         }
 
 
 class AzureHealthCheck(HealthCheck):
-    def __init__(self):
-        self.db = db_adapter
-
     def reportHealth(self):
         azure_key = self.db.find_first_object(AzureKey)
         azure = Service(azure_key.id)

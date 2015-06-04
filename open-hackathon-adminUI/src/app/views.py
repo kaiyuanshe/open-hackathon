@@ -260,3 +260,10 @@ def organizers():
 @login_required
 def edithackathon():
     return __render("/edithackathon.html")
+
+
+@app.route("/adminmgr")
+@login_required
+def adminmgr():
+    return __render("/adminmgr.html")
+
