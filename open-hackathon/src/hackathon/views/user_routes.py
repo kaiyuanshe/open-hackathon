@@ -33,7 +33,6 @@ from hackathon.decorators import token_required, hackathon_name_required
 from hackathon.hackathon_response import internal_server_error
 import json
 from hackathon.enum import RGStatus
-from hackathon.user import user_manager
 
 hackathon_manager = RequiredFeature("hackathon_manager")
 register_manager = RequiredFeature("register_manager")
