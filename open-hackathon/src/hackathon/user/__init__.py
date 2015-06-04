@@ -2,9 +2,9 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
-#  
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -24,10 +24,3 @@
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
 
-import sys
-from _codecs import register
-
-sys.path.append("..")
-
-from user_mgr import user_manager
-from login import login_providers

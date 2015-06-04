@@ -29,20 +29,19 @@ import sys
 
 sys.path.append("..")
 from azure.storage import BlobService
-from hackathon.hackathon_response import *
-from hackathon.functions import get_config
+from hackathon import Component
 
 
-class FileService():
+class FileService(Component):
     def __init__(self):
         self.blob_service = None
 
     def generate_blob_service(self):
         if self.blob_service is None:
             # if storage info doesn't exist in config.py upload file function stop working
-            self.blob_service = BlobService(account_name=get_config("storage.account_name"),
-                                            account_key=get_config("storage.account_key"),
-                                            host_base=get_config("storage.blob_service_host_base"))
+            self.blob_service = BlobService(account_name=self.util.get_config("storage.account_name"),
+                                            account_key=self.util.get_config("storage.account_key"),
+                                            host_base=self.util.get_config("storage.blob_service_host_base"))
 
     def create_container_in_storage(self, container_name, access):
         """
@@ -57,10 +56,10 @@ class FileService():
             if container_name not in names:
                 self.blob_service.create_container(container_name, x_ms_blob_public_access=access)
             else:
-                log.debug("container already exsit in storage")
+                self.log.debug("container already exsit in storage")
             return True
         except Exception as e:
-            log.error(e)
+            self.log.error(e)
             return False
 
 
@@ -72,7 +71,7 @@ class FileService():
             else:
                 return None
         except Exception as e:
-            log.error(e)
+            self.log.error(e)
             return None
 
 
@@ -84,7 +83,5 @@ class FileService():
             else:
                 return None
         except Exception as e:
-            log.error(e)
+            self.log.error(e)
             return None
-
-file_service = FileService()

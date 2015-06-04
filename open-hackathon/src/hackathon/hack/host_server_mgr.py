@@ -25,21 +25,20 @@ THE SOFTWARE.
 import sys
 
 sys.path.append("..")
-from hackathon.database import (
-    db_adapter,
-)
+
+from hackathon import Component
 
 from hackathon.database.models import (
     DockerHostServer,
 )
 
 
-class DockerHostManager(object):
+class DockerHostManager(Component):
     def get_available_docker_host(self, req_count, hackathon):
-        vm = db_adapter.find_first_object(DockerHostServer,
-                                          DockerHostServer.container_count + req_count <=
-                                          DockerHostServer.container_max_count,
-                                          DockerHostServer.hackathon_id == hackathon.id)
+        vm = self.db.find_first_object(DockerHostServer,
+                                       DockerHostServer.container_count + req_count <=
+                                       DockerHostServer.container_max_count,
+                                       DockerHostServer.hackathon_id == hackathon.id)
 
         # todo connect to azure to launch new VM if no existed VM meet the requirement
         # since it takes some time to launch VM,
@@ -52,7 +51,5 @@ class DockerHostManager(object):
 
 
     def get_host_server_by_id(self, id):
-        return db_adapter.find_first_object_by(DockerHostServer, id=id)
+        return self.db.find_first_object_by(DockerHostServer, id=id)
 
-
-host_manager = DockerHostManager()

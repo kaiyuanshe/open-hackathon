@@ -10,6 +10,7 @@
   <meta property="qc:admins" content="274307566465013314076545663016134754100636"/>
   <meta property="wb:webmaster" content="ae884e09bc02b700"/>
   <link rel="shortcut icon" href="/favicon.ico">
+
   <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
   <!-- build:css(.) styles/vendor.css -->
   <!-- bower:css -->
@@ -39,6 +40,7 @@
 <![endif]-->
 <!-- endbuild -->
 <script src="/config"></script>
+<script src="/scripts/jquery/marked.js"></script>
 <!-- build:js(.) scripts/vendor.js -->
 <!-- bower:js -->
 <script src="bower_components/jquery/dist/jquery.js"></script>
@@ -76,9 +78,12 @@
 
 <!-- build:js({app,.tmp}) scripts/main.js -->
 <script src="scripts/app.js"></script>
+<script src="scripts/filters.js"></script>
 <script src="scripts/services/authentication.js"></script>
+<script src="scripts/provider/common.js"></script>
 <script src="scripts/provider/services.js"></script>
 <script src="scripts/controllers/main.js"></script>
+<script src="scripts/controllers/home.js"></script>
 <script src="scripts/controllers/notregister.js"></script>
 <script src="scripts/controllers/hackathon.js"></script>
 <script src="scripts/controllers/settings.js"></script>

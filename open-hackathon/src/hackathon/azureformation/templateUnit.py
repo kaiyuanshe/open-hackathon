@@ -25,6 +25,7 @@ THE SOFTWARE.
 __author__ = 'Yifu Huang'
 
 import sys
+
 sys.path.append("..")
 from hackathon.azureformation.utility import (
     find_unassigned_endpoints,
@@ -39,11 +40,10 @@ from azure.servicemanagement import (
 from threading import (
     current_thread,
 )
-from hackathon.functions import (
-    get_now
-)
+from hackathon import Component
 
-class TemplateUnit:
+
+class TemplateUnit(Component):
     # template name in virtual_environment
     T_P = 'provider'
     T_SA = 'storage_account'
@@ -152,7 +152,7 @@ class TemplateUnit:
         i = self.virtual_environment[self.T_I]
         sa = self.virtual_environment[self.T_SA]
         c = self.virtual_environment[self.T_C]
-        now = get_now()
+        now = self.util.get_now()
         blob = self.BLOB_BASE % (i[self.T_I_N],
                                  str(now.year),
                                  str(now.month),

@@ -32,38 +32,15 @@
 
 /**
  * @ngdoc function
- * @name oh.controllers:oh.header.controller
+ * @name oh.controllers:oh.home.controller
  * @description
  * @author <ifendoe@gmail.com>
- * # oh.header.controller
- * Controller of the oh.header.controller
+ * # oh.home.controller
+ * Controller of the oh.home.controller
  */
 angular.module('oh.controllers')
-  .controller('oh.hackathon.controller', function ($scope, $rootScope, $location, Authentication) {
-    $rootScope.hackathon = true;
-    $rootScope.workspace = true;
-    $rootScope.isShow = true;
-    Authentication.hackathon(function (data) {
-      $scope.workData = data;
+  .controller('oh.home.controller', function ($scope, API) {
+    API.hackathon.list.get().then(function (res) {
+      $scope.hackathons = res.data;
     });
-
-
-    $scope.status = {
-      isopen: false
-    }
-
-    $scope.toggled = function (open) {
-      console.log('dropdown is now', open);
-    }
-    $scope.toggledDropdown = function ($event) {
-      $event.preventDefult();
-      $event.stopPropagation();
-      $event.status.isopen = !$scope.status.isopen;
-    }
-    $scope.$on('$destroy', function (event) {
-        $rootScope.hackathon = false;
-        $rootScope.workspace = false;
-      }
-    );
   });
-

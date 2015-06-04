@@ -22,38 +22,29 @@
  * THE SOFTWARE.
  */
 
-'use strict';
-
-/**
- * Created by v-boguan on 2015/5/4.
- */
-
-angular.module('oh.app')
-  .filter('mkHTML', function () {
-    return function (text) {
-      return markdown.toHTML(text || '');
+angular.module('oh.common', [])
+  .service('state', function ($state, $stateParams, $rootScope) {
+    this.go = function (state, params, options) {
+      var destroyListener = $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams) {
+        $.extend(true, toParams, params);
+        destroyListener();
+      });
+      return $state.go(state, params, options);
+    };
+  }).service('log', function ($log) {
+    var _times = [];
+    $.extend(true, this, $log);
+    this.time = function (label) {
+      _times[label] = Date.now();
     }
-  })
-  .filter('stripTags', function () {
-    return function (html) {
-      html = html || '';
-      return html.replace(/(<([^>]+)>)/ig, '');
-    }
-  })
-  .filter('split', function () {
-    return function (text, limit) {
-      limit = limit || ',';
-      text = text || '';
-      return text.split(limit);
-    }
-  })
-  .filter('defBanner', function () {
-    return function (array) {
-      return array[0].length > 0 ? array[0] : '/images/homepage.jpg';
-    }
-  }).filter('toDate', function () {
-    return function (longTime) {
-      return new Date(longTime);
+    this.timeEnd = function (label) {
+      var time = _times[label];
+      if (!time) {
+        this.error('No such label: ' + label);
+      }
+      var duration = Date.now() - time;
+      this.debug('%s: %dms', label, duration);
     }
   });
 
+;
