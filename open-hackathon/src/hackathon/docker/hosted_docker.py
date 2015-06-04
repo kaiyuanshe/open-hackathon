@@ -28,6 +28,9 @@ import sys
 
 sys.path.append("..")
 
+from hackathon.database import (
+    db_adapter
+)
 from hackathon import (
     RequiredFeature,
     Component
@@ -36,8 +39,8 @@ from hackathon.database.models import (
     Experiment,
     DockerContainer,
     HackathonAzureKey,
+    Hackathon,
     PortBinding)
-
 from hackathon.enum import (
     EStatus,
     PortBindingType)
@@ -63,9 +66,13 @@ from hackathon.azureformation.service import (
 from hackathon.hackathon_response import internal_server_error
 import json
 import requests
+from hackathon.scheduler import scheduler
+from datetime import timedelta
+from hackathon.enum import HACK_STATUS
 
 
 class HostedDockerFormation(DockerFormationBase, Component):
+    template_manager = RequiredFeature("template_manager")
     """
     Docker resource management based on docker remote api v1.18
     Host resource are required. Azure key required in case of azure.
@@ -227,6 +234,11 @@ class HostedDockerFormation(DockerFormationBase, Component):
 
         self.log.debug("starting container %s is ended ... " % container_name)
         return container
+
+    def pull_image(self, dns, image_name):
+        pull_image_url = dns + "/images/create?fromImage=" + image_name
+        self.log.debug(" send request to pull image:" + pull_image_url)
+        return requests.post(pull_image_url)
 
     # --------------------------------------------- helper function ---------------------------------------------#
 
@@ -431,3 +443,21 @@ class HostedDockerFormation(DockerFormationBase, Component):
         host_server_dns = host_server.public_dns.split('.')[0]
         self.log.debug("starting to release ports ... ")
         ep.release_public_endpoints(host_server_dns, 'Production', host_server_name, host_ports)
+
+    # ----------------------initialize hackathon's templates on every docker host-------------------#
+
+    def ensure_images(self):
+        hackathons = db_adapter.find_all_objects(Hackathon, Hackathon.status == HACK_STATUS.ONLINE)
+        for hackathon in hackathons:
+            self.log.debug("Start recycling inactive ensure images for hackathons")
+            excute_time = self.util.get_now() + timedelta(minutes=1)
+            scheduler.add_job(self.template_manager.pull_images_for_hackathon,
+                              'interval',
+                              id=hackathon.id + "pull images",
+                              replace_existing=True,
+                              next_run_time=excute_time,
+                              minutes=60,
+                              args=[hackathon])
+        self.log.debug("starting to release ports ... ")
+
+

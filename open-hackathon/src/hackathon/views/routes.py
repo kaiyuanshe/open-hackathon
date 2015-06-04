@@ -38,7 +38,7 @@ from hackathon.expr.expr_mgr import open_check_expr, recycle_expr_scheduler
 import time
 
 hackathon_manager = RequiredFeature("hackathon_manager")
-
+register_manager = RequiredFeature("register_manager")
 
 class HealthResource(Resource):
     def get(self):
@@ -104,6 +104,15 @@ class HackathonTemplateResource(Resource, Component):
         return [t.dic() for t in g.hackathon.templates.all()]
 
 
+class HackathonRegisterResource(Resource):
+ @hackathon_name_required
+ def get(self):
+     parse = reqparse.RequestParser()
+     parse.add_argument('num', type=int, location='args', default=5)
+     args = parse.parse_args()
+     return register_manager.get_hackathon_registers(args['num'])
+
+
 def register_routes():
     """
     register API routes that user or admin is not required
@@ -127,3 +136,6 @@ def register_routes():
     api.add_resource(HackathonListResource, "/api/hackathon/list")
     api.add_resource(HackathonStatResource, "/api/hackathon/stat")
     api.add_resource(HackathonTemplateResource, "/api/hackathon/template")
+
+    # hackathon register api
+    api.add_resource(HackathonRegisterResource, "/api/hackathon/register")

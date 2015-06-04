@@ -43,6 +43,7 @@ class FileService(Component):
                                             account_key=self.util.get_config("storage.account_key"),
                                             host_base=self.util.get_config("storage.blob_service_host_base"))
 
+
     def create_container_in_storage(self, container_name, access):
         """
         create a container if doesn't exist
@@ -85,3 +86,13 @@ class FileService(Component):
         except Exception as e:
             self.log.error(e)
             return None
+
+
+    def download_file_from_azure(self, container_name, blob_name, local_file):
+        try:
+            self.blob_service.get_blob_to_file(container_name, blob_name, local_file)
+            return local_file
+        except Exception as e:
+            self.log.error(e)
+            return None
+
