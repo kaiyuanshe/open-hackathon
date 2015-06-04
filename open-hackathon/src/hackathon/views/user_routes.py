@@ -171,6 +171,13 @@ class TeamMemberResource(Resource):
         args = parse.parse_args()
         return user_manager.team_member(hackathon_id, args['team_name'])
 
+class CurrentTeamMemberResource(Resource):
+    @token_required
+    @hackathon_name_required
+    def get(self):
+        hackathon_id = g.hackathon.id
+        user_id = g.user.id
+        return user_manager.current_team_member(hackathon_id, user_id)
 
 def register_user_routes():
     """
@@ -195,3 +202,4 @@ def register_user_routes():
 
     # team API
     api.add_resource(TeamMemberResource, "/api/user/teammember")
+    api.add_resource(CurrentTeamMemberResource, "/api/user/currentteam")
