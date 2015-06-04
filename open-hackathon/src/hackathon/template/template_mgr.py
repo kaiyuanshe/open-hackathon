@@ -41,9 +41,6 @@ import json
 from compiler.ast import flatten
 
 
-
-
-
 class TemplateManager(Component):
     hackathon_manager = RequiredFeature("hackathon_manager")
     file_service = RequiredFeature("file_service")
@@ -217,7 +214,7 @@ class TemplateManager(Component):
             download_images = self.__get_undownloaded_images_on_docker_host(api, expected_images)
             for dl_image in download_images:
                 exec_time = self.util.get_now() + timedelta(seconds=2)
-                scheduler.add_job(self.docker.pull_image, 'pullimage', run_date=exec_time, args=[api, dl_image])
+                scheduler.add_job(self.docker.pull_image, 'date', run_date=exec_time, args=[api, dl_image])
 
 
     def __get_images_from_template(self, template):
