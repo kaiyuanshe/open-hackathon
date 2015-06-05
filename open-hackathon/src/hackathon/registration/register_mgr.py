@@ -155,3 +155,24 @@ class RegisterManger(Component):
                                                       hackathon_id=g.hackathon.id)
         return map(lambda x: x.dic(), registers)
 
+    def get_hackathon_team_list(self, hid, name, number):
+        empty_hackathon = []
+        find_team_by_hackathon = self.db.find_all_objects_by(UserHackathonRel, hackathon_id=hid)
+        if find_team_by_hackathon != empty_hackathon:
+            hackathon_team_list = map(lambda x: x.team_name, find_team_by_hackathon)
+            hackathon_team_list = list(set(hackathon_team_list))
+            if name is not None:
+                hackathon_team_list = filter(lambda x: name in x, hackathon_team_list)
+                if number is not None:
+                    hackathon_team_list = hackathon_team_list[0:number]
+                    return hackathon_team_list
+                else:
+                    return hackathon_team_list
+            else:
+                if number is not None:
+                    hackathon_team_list = hackathon_team_list[0:number]
+                    return hackathon_team_list
+                else:
+                    return hackathon_team_list
+        else:
+            return not_found("Oops, no team yet~")
