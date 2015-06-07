@@ -29,7 +29,7 @@ sys.path.append("..")
 
 from hackathon import api, RequiredFeature, Component, g
 from flask_restful import Resource, reqparse
-from hackathon.decorators import hackathon_name_required
+from hackathon.decorators import token_required, hackathon_name_required
 from hackathon.hackathon_response import ok
 from hackathon.health import report_health
 from hackathon.database.models import Announcement
@@ -113,8 +113,7 @@ class HackathonTeamListResource(Resource):
         parse.add_argument('number', type=int, location='args', required=False)
         result = parse.parse_args()
         id = g.hackathon.id
-        return user_manager.hackathon_team_list(id, result['name'], result['number'])
-
+        return hackathon_manager.get_hackathon_team_list(id, result['name'], result['number'])
 
 def register_routes():
     """
@@ -141,4 +140,4 @@ def register_routes():
     api.add_resource(HackathonTemplateResource, "/api/hackathon/template")
 
     # team API
-    api.add_resource(HackathonTeamListResource, "/api/hackathon/teamlist")
+    api.add_resource(HackathonTeamListResource, "/api/hackathon/team/list")

@@ -454,7 +454,7 @@ def recycle_expr_scheduler():
 
 def recycle_expr():
     """
-    recycle experiment when idle more than 5 hours
+    recycle experiment when idle more than 24 hours
     :return:
     """
     log = RequiredFeature("log")
@@ -468,7 +468,7 @@ def recycle_expr():
 
     expr_time_cond = Experiment.last_heart_beat_time + timedelta(hours=recycle_hours) > util.get_now()
     recycle_cond = Experiment.hackathon_id.in_(hackathon_manager.get_recyclable_hackathon_list())
-    r = db.find_first_object(Experiment, hackathon_manager, recycle_cond)
+    r = db.find_first_object(Experiment, hackathon_manager, expr_time_cond, recycle_cond)
 
     if r is not None:
         expr_manager.stop_expr(r.id)

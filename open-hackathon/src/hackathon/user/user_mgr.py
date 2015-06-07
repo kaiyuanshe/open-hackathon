@@ -77,8 +77,8 @@ class UserManager(Component):
             ues = self.db.find_first_object(UserEmail, UserEmail.email.in_(emails))
             if ues is not None:
                 return ues.user
-        return self.db.find_first_object_by(User, openid=openid)
 
+        return self.db.find_first_object_by(User, openid=openid)
 
     def db_logout(self, user):
         try:
@@ -152,24 +152,7 @@ class UserManager(Component):
             "last_login_time": str(user.last_login_time)
         }
 
-    def hackathon_team_list(self, hid, name, number):
-        find_team_by_hackathon = self.db.find_all_objects_by(UserHackathonRel, hackathon_id=hid)
-        hackathon_team_list = map(lambda x: x.team_name, find_team_by_hackathon)
-        hackathon_team_list = list(set(hackathon_team_list))
-        if list is not None:
-            if name is not None:
-                hackathon_team_list = filter(lambda x: name in x, hackathon_team_list)
-                if number is not None:
-                    hackathon_team_list = hackathon_team_list[0:number]
-                    return hackathon_team_list
-                else:
-                    return hackathon_team_list
-            else:
-                return hackathon_team_list
-        else:
-            return not_found("Oops, no team yet~")
-
-    def team_member(self, h_id, t_name):
+    def get_team_members_by_team_name(self, h_id, t_name):
         team_member = self.db.find_all_objects_by(UserHackathonRel, hackathon_id=h_id, team_name=t_name)
 
         def get_info(sql_object):
@@ -181,8 +164,6 @@ class UserManager(Component):
 
         return team_member
 
-    def current_team_member(self, h_id, u_id):
-        my_team = self.db.find_first_object_by(UserHackathonRel, hackathon_id=h_id, team_name=u_id)
-        my_team = my_team.team_name
-        team_member = self.team_member(h_id, my_team)
-        return team_member
+    def get_team_members_by_user(self, h_id, u_id):
+        my_team = self.db.find_first_object_by(UserHackathonRel, hackathon_id=h_id, user_id=u_id)
+        return self.get_team_members_by_team_name(h_id, my_team.team_name)
