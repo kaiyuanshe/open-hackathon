@@ -124,3 +124,5 @@ default['openhackathon'][:storage][:template_container] = "templates"
 default['openhackathon'][:storage][:blob_service_host_base] = ".blob.core.chinacloudapi.cn"
 default['openhackathon'][:storage][:size_limit_kilo_bytes] = 5120
 
+default['openhackathon']['app']['secret_key'] = "secret_key"
+
