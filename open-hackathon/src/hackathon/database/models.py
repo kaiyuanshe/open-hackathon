@@ -187,12 +187,28 @@ class UserHackathonRel(DBBase):
 
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
-    real_name = Column(String(80))
     team_name = Column(String(80))
-    email = Column(String(120))
     create_time = Column(TZDateTime, default=get_now())
     update_time = Column(TZDateTime)
     description = Column(String(200))
+    status = Column(Integer)  # 0: havn't audit 1: audit passed 2:audit reject
+    deleted = Column(Integer, default=0)  # 0:false  1-true
+
+    user = relationship('User', backref=backref('registers', lazy='dynamic'))
+
+    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
+    hackathon = relationship('Hackathon', backref=backref('registers', lazy='dynamic'))
+
+    def __init__(self, **kwargs):
+        super(UserHackathonRel, self).__init__(**kwargs)
+
+
+class UserProfile(DBBase):
+    __tablename__ = 'user_profile'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
+    real_name = Column(String(80))
+    email = Column(String(120))
     phone = Column(String(11))
     gender = Column(Integer)  # 0:women 1:man
     age = Column(Integer)
@@ -203,16 +219,8 @@ class UserHackathonRel(DBBase):
     wechat = Column(String(32))
     skype = Column(String(32))
     address = Column(String(80))
-    status = Column(Integer)  # 0: havn't audit 1: audit passed 2:audit reject
-    deleted = Column(Integer, default=0)  # 0:false  1-true
 
-    user = relationship('User', backref=backref('hackathons', lazy='dynamic'))
-
-    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
-    hackathon = relationship('Hackathon', backref=backref('registers', lazy='dynamic'))
-
-    def __init__(self, **kwargs):
-        super(UserHackathonRel, self).__init__(**kwargs)
+    user = relationship('User', backref=backref('profile', lazy='dynamic'))
 
 
 class Hackathon(DBBase):
@@ -602,4 +610,3 @@ class AdminHackathonRel(DBBase):
 
     def __init__(self, **kwargs):
         super(AdminHackathonRel, self).__init__(**kwargs)
-

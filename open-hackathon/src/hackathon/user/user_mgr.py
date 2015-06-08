@@ -70,7 +70,6 @@ class UserManager(Component):
             existed.name = user.name
             self.db.commit()
 
-
     def __get_existing_user(self, openid, email_list):
         # find user by email first in case that email registered in multiple oauth providers
         emails = [e["email"] for e in email_list]
@@ -80,7 +79,6 @@ class UserManager(Component):
                 return ues.user
 
         return self.db.find_first_object_by(User, openid=openid)
-
 
     def db_logout(self, user):
         try:
@@ -153,3 +151,19 @@ class UserManager(Component):
             "create_time": str(user.create_time),
             "last_login_time": str(user.last_login_time)
         }
+
+    def get_team_members_by_team_name(self, h_id, t_name):
+        team_member = self.db.find_all_objects_by(UserHackathonRel, hackathon_id=h_id, team_name=t_name)
+
+        def get_info(sql_object):
+            r = sql_object.dic()
+            r['user'] = self.user_display_info(sql_object.user)
+            return r
+
+        team_member = map(lambda x: get_info(x), team_member)
+
+        return team_member
+
+    def get_team_members_by_user(self, h_id, u_id):
+        my_team = self.db.find_first_object_by(UserHackathonRel, hackathon_id=h_id, user_id=u_id)
+        return self.get_team_members_by_team_name(h_id, my_team.team_name)
