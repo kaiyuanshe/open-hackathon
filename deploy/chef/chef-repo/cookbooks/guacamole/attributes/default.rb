@@ -46,4 +46,4 @@ default['guacamole']['lib-directory'] = '/etc/guacamole'
 default['guacamole']['auth-provider'] = 'com.openhackathon.guacamole.OpenHackathonAuthenticationProvider'
 default['guacamole']['auth-request-url'] = '/api/user/guacamoleconfig'
 
-
+default['guacamole']['tomcat7']['start'] = true
