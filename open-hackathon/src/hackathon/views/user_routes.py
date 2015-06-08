@@ -151,17 +151,6 @@ class UserExperimentListResource(Resource):
         return expr_manager.get_expr_list_by_user_id(args['user_id'])
 
 
-class GetTeamMembersByTeamNameResource(Resource):
-    @token_required
-    @hackathon_name_required
-    def get(self):
-        hackathon_id = g.hackathon.id
-        parse = reqparse.RequestParser()
-        parse.add_argument('team_name', type=str, location='args', required=True)
-        args = parse.parse_args()
-        return user_manager.get_team_members_by_team_name(hackathon_id, args['team_name'])
-
-
 class GetTeamMembersByUserResource(Resource):
     @token_required
     @hackathon_name_required
@@ -193,6 +182,5 @@ def register_user_routes():
     api.add_resource(UserExperimentListResource, "/api/user/experiment/list")
 
     # team API
-    api.add_resource(GetTeamMembersByTeamNameResource, "/api/user/team/member")
     api.add_resource(GetTeamMembersByUserResource, "/api/user/team/myteam")
 
