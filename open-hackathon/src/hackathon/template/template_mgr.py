@@ -23,15 +23,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
+import os
 import sys
 import uuid
-import requests
 import json
 
 sys.path.append("..")
 
 from datetime import (
     timedelta,
+)
+from compiler.ast import (
+    flatten,
 )
 from hackathon.database.models import (
     Template,
@@ -68,6 +71,11 @@ from hackathon import (
 class TemplateManager(Component):
     hackathon_manager = RequiredFeature("hackathon_manager")
     file_service = RequiredFeature("file_service")
+    docker = RequiredFeature("docker")
+    base_template = RequiredFeature("base_template")
+    docker_template_unit = RequiredFeature("docker_template_unit")
+
+    templates = {}  # template in memory {template.id: template_file_stream}
 
     def get_created_template_list(self, hackathon_name):
         """
@@ -165,15 +173,44 @@ class TemplateManager(Component):
             self.log.error(ex)
             return internal_server_error("delete template fail")
 
-    def pull_images(self, image_name):
-        hosts = self.db.find_all_objects(DockerHostServer, DockerHostServer.hackathon_id == g.hackathon.id)
-        docker_host_api = map(lambda x: x.public_docker_api_port, hosts)
-        for api in docker_host_api:
-            url = api + "/images/create?fromImage=" + image_name
-            exec_time = self.util.get_now() + timedelta(seconds=2)
-            self.log.debug(" send request to pull image:" + url)
-            # use requests.post instead of post_to_remote, because req.contect can not be json.loads()
-            scheduler.add_job(requests.post, 'date', run_date=exec_time, args=[url])
+    def load_template(self, template):
+        """
+        load template priority : from memory > from local file > from from azure
+        :param template:
+        :return:
+        """
+        template_id = template.id
+        dic_from_memory = self.__load_template_from_memory(template_id)
+        if dic_from_memory is not None:
+            return dic_from_memory
+
+        local_url = template.url
+        dic_from_local = self.__load_template_from_local_file(template_id, local_url)
+        if dic_from_local is not None:
+            return dic_from_local
+
+        azure_url = template.azure_url
+        dic_from_azure = self.__load_template_from_azure(template_id, local_url, azure_url)
+        if dic_from_azure is not None:
+            return dic_from_azure
+
+        return None
+
+    # TODO: HACK-483
+    # Know issues:  1. docker host url is not correct
+    #               2. docker remote api related logic should be moved to hosted_docker.py
+    #               3. scheduler do not support instance method
+    def pull_images_for_hackathon(self, hackathon):
+        hosts = self.db.find_all_objects_by(DockerHostServer, hackathon_id=hackathon.id)
+        # loop to get every docker host
+        for host in hosts:
+            templates = hackathon.templates
+            images = [self.__get_images_from_template(template) for template in templates]
+            expected_images = flatten(images)
+            download_images = self.__get_undownloaded_images_on_docker_host(host, expected_images)
+            for dl_image in download_images:
+                exec_time = self.util.get_now() + timedelta(seconds=2)
+                scheduler.add_job(self.docker.pull_image, 'date', run_date=exec_time, args=[host, dl_image])
 
     # ---------------------------------------- helper functions ---------------------------------------- #
 
@@ -218,6 +255,70 @@ class TemplateManager(Component):
         if template is None:
             return False, bad_request("template not exists")
         return True, template
+
+    def __load_template_from_memory(self, template_id):
+        """
+        get template_dic from memory
+        :param template_id:
+        :return:
+        """
+        if template_id not in self.templates:
+            return None
+        else:
+            return self.templates[template_id]
+
+    def __load_template_from_local_file(self, template_id, local_url):
+        """
+        get template_dic from local file
+        :param template_id:
+        :param local_url:
+        :return:
+        """
+        if not os.path.exists(local_url):
+            return None
+        else:
+            template_dic = json.loads(file(local_url))
+            self.templates[template_id] = template_dic
+            return template_dic
+
+    def __load_template_from_azure(self, template_id, local_url, azure_url):
+        """
+        get template_dic from azure storage
+        :param template_id:
+        :param local_url:
+        :param azure_url:
+        :return:
+        """
+        container_name = self.util.safe_get_config("storage.template_container", "templates")
+        if self.file_service.download_file_from_azure(container_name, azure_url, local_url) is not None:
+            return self.__load_template_from_local_file(template_id, local_url)
+        return None
+
+    # TODO: HACK-483
+    def __get_images_from_template(self, template):
+        template_dic = self.load_template(template)
+        ves = template_dic[self.base_template.VIRTUAL_ENVIRONMENTS]
+        images = [ve[self.docker_template_unit.IMAGE] for ve in ves]
+        return images
+
+    # TODO: HACK-483
+    def __get_undownloaded_images_on_docker_host(self, host, *expected_images):
+        images = []
+        get_images_url = self.docker.get_vm_url(host) + "/images/json?all=0"
+        current_images_info = json.loads(self.util.get_remote(get_images_url))  #[{},{},{}]
+        current_images_tags = map(lambda x: json.load(x)['RepoTags'], current_images_info)  #[[],[],[]]
+        for ex_image in expected_images:
+            exist = False
+
+            for cur_image_tag in current_images_tags:
+                if ex_image in cur_image_tag:
+                    exist = True
+                    break
+
+            if not exist:
+                images.append(ex_image)
+
+        return images
 
 # template_manager.create_template({
 # "expr_name": "test",

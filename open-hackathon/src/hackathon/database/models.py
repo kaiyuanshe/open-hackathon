@@ -401,6 +401,7 @@ class Template(DBBase):
     update_time = Column(TZDateTime)
     description = Column(Text)
     virtual_environment_count = Column(Integer, default=0)
+    azure_url = Column(String(200))
 
     hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
     hackathon = relationship('Hackathon', backref=backref('templates', lazy='dynamic'))
