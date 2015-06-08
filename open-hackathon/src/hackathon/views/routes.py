@@ -101,7 +101,8 @@ class HackathonStatResource(Resource):
 class HackathonTemplateResource(Resource, Component):
     @hackathon_name_required
     def get(self):
-        return [t.dic() for t in g.hackathon.templates.all()]
+        template_manager = RequiredFeature('template_manager')
+        return template_manager.get_template_settings(g.hackathon.name)
 
 
 class HackathonRegisterResource(Resource):
