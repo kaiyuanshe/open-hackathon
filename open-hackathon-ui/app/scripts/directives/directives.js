@@ -35,7 +35,7 @@ angular.module('oh.directives', [])
    $templateCache.put('hackathon.html', '');
    $templateCache.get('hackathon.html');
    })*/
-  .directive('hackathonNav', function ($interval, $cookieStore, $templateCache, API) {
+  .directive('hackathonNav', function ($interval, $cookies, $templateCache, API) {
 
     var heartbeatInterval = null;
     var stop = null;
@@ -108,7 +108,7 @@ angular.module('oh.directives', [])
                     dockers.push({
                       purl: data.public_urls[i].url,
                       name: data.remote_servers[i].name,
-                      surl: data.remote_servers[i].url + "&oh=" + $cookieStore.get('token')
+                      surl: data.remote_servers[i].url + "&oh=" + $cookies.get('token')
                     })
                     list.push(temp.format(dockers[i]));
                   }
@@ -183,14 +183,14 @@ angular.module('oh.directives', [])
       }
     }
   })
-  .directive('headdropdownMenu', function ($rootScope, $cookieStore, $state, API) {
+  .directive('headdropdownMenu', function ($rootScope, $cookies, $state, API) {
     var tempurl = 'views/tpls/dropdown-menu.html';
     return {
       scope: {},
       restrict: 'E',
       templateUrl: tempurl,
       link: function (scope, element, attr) {
-        var user = $cookieStore.get('User');
+        var user = $cookies.get('User');
         scope.items = [{
           name: '管理我的黑客松',
           link: ''
@@ -206,8 +206,8 @@ angular.module('oh.directives', [])
         }]
         scope.logout = function () {
           API.user.login.delete();
-          $cookieStore.remove('User');
-          $cookieStore.remove('token');
+          $cookies.remove('User');
+          $cookies.remove('token');
           $state.go('index.home');
         }
         scope.user = user;
