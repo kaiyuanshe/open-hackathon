@@ -71,8 +71,11 @@ uwsgi_service 'open-hackathon-api' do
   config_type :ini
   uid node['openhackathon']['user']
   gid node['openhackathon']['user']
+  start_immediately false
 end
 
-service 'uwsgi-open-hackathon-api' do
-  action :restart
+if node['openhackathon']['service']['start'] 
+  service 'uwsgi-open-hackathon-api' do
+    action :restart
+  end
 end

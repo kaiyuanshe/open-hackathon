@@ -126,3 +126,6 @@ default['openhackathon'][:storage][:size_limit_kilo_bytes] = 5120
 
 default['openhackathon']['app']['secret_key'] = "secret_key"
 
+#service settings (start immediately or not)
+default['openhackathon']['service']['start'] = true
+
