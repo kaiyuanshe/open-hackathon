@@ -62,7 +62,6 @@ class FileService(Component):
             self.log.error(e)
             return False
 
-
     def upload_file_to_azure(self, file, container_name, blob_name):
         try:
             if self.create_container_in_storage(container_name, 'container'):
@@ -74,7 +73,6 @@ class FileService(Component):
             self.log.error(e)
             return None
 
-
     def upload_file_to_azure_from_path(self, path, container_name, blob_name):
         try:
             if self.create_container_in_storage(container_name, 'container'):
@@ -82,6 +80,14 @@ class FileService(Component):
                 return self.blob_service.make_blob_url(container_name, blob_name)
             else:
                 return None
+        except Exception as e:
+            self.log.error(e)
+            return None
+
+    def download_file_from_azure(self, container_name, blob_name, local_file):
+        try:
+            self.blob_service.get_blob_to_file(container_name, blob_name, local_file)
+            return local_file
         except Exception as e:
             self.log.error(e)
             return None

@@ -28,17 +28,15 @@ import sys
 
 sys.path.append("../src/hackathon")
 import datetime
-from hackathon.enum import RGStatus, EStatus
+from hackathon.enum import RGStatus
 from hackathon.hack import HackathonManager
-from hackathon.hackathon_response import *
-from hackathon.functions import get_now
+from hackathon.hackathon_response import bad_request, precondition_failed, not_found, ok
 import unittest
 from hackathon.registration.register_mgr import RegisterManger, register_manager
-from hackathon.database.models import UserHackathonRel, UserEmail, Hackathon, Experiment
+from hackathon.database.models import UserHackathonRel, Hackathon, Experiment
 from hackathon import app
 from mock import Mock, ANY, patch
 import mock
-from flask import g
 
 
 class TestUserHackathonRelManager(unittest.TestCase):
@@ -90,7 +88,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
     @patch.object(RegisterManger, 'get_registration_by_user_and_hackathon')
     def test_create_hackathon_register_registration_not_begin(self, get_method):
         args = {'user_id': 1}
-        hackathon = Hackathon(id=1, registration_start_time=get_now() + datetime.timedelta(seconds=30))
+        hackathon = Hackathon(id=1, registration_start_time=self.get_now() + datetime.timedelta(seconds=30))
         get_method.retrun_value = None
         self.assertEqual(register_manager.create_registration(hackathon, args),
                          precondition_failed("hackathon registration not opened", friendly_message="报名尚未开始"))
@@ -102,8 +100,8 @@ class TestUserHackathonRelManager(unittest.TestCase):
         get_method.retrun_value = None
         args = {'user_id': 1}
         hackathon = Hackathon(id=1,
-                              registration_start_time=get_now() - datetime.timedelta(seconds=30),
-                              registration_end_time=get_now() - datetime.timedelta(seconds=30))
+                              registration_start_time=self.get_now() - datetime.timedelta(seconds=30),
+                              registration_end_time=self.get_now() - datetime.timedelta(seconds=30))
         self.assertEqual(register_manager.create_registration(hackathon, args),
                          precondition_failed("hackathon registration has ended", friendly_message="报名已经结束"))
         get_method.assert_called_once_with(1, 1)
@@ -114,8 +112,8 @@ class TestUserHackathonRelManager(unittest.TestCase):
     def test_create_hackathon_register_registration_common_logic(self, auto_approve, get_method):
         args = {'user_id': 1}
         hackathon = Hackathon(id=1,
-                              registration_start_time=get_now() - datetime.timedelta(seconds=30),
-                              registration_end_time=get_now() + datetime.timedelta(seconds=30))
+                              registration_start_time=self.get_now() - datetime.timedelta(seconds=30),
+                              registration_end_time=self.get_now() + datetime.timedelta(seconds=30))
         get_method.retrun_value = None
         auto_approve.return_value = True
 
