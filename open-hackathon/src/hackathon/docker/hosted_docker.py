@@ -172,7 +172,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
                                     name=container_name,
                                     host_server_id=host_server.id,
                                     virtual_environment=virtual_environment,
-                                    image=unit.get_image())
+                                    image=unit.get_image_with_tag())
         self.db.add_object(container)
         self.db.commit()
 

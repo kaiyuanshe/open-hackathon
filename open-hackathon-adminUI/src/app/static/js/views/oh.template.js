@@ -62,6 +62,8 @@
         var template_unit = $($('#template_unit_item').html());
         if(data){
             template_unit.find('[name="name"]').val(data['name']);
+            template_unit.find('[name="type"]').val(data['type']);
+            template_unit.find('[name="description"]').val(data['description']);
             template_unit.find('[name="image"]').val(data['Image']);
             template_unit.find('[name="env"]').val(data['Env'].join(";"));
             template_unit.find('[name="cmd"]').val(data['Cmd'].join(" "));
@@ -159,6 +161,8 @@
             })
             data.push({
                 name: $group.find('[name="name"]').val(),
+                type: $group.find('[name="type"]').val(),
+                description: $group.find('[name="description"]').val(),
                 ports: ports,
                 remote: remote,
                 Image: $group.find('[name="image"]').val(),
@@ -214,6 +218,7 @@
     }
 
     function toggleTable(){
+        clearTemplateForm();
         if($('#templatetable').css('display') == 'none' ){
             $('#templatetable').show();
             $('#templateform').hide()
@@ -233,8 +238,6 @@
                     if(is_update)
                         is_update = false;
                     bindTemplateList();
-                    clearTemplateForm();
-                    createTemplateUnit();
                     toggleTable();
                 })
         });
@@ -249,9 +252,8 @@
 
         var templatelist = $('#templatelist');
         templatelist.on('click','[data-type="template_item_edit"]',function(e){
-            toggleTable();
-            clearTemplateForm();
             is_update = true;
+            toggleTable();
             var item = $(this).parents('tr').data('tmplItem').data;
             setFormData(item);
         });
@@ -284,9 +286,14 @@
             deleteTemplateUnit(this);
         });
 
-        $('[data-type="template_item_add"], [data-type="cancel"]').click(function(e){
+        $('[data-type="template_item_add"]').click(function(e){
             $('#name').removeAttr('disabled');
             $('#provider').removeAttr('disabled');
+            toggleTable();
+            createTemplateUnit();
+        });
+
+        $('[data-type="cancel"]').click(function(e){
             toggleTable();
         });
     }

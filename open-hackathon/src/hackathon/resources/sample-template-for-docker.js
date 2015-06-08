@@ -6,6 +6,8 @@
         {
             "provider": "docker",
             "name": "web",
+            "type": "ubuntu terminal",
+            "description": "sample environment for ampcamp 2015",
             "ports":
             [
                 {

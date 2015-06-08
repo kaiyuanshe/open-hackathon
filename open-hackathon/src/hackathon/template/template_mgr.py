@@ -92,9 +92,27 @@ class TemplateManager(Component):
         data = []
         for created_template in created_templates:
             dic = created_template.dic()
-            dic['data'] = json.load(file(created_template.url))
+            dic['data'] = self.load_template(created_template)
             data.append(dic)
         return data
+
+    def get_template_settings(self, hackathon_name):
+        data = self.get_created_template_list(hackathon_name)
+        settings = []
+        for d in data:
+            template_units = []
+            for ve in d['data'][BaseTemplate.VIRTUAL_ENVIRONMENTS]:
+                template_units.append({
+                    'name': ve[DockerTemplateUnit.NAME],
+                    'type': ve[DockerTemplateUnit.TYPE],
+                    'description': ve[DockerTemplateUnit.DESCRIPTION],
+                })
+            settings.append({
+                'name': d['data'][BaseTemplate.EXPR_NAME],
+                'description': d['data'][BaseTemplate.DESCRIPTION],
+                'units': template_units,
+            })
+        return settings
 
     def create_template(self, args):
         """
@@ -159,6 +177,8 @@ class TemplateManager(Component):
                               update_time=self.util.get_now(),
                               description=args[BaseTemplate.DESCRIPTION],
                               virtual_environment_count=len(args[BaseTemplate.VIRTUAL_ENVIRONMENTS]))
+        # refresh template in memory after update
+        self.__load_template_from_local_file(template.id, url)
         return ok("update template success")
 
     def delete_template(self, id):
@@ -262,7 +282,7 @@ class TemplateManager(Component):
         :param template_id:
         :return:
         """
-        if template_id not in self.templates:
+        if template_id is None or template_id not in self.templates:
             return None
         else:
             return self.templates[template_id]
@@ -274,10 +294,10 @@ class TemplateManager(Component):
         :param local_url:
         :return:
         """
-        if not os.path.exists(local_url):
+        if local_url is None or not os.path.exists(local_url):
             return None
         else:
-            template_dic = json.loads(file(local_url))
+            template_dic = json.load(file(local_url))
             self.templates[template_id] = template_dic
             return template_dic
 
@@ -289,9 +309,10 @@ class TemplateManager(Component):
         :param azure_url:
         :return:
         """
-        container_name = self.util.safe_get_config("storage.template_container", "templates")
-        if self.file_service.download_file_from_azure(container_name, azure_url, local_url) is not None:
-            return self.__load_template_from_local_file(template_id, local_url)
+        if azure_url is not None:
+            container_name = self.util.safe_get_config("storage.template_container", "templates")
+            if self.file_service.download_file_from_azure(container_name, azure_url, local_url) is not None:
+                return self.__load_template_from_local_file(template_id, local_url)
         return None
 
     # TODO: HACK-483

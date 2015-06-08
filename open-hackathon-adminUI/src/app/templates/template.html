@@ -71,7 +71,11 @@
                             <label class="col-md-3 control-label">描述</label>
 
                             <div class="col-md-6 register">
-                                <input type="text" class="form-control" name="description" id="description">
+                                <input type="text" class="form-control" name="description" id="description"
+                                        data-bv-trigger="blur"
+                                        required
+                                        data-bv-notempty-message="描述是必需的，不能为空"
+                                        >
                             </div>
                         </div>
 
@@ -162,6 +166,26 @@
             <button type="button" class="btn btn-danger" data-type="btn_delete_template_unit"> 删除该模板单元</button>
         </div>
         <div class="form-group has-feedback">
+            <label class="col-md-3 control-label">类型</label>
+            <div class="col-md-6 register">
+                <select class="form-control" name="type">
+                    <option value="ubuntu terminal">ubuntu terminal</option>
+                    <option value="ubuntu desktop">ubuntu desktop</option>
+                    <option value="windows">windows</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group has-feedback">
+            <label class="col-md-3 control-label">描述</label>
+            <div class="col-md-6 register">
+                <input type="text" class="form-control" name="description" data-validate="true"
+                    data-bv-trigger="blur"
+                    required
+                    data-bv-notempty-message="描述是必需的，不能为空"
+                    >
+            </div>
+        </div>
+        <div class="form-group has-feedback">
             <label class="col-md-3 control-label">镜像</label>
             <div class="col-md-6 register">
                 <input type="text" class="form-control" name="image" data-validate="true"
@@ -224,6 +248,12 @@
                     data-bv-trigger="blur"
                     required
                     data-bv-notempty-message="远程连接端口是必需的，不能为空"
+                    min="0"
+                    data-bv-greaterthan-inclusive="true"
+                    data-bv-greaterthan-message="端口号应该大于0"
+                    max="65535"
+                    data-bv-lessthan-inclusive="true"
+                    data-bv-lessthan-message="端口号应该小于65535"
                     >
             </div>
         </div>
@@ -283,6 +313,12 @@
                     data-bv-trigger="blur"
                     required
                     data-bv-notempty-message="端口号是必需的，不能为空"
+                    min="0"
+                    data-bv-greaterthan-inclusive="true"
+                    data-bv-greaterthan-message="端口号应该大于0"
+                    max="65535"
+                    data-bv-lessthan-inclusive="true"
+                    data-bv-lessthan-message="端口号应该小于65535"
                     >
             </div>
         </div>
