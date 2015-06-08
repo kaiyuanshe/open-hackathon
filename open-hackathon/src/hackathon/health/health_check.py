@@ -43,7 +43,6 @@ from sqlalchemy import (
 
 from hackathon.database.models import (
     User,
-    DockerHostServer,
     AzureKey,
 )
 from hackathon.azureformation.service import (
@@ -86,31 +85,7 @@ class DockerHealthCheck(HealthCheck):
         self.docker = RequiredFeature("docker")
 
     def reportHealth(self):
-        try:
-            hosts = self.db.find_all_objects(DockerHostServer)
-            alive = 0
-            for host in hosts:
-                if self.docker.ping(host):
-                    alive += 1
-            if alive == len(hosts):
-                return {
-                    STATUS: HEALTH_STATE.OK
-                }
-            elif alive > 0:
-                return {
-                    STATUS: HEALTH_STATE.WARNING,
-                    DESCRIPTION: 'at least one docker host servers are down'
-                }
-            else:
-                return {
-                    STATUS: HEALTH_STATE.ERROR,
-                    DESCRIPTION: 'all docker host servers are down'
-                }
-        except Exception as e:
-            return {
-                STATUS: HEALTH_STATE.ERROR,
-                "description": e.message
-            }
+        return self.docker.health()
 
 
 class GuacamoleHealthCheck(HealthCheck):

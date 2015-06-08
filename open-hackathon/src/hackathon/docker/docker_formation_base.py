@@ -45,6 +45,6 @@ class DockerFormationBase(object):
         return
 
     @abc.abstractmethod
-    def ping(self, **kwargs):
-        """send a ping for health check"""
+    def health(self):
+        """report health status"""
         return

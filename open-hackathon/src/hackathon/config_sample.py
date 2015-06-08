@@ -11,10 +11,10 @@
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#  
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-#  
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -33,6 +33,7 @@ MYSQL_HOST = "localhost"
 MYSQL_USER = "hackathon"
 MYSQL_PWD = "hackathon"
 MYSQL_DB = "hackathon"
+MYSQL_PORT = 3306
 
 Config = {
     "environment": "local",
@@ -40,7 +41,7 @@ Config = {
         "secret_key": "secret_key"
     },
     "mysql": {
-        "connection": 'mysql://%s:%s@%s/%s' % (MYSQL_USER, MYSQL_PWD, MYSQL_HOST, MYSQL_DB)
+        "connection": 'mysql://%s:%s@%s:%s/%s' % (MYSQL_USER, MYSQL_PWD, MYSQL_HOST, MYSQL_PORT, MYSQL_DB)
     },
     "login": {
         "github": {
@@ -73,7 +74,7 @@ Config = {
     },
     "scheduler": {
         "job_store": "mysql",
-        "job_store_url": 'mysql://%s:%s@%s/%s' % (MYSQL_USER, MYSQL_PWD, MYSQL_HOST, MYSQL_DB)
+        "job_store_url": 'mysql://%s:%s@%s:%s/%s' % (MYSQL_USER, MYSQL_PWD, MYSQL_HOST, MYSQL_PORT, MYSQL_DB)
     },
     "pre_allocate": {
         "check_interval_minutes": 5,
@@ -91,5 +92,13 @@ Config = {
         "template_container": "templates",
         "blob_service_host_base": ".blob.core.chinacloudapi.cn",
         "size_limit_kilo_bytes": 5 * 1024
+    },
+    "docker": {
+        "alauda": {
+            "enabled": False,
+            "token": "",
+            "namespace": "",
+            "endpoint": "https://api.alauda.cn"
+        }
     }
 }

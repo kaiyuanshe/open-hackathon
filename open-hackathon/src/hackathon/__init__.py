@@ -87,7 +87,10 @@ def init_components():
     factory.provide("guacamole_health_check", get_class("hackathon.health.health_check.GuacamoleHealthCheck"))
     factory.provide("azure_health_check", get_class("hackathon.health.health_check.AzureHealthCheck"))
 
-    factory.provide("docker", get_class("hackathon.docker.hosted_docker.HostedDockerFormation"))
+    if safe_get_config("docker.alauda.enabled", False):
+        factory.provide("docker", get_class("hackathon.docker.alauda_docker.AlaudaDockerFormation"))
+    else:
+        factory.provide("docker", get_class("hackathon.docker.hosted_docker.HostedDockerFormation"))
 
 
 def init_app():

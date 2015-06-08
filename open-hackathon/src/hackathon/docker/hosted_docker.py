@@ -36,11 +36,14 @@ from hackathon.database.models import (
     Experiment,
     DockerContainer,
     HackathonAzureKey,
-    PortBinding)
+    PortBinding,
+    DockerHostServer,
+)
 
 from hackathon.enum import (
     EStatus,
-    PortBindingType)
+    PortBindingType,
+)
 
 from compiler.ast import (
     flatten,
@@ -60,7 +63,12 @@ from docker_formation_base import (
 from hackathon.azureformation.service import (
     Service,
 )
-from hackathon.hackathon_response import internal_server_error
+from hackathon.hackathon_response import (
+    internal_server_error
+)
+from hackathon.constants import (
+    HEALTH_STATE,
+)
 import json
 import requests
 
@@ -78,20 +86,37 @@ class HostedDockerFormation(DockerFormationBase, Component):
     def __init__(self):
         self.lock = Lock()
 
-    def ping(self, docker_host):
+    def health(self):
         """
         Ping docker service in docker host
         :param docker_host:
         :return:
         """
         try:
-            ping_url = '%s/_ping' % self.__get_vm_url(docker_host)
-            req = requests.get(ping_url)
-            self.log.debug(req.content)
-            return req.status_code == 200 and req.content == 'OK'
+            hosts = self.db.find_all_objects(DockerHostServer)
+            alive = 0
+            for host in hosts:
+                if self._ping(host):
+                    alive += 1
+            if alive == len(hosts):
+                return {
+                    "status": HEALTH_STATE.OK
+                }
+            elif alive > 0:
+                return {
+                    "status": HEALTH_STATE.WARNING,
+                    "description": 'at least one docker host servers are down'
+                }
+            else:
+                return {
+                    "status": HEALTH_STATE.ERROR,
+                    "description": 'all docker host servers are down'
+                }
         except Exception as e:
-            self.log.error(e)
-            return False
+            return {
+                "status": HEALTH_STATE.ERROR,
+                "description": e.message
+            }
 
     def get_available_host_port(self, docker_host, private_port):
         """
@@ -238,6 +263,21 @@ class HostedDockerFormation(DockerFormationBase, Component):
 
     def __get_vm_url(self, docker_host):
         return 'http://%s:%d' % (docker_host.public_dns, docker_host.public_docker_api_port)
+
+    def _ping(self, docker_host):
+        """
+        Ping docker service in docker host
+        :param docker_host:
+        :return:
+        """
+        try:
+            ping_url = '%s/_ping' % self.__get_vm_url(docker_host)
+            req = requests.get(ping_url)
+            self.log.debug(req.content)
+            return req.status_code == 200 and req.content == 'OK'
+        except Exception as e:
+            self.log.error(e)
+            return False
 
     def __clear_ports_cache(self):
         """
