@@ -34,6 +34,9 @@ MYSQL_PORT = "<%= node['openhackathon']['mysql']['port'] %>"
 
 Config = {
     "environment": "<%= node['openhackathon']['environment'] %>",
+    "app":{
+        "secret_key": "<%= node['openhackathon']['app']['secret_key'] %>"
+    },
     "mysql": {
         "connection": 'mysql://%s:%s@%s:%s/%s' % (MYSQL_USER, MYSQL_PWD, MYSQL_HOST, MYSQL_PORT,MYSQL_DB)
     },

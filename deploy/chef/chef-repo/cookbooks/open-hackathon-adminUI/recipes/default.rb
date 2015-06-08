@@ -78,8 +78,11 @@ uwsgi_service 'open-hackathon-adminUI' do
   start_immediately false
   uid node['openhackathon']['user']
   gid node['openhackathon']['user']
+  start_immediately false
 end
 
-service 'uwsgi-open-hackathon-adminUI' do
-  action :restart
+if node['openhackathon']['service']['start']
+  service 'uwsgi-open-hackathon-adminUI' do
+    action :restart
+  end
 end
