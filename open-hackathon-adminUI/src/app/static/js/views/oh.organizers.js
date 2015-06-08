@@ -90,7 +90,7 @@
     }
 
     function updateOrganizers(basic_info){
-        return oh.api.hackathon.put({
+        return oh.api.admin.hackathon.put({
             body:{
                 id:hackathonID,
                 name:hackathonName,

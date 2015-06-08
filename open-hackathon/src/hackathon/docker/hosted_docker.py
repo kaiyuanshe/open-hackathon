@@ -28,6 +28,9 @@ import sys
 
 sys.path.append("..")
 
+from hackathon.database import (
+    db_adapter
+)
 from hackathon import (
     RequiredFeature,
     Component
@@ -36,8 +39,8 @@ from hackathon.database.models import (
     Experiment,
     DockerContainer,
     HackathonAzureKey,
+    Hackathon,
     PortBinding)
-
 from hackathon.enum import (
     EStatus,
     PortBindingType)
@@ -63,9 +66,13 @@ from hackathon.azureformation.service import (
 from hackathon.hackathon_response import internal_server_error
 import json
 import requests
+from hackathon.scheduler import scheduler
+from datetime import timedelta
+from hackathon.enum import HACK_STATUS
 
 
 class HostedDockerFormation(DockerFormationBase, Component):
+    template_manager = RequiredFeature("template_manager")
     """
     Docker resource management based on docker remote api v1.18
     Host resource are required. Azure key required in case of azure.
@@ -85,7 +92,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
         :return:
         """
         try:
-            ping_url = '%s/_ping' % self.__get_vm_url(docker_host)
+            ping_url = '%s/_ping' % self.get_vm_url(docker_host)
             req = requests.get(ping_url)
             self.log.debug(req.content)
             return req.status_code == 200 and req.content == 'OK'
@@ -127,7 +134,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
         expr_id = kwargs["expr_id"]
         docker_host = self.docker_host_manager.get_host_server_by_id(container.host_server_id)
         if self.__get_container(name, docker_host) is not None:
-            containers_url = '%s/containers/%s/stop' % (self.__get_vm_url(docker_host), name)
+            containers_url = '%s/containers/%s/stop' % (self.get_vm_url(docker_host), name)
             req = requests.post(containers_url)
             self.log.debug(req.content)
         self.__stop_container(expr_id, container, docker_host)
@@ -142,7 +149,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
         container = kwargs["container"]
         expr_id = kwargs["expr_id"]
         docker_host = self.docker_host_manager.get_host_server_by_id(container.host_server_id)
-        containers_url = '%s/containers/%s?force=1' % (self.__get_vm_url(docker_host), name)
+        containers_url = '%s/containers/%s?force=1' % (self.get_vm_url(docker_host), name)
         req = requests.delete(containers_url)
         self.log.debug(req.content)
 
@@ -165,7 +172,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
                                     name=container_name,
                                     host_server_id=host_server.id,
                                     virtual_environment=virtual_environment,
-                                    image=unit.get_image())
+                                    image=unit.get_image_with_tag())
         self.db.add_object(container)
         self.db.commit()
 
@@ -228,6 +235,15 @@ class HostedDockerFormation(DockerFormationBase, Component):
         self.log.debug("starting container %s is ended ... " % container_name)
         return container
 
+    # TODO: HACK-483
+    def pull_image(self, dns, image_name):
+        pull_image_url = dns + "/images/create?fromImage=" + image_name
+        self.log.debug(" send request to pull image:" + pull_image_url)
+        return requests.post(pull_image_url)
+
+    def get_vm_url(self, docker_host):
+        return 'http://%s:%d' % (docker_host.public_dns, docker_host.public_docker_api_port)
+
     # --------------------------------------------- helper function ---------------------------------------------#
 
     def __name_match(self, id, lists):
@@ -235,9 +251,6 @@ class HostedDockerFormation(DockerFormationBase, Component):
             if id in list:
                 return True
         return False
-
-    def __get_vm_url(self, docker_host):
-        return 'http://%s:%d' % (docker_host.public_dns, docker_host.public_docker_api_port)
 
     def __clear_ports_cache(self):
         """
@@ -262,7 +275,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
         self.db.commit()
 
     def __containers_info(self, docker_host):
-        containers_url = '%s/containers/json' % self.__get_vm_url(docker_host)
+        containers_url = '%s/containers/json' % self.get_vm_url(docker_host)
         req = requests.get(containers_url)
         self.log.debug(req.content)
         return self.util.convert(json.loads(req.content))
@@ -304,7 +317,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
         :param container_name:
         :return:
         """
-        containers_url = '%s/containers/create?name=%s' % (self.__get_vm_url(docker_host), container_name)
+        containers_url = '%s/containers/create?name=%s' % (self.get_vm_url(docker_host), container_name)
         req = requests.post(containers_url, data=json.dumps(container_config), headers=self.application_json)
         self.log.debug(req.content)
         container = json.loads(req.content)
@@ -319,7 +332,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
         :param container_id:
         :return:
         """
-        url = '%s/containers/%s/start' % (self.__get_vm_url(docker_host), container_id)
+        url = '%s/containers/%s/start' % (self.get_vm_url(docker_host), container_id)
         req = requests.post(url, headers=self.application_json)
         self.log.debug(req.content)
 
@@ -431,3 +444,20 @@ class HostedDockerFormation(DockerFormationBase, Component):
         host_server_dns = host_server.public_dns.split('.')[0]
         self.log.debug("starting to release ports ... ")
         ep.release_public_endpoints(host_server_dns, 'Production', host_server_name, host_ports)
+
+    # ----------------------initialize hackathon's templates on every docker host-------------------#
+
+    # TODO: HACK-483
+    def ensure_images(self):
+        hackathons = db_adapter.find_all_objects(Hackathon, Hackathon.status == HACK_STATUS.ONLINE)
+        for hackathon in hackathons:
+            self.log.debug("Start recycling inactive ensure images for hackathons")
+            excute_time = self.util.get_now() + timedelta(minutes=1)
+            scheduler.add_job(self.template_manager.pull_images_for_hackathon,
+                              'interval',
+                              id=hackathon.id + "pull images",
+                              replace_existing=True,
+                              next_run_time=excute_time,
+                              minutes=60,
+                              args=[hackathon])
+        self.log.debug("starting to release ports ... ")

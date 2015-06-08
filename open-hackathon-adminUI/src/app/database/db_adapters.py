@@ -101,9 +101,6 @@ class SQLAlchemyAdapter(DBAdapter):
     def count_by(self, ObjectClass, **kwargs):
         return ObjectClass.query.filter_by(**kwargs).count()
 
-    def distinct(self,ObjectClass, *criterion):
-        return ObjectClass.query.filter(*criterion).distinct()
-
     def find_first_object(self, ObjectClass, *criterion):
         return ObjectClass.query.filter(*criterion).first()
 

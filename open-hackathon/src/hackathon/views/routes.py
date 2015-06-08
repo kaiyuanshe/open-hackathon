@@ -38,7 +38,7 @@ from hackathon.expr.expr_mgr import open_check_expr, recycle_expr_scheduler
 import time
 
 hackathon_manager = RequiredFeature("hackathon_manager")
-
+register_manager = RequiredFeature("register_manager")
 
 class HealthResource(Resource):
     def get(self):
@@ -101,7 +101,17 @@ class HackathonStatResource(Resource):
 class HackathonTemplateResource(Resource, Component):
     @hackathon_name_required
     def get(self):
-        return [t.dic() for t in g.hackathon.templates.all()]
+        template_manager = RequiredFeature('template_manager')
+        return template_manager.get_template_settings(g.hackathon.name)
+
+
+class HackathonRegisterResource(Resource):
+ @hackathon_name_required
+ def get(self):
+     parse = reqparse.RequestParser()
+     parse.add_argument('num', type=int, location='args', default=5)
+     args = parse.parse_args()
+     return register_manager.get_hackathon_registers(args['num'])
 
 class GetTeamMembersByTeamNameResource(Resource):
     @hackathon_name_required
@@ -150,3 +160,6 @@ def register_routes():
     # team API
     api.add_resource(HackathonTeamListResource, "/api/hackathon/team/list")
     api.add_resource(GetTeamMembersByTeamNameResource, "/api/team/member")
+
+    # hackathon register api
+    api.add_resource(HackathonRegisterResource, "/api/hackathon/register")

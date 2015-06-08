@@ -1,10 +1,13 @@
 {
     "expr_name": "sample-template-for-docker",
+    "description": "ampcamp 2015",
     "virtual_environments":
     [
         {
             "provider": "docker",
             "name": "web",
+            "type": "ubuntu terminal",
+            "description": "sample environment for ampcamp 2015",
             "ports":
             [
                 {
@@ -53,6 +56,7 @@
             "WorkingDir": "",
             "NetworkDisabled": false,
             "MacAddress": "",
+            "ExposedPorts": {},
             "SecurityOpts": [""],
             "HostConfig":
             {
