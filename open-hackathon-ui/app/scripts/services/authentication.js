@@ -29,7 +29,7 @@
  */
 
 angular.module('oh.app')
-  .factory('Authentication', function Authentication($q, $cookieStore, $stateParams, state, API) {
+  .factory('Authentication', function Authentication($q, $cookies, $stateParams, state, API) {
     var authenticatedUser = null;
     var hackathon_name = $stateParams.hackathon_name || config.name;
 
@@ -39,7 +39,7 @@ angular.module('oh.app')
      * @returns {{avatar_url: string, create_time: string, email: {create_time: number, email: string, id: number, name: string, primary_email: number, update_time: null, user_id: number, verified: number}[], id: number, last_login_time: string, name: string, nickname: string, online: number}}
      */
     function getUser() {
-      return $cookieStore.get('User');
+      return $cookies.get('User');
     }
 
     /**

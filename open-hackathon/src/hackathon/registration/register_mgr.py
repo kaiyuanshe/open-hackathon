@@ -47,30 +47,46 @@ class RegisterManger(Component):
     def get_registration_by_user_and_hackathon(self, user_id, hackathon_id):
         return self.db.find_first_object_by(UserHackathonRel, user_id=user_id, hackathon_id=hackathon_id)
 
+
+    def check_register_enrollment(self, hackathon):
+        max = dict(hackathon.basic_info)['max_enrollment']
+        if max == 0:  # means no limit
+            return True
+        else:
+            current_num = self.db.count(UserHackathonRel, UserHackathonRel.hackathon_id == hackathon.id)
+            return max > current_num
+
+
+    def validate_created_args(self, hackathon, args):
+        self.log.debug("create_register: %r" % args)
+
+        user_id = args['user_id']
+        register = self.get_registration_by_user_and_hackathon(user_id, hackathon.id)
+        if register is not None and register.deleted == 0:
+            self.log.debug("user %d already registered on hackathon %d" % (user_id, hackathon.id))
+            return False, register.dic()
+
+        if hackathon.registration_start_time > self.util.get_now():
+            return False, precondition_failed("hackathon registration not opened", friendly_message="报名尚未开始")
+
+        if hackathon.registration_end_time < self.util.get_now():
+            return False, precondition_failed("hackathon registration has ended", friendly_message="报名已经结束")
+
+        if not self.check_register_enrollment(hackathon):
+            return False, precondition_failed("hackathon registers reach the upper threshold",
+                                              friendly_message="报名人数已满")
+
     def create_registration(self, hackathon, args):
-        self.log.debug("create_or_update_register: %r" % args)
-        if "user_id" not in args:
-            return bad_request("user id invalid")
-
+        statue, return_info = self.validate_created_args(hackathon, args)
+        if not statue:
+            return return_info
         try:
-            user_id = args['user_id']
-            register = self.get_registration_by_user_and_hackathon(user_id, hackathon.id)
-            if register is not None and register.deleted == 0:
-                self.log.debug("user %d already registered on hackathon %d" % (user_id, hackathon.id))
-                return register.dic()
-
-            if hackathon.registration_start_time > self.util.get_now():
-                return precondition_failed("hackathon registration not opened", friendly_message="报名尚未开始")
-
-            if hackathon.registration_end_time < self.util.get_now():
-                return precondition_failed("hackathon registration has ended", friendly_message="报名已经结束")
-
             args["status"] = hackathon.is_auto_approve() and RGStatus.AUTO_PASSED or RGStatus.UNAUDIT
-
             return self.db.add_object_kwargs(UserHackathonRel, **args).dic()
         except Exception as e:
             self.log.error(e)
-            return internal_server_error("fail to create or update register")
+            return internal_server_error("fail to create register")
+
 
     def update_registration(self, args):
         self.log.debug("update_registration: %r" % args)
@@ -148,10 +164,19 @@ class RegisterManger(Component):
 
         return False
 
-    def get_hackathon_registers(self, num=5):
+    def get_hackathon_registers(self, num):
         registers = self.db.find_all_objects_order_by(UserHackathonRel,
                                                       num,  # limit num
                                                       UserHackathonRel.create_time.desc(),
                                                       hackathon_id=g.hackathon.id)
         return map(lambda x: x.dic(), registers)
 
+    def get_hackathon_team_list(self, hid, name, number):
+        find_team_by_hackathon = self.db.find_all_objects_by(UserHackathonRel, hackathon_id=hid)
+        hackathon_team_list = map(lambda x: x.team_name, find_team_by_hackathon)
+        hackathon_team_list = list(set(hackathon_team_list))
+        if name is not None:
+            hackathon_team_list = filter(lambda x: name in x, hackathon_team_list)
+        if number is not None:
+            hackathon_team_list = hackathon_team_list[0:number]
+        return hackathon_team_list

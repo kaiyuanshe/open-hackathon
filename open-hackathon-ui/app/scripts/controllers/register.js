@@ -31,7 +31,7 @@
  */
 
 angular.module('oh.controllers')
-  .controller('register.controller', function ($scope, $rootScope, $stateParams, $cookieStore, state, Authentication, API) {
+  .controller('register.controller', function ($scope, $rootScope, $stateParams, $cookies, state, Authentication, API) {
     var registration = null;
     $rootScope.isShow = true;
     var user = Authentication.getUser();
@@ -105,7 +105,7 @@ angular.module('oh.controllers')
     $scope.showRegister = function () {
 
       if (!user) {
-        $cookieStore.put('redirectHakathonName', hackathon_name);
+        $cookies.put('redirectHakathonName', hackathon_name);
         state.go('index');
         return;
       }

@@ -62,6 +62,8 @@ def init_components():
     from hackathon.hack import HackathonManager
     from hackathon.registration.register_mgr import RegisterManger
     from hackathon.template.template_mgr import TemplateManager
+    from hackathon.template.base_template import BaseTemplate
+    from hackathon.template.docker_template_unit import DockerTemplateUnit
     from hackathon.admin.admin_mgr import AdminManager
     from hackathon.remote.guacamole import GuacamoleInfo
     from hackathon.expr.expr_mgr import ExprManager
@@ -91,6 +93,9 @@ def init_components():
         factory.provide("docker", get_class("hackathon.docker.alauda_docker.AlaudaDockerFormation"))
     else:
         factory.provide("docker", get_class("hackathon.docker.hosted_docker.HostedDockerFormation"))
+
+    factory.provide("base_template", BaseTemplate)
+    factory.provide("docker_template_unit", DockerTemplateUnit)
 
 
 def init_app():

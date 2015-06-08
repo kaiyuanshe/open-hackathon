@@ -296,7 +296,7 @@ class ExprManager(Component):
         # db entity
         ve = VirtualEnvironment(provider=VEProvider.Docker,
                                 name=new_name,
-                                image=docker_template_unit.get_image(),
+                                image=docker_template_unit.get_image_with_tag(),
                                 status=VEStatus.Init,
                                 remote_provider=VERemoteProvider.Guacamole,
                                 experiment=expr)

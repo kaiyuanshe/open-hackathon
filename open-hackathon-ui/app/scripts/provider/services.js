@@ -38,7 +38,7 @@
  * Controller of the API
  */
 angular.module('oh.services', [])
-  .factory('API', function ($http, $cookieStore,state, log) {
+  .factory('API', function ($http, $cookies,state, log) {
     function API(obj, name) {
       var key;
       var getCmd = {};
@@ -72,8 +72,8 @@ angular.module('oh.services', [])
           }
           options = $.extend(_params, options);
           var url = name;
-          options.header.token = $cookieStore.get('token') || '';
-//          log.time(name);
+          options.header.token = $cookies.get('token') || '';
+          log.time(name);
           return $http({
             method: obj,
             url: url,
@@ -82,7 +82,7 @@ angular.module('oh.services', [])
             headers: options.header,
             data: options.body
           }).success(function (data) {
-//            log.timeEnd(name);
+            log.timeEnd(name);
             callback(data)
           }).error(function (data) {
             callback({error: true, data: data});

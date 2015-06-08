@@ -35,6 +35,8 @@ class DockerTemplateUnit(object):
     Smallest unit in docker template
     """
     NAME = 'name'
+    TYPE = 'type'
+    DESCRIPTION = 'description'
     PORTS = 'ports'
     PORTS_NAME = 'name'
     PORTS_PORT = 'port'
@@ -108,6 +110,8 @@ class DockerTemplateUnit(object):
     def load_default_config(self):
         dic = {
             self.NAME: 'web',
+            self.TYPE: 'ubuntu terminal',
+            self.DESCRIPTION: 'sample environment for ampcamp 2015',
             self.PORTS: [
                 {
                     self.PORTS_NAME: 'Tachyon',
@@ -205,14 +209,17 @@ class DockerTemplateUnit(object):
         for p in self.dic[self.PORTS]:
             key = '%d/%s' % (p[self.PORTS_PORT], p[self.PORTS_PROTOCOL])
             self.dic[self.EXPOSED_PORTS][key] = {}
-            self.dic[self.HOST_CONFIG][self.HOST_CONFIG_PORT_BINDING][key] = [{self.HOST_CONFIG_HOST_IP: '', self.HOST_CONFIG_HOST_PORT: str(p[self.PORTS_HOST_PORT])}]
+            self.dic[self.HOST_CONFIG][self.HOST_CONFIG_PORT_BINDING][key] = \
+                [{self.HOST_CONFIG_HOST_IP: '', self.HOST_CONFIG_HOST_PORT: str(p[self.PORTS_HOST_PORT])}]
         self.dic.pop(self.NAME)
+        self.dic.pop(self.TYPE)
+        self.dic.pop(self.DESCRIPTION)
         self.dic.pop(self.PORTS)
         self.dic.pop(self.REMOTE)
         self.dic.pop(BaseTemplate.VIRTUAL_ENVIRONMENTS_PROVIDER)
         return self.dic
 
-    def get_image(self):
+    def get_image_with_tag(self):
         return self.dic[self.IMAGE]
 
     def get_ports(self):
@@ -220,3 +227,15 @@ class DockerTemplateUnit(object):
 
     def get_remote(self):
         return self.dic[self.REMOTE]
+
+    def get_image_without_tag(self):
+        image = self.get_image_with_tag()
+        return image.split(':')[0]
+
+    def get_tag(self):
+        image = self.get_image_with_tag()
+        data = image.split(':')
+        if len(data) == 2:
+            return data[1]
+        else:
+            return 'latest'

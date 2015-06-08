@@ -135,6 +135,9 @@ service "guacd" do
   action :restart
 end
 
-service "tomcat7" do 
-  action :restart
+if node['guacamole']['tomcat7']['start']
+  service 'tomcat7' do
+    action :restart
+  end
 end
+

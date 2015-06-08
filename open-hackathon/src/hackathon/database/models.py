@@ -206,7 +206,7 @@ class UserHackathonRel(DBBase):
     status = Column(Integer)  # 0: havn't audit 1: audit passed 2:audit reject
     deleted = Column(Integer, default=0)  # 0:false  1-true
 
-    user = relationship('User', backref=backref('hackathons', lazy='dynamic'))
+    user = relationship('User', backref=backref('registers', lazy='dynamic'))
 
     hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
     hackathon = relationship('Hackathon', backref=backref('registers', lazy='dynamic'))
@@ -393,6 +393,7 @@ class Template(DBBase):
     id = Column(Integer, primary_key=True)
     name = Column(String(50))
     url = Column(String(200))
+    azure_url = Column(String(200))
     provider = Column(Integer, default=0)
     creator_id = Column(Integer)
     status = Column(Integer)
@@ -400,6 +401,7 @@ class Template(DBBase):
     update_time = Column(TZDateTime)
     description = Column(Text)
     virtual_environment_count = Column(Integer, default=0)
+    azure_url = Column(String(200))
 
     hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
     hackathon = relationship('Hackathon', backref=backref('templates', lazy='dynamic'))
