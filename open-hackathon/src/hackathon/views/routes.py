@@ -29,7 +29,7 @@ sys.path.append("..")
 
 from hackathon import api, RequiredFeature, Component, g
 from flask_restful import Resource, reqparse
-from hackathon.decorators import hackathon_name_required
+from hackathon.decorators import token_required, hackathon_name_required
 from hackathon.hackathon_response import ok
 from hackathon.health import report_health
 from hackathon.database.models import Announcement
@@ -113,30 +113,54 @@ class HackathonRegisterResource(Resource):
      args = parse.parse_args()
      return register_manager.get_hackathon_registers(args['num'])
 
+class GetTeamMembersByTeamNameResource(Resource):
+    @hackathon_name_required
+    def get(self):
+        hackathon_id = g.hackathon.id
+        parse = reqparse.RequestParser()
+        parse.add_argument('team_name', type=str, location='args', required=True)
+        args = parse.parse_args()
+        return user_manager.get_team_members_by_team_name(hackathon_id, args['team_name'])
+
+
+class HackathonTeamListResource(Resource):
+    @hackathon_name_required
+    def get(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('name', type=str, location='args', required=False)
+        parse.add_argument('number', type=int, location='args', required=False)
+        result = parse.parse_args()
+        id = g.hackathon.id
+        return hackathon_manager.get_hackathon_team_list(id, result['name'], result['number'])
+
 
 def register_routes():
     """
     register API routes that user or admin is not required
     """
 
-    # health page
+    # health page API
     api.add_resource(HealthResource, "/", "/health")
 
-    # scheduled jobs
+    # scheduled jobs API
     api.add_resource(ExperimentPreAllocateResource, "/api/default/preallocate")
     api.add_resource(ExperimentRecycleResource, "/api/default/recycle")
 
-    # announcement api
+    # announcement API
     api.add_resource(BulletinResource, "/api/bulletin")
 
-    # system time api
+    # system time API
     api.add_resource(CurrentTimeResource, "/api/currenttime")
 
-    # hackathon api
+    # hackathon API
     api.add_resource(HackathonResource, "/api/hackathon")
     api.add_resource(HackathonListResource, "/api/hackathon/list")
     api.add_resource(HackathonStatResource, "/api/hackathon/stat")
     api.add_resource(HackathonTemplateResource, "/api/hackathon/template")
+
+    # team API
+    api.add_resource(HackathonTeamListResource, "/api/hackathon/team/list")
+    api.add_resource(GetTeamMembersByTeamNameResource, "/api/team/member")
 
     # hackathon register api
     api.add_resource(HackathonRegisterResource, "/api/hackathon/register")
