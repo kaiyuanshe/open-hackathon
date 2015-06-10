@@ -164,19 +164,19 @@ class UserProfileResource(Resource):
     @token_required
     def get(self):
         user_id = g.user.id
-        return expr_manager.get_user_profile(user_id)
+        return register_manager.get_user_profile(user_id)
 
     @token_required
     def post(self):
         args = request.get_json()
         args["user_id"] = g.user.id
-        return expr_manager.create_user_profile(args)
+        return register_manager.create_user_profile(args)
 
     @token_required
     def put(self):
         args = request.get_json()
         args["user_id"] = g.user.id
-        return expr_manager.update_user_profile(args)
+        return register_manager.update_user_profile(args)
 
 
 def register_user_routes():

@@ -182,7 +182,7 @@ class RegisterManger(Component):
         return hackathon_team_list
 
     def get_user_profile(self, user_id):
-        return self.db.get_object(UserProfile, user_id).dic()
+        return self.db.find_first_object_by(UserProfile, user_id=user_id).dic()
 
     def create_user_profile(self, args):
         self.log.debug("create_user_profile: %r" % args)
