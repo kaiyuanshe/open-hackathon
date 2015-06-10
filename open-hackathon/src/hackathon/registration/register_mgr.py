@@ -182,14 +182,14 @@ class RegisterManger(Component):
         return hackathon_team_list
 
     def get_user_profile(self, user_id):
-        return self.db.get_object(UserProfile, user_id)
+        return self.db.get_object(UserProfile, user_id).dic()
 
     def create_user_profile(self, args):
         self.log.debug("create_user_profile: %r" % args)
         if "user_id" not in args:
             return bad_request("missing user_id")
         try:
-            return self.db.add_object_kwargs(UserProfile, **args)
+            return self.db.add_object_kwargs(UserProfile, **args).dic()
         except Exception as e:
             self.log.debug(e)
             return internal_server_error("Failed to create User Profile")
