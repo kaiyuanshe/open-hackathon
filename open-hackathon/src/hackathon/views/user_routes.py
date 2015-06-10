@@ -160,6 +160,25 @@ class GetTeamMembersByUserResource(Resource):
         return user_manager.get_team_members_by_user(hackathon_id, user_id)
 
 
+class UserProfileResource(Resource):
+    @token_required
+    def get(self):
+        user_id = g.user.id
+        return expr_manager.get_user_profile(user_id)
+
+    @token_required
+    def post(self):
+        args = request.get_json()
+        args["user_id"] = g.user.id
+        return expr_manager.create_user_profile(args)
+
+    @token_required
+    def put(self):
+        args = request.get_json()
+        args["user_id"] = g.user.id
+        return expr_manager.update_user_profile(args)
+
+
 def register_user_routes():
     """
     register API routes for hackathon UI user
@@ -184,3 +203,5 @@ def register_user_routes():
     # team API
     api.add_resource(GetTeamMembersByUserResource, "/api/user/team/myteam")
 
+    # user profile API
+    api.add_resource(UserProfileResource, "/api/user/profile")
