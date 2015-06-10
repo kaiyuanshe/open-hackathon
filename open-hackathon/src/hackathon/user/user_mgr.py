@@ -27,7 +27,7 @@
 import sys
 
 sys.path.append("..")
-from hackathon.database.models import UserToken, User, UserEmail
+from hackathon.database.models import UserToken, User, UserEmail, UserHackathonRel
 from datetime import timedelta
 from hackathon.constants import HTTP_HEADER
 from hackathon.hackathon_response import not_found
@@ -153,3 +153,20 @@ class UserManager(Component):
             "create_time": str(user.create_time),
             "last_login_time": str(user.last_login_time)
         }
+
+
+    def get_team_members_by_team_name(self, h_id, t_name):
+        team_member = self.db.find_all_objects_by(UserHackathonRel, hackathon_id=h_id, team_name=t_name)
+
+        def get_info(sql_object):
+            r = sql_object.dic()
+            r['user'] = self.user_display_info(sql_object.user)
+            return r
+
+        team_member = map(lambda x: get_info(x), team_member)
+
+        return team_member
+
+    def get_team_members_by_user(self, h_id, u_id):
+        my_team = self.db.find_first_object_by(UserHackathonRel, hackathon_id=h_id, user_id=u_id)
+        return self.get_team_members_by_team_name(h_id, my_team.team_name)

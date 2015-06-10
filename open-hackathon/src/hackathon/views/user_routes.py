@@ -151,23 +151,36 @@ class UserExperimentListResource(Resource):
         return expr_manager.get_expr_list_by_user_id(args['user_id'])
 
 
+class GetTeamMembersByUserResource(Resource):
+    @token_required
+    @hackathon_name_required
+    def get(self):
+        hackathon_id = g.hackathon.id
+        user_id = g.user.id
+        return user_manager.get_team_members_by_user(hackathon_id, user_id)
+
+
 def register_user_routes():
     """
     register API routes for hackathon UI user
     """
 
-    # guacamole config api. "/api/guacamoleconfig" is depreciated, will be remoted soon
+    # guacamole config API. "/api/guacamoleconfig" is depreciated, will be remoted soon
     api.add_resource(GuacamoleResource, "/api/guacamoleconfig", "/api/user/guacamoleconfig")
 
-    # user api
+    # user API
     api.add_resource(UserResource, "/api/user/<int:id>")
     api.add_resource(UserLoginResource, "/api/user/login")
 
-    # user-hackathon-relationship, or register, api
+    # user-hackathon-relationship, or register, API
     api.add_resource(RegisterCheckEmailResource, "/api/user/registration/checkemail")
     api.add_resource(UserHackathonRelResource, "/api/user/registration")
     api.add_resource(UserHackathonListResource, "/api/user/registration/list")
 
-    # experiment APIs
+    # experiment API
     api.add_resource(UserExperimentResource, "/api/user/experiment")
     api.add_resource(UserExperimentListResource, "/api/user/experiment/list")
+
+    # team API
+    api.add_resource(GetTeamMembersByUserResource, "/api/user/team/myteam")
+

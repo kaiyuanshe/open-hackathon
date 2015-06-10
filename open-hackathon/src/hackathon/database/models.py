@@ -206,7 +206,7 @@ class UserHackathonRel(DBBase):
     status = Column(Integer)  # 0: havn't audit 1: audit passed 2:audit reject
     deleted = Column(Integer, default=0)  # 0:false  1-true
 
-    user = relationship('User', backref=backref('hackathons', lazy='dynamic'))
+    user = relationship('User', backref=backref('registers', lazy='dynamic'))
 
     hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
     hackathon = relationship('Hackathon', backref=backref('registers', lazy='dynamic'))
