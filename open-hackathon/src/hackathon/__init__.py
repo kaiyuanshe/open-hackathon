@@ -90,9 +90,6 @@ def init_components():
     factory.provide("azure_health_check", get_class("hackathon.health.health_check.AzureHealthCheck"))
 
     factory.provide("docker", get_class("hackathon.docker.hosted_docker.HostedDockerFormation"))
-    factory.provide("base_template", BaseTemplate)
-    factory.provide("docker_template_unit", DockerTemplateUnit)
-
 
 
 def init_app():
