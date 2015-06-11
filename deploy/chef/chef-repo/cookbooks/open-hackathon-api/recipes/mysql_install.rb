@@ -36,7 +36,7 @@ service_name=node['openhackathon']['mysql']['service']
 mysql_service service_name do
   run_group node['openhackathon']['user']
   run_user node['openhackathon']['user']
-  initial_root_password api_creds["mysql_usr_pwd"]
+  initial_root_password api_creds["mysql_ini_pwd"]
   version node['openhackathon']['mysql']['version']
   port node['openhackathon']['mysql']['port']
   action [:create, :start]

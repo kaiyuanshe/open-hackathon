@@ -37,7 +37,7 @@ hackathon = db_adapter.find_first_object_by(Hackathon, name="sample")
 if hackathon is None:
     hackathon = Hackathon(name="sample", display_name="Open Hackathon",
                           description="This is a demo for Open Hackathon Project",
-                          status=1, event_start_time=get_now(), event_end_time=get_now() + timedelta(days=365),
+                          event_start_time=get_now(), event_end_time=get_now() + timedelta(days=365),
                           registration_start_time=get_now(),
                           registration_end_time=get_now() + timedelta(days=365),
                           judge_start_time=get_now(), judge_end_time=get_now() + timedelta(days=365),
