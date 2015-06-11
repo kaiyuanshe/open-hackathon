@@ -29,7 +29,7 @@ sys.path.append("..")
 
 from hackathon import api, RequiredFeature, Component, g
 from flask_restful import Resource, reqparse
-from hackathon.decorators import token_required, hackathon_name_required
+from hackathon.decorators import hackathon_name_required
 from hackathon.hackathon_response import ok
 from hackathon.health import report_health
 from hackathon.database.models import Announcement
@@ -40,6 +40,8 @@ import time
 hackathon_manager = RequiredFeature("hackathon_manager")
 user_manager = RequiredFeature("user_manager")
 register_manager = RequiredFeature("register_manager")
+user_manager = RequiredFeature("user_manager")
+docker = RequiredFeature("docker")
 
 
 class HealthResource(Resource):
@@ -137,6 +139,11 @@ class HackathonTeamListResource(Resource):
         return hackathon_manager.get_hackathon_team_list(id, result['name'], result['number'])
 
 
+class TestEnsureImagesResource(Resource):
+    def get(self):
+        return docker.ensure_images()
+
+
 def register_routes():
     """
     register API routes that user or admin is not required
@@ -167,3 +174,7 @@ def register_routes():
 
     # hackathon register api
     api.add_resource(HackathonRegisterResource, "/api/hackathon/registration/list")
+
+    # TODO after find a callable way , would delete this api
+    api.add_resource(TestEnsureImagesResource, "/api/test/ensure")
+

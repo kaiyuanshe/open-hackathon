@@ -31,6 +31,7 @@ from hackathon import Component, RequiredFeature, g
 from hackathon.database.models import UserHackathonRel, Experiment
 from hackathon.hackathon_response import bad_request, precondition_failed, internal_server_error, not_found, ok
 from hackathon.enum import EStatus, RGStatus, ReservedUser
+import json
 
 
 class RegisterManger(Component):
@@ -49,7 +50,7 @@ class RegisterManger(Component):
 
 
     def check_register_enrollment(self, hackathon):
-        max = dict(hackathon.basic_info)['max_enrollment']
+        max = int(json.loads(hackathon.basic_info)['max_enrollment'])
         if max == 0:  # means no limit
             return True
         else:
@@ -75,10 +76,11 @@ class RegisterManger(Component):
         if not self.check_register_enrollment(hackathon):
             return False, precondition_failed("hackathon registers reach the upper threshold",
                                               friendly_message="报名人数已满")
+        return True, ""
 
     def create_registration(self, hackathon, args):
-        statue, return_info = self.validate_created_args(hackathon, args)
-        if not statue:
+        state, return_info = self.validate_created_args(hackathon, args)
+        if not state:
             return return_info
         try:
             args["status"] = hackathon.is_auto_approve() and RGStatus.AUTO_PASSED or RGStatus.UNAUDIT

@@ -40,14 +40,14 @@ class BaseTemplate(Component):
     """
     Base class of template
     """
-    EXPR_NAME = 'expr_name'
+    TEMPLATE_NAME = 'name'
     DESCRIPTION = 'description'
     VIRTUAL_ENVIRONMENTS = 'virtual_environments'
     VIRTUAL_ENVIRONMENTS_PROVIDER = 'provider'
 
-    def __init__(self, expr_name, description):
+    def __init__(self, template_name, description):
         self.dic = {
-            self.EXPR_NAME: expr_name,
+            self.TEMPLATE_NAME: template_name,
             self.DESCRIPTION: description
         }
 

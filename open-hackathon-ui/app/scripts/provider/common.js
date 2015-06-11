@@ -31,20 +31,20 @@ angular.module('oh.common', [])
       });
       return $state.go(state, params, options);
     };
-  }).service('log', function ($state) {
-//    var _times = [];
-//    $.extend(true, this, $log);
-//    this.time = function (label) {
-//      _times[label] = Date.now();
-//    }
-//    this.timeEnd = function (label) {
-//      var time = _times[label];
-//      if (!time) {
-//        this.error('No such label: ' + label);
-//      }
-//      var duration = Date.now() - time;
-//      this.debug('%s: %dms', label, duration);
-//    }
+  }).service('log', function ($state, $log) {
+    var _times = [];
+    $.extend(true, this, $log);
+    this.time = function (label) {
+      _times[label] = Date.now();
+    }
+    this.timeEnd = function (label) {
+      var time = _times[label];
+      if (!time) {
+        this.error('No such label: ' + label);
+      }
+      var duration = Date.now() - time;
+      this.debug('%s: %dms', label, duration);
+    }
   });
 
 ;

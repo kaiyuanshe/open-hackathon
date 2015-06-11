@@ -36,7 +36,9 @@ from hackathon.constants import (
 from hackathon.enum import (
     VEProvider,
 )
-
+from hackathon.hackathon_exception import (
+    AlaudaException
+)
 from hackathon.template.docker_template_unit import (
     DockerTemplateUnit
 )
@@ -67,7 +69,11 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
                 self.log.error('Timed out waiting for async operation to complete.')
                 return False
             time.sleep(10)
-            service = self.__query_service(service_name)
+            try:
+                service = self.__query_service(service_name)
+            except AlaudaException:
+                continue
+
         self.__flush_service_log(service_name)
 
         if not self.__is_service_started(service):
@@ -214,9 +220,13 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
         }
 
     def __post(self, path, data):
+        if isinstance(data, dict):
+            data = json.dumps(data)
         return self.__request("post", path, data)
 
     def __put(self, path, data):
+        if isinstance(data, dict):
+            data = json.dumps(data)
         return self.__request("put", path, data)
 
     def __delete(self, path):
@@ -235,5 +245,5 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
             return resp
         else:
             self.log.debug("'%s' from alauda api '%s' failed: %s, %s" % (method, path, req.status_code, req.content))
-            raise Exception("Http request failed: " + req.content)
+            raise AlaudaException(req.status_code, req.content)
 

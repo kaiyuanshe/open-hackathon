@@ -63,7 +63,7 @@ class PortBindingType:
 
 class VEProvider:
     """
-    For provider in db model VirtualEnvironment
+    For provider in db model VirtualEnvironment and Template
     """
     Docker = 0
     AzureVM = 1

@@ -136,3 +136,6 @@ class Utility(object):
 
     def mkdir_safe(self, path):
         return mkdir_safe(path)
+
+    def get_remote(self, url, headers={}):
+        return get_remote(url, headers)
