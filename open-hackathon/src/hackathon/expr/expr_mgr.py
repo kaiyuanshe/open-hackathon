@@ -182,14 +182,14 @@ class ExprManager(Component):
             # Docker
             if expr.template.provider == VEProvider.Docker:
                 # stop containers
-                for c in expr.virtual_environments:
+                for c in expr.virtual_environments.all():
                     try:
                         self.log.debug("begin to stop %s" % c.name)
                         if force:
-                            self.docker.delete(c.name, container=c.container, expr_id=expr_id)
+                            self.docker.delete(c.name, virtual_environment=c, container=c.container, expr_id=expr_id)
                             c.status = VEStatus.Deleted
                         else:
-                            self.docker.stop(c.name, container=c.container, expr_id=expr_id)
+                            self.docker.stop(c.name, virtual_environment=c, container=c.container, expr_id=expr_id)
                             c.status = VEStatus.Stopped
                     except Exception as e:
                         self.log.error(e)

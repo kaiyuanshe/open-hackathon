@@ -182,5 +182,5 @@ def register_user_routes():
     api.add_resource(UserExperimentListResource, "/api/user/experiment/list")
 
     # team API
-    api.add_resource(GetTeamMembersByUserResource, "/api/user/team/myteam")
+    api.add_resource(GetTeamMembersByUserResource, "/api/user/team/member")
 
