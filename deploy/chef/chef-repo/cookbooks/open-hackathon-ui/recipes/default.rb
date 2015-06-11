@@ -49,7 +49,8 @@ template node['openhackathon'][:ui][:config_file] do
       :github_client_secret => ui_creds["github_client_secret"],
       :qq_client_secret  => ui_creds["qq_client_secret"],
       :gitcafe_client_secret => ui_creds["gitcafe_client_secret"],
-      :weibo_client_secret => ui_creds["weibo_client_secret"]
+      :weibo_client_secret => ui_creds["weibo_client_secret"],
+      :live_client_secret => ui_creds["live_client_secret"]
     )
   mode "0644"
 end
