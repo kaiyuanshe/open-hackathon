@@ -28,7 +28,7 @@ import sys
 
 sys.path.append("..")
 from hackathon import Component, RequiredFeature, g
-from hackathon.database.models import UserHackathonRel, Experiment
+from hackathon.database.models import UserHackathonRel, Experiment, UserProfile
 from hackathon.hackathon_response import bad_request, precondition_failed, internal_server_error, not_found, ok
 from hackathon.enum import EStatus, RGStatus, ReservedUser
 
@@ -180,3 +180,25 @@ class RegisterManger(Component):
         if number is not None:
             hackathon_team_list = hackathon_team_list[0:number]
         return hackathon_team_list
+
+    def get_user_profile(self, user_id):
+        return self.db.find_first_object_by(UserProfile, user_id=user_id)
+
+    def create_user_profile(self, args):
+        self.log.debug("create_user_profile: %r" % args)
+        try:
+            return self.db.add_object_kwargs(UserProfile, **args).dic()
+        except Exception as e:
+            self.log.debug(e)
+            return internal_server_error("Failed to create User Profile")
+
+    def update_user_profile(self, args):
+        self.log.debug("update_user_profile")
+        try:
+            u_id = args["user_id"]
+            user_profile = self.db.find_first_object_by(UserProfile, user_id=u_id)
+            self.db.update_object(user_profile, **args)
+            return user_profile.dic()
+        except Exception as e:
+            self.log.debug(e)
+            return internal_server_error("Failed to update User Profile")
