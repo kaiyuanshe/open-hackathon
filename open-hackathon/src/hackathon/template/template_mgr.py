@@ -48,6 +48,7 @@ from hackathon.hackathon_response import (
 )
 from hackathon.enum import (
     TEMPLATE_STATUS,
+    VEProvider,
 )
 from hackathon.template.docker_template_unit import (
     DockerTemplateUnit,
@@ -72,8 +73,6 @@ class TemplateManager(Component):
     hackathon_manager = RequiredFeature("hackathon_manager")
     file_service = RequiredFeature("file_service")
     docker = RequiredFeature("docker")
-    base_template = RequiredFeature("base_template")
-    docker_template_unit = RequiredFeature("docker_template_unit")
 
     templates = {}  # template in memory {template.id: template_file_stream}
 
@@ -216,21 +215,26 @@ class TemplateManager(Component):
 
         return None
 
-    # TODO: HACK-483
-    # Know issues:  1. docker host url is not correct
-    #               2. docker remote api related logic should be moved to hosted_docker.py
-    #               3. scheduler do not support instance method
     def pull_images_for_hackathon(self, hackathon):
+        # get expected images on hackathon
+        templates = self.db.find_all_objects_by(Template,
+                                                hackathon_id=hackathon.id,
+                                                provider=VEProvider.Docker,
+                                                status=TEMPLATE_STATUS.CREATED)
+        images = map(lambda x: self.__get_images_from_template(x), templates)
+        expected_images = flatten(images)
+        self.log.debug('expected images: %s on hackathon: %s' % (expected_images, hackathon.name))
+        # get all docker host server on hackathon
         hosts = self.db.find_all_objects_by(DockerHostServer, hackathon_id=hackathon.id)
         # loop to get every docker host
-        for host in hosts:
-            templates = hackathon.templates
-            images = [self.__get_images_from_template(template) for template in templates]
-            expected_images = flatten(images)
-            download_images = self.__get_undownloaded_images_on_docker_host(host, expected_images)
+        for docker_host in hosts:
+            download_images = self.__get_undownloaded_images_on_docker_host(docker_host, expected_images)
+            self.log.debug('need to pull images: %s on host: %s' % (download_images, docker_host.vm_name))
             for dl_image in download_images:
-                exec_time = self.util.get_now() + timedelta(seconds=2)
-                scheduler.add_job(self.docker.pull_image, 'date', run_date=exec_time, args=[host, dl_image])
+                exec_time = self.util.get_now() + timedelta(seconds=3)
+                image = dl_image.split(':')[0]
+                tag = dl_image.split(':')[1]
+                scheduler.add_job(docker_pull_image, 'date', run_date=exec_time, args=[docker_host, image, tag])
 
     # ---------------------------------------- helper functions ---------------------------------------- #
 
@@ -310,40 +314,32 @@ class TemplateManager(Component):
         :return:
         """
         if azure_url is not None:
-            container_name = self.util.safe_get_config("storage.template_container", "templates")
-            if self.file_service.download_file_from_azure(container_name, azure_url, local_url) is not None:
+            if self.file_service.download_file_from_azure(azure_url, local_url) is not None:
                 return self.__load_template_from_local_file(template_id, local_url)
         return None
 
-    # TODO: HACK-483
+    # template may have multiple images
     def __get_images_from_template(self, template):
         template_dic = self.load_template(template)
-        ves = template_dic[self.base_template.VIRTUAL_ENVIRONMENTS]
-        images = [ve[self.docker_template_unit.IMAGE] for ve in ves]
-        return images
+        ves = template_dic[BaseTemplate.VIRTUAL_ENVIRONMENTS]
+        images = map(lambda x: x[DockerTemplateUnit.IMAGE], ves)
+        return images  # [image:tag, image:tag]
 
-    # TODO: HACK-483
-    def __get_undownloaded_images_on_docker_host(self, host, *expected_images):
+    def __get_undownloaded_images_on_docker_host(self, docker_host, expected_images):
         images = []
-        get_images_url = self.docker.get_vm_url(host) + "/images/json?all=0"
-        current_images_info = json.loads(self.util.get_remote(get_images_url))  #[{},{},{}]
-        current_images_tags = map(lambda x: json.load(x)['RepoTags'], current_images_info)  #[[],[],[]]
+        current_images = self.docker.get_pulled_images(docker_host)
+        self.log.debug('already exist images: %s on host: %s' % (current_images, docker_host.vm_name))
         for ex_image in expected_images:
-            exist = False
-
-            for cur_image_tag in current_images_tags:
-                if ex_image in cur_image_tag:
-                    exist = True
-                    break
-
-            if not exist:
+            if ex_image not in current_images:
                 images.append(ex_image)
+        return flatten(images)
 
-        return images
 
-# template_manager.create_template({
-# "expr_name": "test",
-# "virtual_environments": [
-# {}, {}
-# ]
-# })
+def auto_pull_images_for_hackathon(hackathon):
+    template_manager = RequiredFeature("template_manager")
+    return template_manager.pull_images_for_hackathon(hackathon)
+
+
+def docker_pull_image(docker_host, image, tag):
+    docker = RequiredFeature("docker")
+    return docker.pull_image(docker_host, image, tag)

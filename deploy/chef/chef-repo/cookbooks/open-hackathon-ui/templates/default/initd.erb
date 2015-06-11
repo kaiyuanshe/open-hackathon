@@ -24,6 +24,7 @@
 
 NAME="<%= @service_name %>"
 APPLICATION_PATH="<%= @start_script %>"
+APPLICATION_DIR="<%= node['openhackathon'][:ui][:src_dir] %>"
 PIDFILE="/var/run/node-<%= @service_name %>.pid"
 LOGFILE="<%= @log_path %>"
 MIN_UPTIME="<%= @min_uptime %>"
@@ -35,6 +36,9 @@ start() {
     forever \
       --pidFile $PIDFILE \
       -a \
+      --sourceDir $APPLICATION_DIR \
+      --workingDir $APPLICATION_DIR \
+      --uid "<%= @service_name %>" \
       -l $LOGFILE \
       -o $LOGFILE \
       -e $LOGFILE \
@@ -48,7 +52,9 @@ stop() {
     if [ -f $PIDFILE ]; then
         echo "Shutting down $NAME"
         # Tell Forever to stop the process.
-        forever stop $APPLICATION_PATH 2>&1 > /dev/null
+        forever --sourceDir $APPLICATION_DIR \
+        --workingDir $APPLICATION_DIR \
+        stop <%= @service_name %> 2>&1 > /dev/null
         # Get rid of the pidfile, since Forever won't do that.
         rm -f $PIDFILE
         RETVAL=$?

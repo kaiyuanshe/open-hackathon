@@ -69,6 +69,7 @@ import requests
 from hackathon.scheduler import scheduler
 from datetime import timedelta
 from hackathon.enum import HACK_STATUS
+from hackathon.template.template_mgr import auto_pull_images_for_hackathon
 
 
 class HostedDockerFormation(DockerFormationBase, Component):
@@ -235,14 +236,19 @@ class HostedDockerFormation(DockerFormationBase, Component):
         self.log.debug("starting container %s is ended ... " % container_name)
         return container
 
-    # TODO: HACK-483
-    def pull_image(self, dns, image_name):
-        pull_image_url = dns + "/images/create?fromImage=" + image_name
+    def get_vm_url(self, docker_host):
+        return 'http://%s:%d' % (docker_host.public_dns, docker_host.public_docker_api_port)
+
+    def pull_image(self, docker_host, image_name, tag):
+        pull_image_url = self.get_vm_url(docker_host) + "/images/create?fromImage=" + image_name + '&tag=' + tag
         self.log.debug(" send request to pull image:" + pull_image_url)
         return requests.post(pull_image_url)
 
-    def get_vm_url(self, docker_host):
-        return 'http://%s:%d' % (docker_host.public_dns, docker_host.public_docker_api_port)
+    def get_pulled_images(self, docker_host):
+        get_images_url = self.get_vm_url(docker_host) + "/images/json?all=0"
+        current_images_info = json.loads(self.util.get_remote(get_images_url))  # [{},{},{}]
+        current_images_tags = map(lambda x: x['RepoTags'], current_images_info)  # [[],[],[]]
+        return flatten(current_images_tags)  # [ imange:tag, image:tag ]
 
     # --------------------------------------------- helper function ---------------------------------------------#
 
@@ -445,17 +451,17 @@ class HostedDockerFormation(DockerFormationBase, Component):
         self.log.debug("starting to release ports ... ")
         ep.release_public_endpoints(host_server_dns, 'Production', host_server_name, host_ports)
 
+
     # ----------------------initialize hackathon's templates on every docker host-------------------#
 
-    # TODO: HACK-483
     def ensure_images(self):
         hackathons = db_adapter.find_all_objects(Hackathon, Hackathon.status == HACK_STATUS.ONLINE)
         for hackathon in hackathons:
             self.log.debug("Start recycling inactive ensure images for hackathons")
-            excute_time = self.util.get_now() + timedelta(minutes=1)
-            scheduler.add_job(self.template_manager.pull_images_for_hackathon,
+            excute_time = self.util.get_now() + timedelta(seconds=3)
+            scheduler.add_job(auto_pull_images_for_hackathon,
                               'interval',
-                              id=hackathon.id + "pull images",
+                              id='%s pull images' % hackathon.id,
                               replace_existing=True,
                               next_run_time=excute_time,
                               minutes=60,
