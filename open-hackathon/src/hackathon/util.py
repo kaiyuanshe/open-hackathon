@@ -118,7 +118,7 @@ def call(mdl_cls_func, cls_args, func_args):
 
 
 def get_now():
-    return datetime.now(utc)
+    return datetime.utcnow()  #tzinfo=None
 
 
 class Utility(object):

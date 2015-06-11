@@ -41,7 +41,7 @@ def relationship(*arg, **kw):
 
 
 def date_serializer(date):
-    return long((date - datetime(1970, 1, 1, tzinfo=utc)).total_seconds() * 1000)
+    return long((date - datetime(1970, 1, 1)).total_seconds() * 1000)
 
 
 def to_dic(inst, cls):
@@ -69,13 +69,11 @@ def to_json(inst, cls):
 
 
 class TZDateTime(TypeDecorator):
-    """
-    Coerces a tz-aware datetime object into a naive utc datetime object to be
-    stored in the database. If already naive, will keep it.
-    On return of the data will restore it as an aware object by assuming it
-    is UTC.
-    Use this instead of the standard :class:`sqlalchemy.types.DateTime`.
-    """
+    '''
+        usage: remove datetime's tzinfo
+        To set all datetime datas are the naive datetime (tzinfo=None) in the whole environment
+    '''
+
     impl = DateTime
 
     def process_bind_param(self, value, dialect):
@@ -85,13 +83,15 @@ class TZDateTime(TypeDecorator):
             if isinstance(value, datetime):
                 if value.tzinfo is not None:
                     value = value.astimezone(utc)
+                    value.replace(tzinfo=None)
         return value
 
     def process_result_value(self, value, dialect):
         if value is not None:
             if isinstance(value, datetime):
-                if value.tzinfo is None:
-                    value = utc.localize(value)
+                if value.tzinfo is not None:
+                    value = value.astimezone(utc)
+                    value.replace(tzinfo=None)
         return value
 
 

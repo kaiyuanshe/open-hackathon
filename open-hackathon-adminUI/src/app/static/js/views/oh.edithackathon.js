@@ -120,7 +120,7 @@
         if(!startTime && !endTime){
             return ''
         }
-        return moment(startTime).format('YYYY/MM/DD HH:MM ') + '- ' + moment(endTime).format('YYYY/MM/DD HH:MM');
+        return moment(startTime).format('YYYY/MM/DD HH:mm ') + '- ' + moment(endTime).format('YYYY/MM/DD HH:mm');
     }
 
     function getHackthonData(){
