@@ -28,7 +28,7 @@ default['openhackathon'][:ui][:config_file] = "#{openhackathon[:ui][:src_dir]}/c
 
 default['openhackathon'][:ui][:hostname] = 'open-hackathon-dev.chinacloudapp.cn'
 default['openhackathon'][:ui][:hackathon_name] = 'kaiyuanshe'
-default['openhackathon'][:ui][:login_provider] ='["github", "qq", "weibo", "gitcafe","live"]'
+default['openhackathon'][:ui][:login_provider] ='["github", "qq", "weibo", "gitcafe", "live"]'
 
 # forever param
 default['openhackathon'][:ui][:forever][:spin_sleep_time] = 2000
