@@ -185,6 +185,9 @@ class HackathonManager(Component):
                 "cannot load pre_allocate_enabled from basic info for hackathon %d, will return False" % hackathon.id)
             return False
 
+    def is_alauda_enabled(self, hackathon):
+        # todo include it in "basic_info" or "extra_info"
+        return True
 
     def get_pre_allocate_number(self, hackathon):
         try:
@@ -407,6 +410,12 @@ def get_pre_allocate_number(hackathon):
     return hack_manager.get_pre_allocate_number(hackathon)
 
 
+def is_alauda_enabled(hackathon):
+    hack_manager = RequiredFeature("hackathon_manager")
+    return hack_manager.is_alauda_enabled(hackathon)
+
+
 Hackathon.is_auto_approve = is_auto_approve
 Hackathon.is_pre_allocate_enabled = is_pre_allocate_enabled
 Hackathon.get_pre_allocate_number = get_pre_allocate_number
+Hackathon.is_alauda_enabled = is_alauda_enabled

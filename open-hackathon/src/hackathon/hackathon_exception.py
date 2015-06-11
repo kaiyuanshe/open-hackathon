@@ -23,28 +23,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-import abc
+
+class HackathonException(Exception):
+    pass
 
 
-class DockerFormationBase(object):
-    __metaclass__ = abc.ABCMeta
+class AlaudaException(HackathonException):
+    '''
+    Exception that indicate failure in http request to Alauda
+    '''
 
-    @abc.abstractmethod
-    def start(self, unit, **kwargs):
-        """start a docker container"""
-        return
+    def __init__(self, code, message):
+        self.code = code
+        self.message = message
 
-    @abc.abstractmethod
-    def stop(self, name, **kwargs):
-        """stop a docker container"""
-        return
-
-    @abc.abstractmethod
-    def delete(self, name, **kwargs):
-        """delete a docker container"""
-        return
-
-    @abc.abstractmethod
-    def health(self):
-        """report health status"""
-        return
+    def __repr__(self):
+        return "Failure in http request to Alauda: [%s]%s" % (self.code, self.message)

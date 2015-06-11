@@ -1,9 +1,12 @@
 {
-    "expr_name": "sample-template-for-docker",
+    "name": "sample-template-for-docker",
+    "description": "",
     "virtual_environments":
     [
         {
             "provider": "docker",
+            "type": "ubuntu terminal",
+            "description":"",
             "name": "web",
             "ports":
             [
@@ -19,12 +22,6 @@
                     "port": 22,
                     "public": true,
                     "protocol": "tcp"
-                },
-                {
-                    "name": "mysql",
-                    "port": 3306,
-                    "public": false,
-                    "protocol": "tcp"
                 }
             ],
             "remote":
@@ -32,7 +29,7 @@
                 "provider": "guacamole",
                 "protocol": "ssh",
                 "username": "root",
-                "password": "acowoman",
+                "password": "root",
                 "port": 22
             },
             "Hostname": "",
@@ -44,10 +41,10 @@
             "Tty": true,
             "OpenStdin": true,
             "StdinOnce": false,
-            "Env": ["ROOT_PASS=acowoman"],
-            "Cmd": [],
+            "Env": [],
+            "Cmd": ["/usr/sbin/sshd", "-D"],
             "Entrypoint": "",
-            "Image": "sffamily/ulampssh",
+            "Image": "rastasheep/ubuntu-sshd",
             "Labels": {},
             "Volumes": {},
             "WorkingDir": "",

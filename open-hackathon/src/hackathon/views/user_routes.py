@@ -47,9 +47,10 @@ class GuacamoleResource(Resource):
         return guacamole.getConnectInfo()
 
 
-class UserResource(Resource):
-    def get(self, id):
-        return user_manager.get_user_by_id(id)
+class CurrentUserResource(Resource):
+    @token_required
+    def get(self):
+        return user_manager.user_display_info(g.user)
 
 
 class UserLoginResource(Resource, Component):
@@ -192,7 +193,7 @@ def register_user_routes():
     api.add_resource(GuacamoleResource, "/api/guacamoleconfig", "/api/user/guacamoleconfig")
 
     # user API
-    api.add_resource(UserResource, "/api/user/<int:id>")
+    api.add_resource(CurrentUserResource, "/api/user")
     api.add_resource(UserLoginResource, "/api/user/login")
 
     # user-hackathon-relationship, or register, API
@@ -205,7 +206,7 @@ def register_user_routes():
     api.add_resource(UserExperimentListResource, "/api/user/experiment/list")
 
     # team API
-    api.add_resource(GetTeamMembersByUserResource, "/api/user/team/myteam")
+    api.add_resource(GetTeamMembersByUserResource, "/api/user/team/member")
 
     # user profile API
     api.add_resource(UserProfileResource, "/api/user/profile")

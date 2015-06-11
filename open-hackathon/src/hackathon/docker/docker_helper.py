@@ -22,29 +22,21 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
+import sys
 
-import abc
+sys.path.append("..")
+from hackathon import Component, RequiredFeature
 
 
-class DockerFormationBase(object):
-    __metaclass__ = abc.ABCMeta
+class DockerHelper(Component):
+    hosted_docker = RequiredFeature("hosted_docker")
+    alauda_docker = RequiredFeature("alauda_docker")
 
-    @abc.abstractmethod
-    def start(self, unit, **kwargs):
-        """start a docker container"""
-        return
+    def get_docker(self, hackathon):
+        if self.util.safe_get_config("docker.alauda.enabled", False):
+            return self.hosted_docker
 
-    @abc.abstractmethod
-    def stop(self, name, **kwargs):
-        """stop a docker container"""
-        return
-
-    @abc.abstractmethod
-    def delete(self, name, **kwargs):
-        """delete a docker container"""
-        return
-
-    @abc.abstractmethod
-    def health(self):
-        """report health status"""
-        return
+        if hackathon.is_alauda_enabled():
+            return self.alauda_docker
+        else:
+            return self.hosted_docker

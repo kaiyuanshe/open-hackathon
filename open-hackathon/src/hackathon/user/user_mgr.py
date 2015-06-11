@@ -166,8 +166,8 @@ class UserManager(Component):
                 "last_login_time": str(user.last_login_time)
             }
 
-    def get_team_members_by_team_name(self, h_id, t_name):
-        team_member = self.db.find_all_objects_by(UserHackathonRel, hackathon_id=h_id, team_name=t_name)
+    def get_team_members_by_team_name(self, hackathon_id, team_name):
+        team_member = self.db.find_all_objects_by(UserHackathonRel, hackathon_id=hackathon_id, team_name=team_name)
 
         def get_info(sql_object):
             r = sql_object.dic()
@@ -175,9 +175,11 @@ class UserManager(Component):
             return r
 
         team_member = map(lambda x: get_info(x), team_member)
-
         return team_member
 
-    def get_team_members_by_user(self, h_id, u_id):
-        my_team = self.db.find_first_object_by(UserHackathonRel, hackathon_id=h_id, user_id=u_id)
-        return self.get_team_members_by_team_name(h_id, my_team.team_name)
+    def get_team_members_by_user(self, hackathon_id, user_id):
+        my_team = self.db.find_first_object_by(UserHackathonRel, hackathon_id=hackathon_id, user_id=user_id)
+        if my_team and my_team.team_name:
+            return self.get_team_members_by_team_name(hackathon_id, my_team.team_name)
+        else:
+            return []

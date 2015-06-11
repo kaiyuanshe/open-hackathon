@@ -96,19 +96,20 @@ class TemplateManager(Component):
         return data
 
     def get_template_settings(self, hackathon_name):
-        data = self.get_created_template_list(hackathon_name)
+        template_list = self.get_created_template_list(hackathon_name)
         settings = []
-        for d in data:
+        for template in template_list:
             template_units = []
-            for ve in d['data'][BaseTemplate.VIRTUAL_ENVIRONMENTS]:
+            for ve in template['data'][BaseTemplate.VIRTUAL_ENVIRONMENTS]:
                 template_units.append({
                     'name': ve[DockerTemplateUnit.NAME],
-                    'type': ve[DockerTemplateUnit.TYPE],
-                    'description': ve[DockerTemplateUnit.DESCRIPTION],
+                    'type': ve[DockerTemplateUnit.TYPE] if DockerTemplateUnit.TYPE in ve else "",
+                    'description': ve[DockerTemplateUnit.DESCRIPTION] if DockerTemplateUnit.DESCRIPTION in ve else "",
                 })
             settings.append({
-                'name': d['data'][BaseTemplate.EXPR_NAME],
-                'description': d['data'][BaseTemplate.DESCRIPTION],
+                'name': template['data'][BaseTemplate.TEMPLATE_NAME],
+                'description': template['data'][BaseTemplate.DESCRIPTION] if BaseTemplate.DESCRIPTION in template[
+                    'data'] else "",
                 'units': template_units,
             })
         return settings
@@ -123,7 +124,7 @@ class TemplateManager(Component):
         status, return_info = self.__check_create_args(args)
         if not status:
             return return_info
-        file_name = '%s-%s-%s.js' % (g.hackathon.name, args[BaseTemplate.EXPR_NAME], str(uuid.uuid1())[0:8])
+        file_name = '%s-%s-%s.js' % (g.hackathon.name, args[BaseTemplate.TEMPLATE_NAME], str(uuid.uuid1())[0:8])
         # create template step 2 : parse args and trans to file
         url = self.__save_args_to_file(args, file_name)
         if url is None:
@@ -135,7 +136,7 @@ class TemplateManager(Component):
         # create template step 4 : insert into DB
         self.log.debug("create template: %r" % args)
         self.db.add_object_kwargs(Template,
-                                  name=args[BaseTemplate.EXPR_NAME],
+                                  name=args[BaseTemplate.TEMPLATE_NAME],
                                   url=url,
                                   azure_url=azure_url,
                                   provider=args[BaseTemplate.VIRTUAL_ENVIRONMENTS_PROVIDER],
@@ -158,7 +159,7 @@ class TemplateManager(Component):
         status, return_info = self.__check_update_args(args)
         if not status:
             return return_info
-        file_name = '%s-%s-%s.js' % (g.hackathon.name, args[BaseTemplate.EXPR_NAME], str(uuid.uuid1())[0:8])
+        file_name = '%s-%s-%s.js' % (g.hackathon.name, args[BaseTemplate.TEMPLATE_NAME], str(uuid.uuid1())[0:8])
         # update template step 2 : parse args and trans to file
         url = self.__save_args_to_file(args, file_name)
         if url is None:
@@ -239,19 +240,19 @@ class TemplateManager(Component):
     # ---------------------------------------- helper functions ---------------------------------------- #
 
     def __check_create_args(self, args):
-        if BaseTemplate.EXPR_NAME not in args \
+        if BaseTemplate.TEMPLATE_NAME not in args \
                 or BaseTemplate.DESCRIPTION not in args \
                 or BaseTemplate.VIRTUAL_ENVIRONMENTS_PROVIDER not in args \
                 or BaseTemplate.VIRTUAL_ENVIRONMENTS not in args:
             return False, bad_request("template args invalid")
-        if self.db.count_by(Template, name=args[BaseTemplate.EXPR_NAME]) > 0:
+        if self.db.count_by(Template, name=args[BaseTemplate.TEMPLATE_NAME]) > 0:
             return False, bad_request("template already exists")
         return True, "pass"
 
     def __save_args_to_file(self, args, file_name):
         try:
             docker_template_units = [DockerTemplateUnit(ve) for ve in args[BaseTemplate.VIRTUAL_ENVIRONMENTS]]
-            docker_template = DockerTemplate(args[BaseTemplate.EXPR_NAME],
+            docker_template = DockerTemplate(args[BaseTemplate.TEMPLATE_NAME],
                                              args[BaseTemplate.DESCRIPTION],
                                              docker_template_units)
             file_path = docker_template.to_file(file_name)
@@ -270,12 +271,12 @@ class TemplateManager(Component):
             return None
 
     def __check_update_args(self, args):
-        if BaseTemplate.EXPR_NAME not in args \
+        if BaseTemplate.TEMPLATE_NAME not in args \
                 or BaseTemplate.DESCRIPTION not in args \
                 or BaseTemplate.VIRTUAL_ENVIRONMENTS_PROVIDER not in args \
                 or BaseTemplate.VIRTUAL_ENVIRONMENTS not in args:
             return False, bad_request("template args invalid")
-        template = self.db.find_first_object_by(Template, name=args[BaseTemplate.EXPR_NAME])
+        template = self.db.find_first_object_by(Template, name=args[BaseTemplate.TEMPLATE_NAME])
         if template is None:
             return False, bad_request("template not exists")
         return True, template

@@ -130,6 +130,11 @@ def before_request():
     app.permanent_session_lifetime = timedelta(minutes=session_lifetime_minutes)
 
 
+@app.errorhandler(401)
+def custom_401(error):
+    return __render("/login.html", error=None)
+
+
 def simple_route(path):
     if Template_Routes.has_key(path):
         return render_template(Template_Routes[path],
@@ -181,9 +186,11 @@ def qq_login():
 def gitcafe_login():
     return __login(LOGIN_PROVIDER.GITCAFE)
 
+
 @app.route('/live')
 def live_login():
     return __login(LOGIN_PROVIDER.LIVE)
+
 
 @app.route('/')
 @app.route('/index')
@@ -243,6 +250,7 @@ def registerusers():
 @login_required
 def users():
     return __render("/users.html")
+
 
 @app.route("/azurecert")
 @login_required
