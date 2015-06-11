@@ -118,7 +118,7 @@ class HackathonManager(Component):
 
 
     def get_user_hackathon_list(self, user_id):
-        user_hack_list = self.db.session.query(Hackathon, UserHackathonRel) \
+        user_hack_list = self.db.session().query(Hackathon, UserHackathonRel) \
             .outerjoin(UserHackathonRel, UserHackathonRel.user_id == user_id) \
             .filter(UserHackathonRel.deleted != 1, UserHackathonRel.user_id == user_id).all()
 
