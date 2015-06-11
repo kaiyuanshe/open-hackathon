@@ -46,21 +46,22 @@
   },
   "api": {
     "user": {
-      "login":["post","del"],
-      "hackathon":["get"],
+      "login":["post","delete"],
       "experiment":{
-        "":["get","post","del","put"],
+        "":["get","post","delete","put"],
         "list":["get"]
       }
     },
-    "register":{
+    "registration":{
+      "":["put","post","get"],
+      "checkmail":["get"],
       "list":["get"]
     },
     "bulletin":{
       "":["get","post"]
     },
     "hackathon": {
-      "": ["get","post"],
+      "": ["get"],
       "list": ["get"],
       "stat": ["get"],
       "template": ["get"]
