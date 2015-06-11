@@ -112,9 +112,9 @@ default['openhackathon'][:gem][:enable_taobao_mirror] = true
 default['openhackathon'][:secret][:secretpath] = '/tmp/data_bag_key'
 
 # pre allocate
-default['openhackathon'][:pre_allocate][:check_interval_minutes] = 5
-default['openhackathon'][:pre_allocate][:azure] = 1
-default['openhackathon'][:pre_allocate][:docker] = 1
+default['openhackathon'][:pre_allocate][:check_interval_minutes] = '5'
+default['openhackathon'][:pre_allocate][:azure] = '1'
+default['openhackathon'][:pre_allocate][:docker] = '1'
 
 # storage
 default['openhackathon'][:storage][:account_name] = "hackathon"
@@ -122,7 +122,7 @@ default['openhackathon'][:storage][:account_key] = "U4/oE3Ocwk9txQHw2qNOCCW2Fy05
 default['openhackathon'][:storage][:image_container] = "images"
 default['openhackathon'][:storage][:template_container] = "templates"
 default['openhackathon'][:storage][:blob_service_host_base] = ".blob.core.chinacloudapi.cn"
-default['openhackathon'][:storage][:size_limit_kilo_bytes] = 5120
+default['openhackathon'][:storage][:size_limit_kilo_bytes] = '5120'
 
 default['openhackathon']['app']['secret_key'] = "secret_key"
 

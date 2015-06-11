@@ -57,7 +57,7 @@ Config = {
             "email_info_url": 'https://api.weibo.com/2/account/profile/email.json?access_token='
         },
         "live": {
-            "user_info_url": 'https://apis.live.net/v5.0/me?access_token="
+            "user_info_url": 'https://apis.live.net/v5.0/me?access_token='
         },
         "token_expiration_minutes": <%= node['openhackathon']['token_expiration_minutes'] %>
     },
@@ -70,12 +70,12 @@ Config = {
     },
     "scheduler": {
         "job_store": "mysql",
-        "job_store_url": 'mysql://%s:%s@%s/%s' % (MYSQL_USER, MYSQL_PWD, MYSQL_HOST, MYSQL_DB)
+        "job_store_url": 'mysql://%s:%s@%s:%s/%s' % (MYSQL_USER, MYSQL_PWD, MYSQL_HOST, MYSQL_PORT,MYSQL_DB)
     },
     "pre_allocate": {
-        "check_interval_minutes": <%= ['openhackathon'][:pre_allocate][:check_interval_minutes] %>,
-        "azure": <%= ['openhackathon'][:pre_allocate][:azure] %>,
-        "docker": <%= ['openhackathon'][:pre_allocate][:docker] %>
+        "check_interval_minutes": <%= node['openhackathon'][:pre_allocate][:check_interval_minutes] %>,
+        "azure": <%= node['openhackathon'][:pre_allocate][:azure] %>,
+        "docker": <%= node['openhackathon'][:pre_allocate][:docker] %>
     },
     "recycle":{
         "idle_hours": 24,

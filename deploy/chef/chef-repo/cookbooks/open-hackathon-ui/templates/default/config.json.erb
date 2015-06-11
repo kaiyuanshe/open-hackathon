@@ -34,37 +34,28 @@
       "redirect_uri":"http://%s/weibo",
       "code":""
     },
-    "live":{
-      "access_token_url": "https://login.live.com/oauth20_token.srf",
-      "client_id":"<%= node['openhackathon']['live']['client_id'] %>",
-      "client_secret":"<%= @live_client_secret %>",
-      "grant_type":"authorization_code",
-      "redirect_uri":"http://%s/live",
-      "code":""
-    },
     "provider_enabled": <%= node['openhackathon'][:ui][:login_provider] %>
   },
   "api": {
     "user": {
-      "login": ["post","del"],
-      "experiment": {
-        "": ["get","post","del","put"],
-        "list": ["get"]
-      },
-      "registration": {
-        "":["put","post","get"],
-        "checkemail": ["get"],
-        "list": ["get"]
+      "login":["post","del"],
+      "hackathon":["get"],
+      "experiment":{
+        "":["get","post","del","put"],
+        "list":["get"]
       }
     },
-    "bulletin": {
-      "": ["get", "post"]
+    "register":{
+      "list":["get"]
     },
-    "hackathon": {
-      "": ["get"],
-      "list": ["get"],
-      "stat": ["get"],
-      "template": ["get"]
+    "bulletin":{
+      "":["get","post"]
+    },
+    "hackathon":{
+      "":["get","post"],
+      "list":["get"],
+      "stat":["get"],
+      "template":["get"]
     }
   },
   "sociallogin": {
@@ -91,23 +82,12 @@
       "scope": "<%= node['openhackathon']['qq']['scope'] %>",
       "state": "<%= node['openhackathon']['qq']['OAUTH_STATE'] %>",
       "response_type": "<%= node['openhackathon']['qq']['response_type'] %>"
-    },
-    "live": {
-      "client_id": "<%= node['openhackathon']['live']['client_id'] %>",
-      "redirect_uri": "http://<%= node['openhackathon'][:ui][:hostname] %>/live" ,
-      "scope": "<%= node['openhackathon']['live']['scope'] %>",
-      "response_type": "code"
     }
   },
   "social":{
     "github":"https://github.com/login/oauth/authorize?",
     "gitcafe":"<%= node['openhackathon']['gitcafe']['domain'] %>/oauth/authorize?'",
     "weibo":"https://api.weibo.com/oauth2/authorize?",
-    "qq":"https://graph.qq.com/oauth2.0/authorize?",
-    "live":"https://login.live.com/oauth20_authorize.srf?"
-  },
-  "seo":{
-    "keywords":"开放黑客松,Open Hackathon Platform",
-    "description":"open hackathon platform"
+    "qq":"https://graph.qq.com/oauth2.0/authorize?"
   }
 }
