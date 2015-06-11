@@ -29,7 +29,7 @@ sys.path.append("..")
 
 from hackathon import api, RequiredFeature, Component, g
 from flask_restful import Resource, reqparse
-from hackathon.decorators import token_required, hackathon_name_required
+from hackathon.decorators import hackathon_name_required
 from hackathon.hackathon_response import ok
 from hackathon.health import report_health
 from hackathon.database.models import Announcement
@@ -39,6 +39,8 @@ import time
 
 hackathon_manager = RequiredFeature("hackathon_manager")
 register_manager = RequiredFeature("register_manager")
+user_manager = RequiredFeature("user_manager")
+docker = RequiredFeature("docker")
 
 class HealthResource(Resource):
     def get(self):
@@ -106,12 +108,12 @@ class HackathonTemplateResource(Resource, Component):
 
 
 class HackathonRegisterResource(Resource):
- @hackathon_name_required
- def get(self):
-     parse = reqparse.RequestParser()
-     parse.add_argument('num', type=int, location='args', default=5)
-     args = parse.parse_args()
-     return register_manager.get_hackathon_registers(args['num'])
+    @hackathon_name_required
+    def get(self):
+         parse = reqparse.RequestParser()
+         parse.add_argument('num', type=int, location='args', default=5)
+         args = parse.parse_args()
+         return register_manager.get_hackathon_registers(args['num'])
 
 class GetTeamMembersByTeamNameResource(Resource):
     @hackathon_name_required
@@ -133,6 +135,10 @@ class HackathonTeamListResource(Resource):
         id = g.hackathon.id
         return hackathon_manager.get_hackathon_team_list(id, result['name'], result['number'])
 
+
+class TestEnsureImagesResource(Resource):
+    def get(self):
+        return docker.ensure_images()
 
 def register_routes():
     """
@@ -164,3 +170,7 @@ def register_routes():
 
     # hackathon register api
     api.add_resource(HackathonRegisterResource, "/api/hackathon/register")
+
+    #TODO after find a callable way , would delete this api
+    api.add_resource(TestEnsureImagesResource, "/api/test/ensure")
+
