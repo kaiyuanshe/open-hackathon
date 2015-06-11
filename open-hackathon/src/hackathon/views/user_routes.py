@@ -30,7 +30,7 @@ from hackathon import api, RequiredFeature, Component, g, request
 from flask_restful import Resource, reqparse
 from hackathon.user.login import login_providers
 from hackathon.decorators import token_required, hackathon_name_required
-from hackathon.hackathon_response import internal_server_error
+from hackathon.hackathon_response import internal_server_error, not_found
 import json
 from hackathon.enum import RGStatus
 
@@ -164,7 +164,11 @@ class UserProfileResource(Resource):
     @token_required
     def get(self):
         user_id = g.user.id
-        return register_manager.get_user_profile(user_id)
+        info = register_manager.get_user_profile(user_id)
+        if info is not None:
+            return info.dic()
+        else:
+            return not_found("User doesn't have profile info yet.")
 
     @token_required
     def post(self):

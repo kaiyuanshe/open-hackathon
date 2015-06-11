@@ -182,12 +182,10 @@ class RegisterManger(Component):
         return hackathon_team_list
 
     def get_user_profile(self, user_id):
-        return self.db.find_first_object_by(UserProfile, user_id=user_id).dic()
+        return self.db.find_first_object_by(UserProfile, user_id=user_id)
 
     def create_user_profile(self, args):
         self.log.debug("create_user_profile: %r" % args)
-        if "user_id" not in args:
-            return bad_request("missing user_id")
         try:
             return self.db.add_object_kwargs(UserProfile, **args).dic()
         except Exception as e:
@@ -196,8 +194,6 @@ class RegisterManger(Component):
 
     def update_user_profile(self, args):
         self.log.debug("update_user_profile")
-        if "user_id" not in args:
-            return bad_request("missing user_id")
         try:
             u_id = args["user_id"]
             user_profile = self.db.find_first_object_by(UserProfile, user_id=u_id)

@@ -208,7 +208,6 @@ class UserProfile(DBBase):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
     real_name = Column(String(80))
-    email = Column(String(120))
     phone = Column(String(11))
     gender = Column(Integer)  # 0:women 1:man
     age = Column(Integer)
@@ -220,7 +219,7 @@ class UserProfile(DBBase):
     skype = Column(String(32))
     address = Column(String(80))
 
-    user = relationship('User', backref=backref('profile', lazy='dynamic'))
+    user = relationship('User', backref=backref('profile', uselist=False))
 
 
 class Hackathon(DBBase):

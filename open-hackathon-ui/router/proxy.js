@@ -58,7 +58,7 @@ function login(res, option) {
     var redirect = '/#!/redirect';
     if (response.statusCode >= 200 && response.statusCode < 300 && !data.error) {
       console.log(data);
-      res.cookie(COOKIE_TOKEN, JSON.stringify(data.token));
+      res.cookie(COOKIE_TOKEN, data.token);
       res.cookie(COOKIE_USERINFORMATION, JSON.stringify(data.user));
     }else{
       redirect = '/#!/error'

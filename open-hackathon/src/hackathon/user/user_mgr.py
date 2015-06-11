@@ -140,17 +140,31 @@ class UserManager(Component):
             return not_found("user id invalid")
 
     def user_display_info(self, user):
-        return {
-            "id": user.id,
-            "name": user.name,
-            "nickname": user.nickname,
-            "email": [e.dic() for e in user.emails.all()],
-            "provider": user.provider,
-            "avatar_url": user.avatar_url,
-            "online": user.online,
-            "create_time": str(user.create_time),
-            "last_login_time": str(user.last_login_time)
-        }
+        if user.profile is not None:
+            return {
+                "id": user.id,
+                "name": user.name,
+                "nickname": user.nickname,
+                "email": [e.dic() for e in user.emails.all()],
+                "provider": user.provider,
+                "avatar_url": user.avatar_url,
+                "online": user.online,
+                "user_profile": user.profile.dic(),
+                "create_time": str(user.create_time),
+                "last_login_time": str(user.last_login_time)
+            }
+        else:
+            return {
+                "id": user.id,
+                "name": user.name,
+                "nickname": user.nickname,
+                "email": [e.dic() for e in user.emails.all()],
+                "provider": user.provider,
+                "avatar_url": user.avatar_url,
+                "online": user.online,
+                "create_time": str(user.create_time),
+                "last_login_time": str(user.last_login_time)
+            }
 
     def get_team_members_by_team_name(self, h_id, t_name):
         team_member = self.db.find_all_objects_by(UserHackathonRel, hackathon_id=h_id, team_name=t_name)
