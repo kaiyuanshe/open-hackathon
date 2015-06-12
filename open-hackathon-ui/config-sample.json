@@ -64,7 +64,10 @@
       "": ["get"],
       "list": ["get"],
       "stat": ["get"],
-      "template": ["get"]
+      "template": ["get"],
+      "registration": {
+        "list": ["get"]
+      }
     }
   },
   "sociallogin": {

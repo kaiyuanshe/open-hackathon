@@ -37,8 +37,8 @@ class DockerTemplate(BaseTemplate):
     """
     DOCKER = 'docker'
 
-    def __init__(self, expr_name, description, docker_template_units):
-        super(DockerTemplate, self).__init__(expr_name, description)
+    def __init__(self, template_name, description, docker_template_units):
+        super(DockerTemplate, self).__init__(template_name, description)
         self.docker_template_units = docker_template_units
         # set provider as docker
         for docker_template_unit in self.docker_template_units:

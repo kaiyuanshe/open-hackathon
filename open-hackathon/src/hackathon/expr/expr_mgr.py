@@ -105,7 +105,7 @@ class ExprManager(Component):
         if not self.register_manager.is_user_registered(user_id, hackathon):
             return access_denied("user not registered or not approved")
 
-        if hackathon.event_end_time < self.util.self.util.get_now():
+        if hackathon.event_end_time < self.util.get_now():
             self.log.warn("hackathon is ended. The expr starting process will be stopped")
             return precondition_failed('hackathen is ended')
 
@@ -182,14 +182,14 @@ class ExprManager(Component):
             # Docker
             if expr.template.provider == VEProvider.Docker:
                 # stop containers
-                for c in expr.virtual_environments:
+                for c in expr.virtual_environments.all():
                     try:
                         self.log.debug("begin to stop %s" % c.name)
                         if force:
-                            self.docker.delete(c.name, container=c.container, expr_id=expr_id)
+                            self.docker.delete(c.name, virtual_environment=c, container=c.container, expr_id=expr_id)
                             c.status = VEStatus.Deleted
                         else:
-                            self.docker.stop(c.name, container=c.container, expr_id=expr_id)
+                            self.docker.stop(c.name, virtual_environment=c, container=c.container, expr_id=expr_id)
                             c.status = VEStatus.Stopped
                     except Exception as e:
                         self.log.error(e)
@@ -454,7 +454,7 @@ def recycle_expr_scheduler():
 
 def recycle_expr():
     """
-    recycle experiment when idle more than 5 hours
+    recycle experiment when idle more than 24 hours
     :return:
     """
     log = RequiredFeature("log")
@@ -468,7 +468,7 @@ def recycle_expr():
 
     expr_time_cond = Experiment.last_heart_beat_time + timedelta(hours=recycle_hours) > util.get_now()
     recycle_cond = Experiment.hackathon_id.in_(hackathon_manager.get_recyclable_hackathon_list())
-    r = db.find_first_object(Experiment, hackathon_manager, recycle_cond)
+    r = db.find_first_object(Experiment, hackathon_manager, expr_time_cond, recycle_cond)
 
     if r is not None:
         expr_manager.stop_expr(r.id)

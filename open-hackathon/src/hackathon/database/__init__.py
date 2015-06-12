@@ -2,7 +2,7 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
 #  
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -42,7 +42,7 @@ engine = create_engine(safe_get_config(MYSQL_CONNECTION, DEFAULT_URL),
                        max_overflow=100,
                        echo=False)
 db_session = scoped_session(sessionmaker(autocommit=False,
-                                         autoflush=False,
+                                         autoflush=True,
                                          bind=engine))
 Base = declarative_base()
 Base.query = db_session.query_property()

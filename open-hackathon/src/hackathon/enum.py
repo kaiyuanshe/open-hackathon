@@ -67,6 +67,7 @@ class VEProvider:
     """
     Docker = 0
     AzureVM = 1
+    Alauda = 2
 
 
 class VERemoteProvider:

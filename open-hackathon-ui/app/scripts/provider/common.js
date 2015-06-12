@@ -31,7 +31,7 @@ angular.module('oh.common', [])
       });
       return $state.go(state, params, options);
     };
-  }).service('log', function ($log) {
+  }).service('log', function ($state, $log) {
     var _times = [];
     $.extend(true, this, $log);
     this.time = function (label) {

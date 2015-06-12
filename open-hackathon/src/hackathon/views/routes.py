@@ -38,9 +38,11 @@ from hackathon.expr.expr_mgr import open_check_expr, recycle_expr_scheduler
 import time
 
 hackathon_manager = RequiredFeature("hackathon_manager")
+user_manager = RequiredFeature("user_manager")
 register_manager = RequiredFeature("register_manager")
 user_manager = RequiredFeature("user_manager")
 docker = RequiredFeature("docker")
+
 
 class HealthResource(Resource):
     def get(self):
@@ -110,10 +112,11 @@ class HackathonTemplateResource(Resource, Component):
 class HackathonRegisterResource(Resource):
     @hackathon_name_required
     def get(self):
-         parse = reqparse.RequestParser()
-         parse.add_argument('num', type=int, location='args', default=5)
-         args = parse.parse_args()
-         return register_manager.get_hackathon_registers(args['num'])
+        parse = reqparse.RequestParser()
+        parse.add_argument('num', type=int, location='args', default=5)
+        args = parse.parse_args()
+        return register_manager.get_hackathon_registers(args['num'])
+
 
 class GetTeamMembersByTeamNameResource(Resource):
     @hackathon_name_required
@@ -139,6 +142,7 @@ class HackathonTeamListResource(Resource):
 class TestEnsureImagesResource(Resource):
     def get(self):
         return docker.ensure_images()
+
 
 def register_routes():
     """
@@ -166,11 +170,11 @@ def register_routes():
 
     # team API
     api.add_resource(HackathonTeamListResource, "/api/hackathon/team/list")
-    api.add_resource(GetTeamMembersByTeamNameResource, "/api/team/member")
+    api.add_resource(GetTeamMembersByTeamNameResource, "/api/hackathon/team/member")
 
     # hackathon register api
-    api.add_resource(HackathonRegisterResource, "/api/hackathon/register")
+    api.add_resource(HackathonRegisterResource, "/api/hackathon/registration/list")
 
-    #TODO after find a callable way , would delete this api
+    # TODO after find a callable way , would delete this api
     api.add_resource(TestEnsureImagesResource, "/api/test/ensure")
 
