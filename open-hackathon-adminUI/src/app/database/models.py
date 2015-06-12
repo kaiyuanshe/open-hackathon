@@ -90,8 +90,6 @@ class TZDateTime(TypeDecorator):
                 if value.tzinfo is not None:
                     value = value.astimezone(utc)
                     value.replace(tzinfo=None)
-                # else:
-                #     value.replace(tzinfo=utc)
         return value
 
     def process_result_value(self, value, dialect):
@@ -100,8 +98,6 @@ class TZDateTime(TypeDecorator):
                 if value.tzinfo is not None:
                     value = value.astimezone(utc)
                     value.replace(tzinfo=None)
-                # else:
-                #     value.replace(tzinfo=utc)
         return value
 
 
