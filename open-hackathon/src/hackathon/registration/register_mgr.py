@@ -60,7 +60,6 @@ class RegisterManger(Component):
 
     def validate_created_args(self, hackathon, args):
         self.log.debug("create_register: %r" % args)
-
         user_id = args['user_id']
         register = self.get_registration_by_user_and_hackathon(user_id, hackathon.id)
         if register is not None and register.deleted == 0:
@@ -77,6 +76,7 @@ class RegisterManger(Component):
             return False, precondition_failed("hackathon registers reach the upper threshold",
                                               friendly_message="报名人数已满")
         return True, ""
+
 
     def create_registration(self, hackathon, args):
         state, return_info = self.validate_created_args(hackathon, args)

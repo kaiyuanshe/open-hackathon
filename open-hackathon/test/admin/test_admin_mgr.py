@@ -25,17 +25,22 @@
 # -----------------------------------------------------------------------------------
 
 import sys
+import datetime
+from pytz import utc
+import pytz
 
 sys.path.append("../../src/hackathon")
 import unittest
-from hackathon.admin.admin_mgr import AdminManager, admin_manager
+from hackathon.admin.admin_mgr import AdminManager
 from hackathon.database.models import User, UserEmail, Hackathon, AdminHackathonRel
-from hackathon import app
+from hackathon import app, RequiredFeature
 from mock import Mock, ANY, patch
 import mock
 
 from flask import g
 from hackathon.hackathon_response import bad_request, precondition_failed, not_found, ok, internal_server_error
+
+
 
 
 class AdminManagerTest(unittest.TestCase):
@@ -46,12 +51,14 @@ class AdminManagerTest(unittest.TestCase):
     def tearDown(self):
         pass
 
+    admin_manager = RequiredFeature("admin_manager")
+
 
     '''test method create admin '''
 
     def test_create_admin_bad_request(self):
         args = {}
-        self.assertEqual(admin_manager.create_admin(args), bad_request("email invalid"))
+        self.assertEqual(self.admin_manager.create_admin(args), bad_request("email invalid"))
 
     def test_create_admin_email_missed(self):
         args = {'email': 'test@test.com'}
@@ -97,7 +104,7 @@ class AdminManagerTest(unittest.TestCase):
 
     def test_validate_updated_args_invalid_id(self):
         args = {}
-        status, return_info = admin_manager.validate_updated_args(args)
+        status, return_info = self.admin_manager.validate_updated_args(args)
         self.assertFalse(status)
         self.assertEqual(return_info, bad_request("invalid id"))
 
