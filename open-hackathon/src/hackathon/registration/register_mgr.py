@@ -23,6 +23,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
+import json
 
 import sys
 
@@ -49,7 +50,7 @@ class RegisterManger(Component):
 
 
     def check_register_enrollment(self, hackathon):
-        max = dict(hackathon.basic_info)['max_enrollment']
+        max = json.loads(hackathon.basic_info)['max_enrollment']
         if max == 0:  # means no limit
             return True
         else:
@@ -59,7 +60,6 @@ class RegisterManger(Component):
 
     def validate_created_args(self, hackathon, args):
         self.log.debug("create_register: %r" % args)
-
         user_id = args['user_id']
         register = self.get_registration_by_user_and_hackathon(user_id, hackathon.id)
         if register is not None and register.deleted == 0:
@@ -75,6 +75,7 @@ class RegisterManger(Component):
         if not self.check_register_enrollment(hackathon):
             return False, precondition_failed("hackathon registers reach the upper threshold",
                                               friendly_message="报名人数已满")
+        return True, 'pass'
 
     def create_registration(self, hackathon, args):
         statue, return_info = self.validate_created_args(hackathon, args)
