@@ -46,6 +46,7 @@
   },
   "api": {
     "user": {
+      "":["get"],
       "login": ["post","delete"],
       "experiment": {
         "": ["get","post","delete","put"],
@@ -55,6 +56,9 @@
         "":["put","post","get"],
         "checkemail": ["get"],
         "list": ["get"]
+      },
+      "profile":{
+        "":["get","post","put"]
       }
     },
     "bulletin": {
@@ -64,7 +68,13 @@
       "": ["get"],
       "list": ["get"],
       "stat": ["get"],
-      "template": ["get"]
+      "template": ["get"],
+      "team":{
+        "list":["get"]
+      },
+      "registration":{
+        "list":["get"]
+      }
     }
   },
   "sociallogin": {

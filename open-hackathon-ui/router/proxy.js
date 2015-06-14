@@ -58,9 +58,9 @@ function login(res, option) {
     var redirect = '/#!/redirect';
     if (response.statusCode >= 200 && response.statusCode < 300 && !data.error) {
       console.log(data);
-      res.cookie(COOKIE_TOKEN, JSON.stringify(data.token));
+      res.cookie(COOKIE_TOKEN, data.token);
       res.cookie(COOKIE_USERINFORMATION, JSON.stringify(data.user));
-    }else{
+    } else {
       redirect = '/#!/error'
     }
     res.redirect(redirect);
@@ -73,7 +73,7 @@ function login_bak(res, option) {
     var redirect = '/#!/hackathon';
     if (response.statusCode >= 200 && response.statusCode <= 300) {
       var user = data.user;
-      user.status = data.hackathon.end_time < Date.now() ? HACKATHON_EXPIRED:0;
+      user.status = data.hackathon.end_time < Date.now() ? HACKATHON_EXPIRED : 0;
       user.check_status = 0;
       if (data.hackathon.check_register == 1) {
         //当hackathon需要注册
@@ -108,7 +108,6 @@ function login_bak(res, option) {
     res.redirect(redirect);
   });
 }
-
 
 
 router.get('/github', function (req, res) {
@@ -207,7 +206,7 @@ router.get('/live', function (req, res) {
   var option = {
     //'content-type': 'application/x-www-form-urlencoded',
     url: config.login.live.access_token_url,
-   // form:'application/x-www-form-urlencoded',
+    // form:'application/x-www-form-urlencoded',
     form: {
       client_id: config.login.live.client_id,
       client_secret: config.login.live.client_secret,

@@ -27,45 +27,32 @@
  * @namespace oh.controllers
  * @author <ifendoe@gmail.com>
  * @version 0.0.1
- * Created by Boli Guan on 15-3-12.
- */
-
-/**
- * @ngdoc function
- * @name oh.controllers:settings.controller
- * @description
- * # settings.controller
- * Controller of the settings.controller
+ * Created by Boli Guan on 15-4-15.
  */
 angular.module('oh.controllers')
-  .controller('settings.controller', function ($scope, $stateParams, state, Authentication, API) {
-    $scope.isLoading = true;
-    var hackathon_name = $stateParams.hackathon_name || config.name;
-    API.list
-
-    Authentication.settings(function (data) {
-      API.hackathon.template.get({header: {hackathon_name: hackathon_name}}, function (data) {
-        $scope.isLoading = false;
-        if (data.error) {
-          $scope.error = data;
-        } else if (data.length > 0) {
-          $scope.isSubmit = true;
-          $scope.templates = data;
-          $scope.type = {name: data[0].name};
-        } else {
-          $scope.error = {error: true, data: {message: '暂无模板'}}
-        }
-      });
-    })
-    $scope.submit = function () {
-      API.user.experiment.post({
-        body: {template_name: $scope.type.name, hackathon: hackathon_name}
-      }, function (data) {
-        if (data.error) {
-          state.go('error', data);
-        } else {
-          state.go('hackathon', {hackathon_name: hackathon_name});
-        }
-      });
+  .controller('userprofile.controller', function ($scope, state, Authentication, API) {
+    var user = Authentication.getUser();
+    if (!user) {
+      state.go('index');
     }
-  });
+    $scope.user = user;
+    var isProfile = false
+    API.user.profile.get().then(function (res) {
+      if (!res.data.error) {
+        $scope.profile = res.data;
+        isProfile = true;
+      }
+    })
+
+    var def = undefined;
+    $scope.submit = function () {
+      if (isProfile) {
+        def = API.user.profile.put({body: $scope.profile});
+      } else {
+        def = API.user.profile.post({body: $scope.profile});
+      }
+      def.then(function (res) {
+        console.log(res.data);
+      })
+    }
+  })
