@@ -23,14 +23,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-__author__ = 'Bian Hu'
-
 import sys
 
 sys.path.append("..")
 from azure.storage import BlobService
 from hackathon import Component
-
+import urllib
 
 class FileService(Component):
     def __init__(self):
@@ -62,7 +60,6 @@ class FileService(Component):
             self.log.error(e)
             return False
 
-
     def upload_file_to_azure(self, file, container_name, blob_name):
         try:
             if self.create_container_in_storage(container_name, 'container'):
@@ -74,7 +71,6 @@ class FileService(Component):
             self.log.error(e)
             return None
 
-
     def upload_file_to_azure_from_path(self, path, container_name, blob_name):
         try:
             if self.create_container_in_storage(container_name, 'container'):
@@ -82,6 +78,14 @@ class FileService(Component):
                 return self.blob_service.make_blob_url(container_name, blob_name)
             else:
                 return None
+        except Exception as e:
+            self.log.error(e)
+            return None
+
+    def download_file_from_azure(self, azure_file_url, local_file_path):
+        try:
+            urllib.urlretrieve(azure_file_url, local_file_path)
+            return local_file_path
         except Exception as e:
             self.log.error(e)
             return None

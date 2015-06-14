@@ -57,20 +57,21 @@ end
 
 bash "config and build" do
   user node['openhackathon']['user']
+  group node['openhackathon']['user']
   cwd node['openhackathon'][:ui][:src_dir]
   environment ({'HOME' => "#{node['openhackathon'][:ui][:src_dir]}"})
   timeout 600
   code <<-EOH
     bower install
     cnpm install
-    grunt build
+    grunt --force build
     EOH
 end
 
 service_name = "open-hackathon-ui"
-start_script = "#{node['openhackathon'][:ui][:src_dir]}/app.js"
+start_script = "app.js"
 if node['openhackathon'][:ui][:debug] then
-  start_script = "#{node['openhackathon'][:ui][:src_dir]}/dev.app.js"
+  start_script = "dev.app.js"
 end
 
 service service_name do

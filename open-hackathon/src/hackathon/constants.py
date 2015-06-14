@@ -36,6 +36,7 @@ class OAUTH_PROVIDER:
     WEIBO = "weibo"
     LIVE = "live"
 
+
 class HEALTH_STATE:
     OK = "ok"
     WARNING = "warning"
@@ -45,6 +46,11 @@ class HEALTH_STATE:
 class ADMIN:
     SUPER_ADMIN_GROUP_ID = 1
     DEFAULT_SUPER_ADMIN_EMAIL = "2303202961@qq.com"
+
+
+class ALAUDA_SERVICE_STATUS:
+    STOPPED = "STOPPED"
+    STARTED = "STARTED"
 
 
 class HACKATHON_BASIC_INFO:
@@ -60,4 +66,4 @@ class HACKATHON_BASIC_INFO:
     AUTO_APPROVE = "auto_approve"  # bool, default=false
     RECYCLE_ENABLED = "recycle_enabled"  # bool, default=false
     PRE_ALLOCATE_ENABLED = "pre_allocate_enabled"  # bool, default=false
-    PRE_ALLOCATE_NUMBER = "pre_allocate_number"  #int, default=1
+    PRE_ALLOCATE_NUMBER = "pre_allocate_number"  # int, default=1

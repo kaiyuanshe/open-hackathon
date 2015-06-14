@@ -30,7 +30,7 @@ from hackathon import api, RequiredFeature, Component, g, request
 from flask_restful import Resource, reqparse
 from hackathon.user.login import login_providers
 from hackathon.decorators import token_required, hackathon_name_required
-from hackathon.hackathon_response import internal_server_error
+from hackathon.hackathon_response import internal_server_error, not_found
 import json
 from hackathon.enum import RGStatus
 
@@ -47,9 +47,10 @@ class GuacamoleResource(Resource):
         return guacamole.getConnectInfo()
 
 
-class UserResource(Resource):
-    def get(self, id):
-        return user_manager.get_user_by_id(id)
+class CurrentUserResource(Resource):
+    @token_required
+    def get(self):
+        return user_manager.user_display_info(g.user)
 
 
 class UserLoginResource(Resource, Component):
@@ -151,23 +152,61 @@ class UserExperimentListResource(Resource):
         return expr_manager.get_expr_list_by_user_id(args['user_id'])
 
 
+class GetTeamMembersByUserResource(Resource):
+    @token_required
+    @hackathon_name_required
+    def get(self):
+        hackathon_id = g.hackathon.id
+        user_id = g.user.id
+        return user_manager.get_team_members_by_user(hackathon_id, user_id)
+
+
+class UserProfileResource(Resource):
+    @token_required
+    def get(self):
+        user_id = g.user.id
+        info = register_manager.get_user_profile(user_id)
+        if info is not None:
+            return info.dic()
+        else:
+            return not_found("User doesn't have profile info yet.")
+
+    @token_required
+    def post(self):
+        args = request.get_json()
+        args["user_id"] = g.user.id
+        return register_manager.create_user_profile(args)
+
+    @token_required
+    def put(self):
+        args = request.get_json()
+        args["user_id"] = g.user.id
+        return register_manager.update_user_profile(args)
+
+
 def register_user_routes():
     """
     register API routes for hackathon UI user
     """
 
-    # guacamole config api. "/api/guacamoleconfig" is depreciated, will be remoted soon
+    # guacamole config API. "/api/guacamoleconfig" is depreciated, will be remoted soon
     api.add_resource(GuacamoleResource, "/api/guacamoleconfig", "/api/user/guacamoleconfig")
 
-    # user api
-    api.add_resource(UserResource, "/api/user/<int:id>")
+    # user API
+    api.add_resource(CurrentUserResource, "/api/user")
     api.add_resource(UserLoginResource, "/api/user/login")
 
-    # user-hackathon-relationship, or register, api
+    # user-hackathon-relationship, or register, API
     api.add_resource(RegisterCheckEmailResource, "/api/user/registration/checkemail")
     api.add_resource(UserHackathonRelResource, "/api/user/registration")
     api.add_resource(UserHackathonListResource, "/api/user/registration/list")
 
-    # experiment APIs
+    # experiment API
     api.add_resource(UserExperimentResource, "/api/user/experiment")
     api.add_resource(UserExperimentListResource, "/api/user/experiment/list")
+
+    # team API
+    api.add_resource(GetTeamMembersByUserResource, "/api/user/team/member")
+
+    # user profile API
+    api.add_resource(UserProfileResource, "/api/user/profile")

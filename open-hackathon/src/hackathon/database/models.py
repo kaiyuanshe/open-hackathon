@@ -32,7 +32,7 @@ from hackathon.util import get_now
 import json
 from pytz import utc
 from dateutil import parser
-
+from math import ceil
 
 def relationship(*arg, **kw):
     ret = relation(*arg, **kw)
@@ -41,7 +41,7 @@ def relationship(*arg, **kw):
 
 
 def date_serializer(date):
-    return long((date - datetime(1970, 1, 1, tzinfo=utc)).total_seconds() * 1000)
+    return long((date - datetime(1970, 1, 1)).total_seconds() * 1000)
 
 
 def to_dic(inst, cls):
@@ -69,13 +69,11 @@ def to_json(inst, cls):
 
 
 class TZDateTime(TypeDecorator):
-    """
-    Coerces a tz-aware datetime object into a naive utc datetime object to be
-    stored in the database. If already naive, will keep it.
-    On return of the data will restore it as an aware object by assuming it
-    is UTC.
-    Use this instead of the standard :class:`sqlalchemy.types.DateTime`.
-    """
+    '''
+        usage: remove datetime's tzinfo
+        To set all datetime datas are the naive datetime (tzinfo=None) in the whole environment
+    '''
+
     impl = DateTime
 
     def process_bind_param(self, value, dialect):
@@ -85,13 +83,15 @@ class TZDateTime(TypeDecorator):
             if isinstance(value, datetime):
                 if value.tzinfo is not None:
                     value = value.astimezone(utc)
+                    value.replace(tzinfo=None)
         return value
 
     def process_result_value(self, value, dialect):
         if value is not None:
             if isinstance(value, datetime):
-                if value.tzinfo is None:
-                    value = utc.localize(value)
+                if value.tzinfo is not None:
+                    value = value.astimezone(utc)
+                    value.replace(tzinfo=None)
         return value
 
 
@@ -187,12 +187,27 @@ class UserHackathonRel(DBBase):
 
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
-    real_name = Column(String(80))
     team_name = Column(String(80))
-    email = Column(String(120))
     create_time = Column(TZDateTime, default=get_now())
     update_time = Column(TZDateTime)
     description = Column(String(200))
+    status = Column(Integer)  # 0: havn't audit 1: audit passed 2:audit reject
+    deleted = Column(Integer, default=0)  # 0:false  1-true
+
+    user = relationship('User', backref=backref('registers', lazy='dynamic'))
+
+    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
+    hackathon = relationship('Hackathon', backref=backref('registers', lazy='dynamic'))
+
+    def __init__(self, **kwargs):
+        super(UserHackathonRel, self).__init__(**kwargs)
+
+
+class UserProfile(DBBase):
+    __tablename__ = 'user_profile'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
+    real_name = Column(String(80))
     phone = Column(String(11))
     gender = Column(Integer)  # 0:women 1:man
     age = Column(Integer)
@@ -203,16 +218,8 @@ class UserHackathonRel(DBBase):
     wechat = Column(String(32))
     skype = Column(String(32))
     address = Column(String(80))
-    status = Column(Integer)  # 0: havn't audit 1: audit passed 2:audit reject
-    deleted = Column(Integer, default=0)  # 0:false  1-true
 
-    user = relationship('User', backref=backref('hackathons', lazy='dynamic'))
-
-    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
-    hackathon = relationship('Hackathon', backref=backref('registers', lazy='dynamic'))
-
-    def __init__(self, **kwargs):
-        super(UserHackathonRel, self).__init__(**kwargs)
+    user = relationship('User', backref=backref('profile', uselist=False))
 
 
 class Hackathon(DBBase):
@@ -393,6 +400,7 @@ class Template(DBBase):
     id = Column(Integer, primary_key=True)
     name = Column(String(50))
     url = Column(String(200))
+    azure_url = Column(String(200))
     provider = Column(Integer, default=0)
     creator_id = Column(Integer)
     status = Column(Integer)
@@ -400,6 +408,7 @@ class Template(DBBase):
     update_time = Column(TZDateTime)
     description = Column(Text)
     virtual_environment_count = Column(Integer, default=0)
+    azure_url = Column(String(200))
 
     hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
     hackathon = relationship('Hackathon', backref=backref('templates', lazy='dynamic'))
@@ -602,4 +611,3 @@ class AdminHackathonRel(DBBase):
 
     def __init__(self, **kwargs):
         super(AdminHackathonRel, self).__init__(**kwargs)
-

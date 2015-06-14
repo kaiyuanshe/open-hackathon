@@ -118,7 +118,7 @@ def call(mdl_cls_func, cls_args, func_args):
 
 
 def get_now():
-    return datetime.now(utc)
+    return datetime.utcnow()  #tzinfo=None
 
 
 class Utility(object):
@@ -136,3 +136,6 @@ class Utility(object):
 
     def mkdir_safe(self, path):
         return mkdir_safe(path)
+
+    def get_remote(self, url, headers={}):
+        return get_remote(url, headers)

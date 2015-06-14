@@ -23,151 +23,324 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
+import os
 import sys
 import uuid
+import json
 
 sys.path.append("..")
-from hackathon.database.models import Template, DockerHostServer
-from hackathon.hackathon_response import bad_request, not_found, internal_server_error, ok
-from datetime import timedelta
-import time
-from hackathon.enum import TEMPLATE_STATUS
-from hackathon.template.docker_template_unit import DockerTemplateUnit
-from hackathon.template.docker_template import DockerTemplate
-from hackathon.template.base_template import BaseTemplate
-from hackathon.scheduler import scheduler
-from hackathon import Component, RequiredFeature, g
-import requests
+
+from datetime import (
+    timedelta,
+)
+from compiler.ast import (
+    flatten,
+)
+from hackathon.database.models import (
+    Template,
+    DockerHostServer,
+)
+from hackathon.hackathon_response import (
+    not_found,
+    bad_request,
+    internal_server_error,
+    ok,
+)
+from hackathon.enum import (
+    TEMPLATE_STATUS,
+    VEProvider,
+)
+from hackathon.template.docker_template_unit import (
+    DockerTemplateUnit,
+)
+from hackathon.template.docker_template import (
+    DockerTemplate,
+)
+from hackathon.template.base_template import (
+    BaseTemplate,
+)
+from hackathon.scheduler import (
+    scheduler,
+)
+from hackathon import (
+    Component,
+    RequiredFeature,
+    g,
+)
 
 
 class TemplateManager(Component):
     hackathon_manager = RequiredFeature("hackathon_manager")
     file_service = RequiredFeature("file_service")
+    docker = RequiredFeature("docker")
 
-    def get_template_list(self, hackathon_name):
+    templates = {}  # template in memory {template.id: template_file_stream}
+
+    def get_created_template_list(self, hackathon_name):
+        """
+        Get created template list of given hackathon
+        :param hackathon_name:
+        :return:
+        """
         hackathon = self.hackathon_manager.get_hackathon_by_name(hackathon_name)
         if hackathon is None:
-            return not_found('hackathon not found')
-        hack_id = hackathon.id
-        templates = self.db.find_all_objects_by(Template, hackathon_id=hack_id)
-        return map(lambda u: u.dic(), templates)
+            return not_found('hackathon [%s] not found' % hackathon_name)
+        created_templates = self.db.find_all_objects_by(Template,
+                                                        hackathon_id=hackathon.id,
+                                                        status=TEMPLATE_STATUS.CREATED)
+        data = []
+        for created_template in created_templates:
+            dic = created_template.dic()
+            dic['data'] = self.load_template(created_template)
+            data.append(dic)
+        return data
 
+    def get_template_settings(self, hackathon_name):
+        template_list = self.get_created_template_list(hackathon_name)
+        settings = []
+        for template in template_list:
+            template_units = []
+            for ve in template['data'][BaseTemplate.VIRTUAL_ENVIRONMENTS]:
+                template_units.append({
+                    'name': ve[DockerTemplateUnit.NAME],
+                    'type': ve[DockerTemplateUnit.TYPE] if DockerTemplateUnit.TYPE in ve else "",
+                    'description': ve[DockerTemplateUnit.DESCRIPTION] if DockerTemplateUnit.DESCRIPTION in ve else "",
+                })
+            settings.append({
+                'name': template['data'][BaseTemplate.TEMPLATE_NAME],
+                'description': template['data'][BaseTemplate.DESCRIPTION] if BaseTemplate.DESCRIPTION in template[
+                    'data'] else "",
+                'units': template_units,
+            })
+        return settings
 
-    def get_template_by_id(self, id):
-        return self.db.find_first_object(Template, Template.id == id)
+    def create_template(self, args):
+        """
+        Create template according to post args
+        :param args:
+        :return:
+        """
+        # create template step 1 : args validate
+        status, return_info = self.__check_create_args(args)
+        if not status:
+            return return_info
+        file_name = '%s-%s-%s.js' % (g.hackathon.name, args[BaseTemplate.TEMPLATE_NAME], str(uuid.uuid1())[0:8])
+        # create template step 2 : parse args and trans to file
+        url = self.__save_args_to_file(args, file_name)
+        if url is None:
+            return internal_server_error("save template as local file failed")
+        # create template step 3 : upload template file to Azure
+        azure_url = self.__upload_template_to_azure(url, file_name)
+        if azure_url is None:
+            return internal_server_error("upload template file failed")
+        # create template step 4 : insert into DB
+        self.log.debug("create template: %r" % args)
+        self.db.add_object_kwargs(Template,
+                                  name=args[BaseTemplate.TEMPLATE_NAME],
+                                  url=url,
+                                  azure_url=azure_url,
+                                  provider=args[BaseTemplate.VIRTUAL_ENVIRONMENTS_PROVIDER],
+                                  creator_id=g.user.id,
+                                  status=TEMPLATE_STATUS.CREATED,
+                                  create_time=self.util.get_now(),
+                                  update_time=self.util.get_now(),
+                                  description=args[BaseTemplate.DESCRIPTION],
+                                  virtual_environment_count=len(args[BaseTemplate.VIRTUAL_ENVIRONMENTS]),
+                                  hackathon_id=g.hackathon.id)
+        return ok("create template success")
 
+    def update_template(self, args):
+        """
+        Update template according to post args
+        :param args:
+        :return:
+        """
+        # update template step 1 : args validate
+        status, return_info = self.__check_update_args(args)
+        if not status:
+            return return_info
+        file_name = '%s-%s-%s.js' % (g.hackathon.name, args[BaseTemplate.TEMPLATE_NAME], str(uuid.uuid1())[0:8])
+        # update template step 2 : parse args and trans to file
+        url = self.__save_args_to_file(args, file_name)
+        if url is None:
+            return internal_server_error("save template as local file failed")
+        # update template step 3 : upload template file to Azure
+        azure_url = self.__upload_template_to_azure(url, file_name)
+        if azure_url is None:
+            return internal_server_error("upload template file failed")
+        # update template step 4 : update DB
+        self.log.debug("update template: %r" % args)
+        template = return_info
+        self.db.update_object(template,
+                              url=url,
+                              azure_url=azure_url,
+                              update_time=self.util.get_now(),
+                              description=args[BaseTemplate.DESCRIPTION],
+                              virtual_environment_count=len(args[BaseTemplate.VIRTUAL_ENVIRONMENTS]))
+        # refresh template in memory after update
+        self.__load_template_from_local_file(template.id, url)
+        return ok("update template success")
 
-    def validate_created_args(self, args):
-        if "name" not in args:
-            return False, bad_request("template name invalid")
+    def delete_template(self, id):
+        self.log.debug("delete template [%d]" % id)
+        try:
+            template = self.db.get_object(Template, id)
+            self.db.update_object(template,
+                                  status=TEMPLATE_STATUS.DELETED,
+                                  update_time=self.util.get_now())
+            return ok("delete template success")
+        except Exception as ex:
+            self.log.error(ex)
+            return internal_server_error("delete template fail")
 
-        template = self.db.find_first_object(Template, Template.name == args['name'])
-        if template is not None:
-            return False, bad_request("template aready exist")
+    def load_template(self, template):
+        """
+        load template priority : from memory > from local file > from from azure
+        :param template:
+        :return:
+        """
+        template_id = template.id
+        dic_from_memory = self.__load_template_from_memory(template_id)
+        if dic_from_memory is not None:
+            return dic_from_memory
 
+        local_url = template.url
+        dic_from_local = self.__load_template_from_local_file(template_id, local_url)
+        if dic_from_local is not None:
+            return dic_from_local
+
+        azure_url = template.azure_url
+        dic_from_azure = self.__load_template_from_azure(template_id, local_url, azure_url)
+        if dic_from_azure is not None:
+            return dic_from_azure
+
+        return None
+
+    def pull_images_for_hackathon(self, hackathon):
+        # get expected images on hackathon
+        templates = self.db.find_all_objects_by(Template,
+                                                hackathon_id=hackathon.id,
+                                                provider=VEProvider.Docker,
+                                                status=TEMPLATE_STATUS.CREATED)
+        images = map(lambda x: self.__get_images_from_template(x), templates)
+        expected_images = flatten(images)
+        self.log.debug('expected images: %s on hackathon: %s' % (expected_images, hackathon.name))
+        # get all docker host server on hackathon
+        hosts = self.db.find_all_objects_by(DockerHostServer, hackathon_id=hackathon.id)
+        # loop to get every docker host
+        for docker_host in hosts:
+            download_images = self.__get_undownloaded_images_on_docker_host(docker_host, expected_images)
+            self.log.debug('need to pull images: %s on host: %s' % (download_images, docker_host.vm_name))
+            for dl_image in download_images:
+                exec_time = self.util.get_now() + timedelta(seconds=3)
+                image = dl_image.split(':')[0]
+                tag = dl_image.split(':')[1]
+                scheduler.add_job(docker_pull_image, 'date', run_date=exec_time, args=[docker_host, image, tag])
+
+    # ---------------------------------------- helper functions ---------------------------------------- #
+
+    def __check_create_args(self, args):
+        if BaseTemplate.TEMPLATE_NAME not in args \
+                or BaseTemplate.DESCRIPTION not in args \
+                or BaseTemplate.VIRTUAL_ENVIRONMENTS_PROVIDER not in args \
+                or BaseTemplate.VIRTUAL_ENVIRONMENTS not in args:
+            return False, bad_request("template args invalid")
+        if self.db.count_by(Template, name=args[BaseTemplate.TEMPLATE_NAME]) > 0:
+            return False, bad_request("template already exists")
         return True, "pass"
 
-
-    def save_args_to_file(self, args):
+    def __save_args_to_file(self, args, file_name):
         try:
             docker_template_units = [DockerTemplateUnit(ve) for ve in args[BaseTemplate.VIRTUAL_ENVIRONMENTS]]
-            docker_template = DockerTemplate(args[BaseTemplate.EXPR_NAME], docker_template_units)
-            file_path = docker_template.to_file()
-            self.log.debug("save template as file :" + file_path)
+            docker_template = DockerTemplate(args[BaseTemplate.TEMPLATE_NAME],
+                                             args[BaseTemplate.DESCRIPTION],
+                                             docker_template_units)
+            file_path = docker_template.to_file(file_name)
+            self.log.debug("save template as file [%s]" % file_path)
             return file_path
         except Exception as ex:
             self.log.error(ex)
             return None
 
-
-    def upload_template_to_azure(self, path):
-        template_container = self.util.safe_get_config("storage.template_container", "templates")
-
+    def __upload_template_to_azure(self, path, file_name):
         try:
-            real_name = g.hackathon.name + "/" + str(uuid.uuid1())[0:9] + time.strftime("%Y%m%d%H%M%S") + ".js"
-            return self.file_service.upload_file_to_azure_from_path(path, template_container, real_name)
+            template_container = self.util.safe_get_config("storage.template_container", "templates")
+            return self.file_service.upload_file_to_azure_from_path(path, template_container, file_name)
         except Exception as ex:
             self.log.error(ex)
             return None
 
-
-    def create_template(self, args):
-        # create template step one : args validate
-        status, return_info = self.validate_created_args(args)
-        if not status:
-            return return_info
-
-        # create template step two : parse args and trans to file
-        local_path = self.save_args_to_file(args)
-        if local_path is None:
-            return internal_server_error("save template as local file failed")
-
-        # create template step Three : upload template file to Azure
-        url = self.upload_template_to_azure(local_path)
-        if url is None:
-            return internal_server_error("upload template file failed")
-
-        # create template step Four : insert into DB
-        try:
-            self.log.debug("create template: %r" % args)
-            args['url'] = url
-            args['creator_id'] = g.user.id
-            args['update_time'] = self.util.get_now()
-            args['hackathon_id'] = g.hackathon.id
-            args['status'] = TEMPLATE_STATUS.ONLINE
-            return self.db.add_object_kwargs(Template, **args)
-        except Exception as ex:
-            self.log.error(ex)
-            return internal_server_error("insert record into template DB failed")
-
-
-    def update_template(self, args):
-        if "name" not in args:
-            return bad_request("template name invalid")
-        template = self.db.find_first_object(Template, Template.name == args['name'])
-
+    def __check_update_args(self, args):
+        if BaseTemplate.TEMPLATE_NAME not in args \
+                or BaseTemplate.DESCRIPTION not in args \
+                or BaseTemplate.VIRTUAL_ENVIRONMENTS_PROVIDER not in args \
+                or BaseTemplate.VIRTUAL_ENVIRONMENTS not in args:
+            return False, bad_request("template args invalid")
+        template = self.db.find_first_object_by(Template, name=args[BaseTemplate.TEMPLATE_NAME])
         if template is None:
-            return bad_request("template doesn't exist")
-        try:
-            self.log.debug("update template: %r" % args)
-            args['update_time'] = self.util.get_now()
-            update_items = dict(dict(args).viewitems() - template.dic().viewitems())
-            self.log.debug("update a exist hackathon :" + str(args))
-            self.db.update_object(template, **update_items)
-            return ok("update template success")
-        except Exception as ex:
-            self.log.error(ex)
-            return internal_server_error("update template failed :" + ex.message)
+            return False, bad_request("template not exists")
+        return True, template
+
+    def __load_template_from_memory(self, template_id):
+        """
+        get template_dic from memory
+        :param template_id:
+        :return:
+        """
+        if template_id is None or template_id not in self.templates:
+            return None
+        else:
+            return self.templates[template_id]
+
+    def __load_template_from_local_file(self, template_id, local_url):
+        """
+        get template_dic from local file
+        :param template_id:
+        :param local_url:
+        :return:
+        """
+        if local_url is None or not os.path.exists(local_url):
+            return None
+        else:
+            template_dic = json.load(file(local_url))
+            self.templates[template_id] = template_dic
+            return template_dic
+
+    def __load_template_from_azure(self, template_id, local_url, azure_url):
+        """
+        get template_dic from azure storage
+        :param template_id:
+        :param local_url:
+        :param azure_url:
+        :return:
+        """
+        if azure_url is not None:
+            if self.file_service.download_file_from_azure(azure_url, local_url) is not None:
+                return self.__load_template_from_local_file(template_id, local_url)
+        return None
+
+    # template may have multiple images
+    def __get_images_from_template(self, template):
+        template_dic = self.load_template(template)
+        ves = template_dic[BaseTemplate.VIRTUAL_ENVIRONMENTS]
+        images = map(lambda x: x[DockerTemplateUnit.IMAGE], ves)
+        return images  # [image:tag, image:tag]
+
+    def __get_undownloaded_images_on_docker_host(self, docker_host, expected_images):
+        images = []
+        current_images = self.docker.get_pulled_images(docker_host)
+        self.log.debug('already exist images: %s on host: %s' % (current_images, docker_host.vm_name))
+        for ex_image in expected_images:
+            if ex_image not in current_images:
+                images.append(ex_image)
+        return flatten(images)
 
 
-    def delete_template(self, id):
-        self.log.debug("delete or disable a exist template")
-        try:
-            template = self.get_template_by_id(id)
-            args = {}
-            args['status'] = TEMPLATE_STATUS.OFFLINE
-            args['update_time'] = self.util.get_now()
-            self.db.update_object(template, args)
-            return ok("delete or disable template success")
-        except Exception as ex:
-            self.log.error(ex)
-            return internal_server_error("disable or delete failed")
+def auto_pull_images_for_hackathon(hackathon):
+    template_manager = RequiredFeature("template_manager")
+    return template_manager.pull_images_for_hackathon(hackathon)
 
 
-    def pull_images(self, image_name):
-        hosts = self.db.find_all_objects(DockerHostServer, DockerHostServer.hackathon_id == g.hackathon.id)
-        docker_host_api = map(lambda x: x.public_docker_api_port, hosts)
-        for api in docker_host_api:
-            url = api + "/images/create?fromImage=" + image_name
-            exec_time = self.util.get_now() + timedelta(seconds=2)
-            self.log.debug(" send request to pull image:" + url)
-            # use requests.post instead of post_to_remote, because req.contect can not be json.loads()
-            scheduler.add_job(requests.post, 'date', run_date=exec_time, args=[url])
-
-
-            # template_manager.create_template({
-            # "expr_name": "test",
-            # "virtual_environments": [
-            # {}, {}
-            # ]
-            # })
+def docker_pull_image(docker_host, image, tag):
+    docker = RequiredFeature("docker")
+    return docker.pull_image(docker_host, image, tag)

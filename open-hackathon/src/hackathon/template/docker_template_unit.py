@@ -24,6 +24,7 @@ THE SOFTWARE.
 """
 
 import sys
+
 sys.path.append("..")
 from hackathon.template.base_template import (
     BaseTemplate,
@@ -35,6 +36,8 @@ class DockerTemplateUnit(object):
     Smallest unit in docker template
     """
     NAME = 'name'
+    TYPE = 'type'
+    DESCRIPTION = 'description'
     PORTS = 'ports'
     PORTS_NAME = 'name'
     PORTS_PORT = 'port'
@@ -108,6 +111,8 @@ class DockerTemplateUnit(object):
     def load_default_config(self):
         dic = {
             self.NAME: 'web',
+            self.TYPE: 'ubuntu terminal',
+            self.DESCRIPTION: 'sample environment for ampcamp 2015',
             self.PORTS: [
                 {
                     self.PORTS_NAME: 'Tachyon',
@@ -205,14 +210,17 @@ class DockerTemplateUnit(object):
         for p in self.dic[self.PORTS]:
             key = '%d/%s' % (p[self.PORTS_PORT], p[self.PORTS_PROTOCOL])
             self.dic[self.EXPOSED_PORTS][key] = {}
-            self.dic[self.HOST_CONFIG][self.HOST_CONFIG_PORT_BINDING][key] = [{self.HOST_CONFIG_HOST_IP: '', self.HOST_CONFIG_HOST_PORT: str(p[self.PORTS_HOST_PORT])}]
-        self.dic.pop(self.NAME)
-        self.dic.pop(self.PORTS)
-        self.dic.pop(self.REMOTE)
+            self.dic[self.HOST_CONFIG][self.HOST_CONFIG_PORT_BINDING][key] = \
+                [{self.HOST_CONFIG_HOST_IP: '', self.HOST_CONFIG_HOST_PORT: str(p[self.PORTS_HOST_PORT])}]
+        self.dic.pop(self.NAME, "")
+        self.dic.pop(self.TYPE, "")
+        self.dic.pop(self.DESCRIPTION, "")
+        self.dic.pop(self.PORTS, None)
+        self.dic.pop(self.REMOTE, None)
         self.dic.pop(BaseTemplate.VIRTUAL_ENVIRONMENTS_PROVIDER)
         return self.dic
 
-    def get_image(self):
+    def get_image_with_tag(self):
         return self.dic[self.IMAGE]
 
     def get_ports(self):
@@ -220,3 +228,43 @@ class DockerTemplateUnit(object):
 
     def get_remote(self):
         return self.dic[self.REMOTE]
+
+    def get_image_without_tag(self):
+        image = self.get_image_with_tag()
+        return image.split(':')[0]
+
+    def get_tag(self):
+        image = self.get_image_with_tag()
+        data = image.split(':')
+        if len(data) == 2:
+            return data[1]
+        else:
+            return 'latest'
+
+    def get_run_command(self):
+        return self.dic[self.CMD]
+
+    def get_instance_env_vars(self):
+        env_vars = {}
+
+        def convert(env):
+            arr = env.split("=")
+            if len(arr) == 2:
+                env_vars[arr[0]] = arr[1]
+
+        map(lambda env: convert(env), self.ENV or [])
+        return env_vars
+
+    def get_instance_ports(self):
+        instance_ports = []
+
+        def convert(p):
+            instance_ports.append({
+                "container_port": p["port"],
+                "protocol": p["protocol"] or "tcp",
+                # endpoint_type: "tcp-endpoint" or "direct-endpoint"? not sure the meanings or usages. Communicating...
+                "endpoint_type": "tcp-endpoint"
+            })
+
+        map(lambda p: convert(p), self.dic[self.PORTS])
+        return instance_ports

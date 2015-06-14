@@ -34,20 +34,10 @@ include_recipe "build-essential"
 
 include_recipe "open-hackathon-api::source"
 
-python_pip "werkzeug" do
-  version "0.9.6"
-end
-
-python_pip "flask-cors" do
-  version "1.9.0"
-end
-
-python_pip "mock" do
-  version "1.0.1"
-end
-
-%w{ flask flask-restful flask-admin sqlalchemy flask-sqlalchemy mysql-python wsgilog azure requests apscheduler }.each do |f|
-  python_pip "#{f}"
+requirement_file_dir = node['openhackathon'][:base_dir]+"/open-hackathon"
+bash 'pip install for api' do
+  cwd requirement_file_dir
+  command 'pip install -r requirement.txt'
 end
 
 template node['openhackathon']['api']['src_dir']+'/nginx_hack_api.uwsgi.ini' do
@@ -71,8 +61,11 @@ uwsgi_service 'open-hackathon-api' do
   config_type :ini
   uid node['openhackathon']['user']
   gid node['openhackathon']['user']
+  start_immediately false
 end
 
-service 'uwsgi-open-hackathon-api' do
-  action :restart
+if node['openhackathon']['service']['start'] 
+  service 'uwsgi-open-hackathon-api' do
+    action :restart
+  end
 end

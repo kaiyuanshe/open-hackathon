@@ -27,24 +27,16 @@ admin_creds = Chef::EncryptedDataBagItem.load(node.chef_environment,"secret",adm
 include_recipe "open-hackathon-api::source"
 
 include_recipe "python"
-# include_recipe "gcc"
 package 'libmysqlclient-dev'
 package 'libpcre3'
 package 'libpcre3-dev'
 package "mysql-client-core-#{node['openhackathon']['mysql']['version']}"
 include_recipe "uwsgi"
 
-
-python_pip "werkzeug" do
-  version "0.9.6"
-end
-
-python_pip "mock" do
-  version "1.0.1"
-end
-
-%w{ flask flask-sqlalchemy flask-debugtoolbar flask-login sqlalchemy mysql-python wsgilog jinja2 six requests}.each do |f|
-  python_pip "#{f}"
+requirement_file = node['openhackathon'][:base_dir]+"/open-hackathon-adminUI"
+bash 'pip install' do
+  cwd requirement_file
+  command 'pip install -r requirement.txt'
 end
 
 config_file= node['openhackathon']['admin']['src_dir']+'/nginx_openhackathon.uwsgi.ini'
@@ -62,7 +54,7 @@ template node['openhackathon']['admin']['src_dir']+'/app/config.py' do
       :qq_client_secret  => admin_creds["qq_client_secret"],
       :gitcafe_client_secret => admin_creds["gitcafe_client_secret"],
       :weibo_client_secret => admin_creds["weibo_client_secret"],
-      :live_client_secret => admin_reds["live_client_secret"],
+      :live_client_secret => admin_creds["live_client_secret"],
       :app_secret => admin_creds["app_secret"],
       :mysql_usr_pwd => admin_creds["mysql_usr_pwd"]
     )
@@ -78,8 +70,11 @@ uwsgi_service 'open-hackathon-adminUI' do
   start_immediately false
   uid node['openhackathon']['user']
   gid node['openhackathon']['user']
+  start_immediately false
 end
 
-service 'uwsgi-open-hackathon-adminUI' do
-  action :restart
+if node['openhackathon']['service']['start']
+  service 'uwsgi-open-hackathon-adminUI' do
+    action :restart
+  end
 end

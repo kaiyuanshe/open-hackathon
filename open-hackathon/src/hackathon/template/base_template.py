@@ -40,16 +40,18 @@ class BaseTemplate(Component):
     """
     Base class of template
     """
-    EXPR_NAME = 'expr_name'
+    TEMPLATE_NAME = 'name'
+    DESCRIPTION = 'description'
     VIRTUAL_ENVIRONMENTS = 'virtual_environments'
     VIRTUAL_ENVIRONMENTS_PROVIDER = 'provider'
 
-    def __init__(self, expr_name):
+    def __init__(self, template_name, description):
         self.dic = {
-            self.EXPR_NAME: expr_name,
+            self.TEMPLATE_NAME: template_name,
+            self.DESCRIPTION: description
         }
 
-    def to_file(self):
+    def to_file(self, file_name):
         """
         Dump to disk as json file, an existing file with the same name will be erased
         :return: absolute path of json file
@@ -59,7 +61,7 @@ class BaseTemplate(Component):
         if not os.path.isdir(template_dir):
             self.log.debug('template dir [%s] not exists' % template_dir)
             os.mkdir(template_dir)
-        template_path = '%s/%s.js' % (template_dir, self.dic[self.EXPR_NAME])
+        template_path = '%s/%s' % (template_dir, file_name)
         with open(template_path, 'w') as template_file:
             json.dump(self.dic, template_file)
         return abspath(template_path)

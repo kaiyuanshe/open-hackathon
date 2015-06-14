@@ -37,10 +37,15 @@ class DockerTemplate(BaseTemplate):
     """
     DOCKER = 'docker'
 
-    def __init__(self, expr_name, docker_template_units):
-        super(DockerTemplate, self).__init__(expr_name)
+    def __init__(self, template_name, description, docker_template_units):
+        super(DockerTemplate, self).__init__(template_name, description)
+        self.docker_template_units = docker_template_units
         # set provider as docker
-        for docker_template_unit in docker_template_units:
+        for docker_template_unit in self.docker_template_units:
             docker_template_unit.dic[self.VIRTUAL_ENVIRONMENTS_PROVIDER] = self.DOCKER
         # set virtual environments as a list of docker template units
-        self.dic[self.VIRTUAL_ENVIRONMENTS] = [docker_template_unit.dic for docker_template_unit in docker_template_units]
+        self.dic[self.VIRTUAL_ENVIRONMENTS] = \
+            [docker_template_unit.dic for docker_template_unit in self.docker_template_units]
+
+    def get_docker_template_units(self):
+        return self.docker_template_units

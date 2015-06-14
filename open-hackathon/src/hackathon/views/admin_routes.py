@@ -22,14 +22,32 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
-import sys
 
+import sys
 sys.path.append("..")
 
-from hackathon import api, RequiredFeature, Component, g, request
-from flask_restful import Resource, reqparse
-from hackathon.decorators import token_required, hackathon_name_required, admin_privilege_required
-from hackathon.hackathon_response import internal_server_error, not_found, bad_request
+from flask_restful import (
+    Resource,
+    reqparse,
+)
+from hackathon import (
+    api,
+    RequiredFeature,
+    Component,
+    g,
+    request,
+)
+from hackathon.decorators import (
+    token_required,
+    hackathon_name_required,
+    admin_privilege_required,
+)
+from hackathon.hackathon_response import (
+    not_found,
+    bad_request,
+    internal_server_error,
+)
+
 
 hackathon_manager = RequiredFeature("hackathon_manager")
 register_manager = RequiredFeature("register_manager")
@@ -107,11 +125,7 @@ class AdminRegisterResource(Resource):
 class AdminHackathonTemplateResource(Resource):
     @hackathon_name_required
     def get(self):
-        # parse = reqparse.RequestParser()
-        # parse.add_argument('hid', type=int, location='args', required=True)
-        # args = parse.parse_args()
-        # return map(lambda u: u.dic(), db_adapter.find_all_objects_by(Template, hackathon_id=args['hid']))
-        return [t.dic() for t in g.hackathon.templates.all()]
+        return template_manager.get_created_template_list(g.hackathon.name)
 
     # create template for hacakthon
     @admin_privilege_required

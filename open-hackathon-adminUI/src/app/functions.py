@@ -115,4 +115,4 @@ def delete_remote(url, headers=None):
     return "OK"
 
 def get_now():
-    return datetime.now(utc)
+    return datetime.utcnow()   #tzinfo=None
