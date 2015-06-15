@@ -60,28 +60,19 @@
         </div>
         <h2 class="line-title">最近参与者..</h2>
         <ul class="users-list">
-          <li>
-            <a href="widgets.html#">
-              <img class="avatar" alt="Lucas" src="assets/img/avatar.jpg">
+          <li ng-repeat="item in registerList">
+            <a href="">
+              <img class="avatar" alt="Lucas" src="{{item.avatar_url}}">
             </a>
 
             <div>
-              <strong>Fendoe</strong>
+              <strong>{{item.name}}}</strong>
             </div>
-            <div class="date">4 minutes ago</div>
-          </li>
-          <li>
-            <a href="widgets.html#">
-              <img class="avatar" alt="Lucas" src="assets/img/avatar.jpg">
-            </a>
-
-            <div>
-              <strong>Fendoe</strong>
-            </div>
-            <div class="date">4 minutes ago</div>
+            <div class="date">{{item.create_time | timeago}}</div>
           </li>
         </ul>
         <h2 class="line-title">分享朋友圈.</h2>
+        <br/>
 
         <div>
           <img src="{{dimensional}}"/>
@@ -108,7 +99,7 @@
                  required=""
                  ng-model="register.team_name" required>
 
-          <p ng-show="registerForm.team_name.$error.required && registerForm.team_name.$touched" class="help-block"  >
+          <p ng-show="registerForm.team_name.$error.required && registerForm.team_name.$touched" class="help-block">
             团队名称必须填写</p>
         </div>
       </div>
@@ -120,7 +111,8 @@
           <input type="url" class="form-control" name="code_hosting_address" placeholder="githubx项目地址"
                  ng-model="register.code_hosting_address">
 
-          <p ng-show="registerForm.code_hosting_address.$touched && registerForm.code_hosting_address.$invalid" class="help-block">请输入正确的托管地址！</p>
+          <p ng-show="registerForm.code_hosting_address.$touched && registerForm.code_hosting_address.$invalid"
+             class="help-block">请输入正确的托管地址！</p>
         </div>
       </div>
 

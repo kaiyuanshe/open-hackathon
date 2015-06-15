@@ -55,5 +55,40 @@ angular.module('oh.app')
     return function (longTime) {
       return new Date(longTime);
     }
+  }).filter('skypelink', function () {
+    return function (skype) {
+      return skype.length > 0 ? 'skype:' + skype + '?chat' : 'javascript:;';
+    }
+  }).filter('tiemago', function ($filter) {
+    return function (time, local, raw) {
+      if (!local) {
+        (local = Date.now())
+      }
+
+      if (angular.isDate(local)) {
+        local = local.getTime();
+      } else if (typeof local === "string") {
+        local = new Date(local).getTime();
+      }
+      var offset = Math.abs((local - time) / 1000),
+        span = '',
+        MINUTE = 60,
+        HOUR = 3600,
+        DAY = 86400;
+      if (offset <= MINUTE) {
+        span = '刚刚';
+      } else if (offset < (MINUTE * 60)) {
+        span = Math.round(Math.abs(offset / MINUTE)) + '分钟前';
+      } else if (offset < (HOUR * 24)) {
+        span = Math.round(Math.abs(offset / HOUR)) + '小时前';
+      } else if (offset < (DAY * 1)) {
+        span = '昨天'
+      } else if (offset < (DAY * 3)) {
+        span = Math.round(Math.abs(offset / DAY)) + '天之前';
+      } else {
+        span = $filter('data')(time, '')
+      }
+      return span;
+    }
   });
 

@@ -208,16 +208,16 @@ class UserProfile(DBBase):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'), unique=True)
     real_name = Column(String(80))
-    phone = Column(String(11))
+    phone = Column(String(20))
     gender = Column(Integer)  # 0:women 1:man
     age = Column(Integer)
-    career_type = Column(String(16))
-    career = Column(String(16))
+    career_type = Column(String(50))
+    career = Column(String(50))
     qq = Column(String(16))
     weibo = Column(String(32))
     wechat = Column(String(32))
     skype = Column(String(32))
-    address = Column(String(80))
+    address = Column(String(100))
 
     user = relationship('User', backref=backref('profile', uselist=False))
 
