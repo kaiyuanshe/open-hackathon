@@ -133,38 +133,23 @@ class UserManager(Component):
         return True
 
     def get_user_by_id(self, user_id):
-        user = self.db.find_first_object_by(User, id=user_id)
-        if user is not None:
-            return self.user_display_info(user)
-        else:
-            return not_found("user id invalid")
+        return self.db.find_first_object_by(User, id=user_id)
 
     def user_display_info(self, user):
-        if user.profile is not None:
-            return {
-                "id": user.id,
-                "name": user.name,
-                "nickname": user.nickname,
-                "email": [e.dic() for e in user.emails.all()],
-                "provider": user.provider,
-                "avatar_url": user.avatar_url,
-                "online": user.online,
-                "user_profile": user.profile.dic(),
-                "create_time": str(user.create_time),
-                "last_login_time": str(user.last_login_time)
-            }
-        else:
-            return {
-                "id": user.id,
-                "name": user.name,
-                "nickname": user.nickname,
-                "email": [e.dic() for e in user.emails.all()],
-                "provider": user.provider,
-                "avatar_url": user.avatar_url,
-                "online": user.online,
-                "create_time": str(user.create_time),
-                "last_login_time": str(user.last_login_time)
-            }
+        ret = {
+            "id": user.id,
+            "name": user.name,
+            "nickname": user.nickname,
+            "email": [e.dic() for e in user.emails.all()],
+            "provider": user.provider,
+            "avatar_url": user.avatar_url,
+            "online": user.online,
+            "create_time": str(user.create_time),
+            "last_login_time": str(user.last_login_time)
+        }
+        if user.profile:
+            ret["user_profile"] = user.profile.dic()
+        return ret
 
     def get_team_members_by_team_name(self, hackathon_id, team_name):
         team_member = self.db.find_all_objects_by(UserHackathonRel, hackathon_id=hackathon_id, team_name=team_name)
