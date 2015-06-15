@@ -183,31 +183,16 @@ angular.module('oh.directives', [])
       }
     }
   })
-  .directive('headdropdownMenu', function ($rootScope, $cookies, $state, API) {
+  .directive('headdropdownMenu', function ($rootScope, Authentication, $state) {
     var tempurl = 'views/tpls/dropdown-menu.html';
     return {
       scope: {},
       restrict: 'E',
       templateUrl: tempurl,
       link: function (scope, element, attr) {
-        var user = $cookies.get('User');
-        scope.items = [{
-          name: '管理我的黑客松',
-          link: ''
-        }, {
-          name: '黑客松活动指南',
-          link: ''
-        }, {
-          name: '我的黑客松挑战',
-          link: ''
-        }, {
-          name: '使用帮助',
-          link: 'https://github.com/msopentechcn/open-hackathon-tutorial/wiki/%E5%9C%A8%E7%BA%BF%E7%BC%96%E7%A8%8B%E9%BB%91%E5%AE%A2%E6%9D%BE%E5%B9%B3%E5%8F%B0%E3%80%8A%E4%BD%BF%E7%94%A8%E5%B8%AE%E5%8A%A9%E3%80%8B'
-        }]
+        var user = Authentication.getUser();
         scope.logout = function () {
-          API.user.login.delete();
-          $cookies.remove('User');
-          $cookies.remove('token');
+          Authentication.logout();
           $state.go('index.home');
         }
         scope.user = user;

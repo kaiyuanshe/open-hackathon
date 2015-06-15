@@ -36,6 +36,7 @@ import json
 
 class RegisterManger(Component):
     hackathon_manager = RequiredFeature("hackathon_manager")
+    user_manager = RequiredFeature("user_manager")
 
     def get_all_registration_by_hackathon_id(self, hackathon_id):
         # TODO make query result with pagination
@@ -124,7 +125,8 @@ class RegisterManger(Component):
 
     def get_registration_detail(self, user_id, hackathon):
         detail = {
-            "hackathon": hackathon.dic()
+            "hackathon": hackathon.dic(),
+            "user": self.user_manager.user_display_info(g.user)
         }
 
         rel = self.get_registration_by_user_and_hackathon(user_id, hackathon.id)
@@ -145,10 +147,6 @@ class RegisterManger(Component):
             self.log.error(e)
 
         return detail
-
-    def is_email_registered(self, hid, email):
-        register = self.db.find_first_object_by(UserHackathonRel, hackathon_id=hid, email=email, deleted=0)
-        return register is None
 
     def is_user_registered(self, user_id, hackathon):
         # reservedUser (-1)
@@ -189,18 +187,25 @@ class RegisterManger(Component):
     def create_user_profile(self, args):
         self.log.debug("create_user_profile: %r" % args)
         try:
-            return self.db.add_object_kwargs(UserProfile, **args).dic()
+            exist = self.get_user_profile(g.user.id)
+            if not exist:
+                return self.db.add_object_kwargs(UserProfile, **args).dic()
+            else:
+                return self.update_user_profile(args)
         except Exception as e:
             self.log.debug(e)
-            return internal_server_error("Failed to create User Profile")
+            return internal_server_error("failed to create user profile")
 
     def update_user_profile(self, args):
         self.log.debug("update_user_profile")
         try:
             u_id = args["user_id"]
             user_profile = self.db.find_first_object_by(UserProfile, user_id=u_id)
-            self.db.update_object(user_profile, **args)
-            return user_profile.dic()
+            if user_profile:
+                self.db.update_object(user_profile, **args)
+                return user_profile.dic()
+            else:
+                return not_found("fail to update user profile")
         except Exception as e:
             self.log.debug(e)
-            return internal_server_error("Failed to update User Profile")
+            return internal_server_error("failed to update user profile")

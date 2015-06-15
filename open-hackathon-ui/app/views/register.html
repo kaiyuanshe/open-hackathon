@@ -16,11 +16,13 @@
       <div class="col-md-7">
         <h2 class="reg-h-name">{{hackathon.display_name}}</h2>
 
-        <p><span class="glyphicon glyphicon-time" aria-hidden="true"></span> {{hackathon.event_start_time | date : 'yyyy年MM月dd日 HH:mm'}} ～ {{hackathon.event_end_time | date : 'yyyy年MM月dd日 HH:mm'}}</p>
+        <p><span class="glyphicon glyphicon-time" aria-hidden="true"></span> {{hackathon.event_start_time | date :
+          'yyyy年MM月dd日 HH:mm'}} ～ {{hackathon.event_end_time | date : 'yyyy年MM月dd日 HH:mm'}}</p>
 
         <p><span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span> {{hackathon.basic_info.location}}</p>
 
-        <p><span class="glyphicon glyphicon-user" aria-hidden="true"></span> 限额人数{{hackathon.basic_info.max_enrollment}}人</p>
+        <p><span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+          限额人数{{hackathon.basic_info.max_enrollment}}人</p>
 
         <p>
           <span class="glyphicon glyphicon-heart" aria-hidden="true"></span>
@@ -32,14 +34,13 @@
           <span ng-bind="hackathon.message"></span>
 
           <div>
-            <a  ng-click="goWork()" ng-if="hackathon.start" class="btn btn-primary ">立即参加</a>
+            <a ng-click="goWork()" ng-if="hackathon.start" class="btn btn-primary ">立即参加</a>
           </div>
         </div>
       </div>
     </div>
     <div class="row">
       <div class="col-md-9">
-        <ng-include src="'views/tpls/register-form.html'" ng-if="hackathon.isRegister"></ng-include>
         <h2 class="line-title">活动内容</h2>
 
         <div ng-bind-html="hackathon.description | mkHTML"></div>
@@ -89,3 +90,44 @@
     </div>
   </div>
 </div>
+<script type="text/ng-template" id="myModalContent.html">
+  <form name="registerForm" class="form-horizontal" ng-submit="submit()" novalidate>
+    <div class="modal-header">
+      <h3 class="modal-title">申请</h3>
+    </div>
+    <div class="modal-body">
+
+      <div class="form-group"
+           ng-class="{ 'has-error' : registerForm.team_name.$invalid && registerForm.team_name.$touched }">
+        <label class="col-sm-3 control-label required">团队名称</label>
+
+        <div class="col-sm-9">
+          <!--typeahead="teamname for teamname in states | filter:$viewValue | limitTo:5"-->
+          <input type="text" class="form-control" name="team_name" placeholder="团队名称"
+                 typeahead="teamname for teamname in getTeamNames($viewValue)"
+                 required=""
+                 ng-model="register.team_name" required>
+
+          <p ng-show="registerForm.team_name.$error.required && registerForm.team_name.$touched" class="help-block"  >
+            团队名称必须填写</p>
+        </div>
+      </div>
+      <div class="form-group"
+           ng-class="{ 'has-error' : registerForm.code_hosting_address.$invalid && registerForm.code_hosting_address.$touched }">
+        <label class="col-sm-3 control-label">代码托管地址</label>
+
+        <div class="col-sm-9">
+          <input type="url" class="form-control" name="code_hosting_address" placeholder="githubx项目地址"
+                 ng-model="register.code_hosting_address">
+
+          <p ng-show="registerForm.code_hosting_address.$touched && registerForm.code_hosting_address.$invalid" class="help-block">请输入正确的托管地址！</p>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" type="submit" ng-disabled="registerForm.$invalid">确定</button>
+      <button class="btn btn-warning" ng-click="cancel()">取消</button>
+    </div>
+  </form>
+</script>

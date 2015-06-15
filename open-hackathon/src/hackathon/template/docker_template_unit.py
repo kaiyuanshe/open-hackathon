@@ -115,25 +115,11 @@ class DockerTemplateUnit(object):
             self.DESCRIPTION: 'sample environment for ampcamp 2015',
             self.PORTS: [
                 {
-                    self.PORTS_NAME: 'Tachyon',
-                    self.PORTS_PORT: 19999,
-                    self.PORTS_PUBLIC: True,
-                    self.PORTS_PROTOCOL: 'tcp',
-                    self.PORTS_URL: 'http://{0}:{1}',
-                },
-                {
                     self.PORTS_NAME: 'Deploy',
                     self.PORTS_PORT: 22,
                     self.PORTS_PUBLIC: True,
                     self.PORTS_PROTOCOL: 'tcp',
-                },
-                {
-                    self.PORTS_NAME: 'WebUI',
-                    self.PORTS_PORT: 4040,
-                    self.PORTS_PUBLIC: True,
-                    self.PORTS_PROTOCOL: 'tcp',
-                    self.PORTS_URL: 'http://{0}:{1}'
-                },
+                }
             ],
             self.REMOTE: {
                 self.REMOTE_PROVIDER: 'guacamole',
@@ -151,10 +137,10 @@ class DockerTemplateUnit(object):
             self.TTY: True,
             self.OPEN_STDIN: True,
             self.STDIN_ONCE: True,
-            self.ENV: ['JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64/jre/'],
-            self.CMD: ['/usr/sbin/sshd', '-D'],
+            self.ENV: [],
+            self.CMD: [],
             self.ENTRY_POINT: '',
-            self.IMAGE: 'sffamily/ampcamp5:v5',
+            self.IMAGE: '',
             self.LABELS: {},
             self.VOLUMES: {},
             self.WORKING_DIR: '',
@@ -242,7 +228,10 @@ class DockerTemplateUnit(object):
             return 'latest'
 
     def get_run_command(self):
-        return self.dic[self.CMD]
+        cmd = self.dic[self.CMD]
+        if cmd:
+            return " ".join(cmd)
+        return ""
 
     def get_instance_env_vars(self):
         env_vars = {}
