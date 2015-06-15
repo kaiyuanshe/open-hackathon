@@ -45,6 +45,13 @@ class RegisterManger(Component):
     def get_registration_by_id(self, id):
         return self.db.get_object(UserHackathonRel, id)
 
+    def get_registration_with_profile(self, register):
+        result = register.dic()
+        profile = self.db.find_first_object_by(UserProfile, user_id=register.user_id)
+        result['user_profile'] = profile.dic()
+        result['avatar_url'] = register.user.avatar_url   # get avatar_url
+        return result
+
     def get_registration_by_user_and_hackathon(self, user_id, hackathon_id):
         return self.db.find_first_object_by(UserHackathonRel, user_id=user_id, hackathon_id=hackathon_id)
 
@@ -171,7 +178,7 @@ class RegisterManger(Component):
                                                       num,  # limit num
                                                       UserHackathonRel.create_time.desc(),
                                                       hackathon_id=g.hackathon.id)
-        return map(lambda x: x.dic(), registers)
+        return map(lambda x: self.get_registration_with_profile(x), registers)
 
     def get_hackathon_team_list(self, hid, name, number):
         find_team_by_hackathon = self.db.find_all_objects_by(UserHackathonRel, hackathon_id=hid)
