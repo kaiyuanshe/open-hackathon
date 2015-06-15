@@ -39,7 +39,7 @@ angular.module('oh.controllers')
 
     API.hackathon.registration.list.get({header: {hackathon_name: hackathon_name}})
       .then(function (res) {
-        //$scope.registerList = res.data;
+        $scope.registerList = res.data;
     })
 
 
@@ -61,7 +61,7 @@ angular.module('oh.controllers')
         user = undefined;
       } else {
         registration = res.data.registration;
-
+        user = res.data.user;
         if (registration) {
           checkUserStatus(registration.status, res.data.hackathon.basic_info.auto_approve);
         }
@@ -82,7 +82,8 @@ angular.module('oh.controllers')
         return;
       }
       if (!user.user_profile) {
-        state.go('index.userprofile');
+        $cookies.put('redirectHakathonName', hackathon_name);
+        state.go('index.userprofile',{isRegister:true});
         return;
       }
       openModal();
@@ -94,7 +95,7 @@ angular.module('oh.controllers')
         $scope.hackathon.message = '您的报名正在审核中，请等待。';
       } else if (status == 2) {
         $scope.hackathon.message = '您的报名已被拒绝，如有疑问请联系主办方。';
-      } else if (status == 3) {
+      } else if (status == 3 && !approve) {
         $scope.hackathon.isRegister = true;
       } else if (status == 1 || status == 3 || approve) {
         $scope.hackathon.start = true

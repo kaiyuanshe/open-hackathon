@@ -21,25 +21,13 @@
           </a>
           <ul class="dropdown-menu team" role="menu">
             <li>
-              <span class="dropdown-menu-title">{{team.name}} asda</span>
+              <span class="dropdown-menu-title">团队名称：{{teamname}}</span>
             </li>
-            <li>
-              <a href="skype:fendoe?chat">
-                <div class="avatar"><img src="https://avatars.githubusercontent.com/u/5856568?v=3" alt="Avatar"></div>
-                <span class="header">Fendoe</span>
-              </a>
-            </li>
-            <li>
-              <a href="index.html#">
-                <div class="avatar"><img src="https://avatars.githubusercontent.com/u/5856568?v=3" alt="Avatar"></div>
-                <span class="header">Fendoe</span>
-              </a>
-            </li>
-            <li>
-              <a href="index.html#">
-                <div class="avatar"><img src="https://avatars.githubusercontent.com/u/5856568?v=3" alt="Avatar"></div>
-                <span class="header">Fendoe</span>
-              </a>
+            <li ng-repeat="team in team">
+              <a href="{{team.user.user_profile.skype | skypelink}}">
+                <div class="avatar"><img src="{{team.user.avatar_url}}" alt="Avatar"></div>
+                <span class="header">{{team.user.name}}</span>
+                <img src="/images/skype.png" ng-if="team.user.user_profile.skype.length>0"></a>
             </li>
             <li>
               <span class="dropdown-menu-title" style="height: 22px;"></span>
