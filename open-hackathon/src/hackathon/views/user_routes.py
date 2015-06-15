@@ -64,16 +64,6 @@ class UserLoginResource(Resource, Component):
         return login_providers.values()[0].logout(g.user)
 
 
-class RegisterCheckEmailResource(Resource):
-    # check email whether exist in the same hackathon registration
-    def get(self):
-        parse = reqparse.RequestParser()
-        parse.add_argument('hid', type=int, location='args', required=True)
-        parse.add_argument('email', type=str, location='args', required=True)
-        args = parse.parse_args()
-        return register_manager.is_email_registered(args['hid'], args['email'])
-
-
 class UserHackathonRelResource(Resource, Component):
     @token_required
     @hackathon_name_required
@@ -197,7 +187,6 @@ def register_user_routes():
     api.add_resource(UserLoginResource, "/api/user/login")
 
     # user-hackathon-relationship, or register, API
-    api.add_resource(RegisterCheckEmailResource, "/api/user/registration/checkemail")
     api.add_resource(UserHackathonRelResource, "/api/user/registration")
     api.add_resource(UserHackathonListResource, "/api/user/registration/list")
 

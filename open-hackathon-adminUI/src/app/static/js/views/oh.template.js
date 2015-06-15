@@ -171,7 +171,7 @@
             })
         })
         return {
-            expr_name: $('#name').val(),
+            name: $('#name').val(),
             description: $('#description').val(),
             provider: Number($('#provider').val()),
             virtual_environments: data

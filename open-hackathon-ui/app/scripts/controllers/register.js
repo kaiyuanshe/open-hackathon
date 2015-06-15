@@ -61,6 +61,7 @@ angular.module('oh.controllers')
         user = undefined;
       } else {
         registration = res.data.registration;
+
         if (registration) {
           checkUserStatus(registration.status, res.data.hackathon.basic_info.auto_approve);
         }
@@ -81,7 +82,7 @@ angular.module('oh.controllers')
         return;
       }
       if (!user.user_profile) {
-        state.go('index.profile');
+        state.go('index.userprofile');
         return;
       }
       openModal();
