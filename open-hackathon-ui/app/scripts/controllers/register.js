@@ -39,7 +39,7 @@ angular.module('oh.controllers')
 
     API.hackathon.registration.list.get({header: {hackathon_name: hackathon_name}})
       .then(function (res) {
-        //$scope.registerList = res.data;
+        $scope.registerList = res.data;
     })
 
 
@@ -61,7 +61,7 @@ angular.module('oh.controllers')
         user = undefined;
       } else {
         registration = res.data.registration;
-
+        user = res.data.user;
         if (registration) {
           checkUserStatus(registration.status, res.data.hackathon.basic_info.auto_approve);
         }
