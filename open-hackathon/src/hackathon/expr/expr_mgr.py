@@ -77,7 +77,6 @@ from datetime import (
 )
 
 import json
-import os
 import random
 import string
 from sqlalchemy import (
@@ -87,6 +86,8 @@ from sqlalchemy import (
 
 class ExprManager(Component):
     register_manager = RequiredFeature("register_manager")
+    hackathon_manager = RequiredFeature("hackathon_manager")
+    template_manager = RequiredFeature("template_manager")
     docker = RequiredFeature("docker")
 
     def start_expr(self, hackathon_name, template_name, user_id):
@@ -110,56 +111,14 @@ class ExprManager(Component):
             return precondition_failed('hackathen is ended')
 
         template = hack_temp[1]
+
         if user_id > 0:
             expr = self.__check_expr_status(user_id, hackathon, template)
             if expr is not None:
                 return self.__report_expr_status(expr)
 
         # new expr
-        expr = self.db.add_object_kwargs(Experiment,
-                                         user_id=user_id,
-                                         hackathon_id=hackathon.id,
-                                         status=EStatus.Init,
-                                         template_id=template.id)
-        self.db.commit()
-
-        curr_num = self.db.count(Experiment,
-                                 Experiment.user_id == ReservedUser.DefaultUserID,
-                                 Experiment.template == template,
-                                 (Experiment.status == EStatus.Starting) |
-                                 (Experiment.status == EStatus.Running))
-        if template.provider == VEProvider.Docker:
-            try:
-                template_dic = json.load(file(template.url))
-                virtual_environments_list = template_dic[BaseTemplate.VIRTUAL_ENVIRONMENTS]
-                if curr_num != 0 and curr_num >= self.util.get_config("pre_allocate.docker"):
-                    return
-                expr.status = EStatus.Starting
-                self.db.commit()
-                map(lambda virtual_environment_dic:
-                    self.__remote_start_container(hackathon, expr, virtual_environment_dic),
-                    virtual_environments_list)
-                expr.status = EStatus.Running
-                self.db.commit()
-            except Exception as e:
-                self.log.error(e)
-                self.log.error("Failed starting containers")
-                self.__roll_back(expr.id)
-                return internal_server_error('Failed starting containers')
-        else:
-            if curr_num != 0 and curr_num >= self.util.get_config("pre_allocate.azure"):
-                return
-            expr.status = EStatus.Starting
-            self.db.commit()
-            try:
-                af = AzureFormation(self.docker.__load_azure_key_id(expr.id))
-                af.create(expr.id)
-            except Exception as e:
-                self.log.error(e)
-                return internal_server_error('Failed starting azure vm')
-        # after everything is ready, set the expr state to running
-        # response to caller
-        return self.__report_expr_status(expr)
+        return self.__start_new_expr(hackathon, template, user_id)
 
     def heart_beat(self, expr_id):
         expr = self.db.find_first_object_by(Experiment, id=expr_id, status=EStatus.Running)
@@ -227,6 +186,53 @@ class ExprManager(Component):
 
     # --------------------------------------------- helper function ---------------------------------------------#
 
+    def __start_new_expr(self, hackathon, template, user_id):
+        # new expr
+        expr = self.db.add_object_kwargs(Experiment,
+                                         user_id=user_id,
+                                         hackathon_id=hackathon.id,
+                                         status=EStatus.Init,
+                                         template_id=template.id)
+        self.db.commit()
+
+        curr_num = self.db.count(Experiment,
+                                 Experiment.user_id == ReservedUser.DefaultUserID,
+                                 Experiment.template == template,
+                                 (Experiment.status == EStatus.Starting) |
+                                 (Experiment.status == EStatus.Running))
+        if template.provider == VEProvider.Docker:
+            try:
+                template_dic = json.load(file(template.url))
+                virtual_environments_list = template_dic[BaseTemplate.VIRTUAL_ENVIRONMENTS]
+                if curr_num != 0 and curr_num >= self.util.get_config("pre_allocate.docker"):
+                    return
+                expr.status = EStatus.Starting
+                self.db.commit()
+                map(lambda virtual_environment_dic:
+                    self.__remote_start_container(hackathon, expr, virtual_environment_dic),
+                    virtual_environments_list)
+                expr.status = EStatus.Running
+                self.db.commit()
+            except Exception as e:
+                self.log.error(e)
+                self.log.error("Failed starting containers")
+                self.__roll_back(expr.id)
+                return internal_server_error('Failed starting containers')
+        else:
+            if curr_num != 0 and curr_num >= self.util.get_config("pre_allocate.azure"):
+                return
+            expr.status = EStatus.Starting
+            self.db.commit()
+            try:
+                af = AzureFormation(self.docker.__load_azure_key_id(expr.id))
+                af.create(expr.id)
+            except Exception as e:
+                self.log.error(e)
+                return internal_server_error('Failed starting azure vm')
+        # after everything is ready, set the expr state to running
+        # response to caller
+        return self.__report_expr_status(expr)
+
     def __report_expr_status(self, expr):
         ret = {
             "expr_id": expr.id,
@@ -282,7 +288,7 @@ class ExprManager(Component):
         if hackathon is None:
             return None
         template = self.db.find_first_object_by(Template, hackathon=hackathon, name=template_name)
-        if template is None or not os.path.isfile(template.url):
+        if template is None or self.template_manager.load_template(template) is None:
             return None
         return [hackathon, template]
 
@@ -323,17 +329,12 @@ class ExprManager(Component):
         :param template:
         :return:
         """
-        expr = self.db.find_first_object_by(Experiment,
-                                            status=EStatus.Running,
-                                            user_id=user_id,
-                                            hackathon_id=hackathon.id)
-        if expr is not None:
-            return expr
-
-        expr = self.db.find_first_object_by(Experiment,
-                                            status=EStatus.Starting,
-                                            user_id=user_id,
-                                            hackathon_id=hackathon.id)
+        exp_status = [EStatus.Running, EStatus.Starting]
+        expr = self.db.find_first_object(Experiment,
+                                         Experiment.status.in_(exp_status),
+                                         Experiment.user_id == user_id,
+                                         Experiment.hackathon_id == hackathon.id,
+                                         Experiment.template_id == template.id if self.hackathon_manager.validate_admin_privilege(user_id, hackathon.id) else 1 == 1)
         if expr is not None:
             return expr
 
@@ -350,7 +351,6 @@ class ExprManager(Component):
             # add a job to start new pre-allocate experiment
             open_check_expr()
             return expr
-
 
     def __roll_back(self, expr_id):
         """
