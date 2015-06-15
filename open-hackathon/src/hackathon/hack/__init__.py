@@ -389,8 +389,9 @@ class HackathonManager(Component):
         return [h.id for h in recyclable]
 
 
-    def get_pre_allocate_enabled_hackathoon_list(self):
-        all = self.db.find_all_objects(Hackathon)
+    def get_pre_allocate_enabled_hackathon_list(self):
+        # only online hackathons will be in consideration
+        all = self.db.find_all_objects(Hackathon, Hackathon.status == HACK_STATUS.ONLINE)
         pre_list = filter(lambda h: self.is_pre_allocate_enabled(h), all)
         return [h.id for h in pre_list]
 

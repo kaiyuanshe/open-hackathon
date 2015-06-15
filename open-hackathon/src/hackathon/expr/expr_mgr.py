@@ -330,11 +330,12 @@ class ExprManager(Component):
         :return:
         """
         exp_status = [EStatus.Running, EStatus.Starting]
+        check_temp = Experiment.template_id == template.id if self.hackathon_manager.validate_admin_privilege(user_id, hackathon.id) else Experiment.id > -1
         expr = self.db.find_first_object(Experiment,
                                          Experiment.status.in_(exp_status),
                                          Experiment.user_id == user_id,
                                          Experiment.hackathon_id == hackathon.id,
-                                         Experiment.template_id == template.id if self.hackathon_manager.validate_admin_privilege(user_id, hackathon.id) else 1 == 1)
+                                         check_temp)
         if expr is not None:
             return expr
 
@@ -400,7 +401,8 @@ def check_default_expr():
     expr_manager = RequiredFeature("expr_manager")
     log = RequiredFeature("log")
 
-    hackathon_id_list = hackathon_manager.get_pre_allocate_enabled_hackathoon_list()
+    # only deal with online hackathons
+    hackathon_id_list = hackathon_manager.get_pre_allocate_enabled_hackathon_list()
     templates = db.find_all_objects_order(Template, Template.hackathon_id.in_(hackathon_id_list))
     for template in templates:
         try:
