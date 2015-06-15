@@ -223,6 +223,15 @@ angular
           }
         }
       })
+      .state('index.userprofile',{
+        url:'userprofile',
+        views: {
+          'main@index': {
+            templateUrl: '../views/userprofile.html',
+            controller:'userprofile.controller'
+          }
+        }
+      })
       .state('redirect', {
         url: '/redirect',
         controller: function ($cookies, state) {
@@ -231,14 +240,13 @@ angular
         }
       });
   })
-  .run(function ($rootScope, $cookies, $stateParams, $log) {
+  .run(function ($rootScope, Authentication, $stateParams, $log) {
     $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams) {
-      var user = $cookies.get('User');
+      var user = Authentication.getUser();
       if (user) {
         $rootScope.isUser = true;
       } else {
         $rootScope.isUser = false;
-        ;
       }
     });
 

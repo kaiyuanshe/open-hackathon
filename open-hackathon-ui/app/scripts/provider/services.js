@@ -38,7 +38,7 @@
  * Controller of the API
  */
 angular.module('oh.services', [])
-  .factory('API', function ($http, $cookies,state, log) {
+  .factory('API', function ($http, $cookies, state, log) {
     function API(obj, name) {
       var key;
       var getCmd = {};
@@ -90,7 +90,9 @@ angular.module('oh.services', [])
         }
       }
     }
+
     return API(config.api, config.url + '/api');
   });
+
 
 

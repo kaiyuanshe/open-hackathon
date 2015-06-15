@@ -147,7 +147,7 @@ a {
 .btn-primary {
   background-color: #00abec;
 }
-
+.main,
 #main {
   background-color: #00abec;
 }
@@ -155,7 +155,10 @@ a {
 #main h1 {
   font-size: 3em;
 }
-
+.main .container{
+  padding: 30px 15px;
+}
+.main .container,
 #main .container {
   background-color: #fff;
   padding-bottom: 30px;
@@ -736,4 +739,59 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
   -webkit-border-radius: 2px;
   -moz-border-radius: 2px;
   border-radius: 2px;
+}
+
+.oh-title {
+  border-bottom: 1px solid #909090;
+  color: #333;
+}
+
+.oh-title h1 {
+  font-size: 20px;
+  font-weight: normal; }
+
+.oh-profile {
+  padding: 80px 40px;
+}
+
+
+ul.profile-details {
+  margin-top: 10px;
+  padding: 0 5px;
+  list-style: none;
+  color: #7c848d;
+}
+
+ul.profile-details li div {
+  color: #909090;
+}
+
+ul.profile-details li {
+  position: relative;
+  margin: 0 0 20px 0;
+  color: #333;
+}
+
+.pofile-form {
+  border: none;
+}
+
+@media (min-width: 768px) {
+  .pofile-form {
+    border-left: 1px solid #e4e4e4;;
+  }
+}
+
+.oh-profileForm{
+  margin-top: 30px;
+}
+
+.profileForm-details{
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.profileForm-details li{
+  margin: 0;
 }
