@@ -30,7 +30,7 @@
  * Created by Boli Guan on 15-4-15.
  */
 angular.module('oh.controllers')
-  .controller('userprofile.controller', function ($scope, state, Authentication, API) {
+  .controller('userprofile.controller', function ($scope, $stateParams, state, Authentication, API) {
     var user = Authentication.getUser();
     if (!user) {
       state.go('index');
@@ -53,6 +53,10 @@ angular.module('oh.controllers')
       }
       def.then(function (res) {
         console.log(res.data);
+        if ($stateParams.isRegister) {
+          var hackathon_name = $cookies.get('redirectHakathonName');
+          state.go('index.register', {hackathon_name: hackathon_name})
+        }
       })
     }
   })

@@ -82,7 +82,8 @@ angular.module('oh.controllers')
         return;
       }
       if (!user.user_profile) {
-        state.go('index.userprofile');
+        $cookies.put('redirectHakathonName', hackathon_name);
+        state.go('index.userprofile',{isRegister:true});
         return;
       }
       openModal();
