@@ -30,7 +30,8 @@
 
 angular.module('oh.app')
   .factory('Authentication', function Authentication($q, $cookies, $stateParams, state, API) {
-    var authenticatedUser = null;
+    var authenticatedUser = undefined;
+    var token = '';
     var hackathon_name = $stateParams.hackathon_name || config.name;
 
     /**
@@ -39,7 +40,24 @@ angular.module('oh.app')
      * @returns {{avatar_url: string, create_time: string, email: {create_time: number, email: string, id: number, name: string, primary_email: number, update_time: null, user_id: number, verified: number}[], id: number, last_login_time: string, name: string, nickname: string, online: number}}
      */
     function getUser() {
-      return $cookies.get('User');
+      token = $cookies.get('token');
+      if (!authenticatedUser && token.length > 0) {
+        authenticatedUser = JSON.parse( $cookies.get('User'));
+        //API.user.get().then(function (res) {
+        //  if (!res.data.error) {
+        //    authenticatedUser = res.data;
+        //  }
+        //});
+      }
+      return authenticatedUser;
+    }
+
+    function logout() {
+      API.user.login.delete().then(function () {
+        token = undefined;
+        authenticatedUser = undefined;
+        $cookies.remove('token');
+      });
     }
 
     /**
@@ -58,7 +76,9 @@ angular.module('oh.app')
               state.go('index.home');
             } else {
               if (data.registration) {
-                if (data.registration.status == 0 || data.registration.status == 2) {
+                if(data.hackathon.basic_info.auto_approve) {
+                  callback(data);
+                }else if (data.registration.status == 0 || data.registration.status == 2 ) {
                   state.go('index.register', {hackathon_name: hackathon_name});
                 } else if (data.registration.status == 3 && data.hackathon.basic_info.auto_approve == 0) {
                   state.go('index.register', {hackathon_name: hackathon_name});
@@ -94,9 +114,11 @@ angular.module('oh.app')
               state.go('index.home');
             } else {
               if (data.registration) {
-                if (data.registration.status == 0 || data.registration.status == 2) {
+                if(data.hackathon.basic_info.auto_approve){
+                  callback(data);
+                }else if (data.registration.status == 0 || data.registration.status == 2) {
                   state.go('index.register', {hackathon_name: hackathon_name});
-                } else if (data.registration.status == 3 && data.hackathon.basic_info.auto_approve == 0) {
+                } else if (data.registration.status == 3) {
                   state.go('index.register', {hackathon_name: hackathon_name});
                 } else if (data.experiment) {
                   state.go('hackathon', {hackathon_name: hackathon_name});

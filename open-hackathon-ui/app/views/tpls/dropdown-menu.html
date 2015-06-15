@@ -8,10 +8,21 @@
     </div>
     <ul class="dropdown-menu" role="menu">
       <li>
-        <a>{{user.nickname}}</a>
+        <a ui-sref="index.userprofile">{{user.nickname}}</a>
       </li>
-      <li ng-repeat="item in items">
-        <a ng-href="{{item.link}}" target="_blank">{{item.name}}</a>
+      <li>
+        <a ui-href="" target="_blank">管理我的黑客松</a>
+      </li>
+      <li>
+        <a ng-href="" target="_blank">黑客松活动指南</a>
+      </li>
+      <li>
+        <a ng-href="" target="_blank">我的黑客松挑战</a>
+      </li>
+      <li>
+        <a
+          ng-href="https://github.com/msopentechcn/open-hackathon-tutorial/wiki/%E5%9C%A8%E7%BA%BF%E7%BC%96%E7%A8%8B%E9%BB%91%E5%AE%A2%E6%9D%BE%E5%B9%B3%E5%8F%B0%E3%80%8A%E4%BD%BF%E7%94%A8%E5%B8%AE%E5%8A%A9%E3%80%8B"
+          target="_blank">使用帮助</a>
       </li>
       <li><a ng-click="logout()">登出</a>
       </li>
