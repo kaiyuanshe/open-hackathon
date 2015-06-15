@@ -205,7 +205,7 @@ class UserHackathonRel(DBBase):
 class UserProfile(DBBase):
     __tablename__ = 'user_profile'
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
+    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'), unique=True)
     real_name = Column(String(80))
     phone = Column(String(11))
     gender = Column(Integer)  # 0:women 1:man
