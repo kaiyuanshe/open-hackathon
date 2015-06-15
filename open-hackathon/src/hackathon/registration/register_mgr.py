@@ -51,6 +51,7 @@ class RegisterManger(Component):
         profile = self.db.find_first_object_by(UserProfile, user_id=register.user_id)
         result['user_profile'] = profile.dic()
         result['avatar_url'] = register.user.avatar_url   # get avatar_url
+        result['name'] = register.user.name   # get avatar_url
         return result
 
     def get_registration_by_user_and_hackathon(self, user_id, hackathon_id):
