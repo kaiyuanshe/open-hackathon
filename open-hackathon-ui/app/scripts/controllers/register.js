@@ -93,7 +93,7 @@ angular.module('oh.controllers')
         $scope.hackathon.message = '您的报名正在审核中，请等待。';
       } else if (status == 2) {
         $scope.hackathon.message = '您的报名已被拒绝，如有疑问请联系主办方。';
-      } else if (status == 3) {
+      } else if (status == 3 && !approve) {
         $scope.hackathon.isRegister = true;
       } else if (status == 1 || status == 3 || approve) {
         $scope.hackathon.start = true

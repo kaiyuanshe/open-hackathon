@@ -113,7 +113,8 @@ angular
     'oh.controllers',
     'oh.directives'
   ])
-  .config(function ($stateProvider, $urlRouterProvider, $locationProvider) {
+  .config(function ($stateProvider, $urlRouterProvider, $locationProvider ,$compileProvider) {
+    $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|skype):/);
     $locationProvider.html5Mode(false);
     $locationProvider.hashPrefix('!');
     $urlRouterProvider.otherwise('/home');

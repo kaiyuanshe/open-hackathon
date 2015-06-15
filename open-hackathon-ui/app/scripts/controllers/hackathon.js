@@ -39,10 +39,17 @@
  * Controller of the oh.header.controller
  */
 angular.module('oh.controllers')
-  .controller('oh.hackathon.controller', function ($scope, $rootScope, $location, Authentication) {
+  .controller('oh.hackathon.controller', function ($scope, $rootScope, $stateParams, $location, Authentication, API) {
     $rootScope.hackathon = true;
     $rootScope.workspace = true;
-    $rootScope.isShow = true;
+    $rootScope.isShow = true
+    var hackathon_name = $stateParams.hackathon_name || config.name;
+
+    API.user.team.member.get({header: {hackathon_name: hackathon_name}}).then(function (res) {
+      $scope.team = res.data;
+      $scope.teamname = res.data[0].team_name;
+    });
+
     Authentication.hackathon(function (data) {
       $scope.workData = data;
     });

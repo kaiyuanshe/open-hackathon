@@ -55,5 +55,9 @@ angular.module('oh.app')
     return function (longTime) {
       return new Date(longTime);
     }
+  }).filter('skypelink', function () {
+    return function (skype) {
+      return skype.length > 0 ? 'skype:' + skype + '?chat' : 'javascript:;';
+    }
   });
 
