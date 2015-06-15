@@ -40,7 +40,7 @@ angular.module('oh.app')
      * @returns {{avatar_url: string, create_time: string, email: {create_time: number, email: string, id: number, name: string, primary_email: number, update_time: null, user_id: number, verified: number}[], id: number, last_login_time: string, name: string, nickname: string, online: number}}
      */
     function getUser() {
-      token = $cookies.get('token');
+      token = $cookies.get('token') || "";
       if (!authenticatedUser && token.length > 0) {
         authenticatedUser = JSON.parse( $cookies.get('User'));
         //API.user.get().then(function (res) {

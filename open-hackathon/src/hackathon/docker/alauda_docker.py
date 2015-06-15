@@ -136,7 +136,7 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
             "service_name": "",
             "namespace": self.util.get_config("docker.alauda.namespace"),
             "image_name": "",
-            "image_tag": "",
+            "image_tag": "latest",
             "run_command": "",
             "instance_size": "XS",
             "scaling_mode": "MANUAL",
@@ -154,6 +154,7 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
         service_config = self.__get_default_service_config()
         service_config["service_name"] = unit.get_name()
         service_config["image_name"] = unit.get_image_without_tag()
+        service_config["image_tag"] = unit.get_tag()
         service_config["run_command"] = unit.get_run_command()
         service_config["instance_envvars"] = unit.get_instance_env_vars()
         service_config["instance_ports"] = unit.get_instance_ports()
@@ -202,6 +203,8 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
         return self.__get(path)
 
     def __is_service_started(self, service):
+        # todo "target_state" not the running state of service. find out another way to test the status.
+        # e.g. ping specific port
         return service["target_state"] == ALAUDA_SERVICE_STATUS.STARTED
 
     def __format_time(self, date):
