@@ -146,10 +146,6 @@ class RegisterManger(Component):
 
         return detail
 
-    def is_email_registered(self, hid, email):
-        register = self.db.find_first_object_by(UserHackathonRel, hackathon_id=hid, email=email, deleted=0)
-        return register is None
-
     def is_user_registered(self, user_id, hackathon):
         # reservedUser (-1)
         if user_id == ReservedUser.DefaultUserID:
