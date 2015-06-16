@@ -6,15 +6,14 @@
 {% endblock %} {% block head %}
 <!-- Head -->
 {% endblock %} {% block content %}
+<div class="text-center loading"><img src="/static/pic/spinner-lg.gif"></div>
 
-<div class="box">
-    <div class="box-header">
-        <h2><i class="fa fa-edit"></i>编辑黑客松</h2>
-        <ul class="nav nav-tabs" id="tabs" data-type="tabs">
-        </ul>
+<div class="full-main" style="display:none">
+    <div class="remote_tabs clearfix">
+        <ul class="nav nav-tabs" id="tabs"></ul>
     </div>
-    <div class="box-content relative" id="images">
-        <div class="text-center"><img src="/static/pic/spinner-lg.gif"></div>
+    <div id="remotes">
+
     </div>
 </div>
 

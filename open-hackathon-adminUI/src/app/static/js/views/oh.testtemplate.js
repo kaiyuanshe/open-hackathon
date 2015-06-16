@@ -31,16 +31,75 @@
         }
     }
 
-    function init(){
+    function createiframe(data){
+        removeLoading();
+        var remotes = $('#remotes');
+        var tabs = $('#tabs');
+        //data.remote_servers = [{name:'aaa',url:'http://www.cnblogs.com/loogn/archive/2011/06/20/2085165.html'}]
+        $.each(data.remote_servers,function(i,remote){
+            var ifrem = $('<iframe>').attr({
+                src: remote.url,
+                id: remote.name,
+                width: '100%',
+                height: '100%',
+                frameborder: 'no',
+                marginwidth: '0',
+                scrolling: 'no',
+                class: 'v-hidden'
+            }).appendTo(remotes);
+            var li = $('<li><a href="#'+ remote.name+'">'+ remote.name +'</a></li>').appendTo(tabs);
+        });
+        tabs.find('a:eq(0)').trigger('click');
+    }
+
+    function showError(error){
+        removeLoading();
+        var remotes = $('#remotes');
+        remotes.append($('<p>').text(JSON.stringify(error)));
+    }
+
+    function removeLoading(){
+        $('.loading').detach();
+        $('.full-main').show();
+    }
+
+    function bindEvent(){
+        var remotes = $('#remotes').bind('tab',function(e,id){
+            remotes.find('iframe').addClass('v-hidden');
+            remotes.find(id).removeClass('v-hidden');
+        });
+        var tabs = $('#tabs').on('click','a',function(e){
+            e.preventDefault();
+            var _self = $(this)
+            var li = _self .parents('li');
+            if(!li.hasClass('active')){
+                tabs.find('li').removeClass('active');
+                li.addClass('active');
+                remotes.trigger('tab',[_self.attr('href')])
+            }
+        });
+    }
+
+    function loadingTemp(){
         var param = getUrlParam();
         oh.api.admin.hackathon.template.check.get({
             query:{name:param.temp_name},
             header:{hackathon_name:param.hackathon_name}
         },function(data){
-            console.log(data);
-
-            oh.comm.removeLoading();
+            if(data.error){
+                showError(data.error);
+            }
+            else if(data.status == 1){
+                setTimeout(loadingTemp,60000);
+            }else if(data.status == 2){
+                createiframe(data);
+            }
         })
+    }
+    
+    function init(){
+        loadingTemp();
+        bindEvent();
     }
 
     $(function(){

@@ -83,9 +83,11 @@
                         },
                         error: function(req, status, error) {
                             var data = {
-                                error: error,
-                                message: req.responseText,
-                                status: req.status
+                                error : {
+                                    error: error ,
+                                    message: req.responseText,
+                                    status: req.status
+                                }
                             };
                             callback(data);
                         }
