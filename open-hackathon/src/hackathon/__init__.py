@@ -104,8 +104,8 @@ def init_app():
 
     init_routes()
 
-    from initialise_jobs import start_init_job
-    start_init_job()
+    # from initialise_jobs import start_init_job
+    # start_init_job()
 
 
 init_app()

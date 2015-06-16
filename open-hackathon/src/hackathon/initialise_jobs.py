@@ -152,7 +152,6 @@ def ensure_images():
 # ------------------------------- Run jobs withn API service starting ---------------------------------------------#
 
 def start_init_job():
-    return ""
-    # open_check_expr()
-    # recycle_expr_scheduler()
-    # ensure_images()
+    open_check_expr()
+    recycle_expr_scheduler()
+    ensure_images()
