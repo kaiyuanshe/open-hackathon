@@ -41,27 +41,19 @@ class RegisterManger(Component):
     def get_all_registration_by_hackathon_id(self, hackathon_id):
         # TODO make query result with pagination
         registers = self.db.find_all_objects_by(UserHackathonRel, hackathon_id=hackathon_id)
-        return [self.get_registration_with_profile(r) for r in registers]
+        return [self.user_manager.user_display_info(r.user) for r in registers]
 
     def get_hackathon_registers(self, num=None):
         registers = self.db.find_all_objects_order_by(UserHackathonRel,
                                                       num,  # limit num
                                                       UserHackathonRel.create_time.desc(),
                                                       hackathon_id=g.hackathon.id)
-        return map(lambda x: self.get_registration_with_profile(x), registers)
+        return map(lambda x: self.user_manager.user_display_info(x), registers)
+
 
     def get_registration_by_id(self, id):
         return self.db.get_object(UserHackathonRel, id)
 
-    def get_registration_with_profile(self, register):
-        result = register.dic()
-        profile = self.db.find_first_object_by(UserProfile, user_id=register.user_id)
-        result['user_profile'] = profile.dic()
-        result['avatar_url'] = register.user.avatar_url   # get avatar_url
-        result['name'] = register.user.name   # get avatar_url
-        emails = map(lambda x: x.email, register.user.emails)
-        result['email'] = emails
-        return result
 
     def get_registration_by_user_and_hackathon(self, user_id, hackathon_id):
         return self.db.find_first_object_by(UserHackathonRel, user_id=user_id, hackathon_id=hackathon_id)
