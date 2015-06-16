@@ -31,11 +31,10 @@
         }
     }
 
-    function createiframe(data){
+    function createRemotes(data){
         removeLoading();
         var remotes = $('#remotes');
         var tabs = $('#tabs');
-        //data.remote_servers = [{name:'aaa',url:'http://www.cnblogs.com/loogn/archive/2011/06/20/2085165.html'}]
         $.each(data.remote_servers,function(i,remote){
             var ifrem = $('<iframe>').attr({
                 src: remote.url,
@@ -92,11 +91,11 @@
             else if(data.status == 1){
                 setTimeout(loadingTemp,60000);
             }else if(data.status == 2){
-                createiframe(data);
+                createRemotes(data);
             }
         })
     }
-    
+
     function init(){
         loadingTemp();
         bindEvent();
