@@ -24,6 +24,7 @@ THE SOFTWARE.
 """
 
 import sys
+
 sys.path.append("..")
 
 from flask_restful import (
@@ -54,6 +55,7 @@ register_manager = RequiredFeature("register_manager")
 template_manager = RequiredFeature("template_manager")
 azure_cert_management = RequiredFeature("azure_cert_management")
 admin_manager = RequiredFeature("admin_manager")
+exper_manager = RequiredFeature("exper_manager")
 
 
 class AdminHackathonResource(Resource):
@@ -92,7 +94,7 @@ class HackathonCheckNameResource(Resource):
 class AdminRegisterListResource(Resource):
     @admin_privilege_required
     def get(self):
-        return register_manager.get_all_registration_by_hackathon_id(g.hackathon.id)
+        return register_manager.get_hackathon_registers()
 
 
 class AdminRegisterResource(Resource):
@@ -144,6 +146,18 @@ class AdminHackathonTemplateResource(Resource):
         parse.add_argument('id', type=int, location='args', required=True)
         args = parse.parse_args()
         return template_manager.delete_template(args['id'])
+
+
+class AdminHackathonCheckTemplateResource(Resource):
+    @admin_privilege_required
+    def get(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('name', type=str, location='args', required=True)  # template_name
+        args = parse.parse_args()
+        user_id = g.user.id
+        hackathon_name = g.hackathon.name
+        template_name = args['name']
+        return exper_manager.start_expr(hackathon_name, template_name, user_id)
 
 
 class AdminAzureResource(Resource, Component):
@@ -232,6 +246,7 @@ def register_admin_routes():
 
     # template APIs
     api.add_resource(AdminHackathonTemplateResource, "/api/admin/hackathon/template")
+    api.add_resource(AdminHackathonCheckTemplateResource, "/api/admin/hackathon/template/check")
 
     # azure resources
     api.add_resource(AdminAzureResource, '/api/admin/azure')
