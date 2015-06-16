@@ -170,6 +170,10 @@
     }
 
     $(function() {
+        if(location.pathname.search('logout','i') != -1){
+            location.href = '/login';
+            return;
+        }
         w.oh.comm.createLoading('[loading]');
         addTabsEvent();
         var currentHackathon = w.oh.comm.getCurrentHackathon();
