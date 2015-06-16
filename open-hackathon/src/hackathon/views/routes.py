@@ -32,12 +32,12 @@ from flask_restful import Resource, reqparse
 from hackathon.decorators import hackathon_name_required
 from hackathon.health import report_health
 from hackathon.database.models import Announcement
+from hackathon.initialise_jobs import start_init_job
 import time
 
 hackathon_manager = RequiredFeature("hackathon_manager")
 user_manager = RequiredFeature("user_manager")
 register_manager = RequiredFeature("register_manager")
-docker = RequiredFeature("docker")
 
 
 class HealthResource(Resource):
@@ -123,9 +123,9 @@ class HackathonTeamListResource(Resource):
         return register_manager.get_hackathon_team_list(id, result['name'], result['number'])
 
 
-class TestEnsureImagesResource(Resource):
+class InitialJobsResource(Resource):
     def get(self):
-        return docker.ensure_images()
+        return start_init_job()
 
 
 def register_routes():
@@ -156,5 +156,5 @@ def register_routes():
     api.add_resource(HackathonRegisterResource, "/api/hackathon/registration/list")
 
     # TODO after find a callable way , would delete this api
-    api.add_resource(TestEnsureImagesResource, "/api/test/ensure")
+    api.add_resource(InitialJobsResource, "/api/test/init")
 
