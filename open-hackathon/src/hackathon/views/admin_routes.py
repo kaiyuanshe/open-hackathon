@@ -55,7 +55,7 @@ register_manager = RequiredFeature("register_manager")
 template_manager = RequiredFeature("template_manager")
 azure_cert_management = RequiredFeature("azure_cert_management")
 admin_manager = RequiredFeature("admin_manager")
-exper_manager = RequiredFeature("exper_manager")
+expr_manager = RequiredFeature("expr_manager")
 
 
 class AdminHackathonResource(Resource):
@@ -157,7 +157,7 @@ class AdminHackathonCheckTemplateResource(Resource):
         user_id = g.user.id
         hackathon_name = g.hackathon.name
         template_name = args['name']
-        return exper_manager.start_expr(hackathon_name, template_name, user_id)
+        return expr_manager.start_expr(hackathon_name, template_name, user_id)
 
 
 class AdminAzureResource(Resource, Component):

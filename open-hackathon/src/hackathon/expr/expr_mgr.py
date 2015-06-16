@@ -197,7 +197,7 @@ class ExprManager(Component):
                                  (Experiment.status == EStatus.Running))
         if template.provider == VEProvider.Docker:
             try:
-                template_dic = json.load(file(template.url))
+                template_dic = self.template_manager.load_template(template)
                 virtual_environments_list = template_dic[BaseTemplate.VIRTUAL_ENVIRONMENTS]
                 if curr_num != 0 and curr_num >= self.util.get_config("pre_allocate.docker"):
                     return
