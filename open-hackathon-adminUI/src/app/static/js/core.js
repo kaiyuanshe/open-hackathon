@@ -206,7 +206,7 @@
         });
 
 
-        if(location.pathname.length !=1 && location.pathname.search('createhackathon|login','i') == -1){
+        if(location.pathname.length !=1 && location.pathname.search('createhackathon|login|logout','i') == -1){
             if(currentHackathon.id == 0){
                 oh.api.admin.hackathon.list.get(function(data){
                     if(data.length == 0){

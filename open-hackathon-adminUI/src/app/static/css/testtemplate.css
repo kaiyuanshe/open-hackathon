@@ -1,0 +1,12 @@
+html{
+  height: 100%;
+}
+body{
+  background-color:#fff;
+  height: 100%;
+  margin-bottom: 0;
+}
+body:after{
+  position: relative;
+  border-left:none;
+}
