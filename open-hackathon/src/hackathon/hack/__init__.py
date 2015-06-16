@@ -116,6 +116,8 @@ class HackathonManager(Component):
 
         return map(lambda (hack, reg): to_dict(hack, reg), hackathon_with_user_list)
 
+    def get_online_hackthons(self):
+        return self.db.find_all_objects(Hackathon, Hackathon.status == HACK_STATUS.ONLINE)
 
     def get_user_hackathon_list(self, user_id):
         user_hack_list = self.db.session().query(Hackathon, UserHackathonRel) \
@@ -391,7 +393,7 @@ class HackathonManager(Component):
 
     def get_pre_allocate_enabled_hackathon_list(self):
         # only online hackathons will be in consideration
-        all = self.db.find_all_objects(Hackathon, Hackathon.status == HACK_STATUS.ONLINE)
+        all = self.get_online_hackthons()
         pre_list = filter(lambda h: self.is_pre_allocate_enabled(h), all)
         return [h.id for h in pre_list]
 

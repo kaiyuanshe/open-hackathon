@@ -30,17 +30,13 @@ sys.path.append("..")
 from hackathon import api, RequiredFeature, Component, g
 from flask_restful import Resource, reqparse
 from hackathon.decorators import hackathon_name_required
-from hackathon.hackathon_response import ok
 from hackathon.health import report_health
 from hackathon.database.models import Announcement
-# todo refactor this logic to make it starts with application other than an api call
-from hackathon.expr.expr_mgr import open_check_expr, recycle_expr_scheduler
 import time
 
 hackathon_manager = RequiredFeature("hackathon_manager")
 user_manager = RequiredFeature("user_manager")
 register_manager = RequiredFeature("register_manager")
-user_manager = RequiredFeature("user_manager")
 docker = RequiredFeature("docker")
 
 
@@ -66,18 +62,6 @@ class CurrentTimeResource(Resource):
         return {
             "currenttime": long(time.time() * 1000)
         }
-
-
-class ExperimentPreAllocateResource(Resource):
-    def get(self):
-        open_check_expr()
-        return ok("start default experiment")
-
-
-class ExperimentRecycleResource(Resource):
-    def get(self):
-        recycle_expr_scheduler()
-        return ok("Recycle inactive user experiment running on backgroud")
 
 
 class HackathonResource(Resource, Component):
@@ -151,10 +135,6 @@ def register_routes():
 
     # health page API
     api.add_resource(HealthResource, "/", "/health")
-
-    # scheduled jobs API
-    api.add_resource(ExperimentPreAllocateResource, "/api/default/preallocate")
-    api.add_resource(ExperimentRecycleResource, "/api/default/recycle")
 
     # announcement API
     api.add_resource(BulletinResource, "/api/bulletin")

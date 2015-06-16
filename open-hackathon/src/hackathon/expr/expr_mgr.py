@@ -33,9 +33,6 @@ from hackathon import (
     RequiredFeature,
 )
 
-from hackathon.scheduler import (
-    scheduler,
-)
 from hackathon.enum import (
     EStatus,
     VERemoteProvider,
@@ -71,16 +68,14 @@ from hackathon.template.docker_template_unit import (
 from hackathon.template.base_template import (
     BaseTemplate,
 )
-
-from datetime import (
-    timedelta,
-)
-
 import json
 import random
 import string
 from sqlalchemy import (
     and_,
+)
+from hackathon.initialise_jobs import (
+    open_check_expr
 )
 
 
@@ -330,7 +325,7 @@ class ExprManager(Component):
         :return:
         """
         exp_status = [EStatus.Running, EStatus.Starting]
-        check_temp = Experiment.template_id == template.id if self.hackathon_manager.validate_admin_privilege(user_id, hackathon.id) else Experiment.id > -1
+        check_temp = Experiment.template_id == template.id if self.hackathon_manager.validate_admin_privilege(user_id,hackathon.id) else Experiment.id > -1
         expr = self.db.find_first_object(Experiment,
                                          Experiment.status.in_(exp_status),
                                          Experiment.user_id == user_id,
@@ -383,98 +378,3 @@ class ExprManager(Component):
 
             # --------------------------------------------- helper function ---------------------------------------------#
 
-
-def open_check_expr():
-    """
-    start a scheduled job to examine default experiment
-    :return:
-    """
-    util = RequiredFeature("util")
-    alarm_time = util.get_now() + timedelta(seconds=1)
-    scheduler.add_job(check_default_expr, 'interval', id='pre', replace_existing=True, next_run_time=alarm_time,
-                      minutes=util.safe_get_config("pre_allocate.check_interval_minutes", 5))
-
-
-def check_default_expr():
-    db = RequiredFeature("db")
-    hackathon_manager = RequiredFeature("hackathon_manager")
-    expr_manager = RequiredFeature("expr_manager")
-    log = RequiredFeature("log")
-
-    # only deal with online hackathons
-    hackathon_id_list = hackathon_manager.get_pre_allocate_enabled_hackathon_list()
-    templates = db.find_all_objects_order(Template, Template.hackathon_id.in_(hackathon_id_list))
-    for template in templates:
-        try:
-            pre_num = hackathon_manager.get_pre_allocate_number(template.hackathon)
-            curr_num = db.count(Experiment,
-                                Experiment.user_id == ReservedUser.DefaultUserID,
-                                Experiment.template_id == template.id,
-                                (Experiment.status == EStatus.Starting) | (
-                                    Experiment.status == EStatus.Running))
-            # todo test azure, config num
-            if template.provider == VEProvider.AzureVM:
-                if curr_num < pre_num:
-                    remain_num = pre_num - curr_num
-                    start_num = db.count_by(Experiment,
-                                            user_id=ReservedUser.DefaultUserID,
-                                            template=template,
-                                            status=EStatus.Starting)
-                    if start_num > 0:
-                        log.debug("there is an azure env starting, will check later ... ")
-                        return
-                    else:
-                        log.debug("no starting template: %s , remain num is %d ... " % (template.name, remain_num))
-                        expr_manager.start_expr(template.hackathon.name, template.name, ReservedUser.DefaultUserID)
-                        break
-                        # curr_num += 1
-                        # self.log.debug("all template %s start complete" % template.name)
-            elif template.provider == VEProvider.Docker:
-                log.debug("template name is %s, hackathon name is %s" % (template.name, template.hackathon.name))
-                if curr_num < pre_num:
-                    remain_num = pre_num - curr_num
-                    log.debug("no idle template: %s, remain num is %d ... " % (template.name, remain_num))
-                    expr_manager.start_expr(template.hackathon.name, template.name, ReservedUser.DefaultUserID)
-                    # curr_num += 1
-                    break
-                    # self.log.debug("all template %s start complete" % template.name)
-        except Exception as e:
-            log.error(e)
-            log.error("check default experiment failed")
-
-
-def recycle_expr_scheduler():
-    """
-    start a scheduled job to recycle inactive experiment
-    :return:
-    """
-    util = RequiredFeature("util")
-    excute_time = util.get_now() + timedelta(minutes=1)
-    scheduler.add_job(recycle_expr, 'interval', id='recycle', replace_existing=True, next_run_time=excute_time,
-                      minutes=util.safe_get_config("recycle.check_idle_interval_minutes", 5))
-
-
-def recycle_expr():
-    """
-    recycle experiment when idle more than 24 hours
-    :return:
-    """
-    log = RequiredFeature("log")
-    util = RequiredFeature("util")
-    hackathon_manager = RequiredFeature("hackathon_manager")
-    expr_manager = RequiredFeature("expr_manager")
-    db = RequiredFeature("db")
-
-    log.debug("start checking experiment ... ")
-    recycle_hours = util.safe_get_config('recycle.idle_hours', 24)
-
-    expr_time_cond = Experiment.last_heart_beat_time + timedelta(hours=recycle_hours) > util.get_now()
-    recycle_cond = Experiment.hackathon_id.in_(hackathon_manager.get_recyclable_hackathon_list())
-    r = db.find_first_object(Experiment, hackathon_manager, expr_time_cond, recycle_cond)
-
-    if r is not None:
-        expr_manager.stop_expr(r.id)
-        log.debug("it's stopping " + str(r.id) + " inactive experiment now")
-    else:
-        log.debug("There is now inactive experiment now")
-        return
