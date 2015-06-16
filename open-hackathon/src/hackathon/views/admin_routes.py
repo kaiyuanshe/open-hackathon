@@ -24,7 +24,6 @@ THE SOFTWARE.
 """
 
 import sys
-
 sys.path.append("..")
 
 from flask_restful import (

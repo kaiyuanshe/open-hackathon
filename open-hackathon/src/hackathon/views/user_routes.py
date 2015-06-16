@@ -112,7 +112,7 @@ class UserExperimentResource(Resource, Component):
         template_name = args["template_name"]
         hackathon = args["hackathon"]
         try:
-            return expr_manager.start_expr_for_frontend(hackathon, template_name, g.user.id)
+            return expr_manager.start_expr(hackathon, template_name, g.user.id)
         except Exception as err:
             self.log.error(err)
             return {"error": "fail to start due to '%s'" % err}, 500
