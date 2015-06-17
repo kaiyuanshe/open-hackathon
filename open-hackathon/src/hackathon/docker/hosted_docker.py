@@ -46,6 +46,7 @@ from hackathon.database.models import (
 from hackathon.enum import (
     EStatus,
     PortBindingType,
+    VEStatus,
 )
 from compiler.ast import (
     flatten,
@@ -257,6 +258,8 @@ class HostedDockerFormation(DockerFormationBase, Component):
                 return None
 
         self.log.debug("starting container %s is ended ... " % container_name)
+        virtual_environment.status = VEStatus.Running
+        self.db.commit()
         return container
 
     def get_vm_url(self, docker_host):

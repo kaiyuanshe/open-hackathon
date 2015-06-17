@@ -67,6 +67,7 @@ angular.module('oh.app')
      * @param {function}
      */
     function hackathon(callback) {
+      var hackathon_name = $stateParams.hackathon_name || config.name;
       var user = this.getUser();
       var hackathon_name = $stateParams.hackathon_name || config.name;
       if (user) {
@@ -106,6 +107,7 @@ angular.module('oh.app')
      * @param {function}
      */
     function settings(callback) {
+      var hackathon_name = $stateParams.hackathon_name || config.name;
       var user = this.getUser();
       var hackathon_name = $stateParams.hackathon_name || config.name;
       if (user) {

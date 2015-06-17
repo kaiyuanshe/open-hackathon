@@ -52,8 +52,9 @@ class VEStatus:
     """
     Init = 0
     Running = 1
-    Stopped = 2
-    Deleted = 3
+    Failed = 2
+    Stopped = 3
+    Deleted = 4
 
 
 class PortBindingType:

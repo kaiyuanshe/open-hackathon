@@ -242,16 +242,20 @@ class ExprManager(Component):
         guacamole_servers = []
         for ve in expr.virtual_environments.all():
             if ve.remote_provider == VERemoteProvider.Guacamole:
-                guacamole_config = json.loads(ve.remote_paras)
-                guacamole_host = self.util.safe_get_config("guacamole.host", "localhost:8080")
-                # target url format:
-                # http://localhost:8080/guacamole/#/client/c/{name}?name={name}&oh={token}
-                name = guacamole_config["name"]
-                url = guacamole_host + '/guacamole/#/client/c/%s?name=%s' % (name, name)
-                guacamole_servers.append({
-                    "name": guacamole_config["displayname"],
-                    "url": url
-                })
+                try:
+                    guacamole_config = json.loads(ve.remote_paras)
+                    guacamole_host = self.util.safe_get_config("guacamole.host", "localhost:8080")
+                    # target url format:
+                    # http://localhost:8080/guacamole/#/client/c/{name}?name={name}&oh={token}
+                    name = guacamole_config["name"]
+                    url = guacamole_host + '/guacamole/#/client/c/%s?name=%s' % (name, name)
+                    guacamole_servers.append({
+                        "name": guacamole_config["displayname"],
+                        "url": url
+                    })
+                except Exception as e:
+                    self.log.error(e)
+
         if expr.status == EStatus.Running:
             ret["remote_servers"] = guacamole_servers
         # return public accessible web url
@@ -311,8 +315,6 @@ class ExprManager(Component):
         if container_ret is None:
             self.log.error("container %s fail to run" % new_name)
             raise Exception("container_ret is none")
-        ve.status = VEStatus.Running
-        self.db.commit()
         self.log.debug("starting container %s is ended ... " % new_name)
         return ve
 
@@ -325,7 +327,8 @@ class ExprManager(Component):
         :return:
         """
         exp_status = [EStatus.Running, EStatus.Starting]
-        check_temp = Experiment.template_id == template.id if self.hackathon_manager.validate_admin_privilege(user_id,hackathon.id) else Experiment.id > -1
+        check_temp = Experiment.template_id == template.id if self.hackathon_manager.validate_admin_privilege(user_id,
+                                                                                                              hackathon.id) else Experiment.id > -1
         expr = self.db.find_first_object(Experiment,
                                          Experiment.status.in_(exp_status),
                                          Experiment.user_id == user_id,
