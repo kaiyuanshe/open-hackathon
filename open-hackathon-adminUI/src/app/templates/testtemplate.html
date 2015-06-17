@@ -1,0 +1,23 @@
+{% extends "base.html" %} {% block meta %}
+<!-- Metas -->
+{% endblock %} {% block style %}
+<!-- Styles-->
+<link href="/static/css/testtemplate.css" rel="stylesheet">
+{% endblock %} {% block head %}
+<!-- Head -->
+{% endblock %} {% block content %}
+<div class="text-center loading"><img src="/static/pic/spinner-lg.gif"></div>
+
+<div class="full-main" style="display:none">
+    <div class="remote_tabs clearfix">
+        <ul class="nav nav-tabs" id="tabs"></ul>
+    </div>
+    <div id="remotes">
+
+    </div>
+</div>
+
+{% endblock %} {% block script %}
+<!-- Scripts -->
+<script type="text/javascript" src="/static/js/views/oh.testtemplate.js"></script>
+{% endblock %}

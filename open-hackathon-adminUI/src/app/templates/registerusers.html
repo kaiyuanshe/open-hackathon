@@ -18,6 +18,7 @@
                 <thead>
                     <tr>
                         <th>注册名</th>
+                        <th>团队名</th>
                         <th>邮箱</th>
                         <th>联系电话</th>
                         <th>联系地址</th>
@@ -50,28 +51,35 @@
         </div>
     </div>
 </div>
+
 <script id="hackathon_template" type="text/x-jquery-tmpl">
     <option value=${id}>${name}</option>
 </script>
 <script id="register_list_template" type="text/x-jquery-tmpl">
     <tr>
         <td>
-            ${real_name}
+            ${name}
+        </td>
+        <td>
+            ${team_name}
         </td>
         <td>${email}</td>
-        <td>${phone}</td>
-        <td>${address}</td>
+        <td>${user_profile.phone}</td>
+        <td>${user_profile.address}</td>
         <td>${moment(create_time).format('YYYY-MM-DD HH:mm')}</td>
         <td>
             <a href="javascript:void(0);" data-type="select" data-name="status" data-value="${status}" class="editable" data-source='{"0":"未审核","1":"通过","2":"拒绝"}' data-placement="top"></a>
         </td>
+
         <td class="col-action">
+        {% if current_user.is_super() %}
             <a class="btn btn-info btn-sm" href="/edit/register?id=${id}">
                 <i class="fa fa-edit "></i>
             </a>
             <a class="btn btn-danger btn-sm" href="#" data-target="#confirm_modal" data-toggle="modal">
                 <i class="fa fa-trash-o "></i>
             </a>
+        {% endif %}
         </td>
     </tr>
 </script>

@@ -128,8 +128,11 @@ Config = {
                     "": ["get", "post", "put"],
                     "checkname": ["get"],
                     "list": ["get"],
-                    "template": ["get", "post", "delete", "put"],
-                    "administrator":{
+                    "template": {
+                        "": ["get", "post", "delete", "put"],
+                        "check": ["get"]
+                    },
+                    "administrator": {
                         "": ["put", "post", "delete"],
                         "list": ["get"]
                     }
