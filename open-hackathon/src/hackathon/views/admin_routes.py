@@ -152,8 +152,8 @@ class AdminExperimentResource(Resource):
     def post(self):
         args = request.get_json()
         if 'name' not in args:
-            return bad_request('invalid name')
-        
+            return bad_request('template name name invalid')
+
         template_name = args['name']
         user_id = g.user.id
         hackathon_name = g.hackathon.name
