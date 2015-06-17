@@ -37,7 +37,7 @@
         var tabs = $('#tabs');
         $.each(data.remote_servers,function(i,remote){
             var ifrem = $('<iframe>').attr({
-                src: remote.url,
+                src: remote.url+'&oh='+$.cookie('token'),
                 id: remote.name,
                 width: '100%',
                 height: '100%',
@@ -66,7 +66,7 @@
         var remotes = $('#remotes').bind('tab',function(e,id){
             remotes.find('iframe').addClass('v-hidden');
             remotes.find(id).removeClass('v-hidden');
-        }).on('mouseover, hover', 'iframe', function (e) {
+        }).on('mouseover', 'iframe', function (e) {
             $(this).focus();
         });
 
