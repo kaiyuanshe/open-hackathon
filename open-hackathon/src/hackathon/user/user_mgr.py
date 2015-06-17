@@ -30,7 +30,6 @@ sys.path.append("..")
 from hackathon.database.models import UserToken, User, UserEmail, UserHackathonRel
 from datetime import timedelta
 from hackathon.constants import HTTP_HEADER
-from hackathon.hackathon_response import not_found
 from flask import request, g
 import uuid
 from hackathon import Component

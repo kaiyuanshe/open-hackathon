@@ -33,6 +33,7 @@ from flask_cors import CORS
 from util import safe_get_config, get_class, Utility
 from hackathon_factory import factory, RequiredFeature
 
+
 # flask
 app = Flask(__name__)
 app.config['SECRET_KEY'] = safe_get_config("app.secret_key", "secret_key")

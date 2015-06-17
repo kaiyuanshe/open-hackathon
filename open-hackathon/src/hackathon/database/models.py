@@ -32,7 +32,6 @@ from hackathon.util import get_now
 import json
 from pytz import utc
 from dateutil import parser
-from math import ceil
 
 def relationship(*arg, **kw):
     ret = relation(*arg, **kw)
@@ -221,6 +220,8 @@ class UserProfile(DBBase):
 
     user = relationship('User', backref=backref('profile', uselist=False))
 
+    def __init__(self, **kwargs):
+        super(UserProfile, self).__init__(**kwargs)
 
 class Hackathon(DBBase):
     __tablename__ = 'hackathon'
@@ -408,7 +409,6 @@ class Template(DBBase):
     update_time = Column(TZDateTime)
     description = Column(Text)
     virtual_environment_count = Column(Integer, default=0)
-    azure_url = Column(String(200))
 
     hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
     hackathon = relationship('Hackathon', backref=backref('templates', lazy='dynamic'))

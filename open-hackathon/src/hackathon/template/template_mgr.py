@@ -67,6 +67,9 @@ from hackathon import (
     RequiredFeature,
     g,
 )
+from hackathon.initialise_jobs import (
+    docker_pull_image
+)
 
 
 class TemplateManager(Component):
@@ -334,13 +337,3 @@ class TemplateManager(Component):
             if ex_image not in current_images:
                 images.append(ex_image)
         return flatten(images)
-
-
-def auto_pull_images_for_hackathon(hackathon):
-    template_manager = RequiredFeature("template_manager")
-    return template_manager.pull_images_for_hackathon(hackathon)
-
-
-def docker_pull_image(docker_host, image, tag):
-    docker = RequiredFeature("docker")
-    return docker.pull_image(docker_host, image, tag)
