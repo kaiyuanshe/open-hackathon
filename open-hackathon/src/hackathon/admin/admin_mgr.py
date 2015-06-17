@@ -39,14 +39,14 @@ class AdminManager(Component):
         return self.db.find_all_objects_by(AdminHackathonRel, hackathon_id=g.hackathon.id)
 
 
-    def get_hackathon_admins(self):
-        def to_dict(ahl):
-            dic = ahl.dic()
-            dic["user_info"] = self.user_manager.user_display_info(ahl.user)
-            return dic
+    def get_admin_details(self, ahl):
+        dic = ahl.dic()
+        dic["user_info"] = self.user_manager.user_display_info(ahl.user)
+        return dic
 
-        x = map(lambda ahl: to_dict(ahl), self.get_hackathon_admin_list())
-        return x
+
+    def get_hackathon_admins(self):
+        return map(lambda ahl: self.get_admin_details(ahl), self.get_hackathon_admin_list())
 
 
     def __validate_created_args(self, args):
@@ -140,7 +140,6 @@ class AdminManager(Component):
         status, info = self.validate_deleted_args(ahl_id)
         if not status:
             return info
-
         try:
             self.db.delete_all_objects(AdminHackathonRel, AdminHackathonRel.id == ahl_id)
             return ok()

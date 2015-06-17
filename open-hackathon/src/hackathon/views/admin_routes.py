@@ -93,7 +93,7 @@ class HackathonCheckNameResource(Resource):
 class AdminRegisterListResource(Resource):
     @admin_privilege_required
     def get(self):
-        return register_manager.get_hackathon_registers()
+        return register_manager.get_hackathon_registration()
 
 
 class AdminRegisterResource(Resource):
@@ -147,15 +147,16 @@ class AdminHackathonTemplateResource(Resource):
         return template_manager.delete_template(args['id'])
 
 
-class AdminHackathonCheckTemplateResource(Resource):
+class AdminExperimentResource(Resource):
     @admin_privilege_required
-    def get(self):
-        parse = reqparse.RequestParser()
-        parse.add_argument('name', type=str, location='args', required=True)  # template_name
-        args = parse.parse_args()
+    def post(self):
+        args = request.get_json()
+        if 'name' not in args:
+            return bad_request('invalid name')
+        
+        template_name = args['name']
         user_id = g.user.id
         hackathon_name = g.hackathon.name
-        template_name = args['name']
         return expr_manager.start_expr(hackathon_name, template_name, user_id)
 
 
@@ -245,7 +246,7 @@ def register_admin_routes():
 
     # template APIs
     api.add_resource(AdminHackathonTemplateResource, "/api/admin/hackathon/template")
-    api.add_resource(AdminHackathonCheckTemplateResource, "/api/admin/hackathon/template/check")
+    api.add_resource(AdminExperimentResource, "/api/admin/experiment")
 
     # azure resources
     api.add_resource(AdminAzureResource, '/api/admin/azure')
