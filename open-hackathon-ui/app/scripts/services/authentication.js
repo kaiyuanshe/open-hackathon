@@ -32,7 +32,7 @@ angular.module('oh.app')
   .factory('Authentication', function Authentication($q, $cookies, $stateParams, state, API) {
     var authenticatedUser = undefined;
     var token = '';
-    var hackathon_name = $stateParams.hackathon_name || config.name;
+
 
     /**
      * Get user information
@@ -42,7 +42,7 @@ angular.module('oh.app')
     function getUser() {
       token = $cookies.get('token') || '';
       if (!authenticatedUser && token.length > 0) {
-        authenticatedUser = JSON.parse( $cookies.get('User'));
+        authenticatedUser = JSON.parse($cookies.get('User'));
         //API.user.get().then(function (res) {
         //  if (!res.data.error) {
         //    authenticatedUser = res.data;
@@ -57,6 +57,7 @@ angular.module('oh.app')
         token = undefined;
         authenticatedUser = undefined;
         $cookies.remove('token');
+        window.location.reload();
       });
     }
 
@@ -67,6 +68,7 @@ angular.module('oh.app')
      */
     function hackathon(callback) {
       var user = this.getUser();
+      var hackathon_name = $stateParams.hackathon_name || config.name;
       if (user) {
         API.user.registration.get({header: {hackathon_name: hackathon_name}}, function (data) {
           if (data.error) {
@@ -76,9 +78,9 @@ angular.module('oh.app')
               state.go('index.home');
             } else {
               if (data.registration) {
-                if(data.hackathon.basic_info.auto_approve) {
+                if (data.hackathon.basic_info.auto_approve) {
                   callback(data);
-                }else if (data.registration.status == 0 || data.registration.status == 2 ) {
+                } else if (data.registration.status == 0 || data.registration.status == 2) {
                   state.go('index.register', {hackathon_name: hackathon_name});
                 } else if (data.registration.status == 3 && data.hackathon.basic_info.auto_approve == 0) {
                   state.go('index.register', {hackathon_name: hackathon_name});
@@ -105,6 +107,7 @@ angular.module('oh.app')
      */
     function settings(callback) {
       var user = this.getUser();
+      var hackathon_name = $stateParams.hackathon_name || config.name;
       if (user) {
         API.user.registration.get({header: {hackathon_name: hackathon_name}}, function (data) {
           if (data.error) {
@@ -114,9 +117,9 @@ angular.module('oh.app')
               state.go('index.home');
             } else {
               if (data.registration) {
-                if(data.hackathon.basic_info.auto_approve){
+                if (data.hackathon.basic_info.auto_approve) {
                   callback(data);
-                }else if (data.registration.status == 0 || data.registration.status == 2) {
+                } else if (data.registration.status == 0 || data.registration.status == 2) {
                   state.go('index.register', {hackathon_name: hackathon_name});
                 } else if (data.registration.status == 3) {
                   state.go('index.register', {hackathon_name: hackathon_name});
@@ -137,6 +140,7 @@ angular.module('oh.app')
     }
 
     return {
+      logout: logout,
       getUser: getUser,
       hackathon: hackathon,
       settings: settings
