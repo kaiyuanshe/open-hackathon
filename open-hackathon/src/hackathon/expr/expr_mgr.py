@@ -139,8 +139,10 @@ class ExprManager(Component):
                 map(lambda virtual_environment_dic:
                     self.__remote_start_container(hackathon, expr, virtual_environment_dic),
                     virtual_environments_list)
-                expr.status = EStatus.Running
-                self.db.commit()
+                virtual_environments = expr.virtual_environments.all()
+                if all(ve.status == VEStatus.Running for ve in virtual_environments):
+                    expr.status = EStatus.Running
+                    self.db.commit()
             except Exception as e:
                 self.log.error(e)
                 self.log.error("Failed starting containers")
@@ -241,16 +243,20 @@ class ExprManager(Component):
         guacamole_servers = []
         for ve in expr.virtual_environments.all():
             if ve.remote_provider == VERemoteProvider.Guacamole:
-                guacamole_config = json.loads(ve.remote_paras)
-                guacamole_host = self.util.safe_get_config("guacamole.host", "localhost:8080")
-                # target url format:
-                # http://localhost:8080/guacamole/#/client/c/{name}?name={name}&oh={token}
-                name = guacamole_config["name"]
-                url = guacamole_host + '/guacamole/#/client/c/%s?name=%s' % (name, name)
-                guacamole_servers.append({
-                    "name": guacamole_config["displayname"],
-                    "url": url
-                })
+                try:
+                    guacamole_config = json.loads(ve.remote_paras)
+                    guacamole_host = self.util.safe_get_config("guacamole.host", "localhost:8080")
+                    # target url format:
+                    # http://localhost:8080/guacamole/#/client/c/{name}?name={name}&oh={token}
+                    name = guacamole_config["name"]
+                    url = guacamole_host + '/guacamole/#/client/c/%s?name=%s' % (name, name)
+                    guacamole_servers.append({
+                        "name": guacamole_config["displayname"],
+                        "url": url
+                    })
+                except Exception as e:
+                    self.log.error(e)
+
         if expr.status == EStatus.Running:
             ret["remote_servers"] = guacamole_servers
         # return public accessible web url
@@ -310,8 +316,6 @@ class ExprManager(Component):
         if container_ret is None:
             self.log.error("container %s fail to run" % new_name)
             raise Exception("container_ret is none")
-        ve.status = VEStatus.Running
-        self.db.commit()
         self.log.debug("starting container %s is ended ... " % new_name)
         return ve
 

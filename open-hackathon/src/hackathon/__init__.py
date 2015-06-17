@@ -46,9 +46,36 @@ cors = CORS(app)
 
 
 class Component(object):
+    '''
+    base class of business object
+    '''
     log = RequiredFeature("log")
     db = RequiredFeature("db")
     util = RequiredFeature("util")
+
+
+class Context(object):
+    '''
+    A collection of parameters that will be passed through threads/databases
+    NEVER put complex object in Context such as instance of db models or business manager
+    '''
+    props = {}
+
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            self.props[key] = value
+
+    def __getattr__(self, name):
+        if name in self.props:
+            return self.props[name]
+
+        raise AttributeError()
+
+    def __setattr__(self, key, value):
+        self.props[key] = value
+
+    def __repr__(self):
+        return repr(self.props)
 
 
 def init_components():

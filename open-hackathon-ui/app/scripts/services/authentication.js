@@ -32,7 +32,7 @@ angular.module('oh.app')
   .factory('Authentication', function Authentication($q, $cookies, $stateParams, state, API) {
     var authenticatedUser = undefined;
     var token = '';
-    var hackathon_name = $stateParams.hackathon_name || config.name;
+
 
     /**
      * Get user information
@@ -66,6 +66,7 @@ angular.module('oh.app')
      * @param {function}
      */
     function hackathon(callback) {
+      var hackathon_name = $stateParams.hackathon_name || config.name;
       var user = this.getUser();
       if (user) {
         API.user.registration.get({header: {hackathon_name: hackathon_name}}, function (data) {
@@ -104,6 +105,7 @@ angular.module('oh.app')
      * @param {function}
      */
     function settings(callback) {
+      var hackathon_name = $stateParams.hackathon_name || config.name;
       var user = this.getUser();
       if (user) {
         API.user.registration.get({header: {hackathon_name: hackathon_name}}, function (data) {

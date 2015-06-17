@@ -2,7 +2,7 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
 #  
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -30,6 +30,7 @@ from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 from . import app
 import os
 from log import log
+from pytz import utc
 
 
 def scheduler_listener(event):
@@ -42,7 +43,7 @@ def scheduler_listener(event):
 
 
 if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
-    scheduler = BackgroundScheduler()
+    scheduler = BackgroundScheduler(timezone=utc)
 
     # job store
     if safe_get_config("scheduler.job_store", "memory") == "mysql":

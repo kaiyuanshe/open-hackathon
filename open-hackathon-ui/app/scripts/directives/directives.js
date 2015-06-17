@@ -104,9 +104,9 @@ angular.module('oh.directives', [])
               API.user.experiment.get({query: {id: newValue.experiment.id}}, function (data) {
                 if (data.status == 2) {
                   var dockers = []
-                  for (var i in data.public_urls) {
+                  for (var i in data.remote_servers) {
                     dockers.push({
-                      purl: data.public_urls[i].url,
+                      purl: "",
                       name: data.remote_servers[i].name,
                       surl: data.remote_servers[i].url + "&oh=" + $cookies.get('token')
                     })

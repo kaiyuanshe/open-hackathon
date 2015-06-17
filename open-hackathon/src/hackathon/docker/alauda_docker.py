@@ -33,8 +33,11 @@ from hackathon.constants import (
     HEALTH_STATE,
     ALAUDA_SERVICE_STATUS,
 )
+from hackathon.database.models import VirtualEnvironment
 from hackathon.enum import (
     VEProvider,
+    VEStatus,
+    EStatus,
 )
 from hackathon.hackathon_exception import (
     AlaudaException
@@ -42,10 +45,14 @@ from hackathon.hackathon_exception import (
 from hackathon.template.docker_template_unit import (
     DockerTemplateUnit
 )
-from hackathon import Component
+from hackathon import Component, RequiredFeature, Context
+from hackathon.scheduler import scheduler
 import json
-import time
 from datetime import datetime, timedelta
+
+
+class ALAUDA:
+    IS_DEPLOYING = "is_deploying"
 
 
 class AlaudaDockerFormation(DockerFormationBase, Component):
@@ -58,51 +65,14 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
         service_config = self.__get_service_config(unit)
         self.__create_service(service_config)
 
-        # todo change docker process to async
         service_name = unit.get_name()
         service = self.__query_service(service_name)
-        count = 0
-        while (service["is_deploying"]):
-            self.log.debug('wait for alauda to deploy [%s], wait count [%d]' % (service_name, count))
-            count += 1
-            if count > 60:  # 10 minutes in total
-                self.log.error('Timed out waiting for async operation to complete.')
-                return False
-            time.sleep(10)
-            try:
-                service = self.__query_service(service_name)
-            except AlaudaException:
-                continue
+        # service = {}
 
-        self.__flush_service_log(service_name)
-
-        if not self.__is_service_started(service):
-            raise Exception("fail to start container")
-
-        # guacamole config
-        guacamole = unit.get_remote()
-        instance_port = filter(lambda p:
-                               p["container_port"] == guacamole[DockerTemplateUnit.REMOTE_PORT],
-                               service["instance_ports"])
-        if len(instance_port) > 0:
-            gc = {
-                "displayname": service_name,
-                "name": service_name,
-                "protocol": guacamole[DockerTemplateUnit.REMOTE_PROTOCOL],
-                "hostname": instance_port[0]["default_domain"],
-                "port": instance_port[0]["service_port"]
-            }
-            if DockerTemplateUnit.REMOTE_USERNAME in guacamole:
-                gc["username"] = guacamole[DockerTemplateUnit.REMOTE_USERNAME]
-
-            if DockerTemplateUnit.REMOTE_PASSWORD in guacamole:
-                gc["password"] = guacamole[DockerTemplateUnit.REMOTE_PASSWORD]
-
-            # save guacamole config into DB
-            virtual_environment.remote_paras = json.dumps(gc)
-            self.db.commit()
-
-        self.log.debug("starting container %s on alauda is succesfull" % (service_name))
+        context = Context(guacamole=unit.get_remote(),
+                          service_name=service_name,
+                          virtual_environment_id=virtual_environment.id)
+        self.__service_result_handler(service, context)
         return service
 
     def stop(self, name, **kwargs):
@@ -131,6 +101,77 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
             }
 
     # --------------------------------------private function--------------------------#
+    def __schedule_query_service_status(self, context):
+        self.log.debug("alauda service '%r' is deploying, will query again 10 seconds later" % context)
+        scheduler.add_job(query_service_status_async, 'date',
+                          run_date=self.util.get_now() + timedelta(seconds=10),
+                          args=[context])
+
+    def __service_result_handler(self, service, context):
+        if ALAUDA.IS_DEPLOYING not in service or service[ALAUDA.IS_DEPLOYING]:
+            self.__schedule_query_service_status(context)
+        elif self.__is_service_started(service):
+            self.__service_started_handler(service, context)
+        else:
+            self.__service_failed_handler(context)
+
+    def query_service_status_async(self, context):
+        try:
+            service = self.__query_service(context.service_name)
+            self.__service_result_handler(service, context)
+        except AlaudaException as ae:
+            self.log.debug(
+                "error in query alauda service '%s', will query again 10 seconds later" % context.service_name)
+            self.__service_failed_handler(context)
+
+    def __service_started_handler(self, service, context):
+        service_name = context.service_name
+        self.__flush_service_log(service_name)
+        ve = self.db.find_first_object_by(VirtualEnvironment, id=context.virtual_environment_id)
+        if not ve:
+            self.log.warn("virtual environment cannot be found by id:" + context.virtual_environment_id)
+            return
+
+        # update virtual environment status and remote config
+        ve.status = VEStatus.Running
+        guacamole = context.guacamole
+        instance_ports = filter(lambda p:
+                                p["container_port"] == guacamole[DockerTemplateUnit.REMOTE_PORT],
+                                service["instance_ports"])
+        if len(instance_ports) > 0:
+            alauda_port = instance_ports[0]
+            gc = {
+                "displayname": service_name,
+                "name": service_name,
+                "protocol": guacamole[DockerTemplateUnit.REMOTE_PROTOCOL],
+                "hostname": alauda_port["default_domain"],
+                "port": alauda_port["service_port"]
+            }
+            if DockerTemplateUnit.REMOTE_USERNAME in guacamole:
+                gc["username"] = guacamole[DockerTemplateUnit.REMOTE_USERNAME]
+
+            if DockerTemplateUnit.REMOTE_PASSWORD in guacamole:
+                gc["password"] = guacamole[DockerTemplateUnit.REMOTE_PASSWORD]
+
+            # save guacamole config into DB
+            ve.remote_paras = json.dumps(gc)
+        self.db.commit()
+
+        # update experiment status
+        virtual_environment_list = ve.experiment.virtual_environments.all()
+        if all(x.status == VEStatus.Running for x in virtual_environment_list):
+            ve.experiment.status = EStatus.Running
+            self.db.commit()
+
+    def __service_failed_handler(self, context):
+        self.__flush_service_log(context.service_name)
+        ve = self.db.find_first_object_by(VirtualEnvironment, id=context.virtual_environment_id)
+        if ve:
+            # todo rollback
+            ve.status = VEStatus.Failed
+            ve.experiment.status = EStatus.Failed
+            self.db.commit()
+
     def __get_default_service_config(self):
         default_service_config = {
             "service_name": "",
@@ -208,7 +249,7 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
         return service["target_state"] == ALAUDA_SERVICE_STATUS.STARTED
 
     def __format_time(self, date):
-        return int(date - datetime(1970, 1, 1, tzinfo=None))
+        return int((date - datetime(1970, 1, 1, tzinfo=None)).total_seconds())
 
     def __get_full_url(self, path):
         sep = "" if path.startswith("/") else "/"
@@ -250,3 +291,7 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
             self.log.debug("'%s' from alauda api '%s' failed: %s, %s" % (method, path, req.status_code, req.content))
             raise AlaudaException(req.status_code, req.content)
 
+
+def query_service_status_async(context):
+    docker = RequiredFeature("docker")
+    docker.query_service_status_async(context)
