@@ -58,14 +58,14 @@
 <script id="register_list_template" type="text/x-jquery-tmpl">
     <tr>
         <td>
-            ${name}
+            ${user.name}
         </td>
         <td>
             ${team_name}
         </td>
-        <td>${email}</td>
-        <td>${user_profile.phone}</td>
-        <td>${user_profile.address}</td>
+        <td>{% raw %}{{each user.email}}${email} ,{{/each}}{% endraw %}</td>
+        <td>${user.user_profile.phone}</td>
+        <td>${user.user_profile.address}</td>
         <td>${moment(create_time).format('YYYY-MM-DD HH:mm')}</td>
         <td>
             <a href="javascript:void(0);" data-type="select" data-name="status" data-value="${status}" class="editable" data-source='{"0":"未审核","1":"通过","2":"拒绝"}' data-placement="top"></a>
@@ -73,7 +73,7 @@
 
         <td class="col-action">
         {% if current_user.is_super() %}
-            <a class="btn btn-info btn-sm" href="/edit/register?id=${id}">
+            <a class="btn btn-info btn-sm" href="/edit/register?id=${user_id}">
                 <i class="fa fa-edit "></i>
             </a>
             <a class="btn btn-danger btn-sm" href="#" data-target="#confirm_modal" data-toggle="modal">
