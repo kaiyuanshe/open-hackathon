@@ -54,6 +54,7 @@ register_manager = RequiredFeature("register_manager")
 template_manager = RequiredFeature("template_manager")
 azure_cert_management = RequiredFeature("azure_cert_management")
 admin_manager = RequiredFeature("admin_manager")
+expr_manager = RequiredFeature("expr_manager")
 
 
 class AdminHackathonResource(Resource):
@@ -92,7 +93,7 @@ class HackathonCheckNameResource(Resource):
 class AdminRegisterListResource(Resource):
     @admin_privilege_required
     def get(self):
-        return register_manager.get_all_registration_by_hackathon_id(g.hackathon.id)
+        return register_manager.get_hackathon_registration()
 
 
 class AdminRegisterResource(Resource):
@@ -144,6 +145,19 @@ class AdminHackathonTemplateResource(Resource):
         parse.add_argument('id', type=int, location='args', required=True)
         args = parse.parse_args()
         return template_manager.delete_template(args['id'])
+
+
+class AdminExperimentResource(Resource):
+    @admin_privilege_required
+    def post(self):
+        args = request.get_json()
+        if 'name' not in args:
+            return bad_request('template name name invalid')
+
+        template_name = args['name']
+        user_id = g.user.id
+        hackathon_name = g.hackathon.name
+        return expr_manager.start_expr(hackathon_name, template_name, user_id)
 
 
 class AdminAzureResource(Resource, Component):
@@ -232,6 +246,7 @@ def register_admin_routes():
 
     # template APIs
     api.add_resource(AdminHackathonTemplateResource, "/api/admin/hackathon/template")
+    api.add_resource(AdminExperimentResource, "/api/admin/experiment")
 
     # azure resources
     api.add_resource(AdminAzureResource, '/api/admin/azure')

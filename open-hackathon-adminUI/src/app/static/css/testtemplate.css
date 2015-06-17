@@ -1,0 +1,47 @@
+html{
+  height: 100%;
+}
+
+body{
+  position: relative;
+  background-color:#fff;
+  height: 100%;
+  margin-bottom: 0;
+}
+
+body:after{
+  position: relative;
+  border-left:none;
+}
+
+.full-main{
+  position: absolute;
+  top: 41px;
+  bottom: 40px;
+  left: 0;
+  right: 0;
+}
+
+.loading{
+  margin-top:100px;
+}
+.remote_tabs {
+  border-bottom: 1px solid #dbdee0;
+  height: 36px;
+  padding-right: 1px;
+}
+.remote_tabs .nav{
+  float:right;
+}
+
+#remotes{
+  height:100%;
+  padding-bottom:36px;
+}
+
+.remote_tabs .nav-tabs li a{
+  margin-top:0;
+}
+.v-hidden {
+  visibility:hidden
+}

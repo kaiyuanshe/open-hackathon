@@ -38,13 +38,23 @@ class RegisterManger(Component):
     hackathon_manager = RequiredFeature("hackathon_manager")
     user_manager = RequiredFeature("user_manager")
 
-    def get_all_registration_by_hackathon_id(self, hackathon_id):
-        # TODO make query result with pagination
-        registers = self.db.find_all_objects_by(UserHackathonRel, hackathon_id=hackathon_id)
-        return [r.dic() for r in registers]
+    def get_hackathon_registration(self, num=None):
+        registers = self.db.find_all_objects_order_by(UserHackathonRel,
+                                                      num,  # limit num
+                                                      UserHackathonRel.create_time.desc(),
+                                                      hackathon_id=g.hackathon.id)
+        return map(lambda x: self.get_registration_with_profile(x), registers)
+
+
+    def get_registration_with_profile(self, register):
+        register_dic = register.dic()
+        register_dic['user'] = self.user_manager.user_display_info(register.user)
+        return register_dic
+
 
     def get_registration_by_id(self, id):
         return self.db.get_object(UserHackathonRel, id)
+
 
     def get_registration_by_user_and_hackathon(self, user_id, hackathon_id):
         return self.db.find_first_object_by(UserHackathonRel, user_id=user_id, hackathon_id=hackathon_id)
@@ -163,13 +173,6 @@ class RegisterManger(Component):
             return reg.status == RGStatus.AUTO_PASSED or reg.status == RGStatus.AUDIT_PASSED
 
         return False
-
-    def get_hackathon_registers(self, num):
-        registers = self.db.find_all_objects_order_by(UserHackathonRel,
-                                                      num,  # limit num
-                                                      UserHackathonRel.create_time.desc(),
-                                                      hackathon_id=g.hackathon.id)
-        return map(lambda x: x.dic(), registers)
 
     def get_hackathon_team_list(self, hid, name, number):
         find_team_by_hackathon = self.db.find_all_objects_by(UserHackathonRel, hackathon_id=hid)

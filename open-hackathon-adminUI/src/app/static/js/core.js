@@ -83,9 +83,11 @@
                         },
                         error: function(req, status, error) {
                             var data = {
-                                error: error,
-                                message: req.responseText,
-                                status: req.status
+                                error : {
+                                    error: error ,
+                                    message: req.responseText,
+                                    status: req.status
+                                }
                             };
                             callback(data);
                         }
@@ -168,6 +170,10 @@
     }
 
     $(function() {
+        if(location.pathname.search('logout','i') != -1){
+            location.href = '/login';
+            return;
+        }
         w.oh.comm.createLoading('[loading]');
         addTabsEvent();
         var currentHackathon = w.oh.comm.getCurrentHackathon();
@@ -206,7 +212,7 @@
         });
 
 
-        if(location.pathname.length !=1 && location.pathname.search('createhackathon|login','i') == -1){
+        if(location.pathname.length !=1 && location.pathname.search('createhackathon|login|logout','i') == -1){
             if(currentHackathon.id == 0){
                 oh.api.admin.hackathon.list.get(function(data){
                     if(data.length == 0){

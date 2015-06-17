@@ -77,7 +77,7 @@ import requests
 from hackathon.scheduler import scheduler
 from datetime import timedelta
 from hackathon.enum import HACK_STATUS
-from hackathon.template.template_mgr import auto_pull_images_for_hackathon
+from hackathon.initialise_jobs import auto_pull_images_for_hackathon
 
 
 class HostedDockerFormation(DockerFormationBase, Component):
@@ -494,20 +494,3 @@ class HostedDockerFormation(DockerFormationBase, Component):
         host_server_dns = host_server.public_dns.split('.')[0]
         self.log.debug("starting to release ports ... ")
         ep.release_public_endpoints(host_server_dns, 'Production', host_server_name, host_ports)
-
-
-    # ----------------------initialize hackathon's templates on every docker host-------------------#
-
-    def ensure_images(self):
-        hackathons = db_adapter.find_all_objects(Hackathon, Hackathon.status == HACK_STATUS.ONLINE)
-        for hackathon in hackathons:
-            self.log.debug("Start recycling inactive ensure images for hackathons")
-            excute_time = self.util.get_now() + timedelta(seconds=3)
-            scheduler.add_job(auto_pull_images_for_hackathon,
-                              'interval',
-                              id='%s pull images' % hackathon.id,
-                              replace_existing=True,
-                              next_run_time=excute_time,
-                              minutes=60,
-                              args=[hackathon])
-        self.log.debug("starting to release ports ... ")

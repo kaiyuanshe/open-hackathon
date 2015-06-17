@@ -59,7 +59,7 @@ angular.module('oh.app')
     return function (skype) {
       return skype.length > 0 ? 'skype:' + skype + '?chat' : 'javascript:;';
     }
-  }).filter('tiemago', function ($filter) {
+  }).filter('timeago', function ($filter) {
     return function (time, local, raw) {
       if (!local) {
         (local = Date.now())

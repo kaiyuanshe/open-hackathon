@@ -128,10 +128,12 @@ Config = {
                     "": ["get", "post", "put"],
                     "checkname": ["get"],
                     "list": ["get"],
-                    "template": ["get", "post", "delete", "put"],
-                    "administrator":{
-                        "": ["put", "post", "delete"],
-                        "list": ["get"]
+                    "template": {
+                        "": ["get", "post", "delete", "put"],
+                        "check": ["get"]
+                    },
+                    "administrator": {
+                        "": ["put", "post", "delete"]
                     }
                 },
                 "registration": {
@@ -141,6 +143,9 @@ Config = {
                 "azure": {
                     "": ["get", "post", "delete", "put"],
                 },
+                "experiment": {
+                    "": ["post"]
+                }
             }
         }
     }

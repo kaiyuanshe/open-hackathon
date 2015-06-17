@@ -280,3 +280,8 @@ def template():
 @login_required
 def adminmgr():
     return __render("/adminmgr.html")
+
+@app.route("/testtemplate")
+@login_required
+def testdocker():
+    return __render("/testtemplate.html")

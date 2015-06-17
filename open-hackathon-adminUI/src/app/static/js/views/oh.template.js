@@ -35,7 +35,10 @@
             header:{hackathon_name:currentHackathon.name}
         }, function(data){
             var index = 0;
-            list.empty().append($('#template_item').tmpl(data,{getIndex:function(){ return ++index;}}));
+            list.empty().append($('#template_item').tmpl(data,{
+                hackathon_name:currentHackathon.name,
+                getIndex:function(){ return ++index;}
+            }));
         });
     }
 
