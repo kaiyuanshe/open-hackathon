@@ -37,7 +37,7 @@
         var tabs = $('#tabs');
         $.each(data.remote_servers,function(i,remote){
             var ifrem = $('<iframe>').attr({
-                src: remote.url,
+                src: remote.url+'&oh='+$.cookie('token'),
                 id: remote.name,
                 width: '100%',
                 height: '100%',
@@ -66,7 +66,10 @@
         var remotes = $('#remotes').bind('tab',function(e,id){
             remotes.find('iframe').addClass('v-hidden');
             remotes.find(id).removeClass('v-hidden');
+        }).on('mouseover', 'iframe', function (e) {
+            $(this).focus();
         });
+
         var tabs = $('#tabs').on('click','a',function(e){
             e.preventDefault();
             var _self = $(this)
@@ -81,8 +84,8 @@
 
     function loadingTemp(){
         var param = getUrlParam();
-        oh.api.admin.hackathon.template.check.get({
-            query:{name:param.temp_name},
+        oh.api.admin.experiment.post({
+            body:{name:param.temp_name},
             header:{hackathon_name:param.hackathon_name}
         },function(data){
             if(data.error){

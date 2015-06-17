@@ -133,8 +133,7 @@ Config = {
                         "check": ["get"]
                     },
                     "administrator": {
-                        "": ["put", "post", "delete"],
-                        "list": ["get"]
+                        "": ["put", "post", "delete"]
                     }
                 },
                 "registration": {
@@ -144,6 +143,9 @@ Config = {
                 "azure": {
                     "": ["get", "post", "delete", "put"],
                 },
+                "experiment": {
+                    "": ["post"]
+                }
             }
         }
     }
