@@ -1,8 +1,7 @@
-
-THIRD-PARTY SOFTWARE NOTICES AND INFORMATION
+THIRD-PARTY SOFTWARE NOTICES AND INFORMATION FOR OPEN HACKATHON PLATFORM
 Do Not Translate or Localize
 
-This package incorporates material from the projects listed below (collectively, ìThird Party Codeî). Microsoft Open Technologies (Shanghai) Co. Ltd. (ìMicrosoft Open Techî) is not the original author of the Third Party Code. The original copyright notices and licenses, under which Microsoft Open Tech received such Third Party Code, are set out below. This Third Party Code is licensed to you under the licenses set forth below.  Microsoft Open Tech reserves all other rights not expressly granted under these terms, whether by implication, estoppel or otherwise. 
+This package incorporates material from the projects listed below (collectively, ‚ÄúThird Party Code‚Äù). Microsoft Open Technologies (Shanghai) Co. Ltd. (‚ÄúMicrosoft Open Tech‚Äù) is not the original author of the Third Party Code. The original copyright notices and licenses, under which Microsoft Open Tech received such Third Party Code, are set out below. This Third Party Code is licensed to you under the licenses set forth below.  Microsoft Open Tech reserves all other rights not expressly granted under these terms, whether by implication, estoppel or otherwise. 
 
 
 1.	JSON package in Java version 20090211 (https://github.com/douglascrockford/JSON-java
@@ -11,7 +10,7 @@ This package incorporates material from the projects listed below (collectively,
 3.	7-zip(chef cookbook) version 1.0.2 (https://github.com/sneal/7-zip)
 4.	apt(chef cookbook) version 2.7.0 (https://github.com/opscode-cookbooks/apt)
 5.	ark(chef cookbook) version 0.9.0 (https://github.com/burtlo/ark)
-6.	build-essential(chef cookbook) version 2.2.2 (https://github.com/opscode-cookbooks/build-essential)
+6.	build-essential(chef cookbook) version 2.2.3 (https://github.com/opscode-cookbooks/build-essential)
 7.	chef-sugar(chef cookbook) version 3.0.1 (https://github.com/sethvargo/chef-sugar)
 8.	chef_handler(chef cookbook) version 1.1.6 (https://github.com/opscode-cookbooks/chef_handler)
 9.	citadel(chef cookbook) version 1.0.2 (https://github.com/poise/citadel)
@@ -20,26 +19,27 @@ This package incorporates material from the projects listed below (collectively,
 12.	dmg(chef cookbook) version 2.2.2 (https://github.com/opscode-cookbooks/dmg)
 13.	gem_specific_install(chef cookbook) version 0.2.4 (https://github.com/guilhem-cookbooks/gem_specific_install)
 14.	git(chef cookbook) version 4.1.0 (https://github.com/jssjr/git)
-15.	java(chef cookbook) version 1.31.0 (https://github.com/agileorbit-cookbooks/java)
-16.	logrotate(chef cookbook) version 1.9.1 (https://github.com/stevendanna/logrotate)
-17.	mariadb(chef cookbook) version 0.3.0 (https://github.com/sinfomicien/mariadb)
-18.	mysql(chef cookbook) version 6.0.20 (https://github.com/chef-cookbooks/mysql)
-19.	mysql2_chef_gem(chef cookbook) version 1.0.1 (https://github.com/sinfomicien/mysql2_chef_gem)
-20.	nodejs(chef cookbook) version 2.4.0 (https://github.com/redguide/nodejs)
-21.	ntp(chef cookbook) version 1.8.2 (https://github.com/gmiranda23/ntp)
-22.	openssl(chef cookbook) version 4.0.0 (https://github.com/opscode-cookbooks/openssl)
-23.	postgresql(chef cookbook) version 3.4.18 (https://github.com/hw-cookbooks/postgresql)
-24.	python(chef cookbook) version 1.4.6 (https://github.com/poise/python)
-25.	rbac(chef cookbook) version 1.0.3 (https://github.com/livinginthepast/rbac)
-26.	runit(chef cookbook) version 1.5.18 (https://github.com/hw-cookbooks/runit)
-27.	smf(chef cookbook) version 2.2.6 (https://github.com/livinginthepast/smf)
-28.	tomcat(chef cookbook) version 0.17.3 (https://github.com/opscode-cookbooks/tomcat)
-29.	uwsgi(chef cookbook) version 0.1.2 (https://github.com/50onRed/uwsgi)
-30.	windows(chef cookbook) version 1.36.6 (https://github.com/opscode-cookbooks/windows)
-31.	yum(chef cookbook) version 3.5.4 (https://github.com/chef-cookbooks/yum)
-32.	yum-epel(chef cookbook) version 0.6.0 (https://github.com/chef-cookbooks/yum-epel)
-33.	yum-mysql-community(chef cookbook) version 0.1.14 (https://github.com/chef-cookbooks/yum-mysql-community)
-34.	jQuery flipcountdown version 3.0.4 (https://github.com/xdan/flipcountdown/)
+15.	homebrew(chef cookbook) version 1.12.0 (https://github.com/opscode-cookbooks/homebrew)
+16.	java(chef cookbook) version 1.31.0 (https://github.com/agileorbit-cookbooks/java)
+17.	logrotate(chef cookbook) version 1.9.1 (https://github.com/stevendanna/logrotate)
+18.	mariadb(chef cookbook) version 0.3.0 (https://github.com/sinfomicien/mariadb)
+19.	mysql(chef cookbook) version 6.0.21 (https://github.com/chef-cookbooks/mysql)
+20.	mysql2_chef_gem(chef cookbook) version 1.0.1 (https://github.com/sinfomicien/mysql2_chef_gem)
+21.	nodejs(chef cookbook) version 2.4.0 (https://github.com/redguide/nodejs)
+22.	ntp(chef cookbook) version 1.8.2 (https://github.com/gmiranda23/ntp)
+23.	openssl(chef cookbook) version 4.0.0 (https://github.com/opscode-cookbooks/openssl)
+24.	postgresql(chef cookbook) version 3.4.18 (https://github.com/hw-cookbooks/postgresql)
+25.	python(chef cookbook) version 1.4.6 (https://github.com/poise/python)
+26.	rbac(chef cookbook) version 1.0.3 (https://github.com/livinginthepast/rbac)
+27.	runit(chef cookbook) version 1.5.18 (https://github.com/hw-cookbooks/runit)
+28.	smf(chef cookbook) version 2.2.6 (https://github.com/livinginthepast/smf)
+29.	tomcat(chef cookbook) version 0.17.3 (https://github.com/opscode-cookbooks/tomcat)
+30.	uwsgi(chef cookbook) version 0.1.2 (https://github.com/50onRed/uwsgi)
+31.	windows(chef cookbook) version 1.36.6 (https://github.com/opscode-cookbooks/windows)
+32.	yum(chef cookbook) version 3.5.4 (https://github.com/chef-cookbooks/yum)
+33.	yum-epel(chef cookbook) version 0.6.0 (https://github.com/chef-cookbooks/yum-epel)
+34.	yum-mysql-community(chef cookbook) version 0.1.14 (https://github.com/chef-cookbooks/yum-mysql-community)
+35.	jQuery flipcountdown version 3.0.4 (https://github.com/xdan/flipcountdown/)
 
 
 %% JSON package in Java NOTICES, INFORMATION, AND LICENSE BEGIN HERE
@@ -59,7 +59,7 @@ END OF JSON package in Java NOTICES, INFORMATION, AND LICENSE
 
 %% nsenter NOTICES, INFORMATION, AND LICENSE BEGIN HERE
 =========================================
-Copyright © JÈrÙme Petazzoni
+Copyright ¬© J√©r√¥me Petazzoni
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
 You may obtain a copy of the License at 
@@ -98,11 +98,11 @@ END OF apt(chef cookbook) NOTICES, INFORMATION, AND LICENSE
 
 %% ark(chef cookbook) NOTICES, INFORMATION, AND LICENSE BEGIN HERE
 =========================================
-ïCopyright: 2011, Philip (flip) Kromer - Infochimps, Inc
-ïCopyright: 2012, Bryan W. Berry
-ïCopyright: 2012, Denis Barishev
-ïCopyright: 2013, Chef Software, Inc
-ïCopyright: 2014, Bloomberg L.P.
+‚Ä¢Copyright: 2011, Philip (flip) Kromer - Infochimps, Inc
+‚Ä¢Copyright: 2012, Bryan W. Berry
+‚Ä¢Copyright: 2012, Denis Barishev
+‚Ä¢Copyright: 2013, Chef Software, Inc
+‚Ä¢Copyright: 2014, Bloomberg L.P.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
 You may obtain a copy of the License at 
@@ -230,6 +230,21 @@ Unless required by applicable law or agreed to in writing, software distributed 
 =========================================
 END OF git(chef cookbook) NOTICES, INFORMATION, AND LICENSE
 
+%% homebrew(chef cookbook) NOTICES, INFORMATION, AND LICENSE BEGIN HERE
+=========================================
+Copyright:: 2011, Graeme Mathieson
+Copyright:: 2012, Chef Software, Inc <legal@chef.io>
+Copyright:: 2014-2015, Chef Software, Inc. <legal@chef.io>
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
+You may obtain a copy of the License at 
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+=========================================
+END OF homebrew(chef cookbook) NOTICES, INFORMATION, AND LICENSE
+
 %% java(chef cookbook) NOTICES, INFORMATION, AND LICENSE BEGIN HERE
 =========================================
 Copyright: 2014, Agile Orbit, LLC
@@ -259,7 +274,7 @@ END OF logrotate(chef cookbook) NOTICES, INFORMATION, AND LICENSE
 
 %% mariadb(chef cookbook) NOTICES, INFORMATION, AND LICENSE BEGIN HERE
 =========================================
-Copyright © Nicolas Blanc (sinfomicien@gmail.com)
+Copyright ¬© Nicolas Blanc (sinfomicien@gmail.com)
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
 You may obtain a copy of the License at 
@@ -285,8 +300,8 @@ END OF mysql(chef cookbook) NOTICES, INFORMATION, AND LICENSE
 
 %% mysql2_chef_gem(chef cookbook) NOTICES, INFORMATION, AND LICENSE BEGIN HERE
 =========================================
-Copyright © Sean OMeara (someara@chef.io)
-Copyright © Nicolas Blanc (sinfomicien@gmail.com)
+Copyright ¬© Sean OMeara (someara@chef.io)
+Copyright ¬© Nicolas Blanc (sinfomicien@gmail.com)
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
 You may obtain a copy of the License at 
@@ -345,11 +360,11 @@ END OF openssl(chef cookbook) NOTICES, INFORMATION, AND LICENSE
 
 %% postgresql(chef cookbook) NOTICES, INFORMATION, AND LICENSE BEGIN HERE
 =========================================
-ïAuthor:: Joshua Timberman (joshua@opscode.com)
-ïAuthor:: Lamont Granquist (lamont@opscode.com)
-ïAuthor:: Chris Roberts (chrisroberts.code@gmail.com)
-ïAuthor:: David Crane (davidc@donorschoose.org)
-ïAuthor:: Aaron Baer (aaron@hw-ops.com)
+‚Ä¢Author:: Joshua Timberman (joshua@opscode.com)
+‚Ä¢Author:: Lamont Granquist (lamont@opscode.com)
+‚Ä¢Author:: Chris Roberts (chrisroberts.code@gmail.com)
+‚Ä¢Author:: David Crane (davidc@donorschoose.org)
+‚Ä¢Author:: Aaron Baer (aaron@hw-ops.com)
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
 You may obtain a copy of the License at 
@@ -427,7 +442,7 @@ END OF tomcat(chef cookbook) NOTICES, INFORMATION, AND LICENSE
 
 %% uwsgi(chef cookbook) NOTICES, INFORMATION, AND LICENSE BEGIN HERE
 =========================================
-MIT License
+The MIT License (MIT)
 
 Copyright 2013 50onRed
 
@@ -507,6 +522,7 @@ THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 END OF jQuery flipcountdown NOTICES, INFORMATION, AND LICENSE
 
 
+
 %% APACHE LICENSE BEGIN HERE
 =========================================
 Apache License
@@ -562,4 +578,3 @@ d.If the Work includes a "NOTICE" text file as part of its distribution, then an
 9. Accepting Warranty or Additional Liability. While redistributing the Work or Derivative Works thereof, You may choose to offer, and charge a fee for, acceptance of support, warranty, indemnity, or other liability obligations and/or rights consistent with this License. However, in accepting such obligations, You may act only on Your own behalf and on Your sole responsibility, not on behalf of any other Contributor, and only if You agree to indemnify, defend, and hold each Contributor harmless for any liability incurred by, or claims asserted against, such Contributor by reason of your accepting any such warranty or additional liability.
 
 END OF TERMS AND CONDITIONS
-
