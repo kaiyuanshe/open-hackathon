@@ -34,7 +34,7 @@ from hackathon.enum import EStatus, RGStatus, ReservedUser
 import json
 
 
-class RegisterManger(Component):
+class RegisterManager(Component):
     hackathon_manager = RequiredFeature("hackathon_manager")
     user_manager = RequiredFeature("user_manager")
 

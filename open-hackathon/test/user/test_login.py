@@ -63,11 +63,11 @@ class UserLoginTest(unittest.TestCase):
                 hackathon = Hackathon(id=1, name='test_hackathon')
                 get_hackathon_by_name.return_value = hackathon
                 with mock.patch(
-                        'hackathon.registration.register_mgr.RegisterManger.get_register_by_rid_or_uid_and_hid') as get_register_by_rid_or_uid_and_hid:
+                        'hackathon.registration.register_mgr.RegisterManager.get_register_by_rid_or_uid_and_hid') as get_register_by_rid_or_uid_and_hid:
                     register = UserHackathonRel(id=1, register_name='test', email='test@test.com', hackathon_id=1)
                     get_register_by_rid_or_uid_and_hid.return_value = register
                     with mock.patch(
-                            'hackathon.registration.register_mgr.RegisterManger.deal_with_user_and_register_when_login') as deal_with_user_and_register_when_login:
+                            'hackathon.registration.register_mgr.RegisterManager.deal_with_user_and_register_when_login') as deal_with_user_and_register_when_login:
                         deal_with_user_and_register_when_login.return_value = None
 
                         result = {}
@@ -117,15 +117,15 @@ class UserLoginTest(unittest.TestCase):
                 get_hackathon_by_name.return_value = hackathon
                 # get register by hid and uid returns None
                 with mock.patch(
-                        'hackathon.registration.register_mgr.RegisterManger.get_register_by_rid_or_uid_and_hid') as get_register_by_rid_or_uid_and_hid:
+                        'hackathon.registration.register_mgr.RegisterManager.get_register_by_rid_or_uid_and_hid') as get_register_by_rid_or_uid_and_hid:
                     get_register_by_rid_or_uid_and_hid.return_value = None
                     #Then get register by emails and hid is not None
                     with mock.patch(
-                            'hackathon.registration.register_mgr.RegisterManger.get_register_by_emails_and_hid') as get_register_by_emails_and_hid:
+                            'hackathon.registration.register_mgr.RegisterManager.get_register_by_emails_and_hid') as get_register_by_emails_and_hid:
                         register = UserHackathonRel(id=1, register_name='test', email='test@test.com', hackathon_id=1)
                         get_register_by_emails_and_hid.return_value = register
                         with mock.patch(
-                                'hackathon.registration.register_mgr.RegisterManger.deal_with_user_and_register_when_login') as deal_with_user_and_register_when_login:
+                                'hackathon.registration.register_mgr.RegisterManager.deal_with_user_and_register_when_login') as deal_with_user_and_register_when_login:
                             deal_with_user_and_register_when_login.return_value = None
 
                             result = {}
@@ -157,14 +157,14 @@ class UserLoginTest(unittest.TestCase):
                 get_hackathon_by_name.return_value = hackathon
                 # get register by hid and uid returns None
                 with mock.patch(
-                        'hackathon.registration.register_mgr.RegisterManger.get_register_by_rid_or_uid_and_hid') as get_register_by_rid_or_uid_and_hid:
+                        'hackathon.registration.register_mgr.RegisterManager.get_register_by_rid_or_uid_and_hid') as get_register_by_rid_or_uid_and_hid:
                     get_register_by_rid_or_uid_and_hid.return_value = None
                     #Then get register by emails and hid returns None
                     with mock.patch(
-                            'hackathon.registration.register_mgr.RegisterManger.get_register_by_emails_and_hid') as get_register_by_emails_and_hid:
+                            'hackathon.registration.register_mgr.RegisterManager.get_register_by_emails_and_hid') as get_register_by_emails_and_hid:
                         get_register_by_emails_and_hid.return_value = None
                         with mock.patch(
-                                'hackathon.registration.register_mgr.RegisterManger.deal_with_user_and_register_when_login') as deal_with_user_and_register_when_login:
+                                'hackathon.registration.register_mgr.RegisterManager.deal_with_user_and_register_when_login') as deal_with_user_and_register_when_login:
                             deal_with_user_and_register_when_login.return_value = None
 
                             result = {}
