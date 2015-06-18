@@ -32,7 +32,7 @@ from hackathon.enum import RGStatus
 from hackathon.hack import HackathonManager
 from hackathon.hackathon_response import bad_request, precondition_failed, not_found, ok
 import unittest
-from hackathon.registration.register_mgr import RegisterManger, register_manager
+from hackathon.registration.register_mgr import RegisterManager, register_manager
 from hackathon.database.models import UserHackathonRel, Hackathon, Experiment
 from hackathon import app
 from mock import Mock, ANY, patch
@@ -53,7 +53,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
     def test_get_UserHackathonRel_list_result_empty(self):
         db_adapter = Mock()
         db_adapter.find_all_objects_by.return_value = []
-        rm = RegisterManger(db_adapter)
+        rm = RegisterManager(db_adapter)
         with app.test_request_context('/'):
             self.assertEqual(rm.get_all_registration_by_hackathon_id(1), [])
 
@@ -62,7 +62,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
         UserHackathonRel1 = UserHackathonRel(id=1, real_name='test1', email='test2@test2.com', hackathon_id=1)
         UserHackathonRel2 = UserHackathonRel(id=2, real_name='test2', email='test2@test2.com', hackathon_id=1)
         db_adapter.find_all_objects_by.return_value = [UserHackathonRel1, UserHackathonRel2]
-        rm = RegisterManger(db_adapter)
+        rm = RegisterManager(db_adapter)
         with app.test_request_context('/'):
             self.assertEqual(len(rm.get_all_registration_by_hackathon_id(1)), 2)
             db_adapter.find_all_objects_by.assert_called_once_with(UserHackathonRel, hackathon_id=1)
@@ -75,7 +75,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
         self.assertEqual(register_manager.create_registration(hackathon, args), bad_request("user id invalid"))
 
 
-    @patch.object(RegisterManger, 'get_registration_by_user_and_hackathon')
+    @patch.object(RegisterManager, 'get_registration_by_user_and_hackathon')
     def test_create_hackathon_register_already_exist(self, get_method):
         args = {'user_id': 1}
         hackathon = Hackathon(id=1)
@@ -85,7 +85,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
         get_method.assert_called_once_with(1, 1)
 
 
-    @patch.object(RegisterManger, 'get_registration_by_user_and_hackathon')
+    @patch.object(RegisterManager, 'get_registration_by_user_and_hackathon')
     def test_create_hackathon_register_registration_not_begin(self, get_method):
         args = {'user_id': 1}
         hackathon = Hackathon(id=1, registration_start_time=self.get_now() + datetime.timedelta(seconds=30))
@@ -95,7 +95,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
         get_method.assert_called_once_with(1, 1)
 
 
-    @patch.object(RegisterManger, 'get_registration_by_user_and_hackathon')
+    @patch.object(RegisterManager, 'get_registration_by_user_and_hackathon')
     def test_create_hackathon_register_registration_already_finished(self, get_method):
         get_method.retrun_value = None
         args = {'user_id': 1}
@@ -107,7 +107,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
         get_method.assert_called_once_with(1, 1)
 
 
-    @patch.object(RegisterManger, 'get_registration_by_user_and_hackathon')
+    @patch.object(RegisterManager, 'get_registration_by_user_and_hackathon')
     @patch.object(HackathonManager, 'is_auto_approve')
     def test_create_hackathon_register_registration_common_logic(self, auto_approve, get_method):
         args = {'user_id': 1}
@@ -120,7 +120,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
         db_adapter = Mock()
         new_register = UserHackathonRel(id=7, user_id=1, status=RGStatus.AUTO_PASSED, deleted=0)
         db_adapter.add_object_kwargs.return_value = new_register
-        rm = RegisterManger(db_adapter)
+        rm = RegisterManager(db_adapter)
 
         self.assertEqual(rm.create_registration(hackathon, args), new_register.dic())
         get_method.assert_called_once_with(1, 1)
@@ -129,14 +129,14 @@ class TestUserHackathonRelManager(unittest.TestCase):
 
     '''test method update_hackathon'''
 
-    @patch.object(RegisterManger, 'get_registration_by_id')
+    @patch.object(RegisterManager, 'get_registration_by_id')
     def test_update_register_not_found(self, get_method):
         args = {"id": 1}
         get_method.return_value = None
         self.assertEqual(register_manager.update_registration(args), not_found("registration not found"))
 
 
-    @patch.object(RegisterManger, 'get_registration_by_id')
+    @patch.object(RegisterManager, 'get_registration_by_id')
     def test_update_register_common_loginc(self, get_method):
         args = {"id": 7, "phone": "1234567", 'create_time': '2012-12-23 09:09:09'}
 
@@ -145,7 +145,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
 
         db_adapter = Mock()
         db_adapter.update_object.return_value = ''
-        rm = RegisterManger(db_adapter)
+        rm = RegisterManager(db_adapter)
 
         with mock.patch('hackathon.registration.register_mgr.get_now') as get_now:
             get_now.return_value = "now"
@@ -162,7 +162,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
     def test_delete_registration_not_found(self):
         db_adapter = Mock()
         db_adapter.find_first_object_by.return_value = None
-        rm = RegisterManger(db_adapter)
+        rm = RegisterManager(db_adapter)
         args = {'id': 1}
         self.assertEqual(rm.delete_registration(args), ok())
         db_adapter.find_first_object_by.assert_called_once_with(UserHackathonRel, id == 1)
@@ -172,7 +172,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
         register = UserHackathonRel(id=1)
         db_adapter.find_first_object_by.return_value = register
         db_adapter.delete_object.return_value = ""
-        rm = RegisterManger(db_adapter)
+        rm = RegisterManager(db_adapter)
         args = {'id': 1}
         self.assertEqual(rm.delete_registration(args), ok())
         db_adapter.find_first_object_by.assert_called_once_with(UserHackathonRel, id == 1)
@@ -181,7 +181,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
 
     ''' test method : get_registration_detail '''
 
-    @patch.object(RegisterManger, 'get_registration_by_user_and_hackathon')
+    @patch.object(RegisterManager, 'get_registration_by_user_and_hackathon')
     def test_get_registration_detail_None_rel(self, get_method):
         user_id = 1
         hackathon = Hackathon(id=1)
@@ -191,7 +191,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
         get_method.assert_called_once_with(1, 1)
 
 
-    @patch.object(RegisterManger, 'get_registration_by_user_and_hackathon')
+    @patch.object(RegisterManager, 'get_registration_by_user_and_hackathon')
     def test_get_registration_detail_None_expr(self, get_method):
         user_id = 1
         hackathon = Hackathon(id=1)
@@ -202,14 +202,14 @@ class TestUserHackathonRelManager(unittest.TestCase):
 
         db_adapter = Mock()
         db_adapter.find_first_object.return_value = None
-        rm = RegisterManger(db_adapter)
+        rm = RegisterManager(db_adapter)
 
         self.assertEqual(rm.get_registration_detail(user_id, hackathon), detail)
         get_method.assert_called_once_with(1, 1)
         db_adapter.find_first_object.assert_called_once_with(Experiment, ANY, ANY, ANY)
 
 
-    @patch.object(RegisterManger, 'get_registration_by_user_and_hackathon')
+    @patch.object(RegisterManager, 'get_registration_by_user_and_hackathon')
     def test_get_registration_detail_common_logic(self, get_method):
         user_id = 1
 
@@ -221,7 +221,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
         get_method.return_value = rel
         db_adapter = Mock()
         db_adapter.find_first_object.return_value = expr
-        rm = RegisterManger(db_adapter)
+        rm = RegisterManager(db_adapter)
 
         self.assertEqual(rm.get_registration_detail(user_id, hackathon), detail)
         get_method.assert_called_once_with(1, 1)

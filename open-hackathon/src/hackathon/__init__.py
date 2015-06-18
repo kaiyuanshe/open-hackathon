@@ -88,7 +88,7 @@ def init_components():
     from hackathon.azureformation.azureCertManagement import AzureCertManagement
     from hackathon.hack.host_server_mgr import DockerHostManager
     from hackathon.hack import HackathonManager
-    from hackathon.registration.register_mgr import RegisterManger
+    from hackathon.registration.register_mgr import RegisterManager
     from hackathon.template.template_mgr import TemplateManager
     from hackathon.admin.admin_mgr import AdminManager
     from hackathon.remote.guacamole import GuacamoleInfo
@@ -101,7 +101,7 @@ def init_components():
 
     factory.provide("user_manager", UserManager)
     factory.provide("hackathon_manager", HackathonManager)
-    factory.provide("register_manager", RegisterManger)
+    factory.provide("register_manager", RegisterManager)
     factory.provide("file_service", FileService)
     factory.provide("azure_cert_management", AzureCertManagement)
     factory.provide("docker_host_manager", DockerHostManager)
