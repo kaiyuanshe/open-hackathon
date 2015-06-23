@@ -46,7 +46,6 @@ from hackathon.template.docker_template_unit import (
     DockerTemplateUnit
 )
 from hackathon import Component, RequiredFeature, Context
-from hackathon.scheduler import scheduler
 import json
 from datetime import datetime, timedelta
 
@@ -56,6 +55,8 @@ class ALAUDA:
 
 
 class AlaudaDockerFormation(DockerFormationBase, Component):
+    scheduler = RequiredFeature("scheduler")
+
     def start(self, unit, **kwargs):
         virtual_environment = kwargs["virtual_environment"]
 
@@ -94,7 +95,8 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
             return {
                 "status": HEALTH_STATE.OK
             }
-        except:
+        except Exception as e:
+            self.log.error(e)
             return {
                 "status": HEALTH_STATE.ERROR,
                 "description": "request alauda failed"
@@ -103,9 +105,7 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
     # --------------------------------------private function--------------------------#
     def __schedule_query_service_status(self, context):
         self.log.debug("alauda service '%r' is deploying, will query again 10 seconds later" % context)
-        scheduler.add_job(query_service_status_async, 'date',
-                          run_date=self.util.get_now() + timedelta(seconds=10),
-                          args=[context])
+        self.scheduler.set_time("docker", "query_service_status_async", context=context, seconds=10)
 
     def __service_result_handler(self, service, context):
         if ALAUDA.IS_DEPLOYING not in service or service[ALAUDA.IS_DEPLOYING]:
@@ -290,8 +290,3 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
         else:
             self.log.debug("'%s' from alauda api '%s' failed: %s, %s" % (method, path, req.status_code, req.content))
             raise AlaudaException(req.status_code, req.content)
-
-
-def query_service_status_async(context):
-    docker = RequiredFeature("docker")
-    docker.query_service_status_async(context)

@@ -40,7 +40,8 @@ from hackathon.database.models import (
 )
 import json
 from hackathon.hackathon_response import access_denied, not_found
-from hackathon import Component, g
+from hackathon import Component
+from flask import g
 
 
 class GuacamoleInfo(Component):

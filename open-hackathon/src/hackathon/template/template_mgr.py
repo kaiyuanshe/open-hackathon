@@ -59,18 +59,12 @@ from hackathon.template.docker_template import (
 from hackathon.template.base_template import (
     BaseTemplate,
 )
-from hackathon.scheduler import (
-    scheduler,
-)
+
 from hackathon import (
     Component,
     RequiredFeature,
-    g,
 )
-from hackathon.initialise_jobs import (
-    docker_pull_image
-)
-
+from flask import g
 
 class TemplateManager(Component):
     hackathon_manager = RequiredFeature("hackathon_manager")
@@ -238,7 +232,8 @@ class TemplateManager(Component):
                 exec_time = self.util.get_now() + timedelta(seconds=3)
                 image = dl_image.split(':')[0]
                 tag = dl_image.split(':')[1]
-                scheduler.add_job(docker_pull_image, 'date', run_date=exec_time, args=[docker_host, image, tag])
+                #todo docker pull
+                # scheduler.add_job(docker_pull_image, 'date', run_date=exec_time, args=[docker_host, image, tag])
 
     # ---------------------------------------- helper functions ---------------------------------------- #
 

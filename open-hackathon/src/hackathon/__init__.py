@@ -27,7 +27,7 @@
 __author__ = 'Junbo Wang'
 __version__ = '2.0'
 
-from flask import Flask, g, request
+from flask import Flask
 from flask_restful import Api
 from flask_cors import CORS
 from util import safe_get_config, get_class, Utility
@@ -93,12 +93,17 @@ def init_components():
     from hackathon.admin.admin_mgr import AdminManager
     from hackathon.remote.guacamole import GuacamoleInfo
     from hackathon.expr.expr_mgr import ExprManager
+    from hackathon.hackathon_scheduler import HackathonScheduler
 
     # dependencies MUST be provided in advance
     factory.provide("util", Utility)
     factory.provide("log", log)
     factory.provide("db", SQLAlchemyAdapter, db_session)
 
+    # scheduler
+    factory.provide("scheduler", HackathonScheduler, app)
+
+    # business components
     factory.provide("user_manager", UserManager)
     factory.provide("hackathon_manager", HackathonManager)
     factory.provide("register_manager", RegisterManager)

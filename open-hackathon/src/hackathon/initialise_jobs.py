@@ -25,7 +25,6 @@ THE SOFTWARE.
 
 from hackathon_factory import RequiredFeature
 from datetime import timedelta
-from hackathon.scheduler import scheduler
 from hackathon.database.models import Template, Experiment
 from hackathon.enum import EStatus, VEProvider, ReservedUser
 
@@ -37,7 +36,7 @@ expr_manager = RequiredFeature("expr_manager")
 db = RequiredFeature("db")
 template_manager = RequiredFeature("template_manager")
 docker = RequiredFeature("docker")
-
+# scheduler = RequiredFeature("scheduler")
 # --------------------------------------------- job function definition ---------------------------------------------#
 
 def check_default_expr():
@@ -119,8 +118,8 @@ def open_check_expr():
     :return:
     """
     alarm_time = util.get_now() + timedelta(seconds=1)
-    scheduler.add_job(check_default_expr, 'interval', id='pre', replace_existing=True, next_run_time=alarm_time,
-                      minutes=util.safe_get_config("pre_allocate.check_interval_minutes", 5))
+    # scheduler.set_interval(check_default_expr, 'interval', id='pre', replace_existing=True, next_run_time=alarm_time,
+    #                   minutes=util.safe_get_config("pre_allocate.check_interval_minutes", 5))
 
 
 def recycle_expr_scheduler():
@@ -129,8 +128,8 @@ def recycle_expr_scheduler():
     :return:
     """
     excute_time = util.get_now() + timedelta(minutes=10)
-    scheduler.add_job(recycle_expr, 'interval', id='recycle', replace_existing=True, next_run_time=excute_time,
-                      minutes=util.safe_get_config("recycle.check_idle_interval_minutes", 5))
+    # scheduler.add_job(recycle_expr, 'interval', id='recycle', replace_existing=True, next_run_time=excute_time,
+    #                   minutes=util.safe_get_config("recycle.check_idle_interval_minutes", 5))
 
 
 def ensure_images():
@@ -139,13 +138,13 @@ def ensure_images():
     for hackathon in hackathons:
         log.debug("Start recycling inactive ensure images for hackathons")
         excute_time = util.get_now() + timedelta(seconds=3)
-        scheduler.add_job(auto_pull_images_for_hackathon,
-                          'interval',
-                          id='%s pull images' % hackathon.id,
-                          replace_existing=True,
-                          next_run_time=excute_time,
-                          minutes=60,
-                          args=[hackathon])
+        # scheduler.add_job(auto_pull_images_for_hackathon,
+        #                   'interval',
+        #                   id='%s pull images' % hackathon.id,
+        #                   replace_existing=True,
+        #                   next_run_time=excute_time,
+        #                   minutes=60,
+        #                   args=[hackathon])
     log.debug("starting to release ports ... ")
 
 

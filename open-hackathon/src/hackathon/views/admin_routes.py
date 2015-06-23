@@ -24,18 +24,21 @@ THE SOFTWARE.
 """
 
 import sys
+
 sys.path.append("..")
 
 from flask_restful import (
     Resource,
     reqparse,
 )
+from flask import (
+    g,
+    request,
+)
 from hackathon import (
     api,
     RequiredFeature,
     Component,
-    g,
-    request,
 )
 from hackathon.decorators import (
     token_required,

@@ -27,7 +27,8 @@ import sys
 
 sys.path.append("..")
 
-from hackathon import api, RequiredFeature, Component, g
+from hackathon import api, RequiredFeature, Component
+from flask import g
 from flask_restful import Resource, reqparse
 from hackathon.decorators import hackathon_name_required
 from hackathon.health import report_health

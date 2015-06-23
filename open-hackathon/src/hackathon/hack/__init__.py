@@ -35,7 +35,8 @@ from sqlalchemy import or_
 from hackathon.constants import HTTP_HEADER
 import json
 from hackathon.constants import HACKATHON_BASIC_INFO
-from hackathon import RequiredFeature, Component, g, request
+from hackathon import RequiredFeature, Component
+from flask import g, request
 import imghdr
 import uuid
 import time
