@@ -38,27 +38,27 @@ def __response_with_code(code, message, friendly_message=""):
     }
 
 
-def not_found(message, friendly_message="Not Found"):
+def not_found(message="", friendly_message="Not Found"):
     return __response_with_code(404, message, friendly_message)
 
 
-def bad_request(message, friendly_message="Bad Request"):
+def bad_request(message="", friendly_message="Bad Request"):
     return __response_with_code(400, message, friendly_message)
 
 
-def unauthorized(message, friendly_message="UnAuthorized"):
+def unauthorized(message="", friendly_message="UnAuthorized"):
     return __response_with_code(401, message, friendly_message)
 
 
-def access_denied(message, friendly_message="Access Denied"):
+def access_denied(message="", friendly_message="Access Denied"):
     return __response_with_code(403, message, friendly_message)
 
 
-def precondition_failed(message, friendly_message="Precondition Failed"):
+def precondition_failed(message="", friendly_message="Precondition Failed"):
     return __response_with_code(412, message, friendly_message)
 
 
-def internal_server_error(message, friendly_message="Internal Server Error"):
+def internal_server_error(message="", friendly_message="Internal Server Error"):
     return __response_with_code(500, message, friendly_message)
 
 

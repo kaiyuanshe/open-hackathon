@@ -27,7 +27,8 @@
 import sys
 
 sys.path.append("..")
-from hackathon import Component, RequiredFeature, g
+from hackathon import Component, RequiredFeature
+from flask import g
 from hackathon.database.models import UserHackathonRel, Experiment, UserProfile
 from hackathon.hackathon_response import bad_request, precondition_failed, internal_server_error, not_found, ok
 from hackathon.enum import EStatus, RGStatus, ReservedUser

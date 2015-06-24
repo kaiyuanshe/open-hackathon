@@ -27,16 +27,20 @@
 __author__ = 'Junbo Wang'
 __version__ = '2.0'
 
-from flask import Flask, g, request
+from flask import Flask
 from flask_restful import Api
 from flask_cors import CORS
 from util import safe_get_config, get_class, Utility
 from hackathon_factory import factory, RequiredFeature
+from hackathon_scheduler import HackathonScheduler
+from datetime import timedelta
 
 
 # flask
 app = Flask(__name__)
 app.config['SECRET_KEY'] = safe_get_config("app.secret_key", "secret_key")
+app.debug = True
+scheduler = HackathonScheduler(app)
 
 # flask restful
 api = Api(app)
@@ -99,6 +103,10 @@ def init_components():
     factory.provide("log", log)
     factory.provide("db", SQLAlchemyAdapter, db_session)
 
+    # scheduler
+    factory.provide("scheduler", scheduler)
+
+    # business components
     factory.provide("user_manager", UserManager)
     factory.provide("hackathon_manager", HackathonManager)
     factory.provide("register_manager", RegisterManager)
@@ -124,12 +132,44 @@ def init_components():
         factory.provide("docker", get_class("hackathon.docker.hosted_docker.HostedDockerFormation"))
 
 
+def init_schedule_jobs():
+    if safe_get_config("environment", "local") == "local":
+        return
+
+    import threading
+
+    t = threading.Thread(target=__init_schedule_jobs)
+    t.start()
+
+
+def __init_schedule_jobs():
+    sche = RequiredFeature("scheduler")
+    expr_manager = RequiredFeature("expr_manager")
+
+    # schedule job to recycle idle experiments
+    next_run_time = util.get_now() + timedelta(minutes=1)
+    sche.add_interval(feature="expr_manager",
+                      method="recycle_expr",
+                      id="recycle_expr",
+                      next_run_time=next_run_time,
+                      minutes=util.safe_get_config("recycle.check_idle_interval_minutes", 10))
+
+    # schedule job to pre-allocate environment
+    expr_manager.schedule_pre_allocate_expr_job()
+
+    # schedule job to pull docker images automatically
+    if not safe_get_config("docker.alauda.enabled", False):
+        docker = RequiredFeature("docker")
+        docker.ensure_images()
+
+
 def init_app():
     init_components()
 
     from views import init_routes
 
     init_routes()
+    init_schedule_jobs()
 
 
 init_app()
