@@ -63,13 +63,16 @@ from hackathon.template.base_template import (
 from hackathon import (
     Component,
     RequiredFeature,
+    Context,
 )
 from flask import g
+
 
 class TemplateManager(Component):
     hackathon_manager = RequiredFeature("hackathon_manager")
     file_service = RequiredFeature("file_service")
     docker = RequiredFeature("docker")
+    scheduler = RequiredFeature("scheduler")
 
     templates = {}  # template in memory {template.id: template_file_stream}
 
@@ -213,27 +216,33 @@ class TemplateManager(Component):
 
         return None
 
-    def pull_images_for_hackathon(self, hackathon):
+    def pull_images_for_hackathon(self, context):
+        hackathon_id = context.hackathon_id
         # get expected images on hackathon
         templates = self.db.find_all_objects_by(Template,
-                                                hackathon_id=hackathon.id,
+                                                hackathon_id=hackathon_id,
                                                 provider=VEProvider.Docker,
                                                 status=TEMPLATE_STATUS.CREATED)
         images = map(lambda x: self.__get_images_from_template(x), templates)
         expected_images = flatten(images)
-        self.log.debug('expected images: %s on hackathon: %s' % (expected_images, hackathon.name))
+        self.log.debug('expected images: %s on hackathon: %s' % (expected_images, hackathon_id))
         # get all docker host server on hackathon
-        hosts = self.db.find_all_objects_by(DockerHostServer, hackathon_id=hackathon.id)
+        hosts = self.db.find_all_objects_by(DockerHostServer, hackathon_id=hackathon_id)
         # loop to get every docker host
         for docker_host in hosts:
             download_images = self.__get_undownloaded_images_on_docker_host(docker_host, expected_images)
             self.log.debug('need to pull images: %s on host: %s' % (download_images, docker_host.vm_name))
             for dl_image in download_images:
-                exec_time = self.util.get_now() + timedelta(seconds=3)
                 image = dl_image.split(':')[0]
                 tag = dl_image.split(':')[1]
-                #todo docker pull
-                # scheduler.add_job(docker_pull_image, 'date', run_date=exec_time, args=[docker_host, image, tag])
+                context = Context(image=image,
+                                  tag=tag,
+                                  docker_host=docker_host)
+                # todo docker pull for hosted docker only
+                self.scheduler.add_once(feature="docker",
+                                        method="pull_image",
+                                        context=context,
+                                        seconds=3)
 
     # ---------------------------------------- helper functions ---------------------------------------- #
 

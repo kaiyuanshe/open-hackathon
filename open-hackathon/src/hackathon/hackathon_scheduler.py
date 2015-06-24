@@ -22,18 +22,20 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
+from apscheduler.jobstores.base import JobLookupError
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.util import undefined
 from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 import os
 from pytz import utc
+from log import log
 from hackathon_factory import RequiredFeature
+from hackathon.util import safe_get_config, get_config, get_now
 from datetime import timedelta
+import inspect
 
 
 def scheduler_listener(event):
-    log = RequiredFeature("log")
-
     if event.code == EVENT_JOB_ERROR:
         print('The job crashed :(')
         log.warn("The schedule job crashed because of %s" % repr(event.exception))
@@ -43,50 +45,72 @@ def scheduler_listener(event):
 
 
 def scheduler_executor(feature, method, context):
+    log.debug("prepare to execute '%s.%s' with context: %s" % (feature, method, context))
+
     inst = RequiredFeature(feature)
     mtd = getattr(inst, method)
-    mtd(context)
+    args_len = len(inspect.getargspec(mtd).args)
+
+    if args_len < 2:
+        mtd()
+    else:
+        mtd(context)
 
 
 class HackathonScheduler():
-    log = RequiredFeature("log")
-    util = RequiredFeature("util")
+    jobstore = None
 
     def __init__(self, app):
         self.app = app
+        self.__apscheduler = None
 
         if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
-            self.scheduler = BackgroundScheduler(timezone=utc)
+            self.__apscheduler = BackgroundScheduler(timezone=utc)
 
             # job store
-            if self.util.safe_get_config("scheduler.job_store", "memory") == "mysql":
-                self.scheduler.add_jobstore('sqlalchemy', url=self.util.get_config("scheduler.job_store_url"))
+            if safe_get_config("scheduler.job_store", "memory") == "mysql":
+                self.jobstore = 'sqlalchemy'
+                self.__apscheduler.add_jobstore(self.jobstore, url=get_config("scheduler.job_store_url"))
 
             # listener
             # do we need listen EVENT_JOB_MISSED?
-            self.scheduler.add_listener(scheduler_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
-            self.scheduler.start()
+            self.__apscheduler.add_listener(scheduler_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
+            log.info("APScheduler loaded")
+            self.__apscheduler.start()
 
     def get_scheduler(self):
-        return self.scheduler
+        return self.__apscheduler
 
-    def set_time(self, feature, method, context=None, id=None, replace_existing=True, run_date=None, **delta):
+    def add_once(self, feature, method, context=None, id=None, replace_existing=True, run_date=None, **delta):
         if not run_date:
-            run_date = self.util.get_now() + timedelta(**delta)
+            run_date = get_now() + timedelta(**delta)
 
-        self.scheduler.add_job(scheduler_executor,
-                               trigger='date',
-                               run_date=run_date,
-                               id=id,
-                               replace_existing=replace_existing,
-                               args=[feature, method, context])
+        if self.__apscheduler:
+            self.__apscheduler.add_job(scheduler_executor,
+                                       trigger='date',
+                                       run_date=run_date,
+                                       id=id,
+                                       max_instances=1,
+                                       replace_existing=replace_existing,
+                                       args=[feature, method, context])
 
-    def set_interval(self, feature, method, id=None, context=None, replace_existing=True, next_run_time=undefined,
+    def add_interval(self, feature, method, id=None, context=None, replace_existing=True, next_run_time=undefined,
                      **interval):
-        self.scheduler.add_job(scheduler_executor,
-                               trigger='interval',
-                               id=id,
-                               replace_existing=replace_existing,
-                               next_run_time=next_run_time,
-                               args=[feature, method, context],
-                               **interval)
+        if self.__apscheduler:
+            self.__apscheduler.add_job(scheduler_executor,
+                                       trigger='interval',
+                                       id=id,
+                                       max_instances=1,
+                                       replace_existing=replace_existing,
+                                       next_run_time=next_run_time,
+                                       args=[feature, method, context],
+                                       **interval)
+
+    def remove_job(self, job_id):
+        if self.__apscheduler:
+            try:
+                self.__apscheduler.remove_job(job_id, self.jobstore)
+            except JobLookupError:
+                log.debug("remove job failed because job %s not found" % job_id)
+            except Exception as e:
+                log.error(e)

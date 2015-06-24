@@ -181,7 +181,8 @@ class HackathonManager(Component):
     def is_pre_allocate_enabled(self, hackathon):
         try:
             basic_info = json.loads(hackathon.basic_info)
-            return basic_info[HACKATHON_BASIC_INFO.PRE_ALLOCATE_ENABLED] == 1
+            k = HACKATHON_BASIC_INFO.PRE_ALLOCATE_ENABLED
+            return k in basic_info and basic_info[k] == 1
         except Exception as e:
             self.log.error(e)
             self.log.warn(

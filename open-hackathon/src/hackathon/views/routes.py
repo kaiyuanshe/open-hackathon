@@ -33,7 +33,6 @@ from flask_restful import Resource, reqparse
 from hackathon.decorators import hackathon_name_required
 from hackathon.health import report_health
 from hackathon.database.models import Announcement
-from hackathon.initialise_jobs import start_init_job
 import time
 
 hackathon_manager = RequiredFeature("hackathon_manager")
