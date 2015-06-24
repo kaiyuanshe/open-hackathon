@@ -33,9 +33,6 @@ class DockerHelper(Component):
     alauda_docker = RequiredFeature("alauda_docker")
 
     def get_docker(self, hackathon):
-        if self.util.safe_get_config("docker.alauda.enabled", False):
-            return self.hosted_docker
-
         if hackathon.is_alauda_enabled():
             return self.alauda_docker
         else:

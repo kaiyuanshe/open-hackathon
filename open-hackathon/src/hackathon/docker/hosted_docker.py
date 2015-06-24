@@ -28,9 +28,6 @@ import sys
 
 sys.path.append("..")
 
-from hackathon.database import (
-    db_adapter
-)
 from hackathon import (
     RequiredFeature,
     Component
@@ -41,7 +38,6 @@ from hackathon.database.models import (
     HackathonAzureKey,
     PortBinding,
     DockerHostServer,
-    Hackathon,
 )
 from hackathon.enum import (
     EStatus,
@@ -74,10 +70,6 @@ from hackathon.constants import (
 )
 import json
 import requests
-from hackathon.scheduler import scheduler
-from datetime import timedelta
-from hackathon.enum import HACK_STATUS
-from hackathon.initialise_jobs import auto_pull_images_for_hackathon
 
 
 class HostedDockerFormation(DockerFormationBase, Component):

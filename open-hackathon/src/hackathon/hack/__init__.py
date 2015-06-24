@@ -49,14 +49,9 @@ class HackathonManager(Component):
     file_service = RequiredFeature("file_service")
 
     def __is_recycle_enabled(self, hackathon):
-        try:
-            basic_info = json.loads(hackathon.basic_info)
-            return basic_info[HACKATHON_BASIC_INFO.RECYCLE_ENABLED] == 1
-        except Exception as e:
-            self.log.error(e)
-            self.log.warn(
-                "cannot load recycle_enabled from basic info for hackathon %d, will return False" % hackathon.id)
-            return False
+        key = HACKATHON_BASIC_INFO.RECYCLE_ENABLED
+        value = self.__get_property_from_hackathon_basic_info(hackathon, key)
+        return value == 1
 
     # check the admin authority on hackathon
     def validate_admin_privilege(self, user_id, hackathon_id):
@@ -144,6 +139,15 @@ class HackathonManager(Component):
 
         return list(set(hackathon_ids))
 
+    def __get_property_from_hackathon_basic_info(self, hackathon, key):
+        try:
+            basic_info = json.loads(hackathon.basic_info)
+            value = basic_info[key]
+            return value
+        except Exception as e:
+            self.log.error(e)
+            self.log.warn("cannot get %s from basic info for hackathon %d, will return None" % (key, hackathon.id))
+            return None
 
     def validate_admin_privilege_http(self):
         return self.validate_admin_privilege(g.user.id, g.hackathon.id)
@@ -168,39 +172,24 @@ class HackathonManager(Component):
             return False
 
     def is_auto_approve(self, hackathon):
-        try:
-            basic_info = json.loads(hackathon.basic_info)
-            return basic_info[HACKATHON_BASIC_INFO.AUTO_APPROVE] == 1
-        except Exception as e:
-            self.log.error(e)
-            self.log.warn("cannot load auto_approve from basic info for hackathon %d, will return False" % hackathon.id)
-            return False
-
+        key = HACKATHON_BASIC_INFO.AUTO_APPROVE
+        value = self.__get_property_from_hackathon_basic_info(hackathon, key)
+        return value == 1
 
     def is_pre_allocate_enabled(self, hackathon):
-        try:
-            basic_info = json.loads(hackathon.basic_info)
-            return basic_info[HACKATHON_BASIC_INFO.PRE_ALLOCATE_ENABLED] == 1
-        except Exception as e:
-            self.log.error(e)
-            self.log.warn(
-                "cannot load pre_allocate_enabled from basic info for hackathon %d, will return False" % hackathon.id)
-            return False
+        key = HACKATHON_BASIC_INFO.PRE_ALLOCATE_ENABLED
+        value = self.__get_property_from_hackathon_basic_info(hackathon, key)
+        return value == 1
 
     def is_alauda_enabled(self, hackathon):
-        # todo include it in "basic_info" or "extra_info"
-        return True
+        key = HACKATHON_BASIC_INFO.ALAUDA_ENABLED
+        value = self.__get_property_from_hackathon_basic_info(hackathon, key)
+        return value if value is not None else False
 
     def get_pre_allocate_number(self, hackathon):
-        try:
-            basic_info = json.loads(hackathon.basic_info)
-            return basic_info[HACKATHON_BASIC_INFO.PRE_ALLOCATE_NUMBER]
-        except Exception as e:
-            self.log.error(e)
-            self.log.warn(
-                "cannot load pre_allocate_number from basic info for hackathon %d, will return 1" % hackathon.id)
-            return 1
-
+        key = HACKATHON_BASIC_INFO.PRE_ALLOCATE_NUMBER
+        value = self.__get_property_from_hackathon_basic_info(hackathon, key)
+        return value if value is not None else 1
 
     def validate_created_args(self, args):
         self.log.debug("create_or_update_hackathon: %r" % args)

@@ -307,8 +307,9 @@ class ExprManager(Component):
                                 experiment=expr)
         self.db.add_object(ve)
 
-        # start container remotely
-        container_ret = self.docker.start(docker_template_unit,
+        # start container remotely , use hosted docker or alauda docker
+        docker = self.docker.get_docker(hackathon)
+        container_ret = docker.start(docker_template_unit,
                                           hackathon=hackathon,
                                           virtual_environment=ve,
                                           experiment=expr)
@@ -380,4 +381,3 @@ class ExprManager(Component):
             self.log.error(e)
 
             # --------------------------------------------- helper function ---------------------------------------------#
-

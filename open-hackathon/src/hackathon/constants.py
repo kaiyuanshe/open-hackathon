@@ -67,3 +67,4 @@ class HACKATHON_BASIC_INFO:
     RECYCLE_ENABLED = "recycle_enabled"  # bool, default=false
     PRE_ALLOCATE_ENABLED = "pre_allocate_enabled"  # bool, default=false
     PRE_ALLOCATE_NUMBER = "pre_allocate_number"  # int, default=1
+    ALAUDA_ENABLED = "alauda_enabled"  #  bool, default=false
