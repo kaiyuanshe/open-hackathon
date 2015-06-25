@@ -105,7 +105,7 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
     # --------------------------------------private function--------------------------#
     def __schedule_query_service_status(self, context):
         self.log.debug("alauda service '%r' is deploying, will query again 10 seconds later" % context)
-        self.scheduler.set_time("docker", "query_service_status_async", context=context, seconds=10)
+        self.scheduler.add_once("docker", "query_service_status_async", context=context, seconds=10)
 
     def __service_result_handler(self, service, context):
         if ALAUDA.IS_DEPLOYING not in service or service[ALAUDA.IS_DEPLOYING]:
