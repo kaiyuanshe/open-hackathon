@@ -48,6 +48,7 @@ from hackathon.database.models import (
     Experiment,
     Hackathon,
     Template,
+    User
 )
 
 from hackathon.azureformation.azureFormation import (
@@ -81,6 +82,7 @@ from hackathon.initialise_jobs import (
 
 class ExprManager(Component):
     register_manager = RequiredFeature("register_manager")
+    user_manager = RequiredFeature("user_manager")
     hackathon_manager = RequiredFeature("hackathon_manager")
     template_manager = RequiredFeature("template_manager")
     docker = RequiredFeature("docker")
@@ -177,7 +179,13 @@ class ExprManager(Component):
 
     def get_expr_list_by_user_id(self, user_id):
         return map(lambda u: u.dic(),
-                   self.db.find_all_objects(Experiment, and_(Experiment.user_id == user_id, Experiment.status < 5)))
+                   self.db.find_all_objects(Experiment, and_(Experiment.user_id == user_id,
+                                                             Experiment.status < 5)))
+
+    def get_expr_list_by_hackathon_id(self, hackathon_id, **kwargs):
+        condition = self.__get_filter_condition(hackathon_id, **kwargs)
+        expers = self.db.find_all_objects(Experiment, condition)
+        return map(lambda u: self.__get_expr_with_user_info(u), expers)
 
     # --------------------------------------------- helper function ---------------------------------------------#
 
@@ -310,9 +318,9 @@ class ExprManager(Component):
         # start container remotely , use hosted docker or alauda docker
         docker = self.docker.get_docker(hackathon)
         container_ret = docker.start(docker_template_unit,
-                                          hackathon=hackathon,
-                                          virtual_environment=ve,
-                                          experiment=expr)
+                                     hackathon=hackathon,
+                                     virtual_environment=ve,
+                                     experiment=expr)
         if container_ret is None:
             self.log.error("container %s fail to run" % new_name)
             raise Exception("container_ret is none")
@@ -381,3 +389,22 @@ class ExprManager(Component):
             self.log.error(e)
 
             # --------------------------------------------- helper function ---------------------------------------------#
+
+    def __get_expr_with_user_info(self, experiment):
+        info = experiment.dic()
+        info['user_info'] = self.user_manager.user_display_info(experiment.user)
+        return info
+
+    def __get_filter_condition(self, hackathon_id, **kwargs):
+        condition = Experiment.hackathon_id == hackathon_id
+        # check status: -1 means query all status
+        if 'status' in kwargs and kwargs['status'] != -1:
+            condition = and_(condition, Experiment.status == kwargs['status'])
+        else:
+            condition = and_(condition, Experiment.status >= 0)
+        # check user name
+        if "user_name" in kwargs and len(kwargs['user_name']) > 0:
+            users = self.db.find_all_objects(User, User.nickname.like('%'+kwargs['user_name']+'%'))
+            uids = map(lambda x: x.id, users)
+            condition = and_(condition, Experiment.user_id.in_(uids))
+        return condition

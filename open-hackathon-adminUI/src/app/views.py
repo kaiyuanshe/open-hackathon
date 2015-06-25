@@ -285,3 +285,9 @@ def adminmgr():
 @login_required
 def testdocker():
     return __render("/testtemplate.html")
+
+
+@app.route("/experiment")
+@login_required
+def experiment():
+    return __render("/experiment.html")
