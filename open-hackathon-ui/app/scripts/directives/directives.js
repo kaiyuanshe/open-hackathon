@@ -82,7 +82,7 @@ angular.module('oh.directives', [])
         }
 
         var temp = $templateCache.get('hackathon-vm.html');
-        API.user.experiment.post(JSON.stringify({cid: 'ut', hackathon: scope.config.name}), function (data) {
+        API.user.experiment.post(JSON.stringify({cid: 'win10', hackathon: scope.config.name}), function (data) {
           var stop;
           var loopstart = function () {
             API.user.experiment.get({id: data.expr_id}, function (data) {
