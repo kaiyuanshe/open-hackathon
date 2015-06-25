@@ -25,6 +25,7 @@ THE SOFTWARE.
 __author__ = 'Yifu Huang'
 
 import sys
+
 sys.path.append("..")
 from hackathon.database import (
     db_adapter,
@@ -45,9 +46,7 @@ from hackathon.util import (
     call,
     get_now,
 )
-from hackathon.scheduler import (
-    scheduler,
-)
+
 from hackathon.enum import (
     ALStatus,
     EStatus,
@@ -60,6 +59,9 @@ from azure.servicemanagement import (
 )
 from datetime import (
     timedelta,
+)
+from hackathon import (
+    RequiredFeature
 )
 # -------------------------------------------------- constants --------------------------------------------------#
 # project name
@@ -380,7 +382,8 @@ def set_template_virtual_environment_count(experiment_id, count):
 # --------------------------------------------- scheduler ---------------------------------------------#
 def run_job(mdl_cls_func, cls_args, func_args, second=DEFAULT_TICK):
     exec_time = get_now() + timedelta(seconds=second)
-    scheduler.add_job(call, 'date', run_date=exec_time, args=[mdl_cls_func, cls_args, func_args])
+    scheduler = RequiredFeature("scheduler")
+    scheduler.get_scheduler().add_job(call, 'date', run_date=exec_time, args=[mdl_cls_func, cls_args, func_args])
 
 
 # --------------------------------------------- experiment ---------------------------------------------#

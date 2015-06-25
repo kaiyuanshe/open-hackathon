@@ -35,7 +35,8 @@ from sqlalchemy import or_
 from hackathon.constants import HTTP_HEADER
 import json
 from hackathon.constants import HACKATHON_BASIC_INFO
-from hackathon import RequiredFeature, Component, g, request
+from hackathon import RequiredFeature, Component
+from flask import g, request
 import imghdr
 import uuid
 import time
@@ -177,9 +178,16 @@ class HackathonManager(Component):
         return value == 1
 
     def is_pre_allocate_enabled(self, hackathon):
-        key = HACKATHON_BASIC_INFO.PRE_ALLOCATE_ENABLED
-        value = self.__get_property_from_hackathon_basic_info(hackathon, key)
-        return value == 1
+        try:
+            basic_info = json.loads(hackathon.basic_info)
+            k = HACKATHON_BASIC_INFO.PRE_ALLOCATE_ENABLED
+            return k in basic_info and basic_info[k] == 1
+        except Exception as e:
+            self.log.error(e)
+            self.log.warn(
+                "cannot load pre_allocate_enabled from basic info for hackathon %d, will return False" % hackathon.id)
+            return False
+
 
     def is_alauda_enabled(self, hackathon):
         key = HACKATHON_BASIC_INFO.ALAUDA_ENABLED

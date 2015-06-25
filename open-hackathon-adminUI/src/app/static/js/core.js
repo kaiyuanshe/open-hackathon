@@ -73,6 +73,7 @@
                         success: function(data) {
                             if(data.error){
                                 if(data.error.code == 401){
+                                    console.log(data)
                                     location.href = '/logout';
                                 }else {
                                     callback(data)

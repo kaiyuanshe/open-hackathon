@@ -27,12 +27,12 @@ import sys
 
 sys.path.append("..")
 
-from hackathon import api, RequiredFeature, Component, g
+from hackathon import api, RequiredFeature, Component
+from flask import g
 from flask_restful import Resource, reqparse
 from hackathon.decorators import hackathon_name_required
 from hackathon.health import report_health
 from hackathon.database.models import Announcement
-from hackathon.initialise_jobs import start_init_job
 import time
 
 hackathon_manager = RequiredFeature("hackathon_manager")

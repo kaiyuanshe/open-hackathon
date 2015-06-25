@@ -30,7 +30,8 @@ sys.path.append("..")
 
 from hackathon import (
     RequiredFeature,
-    Component
+    Component,
+    Context,
 )
 from hackathon.database.models import (
     Experiment,
@@ -70,10 +71,14 @@ from hackathon.constants import (
 )
 import json
 import requests
+from datetime import timedelta
+
 
 
 class HostedDockerFormation(DockerFormationBase, Component):
     template_manager = RequiredFeature("template_manager")
+    hackathon_manager = RequiredFeature("hackathon_manager")
+    scheduler = RequiredFeature("scheduler")
     """
     Docker resource management based on docker remote api v1.18
     Host resource are required. Azure key required in case of azure.
@@ -257,7 +262,8 @@ class HostedDockerFormation(DockerFormationBase, Component):
     def get_vm_url(self, docker_host):
         return 'http://%s:%d' % (docker_host.public_dns, docker_host.public_docker_api_port)
 
-    def pull_image(self, docker_host, image_name, tag):
+    def pull_image(self, context):
+        docker_host, image_name, tag = context.docker_host, context.image_name, context.tag
         pull_image_url = self.get_vm_url(docker_host) + "/images/create?fromImage=" + image_name + '&tag=' + tag
         self.log.debug(" send request to pull image:" + pull_image_url)
         return requests.post(pull_image_url)
@@ -268,6 +274,11 @@ class HostedDockerFormation(DockerFormationBase, Component):
         current_images_tags = map(lambda x: x['RepoTags'], current_images_info)  # [[],[],[]]
         return flatten(current_images_tags)  # [ imange:tag, image:tag ]
 
+    def ensure_images(self):
+        hackathons = self.hackathon_manager.get_online_hackathons()
+        # TODO check hackathon VirtualEvironment provider is docker
+        map(lambda h: self.__ensure_images_for_hackathon(h), hackathons)
+
     # --------------------------------------------- helper function ---------------------------------------------#
 
     def __name_match(self, id, lists):
@@ -275,6 +286,27 @@ class HostedDockerFormation(DockerFormationBase, Component):
             if id in list:
                 return True
         return False
+
+    def __get_schedule_job_id(self, hackathon):
+        return "pull_images_for_hackathon_%s" % hackathon.id
+
+    def __ensure_images_for_hackathon(self, hackathon):
+        # only ensure those alauda is disabled
+        if hackathon.is_alauda_enabled():
+            self.log.debug("schedule job of hackathon '%s(%d)' removed for alauda enabled" %
+                           (hackathon.name, hackathon.id))
+            self.scheduler.remove_job(self.__get_schedule_job_id(hackathon))
+            return
+
+        self.log.debug("adding schedule job to ensure images for hackathon [%d]%s" % (hackathon.id, hackathon.name))
+        next_run_time = self.util.get_now() + timedelta(seconds=3)
+        context = Context(hackathon_id=hackathon.id)
+        self.scheduler.add_interval(feature="template_manager",
+                                    method="pull_images_for_hackathon",
+                                    id=self.__get_schedule_job_id(hackathon),
+                                    context=context,
+                                    next_run_time=next_run_time,
+                                    minutes=60)
 
     def __get_vm_url(self, docker_host):
         return 'http://%s:%d' % (docker_host.public_dns, docker_host.public_docker_api_port)

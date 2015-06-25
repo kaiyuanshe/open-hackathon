@@ -75,9 +75,8 @@ import string
 from sqlalchemy import (
     and_,
 )
-from hackathon.initialise_jobs import (
-    open_check_expr
-)
+
+from datetime import timedelta
 
 
 class ExprManager(Component):
@@ -86,6 +85,7 @@ class ExprManager(Component):
     hackathon_manager = RequiredFeature("hackathon_manager")
     template_manager = RequiredFeature("template_manager")
     docker = RequiredFeature("docker")
+    scheduler = RequiredFeature("scheduler")
 
     def start_expr(self, hackathon_name, template_name, user_id):
         """
@@ -186,6 +186,79 @@ class ExprManager(Component):
         condition = self.__get_filter_condition(hackathon_id, **kwargs)
         expers = self.db.find_all_objects(Experiment, condition)
         return map(lambda u: self.__get_expr_with_user_info(u), expers)
+
+    def recycle_expr(self):
+        """
+        recycle experiment when idle more than 24 hours
+        :return:
+        """
+        self.log.debug("start checking recyclable experiment ... ")
+
+        recycle_hours = self.util.safe_get_config('recycle.idle_hours', 24)
+        expr_time_cond = Experiment.last_heart_beat_time + timedelta(hours=recycle_hours) > self.util.get_now()
+        recycle_cond = Experiment.hackathon_id.in_(self.hackathon_manager.get_recyclable_hackathon_list())
+        status_cond = Experiment.status == EStatus.Running
+        r = self.db.find_first_object(Experiment, status_cond, expr_time_cond, recycle_cond)
+
+        if r is not None:
+            self.stop_expr(r.id)
+            self.log.debug("it's stopping " + str(r.id) + " inactive experiment now")
+        else:
+            self.log.debug("There is now inactive experiment now")
+            return
+
+    def schedule_pre_allocate_expr_job(self):
+        next_run_time = self.util.get_now() + timedelta(seconds=1)
+        self.scheduler.add_interval(feature="expr_manager",
+                                    method="pre_allocate_expr",
+                                    id="pre_allocate_expr",
+                                    next_run_time=next_run_time,
+                                    minutes=self.util.safe_get_config("pre_allocate.check_interval_minutes", 5))
+
+
+    def pre_allocate_expr(self):
+        # only deal with online hackathons
+        hackathon_id_list = self.hackathon_manager.get_pre_allocate_enabled_hackathon_list()
+        templates = self.db.find_all_objects(Template, Template.hackathon_id.in_(hackathon_id_list))
+        for template in templates:
+            try:
+                pre_num = self.hackathon_manager.get_pre_allocate_number(template.hackathon)
+                curr_num = self.db.count(Experiment,
+                                         Experiment.user_id == ReservedUser.DefaultUserID,
+                                         Experiment.template_id == template.id,
+                                         (Experiment.status == EStatus.Starting) | (
+                                             Experiment.status == EStatus.Running))
+                # todo test azure, config num
+                if template.provider == VEProvider.AzureVM:
+                    if curr_num < pre_num:
+                        remain_num = pre_num - curr_num
+                        start_num = self.db.count_by(Experiment,
+                                                     user_id=ReservedUser.DefaultUserID,
+                                                     template=template,
+                                                     status=EStatus.Starting)
+                        if start_num > 0:
+                            self.log.debug("there is an azure env starting, will check later ... ")
+                            return
+                        else:
+                            self.log.debug(
+                                "no starting template: %s , remain num is %d ... " % (template.name, remain_num))
+                            self.start_expr(template.hackathon.name, template.name, ReservedUser.DefaultUserID)
+                            break
+                            # curr_num += 1
+                            # self.log.debug("all template %s start complete" % template.name)
+                elif template.provider == VEProvider.Docker:
+                    self.log.debug(
+                        "template name is %s, hackathon name is %s" % (template.name, template.hackathon.name))
+                    if curr_num < pre_num:
+                        remain_num = pre_num - curr_num
+                        self.log.debug("no idle template: %s, remain num is %d ... " % (template.name, remain_num))
+                        self.start_expr(template.hackathon.name, template.name, ReservedUser.DefaultUserID)
+                        # curr_num += 1
+                        break
+                        # self.log.debug("all template %s start complete" % template.name)
+            except Exception as e:
+                self.log.error(e)
+                self.log.error("check default experiment failed")
 
     # --------------------------------------------- helper function ---------------------------------------------#
 
@@ -357,7 +430,7 @@ class ExprManager(Component):
             self.log.debug("experiment had been assigned, check experiment and start new job ... ")
 
             # add a job to start new pre-allocate experiment
-            open_check_expr()
+            self.schedule_pre_allocate_expr_job()
             return expr
 
     def __roll_back(self, expr_id):
