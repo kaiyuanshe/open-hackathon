@@ -95,9 +95,8 @@ Config = {
     },
     "docker": {
         "alauda": {
-            "enabled": False,
-            "token": "",
-            "namespace": "",
+            "token": "fd5fcc2bd5dbe0866b126184ede6b7b195bd9909",
+            "namespace": "junbo",
             "endpoint": "https://api.alauda.cn"
         }
     }

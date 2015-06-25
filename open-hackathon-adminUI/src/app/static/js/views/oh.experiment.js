@@ -53,7 +53,7 @@
         var currentHackathon = oh.comm.getCurrentHackathon();
         var data = getFilterData()
         oh.api.admin.experiment.list.get({
-            query: data
+            query: data,
             header: {
                 hackathon_name: currentHackathon.name
             }
@@ -109,24 +109,22 @@
             }
         });
     }
-//
-//    // call api to update a admin
-//    function updateAdmin(itemData){
-//        var currentHackathon = oh.comm.getCurrentHackathon();
-//        return oh.api.admin.hackathon.administrator.put({
-//            body: itemData,
-//            header: {
-//                hackathon_name: currentHackathon.name
-//            }
-//        }, function(data) {
-//            if(data.error){
-//                alert(data.error.message)
-//            }else{
-//            }
-//        });
-//    }
-//
 
+    // call api to reset experiment
+    function resetExperiment(id){
+        var currentHackathon = oh.comm.getCurrentHackathon();
+        return oh.api.admin.experiment.put({
+            body: {experiment_id:id},
+            header: {
+                hackathon_name: currentHackathon.name
+            }
+        }, function(data) {
+            if(data.error){
+                alert(data.error.message)
+            }else{
+            }
+        });
+    }
 
     // initial submit button events
     function forminit(){
@@ -145,32 +143,16 @@
         pageLoad();
         forminit();
 
-//        $('[data-type="new"],[data-type="cancel"]').click(function(e){
-//            isupdate = false ;
-//            $('#adminform').data({id:undefined}).find('[type="submit"]').removeAttr('disabled')
-//            $('#adminform').data({id:undefined}).find('#admin_email').removeAttr('disabled')
-//            resetForm();
-//            toggleTable();
-//        });
-//
-//        $('#adminlisttable').on('click','[data-type="edit"]',function(e){
-//            editLi = $(this).parents('tr');
-//            var item = editLi.data('tmplItem').data;
-//            setFormData(item);
-//            isupdate = true ;
-//            toggleTable();
-//        });
-//
-//        var confirmModal = $('#confirm_modal').on('show.bs.modal',function(e){
-//            console.log(e);
-//            editLi = $(e.relatedTarget).parents('tr');
-//        }).on('click','[data-type="ok"]',function(e){
-//            var item = editLi.data('tmplItem').data;
-//            deleteAdmin(item.id).then(function(){
-//                pageLoad()
-//            });
-//            confirmModal.modal('hide');
-//        });
+        var confirmModal = $('#confirm_reset_modal').on('show.bs.modal',function(e){
+            console.log(e);
+            confirmModal.data({item:$(e.relatedTarget).parents('tr').data('tmplItem').data});
+        }).on('click','[data-type="ok"]',function(e){
+            var item = confirmModal.data('item');
+            resetExperiment(item.id).then(function(){
+                pageLoad()
+            });
+            confirmModal.modal('hide');
+        });
     }
 
     $(function() {

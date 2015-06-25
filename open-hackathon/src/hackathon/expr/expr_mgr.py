@@ -136,16 +136,17 @@ class ExprManager(Component):
         expr = self.db.find_first_object_by(Experiment, id=expr_id, status=EStatus.Running)
         if expr is not None:
             # Docker
+            docker = self.docker.get_docker(expr.hackathon)
             if expr.template.provider == VEProvider.Docker:
                 # stop containers
                 for c in expr.virtual_environments.all():
                     try:
                         self.log.debug("begin to stop %s" % c.name)
                         if force:
-                            self.docker.delete(c.name, virtual_environment=c, container=c.container, expr_id=expr_id)
+                            docker.delete(c.name, virtual_environment=c, container=c.container, expr_id=expr_id)
                             c.status = VEStatus.Deleted
                         else:
-                            self.docker.stop(c.name, virtual_environment=c, container=c.container, expr_id=expr_id)
+                            docker.stop(c.name, virtual_environment=c, container=c.container, expr_id=expr_id)
                             c.status = VEStatus.Stopped
                     except Exception as e:
                         self.log.error(e)
@@ -159,7 +160,8 @@ class ExprManager(Component):
             else:
                 try:
                     # todo support delete azure vm
-                    af = AzureFormation(self.docker.__load_azure_key_id(expr_id))
+                    hosted_docker = RequiredFeature("hosted_docker")
+                    af = AzureFormation(hosted_docker.load_azure_key_id(expr_id))
                     af.stop(expr_id, AVMStatus.STOPPED_DEALLOCATED)
                 except Exception as e:
                     self.log.error(e)

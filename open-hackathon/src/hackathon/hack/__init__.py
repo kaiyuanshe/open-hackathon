@@ -222,6 +222,7 @@ class HackathonManager(Component):
             HACKATHON_BASIC_INFO.RECYCLE_ENABLED: False,
             HACKATHON_BASIC_INFO.PRE_ALLOCATE_ENABLED: False,
             HACKATHON_BASIC_INFO.PRE_ALLOCATE_NUMBER: 1,
+            HACKATHON_BASIC_INFO.ALAUDA_ENABLED: False
         }
         args[self.BASIC_INFO] = json.dumps(default_base_info)
         return True, args
