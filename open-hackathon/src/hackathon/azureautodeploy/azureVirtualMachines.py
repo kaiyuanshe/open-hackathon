@@ -157,8 +157,7 @@ class AzureVirtualMachines:
                                                    virtual_machine['role_name'],
                                                    config,
                                                    os_hd,
-                                                   role_size=virtual_machine['role_size'],
-                                                   vm_image_name=vm_image)
+                                                   role_size=virtual_machine['role_size'])
                     except Exception as e:
                         user_operation_commit(self.template, CREATE_VIRTUAL_MACHINE, FAIL, e.message)
                         log.error(e)

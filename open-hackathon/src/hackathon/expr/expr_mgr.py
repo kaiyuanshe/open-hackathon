@@ -4,17 +4,17 @@
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
 #
 # The MIT License (MIT)
-#  
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#  
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-#  
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -29,10 +29,10 @@ import sys
 sys.path.append("..")
 
 from compiler.ast import flatten
-from flask import g
 from hackathon.constants import GUACAMOLE
 from hackathon.docker import OssDocker
 from hackathon.enum import *
+from hackathon.hack import hack_manager
 from hackathon.azureautodeploy.azureImpl import *
 from hackathon.azureautodeploy.portManagement import *
 from hackathon.functions import safe_get_config, get_config, post_to_remote
@@ -43,17 +43,30 @@ import uuid
 
 docker = OssDocker()
 
+WINDOWS_TEN = "win10"
+COUNT_DOWN_MINUTES = 60
 # initial once
+
+def date_serializer(date):
+    return long((date - datetime(1970, 1, 1)).total_seconds() * 1000)
 
 
 class ExprManager(object):
+    def __end_time_for_win10(self, expr):
+        if expr.hackathon.name == WINDOWS_TEN:
+            end_time = expr.create_time + timedelta(minutes=COUNT_DOWN_MINUTES)
+            return date_serializer(end_time)
+
+        return -1
+
     def __report_expr_status(self, expr):
         ret = {
             "expr_id": expr.id,
             "status": expr.status,
             "hackathon": expr.hackathon.name,
-            "create_time": str(expr.create_time),
-            "last_heart_beat_time": str(expr.last_heart_beat_time),
+            "create_time": date_serializer(expr.create_time),
+            "end_time": self.__end_time_for_win10(expr),
+            "last_heart_beat_time": date_serializer(expr.last_heart_beat_time),
         }
 
         if expr.status != ExprStatus.Running:
@@ -357,7 +370,9 @@ class ExprManager(object):
         expr = db_adapter.find_first_object_by(Experiment, status=ExprStatus.Running, hackathon_id=hackathon.id,
                                                user_id=ReservedUser.DefaultUserID, template=template)
         if expr is not None:
-            db_adapter.update_object(expr, user_id=user_id)
+            db_adapter.update_object(expr, user_id=user_id, create_time=datetime.utcnow())
+            hack_manager.increase_win10_trial_count()
+
             for ve in expr.virtual_environments:
                 db_adapter.update_object(ve, user_id=user_id)
             db_session.commit()
@@ -378,6 +393,21 @@ class ExprManager(object):
             expr = self.check_expr_status(user_id, hackathon, template)
             if expr is not None:
                 return self.__report_expr_status(expr)
+
+        # for win10 only
+        if hackathon_name == WINDOWS_TEN:
+            total_env_count = db_adapter.count(Experiment,
+                                               Experiment.template == template,
+                                               (Experiment.status == ExprStatus.Starting) | (
+                                                   Experiment.status == ExprStatus.Running))
+            if total_env_count >= 10:
+                return {
+                    "error": {
+                        "code": 412,
+                        "message": "no idle VM"
+                    }
+                }
+
         # new expr
         expr = db_adapter.add_object_kwargs(Experiment,
                                             user_id=user_id,
@@ -388,7 +418,8 @@ class ExprManager(object):
 
         expr_config = json.load(file(template.url))
 
-        curr_num = db_adapter.count(Experiment, Experiment.user_id == ReservedUser.DefaultUserID,
+        curr_num = db_adapter.count(Experiment,
+                                    Experiment.user_id == ReservedUser.DefaultUserID,
                                     Experiment.template == template,
                                     (Experiment.status == ExprStatus.Starting) | (
                                         Experiment.status == ExprStatus.Running))
@@ -582,7 +613,7 @@ def open_check_expr():
 
 def check_default_expr():
     # todo only pre-allocate env for those needed. It should configured in table hackathon
-    templates = db_adapter.find_all_objects_order_by(Template, hackathon_id=3)
+    templates = db_adapter.find_all_objects_order_by(Template, hackathon_name="win10-")
     total_azure = safe_get_config("pre_allocate.azure", 1)
     total_docker = safe_get_config("pre_allocate.docker", 1)
     for template in templates:

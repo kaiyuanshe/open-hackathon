@@ -2,7 +2,7 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
 #  
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -50,6 +50,7 @@ class QQLogin(LoginProviderBase):
         self.um = user_manager
 
     def login(self, args):
+        hackathon_name = args.get('hackathon_name')
         access_token = args['access_token']
         # get openID.
         openid_resp = get_remote(get_config("login.qq.openid_url") + access_token)
@@ -74,12 +75,12 @@ class QQLogin(LoginProviderBase):
                                            nickname=user_info["nickname"],
                                            access_token=access_token,
                                            email_info=email_info,
-                                           avatar_url=user_info["figureurl"])
+                                           avatar_url=user_info["figureurl"],
+                                           hackathon_name=hackathon_name)
 
         # login flask
         user = user_with_token["user"]
         log.info("QQ user login successfully:" + repr(user))
-        hackathon_name = args.get('hackathon_name')
         detail = self.um.get_user_detail_info(user, hackathon_name=hackathon_name)
         detail["token"] = user_with_token["token"].token
         return detail
@@ -90,6 +91,7 @@ class GithubLogin(LoginProviderBase):
         self.um = user_manager
 
     def login(self, args):
+        hackathon_name = args.get('hackathon_name')
         access_token = args.get('access_token')
         # get user info
 
@@ -130,11 +132,11 @@ class GithubLogin(LoginProviderBase):
                                            nickname=nickname,
                                            access_token=access_token,
                                            email_info=email_info,
-                                           avatar_url=avatar)
+                                           avatar_url=avatar,
+                                           hackathon_name=hackathon_name)
         # login flask
         user = user_with_token["user"]
         log.info("github user login successfully:" + repr(user))
-        hackathon_name = args.get('hackathon_name')
         detail = self.um.get_user_detail_info(user, hackathon_name=hackathon_name)
         detail["token"] = user_with_token["token"].token
         return detail
@@ -145,6 +147,7 @@ class GitcafeLogin(LoginProviderBase):
         self.um = user_manager
 
     def login(self, args):
+        hackathon_name = args.get('hackathon_name')
         token = args.get('access_token')
         value = "Bearer " + token
         # opener = urllib2.build_opener(urllib2.HTTPHandler)
@@ -175,11 +178,11 @@ class GitcafeLogin(LoginProviderBase):
                                            nickname=nickname,
                                            access_token=token,
                                            email_info=email_info,
-                                           avatar_url=avatar_url)
+                                           avatar_url=avatar_url,
+                                           hackathon_name=hackathon_name)
         user = user_with_token["user"]
         log.info("gitcafe user login successfully:" + repr(user))
 
-        hackathon_name = args.get('hackathon_name')
         detail = self.um.get_user_detail_info(user, hackathon_name=hackathon_name)
         detail["token"] = user_with_token["token"].token
 
@@ -193,6 +196,7 @@ class WeiboLogin(LoginProviderBase):
 
     def login(self, args):
         access_token = args.get('access_token')
+        hackathon_name = args.get('hackathon_name')
         uid = args.get('uid')
 
         # get user info
@@ -235,11 +239,11 @@ class WeiboLogin(LoginProviderBase):
                                            nickname=nickname,
                                            access_token=access_token,
                                            email_info=email_info,
-                                           avatar_url=avatar_url)
+                                           avatar_url=avatar_url,
+                                           hackathon_name=hackathon_name)
         user = user_with_token["user"]
         log.info("weibo user login successfully:" + repr(user))
 
-        hackathon_name = args.get('hackathon_name')
         detail = self.um.get_user_detail_info(user, hackathon_name=hackathon_name)
         detail["token"] = user_with_token["token"].token
 

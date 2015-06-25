@@ -2,16 +2,16 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
-#  
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#  
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #  
@@ -230,6 +230,15 @@ class DefaultExperiment(Resource):
         return {"Info": "start default experiment"}, 200
 
 
+class Win10StatResource(Resource):
+    def get(self):
+        return hack_manager.get_win10_stat()
+
+    def post(self):
+        hack_manager.increase_win10_download_count()
+        return hack_manager.get_win10_stat()
+
+
 api.add_resource(UserExperimentResource, "/api/user/experiment")
 api.add_resource(RegisterListResource, "/api/register/list")
 api.add_resource(BulletinResource, "/api/bulletin")
@@ -245,6 +254,7 @@ api.add_resource(GuacamoleResource, "/api/guacamoleconfig")
 api.add_resource(UserResource, "/api/user")
 api.add_resource(CurrentTime, "/api/currenttime")
 api.add_resource(DefaultExperiment, "/api/default/experiment")
+api.add_resource(Win10StatResource, "/api/win10/stat")
 
 # ------------------------------ APIs for admin-site --------------------------------
 
