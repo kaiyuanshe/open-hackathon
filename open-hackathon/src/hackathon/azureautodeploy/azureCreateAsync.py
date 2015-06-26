@@ -33,6 +33,7 @@ sys.path.append("..")
 from azureImpl import *
 from hackathon.functions import *
 from hackathon.enum import *
+from hackathon.hack import hack_manager
 
 
 def set_expr_status(e_id, status):
@@ -63,3 +64,4 @@ if __name__ == "__main__":
         set_expr_status(expr_id, ExprStatus.Failed)
         sys.exit(-1)
     set_expr_status(expr_id, ExprStatus.Running)
+    hack_manager.increase_win10_trial_count()

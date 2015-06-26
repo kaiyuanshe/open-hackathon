@@ -2,19 +2,19 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
-#  
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#  
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-#  
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -29,30 +29,44 @@ import sys
 sys.path.append("..")
 
 from compiler.ast import flatten
-from flask import g
 from hackathon.constants import GUACAMOLE
 from hackathon.docker import OssDocker
 from hackathon.enum import *
+from hackathon.hack import hack_manager
 from hackathon.azureautodeploy.azureImpl import *
 from hackathon.azureautodeploy.portManagement import *
 from hackathon.functions import safe_get_config, get_config, post_to_remote
 from subprocess import Popen
 from hackathon.scheduler import scheduler
 from datetime import timedelta
+import uuid
 
 docker = OssDocker()
 
+WINDOWS_TEN = "win10"
+COUNT_DOWN_MINUTES = 60
 # initial once
+
+def date_serializer(date):
+    return long((date - datetime(1970, 1, 1)).total_seconds() * 1000)
 
 
 class ExprManager(object):
+    def __end_time_for_win10(self, expr):
+        if expr.hackathon.name == WINDOWS_TEN:
+            end_time = expr.create_time + timedelta(minutes=COUNT_DOWN_MINUTES)
+            return date_serializer(end_time)
+
+        return -1
+
     def __report_expr_status(self, expr):
         ret = {
             "expr_id": expr.id,
             "status": expr.status,
             "hackathon": expr.hackathon.name,
-            "create_time": str(expr.create_time),
-            "last_heart_beat_time": str(expr.last_heart_beat_time),
+            "create_time": date_serializer(expr.create_time),
+            "end_time": self.__end_time_for_win10(expr),
+            "last_heart_beat_time": date_serializer(expr.last_heart_beat_time),
         }
 
         if expr.status != ExprStatus.Running:
@@ -76,13 +90,17 @@ class ExprManager(object):
                 ves.append(db_adapter.find_first_object_by(VMConfig, virtual_machine_id=id))
         for ve in ves:
             if ve.remote_provider == RemoteProvider.Guacamole:
-                guaca_config = json.loads(ve.remote_paras)
-                url = "%s/guacamole/client.xhtml?id=" % (
-                    safe_get_config("guacamole.host", "localhost:8080")) + "c%2F" + guaca_config["name"]
+                guacamole_config = json.loads(ve.remote_paras)
+                guacamole_host = safe_get_config("guacamole.host", "localhost:8080")
+                # target url format:
+                # http://localhost:8080/guacamole/#/client/c/{name}?name={name}&oh={token}
+                name = guacamole_config["name"]
+                url = guacamole_host + '/guacamole/#/client/c/%s?name=%s' % (name, name)
                 guacamole_servers.append({
-                    "name": guaca_config["displayname"],
+                    "name": guacamole_config["displayname"],
                     "url": url
                 })
+
         if expr.status == ExprStatus.Running:
             ret["remote_servers"] = guacamole_servers
 
@@ -92,7 +110,7 @@ class ExprManager(object):
         if expr.template.provider == VirtualEnvironmentProvider.Docker:
             for ve in expr.virtual_environments.filter(VirtualEnvironment.image != GUACAMOLE.IMAGE).all():
                 for p in ve.port_bindings.all():
-                    if p.binding_type == PortBindingType.CloudService and p.name == "website":
+                    if p.binding_type == PortBindingType.CloudService and p.name in ("Tachyon", "WebUI"):
                         hs = db_adapter.find_first_object_by(DockerHostServer, id=p.binding_resource_id)
                         url = "http://%s:%s" % (hs.public_dns, p.port_from)
                         public_urls.append({
@@ -240,7 +258,7 @@ class ExprManager(object):
     def __remote_start_container(self, expr, host_server, container_config, user_id):
         post_data = container_config
         post_data["expr_id"] = expr.id
-        post_data["container_name"] = "%s-%s" % (expr.id, container_config["name"])
+        post_data["container_name"] = "%s-%s-%s" % (expr.id, container_config["name"], str(uuid.uuid1())[0:8])
         log.debug("starting to start container: %s" % post_data["container_name"])
 
         # db entity
@@ -352,7 +370,9 @@ class ExprManager(object):
         expr = db_adapter.find_first_object_by(Experiment, status=ExprStatus.Running, hackathon_id=hackathon.id,
                                                user_id=ReservedUser.DefaultUserID, template=template)
         if expr is not None:
-            db_adapter.update_object(expr, user_id=user_id)
+            db_adapter.update_object(expr, user_id=user_id, create_time=datetime.utcnow())
+            hack_manager.increase_win10_trial_count()
+
             for ve in expr.virtual_environments:
                 db_adapter.update_object(ve, user_id=user_id)
             db_session.commit()
@@ -373,6 +393,21 @@ class ExprManager(object):
             expr = self.check_expr_status(user_id, hackathon, template)
             if expr is not None:
                 return self.__report_expr_status(expr)
+
+        # for win10 only
+        if hackathon_name == WINDOWS_TEN:
+            total_env_count = db_adapter.count(Experiment,
+                                               Experiment.template == template,
+                                               (Experiment.status == ExprStatus.Starting) | (
+                                                   Experiment.status == ExprStatus.Running))
+            if total_env_count >= 10:
+                return {
+                    "error": {
+                        "code": 412,
+                        "message": "no idle VM"
+                    }
+                }
+
         # new expr
         expr = db_adapter.add_object_kwargs(Experiment,
                                             user_id=user_id,
@@ -383,7 +418,8 @@ class ExprManager(object):
 
         expr_config = json.load(file(template.url))
 
-        curr_num = db_adapter.count(Experiment, Experiment.user_id == ReservedUser.DefaultUserID,
+        curr_num = db_adapter.count(Experiment,
+                                    Experiment.user_id == ReservedUser.DefaultUserID,
                                     Experiment.template == template,
                                     (Experiment.status == ExprStatus.Starting) | (
                                         Experiment.status == ExprStatus.Running))
@@ -393,7 +429,7 @@ class ExprManager(object):
             # guacamole_config = []
             try:
                 host_server = self.__get_available_docker_host(expr_config, hackathon)
-                if curr_num >= safe_get_config("pre_allocate.docker", 1):
+                if curr_num != 0 and curr_num >= get_config("pre_allocate.docker"):
                     return
                 expr.status = ExprStatus.Starting
                 db_adapter.commit()
@@ -408,7 +444,7 @@ class ExprManager(object):
                 self.__roll_back(expr.id)
                 return {"error": "Failed starting containers"}, 500
         else:
-            if curr_num >= safe_get_config("pre_allocate.azure", 1):
+            if curr_num != 0 and curr_num >= get_config("pre_allocate.azure"):
                 return
             expr.status = ExprStatus.Starting
             db_adapter.commit()
@@ -577,7 +613,7 @@ def open_check_expr():
 
 def check_default_expr():
     # todo only pre-allocate env for those needed. It should configured in table hackathon
-    templates = db_adapter.find_all_objects_order_by(Template, hackathon_id=2)
+    templates = db_adapter.find_all_objects_order_by(Template, hackathon_name="win10-")
     total_azure = safe_get_config("pre_allocate.azure", 1)
     total_docker = safe_get_config("pre_allocate.docker", 1)
     for template in templates:

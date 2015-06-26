@@ -2,19 +2,19 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
-#  
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#  
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-#  
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -27,7 +27,7 @@
 import sys
 
 sys.path.append("..")
-from hackathon.database.models import Hackathon, User, UserEmail, Register
+from hackathon.database.models import Hackathon, User, UserEmail, Register, WindowsTenStat
 from hackathon.database import db_adapter
 
 
@@ -62,6 +62,38 @@ class HackathonManager():
         if name is not None:
             return db_adapter.find_first_object_by(Hackathon, name=name).json()
         return map(lambda u: u.json(), db_adapter.find_all_objects(Hackathon))
+
+    # --------------------temp methods for win10 preview-----------------------
+    def __increase_win10_stat(self, key, increment=1):
+        if increment <= 0:
+            increment = 1
+
+        stat = self.db.find_first_object(WindowsTenStat)
+        if stat is None:
+            stat = WindowsTenStat()
+            setattr(stat, key, increment)
+            self.db.add_object(stat)
+        else:
+            old_value = getattr(stat, key)
+            setattr(stat, key, old_value + increment)
+            self.db.commit()
+
+    def increase_win10_willing_count(self, increment=1):
+        self.__increase_win10_stat("willing_count", increment)
+
+    def increase_win10_trial_count(self, increment=1):
+        self.__increase_win10_stat("trial_count", increment)
+
+    def increase_win10_download_count(self, increment=1):
+        self.__increase_win10_stat("download_count", increment)
+
+    def get_win10_stat(self):
+        stat = self.db.find_first_object(WindowsTenStat)
+        if not stat:
+            stat = WindowsTenStat()
+            self.db.add_object(stat)
+
+        return stat.dic()
 
 
 hack_manager = HackathonManager(db_adapter)

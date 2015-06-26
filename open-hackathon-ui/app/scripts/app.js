@@ -136,6 +136,22 @@ angular
           }
         }
       })
+      .state('index.introduction', {
+        url: 'introduction',
+        views: {
+          'header@index': {
+            templateUrl: 'views/header.html',
+            controller: function ($scope, User) {
+              if (User) {
+                $scope.isShow = true;
+              }
+            }
+          },
+          'main@index': {
+            templateUrl: 'views/introduction.html'
+          }
+        }
+      })
     ;
   });
 
