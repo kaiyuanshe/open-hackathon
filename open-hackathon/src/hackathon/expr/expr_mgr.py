@@ -473,12 +473,10 @@ class ExprManager(Component):
     def __get_filter_condition(self, hackathon_id, **kwargs):
         condition = Experiment.hackathon_id == hackathon_id
         # check status: -1 means query all status
-        if 'status' in kwargs and kwargs['status'] != -1:
+        if kwargs['status'] != -1:
             condition = and_(condition, Experiment.status == kwargs['status'])
-        else:
-            condition = and_(condition, Experiment.status >= 0)
         # check user name
-        if "user_name" in kwargs and len(kwargs['user_name']) > 0:
+        if len(kwargs['user_name']) > 0:
             users = self.db.find_all_objects(User, User.nickname.like('%'+kwargs['user_name']+'%'))
             uids = map(lambda x: x.id, users)
             condition = and_(condition, Experiment.user_id.in_(uids))

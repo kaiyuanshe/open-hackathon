@@ -140,15 +140,17 @@ class HackathonManager(Component):
 
         return list(set(hackathon_ids))
 
-    def __get_property_from_hackathon_basic_info(self, hackathon, key):
+    def __get_property_from_hackathon_basic_info(self, hackathon, key, default=None):
         try:
             basic_info = json.loads(hackathon.basic_info)
+            if key not in basic_info:
+                return default
             value = basic_info[key]
             return value
         except Exception as e:
             self.log.error(e)
-            self.log.warn("cannot get %s from basic info for hackathon %d, will return None" % (key, hackathon.id))
-            return None
+            self.log.warn("cannot get %s from basic info for hackathon %d, will return default value" % (key, hackathon.id))
+            return default
 
     def validate_admin_privilege_http(self):
         return self.validate_admin_privilege(g.user.id, g.hackathon.id)
