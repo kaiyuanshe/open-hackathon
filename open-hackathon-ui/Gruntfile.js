@@ -465,4 +465,11 @@ module.exports = function(grunt) {
         'test',
         'build'
     ]);
+    grunt.registerTask('buildcss', [
+      'clean:dist',
+      'wiredep',
+      'useminPrepare',
+      'concurrent:dist',
+      'autoprefixer'
+    ]);
 };
