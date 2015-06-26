@@ -1,0 +1,21 @@
+<div class="error-container" style="display:block">
+  <div class="error-body">
+    <div class="header">
+      <div class="error">
+        <span class="code"></span>
+        <span class="message" style="font-size:36pt;">对不起，您还未注册本次黑客松！</span>
+      </div>
+    </div>
+    <div class="more-details">
+      <div class="error-info">
+        <div class="more-info form-group" style="font-size:24pt">请到如下网站注册 (等待 <countdown link="https://campaign.gitcafe.com/openxml-hackathon2015" ng-bind="second" second="5"></countdown> 秒后自动跳转)
+          ...
+        </div>
+        <div class="text-center">
+          <a href="https://campaign.gitcafe.com/openxml-hackathon2015" class="btn btn-lg btn-info">立即去报名</a>
+          <a ui-sref="index" ng-click="stopCountdown()" class="btn btn-lg btn-info">返回首页</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
