@@ -22,21 +22,10 @@
  * THE SOFTWARE.
  */
 
- ;
+
 (function($, oh) {
 
-//    var isupdate = false;
-//
-//    function toggleTable(){
-//        if($('#adminlisttable').css('display') == 'none' ){
-//            $('#adminlisttable').show();
-//            $('#adminform').hide()
-//        }else{
-//            $('#adminlisttable').hide();
-//            $('#adminform').show()
-//        }
-//    }
-//
+
     //get form-data for submit
     function getFilterData(){
         var Data = {
@@ -126,7 +115,7 @@
         });
     }
 
-    // initial submit button events
+    // initial query button events
     function forminit(){
         var filter = $('#expr_list_filter');
         filter.bootstrapValidator().on('success.form.bv', function(e) {

@@ -276,7 +276,6 @@ class HostedDockerFormation(DockerFormationBase, Component):
 
     def ensure_images(self):
         hackathons = self.hackathon_manager.get_online_hackathons()
-        # TODO check hackathon VirtualEvironment provider is docker
         map(lambda h: self.__ensure_images_for_hackathon(h), hackathons)
 
     # --------------------------------------------- helper function ---------------------------------------------#

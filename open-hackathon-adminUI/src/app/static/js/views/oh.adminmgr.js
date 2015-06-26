@@ -22,7 +22,6 @@
  * THE SOFTWARE.
  */
 
- ;
 (function($, oh) {
 
     var isupdate = false;

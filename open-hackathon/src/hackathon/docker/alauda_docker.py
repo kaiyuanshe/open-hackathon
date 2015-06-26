@@ -120,6 +120,7 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
             service = self.__query_service(context.service_name)
             self.__service_result_handler(service, context)
         except AlaudaException as ae:
+            self.log.error(ae)
             self.log.debug(
                 "error in query alauda service '%s', will query again 10 seconds later" % context.service_name)
             self.__service_failed_handler(context)
