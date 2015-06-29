@@ -77,6 +77,7 @@ from sqlalchemy import (
 )
 
 from datetime import timedelta
+from hackathon.constants import CLOUD_ECLIPSE
 
 
 class ExprManager(Component):
@@ -321,8 +322,8 @@ class ExprManager(Component):
         }
         if expr.status != EStatus.Running:
             return ret
-        # return guacamole link to frontend
-        guacamole_servers = []
+        # return remote clients include guacamole and cloudEclipse
+        remote_servers = []
         for ve in expr.virtual_environments.all():
             if ve.remote_provider == VERemoteProvider.Guacamole:
                 try:
@@ -332,15 +333,23 @@ class ExprManager(Component):
                     # http://localhost:8080/guacamole/#/client/c/{name}?name={name}&oh={token}
                     name = guacamole_config["name"]
                     url = guacamole_host + '/guacamole/#/client/c/%s?name=%s' % (name, name)
-                    guacamole_servers.append({
+                    remote_servers.append({
                         "name": guacamole_config["displayname"],
                         "url": url
                     })
+                    # cloud eclipse
+                    cloud_eclipse_url = self.__get_cloud_eclipse_url(expr)
+                    if cloud_eclipse_url is not None:
+                        remote_servers.append({
+                            "name": CLOUD_ECLIPSE.CLOUD_ECLIPSE,
+                            "url": cloud_eclipse_url
+                        })
+
                 except Exception as e:
                     self.log.error(e)
 
         if expr.status == EStatus.Running:
-            ret["remote_servers"] = guacamole_servers
+            ret["remote_servers"] = remote_servers
         # return public accessible web url
         public_urls = []
         if expr.template.provider == VEProvider.Docker:
@@ -481,3 +490,16 @@ class ExprManager(Component):
             uids = map(lambda x: x.id, users)
             condition = and_(condition, Experiment.user_id.in_(uids))
         return condition
+
+    def __get_cloud_eclipse_url(self,experiment):
+        reg = self.register_manager.get_registration_by_user_and_hackathon(experiment.user_id, experiment.hackathon_id)
+        if reg is None:
+            return None
+        if reg.git_project is None :
+            return None
+        # http://www.idehub.cn/api/ide/18?git=http://git.idehub.cn/root/test-c.git&user=root&from=hostname(frontend)
+        api = self.util.safe_get_config("%s.api" % CLOUD_ECLIPSE.CLOUD_ECLIPSE, "http://www.idehub.cn/api/ide")
+        openId = experiment.user.openid
+        url = "%s/%d?git=%s&user=%s&from=" % (api, experiment.id, reg.git_project, openId)
+        self.log.debug("cloud eclipse url : %s") % url
+        return url
