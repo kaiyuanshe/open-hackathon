@@ -144,7 +144,8 @@ Config = {
                     "": ["get", "post", "delete", "put"],
                 },
                 "experiment": {
-                    "": ["post"]
+                    "list": ["get"],
+                    "": ["post", "put"]
                 }
             }
         }

@@ -218,11 +218,12 @@ class TemplateManager(Component):
 
     def pull_images_for_hackathon(self, context):
         hackathon_id = context.hackathon_id
-        # get expected images on hackathon
+        # get templates which ve is provided by docker
         templates = self.db.find_all_objects_by(Template,
                                                 hackathon_id=hackathon_id,
                                                 provider=VEProvider.Docker,
                                                 status=TEMPLATE_STATUS.CREATED)
+        # get expected images on hackathons' templates
         images = map(lambda x: self.__get_images_from_template(x), templates)
         expected_images = flatten(images)
         self.log.debug('expected images: %s on hackathon: %s' % (expected_images, hackathon_id))
@@ -238,7 +239,7 @@ class TemplateManager(Component):
                 context = Context(image=image,
                                   tag=tag,
                                   docker_host=docker_host)
-                # todo docker pull for hosted docker only
+                # todo docker pull for hosted docker only : Done
                 self.scheduler.add_once(feature="docker",
                                         method="pull_image",
                                         context=context,

@@ -48,6 +48,7 @@ from hackathon.database.models import (
     Experiment,
     Hackathon,
     Template,
+    User
 )
 
 from hackathon.azureformation.azureFormation import (
@@ -80,6 +81,7 @@ from datetime import timedelta
 
 class ExprManager(Component):
     register_manager = RequiredFeature("register_manager")
+    user_manager = RequiredFeature("user_manager")
     hackathon_manager = RequiredFeature("hackathon_manager")
     template_manager = RequiredFeature("template_manager")
     docker = RequiredFeature("docker")
@@ -134,16 +136,17 @@ class ExprManager(Component):
         expr = self.db.find_first_object_by(Experiment, id=expr_id, status=EStatus.Running)
         if expr is not None:
             # Docker
+            docker = self.docker.get_docker(expr.hackathon)
             if expr.template.provider == VEProvider.Docker:
                 # stop containers
                 for c in expr.virtual_environments.all():
                     try:
                         self.log.debug("begin to stop %s" % c.name)
                         if force:
-                            self.docker.delete(c.name, virtual_environment=c, container=c.container, expr_id=expr_id)
+                            docker.delete(c.name, virtual_environment=c, container=c.container, expr_id=expr_id)
                             c.status = VEStatus.Deleted
                         else:
-                            self.docker.stop(c.name, virtual_environment=c, container=c.container, expr_id=expr_id)
+                            docker.stop(c.name, virtual_environment=c, container=c.container, expr_id=expr_id)
                             c.status = VEStatus.Stopped
                     except Exception as e:
                         self.log.error(e)
@@ -157,7 +160,8 @@ class ExprManager(Component):
             else:
                 try:
                     # todo support delete azure vm
-                    af = AzureFormation(self.docker.__load_azure_key_id(expr_id))
+                    hosted_docker = RequiredFeature("hosted_docker")
+                    af = AzureFormation(hosted_docker.load_azure_key_id(expr_id))
                     af.stop(expr_id, AVMStatus.STOPPED_DEALLOCATED)
                 except Exception as e:
                     self.log.error(e)
@@ -177,7 +181,13 @@ class ExprManager(Component):
 
     def get_expr_list_by_user_id(self, user_id):
         return map(lambda u: u.dic(),
-                   self.db.find_all_objects(Experiment, and_(Experiment.user_id == user_id, Experiment.status < 5)))
+                   self.db.find_all_objects(Experiment, and_(Experiment.user_id == user_id,
+                                                             Experiment.status < 5)))
+
+    def get_expr_list_by_hackathon_id(self, hackathon_id, **kwargs):
+        condition = self.__get_filter_condition(hackathon_id, **kwargs)
+        expers = self.db.find_all_objects(Experiment, condition)
+        return map(lambda u: self.__get_expr_with_user_info(u), expers)
 
     def recycle_expr(self):
         """
@@ -380,11 +390,12 @@ class ExprManager(Component):
                                 experiment=expr)
         self.db.add_object(ve)
 
-        # start container remotely
-        container_ret = self.docker.start(docker_template_unit,
-                                          hackathon=hackathon,
-                                          virtual_environment=ve,
-                                          experiment=expr)
+        # start container remotely , use hosted docker or alauda docker
+        docker = self.docker.get_docker(hackathon)
+        container_ret = docker.start(docker_template_unit,
+                                     hackathon=hackathon,
+                                     virtual_environment=ve,
+                                     experiment=expr)
         if container_ret is None:
             self.log.error("container %s fail to run" % new_name)
             raise Exception("container_ret is none")
@@ -454,3 +465,19 @@ class ExprManager(Component):
 
             # --------------------------------------------- helper function ---------------------------------------------#
 
+    def __get_expr_with_user_info(self, experiment):
+        info = experiment.dic()
+        info['user_info'] = self.user_manager.user_display_info(experiment.user)
+        return info
+
+    def __get_filter_condition(self, hackathon_id, **kwargs):
+        condition = Experiment.hackathon_id == hackathon_id
+        # check status: -1 means query all status
+        if kwargs['status'] != -1:
+            condition = and_(condition, Experiment.status == kwargs['status'])
+        # check user name
+        if len(kwargs['user_name']) > 0:
+            users = self.db.find_all_objects(User, User.nickname.like('%'+kwargs['user_name']+'%'))
+            uids = map(lambda x: x.id, users)
+            condition = and_(condition, Experiment.user_id.in_(uids))
+        return condition
