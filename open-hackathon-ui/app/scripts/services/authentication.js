@@ -42,7 +42,7 @@ angular.module('oh.app')
     function getUser() {
       token = $cookies.get('token') || '';
       if (!authenticatedUser && token.length > 0) {
-        authenticatedUser = JSON.parse($cookies.get('User'));
+        authenticatedUser = JSON.parse($cookies.get('User')||'{}');
         //API.user.get().then(function (res) {
         //  if (!res.data.error) {
         //    authenticatedUser = res.data;

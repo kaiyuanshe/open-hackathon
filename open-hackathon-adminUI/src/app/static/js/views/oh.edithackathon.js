@@ -95,6 +95,7 @@
                 locale:oh.daterangepickerLocale
             });
         $('#auto_approve').attr({checked:data.basic_info.auto_approve || false});
+        $('#alauda_enabled').attr({checked:data.basic_info.alauda_enabled || false});
         $('#markdownEdit').val(data.description);
         basic_info = data.basic_info;
         hackathonID = data.id;
@@ -144,6 +145,7 @@
                 max_enrollment:$('#max_enrollment').val(),
                 wall_time:'',
                 auto_approve:$('#auto_approve').is(':checked'),
+                alauda_enabled:$('#alauda_enabled').is(':checked'),
                 recycle_enabled:false,
                 organizers: basic_info.organizers
             }

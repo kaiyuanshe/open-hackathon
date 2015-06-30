@@ -192,6 +192,7 @@ class UserHackathonRel(DBBase):
     description = Column(String(200))
     status = Column(Integer)  # 0: havn't audit 1: audit passed 2:audit reject
     deleted = Column(Integer, default=0)  # 0:false  1-true
+    git_project = Column(String(200))  # git project url
 
     user = relationship('User', backref=backref('registers', lazy='dynamic'))
 
