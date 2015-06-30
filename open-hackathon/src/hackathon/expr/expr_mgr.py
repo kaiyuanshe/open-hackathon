@@ -378,7 +378,7 @@ class ExprManager(Component):
         hackathon = self.db.find_first_object_by(Hackathon, name=hackathon_name)
         if hackathon is None:
             return None
-        template = self.db.find_first_object_by(Template, hackathon=hackathon, name=template_name)
+        template = self.db.find_first_object_by(Template, hackathon_id=hackathon.id, name=template_name)
         if template is None or self.template_manager.load_template(template) is None:
             return None
         return [hackathon, template]
@@ -501,5 +501,5 @@ class ExprManager(Component):
         api = self.util.safe_get_config("%s.api" % CLOUD_ECLIPSE.CLOUD_ECLIPSE, "http://www.idehub.cn/api/ide")
         openId = experiment.user.openid
         url = "%s/%d?git=%s&user=%s&from=" % (api, experiment.id, reg.git_project, openId)
-        self.log.debug("cloud eclipse url : %s") % url
+        self.log.debug("cloud eclipse url : %s" % url)
         return url

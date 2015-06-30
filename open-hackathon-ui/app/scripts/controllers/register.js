@@ -113,7 +113,8 @@ angular.module('oh.controllers')
         API.user.registration.post({
           body: {
             hackathon_id: $scope.hackathon.id,
-            team_name: register.team_name
+            team_name: register.team_name,
+            git_project: register.code_hosting_address
           },
           header: {hackathon_name: hackathon_name}
         }).then(function (res) {
