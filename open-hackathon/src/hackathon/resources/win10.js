@@ -8,7 +8,7 @@
         "location" : "China East",
         "url_base" : "blob.core.chinacloudapi.cn"
     },
-    "container" : "vhds",
+    "container" : "otvhds",
     "cloud_service" : {
         "service_name" : "open-tech-service",
         "label" : "cloud-service-label",
@@ -26,12 +26,12 @@
             "system_config" : {
                 "os_family" : "Windows",
                 "host_name" : "hostname",
-                "user_name" : "azureUser888",
-                "user_password" : "PASSword00X"
+                "user_name" : "clouduser",
+                "user_password" : "Password01!"
             },
             "image" : {
-                "type" : "vm",
-                "name" : "openxml"
+                "type" : "os",
+                "name" : "win10-10137-pro2"
             },
             "network_config" : {
                 "configuration_set_type" : "NetworkConfiguration",

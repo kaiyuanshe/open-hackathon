@@ -130,7 +130,7 @@ class AzureVirtualMachines:
                                     deployment['deployment_name'],
                                     virtual_machine['role_name']):
                     if db_adapter.count_by(UserResource,
-                                           user_template_id=self.template.id,
+                                           template_id=self.template.id,
                                            type=VIRTUAL_MACHINE,
                                            name=virtual_machine['role_name'],
                                            cloud_service_id=cs.id) == 0:
