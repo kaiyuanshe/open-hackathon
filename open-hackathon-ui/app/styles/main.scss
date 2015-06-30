@@ -290,7 +290,6 @@ body.hackathon {
 .hackathon .footer {
   position: absolute;
   bottom: 0;
-  margin-left: 250px;
 }
 
 .hackathon .footer .container {
@@ -302,7 +301,7 @@ body.hackathon {
   padding: 0 0 0 5px;
   top: 90px;
   bottom: 60px;
-  left: 245px;
+  left: 0px;
   right: 0;
   width: auto;
   height: auto;
@@ -310,6 +309,7 @@ body.hackathon {
 }
 
 .hackathon .hackathon-nav {
+  display: none;
   position: fixed;
   width: 250px;
   left: 0px;
