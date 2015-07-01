@@ -1,6 +1,16 @@
 This document will tell you how to deploy the whole open-hackathon web application environment manually.    
 And the whole environment cotains serval components such guacamole , nginx , tomcat and the open-hackathon running Dependencies. 
 
+  * [/api/hackathon](#hackathon-operation)
+  * [/api/hackathon/list](#get-hackathon-list)
+  * [/api/hackathon/stat](#get-hackathon-statics-user-info)
+  * [/api/user/hackathon](#User-Operation-on-Hackathon)
+  * [/api/user/hackathon/list](#/api/user/hackathon/list)
+  * [/api/admin/hackathon/list](#/api/admin/hackathon/list)
+  * [/api/hackathon/checkname](#/api/hackathon/checkname)
+
+
+
 #install components
 ```shell
 sudo apt-get update && sudo apt-get upgrade
