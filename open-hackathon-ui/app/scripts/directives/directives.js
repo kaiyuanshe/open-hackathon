@@ -108,11 +108,19 @@ angular.module('oh.directives', [])
                     dockers.push({
                       purl: "",
                       name: data.remote_servers[i].name,
-                      surl: data.remote_servers[i].url + "&oh=" + $cookies.get('token')
+                      surl: data.remote_servers[i].name=='cloud_eclipse' ? data.remote_servers[i].url + window.location.origin : data.remote_servers[i].url + "&oh=" + $cookies.get('token')
                     })
                     list.push(temp.format(dockers[i]));
                   }
-                  $('.hackathon-nav').append(list.join(''))
+                   var ulrsbox = $('<div class="row"><div class="col-md-12 public-urls"></div></div>');
+                   $.each(data.public_urls,function(i,purl){
+                      var link = $('<p><a href="'+purl.url+'" target="_blank">'+purl.name+'<a></p>');
+                      ulrsbox.find('.public-urls').append(link);
+                   });
+
+                  $('.hackathon-nav')
+                  .append(ulrsbox)
+                  .append(list.join(''))
                   bindTemp(data);
                   $('.hackathon-nav a.vm-box:eq(0)').trigger('click');
                   $interval.cancel(stop);

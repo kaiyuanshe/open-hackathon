@@ -99,5 +99,8 @@ Config = {
             "namespace": "junbo",
             "endpoint": "https://api.alauda.cn"
         }
+    },
+    "cloud_eclipse":{
+        "api" : "http://www.idehub.cn/api/ide"
     }
 }

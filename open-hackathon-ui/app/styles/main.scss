@@ -292,7 +292,7 @@ body.hackathon {
 .hackathon .footer {
   position: absolute;
   bottom: 0;
-  margin-left: 250px;
+  margin-left: 200px;
 }
 
 .hackathon .footer .container {
@@ -304,7 +304,7 @@ body.hackathon {
   padding: 0 0 0 5px;
   top: 90px;
   bottom: 60px;
-  left: 245px;
+  left: 195px;
   right: 0;
   width: auto;
   height: auto;
@@ -313,7 +313,7 @@ body.hackathon {
 
 .hackathon .hackathon-nav {
   position: fixed;
-  width: 250px;
+  width: 200px;
   left: 0px;
   bottom: 0px;
   top: 90px;
@@ -332,11 +332,11 @@ body.hackathon {
 
 .hackathon .vm-box {
   display: inline-block;
-  height: 150px;
-  width: 150px;
+  height: 100px;
+  width: 100px;
   background: #525252;
   vertical-align: middle;
-  padding-top: 25px;
+  padding: 10px;
   margin-top: 20px;
   position: relative;
 }
@@ -346,7 +346,7 @@ body.hackathon {
 }
 
 .hackathon .vm-box img {
-  height: 100px;
+  height: 100%;
 }
 
 .hackathon .center {
