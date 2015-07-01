@@ -1,7 +1,7 @@
 This document will tell you how to deploy the whole open-hackathon web application environment manually.    
 And the whole environment cotains serval components such guacamole , nginx , tomcat and the open-hackathon running Dependencies. 
 
-  * [/api/hackathon](#hackathon-operation)
+  * [install system components](#install-system-components)
   * [/api/hackathon/list](#get-hackathon-list)
   * [/api/hackathon/stat](#get-hackathon-statics-user-info)
   * [/api/user/hackathon](#User-Operation-on-Hackathon)
@@ -11,7 +11,7 @@ And the whole environment cotains serval components such guacamole , nginx , tom
 
 
 
-#install components
+#install system components
 ```shell
 sudo apt-get update && sudo apt-get upgrade
 sudo apt-get install build-essential python python-dev python-setuptools libmysqlclient-dev
