@@ -2,7 +2,7 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
 #  
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -34,12 +34,30 @@ from azureImpl import *
 from hackathon.functions import *
 from hackathon.enum import *
 from hackathon.hack import hack_manager
+from datetime import timedelta, datetime
+from hackathon.scheduler import scheduler
+from hackathon.database.models import Experiment
 
 
 def set_expr_status(e_id, status):
     expr = db_adapter.get_object(Experiment, e_id)
     expr.status = status
     db_adapter.commit()
+
+
+def auto_assign_expr_to_admin(experiment_id):
+    exec_time = datetime.now() + timedelta(hours=1)
+    scheduler.add_job(assign_expr_to_admin, 'auto_assign', run_date=exec_time, args=[experiment_id])
+
+
+def assign_expr_to_admin(experiment_id):
+    try:
+        experiment = db_adapter.find_first_object_by(Experiment, id=experiment_id)
+        if experiment is None:
+            return None
+        db_adapter.update_object(experiment, user_id=ReservedUser.DefaultUserID)
+    except Exception as e:
+        log.error(e)
 
 
 if __name__ == "__main__":
@@ -65,3 +83,6 @@ if __name__ == "__main__":
         sys.exit(-1)
     set_expr_status(expr_id, ExprStatus.Running)
     hack_manager.increase_win10_trial_count()
+
+    # auto assign expr to admin
+    auto_assign_expr_to_admin(expr_id)
