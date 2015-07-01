@@ -55,7 +55,7 @@ def assign_expr_to_admin(experiment_id):
         experiment = db_adapter.find_first_object_by(Experiment, id=experiment_id)
         if experiment is None:
             return None
-        db_adapter.update_object(experiment, user_id=-1)
+        db_adapter.update_object(experiment, user_id=ReservedUser.DefaultUserID)
     except Exception as e:
         log.error(e)
 
