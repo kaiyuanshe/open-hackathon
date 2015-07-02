@@ -40,6 +40,7 @@ from subprocess import Popen
 from hackathon.scheduler import scheduler
 from datetime import timedelta
 import uuid
+from hackathon.azureCreateAsync import auto_assign_expr_to_admin
 
 docker = OssDocker()
 
@@ -381,6 +382,9 @@ class ExprManager(object):
             # add a job to start new pre-allocate experiment
             alarm_time = datetime.now() + timedelta(seconds=1)
             scheduler.add_job(check_default_expr, 'date', next_run_time=alarm_time)
+
+            # add a job : auto assign expr to -1 user
+            auto_assign_expr_to_admin(expr.id)
             return expr
 
     def start_expr(self, hackathon_name, template_name, user_id):
