@@ -107,6 +107,7 @@ angular.module('oh.directives', [])
                   for (var i in data.remote_servers) {
                     dockers.push({
                       purl: "",
+                      imgUrl: data.remote_servers[i].name=='cloud_eclipse' ? '/images/idehub.png': '/images/dseries.png',
                       name: data.remote_servers[i].name,
                       surl: data.remote_servers[i].name=='cloud_eclipse' ? data.remote_servers[i].url + window.location.origin : data.remote_servers[i].url + "&oh=" + $cookies.get('token')
                     })
