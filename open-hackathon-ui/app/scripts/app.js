@@ -242,6 +242,7 @@ angular
       });
   })
   .run(function ($rootScope, Authentication, $stateParams, $log) {
+    $rootScope.config = config;
     $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams) {
       var user = Authentication.getUser();
       if (user) {
