@@ -345,4 +345,39 @@ angular.module('oh.directives', [])
         };
       }
     }
-  });
+  })
+  .directive('ohResizebgimage', function () {
+
+    var image_ratio = 1.3148148148148149;
+
+    function scale() {
+      var e = $(window).width() - 400,
+        f = $(window).height(),
+        i = e,
+        t = Math.round(i / image_ratio),
+        css = {width: i, height: t};
+      if (t < f && (t = f, i = Math.round(t * image_ratio))) {
+        css.width = i;
+        css.height = t;
+      }
+
+      return css;
+
+
+    }
+
+    return {
+      restrict: 'A',
+      link: function (scope, element, attr) {
+        var imgWidth = 0, imgHeight = 0;
+        $(element).load(function () {
+          $(window).trigger('resize');
+        })
+        $(window).resize(function () {
+
+          element.css(scale());
+        });
+      }
+    }
+  })
+;
