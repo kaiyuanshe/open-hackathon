@@ -2,12 +2,13 @@ This document will tell you how to deploy the whole open-hackathon web applicati
 And the whole environment cotains serval components such guacamole , nginx , tomcat and the open-hackathon running Dependencies. 
 
   * [setup system components](#install-system-components)
-  * [setup Docker Env](#get-hackathon-list)
-  * [setup Guacamole Env](#get-hackathon-statics-user-info)
-  * [setup MysqlDB Env](#/api/admin/hackathon/list)
-  * [setup server api Env](#User-Operation-on-Hackathon)
-  * [setup frontend website Env](#/api/user/hackathon/list)
-  * [QA](#/api/hackathon/checkname)
+  * [setup Docker Env](#setup-Docker-Env)
+  * [setup Guacamole Env](#setup-Guacamole-Env)
+  * [get src from GitHub](#get-src-from-GitHub)
+  * [setup MysqlDB Env](#setup-MysqlDB-Env)
+  * [setup server api Env](#setup-server-api-Env)
+  * [setup frontend website Env](#setup-frontend-website-Env)
+  * [QA](#QA)
 
 
 
