@@ -117,7 +117,7 @@ angular
     $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|skype):/);
     $locationProvider.html5Mode(false);
     $locationProvider.hashPrefix('!');
-    $urlRouterProvider.otherwise('/home');
+    $urlRouterProvider.otherwise('/');
     $stateProvider
       .state('index', {
         url: '/',
@@ -129,8 +129,8 @@ angular
             templateUrl: 'views/header.html'
           },
           'main@index': {
-            templateUrl: 'views/main.html',
-            controller: 'main.controller'
+            templateUrl: 'views/home.html',
+            controller: 'oh.home.controller'
           },
           'footer@index': {
             templateUrl: 'views/footer.html'
@@ -195,15 +195,6 @@ angular
           }
         }
       })
-      .state('index.home', {
-        url: 'home',
-        views: {
-          'main@index': {
-            templateUrl: 'views/home.html',
-            controller: 'oh.home.controller'
-          }
-        }
-      })
       .state('error', {
         url: '/error',
         views: {
@@ -221,6 +212,15 @@ angular
         views: {
           '': {
             templateUrl: 'views/expired.html'
+          }
+        }
+      })
+      .state('login', {
+        url: '/login',
+        views: {
+          '': {
+            templateUrl: 'views/login.html',
+            controller: 'login.controller'
           }
         }
       })
@@ -242,6 +242,7 @@ angular
       });
   })
   .run(function ($rootScope, Authentication, $stateParams, $log) {
+    $rootScope.config = config;
     $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams) {
       var user = Authentication.getUser();
       if (user) {
