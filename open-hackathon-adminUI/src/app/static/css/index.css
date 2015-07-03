@@ -60,7 +60,7 @@ body:after{
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
-.btn-live:hover
+.btn-live:hover,
 .btn-github:hover,
 .btn-qq:hover,
 .btn-weibo:hover {

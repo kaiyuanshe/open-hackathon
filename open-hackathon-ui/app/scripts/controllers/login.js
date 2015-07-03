@@ -27,33 +27,53 @@
  * @namespace oh.controllers
  * @author <ifendoe@gmail.com>
  * @version 0.0.1
- * Created by Boli Guan on 15-4-15.
+ * Created by Boli Guan on 15-3-10.
  */
-angular.module('oh.controllers')
-  .controller('userprofile.controller', function ($scope, $stateParams,$cookies, state, Authentication, API) {
-    var user = Authentication.getUser();
-    if (!user) {
-      state.go('index');
-    }
-    $scope.user = user;
-    var isProfile = false
-    API.user.profile.get().then(function (res) {
-      if (!res.data.error) {
-        $scope.profile = res.data;
-        isProfile = true;
-      }
-    })
 
-    var def = undefined;
-    $scope.submit = function () {
-      if (isProfile) {
-        def = API.user.profile.put({body: $scope.profile});
-      } else {
-        def = API.user.profile.post({body: $scope.profile});
-      }
-      def.then(function (res) {
-        var hackathon_name = $cookies.get('redirectHakathonName');
-        state.go('index.register', {hackathon_name: hackathon_name})
-      })
-    }
-  })
+/**
+ * @ngdoc function
+ * @name oh.controllers:login.controller
+ * @description
+ * # main.controller
+ * Controller of the login.controller
+ */
+var s = angular.module('oh.controllers', []);
+s.controller('login.controller', function ($scope) {
+
+  function openWindow(url, width) {
+//    width = width || 600;
+//    var l, t;
+//    l = (screen.width - width ) / 2;
+//    t = (screen.height - 400) / 2;
+//    window.open(url, '_blank', 'toolbar=no, directories=no, status=yes,location=no, menubar=no, width=' + width + ', height=500, top=' + t + ', left=' + l);
+    window.location.href = url
+  }
+
+  $scope.githublogin = function () {
+    var url = config.social.github +
+      $.param(config.sociallogin.github);
+    openWindow(url);
+  };
+  $scope.qqlogin = function () {
+    var url = config.social.qq +
+      $.param(config.sociallogin.qq);
+    openWindow(url);
+  };
+  $scope.gitcafelogin = function () {
+    var url = config.social.gitcafe +
+      $.param(config.sociallogin.gitcafe);
+    openWindow(url, 980);
+  };
+  $scope.livelogin = function () {
+    var url = config.social.live +
+      $.param(config.sociallogin.live);
+    openWindow(url, 980);
+  };
+  $scope.weibologin = function () {
+    var url = config.social.weibo +
+      $.param(config.sociallogin.weibo);
+    openWindow(url);
+  }
+});
+
+

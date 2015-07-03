@@ -48,6 +48,7 @@ from hackathon.database.models import (
     Experiment,
     Hackathon,
     Template,
+    User
 )
 
 from hackathon.azureformation.azureFormation import (
@@ -76,10 +77,12 @@ from sqlalchemy import (
 )
 
 from datetime import timedelta
+from hackathon.constants import CLOUD_ECLIPSE
 
 
 class ExprManager(Component):
     register_manager = RequiredFeature("register_manager")
+    user_manager = RequiredFeature("user_manager")
     hackathon_manager = RequiredFeature("hackathon_manager")
     template_manager = RequiredFeature("template_manager")
     docker = RequiredFeature("docker")
@@ -134,16 +137,17 @@ class ExprManager(Component):
         expr = self.db.find_first_object_by(Experiment, id=expr_id, status=EStatus.Running)
         if expr is not None:
             # Docker
+            docker = self.docker.get_docker(expr.hackathon)
             if expr.template.provider == VEProvider.Docker:
                 # stop containers
                 for c in expr.virtual_environments.all():
                     try:
                         self.log.debug("begin to stop %s" % c.name)
                         if force:
-                            self.docker.delete(c.name, virtual_environment=c, container=c.container, expr_id=expr_id)
+                            docker.delete(c.name, virtual_environment=c, container=c.container, expr_id=expr_id)
                             c.status = VEStatus.Deleted
                         else:
-                            self.docker.stop(c.name, virtual_environment=c, container=c.container, expr_id=expr_id)
+                            docker.stop(c.name, virtual_environment=c, container=c.container, expr_id=expr_id)
                             c.status = VEStatus.Stopped
                     except Exception as e:
                         self.log.error(e)
@@ -157,7 +161,8 @@ class ExprManager(Component):
             else:
                 try:
                     # todo support delete azure vm
-                    af = AzureFormation(self.docker.__load_azure_key_id(expr_id))
+                    hosted_docker = RequiredFeature("hosted_docker")
+                    af = AzureFormation(hosted_docker.load_azure_key_id(expr_id))
                     af.stop(expr_id, AVMStatus.STOPPED_DEALLOCATED)
                 except Exception as e:
                     self.log.error(e)
@@ -177,7 +182,13 @@ class ExprManager(Component):
 
     def get_expr_list_by_user_id(self, user_id):
         return map(lambda u: u.dic(),
-                   self.db.find_all_objects(Experiment, and_(Experiment.user_id == user_id, Experiment.status < 5)))
+                   self.db.find_all_objects(Experiment, and_(Experiment.user_id == user_id,
+                                                             Experiment.status < 5)))
+
+    def get_expr_list_by_hackathon_id(self, hackathon_id, **kwargs):
+        condition = self.__get_filter_condition(hackathon_id, **kwargs)
+        expers = self.db.find_all_objects(Experiment, condition)
+        return map(lambda u: self.__get_expr_with_user_info(u), expers)
 
     def recycle_expr(self):
         """
@@ -311,8 +322,8 @@ class ExprManager(Component):
         }
         if expr.status != EStatus.Running:
             return ret
-        # return guacamole link to frontend
-        guacamole_servers = []
+        # return remote clients include guacamole and cloudEclipse
+        remote_servers = []
         for ve in expr.virtual_environments.all():
             if ve.remote_provider == VERemoteProvider.Guacamole:
                 try:
@@ -322,15 +333,23 @@ class ExprManager(Component):
                     # http://localhost:8080/guacamole/#/client/c/{name}?name={name}&oh={token}
                     name = guacamole_config["name"]
                     url = guacamole_host + '/guacamole/#/client/c/%s?name=%s' % (name, name)
-                    guacamole_servers.append({
+                    remote_servers.append({
                         "name": guacamole_config["displayname"],
                         "url": url
                     })
+                    # cloud eclipse
+                    cloud_eclipse_url = self.__get_cloud_eclipse_url(expr)
+                    if cloud_eclipse_url is not None:
+                        remote_servers.append({
+                            "name": CLOUD_ECLIPSE.CLOUD_ECLIPSE,
+                            "url": cloud_eclipse_url
+                        })
+
                 except Exception as e:
                     self.log.error(e)
 
         if expr.status == EStatus.Running:
-            ret["remote_servers"] = guacamole_servers
+            ret["remote_servers"] = remote_servers
         # return public accessible web url
         public_urls = []
         if expr.template.provider == VEProvider.Docker:
@@ -359,7 +378,7 @@ class ExprManager(Component):
         hackathon = self.db.find_first_object_by(Hackathon, name=hackathon_name)
         if hackathon is None:
             return None
-        template = self.db.find_first_object_by(Template, hackathon=hackathon, name=template_name)
+        template = self.db.find_first_object_by(Template, hackathon_id=hackathon.id, name=template_name)
         if template is None or self.template_manager.load_template(template) is None:
             return None
         return [hackathon, template]
@@ -380,11 +399,12 @@ class ExprManager(Component):
                                 experiment=expr)
         self.db.add_object(ve)
 
-        # start container remotely
-        container_ret = self.docker.start(docker_template_unit,
-                                          hackathon=hackathon,
-                                          virtual_environment=ve,
-                                          experiment=expr)
+        # start container remotely , use hosted docker or alauda docker
+        docker = self.docker.get_docker(hackathon)
+        container_ret = docker.start(docker_template_unit,
+                                     hackathon=hackathon,
+                                     virtual_environment=ve,
+                                     experiment=expr)
         if container_ret is None:
             self.log.error("container %s fail to run" % new_name)
             raise Exception("container_ret is none")
@@ -454,3 +474,32 @@ class ExprManager(Component):
 
             # --------------------------------------------- helper function ---------------------------------------------#
 
+    def __get_expr_with_user_info(self, experiment):
+        info = experiment.dic()
+        info['user_info'] = self.user_manager.user_display_info(experiment.user)
+        return info
+
+    def __get_filter_condition(self, hackathon_id, **kwargs):
+        condition = Experiment.hackathon_id == hackathon_id
+        # check status: -1 means query all status
+        if kwargs['status'] != -1:
+            condition = and_(condition, Experiment.status == kwargs['status'])
+        # check user name
+        if len(kwargs['user_name']) > 0:
+            users = self.db.find_all_objects(User, User.nickname.like('%'+kwargs['user_name']+'%'))
+            uids = map(lambda x: x.id, users)
+            condition = and_(condition, Experiment.user_id.in_(uids))
+        return condition
+
+    def __get_cloud_eclipse_url(self,experiment):
+        reg = self.register_manager.get_registration_by_user_and_hackathon(experiment.user_id, experiment.hackathon_id)
+        if reg is None:
+            return None
+        if reg.git_project is None :
+            return None
+        # http://www.idehub.cn/api/ide/18?git=http://git.idehub.cn/root/test-c.git&user=root&from=hostname(frontend)
+        api = self.util.safe_get_config("%s.api" % CLOUD_ECLIPSE.CLOUD_ECLIPSE, "http://www.idehub.cn/api/ide")
+        openId = experiment.user.openid
+        url = "%s/%d?git=%s&user=%s&from=" % (api, experiment.id, reg.git_project, openId)
+        self.log.debug("cloud eclipse url : %s" % url)
+        return url

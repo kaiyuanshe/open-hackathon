@@ -1,0 +1,111 @@
+{% extends "main.html" %} {% block style %}
+<link href="/static/css/bootstrap-editable.css" rel="stylesheet">{% endblock %} {% block body %}
+<div class="col-lg-12" loading>
+    <div class="box" style="display:none">
+        <div class="box-header">
+            <h2>
+                <i class="fa fa-home"></i>
+                环境管理
+            </h2>
+        </div>
+        <div>
+            <form class="form-horizontal" id="expr_list_filter">
+                <table>
+                    <tr>
+                        <td width="5px" height="60px"></td>
+                        <td>用户名称:</td>
+                        <td width="5px" height="60px"></td>
+                        <td width="150px" height="60px">
+                            <input type="text" class="form-control" name="expr_user_name" id="expr_user_name" data-bv-trigger="blur">
+                        </td>
+                        <td width="5px" height="60px"></td>
+                        <td> 状态:</td>
+                        <td width="5px" height="60px"></td>
+                        <td width="100px" height="60px">
+                            <select class="form-control" name="status" id="status">
+                                <option value="-1" selected="selected"> 全部</option>
+                                <option value="0"> 初始化中</option>
+                                <option value="1"> 准备中</option>
+                                <option value="2"> 运行中</option>
+                                <option value="3"> 已停止</option>
+                                <option value="4"> 已删除</option>
+                                <option value="5"> 已失败</option>
+                                <option value="6"> 回收中</option>
+                                <option value="7"> 已回收</option>
+                            </select>
+                        </td>
+                        <td width="300px" height="60px"></td>
+                        <td>
+                            <button type="submit" class="btn btn-primary"> 查询</button>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+        <div class="box-content">
+            <div id="experimentlisttable">
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>用户名称</th>
+                        <th>环境ID</th>
+                        <th>状态</th>
+                        <th>最后心跳时间</th>
+                        <th>创建时间</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="experiment_list">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock body %} {% block script %} {{ super() }}
+<div class="modal fade bs-example-modal-sm" id="confirm_reset_modal" tabindex="-1" role="dialog"
+     aria-labelledby="mySmallModalLabel" aria-hidden="true" data-api="oh.api.admin.register.delete">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">提示</h4>
+            </div>
+            <div class="modal-body">
+                <p>确定重置此环境？</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default wb-btn" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary wb-btn" data-type="ok">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script id="hackathon_experiment" type="text/x-jquery-tmpl">
+    <option value=${id}>${name}</option>
+
+</script>
+
+<script id="experiment_list_template" type="text/x-jquery-tmpl">
+    <tr>
+        <td>${user_info.nickname}</td>
+        <td>${id}</td>
+        <td>${$item.getStatus(status)}</td>
+        <td>${moment(last_heart_beat_time).format('YYYY-MM-DD HH:mm')}</td>
+        <td>${moment(create_time).format('YYYY-MM-DD HH:mm')}</td>
+        <td>
+            <a href="#" data-target="#confirm_reset_modal" data-toggle="modal" data-name="reset" data-value="reset" class="editable" data-placement="top">重置</a>
+        </td>
+    </tr>
+
+</script>
+
+<script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
+<script type="text/javascript" src="/static/js/jquery/moment.min.js"></script>
+<script type="text/javascript" src="/static/js/views/oh.experiment.js"></script>
+{% endblock %}

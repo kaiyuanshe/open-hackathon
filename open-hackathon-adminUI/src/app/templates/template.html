@@ -133,7 +133,9 @@
         <td>${name}</td>
         <td>${virtual_environment_count}</td>
         <td>${moment(create_time).format('YYYY/MM/DD HH:mm')}</td>
-        <td>${moment(update_time).format('YYYY/MM/DD HH:mm')}</td>
+        {% raw %}
+        <td>{{if update_time}}${moment(update_time).format('YYYY/MM/DD HH:mm')}{{else}} N/A {{/if}}</td>
+        {% endraw %}
         <td><a href="${azure_url}">下载</a></td>
         <td class="col-action">
             <a type="button" class="btn btn-info btn-sm" data-type="template_item_edit">

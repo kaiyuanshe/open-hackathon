@@ -74,6 +74,7 @@ import requests
 from datetime import timedelta
 
 
+
 class HostedDockerFormation(DockerFormationBase, Component):
     template_manager = RequiredFeature("template_manager")
     hackathon_manager = RequiredFeature("hackathon_manager")
@@ -275,7 +276,6 @@ class HostedDockerFormation(DockerFormationBase, Component):
 
     def ensure_images(self):
         hackathons = self.hackathon_manager.get_online_hackathons()
-        # TODO check hackathon VirtualEvironment provider is docker
         map(lambda h: self.__ensure_images_for_hackathon(h), hackathons)
 
     # --------------------------------------------- helper function ---------------------------------------------#
@@ -411,7 +411,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
 
     def __get_available_public_ports(self, expr_id, host_server, host_ports):
         self.log.debug("starting to get azure ports")
-        ep = Endpoint(Service(self.__load_azure_key_id(expr_id)))
+        ep = Endpoint(Service(self.load_azure_key_id(expr_id)))
         host_server_name = host_server.vm_name
         host_server_dns = host_server.public_dns.split('.')[0]
         public_endpoints = ep.assign_public_endpoints(host_server_dns, 'Production', host_server_name, host_ports)
@@ -421,7 +421,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
         self.log.debug("public ports : %s" % public_endpoints)
         return public_endpoints
 
-    def __load_azure_key_id(self, expr_id):
+    def load_azure_key_id(self, expr_id):
         expr = self.db.get_object(Experiment, expr_id)
         hak = self.db.find_first_object_by(HackathonAzureKey, hackathon_id=expr.hackathon_id)
         return hak.azure_key_id
@@ -512,7 +512,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
         self.log.debug("End to release ports: expr_id: %d, host_server: %r" % (expr_id, host_server))
 
     def __release_public_ports(self, expr_id, host_server, host_ports):
-        ep = Endpoint(Service(self.__load_azure_key_id(expr_id)))
+        ep = Endpoint(Service(self.load_azure_key_id(expr_id)))
         host_server_name = host_server.vm_name
         host_server_dns = host_server.public_dns.split('.')[0]
         self.log.debug("starting to release ports ... ")

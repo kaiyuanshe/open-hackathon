@@ -313,6 +313,7 @@
                 max_enrollment:$('#max_enrollment').val(),
                 wall_time:'',
                 auto_approve:$('#auto_approve').is(':checked'),
+                alauda_enabled:$('#alauda_enabled').is(':checked'),
                 recycle_enabled:false,
                 organizers: [{
                     organizer_name:$.trim($('#organizer_name').val()),
