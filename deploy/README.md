@@ -1,6 +1,9 @@
 This document will tell you how to deploy the whole open-hackathon web application environment manually.    
 And the whole environment cotains serval components such guacamole , nginx , tomcat and the open-hackathon running Dependencies. 
 * [Introduction](#Introduction)
+  * [What is OpenHackathon](#What-is-OpenHackathon)
+  * [Why-choose-OpenHackathon](#Why-choose-OpenHackathon)
+  * [Where-is-the-feature](#Where-is-the-feature)
 * [User's Guide](#User's-Guide)
 * [Developer's Guide](#Developer's-Guide)
   * [setup system components](#install-system-components)
