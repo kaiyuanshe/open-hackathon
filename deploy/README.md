@@ -1,6 +1,8 @@
 This document will tell you how to deploy the whole open-hackathon web application environment manually.    
 And the whole environment cotains serval components such guacamole , nginx , tomcat and the open-hackathon running Dependencies. 
-
+* [Introduction]
+* [User's Guide]
+* [Developer's Guide]
   * [setup system components](#install-system-components)
   * [setup Docker Env](#setup-Docker-Env)
   * [setup Guacamole Env](#setup-Guacamole-Env)
@@ -8,7 +10,7 @@ And the whole environment cotains serval components such guacamole , nginx , tom
   * [setup MysqlDB Env](#setup-MysqlDB-Env)
   * [setup server api Env](#setup-server-api-Env)
   * [setup frontend website Env](#setup-frontend-website-Env)
-  * [QA](#QA)
+* [QA](#QA)
 
 
 
