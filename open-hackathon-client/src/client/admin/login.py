@@ -28,9 +28,9 @@ __author__ = 'root'
 
 import sys
 import urllib2
-import urllib
 
 sys.path.append("..")
+
 from client.functions import get_remote, get_config, post_to_remote, convert
 from client.log import log
 import json
@@ -43,9 +43,13 @@ from client.constants import LOGIN_PROVIDER
 
 class LoginBase():
     def logout(self, admin):
+        if admin_manager.db_logout(admin):
+            info = "ok"
+        else:
+            info = "log out failed"
         session.pop("token")
         logout_user()
-        return admin_manager.db_logout(admin)
+        return info
 
 
 class QQLogin(LoginBase):
