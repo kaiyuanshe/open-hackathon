@@ -46,6 +46,7 @@ cors = CORS(app)
 from . import views
 
 
+
 ### example of scheduler
 # from scheduler import scheduler
 # from datetime import datetime, timedelta

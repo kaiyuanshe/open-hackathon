@@ -133,6 +133,3 @@ class AzureHealthCheck(HealthCheck):
                 STATUS: HEALTH_STATE.ERROR
             }
 
-
-g = GuacamoleHealthCheck()
-print g.reportHealth()
