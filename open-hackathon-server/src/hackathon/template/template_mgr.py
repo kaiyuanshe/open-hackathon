@@ -30,9 +30,6 @@ import json
 
 sys.path.append("..")
 
-from datetime import (
-    timedelta,
-)
 from compiler.ast import (
     flatten,
 )
@@ -73,6 +70,7 @@ class TemplateManager(Component):
     file_service = RequiredFeature("file_service")
     docker = RequiredFeature("docker")
     scheduler = RequiredFeature("scheduler")
+    user_manager = RequiredFeature("user_manager")
 
     templates = {}  # template in memory {template.id: template_file_stream}
 
@@ -86,8 +84,7 @@ class TemplateManager(Component):
         if hackathon is None:
             return not_found('hackathon [%s] not found' % hackathon_name)
         created_templates = self.db.find_all_objects_by(Template,
-                                                        hackathon_id=hackathon.id,
-                                                        status=TEMPLATE_STATUS.CREATED)
+                                                        hackathon_id=hackathon.id)
         data = []
         for created_template in created_templates:
             dic = created_template.dic()
@@ -141,7 +138,7 @@ class TemplateManager(Component):
                                   azure_url=azure_url,
                                   provider=args[BaseTemplate.VIRTUAL_ENVIRONMENTS_PROVIDER],
                                   creator_id=g.user.id,
-                                  status=TEMPLATE_STATUS.CREATED,
+                                  status=TEMPLATE_STATUS.OFFLINE,
                                   create_time=self.util.get_now(),
                                   update_time=self.util.get_now(),
                                   description=args[BaseTemplate.DESCRIPTION],
@@ -185,13 +182,16 @@ class TemplateManager(Component):
         self.log.debug("delete template [%d]" % id)
         try:
             template = self.db.get_object(Template, id)
-            self.db.update_object(template,
-                                  status=TEMPLATE_STATUS.DELETED,
-                                  update_time=self.util.get_now())
+            if template is None:
+                return ok("already removed")
+            # user can only delete the template which created by himself except super admin
+            if g.user.id != template.creator_id and not self.user_manager.is_super_admin(g.user):
+                return bad_request("not allowed")
+            self.db.delete_object(template)
             return ok("delete template success")
         except Exception as ex:
             self.log.error(ex)
-            return internal_server_error("delete template fail")
+            return internal_server_error("delete template failed")
 
     def load_template(self, template):
         """
@@ -286,7 +286,10 @@ class TemplateManager(Component):
             return False, bad_request("template args invalid")
         template = self.db.find_first_object_by(Template, name=args[BaseTemplate.TEMPLATE_NAME])
         if template is None:
-            return False, bad_request("template not exists")
+            return False, bad_request("template does not exist")
+        # user can only modify the template which created by himself except super admin
+        if g.user.id != template.creator_id and not self.user_manager.is_super_admin(g.user):
+            return False, bad_request("not allowed")
         return True, template
 
     def __load_template_from_memory(self, template_id):

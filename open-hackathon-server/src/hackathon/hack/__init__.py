@@ -56,7 +56,7 @@ class HackathonManager(Component):
 
     # check the admin authority on hackathon
     def validate_admin_privilege(self, user_id, hackathon_id):
-        hack_ids = self.__get_hackathon_ids_by_admin_user_id(user_id)
+        hack_ids = self.get_hackathon_ids_by_admin_user_id(user_id)
         return -1 in hack_ids or hackathon_id in hack_ids
 
     def get_hackathon_by_name_or_id(self, hack_id=None, name=None):
@@ -123,7 +123,7 @@ class HackathonManager(Component):
         return [h.dic() for h in user_hack_list]
 
     def get_permitted_hackathon_list_by_admin_user_id(self, user_id):
-        hackathon_ids = self.__get_hackathon_ids_by_admin_user_id(user_id)
+        hackathon_ids = self.get_hackathon_ids_by_admin_user_id(user_id)
         if -1 in hackathon_ids:
             hackathon_list = self.db.find_all_objects(Hackathon)
         else:
@@ -131,7 +131,7 @@ class HackathonManager(Component):
 
         return map(lambda u: u.dic(), hackathon_list)
 
-    def __get_hackathon_ids_by_admin_user_id(self, user_id):
+    def get_hackathon_ids_by_admin_user_id(self, user_id):
         # get AdminUserHackathonRels from query withn filter by email
         admin_user_hackathon_rels = self.db.find_all_objects_by(AdminHackathonRel, user_id=user_id)
 

@@ -28,9 +28,9 @@ import sys
 sys.path.append("..")
 
 from hackathon import api, RequiredFeature, Component
-from flask import g
+from flask import g, request
 from flask_restful import Resource, reqparse
-from hackathon.decorators import hackathon_name_required
+from hackathon.decorators import hackathon_name_required, token_required
 from hackathon.health import report_health
 from hackathon.database.models import Announcement
 import time
@@ -38,6 +38,7 @@ import time
 hackathon_manager = RequiredFeature("hackathon_manager")
 user_manager = RequiredFeature("user_manager")
 register_manager = RequiredFeature("register_manager")
+template_manager = RequiredFeature("template_manager")
 
 
 class HealthResource(Resource):
@@ -128,6 +129,31 @@ class InitialJobsResource(Resource):
         return start_init_job()
 
 
+class TemplateResource(Resource):
+    def get(self):
+        return template_manager.get_created_template_list(g.hackathon.name)
+
+    # create template
+    @token_required
+    def post(self):
+        args = request.get_json()
+        return template_manager.create_template(args)
+
+    # modify template
+    @token_required
+    def put(self):
+        args = request.get_json()
+        return template_manager.update_template(args)
+
+    # delete template
+    @token_required
+    def delete(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('id', type=int, location='args', required=True)
+        args = parse.parse_args()
+        return template_manager.delete_template(args['id'])
+
+
 def register_routes():
     """
     register API routes that user or admin is not required
@@ -158,3 +184,5 @@ def register_routes():
     # TODO after find a callable way , would delete this api
     api.add_resource(InitialJobsResource, "/api/test/init")
 
+    # template API
+    api.add_resource(TemplateResource, "/api/template")
