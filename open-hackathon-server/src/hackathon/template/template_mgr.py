@@ -188,6 +188,7 @@ class TemplateManager(Component):
             if g.user.id != template.creator_id and not self.user_manager.is_super_admin(g.user):
                 return bad_request("not allowed")
             self.db.delete_object(template)
+
             return ok("delete template success")
         except Exception as ex:
             self.log.error(ex)
@@ -222,7 +223,7 @@ class TemplateManager(Component):
         templates = self.db.find_all_objects_by(Template,
                                                 hackathon_id=hackathon_id,
                                                 provider=VEProvider.Docker,
-                                                status=TEMPLATE_STATUS.CREATED)
+                                                status=TEMPLATE_STATUS.ONLINE)
         # get expected images on hackathons' templates
         images = map(lambda x: self.__get_images_from_template(x), templates)
         expected_images = flatten(images)
@@ -239,8 +240,7 @@ class TemplateManager(Component):
                 context = Context(image=image,
                                   tag=tag,
                                   docker_host=docker_host)
-                # todo docker pull for hosted docker only : Done
-                self.scheduler.add_once(feature="docker",
+                self.scheduler.add_once(feature="hosted_docker",
                                         method="pull_image",
                                         context=context,
                                         seconds=3)
