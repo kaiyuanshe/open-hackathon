@@ -31,7 +31,6 @@ from app.database.models import *
 from app.log import log
 from app.database import db_adapter
 from app.constants import HTTP_HEADER
-from app.enum import EmailStatus
 from app.functions import safe_get_config, get_now
 from flask import request, g
 import uuid
@@ -52,7 +51,6 @@ class AdminManager(object):
                                expire_date=token_expire_date,
                                issue_date=token_issue_date)
         self.db.add_object(user_token)
-        self.db.commit()
         return user_token
 
     def __validate_token(self, token):
@@ -93,10 +91,10 @@ class AdminManager(object):
         try:
             self.db.update_object(admin, online=0)
             self.db.commit()
-            return "OK"
+            return True
         except Exception as e:
             log.error(e)
-            return "log out failed"
+            return False
 
     def mysql_login(self, user, pwd):
         enc_pwd = encode(pwd)
@@ -139,6 +137,7 @@ class AdminManager(object):
 
         # generate API token
         token = self.__generate_api_token(admin)
+        self.db.commit()
         return {
             "token": token,
             "admin": admin

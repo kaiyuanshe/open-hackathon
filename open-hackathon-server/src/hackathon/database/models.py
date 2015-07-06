@@ -405,21 +405,35 @@ class Template(DBBase):
     azure_url = Column(String(200))
     provider = Column(Integer, default=0)
     creator_id = Column(Integer)
-    status = Column(Integer)
+    status = Column(Integer)    # 1=Online , 0=offline
     create_time = Column(TZDateTime, default=get_now())
     update_time = Column(TZDateTime)
     description = Column(Text)
     virtual_environment_count = Column(Integer, default=0)
 
-    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
-    hackathon = relationship('Hackathon', backref=backref('templates', lazy='dynamic'))
-
     def __init__(self, **kwargs):
         super(Template, self).__init__(**kwargs)
 
 
-# ------------------------------ Tables are introduced by azure formation ------------------------------
+class HackathonTemplateRel(DBBase):
+    __tablename__ = 'hackathon_template_rel'
 
+    id = Column(Integer, primary_key=True)
+    create_time = Column(TZDateTime, default=get_now())
+    update_time = Column(TZDateTime)
+    team_id = Column(Integer)
+
+    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
+    hackathon = relationship('Hackathon', backref=backref('hackathon_template_rels', lazy='dynamic'))
+
+    template_id = Column(Integer, ForeignKey('template.id', ondelete='CASCADE'))
+    template = relationship('Template', backref=backref('hackathon_template_rels', lazy='dynamic'))
+
+    def __init__(self, **kwargs):
+        super(HackathonTemplateRel, self).__init__(**kwargs)
+
+
+# ------------------------------ Tables are introduced by azure formation ------------------------------
 
 class AzureKey(DBBase):
     """

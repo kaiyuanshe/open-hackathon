@@ -28,11 +28,8 @@ __author__ = 'root'
 
 import sys
 import urllib2
-import urllib
 
 sys.path.append("..")
-# -*- coding:utf8 -*-
-# encoding = utf-8
 from app.functions import get_remote, get_config, post_to_remote, convert
 from app.log import log
 import json
@@ -45,9 +42,13 @@ from app.constants import LOGIN_PROVIDER
 
 class LoginBase():
     def logout(self, admin):
+        if admin_manager.db_logout(admin):
+            info = "ok"
+        else:
+            info = "log out failed"
         session.pop("token")
         logout_user()
-        return admin_manager.db_logout(admin)
+        return info
 
 
 class QQLogin(LoginBase):
