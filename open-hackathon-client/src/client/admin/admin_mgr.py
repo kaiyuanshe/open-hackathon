@@ -27,11 +27,11 @@
 import sys
 
 sys.path.append("..")
+
 from client.database.models import *
 from client.log import log
 from client.database import db_adapter
 from client.constants import HTTP_HEADER
-from client.enum import EmailStatus
 from client.functions import safe_get_config, get_now
 from flask import request, g
 import uuid
@@ -93,10 +93,10 @@ class AdminManager(object):
         try:
             self.db.update_object(admin, online=0)
             self.db.commit()
-            return "OK"
+            return True
         except Exception as e:
             log.error(e)
-            return "log out failed"
+            return False
 
     def mysql_login(self, user, pwd):
         enc_pwd = encode(pwd)
