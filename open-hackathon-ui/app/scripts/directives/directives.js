@@ -1,18 +1,18 @@
 // -----------------------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-//  
+//
 // The MIT License (MIT)
-//  
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-//  
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-//  
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -35,7 +35,7 @@ angular.module('oh.directives', [])
    $templateCache.put('hackathon.html', '');
    $templateCache.get('hackathon.html');
    })*/
-  .directive('hackathonNav', function ($interval, $cookieStore,$templateCache, API) {
+  .directive('hackathonNav', function ($interval, $cookieStore, $templateCache, $state, API) {
     return {
       restrict: 'E',//'AEMC'
       templateUrl: 'views/tpls/hackathon-nav.html', //<div ng-transclude></div>
@@ -69,7 +69,7 @@ angular.module('oh.directives', [])
               ifrem.removeClass('invisible');
             } else {
               ifrem = $('<iframe>').attr({
-                src: url + "&token=" + ($cookieStore.get('User') || '').token,
+                src: url + "&oh=" + ($cookieStore.get('User') || '').token,
                 id: name,
                 width: '100%',
                 height: '100%',
@@ -82,22 +82,30 @@ angular.module('oh.directives', [])
         }
 
         var temp = $templateCache.get('hackathon-vm.html');
-        API.user.experiment.post(JSON.stringify({cid: 'windows10', hackathon: scope.config.name}), function (data) {
+        API.user.experiment.post(JSON.stringify({cid: 'win10', hackathon: scope.config.name}), function (data) {
+          if (data.error) {
+            $state.go('lineup');
+            return;
+          }
+          $('body').trigger('win10_endCountdown', [data]);
           var stop;
-          var list = [];
           var loopstart = function () {
             API.user.experiment.get({id: data.expr_id}, function (data) {
               if (data.status == 2) {
                 var dockers = []
-                for (var i in data.public_urls) {
+                for (var i in data.remote_servers) {
                   dockers.push({
-                    purl: data.public_urls[i].url,
                     name: data.remote_servers[i].name,
                     surl: data.remote_servers[i].url
                   })
-                  list.push(temp.format(dockers[i]));
+                  var element = $(temp.format(dockers[i]));
+                  var purls = element.find('[data-pul]');
+                  for (var i in data.public_urls) {
+                    var url = data.public_urls[i].url;
+                    purls.append($('<a>').attr({href: url, target: '_blank'}).text(url));
+                  }
+                  $('.hackathon-nav').append(element);
                 }
-                $('.hackathon-nav').append(list.join(''))
                 bindTemp(data);
                 $('.hackathon-nav a.vm-box:eq(0)').trigger('click');
                 $interval.cancel(stop);
@@ -176,7 +184,7 @@ angular.module('oh.directives', [])
         }, {
           name: '黑客松活动指南',
           link: ''
-        },{
+        }, {
           name: '我的黑客松挑战',
           link: ''
         }, {
@@ -217,7 +225,7 @@ angular.module('oh.directives', [])
       }
     }
   })
-  .directive('endCountdown', function ($rootScope, $interval, API) {
+  .directive('endCountdown', function ($rootScope, $interval, $state,API) {
     return {
       scope: {},
       restrict: 'EA',
@@ -236,16 +244,16 @@ angular.module('oh.directives', [])
             timing.distance -= timing.minute * 60000;
             timing.second = Math.floor(timing.distance / 1000)
             if (timing.day == 0) {
-              timing.day = null
+              timing.day = 0
             }
             if (timing.hour == 0 && timing.day == null) {
-              timing.hour = null
+              timing.hour = 0
             }
             if (timing.minute == 0 && timing.hour == null) {
-              timing.minute = null
+              timing.minute = 0
             }
             if (timing.second == 0 && timing.minute == null) {
-              timing.second = null
+              timing.second = 0
             }
             return timing;
           } else {
@@ -254,16 +262,21 @@ angular.module('oh.directives', [])
         }
 
         var timerTmpe = '{day}天{hour}小时{minute}分钟{second}秒';
-        API.hackathon.list.get({name: $rootScope.config.name}, function (data) {
-          data = $.parseJSON(data);
+        //API.hackathon.list.get({name: $rootScope.config.name}, function (data) {
+        //
+        //})
+
+        $('body').bind('win10_endCountdown', function (e, data) {
+         // data = $.parseJSON(data);
           var countDown = {
             time_server: new Date().getTime(),
-            time_end: new Date(data.end_time.replace(/-/g, '/')).getTime()
+            time_end: data.end_time
           }
           var showCountDown = function () {
             var timing = show_time.apply(countDown);
             if (!timing) {
-              element.find('#timer').text('本次活动已结束，非常感谢您的参与。')
+              //element.find('#timer').text('本次活动已结束，非常感谢您的参与。')
+              $state.go('index.introduction');
               $interval.cancel(stop);
             } else {
               element.find('#end_timer').text(timerTmpe.format(timing))
@@ -276,6 +289,7 @@ angular.module('oh.directives', [])
             }
           );
         })
+
       }
     }
   })

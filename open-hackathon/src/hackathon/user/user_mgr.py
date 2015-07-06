@@ -4,7 +4,7 @@
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
 #
 # The MIT License (MIT)
-#  
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -94,6 +94,15 @@ class UserManager(object):
             return "log out failed"
 
     def db_login(self, openid, **kwargs):
+        # for win10 only
+        try:
+            hackathon_name = kwargs["hackathon_name"]
+            if hackathon_name == "win10":
+                hack_manager.increase_win10_willing_count()
+        except Exception as e:
+            # do nothing
+            log.error(e)
+
         # update db
         email_info = kwargs['email_info']
         user = self.db.find_first_object_by(User, openid=openid)
