@@ -74,6 +74,16 @@ class TemplateManager(Component):
 
     templates = {}  # template in memory {template.id: template_file_stream}
 
+    def get_hackathon_online_docker_templates(self, hackathon_id):
+        hackathon = self.hackathon_manager.get_hackathon_by_id(hackathon_id)
+        htrs = hackathon.hackathon_template_rels
+        template_ids = map(lambda x: x.template.id, htrs)
+        templates = self.db.find_all_objects(Template,
+                                             Template.id.in_(template_ids),
+                                             Template.provider == VEProvider.Docker,
+                                             Template.status == TEMPLATE_STATUS.ONLINE)
+        return templates
+
     def get_created_template_list(self, hackathon_name):
         """
         Get created template list of given hackathon
@@ -219,11 +229,8 @@ class TemplateManager(Component):
 
     def pull_images_for_hackathon(self, context):
         hackathon_id = context.hackathon_id
-        # get templates which ve is provided by docker
-        templates = self.db.find_all_objects_by(Template,
-                                                hackathon_id=hackathon_id,
-                                                provider=VEProvider.Docker,
-                                                status=TEMPLATE_STATUS.ONLINE)
+        # get templates which is online and provided by docker
+        templates = self.get_hackathon_online_docker_templates(hackathon_id)
         # get expected images on hackathons' templates
         images = map(lambda x: self.__get_images_from_template(x), templates)
         expected_images = flatten(images)
