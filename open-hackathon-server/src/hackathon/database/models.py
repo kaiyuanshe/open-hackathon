@@ -405,7 +405,7 @@ class Template(DBBase):
     azure_url = Column(String(200))
     provider = Column(Integer, default=0)
     creator_id = Column(Integer)
-    status = Column(Integer)    # 1=Online , 0=offline
+    status = Column(Integer)    # 1=online , 0=offline
     create_time = Column(TZDateTime, default=get_now())
     update_time = Column(TZDateTime)
     description = Column(Text)

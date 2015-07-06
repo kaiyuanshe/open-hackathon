@@ -52,6 +52,7 @@ class AdminManager(object):
                                expire_date=token_expire_date,
                                issue_date=token_issue_date)
         self.db.add_object(user_token)
+        self.db.commit()
         return user_token
 
     def __validate_token(self, token):
@@ -138,7 +139,6 @@ class AdminManager(object):
 
         # generate API token
         token = self.__generate_api_token(admin)
-        self.db.commit()
         return {
             "token": token,
             "admin": admin
