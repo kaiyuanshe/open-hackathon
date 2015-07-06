@@ -91,7 +91,7 @@ class HackathonTemplateResource(Resource, Component):
     @hackathon_name_required
     def get(self):
         template_manager = RequiredFeature('template_manager')
-        return template_manager.get_template_settings(g.hackathon.name)
+        return template_manager.get_template_settings(g.hackathon.name, g.user)
 
 
 class HackathonRegisterResource(Resource):

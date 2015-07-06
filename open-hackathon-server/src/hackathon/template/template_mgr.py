@@ -74,6 +74,11 @@ class TemplateManager(Component):
 
     templates = {}  # template in memory {template.id: template_file_stream}
 
+    def get_template_list(self, status=None):
+        if status is None:
+            return self.db.find_all_objects(Template)
+        return self.db.find_all_objects(Template,Template.status == status)
+
     def get_hackathon_online_docker_templates(self, hackathon_id):
         hackathon = self.hackathon_manager.get_hackathon_by_id(hackathon_id)
         htrs = hackathon.hackathon_template_rels
@@ -84,26 +89,21 @@ class TemplateManager(Component):
                                              Template.status == TEMPLATE_STATUS.ONLINE)
         return templates
 
-    def get_created_template_list(self, hackathon_name):
-        """
-        Get created template list of given hackathon
-        :param hackathon_name:
-        :return:
-        """
+    def get_hackathon_user_template_list(self, hackathon_name, user):
         hackathon = self.hackathon_manager.get_hackathon_by_name(hackathon_name)
         if hackathon is None:
             return not_found('hackathon [%s] not found' % hackathon_name)
-        created_templates = self.db.find_all_objects_by(Template,
-                                                        hackathon_id=hackathon.id)
+        team = self.user_manager.get_team_by_user_and_hackathon_id(user.id, hackathon.id)
+        templates = self.db.find_all_objects_by(team_id=team.id, hackathon_id=hackathon.id)
         data = []
-        for created_template in created_templates:
-            dic = created_template.dic()
-            dic['data'] = self.load_template(created_template)
+        for template in templates:
+            dic = template.dic()
+            dic['data'] = self.load_template(template)
             data.append(dic)
         return data
 
-    def get_template_settings(self, hackathon_name):
-        template_list = self.get_created_template_list(hackathon_name)
+    def get_template_settings(self, hackathon_name, user):
+        template_list = self.get_hackathon_user_template_list(hackathon_name, user)
         settings = []
         for template in template_list:
             template_units = []
