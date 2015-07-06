@@ -5,7 +5,7 @@
         "service_name" : "hackathon",
         "description" : "storage-description",
         "label" : "storage-label",
-        "location" : "China north",
+        "location" : "China North",
         "url_base" : "blob.core.chinacloudapi.cn"
     },
     "container" : "vhds",
@@ -22,7 +22,7 @@
         {
             "provider": "azure",
             "label" : "role-label",
-            "role_name" : "open-tech-win10",
+            "role_name" : "opentech-win10",
             "system_config" : {
                 "os_family" : "Windows",
                 "host_name" : "hostname",
@@ -39,13 +39,11 @@
                     {
                         "name" : "VNC",
                         "protocol" : "tcp",
-                        "port" : "15900",
                         "local_port" : "5900"
                     },
                     {
                         "name" : "Deploy",
                         "protocol" : "tcp",
-                        "port" : "33389",
                         "local_port" : "3389"
                     }
                 ]
