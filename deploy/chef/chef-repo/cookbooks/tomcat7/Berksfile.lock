@@ -1,9 +1,0 @@
-DEPENDENCIES
-  tomcat
-    path: .
-    metadata: true
-
-GRAPH
-  java (1.29.0)
-  tomcat (0.1.0)
-    java (>= 0.0.0)

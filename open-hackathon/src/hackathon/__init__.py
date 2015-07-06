@@ -2,7 +2,7 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
 #  
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -44,7 +44,6 @@ app.config['CORS_HEADERS'] = 'Content-Type, token'
 cors = CORS(app)
 
 from . import views
-
 
 
 ### example of scheduler
