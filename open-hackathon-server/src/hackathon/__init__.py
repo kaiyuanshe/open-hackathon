@@ -155,8 +155,7 @@ def __init_schedule_jobs():
 
     # schedule job to pull docker images automatically
     if not safe_get_config("docker.alauda.enabled", False):
-        docker = RequiredFeature("docker")
-        # todo AttributeError: 'DockerHelper' object has no attribute 'ensure_images'
+        docker = RequiredFeature("hosted_docker")
         docker.ensure_images()
 
 

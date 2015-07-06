@@ -31,7 +31,6 @@ from docker_formation_base import (
 )
 from hackathon.constants import (
     HEALTH_STATE,
-    ALAUDA_SERVICE_STATUS,
 )
 from hackathon.database.models import VirtualEnvironment
 from hackathon.enum import (
@@ -52,6 +51,12 @@ from datetime import datetime, timedelta
 
 class ALAUDA:
     IS_DEPLOYING = "is_deploying"
+    CURRENT_STATUS = "current_status"
+    RUNNING = "Running"
+    CONTAINER_PORT = "container_port"
+    INSTANCE_PORTS = "instance_ports"
+    DEFAULT_DOMAIN = "default_domain"
+    SERVICE_PORT = "service_port"
 
 
 class AlaudaDockerFormation(DockerFormationBase, Component):
@@ -80,13 +85,11 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
         """stop a alauda service"""
         virtual_environment = kwargs["virtual_environment"]
         self.__stop_service(virtual_environment.name)
-        self.__flush_service_log(virtual_environment.name)
 
     def delete(self, name, **kwargs):
         """delete a alauda service"""
         virtual_environment = kwargs["virtual_environment"]
         self.__delete_service(virtual_environment.name)
-        self.__flush_service_log(virtual_environment.name)
 
     def health(self):
         """send a ping for health check"""
@@ -105,12 +108,12 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
     # --------------------------------------private function--------------------------#
     def __schedule_query_service_status(self, context):
         self.log.debug("alauda service '%r' is deploying, will query again 10 seconds later" % context)
-        self.scheduler.add_once("docker", "query_service_status_async", context=context, seconds=10)
+        self.scheduler.add_once("alauda_docker", "query_service_status_async", context=context, seconds=10)
 
     def __service_result_handler(self, service, context):
-        if ALAUDA.IS_DEPLOYING not in service or service[ALAUDA.IS_DEPLOYING]:
+        if self.__is_service_deploying(service):
             self.__schedule_query_service_status(context)
-        elif self.__is_service_started(service):
+        elif self.__is_service_running(service):
             self.__service_started_handler(service, context)
         else:
             self.__service_failed_handler(context)
@@ -137,16 +140,16 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
         ve.status = VEStatus.Running
         guacamole = context.guacamole
         instance_ports = filter(lambda p:
-                                p["container_port"] == guacamole[DockerTemplateUnit.REMOTE_PORT],
-                                service["instance_ports"])
+                                p[ALAUDA.CONTAINER_PORT] == guacamole[DockerTemplateUnit.REMOTE_PORT],
+                                service[ALAUDA.INSTANCE_PORTS])
         if len(instance_ports) > 0:
             alauda_port = instance_ports[0]
             gc = {
                 "displayname": service_name,
                 "name": service_name,
                 "protocol": guacamole[DockerTemplateUnit.REMOTE_PROTOCOL],
-                "hostname": alauda_port["default_domain"],
-                "port": alauda_port["service_port"]
+                "hostname": alauda_port[ALAUDA.DEFAULT_DOMAIN],
+                "port": alauda_port[ALAUDA.SERVICE_PORT]
             }
             if DockerTemplateUnit.REMOTE_USERNAME in guacamole:
                 gc["username"] = guacamole[DockerTemplateUnit.REMOTE_USERNAME]
@@ -244,10 +247,15 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
         path = "/v1/services/%s/%s/" % (namespace, service_name)
         return self.__get(path)
 
-    def __is_service_started(self, service):
-        # todo "target_state" not the running state of service. find out another way to test the status.
-        # e.g. ping specific port
-        return service["target_state"] == ALAUDA_SERVICE_STATUS.STARTED
+    def __is_service_running(self, service):
+        return service[ALAUDA.CURRENT_STATUS] == ALAUDA.RUNNING
+
+    def __is_service_deploying(self, service):
+        if ALAUDA.IS_DEPLOYING not in service:
+            self.log.debug("is_deploying not included in alauda API response. Will retry")
+            return True
+
+        return service[ALAUDA.IS_DEPLOYING]
 
     def __format_time(self, date):
         return int((date - datetime(1970, 1, 1, tzinfo=None)).total_seconds())

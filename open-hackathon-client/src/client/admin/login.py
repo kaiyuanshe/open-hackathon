@@ -43,13 +43,16 @@ from client.constants import LOGIN_PROVIDER
 
 class LoginBase():
     def logout(self, admin):
-        if admin_manager.db_logout(admin):
-            info = "ok"
+        if admin.is_authenticated():
+            if admin_manager.db_logout(admin):
+                info = "ok"
+            else:
+                info = "log out failed"
+            session.pop("token")
+            logout_user()
+            return info
         else:
-            info = "log out failed"
-        session.pop("token")
-        logout_user()
-        return info
+            return "ok"
 
 
 class QQLogin(LoginBase):
@@ -305,7 +308,7 @@ class LiveLogin(LoginBase):
         # conn.request('GET',url,'',{'user-agent':'flask'})
         log.debug("get user info from live:" + user_info_resp)
         # user.info
-        #{u'first_name': u'Ice', u'last_name': u'Shi', u'name': u'Ice Shi', u'locale': u'en_US', \
+        # {u'first_name': u'Ice', u'last_name': u'Shi', u'name': u'Ice Shi', u'locale': u'en_US', \
         # u'gender': None,\
         # u'emails': {u'personal': None, u'account': u'iceshi@outlook.com', u'business': None, u'preferred': u'iceshi@outlook.com'}, \
         # u'link': u'https://profile.live.com/', \
