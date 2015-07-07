@@ -104,7 +104,7 @@
                     oh.api.admin.registration.put({
                         body: data,
                         header: {
-                            hackathon_name: currentHackathon.name
+                            hackathon_name: currentHackathon
                         }
                     }, function(data) {
                         if(data.error){
@@ -119,7 +119,7 @@
                      oh.api.admin.registration.post({
                         body: data,
                         header: {
-                            hackathon_name: currentHackathon.name
+                            hackathon_name: currentHackathon
                         }
                     }, function(data) {
                         if(data.error){

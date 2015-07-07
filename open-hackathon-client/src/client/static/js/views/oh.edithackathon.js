@@ -27,6 +27,7 @@
         hackathonID = 0,
         files = [],
         basic_info = undefined ;
+    var currentHackathon = oh.comm.getCurrentHackathon();
 
     function addFile(file){
         files.push(file);
@@ -50,9 +51,9 @@
     }
 
     function pageload(){
-        var currentHackathon = oh.comm.getCurrentHackathon();
+
         oh.api.admin.hackathon.get({
-            header:{hackathon_name:currentHackathon.name}
+            header:{hackathon_name:currentHackathon}
         },function(data){
             if(!data.error){
                 setFormData(data);

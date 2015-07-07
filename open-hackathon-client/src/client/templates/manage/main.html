@@ -1,4 +1,4 @@
-{% extends "../base/base.html" %} {% block meta %}
+{% extends "base/base.html" %} {% block meta %}
 <!-- Metas -->
 {% endblock %} {% block style %}
 <!-- Styles-->
@@ -14,6 +14,7 @@
             <a href="#" id="main-menu-min" class="full visible-md visible-lg"><i class="fa fa-angle-double-left"></i></a>
         </div>
         <div id="content" class="col-lg-10 col-sm-11">
+            <legend> 当前黑客松：{{hackathon_name}}</legend>
             <div class="row">
                 {% block body %} {% endblock %}
             </div>
