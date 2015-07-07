@@ -29,43 +29,43 @@
     </li>
     {% endif %}
     <li>
-        <a href="/myhackathon">
+        <a href="/manage">
             <i class="fa fa-cloud"></i>
             <span class="hidden-sm text"> 我的Hackathon</span>
         </a>
     </li>
     <li>
-        <a href="/registerusers">
+        <a href="/manage/{{hackathon_name}}/user">
             <i class="fa fa-users"></i><span class="hidden-sm text"> 用户管理</span>
         </a>
     </li>
     <li>
-        <a href="/adminmgr">
+        <a href="/manage/{{hackathon_name}}/adminmgr">
             <i class="fa fa-adn"></i><span class="hidden-sm text"> 管理员管理</span>
         </a>
     </li>
     <li>
-        <a href="/edithackathon">
+        <a href="/manage/{{hackathon_name}}/edit">
             <i class="fa fa-edit"></i><span class="hidden-sm text"> 编辑黑客松</span>
         </a>
     </li>
     <li>
-        <a href="/organizers">
+        <a href="/manage/{{hackathon_name}}/organizers">
             <i class="fa fa-briefcase"></i><span class="hidden-sm text"> 主办方</span>
         </a>
     </li>
     <li>
-        <a href="/azurecert">
+        <a href="/manage/{{hackathon_name}}/azurecert">
             <i class="fa fa-users"></i><span class="hidden-sm text"> Azure证书管理</span>
         </a>
     </li>
     <li>
-        <a href="/template">
+        <a href="/manage/{{hackathon_name}}/template">
             <i class="fa fa-users"></i><span class="hidden-sm text"> 模板管理</span>
         </a>
     </li>
     <li>
-        <a href="/experiment">
+        <a href="/manage/{{hackathon_name}}/experiment">
             <i class="fa fa-users"></i><span class="hidden-sm text"> 环境管理</span>
         </a>
     </li>

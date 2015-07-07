@@ -30,9 +30,6 @@ import json
 
 sys.path.append("..")
 
-from datetime import (
-    timedelta,
-)
 from compiler.ast import (
     flatten,
 )
@@ -87,7 +84,7 @@ class TemplateManager(Component):
             return not_found('hackathon [%s] not found' % hackathon_name)
         created_templates = self.db.find_all_objects_by(Template,
                                                         hackathon_id=hackathon.id,
-                                                        status=TEMPLATE_STATUS.CREATED)
+                                                        status=TEMPLATE_STATUS.ONLINE)
         data = []
         for created_template in created_templates:
             dic = created_template.dic()
@@ -141,7 +138,7 @@ class TemplateManager(Component):
                                   azure_url=azure_url,
                                   provider=args[BaseTemplate.VIRTUAL_ENVIRONMENTS_PROVIDER],
                                   creator_id=g.user.id,
-                                  status=TEMPLATE_STATUS.CREATED,
+                                  status=TEMPLATE_STATUS.ONLINE,
                                   create_time=self.util.get_now(),
                                   update_time=self.util.get_now(),
                                   description=args[BaseTemplate.DESCRIPTION],
@@ -186,7 +183,7 @@ class TemplateManager(Component):
         try:
             template = self.db.get_object(Template, id)
             self.db.update_object(template,
-                                  status=TEMPLATE_STATUS.DELETED,
+                                  status=TEMPLATE_STATUS.OFFLINE,
                                   update_time=self.util.get_now())
             return ok("delete template success")
         except Exception as ex:
@@ -222,7 +219,7 @@ class TemplateManager(Component):
         templates = self.db.find_all_objects_by(Template,
                                                 hackathon_id=hackathon_id,
                                                 provider=VEProvider.Docker,
-                                                status=TEMPLATE_STATUS.CREATED)
+                                                status=TEMPLATE_STATUS.ONLINE)
         # get expected images on hackathons' templates
         images = map(lambda x: self.__get_images_from_template(x), templates)
         expected_images = flatten(images)
@@ -239,8 +236,7 @@ class TemplateManager(Component):
                 context = Context(image=image,
                                   tag=tag,
                                   docker_host=docker_host)
-                # todo docker pull for hosted docker only : Done
-                self.scheduler.add_once(feature="docker",
+                self.scheduler.add_once(feature="hosted_docker",
                                         method="pull_image",
                                         context=context,
                                         seconds=3)

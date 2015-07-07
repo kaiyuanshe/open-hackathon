@@ -27,11 +27,11 @@
 import sys
 
 sys.path.append("..")
+
 from client.database.models import *
 from client.log import log
 from client.database import db_adapter
 from client.constants import HTTP_HEADER
-from client.enum import EmailStatus
 from client.functions import safe_get_config, get_now
 from flask import request, g
 import uuid
@@ -93,10 +93,10 @@ class AdminManager(object):
         try:
             self.db.update_object(admin, online=0)
             self.db.commit()
-            return "OK"
+            return True
         except Exception as e:
             log.error(e)
-            return "log out failed"
+            return False
 
     def mysql_login(self, user, pwd):
         enc_pwd = encode(pwd)
@@ -179,10 +179,6 @@ class AdminManager(object):
         # get hackathon_ids_from AdminUserHackathonRels details
         hackathon_ids = map(lambda x: x.hackathon_id, admin_user_hackathon_rels)
         return list(set(hackathon_ids))
-
-    def check_role(self, role):
-        hackathon_ids = self.get_hackid_from_adminid(g.admin.id)
-        return -1 in hackathon_ids or len(hackathon_ids) > 0
 
     def is_super(self, admin_id):
         return -1 in self.get_hackid_from_adminid(admin_id)

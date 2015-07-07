@@ -27,12 +27,12 @@
         hackathonID = 0,
         files = [],
         basic_info = undefined ;
+    var currentHackathon = oh.comm.getCurrentHackathon();
 
     function bindAzurecertList(){
-        var currentHackathon = oh.comm.getCurrentHackathon();
         var list = $('#organizerlist');
         oh.api.admin.hackathon.get({
-           header:{hackathon_name:currentHackathon.name}
+           header:{hackathon_name:currentHackathon}
         },function(data){
             if(!data.error){
                 basic_info = data.basic_info;
@@ -116,7 +116,6 @@
 
     function init(){
         var editLi = undefined;
-        var currentHackathon = oh.comm.getCurrentHackathon();
         var organizerform = $('#organizerform');
         organizerform.bootstrapValidator()
             .on('success.form.bv', function(e) {

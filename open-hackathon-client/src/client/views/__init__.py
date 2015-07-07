@@ -31,10 +31,10 @@ sys.path.append("..")
 from client import app
 import json
 from client.constants import LOGIN_PROVIDER
-from flask_login import login_required, current_user, login_user, LoginManager, logout_user
+from flask_login import login_required, current_user, login_user, LoginManager
 from client.admin.login import login_providers
 from client.admin.admin_mgr import admin_manager
-from flask import Response, render_template, request, g, redirect, make_response, session, abort
+from flask import Response, render_template, request, g, redirect, make_response, session
 from datetime import timedelta
 from client.functions import get_config
 from client.log import log
@@ -79,7 +79,7 @@ def __login(provider):
         token = admin_with_token["token"].token
         login_user(admin_with_token["admin"])
         session["token"] = token
-        resp = make_response(redirect("/"))
+        resp = make_response(redirect("/manage"))
         resp.set_cookie('token', token)
         return resp
     except Exception as ex:
@@ -157,7 +157,6 @@ def about():
 @login_required
 def logout():
     login_providers.values()[0].logout(g.admin)
-    logout_user()
     return redirect("/login")
 
 

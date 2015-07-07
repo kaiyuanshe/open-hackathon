@@ -48,11 +48,6 @@ class ADMIN:
     DEFAULT_SUPER_ADMIN_EMAIL = "2303202961@qq.com"
 
 
-class ALAUDA_SERVICE_STATUS:
-    STOPPED = "STOPPED"
-    STARTED = "STARTED"
-
-
 class HACKATHON_BASIC_INFO:
     ORGANIZERS = "organizers"  # array  [{ organizer_name:'' , organizer_url:'',  organizer_image:'',organizer_description:''},...]
     ORGANIZER_NAME = "organizer_name"  # string

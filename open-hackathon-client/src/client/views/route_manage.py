@@ -35,53 +35,61 @@ from flask_login import login_required
 @app.route("/manage/create")
 @login_required
 def create_hackathon():
-    return render("/manage/createhackathon.html")
+    return render("/manage/createhackathon.html", hackathon_name="")
 
 
 @app.route("/manage")
 @login_required
 def myhackathon():
-    return render("/manage/myhackathon.html")
+    return render("/manage/myhackathon.html", hackathon_name="")
 
 
 # get registered user list of a hackathon
-@app.route("/manage/user/<hackathon_name>")
+
+@app.route("/manage/<hackathon_name>")
+@login_required
+def hackathon_manage_detail(hackathon_name):
+    return render("/manage/detail.html", hackathon_name=hackathon_name)
+
+
+@app.route("/manage/<hackathon_name>/user")
 @login_required
 def registerusers(hackathon_name):
-    return render("/manage/registerusers.html")
+    return render("/manage/registerusers.html", hackathon_name=hackathon_name)
 
 
-@app.route("/manage/azurecert/<hackathon_name>")
+@app.route("/manage/<hackathon_name>/azurecert")
 @login_required
 def azurecert(hackathon_name):
-    return render("/manage/azurecert.html")
+    return render("/manage/azurecert.html", hackathon_name=hackathon_name)
 
 
-@app.route("/manage/organizers/<hackathon_name>")
+@app.route("/manage/<hackathon_name>/organizers")
 @login_required
 def organizers(hackathon_name):
-    return render("/manage/organizers.html")
+    return render("/manage/organizers.html", hackathon_name=hackathon_name)
 
 
-@app.route("/manage/edit/<hackathon_name>")
+@app.route("/manage/<hackathon_name>/edit")
 @login_required
 def edithackathon(hackathon_name):
-    return render("/manage/edithackathon.html")
+    return render("/manage/edithackathon.html", hackathon_name=hackathon_name)
 
 
-@app.route("/manage/template/<hackathon_name>")
+@app.route("/manage/<hackathon_name>/template")
 @login_required
 def template(hackathon_name):
-    return render("/manage/template.html")
+    return render("/manage/template.html", hackathon_name=hackathon_name)
 
 
-@app.route("/manage/adminmgr/<hackathon_name>")
+@app.route("/manage/<hackathon_name>/adminmgr")
 @login_required
 def adminmgr(hackathon_name):
-    return render("/manage/adminmgr.html")
+    return render("/manage/adminmgr.html", hackathon_name=hackathon_name)
 
 
-@app.route("/manage/experiment/<hackathon_name>")
+@app.route("/manage/<hackathon_name>/experiment")
 @login_required
 def experiment(hackathon_name):
-    return render("/manage/experiment.html")
+    return render("/manage/experiment.html", hackathon_name=hackathon_name)
+
