@@ -230,6 +230,7 @@ class UserTeamRel(DBBase):
     id = Column(Integer, primary_key=True)
     create_time = Column(TZDateTime, default=get_now())
     update_time = Column(TZDateTime)
+    status = Column(Integer)  # 0:unaudit ,1:audit_passed, 2:audit_refused
 
     user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
     user = relationship('User', backref=backref('user_team_rels', lazy='dynamic'))

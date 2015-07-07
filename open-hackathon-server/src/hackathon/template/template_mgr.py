@@ -86,24 +86,11 @@ class TemplateManager(Component):
         templates = self.db.find_all_objects(Template,
                                              Template.id.in_(template_ids),
                                              Template.provider == VEProvider.Docker,
-                                             Template.status == TEMPLATE_STATUS.ONLINE)
+                                             Template.status == TEMPLATE_STATUS.CHECK_PASS)
         return templates
 
-    def get_hackathon_user_template_list(self, hackathon_name, user):
-        hackathon = self.hackathon_manager.get_hackathon_by_name(hackathon_name)
-        if hackathon is None:
-            return not_found('hackathon [%s] not found' % hackathon_name)
-        team = self.user_manager.get_team_by_user_and_hackathon_id(user.id, hackathon.id)
-        templates = self.db.find_all_objects_by(team_id=team.id, hackathon_id=hackathon.id)
-        data = []
-        for template in templates:
-            dic = template.dic()
-            dic['data'] = self.load_template(template)
-            data.append(dic)
-        return data
-
-    def get_template_settings(self, hackathon_name, user):
-        template_list = self.get_hackathon_user_template_list(hackathon_name, user)
+    def get_user_templates(self, user, hackathon):
+        template_list = self.__get_templates_by_user(user, hackathon)
         settings = []
         for template in template_list:
             template_units = []
@@ -148,7 +135,7 @@ class TemplateManager(Component):
                                   azure_url=azure_url,
                                   provider=args[BaseTemplate.VIRTUAL_ENVIRONMENTS_PROVIDER],
                                   creator_id=g.user.id,
-                                  status=TEMPLATE_STATUS.OFFLINE,
+                                  status=TEMPLATE_STATUS.UNCHECK,
                                   create_time=self.util.get_now(),
                                   update_time=self.util.get_now(),
                                   description=args[BaseTemplate.DESCRIPTION],
@@ -335,6 +322,16 @@ class TemplateManager(Component):
             if self.file_service.download_file_from_azure(azure_url, local_url) is not None:
                 return self.__load_template_from_local_file(template_id, local_url)
         return None
+
+    def __get_templates_by_user(self, user, hackathon):
+        team = self.user_manager.get_team_by_user_and_hackathon_id(user.id, hackathon.id)
+        templates = self.db.find_all_objects_by(team_id=team.id, hackathon_id=hackathon.id)
+        data = []
+        for template in templates:
+            dic = template.dic()
+            dic['data'] = self.load_template(template)
+            data.append(dic)
+        return data
 
     # template may have multiple images
     def __get_images_from_template(self, template):

@@ -190,5 +190,6 @@ class TEMPLATE_STATUS:
     """
     For status in db model Template
     """
-    ONLINE = 1
-    OFFLINE = 0
+    UNCHECK = 0
+    CHECK_PASS = 1
+    CHECK_FAILD = 2

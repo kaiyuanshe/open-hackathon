@@ -86,13 +86,10 @@ class HackathonStatResource(Resource):
         return hackathon_manager.get_hackathon_stat(g.hackathon)
 
 
-class HackathonTemplateResource(Resource, Component):
+class HackathonUserTemplateResource(Resource, Component):
     @hackathon_name_required
     def get(self):
-        parse = reqparse.RequestParser()
-        parse.add_argument('team_id', type=int, location='args', required=True)
-        args = parse.parse_args()
-        return template_manager.get_template_settings(g.hackathon.name, args['team_id'])
+        return template_manager.get_user_templates(g.user, g.hackathon)
 
 
 class HackathonRegisterResource(Resource):
@@ -181,7 +178,7 @@ def register_routes():
     api.add_resource(HackathonResource, "/api/hackathon")
     api.add_resource(HackathonListResource, "/api/hackathon/list")
     api.add_resource(HackathonStatResource, "/api/hackathon/stat")
-    api.add_resource(HackathonTemplateResource, "/api/hackathon/template")
+    api.add_resource(HackathonUserTemplateResource, "/api/hackathon/template")
 
     # team API
     api.add_resource(HackathonTeamListResource, "/api/hackathon/team/list")
