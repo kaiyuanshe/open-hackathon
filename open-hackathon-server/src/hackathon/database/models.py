@@ -249,6 +249,7 @@ class Team(DBBase):
     display_name = Column(String(20))
     description = Column(Text)
     git_project = Column(String(200))
+    logo = Column(String(200))
     create_time = Column(TZDateTime, default=get_now())
     update_time = Column(TZDateTime)
 

@@ -77,7 +77,6 @@ class HackathonListResource(Resource):
         parse.add_argument('user_id', type=int, location='args')
         parse.add_argument('status', type=int, location='args')
         args = parse.parse_args()
-
         return hackathon_manager.get_hackathon_list(args["user_id"], args["status"])
 
 
@@ -90,8 +89,10 @@ class HackathonStatResource(Resource):
 class HackathonTemplateResource(Resource, Component):
     @hackathon_name_required
     def get(self):
-        template_manager = RequiredFeature('template_manager')
-        return template_manager.get_template_settings(g.hackathon.name, g.user)
+        parse = reqparse.RequestParser()
+        parse.add_argument('team_id', type=int, location='args', required=True)
+        args = parse.parse_args()
+        return template_manager.get_template_settings(g.hackathon.name, args['team_id'])
 
 
 class HackathonRegisterResource(Resource):
