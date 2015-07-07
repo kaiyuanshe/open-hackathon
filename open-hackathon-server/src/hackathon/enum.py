@@ -190,5 +190,5 @@ class TEMPLATE_STATUS:
     """
     For status in db model Template
     """
-    CREATED = 1
-    DELETED = 0
+    ONLINE = 1
+    OFFLINE = 0

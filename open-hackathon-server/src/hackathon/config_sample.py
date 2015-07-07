@@ -95,12 +95,12 @@ Config = {
     },
     "docker": {
         "alauda": {
-            "token": "fd5fcc2bd5dbe0866b126184ede6b7b195bd9909",
-            "namespace": "junbo",
+            "token": "",
+            "namespace": "",
             "endpoint": "https://api.alauda.cn"
         }
     },
-    "cloud_eclipse":{
-        "api" : "http://www.idehub.cn/api/ide"
+    "cloud_eclipse": {
+        "api": "http://www.idehub.cn/api/ide"
     }
 }
