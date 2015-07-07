@@ -129,7 +129,10 @@ class InitialJobsResource(Resource):
 
 class TemplateResource(Resource):
     def get(self):
-        return template_manager.get_created_template_list(g.hackathon.name)
+        parse = reqparse.RequestParser()
+        parse.add_argument('id', type=int, location='args', required=False)
+        args = parse.parse_args()
+        return template_manager.get_template_by_id(args['id'])
 
     # create template
     @token_required

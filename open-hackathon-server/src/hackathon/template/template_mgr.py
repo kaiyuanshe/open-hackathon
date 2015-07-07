@@ -36,12 +36,15 @@ from compiler.ast import (
 from hackathon.database.models import (
     Template,
     DockerHostServer,
+    HackathonTemplateRel,
+    Experiment
 )
 from hackathon.hackathon_response import (
     not_found,
     bad_request,
     internal_server_error,
     ok,
+    access_denied
 )
 from hackathon.enum import (
     TEMPLATE_STATUS,
@@ -71,8 +74,16 @@ class TemplateManager(Component):
     docker = RequiredFeature("docker")
     scheduler = RequiredFeature("scheduler")
     user_manager = RequiredFeature("user_manager")
+    team_manager = RequiredFeature("team_manager")
 
     templates = {}  # template in memory {template.id: template_file_dic}
+
+    def get_template_by_id(self, id):
+        return self.db.find_first_object(Template, id=id).dic()
+
+    def get_templates_by_hackathon_id(self, hackathon_id):
+        htrs = self.db.find_all_objects(HackathonTemplateRel, hackathon_id=hackathon_id)
+        return map(lambda x: x.template, htrs)
 
     def get_template_list(self, status=None):
         if status is None:
@@ -182,9 +193,20 @@ class TemplateManager(Component):
                 return ok("already removed")
             # user can only delete the template which created by himself except super admin
             if g.user.id != template.creator_id and not self.user_manager.is_super_admin(g.user):
-                return bad_request("not allowed")
-            self.db.delete_object(template)
+                return access_denied("not allowed")
+            if self.db.find_all_project(Experiment, template_id=id) is not None:
+                return bad_request("template already in use")
 
+            # remove template cache , localfile, azurefile
+            self.templates.pop(template.id, '')
+            if os.path.exists(template.url):
+                os.remove(template.url)
+            container_name = self.util.get_config("storage.template_container")
+            blob_name = template.azure_url.split("/")[-1]
+            self.file_service.delete_file_from_azure(container_name, blob_name)
+
+            # remove record in DB
+            self.db.delete_object(template)
             return ok("delete template success")
         except Exception as ex:
             self.log.error(ex)
@@ -282,7 +304,7 @@ class TemplateManager(Component):
             return False, bad_request("template does not exist")
         # user can only modify the template which created by himself except super admin
         if g.user.id != template.creator_id and not self.user_manager.is_super_admin(g.user):
-            return False, bad_request("not allowed")
+            return False, access_denied("not allowed")
         return True, template
 
     def __load_template_from_memory(self, template_id):
@@ -324,8 +346,16 @@ class TemplateManager(Component):
         return None
 
     def __get_templates_by_user(self, user, hackathon):
-        team = self.user_manager.get_team_by_user_and_hackathon_id(user.id, hackathon.id)
-        templates = self.db.find_all_objects_by(team_id=team.id, hackathon_id=hackathon.id)
+        team = self.team_manager.get_team_by_user_and_hackathon(user, hackathon)
+        if team is None:
+            return []
+        # get template from team
+        htrs = self.db.find_all_objects(HackathonTemplateRel, hackathon_id=hackathon.id, team_id=team.id)
+        if len(htrs) == 0:
+            # get template from hackathon
+            htrs = self.db.find_all_objects(HackathonTemplateRel, hackathon_id=hackathon.id)
+
+        templates = map(lambda x: x.template, htrs)
         data = []
         for template in templates:
             dic = template.dic()
@@ -348,3 +378,4 @@ class TemplateManager(Component):
             if ex_image not in current_images:
                 images.append(ex_image)
         return flatten(images)
+

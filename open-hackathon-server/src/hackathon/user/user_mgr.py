@@ -30,6 +30,7 @@ sys.path.append("..")
 from hackathon.database.models import UserToken, User, UserEmail, UserHackathonRel
 from datetime import timedelta
 from hackathon.constants import HTTP_HEADER
+from hackathon.enum import ReservedUser
 from flask import request, g
 import uuid
 from hackathon import Component, RequiredFeature
@@ -171,8 +172,6 @@ class UserManager(Component):
             return []
 
     def is_super_admin(self, user):
-        if user.id == 1:
+        if user.id == ReservedUser.DefaultSuperAdmin:
             return True
-        if -1 in self.admin_manager.get_hackathon_ids_by_admin_user_id(user.id):
-            return True
-        return False
+        return -1 in self.admin_manager.get_hackathon_ids_by_admin_user_id(user.id)

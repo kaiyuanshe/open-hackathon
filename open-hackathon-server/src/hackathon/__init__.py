@@ -97,6 +97,7 @@ def init_components():
     from hackathon.admin.admin_mgr import AdminManager
     from hackathon.remote.guacamole import GuacamoleInfo
     from hackathon.expr.expr_mgr import ExprManager
+    from hackathon.team.team_mgr import TeamManager
 
     # dependencies MUST be provided in advance
     factory.provide("util", Utility)
@@ -116,6 +117,7 @@ def init_components():
     factory.provide("template_manager", TemplateManager)
     factory.provide("expr_manager", ExprManager)
     factory.provide("admin_manager", AdminManager)
+    factory.provide("team_manager", TeamManager)
     factory.provide("guacamole", GuacamoleInfo)
 
     factory.provide("mysql_health_check", get_class("hackathon.health.health_check.MySQLHealthCheck"))
