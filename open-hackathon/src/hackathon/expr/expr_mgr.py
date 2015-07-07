@@ -40,7 +40,7 @@ from subprocess import Popen
 from hackathon.scheduler import scheduler
 from datetime import timedelta
 import uuid
-from hackathon.azureCreateAsync import auto_assign_expr_to_admin
+from hackathon.azureautodeploy.azureCreateAsync import auto_assign_expr_to_admin
 
 docker = OssDocker()
 
