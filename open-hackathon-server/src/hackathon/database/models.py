@@ -224,6 +224,45 @@ class UserProfile(DBBase):
     def __init__(self, **kwargs):
         super(UserProfile, self).__init__(**kwargs)
 
+class UserTeamRel(DBBase):
+    __tablename__ = 'user_team_rel'
+
+    id = Column(Integer, primary_key=True)
+    create_time = Column(TZDateTime, default=get_now())
+    update_time = Column(TZDateTime)
+    status = Column(Integer)  # 0:unaudit ,1:audit_passed, 2:audit_refused
+
+    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
+    user = relationship('User', backref=backref('user_team_rels', lazy='dynamic'))
+
+    team_id = Column(Integer, ForeignKey('team.id', ondelete='CASCADE'))
+    team = relationship('Team', backref=backref('user_team_rels', lazy='dynamic'))
+
+    def __init__(self, **kwargs):
+        super(UserTeamRel, self).__init__(**kwargs)
+
+
+class Team(DBBase):
+    __tablename__ = 'team'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(80))
+    display_name = Column(String(20))
+    description = Column(Text)
+    git_project = Column(String(200))
+    logo = Column(String(200))
+    create_time = Column(TZDateTime, default=get_now())
+    update_time = Column(TZDateTime)
+
+    leader_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
+    leader = relationship('User', backref=backref('lead_teams', lazy='dynamic'))
+
+    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
+    hackathon = relationship('Hackathon', backref=backref('teams', lazy='dynamic'))
+
+    def __init__(self, **kwargs):
+        super(Team, self).__init__(**kwargs)
+
 class Hackathon(DBBase):
     __tablename__ = 'hackathon'
 
