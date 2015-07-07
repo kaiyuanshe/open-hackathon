@@ -79,7 +79,7 @@ def __login(provider):
         token = admin_with_token["token"].token
         login_user(admin_with_token["admin"])
         session["token"] = token
-        resp = make_response(redirect("/"))
+        resp = make_response(redirect("/manage"))
         resp.set_cookie('token', token)
         return resp
     except Exception as ex:

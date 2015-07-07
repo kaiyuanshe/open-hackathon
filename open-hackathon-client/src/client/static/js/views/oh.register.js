@@ -24,12 +24,13 @@
 
 ;
 (function($, oh) {
+    var currentHackathon = oh.comm.getCurrentHackathon();
+
     function pageLoad(){
         var list = $('#registe_list');
-        var currentHackathon = oh.comm.getCurrentHackathon();
         oh.api.admin.registration.list.get({
             header: {
-                hackathon_name: currentHackathon.name
+                hackathon_name: currentHackathon
             }
         }, function(data) {
             list.empty().append($('#register_list_template').tmpl(data));
@@ -43,7 +44,7 @@
                             status: params.value
                         },
                         header: {
-                            hackathon_name: currentHackathon.name
+                            hackathon_name: currentHackathon
                         }
                     }, function(data) {
                         if (data.error) {

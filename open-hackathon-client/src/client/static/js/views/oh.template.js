@@ -26,17 +26,18 @@
 
     // true: PUT to update; false: POST to create
     var is_update = false;
+    var currentHackathon = oh.comm.getCurrentHackathon();
 
     // Get created template list
     function bindTemplateList(){
-        var currentHackathon = oh.comm.getCurrentHackathon();
+
         var list = $('#templatelist');
         oh.api.admin.hackathon.template.get({
-            header:{hackathon_name:currentHackathon.name}
+            header:{hackathon_name:currentHackathon}
         }, function(data){
             var index = 0;
             list.empty().append($('#template_item').tmpl(data,{
-                hackathon_name:currentHackathon.name,
+                hackathon_name:currentHackathon,
                 getIndex:function(){ return ++index;}
             }));
         });
@@ -192,32 +193,28 @@
 
     // POST to create
     function createTemplate(data){
-        var currentHackathon = oh.comm.getCurrentHackathon();
         return oh.api.admin.hackathon.template.post({
-                    body: data,
-                    query: {},
-                    header: {hackathon_name:currentHackathon.name}
-                }, function(data){
-                    if(data.error){
-                        alert(data.error.message);
-                    }else{
-                    }
-                })
+            body: data,
+            header: {hackathon_name:currentHackathon}
+        }, function(data){
+            if(data.error){
+                alert(data.error.message);
+            }else{
+            }
+        })
     }
 
     // PUT to update
     function updateTemplate(data){
-        var currentHackathon = oh.comm.getCurrentHackathon();
         return oh.api.admin.hackathon.template.put({
-                    body: data,
-                    query: {},
-                    header: {hackathon_name:currentHackathon.name}
-                }, function(data){
-                    if(data.error){
-                        alert(data.error.message);
-                    }else{
-                    }
-                })
+            body: data,
+            header: {hackathon_name:currentHackathon}
+        }, function(data){
+            if(data.error){
+                alert(data.error.message);
+            }else{
+            }
+        })
     }
 
     function toggleTable(){
@@ -232,17 +229,16 @@
     }
 
     function init(){
-        var currentHackathon = oh.comm.getCurrentHackathon();
         var templateform = $('#templateform');
         templateform.bootstrapValidator().on('success.form.bv', function(e) {
-                e.preventDefault();
-                var formData = getFormData();
-                (is_update ? updateTemplate(formData) : createTemplate(formData)).then(function(){
-                    if(is_update)
-                        is_update = false;
-                    bindTemplateList();
-                    toggleTable();
-                })
+            e.preventDefault();
+            var formData = getFormData();
+            (is_update ? updateTemplate(formData) : createTemplate(formData)).then(function(){
+                if(is_update)
+                    is_update = false;
+                bindTemplateList();
+                toggleTable();
+            })
         });
 
         templateform.on('click','[data-type="btn_add_port"]',function(e){
@@ -268,8 +264,7 @@
             var item = confirm_modal.data('item');
              oh.api.admin.hackathon.template.delete({
                 query: {id:item.id},
-                body: {},
-                header: {hackathon_name:currentHackathon.name}
+                header: {hackathon_name:currentHackathon}
              },
              function(data){
                 if(data.error){
