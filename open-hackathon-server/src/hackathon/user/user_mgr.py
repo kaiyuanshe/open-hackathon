@@ -170,10 +170,6 @@ class UserManager(Component):
         else:
             return []
 
-    def get_team_by_user_and_hackathon_id(self, user_id, hackathon_id):
-        team = self.db.find_first_object_by(UserHackathonRel, hackathon_id=hackathon_id, user_id=user_id)
-        return team
-
     def is_super_admin(self, user):
         if user.id == 1:
             return True

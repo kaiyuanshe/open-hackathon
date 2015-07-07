@@ -60,7 +60,7 @@ from hackathon.template.base_template import (
 from hackathon import (
     Component,
     RequiredFeature,
-    Context,
+    Context
 )
 from flask import g
 
@@ -72,7 +72,7 @@ class TemplateManager(Component):
     scheduler = RequiredFeature("scheduler")
     user_manager = RequiredFeature("user_manager")
 
-    templates = {}  # template in memory {template.id: template_file_stream}
+    templates = {}  # template in memory {template.id: template_file_dic}
 
     def get_template_list(self, status=None):
         if status is None:
@@ -152,8 +152,7 @@ class TemplateManager(Component):
                                   create_time=self.util.get_now(),
                                   update_time=self.util.get_now(),
                                   description=args[BaseTemplate.DESCRIPTION],
-                                  virtual_environment_count=len(args[BaseTemplate.VIRTUAL_ENVIRONMENTS]),
-                                  hackathon_id=g.hackathon.id)
+                                  virtual_environment_count=len(args[BaseTemplate.VIRTUAL_ENVIRONMENTS]))
         return ok("create template success")
 
     def update_template(self, args):

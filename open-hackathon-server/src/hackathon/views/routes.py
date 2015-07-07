@@ -154,6 +154,14 @@ class TemplateResource(Resource):
         return template_manager.delete_template(args['id'])
 
 
+class TemplateListResource(Resource):
+    def get(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('status', type=int, location='args')
+        args = parse.parse_args()
+        templates = template_manager.get_template_list(args['status'])
+        return map(lambda x: x.dic(), templates)
+
 def register_routes():
     """
     register API routes that user or admin is not required
@@ -186,3 +194,4 @@ def register_routes():
 
     # template API
     api.add_resource(TemplateResource, "/api/template")
+    api.add_resource(TemplateListResource, "/api/template/list")
