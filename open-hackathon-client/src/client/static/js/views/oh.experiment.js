@@ -25,6 +25,7 @@
 
 (function($, oh) {
 
+    var currentHackathon = oh.comm.getCurrentHackathon();
 
     //get form-data for submit
     function getFilterData(){
@@ -39,12 +40,12 @@
     // initial table to show admin list
     function pageLoad(){
         var list = $('#experiment_list');
-        var currentHackathon = oh.comm.getCurrentHackathon();
+
         var data = getFilterData()
         oh.api.admin.experiment.list.get({
             query: data,
             header: {
-                hackathon_name: currentHackathon.name
+                hackathon_name: currentHackathon
             }
         }, function(data) {
             list.empty().append($('#experiment_list_template').tmpl(data,{
@@ -90,22 +91,20 @@
 
     // call api to get experiment list by filter
     function getExprListByFilter(data){
-        var currentHackathon = oh.comm.getCurrentHackathon();
         return oh.api.admin.experiment.list.get({
             query: data,
             header: {
-                hackathon_name: currentHackathon.name
+                hackathon_name: currentHackathon
             }
         });
     }
 
     // call api to reset experiment
     function resetExperiment(id){
-        var currentHackathon = oh.comm.getCurrentHackathon();
         return oh.api.admin.experiment.put({
             body: {experiment_id:id},
             header: {
-                hackathon_name: currentHackathon.name
+                hackathon_name: currentHackathon
             }
         }, function(data) {
             if(data.error){

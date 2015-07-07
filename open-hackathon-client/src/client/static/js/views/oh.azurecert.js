@@ -23,12 +23,12 @@
  */
 
 (function($, oh) {
+    var currentHackathon = oh.comm.getCurrentHackathon();
 
     function bindAzurecertList(){
-        var currentHackathon = oh.comm.getCurrentHackathon();
         var list = $('#azurecertlist');
         oh.api.admin.azure.get({
-            header:{hackathon_name:currentHackathon.name}
+            header:{hackathon_name:currentHackathon}
         },
         function(data){
             var index = 0;
@@ -37,7 +37,7 @@
     }
 
     function init(){
-        var currentHackathon = oh.comm.getCurrentHackathon();
+
         $('#azurecertform')
             .bootstrapValidator()
             .on('success.form.bv', function(e) {
@@ -48,7 +48,7 @@
                         management_host: $('#management_host').val()
                     },
                     query:{},
-                    header:{hackathon_name:currentHackathon.name}
+                    header:{hackathon_name:currentHackathon}
                 }, function(data){
                     if(data.error){
                         // todo
@@ -65,7 +65,7 @@
             var item = confirm_modal.data('item');
              oh.api.admin.azure.delete({
                 body:{certificate_id:item.id},
-                header:{hackathon_name:currentHackathon.name}
+                header:{hackathon_name:currentHackathon}
              },
              function(data){
                 if(data.error){

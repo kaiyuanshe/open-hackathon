@@ -1,89 +1,61 @@
-{% extends "base.html" %}
+{% extends "base/default.html" %}
+
 {% block meta %}
-<!-- Metas -->
+<title>黑客松登录</title>
+<meta name="keywords" content=""/>
+<meta name="description" content="">
 {% endblock %}
+
 {% block style %}
-<!-- Styles-->
-<link rel="stylesheet" href="/static/css/index.css">
+<style>
+    body:after{
+    content:initial;
+    }
+</style>
 {% endblock %}
-{% block head %}
-<!-- Head -->
-{% endblock %}
-{% block script %}
-<!-- Scripts -->
-<script type="text/javascript" src="/config.js"></script>
-<script src="/static/js/login.js"></script>
-{% endblock %}
+
 {% block content %}
-<div class="container">
-
-    <div class="row">
-        <div class="login-box">
-            <div class="header">
-                登录开放黑客松管理平台
-            </div>
-            <p>
-                <a class="btn btn-github" id="githublogin"><span>github 登录</span></a>
-            </p>
-
-            <p>
-                <a class="btn btn-qq" id="qqlogin"><span>QQ 登录</span></a>
-            </p>
-
-            <p>
-                <a class="btn btn-weibo" id="weibologin"><span>Weibo 登录</span></a>
-            </p>
-
-            <p>
-                <a class="btn btn-live" id="livelogin"><span>Microsoft Account 登录</span></a>
-            </p>
-
-            <div class="text-with-hr">
-                <span>超级管理员登录</span>
-            </div>
-
-            <form class="form-horizontal login" action="login" method="post">
-                <fieldset class="col-sm-12">
-                    <div class="form-group">
-                        <div class="controls row">
-                            <div class="input-group col-sm-12">
-                                <input type="text" class="form-control" id="username" name="username" placeholder="Username or E-mail">
-                                <span class="input-group-addon"><i class="fa fa-user"></i></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="controls row">
-                            <div class="input-group col-sm-12">
-                                <input type="password" class="form-control" id="password" name="password" placeholder="Password">
-                                <span class="input-group-addon"><i class="fa fa-key"></i></span>
-                            </div>
-                        </div>
-                    </div>
-                    {% if error %}
-                    <div class="form-group has-error">
-                        <div class=" controls row">
-                            <div class="input-group col-sm-12">
-                                [{{error}}]
-                            </div>
-                        </div>
-                    </div>
-                    {% endif %}
-                    <div class="row">
-                        <button type="submit" class="btn btn-lg btn-primary col-xs-12">Login</button>
-                    </div>
-                </fieldset>
-            </form>
-            <div class="clearfix"></div>
-        </div>
-        <div class="text-center">
-            <p>建议使用环境：支持HTML5的浏览器(IE 10+,Chrome,Firefox,Safari)，请尽量使用分辨率较高的宽幅显示。</p>
-
-            <p>此站点为OpenHackathon的管理站点</p>
-        </div>
-    </div>
-
-
+<div class="background_branding_container">
+    <img class="background_image" alt="" src="/static/pic/login.png" width="100%" oh-resizebgimage>
 </div>
-{% endblock %} 
+<div class="login_panel">
+    <div class="login_panel_center">
+        <div class="inner_container ">
+            <div class="login_workload_logo_container">
+                <span class="fa fa-windows"></span> Microsoft Open Technologies Center&reg;
+            </div>
+            <div class="login-box">
+                <p>
+                    <a class="btn btn-live" data-login="live"><span>Microsoft Account 登录</span></a>
+                </p>
+
+                <p>
+                    <a class="btn btn-github" data-login="github"><span>github 登录</span></a>
+                </p>
+
+                <p>
+                    <a class="btn btn-qq" data-login="qq"><span>QQ 登录</span></a>
+                </p>
+
+                <p>
+                    <a class="btn btn-weibo" data-login="weibo"><span>Weibo 登录</span></a>
+                </p>
+            </div>
+
+        </div>
+        <footer class="login_footer">
+            <img class="footer_glyph" src="/static/pic/ad_glyph_footer_30x30.png">
+
+            <p class="branding_footer">
+                <a target="_blank" href="http://cn.msopentech.com/%e5%85%b3%e4%ba%8e%e6%88%91%e4%bb%ac/">联系我们</a> |
+                <a target="_blank" href="/PrivacyStatement.html">隐私条款</a> |
+                <a target="_blank" href="TermsOfUse">使用条款</a> | © 2015 Microsoft Open Technologies (Shanghai) Company Limited
+            </p>
+        </footer>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript" src="/static/js/views/oh.login.js"></script>
+{% endblock %}
