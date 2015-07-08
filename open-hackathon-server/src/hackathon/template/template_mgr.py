@@ -40,7 +40,6 @@ from hackathon.database.models import (
     Experiment
 )
 from hackathon.hackathon_response import (
-    not_found,
     bad_request,
     internal_server_error,
     ok,
@@ -110,11 +109,6 @@ class TemplateManager(Component):
         return settings
 
     def create_template(self, args):
-        """
-        Create template according to post args
-        :param args:
-        :return:
-        """
         # create template step 1 : args validate
         status, return_info = self.__check_create_args(args)
         if not status:
