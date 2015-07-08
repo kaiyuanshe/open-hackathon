@@ -32,7 +32,7 @@
     function bindTemplateList(){
 
         var list = $('#templatelist');
-        oh.api.admin.hackathon.template.get({
+        oh.api.admin.hackathon.template.list.get({
             header:{hackathon_name:currentHackathon}
         }, function(data){
             var index = 0;
@@ -193,7 +193,7 @@
 
     // POST to create
     function createTemplate(data){
-        return oh.api.admin.hackathon.template.post({
+        return oh.api.template.post({
             body: data,
             header: {hackathon_name:currentHackathon}
         }, function(data){
@@ -206,7 +206,7 @@
 
     // PUT to update
     function updateTemplate(data){
-        return oh.api.admin.hackathon.template.put({
+        return oh.api.template.put({
             body: data,
             header: {hackathon_name:currentHackathon}
         }, function(data){
@@ -262,7 +262,7 @@
             confirm_modal.data({item:item});
         }).on('click','[data-type="ok"]',function(e){
             var item = confirm_modal.data('item');
-             oh.api.admin.hackathon.template.delete({
+             oh.api.template.delete({
                 query: {id:item.id},
                 header: {hackathon_name:currentHackathon}
              },

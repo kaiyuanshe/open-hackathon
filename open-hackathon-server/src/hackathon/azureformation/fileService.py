@@ -92,7 +92,8 @@ class FileService(Component):
 
     def delete_file_from_azure(self, container_name, blob_name):
         try:
-            self.blob_service.delete_blob(container_name, blob_name)
+            if self.create_container_in_storage(container_name, 'container'):
+                self.blob_service.delete_blob(container_name, blob_name)
         except Exception as e:
             self.log.error(e)
             return None

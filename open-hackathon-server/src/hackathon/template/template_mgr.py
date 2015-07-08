@@ -82,23 +82,13 @@ class TemplateManager(Component):
         return self.db.find_first_object(Template, id=id).dic()
 
     def get_templates_by_hackathon_id(self, hackathon_id):
-        htrs = self.db.find_all_objects(HackathonTemplateRel, hackathon_id=hackathon_id)
+        htrs = self.db.find_all_objects_by(HackathonTemplateRel, hackathon_id=hackathon_id)
         return map(lambda x: x.template, htrs)
 
     def get_template_list(self, status=None):
         if status is None:
             return self.db.find_all_objects(Template)
-        return self.db.find_all_objects(Template,Template.status == status)
-
-    def get_hackathon_online_docker_templates(self, hackathon_id):
-        hackathon = self.hackathon_manager.get_hackathon_by_id(hackathon_id)
-        htrs = hackathon.hackathon_template_rels
-        template_ids = map(lambda x: x.template.id, htrs)
-        templates = self.db.find_all_objects(Template,
-                                             Template.id.in_(template_ids),
-                                             Template.provider == VEProvider.Docker,
-                                             Template.status == TEMPLATE_STATUS.CHECK_PASS)
-        return templates
+        return self.db.find_all_objects_by(Template, status=status)
 
     def get_user_templates(self, user, hackathon):
         template_list = self.__get_templates_by_user(user, hackathon)
@@ -129,7 +119,7 @@ class TemplateManager(Component):
         status, return_info = self.__check_create_args(args)
         if not status:
             return return_info
-        file_name = '%s-%s-%s.js' % (g.hackathon.name, args[BaseTemplate.TEMPLATE_NAME], str(uuid.uuid1())[0:8])
+        file_name = '%s-%s-%s.js' % (g.user.name, args[BaseTemplate.TEMPLATE_NAME], str(uuid.uuid1())[0:8])
         # create template step 2 : parse args and trans to file
         url = self.__save_args_to_file(args, file_name)
         if url is None:
@@ -193,20 +183,22 @@ class TemplateManager(Component):
                 return ok("already removed")
             # user can only delete the template which created by himself except super admin
             if g.user.id != template.creator_id and not self.user_manager.is_super_admin(g.user):
-                return access_denied("not allowed")
-            if self.db.find_all_project(Experiment, template_id=id) is not None:
-                return bad_request("template already in use")
+                return access_denied()
+            if len(self.db.find_all_objects_by(Experiment, template_id=id)) > 0:
+                return access_denied("template already in use")
 
             # remove template cache , localfile, azurefile
             self.templates.pop(template.id, '')
             if os.path.exists(template.url):
                 os.remove(template.url)
-            container_name = self.util.get_config("storage.template_container")
+            container_name = self.util.safe_get_config("storage.template_container", "templates")
             blob_name = template.azure_url.split("/")[-1]
             self.file_service.delete_file_from_azure(container_name, blob_name)
 
             # remove record in DB
+            self.db.delete_all_objects_by(HackathonTemplateRel, template_id=template.id)
             self.db.delete_object(template)
+
             return ok("delete template success")
         except Exception as ex:
             self.log.error(ex)
@@ -238,7 +230,7 @@ class TemplateManager(Component):
     def pull_images_for_hackathon(self, context):
         hackathon_id = context.hackathon_id
         # get templates which is online and provided by docker
-        templates = self.get_hackathon_online_docker_templates(hackathon_id)
+        templates = self.__get_templates_for_pull(hackathon_id)
         # get expected images on hackathons' templates
         images = map(lambda x: self.__get_images_from_template(x), templates)
         expected_images = flatten(images)
@@ -304,7 +296,7 @@ class TemplateManager(Component):
             return False, bad_request("template does not exist")
         # user can only modify the template which created by himself except super admin
         if g.user.id != template.creator_id and not self.user_manager.is_super_admin(g.user):
-            return False, access_denied("not allowed")
+            return False, access_denied()
         return True, template
 
     def __load_template_from_memory(self, template_id):
@@ -362,6 +354,16 @@ class TemplateManager(Component):
             dic['data'] = self.load_template(template)
             data.append(dic)
         return data
+
+    def __get_templates_for_pull(self, hackathon_id):
+        hackathon = self.hackathon_manager.get_hackathon_by_id(hackathon_id)
+        htrs = hackathon.hackathon_template_rels
+        template_ids = map(lambda x: x.template.id, htrs)
+        templates = self.db.find_all_objects(Template,
+                                             Template.id.in_(template_ids),
+                                             Template.provider == VEProvider.Docker,
+                                             Template.status == TEMPLATE_STATUS.CHECK_PASS)
+        return templates
 
     # template may have multiple images
     def __get_images_from_template(self, template):

@@ -163,6 +163,13 @@ class TemplateListResource(Resource):
         templates = template_manager.get_template_list(args['status'])
         return map(lambda x: x.dic(), templates)
 
+class HackathonTemplateListResource(Resource):
+    @hackathon_name_required
+    def get(self):
+        templates = template_manager.get_templates_by_hackathon_id(g.hackathon.id)
+        return map(lambda x: x.dic(), templates)
+
+
 def register_routes():
     """
     register API routes that user or admin is not required
@@ -196,3 +203,4 @@ def register_routes():
     # template API
     api.add_resource(TemplateResource, "/api/template")
     api.add_resource(TemplateListResource, "/api/template/list")
+    api.add_resource(HackathonTemplateListResource, "/api/admin/hackathon/template/list")

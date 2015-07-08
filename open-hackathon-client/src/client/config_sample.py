@@ -127,12 +127,11 @@ Config = {
                         "": ["get", "post", "put"],
                         "checkname": ["get"],
                         "list": ["get"],
-                        "template": {
-                            "": ["get", "post", "delete", "put"],
-                            "check": ["get"]
-                        },
                         "administrator": {
                             "": ["put", "post", "delete"],
+                            "list": ["get"]
+                        },
+                        "template": {
                             "list": ["get"]
                         }
                     },
@@ -147,7 +146,12 @@ Config = {
                         "list": ["get"],
                         "": ["post", "put"]
                     }
-                }
+                },
+                "template": {
+                        "": ["get", "post", "delete", "put"],
+                        "list": ["get"],
+                        "check": ["get"]
+                },
             }
         }
     }
