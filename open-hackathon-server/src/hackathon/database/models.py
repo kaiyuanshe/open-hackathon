@@ -273,6 +273,7 @@ class Hackathon(DBBase):
     description = Column(Text)
     status = Column(Integer, default=0)  # 0-new 1-online 2-offline
     creator_id = Column(Integer, default=-1)
+    type = Column(Integer, default=1)  # enum.HACK_TYPE
 
     event_start_time = Column(TZDateTime)
     event_end_time = Column(TZDateTime)

@@ -193,3 +193,11 @@ class TEMPLATE_STATUS:
     UNCHECK = 0
     CHECK_PASS = 1
     CHECK_FAILD = 2
+
+
+class HACK_TYPE:
+    """
+    For type in db model Hackathon
+    """
+    PROPOSITION = 1
+    OPEN = 2
