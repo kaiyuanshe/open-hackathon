@@ -37,15 +37,15 @@ class TeamManager(Component):
     template_manager = RequiredFeature("template_manager")
 
     def get_team_by_id(self, team_id):
-        return self.db.find_first_project_by(Team, id=team_id)
+        return self.db.find_first_object_by(Team, id=team_id)
 
     def get_team_by_name(self, team_name):
-        return self.db.find_first_project_by(Team, name=team_name)
+        return self.db.find_first_object_by(Team, name=team_name)
 
     def get_team_by_user_and_hackathon(self, user, hackathon):
-        utrs = self.db.find_all_projects_by(UserTeamRel, user_id=user.id)
+        utrs = self.db.find_all_objects_by(UserTeamRel, user_id=user.id)
         team_ids = map(lambda x: x.team_id, utrs)
-        team = self.db.find_first_project(Team, Team.id.in_(team_ids), Team.hackathon_id == hackathon.id)
+        team = self.db.find_first_object(Team, Team.id.in_(team_ids), Team.hackathon_id == hackathon.id)
         return team
 
     def team_leader_add_template(self, template_name):

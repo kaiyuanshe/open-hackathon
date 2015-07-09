@@ -254,6 +254,12 @@ class TemplateManager(Component):
         template = self.get_template_by_name(template_name)
         if template is None:
             return not_found("template does not exist")
+        htr = self.db.find_first_object_by(HackathonTemplateRel,
+                                           template_id=template.id,
+                                           hackathon_id=g.hackathon.id,
+                                           team_id=team_id)
+        if htr is not None:
+            return ok("already exist")
         try:
             self.db.add_object_kwargs(HackathonTemplateRel,
                                       hackathon_id=g.hackathon.id,
