@@ -40,7 +40,9 @@ class UserManager(Component):
         token_issue_date = self.util.get_now()
         token_expire_date = token_issue_date + timedelta(
             minutes=self.util.safe_get_config("login.token_expiration_minutes", 1440))
-        user_token = UserToken(token=str(uuid.uuid1()), user=user, expire_date=token_expire_date,
+        user_token = UserToken(token=str(uuid.uuid1()),
+                               user=user,
+                               expire_date=token_expire_date,
                                issue_date=token_issue_date)
         self.db.add_object(user_token)
         return user_token

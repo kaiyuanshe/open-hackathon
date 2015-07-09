@@ -33,8 +33,7 @@ import json
 from hackathon.constants import OAUTH_PROVIDER
 from hackathon.hackathon_response import *
 from hackathon import RequiredFeature, Component
-from hackathon.util import get_remote
-
+import urllib2
 
 class LoginProviderBase(Component):
     user_manager = RequiredFeature("user_manager")
@@ -55,12 +54,18 @@ class LoginProviderBase(Component):
         log.debug("user login successfully:" + repr(login_result))
         return login_result
 
+    def get_remote(url, headers=None):
+        opener = urllib2.build_opener(urllib2.HTTPHandler)
+        request = urllib2.Request(url, None, headers)
+        resp = opener.open(request)
+        return resp.read()
+
 
 class QQLogin(LoginProviderBase):
     def login(self, args):
         access_token = args['access_token']
         # get openID.
-        openid_resp = get_remote(self.util.get_config("login.qq.openid_url") + access_token)
+        openid_resp = self.get_remote(self.util.get_config("login.qq.openid_url") + access_token)
         log.debug("get access_token from qq:" + access_token)
 
         info = json.loads(openid_resp[10:-4])
@@ -71,7 +76,7 @@ class QQLogin(LoginProviderBase):
 
         # get user info
         url = self.util.get_config("login.qq.user_info_url") % (access_token, client_id, openid)
-        user_info_resp = get_remote(url)
+        user_info_resp = self.get_remote(url)
         log.debug("get user info from qq:" + user_info_resp)
         user_info = self.util.convert(json.loads(user_info_resp))
         email_list = []
@@ -91,7 +96,7 @@ class GithubLogin(LoginProviderBase):
         access_token = args.get('access_token')
         # get user info
 
-        user_info_resp = get_remote(self.util.get_config('login.github.user_info_url') + access_token)
+        user_info_resp = self.get_remote(self.util.get_config('login.github.user_info_url') + access_token)
         log.debug("get user info from github:" + user_info_resp + '\n')
         # example:
         #
@@ -117,7 +122,7 @@ class GithubLogin(LoginProviderBase):
         openid = str(user_info["id"])
         avatar = user_info["avatar_url"]
         # get user primary email
-        email_info_resp = get_remote(self.util.get_config('login.github.emails_info_url') + access_token)
+        email_info_resp = self.get_remote(self.util.get_config('login.github.emails_info_url') + access_token)
         log.debug("get email from github:" + email_info_resp + '\n')
 
         # email_info include all user email provided by github
@@ -138,7 +143,7 @@ class GitcafeLogin(LoginProviderBase):
         value = "Bearer " + token
 
         header = {"Authorization": value}
-        user_info = get_remote(self.util.get_config("login.gitcafe.user_info_url"), headers=header)
+        user_info = self.get_remote(self.util.get_config("login.gitcafe.user_info_url"), headers=header)
         log.debug("get user info from GitCafe:" + user_info + "\n")
         info = json.loads(user_info)
 
@@ -177,7 +182,7 @@ class WeiboLogin(LoginProviderBase):
 
         # get user info
         # https://api.weibo.com/2/users/show.json?access_token=2.005RDjXC0rYD8d39ca83156aLZWgZE&uid=1404376560
-        user_info_resp = get_remote(self.util.get_config('login.weibo.user_info_url') + access_token + "&uid=" + uid)
+        user_info_resp = self.get_remote(self.util.get_config('login.weibo.user_info_url') + access_token + "&uid=" + uid)
         user_info = json.loads(user_info_resp)
         log.debug("get user base info from Weibo:" + user_info_resp)
         # {"id":2330622122,"idstr":"2330622122","class":1,"screen_name":"test name","name":"test name",
@@ -199,7 +204,7 @@ class WeiboLogin(LoginProviderBase):
         # get user email
         email_list = []
         try:
-            email_info_resp = get_remote(self.util.get_config('login.weibo.email_info_url') + access_token)
+            email_info_resp = self.get_remote(self.util.get_config('login.weibo.email_info_url') + access_token)
             log.debug("get email from github:" + email_info_resp)
             email_info_resp_json = json.loads(email_info_resp)
             email = email_info_resp_json['email']
@@ -232,7 +237,7 @@ class LiveLogin(LoginProviderBase):
         log.debug(access_token)
         log.debug(self.util.get_config('login.live.user_info_url'))
 
-        user_info_resp = get_remote(self.util.get_config('login.live.user_info_url') + access_token)
+        user_info_resp = self.get_remote(self.util.get_config('login.live.user_info_url') + access_token)
         log.debug("get user info from live:" + user_info_resp)
         # user.info
         # {u'first_name': u'Ice', u'last_name': u'Shi', u'name': u'Ice Shi', u'locale': u'en_US', \
