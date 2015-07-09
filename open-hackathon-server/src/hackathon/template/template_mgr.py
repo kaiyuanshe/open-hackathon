@@ -40,6 +40,7 @@ from hackathon.database.models import (
     Experiment
 )
 from hackathon.hackathon_response import (
+    not_found,
     bad_request,
     internal_server_error,
     ok,
@@ -78,7 +79,10 @@ class TemplateManager(Component):
     templates = {}  # template in memory {template.id: template_file_dic}
 
     def get_template_by_id(self, id):
-        return self.db.find_first_object(Template, id=id).dic()
+        return self.db.find_first_object(Template, id=id)
+
+    def get_template_by_name(self, template_name):
+        return self.db.find_first_object(Template, name=template_name)
 
     def get_templates_by_hackathon_id(self, hackathon_id):
         htrs = self.db.find_all_objects_by(HackathonTemplateRel, hackathon_id=hackathon_id)
@@ -245,6 +249,32 @@ class TemplateManager(Component):
                                         method="pull_image",
                                         context=context,
                                         seconds=3)
+
+    def add_template_to_hackathon(self, template_name):
+        template = self.get_template_by_name(template_name)
+        if template is None:
+            return not_found("template does not exist")
+        try:
+            self.db.add_object_kwargs(HackathonTemplateRel,
+                                      hackathon_id=g.hackathon.id,
+                                      template_id=template.id,
+                                      update_time=self.util.get_now())
+            return ok()
+        except Exception as ex:
+            self.log.error(ex)
+            return internal_server_error("add a h-t-r record faild")
+
+    def delete_template_from_hackathon(self, template_name):
+        template = self.get_template_by_name(template_name)
+        htr = self.db.find_first_poject_by(HackathonTemplateRel, template_id=template.id, hackathon_id=g.hackathon.id)
+        if template is None or htr is None:
+            return ok("already removed")
+        try:
+            self.db.delete_object(htr)
+            return ok()
+        except Exception as ex:
+            self.log.error(ex)
+            return internal_server_error("delete h-t-r record faild")
 
     # ---------------------------------------- helper functions ---------------------------------------- #
 

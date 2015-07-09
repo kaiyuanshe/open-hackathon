@@ -193,7 +193,7 @@
 
     // POST to create
     function createTemplate(data){
-        return oh.api.template.post({
+        return oh.api.admin.hackathon.template.post({
             body: data,
             header: {hackathon_name:currentHackathon}
         }, function(data){
@@ -206,7 +206,7 @@
 
     // PUT to update
     function updateTemplate(data){
-        return oh.api.template.put({
+        return oh.api.admin.hackathon.template.put({
             body: data,
             header: {hackathon_name:currentHackathon}
         }, function(data){
@@ -262,7 +262,7 @@
             confirm_modal.data({item:item});
         }).on('click','[data-type="ok"]',function(e){
             var item = confirm_modal.data('item');
-             oh.api.template.delete({
+             oh.api.admin.hackathon.template.delete({
                 query: {id:item.id},
                 header: {hackathon_name:currentHackathon}
              },

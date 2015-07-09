@@ -34,6 +34,8 @@ from hackathon.decorators import hackathon_name_required, token_required
 from hackathon.health import report_health
 from hackathon.database.models import Announcement
 import time
+from hackathon.hackathon_response import not_found
+
 
 hackathon_manager = RequiredFeature("hackathon_manager")
 user_manager = RequiredFeature("user_manager")
@@ -122,17 +124,13 @@ class HackathonTeamListResource(Resource):
         return register_manager.get_hackathon_team_list(id, result['name'], result['number'])
 
 
-class InitialJobsResource(Resource):
-    def get(self):
-        return start_init_job()
-
-
 class TemplateResource(Resource):
     def get(self):
         parse = reqparse.RequestParser()
         parse.add_argument('id', type=int, location='args', required=False)
         args = parse.parse_args()
-        return template_manager.get_template_by_id(args['id'])
+        template = template_manager.get_template_by_id(args['id'])
+        return template.dic() if template is not None else not_found("not found")
 
     # create template
     @token_required
@@ -196,9 +194,6 @@ def register_routes():
 
     # hackathon register api
     api.add_resource(HackathonRegisterResource, "/api/hackathon/registration/list")
-
-    # TODO after find a callable way , would delete this api
-    api.add_resource(InitialJobsResource, "/api/test/init")
 
     # template API
     api.add_resource(TemplateResource, "/api/template")

@@ -132,7 +132,9 @@ Config = {
                             "list": ["get"]
                         },
                         "template": {
-                            "list": ["get"]
+                                "": ["post", "delete"],
+                                "list": ["get"],
+                                "check": ["get"]
                         }
                     },
                     "registration": {
