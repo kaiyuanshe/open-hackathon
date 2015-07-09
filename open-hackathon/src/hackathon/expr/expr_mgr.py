@@ -83,7 +83,7 @@ class ExprManager(object):
             vms = db_adapter.find_all_objects_by(UserResource,
                                                  type=VIRTUAL_MACHINE,
                                                  status=RUNNING,
-                                                 name='open-tech-role-' + str(expr.id),
+                                                 name='opentech-win10-' + str(expr.id),
                                                  template_id=expr.template.id)
             vms_id = map(lambda v: v.id, vms)
             ves = []
@@ -615,9 +615,12 @@ def open_check_expr():
                       minutes=safe_get_config("pre_allocate.check_interval_minutes", 5))
 
 
-def check_default_expr():
+def check_default_expr(hackathon_id=None):
     # todo only pre-allocate env for those needed. It should configured in table hackathon
-    templates = db_adapter.find_all_objects_order_by(Template, hackathon_name="win10-")
+    if hackathon_id:
+        templates = db_adapter.find_all_objects_order_by(Template, hackathon_id=hackathon_id)
+    else:
+        templates = db_adapter.find_all_objects(Template)
     total_azure = safe_get_config("pre_allocate.azure", 1)
     total_docker = safe_get_config("pre_allocate.docker", 1)
     for template in templates:
