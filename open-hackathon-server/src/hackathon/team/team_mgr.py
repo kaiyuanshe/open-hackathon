@@ -26,14 +26,15 @@ THE SOFTWARE.
 import sys
 
 sys.path.append("..")
-from hackathon.database.models import UserTeamRel, User, Team, UserHackathonRel
-from datetime import timedelta
-from hackathon.constants import HTTP_HEADER
-from flask import request, g
+from hackathon.database.models import UserTeamRel, Team
+from flask import g
 from hackathon import Component, RequiredFeature
+from hackathon.hackathon_response import access_denied
 
 
 class TeamManager(Component):
+
+    template_manager = RequiredFeature("template_manager")
 
     def get_team_by_id(self, team_id):
         return self.db.find_first_project_by(Team, id=team_id)
@@ -44,5 +45,21 @@ class TeamManager(Component):
     def get_team_by_user_and_hackathon(self, user, hackathon):
         utrs = self.db.find_all_projects_by(UserTeamRel, user_id=user.id)
         team_ids = map(lambda x: x.team_id, utrs)
-        team = self.db.find_first_project(Team, Team.id.in_(team_ids), Team.hackathon_id==hackathon.id)
+        team = self.db.find_first_project(Team, Team.id.in_(team_ids), Team.hackathon_id == hackathon.id)
         return team
+
+    def team_leader_add_template(self, template_name):
+        team = self.get_team_by_user_and_hackathon(g.user, g.hackathon)
+        if team is None or team.leader_id != g.user.id:
+            return access_denied("team leader required")
+        else:
+            return self.template_manager.add_template_to_hackathon(template_name, team.id)
+
+    def team_leader_delete_template(self, template_id):
+        team = self.get_team_by_user_and_hackathon(g.user, g.hackathon)
+        if team is None or team.leader_id != g.user.id:
+            return access_denied("team leader required")
+        else:
+            return self.template_manager.delete_template_from_hackathon(template_id, team.id)
+
+    #----------------------------helper functions---------------------------#

@@ -462,7 +462,7 @@ class HackathonTemplateRel(DBBase):
     id = Column(Integer, primary_key=True)
     create_time = Column(TZDateTime, default=get_now())
     update_time = Column(TZDateTime)
-    team_id = Column(Integer)  # none: relations for all teams
+    team_id = Column(Integer, default=-1)  # none: relations for all teams
 
     hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
     hackathon = relationship('Hackathon', backref=backref('hackathon_template_rels', lazy='dynamic'))
