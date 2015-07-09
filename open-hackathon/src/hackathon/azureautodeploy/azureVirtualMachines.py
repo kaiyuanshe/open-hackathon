@@ -2,16 +2,16 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
-#  
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#  
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #  
@@ -105,11 +105,24 @@ class AzureVirtualMachines:
             remote_provider = remote['provider']
             remote_protocol = remote['protocol']
             remote_input_endpoint_name = remote['input_endpoint_name']
+
+            remote_pwd = 'Password01!'
+            if 'password' in remote:
+                remote_pwd = remote['password']
+            elif image['type'] == 'os':
+                remote_pwd = system_config['user_password']
+
+            remote_user = 'opentech'
+            if 'username' in remote:
+                remote_user = remote['username']
+            elif image['type'] == 'os':
+                remote_user = system_config['user_name']
+
             gc = {
                 'displayname': remote_input_endpoint_name,
                 'protocol': remote_protocol,
-                "username": system_config['user_name'] if image['type'] == 'os' else 'opentech',
-                "password": system_config['user_password'] if image['type'] == 'os' else 'Password01!'
+                "username": remote_user,
+                "password": remote_pwd
             }
             # avoid duplicate deployment
             if self.deployment_exists(cloud_service['service_name'], deployment['deployment_slot']):

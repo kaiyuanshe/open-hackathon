@@ -23,7 +23,7 @@
 // -----------------------------------------------------------------------------------
 
 angular.module('oh.controllers')
-  .controller('oh.header.controller', function ($scope, API) {
+  .controller('lineup.controller', function ($scope, API) {
 
     $scope.gotopreview = function(){
       API

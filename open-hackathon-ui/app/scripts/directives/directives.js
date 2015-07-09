@@ -216,7 +216,7 @@ angular.module('oh.directives', [])
           getStat();
           var stop = $interval(function () {
             getStat(0)
-          }, 10000);
+          }, 100000);
           scope.$on('$destroy', function (event) {
               $interval.cancel(stop);
             }

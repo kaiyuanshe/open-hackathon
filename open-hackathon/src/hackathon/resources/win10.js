@@ -55,7 +55,7 @@
                 "username": "CloudUser",
                 "password": "acoman",
                 "port": 5900,
-                "input_endpoint_name" : "Deploy"
+                "input_endpoint_name" : "VNC"
             }
         }
     ]
