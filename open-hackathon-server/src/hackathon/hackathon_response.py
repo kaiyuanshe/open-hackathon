@@ -25,9 +25,11 @@ THE SOFTWARE.
 
 from log import log
 
+#
+# Common hackathon response with status code 200 and the real status code and message in body
+#
 
 def __response_with_code(code, message, friendly_message=""):
-    # todo log the stack trace or request information later
     log.debug("response with code: %d and message: %s" % (code, message))
     return {
         "error": {
