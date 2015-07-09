@@ -30,12 +30,15 @@ sys.path.append("..")
 from hackathon.database.models import UserToken, User, UserEmail, UserHackathonRel
 from datetime import timedelta
 from hackathon.constants import HTTP_HEADER
+from hackathon.enum import ReservedUser
 from flask import request, g
 import uuid
-from hackathon import Component
+from hackathon import Component, RequiredFeature
 
 
 class UserManager(Component):
+    admin_manager = RequiredFeature("admin_manager")
+
     def __generate_api_token(self, user):
         token_issue_date = self.util.get_now()
         token_expire_date = token_issue_date + timedelta(
@@ -169,3 +172,8 @@ class UserManager(Component):
             return self.get_team_members_by_team_name(hackathon_id, my_team.team_name)
         else:
             return []
+
+    def is_super_admin(self, user):
+        if user.id == ReservedUser.DefaultSuperAdmin:
+            return True
+        return -1 in self.admin_manager.get_hackathon_ids_by_admin_user_id(user.id)

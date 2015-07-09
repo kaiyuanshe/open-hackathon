@@ -32,7 +32,7 @@
     function bindTemplateList(){
 
         var list = $('#templatelist');
-        oh.api.admin.hackathon.template.get({
+        oh.api.admin.hackathon.template.list.get({
             header:{hackathon_name:currentHackathon}
         }, function(data){
             var index = 0;

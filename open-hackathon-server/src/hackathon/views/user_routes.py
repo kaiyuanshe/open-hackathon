@@ -31,7 +31,7 @@ from flask import g, request
 from flask_restful import Resource, reqparse
 from hackathon.user.login import login_providers
 from hackathon.decorators import token_required, hackathon_name_required
-from hackathon.hackathon_response import internal_server_error, not_found
+from hackathon.hackathon_response import internal_server_error, not_found, bad_request
 import json
 from hackathon.enum import RGStatus
 
@@ -40,6 +40,7 @@ register_manager = RequiredFeature("register_manager")
 expr_manager = RequiredFeature("expr_manager")
 user_manager = RequiredFeature("user_manager")
 guacamole = RequiredFeature("guacamole")
+team_manager = RequiredFeature("team_manager")
 
 
 class GuacamoleResource(Resource):
@@ -175,6 +176,24 @@ class UserProfileResource(Resource):
         return register_manager.update_user_profile(args)
 
 
+class TeamTemplateResource(Resource):
+    @token_required
+    @hackathon_name_required
+    def post(self):
+        args = request.get_json()
+        if "template_name" not in args:
+            return bad_request("template name invalid")
+        return team_manager.team_leader_add_template(args['template_name'])
+
+    @token_required
+    @hackathon_name_required
+    def delete(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('template_id', type=int, location='args', required=True)
+        args = parse.parse_args()
+        return team_manager.team_leader_delete_template(args['template_id'])
+
+
 def register_user_routes():
     """
     register API routes for hackathon UI user
@@ -200,3 +219,6 @@ def register_user_routes():
 
     # user profile API
     api.add_resource(UserProfileResource, "/api/user/profile")
+
+    # team template API
+    api.add_resource(TeamTemplateResource, "/api/team/template")
