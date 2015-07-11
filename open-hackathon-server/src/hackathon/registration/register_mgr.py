@@ -29,7 +29,7 @@ import sys
 sys.path.append("..")
 from hackathon import Component, RequiredFeature
 from flask import g
-from hackathon.database.models import UserHackathonRel, Experiment, UserProfile
+from hackathon.database.models import UserHackathonRel, Experiment, UserProfile, Team
 from hackathon.hackathon_response import bad_request, precondition_failed, internal_server_error, not_found, ok
 from hackathon.enum import EStatus, RGStatus, ReservedUser
 import json
@@ -176,7 +176,7 @@ class RegisterManager(Component):
         return False
 
     def get_hackathon_team_list(self, hid, name, number):
-        find_team_by_hackathon = self.db.find_all_objects_by(UserHackathonRel, hackathon_id=hid)
+        find_team_by_hackathon = self.db.find_all_objects_by(Team, hackathon_id=hid)
         hackathon_team_list = map(lambda x: x.team_name, find_team_by_hackathon)
         hackathon_team_list = list(set(hackathon_team_list))
         if name is not None:
