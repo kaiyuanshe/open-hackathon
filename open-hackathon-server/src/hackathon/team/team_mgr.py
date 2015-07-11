@@ -30,5 +30,27 @@ from hackathon.database.models import Team, UserTeamRel
 
 class TeamManager(Component):
 
-    def team_approve(self):
-        self.db.find_first_object_by(hackathon_id=hid, team_name=tname, user=user)
+    def team_approve(self,hid,tname,uid):
+        candidate=self.db.find_first_object_by(UserTeamRel, hackathon_id=hid, team_name=tname, user_id=uid)
+        candidate.status = 1
+        self.db.update_object()
+
+    def team_refuse(self,hid,tname,uid):
+        candidate=self.db.find_first_object_by(UserTeamRel, hackathon_id=hid, team_name=tname, user_id=uid)
+        candidate.status = 2
+        self.db.update_object()
+
+    def team_kick(self,hid,tname,uid):
+        candidate=self.db.find_first_object_by(UserTeamRel, hackathon_id=hid, team_name=tname, user_id=uid)
+        candidate.status = 0
+        self.db.update_object()
+
+    def team_leave(self,hid,tname,uid):
+        candidate=self.db.find_first_object_by(UserTeamRel, hackathon_id=hid, team_name=tname, user_id=uid)
+        if candidate is not None:
+            self.db.update_object()
+
+    def promo_leader(self,hid,tname,new_uid,old_uid):
+        leader = self.db.find_first_object_by(Team, hackathon_id=hid, team_)
+
+    def team_dismiss(self,hid,tname,uid):

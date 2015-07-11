@@ -187,7 +187,7 @@ class UserHackathonRel(DBBase):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
     team_name = Column(String(80))
-    create_time = Column(TZDateTime, default=get_now())
+    join_time = Column(TZDateTime, default=get_now())
     update_time = Column(TZDateTime)
     description = Column(String(200))
     status = Column(Integer)  # 0: havn't audit 1: audit passed 2:audit reject
