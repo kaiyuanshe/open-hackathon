@@ -5,7 +5,7 @@ And the whole environment cotains serval components such guacamole , nginx , tom
   * [Why choose OpenHackathon](#Why-choose-OpenHackathon)
   * [Where is the feature](#Where-is-the-feature)
 * [User's Guide](#User's-Guide)
-  *[introduction vedio](#introduction-vedio)
+  * [introduction vedio](#introduction-vedio)
 * [Developer's Guide](#Developer's-Guide)
   * [setup develop environment](#setup-develop-environment)
     * [setup system components](#install-system-components)
