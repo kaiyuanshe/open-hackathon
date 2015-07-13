@@ -3,7 +3,7 @@ And the whole environment cotains serval components such guacamole , nginx , tom
 * [Introduction](#Introduction)
   * [What is OpenHackathon](#What-is-OpenHackathon)
   * [Why choose OpenHackathon](#Why-choose-OpenHackathon)
-  * [Where is the feature](#Where-is-the-feature)
+  * [Where is the feature of OpenHackathon](#Where-is-the-feature-of-OpenHackathon)
 
 * [User's Guide](#User's-Guide)
   * [introduction vedio](#introduction-vedio)
