@@ -119,7 +119,7 @@ angular.module('oh.controllers')
           header: {hackathon_name: hackathon_name}
         }).then(function (res) {
           if ($scope.hackathon.basic_info.auto_approve) {
-            checkUserStatus(3, 0);
+            checkUserStatus(3, 1);
           } else {
             checkUserStatus(0, 0);
           }
