@@ -10,8 +10,16 @@ And the whole environment cotains serval components such guacamole , nginx , tom
   * [how to create a hackathon](#how-to-create-a-hackathon)
   * [how to manage a hackathon](#how-to-manage-a-hackathon)
   * [how to attend a hackathon](#how-to-attend-a-hackathon)
+  * [FAQ](#FAQ)
+    * [guacamole usage](#guacamole-usage)
 
 * [Developer's Guide](#Developer's-Guide)
+  * [src architecture](#src-architecture)
+  * [src implementation](#src-implementation)
+  * [API documemt](#API-document)
+    * [hackathon APIs](#hackathon-APIs)
+    * [user APIs](#user-APIs)
+    * [others APIs](#others-APIs)* 
   * [setup develop environment](#setup-develop-environment)
     * [setup system components](#install-system-components)
     * [setup Docker Env](#setup-Docker-Env)
@@ -20,10 +28,7 @@ And the whole environment cotains serval components such guacamole , nginx , tom
     * [setup MysqlDB Env](#setup-MysqlDB-Env)
     * [setup server api Env](#setup-server-api-Env)
     * [setup frontend website Env](#setup-frontend-website-Env)
-  * [API documemt](#API-document)
-    * [hackathon APIs](#hackathon-APIs)
-    * [user APIs](#user-APIs)
-    * [others APIs](#others-APIs)
+
 
 * [QA](#QA)
 
