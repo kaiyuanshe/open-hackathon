@@ -28,6 +28,7 @@ And the whole environment cotains serval components such guacamole , nginx , tom
     * [setup MysqlDB Env](#setup-MysqlDB-Env)
     * [setup server api Env](#setup-server-api-Env)
     * [setup frontend website Env](#setup-frontend-website-Env)
+    * [setup python IDE](#setup-python-IDE)
 
 
 * [QA](#QA)
