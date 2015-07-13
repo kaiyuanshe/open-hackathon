@@ -2,22 +2,24 @@ This document will tell you how to deploy the whole open-hackathon web applicati
 And the whole environment cotains serval components such guacamole , nginx , tomcat and the open-hackathon running Dependencies. 
 * [Introduction](#Introduction)
   * [What is OpenHackathon](#What-is-OpenHackathon)
-  * [Why-choose-OpenHackathon](#Why-choose-OpenHackathon)
-  * [Where-is-the-feature](#Where-is-the-feature)
+  * [Why choose OpenHackathon](#Why-choose-OpenHackathon)
+  * [Where is the feature](#Where-is-the-feature)
 * [User's Guide](#User's-Guide)
 * [Developer's Guide](#Developer's-Guide)
-  * [setup system components](#install-system-components)
-  * [setup Docker Env](#setup-Docker-Env)
-  * [setup Guacamole Env](#setup-Guacamole-Env)
-  * [get src from GitHub](#get-src-from-GitHub)
-  * [setup MysqlDB Env](#setup-MysqlDB-Env)
-  * [setup server api Env](#setup-server-api-Env)
-  * [setup frontend website Env](#setup-frontend-website-Env)
+  * [setup develop environment](#setup-develop-environment)
+   * [setup system components](#install-system-components)
+   * [setup Docker Env](#setup-Docker-Env)
+   * [setup Guacamole Env](#setup-Guacamole-Env)
+   * [get src from GitHub](#get-src-from-GitHub)
+   * [setup MysqlDB Env](#setup-MysqlDB-Env)
+   * [setup server api Env](#setup-server-api-Env)
+   * [setup frontend website Env](#setup-frontend-website-Env)
 * [QA](#QA)
 
 # Introduction
 # User's Guide
 # Developer's Guide
+## setup develop environment
 
 #install system components
 ```shell
