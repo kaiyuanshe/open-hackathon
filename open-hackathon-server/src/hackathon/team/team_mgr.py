@@ -29,7 +29,7 @@ sys.path.append("..")
 from hackathon.database.models import UserTeamRel, Team
 from flask import g
 from hackathon import Component, RequiredFeature
-from hackathon.hackathon_response import access_denied
+from hackathon.hackathon_response import access_denied, bad_request, not_found, internal_server_error, ok
 
 
 class TeamManager(Component):
@@ -62,4 +62,103 @@ class TeamManager(Component):
         else:
             return self.template_manager.delete_template_from_hackathon(template_id, team.id)
 
+    def leader_approve_user(self, args):
+        return_status, return_info = self.__check_approve_user_args(args)
+        if not return_status:
+            return return_info
+        utr = return_info
+        status = args['status']
+        try:
+            self.db.update_object(utr, status=status)
+        except Exception as ex:
+            self.log.error(ex)
+            return internal_server_error("update user_team_rel record faild")
+
+    def leader_kick_user(self, args):
+        return_status, return_info = self.__check_leader_kick_user_args(args)
+        if not return_status:
+            return return_info
+        utr = return_info
+        try:
+            self.db.delete_object(utr)
+        except Exception as ex:
+            self.log.error(ex)
+            return internal_server_error("delete user_team_rel record faild")
+
+    def leader_dismiss_team(self, args):
+        return_status, return_info = self.__check_team_leader_args(args)
+        if not return_status:
+            return return_info
+        team = return_info
+
+
+    def user_leave_team(self, args):
+        return_status, return_info = self.__check_team_leader_args(args)
+        if not return_status:
+            return return_info
+        utr = return_info
+        try:
+            self.db.delete_object(utr)
+        except Exception as ex:
+            self.log.error(ex)
+            return internal_server_error("delete user_team_rel record faild")
+
     #----------------------------helper functions---------------------------#
+
+    def __check_team_leader_args(self, args):
+        if 'team_id' not in args:
+            return False, bad_request("team_id invalid")
+
+        team = self.get_team_by_id(args['team_id'])
+        if team is None:
+            return False, not_found("team does not exist")
+
+        if team.leader_id != g.user.id:
+            return False, access_denied("team leader required")
+
+        return True, team
+
+    def __check_approve_user_args(self, args):
+        return_status, return_info = self.__check_team_leader_args(args)
+        if not return_status:
+            return return_status, return_info
+
+        if 'user_id' not in args:
+            return False, bad_request("user_id invalid")
+
+        if 'status' not in args:
+            return False, bad_request("status invalid")
+
+        utr = self.db.find_first_object_by(UserTeamRel, team_id=args['team_id'], user_id=['user_id'])
+        if utr is None:
+           return False, not_found("user_team_rel does not exist")
+
+        return True, utr
+
+    def __check_leader_kick_user_args(self, args):
+        return_status, return_info = self.__check_team_leader_args(args)
+        if not return_status:
+            return return_status, return_info
+
+        if 'user_id' not in args:
+            return False, bad_request("user_id invalid")
+
+        utr = self.db.find_first_object_by(UserTeamRel, team_id=args['team_id'], user_id=['user_id'])
+        if utr is None:
+           return False, ok("user_team_rel already removed")
+
+        return True, utr
+
+    def __check_user_leave_team_args(self, args):
+        if 'team_id' not in args:
+            return False, bad_request("team_id invalid")
+
+        team = self.get_team_by_id(args['team_id'])
+        if team is None:
+            return False, ok("team already dismiss")
+
+        utr = self.db.find_first_object_by(UserTeamRel, team_id=args['team_id'], user_id=g.user.id)
+        if utr is None:
+           return False, ok("user_team_rel already removed")
+
+        return True, utr
