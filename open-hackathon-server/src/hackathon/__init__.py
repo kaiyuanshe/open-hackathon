@@ -30,30 +30,32 @@ __version__ = '2.0'
 from flask import Flask
 from flask_restful import Api
 from flask_cors import CORS
+from datetime import timedelta
+
 from util import safe_get_config, get_class, Utility
 from hackathon_factory import factory, RequiredFeature
 from hackathon_scheduler import HackathonScheduler
-from datetime import timedelta
 
 
-# flask
+# initialize flask and flask restful
 app = Flask(__name__)
 app.config['SECRET_KEY'] = safe_get_config("app.secret_key", "secret_key")
 app.debug = True
-scheduler = HackathonScheduler(app)
-
-# flask restful
 api = Api(app)
 
-# CORS
+# Enable CORS support
 app.config['CORS_HEADERS'] = 'Content-Type, token, hackathon_name'
 cors = CORS(app)
 
+# initialize hackathon scheduler
+scheduler = HackathonScheduler(app)
+
 
 class Component(object):
-    '''
-    base class of business object
-    '''
+    """Base class of business object
+
+    inheritance classes can make use of self.log, self.db and self.util directly without import or instantiating,
+    """
     log = RequiredFeature("log")
     db = RequiredFeature("db")
     util = RequiredFeature("util")

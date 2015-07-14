@@ -31,13 +31,11 @@ from docker_formation_base import (
 )
 from hackathon.constants import (
     HEALTH_STATE,
-)
-from hackathon.database.models import VirtualEnvironment
-from hackathon.enum import (
-    VEProvider,
+    VE_PROVIDER,
     VEStatus,
     EStatus,
 )
+from hackathon.database.models import VirtualEnvironment
 from hackathon.hackathon_exception import (
     AlaudaException
 )
@@ -65,7 +63,7 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
     def start(self, unit, **kwargs):
         virtual_environment = kwargs["virtual_environment"]
 
-        virtual_environment.provider = VEProvider.Alauda
+        virtual_environment.provider = VE_PROVIDER.ALAUDA
         self.db.commit()
 
         service_config = self.__get_service_config(unit)
@@ -137,7 +135,7 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
             return
 
         # update virtual environment status and remote config
-        ve.status = VEStatus.Running
+        ve.status = VEStatus.RUNNING
         guacamole = context.guacamole
         instance_ports = filter(lambda p:
                                 p[ALAUDA.CONTAINER_PORT] == guacamole[DockerTemplateUnit.REMOTE_PORT],
@@ -163,8 +161,8 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
 
         # update experiment status
         virtual_environment_list = ve.experiment.virtual_environments.all()
-        if all(x.status == VEStatus.Running for x in virtual_environment_list):
-            ve.experiment.status = EStatus.Running
+        if all(x.status == VEStatus.RUNNING for x in virtual_environment_list):
+            ve.experiment.status = EStatus.RUNNING
             self.db.commit()
 
     def __service_failed_handler(self, context):
@@ -172,8 +170,8 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
         ve = self.db.find_first_object_by(VirtualEnvironment, id=context.virtual_environment_id)
         if ve:
             # todo rollback
-            ve.status = VEStatus.Failed
-            ve.experiment.status = EStatus.Failed
+            ve.status = VEStatus.FAILED
+            ve.experiment.status = EStatus.FAILED
             self.db.commit()
 
     def __get_default_service_config(self):

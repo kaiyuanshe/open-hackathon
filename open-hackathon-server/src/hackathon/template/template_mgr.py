@@ -46,9 +46,9 @@ from hackathon.hackathon_response import (
     ok,
     access_denied
 )
-from hackathon.enum import (
+from hackathon.constants import (
     TEMPLATE_STATUS,
-    VEProvider,
+    VE_PROVIDER,
 )
 from hackathon.template.docker_template_unit import (
     DockerTemplateUnit,
@@ -134,7 +134,7 @@ class TemplateManager(Component):
                                   azure_url=azure_url,
                                   provider=args[BaseTemplate.VIRTUAL_ENVIRONMENTS_PROVIDER],
                                   creator_id=g.user.id,
-                                  status=TEMPLATE_STATUS.UNCHECK,
+                                  status=TEMPLATE_STATUS.UNCHECKED,
                                   create_time=self.util.get_now(),
                                   update_time=self.util.get_now(),
                                   description=args[BaseTemplate.DESCRIPTION],
@@ -394,7 +394,7 @@ class TemplateManager(Component):
         template_ids = map(lambda x: x.template.id, htrs)
         templates = self.db.find_all_objects(Template,
                                              Template.id.in_(template_ids),
-                                             Template.provider == VEProvider.Docker,
+                                             Template.provider == VE_PROVIDER.DOCKER,
                                              Template.status == TEMPLATE_STATUS.CHECK_PASS)
         return templates
 

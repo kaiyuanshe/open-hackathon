@@ -33,6 +33,7 @@ import json
 from pytz import utc
 from dateutil import parser
 
+
 def relationship(*arg, **kw):
     ret = relation(*arg, **kw)
     db_adapter.commit()
@@ -358,7 +359,7 @@ class VirtualEnvironment(DBBase):
     __tablename__ = 'virtual_environment'
 
     id = Column(Integer, primary_key=True)
-    # VEProvider in enum.py
+    # VE_PROVIDER in enum.py
     provider = Column(Integer)
     name = Column(String(100), nullable=False)
     image = Column(String(100))
@@ -446,7 +447,7 @@ class Template(DBBase):
     azure_url = Column(String(200))
     provider = Column(Integer, default=0)
     creator_id = Column(Integer)
-    status = Column(Integer)    # 1=online , 0=offline
+    status = Column(Integer)  # 1=online , 0=offline
     create_time = Column(TZDateTime, default=get_now())
     update_time = Column(TZDateTime)
     description = Column(Text)
@@ -660,7 +661,7 @@ class AdminHackathonRel(DBBase):
 
     role_type = Column(Integer)  # enum.ADMIN_ROLE_TYPE
     hackathon_id = Column(Integer)
-    status = Column(Integer)  # enum.AdminHackathonRelStatus
+    status = Column(Integer, default=0)  # reserved, not in use currently
     remarks = Column(String(255))
     create_time = Column(TZDateTime, default=get_now())
     update_time = Column(TZDateTime)

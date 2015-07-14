@@ -28,13 +28,10 @@ import sys
 
 sys.path.append("..")
 from hackathon.database.models import Hackathon, User, UserHackathonRel, AdminHackathonRel, DockerHostServer, Template
-from hackathon.enum import RGStatus, VEProvider
 from hackathon.hackathon_response import internal_server_error, bad_request, ok
-from hackathon.enum import ADMIN_ROLE_TYPE, HACK_STATUS
 from sqlalchemy import or_
-from hackathon.constants import HTTP_HEADER
 import json
-from hackathon.constants import HACKATHON_BASIC_INFO
+from hackathon.constants import HACKATHON_BASIC_INFO, ADMIN_ROLE_TYPE, HACK_STATUS, RGStatus, VE_PROVIDER, HTTP_HEADER
 from hackathon import RequiredFeature, Component
 from flask import g, request
 import imghdr
@@ -149,7 +146,8 @@ class HackathonManager(Component):
             return value
         except Exception as e:
             self.log.error(e)
-            self.log.warn("cannot get %s from basic info for hackathon %d, will return default value" % (key, hackathon.id))
+            self.log.warn(
+                "cannot get %s from basic info for hackathon %d, will return default value" % (key, hackathon.id))
             return default
 
     def validate_admin_privilege_http(self):
@@ -250,7 +248,7 @@ class HackathonManager(Component):
             template_dir = dirname(dirname(realpath(__file__))) + '/resources'
             template_url = template_dir + os.path.sep + "kaiyuanshe-ut.js"
             template = Template(name="ut", url=template_url,
-                                provider=VEProvider.Docker,
+                                provider=VE_PROVIDER.DOCKER,
                                 status=1,
                                 virtual_environment_count=1,
                                 description="<ul><li>Ubuntu</li><li>SSH</li><li>LAMP</li></ul>",

@@ -28,7 +28,7 @@ from hackathon.database import Base, engine
 from hackathon.database.models import AdminHackathonRel, User
 from hackathon.database import db_adapter
 from hackathon.util import get_now
-from hackathon.enum import ADMIN_ROLE_TYPE, ReservedUser
+from hackathon.constants import ADMIN_ROLE_TYPE, ReservedUser
 
 
 def setup_db():

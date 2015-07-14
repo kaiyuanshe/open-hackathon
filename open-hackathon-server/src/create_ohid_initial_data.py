@@ -24,12 +24,11 @@ THE SOFTWARE.
 """
 
 from hackathon.database.models import *
-from hackathon.constants import HACKATHON_BASIC_INFO
+from hackathon.constants import HACKATHON_BASIC_INFO, VE_PROVIDER
 from datetime import timedelta
 import json
 import os
 from os.path import realpath, dirname
-from hackathon.enum import VEProvider
 from hackathon.util import get_now
 
 # test hackathon
@@ -65,7 +64,7 @@ if db_adapter.find_first_object_by(DockerHostServer, vm_name=docker_host.vm_name
 # test template: ubuntu terminal
 template_dir = dirname(realpath(__file__)) + '/hackathon/resources'
 template_url = template_dir + os.path.sep + "sample.js"
-template = Template(name="ut", url=template_url, provider=VEProvider.Docker, status=1, virtual_environment_count=1,
+template = Template(name="ut", url=template_url, provider=VE_PROVIDER.DOCKER, status=1, virtual_environment_count=1,
                     description="", hackathon=hackathon)
 if db_adapter.find_first_object_by(Template, name=template.name, hackathon_id=hackathon.id) is None:
     db_adapter.add_object(template)

@@ -40,7 +40,7 @@ from hackathon.database.models import (
     PortBinding,
     DockerHostServer,
 )
-from hackathon.enum import (
+from hackathon.constants import (
     EStatus,
     PortBindingType,
     VEStatus,
@@ -255,7 +255,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
                 return None
 
         self.log.debug("starting container %s is ended ... " % container_name)
-        virtual_environment.status = VEStatus.Running
+        virtual_environment.status = VEStatus.RUNNING
         self.db.commit()
         return container
 
@@ -333,7 +333,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
         if we release ports now, the new ports will be lost.
         :return:
         """
-        num = self.db.count(Experiment, Experiment.status == EStatus.Starting)
+        num = self.db.count(Experiment, Experiment.status == EStatus.STARTING)
         if num > 0:
             self.log.debug("there are %d experiment is starting, host ports will updated in next loop" % num)
             return
@@ -461,7 +461,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
             binding_cloud_service = PortBinding(name=public_cfg[DockerTemplateUnit.PORTS_NAME],
                                                 port_from=public_cfg[DockerTemplateUnit.PORTS_PUBLIC_PORT],
                                                 port_to=public_cfg[DockerTemplateUnit.PORTS_HOST_PORT],
-                                                binding_type=PortBindingType.CloudService,
+                                                binding_type=PortBindingType.CLOUD_SERVICE,
                                                 binding_resource_id=host_server.id,
                                                 virtual_environment=ve,
                                                 experiment=expr,
@@ -470,7 +470,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
             binding_docker = PortBinding(name=public_cfg[DockerTemplateUnit.PORTS_NAME],
                                          port_from=public_cfg[DockerTemplateUnit.PORTS_HOST_PORT],
                                          port_to=public_cfg[DockerTemplateUnit.PORTS_PORT],
-                                         binding_type=PortBindingType.Docker,
+                                         binding_type=PortBindingType.DOCKER,
                                          binding_resource_id=host_server.id,
                                          virtual_environment=ve,
                                          experiment=expr)
@@ -484,7 +484,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
             port_binding = PortBinding(name=local_cfg[DockerTemplateUnit.PORTS_NAME],
                                        port_from=local_cfg[DockerTemplateUnit.PORTS_HOST_PORT],
                                        port_to=local_cfg[DockerTemplateUnit.PORTS_PORT],
-                                       binding_type=PortBindingType.Docker,
+                                       binding_type=PortBindingType.DOCKER,
                                        binding_resource_id=host_server.id,
                                        virtual_environment=ve,
                                        experiment=expr)
