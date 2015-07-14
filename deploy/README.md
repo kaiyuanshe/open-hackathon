@@ -1,10 +1,10 @@
 
-<center>OpenHackathon Manual</center>
+OpenHackathon Manual
 Microsot Open Technologies
 
 Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd. All rights reserved.
 
-This work is licensed under the Creative Commons Attribution 4.0 International license. You may copy, transform, and redistribute this work for any purpose so long as attribution is given. Please see the exact terms of the license for details.
+This project is licensed under [MIT License](https://github.com/msopentechcn/open-hackathon/blob/master/license.txt)
 
 
 
