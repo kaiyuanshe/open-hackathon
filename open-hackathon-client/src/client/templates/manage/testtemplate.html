@@ -1,13 +1,11 @@
-{% extends "base/base.html" %} {% block meta %}
-<!-- Metas -->
-{% endblock %} {% block style %}
-<!-- Styles-->
-<link href="/static/css/testtemplate.css" rel="stylesheet">
-{% endblock %} {% block head %}
-<!-- Head -->
-{% endblock %} {% block content %}
-<div class="text-center loading"><img src="/static/pic/spinner-lg.gif"></div>
+{% extends "base/manage.html" %}
 
+{% block style %}
+<link href="/static/css/oh.manage.testtemplate.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="text-center loading"><img src="/static/pic/spinner-lg.gif"></div>
 <div class="full-main" style="display:none">
     <div class="remote_tabs clearfix">
         <ul class="nav nav-tabs" id="tabs"></ul>
@@ -16,8 +14,8 @@
 
     </div>
 </div>
+{% endblock %}
 
-{% endblock %} {% block script %}
-<!-- Scripts -->
-<script type="text/javascript" src="/static/js/views/oh.testtemplate.js"></script>
+{% block script %}
+<script type="text/javascript" src="/static/js/views/oh.manage.testtemplate.js"></script>
 {% endblock %}
