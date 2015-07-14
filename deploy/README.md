@@ -1,37 +1,85 @@
-This document will tell you how to deploy the whole open-hackathon web application environment manually.    
-And the whole environment cotains serval components such guacamole , nginx , tomcat and the open-hackathon running Dependencies. 
+
+Guacamole Manual
+Michael Jumper
+<mike.jumper@guac-dev.org>
+
+Copyright © 2015 Glyptodon LLC
+
+This work is licensed under the Creative Commons Attribution 4.0 International license. You may copy, transform, and redistribute this work for any purpose so long as attribution is given. Please see the exact terms of the license for details.
+
+
+
 * [Introduction](#Introduction)
   * [What is OpenHackathon](#What-is-OpenHackathon)
-  * [Why choose OpenHackathon](#Why-choose-OpenHackathon)
-  * [Where is the feature of OpenHackathon](#Where-is-the-feature-of-OpenHackathon)
+  * [Why OpenHackathon](#Why-OpenHackathon)
+  
 
 * [User's Guide](#User's-Guide)
-  * [introduction vedio](#introduction-vedio)
-  * [how to create a hackathon](#how-to-create-a-hackathon)
-  * [how to manage a hackathon](#how-to-manage-a-hackathon)
-  * [how to attend a hackathon](#how-to-attend-a-hackathon)
+  * [Implementation and architecture](#introduction-vedio)
+    各种名词介绍
+  * [attend hackathons](#how-to-attend-a-hackathon)
+     报名，组队，参赛，提交评审
+  * [manage your own hackathon](#how-to-manage-a-hackathon)
+     create new
+     基本信息
+     报名用户
+     活动管理员，
+     主办方
+     ……
+  * [Template] 
+    模版库，管理
+
   * [FAQ](#FAQ)
     * [guacamole usage](#guacamole-usage)
 
 * [Developer's Guide](#Developer's-Guide)
-  * [src architecture](#src-architecture)
-  * [src implementation](#src-implementation)
-  * [API documemt](#API-document)
-    * [hackathon APIs](#hackathon-APIs)
-    * [user APIs](#user-APIs)
-    * [others APIs](#others-APIs)* 
+  * [Implementation and architecture](#src-architecture)
+    文件夹，Flask框架
+  * [try openhackathon quickly]
+    用doker
   * [setup develop environment](#setup-develop-environment)
-    * [setup system components](#install-system-components)
+  
     * [setup Docker Env](#setup-Docker-Env)
     * [setup Guacamole Env](#setup-Guacamole-Env)
-    * [get src from GitHub](#get-src-from-GitHub)
     * [setup MysqlDB Env](#setup-MysqlDB-Env)
-    * [setup server api Env](#setup-server-api-Env)
-    * [setup frontend website Env](#setup-frontend-website-Env)
-    * [setup python IDE](#setup-python-IDE)
+    * [setup python env]
+       src
+       pip install
+       config-sample =》config
+
+  * customize
+    自定义，
+    azure --> Ali
+    guacamole --> other client provider
+    
+  * Test
+    * unit test
+    * api test
+    
+  * [API documemt](#API-document)
+  * python doc
+  * DB schema
+  * contribution.MD
+
+  * [FAQ](#QA)
 
 
-* [QA](#QA)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Introduction
 # User's Guide
