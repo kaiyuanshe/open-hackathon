@@ -1,11 +1,8 @@
 
 <h1 align = "center">OpenHackathon Manual</h1>   
 <p align = "center">Microsot Open Technologies</p>                  
-                     
-Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd. All rights reserved.
-                           
-This project is licensed under [MIT License](https://github.com/msopentechcn/open-hackathon/blob/master/license.txt)
-                     
+<p align = "center">Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd. All rights reserved</p>
+<p align = "center">This project is licensed under [MIT License](https://github.com/msopentechcn/open-hackathon/blob/master/license.txt)</p>
                      
                      
 * [Introduction](#Introduction)
