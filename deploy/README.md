@@ -6,7 +6,9 @@
 
 
 
-#### Table of Contens
+
+
+
 * [Introduction](#Introduction)
   * [What is OpenHackathon](#What-is-OpenHackathon)
   * [Why OpenHackathon](#Why-OpenHackathon)
