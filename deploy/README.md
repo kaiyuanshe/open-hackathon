@@ -43,7 +43,7 @@
   * [Test](#test)
     * [Unit test](#unit-test)
     * [API test](#api-test)
-  * [API documemt](#API-document)
+  * [API documemt](#api-document)
   * [Python doc](#python-doc)
   * [DB schema](#db-schema)
   * [Contribution.MD](#contribution.md)
@@ -102,10 +102,10 @@ Templat 上传过程及用户对自己上传的Template的管理操作
 ### unit test
 ### api test
     
-## API-document
-## python doc
+## API document
+## Python doc
 ## DB schema
-## contribution.MD
+## Contribution.MD
 
 
 
