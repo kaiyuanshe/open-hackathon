@@ -1,5 +1,5 @@
 
-OpenHackathon Manual             
+<h1 align = "center">OpenHackathon Manual</h1>   
 Microsot Open Technologies                 
                      
 Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd. All rights reserved.
