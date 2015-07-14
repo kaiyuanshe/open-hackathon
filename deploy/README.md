@@ -9,7 +9,7 @@
 
 
 
-* [Introduction](#Introduction)
+* [Introduction](#introduction)
   * [What is OpenHackathon](#What-is-OpenHackathon)
   * [Why OpenHackathon](#Why-OpenHackathon)
 
@@ -26,8 +26,8 @@
     * [Manage basic info](#manage-basic-info)
   * [Manage registration](#manage-registration)
   * [Manage administrators](#manage-administrators)
-  * [Manage Azure certificate](#manage-Azure-certificate)
-  * [Manage templates](#manage-template)
+  * [Manage Azure certificate](#manage-azure-certificate)
+  * [Manage templates](#manage-templates)
   * [Manage experiment](#manage-experiment)
   * [FAQ](#FAQ)
 
@@ -74,7 +74,7 @@ Templat 上传过程及用户对自己上传的Template的管理操作
 ## Manage registration
 ## Manage administrators
 ## Manage Azure certificate)
-## Manage template
+## Manage templates
 ## Manage experiment
 
 
