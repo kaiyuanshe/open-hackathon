@@ -1,31 +1,4 @@
 @import "font-awesome.min.css";
-/*
-@import "jquery-ui-1.10.3.custom.css";
-@import "fullcalendar.css";
-@import "chosen.css";
-@import "select2.css";
-@import "jquery.cleditor.css";
-@import "jquery.noty.css";
-@import "noty_theme_default.css";
-@import "elfinder.min.css";
-@import "elfinder.theme.css";
-@import "uploadify.css";
-@import "jquery.gritter.css";
-
-
-@import "glyphicons.css";
-@import "halflings.css";
-@import "dropzone.css";
-@import "filetypes.css";
-@import "social.css";
-@import "xcharts.min.css";
-@import "jquery.easy-pie-chart.css";
-@import "icheck/all.css";
-@import "bootstrap-editable.css";
-@import url(http://fonts.googleapis.com/css?family=Lato:300);
-@import url(http://fonts.googleapis.com/css?family=Lato:400);
-@import url(http://fonts.googleapis.com/css?family=Kaushan+Script);
-*/
 
 @media (min-width: 1200px) {
     .container-fluid #content {
@@ -166,21 +139,7 @@
 }
 
 body {
-    background-color: #71B1D1;
     font-family: "Helvetica Neue", Helvetica, Hiragino Sans GB, WenQuanYi Micro Hei, stheiti, Microsoft Yahei, Simsun, sans-serif;
-    margin-bottom: 40px;
-}
-
-body:after {
-    top: 0;
-    left: 14.422%;
-    position: fixed;
-    content: '';
-    height: 100%;
-    width: 85.578%;
-    background: #fff;
-    border-left: 1px solid #fff;
-    z-index: 0;
 }
 
 #content {
@@ -188,6 +147,7 @@ body:after {
     background: #fff;
     z-index: 1;
 }
+
 .md-nooverflow #content{
  z-index: auto;
 }
@@ -199,6 +159,7 @@ label {
 .relative{
   position: relative;
 }
+
 .bootstrap-duallistbox-container label,
 .form header,
 legend {
@@ -1351,249 +1312,3 @@ ul.notifications li, ul.tasks li, ul.messages li {
     right:15px;
 }
 
-
-
-
-
-@media only screen and (max-width: 600px), (max-device-width: 600px) {
-  .background_branding_container {
-    opacity: 0;
-    display: none;
-  }
-
-  .login_panel {
-    border-left: 0;
-    position: relative;
-    float: none;
-    height: 100%;
-    width: 100%;
-    min-width: 100%;
-    margin: 0px;
-    padding: 0px;
-    z-index: 1;
-    padding-top: 0px;
-    overflow: auto;
-  }
-}
-
-@media only screen and (max-height: 820px), (max-device-height: 820px) {
-  .inner_container {
-    padding-top: 45px;
-  }
-}
-
-@media only screen and (max-height: 600px), (max-device-height: 600px) {
-  .inner_container {
-    padding-top: 30px;
-  }
-}
-
-@media only screen and (max-height: 575px), (max-device-height: 575px) {
-  .inner_container {
-    padding-bottom: 14em;
-  }
-}
-
-.background_branding_container {
-  position: fixed;
-  left: 0px;
-  top: 0;
-  overflow: hidden;
-  z-index: 0;
-  opacity: 1;
-  width: 100%;
-  height: 100%;
-  transition: opacity 1s;
-  -moz-transition: opacity 1s;
-  -webkit-transition: opacity 1s;
-  -o-transition: opacity 1s;
-  -ms-transition: opacity 1s;
-  transition-property: opacity;
-  transition-duration: 1s;
-}
-
-.background_image {
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  visibility: visible;
-  display: block;
-  background-color: rgb(235, 60, 0);
-}
-
-.login_panel {
-  background: #FFFFFF;
-  position: fixed;
-  top: 0;
-  right: 0px;
-  float: right;
-  height: 100%;
-  width: 484px;
-  margin: 0px;
-  padding: 0px;
-  z-index: 1;
-  text-align: left;
-  border-left: 1px solid #FFFFFF;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.login_panel_center {
-  width: 379px;
-  height: 100%;
-  min-height: 100%;
-  margin: 0 auto;
-  padding: 0;
-  border: 0;
-}
-.login-box{
-  padding-right: 20px;
-  margin: 80px auto;
-  background: #fff;
-}
-.btn-live,
-.btn-github,
-.btn-qq,
-.btn-weibo {
-  color: white;
-  position: relative;
-  text-align: center;
-  height: 40px;
-  width: 100%;
-  font-family: 'FontAwesome';
-  font-weight: bold;
-  padding: 10px 0;
-  border:0;
-}
-.btn-live:before,
-.btn-github:before,
-.btn-qq:before,
-.btn-weibo:before {
-  position: absolute;
-  display: block;
-  height: 40px;
-  width: 40px;
-  top: 0;
-  left: 0;
-  -webkit-border-radius: 2px;
-  -moz-border-radius: 2px;
-  border-radius: 2px;
-  font-size: 25px;
-  padding: 6px 0;
-  font-style: normal;
-  font-weight: normal;
-  line-height: 1;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-.btn-live:hover,
-.btn-github:hover,
-.btn-qq:hover,
-.btn-weibo:hover {
-  color: white;
-}
-.btn-live {
-  background: #00aced
-}
-
-.btn-live:before{
-  content: "\f17a";
-  background: #0099d4
-}
-
-.btn-live:hover {
-  background: #0099d4
-}
-
-.btn-live:hover:before {
-  background: #0087ba
-}
-
-.btn-github {
-  background: #3b5998
-}
-.btn-github:before {
-  content: "\f113";
-  background: #344e86
-}
-
-.btn-github:hover {
-  background: #344e86
-}
-
-.btn-github:hover:before {
-  background: #2d4373
-}
-
-.btn-qq {
-  background: #00aced
-}
-
-.btn-qq:before {
-  content: "\f1d6";
-  background: #0099d4
-}
-
-.btn-qq:hover {
-  background: #0099d4
-}
-
-.btn-qq:hover:before {
-  background: #0087ba
-}
-
-.btn-weibo {
-  background: #4875b4
-}
-
-.btn-weibo:before {
-  content: "\f18a";
-  background: #4169a2
-}
-
-.btn-weibo:hover {
-  background: #4169a2
-}
-
-.btn-weibo:hover:before {
-  background: #395d90
-}
-
-
-
-
-
-.inner_container{
-  height: 600px;
-  padding-bottom: 18em;
-}
-.login_workload_logo_container {
-
-}
-.login_footer{
-  width: 100%;
-  height: 40px;
-  color: #666666;
-  margin-left: 0px;
-  display: inline-block;
-  position: static;
-  background: none;
-  line-height: normal;
-}
-.login_footer a {
-  color: #000000;
-}
-.footer_glyph{
-  float: left;
-}
-.branding_footer{
-  padding-left: 37px;
-  font-size: 0.7em;
-}
-
-.login_workload_logo_container{
-  color: #0071C1;
-  font-weight: 400;
-  font-size: 1.178em;
-  font-family: 'Segoe UI' , 'Segoe' , 'SegoeUI-Regular-final', Tahoma, Helvetica, Arial, sans-serif;
-}

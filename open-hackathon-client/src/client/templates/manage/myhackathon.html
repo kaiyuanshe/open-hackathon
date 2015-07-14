@@ -1,4 +1,4 @@
-{% extends "base/base.html" %}
+{% extends "base/manage.html" %}
 
 {% block style %}
 <style>
@@ -39,7 +39,10 @@
         </div>
     </div>
 </div>
-{% endblock %} {% block script %} {{ super() }}
+{% endblock %}
+
+{% block script %}
+{{ super() }}
 <script id="hackathon_template" type="text/x-jquery-tmpl">
 {% raw %}
 <tr>
@@ -57,5 +60,5 @@
 </script>
 <script type="text/javascript" src="/static/js/bootstrap/bootstrap-editable.js"></script>
 <script type="text/javascript" src="/static/js/jquery/moment.min.js"></script>
-<script type="text/javascript" src="/static/js/views/oh.myhackathon.js"></script>
+<script type="text/javascript" src="/static/js/views/oh.manage.myhackathon.js"></script>
 {% endblock %}

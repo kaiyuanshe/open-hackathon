@@ -1,7 +1,9 @@
-{% extends "manage/main.html" %} {% block style %}
-<link href="/static/css/bootstrapValidator.css" rel="stylesheet">
-{% endblock %} {% block body %}
+{% extends "manage/main.html" %}
 
+{% block style %}
+{% endblock %}
+
+{% block body %}
 <div class="col-lg-12" loading>
     <div class="box" style="display:none">
         <div class="box-header">
@@ -75,8 +77,6 @@
         </div>
     </div>
 </div>
-
-{% endblock body %} {% block script %} {{ super() }}
 <div class="modal fade bs-example-modal-sm" id="confirm_modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-api="oh.api.admin.registration.delete">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
@@ -94,6 +94,10 @@
         </div>
     </div>
 </div>
+{% endblock body %}
+
+{% block script %}
+{{ super() }}
 <script id="hackathon_organizer" type="text/x-jquery-tmpl">
     <tr>
         <td>${organizer_name}</td>
@@ -110,7 +114,5 @@
         </td>
     </tr>
 </script>
-<script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
-<script type="text/javascript" src="/static/js/jquery/jquery.tmpl.min.js"></script>
-<script type="text/javascript" src="/static/js/views/oh.organizers.js"></script>
+<script type="text/javascript" src="/static/js/views/oh.manage.organizers.js"></script>
 {% endblock %}
