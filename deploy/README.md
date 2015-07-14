@@ -78,7 +78,7 @@ Templat 上传过程及用户对自己上传的Template的管理操作
 ## Manage experiment
 
 
-# Developer's Guide
+#Developer's Guide
 ## Implementation and Architecture for Developer
 Project on Github:`https://github.com/msopentechcn/open-hackathon.git`    
 src folders introduction:        
@@ -94,9 +94,11 @@ src folders introduction:
     介绍如何用doker的一个image来run起一个openhackathon
 ## Setup develop environment
 ### Setup Docker Env
+    介绍下docker在OpenHackathon的作用
     .[Docker intsallation on Ubuntu](https://docs.docker.com/installation/ubuntulinux/)
     
 ### Setup Guacamole Env
+    介绍下Guacamole在OpenHackathon的作用
     .[Gucamole installation](http://guac-dev.org/doc/gug/installing-guacamole.html)
     
 ### Setup MysqlDB Env
