@@ -33,6 +33,7 @@ import json
 from pytz import utc
 from dateutil import parser
 
+
 def relationship(*arg, **kw):
     ret = relation(*arg, **kw)
     db_adapter.commit()
@@ -223,23 +224,6 @@ class UserProfile(DBBase):
     def __init__(self, **kwargs):
         super(UserProfile, self).__init__(**kwargs)
 
-class UserTeamRel(DBBase):
-    __tablename__ = 'user_team_rel'
-
-    id = Column(Integer, primary_key=True)
-    join_time = Column(TZDateTime, default=get_now())
-    update_time = Column(TZDateTime)
-    status = Column(Integer)  # 0:unaudit ,1:audit_passed, 2:audit_refused
-
-    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
-    user = relationship('User', backref=backref('user_team_rels', lazy='dynamic'))
-
-    team_id = Column(Integer, ForeignKey('team.id', ondelete='CASCADE'))
-    team = relationship('Team', backref=backref('user_team_rels', lazy='dynamic'))
-
-    def __init__(self, **kwargs):
-        super(UserTeamRel, self).__init__(**kwargs)
-
 
 class Team(DBBase):
     __tablename__ = 'team'
@@ -261,6 +245,27 @@ class Team(DBBase):
 
     def __init__(self, **kwargs):
         super(Team, self).__init__(**kwargs)
+
+
+class UserTeamRel(DBBase):
+    __tablename__ = 'user_team_rel'
+
+    id = Column(Integer, primary_key=True)
+    join_time = Column(TZDateTime, default=get_now())
+    update_time = Column(TZDateTime)
+    status = Column(Integer)  # 0:unaudit ,1:audit_passed, 2:audit_refused
+
+    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
+
+    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
+    user = relationship('User', backref=backref('user_team_rels', lazy='dynamic'))
+
+    team_id = Column(Integer, ForeignKey('team.id', ondelete='CASCADE'))
+    team = relationship('Team', backref=backref('user_team_rels', lazy='dynamic'))
+
+    def __init__(self, **kwargs):
+        super(UserTeamRel, self).__init__(**kwargs)
+
 
 class Hackathon(DBBase):
     __tablename__ = 'hackathon'
@@ -442,12 +447,13 @@ class Template(DBBase):
     url = Column(String(200))
     azure_url = Column(String(200))
     provider = Column(Integer, default=0)
-    creator_id = Column(Integer)
-    status = Column(Integer)    # 1=online , 0=offline
+    status = Column(Integer)  # 1=online , 0=offline
     create_time = Column(TZDateTime, default=get_now())
     update_time = Column(TZDateTime)
     description = Column(Text)
     virtual_environment_count = Column(Integer, default=0)
+
+    creator_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
 
     def __init__(self, **kwargs):
         super(Template, self).__init__(**kwargs)
@@ -459,7 +465,7 @@ class HackathonTemplateRel(DBBase):
     id = Column(Integer, primary_key=True)
     create_time = Column(TZDateTime, default=get_now())
     update_time = Column(TZDateTime)
-    team_id = Column(Integer)
+    team_id = Column(Integer, default=-1)
 
     hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
     hackathon = relationship('Hackathon', backref=backref('hackathon_template_rels', lazy='dynamic'))

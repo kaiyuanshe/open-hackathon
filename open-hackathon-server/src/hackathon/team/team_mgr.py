@@ -40,19 +40,19 @@ class TeamManager(Component):
         if __checkleader__(hid,tname,leader_id) is not False:
             candidate = self.db.find_first_object_by(UserTeamRel, hackathon_id=hid, user_id=candidate_id)
             candidate.status = 1
-            self.db.update_object(candidate)
+            self.db.commit()
 
     def team_refuse(self, hid, leader_id, candidate_id):
         if __checkleader__(hid,tname,leader_id) is not False:
             candidate = self.db.find_first_object_by(UserTeamRel, hackathon_id=hid, user_id=candidate_id)
             candidate.status = 2
-            self.db.update_object()
+            self.db.commit()
 
     def team_kick(self, hid, leader_id, candidate_id):
         if __checkleader__(hid,tname,leader_id) is not False:
             candidate = self.db.find_first_object_by(UserTeamRel, hackathon_id=hid, user_id=candidate_id)
             candidate.status = 0
-            self.db.update_object(candidate)
+            self.db.commit()
 
     def team_leave(self, hid, tname, leader_id, candidate_id):
         if __checkleader__(hid,tname,leader_id) is False:
@@ -66,7 +66,7 @@ class TeamManager(Component):
     def promo_leader(self, hid, tname, new_uid, old_uid):
         leader = self.db.find_first_object_by(Team, hackathon_id=hid, team_name=tname, leader_id=old_uid)
         leader.leader_id = new_uid
-        self.db.update_object(leader)
+        self.db.commit()
 
     def team_dismiss(self, hid, tname, leader_id):
         if __checkleader__(hid,tname,leader_id) is not False:
