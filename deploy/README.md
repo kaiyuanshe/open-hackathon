@@ -1,9 +1,8 @@
 
-Guacamole Manual
-Michael Jumper
-<mike.jumper@guac-dev.org>
+<center>OpenHackathon Manual</center>
+Microsot Open Technologies
 
-Copyright © 2015 Glyptodon LLC
+Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd. All rights reserved.
 
 This work is licensed under the Creative Commons Attribution 4.0 International license. You may copy, transform, and redistribute this work for any purpose so long as attribution is given. Please see the exact terms of the license for details.
 
