@@ -26,7 +26,10 @@
 
 #!flask/bin/python
 from hackathon import app
-
+from hackathon.health.health_check import GuacamoleHealthCheck
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=15000)
+
+g = GuacamoleHealthCheck()
+print g.reportHealth()

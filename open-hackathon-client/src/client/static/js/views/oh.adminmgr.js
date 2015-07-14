@@ -23,7 +23,7 @@
  */
 
 (function($, oh) {
-
+    var currentHackathon = oh.comm.getCurrentHackathon();
     var isupdate = false;
 
     function toggleTable(){
@@ -64,10 +64,10 @@
     // initial table to show admin list
     function pageLoad(){
         var list = $('#hackathon_admin_list');
-        var currentHackathon = oh.comm.getCurrentHackathon();
+
         oh.api.admin.hackathon.administrator.list.get({
             header: {
-                hackathon_name: currentHackathon.name
+                hackathon_name: currentHackathon
             }
         }, function(data) {
             list.empty().append($('#hackathon_admin_list_template').tmpl(data,{
@@ -104,11 +104,10 @@
 
     // call api to add a admin
     function createAdmin(itemData){
-        var currentHackathon = oh.comm.getCurrentHackathon();
         return oh.api.admin.hackathon.administrator.post({
             body: itemData,
             header: {
-                hackathon_name: currentHackathon.name
+                hackathon_name: currentHackathon
             }
         }, function(data) {
             if(data.error){
@@ -120,11 +119,10 @@
 
     // call api to update a admin
     function updateAdmin(itemData){
-        var currentHackathon = oh.comm.getCurrentHackathon();
         return oh.api.admin.hackathon.administrator.put({
             body: itemData,
             header: {
-                hackathon_name: currentHackathon.name
+                hackathon_name: currentHackathon
             }
         }, function(data) {
             if(data.error){
@@ -136,11 +134,10 @@
 
     // call api to delete a admin
     function deleteAdmin(id){
-        var currentHackathon = oh.comm.getCurrentHackathon();
         return oh.api.admin.hackathon.administrator.delete({
             query: {id:id},
             header: {
-                hackathon_name: currentHackathon.name
+                hackathon_name: currentHackathon
             }
         }, function(data) {
             if(data.error){

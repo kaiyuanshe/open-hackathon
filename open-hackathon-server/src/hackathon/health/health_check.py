@@ -122,5 +122,3 @@ class AzureHealthCheck(HealthCheck):
             }
 
 
-g = GuacamoleHealthCheck()
-print g.reportHealth()

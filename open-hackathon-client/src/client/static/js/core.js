@@ -108,19 +108,10 @@
             formatstr = formatstr || 'yyyy-MM-dd';
             return new Date(milliseconds).format(formatstr);
         },
-        changeCurrentHackathon:function(hackathon){
-            var data = {};
-            data[$.cookie('token')] = hackathon;
-            $.cookie(CURRENT_HACKATHON_COOKIE_NAME,JSON.stringify(data));
-        },
         getCurrentHackathon: function() {
-            var data = $.cookie(CURRENT_HACKATHON_COOKIE_NAME) || '{}';
-            var token = $.cookie('token');
-            var json = JSON.parse(data);
-            if(json[token]){
-                return json[token];
-            }
-            return  {name:'',id:0};
+            var route = '/manage/:hackathon_name';
+            var routeMatcher = new RegExp(route.replace(/:[^\s/]+/g, '([\\w-]+)'));
+            return window.location.pathname.match(routeMatcher)[1] || '';
         },
         createLoading:function(elemt){
             $(elemt).children().hide();
@@ -177,7 +168,7 @@
         }
         w.oh.comm.createLoading('[loading]');
         addTabsEvent();
-        var currentHackathon = w.oh.comm.getCurrentHackathon();
+       /*  var currentHackathon = w.oh.comm.getCurrentHackathon();
         $.template('switc_hackathons_temp', '<li {{if id == $item.hid }} class="active" {{/if}}>{{if id == $item.hid }}<i class="fa fa-check"></i>{{/if}}<a href="#" data-type="hackathon">${name}</a></li>');
         $.template('switc_hackathons_temp2','<li><a href="javascript:;"><span class="icon blue"><i class="fa fa-check"></i></span><span class="message">${name}</span></a></li>')
         var hackathon_modal = $('#switc_hackathon_modal').on('show.bs.modal', function(e) {
@@ -213,7 +204,7 @@
         });
 
 
-        if(location.pathname.length !=1 && location.pathname.search('createhackathon|login|logout','i') == -1){
+       if(location.pathname.length !=1 && location.pathname.search('createhackathon|login|logout','i') == -1){
             if(currentHackathon.id == 0){
                 oh.api.admin.hackathon.list.get(function(data){
                     if(data.length == 0){
@@ -230,7 +221,7 @@
             }else{
                  $('#content').prepend('<legend> 当前黑客松：'+currentHackathon.name+'</legend>')
             }
-        }
+        }*/
 
         var menu = $('#sidebar-left .main-menu');
         menu.find('a').each(function() {

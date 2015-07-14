@@ -2,7 +2,7 @@
 #
 # -----------------------------------------------------------------------------------
 # Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#  
+#
 # The MIT License (MIT)
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -118,36 +118,44 @@ Config = {
         "hackathon": {
             "name": "open-xml-sdk",
             "endpoint": HACKATHON_API_ENDPOINT
-        }
-    },
-    "apiconfig": {
-        "proxy": HACKATHON_API_ENDPOINT,
-        "api": {
-            "admin": {
-                "hackathon": {
-                    "": ["get", "post", "put"],
-                    "checkname": ["get"],
-                    "list": ["get"],
-                    "template": {
-                        "": ["get", "post", "delete", "put"],
-                        "check": ["get"]
+        },
+        "apiconfig": {
+            "proxy": HACKATHON_API_ENDPOINT,
+            "api": {
+                "admin": {
+                    "hackathon": {
+                        "": ["get", "post", "put"],
+                        "checkname": ["get"],
+                        "list": ["get"],
+                        "administrator": {
+                            "": ["put", "post", "delete"],
+                            "list": ["get"]
+                        },
+                        "template": {
+                                "": ["post", "delete"],
+                                "list": ["get"],
+                                "check": ["get"]
+                        }
                     },
-                    "administrator": {
-                        "": ["put", "post", "delete"]
+                    "registration": {
+                        "": ["get", "post", "delete", "put"],
+                        "list": ["get"]
+                    },
+                    "azure": {
+                        "": ["get", "post", "delete", "put"],
+                    },
+                    "experiment": {
+                        "list": ["get"],
+                        "": ["post", "put"]
                     }
                 },
-                "registration": {
-                    "": ["get", "post", "delete", "put"],
-                    "list": ["get"]
+                "template": {
+                        "": ["get", "post", "delete", "put"],
+                        "list": ["get"],
+                        "check": ["get"]
                 },
-                "azure": {
-                    "": ["get", "post", "delete", "put"],
-                },
-                "experiment": {
-                    "list": ["get"],
-                    "": ["post", "put"]
-                }
             }
         }
     }
+
 }

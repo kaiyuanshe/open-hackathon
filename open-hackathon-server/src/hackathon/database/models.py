@@ -186,7 +186,6 @@ class UserHackathonRel(DBBase):
 
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
-    team_name = Column(String(80))
     create_time = Column(TZDateTime, default=get_now())
     update_time = Column(TZDateTime)
     description = Column(String(200))
@@ -224,6 +223,47 @@ class UserProfile(DBBase):
     def __init__(self, **kwargs):
         super(UserProfile, self).__init__(**kwargs)
 
+
+class UserTeamRel(DBBase):
+    __tablename__ = 'user_team_rel'
+
+    id = Column(Integer, primary_key=True)
+    create_time = Column(TZDateTime, default=get_now())
+    update_time = Column(TZDateTime)
+    status = Column(Integer, default=0)  # 0:unaudit ,1:audit_passed, 2:audit_refused
+
+    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
+    user = relationship('User', backref=backref('user_team_rels', lazy='dynamic'))
+
+    team_id = Column(Integer, ForeignKey('team.id', ondelete='CASCADE'))
+    team = relationship('Team', backref=backref('user_team_rels', lazy='dynamic'))
+
+    def __init__(self, **kwargs):
+        super(UserTeamRel, self).__init__(**kwargs)
+
+
+class Team(DBBase):
+    __tablename__ = 'team'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(80))
+    display_name = Column(String(20))
+    description = Column(Text)
+    git_project = Column(String(200))
+    logo = Column(String(200))
+    create_time = Column(TZDateTime, default=get_now())
+    update_time = Column(TZDateTime)
+
+    leader_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
+    leader = relationship('User', backref=backref('lead_teams', lazy='dynamic'))
+
+    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
+    hackathon = relationship('Hackathon', backref=backref('teams', lazy='dynamic'))
+
+    def __init__(self, **kwargs):
+        super(Team, self).__init__(**kwargs)
+
+
 class Hackathon(DBBase):
     __tablename__ = 'hackathon'
 
@@ -233,6 +273,7 @@ class Hackathon(DBBase):
     description = Column(Text)
     status = Column(Integer, default=0)  # 0-new 1-online 2-offline
     creator_id = Column(Integer, default=-1)
+    type = Column(Integer, default=1)  # enum.HACK_TYPE
 
     event_start_time = Column(TZDateTime)
     event_end_time = Column(TZDateTime)
@@ -421,7 +462,7 @@ class HackathonTemplateRel(DBBase):
     id = Column(Integer, primary_key=True)
     create_time = Column(TZDateTime, default=get_now())
     update_time = Column(TZDateTime)
-    team_id = Column(Integer)
+    team_id = Column(Integer, default=-1)  # none: relations for all teams
 
     hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
     hackathon = relationship('Hackathon', backref=backref('hackathon_template_rels', lazy='dynamic'))

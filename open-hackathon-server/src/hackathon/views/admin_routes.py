@@ -125,28 +125,29 @@ class AdminRegisterResource(Resource):
         return register_manager.delete_registration(args)
 
 
-class AdminHackathonTemplateResource(Resource):
+class AdminHackathonTemplateListResource(Resource):
     @hackathon_name_required
     def get(self):
-        return template_manager.get_created_template_list(g.hackathon.name)
+        templates = template_manager.get_templates_by_hackathon_id(g.hackathon.id)
+        return map(lambda x: x.dic(), templates)
 
-    # create template for hacakthon
+
+class AdminHackathonTemplateResource(Resource):
+    # create a h-t-r for hacakthon
     @admin_privilege_required
     def post(self):
         args = request.get_json()
-        return template_manager.create_template(args)
+        if "template_name" not in args:
+            return bad_request("template name invalid")
+        return template_manager.add_template_to_hackathon(args['template_name'])
 
-    @admin_privilege_required
-    def put(self):
-        args = request.get_json()
-        return template_manager.update_template(args)
-
+    # delete a h-t-r for hacakthon
     @admin_privilege_required
     def delete(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('id', type=int, location='args', required=True)
+        parse.add_argument('template_id', type=int, location='args', required=True)
         args = parse.parse_args()
-        return template_manager.delete_template(args['id'])
+        return template_manager.delete_template_from_hackathon(args['template_id'])
 
 
 class ExperimentListResource(Resource):
@@ -266,6 +267,7 @@ def register_admin_routes():
 
     # template APIs
     api.add_resource(AdminHackathonTemplateResource, "/api/admin/hackathon/template")
+    api.add_resource(AdminHackathonTemplateListResource, "/api/admin/hackathon/template/list")
 
     # experiment APIs
     api.add_resource(AdminExperimentResource, "/api/admin/experiment")
@@ -280,4 +282,3 @@ def register_admin_routes():
     # hackathon administrators
     api.add_resource(HackathonAdminListResource, "/api/admin/hackathon/administrator/list")
     api.add_resource(HackathonAdminResource, "/api/admin/hackathon/administrator")
-
