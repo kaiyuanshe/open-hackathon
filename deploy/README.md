@@ -29,7 +29,6 @@
   * [Manage Azure certificate](#Manage-Azure-certificate)
   * [Manage templates](#Manage-template)
   * [Manage experiment](#Manage-experiment)
-
   * [FAQ](#FAQ)
 
 * [Developer's Guide](#Developer's-Guide)
@@ -79,13 +78,47 @@
 ## Upload Template
 Templat 上传过程及用户对自己上传的Template的管理操作
 
+
 # Admin's Guide
 ## Implementation and Architecture for Admin
+## Manage Hackathon
+### Create hackathon
+### Manage basic info
+## Manage registration
+## Manage administrators
+## Manage Azure certificate)
+## Manage template
+## Manage experiment
 
 
+# Developer's Guide
+## Implementation and Architecture for Developer
+   open-hackathon里面各个文件夹的主要介绍
+   Flask框架简单介绍
+## Try openhackathon quickly
+    介绍如何用doker的一个image来run起一个openhackathon
+## Setup develop environment
+### Setup Docker Env
+### Setup Guacamole Env
+### Setup MysqlDB Env
+### Setup Python Env
+       github src 地址
+       pip install requirements
+       config-sample =》config
 
-
-
+## customize
+    如何自定义，
+    如何由Azure资源，切换到其他的云服务厂商，如阿里云，盛大云等
+    guacamole --> other client provider
+    
+## Test
+### unit test
+### api test
+    
+## API-document
+## python doc
+## DB schema
+## contribution.MD
 
 
 
