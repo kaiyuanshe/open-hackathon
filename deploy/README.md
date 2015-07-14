@@ -80,8 +80,16 @@ Templat 上传过程及用户对自己上传的Template的管理操作
 
 # Developer's Guide
 ## Implementation and Architecture for Developer
-   open-hackathon里面各个文件夹的主要介绍
-   Flask框架简单介绍
+Project on Github:`https://github.com/msopentechcn/open-hackathon.git`
+src folders introduction:
+`deploy`: all components for deployment
+`open-hackathon-client`: frontend web project src
+`open-hackathon-server`: backend api server project src
+`openhackathon-guacamole-auth-provider`: guacamole auth provider java project src
+`tools/docker-enter`: tool to quickly connect to a running docker container
+
+
+ Use Flask to build the whole project, [Flask Introduction](http://flask.pocoo.org/docs/0.10/)
 ## Try openhackathon quickly
     介绍如何用doker的一个image来run起一个openhackathon
 ## Setup develop environment
@@ -99,8 +107,8 @@ Templat 上传过程及用户对自己上传的Template的管理操作
     guacamole --> other client provider
     
 ## Test
-### unit test
-### api test
+### Unit test
+### API test
     
 ## API document
 ## Python doc
