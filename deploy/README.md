@@ -1,6 +1,6 @@
 
 <h1 align = "center">OpenHackathon Manual</h1>   
-<br align = "center">Microsot Open Technologies</br>                  
+<p align = "center">Microsot Open Technologies</p>                  
                      
 Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd. All rights reserved.
                            
