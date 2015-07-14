@@ -33,33 +33,20 @@
 
 * [Developer's Guide](#Developer's-Guide)
   * [Implementation and Architecture](#Implementation-and-Architecture-for-Developer)
-    文件夹，Flask框架
-  * [try openhackathon quickly]
-    用doker
-  * [setup develop environment](#setup-develop-environment)
-  
-    * [setup Docker Env](#setup-Docker-Env)
-    * [setup Guacamole Env](#setup-Guacamole-Env)
-    * [setup MysqlDB Env](#setup-MysqlDB-Env)
-    * [setup python env]
-       src
-       pip install
-       config-sample =》config
-
-  * customize
-    自定义，
-    azure --> Ali
-    guacamole --> other client provider
-    
-  * Test
-    * unit test
-    * api test
-    
+  * [Try OpenHackathon quickly](#Try-openhackathon-quickly)
+  * [Setup develop environment](#Setup-develop-environment)
+    * [Setup Docker Env](#Setup-Docker-Env)
+    * [Setup Guacamole Env](#Setup-Guacamole-Env)
+    * [Setup MysqlDB Env](#Setup-MysqlDB-Env)
+    * [Setup python Env](#Setup-python-Env)
+  * [Customize](#Customize)
+  * [Test](#Test)
+    * [Unit test](#Unit-test)
+    * [API test](#API-test)
   * [API documemt](#API-document)
-  * python doc
-  * DB schema
-  * contribution.MD
-
+  * [Python doc](#Python-doc)
+  * [DB schema](#DB-schema)
+  * [Contribution.MD](#Contribution.MD)
   * [FAQ](#QA)
 
 
