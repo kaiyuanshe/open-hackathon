@@ -24,12 +24,20 @@
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
 
+
 class HTTP_HEADER:
+    """Http header that hackathon server api requires
+
+    Attributes:
+        TOKEN: token for current login user to access the hackathon server APIs with @token_required
+        HACKATHON_NAME: the name of hackathon related to the API call
+    """
     TOKEN = "token"
     HACKATHON_NAME = "hackathon_name"
 
 
 class OAUTH_PROVIDER:
+    """Social Login that open-hackathon platform support"""
     GITHUB = "github"
     QQ = "qq"
     GITCAFE = "gitcafe"
@@ -38,31 +46,53 @@ class OAUTH_PROVIDER:
 
 
 class HEALTH_STATE:
+    """The running state of open-hackathon server
+
+    Attributes:
+        OK: open-hackathon server API is running
+        WARNING: open-hackathon server is running but something might be wrong, some feature may not work
+        ERROR: open-hackathon server is unavailable
+    """
     OK = "ok"
     WARNING = "warning"
     ERROR = "error"
 
 
-class ADMIN:
-    SUPER_ADMIN_GROUP_ID = 1
-    DEFAULT_SUPER_ADMIN_EMAIL = "2303202961@qq.com"
-
-
 class HACKATHON_BASIC_INFO:
-    ORGANIZERS = "organizers"  # array  [{ organizer_name:'' , organizer_url:'',  organizer_image:'',organizer_description:''},...]
-    ORGANIZER_NAME = "organizer_name"  # string
-    ORGANIZER_URL = "organizer_url"  # string
-    ORGANIZER_IMAGE = "organizer_image"  # string
-    ORGANIZER_DESCRIPTION = "organizer_description"  # string
-    BANNERS = "banners"  # array ['banner_image_url',...]
-    LOCATION = "location"  # string location organizer
-    MAX_ENROLLMENT = "max_enrollment"  # int
-    WALL_TIME = "wall_time"  # long
-    AUTO_APPROVE = "auto_approve"  # bool, default=false
-    RECYCLE_ENABLED = "recycle_enabled"  # bool, default=false
-    PRE_ALLOCATE_ENABLED = "pre_allocate_enabled"  # bool, default=false
-    PRE_ALLOCATE_NUMBER = "pre_allocate_number"  # int, default=1
-    ALAUDA_ENABLED = "alauda_enabled"  #  bool, default=false
+    """Basic settings of hackathon that saved into column 'basic_info' of table 'hackathon'
+
+    Attributes:
+        ORGANIZERS: array [{ organizer_name:'' , organizer_url:'',  organizer_image:'',organizer_description:''},...]
+        ORGANIZER_NAME: str|unicode, name of organizer
+        ORGANIZER_URL: str|unicode, url link to the organizer. For example its homepage
+        ORGANIZER_IMAGE: str|unicode, logo of the organizer. We don't store the image itself, just a link to target
+        ORGANIZER_DESCRIPTION: str|unicode, description of the organizer.
+        BANNERS: array ['banner_image_url',...], array of images as banners for the hackathon
+        LOCATION: str|unicode, the location where the hackathon is held
+        MAX_ENROLLMENT: int, maximum users allowed to register
+        WALL_TIME: long, environment will be auto recycled, in seconds
+        AUTO_APPROVE: bool, whether manual approve is required, default false
+        RECYCLE_ENABLED: bool, whether environment be recycled automatically. default false
+        PRE_ALLOCATE_ENABLED: bool, whether to pre-start several environment. default false
+        PRE_ALLOCATE_NUMBER: int, the maximum count of pre-start environment per hackathon and per template. default 1
+        ALAUDA_ENABLED: bool,default false, whether to use alauda service, no azure resource needed if true
+    """
+    ORGANIZERS = "organizers"
+    ORGANIZER_NAME = "organizer_name"
+    ORGANIZER_URL = "organizer_url"
+    ORGANIZER_IMAGE = "organizer_image"
+    ORGANIZER_DESCRIPTION = "organizer_description"
+    BANNERS = "banners"
+    LOCATION = "location"
+    MAX_ENROLLMENT = "max_enrollment"
+    WALL_TIME = "wall_time"
+    AUTO_APPROVE = "auto_approve"
+    RECYCLE_ENABLED = "recycle_enabled"
+    PRE_ALLOCATE_ENABLED = "pre_allocate_enabled"
+    PRE_ALLOCATE_NUMBER = "pre_allocate_number"
+    ALAUDA_ENABLED = "alauda_enabled"
+
 
 class CLOUD_ECLIPSE:
+    """CloudEclipse Constans"""
     CLOUD_ECLIPSE = "cloud_eclipse"

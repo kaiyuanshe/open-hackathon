@@ -32,9 +32,11 @@ from hackathon.enum import ADMIN_ROLE_TYPE, ReservedUser
 
 
 def setup_db():
-    # initialize db tables
-    # make sure database and user correctly created in mysql
-    # in case upgrade the table structure, the origin table need be dropped firstly
+    """Initialize db tables
+
+    make sure database and user correctly created in mysql
+    in case upgrade the table structure, the origin table need be dropped firstly
+    """
     Base.metadata.create_all(bind=engine)
 
     # init REQUIRED db data.
