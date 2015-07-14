@@ -94,10 +94,10 @@ src folders introduction:
     介绍如何用doker的一个image来run起一个openhackathon
 ## Setup develop environment
 ### Setup Docker Env
-    [Docker intsallation on Ubuntu](https://docs.docker.com/installation/ubuntulinux/)
+    .[Docker intsallation on Ubuntu](https://docs.docker.com/installation/ubuntulinux/)
     
 ### Setup Guacamole Env
-    [Gucamole installation](http://guac-dev.org/doc/gug/installing-guacamole.html)
+    .[Gucamole installation](http://guac-dev.org/doc/gug/installing-guacamole.html)
     
 ### Setup MysqlDB Env
 ### Setup Python Env
