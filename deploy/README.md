@@ -12,11 +12,10 @@
 * [Introduction](#Introduction)
   * [What is OpenHackathon](#What-is-OpenHackathon)
   * [Why OpenHackathon](#Why-OpenHackathon)
+
 * [User's Guide](#User's-Guide)
   * [Implementation and Architecture](#Implementation-and-Architecture-for-User)
-    各种名词介绍
   * [attend hackathons](#how-to-attend-a-hackathon)
-     报名，组队，参赛，提交评审
   * [Upload Template](#Upload-Template)
   * [FAQ](#FAQ)
 
@@ -34,7 +33,7 @@
   * [FAQ](#FAQ)
 
 * [Developer's Guide](#Developer's-Guide)
-  * [Implementation and architecture](#src-architecture)
+  * [Implementation and Architecture](#Implementation-and-Architecture-for-Developer)
     文件夹，Flask框架
   * [try openhackathon quickly]
     用doker
@@ -71,9 +70,14 @@
 ## What is OpenHackathon
 ## Why OpenHackathon
 
+
 # User's-Guide
 ## Implementation and Architecture for User
+用户角色模块的基础介绍，以及涉及到的各种关键字的解释
 ## How to attend a hackathon
+报名，组队，参赛，提交评审等介绍，以及主干流程的截图
+## Upload Template
+Templat 上传过程及用户对自己上传的Template的管理操作
 
 # Admin's Guide
 ## Implementation and Architecture for Admin
