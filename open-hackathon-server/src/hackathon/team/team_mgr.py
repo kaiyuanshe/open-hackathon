@@ -37,6 +37,44 @@ class TeamManager(Component):
             log.debug("You are not team leader yet, can't use this function")
             return False
 
+    def __getteamid__(self, hid, uid):
+        user_team = self.db.find_first_object_by(UserTeamRel, hackathon_id=hid, user_id=uid)
+        return user_team.team_id
+
+    def get_team_info(self, hid, tname):
+        team = self.db.find_first_object_by(Team, hackathon_id=hid, team_name=tname)
+        return team.dic()
+
+    def get_hackathon_team_list(self, hid, name, number):
+        find_team_by_hackathon = self.db.find_all_objects_by(Team, hackathon_id=hid)
+        hackathon_team_list = map(lambda x: x.team_name, find_team_by_hackathon)
+        hackathon_team_list = list(set(hackathon_team_list))
+        if name is not None:
+            hackathon_team_list = filter(lambda x: name in x, hackathon_team_list)
+        if number is not None:
+            hackathon_team_list = hackathon_team_list[0:number]
+        return hackathon_team_list
+
+    def get_team_members_by_team_name(self, hackathon_id, team_name):
+        team = self.db.find_all_objects_by(Team, hackathon_id=hackathon_id, team_name=team_name)
+        team_member = self.db.find_first_object_by(UserTeamRel, team_id=team.id)
+
+        def get_info(sql_object):
+            r = sql_object.dic()
+            r['user'] = self.user_display_info(sql_object.user)
+            return r
+
+        team_member = map(lambda x: get_info(x), team_member)
+        return team_member
+
+    def get_team_members_by_user(self, hackathon_id, user_id):
+        my_team_id = __getteamid__(hackathon_id, user_id)
+
+        if my_team and my_team.team_name:
+            return self.get_team_members_by_team_name(hackathon_id, my_team.team_name)
+        else:
+            return []
+
     def team_approve(self, hid,tname, leader_id, candidate_id):
         if __checkleader__(hid,tname,leader_id) is not False:
             candidate = self.db.find_first_object_by(UserTeamRel, hackathon_id=hid, user_id=candidate_id)

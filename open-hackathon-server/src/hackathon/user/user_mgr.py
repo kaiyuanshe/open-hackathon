@@ -27,7 +27,7 @@
 import sys
 
 sys.path.append("..")
-from hackathon.database.models import UserToken, User, UserEmail, Team, UserTeamRel
+from hackathon.database.models import UserToken, User, UserEmail
 from datetime import timedelta
 from hackathon.constants import HTTP_HEADER
 from hackathon.enum import ReservedUser
@@ -155,25 +155,6 @@ class UserManager(Component):
             ret["user_profile"] = user.profile.dic()
         return ret
 
-    def get_team_members_by_team_name(self, hackathon_id, team_name):
-        team = self.db.find_all_objects_by(Team, hackathon_id=hackathon_id, team_name=team_name)
-        team_member = self.db.find_first_object_by(UserTeamRel, team_id=team.id)
-
-        def get_info(sql_object):
-            r = sql_object.dic()
-            r['user'] = self.user_display_info(sql_object.user)
-            return r
-
-        team_member = map(lambda x: get_info(x), team_member)
-        return team_member
-
-    def get_team_members_by_user(self, hackathon_id, user_id):
-        my_all_team = self.db.find_all_object_by(UserTeamRel, user_id=user_id)
-
-        if my_team and my_team.team_name:
-            return self.get_team_members_by_team_name(hackathon_id, my_team.team_name)
-        else:
-            return []
 
     def is_super_admin(self, user):
         if user.id == ReservedUser.DefaultSuperAdmin:
