@@ -10,7 +10,7 @@
 
 
 * [Introduction](#introduction)
-  * [What is OpenHackathon](#What-is-openhackathon)
+  * [What is OpenHackathon](#what-is-openhackathon)
   * [Why OpenHackathon](#Why-OpenHackathon)
 
 * [User's Guide](#User's-Guide)
