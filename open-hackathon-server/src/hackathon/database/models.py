@@ -225,6 +225,7 @@ class UserProfile(DBBase):
         super(UserProfile, self).__init__(**kwargs)
 
 
+
 class Team(DBBase):
     __tablename__ = 'team'
 
@@ -247,6 +248,7 @@ class Team(DBBase):
         super(Team, self).__init__(**kwargs)
 
 
+
 class UserTeamRel(DBBase):
     __tablename__ = 'user_team_rel'
 
@@ -267,6 +269,7 @@ class UserTeamRel(DBBase):
         super(UserTeamRel, self).__init__(**kwargs)
 
 
+
 class Hackathon(DBBase):
     __tablename__ = 'hackathon'
 
@@ -276,6 +279,7 @@ class Hackathon(DBBase):
     description = Column(Text)
     status = Column(Integer, default=0)  # 0-new 1-online 2-offline
     creator_id = Column(Integer, default=-1)
+    type = Column(Integer, default=1)  # enum.HACK_TYPE
 
     event_start_time = Column(TZDateTime)
     event_end_time = Column(TZDateTime)
@@ -465,7 +469,8 @@ class HackathonTemplateRel(DBBase):
     id = Column(Integer, primary_key=True)
     create_time = Column(TZDateTime, default=get_now())
     update_time = Column(TZDateTime)
-    team_id = Column(Integer, default=-1)
+    team_id = Column(Integer, default=-1)  # -1: avaiable for all teams
+
 
     hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
     hackathon = relationship('Hackathon', backref=backref('hackathon_template_rels', lazy='dynamic'))

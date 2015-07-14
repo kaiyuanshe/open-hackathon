@@ -28,16 +28,19 @@ import sys
 sys.path.append("..")
 
 from hackathon import api, RequiredFeature, Component
-from flask import g
+from flask import g, request
 from flask_restful import Resource, reqparse
-from hackathon.decorators import hackathon_name_required
+from hackathon.decorators import hackathon_name_required, token_required
 from hackathon.health import report_health
 from hackathon.database.models import Announcement
 import time
+from hackathon.hackathon_response import not_found
+
 
 hackathon_manager = RequiredFeature("hackathon_manager")
 user_manager = RequiredFeature("user_manager")
 register_manager = RequiredFeature("register_manager")
+template_manager = RequiredFeature("template_manager")
 
 
 class HealthResource(Resource):
@@ -76,7 +79,6 @@ class HackathonListResource(Resource):
         parse.add_argument('user_id', type=int, location='args')
         parse.add_argument('status', type=int, location='args')
         args = parse.parse_args()
-
         return hackathon_manager.get_hackathon_list(args["user_id"], args["status"])
 
 
@@ -86,11 +88,10 @@ class HackathonStatResource(Resource):
         return hackathon_manager.get_hackathon_stat(g.hackathon)
 
 
-class HackathonTemplateResource(Resource, Component):
+class HackathonUserTemplateResource(Resource, Component):
     @hackathon_name_required
     def get(self):
-        template_manager = RequiredFeature('template_manager')
-        return template_manager.get_template_settings(g.hackathon.name)
+        return template_manager.get_user_templates(g.user, g.hackathon)
 
 
 class HackathonRegisterResource(Resource):
@@ -123,9 +124,48 @@ class HackathonTeamListResource(Resource):
         return register_manager.get_hackathon_team_list(id, result['name'], result['number'])
 
 
-class InitialJobsResource(Resource):
+class TemplateResource(Resource):
     def get(self):
-        return start_init_job()
+        parse = reqparse.RequestParser()
+        parse.add_argument('id', type=int, location='args', required=False)
+        args = parse.parse_args()
+        template = template_manager.get_template_by_id(args['id'])
+        return template.dic() if template is not None else not_found("not found")
+
+    # create template
+    @token_required
+    def post(self):
+        args = request.get_json()
+        return template_manager.create_template(args)
+
+    # modify template
+    @token_required
+    def put(self):
+        args = request.get_json()
+        return template_manager.update_template(args)
+
+    # delete template
+    @token_required
+    def delete(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('id', type=int, location='args', required=True)
+        args = parse.parse_args()
+        return template_manager.delete_template(args['id'])
+
+
+class TemplateListResource(Resource):
+    def get(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('status', type=int, location='args')
+        args = parse.parse_args()
+        templates = template_manager.get_template_list(args['status'])
+        return map(lambda x: x.dic(), templates)
+
+class HackathonTemplateListResource(Resource):
+    @hackathon_name_required
+    def get(self):
+        templates = template_manager.get_templates_by_hackathon_id(g.hackathon.id)
+        return map(lambda x: x.dic(), templates)
 
 
 def register_routes():
@@ -146,7 +186,7 @@ def register_routes():
     api.add_resource(HackathonResource, "/api/hackathon")
     api.add_resource(HackathonListResource, "/api/hackathon/list")
     api.add_resource(HackathonStatResource, "/api/hackathon/stat")
-    api.add_resource(HackathonTemplateResource, "/api/hackathon/template")
+    api.add_resource(HackathonUserTemplateResource, "/api/hackathon/template")
 
     # team API
     api.add_resource(HackathonTeamListResource, "/api/hackathon/team/list")
@@ -155,6 +195,7 @@ def register_routes():
     # hackathon register api
     api.add_resource(HackathonRegisterResource, "/api/hackathon/registration/list")
 
-    # TODO after find a callable way , would delete this api
-    api.add_resource(InitialJobsResource, "/api/test/init")
-
+    # template API
+    api.add_resource(TemplateResource, "/api/template")
+    api.add_resource(TemplateListResource, "/api/template/list")
+    api.add_resource(HackathonTemplateListResource, "/api/admin/hackathon/template/list")
