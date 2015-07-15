@@ -4,21 +4,16 @@
 <p align = "center">Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd. All rights reserved</p>
 .
 
-
-
-
-
-
 * [Introduction](#introduction)
   * [What is OpenHackathon](#what-is-openhackathon)
   * [Why OpenHackathon](#why-openhackathon)
+ 
 * [Keywords and interpretation](#keywords-and-interpretation)
 * [User's Guide](#user's-guide)
   * [Implementation and Architecture](#implementation-and-architecture-for-user)
   * [attend hackathons](#how-to-attend-a-hackathon)
   * [Upload Template](#upload-template)
   * [FAQ](#FAQ)
-
 * [Admin's Guid](#admin's-guide)
   * [Implementation and Architecture](#implementation-and-architecture-for-admin)
   * [Manage hackathon](#how-to-manage-a-hackathon)
@@ -30,7 +25,6 @@
   * [Manage templates](#manage-templates)
   * [Manage experiment](#manage-experiment)
   * [FAQ](#FAQ)
-
 * [Developer's Guide](#developer's-guide)
   * [Implementation and Architecture](#implementation-and-architecture-for-developer)
   * [Try OpenHackathon quickly](#try-openhackathon-quickly)
@@ -87,7 +81,7 @@ Templat 上传过程及用户对自己上传的Template的管理操作
 ### Manage basic info
 ## Manage registration
 ## Manage administrators
-## Manage Azure certificate)
+## Manage Azure certificate
 ## Manage templates
 ## Manage experiment
 
@@ -118,8 +112,11 @@ src folders introduction:
 [Docker intsallation on Ubuntu](https://docs.docker.com/installation/ubuntulinux/)
     
 ### Setup Guacamole Env
-介绍下Guacamole在OpenHackathon的作用              
+Guacamole is used as a remote client to connect to running environments , SSH RDP VNC are all provided. [Guacamole](http://guac-dev.org/) can give you more details.        
+                 
 [Guacamole installation](http://guac-dev.org/doc/gug/installing-guacamole.html)
+
+     Gucamole has its own authentication so does OpenHackathon, in order to unify them we customise a new auth provider and hacked it into guacamole client
     
 ### Setup MysqlDB Env
 ### Setup Python Env
