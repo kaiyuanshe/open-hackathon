@@ -85,7 +85,10 @@ Templat 上传过程及用户对自己上传的Template的管理操作
 
 #Developer's Guide
 ## Implementation and Architecture for Developer
-Project on Github:`https://github.com/msopentechcn/open-hackathon.git`    
+`Project on Github`:`https://github.com/msopentechcn/open-hackathon.git`
+`Architecture:`    
+OpenHackathon is separated into two pieces: open-hackathon server, which provides the openhackathon proxy and related libraries, and open-hackathon client, which provides the website client to users            
+
 src folders introduction:        
 `deploy`: all components for deployment               
 `open-hackathon-client`: frontend web project src               
