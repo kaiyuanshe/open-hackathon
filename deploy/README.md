@@ -12,7 +12,7 @@
 * [Introduction](#introduction)
   * [What is OpenHackathon](#what-is-openhackathon)
   * [Why OpenHackathon](#why-openhackathon)
-
+* [Keywords and interpretation](#keywords-and-interpretation)
 * [User's Guide](#user's-guide)
   * [Implementation and Architecture](#implementation-and-architecture-for-user)
   * [attend hackathons](#how-to-attend-a-hackathon)
