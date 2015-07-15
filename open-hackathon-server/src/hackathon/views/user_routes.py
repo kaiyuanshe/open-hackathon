@@ -150,7 +150,7 @@ class GetTeamMembersByUserResource(Resource):
     def get(self):
         hackathon_id = g.hackathon.id
         user_id = g.user.id
-        return user_manager.get_team_members_by_user(hackathon_id, user_id)
+        return team_manager.get_team_members_by_user(hackathon_id, user_id)
 
 
 class UserProfileResource(Resource):
@@ -197,8 +197,11 @@ class TeamResource(Resource):
     @token_required
     @hackathon_name_required
     def get(self):
-        args = request.args
-        return team_manager.get_team_info(g.hackathon.id, args["team_name"])
+        parse = reqparse.RequestParser()
+        parse.add_argument('team_name', type=str, location='args', required=True)
+        args = parse.parse_args()
+        hackathon_id = g.hackathon.id
+        return team_manager.get_team_info(hackathon_id, args["team_name"])
 
     @token_required
     @hackathon_name_required

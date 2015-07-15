@@ -30,7 +30,7 @@ sys.path.append("..")
 from flask import g
 
 from hackathon import Component, RequiredFeature
-from hackathon.database.models import Team, UserTeamRel, AdminHackathonRel
+from hackathon.database.models import Team, UserTeamRel, AdminHackathonRel, User
 from hackathon.hackathon_response import ok, access_denied, bad_request
 
 
@@ -39,10 +39,13 @@ class TeamManager(Component):
     user_manager = RequiredFeature("user_manager")
 
     def __valid_permission__(self, hid, tname, uid):
-        if self.db.find_first_object_by(Team, hackathon_id=hid, team_name=tname, leader_id=uid) is not None:
+        #check if team leader
+        if self.db.find_first_object_by(Team, hackathon_id=hid, name=tname, leader_id=uid) is not None:
             return True
+        #check if hackathon admin
         elif self.db.find_first_object_by(AdminHackathonRel, hackathon_id=hid, user_id=leader_id) is not None:
             return True
+        #check if super admin
         elif self.is_super_admin(uid) is True:
             return True
         else:
@@ -53,10 +56,10 @@ class TeamManager(Component):
         if user_team is not None:
             return user_team.team_id
         else:
-            return False
+            return None
 
     def get_team_info(self, hid, tname):
-        team = self.db.find_first_object_by(Team, hackathon_id=hid, team_name=tname)
+        team = self.db.find_first_object_by(Team, hackathon_id=hid, name=tname)
         if team is not None:
             return team.dic()
         else:
@@ -66,18 +69,18 @@ class TeamManager(Component):
         hackathon_team_list = self.db.find_all_objects_by(Team, hackathon_id=hid)
         hackathon_team_list = map(lambda x: x.dic(), hackathon_team_list)
         if name is not None:
-            hackathon_team_list = filter(lambda x: name in x["team_name"], hackathon_team_list)
+            hackathon_team_list = filter(lambda x: name in x["name"], hackathon_team_list)
         if number is not None:
             hackathon_team_list = hackathon_team_list[0:number]
         return hackathon_team_list
 
     def get_team_members_by_team_name(self, uid, tname):
-        team = self.db.find_first_objects_by(UserTeamRel, hackathon_id=uid, team_name=tname)
-        team_member = self.db.find_all_object_by(UserTeamRel, team_id=team.id)
+        team = self.db.find_first_object_by(Team, hackathon_id=uid, name=tname)
+        team_member = self.db.find_all_objects_by(UserTeamRel, team_id=team.id)
 
         def get_info(sql_object):
             r = sql_object.dic()
-            r['user'] = self.user_display_info(sql_object.user)
+            r['user'] = self.user_manager.user_display_info(sql_object.user)
             return r
 
         team_member = map(lambda x: get_info(x), team_member)
@@ -85,39 +88,66 @@ class TeamManager(Component):
 
     def get_team_members_by_user(self, hackathon_id, user_id):
         my_team_id = self.__getteamid__(hackathon_id, user_id)
-        if my_team_id is not False:
-            my_team_name = self.db.find_first_object_by(Team, team_id=my_team_id)
-            return self.get_team_members_by_team_name(hackathon_id, my_team_name)
+        if my_team_id is not None:
+            my_team_name = self.db.find_first_object_by(Team, id=my_team_id)
+            return self.get_team_members_by_team_name(hackathon_id, my_team_name.name)
         else:
             return []
 
-    def create_team(self, kwargs):
+    def create_team(self, **kwargs):
         #  nickname = user_info["name"] if "name" in user_info else name
+        user = self.db.find_first_object_by(User, id=g.user.id)
+        name=kwargs["name"] if "name" in kwargs else user.name
+        display_name=kwargs["display_name"] if "display_name" in kwargs else name
+        description=kwargs["description"] if "description" in kwargs else ""
+        git_project=kwargs["git_project"] if "git_project" in kwargs else ""
+        logo=kwargs["logo"] if "logo" in kwargs else ""
         team = Team(self,
-                    name=kwargs["name"],
-                    display_name=kwargs["display_name"],
-                    description=kwargs["description"],
-                    git_project=kwargs["git_project"],
-                    logo=kwargs["logo"],
+                    name=name,
+                    display_name=display_name,
+                    description=description,
+                    git_project=git_project,
+                    logo=logo,
                     create_time=self.util.get_now(),
                     update_time=self.util.get_now(),
                     leader_id=g.user.id,
-                    hackathon_id=g.hackathon.id)
+                    hackathon_id=g.hackathon_id)
         self.db.add_object(team)
 
-        team_id = self.db.find_first_object_by(Team, hackathon_id=g.hackathon.id, leader_id=g.user.id)
+        team = self.db.find_first_object_by(Team, hackathon_id=g.hackathon.id, leader_id=g.user.id)
         userteamrel = UserTeamRel(self,
                                   join_time=self.util.get_now(),
                                   update_time=self.util.get_now(),
                                   status=1,
                                   hackathon_id=g.hackathon.id,
                                   user_id=g.user.id,
-                                  team_id=team_id.team_id)
+                                  team_id=team.id)
         self.db.add_object(userteamrel)
         return team.dic()
 
+    def update_team(self, args):
+        if __valid_permission__(g.user.id) is True:
+            team_id=args["team_id"]
+            team = self.db.find_first_object_by(Team, team_id=team_id)
+            name=kwargs["name"] if "name" in kwargs else team.name
+            display_name=kwargs["display_name"] if "display_name" in kwargs else team.display_name
+            description=kwargs["description"] if "description" in kwargs else team.description
+            git_project=kwargs["git_project"] if "git_project" in kwargs else team.git_project
+            logo=kwargs["logo"] if "logo" in kwargs else team.logo
+            team = Team(self,
+                        name=name,
+                        display_name=display_name,
+                        description=description,
+                        git_project=git_project,
+                        logo=logo,
+                        update_time=self.util.get_now())
+            self.db.add_object(team)
+            return team.dic()
+        else:
+            return access_denied("You don't have permission")
+
     def join_team(self, hid, tname, uid):
-        team_id = self.db.find_first_object_by(Team, hackathon_id=hid, team_name=tname)
+        team_id = self.db.find_first_object_by(Team, hackathon_id=hid, name=tname)
         candidate = UserTeamRel(self,
                                 join_time=self.util.get_now(),
                                 update_time=self.util.get_now(),
@@ -145,11 +175,11 @@ class TeamManager(Component):
             return ok("You have left the team")
 
         # if user is not team leader
-        if self.db.find_first_object_by(Team, hackathon_id=hid, team_name=tname, leader_id=candidate_id) is None:
+        if self.db.find_first_object_by(Team, hackathon_id=hid, name=tname, leader_id=candidate_id) is None:
             return leave(hid, candidate_id)
 
         # if user is team leader
-        elif self.db.find_first_object_by(Team, hackathon_id=hid, team_name=tname, leader_id=candidate_id) is not None:
+        elif self.db.find_first_object_by(Team, hackathon_id=hid, name=tname, leader_id=candidate_id) is not None:
             team_members = self.get_team_members_by_user(hid, candidate_id)
             if len(team_members) >= 2:
                 return bad_request("Please promo a new team leader, before leave team.")
@@ -165,16 +195,15 @@ class TeamManager(Component):
 
 
     def promo_leader(self, hid, tname, new_uid, old_uid):
-        leader = self.db.find_first_object_by(Team, hackathon_id=hid, team_name=tname, leader_id=old_uid)
+        leader = self.db.find_first_object_by(Team, hackathon_id=hid, name=tname, leader_id=old_uid)
         leader.leader_id = new_uid
         self.db.commit()
         return leader.dic()
 
-
     def dismiss_team(self, hid, tname):
         if self.__valid_permission__(hid, tname, g.user.id) is not False:
-            team = self.db.find_first_object_by(Team, hackathon_id=hid, team_name=tname)
-            members = self.db.find_all_objects_order_by(UserTeamRel, Team_id=team.id)
+            team = self.db.find_first_object_by(Team, hackathon_id=hid, name=tname)
+            members = self.db.find_all_objects_order_by(UserTeamRel, team_id=team.id)
             lambda x: self.db.delete_object(x), members
             self.db.delete_object(team)
             return ok("you have dismissed team")
