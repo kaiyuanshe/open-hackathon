@@ -57,9 +57,18 @@
 ## Why OpenHackathon
 
 
+# Keywords and interpretation
+
+| Keywords        | Interpretation          |
+|:--------:|:-----------------------------------------------------------------------------:|
+| Get     | get the hackathon info|
+| POST | creat a new hackathon|
+| PUT | modify a exist hackathon|
+
 # User's-Guide
 ## Implementation and Architecture for User
 用户角色模块的基础介绍，以及涉及到的各种关键字的解释
+### keys 
 ## How to attend a hackathon
 报名，组队，参赛，提交评审等介绍，以及主干流程的截图
 ## Upload Template
@@ -70,10 +79,10 @@ Templat 上传过程及用户对自己上传的Template的管理操作
 ## Implementation and Architecture for Admin
 ## Manage Hackathon
 ### Create hackathon
-`create hackathon`: name and display name
-`organizer`：include organizer description
-`event images`: upload event images to show your hackathon event
-`hackathon basic info`: hackathon event basic info setup
+`create hackathon`: name and display name                   
+`organizer`：include organizer description              
+`event images`: upload event images to show your hackathon event                
+`hackathon basic info`: hackathon event basic info setup                 
 
 ### Manage basic info
 ## Manage registration
@@ -84,9 +93,9 @@ Templat 上传过程及用户对自己上传的Template的管理操作
 
 
 #Developer's Guide
-## Implementation and Architecture for Developer
-`Project on Github`:`https://github.com/msopentechcn/open-hackathon.git`
-`Architecture:`    
+## Implementation and Architecture for Developer            
+`Project on Github`:`https://github.com/msopentechcn/open-hackathon.git`                         
+`Architecture:`                             
 OpenHackathon is separated into two pieces: open-hackathon server, which provides the openhackathon proxy and related libraries, and open-hackathon client, which provides the website client to users            
 
 src folders introduction:        
@@ -98,6 +107,9 @@ src folders introduction:
                   
                    
  Use Flask to build the whole project.[Flask Introduction](http://flask.pocoo.org/docs/0.10/)
+ 
+ 
+ 
 ## Try openhackathon quickly
     介绍如何用doker的一个image来run起一个openhackathon
 ## Setup develop environment
