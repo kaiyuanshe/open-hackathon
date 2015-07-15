@@ -65,6 +65,6 @@ if db_adapter.find_first_object_by(DockerHostServer, vm_name=docker_host.vm_name
 template_dir = dirname(realpath(__file__)) + '/hackathon/resources'
 template_url = template_dir + os.path.sep + "kaiyuanshe-ut.js"
 template = Template(name="ut", url=template_url, provider=VEProvider.Docker, status=1, virtual_environment_count=1,
-                    description="", hackathon=hackathon)
-if db_adapter.find_first_object_by(Template, name=template.name, hackathon_id=hackathon.id) is None:
+                    description="")
+if db_adapter.find_first_object_by(Template, name=template.name) is None:
     db_adapter.add_object(template)

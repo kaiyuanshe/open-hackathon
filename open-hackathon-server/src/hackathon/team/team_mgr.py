@@ -29,7 +29,7 @@ sys.path.append("..")
 
 from flask import g
 
-from hackathon import Component
+from hackathon import Component, RequiredFeature
 from hackathon.database.models import Team, UserTeamRel, AdminHackathonRel
 from hackathon.hackathon_response import ok, access_denied, bad_request
 
@@ -43,7 +43,7 @@ class TeamManager(Component):
             return True
         elif self.db.find_first_object_by(AdminHackathonRel, hackathon_id=hid, user_id=leader_id) is not None:
             return True
-        elif self.is_super_admin(uid) is True
+        elif self.is_super_admin(uid) is True:
             return True
         else:
             return False
@@ -59,6 +59,8 @@ class TeamManager(Component):
         team = self.db.find_first_object_by(Team, hackathon_id=hid, team_name=tname)
         if team is not None:
             return team.dic()
+        else:
+            return bad_request("no such team")
 
     def get_hackathon_team_list(self, hid, name, number):
         hackathon_team_list = self.db.find_all_objects_by(Team, hackathon_id=hid)
@@ -89,7 +91,8 @@ class TeamManager(Component):
         else:
             return []
 
-    def create_team(self, **kwargs):
+    def create_team(self, kwargs):
+        #  nickname = user_info["name"] if "name" in user_info else name
         team = Team(self,
                     name=kwargs["name"],
                     display_name=kwargs["display_name"],

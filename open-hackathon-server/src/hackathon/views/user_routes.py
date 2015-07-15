@@ -197,7 +197,7 @@ class TeamResource(Resource):
     @token_required
     @hackathon_name_required
     def get(self):
-        args = request.args()
+        args = request.args
         return team_manager.get_team_info(g.hackathon.id, args["team_name"])
 
     @token_required
