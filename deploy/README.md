@@ -61,9 +61,9 @@
 
 | Keywords        | Interpretation          |
 |:--------:|:-----------------------------------------------------------------------------:|
-| Get     | get the hackathon info|
-| POST | creat a new hackathon|
-| PUT | modify a exist hackathon|
+| template  | as a description of the Docker container|
+| experiment | correspond with a Docker container|
+| team | every user must join in a team to participate in hackathon event|
 
 # User's-Guide
 ## Implementation and Architecture for User
