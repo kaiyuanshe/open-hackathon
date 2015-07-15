@@ -70,6 +70,11 @@ Templat 上传过程及用户对自己上传的Template的管理操作
 ## Implementation and Architecture for Admin
 ## Manage Hackathon
 ### Create hackathon
+`create hackathon`: name and display name
+`organizer`：include organizer description
+`event images`: upload event images to show your hackathon event
+`hackathon basic info`: hackathon event basic info setup
+
 ### Manage basic info
 ## Manage registration
 ## Manage administrators
