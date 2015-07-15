@@ -120,11 +120,11 @@ Gucamole has its own authentication so does OpenHackathon, in order to unify the
     
 ### Setup MysqlDB Env
 ### Setup Python Env
-Find out the `requirement.txt` both in `open-hackathon-server` and `open-hackathon-client` in src folders, all dependencies are recorded in , we can install them through a simply command :
-`
+Find out the `requirement.txt` both in `open-hackathon-server` and `open-hackathon-client` in src folders, all dependencies are recorded in , we can install them through a simply command :   
+```
 sudo pip install -r open-hackathon-server/requirement.txt
 sudo pip install -r open-hackathon-client/requirement.txt
-`
+```
 
 config-sample =》config
 
