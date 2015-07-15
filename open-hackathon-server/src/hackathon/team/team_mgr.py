@@ -29,7 +29,7 @@ sys.path.append("..")
 from hackathon.database.models import UserTeamRel, Team
 from flask import g
 from hackathon import Component, RequiredFeature
-from hackathon.hackathon_response import access_denied
+from hackathon.hackathon_response import access_denied, bad_request, not_found, internal_server_error, ok
 
 
 class TeamManager(Component):
@@ -61,5 +61,3 @@ class TeamManager(Component):
             return access_denied("team leader required")
         else:
             return self.template_manager.delete_template_from_hackathon(template_id, team.id)
-
-    #----------------------------helper functions---------------------------#
