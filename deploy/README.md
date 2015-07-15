@@ -116,13 +116,17 @@ Guacamole is used as a remote client to connect to running environments , SSH RD
                  
 [Guacamole installation](http://guac-dev.org/doc/gug/installing-guacamole.html)
 
-     Gucamole has its own authentication so does OpenHackathon, in order to unify them we customise a new auth provider and hacked it into guacamole client
+Gucamole has its own authentication so does OpenHackathon, in order to unify them we customise a new auth provider and hacked it into guacamole client
     
 ### Setup MysqlDB Env
 ### Setup Python Env
-       github src 地址
-       pip install requirements
-       config-sample =》config
+Find out the `requirement.txt` both in `open-hackathon-server` and `open-hackathon-client` in src folders, all dependencies are recorded in , we can install them through a simply command :
+`
+sudo pip install -r open-hackathon-server/requirement.txt
+sudo pip install -r open-hackathon-client/requirement.txt
+`
+
+config-sample =》config
 
 ## customize
     如何自定义，
