@@ -131,7 +131,7 @@ class TeamManager(Component):
             candidate.status = status
             candidate.update_time = self.util.get_now()
             self.db.commit()
-            return ok("Approved")
+            return ok()
 
 
     def leave_team(self, hid, tname, leader_id, candidate_id):
@@ -165,6 +165,7 @@ class TeamManager(Component):
         leader = self.db.find_first_object_by(Team, hackathon_id=hid, team_name=tname, leader_id=old_uid)
         leader.leader_id = new_uid
         self.db.commit()
+        return leader.dic()
 
 
     def dismiss_team(self, hid, tname):
@@ -173,7 +174,7 @@ class TeamManager(Component):
             members = self.db.find_all_objects_order_by(UserTeamRel, Team_id=team.id)
             lambda x: self.db.delete_object(x), members
             self.db.delete_object(team)
-
+            return ok("you have dismissed team")
 
     def get_team_by_user_and_hackathon(self, user, hackathon):
         utrs = self.db.find_all_objects_by(UserTeamRel, user_id=user.id)
