@@ -193,6 +193,69 @@ class TeamTemplateResource(Resource):
         args = parse.parse_args()
         return team_manager.team_leader_delete_template(args['template_id'])
 
+class TeamResource(Resource):
+    @token_required
+    @hackathon_name_required
+    def get(self):
+        args = request.args()
+        return team_manager.get_team_info(g.hackathon.id, args["team_name"])
+
+    @token_required
+    @hackathon_name_required
+    def post(self):
+        args = request.get_json()
+        return team_manager.create_team(args)
+
+    @token_required
+    @hackathon_name_required
+    def put(self):
+        args = request.get_json()
+        return team_manager.update_team(args)
+
+    @token_required
+    @hackathon_name_required
+    def delete(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('hackathon_id', type=int, location='args', required=True)
+        parse.add_argument('team_name', type=str, location='args', required=True)
+        args = parse.parse_args()
+        return dismiss_team(args["hackathon_id"], args["team_name"])
+
+class TeamMemberResource(Resource):
+    @token_required
+    @hackathon_name_required
+    def post(self):
+        args = request.get_json()
+        if "team_name" not in args:
+            return bad_request("Team name is required")
+        return team_manager.join_team(g.hackathon.id, args["team_name"], g.user)
+
+    @token_required
+    @hackathon_name_required
+    def put(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('hackathon_id', type=int, location='body', required=True)
+        parse.add_argument('condidate_id', type=int, location='body', required=True)
+        parse.add_argument("status", type=int, location="body", required=True)
+        parse.add_argument("team_name", type=str, location="body", required=True)
+        args = parse.parse_args()
+        return team_manager.apply_team_manage(args["hackathon_id"],
+                                              args["team_name"],
+                                              args["status"],
+                                              g.user.id,
+                                              args["condidate_id"])
+    @token_required
+    @hackathon_name_required
+    def delete(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('hackathon_id', type=int, location='args', required=True)
+        parse.add_argument('condidate_id', type=int, location='args', required=True)
+        parse.add_argument('team_name', type=str, location='args', required=True)
+        args = parse.parse_args()
+        return team_manager.apply_team_manage(args["hackathon_id"],
+                                              args["team_name"],
+                                              g.user.id,
+                                              args["condidate_id"])
 
 def register_user_routes():
     """
@@ -215,7 +278,9 @@ def register_user_routes():
     api.add_resource(UserExperimentListResource, "/api/user/experiment/list")
 
     # team API
+    api.add_resource(TeamResource, "/api/user/team")
     api.add_resource(GetTeamMembersByUserResource, "/api/user/team/member")
+    api.add_resource(TeamMemberResource, "/api/user/team/teammember")
 
     # user profile API
     api.add_resource(UserProfileResource, "/api/user/profile")

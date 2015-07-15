@@ -32,11 +32,12 @@ from flask import g
 from hackathon import Component
 from hackathon.database.models import Team, UserTeamRel, AdminHackathonRel
 from hackathon.hackathon_response import ok, access_denied, bad_request
-from hackathon.user.user_mgr import user_display_info
 
 
 class TeamManager(Component):
 
+    template_manager = RequiredFeature("template_manager")
+    user_manager = RequiredFeature("user_manager")
     def __valid_permission__(self, hid, tname, uid):
         if self.db.find_first_object_by(Team, hackathon_id=hid, team_name=tname, leader_id=uid) is not None:
             return True
@@ -120,29 +121,16 @@ class TeamManager(Component):
                                 team_id=team_id.team_id)
         self.db.add_object(candidate)
         return ok("Wait team leader approve")
-    def team_approve(self, hid, tname, leader_id, candidate_id):
+    def apply_team_manage(self, hid, tname, status, leader_id, candidate_id):
         if __valid_permission__(hid,tname,leader_id) is not False:
             candidate = self.db.find_first_object_by(UserTeamRel, hackathon_id=hid, user_id=candidate_id)
-            candidate.status = 1
+            candidate.status = status
             candidate.update_time=self.util.get_now()
             self.db.commit()
             return ok("Approved")
 
-    def team_refuse(self, hid,tname, leader_id, candidate_id):
-        if __valid_permission__(hid,tname,leader_id) is not False:
-            candidate = self.db.find_first_object_by(UserTeamRel, hackathon_id=hid, user_id=candidate_id)
-            candidate.status = 2
-            candidate.update_time=self.util.get_now()
-            self.db.commit()
 
-    def team_kick(self, hid,tname, leader_id, candidate_id):
-        if __valid_permission__(hid,tname,leader_id) is not False:
-            candidate = self.db.find_first_object_by(UserTeamRel, hackathon_id=hid, user_id=candidate_id)
-            candidate.status = 0
-            candidate.update_time=self.util.get_now()
-            self.db.commit()
-
-    def team_leave(self, hid, tname,leader_id candidate_id):
+    def leave_team(self, hid, tname,leader_id candidate_id):
         def leave(self, hid, candidate_id):
             candidate = self.db.find_first_object_by(UserTeamRel, hackathon_id=hid, user_id=candidate_id)
             self.db.delete_object(candidate)
@@ -158,20 +146,20 @@ class TeamManager(Component):
             if len(team_members)>=2: return bad_request("Please promo a new team leader, before leave team.")
             else: return bad_request("You are last one of team, please use \"Dismiss\" button to dismiss team.")
 
-        # if user is hackathon admin or super admin
+        # if user is hackathon admin
         elif self.db.find_first_object_by(AdminHackathonRel, hackathon_id=hid, user_id=leader_id) is not None:
             return leave(hid, candidate_id)
-        else:
-            log.debug("Please promo the other to become leader, before you left team")
-            return False
+
+        elif self.is_super_admin(leader_id) is True:
+            return leave(hid, tname, candidate_id)
 
     def promo_leader(self, hid, tname, new_uid, old_uid):
         leader = self.db.find_first_object_by(Team, hackathon_id=hid, team_name=tname, leader_id=old_uid)
         leader.leader_id = new_uid
         self.db.commit()
 
-    def team_dismiss(self, hid, tname, uid):
-        if __valid_permission__(hid,tname,uid) is not False:
+    def dismiss_team(self, hid, tname):
+        if __valid_permission__(hid,tname, g.user.id) is not False:
             team = self.db.find_first_object_by(Team, hackathon_id=hid, team_name=tname)
             members = self.db.find_all_objects_order_by(UserTeamRel, Team_id=team.id)
             lambda x: self.db.delete_object(x), members
@@ -179,60 +167,7 @@ class TeamManager(Component):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import sys
-
-sys.path.append("..")
-from hackathon.database.models import UserTeamRel, Team
-from flask import g
-from hackathon import Component, RequiredFeature
-from hackathon.hackathon_response import access_denied
-
-
-class TeamManager(Component):
-
-    template_manager = RequiredFeature("template_manager")
-
-    def get_team_by_id(self, team_id):
-        return self.db.find_first_object_by(Team, id=team_id)
-
-    def get_team_by_name(self, team_name):
-        return self.db.find_first_object_by(Team, name=team_name)
-
-    def get_team_by_user_and_hackathon(self, user, hackathon):
-        utrs = self.db.find_all_objects_by(UserTeamRel, user_id=user.id)
-        team_ids = map(lambda x: x.team_id, utrs)
-        team = self.db.find_first_object(Team, Team.id.in_(team_ids), Team.hackathon_id == hackathon.id)
-        return team
-
-    def team_leader_add_template(self, template_name):
+    def add_template(self, template_name):
         team = self.get_team_by_user_and_hackathon(g.user, g.hackathon)
         if team is None or team.leader_id != g.user.id:
             return access_denied("team leader required")
