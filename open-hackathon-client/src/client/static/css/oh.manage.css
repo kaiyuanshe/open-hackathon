@@ -1,0 +1,15 @@
+body {
+    background-color: #71B1D1;
+    margin-bottom: 40px;
+}
+body:after {
+    top: 0;
+    left: 14.422%;
+    position: fixed;
+    content: '';
+    height: 100%;
+    width: 85.578%;
+    background: #fff;
+    border-left: 1px solid #fff;
+    z-index: 0;
+}

@@ -5,7 +5,7 @@
     <!-- start: Meta -->
     <meta property="wb:webmaster" content="{{meta_content.weibo}}"/>
     <meta property="qc:admins" content="{{meta_content.qq}}"/>
-    {% block meta %}{% endblock %}
+    {% block meta %} {% endblock %}
     <meta name="author" content="Boli Guan">
     <meta name="copyright" content="Microsoft Open Technologies Center">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
@@ -14,6 +14,7 @@
     <!-- start: CSS -->
     <link href="/static/css/bootstrap.min.css" rel="stylesheet">
     <link href="/static/css/oh.base.css" rel="stylesheet">
+    <link href="/static/css/oh.manage.css" rel="stylesheet">
     {% block style %}{% endblock %}
     <!-- end: CSS -->
     <!-- The HTML5 shim, for IE6-8 support of HTML5 elements -->
@@ -87,5 +88,4 @@
 <script type="text/javascript" src="/static/js/oh.api.js"></script>
 {% block script %}{% endblock %}
 </body>
-
 </html>
