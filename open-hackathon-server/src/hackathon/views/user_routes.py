@@ -221,7 +221,7 @@ class TeamResource(Resource):
         args = parse.parse_args()
         return dismiss_team(args["hackathon_id"], args["team_name"])
 
-class TeamMemberResource(Resource):
+class TeamManageResource(Resource):
     @token_required
     @hackathon_name_required
     def post(self):
@@ -239,7 +239,7 @@ class TeamMemberResource(Resource):
         parse.add_argument("status", type=int, location="body", required=True)
         parse.add_argument("team_name", type=str, location="body", required=True)
         args = parse.parse_args()
-        return team_manager.apply_team_manage(args["hackathon_id"],
+        return team_manager.manage_team(args["hackathon_id"],
                                               args["team_name"],
                                               args["status"],
                                               g.user.id,
@@ -280,7 +280,7 @@ def register_user_routes():
     # team API
     api.add_resource(TeamResource, "/api/user/team")
     api.add_resource(GetTeamMembersByUserResource, "/api/user/team/member")
-    api.add_resource(TeamMemberResource, "/api/user/team/teammember")
+    api.add_resource(TeamManageResource, "/api/user/team/manage")
 
     # user profile API
     api.add_resource(UserProfileResource, "/api/user/profile")

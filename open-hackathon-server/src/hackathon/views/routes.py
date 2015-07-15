@@ -167,12 +167,6 @@ class HackathonTemplateListResource(Resource):
         templates = template_manager.get_templates_by_hackathon_id(g.hackathon.id)
         return map(lambda x: x.dic(), templates)
 
-class TeamResource(Resource)
-    @token_required
-    @hackathon_name_required
-    def get(self):
-
-
 def register_routes():
     """
     register API routes that user or admin is not required
