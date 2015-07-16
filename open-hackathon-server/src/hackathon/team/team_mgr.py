@@ -31,7 +31,7 @@ from flask import g
 
 from hackathon import Component, RequiredFeature
 from hackathon.database.models import Team, UserTeamRel, AdminHackathonRel, User
-from hackathon.hackathon_response import ok, access_denied, bad_request
+from hackathon.hackathon_response import ok, access_denied, bad_request, not_found
 
 
 class TeamManager(Component):
@@ -39,17 +39,18 @@ class TeamManager(Component):
     user_manager = RequiredFeature("user_manager")
 
     def __valid_permission__(self, hid, tname, uid):
+        user = self.db.find_first_object_by(User, id=uid)
         #check if team leader
         if self.db.find_first_object_by(Team, hackathon_id=hid, name=tname, leader_id=uid) is not None:
             return True
         #check if hackathon admin
-        elif self.db.find_first_object_by(AdminHackathonRel, hackathon_id=hid, user_id=leader_id) is not None:
+        elif self.db.find_first_object_by(AdminHackathonRel, hackathon_id=hid, user_id=uid) is not None:
             return True
         #check if super admin
-        elif self.is_super_admin(uid) is True:
+        elif self.user_manager.is_super_admin(user) is True:
             return True
         else:
-            return False
+            return access_denied("You don't have permission")
 
     def __getteamid__(self, hid, uid):
         user_team = self.db.find_first_object_by(UserTeamRel, hackathon_id=hid, user_id=uid)
@@ -63,7 +64,7 @@ class TeamManager(Component):
         if team is not None:
             return team.dic()
         else:
-            return bad_request("no such team")
+            return not_found("no such team")
 
     def get_hackathon_team_list(self, hid, name, number):
         hackathon_team_list = self.db.find_all_objects_by(Team, hackathon_id=hid)
@@ -94,7 +95,7 @@ class TeamManager(Component):
         else:
             return []
 
-    def create_team(self, **kwargs):
+    def create_team(self, kwargs):
         #  nickname = user_info["name"] if "name" in user_info else name
         user = self.db.find_first_object_by(User, id=g.user.id)
         name=kwargs["name"] if "name" in kwargs else user.name
@@ -102,8 +103,7 @@ class TeamManager(Component):
         description=kwargs["description"] if "description" in kwargs else ""
         git_project=kwargs["git_project"] if "git_project" in kwargs else ""
         logo=kwargs["logo"] if "logo" in kwargs else ""
-        team = Team(self,
-                    name=name,
+        team = Team(name=name,
                     display_name=display_name,
                     description=description,
                     git_project=git_project,
@@ -111,12 +111,11 @@ class TeamManager(Component):
                     create_time=self.util.get_now(),
                     update_time=self.util.get_now(),
                     leader_id=g.user.id,
-                    hackathon_id=g.hackathon_id)
+                    hackathon_id=g.hackathon.id)
         self.db.add_object(team)
 
         team = self.db.find_first_object_by(Team, hackathon_id=g.hackathon.id, leader_id=g.user.id)
-        userteamrel = UserTeamRel(self,
-                                  join_time=self.util.get_now(),
+        userteamrel = UserTeamRel(join_time=self.util.get_now(),
                                   update_time=self.util.get_now(),
                                   status=1,
                                   hackathon_id=g.hackathon.id,
@@ -125,36 +124,34 @@ class TeamManager(Component):
         self.db.add_object(userteamrel)
         return team.dic()
 
-    def update_team(self, args):
-        if __valid_permission__(g.user.id) is True:
-            team_id=args["team_id"]
-            team = self.db.find_first_object_by(Team, team_id=team_id)
+    def update_team(self, kwargs):
+        team_id = kwargs["team_id"]
+        team = self.db.find_first_object_by(Team, id=team_id)
+        if self.__valid_permission__(g.hackathon.id, team.name, g.user.id) is True:
             name=kwargs["name"] if "name" in kwargs else team.name
             display_name=kwargs["display_name"] if "display_name" in kwargs else team.display_name
             description=kwargs["description"] if "description" in kwargs else team.description
             git_project=kwargs["git_project"] if "git_project" in kwargs else team.git_project
             logo=kwargs["logo"] if "logo" in kwargs else team.logo
-            team = Team(self,
-                        name=name,
+            team = Team(name=name,
                         display_name=display_name,
                         description=description,
                         git_project=git_project,
                         logo=logo,
                         update_time=self.util.get_now())
-            self.db.add_object(team)
+            self.db.update_object(team)
             return team.dic()
         else:
             return access_denied("You don't have permission")
 
     def join_team(self, hid, tname, uid):
-        team_id = self.db.find_first_object_by(Team, hackathon_id=hid, name=tname)
-        candidate = UserTeamRel(self,
-                                join_time=self.util.get_now(),
+        team = self.db.find_first_object_by(Team, hackathon_id=hid, name=tname)
+        candidate = UserTeamRel(join_time=self.util.get_now(),
                                 update_time=self.util.get_now(),
                                 status=0,
                                 hackathon_id=hid,
                                 user_id=uid,
-                                team_id=team_id.team_id)
+                                team_id=team.id)
         self.db.add_object(candidate)
         return candidate.dic()
 
@@ -169,7 +166,7 @@ class TeamManager(Component):
 
     def leave_team(self, hid, tname, leader_id, candidate_id):
 
-        def leave(self, hid, candidate_id):
+        def leave(hid, candidate_id):
             candidate = self.db.find_first_object_by(UserTeamRel, hackathon_id=hid, user_id=candidate_id)
             self.db.delete_object(candidate)
             return ok("You have left the team")
@@ -191,7 +188,7 @@ class TeamManager(Component):
             return leave(hid, candidate_id)
 
         elif self.is_super_admin(leader_id) is True:
-            return leave(hid, tname, candidate_id)
+            return leave(hid, candidate_id)
 
 
     def promo_leader(self, hid, tname, new_uid, old_uid):
@@ -203,7 +200,7 @@ class TeamManager(Component):
     def dismiss_team(self, hid, tname):
         if self.__valid_permission__(hid, tname, g.user.id) is not False:
             team = self.db.find_first_object_by(Team, hackathon_id=hid, name=tname)
-            members = self.db.find_all_objects_order_by(UserTeamRel, team_id=team.id)
+            members = self.db.find_all_objects_by(UserTeamRel, team_id=team.id)
             lambda x: self.db.delete_object(x), members
             self.db.delete_object(team)
             return ok("you have dismissed team")

@@ -194,7 +194,6 @@ class TeamTemplateResource(Resource):
         return team_manager.team_leader_delete_template(args['template_id'])
 
 class TeamResource(Resource):
-    @token_required
     @hackathon_name_required
     def get(self):
         parse = reqparse.RequestParser()
@@ -219,10 +218,9 @@ class TeamResource(Resource):
     @hackathon_name_required
     def delete(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('hackathon_id', type=int, location='args', required=True)
         parse.add_argument('team_name', type=str, location='args', required=True)
         args = parse.parse_args()
-        return dismiss_team(args["hackathon_id"], args["team_name"])
+        return team_manager.dismiss_team(g.hackathon.id, args["team_name"])
 
 class TeamManageResource(Resource):
     @token_required
@@ -231,34 +229,32 @@ class TeamManageResource(Resource):
         args = request.get_json()
         if "team_name" not in args:
             return bad_request("Team name is required")
-        return team_manager.join_team(g.hackathon.id, args["team_name"], g.user)
+        return team_manager.join_team(g.hackathon.id, args["team_name"], g.user.id)
 
     @token_required
     @hackathon_name_required
     def put(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('hackathon_id', type=int, location='body', required=True)
-        parse.add_argument('condidate_id', type=int, location='body', required=True)
-        parse.add_argument("status", type=int, location="body", required=True)
-        parse.add_argument("team_name", type=str, location="body", required=True)
+        parse.add_argument('user_id', type=int, location='json', required=True)
+        parse.add_argument("status", type=int, location="json", required=True)
+        parse.add_argument("team_name", type=str, location="json", required=True)
         args = parse.parse_args()
-        return team_manager.manage_team(args["hackathon_id"],
-                                              args["team_name"],
-                                              args["status"],
-                                              g.user.id,
-                                              args["condidate_id"])
+        return team_manager.manage_team(g.hackathon.id,
+                                        args["team_name"],
+                                        args["status"],
+                                        g.user.id,
+                                        args["user_id"])
     @token_required
     @hackathon_name_required
     def delete(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('hackathon_id', type=int, location='args', required=True)
-        parse.add_argument('condidate_id', type=int, location='args', required=True)
+        parse.add_argument('user_id', type=int, location='args', required=True)
         parse.add_argument('team_name', type=str, location='args', required=True)
         args = parse.parse_args()
-        return team_manager.apply_team_manage(args["hackathon_id"],
-                                              args["team_name"],
-                                              g.user.id,
-                                              args["condidate_id"])
+        return team_manager.leave_team(g.hackathon.id,
+                                        args["team_name"],
+                                        g.user.id,
+                                        args["user_id"])
 
 def register_user_routes():
     """
@@ -281,9 +277,9 @@ def register_user_routes():
     api.add_resource(UserExperimentListResource, "/api/user/experiment/list")
 
     # team API
-    api.add_resource(TeamResource, "/api/user/team")
-    api.add_resource(GetTeamMembersByUserResource, "/api/user/team/member")
-    api.add_resource(TeamManageResource, "/api/user/team/manage")
+    api.add_resource(TeamResource, "/api/team")
+    api.add_resource(GetTeamMembersByUserResource, "/api/user/team")
+    api.add_resource(TeamManageResource, "/api/team/member")
 
     # user profile API
     api.add_resource(UserProfileResource, "/api/user/profile")

@@ -38,6 +38,7 @@ from hackathon import Component, RequiredFeature
 
 class UserManager(Component):
     admin_manager = RequiredFeature("admin_manager")
+    hackathon_manager = RequiredFeature("hackathon_manager")
 
     def __generate_api_token(self, user):
         token_issue_date = self.util.get_now()
@@ -159,4 +160,4 @@ class UserManager(Component):
     def is_super_admin(self, user):
         if user.id == ReservedUser.DefaultSuperAdmin:
             return True
-        return -1 in self.admin_manager.get_hackathon_ids_by_admin_user_id(user.id)
+        return -1 in self.hackathon_manager.get_hackathon_ids_by_admin_user_id(user.id)
