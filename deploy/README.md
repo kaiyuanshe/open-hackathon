@@ -88,10 +88,13 @@ Templat 上传过程及用户对自己上传的Template的管理操作
 
 ### Manage basic info
 ## Manage registration
+The main content of registration managment is auditing all registers 
 ## Manage administrators
 ## Manage Azure certificate
 ## Manage templates
+Hackathon administrators can delete or add a template from templates pool to current hackathon
 ## Manage experiment
+Hackathon will provider a runnable environment to every player , naturally the hackathon administrator could manage them , stop or reset them when necessary
 
 
 #Developer's Guide
@@ -105,7 +108,7 @@ src folders introduction:
 `open-hackathon-client`: frontend web project src               
 `open-hackathon-server`: backend api server project src              
 `openhackathon-guacamole-auth-provider`: guacamole auth provider java project src                 
-`tools/docker-enter`: tool to quickly connect to a running docker container              
+`tools/docker-enter`: tool to quickly connect to a running docker container through container id             
                   
                    
  Use Flask to build the whole project.[Flask Introduction](http://flask.pocoo.org/docs/0.10/)
