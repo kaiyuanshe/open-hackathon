@@ -73,15 +73,17 @@ Templat 上传过程及用户对自己上传的Template的管理操作
 ## Implementation and Architecture for Admin
 ## Manage Hackathon
 ### Create hackathon
-[Imgur](http://i.imgur.com/TZgnKvN.png?1)
+![Imgur](http://i.imgur.com/TZgnKvN.png?1)
 `create hackathon`: name and display name    
-[Imgur](http://i.imgur.com/40e0WKT.png)
+![Imgur](http://i.imgur.com/40e0WKT.png)
 `organizer`：include organizer description  
-[Imgur](http://i.imgur.com/Nt72XiY.png)
+![Imgur](http://i.imgur.com/Nt72XiY.png)
 `event images`: upload event images to show your hackathon event 
-[Imgur](http://i.imgur.com/JRPIP1K.png)
+![Imgur](http://i.imgur.com/JRPIP1K.png)
 `hackathon basic info`: hackathon event basic info setup  
-[Imgur](http://i.imgur.com/1qp26bI.png)
+![Imgur](http://i.imgur.com/1qp26bI.png)
+`finish creation`: 
+![Imgur](http://i.imgur.com/ZpLUYUJ.png)
 
 ### Manage basic info
 ## Manage registration
