@@ -55,7 +55,7 @@ class TeamManager(Component):
     def __getteamid(self, hid, uid):
         user_team = self.db.find_first_object_by(UserTeamRel, hackathon_id=hid, user_id=uid)
         if user_team is not None:
-            return user_team.team_id
+            return user_team
         else:
             return None
 
@@ -88,9 +88,9 @@ class TeamManager(Component):
         return team_member
 
     def get_team_members_by_user(self, hackathon_id, user_id):
-        my_team_id = self.__getteamid(hackathon_id, user_id)
+        my_team = self.__getteamid(hackathon_id, user_id)
         if my_team_id is not None:
-            team_member = self.db.find_all_objects_by(UserTeamRel, team_id=my_team_id)
+            team_member = self.db.find_all_objects_by(UserTeamRel, team_id=my_team.team_id)
 
             def get_info(sql_object):
                 r = sql_object.dic()
