@@ -31,7 +31,7 @@ from flask import g
 
 from hackathon import Component, RequiredFeature
 from hackathon.database.models import Team, UserTeamRel, AdminHackathonRel, User
-from hackathon.hackathon_response import ok, access_denied, bad_request, not_found
+from hackathon.hackathon_response import ok, access_denied, bad_request, not_found, internal_server_error
 
 
 class TeamManager(Component):
@@ -40,7 +40,7 @@ class TeamManager(Component):
 
     def __valid_permission__(self, hid, tname, uid):
         user = self.db.find_first_object_by(User, id=uid)
-        #check if team leader
+        # check if team leader
         if self.db.find_first_object_by(Team, hackathon_id=hid, name=tname, leader_id=uid) is not None:
             return True
         #check if hackathon admin
@@ -106,12 +106,12 @@ class TeamManager(Component):
         team = self.db.find_first_object_by(UserTeamRel, g.user.id)
         if team is not None:
             return self.db.find_first_object_by(Team, id=team.team_id).dic()
-        #  nickname = user_info["name"] if "name" in user_info else name
+        # nickname = user_info["name"] if "name" in user_info else name
         if "name" not in kwargs.keys():
             return bad_request("Please provide a team name")
-        description=kwargs["description"] if "description" in kwargs else ""
-        git_project=kwargs["git_project"] if "git_project" in kwargs else ""
-        logo=kwargs["logo"] if "logo" in kwargs else ""
+        description = kwargs["description"] if "description" in kwargs else ""
+        git_project = kwargs["git_project"] if "git_project" in kwargs else ""
+        logo = kwargs["logo"] if "logo" in kwargs else ""
         team = Team(name=kwargs["name"],
                     description=description,
                     git_project=git_project,
@@ -136,10 +136,10 @@ class TeamManager(Component):
         team_id = kwargs["team_id"]
         team = self.db.find_first_object_by(Team, id=team_id)
         if self.__valid_permission__(g.hackathon.id, team.name, g.user.id) is True:
-            name=kwargs["name"] if "name" in kwargs else team.name
-            description=kwargs["description"] if "description" in kwargs else team.description
-            git_project=kwargs["git_project"] if "git_project" in kwargs else team.git_project
-            logo=kwargs["logo"] if "logo" in kwargs else team.logo
+            name = kwargs["name"] if "name" in kwargs else team.name
+            description = kwargs["description"] if "description" in kwargs else team.description
+            git_project = kwargs["git_project"] if "git_project" in kwargs else team.git_project
+            logo = kwargs["logo"] if "logo" in kwargs else team.logo
             team = Team(name=name,
                         description=description,
                         git_project=git_project,

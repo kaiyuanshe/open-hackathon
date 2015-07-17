@@ -1,10 +1,13 @@
-{% extends "manage/main.html" %} {% block style %}
+{% extends "manage/main.html" %}
+
+{% block style %}
+{{ super() }}
 <link href="/static/css/daterangepicker-bs3.css" rel="stylesheet">
 <link href="/static/css/jquery.fileupload.css" rel="stylesheet">
-<link href="/static/css/bootstrapValidator.css" rel="stylesheet">
 <link href="/static/css/bootstrap-markdown.min.css" rel="stylesheet">
+{% endblock %}
 
-{% endblock %} {% block body %}
+{% block body %}
 <div class="col-lg-12" loading>
     <div class="box" style="display:none">
         <div class="box-header">
@@ -143,11 +146,12 @@
         </div>
     </div>
 </div>
+{% endblock body %}
 
-
-{% endblock body %} {% block script %} {{ super() }}
+{% block script %}
+{{ super() }}
 <script id="hackathon_images_temp" type="text/x-jquery-tmpl">
-    <div class="col-sm-3 col-xs-6 template-download in">
+<div class="col-sm-3 col-xs-6 template-download in">
     <div class="thumbnail">
         <span class="preview">
             <a href="${thumbnailUrl}" title="${name}" data-gallery="">
@@ -161,12 +165,10 @@
             <i class="glyphicon glyphicon-remove"></i>
         </a>
     </div>
-    </div>
-
+</div>
 </script>
 <script type="text/javascript" src="/static/js/daterangepickerlocale.js"></script>
 <script type="text/javascript" src="/static/js/fileuploadTemplate.js"></script>
-<script type="text/javascript" src="/static/js/jquery/jquery.tmpl.min.js"></script>
 <script type="text/javascript" src="/static/js/jquery/jquery.ui.widget.js"></script>
 <script type="text/javascript" src="/static/js/jquery/tmpl.min.js"></script>
 <script type="text/javascript" src="/static/js/jquery/marked.min.js"></script>
@@ -182,8 +184,6 @@
 <script type="text/javascript" src="/static/js/jquery/jquery.fileupload-video.js"></script>
 <script type="text/javascript" src="/static/js/jquery/jquery.fileupload-validate.js"></script>
 <script type="text/javascript" src="/static/js/jquery/jquery.fileupload-ui.js"></script>
-<script type="text/javascript" src="/static/js/jquery/moment.min.js"></script>
 <script type="text/javascript" src="/static/js/jquery/daterangepicker.js"></script>
-<script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
-<script type="text/javascript" src="/static/js/views/oh.edithackathon.js"></script>
+<script type="text/javascript" src="/static/js/views/oh.manage.edithackathon.js"></script>
 {% endblock %}
