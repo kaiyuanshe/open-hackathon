@@ -176,7 +176,6 @@ class ExprManager(Component):
     def get_expr_status(self, expr_id):
         expr = self.db.find_first_object_by(Experiment, id=expr_id)
         if expr is not None:
-            #TODO check container status in docker_host running env
             return self.__report_expr_status(expr)
         else:
             return not_found('Experiment Not found')
@@ -428,6 +427,15 @@ class ExprManager(Component):
                                          Experiment.hackathon_id == hackathon.id,
                                          check_temp)
         if expr is not None:
+            containers = self.__get_containers_by_exper(expr)
+            for container in containers:
+                # expr status is not match container running status in docker host
+                if  not self.docker.check_container_status_is_normal(container):
+                    try:
+                        self.db.update_object(expr, status=EStatus.Exception)
+                        self.db.update_object(container.virtual_environment, status=VEStatus.Exception)
+                    except Exception as ex:
+                        self.log.error(ex)
             return expr
 
         expr = self.db.find_first_object_by(Experiment,
@@ -505,5 +513,13 @@ class ExprManager(Component):
         return url
 
     def __get_containers_by_exper(self, expr):
+        """get experiment's all containers which are based on hosted_docker
+
+        :type  expr: object | Experiment
+        :param Experiment object
+
+        :return DockerContainer object List by query
+
+        """
         ves = self.db.find_all_objects_by(VirtualEnvironment, experiment_id=expr.id, provider=VEProvider.Docker)
         return map(lambda x: x.container, ves)

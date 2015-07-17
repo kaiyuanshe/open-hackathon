@@ -74,7 +74,6 @@ import requests
 from datetime import timedelta
 
 
-
 class HostedDockerFormation(DockerFormationBase, Component):
     template_manager = RequiredFeature("template_manager")
     hackathon_manager = RequiredFeature("hackathon_manager")
@@ -279,6 +278,16 @@ class HostedDockerFormation(DockerFormationBase, Component):
         map(lambda h: self.__ensure_images_for_hackathon(h), hackathons)
 
     def check_container_status_is_normal(self, docker_container):
+        """check container's running status on docker host
+
+        if status is Running or Restarting returns True , else returns False
+
+        :type docker_container: object | DockerContainer
+        :param the container that you want to check
+
+        :return boolean
+
+        """
         docker_host = self.db.find_first_object_by(DockerHostServer, id=docker_container.host_server_id)
         if docker_host is not None:
             container_info = self.__get_container_info_by_container_id(docker_host, docker_container.container_id)
