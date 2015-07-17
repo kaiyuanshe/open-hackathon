@@ -38,7 +38,7 @@ class TeamManager(Component):
     template_manager = RequiredFeature("template_manager")
     user_manager = RequiredFeature("user_manager")
 
-    def __valid_permission__(self, hid, tname, uid):
+    def __validate_permission(self, hid, tname, uid):
         user = self.db.find_first_object_by(User, id=uid)
         # check if team leader
         if self.db.find_first_object_by(Team, hackathon_id=hid, name=tname, leader_id=uid) is not None:
@@ -52,7 +52,7 @@ class TeamManager(Component):
         else:
             return access_denied("You don't have permission")
 
-    def __getteamid__(self, hid, uid):
+    def __getteamid(self, hid, uid):
         user_team = self.db.find_first_object_by(UserTeamRel, hackathon_id=hid, user_id=uid)
         if user_team is not None:
             return user_team.team_id
@@ -88,7 +88,7 @@ class TeamManager(Component):
         return team_member
 
     def get_team_members_by_user(self, hackathon_id, user_id):
-        my_team_id = self.__getteamid__(hackathon_id, user_id)
+        my_team_id = self.__getteamid(hackathon_id, user_id)
         if my_team_id is not None:
             team_member = self.db.find_all_objects_by(UserTeamRel, team_id=my_team_id)
 
@@ -135,7 +135,7 @@ class TeamManager(Component):
     def update_team(self, kwargs):
         team_id = kwargs["team_id"]
         team = self.db.find_first_object_by(Team, id=team_id)
-        if self.__valid_permission__(g.hackathon.id, team.name, g.user.id) is True:
+        if self.__validate_permission(g.hackathon.id, team.name, g.user.id) is True:
             name = kwargs["name"] if "name" in kwargs else team.name
             description = kwargs["description"] if "description" in kwargs else team.description
             git_project = kwargs["git_project"] if "git_project" in kwargs else team.git_project
@@ -165,7 +165,7 @@ class TeamManager(Component):
             return bad_request("you have joined other team, please quit first")
 
     def manage_team(self, hid, tname, status, leader_id, candidate_id):
-        if self.__valid_permission__(hid, tname, leader_id) is not False:
+        if self.__validate_permission(hid, tname, leader_id) is not False:
             candidate = self.db.find_first_object_by(UserTeamRel, hackathon_id=hid, user_id=candidate_id)
             candidate.status = status
             candidate.update_time = self.util.get_now()
@@ -207,7 +207,7 @@ class TeamManager(Component):
         return leader.dic()
 
     def dismiss_team(self, hid, tname):
-        if self.__valid_permission__(hid, tname, g.user.id) is not False:
+        if self.__validate_permission(hid, tname, g.user.id) is not False:
             team = self.db.find_first_object_by(Team, hackathon_id=hid, name=tname)
             members = self.db.find_all_objects_by(UserTeamRel, team_id=team.id)
             lambda x: self.db.delete_object(x), members
