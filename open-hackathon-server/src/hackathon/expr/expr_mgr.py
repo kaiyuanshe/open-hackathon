@@ -176,6 +176,7 @@ class ExprManager(Component):
     def get_expr_status(self, expr_id):
         expr = self.db.find_first_object_by(Experiment, id=expr_id)
         if expr is not None:
+            #TODO check container status in docker_host running env
             return self.__report_expr_status(expr)
         else:
             return not_found('Experiment Not found')
@@ -217,7 +218,6 @@ class ExprManager(Component):
                                     id="pre_allocate_expr",
                                     next_run_time=next_run_time,
                                     minutes=self.util.safe_get_config("pre_allocate.check_interval_minutes", 5))
-
 
     def pre_allocate_expr(self):
         # only deal with online hackathons
@@ -503,3 +503,7 @@ class ExprManager(Component):
         url = "%s/%d?git=%s&user=%s&from=" % (api, experiment.id, reg.git_project, openId)
         self.log.debug("cloud eclipse url : %s" % url)
         return url
+
+    def __get_containers_by_exper(self, expr):
+        ves = self.db.find_all_objects_by(VirtualEnvironment, experiment_id=expr.id, provider=VEProvider.Docker)
+        return map(lambda x: x.container, ves)

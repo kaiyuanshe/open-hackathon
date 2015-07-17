@@ -278,6 +278,14 @@ class HostedDockerFormation(DockerFormationBase, Component):
         hackathons = self.hackathon_manager.get_online_hackathons()
         map(lambda h: self.__ensure_images_for_hackathon(h), hackathons)
 
+    def check_container_status_is_normal(self, docker_container):
+        docker_host = self.db.find_first_object_by(DockerHostServer, id=docker_container.host_server_id)
+        if docker_host is not None:
+            container_info = self.__get_container_info_by_container_id(docker_host, docker_container.container_id)
+            return container_info['State']['Running'] or container_info['State']['Restarting']
+        else:
+            return False
+
     # --------------------------------------------- helper function ---------------------------------------------#
 
     def __name_match(self, id, lists):
@@ -517,3 +525,22 @@ class HostedDockerFormation(DockerFormationBase, Component):
         host_server_dns = host_server.public_dns.split('.')[0]
         self.log.debug("starting to release ports ... ")
         ep.release_public_endpoints(host_server_dns, 'Production', host_server_name, host_ports)
+
+    def __get_container_info_by_container_id(self, docker_host, container_id):
+        """get a container info by container_id from a docker host
+
+        :type docker_host: str|unicode
+        :param: the docker host which you want to search container from
+
+        :type container_id: str|unicode
+        :param as a parameter that you want to search container though docker remote API
+
+        :return dic object of the container info if not None
+        """
+        try:
+            get_container_url = self.get_vm_url(docker_host) + "/container/%s/json?all=0" % container_id
+            container_info = json.loads(self.util.get_remote(get_container_url))
+            return container_info
+        except Exception as ex:
+            self.log.error(ex)
+            return None
