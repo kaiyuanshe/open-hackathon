@@ -27,30 +27,14 @@ import sys
 
 sys.path.append("..")
 
-from flask_restful import (
-    Resource,
-    reqparse,
-)
-from flask import (
-    g,
-    request,
-)
-from hackathon import (
-    api,
-    RequiredFeature,
-    Component,
-)
-from hackathon.decorators import (
-    token_required,
-    hackathon_name_required,
-    admin_privilege_required,
-)
-from hackathon.hackathon_response import (
-    not_found,
-    bad_request,
-    internal_server_error,
-)
+from flask_restful import Resource, reqparse
+from flask import g, request
 
+from hackathon import api, RequiredFeature, Component
+from hackathon.decorators import token_required, hackathon_name_required, admin_privilege_required
+from hackathon.hackathon_response import not_found, bad_request, internal_server_error
+
+__all__ = ["register_admin_routes"]
 
 hackathon_manager = RequiredFeature("hackathon_manager")
 register_manager = RequiredFeature("register_manager")
@@ -61,6 +45,11 @@ expr_manager = RequiredFeature("expr_manager")
 
 
 class AdminHackathonResource(Resource):
+    """Resource for admin to create/update hackathon
+
+    url path: /api/admin/hackathon
+    """
+
     @hackathon_name_required
     def get(self):
         return g.hackathon.dic()

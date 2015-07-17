@@ -27,7 +27,7 @@
 # "javascript" section for javascript. see @app.route('/config.js') in app/views.py
 
 # oauth constants
-QQ_OAUTH_STATE = "openhackathon"  # todo state should be constant. Actually it should be unguessable to prevent CSFA
+QQ_OAUTH_STATE = "openhackathon"  # todo state should not be constant. Actually it should be unguessable to prevent CSFA
 
 MYSQL_HOST = "localhost"
 MYSQL_USER = "hackathon"

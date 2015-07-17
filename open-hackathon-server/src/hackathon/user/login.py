@@ -31,9 +31,9 @@ import sys
 sys.path.append("..")
 import json
 from hackathon.constants import OAUTH_PROVIDER
-from hackathon.hackathon_response import *
 from hackathon import RequiredFeature, Component
 import urllib2
+
 
 class LoginProviderBase(Component):
     user_manager = RequiredFeature("user_manager")
@@ -51,7 +51,7 @@ class LoginProviderBase(Component):
             "user": self.user_manager.user_display_info(user),
             "token": user_with_token["token"].token
         }
-        log.debug("user login successfully:" + repr(login_result))
+        self.log.debug("user login successfully:" + repr(login_result))
         return login_result
 
     def get_remote(url, headers=None):
@@ -66,18 +66,18 @@ class QQLogin(LoginProviderBase):
         access_token = args['access_token']
         # get openID.
         openid_resp = self.get_remote(self.util.get_config("login.qq.openid_url") + access_token)
-        log.debug("get access_token from qq:" + access_token)
+        self.log.debug("get access_token from qq:" + access_token)
 
         info = json.loads(openid_resp[10:-4])
         openid = info['openid']
-        log.debug("get client_id from qq:" + openid)
+        self.log.debug("get client_id from qq:" + openid)
         client_id = info['client_id']
-        log.debug("get openid from qq:" + client_id)
+        self.log.debug("get openid from qq:" + client_id)
 
         # get user info
         url = self.util.get_config("login.qq.user_info_url") % (access_token, client_id, openid)
         user_info_resp = self.get_remote(url)
-        log.debug("get user info from qq:" + user_info_resp)
+        self.log.debug("get user info from qq:" + user_info_resp)
         user_info = self.util.convert(json.loads(user_info_resp))
         email_list = []
         user_with_token = self.user_manager.db_login(openid,
@@ -97,7 +97,7 @@ class GithubLogin(LoginProviderBase):
         # get user info
 
         user_info_resp = self.get_remote(self.util.get_config('login.github.user_info_url') + access_token)
-        log.debug("get user info from github:" + user_info_resp + '\n')
+        self.log.debug("get user info from github:" + user_info_resp + '\n')
         # example:
         #
         # {"login":"juniwang","id":8814383,"avatar_url":"https://avatars.githubusercontent.com/u/8814383?v=3","gravatar_id":"",
@@ -123,7 +123,7 @@ class GithubLogin(LoginProviderBase):
         avatar = user_info["avatar_url"]
         # get user primary email
         email_info_resp = self.get_remote(self.util.get_config('login.github.emails_info_url') + access_token)
-        log.debug("get email from github:" + email_info_resp + '\n')
+        self.log.debug("get email from github:" + email_info_resp + '\n')
 
         # email_info include all user email provided by github
         email_list = json.loads(email_info_resp)
@@ -143,8 +143,8 @@ class GitcafeLogin(LoginProviderBase):
         value = "Bearer " + token
 
         header = {"Authorization": value}
-        user_info = self.get_remote(self.util.get_config("login.gitcafe.user_info_url"), headers=header)
-        log.debug("get user info from GitCafe:" + user_info + "\n")
+        user_info = self.get_remote(self.util.get_config("login.gitcafe.user_info_url"), header)
+        self.log.debug("get user info from GitCafe:" + user_info + "\n")
         info = json.loads(user_info)
 
         name = info['username']
@@ -182,9 +182,10 @@ class WeiboLogin(LoginProviderBase):
 
         # get user info
         # https://api.weibo.com/2/users/show.json?access_token=2.005RDjXC0rYD8d39ca83156aLZWgZE&uid=1404376560
-        user_info_resp = self.get_remote(self.util.get_config('login.weibo.user_info_url') + access_token + "&uid=" + uid)
+        user_info_resp = self.get_remote(
+            self.util.get_config('login.weibo.user_info_url') + access_token + "&uid=" + uid)
         user_info = json.loads(user_info_resp)
-        log.debug("get user base info from Weibo:" + user_info_resp)
+        self.log.debug("get user base info from Weibo:" + user_info_resp)
         # {"id":2330622122,"idstr":"2330622122","class":1,"screen_name":"test name","name":"test name",
         # "province":"31","city":"10","location":"shanghai yangpu","description":"","url":"",
         # "profile_image_url":"http://tp3.sinaimg.cn/2330622122/50/5629035320/1",
@@ -205,7 +206,7 @@ class WeiboLogin(LoginProviderBase):
         email_list = []
         try:
             email_info_resp = self.get_remote(self.util.get_config('login.weibo.email_info_url') + access_token)
-            log.debug("get email from github:" + email_info_resp)
+            self.log.debug("get email from github:" + email_info_resp)
             email_info_resp_json = json.loads(email_info_resp)
             email = email_info_resp_json['email']
             email_list = [
@@ -217,8 +218,8 @@ class WeiboLogin(LoginProviderBase):
                 }
             ]
         except Exception as e:
-            log.debug("fail to get user email from weibo")
-            log.error(e)
+            self.log.debug("fail to get user email from weibo")
+            self.log.error(e)
 
         user_with_token = self.user_manager.db_login(openid,
                                                      provider=OAUTH_PROVIDER.WEIBO,
@@ -233,12 +234,12 @@ class WeiboLogin(LoginProviderBase):
 class LiveLogin(LoginProviderBase):
     def login(self, args):
         access_token = args.get('access_token')
-        log.debug("access_token is following")
-        log.debug(access_token)
-        log.debug(self.util.get_config('login.live.user_info_url'))
+        self.log.debug("access_token is following")
+        self.log.debug(access_token)
+        self.log.debug(self.util.get_config('login.live.user_info_url'))
 
         user_info_resp = self.get_remote(self.util.get_config('login.live.user_info_url') + access_token)
-        log.debug("get user info from live:" + user_info_resp)
+        self.log.debug("get user info from live:" + user_info_resp)
         # user.info
         # {u'first_name': u'Ice', u'last_name': u'Shi', u'name': u'Ice Shi', u'locale': u'en_US', \
         # u'gender': None,\
@@ -248,7 +249,7 @@ class LiveLogin(LoginProviderBase):
         # u'id': u'655c03b1b314b5ee'}
 
         user_info = json.loads(user_info_resp)
-        log.debug(user_info)
+        self.log.debug(user_info)
         name = user_info["name"]
         openid = str(args.get('user_id'))
         # avatar = user_info["avatar_url"]

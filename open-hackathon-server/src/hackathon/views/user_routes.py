@@ -199,7 +199,7 @@ def register_user_routes():
     register API routes for hackathon UI user
     """
 
-    # guacamole config API. "/api/guacamoleconfig" is depreciated, will be remoted soon
+    # guacamole config API. "/api/guacamoleconfig" is depreciated, will be removed soon
     api.add_resource(GuacamoleResource, "/api/guacamoleconfig", "/api/user/guacamoleconfig")
 
     # user API
