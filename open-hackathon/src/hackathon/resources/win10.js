@@ -31,7 +31,7 @@
             },
             "image" : {
                 "type" : "os",
-                "name" : "win10-161"
+                "name" : "win10-162"
             },
             "network_config" : {
                 "configuration_set_type" : "NetworkConfiguration",
