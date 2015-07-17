@@ -75,18 +75,6 @@ class TeamManager(Component):
             hackathon_team_list = hackathon_team_list[0:number]
         return hackathon_team_list
 
-    def get_team_members_by_team_name(self, uid, tname):
-        team = self.db.find_first_object_by(Team, hackathon_id=uid, name=tname)
-        team_member = self.db.find_all_objects_by(UserTeamRel, team_id=team.id)
-
-        def get_info(sql_object):
-            r = sql_object.dic()
-            r['user'] = self.user_manager.user_display_info(sql_object.user)
-            return r
-
-        team_member = map(lambda x: get_info(x), team_member)
-        return team_member
-
     def get_team_members_by_user(self, hackathon_id, user_id):
         my_team = self.__getteamid(hackathon_id, user_id)
         if my_team_id is not None:
@@ -103,12 +91,14 @@ class TeamManager(Component):
             return []
 
     def create_team(self, kwargs):
-        team = self.db.find_first_object_by(UserTeamRel, g.user.id)
+        team = self.db.find_first_object_by(UserTeamRel, g.hackathon.id, g.user.id)
         if team is not None:
             return self.db.find_first_object_by(Team, id=team.team_id).dic()
-        # nickname = user_info["name"] if "name" in user_info else name
         if "name" not in kwargs.keys():
             return bad_request("Please provide a team name")
+        # check team name to avoid duplicate name
+        if self.db.find_first_object_by(Team, name=kwargs["name"], hackathon_id=g.hackathon.id):
+            return bad_request("The team name is existed, please provide a new name")
         description = kwargs["description"] if "description" in kwargs else ""
         git_project = kwargs["git_project"] if "git_project" in kwargs else ""
         logo = kwargs["logo"] if "logo" in kwargs else ""
@@ -122,7 +112,6 @@ class TeamManager(Component):
                     hackathon_id=g.hackathon.id)
         self.db.add_object(team)
 
-        team = self.db.find_first_object_by(Team, hackathon_id=g.hackathon.id, leader_id=g.user.id)
         userteamrel = UserTeamRel(join_time=self.util.get_now(),
                                   update_time=self.util.get_now(),
                                   status=1,
@@ -135,7 +124,7 @@ class TeamManager(Component):
     def update_team(self, kwargs):
         team_id = kwargs["team_id"]
         team = self.db.find_first_object_by(Team, id=team_id)
-        if self.__validate_permission(g.hackathon.id, team.name, g.user.id) is True:
+        if self.__validate_permission(g.hackathon.id, team.name, g.user.id):
             name = kwargs["name"] if "name" in kwargs else team.name
             description = kwargs["description"] if "description" in kwargs else team.description
             git_project = kwargs["git_project"] if "git_project" in kwargs else team.git_project
@@ -196,7 +185,7 @@ class TeamManager(Component):
         elif self.db.find_first_object_by(AdminHackathonRel, hackathon_id=hid, user_id=leader_id) is not None:
             return leave(hid, candidate_id)
 
-        elif self.is_super_admin(leader_id) is True:
+        elif self.is_super_admin(leader_id):
             return leave(hid, candidate_id)
 
 

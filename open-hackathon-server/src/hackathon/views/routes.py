@@ -104,16 +104,6 @@ class HackathonRegisterResource(Resource):
         return team_manager.get_hackathon_registration(args['num'])
 
 
-class GetTeamMembersByTeamNameResource(Resource):
-    @hackathon_name_required
-    def get(self):
-        hackathon_id = g.hackathon.id
-        parse = reqparse.RequestParser()
-        parse.add_argument('team_name', type=str, location='args', required=True)
-        args = parse.parse_args()
-        return team_manager.get_team_members_by_team_name(hackathon_id, args['team_name'])
-
-
 class HackathonTeamListResource(Resource):
     @hackathon_name_required
     def get(self):
