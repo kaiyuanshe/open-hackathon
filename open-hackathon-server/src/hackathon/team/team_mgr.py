@@ -90,21 +90,29 @@ class TeamManager(Component):
     def get_team_members_by_user(self, hackathon_id, user_id):
         my_team_id = self.__getteamid__(hackathon_id, user_id)
         if my_team_id is not None:
-            my_team_name = self.db.find_first_object_by(Team, id=my_team_id)
-            return self.get_team_members_by_team_name(hackathon_id, my_team_name.name)
+            team_member = self.db.find_all_objects_by(UserTeamRel, team_id=my_team_id)
+
+            def get_info(sql_object):
+                r = sql_object.dic()
+                r['user'] = self.user_manager.user_display_info(sql_object.user)
+                return r
+
+            team_member = map(lambda x: get_info(x), team_member)
+            return team_member
         else:
             return []
 
     def create_team(self, kwargs):
+        team = self.db.find_first_object_by(UserTeamRel, g.user.id)
+        if team is not None:
+            return self.db.find_first_object_by(Team, id=team.team_id).dic()
         #  nickname = user_info["name"] if "name" in user_info else name
-        user = self.db.find_first_object_by(User, id=g.user.id)
-        name=kwargs["name"] if "name" in kwargs else user.name
-        display_name=kwargs["display_name"] if "display_name" in kwargs else name
+        if "name" not in kwargs.keys():
+            return bad_request("Please provide a team name")
         description=kwargs["description"] if "description" in kwargs else ""
         git_project=kwargs["git_project"] if "git_project" in kwargs else ""
         logo=kwargs["logo"] if "logo" in kwargs else ""
-        team = Team(name=name,
-                    display_name=display_name,
+        team = Team(name=kwargs["name"],
                     description=description,
                     git_project=git_project,
                     logo=logo,
@@ -129,12 +137,10 @@ class TeamManager(Component):
         team = self.db.find_first_object_by(Team, id=team_id)
         if self.__valid_permission__(g.hackathon.id, team.name, g.user.id) is True:
             name=kwargs["name"] if "name" in kwargs else team.name
-            display_name=kwargs["display_name"] if "display_name" in kwargs else team.display_name
             description=kwargs["description"] if "description" in kwargs else team.description
             git_project=kwargs["git_project"] if "git_project" in kwargs else team.git_project
             logo=kwargs["logo"] if "logo" in kwargs else team.logo
             team = Team(name=name,
-                        display_name=display_name,
                         description=description,
                         git_project=git_project,
                         logo=logo,
@@ -146,14 +152,17 @@ class TeamManager(Component):
 
     def join_team(self, hid, tname, uid):
         team = self.db.find_first_object_by(Team, hackathon_id=hid, name=tname)
-        candidate = UserTeamRel(join_time=self.util.get_now(),
-                                update_time=self.util.get_now(),
-                                status=0,
-                                hackathon_id=hid,
-                                user_id=uid,
-                                team_id=team.id)
-        self.db.add_object(candidate)
-        return candidate.dic()
+        if team is not None:
+            candidate = UserTeamRel(join_time=self.util.get_now(),
+                                    update_time=self.util.get_now(),
+                                    status=0,
+                                    hackathon_id=hid,
+                                    user_id=uid,
+                                    team_id=team.id)
+            self.db.add_object(candidate)
+            return candidate.dic()
+        else:
+            return bad_request("you have joined other team, please quit first")
 
     def manage_team(self, hid, tname, status, leader_id, candidate_id):
         if self.__valid_permission__(hid, tname, leader_id) is not False:

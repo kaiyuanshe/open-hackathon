@@ -190,7 +190,6 @@ def register_routes():
 
     # team API
     api.add_resource(HackathonTeamListResource, "/api/hackathon/team/list")
-    api.add_resource(GetTeamMembersByTeamNameResource, "/api/hackathon/team/member")
 
     # hackathon register api
     api.add_resource(HackathonRegisterResource, "/api/hackathon/registration/list")
