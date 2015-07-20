@@ -38,14 +38,14 @@ from hackathon.azureautodeploy.portManagement import *
 from hackathon.functions import safe_get_config, get_config, post_to_remote
 from subprocess import Popen
 from hackathon.scheduler import scheduler
-from datetime import timedelta
+from datetime import timedelta, datetime
 import uuid
 from hackathon.azureautodeploy.azureCreateAsync import auto_assign_expr_to_admin
 
 docker = OssDocker()
 
 WINDOWS_TEN = "win10"
-COUNT_DOWN_MINUTES = 60
+WIN10_COUNT_DOWN_MINUTES = safe_get_config("win10.wall_time_minutes", 60)
 # initial once
 
 def date_serializer(date):
@@ -55,7 +55,7 @@ def date_serializer(date):
 class ExprManager(object):
     def __end_time_for_win10(self, expr):
         if expr.hackathon.name == WINDOWS_TEN:
-            end_time = expr.create_time + timedelta(minutes=COUNT_DOWN_MINUTES)
+            end_time = expr.create_time + timedelta(minutes=WIN10_COUNT_DOWN_MINUTES)
             return date_serializer(end_time)
 
         return -1
@@ -472,6 +472,22 @@ class ExprManager(object):
         expr.last_heart_beat_time = datetime.utcnow()
         db_adapter.commit()
         return "OK"
+
+    def win10_recycle(self):
+        hack = hack_manager.get_hackathon_by_name(WINDOWS_TEN)
+        if hack is None:
+            return
+
+        expr_list = db_adapter.find_all_objects_by(Experiment, hackathon_id=hack.id, status=ExprStatus.Running)
+
+        def sub_check(expr):
+            if expr.user_id > 0 and expr.create_time + timedelta(minutes=WIN10_COUNT_DOWN_MINUTES) < datetime.utcnow():
+                expr.user_id = ReservedUser.DefaultUserID
+            return
+
+        map(lambda expr: sub_check(expr), expr_list)
+        db_adapter.commit()
+        return
 
     def __release_ports(self, expr_id, host_server):
         """
