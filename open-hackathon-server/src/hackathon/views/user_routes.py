@@ -229,7 +229,7 @@ class TeamManageResource(Resource):
         args = request.get_json()
         if "team_name" not in args:
             return bad_request("Team name is required")
-        return team_manager.join_team(g.hackathon.id, args["team_name"], g.user.id)
+        return team_manager.join_team(g.hackathon.id, args["team_name"], g.user)
 
     @token_required
     @hackathon_name_required
@@ -239,10 +239,10 @@ class TeamManageResource(Resource):
         parse.add_argument("status", type=int, location="json", required=True)
         parse.add_argument("team_name", type=str, location="json", required=True)
         args = parse.parse_args()
-        return team_manager.manage_team(g.hackathon.id,
+        return team_manager.update_statues(g.hackathon.id,
                                         args["team_name"],
                                         args["status"],
-                                        g.user.id,
+                                        g.user,
                                         args["user_id"])
     @token_required
     @hackathon_name_required
