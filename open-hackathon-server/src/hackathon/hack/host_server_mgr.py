@@ -33,7 +33,6 @@ class DockerHostManager(Component):
 
     docker = RequiredFeature("docker")
 
-
     def get_available_docker_host(self, req_count, hackathon):
         vms = self.db.find_all_objects(DockerHostServer,
                                        DockerHostServer.container_count + req_count <=

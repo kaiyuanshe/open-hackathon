@@ -291,11 +291,23 @@ class HostedDockerFormation(DockerFormationBase, Component):
         docker_host = self.db.find_first_object_by(DockerHostServer, id=docker_container.host_server_id)
         if docker_host is not None:
             container_info = self.__get_container_info_by_container_id(docker_host, docker_container.container_id)
+            if container_info is None:
+                return False
             return container_info['State']['Running'] or container_info['State']['Restarting']
         else:
             return False
 
     def check_docker_host_status_is_normal(self, docker_host):
+        """check docker host's running status
+
+        if status is Running or Restarting returns True , else returns False
+
+        :type docker_host: object | DockerHostServer
+        :param the docker host that you want to check
+
+        :return boolean
+
+        """
         if self._ping(docker_host):
             url = self.get_vm_url(docker_host) + "/info"
             req = requests.get(url)
