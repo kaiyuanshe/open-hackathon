@@ -232,16 +232,33 @@ class DefaultExperiment(Resource):
 
 class Win10StatResource(Resource):
     def get(self):
-        return hack_manager.get_win10_stat()
+        return expr_manager.get_win10_stat()
 
     def post(self):
         hack_manager.increase_win10_download_count()
-        return hack_manager.get_win10_stat()
+        return expr_manager.get_win10_stat()
 
 
 class Win10RecycleResource(Resource):
     def get(self):
         expr_manager.win10_recycle()
+        return "OK"
+
+
+class Win10EndExprResource(Resource):
+    @token_required
+    def post(self):
+        try:
+            body = request.get_json()
+            return expr_manager.end_expr_now(body)
+        except Exception as ex:
+            log.error(ex)
+            return {
+                "error": {
+                    "code": 400,
+                    "message": "Bad Request"
+                }
+            }
 
 
 api.add_resource(UserExperimentResource, "/api/user/experiment")
@@ -261,6 +278,7 @@ api.add_resource(CurrentTime, "/api/currenttime")
 api.add_resource(DefaultExperiment, "/api/default/experiment")
 api.add_resource(Win10StatResource, "/api/win10/stat")
 api.add_resource(Win10RecycleResource, "/api/win10/recycle")
+api.add_resource(Win10EndExprResource, "/api/win10/endnow")
 
 # ------------------------------ APIs for admin-site --------------------------------
 
