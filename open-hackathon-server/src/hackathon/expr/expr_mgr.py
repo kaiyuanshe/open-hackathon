@@ -312,6 +312,16 @@ class ExprManager(Component):
         return self.__report_expr_status(expr)
 
     def __report_expr_status(self, expr):
+        containers = self.__get_containers_by_exper(expr)
+        for container in containers:
+            # expr status(restarting or running) is not match container running status on docker host
+            if not self.docker.check_container_status_is_normal(container):
+                try:
+                    self.db.update_object(expr, status=EStatus.Exception)
+                    self.db.update_object(container.virtual_environment, status=VEStatus.Exception)
+                    break
+                except Exception as ex:
+                    self.log.error(ex)
         ret = {
             "expr_id": expr.id,
             "status": expr.status,
@@ -319,6 +329,7 @@ class ExprManager(Component):
             "create_time": str(expr.create_time),
             "last_heart_beat_time": str(expr.last_heart_beat_time),
         }
+
         if expr.status != EStatus.Running:
             return ret
         # return remote clients include guacamole and cloudEclipse
@@ -427,15 +438,6 @@ class ExprManager(Component):
                                          Experiment.hackathon_id == hackathon.id,
                                          check_temp)
         if expr is not None:
-            containers = self.__get_containers_by_exper(expr)
-            for container in containers:
-                # expr status is not match container running status in docker host
-                if  not self.docker.check_container_status_is_normal(container):
-                    try:
-                        self.db.update_object(expr, status=EStatus.Exception)
-                        self.db.update_object(container.virtual_environment, status=VEStatus.Exception)
-                    except Exception as ex:
-                        self.log.error(ex)
             return expr
 
         expr = self.db.find_first_object_by(Experiment,
@@ -494,16 +496,16 @@ class ExprManager(Component):
             condition = and_(condition, Experiment.status == kwargs['status'])
         # check user name
         if len(kwargs['user_name']) > 0:
-            users = self.db.find_all_objects(User, User.nickname.like('%'+kwargs['user_name']+'%'))
+            users = self.db.find_all_objects(User, User.nickname.like('%' + kwargs['user_name'] + '%'))
             uids = map(lambda x: x.id, users)
             condition = and_(condition, Experiment.user_id.in_(uids))
         return condition
 
-    def __get_cloud_eclipse_url(self,experiment):
+    def __get_cloud_eclipse_url(self, experiment):
         reg = self.register_manager.get_registration_by_user_and_hackathon(experiment.user_id, experiment.hackathon_id)
         if reg is None:
             return None
-        if reg.git_project is None :
+        if reg.git_project is None:
             return None
         # http://www.idehub.cn/api/ide/18?git=http://git.idehub.cn/root/test-c.git&user=root&from=hostname(frontend)
         api = self.util.safe_get_config("%s.api" % CLOUD_ECLIPSE.CLOUD_ECLIPSE, "http://www.idehub.cn/api/ide")

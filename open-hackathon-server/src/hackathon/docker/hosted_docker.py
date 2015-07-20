@@ -295,6 +295,13 @@ class HostedDockerFormation(DockerFormationBase, Component):
         else:
             return False
 
+    def check_docker_host_status_is_normal(self, docker_host):
+        if self._ping(docker_host):
+            url = self.get_vm_url(docker_host) + "/info"
+            req = requests.get(url)
+            return req.status_code >= 200 and req.status_code < 300
+
+
     # --------------------------------------------- helper function ---------------------------------------------#
 
     def __name_match(self, id, lists):
