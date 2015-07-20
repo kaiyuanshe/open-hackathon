@@ -27,7 +27,7 @@
 import sys
 
 sys.path.append("..")
-from hackathon.database.models import Hackathon, User, UserEmail, Register, WindowsTenStat
+from hackathon.database.models import Hackathon, User, UserEmail, Register, WindowsTenStat, Experiment
 from hackathon.database import db_adapter
 
 
@@ -82,18 +82,11 @@ class HackathonManager():
         self.__increase_win10_stat("willing_count", increment)
 
     def increase_win10_trial_count(self, increment=1):
+        self.__increase_win10_stat("willing_count", increment)
         self.__increase_win10_stat("trial_count", increment)
 
     def increase_win10_download_count(self, increment=1):
         self.__increase_win10_stat("download_count", increment)
-
-    def get_win10_stat(self):
-        stat = self.db.find_first_object(WindowsTenStat)
-        if not stat:
-            stat = WindowsTenStat()
-            self.db.add_object(stat)
-
-        return stat.dic()
 
 
 hack_manager = HackathonManager(db_adapter)

@@ -35,6 +35,7 @@ from hackathon.enum import *
 from hackathon.hack import hack_manager
 from hackathon.azureautodeploy.azureImpl import *
 from hackathon.azureautodeploy.portManagement import *
+from hackathon.database.models import WindowsTenStat
 from hackathon.functions import safe_get_config, get_config, post_to_remote
 from subprocess import Popen
 from hackathon.scheduler import scheduler
@@ -46,6 +47,7 @@ docker = OssDocker()
 
 WINDOWS_TEN = "win10"
 WIN10_COUNT_DOWN_MINUTES = safe_get_config("win10.wall_time_minutes", 60)
+WIN10_TOTAL_SEAT = safe_get_config("win10.total_seats", 10)
 # initial once
 
 def date_serializer(date):
@@ -404,7 +406,7 @@ class ExprManager(object):
                                                Experiment.template == template,
                                                (Experiment.status == ExprStatus.Starting) | (
                                                    Experiment.status == ExprStatus.Running))
-            if total_env_count >= 10:
+            if total_env_count >= WIN10_TOTAL_SEAT:
                 return {
                     "error": {
                         "code": 412,
@@ -479,6 +481,52 @@ class ExprManager(object):
                           id='win10_recycle_task',
                           replace_existing=True,
                           minutes=1)
+
+    def get_win10_stat(self):
+        stat = db_adapter.find_first_object(WindowsTenStat)
+        if not stat:
+            stat = WindowsTenStat()
+            db_adapter.add_object(stat)
+
+        ret = stat.dic()
+
+        hack = hack_manager.get_hackathon_by_name(WINDOWS_TEN)
+        if hack:
+            ret["running_count"] = db_adapter.count(Experiment,
+                                                    Experiment.hackathon_id == hack.id,
+                                                    Experiment.status == ExprStatus.Running,
+                                                    Experiment.user_id > 0)
+        else:
+            ret["running_count"] = 0
+
+        ret["total_seat="] = WIN10_TOTAL_SEAT
+
+        return ret
+
+    def end_expr_now(self, body):
+        expr_id = body["experiment_id"]
+        expr = db_adapter.find_first_object_by(Experiment, id=expr_id, status=ExprStatus.Running)
+        if expr is None:
+            log.warn("expr not found")
+            return {
+                "error": {
+                    "code": 404,
+                    "message": "not found"
+                }
+            }
+
+        if expr.user_id != g.user.id:
+            log.warn("try to recycle expr of others")
+            return {
+                "error": {
+                    "code": 403,
+                    "message": "Forbidden"
+                }
+            }
+
+        expr.user_id = ReservedUser.DefaultUserID
+        db_adapter.commit()
+        return "OK"
 
     def __release_ports(self, expr_id, host_server):
         """
