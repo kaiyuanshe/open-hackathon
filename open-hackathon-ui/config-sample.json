@@ -38,10 +38,10 @@
   },
   "api": {
     "user": {
-      "login":["post","del"],
+      "login":["post","delete"],
       "hackathon":["get"],
       "experiment":{
-        "_self":["get","post","del","put"],
+        "":["get","post","del","put"],
         "list":["get"]
       }
     },
@@ -49,10 +49,10 @@
       "list":["get"]
     },
     "bulletin":{
-      "_self":["get","post"]
+      "":["get","post"]
     },
     "hackathon":{
-      "_self":["get","post"],
+      "":["get","post"],
       "list":["get"],
       "stat":["get"],
       "template":["get"]

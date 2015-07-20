@@ -83,6 +83,3 @@ if __name__ == "__main__":
         sys.exit(-1)
     set_expr_status(expr_id, ExprStatus.Running)
     hack_manager.increase_win10_trial_count()
-
-    # auto assign expr to admin
-    auto_assign_expr_to_admin(expr_id)

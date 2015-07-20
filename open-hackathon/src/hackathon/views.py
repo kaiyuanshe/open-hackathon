@@ -14,7 +14,7 @@
 #
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-#  
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -239,6 +239,11 @@ class Win10StatResource(Resource):
         return hack_manager.get_win10_stat()
 
 
+class Win10RecycleResource(Resource):
+    def get(self):
+        return expr_manager.win10_recycle()
+
+
 api.add_resource(UserExperimentResource, "/api/user/experiment")
 api.add_resource(RegisterListResource, "/api/register/list")
 api.add_resource(BulletinResource, "/api/bulletin")
@@ -255,6 +260,7 @@ api.add_resource(UserResource, "/api/user")
 api.add_resource(CurrentTime, "/api/currenttime")
 api.add_resource(DefaultExperiment, "/api/default/experiment")
 api.add_resource(Win10StatResource, "/api/win10/stat")
+api.add_resource(Win10RecycleResource, "/api/win10/recycle")
 
 # ------------------------------ APIs for admin-site --------------------------------
 
