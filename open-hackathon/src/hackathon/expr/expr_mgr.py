@@ -474,20 +474,11 @@ class ExprManager(object):
         return "OK"
 
     def win10_recycle(self):
-        hack = hack_manager.get_hackathon_by_name(WINDOWS_TEN)
-        if hack is None:
-            return
-
-        expr_list = db_adapter.find_all_objects_by(Experiment, hackathon_id=hack.id, status=ExprStatus.Running)
-
-        def sub_check(expr):
-            if expr.user_id > 0 and expr.create_time + timedelta(minutes=WIN10_COUNT_DOWN_MINUTES) < datetime.utcnow():
-                expr.user_id = ReservedUser.DefaultUserID
-            return
-
-        map(lambda expr: sub_check(expr), expr_list)
-        db_adapter.commit()
-        return
+        scheduler.add_job(win10_recycle_task,
+                          trigger='interval',
+                          id='win10_recycle_task',
+                          replace_existing=True,
+                          minutes=1)
 
     def __release_ports(self, expr_id, host_server):
         """
@@ -618,6 +609,24 @@ class ExprManager(object):
         u.submitted_time = datetime.utcnow()
         db_adapter.commit()
         return u
+
+
+def win10_recycle_task():
+    hack = hack_manager.get_hackathon_by_name(WINDOWS_TEN)
+    if hack is None:
+        return
+
+    expr_list = db_adapter.find_all_objects_by(Experiment, hackathon_id=hack.id, status=ExprStatus.Running)
+
+    def sub_check(expr):
+        if expr.user_id > 0 and expr.create_time + timedelta(minutes=WIN10_COUNT_DOWN_MINUTES) < datetime.utcnow():
+            log.debug("experiment %d will be recycled" % expr.id)
+            expr.user_id = ReservedUser.DefaultUserID
+        return
+
+    map(lambda expr: sub_check(expr), expr_list)
+    db_adapter.commit()
+    return
 
 
 def open_check_expr():
