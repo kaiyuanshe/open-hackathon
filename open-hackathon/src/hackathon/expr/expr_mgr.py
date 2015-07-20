@@ -39,6 +39,7 @@ from hackathon.database.models import WindowsTenStat
 from hackathon.functions import safe_get_config, get_config, post_to_remote
 from subprocess import Popen
 from hackathon.scheduler import scheduler
+from flask import g
 from datetime import timedelta, datetime
 import uuid
 from hackathon.azureautodeploy.azureCreateAsync import auto_assign_expr_to_admin
