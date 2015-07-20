@@ -241,7 +241,7 @@ class Win10StatResource(Resource):
 
 class Win10RecycleResource(Resource):
     def get(self):
-        return expr_manager.win10_recycle()
+        expr_manager.win10_recycle()
 
 
 api.add_resource(UserExperimentResource, "/api/user/experiment")
