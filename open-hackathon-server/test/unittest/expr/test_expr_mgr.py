@@ -51,24 +51,3 @@ class TestExperimengManager(unittest.TestCase):
         expr_id = 11
         expr_manager = RequiredFeature("expr_manager")
         result = expr_manager.get_expr_status(expr_id)
-
-    '''test method get_UserHackathonRel_list'''
-    #
-    # def test_get_UserHackathonRel_list_result_empty(self):
-    #     db_adapter = Mock()
-    #     db_adapter.find_all_objects_by.return_value = []
-    #     rm = RegisterManager(db_adapter)
-    #     with app.test_request_context('/'):
-    #         self.assertEqual(rm.get_all_registration_by_hackathon_id(1), [])
-    #
-    # def test_get_UserHackathonRel_list_result_not_empty(self):
-    #     db_adapter = Mock()
-    #     UserHackathonRel1 = UserHackathonRel(id=1, real_name='test1', email='test2@test2.com', hackathon_id=1)
-    #     UserHackathonRel2 = UserHackathonRel(id=2, real_name='test2', email='test2@test2.com', hackathon_id=1)
-    #     db_adapter.find_all_objects_by.return_value = [UserHackathonRel1, UserHackathonRel2]
-    #     rm = RegisterManager(db_adapter)
-    #     with app.test_request_context('/'):
-    #         self.assertEqual(len(rm.get_all_registration_by_hackathon_id(1)), 2)
-    #         db_adapter.find_all_objects_by.assert_called_once_with(UserHackathonRel, hackathon_id=1)
-
-    '''test method create_hackathon'''
