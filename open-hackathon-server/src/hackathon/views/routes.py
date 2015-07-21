@@ -157,8 +157,12 @@ class TemplateListResource(Resource):
     def get(self):
         parse = reqparse.RequestParser()
         parse.add_argument('status', type=int, location='args')
+        parse.add_argument('name', type=str, location='args')
+        parse.add_argument('description', type=str, location='args')
         args = parse.parse_args()
-        templates = template_manager.get_template_list(args['status'])
+        templates = template_manager.get_template_list(status=args['status'],
+                                                       name=args['name'],
+                                                       description=args['description'])
         return map(lambda x: x.dic(), templates)
 
 class HackathonTemplateListResource(Resource):

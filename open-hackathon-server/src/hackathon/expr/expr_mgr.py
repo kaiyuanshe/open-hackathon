@@ -218,7 +218,6 @@ class ExprManager(Component):
                                     next_run_time=next_run_time,
                                     minutes=self.util.safe_get_config("pre_allocate.check_interval_minutes", 5))
 
-
     def pre_allocate_expr(self):
         # only deal with online hackathons
         hackathon_id_list = self.hackathon_manager.get_pre_allocate_enabled_hackathon_list()
@@ -313,6 +312,16 @@ class ExprManager(Component):
         return self.__report_expr_status(expr)
 
     def __report_expr_status(self, expr):
+        containers = self.__get_containers_by_exper(expr)
+        for container in containers:
+            # expr status(restarting or running) is not match container running status on docker host
+            if not self.docker.hosted_docker.check_container_status_is_normal(container):
+                try:
+                    self.db.update_object(expr, status=EStatus.UnexpectedErrors)
+                    self.db.update_object(container.virtual_environment, status=VEStatus.UnexpectedErrors)
+                    break
+                except Exception as ex:
+                    self.log.error(ex)
         ret = {
             "expr_id": expr.id,
             "status": expr.status,
@@ -320,6 +329,7 @@ class ExprManager(Component):
             "create_time": str(expr.create_time),
             "last_heart_beat_time": str(expr.last_heart_beat_time),
         }
+
         if expr.status != EStatus.Running:
             return ret
         # return remote clients include guacamole and cloudEclipse
@@ -486,16 +496,16 @@ class ExprManager(Component):
             condition = and_(condition, Experiment.status == kwargs['status'])
         # check user name
         if len(kwargs['user_name']) > 0:
-            users = self.db.find_all_objects(User, User.nickname.like('%'+kwargs['user_name']+'%'))
+            users = self.db.find_all_objects(User, User.nickname.like('%' + kwargs['user_name'] + '%'))
             uids = map(lambda x: x.id, users)
             condition = and_(condition, Experiment.user_id.in_(uids))
         return condition
 
-    def __get_cloud_eclipse_url(self,experiment):
+    def __get_cloud_eclipse_url(self, experiment):
         reg = self.register_manager.get_registration_by_user_and_hackathon(experiment.user_id, experiment.hackathon_id)
         if reg is None:
             return None
-        if reg.git_project is None :
+        if reg.git_project is None:
             return None
         # http://www.idehub.cn/api/ide/18?git=http://git.idehub.cn/root/test-c.git&user=root&from=hostname(frontend)
         api = self.util.safe_get_config("%s.api" % CLOUD_ECLIPSE.CLOUD_ECLIPSE, "http://www.idehub.cn/api/ide")
@@ -503,3 +513,15 @@ class ExprManager(Component):
         url = "%s/%d?git=%s&user=%s&from=" % (api, experiment.id, reg.git_project, openId)
         self.log.debug("cloud eclipse url : %s" % url)
         return url
+
+    def __get_containers_by_exper(self, expr):
+        """get experiment's all containers which are based on hosted_docker
+
+        :type  expr: Experiment
+        :param expr: which to get containers from
+
+        :return DockerContainer object List by query
+
+        """
+        ves = self.db.find_all_objects_by(VirtualEnvironment, experiment_id=expr.id, provider=VEProvider.Docker)
+        return map(lambda x: x.container, ves)

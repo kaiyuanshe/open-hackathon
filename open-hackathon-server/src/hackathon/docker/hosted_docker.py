@@ -74,7 +74,6 @@ import requests
 from datetime import timedelta
 
 
-
 class HostedDockerFormation(DockerFormationBase, Component):
     template_manager = RequiredFeature("template_manager")
     hackathon_manager = RequiredFeature("hackathon_manager")
@@ -100,7 +99,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
             hosts = self.db.find_all_objects(DockerHostServer)
             alive = 0
             for host in hosts:
-                if self._ping(host):
+                if self.ping_passed(host):
                     alive += 1
             if alive == len(hosts):
                 return {
@@ -278,6 +277,41 @@ class HostedDockerFormation(DockerFormationBase, Component):
         hackathons = self.hackathon_manager.get_online_hackathons()
         map(lambda h: self.__ensure_images_for_hackathon(h), hackathons)
 
+    def check_container_status_is_normal(self, docker_container):
+        """check container's running status on docker host
+
+        if status is Running or Restarting returns True , else returns False
+
+        :type docker_container: DockerContainer
+        :param docker_container: the container that you want to check
+
+        :return boolean
+
+        """
+        docker_host = self.db.find_first_object_by(DockerHostServer, id=docker_container.host_server_id)
+        if docker_host is not None:
+            container_info = self.__get_container_info_by_container_id(docker_host, docker_container.container_id)
+            if container_info is None:
+                return False
+            return container_info['State']['Running'] or container_info['State']['Restarting']
+        else:
+            return False
+
+    def ping_passed(self, docker_host):
+        """
+        Ping docker service in docker host
+        :param docker_host:
+        :return:
+        """
+        try:
+            ping_url = '%s/_ping' % self.__get_vm_url(docker_host)
+            req = requests.get(ping_url)
+            self.log.debug(req.content)
+            return req.status_code == 200 and req.content == 'OK'
+        except Exception as e:
+            self.log.error(e)
+            return False
+
     # --------------------------------------------- helper function ---------------------------------------------#
 
     def __name_match(self, id, lists):
@@ -309,21 +343,6 @@ class HostedDockerFormation(DockerFormationBase, Component):
 
     def __get_vm_url(self, docker_host):
         return 'http://%s:%d' % (docker_host.public_dns, docker_host.public_docker_api_port)
-
-    def _ping(self, docker_host):
-        """
-        Ping docker service in docker host
-        :param docker_host:
-        :return:
-        """
-        try:
-            ping_url = '%s/_ping' % self.__get_vm_url(docker_host)
-            req = requests.get(ping_url)
-            self.log.debug(req.content)
-            return req.status_code == 200 and req.content == 'OK'
-        except Exception as e:
-            self.log.error(e)
-            return False
 
     def __clear_ports_cache(self):
         """
@@ -517,3 +536,25 @@ class HostedDockerFormation(DockerFormationBase, Component):
         host_server_dns = host_server.public_dns.split('.')[0]
         self.log.debug("starting to release ports ... ")
         ep.release_public_endpoints(host_server_dns, 'Production', host_server_name, host_ports)
+
+    def __get_container_info_by_container_id(self, docker_host, container_id):
+        """get a container info by container_id from a docker host
+
+        :type docker_host: str|unicode
+        :param: the docker host which you want to search container from
+
+        :type container_id: str|unicode
+        :param as a parameter that you want to search container though docker remote API
+
+        :return dic object of the container info if not None
+        """
+        try:
+            get_container_url = self.get_vm_url(docker_host) + "/container/%s/json?all=0" % container_id
+            req = requests.get(get_container_url)
+            if req.status_code >= 200 and req.status_code < 300 :
+                container_info = json.loads(req.content)
+                return container_info
+            return None
+        except Exception as ex:
+            self.log.error(ex)
+            return None

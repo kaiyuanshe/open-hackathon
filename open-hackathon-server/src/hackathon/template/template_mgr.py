@@ -66,6 +66,9 @@ from hackathon import (
     Context
 )
 from flask import g
+from sqlalchemy import (
+    and_
+)
 
 
 class TemplateManager(Component):
@@ -88,10 +91,9 @@ class TemplateManager(Component):
         htrs = self.db.find_all_objects_by(HackathonTemplateRel, hackathon_id=hackathon_id)
         return map(lambda x: x.template, htrs)
 
-    def get_template_list(self, status=None):
-        if status is None:
-            return self.db.find_all_objects(Template)
-        return self.db.find_all_objects_by(Template, status=status)
+    def get_template_list(self, **kwargs):
+        condition = self.__get_filter_condition(**kwargs)
+        return self.db.find_all_objects(Template, condition)
 
     def get_user_templates(self, user, hackathon):
         template_list = self.__get_templates_by_user(user, hackathon)
@@ -414,3 +416,22 @@ class TemplateManager(Component):
                 images.append(ex_image)
         return flatten(images)
 
+    def __get_filter_condition(self, **kwargs):
+        """parse args and transfer to condition that can be used to query in DB
+
+        :type  args: dict
+        :param args: filter conditions
+
+        :return: condition for query in DB
+        """
+        condition = Template.status != -1
+        if kwargs['status'] is not None:
+            condition = and_(condition, Template.status == kwargs['status'])
+
+        if kwargs['name'] is not None:
+            condition = and_(condition, Template.name.like('%'+kwargs['name']+'%'))
+
+        if kwargs['description'] is not None:
+            condition = and_(condition, Template.description.like('%'+kwargs['description']+'%'))
+
+        return condition

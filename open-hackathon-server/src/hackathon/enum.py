@@ -44,6 +44,7 @@ class EStatus:
     Failed = 5
     Rollbacking = 6
     Rollbacked = 7
+    UnexpectedErrors = 8
 
 
 class VEStatus:
@@ -55,6 +56,7 @@ class VEStatus:
     Failed = 2
     Stopped = 3
     Deleted = 4
+    UnexpectedErrors = 5
 
 
 class PortBindingType:

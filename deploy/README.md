@@ -73,17 +73,28 @@ Templat 上传过程及用户对自己上传的Template的管理操作
 ## Implementation and Architecture for Admin
 ## Manage Hackathon
 ### Create hackathon
-`create hackathon`: name and display name                   
-`organizer`：include organizer description              
-`event images`: upload event images to show your hackathon event                
-`hackathon basic info`: hackathon event basic info setup                 
+`Hackathon creation entrance`
+![Imgur](http://i.imgur.com/TZgnKvN.png?1)
+`create hackathon`: name and display name                  
+![Imgur](http://i.imgur.com/40e0WKT.png)
+`organizer`：include organizer description                 
+![Imgur](http://i.imgur.com/Nt72XiY.png)
+`event images`: upload event images to show your hackathon event                 
+![Imgur](http://i.imgur.com/JRPIP1K.png)
+`hackathon basic info`: hackathon event basic info setup                      
+![Imgur](http://i.imgur.com/1qp26bI.png)
+`finish creation`:                    
+![Imgur](http://i.imgur.com/ZpLUYUJ.png)
 
 ### Manage basic info
 ## Manage registration
+The main content of registration managment is auditing all registers 
 ## Manage administrators
 ## Manage Azure certificate
 ## Manage templates
+Hackathon administrators can delete or add a template from templates pool to current hackathon
 ## Manage experiment
+Hackathon will provider a runnable environment to every player , naturally the hackathon administrator could manage them , stop or reset them when necessary
 
 
 #Developer's Guide
@@ -97,7 +108,7 @@ src folders introduction:
 `open-hackathon-client`: frontend web project src               
 `open-hackathon-server`: backend api server project src              
 `openhackathon-guacamole-auth-provider`: guacamole auth provider java project src                 
-`tools/docker-enter`: tool to quickly connect to a running docker container              
+`tools/docker-enter`: tool to quickly connect to a running docker container through container id             
                   
                    
  Use Flask to build the whole project.[Flask Introduction](http://flask.pocoo.org/docs/0.10/)
