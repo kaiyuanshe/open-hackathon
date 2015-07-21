@@ -500,7 +500,7 @@ class ExprManager(object):
         else:
             ret["running_count"] = 0
 
-        ret["total_seat="] = WIN10_TOTAL_SEAT
+        ret["total_seat"] = WIN10_TOTAL_SEAT
 
         return ret
 

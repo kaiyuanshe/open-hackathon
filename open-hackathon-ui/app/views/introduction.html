@@ -1,33 +1,125 @@
 <div id="main">
-  <div class="container">
-    <div class="row  form-group">
-      <div class="jumbotron">
-        <div class="container">
-          <h1>Open XML SDK 编程黑客松</h1>
+    <div class="container">
+        <div class="row  form-group">
+            <div class="jumbotron">
+                <div class="container">
+                    <h1>Open XML SDK 编程黑客松</h1>
 
-          <p class="text-left">
-            在整个编程黑客松活动中，我们为各位黑客设计了三个挑战。 我们希望通过这些挑战，让大家更好的去了解 WordProcessingML 的编程。 使用的技能和工具同样可以帮助大家处理 SpreadsheetML 和
-            PresentationML。 友情提示一下，答案可能会在我们之后推出的各种技术视频中提到！
-          </p>
-          <b>在完成挑战后，请大家把代码发布到在 GitCafe 的项目中，我们会检查作业的！</b>
+                    <p class="text-left">
+                        在整个编程黑客松活动中，我们为各位黑客设计了三个挑战。 我们希望通过这些挑战，让大家更好的去了解 WordProcessingML 的编程。 使用的技能和工具同样可以帮助大家处理 SpreadsheetML 和
+                        PresentationML。 友情提示一下，答案可能会在我们之后推出的各种技术视频中提到！
+                    </p>
+                    <b>在完成挑战后，请大家把代码发布到在 GitCafe 的项目中，我们会检查作业的！</b>
+
+                    <h2>Windows </h2>
+
+                    <p>
+                        <a href="#" ng-click="accessWindowsDownload()" class="btn btn-primary">
+                            访问windows下载页面
+                        </a>
+                    </p>
+
+                    <h4>加入兴趣小组 </h4>
+
+                    <p>
+                        <a href="#" class="btn btn-success">小组A
+                        </a>
+                        <a href="#" class="btn btn-success">小组B
+                        </a>
+                        <a href="#" class="btn btn-success">小组C
+                        </a>
+                    </p>
+
+                    <p>{{t.trial_count}}人已经正在体验，{{t.download_count}}人开始下载</p>
+
+                    <div class="oh-share">
+                        <div class="jiathis_style_32x32">
+                            <span class="jiathis_txt">分享到：</span>
+                            <a class="jiathis_button_qzone">QQ空间</a>
+                            <a class="jiathis_button_tsina">新浪微博</a>
+                            <a class="jiathis_button_weixin">微信</a>
+                            <a class="jiathis_button_cqq">QQ好友</a>
+                            <a class="jiathis_button_tqq">腾讯微博</a>
+                            <a class="jiathis_button_douban">豆瓣</a>
+                            <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+                            <a class="jiathis_counter_style"></a>
+                        </div>
+                    </div>
+                    <script type="text/javascript">
+                        var jiathis_config = {
+                            summary: "",
+                            shortUrl: false,
+                            hideMore: false
+                        }
+
+
+
+                    </script>
+                    <script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+                </div>
+            </div>
+            <div class="container text-left">
+                <div class="row ">
+                    <div class="col-md-offset-1 col-md-6">
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div id="respond" class="col-md-offset-1 col-md-6">
+                        <form name="registerForm" class="form-horizontal" novalidate>
+
+                            <h3 class="modal-title">发表评论</h3>
+
+                            <p>电子邮件地址不会被公开。 必填项已用*标注</p>
+
+
+                            <div class="form-group"
+                                 ng-class="{ 'has-error' : comment.name.$invalid && comment.name.$touched }">
+                                <label class="control-label required">姓名 *</label>
+
+
+                                <!--typeahead="teamname for teamname in states | filter:$viewValue | limitTo:5"-->
+                                <input type="text" class="form-control" name="name" placeholder="姓名 "
+                                       required=""
+                                       ng-model="comment.name" required>
+
+                                <p ng-show="comment.name.$error.required && comment.name.$touched" class="help-block">
+                                    姓名必须填写</p>
+
+                            </div>
+                            <div class="form-group"
+                                 ng-class="{ 'has-error' : comment.email.$invalid && comment.email.$touched }">
+                                <label class="control-label">电子邮件 *</label>
+
+
+                                <input type="email" class="form-control" name="email" placeholder="电子邮件 *"
+                                       ng-model="comment.email">
+                                <p ng-show="comment.email.$error.required && comment.email.$touched" class="help-block">
+                                    电子邮件必须填写</p>
+                                <p ng-show="comment.email.$touched && comment.email.$invalid"
+                                   class="help-block">请输入正确的电子邮件！</p>
+                            </div>
+                            <div class="form-group"
+                                 ng-class="{ 'has-error' : comment.site.$invalid && comment.site.$touched }">
+                                <label class="control-label">站点</label>
+
+
+                                <input type="url" class="form-control" name="site" placeholder="站点 "
+                                       ng-model="comment.site">
+
+                                <p ng-show="comment.site.$touched && comment.site.$invalid"
+                                   class="help-block">请输入正确的站点地址！</p>
+                            </div>
+                            <div class="form-group">
+
+                                <textarea class="form-control" rows="7" name="note" style="  resize: none;" ng-model="comment.note"></textarea>
+                            </div>
+                            <button class="btn btn-primary" type="submit" ng-disabled="registerForm.$invalid">发表评论</button>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="container">
-        <div class="row ">
-
-          <div class="col-md-offset-4 col-md-4">
-            <h2>下载 </h2>
-
-            <p>
-              <a href="http://windows.microsoft.com/en-us/windows/preview-iso"
-                 target="_blank">
-                Windows 10
-              </a>
-            </p>
-          </div>
-
-        </div>
-      </div>
     </div>
-  </div>
 </div>
