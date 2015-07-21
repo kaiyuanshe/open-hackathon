@@ -99,7 +99,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
             hosts = self.db.find_all_objects(DockerHostServer)
             alive = 0
             for host in hosts:
-                if self._ping(host):
+                if self.ping_passed(host):
                     alive += 1
             if alive == len(hosts):
                 return {
@@ -282,8 +282,8 @@ class HostedDockerFormation(DockerFormationBase, Component):
 
         if status is Running or Restarting returns True , else returns False
 
-        :type docker_container: object | DockerContainer
-        :param the container that you want to check
+        :type docker_container: DockerContainer
+        :param docker_container: the container that you want to check
 
         :return boolean
 
@@ -297,22 +297,20 @@ class HostedDockerFormation(DockerFormationBase, Component):
         else:
             return False
 
-    def check_docker_host_status_is_normal(self, docker_host):
-        """check docker host's running status
-
-        if status is Running or Restarting returns True , else returns False
-
-        :type docker_host: object | DockerHostServer
-        :param the docker host that you want to check
-
-        :return boolean
-
+    def ping_passed(self, docker_host):
         """
-        if self._ping(docker_host):
-            url = self.get_vm_url(docker_host) + "/info"
-            req = requests.get(url)
-            return req.status_code >= 200 and req.status_code < 300
-
+        Ping docker service in docker host
+        :param docker_host:
+        :return:
+        """
+        try:
+            ping_url = '%s/_ping' % self.__get_vm_url(docker_host)
+            req = requests.get(ping_url)
+            self.log.debug(req.content)
+            return req.status_code == 200 and req.content == 'OK'
+        except Exception as e:
+            self.log.error(e)
+            return False
 
     # --------------------------------------------- helper function ---------------------------------------------#
 
@@ -345,21 +343,6 @@ class HostedDockerFormation(DockerFormationBase, Component):
 
     def __get_vm_url(self, docker_host):
         return 'http://%s:%d' % (docker_host.public_dns, docker_host.public_docker_api_port)
-
-    def _ping(self, docker_host):
-        """
-        Ping docker service in docker host
-        :param docker_host:
-        :return:
-        """
-        try:
-            ping_url = '%s/_ping' % self.__get_vm_url(docker_host)
-            req = requests.get(ping_url)
-            self.log.debug(req.content)
-            return req.status_code == 200 and req.content == 'OK'
-        except Exception as e:
-            self.log.error(e)
-            return False
 
     def __clear_ports_cache(self):
         """

@@ -517,8 +517,8 @@ class ExprManager(Component):
     def __get_containers_by_exper(self, expr):
         """get experiment's all containers which are based on hosted_docker
 
-        :type  expr: object | Experiment
-        :param Experiment object
+        :type  expr: Experiment
+        :param expr: which to get containers from
 
         :return DockerContainer object List by query
 
