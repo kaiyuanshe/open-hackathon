@@ -125,8 +125,8 @@ angular
         views: {
           'header@index': {
             templateUrl: 'views/header.html',
-            controller: function ($scope, User) {
-              if (User) {
+            controller: function ($scope, $cookieStore) {
+              if ($cookieStore.get('User')) {
                 $scope.isShow = true;
               }
             }
@@ -141,14 +141,15 @@ angular
         views: {
           'header@index': {
             templateUrl: 'views/header.html',
-            controller: function ($scope, User) {
-              if (User) {
+            controller: function ($scope, $cookieStore) {
+              if ($cookieStore.get('User')) {
                 $scope.isShow = true;
               }
             }
           },
           'main@index': {
-            templateUrl: 'views/introduction.html'
+            templateUrl: 'views/introduction.html',
+            controller:'oh.introduction.controller'
           }
         }
       })
