@@ -32,7 +32,7 @@ from flask import g
 from hackathon import Component, RequiredFeature
 from hackathon.database.models import Team, UserTeamRel, AdminHackathonRel, User
 from hackathon.hackathon_response import ok, access_denied, bad_request, not_found, internal_server_error
-from hackathon.constant import TeamMemberStatus
+from hackathon.constants import TeamMemberStatus
 
 
 class TeamManager(Component):
@@ -66,7 +66,7 @@ class TeamManager(Component):
         else:
             return not_found("no such team")
 
-    def get_hackathon_team_list(self, hid, name, number):
+    def get_hackathon_team_list(self, hid, name=None, number=None):
         hackathon_team_list = self.db.find_all_objects_by(Team, hackathon_id=hid)
         hackathon_team_list = map(lambda x: x.dic(), hackathon_team_list)
         if name is not None:
@@ -91,18 +91,18 @@ class TeamManager(Component):
             return []
 
     def create_team(self, kwargs):
-        team = self.db.find_first_object_by(UserTeamRel, g.hackathon.id, g.user.id)
+        team = self.db.find_first_object_by(UserTeamRel, hackathon_id=g.hackathon.id, user_id=g.user.id)
         if team is not None:
             return self.db.find_first_object_by(Team, id=team.team_id).dic()
-        if "name" not in kwargs.keys():
+        if "team_name" not in kwargs.keys():
             return bad_request("Please provide a team name")
         # check team name to avoid duplicate name
-        if self.db.find_first_object_by(Team, name=kwargs["name"], hackathon_id=g.hackathon.id):
+        if self.db.find_first_object_by(Team, name=kwargs["team_name"], hackathon_id=g.hackathon.id):
             return bad_request("The team name is existed, please provide a new name")
         description = kwargs["description"] if "description" in kwargs else ""
         git_project = kwargs["git_project"] if "git_project" in kwargs else ""
         logo = kwargs["logo"] if "logo" in kwargs else ""
-        team = Team(name=kwargs["name"],
+        team = Team(name=kwargs["team_name"],
                     description=description,
                     git_project=git_project,
                     logo=logo,
@@ -122,22 +122,25 @@ class TeamManager(Component):
         return team.dic()
 
     def update_team(self, kwargs):
-        team_id = kwargs["team_id"]
-        team = self.db.find_first_object_by(Team, id=team_id)
-        if self.__validate_permission(g.hackathon.id, team.name, g.user):
-            name = kwargs["name"] if "name" in kwargs else team.name
-            description = kwargs["description"] if "description" in kwargs else team.description
-            git_project = kwargs["git_project"] if "git_project" in kwargs else team.git_project
-            logo = kwargs["logo"] if "logo" in kwargs else team.logo
-            self.db.update_object(team,
-                                  name=name,
-                                  description=description,
-                                  git_project=git_project,
-                                  logo=logo,
-                                  update_time=self.util.get_now())
-            return team.dic()
+        if "team_name" in kwargs.keys():
+            team_name = kwargs["team_name"]
+            team = self.db.find_first_object_by(Team, hackathon_id=g.hackathon.id, name=team_name)
+            if self.__validate_permission(g.hackathon.id, team.name, g.user):
+                name = kwargs["team_name"] if "team_name" in kwargs else team.name
+                description = kwargs["description"] if "description" in kwargs else team.description
+                git_project = kwargs["git_project"] if "git_project" in kwargs else team.git_project
+                logo = kwargs["logo"] if "logo" in kwargs else team.logo
+                self.db.update_object(team,
+                                      name=name,
+                                      description=description,
+                                      git_project=git_project,
+                                      logo=logo,
+                                      update_time=self.util.get_now())
+                return team.dic()
+            else:
+                return access_denied("You don't have permission")
         else:
-            return access_denied("You don't have permission")
+            return bad_request("Please choose a team to update")
 
     def join_team(self, hid, tname, user):
         if self.db.find_first_object_by(UserTeamRel, hackathon_id=hid, user_id=g.user.id):
@@ -194,18 +197,25 @@ class TeamManager(Component):
                 return ok("kicked")
 
     def promote_leader(self, hid, tname, new_uid, old_uid):
+        # check permission
         if self.__validate_permission(hid, tname, g.user):
-            leader = self.db.find_first_object_by(Team, hackathon_id=hid, name=tname, leader_id=old_uid)
-            leader.leader_id = new_uid
-            self.log.debug(leader.lead_teams.name + " has been promote to leader.")
-            self.db.commit()
-            return leader.dic()
+            # check new leader and old leader in same team
+            team = self.db.find_first_object_by(Team, hackathon_id=hid, name=tname)
+            team = team.user_team_rels.all()
+            team_member_id = map(lambda x: x.user_id, team)
+            if new_uid in team_member_id and old_uid in team_member_id:
+                leader = self.db.find_first_object_by(Team, hackathon_id=hid, name=tname, leader_id=old_uid)
+                leader.leader_id = new_uid
+                self.log.debug(leader.leader.name + " has been promote to leader.")
+                self.db.commit()
+                return leader.dic()
+            else:
+                return bad_request("Please promote someone in the same team.")
 
     def dismiss_team(self, hid, tname):
         if self.__validate_permission(hid, tname, g.user) is not False:
             team = self.db.find_first_object_by(Team, hackathon_id=hid, name=tname)
-            members = self.db.find_all_objects_by(UserTeamRel, team_id=team.id)
-            lambda x: self.db.delete_object(x), members
+            self.db.delete_all_objects_by(UserTeamRel, team_id=team.id)
             self.log.debug(g.user.name + " has dismissed team: " + tname)
             self.db.delete_object(team)
             return ok("you have dismissed team")

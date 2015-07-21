@@ -251,10 +251,25 @@ class TeamManageResource(Resource):
         parse.add_argument('user_id', type=int, location='args', required=True)
         parse.add_argument('team_name', type=str, location='args', required=True)
         args = parse.parse_args()
-        return team_manager.leave_team(g.hackathon.id,
-                                        args["team_name"],
-                                        g.user.id,
-                                        args["user_id"])
+        if g.user.id == args["user_id"]:
+            return team_manager.leave_team(g.hackathon.id, args["team_name"])
+        else:
+            return team_manager.kick(args["team_name"], args["user_id"])
+
+
+class TeamLeaderResource(Resource):
+    @token_required
+    @hackathon_name_required
+    def put(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('new_leader_id', type=int, location='json', required=True)
+        parse.add_argument('old_leader_id', type=int, location='json', required=True)
+        parse.add_argument('team_name', type=str, location='json', required=True)
+        args = parse.parse_args()
+        return team_manager.promote_leader(g.hackathon.id,
+                                           args["team_name"],
+                                           args["new_leader_id"],
+                                           args["old_leader_id"])
 
 def register_user_routes():
     """
@@ -280,6 +295,7 @@ def register_user_routes():
     api.add_resource(TeamResource, "/api/team")
     api.add_resource(GetTeamMembersByUserResource, "/api/user/team")
     api.add_resource(TeamManageResource, "/api/team/member")
+    api.add_resource(TeamLeaderResource, "/api/team/leader")
 
     # user profile API
     api.add_resource(UserProfileResource, "/api/user/profile")
