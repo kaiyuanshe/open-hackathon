@@ -550,8 +550,11 @@ class HostedDockerFormation(DockerFormationBase, Component):
         """
         try:
             get_container_url = self.get_vm_url(docker_host) + "/container/%s/json?all=0" % container_id
-            container_info = json.loads(self.util.get_remote(get_container_url))
-            return container_info
+            req = requests.get(get_container_url)
+            if req.status_code >= 200 and req.status_code < 300 :
+                container_info = json.loads(req.content)
+                return container_info
+            return None
         except Exception as ex:
             self.log.error(ex)
             return None

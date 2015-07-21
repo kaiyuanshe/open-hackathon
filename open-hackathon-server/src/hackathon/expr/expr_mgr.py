@@ -315,10 +315,10 @@ class ExprManager(Component):
         containers = self.__get_containers_by_exper(expr)
         for container in containers:
             # expr status(restarting or running) is not match container running status on docker host
-            if not self.docker.check_container_status_is_normal(container):
+            if not self.docker.hosted_docker.check_container_status_is_normal(container):
                 try:
-                    self.db.update_object(expr, status=EStatus.Exception)
-                    self.db.update_object(container.virtual_environment, status=VEStatus.Exception)
+                    self.db.update_object(expr, status=EStatus.UnexpectedErrors)
+                    self.db.update_object(container.virtual_environment, status=VEStatus.UnexpectedErrors)
                     break
                 except Exception as ex:
                     self.log.error(ex)
