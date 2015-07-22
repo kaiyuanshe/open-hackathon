@@ -23,6 +23,7 @@
  */
 
 (function($, oh) {
+
     var image_ratio = 1.3148148148148149;
 
     function openWindow(url, width) {

@@ -1,4 +1,4 @@
-{% extends "base/base.html" %}
+{% extends "base/manage.html" %}
 
 {% block style %}
 <link href="/static/css/daterangepicker-bs3.css" rel="stylesheet">
@@ -242,7 +242,6 @@
                                 <a class="btn btn-success" href="/manage">返回我的黑客松</a>
                             </div>
                         </div>
-                        <
                     </div>
                 </div>
                 <div class="step-pane" id="step6">
@@ -267,9 +266,11 @@
 {% endblock%}
 
 {% block script %}
+<script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
+<script type="text/javascript" src="/static/js/jquery/moment.min.js"></script>
+<script type="text/javascript" src="/static/js/jquery/jquery.tmpl.min.js"></script>
 <script type="text/javascript" src="/static/js/daterangepickerlocale.js"></script>
 <script type="text/javascript" src="/static/js/fileuploadTemplate.js"></script>
-<script type="text/javascript" src="/static/js/jquery/jquery.tmpl.min.js"></script>
 <script type="text/javascript" src="/static/js/jquery/jquery.ui.widget.js"></script>
 <script type="text/javascript" src="/static/js/jquery/tmpl.min.js"></script>
 <script type="text/javascript" src="/static/js/jquery/marked.min.js"></script>
@@ -285,8 +286,6 @@
 <script type="text/javascript" src="/static/js/jquery/jquery.fileupload-video.js"></script>
 <script type="text/javascript" src="/static/js/jquery/jquery.fileupload-validate.js"></script>
 <script type="text/javascript" src="/static/js/jquery/jquery.fileupload-ui.js"></script>
-<script type="text/javascript" src="/static/js/jquery/moment.min.js"></script>
 <script type="text/javascript" src="/static/js/jquery/daterangepicker.js"></script>
-<script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
-<script type="text/javascript" src="/static/js/views/oh.createhackathon.js"></script>
+<script type="text/javascript" src="/static/js/views/oh.manage.createhackathon.js"></script>
 {% endblock %}

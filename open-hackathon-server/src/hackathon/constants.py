@@ -150,6 +150,7 @@ class EStatus:
     FAILED = 5
     ROLL_BACKING = 6
     ROLL_BACKED = 7
+    UNEXPECTED_ERROR = 8
 
 
 class VEStatus:
@@ -298,3 +299,9 @@ class FILE_TYPE:
     """
     TEMPLATE = "template"
     HACK_IMAGE = "hack_image"
+
+
+class TeamMemberStatus:
+    Init = 0
+    Allow = 1
+    Deny = 2
