@@ -40,10 +40,11 @@ from hackathon.database.models import (
     PortBinding,
     DockerHostServer,
 )
-from hackathon.enum import (
+from hackathon.constants import (
     EStatus,
     PortBindingType,
     VEStatus,
+    HEALTH,
 )
 from compiler.ast import (
     flatten,
@@ -67,7 +68,7 @@ from hackathon.hackathon_response import (
     internal_server_error
 )
 from hackathon.constants import (
-    HEALTH_STATE,
+    HEALTH_STATUS,
 )
 import json
 import requests
@@ -90,10 +91,11 @@ class HostedDockerFormation(DockerFormationBase, Component):
     def __init__(self):
         self.lock = Lock()
 
-    def health(self):
-        """
-        Ping docker service in docker host
-        :return:
+    def report_health(self):
+        """Report health of DockerHostServers
+
+        :rtype: dict
+        :return health status item of docker. OK when all servers running, Warning if some of them working, Error if no server running
         """
         try:
             hosts = self.db.find_all_objects(DockerHostServer)
@@ -103,22 +105,22 @@ class HostedDockerFormation(DockerFormationBase, Component):
                     alive += 1
             if alive == len(hosts):
                 return {
-                    "status": HEALTH_STATE.OK
+                    HEALTH.STATUS: HEALTH_STATUS.OK
                 }
             elif alive > 0:
                 return {
-                    "status": HEALTH_STATE.WARNING,
-                    "description": 'at least one docker host servers are down'
+                    HEALTH.STATUS: HEALTH_STATUS.WARNING,
+                    HEALTH.DESCRIPTION: 'at least one docker host servers are down'
                 }
             else:
                 return {
-                    "status": HEALTH_STATE.ERROR,
-                    "description": 'all docker host servers are down'
+                    HEALTH.STATUS: HEALTH_STATUS.ERROR,
+                    HEALTH.DESCRIPTION: 'all docker host servers are down'
                 }
         except Exception as e:
             return {
-                "status": HEALTH_STATE.ERROR,
-                "description": e.message
+                HEALTH.STATUS: HEALTH_STATUS.ERROR,
+                HEALTH.DESCRIPTION: e.message
             }
 
     def get_available_host_port(self, docker_host, private_port):
@@ -254,7 +256,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
                 return None
 
         self.log.debug("starting container %s is ended ... " % container_name)
-        virtual_environment.status = VEStatus.Running
+        virtual_environment.status = VEStatus.RUNNING
         self.db.commit()
         return container
 
@@ -352,7 +354,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
         if we release ports now, the new ports will be lost.
         :return:
         """
-        num = self.db.count(Experiment, Experiment.status == EStatus.Starting)
+        num = self.db.count(Experiment, Experiment.status == EStatus.STARTING)
         if num > 0:
             self.log.debug("there are %d experiment is starting, host ports will updated in next loop" % num)
             return
@@ -480,7 +482,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
             binding_cloud_service = PortBinding(name=public_cfg[DockerTemplateUnit.PORTS_NAME],
                                                 port_from=public_cfg[DockerTemplateUnit.PORTS_PUBLIC_PORT],
                                                 port_to=public_cfg[DockerTemplateUnit.PORTS_HOST_PORT],
-                                                binding_type=PortBindingType.CloudService,
+                                                binding_type=PortBindingType.CLOUD_SERVICE,
                                                 binding_resource_id=host_server.id,
                                                 virtual_environment=ve,
                                                 experiment=expr,
@@ -489,7 +491,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
             binding_docker = PortBinding(name=public_cfg[DockerTemplateUnit.PORTS_NAME],
                                          port_from=public_cfg[DockerTemplateUnit.PORTS_HOST_PORT],
                                          port_to=public_cfg[DockerTemplateUnit.PORTS_PORT],
-                                         binding_type=PortBindingType.Docker,
+                                         binding_type=PortBindingType.DOCKER,
                                          binding_resource_id=host_server.id,
                                          virtual_environment=ve,
                                          experiment=expr)
@@ -503,7 +505,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
             port_binding = PortBinding(name=local_cfg[DockerTemplateUnit.PORTS_NAME],
                                        port_from=local_cfg[DockerTemplateUnit.PORTS_HOST_PORT],
                                        port_to=local_cfg[DockerTemplateUnit.PORTS_PORT],
-                                       binding_type=PortBindingType.Docker,
+                                       binding_type=PortBindingType.DOCKER,
                                        binding_resource_id=host_server.id,
                                        virtual_environment=ve,
                                        experiment=expr)

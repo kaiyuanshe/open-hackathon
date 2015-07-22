@@ -30,7 +30,7 @@ sys.path.append("..")
 from flask import (
     request,
 )
-from hackathon.enum import (
+from hackathon.constants import (
     VEStatus,
     VERemoteProvider,
 )
@@ -49,7 +49,7 @@ class GuacamoleInfo(Component):
         connection_name = request.args.get("name")
         guacamole_config = self.db.find_first_object_by(VirtualEnvironment,
                                                         name=connection_name,
-                                                        status=VEStatus.Running,
+                                                        status=VEStatus.RUNNING,
                                                         remote_provider=VERemoteProvider.Guacamole)
         if guacamole_config is None:
             return not_found("not_found")

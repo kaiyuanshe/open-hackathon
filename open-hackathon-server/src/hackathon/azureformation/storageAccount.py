@@ -25,8 +25,9 @@ THE SOFTWARE.
 __author__ = 'Yifu Huang'
 
 import sys
+
 sys.path.append("..")
-from hackathon.azureformation.resourceBase import(
+from hackathon.azureformation.resourceBase import (
     ResourceBase,
 )
 from hackathon.azureformation.utility import (
@@ -39,8 +40,8 @@ from hackathon.azureformation.utility import (
     run_job,
 )
 
-from hackathon.enum import (
-    STORAGE_ACCOUNT,
+from hackathon.constants import (
+    AZURE_RESOURCE_TYPE,
     ALOperation,
     ALStatus,
     ASAStatus,
@@ -83,13 +84,13 @@ class StorageAccount(ResourceBase):
         if not self.service.storage_account_exists(name):
             # avoid name already taken by other azure subscription
             if not self.service.check_storage_account_name_availability(name).result:
-                m = self.CREATE_STORAGE_ACCOUNT_ERROR[1] % (STORAGE_ACCOUNT, name)
+                m = self.CREATE_STORAGE_ACCOUNT_ERROR[1] % (AZURE_RESOURCE_TYPE.STORAGE_ACCOUNT, name)
                 commit_azure_log(experiment_id, ALOperation.CREATE_STORAGE_ACCOUNT, ALStatus.FAIL, m, 1)
                 self.log.error(m)
                 return False
             # avoid no available subscription remained
             if self.subscription.get_available_storage_account_count() < self.NEED_COUNT:
-                m = self.CREATE_STORAGE_ACCOUNT_ERROR[2] % (STORAGE_ACCOUNT, name)
+                m = self.CREATE_STORAGE_ACCOUNT_ERROR[2] % (AZURE_RESOURCE_TYPE.STORAGE_ACCOUNT, name)
                 commit_azure_log(experiment_id, ALOperation.CREATE_STORAGE_ACCOUNT, ALStatus.FAIL, m, 2)
                 self.log.error(m)
                 return False
@@ -101,7 +102,7 @@ class StorageAccount(ResourceBase):
                                                              label,
                                                              location)
             except Exception as e:
-                m = self.CREATE_STORAGE_ACCOUNT_ERROR[0] % (STORAGE_ACCOUNT, name, e.message)
+                m = self.CREATE_STORAGE_ACCOUNT_ERROR[0] % (AZURE_RESOURCE_TYPE.STORAGE_ACCOUNT, name, e.message)
                 commit_azure_log(experiment_id, ALOperation.CREATE_STORAGE_ACCOUNT, ALStatus.FAIL, m, 0)
                 self.log.error(e)
                 return False
@@ -114,10 +115,10 @@ class StorageAccount(ResourceBase):
         else:
             # check whether storage account created by azure formation before
             if contain_azure_storage_account(name):
-                m = self.CREATE_STORAGE_ACCOUNT_INFO[1] % (STORAGE_ACCOUNT, name, AZURE_FORMATION)
+                m = self.CREATE_STORAGE_ACCOUNT_INFO[1] % (AZURE_RESOURCE_TYPE.STORAGE_ACCOUNT, name, AZURE_FORMATION)
                 commit_azure_log(experiment_id, ALOperation.CREATE_STORAGE_ACCOUNT, ALStatus.END, m, 1)
             else:
-                m = self.CREATE_STORAGE_ACCOUNT_INFO[2] % (STORAGE_ACCOUNT, name, AZURE_FORMATION)
+                m = self.CREATE_STORAGE_ACCOUNT_INFO[2] % (AZURE_RESOURCE_TYPE.STORAGE_ACCOUNT, name, AZURE_FORMATION)
                 commit_azure_storage_account(name, description, label, location, ASAStatus.ONLINE, experiment_id)
                 commit_azure_log(experiment_id, ALOperation.CREATE_STORAGE_ACCOUNT, ALStatus.END, m, 2)
             self.log.debug(m)
@@ -132,11 +133,11 @@ class StorageAccount(ResourceBase):
         location = template_unit.get_storage_account_location()
         # make sure storage account exist
         if not self.service.storage_account_exists(name):
-            m = self.CREATE_STORAGE_ACCOUNT_ERROR[4] % (STORAGE_ACCOUNT, name)
+            m = self.CREATE_STORAGE_ACCOUNT_ERROR[4] % (AZURE_RESOURCE_TYPE.STORAGE_ACCOUNT, name)
             commit_azure_log(experiment_id, ALOperation.CREATE_STORAGE_ACCOUNT, ALStatus.FAIL, m, 4)
             self.log.error(m)
         else:
-            m = self.CREATE_STORAGE_ACCOUNT_INFO[0] % (STORAGE_ACCOUNT, name)
+            m = self.CREATE_STORAGE_ACCOUNT_INFO[0] % (AZURE_RESOURCE_TYPE.STORAGE_ACCOUNT, name)
             commit_azure_storage_account(name, description, label, location, ASAStatus.ONLINE, experiment_id)
             commit_azure_log(experiment_id, ALOperation.CREATE_STORAGE_ACCOUNT, ALStatus.END, m, 0)
             self.log.debug(m)
@@ -145,7 +146,7 @@ class StorageAccount(ResourceBase):
 
     def create_storage_account_async_false(self, experiment_id, template_unit):
         name = template_unit.get_storage_account_name()
-        m = self.CREATE_STORAGE_ACCOUNT_ERROR[3] % (STORAGE_ACCOUNT, name)
+        m = self.CREATE_STORAGE_ACCOUNT_ERROR[3] % (AZURE_RESOURCE_TYPE.STORAGE_ACCOUNT, name)
         commit_azure_log(experiment_id, ALOperation.CREATE_STORAGE_ACCOUNT, ALStatus.FAIL, m, 3)
         self.log.error(m)
 

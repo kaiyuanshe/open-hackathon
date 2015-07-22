@@ -31,7 +31,7 @@ from hackathon import Component, RequiredFeature
 from flask import g
 from hackathon.database.models import UserHackathonRel, Experiment, UserProfile, Team
 from hackathon.hackathon_response import bad_request, precondition_failed, internal_server_error, not_found, ok
-from hackathon.enum import EStatus, RGStatus, ReservedUser
+from hackathon.constants import EStatus, RGStatus, ReservedUser
 import json
 
 
@@ -151,7 +151,7 @@ class RegisterManager(Component):
             experiment = self.db.find_first_object(Experiment,
                                                    Experiment.user_id == user_id,
                                                    Experiment.hackathon_id == hackathon.id,
-                                                   Experiment.status.in_([EStatus.Starting, EStatus.Running]))
+                                                   Experiment.status.in_([EStatus.STARTING, EStatus.RUNNING]))
             if experiment is not None:
                 detail["experiment"] = experiment.dic()
         except Exception as e:

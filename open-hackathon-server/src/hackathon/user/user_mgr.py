@@ -29,8 +29,7 @@ import sys
 sys.path.append("..")
 from hackathon.database.models import UserToken, User, UserEmail
 from datetime import timedelta
-from hackathon.constants import HTTP_HEADER
-from hackathon.enum import ReservedUser
+from hackathon.constants import ReservedUser, HTTP_HEADER
 from flask import request, g
 import uuid
 from hackathon import Component, RequiredFeature

@@ -25,8 +25,9 @@ THE SOFTWARE.
 __author__ = 'Yifu Huang'
 
 import sys
+
 sys.path.append("..")
-from hackathon.azureformation.resourceBase import(
+from hackathon.azureformation.resourceBase import (
     ResourceBase,
 )
 from hackathon.azureformation.utility import (
@@ -51,14 +52,13 @@ from hackathon.azureformation.utility import (
     update_virtual_environment_remote_paras,
     run_job,
 )
-from hackathon.enum import (
-    DEPLOYMENT,
-    VIRTUAL_MACHINE,
+from hackathon.constants import (
+    AZURE_RESOURCE_TYPE,
     ALOperation,
     ALStatus,
     ADStatus,
     AVMStatus,
-    VEProvider,
+    VE_PROVIDER,
     VERemoteProvider,
     VEStatus,
 )
@@ -178,10 +178,10 @@ class VirtualMachine(ResourceBase):
                                                                  experiment_id)
         virtual_machine_size = template_unit.get_virtual_machine_size()
         if self.subscription.get_available_core_count() < self.SIZE_CORE_MAP[virtual_machine_size.lower()]:
-            m = self.CREATE_DEPLOYMENT_ERROR[1] % (DEPLOYMENT, deployment_slot)
+            m = self.CREATE_DEPLOYMENT_ERROR[1] % (AZURE_RESOURCE_TYPE.DEPLOYMENT, deployment_slot)
             commit_azure_log(experiment_id, ALOperation.CREATE_DEPLOYMENT, ALStatus.FAIL, m, 1)
             self.log.error(m)
-            m = self.CREATE_VIRTUAL_MACHINE_ERROR[1] % (VIRTUAL_MACHINE, virtual_machine_name)
+            m = self.CREATE_VIRTUAL_MACHINE_ERROR[1] % (AZURE_RESOURCE_TYPE.VIRTUAL_MACHINE, virtual_machine_name)
             commit_azure_log(experiment_id, ALOperation.CREATE_VIRTUAL_MACHINE, ALStatus.FAIL, m, 1)
             self.log.error(m)
             return False
@@ -194,10 +194,10 @@ class VirtualMachine(ResourceBase):
             # use deployment name from azure subscription
             deployment_name = self.service.get_deployment_name(cloud_service_name, deployment_slot)
             if contain_azure_deployment(cloud_service_name, deployment_slot):
-                m = self.CREATE_DEPLOYMENT_INFO[1] % (DEPLOYMENT, deployment_name, AZURE_FORMATION)
+                m = self.CREATE_DEPLOYMENT_INFO[1] % (AZURE_RESOURCE_TYPE.DEPLOYMENT, deployment_name, AZURE_FORMATION)
                 commit_azure_log(experiment_id, ALOperation.CREATE_DEPLOYMENT, ALStatus.END, m, 1)
             else:
-                m = self.CREATE_DEPLOYMENT_INFO[2] % (DEPLOYMENT, deployment_name, AZURE_FORMATION)
+                m = self.CREATE_DEPLOYMENT_INFO[2] % (AZURE_RESOURCE_TYPE.DEPLOYMENT, deployment_name, AZURE_FORMATION)
                 commit_azure_deployment(deployment_name,
                                         deployment_slot,
                                         ADStatus.RUNNING,
@@ -208,11 +208,13 @@ class VirtualMachine(ResourceBase):
             # avoid duplicate virtual machine in azure subscription
             if self.service.virtual_machine_exists(cloud_service_name, deployment_name, virtual_machine_name):
                 if contain_azure_virtual_machine(cloud_service_name, deployment_name, virtual_machine_name):
-                    m = self.CREATE_VIRTUAL_MACHINE_INFO[1] % (VIRTUAL_MACHINE, virtual_machine_name, AZURE_FORMATION)
+                    m = self.CREATE_VIRTUAL_MACHINE_INFO[1] % (
+                    AZURE_RESOURCE_TYPE.VIRTUAL_MACHINE, virtual_machine_name, AZURE_FORMATION)
                     commit_azure_log(experiment_id, ALOperation.CREATE_VIRTUAL_MACHINE, ALStatus.END, m, 1)
                     self.log.debug(m)
                 else:
-                    m = self.CREATE_VIRTUAL_MACHINE_ERROR[4] % (VIRTUAL_MACHINE, virtual_machine_name, AZURE_FORMATION)
+                    m = self.CREATE_VIRTUAL_MACHINE_ERROR[4] % (
+                    AZURE_RESOURCE_TYPE.VIRTUAL_MACHINE, virtual_machine_name, AZURE_FORMATION)
                     commit_azure_log(experiment_id, ALOperation.CREATE_VIRTUAL_MACHINE, ALStatus.FAIL, m, 4)
                     self.log.error(m)
                     return False
@@ -230,7 +232,8 @@ class VirtualMachine(ResourceBase):
                                                               virtual_machine_size,
                                                               vm_image_name)
                 except Exception as e:
-                    m = self.CREATE_VIRTUAL_MACHINE_ERROR[0] % (VIRTUAL_MACHINE, virtual_machine_name, e.message)
+                    m = self.CREATE_VIRTUAL_MACHINE_ERROR[0] % (
+                    AZURE_RESOURCE_TYPE.VIRTUAL_MACHINE, virtual_machine_name, e.message)
                     commit_azure_log(experiment_id, ALOperation.CREATE_VIRTUAL_MACHINE, ALStatus.FAIL, m, 0)
                     self.log.error(e)
                     return False
@@ -259,9 +262,10 @@ class VirtualMachine(ResourceBase):
                                                                         virtual_machine_size,
                                                                         vm_image_name)
             except Exception as e:
-                m = self.CREATE_DEPLOYMENT_ERROR[0] % (DEPLOYMENT, deployment_slot, e.message)
+                m = self.CREATE_DEPLOYMENT_ERROR[0] % (AZURE_RESOURCE_TYPE.DEPLOYMENT, deployment_slot, e.message)
                 commit_azure_log(experiment_id, ALOperation.CREATE_DEPLOYMENT, ALStatus.FAIL, m, 0)
-                m = self.CREATE_VIRTUAL_MACHINE_ERROR[0] % (VIRTUAL_MACHINE, virtual_machine_name, e.message)
+                m = self.CREATE_VIRTUAL_MACHINE_ERROR[0] % (
+                AZURE_RESOURCE_TYPE.VIRTUAL_MACHINE, virtual_machine_name, e.message)
                 commit_azure_log(experiment_id, ALOperation.CREATE_VIRTUAL_MACHINE, ALStatus.FAIL, m, 0)
                 self.log.error(e)
                 return False
@@ -289,7 +293,7 @@ class VirtualMachine(ResourceBase):
     def create_virtual_machine_async_false_1(self, experiment_id, template_unit):
         virtual_machine_name = self.VIRTUAL_MACHINE_NAME_BASE % (template_unit.get_virtual_machine_name(),
                                                                  experiment_id)
-        m = self.CREATE_VIRTUAL_MACHINE_ERROR[2] % (VIRTUAL_MACHINE, virtual_machine_name)
+        m = self.CREATE_VIRTUAL_MACHINE_ERROR[2] % (AZURE_RESOURCE_TYPE.VIRTUAL_MACHINE, virtual_machine_name)
         commit_azure_log(experiment_id, ALOperation.CREATE_VIRTUAL_MACHINE, ALStatus.FAIL, m, 2)
         self.log.error(m)
 
@@ -330,7 +334,7 @@ class VirtualMachine(ResourceBase):
     def create_virtual_machine_async_false_2(self, experiment_id, template_unit):
         virtual_machine_name = self.VIRTUAL_MACHINE_NAME_BASE % (template_unit.get_virtual_machine_name(),
                                                                  experiment_id)
-        m = self.CREATE_VIRTUAL_MACHINE_ERROR[3] % (VIRTUAL_MACHINE, virtual_machine_name)
+        m = self.CREATE_VIRTUAL_MACHINE_ERROR[3] % (AZURE_RESOURCE_TYPE.VIRTUAL_MACHINE, virtual_machine_name)
         commit_azure_log(experiment_id, ALOperation.CREATE_VIRTUAL_MACHINE, ALStatus.FAIL, m, 3)
         self.log.error(m)
 
@@ -351,10 +355,10 @@ class VirtualMachine(ResourceBase):
         deployment_slot = template_unit.get_deployment_slot()
         virtual_machine_name = self.VIRTUAL_MACHINE_NAME_BASE % (template_unit.get_virtual_machine_name(),
                                                                  experiment_id)
-        m = self.CREATE_DEPLOYMENT_ERROR[2] % (DEPLOYMENT, deployment_slot)
+        m = self.CREATE_DEPLOYMENT_ERROR[2] % (AZURE_RESOURCE_TYPE.DEPLOYMENT, deployment_slot)
         commit_azure_log(experiment_id, ALOperation.CREATE_DEPLOYMENT, ALStatus.FAIL, m, 2)
         self.log.error(m)
-        m = self.CREATE_VIRTUAL_MACHINE_ERROR[2] % (VIRTUAL_MACHINE, virtual_machine_name)
+        m = self.CREATE_VIRTUAL_MACHINE_ERROR[2] % (AZURE_RESOURCE_TYPE.VIRTUAL_MACHINE, virtual_machine_name)
         commit_azure_log(experiment_id, ALOperation.CREATE_VIRTUAL_MACHINE, ALStatus.FAIL, m, 2)
         self.log.error(m)
 
@@ -364,7 +368,7 @@ class VirtualMachine(ResourceBase):
         deployment_name = template_unit.get_deployment_name()
         virtual_machine_name = self.VIRTUAL_MACHINE_NAME_BASE % (template_unit.get_virtual_machine_name(),
                                                                  experiment_id)
-        m = self.CREATE_DEPLOYMENT_INFO[0] % (DEPLOYMENT, deployment_slot)
+        m = self.CREATE_DEPLOYMENT_INFO[0] % (AZURE_RESOURCE_TYPE.DEPLOYMENT, deployment_slot)
         commit_azure_deployment(deployment_name,
                                 deployment_slot,
                                 ADStatus.RUNNING,
@@ -399,7 +403,7 @@ class VirtualMachine(ResourceBase):
                                                                  experiment_id)
         now_status = self.service.get_virtual_machine_instance_status(deployment, virtual_machine_name)
         if need_status == AVMStatus.STOPPED_VM and now_status == AVMStatus.STOPPED_DEALLOCATED:
-            m = self.STOP_VIRTUAL_MACHINE_ERROR[1] % (VIRTUAL_MACHINE,
+            m = self.STOP_VIRTUAL_MACHINE_ERROR[1] % (AZURE_RESOURCE_TYPE.VIRTUAL_MACHINE,
                                                       virtual_machine_name,
                                                       AVMStatus.STOPPED_VM,
                                                       AVMStatus.STOPPED_DEALLOCATED)
@@ -409,13 +413,13 @@ class VirtualMachine(ResourceBase):
         elif need_status == now_status:
             db_status = get_azure_virtual_machine_status(cloud_service_name, deployment_name, virtual_machine_name)
             if db_status == need_status:
-                m = self.STOP_VIRTUAL_MACHINE_INFO[1] % (VIRTUAL_MACHINE,
+                m = self.STOP_VIRTUAL_MACHINE_INFO[1] % (AZURE_RESOURCE_TYPE.VIRTUAL_MACHINE,
                                                          virtual_machine_name,
                                                          need_status,
                                                          AZURE_FORMATION)
                 commit_azure_log(experiment_id, ALOperation.STOP_VIRTUAL_MACHINE, ALStatus.END, m, 1)
             else:
-                m = self.STOP_VIRTUAL_MACHINE_INFO[2] % (VIRTUAL_MACHINE,
+                m = self.STOP_VIRTUAL_MACHINE_INFO[2] % (AZURE_RESOURCE_TYPE.VIRTUAL_MACHINE,
                                                          virtual_machine_name,
                                                          need_status,
                                                          AZURE_FORMATION)
@@ -429,7 +433,8 @@ class VirtualMachine(ResourceBase):
                                                            virtual_machine_name,
                                                            action)
             except Exception as e:
-                m = self.STOP_VIRTUAL_MACHINE_ERROR[0] % (VIRTUAL_MACHINE, virtual_machine_name, e.message)
+                m = self.STOP_VIRTUAL_MACHINE_ERROR[0] % (
+                AZURE_RESOURCE_TYPE.VIRTUAL_MACHINE, virtual_machine_name, e.message)
                 commit_azure_log(experiment_id, ALOperation.STOP_VIRTUAL_MACHINE, ALStatus.FAIL, 0)
                 self.log.error(e)
                 return False
@@ -457,7 +462,8 @@ class VirtualMachine(ResourceBase):
     def stop_virtual_machine_async_false(self, experiment_id, template_unit, need_status):
         virtual_machine_name = self.VIRTUAL_MACHINE_NAME_BASE % (template_unit.get_virtual_machine_name(),
                                                                  experiment_id)
-        m = self.STOP_VIRTUAL_MACHINE_ERROR[2] % (VIRTUAL_MACHINE, virtual_machine_name, need_status)
+        m = self.STOP_VIRTUAL_MACHINE_ERROR[2] % (
+        AZURE_RESOURCE_TYPE.VIRTUAL_MACHINE, virtual_machine_name, need_status)
         commit_azure_log(experiment_id, ALOperation.STOP_VIRTUAL_MACHINE, ALStatus.FAIL, 2)
         self.log.error(m)
 
@@ -468,7 +474,7 @@ class VirtualMachine(ResourceBase):
         virtual_machine_name = self.VIRTUAL_MACHINE_NAME_BASE % (template_unit.get_virtual_machine_name(),
                                                                  experiment_id)
         self.__stop_virtual_machine_helper(experiment_id, template_unit, need_status)
-        m = self.STOP_VIRTUAL_MACHINE_INFO[0] % (VIRTUAL_MACHINE, virtual_machine_name, need_status)
+        m = self.STOP_VIRTUAL_MACHINE_INFO[0] % (AZURE_RESOURCE_TYPE.VIRTUAL_MACHINE, virtual_machine_name, need_status)
         commit_azure_log(experiment_id, ALOperation.STOP_VIRTUAL_MACHINE, ALStatus.END, m, 0)
         self.log.debug(m)
 
@@ -491,10 +497,12 @@ class VirtualMachine(ResourceBase):
         if status == AVMStatus.READY_ROLE:
             db_status = get_azure_virtual_machine_status(cloud_service_name, deployment_name, virtual_machine_name)
             if db_status == status:
-                m = self.START_VIRTUAL_MACHINE_INFO[1] % (VIRTUAL_MACHINE, virtual_machine_name, AZURE_FORMATION)
+                m = self.START_VIRTUAL_MACHINE_INFO[1] % (
+                AZURE_RESOURCE_TYPE.VIRTUAL_MACHINE, virtual_machine_name, AZURE_FORMATION)
                 commit_azure_log(experiment_id, ALOperation.START_VIRTUAL_MACHINE, ALStatus.END, m, 1)
             else:
-                m = self.START_VIRTUAL_MACHINE_INFO[2] % (VIRTUAL_MACHINE, virtual_machine_name, AZURE_FORMATION)
+                m = self.START_VIRTUAL_MACHINE_INFO[2] % (
+                AZURE_RESOURCE_TYPE.VIRTUAL_MACHINE, virtual_machine_name, AZURE_FORMATION)
                 self.__start_virtual_machine_helper(experiment_id, template_unit)
                 commit_azure_log(experiment_id, ALOperation.START_VIRTUAL_MACHINE, ALStatus.END, m, 2)
             self.log.debug(m)
@@ -504,7 +512,8 @@ class VirtualMachine(ResourceBase):
                                                             deployment_name,
                                                             virtual_machine_name)
             except Exception as e:
-                m = self.START_VIRTUAL_MACHINE_ERROR[0] % (VIRTUAL_MACHINE, virtual_machine_name, e.message)
+                m = self.START_VIRTUAL_MACHINE_ERROR[0] % (
+                AZURE_RESOURCE_TYPE.VIRTUAL_MACHINE, virtual_machine_name, e.message)
                 commit_azure_log(experiment_id, ALOperation.START_VIRTUAL_MACHINE, ALStatus.FAIL, 0)
                 self.log.error(e)
                 return False
@@ -532,7 +541,7 @@ class VirtualMachine(ResourceBase):
     def start_virtual_machine_async_false(self, experiment_id, template_unit):
         virtual_machine_name = self.VIRTUAL_MACHINE_NAME_BASE % (template_unit.get_virtual_machine_name(),
                                                                  experiment_id)
-        m = self.START_VIRTUAL_MACHINE_ERROR[1] % (VIRTUAL_MACHINE, virtual_machine_name)
+        m = self.START_VIRTUAL_MACHINE_ERROR[1] % (AZURE_RESOURCE_TYPE.VIRTUAL_MACHINE, virtual_machine_name)
         commit_azure_log(experiment_id, ALOperation.START_VIRTUAL_MACHINE, ALStatus.FAIL, 1)
         self.log.error(m)
 
@@ -540,7 +549,7 @@ class VirtualMachine(ResourceBase):
         virtual_machine_name = self.VIRTUAL_MACHINE_NAME_BASE % (template_unit.get_virtual_machine_name(),
                                                                  experiment_id)
         self.__start_virtual_machine_helper(experiment_id, template_unit)
-        m = self.START_VIRTUAL_MACHINE_INFO[0] % (VIRTUAL_MACHINE, virtual_machine_name)
+        m = self.START_VIRTUAL_MACHINE_INFO[0] % (AZURE_RESOURCE_TYPE.VIRTUAL_MACHINE, virtual_machine_name)
         commit_azure_log(experiment_id, ALOperation.START_VIRTUAL_MACHINE, ALStatus.END, m, 0)
         self.log.debug(m)
 
@@ -567,10 +576,10 @@ class VirtualMachine(ResourceBase):
         remote_paras = template_unit.get_remote_paras(virtual_machine_name,
                                                       public_ip,
                                                       remote_port)
-        virtual_environment = commit_virtual_environment(VEProvider.AzureVM,
+        virtual_environment = commit_virtual_environment(VE_PROVIDER.AZURE,
                                                          virtual_machine_name,
                                                          template_unit.get_image_name(),
-                                                         VEStatus.Running,
+                                                         VEStatus.RUNNING,
                                                          VERemoteProvider.Guacamole,
                                                          json.dumps(remote_paras),
                                                          experiment_id)
@@ -598,7 +607,7 @@ class VirtualMachine(ResourceBase):
                                   input_endpoint.port,
                                   input_endpoint.local_port,
                                   virtual_machine)
-        m = self.CREATE_VIRTUAL_MACHINE_INFO[0] % (VIRTUAL_MACHINE, virtual_machine_name)
+        m = self.CREATE_VIRTUAL_MACHINE_INFO[0] % (AZURE_RESOURCE_TYPE.VIRTUAL_MACHINE, virtual_machine_name)
         commit_azure_log(experiment_id, ALOperation.CREATE_VIRTUAL_MACHINE, ALStatus.END, m, 0)
         self.log.debug(m)
 
@@ -619,7 +628,7 @@ class VirtualMachine(ResourceBase):
                                                               deployment_name,
                                                               virtual_machine_name,
                                                               need_status)
-        update_virtual_environment_status(virtual_machine, VEStatus.Stopped)
+        update_virtual_environment_status(virtual_machine, VEStatus.STOPPED)
 
     def __start_virtual_machine_helper(self, experiment_id, template_unit):
         """
@@ -646,7 +655,7 @@ class VirtualMachine(ResourceBase):
                                                                  deployment_name,
                                                                  virtual_machine_name)
         update_azure_virtual_machine_private_ip(virtual_machine, private_ip)
-        update_virtual_environment_status(virtual_machine, VEStatus.Running)
+        update_virtual_environment_status(virtual_machine, VEStatus.RUNNING)
         remote_port_name = template_unit.get_remote_port_name()
         remote_port = self.service.get_virtual_machine_public_endpoint(cloud_service_name,
                                                                        deployment_name,

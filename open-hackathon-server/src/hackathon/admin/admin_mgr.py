@@ -27,7 +27,6 @@ import sys
 sys.path.append("..")
 from hackathon.database.models import AdminHackathonRel, UserEmail, Hackathon
 from hackathon.hackathon_response import bad_request, not_found, internal_server_error, ok, precondition_failed
-from hackathon.enum import AdminUserHackathonRelStates
 from hackathon import RequiredFeature, Component
 from flask import g
 
@@ -77,7 +76,6 @@ class AdminManager(Component):
                     user_id=user_email.user.id,
                     role_type=args['role_type'],
                     hackathon_id=g.hackathon.id,
-                    status=AdminUserHackathonRelStates.Actived,
                     remarks=args['remarks'],
                     create_time=self.util.get_now()
                 )

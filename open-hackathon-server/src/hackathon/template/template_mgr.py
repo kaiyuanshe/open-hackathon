@@ -46,9 +46,10 @@ from hackathon.hackathon_response import (
     ok,
     access_denied
 )
-from hackathon.enum import (
+from hackathon.constants import (
     TEMPLATE_STATUS,
-    VEProvider,
+    VE_PROVIDER,
+    FILE_TYPE,
 )
 from hackathon.template.docker_template_unit import (
     DockerTemplateUnit,
@@ -78,6 +79,7 @@ class TemplateManager(Component):
     scheduler = RequiredFeature("scheduler")
     user_manager = RequiredFeature("user_manager")
     team_manager = RequiredFeature("team_manager")
+    storage = RequiredFeature("storage")
 
     templates = {}  # template in memory {template.id: template_file_dic}
 
@@ -119,24 +121,24 @@ class TemplateManager(Component):
         status, return_info = self.__check_create_args(args)
         if not status:
             return return_info
-        file_name = '%s-%s-%s.js' % (g.user.name, args[BaseTemplate.TEMPLATE_NAME], str(uuid.uuid1())[0:8])
         # create template step 2 : parse args and trans to file
-        url = self.__save_args_to_file(args, file_name)
-        if url is None:
-            return internal_server_error("save template as local file failed")
+        context = self.__save_template(args)
+        if not context:
+            return internal_server_error("save tempplate failed")
         # create template step 3 : upload template file to Azure
-        azure_url = self.__upload_template_to_azure(url, file_name)
-        if azure_url is None:
-            return internal_server_error("upload template file failed")
+        # todo azure storage
+        # azure_url = self.__upload_template_to_azure(url, file_name)
+        # if azure_url is None:
+        # return internal_server_error("upload template file failed")
         # create template step 4 : insert into DB
         self.log.debug("create template: %r" % args)
         self.db.add_object_kwargs(Template,
                                   name=args[BaseTemplate.TEMPLATE_NAME],
-                                  url=url,
-                                  azure_url=azure_url,
+                                  url=context.url,
+                                  local_path=context.physical_path,
                                   provider=args[BaseTemplate.VIRTUAL_ENVIRONMENTS_PROVIDER],
                                   creator_id=g.user.id,
-                                  status=TEMPLATE_STATUS.UNCHECK,
+                                  status=TEMPLATE_STATUS.UNCHECKED,
                                   create_time=self.util.get_now(),
                                   update_time=self.util.get_now(),
                                   description=args[BaseTemplate.DESCRIPTION],
@@ -153,26 +155,26 @@ class TemplateManager(Component):
         status, return_info = self.__check_update_args(args)
         if not status:
             return return_info
-        file_name = '%s-%s-%s.js' % (g.hackathon.name, args[BaseTemplate.TEMPLATE_NAME], str(uuid.uuid1())[0:8])
         # update template step 2 : parse args and trans to file
-        url = self.__save_args_to_file(args, file_name)
-        if url is None:
-            return internal_server_error("save template as local file failed")
+        context = self.__save_template(args)
+        if not context:
+            return internal_server_error("save tempplate failed")
         # update template step 3 : upload template file to Azure
-        azure_url = self.__upload_template_to_azure(url, file_name)
-        if azure_url is None:
-            return internal_server_error("upload template file failed")
+        # todo azure storage
+        # azure_url = self.__upload_template_to_azure(url, file_name)
+        # if azure_url is None:
+        # return internal_server_error("upload template file failed")
         # update template step 4 : update DB
         self.log.debug("update template: %r" % args)
         template = return_info
         self.db.update_object(template,
-                              url=url,
-                              azure_url=azure_url,
+                              url=context.url,
+                              local_path=context.physical_path,
                               update_time=self.util.get_now(),
                               description=args[BaseTemplate.DESCRIPTION],
                               virtual_environment_count=len(args[BaseTemplate.VIRTUAL_ENVIRONMENTS]))
         # refresh template in memory after update
-        self.__load_template_from_local_file(template.id, url)
+        self.__load_template_from_local_file(template.id, context.physical_path)
         return ok("update template success")
 
     def delete_template(self, id):
@@ -189,10 +191,10 @@ class TemplateManager(Component):
 
             # remove template cache , localfile, azurefile
             self.templates.pop(template.id, '')
-            if os.path.exists(template.url):
-                os.remove(template.url)
+            if os.path.exists(template.local_path):
+                os.remove(template.local_path)
             container_name = self.util.safe_get_config("storage.template_container", "templates")
-            blob_name = template.azure_url.split("/")[-1]
+            blob_name = template.url.split("/")[-1]
             self.file_service.delete_file_from_azure(container_name, blob_name)
 
             # remove record in DB
@@ -215,13 +217,13 @@ class TemplateManager(Component):
         if dic_from_memory is not None:
             return dic_from_memory
 
-        local_url = template.url
+        local_url = template.local_path
         dic_from_local = self.__load_template_from_local_file(template_id, local_url)
         if dic_from_local is not None:
             return dic_from_local
 
-        azure_url = template.azure_url
-        dic_from_azure = self.__load_template_from_azure(template_id, local_url, azure_url)
+        remote_url = template.url
+        dic_from_azure = self.__load_template_from_azure(template_id, local_url, remote_url)
         if dic_from_azure is not None:
             return dic_from_azure
 
@@ -299,15 +301,22 @@ class TemplateManager(Component):
             return False, bad_request("template already exists")
         return True, "pass"
 
-    def __save_args_to_file(self, args, file_name):
+    def __save_template(self, args):
         try:
             docker_template_units = [DockerTemplateUnit(ve) for ve in args[BaseTemplate.VIRTUAL_ENVIRONMENTS]]
             docker_template = DockerTemplate(args[BaseTemplate.TEMPLATE_NAME],
                                              args[BaseTemplate.DESCRIPTION],
                                              docker_template_units)
-            file_path = docker_template.to_file(file_name)
-            self.log.debug("save template as file [%s]" % file_path)
-            return file_path
+
+            file_name = '%s-%s-%s.js' % (g.user.name, args[BaseTemplate.TEMPLATE_NAME], str(uuid.uuid1())[0:8])
+            context = Context(
+                file_name=file_name,
+                file_type=FILE_TYPE.TEMPLATE,
+                content=docker_template.dic
+            )
+            self.log.debug("save=ing template as file [%s]" % file_name)
+            context = self.storage.save(context)
+            return context
         except Exception as ex:
             self.log.error(ex)
             return None
@@ -359,16 +368,16 @@ class TemplateManager(Component):
             self.templates[template_id] = template_dic
             return template_dic
 
-    def __load_template_from_azure(self, template_id, local_url, azure_url):
+    def __load_template_from_azure(self, template_id, local_url, remote_url):
         """
         get template_dic from azure storage
         :param template_id:
         :param local_url:
-        :param azure_url:
+        :param remote_url:
         :return:
         """
-        if azure_url is not None:
-            if self.file_service.download_file_from_azure(azure_url, local_url) is not None:
+        if remote_url is not None:
+            if self.file_service.download_file_from_azure(remote_url, local_url) is not None:
                 return self.__load_template_from_local_file(template_id, local_url)
         return None
 
@@ -396,7 +405,7 @@ class TemplateManager(Component):
         template_ids = map(lambda x: x.template.id, htrs)
         templates = self.db.find_all_objects(Template,
                                              Template.id.in_(template_ids),
-                                             Template.provider == VEProvider.Docker,
+                                             Template.provider == VE_PROVIDER.DOCKER,
                                              Template.status == TEMPLATE_STATUS.CHECK_PASS)
         return templates
 

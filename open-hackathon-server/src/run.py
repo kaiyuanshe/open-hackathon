@@ -32,4 +32,4 @@ if __name__ == "__main__":
     app.run(host='0.0.0.0', port=15000)
 
 g = GuacamoleHealthCheck()
-print g.reportHealth()
+print g.report_health()

@@ -33,7 +33,7 @@ from hackathon.user.login import login_providers
 from hackathon.decorators import token_required, hackathon_name_required
 from hackathon.hackathon_response import internal_server_error, not_found, bad_request
 import json
-from hackathon.enum import RGStatus
+from hackathon.constants import RGStatus
 
 hackathon_manager = RequiredFeature("hackathon_manager")
 register_manager = RequiredFeature("register_manager")
@@ -274,7 +274,7 @@ def register_user_routes():
     register API routes for hackathon UI user
     """
 
-    # guacamole config API. "/api/guacamoleconfig" is depreciated, will be remoted soon
+    # guacamole config API. "/api/guacamoleconfig" is depreciated, will be removed soon
     api.add_resource(GuacamoleResource, "/api/guacamoleconfig", "/api/user/guacamoleconfig")
 
     # user API

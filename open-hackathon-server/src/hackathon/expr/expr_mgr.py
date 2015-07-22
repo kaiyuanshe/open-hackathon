@@ -33,10 +33,10 @@ from hackathon import (
     RequiredFeature,
 )
 
-from hackathon.enum import (
+from hackathon.constants import (
     EStatus,
     VERemoteProvider,
-    VEProvider,
+    VE_PROVIDER,
     PortBindingType,
     VEStatus,
     ReservedUser,
@@ -119,7 +119,7 @@ class ExprManager(Component):
         return self.__start_new_expr(hackathon, template, user_id)
 
     def heart_beat(self, expr_id):
-        expr = self.db.find_first_object_by(Experiment, id=expr_id, status=EStatus.Running)
+        expr = self.db.find_first_object_by(Experiment, id=expr_id, status=EStatus.RUNNING)
         if expr is None:
             return not_found('Experiment does not running')
 
@@ -134,29 +134,29 @@ class ExprManager(Component):
         :return:
         """
         self.log.debug("begin to stop %d" % expr_id)
-        expr = self.db.find_first_object_by(Experiment, id=expr_id, status=EStatus.Running)
+        expr = self.db.find_first_object_by(Experiment, id=expr_id, status=EStatus.RUNNING)
         if expr is not None:
             # Docker
             docker = self.docker.get_docker(expr.hackathon)
-            if expr.template.provider == VEProvider.Docker:
+            if expr.template.provider == VE_PROVIDER.DOCKER:
                 # stop containers
                 for c in expr.virtual_environments.all():
                     try:
                         self.log.debug("begin to stop %s" % c.name)
                         if force:
                             docker.delete(c.name, virtual_environment=c, container=c.container, expr_id=expr_id)
-                            c.status = VEStatus.Deleted
+                            c.status = VEStatus.DELETED
                         else:
                             docker.stop(c.name, virtual_environment=c, container=c.container, expr_id=expr_id)
-                            c.status = VEStatus.Stopped
+                            c.status = VEStatus.STOPPED
                     except Exception as e:
                         self.log.error(e)
                         self.__roll_back(expr_id)
                         return internal_server_error('Failed stop/delete container')
                 if force:
-                    expr.status = EStatus.Deleted
+                    expr.status = EStatus.DELETED
                 else:
-                    expr.status = EStatus.Stopped
+                    expr.status = EStatus.STOPPED
                 self.db.commit()
             else:
                 try:
@@ -200,7 +200,7 @@ class ExprManager(Component):
         recycle_hours = self.util.safe_get_config('recycle.idle_hours', 24)
         expr_time_cond = Experiment.last_heart_beat_time + timedelta(hours=recycle_hours) > self.util.get_now()
         recycle_cond = Experiment.hackathon_id.in_(self.hackathon_manager.get_recyclable_hackathon_list())
-        status_cond = Experiment.status == EStatus.Running
+        status_cond = Experiment.status == EStatus.RUNNING
         r = self.db.find_first_object(Experiment, status_cond, expr_time_cond, recycle_cond)
 
         if r is not None:
@@ -228,16 +228,16 @@ class ExprManager(Component):
                 curr_num = self.db.count(Experiment,
                                          Experiment.user_id == ReservedUser.DefaultUserID,
                                          Experiment.template_id == template.id,
-                                         (Experiment.status == EStatus.Starting) | (
-                                             Experiment.status == EStatus.Running))
+                                         (Experiment.status == EStatus.STARTING) | (
+                                             Experiment.status == EStatus.RUNNING))
                 # todo test azure, config num
-                if template.provider == VEProvider.AzureVM:
+                if template.provider == VE_PROVIDER.AZURE:
                     if curr_num < pre_num:
                         remain_num = pre_num - curr_num
                         start_num = self.db.count_by(Experiment,
                                                      user_id=ReservedUser.DefaultUserID,
                                                      template=template,
-                                                     status=EStatus.Starting)
+                                                     status=EStatus.STARTING)
                         if start_num > 0:
                             self.log.debug("there is an azure env starting, will check later ... ")
                             return
@@ -248,7 +248,7 @@ class ExprManager(Component):
                             break
                             # curr_num += 1
                             # self.log.debug("all template %s start complete" % template.name)
-                elif template.provider == VEProvider.Docker:
+                elif template.provider == VE_PROVIDER.DOCKER:
                     self.log.debug(
                         "template name is %s, hackathon name is %s" % (template.name, template.hackathon.name))
                     if curr_num < pre_num:
@@ -269,27 +269,27 @@ class ExprManager(Component):
         expr = self.db.add_object_kwargs(Experiment,
                                          user_id=user_id,
                                          hackathon_id=hackathon.id,
-                                         status=EStatus.Init,
+                                         status=EStatus.INIT,
                                          template_id=template.id)
         self.db.commit()
 
         curr_num = self.db.count(Experiment,
                                  Experiment.user_id == ReservedUser.DefaultUserID,
                                  Experiment.template == template,
-                                 (Experiment.status == EStatus.Starting) |
-                                 (Experiment.status == EStatus.Running))
-        if template.provider == VEProvider.Docker:
+                                 (Experiment.status == EStatus.STARTING) |
+                                 (Experiment.status == EStatus.RUNNING))
+        if template.provider == VE_PROVIDER.DOCKER:
             try:
                 template_dic = self.template_manager.load_template(template)
                 virtual_environments_list = template_dic[BaseTemplate.VIRTUAL_ENVIRONMENTS]
                 if curr_num != 0 and curr_num >= self.util.get_config("pre_allocate.docker"):
                     return
-                expr.status = EStatus.Starting
+                expr.status = EStatus.STARTING
                 self.db.commit()
                 map(lambda virtual_environment_dic:
                     self.__remote_start_container(hackathon, expr, virtual_environment_dic),
                     virtual_environments_list)
-                expr.status = EStatus.Running
+                expr.status = EStatus.RUNNING
                 self.db.commit()
             except Exception as e:
                 self.log.error(e)
@@ -299,7 +299,7 @@ class ExprManager(Component):
         else:
             if curr_num != 0 and curr_num >= self.util.get_config("pre_allocate.azure"):
                 return
-            expr.status = EStatus.Starting
+            expr.status = EStatus.STARTING
             self.db.commit()
             try:
                 af = AzureFormation(self.docker.__load_azure_key_id(expr.id))
@@ -317,8 +317,8 @@ class ExprManager(Component):
             # expr status(restarting or running) is not match container running status on docker host
             if not self.docker.hosted_docker.check_container_status_is_normal(container):
                 try:
-                    self.db.update_object(expr, status=EStatus.UnexpectedErrors)
-                    self.db.update_object(container.virtual_environment, status=VEStatus.UnexpectedErrors)
+                    self.db.update_object(expr, status=EStatus.UNEXPECTED_ERROR)
+                    self.db.update_object(container.virtual_environment, status=VEStatus.UNEXPECTEDERRORS)
                     break
                 except Exception as ex:
                     self.log.error(ex)
@@ -330,7 +330,7 @@ class ExprManager(Component):
             "last_heart_beat_time": str(expr.last_heart_beat_time),
         }
 
-        if expr.status != EStatus.Running:
+        if expr.status != EStatus.RUNNING:
             return ret
         # return remote clients include guacamole and cloudEclipse
         remote_servers = []
@@ -358,14 +358,14 @@ class ExprManager(Component):
                 except Exception as e:
                     self.log.error(e)
 
-        if expr.status == EStatus.Running:
+        if expr.status == EStatus.RUNNING:
             ret["remote_servers"] = remote_servers
         # return public accessible web url
         public_urls = []
-        if expr.template.provider == VEProvider.Docker:
+        if expr.template.provider == VE_PROVIDER.DOCKER:
             for ve in expr.virtual_environments.all():
                 for p in ve.port_bindings.all():
-                    if p.binding_type == PortBindingType.CloudService and p.url is not None:
+                    if p.binding_type == PortBindingType.CLOUD_SERVICE and p.url is not None:
                         hs = self.db.find_first_object_by(DockerHostServer, id=p.binding_resource_id)
                         url = p.url.format(hs.public_dns, p.port_from)
                         public_urls.append({
@@ -401,10 +401,10 @@ class ExprManager(Component):
         docker_template_unit.set_name(new_name)
         self.log.debug("starting to start container: %s" % new_name)
         # db entity
-        ve = VirtualEnvironment(provider=VEProvider.Docker,
+        ve = VirtualEnvironment(provider=VE_PROVIDER.DOCKER,
                                 name=new_name,
                                 image=docker_template_unit.get_image_with_tag(),
-                                status=VEStatus.Init,
+                                status=VEStatus.INIT,
                                 remote_provider=VERemoteProvider.Guacamole,
                                 experiment=expr)
         self.db.add_object(ve)
@@ -429,7 +429,7 @@ class ExprManager(Component):
         :param template:
         :return:
         """
-        exp_status = [EStatus.Running, EStatus.Starting]
+        exp_status = [EStatus.RUNNING, EStatus.STARTING]
         check_temp = Experiment.template_id == template.id if self.hackathon_manager.validate_admin_privilege(user_id,
                                                                                                               hackathon.id) else Experiment.id > -1
         expr = self.db.find_first_object(Experiment,
@@ -441,7 +441,7 @@ class ExprManager(Component):
             return expr
 
         expr = self.db.find_first_object_by(Experiment,
-                                            status=EStatus.Running,
+                                            status=EStatus.RUNNING,
                                             hackathon_id=hackathon.id,
                                             user_id=ReservedUser.DefaultUserID,
                                             template=template)
@@ -462,22 +462,22 @@ class ExprManager(Component):
         self.log.debug("Starting rollback ...")
         expr = self.db.find_first_object_by(Experiment, id=expr_id)
         try:
-            expr.status = EStatus.Rollbacking
+            expr.status = EStatus.ROLL_BACKING
             self.db.commit()
             if expr is not None:
                 # delete containers and change expr status
                 for c in expr.virtual_environments:
-                    if c.provider == VEProvider.Docker:
+                    if c.provider == VE_PROVIDER.DOCKER:
                         self.docker.delete(c.name, container=c.container, expr_id=expr_id)
-                        c.status = VEStatus.Deleted
+                        c.status = VEStatus.DELETED
                         self.db.commit()
             # delete ports
-            expr.status = EStatus.Rollbacked
+            expr.status = EStatus.ROLL_BACKED
 
             self.db.commit()
             self.log.info("Rollback succeeded")
         except Exception as e:
-            expr.status = EStatus.Failed
+            expr.status = EStatus.FAILED
             self.db.commit()
             self.log.info("Rollback failed")
             self.log.error(e)
@@ -523,5 +523,5 @@ class ExprManager(Component):
         :return DockerContainer object List by query
 
         """
-        ves = self.db.find_all_objects_by(VirtualEnvironment, experiment_id=expr.id, provider=VEProvider.Docker)
+        ves = self.db.find_all_objects_by(VirtualEnvironment, experiment_id=expr.id, provider=VE_PROVIDER.DOCKER)
         return map(lambda x: x.container, ves)

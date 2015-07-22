@@ -25,6 +25,7 @@ THE SOFTWARE.
 
 
 class HackathonException(Exception):
+    """Base of open hackathon platform exceptions"""
     pass
 
 
