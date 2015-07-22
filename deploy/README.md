@@ -130,11 +130,48 @@ Having got many environments we need to find a way to connect them for users, as
 [Guacamole](http://guac-dev.org/) can give you more details.        
 
 
+Guacamole installation is separated into two pieces: server and client, service need to be built by src and client can be built to tomcat from a war package directly. More details can follow this:[Guacamole installation](http://guac-dev.org/doc/gug/installing-guacamole.html)             
 
-[Guacamole installation](http://guac-dev.org/doc/gug/installing-guacamole.html)
-Gucamole has its own authentication so does OpenHackathon, in order to unify them we customise a new auth provider and hacked it into guacamole client
-    
+Note:               
+Gucamole has its own authentication so does OpenHackathon, in order to unify them we customise a new auth provider and hacked it into guacamole client. You can use it or you could build a new one.   
+To use it you would make the `guacmaole.properties` like this:
+```
+guacd-hostname: localhost
+guacd-port:     4822
+
+lib-directory: /var/lib/guacamole
+auth-provider: com.openhackathon.guacamole.OpenHackathonAuthenticationProvider
+auth-request-url: http://localhost:15000/api/guacamoleconfig
+```
+And find the `openhackathon-gucamole-authentication-1.0-SNAPSHOT.jar` in src folders and move it to path that configured in `guacamole.propertied`
+
+If you want to make you own Guacamole auth provider, there is a java project named `openhackathon-guacamole-auth-provider` can give a example, you also can find in out src folders! But, this java project just match `version 0.9.7` of guacamole client!
+
 ### Setup MysqlDB Env
+First you need to install the components of Mysql and Python libs:
+```
+sudo apt-get install build-essential python python-dev python-setuptools libmysqlclient-dev
+sudo apt-get install mysql-server
+```
+Then change the ``my.conf` of mysql
+```
+[client]
+default-character-set=utf8
+
+[mysqld]
+default-storage-engine=INNODB
+character-set-server=utf8
+collation-server=utf8_general_ci
+```
+Then login mysql console with root user(mysql -u root -p) and then create develope mysql database like this:
+```
+create database hackathon;
+create User 'hackathon'@'localhost' IDENTIFIED by 'hackathon';
+GRANT ALL on hackathon.* TO 'hackathon'@'localhost';
+```
+Finally please remember match your `c` 
+
+
 ### Setup Python Env
 Find out the `requirement.txt` both in `open-hackathon-server` and `open-hackathon-client` in src folders, all dependencies are recorded in , we can install them through a simply command :   
 ```
