@@ -163,23 +163,24 @@ default-storage-engine=INNODB
 character-set-server=utf8
 collation-server=utf8_general_ci
 ```
-Then login mysql console with root user(mysql -u root -p) and then create develope mysql database like this:
+Then login mysql console with root user(`mysql -u root -p`) and then create develope mysql database like this:
 ```
 create database hackathon;
 create User 'hackathon'@'localhost' IDENTIFIED by 'hackathon';
 GRANT ALL on hackathon.* TO 'hackathon'@'localhost';
 ```
-Finally please remember match your `c` 
+Finally please remember match your `config.py` options on mysql configuration
 
 
 ### Setup Python Env
-Find out the `requirement.txt` both in `open-hackathon-server` and `open-hackathon-client` in src folders, all dependencies are recorded in , we can install them through a simply command :   
+Find out the `requirement.txt` both in `open-hackathon-server` and `open-hackathon-client` in src folders, all dependencies are recorded in , we could install them through a simply command :   
 ```
 sudo pip install -r open-hackathon-server/requirement.txt
 sudo pip install -r open-hackathon-client/requirement.txt
 ```
 
-config-sample =》config
+Then copy a file `config.py` from `config_sample.py`, and modify it as needed. Below is the instruction:
+
 
 ## customize
     如何自定义，
