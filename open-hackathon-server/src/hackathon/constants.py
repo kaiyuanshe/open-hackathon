@@ -66,3 +66,9 @@ class HACKATHON_BASIC_INFO:
 
 class CLOUD_ECLIPSE:
     CLOUD_ECLIPSE = "cloud_eclipse"
+
+class TeamMemberStatus:
+    Init = 0
+    Allow = 1
+    Deny = 2
+

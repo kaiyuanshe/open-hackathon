@@ -41,6 +41,7 @@ hackathon_manager = RequiredFeature("hackathon_manager")
 user_manager = RequiredFeature("user_manager")
 register_manager = RequiredFeature("register_manager")
 template_manager = RequiredFeature("template_manager")
+team_manager = RequiredFeature("team_manager")
 
 
 class HealthResource(Resource):
@@ -100,17 +101,7 @@ class HackathonRegisterResource(Resource):
         parse = reqparse.RequestParser()
         parse.add_argument('num', type=int, location='args', default=5)
         args = parse.parse_args()
-        return register_manager.get_hackathon_registration(args['num'])
-
-
-class GetTeamMembersByTeamNameResource(Resource):
-    @hackathon_name_required
-    def get(self):
-        hackathon_id = g.hackathon.id
-        parse = reqparse.RequestParser()
-        parse.add_argument('team_name', type=str, location='args', required=True)
-        args = parse.parse_args()
-        return user_manager.get_team_members_by_team_name(hackathon_id, args['team_name'])
+        return team_manager.get_hackathon_registration(args['num'])
 
 
 class HackathonTeamListResource(Resource):
@@ -121,7 +112,7 @@ class HackathonTeamListResource(Resource):
         parse.add_argument('number', type=int, location='args', required=False)
         result = parse.parse_args()
         id = g.hackathon.id
-        return register_manager.get_hackathon_team_list(id, result['name'], result['number'])
+        return team_manager.get_hackathon_team_list(id, result['name'], result['number'])
 
 
 class TemplateResource(Resource):
@@ -171,7 +162,6 @@ class HackathonTemplateListResource(Resource):
         templates = template_manager.get_templates_by_hackathon_id(g.hackathon.id)
         return map(lambda x: x.dic(), templates)
 
-
 def register_routes():
     """
     register API routes that user or admin is not required
@@ -194,7 +184,6 @@ def register_routes():
 
     # team API
     api.add_resource(HackathonTeamListResource, "/api/hackathon/team/list")
-    api.add_resource(GetTeamMembersByTeamNameResource, "/api/hackathon/team/member")
 
     # hackathon register api
     api.add_resource(HackathonRegisterResource, "/api/hackathon/registration/list")

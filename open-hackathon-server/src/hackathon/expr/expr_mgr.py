@@ -187,8 +187,8 @@ class ExprManager(Component):
 
     def get_expr_list_by_hackathon_id(self, hackathon_id, **kwargs):
         condition = self.__get_filter_condition(hackathon_id, **kwargs)
-        expers = self.db.find_all_objects(Experiment, condition)
-        return map(lambda u: self.__get_expr_with_user_info(u), expers)
+        experiments = self.db.find_all_objects(Experiment, condition)
+        return map(lambda u: self.__get_expr_with_user_info(u), experiments)
 
     def recycle_expr(self):
         """

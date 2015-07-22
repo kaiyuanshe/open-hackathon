@@ -27,7 +27,7 @@
 import sys
 
 sys.path.append("..")
-from hackathon.database.models import UserToken, User, UserEmail, UserHackathonRel
+from hackathon.database.models import UserToken, User, UserEmail
 from datetime import timedelta
 from hackathon.constants import HTTP_HEADER
 from hackathon.enum import ReservedUser
@@ -38,6 +38,7 @@ from hackathon import Component, RequiredFeature
 
 class UserManager(Component):
     admin_manager = RequiredFeature("admin_manager")
+    hackathon_manager = RequiredFeature("hackathon_manager")
 
     def __generate_api_token(self, user):
         token_issue_date = self.util.get_now()
@@ -155,25 +156,8 @@ class UserManager(Component):
             ret["user_profile"] = user.profile.dic()
         return ret
 
-    def get_team_members_by_team_name(self, hackathon_id, team_name):
-        team_member = self.db.find_all_objects_by(UserHackathonRel, hackathon_id=hackathon_id, team_name=team_name)
-
-        def get_info(sql_object):
-            r = sql_object.dic()
-            r['user'] = self.user_display_info(sql_object.user)
-            return r
-
-        team_member = map(lambda x: get_info(x), team_member)
-        return team_member
-
-    def get_team_members_by_user(self, hackathon_id, user_id):
-        my_team = self.db.find_first_object_by(UserHackathonRel, hackathon_id=hackathon_id, user_id=user_id)
-        if my_team and my_team.team_name:
-            return self.get_team_members_by_team_name(hackathon_id, my_team.team_name)
-        else:
-            return []
 
     def is_super_admin(self, user):
         if user.id == ReservedUser.DefaultSuperAdmin:
             return True
-        return -1 in self.admin_manager.get_hackathon_ids_by_admin_user_id(user.id)
+        return -1 in self.hackathon_manager.get_hackathon_ids_by_admin_user_id(user.id)
