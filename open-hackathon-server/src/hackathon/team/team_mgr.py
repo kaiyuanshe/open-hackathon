@@ -53,11 +53,7 @@ class TeamManager(Component):
             return False
 
     def __get_team(self, hid, uid):
-        user_team = self.db.find_first_object_by(UserTeamRel, hackathon_id=hid, user_id=uid)
-        if user_team is not None:
-            return user_team
-        else:
-            return None
+        return self.db.find_first_object_by(UserTeamRel, hackathon_id=hid, user_id=uid)
 
     def get_team_info(self, hid, tname):
         team = self.db.find_first_object_by(Team, hackathon_id=hid, name=tname)
@@ -126,7 +122,6 @@ class TeamManager(Component):
             team_name = kwargs["team_name"]
             team = self.db.find_first_object_by(Team, hackathon_id=g.hackathon.id, name=team_name)
             if self.__validate_permission(g.hackathon.id, team.name, g.user):
-                name = kwargs["team_name"] if "team_name" in kwargs else team.name
                 description = kwargs["description"] if "description" in kwargs else team.description
                 git_project = kwargs["git_project"] if "git_project" in kwargs else team.git_project
                 logo = kwargs["logo"] if "logo" in kwargs else team.logo
@@ -196,19 +191,19 @@ class TeamManager(Component):
                 self.db.delete_object(candidate_record)
                 return ok("kicked")
 
-    def promote_leader(self, hid, tname, new_uid, old_uid):
+    def promote_leader(self, hid, tname, user_id):
         # check permission
         if self.__validate_permission(hid, tname, g.user):
             # check new leader and old leader in same team
             team = self.db.find_first_object_by(Team, hackathon_id=hid, name=tname)
-            team = team.user_team_rels.all()
-            team_member_id = map(lambda x: x.user_id, team)
-            if new_uid in team_member_id and old_uid in team_member_id:
-                leader = self.db.find_first_object_by(Team, hackathon_id=hid, name=tname, leader_id=old_uid)
-                leader.leader_id = new_uid
-                self.log.debug(leader.leader.name + " has been promote to leader.")
+            leader_id = team.leader_id
+            team_member = team.user_team_rels.all()
+            team_member_id = map(lambda x: x.user_id, team_member)
+            if user_id in team_member_id and leader_id in team_member_id:
+                team.leader_id = user_id
+                self.log.debug(team.leader.name + " has been promote to leader.")
                 self.db.commit()
-                return leader.dic()
+                return team.dic()
             else:
                 return bad_request("Please promote someone in the same team.")
 

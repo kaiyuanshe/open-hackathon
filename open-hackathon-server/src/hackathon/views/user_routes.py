@@ -262,14 +262,12 @@ class TeamLeaderResource(Resource):
     @hackathon_name_required
     def put(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('new_leader_id', type=int, location='json', required=True)
-        parse.add_argument('old_leader_id', type=int, location='json', required=True)
+        parse.add_argument('user_id', type=int, location='json', required=True)
         parse.add_argument('team_name', type=str, location='json', required=True)
         args = parse.parse_args()
         return team_manager.promote_leader(g.hackathon.id,
                                            args["team_name"],
-                                           args["new_leader_id"],
-                                           args["old_leader_id"])
+                                           args["user_id"])
 
 def register_user_routes():
     """
