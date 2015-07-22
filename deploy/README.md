@@ -126,10 +126,12 @@ In OpenHackathon develop evnironment you should install and setup docker service
 In order to control and manage docker service from OpenHackathon conveniently , we'd better to enable docker's `remote API`. Fllow this steps after installation of docker service,[enable docker remote API](http://blog.trifork.com/2013/12/24/docker-from-a-distance-the-remote-api/)
     
 ### Setup Guacamole Env
-Having got many environments we need to find a way to connect them for users, as you know that we choose Guacamole!Guacamole works as a remote client connecting to running environments, which provides SSH, RDP and VNC protocols. So we can cope with environments of all kinds of hackathons [Guacamole](http://guac-dev.org/) can give you more details.        
-                 
-[Guacamole installation](http://guac-dev.org/doc/gug/installing-guacamole.html)
+Having got many environments we need to find a way to connect them for users, as you know that we choose Guacamole!Guacamole works as a remote client connecting to running environments, which provides SSH, RDP and VNC protocols. So we can cope with various environments of different hackathons        
+[Guacamole](http://guac-dev.org/) can give you more details.        
 
+
+
+[Guacamole installation](http://guac-dev.org/doc/gug/installing-guacamole.html)
 Gucamole has its own authentication so does OpenHackathon, in order to unify them we customise a new auth provider and hacked it into guacamole client
     
 ### Setup MysqlDB Env
