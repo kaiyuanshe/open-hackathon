@@ -27,29 +27,22 @@
 import sys
 
 sys.path.append("..")
-
-from hackathon.constants import (
-    HEALTH_STATE,
-)
-
-from hackathon import (
-    RequiredFeature,
-    Component
-)
-
-from sqlalchemy import (
-    __version__,
-)
-
-from hackathon.database.models import (
-    User,
-    AzureKey,
-)
-from hackathon.azureformation.service import (
-    Service,
-)
 import requests
 import abc
+
+from sqlalchemy import __version__
+
+from hackathon.constants import HEALTH_STATUS
+from hackathon import RequiredFeature, Component
+from hackathon.database.models import User, AzureKey
+from hackathon.azureformation.service import Service
+
+__all__ = [
+    "MySQLHealthCheck",
+    "HostedDockerHealthCheck",
+    "AlaudaDockerHealthCheck",
+    "GuacamoleHealthCheck",
+]
 
 STATUS = "status"
 DESCRIPTION = "description"
@@ -57,68 +50,100 @@ VERSION = "version"
 
 
 class HealthCheck(Component):
+    """Base class for health check item"""
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
-    def reportHealth(self):
+    def report_health(self):
         pass
 
 
 class MySQLHealthCheck(HealthCheck):
-    def reportHealth(self):
+    """Check health status of MySQL database
+
+    Make sure MySQL is working and correctly configured by a single DB query
+    """
+
+    def report_health(self):
+        """Report status of MySQL by query the count of User table
+
+        Will return OK if no exception raised else return ERROR
+        """
         try:
             self.db.count(User)
             return {
-                STATUS: HEALTH_STATE.OK,
+                STATUS: HEALTH_STATUS.OK,
                 VERSION: __version__
             }
         except Exception as e:
             return {
-                STATUS: HEALTH_STATE.ERROR,
+                STATUS: HEALTH_STATUS.ERROR,
                 VERSION: __version__,
                 DESCRIPTION: e.message
             }
 
 
-class DockerHealthCheck(HealthCheck):
-    def __init__(self):
-        self.docker = RequiredFeature("docker")
+class HostedDockerHealthCheck(HealthCheck):
+    """Report status of hostdd docker
 
-    def reportHealth(self):
-        return self.docker.health()
+    see more on docker/hosted_docker.py
+    """
+
+    def __init__(self):
+        self.hosted_docker = RequiredFeature("hosted_docker")
+        self.alauda_docker = RequiredFeature("alauda_docker")
+
+    def report_health(self):
+        return self.hosted_docker.report_health()
+
+
+class AlaudaDockerHealthCheck(HealthCheck):
+    """Report status of Alauda service
+
+    see more on docker/alauda_docker.py
+    """
+
+    def __init__(self):
+        self.alauda_docker = RequiredFeature("alauda_docker")
+
+    def report_health(self):
+        return self.alauda_docker.report_health()
 
 
 class GuacamoleHealthCheck(HealthCheck):
-    # todo now check only server status
+    """Check the status of Guacamole Server by request its homepage"""
+
     def __init__(self):
         self.guacamole_url = self.util.get_config("guacamole.host") + '/guacamole'
 
-    def reportHealth(self):
+    def report_health(self):
         try:
             req = requests.get(self.guacamole_url)
             self.log.debug(req.status_code)
             if req.status_code == 200:
                 return {
-                    STATUS: HEALTH_STATE.OK
+                    STATUS: HEALTH_STATUS.OK
                 }
         except Exception as e:
             self.log.error(e)
         return {
-            STATUS: HEALTH_STATE.ERROR
+            STATUS: HEALTH_STATUS.ERROR
         }
 
 
 class AzureHealthCheck(HealthCheck):
-    def reportHealth(self):
+    """Check the status of azure to make sure config is right and azure is available"""
+
+    def report_health(self):
         azure_key = self.db.find_first_object(AzureKey)
         azure = Service(azure_key.id)
         if azure.ping():
             return {
-                STATUS: HEALTH_STATE.OK
+                STATUS: HEALTH_STATUS.OK
             }
         else:
             return {
-                STATUS: HEALTH_STATE.ERROR
+                STATUS: HEALTH_STATUS.ERROR
             }
 
 

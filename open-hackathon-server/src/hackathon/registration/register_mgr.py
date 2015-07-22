@@ -29,9 +29,9 @@ import sys
 sys.path.append("..")
 from hackathon import Component, RequiredFeature
 from flask import g
-from hackathon.database.models import UserHackathonRel, Experiment, UserProfile
+from hackathon.database.models import UserHackathonRel, Experiment, UserProfile, Team
 from hackathon.hackathon_response import bad_request, precondition_failed, internal_server_error, not_found, ok
-from hackathon.enum import EStatus, RGStatus, ReservedUser
+from hackathon.constants import EStatus, RGStatus, ReservedUser
 import json
 
 
@@ -151,7 +151,7 @@ class RegisterManager(Component):
             experiment = self.db.find_first_object(Experiment,
                                                    Experiment.user_id == user_id,
                                                    Experiment.hackathon_id == hackathon.id,
-                                                   Experiment.status.in_([EStatus.Starting, EStatus.Running]))
+                                                   Experiment.status.in_([EStatus.STARTING, EStatus.RUNNING]))
             if experiment is not None:
                 detail["experiment"] = experiment.dic()
         except Exception as e:
@@ -175,15 +175,7 @@ class RegisterManager(Component):
 
         return False
 
-    def get_hackathon_team_list(self, hid, name, number):
-        find_team_by_hackathon = self.db.find_all_objects_by(UserHackathonRel, hackathon_id=hid)
-        hackathon_team_list = map(lambda x: x.team_name, find_team_by_hackathon)
-        hackathon_team_list = list(set(hackathon_team_list))
-        if name is not None:
-            hackathon_team_list = filter(lambda x: name in x, hackathon_team_list)
-        if number is not None:
-            hackathon_team_list = hackathon_team_list[0:number]
-        return hackathon_team_list
+
 
     def get_user_profile(self, user_id):
         return self.db.find_first_object_by(UserProfile, user_id=user_id)

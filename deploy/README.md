@@ -1,208 +1,160 @@
-This document will tell you how to deploy the whole open-hackathon web application environment manually.    
-And the whole environment cotains serval components such guacamole , nginx , tomcat and the open-hackathon running Dependencies. 
-* [Introduction](#Introduction)
-  * [What is OpenHackathon](#What-is-OpenHackathon)
-  * [Why-choose-OpenHackathon](#Why-choose-OpenHackathon)
-  * [Where-is-the-feature](#Where-is-the-feature)
-* [User's Guide](#User's-Guide)
-* [Developer's Guide](#Developer's-Guide)
-  * [setup system components](#install-system-components)
-  * [setup Docker Env](#setup-Docker-Env)
-  * [setup Guacamole Env](#setup-Guacamole-Env)
-  * [get src from GitHub](#get-src-from-GitHub)
-  * [setup MysqlDB Env](#setup-MysqlDB-Env)
-  * [setup server api Env](#setup-server-api-Env)
-  * [setup frontend website Env](#setup-frontend-website-Env)
-* [QA](#QA)
+
+<h1 align = "center">OpenHackathon Manual</h1>   
+<p align = "center">Microsot Open Technologies</p>                  
+<p align = "center">Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd. All rights reserved</p>
+.
+
+* [Introduction](#introduction)
+  * [What is OpenHackathon](#what-is-openhackathon)
+  * [Why OpenHackathon](#why-openhackathon)
+ 
+* [Keywords and interpretation](#keywords-and-interpretation)
+* [User's Guide](#user's-guide)
+  * [Implementation and Architecture](#implementation-and-architecture-for-user)
+  * [attend hackathons](#how-to-attend-a-hackathon)
+  * [Upload Template](#upload-template)
+  * [FAQ](#FAQ)
+* [Admin's Guid](#admin's-guide)
+  * [Implementation and Architecture](#implementation-and-architecture-for-admin)
+  * [Manage hackathon](#how-to-manage-a-hackathon)
+    * [Create hackathon](#create-hackathon)
+    * [Manage basic info](#manage-basic-info)
+  * [Manage registration](#manage-registration)
+  * [Manage administrators](#manage-administrators)
+  * [Manage Azure certificate](#manage-azure-certificate)
+  * [Manage templates](#manage-templates)
+  * [Manage experiment](#manage-experiment)
+  * [FAQ](#FAQ)
+* [Developer's Guide](#developer's-guide)
+  * [Implementation and Architecture](#implementation-and-architecture-for-developer)
+  * [Try OpenHackathon quickly](#try-openhackathon-quickly)
+  * [Setup develop environment](#setup-develop-environment)
+    * [Setup Docker Env](#setup-docker-env)
+    * [Setup Guacamole Env](#setup-guacamole-env)
+    * [Setup MysqlDB Env](#setup-mysqlDB-env)
+    * [Setup python Env](#setup-python-env)
+  * [Customize](#customize)
+  * [Test](#test)
+    * [Unit test](#unit-test)
+    * [API test](#api-test)
+  * [API documemt](#api-document)
+  * [Python doc](#python-doc)
+  * [DB schema](#db-schema)
+  * [Contribution.MD](#contribution.md)
+  * [FAQ](#QA)
+
+
+
 
 # Introduction
-# User's Guide
-# Developer's Guide
-
-#install system components
-```shell
-sudo apt-get update && sudo apt-get upgrade
-sudo apt-get install build-essential python python-dev python-setuptools libmysqlclient-dev
-sudo apt-get install vim git
-sudo easy_install pip
-sudo apt-get install tomcat7
-sudo apt-get install openjdk-7-jdk
-sudo apt-get install nginx
-sudo apt-get install mysql-server
-
-```
-#Get src from github
-```
-cd /opt/
-git clone https://github.com/msopentechcn/open-hackathon.git
-```
-
-#config guacamole
-Do this steps you should follow [http://guac-dev.org/doc/gug/installing-guacamole.html](http://guac-dev.org/doc/gug/installing-guacamole.html)      
-Here are the main steps about configure and depoly guacamole-server as well as guacamole-client       
-Note：*guacamole version choose 0.9.3 !!!*
+## What is OpenHackathon
+## Why OpenHackathon
 
 
-###setup guacamole-server
-```
-sudo apt-get install libtool libcairo2-dev libpng12-dev libossp-uuid-dev
-sudo apt-get install libfreerdp-dev libpango1.0-dev libssh2-1-dev libtelnet-dev 
-sudo apt-get install libvncserver-dev libpulse-dev libssl-dev libvorbis-dev
-sudo apt-get install autoconf
+# Keywords and interpretation
 
-sudo wget http://jaist.dl.sourceforge.net/project/guacamole/current/source/guacamole-server-0.9.3.tar.gz
-sudo tar -zxvf guacamole-server-0.9.3.tar.gz
-sudo cd guacamole-server-0.9.3/
-sudo autoreconf -fi
-sudo ./configure --with-init-dir=/etc/init.d
-sudo make
-sudo make install
-sudo ldconfig
-sudo /etc/init.d/guacd start
-```
-###setup guacamole-client
-Download guacamole-client war package ,and deploy the `guacamole.war` into tomcat7 
-```
-wget http://jaist.dl.sourceforge.net/project/guacamole/current/binary/guacamole-0.9.3.war
-mv guacamole-0.9.3.war /var/lib/tomcat7/webapps/guacamole.war
-```
+| Keywords        | Interpretation          |
+|:--------:|:-----------------------------------------------------------------------------:|
+| template  | as a description of the Docker container|
+| experiment | correspond with a Docker container|
+| team | every user must join in a team to participate in hackathon event|
+
+# User's-Guide
+## Implementation and Architecture for User
+用户角色模块的基础介绍，以及涉及到的各种关键字的解释
+### keys 
+## How to attend a hackathon
+报名，组队，参赛，提交评审等介绍，以及主干流程的截图
+## Upload Template
+Templat 上传过程及用户对自己上传的Template的管理操作
 
 
-###config guacamole
-Check the guacamole config file `/etc/guacamole/guacamole.properties`, and edit the file like this:
-```shell
-guacd-hostname: localhost
-guacd-port:     4822
+# Admin's Guide
+## Implementation and Architecture for Admin
+## Manage Hackathon
+### Create hackathon
+`Hackathon creation entrance`
+![Imgur](http://i.imgur.com/TZgnKvN.png?1)
+`create hackathon`: name and display name                  
+![Imgur](http://i.imgur.com/40e0WKT.png)
+`organizer`：include organizer description                 
+![Imgur](http://i.imgur.com/Nt72XiY.png)
+`event images`: upload event images to show your hackathon event                 
+![Imgur](http://i.imgur.com/JRPIP1K.png)
+`hackathon basic info`: hackathon event basic info setup                      
+![Imgur](http://i.imgur.com/1qp26bI.png)
+`finish creation`:                    
+![Imgur](http://i.imgur.com/ZpLUYUJ.png)
 
-lib-directory: /var/lib/guacamole
-auth-provider: com.openhackathon.guacamole.OpenHackathonAuthenticationProvider
-auth-request-url: http://localhost:15000/api/guacamoleconfig
-```
-Then copy the auth-provider jar file to the path that was setted in the config file
-```
-sudo cp deploy/openhackathon-gucamole-authentication-1.0-SNAPSHOT.jar /var/lib/guacamole/
-```
-Note: the `auth-request-url` value must be setted match the _open-hackathon_ src provides
-And every time you change this file , you may need to restart guacd and tomcat7 service
-
-#config tomcat7
-After installed tomcat7 we need to make tomcat load the guacamole-UI web application. The guacamole.war was provided after we install guacamole commponent.     
-So we can config tomcat7 like these steps:
-```
-sudo mkdir /usr/share/tomcat7/.guacamole
-sudo ln -s /etc/guacamole/guacamole.properties /usr/share/tomcat7/.guacamole/guacamole.properties
-
-sudo service guacd restart
-sudo service tomcat7 restart
-```
-
-#Deploy open-hackathon withn uWsgi
-
-Before deploy the web application ,we need to setup all the dependencies and do some pre-execution
-```
-echo "127.0.0.1    hackathon.chinacloudapp.cn" >> /etc/hosts
-sudo mkdir /var/log/uwsgi
-sudo mkdir /var/log/open-hackathon
-cd /opt/open-hackathon
-virtualenv venv
-source venv/bin/activate
-cd /opt/open-hackathon/open-hackathon/
-sudo pip install -r requirement.txt
-```
-####- confi mysql
-edit `/etc/mysql/my.conf` make changes like this:
-```shell
-[client]
-default-character-set=utf8
-
-[mysqld]
-default-storage-engine=INNODB
-character-set-server=utf8
-collation-server=utf8_general_ci
-```
-Then restart the `mysqld` service     
-
-Next logon mysql console with root user(mysql -u root -p) and then:
-```mysql
-create database hackathon;
-create User 'hackathon'@'localhost' IDENTIFIED by 'hackathon';
-GRANT ALL on hackathon.* TO 'hackathon'@'localhost';
-```
-Next update `app/config.py` with your user/password. And don't submit your password to github!!!
-
-Then we should initialize tables and creat test data:
-```
-sudo python /opt/open-hackathon/open-hackathon/src/setup_db.py
-mysql -u root -p
-use hackathon;
-insert into register (register_name, email, enabled) values("Your Name", "xxx@abc.com", 1);
-```
-####- deploy withn nginx
-To deploy the web application in nginx service , we need to provide:            
-- a conf file to let nginx load it; 
-- a uWsgi to hold the python-flask web application;    - 
-
-To make it to be easily operational, we would setup a linux demo to hanld the uwsgi process           
-
-What we need is already putted in the `deploy` folder, So we can do it like this:
-```
-sudo rm -rf /etc/nginx/sites-enabled/default
-sudo cp deploy/nginx_openhackathon.conf /etc/nginx/conf.d/
-sudo cp deploy/nginx_openhackathon.uwsgi.ini ./
-sudo cp deploy/uwsgi /etc/init.d/
-```
-Note: Please check the three files carefully , especially about the paths !!!           
-Then we would start and restart these services
-```
-sudo /etc/init.d/guacd restart
-sudo /etc/init.d/tomcat7 restart
-sudo /etc/init.d/uwsgi start
-```
-# Test the Web-application
-After finishsd those steps you could do some tests on local machine                     
-check guacd service:[http://localhost:8080/guacamole](http://localhost:8080/guacamole)                            
-check nginx service for proxy forwarding:[http://hackathon.chinacloudapp.cn/guacamole](http://localhost:8080/guacamole)           
-check open-hackathon web application:[http://localhost](http://localhost:8080/guacamole)                   
+### Manage basic info
+## Manage registration
+The main content of registration managment is auditing all registers 
+## Manage administrators
+## Manage Azure certificate
+## Manage templates
+Hackathon administrators can delete or add a template from templates pool to current hackathon
+## Manage experiment
+Hackathon will provider a runnable environment to every player , naturally the hackathon administrator could manage them , stop or reset them when necessary
 
 
-#Python IDE
-Get "PyCharm" from [https://www.jetbrains.com/pycharm/](https://www.jetbrains.com/pycharm/) freely on your localhost     
-Extract the download `pycharm-community-4.0.4.tar.gz` , execuse `pycharm-community-4.0.4/bin/pycharm.sh`can open this software.
-Then we can develop or debug the open-hackathon
+#Developer's Guide
+## Implementation and Architecture for Developer            
+`Project on Github`:`https://github.com/msopentechcn/open-hackathon.git`                         
+`Architecture:`                             
+OpenHackathon is separated into two pieces: open-hackathon server, which provides the openhackathon proxy and related libraries, and open-hackathon client, which provides the website client to users            
 
-# setup cloudVM service
+src folders introduction:        
+`deploy`: all components for deployment               
+`open-hackathon-client`: frontend web project src               
+`open-hackathon-server`: backend api server project src              
+`openhackathon-guacamole-auth-provider`: guacamole auth provider java project src                 
+`tools/docker-enter`: tool to quickly connect to a running docker container through container id             
+                  
+                   
+ Use Flask to build the whole project.[Flask Introduction](http://flask.pocoo.org/docs/0.10/)
+ 
+ 
+ 
+## Try openhackathon quickly
+    介绍如何用doker的一个image来run起一个openhackathon
+## Setup develop environment
+### Setup Docker Env
+介绍下docker在OpenHackathon的作用         
+[Docker intsallation on Ubuntu](https://docs.docker.com/installation/ubuntulinux/)
+    
+### Setup Guacamole Env
+Guacamole is used as a remote client to connect to running environments , SSH RDP VNC are all provided. [Guacamole](http://guac-dev.org/) can give you more details.        
+                 
+[Guacamole installation](http://guac-dev.org/doc/gug/installing-guacamole.html)
 
-####download dependencies 
+Gucamole has its own authentication so does OpenHackathon, in order to unify them we customise a new auth provider and hacked it into guacamole client
+    
+### Setup MysqlDB Env
+### Setup Python Env
+Find out the `requirement.txt` both in `open-hackathon-server` and `open-hackathon-client` in src folders, all dependencies are recorded in , we can install them through a simply command :   
 ```
-sudo apt-get install docker.io
-sudo pip install -r /opt/open-hackathon/cloudvm/requestment.txt
+sudo pip install -r open-hackathon-server/requirement.txt
+sudo pip install -r open-hackathon-client/requirement.txt
 ```
-####download docker images 
-```
-sudo docker pull 42.159.103.213:5000/rails
-sudo docker pull 42.159.103.213:5000/mean
-```
-after pull down these two images PLS rename to `msopentechcn/rails` and `msopentechcn/mean` withn this commnad:      
-`sudo docke images` to find out imageID from image name              
-`sudo docker tag <imageID> "newName"`   to rename image     
-Then pull down other three images                      
-```
-sudo docker pull msopentechcn/flask
-sudo docker pull rastasheep/ubuntu-sshd
-sudo docker pull sffamily/ubuntu-gnome-vnc-eclipse
-```
-####config docker remote api
-If you want to use docker remote api to visit docker on your host machine or Azure server, please change the following configure:          
-Please edit this file: /etc/init/docker.conf or /etc/default/docker and update the DOCKER_OPTS variable to the following:
-```
-DOCKER_OPTS = '-H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock'
-```
-The daemon process will listen on port '4243', if '4243' port has been occupied on the machine which you want to visit, please change it. 
-And add user into docker gourp 
-```
-sudo groupadd docker
-sudo gpasswd -a ${USER} docker
-```
-Then restart the docker process: `service docker.io restart`
 
-#Debug the web application
+config-sample =》config
+
+## customize
+    如何自定义，
+    如何由Azure资源，切换到其他的云服务厂商，如阿里云，盛大云等
+    guacamole --> other client provider
+    
+## Test
+### Unit test
+### API test
+    
+## API document
+## Python doc
+## DB schema
+## Contribution.MD
+
+
+
+
+
+

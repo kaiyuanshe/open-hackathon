@@ -27,15 +27,19 @@
 from hackathon import RequiredFeature
 from hackathon_response import unauthorized, bad_request, access_denied
 
+__all__ = [
+    "token_required",
+    "hackathon_name_required",
+    "admin_privilege_required",
+]
+
 user_manager = RequiredFeature("user_manager")
 hack_manager = RequiredFeature("hackathon_manager")
 
-"""
-user must login when this decorator is enabled (for both user and admin)
-"""
-
 
 def token_required(func):
+    """User must login when this decorator is enabled (for both user and admin)"""
+
     def authenticate_and_call(*args, **kwargs):
         if not user_manager.validate_login():
             return unauthorized("login required")
@@ -44,12 +48,9 @@ def token_required(func):
     return authenticate_and_call
 
 
-"""
-hackathon_name must be included in header when this decorator is enabled
-"""
-
-
 def hackathon_name_required(func):
+    """hackathon_name must be included in header when this decorator is enabled"""
+
     def authenticate_and_call(*args, **kwargs):
         if not hack_manager.validate_hackathon_name():
             return bad_request("hackathon name invalid")
@@ -58,12 +59,9 @@ def hackathon_name_required(func):
     return authenticate_and_call
 
 
-"""
-user must login , hackathon_name must be available, and 'user' has proper admin privilege on this hackathon
-"""
-
-
 def admin_privilege_required(func):
+    """user must login , hackathon_name must be available, and 'user' has proper admin privilege on this hackathon"""
+
     def authenticate_and_call(*args, **kwargs):
         if not user_manager.validate_login():
             return unauthorized("login required")

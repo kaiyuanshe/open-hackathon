@@ -47,7 +47,7 @@ from hackathon.util import (
     get_now,
 )
 
-from hackathon.enum import (
+from hackathon.constants import (
     ALStatus,
     EStatus,
     ALOperation,
@@ -120,11 +120,11 @@ def commit_azure_log(experiment_id, operation, status, note=None, code=None):
                                  code=code)
     db_adapter.commit()
     if status == ALStatus.FAIL:
-        update_experiment_status(experiment_id, EStatus.Failed)
+        update_experiment_status(experiment_id, EStatus.FAILED)
     elif status == ALStatus.END:
-        need_status = EStatus.Running
+        need_status = EStatus.RUNNING
         if operation == ALOperation.STOP_VIRTUAL_MACHINE:
-            need_status = EStatus.Stopped
+            need_status = EStatus.STOPPED
         check_experiment_done(experiment_id, need_status)
 
 
@@ -395,9 +395,9 @@ def update_experiment_status(experiment_id, status):
 
 def check_experiment_done(experiment_id, need_status):
     e = db_adapter.get_object(Experiment, experiment_id)
-    need_ve_status = VEStatus.Running
-    if need_status == EStatus.Stopped:
-        need_ve_status = VEStatus.Stopped
+    need_ve_status = VEStatus.RUNNING
+    if need_status == EStatus.STOPPED:
+        need_ve_status = VEStatus.STOPPED
     if db_adapter.count_by(VirtualEnvironment,
                            experiment_id=experiment_id,
                            status=need_ve_status) == e.template.virtual_environment_count:

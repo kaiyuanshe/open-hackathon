@@ -33,7 +33,7 @@ from hackathon.azureformation.service import (
 from hackathon.database.models import (
     AzureKey,
 )
-from hackathon.enum import (
+from hackathon.constants import (
     ADStatus,
     AVMStatus,
 )

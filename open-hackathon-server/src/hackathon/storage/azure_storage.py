@@ -22,16 +22,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
+from storage import Storage
 
-from user_routes import register_user_routes
-from admin_routes import register_admin_routes
-from routes import register_routes
-
-__all__ = ["init_routes"]
+__all__ = ["AzureStorage"]
 
 
-def init_routes():
-    """Register RESTFul API routes"""
-    register_routes()
-    register_user_routes()
-    register_admin_routes()
+class AzureStorage(Storage):
+    """Hackathon file storage that saves all templates on MS azure"""
+
+    def __init__(self):
+        return

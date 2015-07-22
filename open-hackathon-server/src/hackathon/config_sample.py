@@ -27,7 +27,9 @@
 # "javascript" section for javascript. see @app.route('/config.js') in app/views.py
 
 # oauth constants
-QQ_OAUTH_STATE = "openhackathon"  # todo state should be constant. Actually it should be unguessable to prevent CSFA
+QQ_OAUTH_STATE = "openhackathon"  # todo state should not be constant. Actually it should be unguessable to prevent CSFA
+
+HACKATHON_SERVER_ENDPOINT = "http://localhost:15000"
 
 MYSQL_HOST = "localhost"
 MYSQL_USER = "hackathon"
@@ -37,6 +39,7 @@ MYSQL_PORT = 3306
 
 Config = {
     "environment": "local",
+    "endpoint": HACKATHON_SERVER_ENDPOINT,
     "app": {
         "secret_key": "secret_key"
     },
@@ -86,12 +89,15 @@ Config = {
         "check_idle_interval_minutes": 5
     },
     "storage": {
-        "account_name": "hackathon",
-        "account_key": "U4/oE3Ocwk9txQHw2qNOCCW2Fy05FBY3yQfzcKRNss5tnReyYTO7PDyeXQ8TWMMxXF07JrW7UXPyOhGgJlodEQ==",
-        "image_container": "images",
-        "template_container": "templates",
-        "blob_service_host_base": ".blob.core.chinacloudapi.cn",
-        "size_limit_kilo_bytes": 5 * 1024
+        "type": "local",
+        "size_limit_kilo_bytes": 5 * 1024,
+        "azure": {
+            "account_name": "hackathon",
+            "account_key": "U4/oE3Ocwk9txQHw2qNOCCW2Fy05FBY3yQfzcKRNss5tnReyYTO7PDyeXQ8TWMMxXF07JrW7UXPyOhGgJlodEQ==",
+            "image_container": "images",
+            "template_container": "templates",
+            "blob_service_host_base": ".blob.core.chinacloudapi.cn"
+        }
     },
     "docker": {
         "alauda": {
