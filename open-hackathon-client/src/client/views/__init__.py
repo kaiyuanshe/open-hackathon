@@ -27,9 +27,16 @@
 import sys
 
 sys.path.append("..")
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 from client import app
 import json
+import requests
+import markdown
+import re
+
+from datetime import datetime
 from client.constants import LOGIN_PROVIDER
 from flask_login import login_required, current_user, login_user, LoginManager
 from client.admin.login import login_providers
@@ -40,6 +47,7 @@ from client.functions import get_config
 from client.log import log
 
 session_lifetime_minutes = 60
+
 PERMANENT_SESSION_LIFETIME = timedelta(minutes=session_lifetime_minutes)
 
 login_manager = LoginManager()
@@ -85,6 +93,58 @@ def __login(provider):
     except Exception as ex:
         log.error(ex)
         return __login_failed(provider)
+
+
+def __get_hackthon_list(headers=None):
+    default_headers = {"content-type": "application/json"}
+    req = requests.get(get_config("hackathon-api.endpoint") + "/api/hackathon/list", headers=default_headers,
+                       data={"status": 1})
+    resp = json.loads(req.content)
+
+    return resp
+
+
+def __get_hackathon(headers=None):
+    default_headers = {"content-type": "application/json"}
+    if headers is not None and isinstance(headers, dict):
+        default_headers.update(headers)
+    req = requests.get(get_config("hackathon-api.endpoint") + "/api/hackathon", headers=default_headers)
+    resp = json.loads(req.content)
+
+    return resp
+
+
+def __get_hackathon_template(headers=None):
+    default_headers = {"content-type": "application/json"}
+    if headers is not None and isinstance(headers, dict):
+        default_headers.update(headers)
+    req = requests.get(get_config("hackathon-api.endpoint") + "/api/hackathon/template", headers=default_headers)
+    resp = json.loads(req.content)
+
+    return resp
+
+
+@app.template_filter('mkHTML')
+def toMarkdownHtml(text):
+    return markdown.markdown(text)
+
+
+@app.template_filter('stripTags')
+def stripTags(html):
+    return re.sub(r"</?\w+[^>]*>", "", html)
+
+
+@app.template_filter('limitTo')
+def limitTo(text, limit=100):
+    return text[0:limit]
+
+
+@app.template_filter('date')
+def toDatetime(datelong, fmt=None):
+    if fmt:
+        return datetime.fromtimestamp(datelong / 1e3).strftime(fmt)
+    else:
+        return datetime.fromtimestamp(datelong / 1e3).strftime("%y/%m/%d")
 
 
 @login_manager.user_loader
@@ -140,7 +200,8 @@ def live_login():
 @app.route('/')
 @app.route('/index')
 def index():
-    return render('/home.html')
+    hackathon_list = __get_hackthon_list()
+    return render('/home.html', hackathon_list=hackathon_list)
 
 
 @app.route('/help')
@@ -168,6 +229,27 @@ def login():
     # todo redirect to the page request login
 
     return render("/login.html", error=None)
+
+
+@app.route("/site/<hackathon_name>")
+def hackathon(hackathon_name):
+    item = __get_hackathon(headers={"hackathon_name": hackathon_name})
+    if "error" in item.keys():
+        return render("/404.html")
+    else:
+        return render("/site/hackathon.html", hackathon=item)
+
+@app.route("/site/<hackathon_name>/workspace")
+@login_required
+def workspace(hackathon_name):
+    return render("/site/workspace.html", hackathon_name=hackathon_name)
+
+
+@app.route("/site/<hackathon_name>/settings")
+@login_required
+def tempSettings(hackathon_name):
+    temp = __get_hackathon_template(headers={"hackathon_name": hackathon_name, "token": session["token"]})
+    return render("/site/settings.html", hackathon_name=hackathon_name, temp=temp)
 
 
 from route_manage import *

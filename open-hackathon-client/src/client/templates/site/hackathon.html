@@ -1,0 +1,107 @@
+{% extends "base/base.html" %}
+{% block style %}
+    <link href="/static/css/oh.hackathon.css" rel="stylesheet">
+{% endblock %}
+{% block content %}
+    <div class="oh-main">
+        <div class="container">
+            <div class="row jumbotron">
+                <div class="col-md-5">
+                    <div class="row">
+                        <div id="carousel-example-generic" class="carousel slide" data-ride="carousel">
+                            <ol class="carousel-indicators">
+                                {% for banner in hackathon.basic_info.banners.split(";") %}
+                                    <li data-target="#carousel-example-generic" data-slide-to="{{ loop.index - 1 }}"
+                                        class="{% if loop.index == 1 %} active {% endif %} "></li>
+                                {% endfor %}
+                            </ol>
+                            <carousel class="carousel-inner" role="listbox">
+                                {% for banner in hackathon.basic_info.banners.split(";") %}
+                                    {% if banner %}
+                                        <slide class="item {% if loop.index == 1 %}active{% endif %}">
+                                            <img src="{{ banner }}" alt="{{ hackathon.display_name }}">
+                                        </slide>
+                                    {% else %}
+                                        <slide class="item active">
+                                            <img src="{{ url_for('static',filename='pic/homepage.jpg') }}"
+                                                 alt="{{ hackathon.display_name }}">
+                                        </slide>
+                                    {% endif %}
+                                {% endfor %}
+                            </carousel>
+                            <a class="left carousel-control" href="#carousel-example-generic" role="button"
+                               data-slide="prev">
+                                <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+                                <span class="sr-only">上一张</span>
+                            </a>
+                            <a class="right carousel-control" href="#carousel-example-generic" role="button"
+                               data-slide="next">
+                                <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+                                <span class="sr-only">下一张</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-7">
+                    <h2 class="reg-h-name">{{ hackathon.display_name }}</h2>
+
+                    <p><span class="glyphicon glyphicon-time"></span>
+                        {{ hackathon.event_start_time | date("%Y年%m月%d日 %H:%M") }} ~
+                        {{ hackathon.event_end_time | date("%Y年%m月%d日 %H:%M") }}
+                    </p>
+
+                    <p><span class="glyphicon glyphicon-map-marker"
+                             aria-hidden="true"></span> {{ hackathon.basic_info.location }}</p>
+
+                    <p><span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                        限额人数{{ hackathon.basic_info.max_enrollment }}人</p>
+
+                    <p>
+                        <span class="glyphicon glyphicon-heart" aria-hidden="true"></span>
+                        {% for organizer in  hackathon.basic_info.organizers %}
+                            <a href="{{ organizer.organizer_url }}">{{ organizer.organizer_name }}</a>
+                        {% endfor %}
+                    </p>
+
+                    <div>
+                        <button class="btn btn-primary btn-lg">
+                            我要报名
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-9">
+                    <h2 class="line-title">活动内容</h2>
+
+                    <div>{{ hackathon.description | mkHTML | safe }}</div>
+                </div>
+                <div class="col-md-3">
+                    <h2 class="line-title">活动主办方..</h2>
+                    {% for organizer in hackathon.basic_info.organizers %}
+                        <div class="post">
+                            <div class="thumb">
+                                <img src="{{ organizer.organizer_image }}" width="100%">
+                            </div>
+                            <div class="body">
+                                <h3><a href="{{ organizer.organizer_url }}">{{ organizer.organizer_name }}</a></h3>
+
+                                <p>{{ organizer.organizer_description }}</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    <h2 class="line-title">最近参与者..</h2>
+                    <ul class="users-list">
+
+                    </ul>
+                    <h2 class="line-title">分享朋友圈.</h2>
+                    <br/>
+
+                    <div>
+                        <img src="{{ dimensional }}"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endblock %}

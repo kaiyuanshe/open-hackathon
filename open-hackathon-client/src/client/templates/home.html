@@ -1,19 +1,51 @@
 {% extends "base/base.html" %}
-{% block body %}
-<div class="col-lg-12">
-    <div class="box">
-        <div class="box-header">
-            <h2>
-              <i class="fa fa-home"></i>
-              Welcome to Management Console
-          </h2>
-        </div>
-        <div class="box-content">
-            <p>
-                Manage registered users, hackathons, and administrators. You can add/delete/update all of them here.
-            </p>
-            <a class="btn btn-primary" href="/hackathon"><i class="icon-arrow-left icon-white"></i> Back</a>
+{% block style %}
+    <link href="/static/css/oh.home.css" rel="stylesheet">
+{% endblock %}
+{% block content %}
+    <div class="oh-main">
+        <div class="container">
+            <div class="col-md-12">
+                <div class="jumbotron">
+                    <h1>黑客松活动列表</h1>
+                    <p class="lead">
+                    <p>
+                </div>
+            </div>
+            {% for hackathon in hackathon_list %}
+                <div class="col-xs-12 col-md-6">
+                    <article class="hackathon-item">
+                        <div class="hakcathon-inner">
+                            <a href="{{ url_for('hackathon', hackathon_name=hackathon.name) }}" target="_blank">
+                                <section class="hackathon-content">
+                                    <img src="{{ hackathon.basic_info.banners.split(';')[0] or url_for('static',filename='pic/homepage.jpg') }}"
+                                         class="hackathon-thumb" alt="{{ hackathon.display_name }}">
+
+                                    <div class="hackathon-overlay"></div>
+                                    <div class="hackathon-info">
+                                        <div class="hackathon-organizers">
+                                            {% for organizer in hackathon.basic_info.organizers %}
+                                                <span>{{ organizer.organizer_name }}</span>
+                                            {% endfor %}
+                                        </div>
+                                        <h2 class="hackathon-name">{{ hackathon.display_name }}</h2>
+
+                                        <div class="hackathon-details">
+                                            <div class="hackathon-event-time">
+                                                {{ hackathon.event_start_time | date("%Y年%m月%d日 %H:%M") }} ~
+                                                {{ hackathon.event_end_time | date("%Y年%m月%d日 %H:%M") }}
+                                            </div>
+                                            <div class="hackathon-description">
+                                                {{ hackathon.description | mkHTML | stripTags | limitTo(300) }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </a>
+                        </div>
+                    </article>
+                </div>
+            {% endfor %}
         </div>
     </div>
-</div>
 {% endblock %}
