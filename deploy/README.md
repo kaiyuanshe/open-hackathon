@@ -7,7 +7,6 @@
 * [Introduction](#introduction)
   * [What is OpenHackathon](#what-is-openhackathon)
   * [Why OpenHackathon](#why-openhackathon)
- 
 * [Keywords and interpretation](#keywords-and-interpretation)
 * [User's Guide](#user's-guide)
   * [Implementation and Architecture](#implementation-and-architecture-for-user)
@@ -52,12 +51,6 @@
 
 
 # Keywords and interpretation
-
-| Keywords        | Interpretation          |
-|:--------:|:-----------------------------------------------------------------------------:|
-| template  | as a description of the Docker container|
-| experiment | correspond with a Docker container|
-| team | every user must join in a team to participate in hackathon event|
 
 # User's-Guide
 ## Implementation and Architecture for User
@@ -118,12 +111,22 @@ src folders introduction:
 ## Try openhackathon quickly
     介绍如何用doker的一个image来run起一个openhackathon
 ## Setup develop environment
+To setup the whole OpenHackathon develop environment, you need those components:
+```
+Docker Service
+Guacamole
+MysqlDB
+Python third part lib
+```
 ### Setup Docker Env
-介绍下docker在OpenHackathon的作用         
-[Docker intsallation on Ubuntu](https://docs.docker.com/installation/ubuntulinux/)
+Docker service takes part in OpenHackathon Platform as a environment provider that will provide to all users. And docker service now is the most populer cloudservice, you could get more details on [docker official website](https://www.docker.com/)                         
+
+In OpenHackathon develop evnironment you should install and setup docker service like this: [Docker intsallation on Ubuntu](https://docs.docker.com/installation/ubuntulinux/)                    
+
+In order to control and manage docker service from OpenHackathon conveniently , we'd better to enable docker's `remote API`. Fllow this steps after installation of docker service,[enable docker remote API](http://blog.trifork.com/2013/12/24/docker-from-a-distance-the-remote-api/)
     
 ### Setup Guacamole Env
-Guacamole is used as a remote client to connect to running environments , SSH RDP VNC are all provided. [Guacamole](http://guac-dev.org/) can give you more details.        
+Having got many environments we need to find a way to connect them for users, as you know that we choose Guacamole!Guacamole works as a remote client connecting to running environments, which provides SSH, RDP and VNC protocols. So we can cope with environments of all kinds of hackathons [Guacamole](http://guac-dev.org/) can give you more details.        
                  
 [Guacamole installation](http://guac-dev.org/doc/gug/installing-guacamole.html)
 
