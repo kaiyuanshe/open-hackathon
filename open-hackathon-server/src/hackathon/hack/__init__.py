@@ -28,14 +28,12 @@ import sys
 
 sys.path.append("..")
 from hackathon.database.models import Hackathon, User, UserHackathonRel, AdminHackathonRel, DockerHostServer, Template
-from hackathon.enum import RGStatus, VEProvider
 from hackathon.hackathon_response import internal_server_error, bad_request, ok
-from hackathon.enum import ADMIN_ROLE_TYPE, HACK_STATUS
 from sqlalchemy import or_
-from hackathon.constants import HTTP_HEADER
 import json
-from hackathon.constants import HACKATHON_BASIC_INFO
-from hackathon import RequiredFeature, Component
+from hackathon.constants import HACKATHON_BASIC_INFO, ADMIN_ROLE_TYPE, HACK_STATUS, RGStatus, VE_PROVIDER, HTTP_HEADER, \
+    FILE_TYPE
+from hackathon import RequiredFeature, Component, Context
 from flask import g, request
 import imghdr
 import uuid
@@ -149,7 +147,8 @@ class HackathonManager(Component):
             return value
         except Exception as e:
             self.log.error(e)
-            self.log.warn("cannot get %s from basic info for hackathon %d, will return default value" % (key, hackathon.id))
+            self.log.warn(
+                "cannot get %s from basic info for hackathon %d, will return default value" % (key, hackathon.id))
             return default
 
     def validate_admin_privilege_http(self):
@@ -250,7 +249,7 @@ class HackathonManager(Component):
             template_dir = dirname(dirname(realpath(__file__))) + '/resources'
             template_url = template_dir + os.path.sep + "kaiyuanshe-ut.js"
             template = Template(name="ut", url=template_url,
-                                provider=VEProvider.Docker,
+                                provider=VE_PROVIDER.DOCKER,
                                 status=1,
                                 virtual_environment_count=1,
                                 description="<ul><li>Ubuntu</li><li>SSH</li><li>LAMP</li></ul>",
@@ -364,23 +363,42 @@ class HackathonManager(Component):
 
         image_container_name = self.util.safe_get_config("storage.image_container", "images")
         images = []
-
+        storage = RequiredFeature("storage")
         for file_name in request.files:
             file = request.files[file_name]
-            real_name = self.generate_file_name(file)
-            self.log.debug("upload image file : " + real_name)
+            self.log.debug("upload image file : " + file_name)
+            context = Context(
+                hackathon_name=g.hackathon.name,
+                file_name=file.filename,
+                file_type=FILE_TYPE.HACK_IMAGE,
+                content=file
+            )
+            context = storage.save(context)
 
-            url = self.file_service.upload_file_to_azure(file, image_container_name, real_name)
-            if url is not None:
-                image = {}
-                image['name'] = file.filename
-                image['url'] = url
-                # frontUI components needed return values
-                image['thumbnailUrl'] = url
-                image['deleteUrl'] = '/api/file?key=' + real_name
-                images.append(image)
-            else:
-                return internal_server_error("upload file failed")
+            image = {}
+            image['name'] = file.filename
+            image['url'] = context.url
+            image['thumbnailUrl'] = context.url
+            # context.file_name is a random name created by server, file.filename is the original name
+            image['deleteUrl'] = '/api/admin/file?key=' + context.file_name
+            images.append(image)
+
+        # for file_name in request.files:
+        # file = request.files[file_name]
+        # real_name = self.generate_file_name(file)
+        #     self.log.debug("upload image file : " + real_name)
+        #
+        #     url = self.file_service.upload_file_to_azure(file, image_container_name, real_name)
+        #     if url is not None:
+        #         image = {}
+        #         image['name'] = file.filename
+        #         image['url'] = url
+        #         # frontUI components needed return values
+        #         image['thumbnailUrl'] = url
+        #         image['deleteUrl'] = '/api/file?key=' + real_name
+        #         images.append(image)
+        #     else:
+        #         return internal_server_error("upload file failed")
 
         return {"files": images}
 

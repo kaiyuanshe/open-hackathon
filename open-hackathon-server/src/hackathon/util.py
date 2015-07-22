@@ -71,9 +71,10 @@ def get_config(key):
 def safe_get_config(key, default_value):
     """Get configured value from configuration file according to specified key and a default value
 
-    :type key: str or unicode
+    :type key: str | unicode
     :param key: the search key, separate section with '.'. For example: "mysql.connection"
-    :type default_value: str or unicode or dict
+
+    :type default_value: object
     :param default_value: the default value if specified key cannot be found in configuration file
 
     :Example:
