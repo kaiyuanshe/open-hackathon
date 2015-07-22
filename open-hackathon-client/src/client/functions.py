@@ -27,11 +27,11 @@
 import json, os, requests, urllib2
 from datetime import datetime
 from pytz import utc
+
 try:
     from config import Config
 except ImportError:
     from config_sample import Config
-
 
 
 def convert(input):
@@ -112,7 +112,9 @@ def delete_remote(url, headers=None):
     request = urllib2.Request(url, headers=default_headers)
     request.get_method = lambda: 'DELETE'
     opener.open(request)
+    
     return "OK"
 
+
 def get_now():
-    return datetime.utcnow()   #tzinfo=None
+    return datetime.utcnow()  # tzinfo=None

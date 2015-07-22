@@ -34,7 +34,7 @@ from datetime import datetime
 from client.functions import get_now
 import json
 from pytz import utc
-from dateutil import parser
+
 
 
 def relationship(*arg, **kw):
