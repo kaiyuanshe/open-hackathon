@@ -89,6 +89,7 @@ class HackathonStatResource(Resource):
 
 
 class HackathonUserTemplateResource(Resource, Component):
+    @token_required
     @hackathon_name_required
     def get(self):
         return template_manager.get_user_templates(g.user, g.hackathon)
