@@ -45,7 +45,7 @@ class OAUTH_PROVIDER:
     LIVE = "live"
 
 
-class HEALTH_STATE:
+class HEALTH_STATUS:
     """The running state of open-hackathon server
 
     Attributes:
@@ -56,6 +56,13 @@ class HEALTH_STATE:
     OK = "ok"
     WARNING = "warning"
     ERROR = "error"
+
+
+class HEALTH:
+    """Constants for health check"""
+    STATUS = "status"
+    DESCRIPTION = "description"
+    VERSION = "version"
 
 
 class HACKATHON_BASIC_INFO:
@@ -282,3 +289,12 @@ class HACK_TYPE:
     """
     PROPOSITION = 1
     OPEN = 2
+
+
+class FILE_TYPE:
+    """Type of file to be saved into storage
+
+    File of different types may saved in different position
+    """
+    TEMPLATE = "template"
+    HACK_IMAGE = "hack_image"

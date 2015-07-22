@@ -31,8 +31,9 @@ from hackathon.database.models import Hackathon, User, UserHackathonRel, AdminHa
 from hackathon.hackathon_response import internal_server_error, bad_request, ok
 from sqlalchemy import or_
 import json
-from hackathon.constants import HACKATHON_BASIC_INFO, ADMIN_ROLE_TYPE, HACK_STATUS, RGStatus, VE_PROVIDER, HTTP_HEADER
-from hackathon import RequiredFeature, Component
+from hackathon.constants import HACKATHON_BASIC_INFO, ADMIN_ROLE_TYPE, HACK_STATUS, RGStatus, VE_PROVIDER, HTTP_HEADER, \
+    FILE_TYPE
+from hackathon import RequiredFeature, Component, Context
 from flask import g, request
 import imghdr
 import uuid
@@ -362,23 +363,42 @@ class HackathonManager(Component):
 
         image_container_name = self.util.safe_get_config("storage.image_container", "images")
         images = []
-
+        storage = RequiredFeature("storage")
         for file_name in request.files:
             file = request.files[file_name]
-            real_name = self.generate_file_name(file)
-            self.log.debug("upload image file : " + real_name)
+            self.log.debug("upload image file : " + file_name)
+            context = Context(
+                hackathon_name=g.hackathon.name,
+                file_name=file.filename,
+                file_type=FILE_TYPE.HACK_IMAGE,
+                content=file
+            )
+            context = storage.save(context)
 
-            url = self.file_service.upload_file_to_azure(file, image_container_name, real_name)
-            if url is not None:
-                image = {}
-                image['name'] = file.filename
-                image['url'] = url
-                # frontUI components needed return values
-                image['thumbnailUrl'] = url
-                image['deleteUrl'] = '/api/file?key=' + real_name
-                images.append(image)
-            else:
-                return internal_server_error("upload file failed")
+            image = {}
+            image['name'] = file.filename
+            image['url'] = context.url
+            image['thumbnailUrl'] = context.url
+            # context.file_name is a random name created by server, file.filename is the original name
+            image['deleteUrl'] = '/api/admin/file?key=' + context.file_name
+            images.append(image)
+
+        # for file_name in request.files:
+        # file = request.files[file_name]
+        # real_name = self.generate_file_name(file)
+        #     self.log.debug("upload image file : " + real_name)
+        #
+        #     url = self.file_service.upload_file_to_azure(file, image_container_name, real_name)
+        #     if url is not None:
+        #         image = {}
+        #         image['name'] = file.filename
+        #         image['url'] = url
+        #         # frontUI components needed return values
+        #         image['thumbnailUrl'] = url
+        #         image['deleteUrl'] = '/api/file?key=' + real_name
+        #         images.append(image)
+        #     else:
+        #         return internal_server_error("upload file failed")
 
         return {"files": images}
 

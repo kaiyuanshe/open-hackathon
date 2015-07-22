@@ -26,14 +26,18 @@ import sys
 
 sys.path.append("..")
 import requests
+import json
+from datetime import datetime, timedelta
+
 from docker_formation_base import (
     DockerFormationBase
 )
 from hackathon.constants import (
-    HEALTH_STATE,
+    HEALTH_STATUS,
     VE_PROVIDER,
     VEStatus,
     EStatus,
+    HEALTH,
 )
 from hackathon.database.models import VirtualEnvironment
 from hackathon.hackathon_exception import (
@@ -43,8 +47,6 @@ from hackathon.template.docker_template_unit import (
     DockerTemplateUnit
 )
 from hackathon import Component, RequiredFeature, Context
-import json
-from datetime import datetime, timedelta
 
 
 class ALAUDA:
@@ -89,18 +91,18 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
         virtual_environment = kwargs["virtual_environment"]
         self.__delete_service(virtual_environment.name)
 
-    def health(self):
+    def report_health(self):
         """send a ping for health check"""
         try:
             self.__get("/v1/auth/profile/")
             return {
-                "status": HEALTH_STATE.OK
+                HEALTH.STATUS: HEALTH_STATUS.OK
             }
         except Exception as e:
             self.log.error(e)
             return {
-                "status": HEALTH_STATE.ERROR,
-                "description": "request alauda failed"
+                HEALTH.STATUS: HEALTH_STATUS.ERROR,
+                HEALTH.DESCRIPTION: "request alauda failed"
             }
 
     # --------------------------------------private function--------------------------#

@@ -44,6 +44,7 @@ from hackathon.constants import (
     EStatus,
     PortBindingType,
     VEStatus,
+    HEALTH,
 )
 from compiler.ast import (
     flatten,
@@ -67,12 +68,11 @@ from hackathon.hackathon_response import (
     internal_server_error
 )
 from hackathon.constants import (
-    HEALTH_STATE,
+    HEALTH_STATUS,
 )
 import json
 import requests
 from datetime import timedelta
-
 
 
 class HostedDockerFormation(DockerFormationBase, Component):
@@ -91,10 +91,11 @@ class HostedDockerFormation(DockerFormationBase, Component):
     def __init__(self):
         self.lock = Lock()
 
-    def health(self):
-        """
-        Ping docker service in docker host
-        :return:
+    def report_health(self):
+        """Report health of DockerHostServers
+
+        :rtype: dict
+        :return health status item of docker. OK when all servers running, Warning if some of them working, Error if no server running
         """
         try:
             hosts = self.db.find_all_objects(DockerHostServer)
@@ -104,22 +105,22 @@ class HostedDockerFormation(DockerFormationBase, Component):
                     alive += 1
             if alive == len(hosts):
                 return {
-                    "status": HEALTH_STATE.OK
+                    HEALTH.STATUS: HEALTH_STATUS.OK
                 }
             elif alive > 0:
                 return {
-                    "status": HEALTH_STATE.WARNING,
-                    "description": 'at least one docker host servers are down'
+                    HEALTH.STATUS: HEALTH_STATUS.WARNING,
+                    HEALTH.DESCRIPTION: 'at least one docker host servers are down'
                 }
             else:
                 return {
-                    "status": HEALTH_STATE.ERROR,
-                    "description": 'all docker host servers are down'
+                    HEALTH.STATUS: HEALTH_STATUS.ERROR,
+                    HEALTH.DESCRIPTION: 'all docker host servers are down'
                 }
         except Exception as e:
             return {
-                "status": HEALTH_STATE.ERROR,
-                "description": e.message
+                HEALTH.STATUS: HEALTH_STATUS.ERROR,
+                HEALTH.DESCRIPTION: e.message
             }
 
     def get_available_host_port(self, docker_host, private_port):

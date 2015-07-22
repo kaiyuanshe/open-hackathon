@@ -35,6 +35,8 @@ from datetime import timedelta
 from util import safe_get_config, get_class, Utility
 from hackathon_factory import factory, RequiredFeature
 from hackathon_scheduler import HackathonScheduler
+from hackathon_response import internal_server_error, bad_request
+from log import log
 
 
 # initialize flask and flask restful
@@ -49,6 +51,18 @@ cors = CORS(app)
 
 # initialize hackathon scheduler
 scheduler = HackathonScheduler(app)
+
+
+@app.errorhandler(400)
+def bad_request_handler(error):
+    log.error(error)
+    return bad_request(error.message)
+
+
+@app.errorhandler(Exception)
+def exception_handler(error):
+    log.error(error)
+    return internal_server_error(error.message)
 
 
 class Component(object):
@@ -84,9 +98,11 @@ class Context(object):
     def __repr__(self):
         return repr(self.props)
 
+    def __contains__(self, key):
+        return key in self.props
+
 
 def init_components():
-    from hackathon.log import log
     from hackathon.database import db_session
     from hackathon.database.db_adapters import SQLAlchemyAdapter
     from hackathon.user.user_mgr import UserManager
@@ -122,14 +138,27 @@ def init_components():
     factory.provide("team_manager", TeamManager)
     factory.provide("guacamole", GuacamoleInfo)
 
-    factory.provide("mysql_health_check", get_class("hackathon.health.health_check.MySQLHealthCheck"))
-    factory.provide("docker_health_check", get_class("hackathon.health.health_check.DockerHealthCheck"))
-    factory.provide("guacamole_health_check", get_class("hackathon.health.health_check.GuacamoleHealthCheck"))
-    factory.provide("azure_health_check", get_class("hackathon.health.health_check.AzureHealthCheck"))
+    factory.provide("health_check_mysql", get_class("hackathon.health.health_check.MySQLHealthCheck"))
+    factory.provide("health_check_hosted_docker", get_class("hackathon.health.health_check.HostedDockerHealthCheck"))
+    factory.provide("health_check_alauda_docker", get_class("hackathon.health.health_check.AlaudaDockerHealthCheck"))
+    factory.provide("health_check_guacamole", get_class("hackathon.health.health_check.GuacamoleHealthCheck"))
+    factory.provide("health_check_azure", get_class("hackathon.health.health_check.AzureHealthCheck"))
 
     factory.provide("docker", get_class("hackathon.docker.docker_helper.DockerHelper"))
     factory.provide("hosted_docker", get_class("hackathon.docker.hosted_docker.HostedDockerFormation"))
     factory.provide("alauda_docker", get_class("hackathon.docker.alauda_docker.AlaudaDockerFormation"))
+
+    init_hackathon_storage()
+
+
+def init_hackathon_storage():
+    from hackathon.storage import AzureStorage, LocalStorage
+
+    storage_type = safe_get_config("storage.type", "local")
+    if storage_type == "azure":
+        factory.provide("storage", AzureStorage)
+    else:
+        factory.provide("storage", LocalStorage)
 
 
 def init_schedule_jobs():

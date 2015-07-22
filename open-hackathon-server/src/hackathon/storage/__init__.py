@@ -23,28 +23,5 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-import abc
-
-
-class DockerFormationBase(object):
-    __metaclass__ = abc.ABCMeta
-
-    @abc.abstractmethod
-    def start(self, unit, **kwargs):
-        """start a docker container"""
-        return
-
-    @abc.abstractmethod
-    def stop(self, name, **kwargs):
-        """stop a docker container"""
-        return
-
-    @abc.abstractmethod
-    def delete(self, name, **kwargs):
-        """delete a docker container"""
-        return
-
-    @abc.abstractmethod
-    def report_health(self):
-        """report health status"""
-        return
+from local_storage import LocalStorage
+from azure_storage import AzureStorage

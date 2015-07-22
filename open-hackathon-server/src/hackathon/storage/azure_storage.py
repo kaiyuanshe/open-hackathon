@@ -22,29 +22,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
+from storage import Storage
 
-import abc
+__all__ = ["AzureStorage"]
 
 
-class DockerFormationBase(object):
-    __metaclass__ = abc.ABCMeta
+class AzureStorage(Storage):
+    """Hackathon file storage that saves all templates on MS azure"""
 
-    @abc.abstractmethod
-    def start(self, unit, **kwargs):
-        """start a docker container"""
-        return
-
-    @abc.abstractmethod
-    def stop(self, name, **kwargs):
-        """stop a docker container"""
-        return
-
-    @abc.abstractmethod
-    def delete(self, name, **kwargs):
-        """delete a docker container"""
-        return
-
-    @abc.abstractmethod
-    def report_health(self):
-        """report health status"""
+    def __init__(self):
         return

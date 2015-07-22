@@ -211,7 +211,7 @@ class HackathonFileResource(Resource):
         return hackathon_manager.upload_files()
 
     def delete(self):
-        # TODO call azure blobservice api to delete file
+        # TODO call storage api to delete file
         return True
 
 
