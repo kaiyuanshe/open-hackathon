@@ -154,7 +154,7 @@ First you need to install the components of Mysql and Python libs:
 sudo apt-get install build-essential python python-dev python-setuptools libmysqlclient-dev
 sudo apt-get install mysql-server
 ```
-Then change the ``my.conf` of mysql
+Then change the `my.conf` of mysql like this:
 ```
 [client]
 default-character-set=utf8
@@ -170,8 +170,11 @@ create database hackathon;
 create User 'hackathon'@'localhost' IDENTIFIED by 'hackathon';
 GRANT ALL on hackathon.* TO 'hackathon'@'localhost';
 ```
-Finally please remember match your `config.py` options on mysql configuration
-
+Please remember match your `config.py` options on mysql configuration , finally execute the `setup_db.py` withn command or other ways , like this:
+```
+sudo python open-hackathon/open-hackathon-server/src/setup_db.py
+```
+Now , you can write and design you own OpenHackathon freely !
 
 ### Setup Python Env
 Find out the `requirement.txt` both in `open-hackathon-server` and `open-hackathon-client` in src folders, all dependencies are recorded in , we could install them through a simply command :   
