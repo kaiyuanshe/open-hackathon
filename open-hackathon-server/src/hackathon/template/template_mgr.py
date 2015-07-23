@@ -66,7 +66,7 @@ from hackathon import (
     RequiredFeature,
     Context
 )
-from flask import g
+from flask import g, request
 from sqlalchemy import (
     and_
 )
@@ -117,6 +117,37 @@ class TemplateManager(Component):
         return settings
 
     def create_template(self, args):
+        # create template step 1 : args validate
+        status, return_info = self.__check_create_args(args)
+        if not status:
+            return return_info
+        # create template step 2 : parse args and trans to file
+        context = self.__save_template(args)
+        if not context:
+            return internal_server_error("save tempplate failed")
+        # create template step 3 : upload template file to Azure
+        # todo azure storage
+        # azure_url = self.__upload_template_to_azure(url, file_name)
+        # if azure_url is None:
+        # return internal_server_error("upload template file failed")
+        # create template step 4 : insert into DB
+        self.log.debug("create template: %r" % args)
+        self.db.add_object_kwargs(Template,
+                                  name=args[BaseTemplate.TEMPLATE_NAME],
+                                  url=context.url,
+                                  local_path=context.physical_path,
+                                  provider=args[BaseTemplate.VIRTUAL_ENVIRONMENTS_PROVIDER],
+                                  creator_id=g.user.id,
+                                  status=TEMPLATE_STATUS.UNCHECKED,
+                                  create_time=self.util.get_now(),
+                                  update_time=self.util.get_now(),
+                                  description=args[BaseTemplate.DESCRIPTION],
+                                  virtual_environment_count=len(args[BaseTemplate.VIRTUAL_ENVIRONMENTS]))
+        return ok("create template success")
+
+    def create_template_by_file(self, args):
+        file = request.file
+
         # create template step 1 : args validate
         status, return_info = self.__check_create_args(args)
         if not status:

@@ -145,6 +145,15 @@ class TemplateResource(Resource):
         return template_manager.delete_template(args['id'])
 
 
+class TemplateCreateByFileResource(Resource):
+    # create template by file
+    @token_required
+    def post(self):
+        args = request.get_json()
+        return template_manager.create_template(args)
+
+
+
 class TemplateListResource(Resource):
     def get(self):
         parse = reqparse.RequestParser()
@@ -191,5 +200,6 @@ def register_routes():
 
     # template API
     api.add_resource(TemplateResource, "/api/template")
+    api.add_resource(TemplateCreateByFileResource, "/api/template/createbyfile")
     api.add_resource(TemplateListResource, "/api/template/list")
     api.add_resource(HackathonTemplateListResource, "/api/admin/hackathon/template/list")
