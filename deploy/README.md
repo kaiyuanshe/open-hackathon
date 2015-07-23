@@ -11,7 +11,7 @@
 * [User's Guide](#user's-guide)
   * [Implementation and Architecture](#implementation-and-architecture-for-user)
   * [attend hackathons](#how-to-attend-a-hackathon)
-  * [Contribute your Template](#upload-template)
+  * [Contribute your Template](#contribute-your-template)
   * [FAQ](#FAQ)
 * [Admin's Guid](#admin's-guide)
   * [Implementation and Architecture](#implementation-and-architecture-for-admin)
@@ -59,7 +59,7 @@
 ### keys 
 ## How to attend a hackathon
 报名，组队，参赛，提交评审等介绍，以及主干流程的截图
-## Upload Template
+## Contribute your Template
 Templat 上传过程及用户对自己上传的Template的管理操作
 
 
@@ -103,9 +103,8 @@ src folders introduction:
 **open-hackathon-server**: backend api server project src              
 **openhackathon-guacamole-auth-provider**: guacamole auth provider java project src                 
 **tools/docker-enter**: tool to quickly connect to a running docker container through container id             
-                  
-                   
- Use Flask to build the whole project.[Flask Introduction](http://flask.pocoo.org/docs/0.10/)
+src framework intriduction：                    
+Use `Flask` to build the whole project.[Flask Introduction](http://flask.pocoo.org/docs/0.10/)
  
  
  
@@ -113,12 +112,12 @@ src folders introduction:
     介绍如何用doker的一个image来run起一个openhackathon
 ## Setup develop environment
 To setup the whole OpenHackathon develop environment, you need those components:
-```
-Docker Service
-Guacamole
-MysqlDB
-Python third part lib
-```
+
+**Docker Service**
+**Guacamole**
+**MysqlDB**
+**Python third part lib**
+
 ### Setup Docker Env
 Docker service takes part in OpenHackathon Platform as a environment provider that will provide to all users. And docker service now is the most populer cloudservice, you could get more details on [docker official website](https://www.docker.com/)                         
 
