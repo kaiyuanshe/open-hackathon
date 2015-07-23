@@ -39,8 +39,8 @@ import re
 from datetime import datetime
 from client.constants import LOGIN_PROVIDER
 from flask_login import login_required, current_user, login_user, LoginManager
-from client.admin.login import login_providers
-from client.admin.admin_mgr import admin_manager
+from client.user.login import login_providers
+from client.user.user_mgr import user_manager
 from flask import Response, render_template, request, g, redirect, make_response, session
 from datetime import timedelta
 from client.functions import get_config
@@ -149,7 +149,7 @@ def toDatetime(datelong, fmt=None):
 
 @login_manager.user_loader
 def load_user(id):
-    return admin_manager.get_admin_by_id(id)
+    return user_manager.get_user_by_id(id)
 
 
 @app.before_request
@@ -238,6 +238,7 @@ def hackathon(hackathon_name):
         return render("/404.html")
     else:
         return render("/site/hackathon.html", hackathon=item)
+
 
 @app.route("/site/<hackathon_name>/workspace")
 @login_required

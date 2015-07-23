@@ -105,7 +105,7 @@ class Context(object):
 def init_components():
     from hackathon.database import db_session
     from hackathon.database.db_adapters import SQLAlchemyAdapter
-    from hackathon.user.user_mgr import UserManager
+    from hackathon.user import UserManager
     from hackathon.azureformation.fileService import FileService
     from hackathon.azureformation.azureCertManagement import AzureCertManagement
     from hackathon.hack.host_server_mgr import DockerHostManager
