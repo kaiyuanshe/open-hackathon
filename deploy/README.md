@@ -98,11 +98,11 @@ Hackathon will provider a runnable environment to every player , naturally the h
 OpenHackathon is separated into two pieces: open-hackathon server, which provides the openhackathon proxy and related libraries, and open-hackathon client, which provides the website client to users            
 
 src folders introduction:        
-`deploy`: all components for deployment               
-`open-hackathon-client`: frontend web project src               
-`open-hackathon-server`: backend api server project src              
-`openhackathon-guacamole-auth-provider`: guacamole auth provider java project src                 
-`tools/docker-enter`: tool to quickly connect to a running docker container through container id             
+**deploy**: all components for deployment               
+**open-hackathon-client**: frontend web project src               
+**open-hackathon-server**: backend api server project src              
+**openhackathon-guacamole-auth-provider**: guacamole auth provider java project src                 
+**tools/docker-enter**: tool to quickly connect to a running docker container through container id             
                   
                    
  Use Flask to build the whole project.[Flask Introduction](http://flask.pocoo.org/docs/0.10/)
@@ -182,6 +182,12 @@ sudo pip install -r open-hackathon-client/requirement.txt
 
 Then copy a file `config.py` from `config_sample.py`, and modify it as needed. Below is the instruction:
 
+##Config file
+| Item      |    Value | Qty  |
+|:---------:|:--------:| :-----------------------|
+| Computer  | 1600 USD |  5   |
+| Phone     |   12 USD |  12  |
+| Pipe      |    1 USD | 234  |
 
 ## customize
     如何自定义，
