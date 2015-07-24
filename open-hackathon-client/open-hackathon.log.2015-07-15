@@ -1,0 +1,6 @@
+2015-07-15 17:14:48,324 - INFO - login from GitHub
+2015-07-15 17:14:49,570 - DEBUG - get token from github:access_token=43fb944f71d672cf5aeb8f3132cf7b625fe422a6&scope=user&token_type=bearer
+2015-07-15 17:14:49,570 - DEBUG - get token info from github
+2015-07-15 17:14:52,189 - DEBUG - get email from github:[{"email":"t-guzho@microsoft.com","primary":true,"verified":true}]
+
+2015-07-15 17:14:52,549 - INFO - login successfully:{'admin': User: {"openid": "10803697", "name": "xunxunzgq", "access_token": "43fb944f71d672cf5aeb8f3132cf7b625fe422a6", "online": 1, "avatar_url": "https://avatars.githubusercontent.com/u/10803697?v=3", "create_time": 1436951397000, "provider": "github", "password": null, "nickname": "xunxunzgq", "id": 2, "last_login_time": 1436951397000}, 'token': UserToken: {"token": "f36a1c66-2ad1-11e5-a3d7-08002752ccd7", "expire_date": 1437038092000, "user_id": 2, "id": 1, "issue_date": 1436951692000}}
