@@ -516,7 +516,7 @@ class ExprManager(Component):
 
     def __get_containers_by_exper(self, expr):
         """get experiment's all containers which are based on hosted_docker
-
+d
         :type  expr: Experiment
         :param expr: which to get containers from
 
@@ -525,3 +525,7 @@ class ExprManager(Component):
         """
         ves = self.db.find_all_objects_by(VirtualEnvironment, experiment_id=expr.id, provider=VE_PROVIDER.DOCKER)
         return map(lambda x: x.container, ves)
+
+    def __recycle_expr(self, expr):
+
+        return

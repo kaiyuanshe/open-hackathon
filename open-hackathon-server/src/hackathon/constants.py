@@ -95,6 +95,7 @@ class HACKATHON_BASIC_INFO:
     WALL_TIME = "wall_time"
     AUTO_APPROVE = "auto_approve"
     RECYCLE_ENABLED = "recycle_enabled"
+    RECYCLE_TIME = "recycle_time"  # minutes
     PRE_ALLOCATE_ENABLED = "pre_allocate_enabled"
     PRE_ALLOCATE_NUMBER = "pre_allocate_number"
     ALAUDA_ENABLED = "alauda_enabled"

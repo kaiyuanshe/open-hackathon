@@ -189,9 +189,13 @@ class HackathonManager(Component):
                 "cannot load pre_allocate_enabled from basic info for hackathon %d, will return False" % hackathon.id)
             return False
 
-
     def is_alauda_enabled(self, hackathon):
         key = HACKATHON_BASIC_INFO.ALAUDA_ENABLED
+        value = self.__get_property_from_hackathon_basic_info(hackathon, key)
+        return value if value is not None else False
+
+    def is_recycle_enabled(self,hackathon):
+        key = HACKATHON_BASIC_INFO.RECYCLE_ENABLED
         value = self.__get_property_from_hackathon_basic_info(hackathon, key)
         return value if value is not None else False
 
@@ -199,6 +203,11 @@ class HackathonManager(Component):
         key = HACKATHON_BASIC_INFO.PRE_ALLOCATE_NUMBER
         value = self.__get_property_from_hackathon_basic_info(hackathon, key)
         return value if value is not None else 1
+
+    def get_recycle_time(self, hackathon):
+        key = HACKATHON_BASIC_INFO.RECYCLE_TIME
+        value = self.__get_property_from_hackathon_basic_info(hackathon, key)
+        return value if value is not None else 0
 
     def validate_created_args(self, args):
         self.log.debug("create_or_update_hackathon: %r" % args)
@@ -221,9 +230,13 @@ class HackathonManager(Component):
             HACKATHON_BASIC_INFO.WALL_TIME: time.strftime("%Y-%m-%d %H:%M:%S"),
             HACKATHON_BASIC_INFO.AUTO_APPROVE: False,
             HACKATHON_BASIC_INFO.RECYCLE_ENABLED: False,
+            HACKATHON_BASIC_INFO.RECYCLE_TIME: 0,   # minutes
             HACKATHON_BASIC_INFO.PRE_ALLOCATE_ENABLED: False,
             HACKATHON_BASIC_INFO.PRE_ALLOCATE_NUMBER: 1,
             HACKATHON_BASIC_INFO.ALAUDA_ENABLED: False
+
+
+
         }
         args[self.BASIC_INFO] = json.dumps(default_base_info)
         return True, args
@@ -293,7 +306,6 @@ class HackathonManager(Component):
             self.log.error(e)
             return internal_server_error("fail to create hackathon")
 
-
     def update_hackathon(self, args):
         self.log.debug("update a exist hackathon insert args: %r" % args)
         if "name" not in args or "id" not in args:
@@ -314,7 +326,6 @@ class HackathonManager(Component):
             self.log.error(e)
             return internal_server_error("fail to update hackathon")
 
-
     def parse_update_items(self, args, hackathon):
         result = {}
 
@@ -332,7 +343,6 @@ class HackathonManager(Component):
         result['update_time'] = self.util.get_now()
         return result
 
-
     def validate_args(self):
         # check size
         if request.content_length > len(request.files) * self.util.get_config("storage.size_limit_kilo_bytes") * 1024:
@@ -346,7 +356,6 @@ class HackathonManager(Component):
 
         return True, "passed"
 
-
     def generate_file_name(self, file):
         # refresh file_name = hack_name + uuid(10) + time + suffix
         suffix = file.filename.split('.')[1]
@@ -354,7 +363,6 @@ class HackathonManager(Component):
                     str(uuid.uuid1())[0:9] + \
                     time.strftime("%Y%m%d%H%M%S") + "." + suffix
         return real_name
-
 
     def upload_files(self):
         status, return_info = self.validate_args()
@@ -402,12 +410,10 @@ class HackathonManager(Component):
 
         return {"files": images}
 
-
     def get_recyclable_hackathon_list(self):
         all = self.db.find_all_objects(Hackathon)
         recyclable = filter(lambda h: self.__is_recycle_enabled(h), all)
         return [h.id for h in recyclable]
-
 
     def get_pre_allocate_enabled_hackathon_list(self):
         # only online hackathons will be in consideration
