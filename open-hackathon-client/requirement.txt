@@ -9,3 +9,4 @@ flask-login
 requests
 mock==1.0.1
 pytz
+markdown

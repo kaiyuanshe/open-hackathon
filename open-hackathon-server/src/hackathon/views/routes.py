@@ -41,6 +41,7 @@ hackathon_manager = RequiredFeature("hackathon_manager")
 user_manager = RequiredFeature("user_manager")
 register_manager = RequiredFeature("register_manager")
 template_manager = RequiredFeature("template_manager")
+team_manager = RequiredFeature("team_manager")
 
 
 class HealthResource(Resource):
@@ -89,6 +90,7 @@ class HackathonStatResource(Resource):
 
 
 class HackathonUserTemplateResource(Resource, Component):
+    @token_required
     @hackathon_name_required
     def get(self):
         return template_manager.get_user_templates(g.user, g.hackathon)
@@ -100,17 +102,7 @@ class HackathonRegisterResource(Resource):
         parse = reqparse.RequestParser()
         parse.add_argument('num', type=int, location='args', default=5)
         args = parse.parse_args()
-        return register_manager.get_hackathon_registration(args['num'])
-
-
-class GetTeamMembersByTeamNameResource(Resource):
-    @hackathon_name_required
-    def get(self):
-        hackathon_id = g.hackathon.id
-        parse = reqparse.RequestParser()
-        parse.add_argument('team_name', type=str, location='args', required=True)
-        args = parse.parse_args()
-        return user_manager.get_team_members_by_team_name(hackathon_id, args['team_name'])
+        return team_manager.get_hackathon_registration(args['num'])
 
 
 class HackathonTeamListResource(Resource):
@@ -121,7 +113,7 @@ class HackathonTeamListResource(Resource):
         parse.add_argument('number', type=int, location='args', required=False)
         result = parse.parse_args()
         id = g.hackathon.id
-        return register_manager.get_hackathon_team_list(id, result['name'], result['number'])
+        return team_manager.get_hackathon_team_list(id, result['name'], result['number'])
 
 
 class TemplateResource(Resource):
@@ -157,8 +149,12 @@ class TemplateListResource(Resource):
     def get(self):
         parse = reqparse.RequestParser()
         parse.add_argument('status', type=int, location='args')
+        parse.add_argument('name', type=str, location='args')
+        parse.add_argument('description', type=str, location='args')
         args = parse.parse_args()
-        templates = template_manager.get_template_list(args['status'])
+        templates = template_manager.get_template_list(status=args['status'],
+                                                       name=args['name'],
+                                                       description=args['description'])
         return map(lambda x: x.dic(), templates)
 
 class HackathonTemplateListResource(Resource):
@@ -166,7 +162,6 @@ class HackathonTemplateListResource(Resource):
     def get(self):
         templates = template_manager.get_templates_by_hackathon_id(g.hackathon.id)
         return map(lambda x: x.dic(), templates)
-
 
 def register_routes():
     """
@@ -190,7 +185,6 @@ def register_routes():
 
     # team API
     api.add_resource(HackathonTeamListResource, "/api/hackathon/team/list")
-    api.add_resource(GetTeamMembersByTeamNameResource, "/api/hackathon/team/member")
 
     # hackathon register api
     api.add_resource(HackathonRegisterResource, "/api/hackathon/registration/list")

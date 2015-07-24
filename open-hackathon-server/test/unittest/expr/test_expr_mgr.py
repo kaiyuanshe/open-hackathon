@@ -26,41 +26,28 @@
 
 import sys
 
-sys.path.append("..")
-from flask import (
-    request,
-)
-from hackathon.constants import (
-    VEStatus,
-    VERemoteProvider,
-)
-
-from hackathon.database.models import (
-    VirtualEnvironment,
-)
-import json
-from hackathon.hackathon_response import access_denied, not_found
-from hackathon import Component
-from flask import g
+sys.path.append("../src/hackathon")
+import datetime
+from hackathon.enum import RGStatus
+from hackathon.hack import HackathonManager
+from hackathon.hackathon_response import bad_request, precondition_failed, not_found, ok
+import unittest
+from hackathon.database.models import UserHackathonRel, Hackathon, Experiment
+from hackathon import app, RequiredFeature
+from mock import Mock, ANY, patch
+import mock
 
 
-class GuacamoleInfo(Component):
-    def getConnectInfo(self):
-        connection_name = request.args.get("name")
-        guacamole_config = self.db.find_first_object_by(VirtualEnvironment,
-                                                        name=connection_name,
-                                                        status=VEStatus.RUNNING,
-                                                        remote_provider=VERemoteProvider.Guacamole)
-        if guacamole_config is None:
-            return not_found("not_found")
+class TestExperimengManager(unittest.TestCase):
 
-        if guacamole_config.experiment.user_id != g.user.id:
-            return access_denied("forbidden")
+    def setUp(self):
+        app.config['TESTING'] = True
+        app.config['WTF_CSRF_ENABLED'] = False
 
-        self.log.debug("get guacamole config by id: %s, paras: %s" % (connection_name, guacamole_config.remote_paras))
-        return json.loads(guacamole_config.remote_paras)
-        # return {
-        # "displayname": "ubuntu", "hostname": "139.217.133.53",
-        # "name": "174-ubuntu", "password": "acowoman",
-        # "port": 10026, "protocol": "ssh", "username": "root"
-        # }
+    def tearDown(self):
+        pass
+
+    def test_get_expr_status(self):
+        expr_id = 11
+        expr_manager = RequiredFeature("expr_manager")
+        result = expr_manager.get_expr_status(expr_id)

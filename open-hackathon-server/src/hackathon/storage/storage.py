@@ -22,29 +22,63 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
+import sys
+
+sys.path.append("..")
 
 import abc
+import os
+import uuid
+import time
+
+from hackathon import Component
+
+__all__ = ["Storage"]
 
 
-class DockerFormationBase(object):
+class Storage(Component):
+    """Base for template storage"""
+
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
-    def start(self, unit, **kwargs):
-        """start a docker container"""
+    def save(self, context):
+        """Save a file to storage
+
+        :type context: Context
+        :param context: the execution context of file saving
+
+        :rtype context
+        :return the updated context which should including the full path of saved file
+        """
+
         return
 
     @abc.abstractmethod
-    def stop(self, name, **kwargs):
-        """stop a docker container"""
+    def load(self, context):
+        """Load file from storage
+
+        :type context: Context
+        :param context: the execution context of file loading
+
+        :rtype dict
+        :return the file content
+        """
         return
 
     @abc.abstractmethod
-    def delete(self, name, **kwargs):
-        """delete a docker container"""
+    def delete(self, context):
+        """Delete file from storage
+
+        :type context: Context
+        :param context: the execution context of file deleting
+
+        :rtype bool
+        :return True if successfully deleted else False
+        """
         return
 
     @abc.abstractmethod
     def report_health(self):
-        """report health status"""
+        """report health status of the storage"""
         return

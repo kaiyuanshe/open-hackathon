@@ -28,11 +28,11 @@ import sys
 
 sys.path.append("../src/hackathon")
 import datetime
-from hackathon.enum import RGStatus
+from hackathon.constants import RGStatus
 from hackathon.hack import HackathonManager
 from hackathon.hackathon_response import bad_request, precondition_failed, not_found, ok
 import unittest
-from hackathon.registration.register_mgr import RegisterManager, register_manager
+from hackathon.registration.register_mgr import RegisterManager
 from hackathon.database.models import UserHackathonRel, Hackathon, Experiment
 from hackathon import app
 from mock import Mock, ANY, patch
@@ -40,6 +40,8 @@ import mock
 
 
 class TestUserHackathonRelManager(unittest.TestCase):
+    register_manager = RegisterManager()
+    
     def setUp(self):
         app.config['TESTING'] = True
         app.config['WTF_CSRF_ENABLED'] = False
@@ -53,7 +55,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
     def test_get_UserHackathonRel_list_result_empty(self):
         db_adapter = Mock()
         db_adapter.find_all_objects_by.return_value = []
-        rm = RegisterManager(db_adapter)
+        rm = RegisterManager()
         with app.test_request_context('/'):
             self.assertEqual(rm.get_all_registration_by_hackathon_id(1), [])
 
@@ -72,7 +74,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
     def test_create_hackathon_lost_args(self):
         args = {"a": "b"}
         hackathon = 'test_hackathon'
-        self.assertEqual(register_manager.create_registration(hackathon, args), bad_request("user id invalid"))
+        self.assertEqual(self.register_manager.create_registration(hackathon, args), bad_request("user id invalid"))
 
 
     @patch.object(RegisterManager, 'get_registration_by_user_and_hackathon')
@@ -81,7 +83,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
         hackathon = Hackathon(id=1)
         register = UserHackathonRel(id=1, deleted=0)
         get_method.return_value = register
-        self.assertEqual(register_manager.create_registration(hackathon, args), register.dic())
+        self.assertEqual(self.register_manager.create_registration(hackathon, args), register.dic())
         get_method.assert_called_once_with(1, 1)
 
 
@@ -90,7 +92,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
         args = {'user_id': 1}
         hackathon = Hackathon(id=1, registration_start_time=self.get_now() + datetime.timedelta(seconds=30))
         get_method.retrun_value = None
-        self.assertEqual(register_manager.create_registration(hackathon, args),
+        self.assertEqual(self.register_manager.create_registration(hackathon, args),
                          precondition_failed("hackathon registration not opened", friendly_message="报名尚未开始"))
         get_method.assert_called_once_with(1, 1)
 
@@ -102,7 +104,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
         hackathon = Hackathon(id=1,
                               registration_start_time=self.get_now() - datetime.timedelta(seconds=30),
                               registration_end_time=self.get_now() - datetime.timedelta(seconds=30))
-        self.assertEqual(register_manager.create_registration(hackathon, args),
+        self.assertEqual(self.register_manager.create_registration(hackathon, args),
                          precondition_failed("hackathon registration has ended", friendly_message="报名已经结束"))
         get_method.assert_called_once_with(1, 1)
 
@@ -133,7 +135,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
     def test_update_register_not_found(self, get_method):
         args = {"id": 1}
         get_method.return_value = None
-        self.assertEqual(register_manager.update_registration(args), not_found("registration not found"))
+        self.assertEqual(self.register_manager.update_registration(args), not_found("registration not found"))
 
 
     @patch.object(RegisterManager, 'get_registration_by_id')
@@ -157,7 +159,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
 
     def test_delete_registration_lost_id(self):
         args = {'a': 'b'}
-        self.assertEqual(register_manager.delete_registration(args), bad_request("id not invalid"))
+        self.assertEqual(self.register_manager.delete_registration(args), bad_request("id not invalid"))
 
     def test_delete_registration_not_found(self):
         db_adapter = Mock()
@@ -187,7 +189,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
         hackathon = Hackathon(id=1)
         get_method.return_value = None
         detail = {'hackathon': hackathon.dic()}
-        self.assertEqual(register_manager.get_registration_detail(user_id, hackathon), detail)
+        self.assertEqual(self.register_manager.get_registration_detail(user_id, hackathon), detail)
         get_method.assert_called_once_with(1, 1)
 
 

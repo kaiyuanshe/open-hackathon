@@ -32,8 +32,8 @@ from hackathon.azureformation.utility import (
     add_endpoint_to_network_config,
     delete_endpoint_from_network_config,
 )
-from hackathon.enum import (
-    VIRTUAL_MACHINE,
+from hackathon.constants import (
+    AZURE_RESOURCE_TYPE,
     AVMStatus,
 )
 from hackathon import Component
@@ -93,7 +93,7 @@ class Endpoint(Component):
                                                      self.TICK,
                                                      self.LOOP,
                                                      AVMStatus.READY_ROLE):
-            self.log.error('%s [%s] not ready' % (VIRTUAL_MACHINE, virtual_machine_name))
+            self.log.error('%s [%s] not ready' % (AZURE_RESOURCE_TYPE.VIRTUAL_MACHINE, virtual_machine_name))
             return self.ERROR_RESULT
         return public_endpoints
 
@@ -132,6 +132,6 @@ class Endpoint(Component):
                                                      self.TICK,
                                                      self.LOOP,
                                                      AVMStatus.READY_ROLE):
-            self.log.error('%s [%s] not ready' % (VIRTUAL_MACHINE, virtual_machine_name))
+            self.log.error('%s [%s] not ready' % (AZURE_RESOURCE_TYPE.VIRTUAL_MACHINE, virtual_machine_name))
             return False
         return True

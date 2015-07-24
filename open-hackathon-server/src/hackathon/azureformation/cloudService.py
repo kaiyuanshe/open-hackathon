@@ -39,8 +39,8 @@ from hackathon.azureformation.utility import (
     run_job,
 )
 
-from hackathon.enum import (
-    CLOUD_SERVICE,
+from hackathon.constants import (
+    AZURE_RESOURCE_TYPE,
     ALOperation,
     ALStatus,
     ACSStatus,
@@ -81,13 +81,13 @@ class CloudService(ResourceBase):
         if not self.service.cloud_service_exists(name):
             # avoid name already taken by other azure subscription
             if not self.service.check_hosted_service_name_availability(name).result:
-                m = self.CREATE_CLOUD_SERVICE_ERROR[1] % (CLOUD_SERVICE, name)
+                m = self.CREATE_CLOUD_SERVICE_ERROR[1] % (AZURE_RESOURCE_TYPE.CLOUD_SERVICE, name)
                 commit_azure_log(experiment_id, ALOperation.CREATE_CLOUD_SERVICE, ALStatus.FAIL, m, 1)
                 self.log.error(m)
                 return False
             # avoid no available subscription remained
             if self.subscription.get_available_cloud_service_count() < self.NEED_COUNT:
-                m = self.CREATE_CLOUD_SERVICE_ERROR[2] % (CLOUD_SERVICE, name)
+                m = self.CREATE_CLOUD_SERVICE_ERROR[2] % (AZURE_RESOURCE_TYPE.CLOUD_SERVICE, name)
                 commit_azure_log(experiment_id, ALOperation.CREATE_CLOUD_SERVICE, ALStatus.FAIL, m, 2)
                 self.log.error(m)
                 return False
@@ -99,28 +99,28 @@ class CloudService(ResourceBase):
                                                    label=label,
                                                    location=location)
             except Exception as e:
-                m = self.CREATE_CLOUD_SERVICE_ERROR[0] % (CLOUD_SERVICE, name, e.message)
+                m = self.CREATE_CLOUD_SERVICE_ERROR[0] % (AZURE_RESOURCE_TYPE.CLOUD_SERVICE, name, e.message)
                 commit_azure_log(experiment_id, ALOperation.CREATE_CLOUD_SERVICE, ALStatus.FAIL, m, 0)
                 self.log.error(e)
                 return False
             # make sure cloud service is created
             if not self.service.cloud_service_exists(name):
-                m = self.CREATE_CLOUD_SERVICE_ERROR[3] % (CLOUD_SERVICE, name)
+                m = self.CREATE_CLOUD_SERVICE_ERROR[3] % (AZURE_RESOURCE_TYPE.CLOUD_SERVICE, name)
                 commit_azure_log(experiment_id, ALOperation.CREATE_CLOUD_SERVICE, ALStatus.FAIL, m, 3)
                 self.log.error(m)
                 return False
             else:
-                m = self.CREATE_CLOUD_SERVICE_INFO[0] % (CLOUD_SERVICE, name)
+                m = self.CREATE_CLOUD_SERVICE_INFO[0] % (AZURE_RESOURCE_TYPE.CLOUD_SERVICE, name)
                 commit_azure_cloud_service(name, label, location, ACSStatus.CREATED, experiment_id)
                 commit_azure_log(experiment_id, ALOperation.CREATE_CLOUD_SERVICE, ALStatus.END, m, 0)
                 self.log.debug(m)
         else:
             # check whether cloud service created by azure formation before
             if contain_azure_cloud_service(name):
-                m = self.CREATE_CLOUD_SERVICE_INFO[1] % (CLOUD_SERVICE, name, AZURE_FORMATION)
+                m = self.CREATE_CLOUD_SERVICE_INFO[1] % (AZURE_RESOURCE_TYPE.CLOUD_SERVICE, name, AZURE_FORMATION)
                 commit_azure_log(experiment_id, ALOperation.CREATE_CLOUD_SERVICE, ALStatus.END, m, 1)
             else:
-                m = self.CREATE_CLOUD_SERVICE_INFO[2] % (CLOUD_SERVICE, name, AZURE_FORMATION)
+                m = self.CREATE_CLOUD_SERVICE_INFO[2] % (AZURE_RESOURCE_TYPE.CLOUD_SERVICE, name, AZURE_FORMATION)
                 commit_azure_cloud_service(name, label, location, ACSStatus.CREATED, experiment_id)
                 commit_azure_log(experiment_id, ALOperation.CREATE_CLOUD_SERVICE, ALStatus.END, m, 2)
             self.log.debug(m)

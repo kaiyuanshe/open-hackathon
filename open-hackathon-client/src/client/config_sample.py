@@ -154,6 +154,40 @@ Config = {
                         "list": ["get"],
                         "check": ["get"]
                 },
+                 "user": {
+                    "": ["get"],
+                    "login": ["post", "delete"],
+                    "experiment": {
+                        "": ["get", "post", "delete", "put"],
+                        "list": ["get"]
+                    },
+                    "registration": {
+                        "": ["put", "post", "get"],
+                        "checkemail": ["get"],
+                        "list": ["get"]
+                    },
+                    "profile": {
+                        "": ["get", "post", "put"]
+                    },
+                    "team": {
+                        "member": ["get"]
+                    }
+                },
+                "bulletin": {
+                    "": ["get", "post"]
+                },
+                "hackathon": {
+                    "": ["get"],
+                    "list": ["get"],
+                    "stat": ["get"],
+                    "template": ["get"],
+                    "team": {
+                        "list": ["get"]
+                    },
+                    "registration": {
+                        "list": ["get"]
+                    }
+                }
             }
         }
     }

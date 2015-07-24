@@ -27,7 +27,7 @@ __author__ = 'Yifu Huang'
 import sys
 
 sys.path.append("..")
-from hackathon.enum import (
+from hackathon.constants import (
     ADStatus,
 )
 

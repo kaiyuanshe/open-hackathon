@@ -22,16 +22,3 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
-
-from user_routes import register_user_routes
-from admin_routes import register_admin_routes
-from routes import register_routes
-
-__all__ = ["init_routes"]
-
-
-def init_routes():
-    """Register RESTFul API routes"""
-    register_routes()
-    register_user_routes()
-    register_admin_routes()

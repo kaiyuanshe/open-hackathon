@@ -33,7 +33,7 @@ from hackathon.user.login import login_providers
 from hackathon.decorators import token_required, hackathon_name_required
 from hackathon.hackathon_response import internal_server_error, not_found, bad_request
 import json
-from hackathon.enum import RGStatus
+from hackathon.constants import RGStatus
 
 hackathon_manager = RequiredFeature("hackathon_manager")
 register_manager = RequiredFeature("register_manager")
@@ -150,7 +150,7 @@ class GetTeamMembersByUserResource(Resource):
     def get(self):
         hackathon_id = g.hackathon.id
         user_id = g.user.id
-        return user_manager.get_team_members_by_user(hackathon_id, user_id)
+        return team_manager.get_team_members_by_user(hackathon_id, user_id)
 
 
 class UserProfileResource(Resource):
@@ -193,13 +193,88 @@ class TeamTemplateResource(Resource):
         args = parse.parse_args()
         return team_manager.team_leader_delete_template(args['template_id'])
 
+class TeamResource(Resource):
+    @hackathon_name_required
+    def get(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('team_name', type=str, location='args', required=True)
+        args = parse.parse_args()
+        hackathon_id = g.hackathon.id
+        return team_manager.get_team_info(hackathon_id, args["team_name"])
+
+    @token_required
+    @hackathon_name_required
+    def post(self):
+        args = request.get_json()
+        return team_manager.create_team(args)
+
+    @token_required
+    @hackathon_name_required
+    def put(self):
+        args = request.get_json()
+        return team_manager.update_team(args)
+
+    @token_required
+    @hackathon_name_required
+    def delete(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('team_name', type=str, location='args', required=True)
+        args = parse.parse_args()
+        return team_manager.dismiss_team(g.hackathon.id, args["team_name"])
+
+class TeamManageResource(Resource):
+    @token_required
+    @hackathon_name_required
+    def post(self):
+        args = request.get_json()
+        if "team_name" not in args:
+            return bad_request("Team name is required")
+        return team_manager.join_team(g.hackathon.id, args["team_name"], g.user)
+
+    @token_required
+    @hackathon_name_required
+    def put(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('user_id', type=int, location='json', required=True)
+        parse.add_argument("status", type=int, location="json", required=True)
+        parse.add_argument("team_name", type=str, location="json", required=True)
+        args = parse.parse_args()
+        return team_manager.update_statues(g.hackathon.id,
+                                        args["team_name"],
+                                        args["status"],
+                                        g.user,
+                                        args["user_id"])
+    @token_required
+    @hackathon_name_required
+    def delete(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('user_id', type=int, location='args', required=True)
+        parse.add_argument('team_name', type=str, location='args', required=True)
+        args = parse.parse_args()
+        if g.user.id == args["user_id"]:
+            return team_manager.leave_team(g.hackathon.id, args["team_name"])
+        else:
+            return team_manager.kick(args["team_name"], args["user_id"])
+
+
+class TeamLeaderResource(Resource):
+    @token_required
+    @hackathon_name_required
+    def put(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('user_id', type=int, location='json', required=True)
+        parse.add_argument('team_name', type=str, location='json', required=True)
+        args = parse.parse_args()
+        return team_manager.promote_leader(g.hackathon.id,
+                                           args["team_name"],
+                                           args["user_id"])
 
 def register_user_routes():
     """
     register API routes for hackathon UI user
     """
 
-    # guacamole config API. "/api/guacamoleconfig" is depreciated, will be remoted soon
+    # guacamole config API. "/api/guacamoleconfig" is depreciated, will be removed soon
     api.add_resource(GuacamoleResource, "/api/guacamoleconfig", "/api/user/guacamoleconfig")
 
     # user API
@@ -215,7 +290,10 @@ def register_user_routes():
     api.add_resource(UserExperimentListResource, "/api/user/experiment/list")
 
     # team API
-    api.add_resource(GetTeamMembersByUserResource, "/api/user/team/member")
+    api.add_resource(TeamResource, "/api/team")
+    api.add_resource(GetTeamMembersByUserResource, "/api/user/team")
+    api.add_resource(TeamManageResource, "/api/team/member")
+    api.add_resource(TeamLeaderResource, "/api/team/leader")
 
     # user profile API
     api.add_resource(UserProfileResource, "/api/user/profile")
