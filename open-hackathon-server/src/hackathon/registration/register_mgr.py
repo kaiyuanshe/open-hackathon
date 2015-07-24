@@ -46,20 +46,16 @@ class RegisterManager(Component):
                                                       hackathon_id=g.hackathon.id)
         return map(lambda x: self.get_registration_with_profile(x), registers)
 
-
     def get_registration_with_profile(self, register):
         register_dic = register.dic()
         register_dic['user'] = self.user_manager.user_display_info(register.user)
         return register_dic
 
-
     def get_registration_by_id(self, id):
         return self.db.get_object(UserHackathonRel, id)
 
-
     def get_registration_by_user_and_hackathon(self, user_id, hackathon_id):
         return self.db.find_first_object_by(UserHackathonRel, user_id=user_id, hackathon_id=hackathon_id)
-
 
     def check_register_enrollment(self, hackathon):
         max = int(json.loads(hackathon.basic_info)['max_enrollment'])
@@ -68,7 +64,6 @@ class RegisterManager(Component):
         else:
             current_num = self.db.count(UserHackathonRel, UserHackathonRel.hackathon_id == hackathon.id)
             return max > current_num
-
 
     def validate_created_args(self, hackathon, args):
         self.log.debug("create_register: %r" % args)
@@ -89,7 +84,6 @@ class RegisterManager(Component):
                                               friendly_message="报名人数已满")
         return True, ""
 
-
     def create_registration(self, hackathon, args):
         state, return_info = self.validate_created_args(hackathon, args)
         if not state:
@@ -100,7 +94,6 @@ class RegisterManager(Component):
         except Exception as e:
             self.log.error(e)
             return internal_server_error("fail to create register")
-
 
     def update_registration(self, args):
         self.log.debug("update_registration: %r" % args)
@@ -113,7 +106,8 @@ class RegisterManager(Component):
 
             self.log.debug("update a existed register")
             update_items = dict(dict(args).viewitems() - register.dic().viewitems())
-            if "create_time" in update_items: update_items.pop("create_time")
+            if "create_time" in update_items:
+                update_items.pop("create_time")
             update_items["update_time"] = self.util.get_now()
             self.db.update_object(register, **update_items)
 
