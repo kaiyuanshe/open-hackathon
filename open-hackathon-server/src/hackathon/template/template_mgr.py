@@ -161,10 +161,10 @@ class TemplateManager(Component):
                 template = json.load(file)
                 self.log.debug("create template: %r" % template)
 
-                # step 2: parse template and get template provider
-                provider = self.__get_provider_from_template_dic(template)
-                if provider is None:
-                    return bad_request("template provider invalid")
+                # step 2: parse template and check required properties
+                status, return_info = self.__check_create_args(template)
+                if not status:
+                    return return_info
 
                 # step 3: save to storage
                 context = self.__save_template(template)
@@ -176,7 +176,7 @@ class TemplateManager(Component):
                                           name=template[BaseTemplate.TEMPLATE_NAME],
                                           url=context.url,
                                           local_path=context.physical_path,
-                                          provider=provider,
+                                          provider=template[BaseTemplate.VIRTUAL_ENVIRONMENTS_PROVIDER],
                                           creator_id=g.user.id,
                                           status=TEMPLATE_STATUS.UNCHECKED,
                                           create_time=self.util.get_now(),
