@@ -149,8 +149,7 @@ class TemplateCreateByFileResource(Resource):
     # create template by file
     @token_required
     def post(self):
-        args = request.get_json()
-        return template_manager.create_template(args)
+        return template_manager.create_template_by_file()
 
 
 

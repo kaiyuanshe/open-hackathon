@@ -145,35 +145,40 @@ class TemplateManager(Component):
                                   virtual_environment_count=len(args[BaseTemplate.VIRTUAL_ENVIRONMENTS]))
         return ok("create template success")
 
-    def create_template_by_file(self, args):
-        file = request.file
+    def create_template_by_file(self):
+        """create a template by a whole template file
 
-        # create template step 1 : args validate
-        status, return_info = self.__check_create_args(args)
-        if not status:
-            return return_info
-        # create template step 2 : parse args and trans to file
-        context = self.__save_template(args)
-        if not context:
-            return internal_server_error("save tempplate failed")
-        # create template step 3 : upload template file to Azure
-        # todo azure storage
-        # azure_url = self.__upload_template_to_azure(url, file_name)
-        # if azure_url is None:
-        # return internal_server_error("upload template file failed")
-        # create template step 4 : insert into DB
-        self.log.debug("create template: %r" % args)
-        self.db.add_object_kwargs(Template,
-                                  name=args[BaseTemplate.TEMPLATE_NAME],
-                                  url=context.url,
-                                  local_path=context.physical_path,
-                                  provider=args[BaseTemplate.VIRTUAL_ENVIRONMENTS_PROVIDER],
-                                  creator_id=g.user.id,
-                                  status=TEMPLATE_STATUS.UNCHECKED,
-                                  create_time=self.util.get_now(),
-                                  update_time=self.util.get_now(),
-                                  description=args[BaseTemplate.DESCRIPTION],
-                                  virtual_environment_count=len(args[BaseTemplate.VIRTUAL_ENVIRONMENTS]))
+
+        :return:
+        """
+
+        for file_name in request.files:
+            file = request.files[file_name]
+            try:
+                # step 1: check file json format
+                template = json.load(file)
+                self.log.debug("create template: %r" % template)
+
+                # step 2: save to storage
+                context = self.__save_template(template)
+                if not context:
+                    return internal_server_error("save template failed")
+
+                # step 3: add a record to DB
+                self.db.add_object_kwargs(Template,
+                                          name=template[BaseTemplate.TEMPLATE_NAME],
+                                          url=context.url,
+                                          local_path=context.physical_path,
+                                          # provider=template[BaseTemplate.VVIRTUAL_ENVIRONMENTS][IRTUAL_ENVIRONMENTS_PROVIDER],
+                                          creator_id=g.user.id,
+                                          status=TEMPLATE_STATUS.UNCHECKED,
+                                          create_time=self.util.get_now(),
+                                          update_time=self.util.get_now(),
+                                          description=template[BaseTemplate.DESCRIPTION],
+                                          virtual_environment_count=len(template[BaseTemplate.VIRTUAL_ENVIRONMENTS]))
+            except Exception as ex:
+                self.log.error(ex)
+                return bad_request("invalid template file", ex)
         return ok("create template success")
 
     def update_template(self, args):
@@ -469,9 +474,9 @@ class TemplateManager(Component):
             condition = and_(condition, Template.status == kwargs['status'])
 
         if kwargs['name'] is not None:
-            condition = and_(condition, Template.name.like('%'+kwargs['name']+'%'))
+            condition = and_(condition, Template.name.like('%' + kwargs['name'] + '%'))
 
         if kwargs['description'] is not None:
-            condition = and_(condition, Template.description.like('%'+kwargs['description']+'%'))
+            condition = and_(condition, Template.description.like('%' + kwargs['description'] + '%'))
 
         return condition
