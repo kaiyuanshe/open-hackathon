@@ -148,10 +148,12 @@ class TemplateManager(Component):
     def create_template_by_file(self):
         """create a template by a whole template file
 
-
         :return:
+            bad_request("invalid template file", ex) : template cannot be formatted as a json object
+            internal_server_error("save template failed") : save template file to storage faild
+            bad_request("template provider invalid") : provider missed or wrong place in template file
+            ok("create template success") : successfully create template by uploaded file
         """
-
         for file_name in request.files:
             file = request.files[file_name]
             try:
@@ -159,17 +161,22 @@ class TemplateManager(Component):
                 template = json.load(file)
                 self.log.debug("create template: %r" % template)
 
-                # step 2: save to storage
+                # step 2: parse template and get template provider
+                provider = self.__get_provider_from_template_dic(template)
+                if provider is None:
+                    return bad_request("template provider invalid")
+
+                # step 3: save to storage
                 context = self.__save_template(template)
                 if not context:
                     return internal_server_error("save template failed")
 
-                # step 3: add a record to DB
+                # step 4: add a record to DB
                 self.db.add_object_kwargs(Template,
                                           name=template[BaseTemplate.TEMPLATE_NAME],
                                           url=context.url,
                                           local_path=context.physical_path,
-                                          # provider=template[BaseTemplate.VVIRTUAL_ENVIRONMENTS][IRTUAL_ENVIRONMENTS_PROVIDER],
+                                          provider=provider,
                                           creator_id=g.user.id,
                                           status=TEMPLATE_STATUS.UNCHECKED,
                                           create_time=self.util.get_now(),
@@ -480,3 +487,19 @@ class TemplateManager(Component):
             condition = and_(condition, Template.description.like('%' + kwargs['description'] + '%'))
 
         return condition
+
+    def __get_provider_from_template_dic(self, template):
+        """get the provider from template
+
+        :type template: dict
+        :param template: dict object of template
+
+        :return: provider value , if not exist in template return None
+        """
+        try:
+            if BaseTemplate.VIRTUAL_ENVIRONMENTS_PROVIDER in template:
+                return template[BaseTemplate.VIRTUAL_ENVIRONMENTS_PROVIDER]
+            return template[BaseTemplate.VIRTUAL_ENVIRONMENTS][0][BaseTemplate.VIRTUAL_ENVIRONMENTS]
+        except Exception as e:
+            self.log.error(e)
+            return None
