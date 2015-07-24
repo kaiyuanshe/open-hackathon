@@ -36,7 +36,6 @@ from hackathon.database.models import Announcement
 import time
 from hackathon.hackathon_response import not_found
 
-
 hackathon_manager = RequiredFeature("hackathon_manager")
 user_manager = RequiredFeature("user_manager")
 register_manager = RequiredFeature("register_manager")
@@ -152,7 +151,6 @@ class TemplateCreateByFileResource(Resource):
         return template_manager.create_template_by_file()
 
 
-
 class TemplateListResource(Resource):
     def get(self):
         parse = reqparse.RequestParser()
@@ -165,11 +163,13 @@ class TemplateListResource(Resource):
                                                        description=args['description'])
         return map(lambda x: x.dic(), templates)
 
+
 class HackathonTemplateListResource(Resource):
     @hackathon_name_required
     def get(self):
         templates = template_manager.get_templates_by_hackathon_id(g.hackathon.id)
         return map(lambda x: x.dic(), templates)
+
 
 def register_routes():
     """
