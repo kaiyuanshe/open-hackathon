@@ -31,7 +31,7 @@ from flask import g
 
 from hackathon import Component, RequiredFeature
 from hackathon.database.models import Team, UserTeamRel, AdminHackathonRel, User
-from hackathon.hackathon_response import ok, access_denied, bad_request, not_found, internal_server_error
+from hackathon.hackathon_response import ok, forbidden, bad_request, not_found, internal_server_error
 from hackathon.constants import TeamMemberStatus
 
 
@@ -133,7 +133,7 @@ class TeamManager(Component):
                                       update_time=self.util.get_now())
                 return team.dic()
             else:
-                return access_denied("You don't have permission")
+                return forbidden("You don't have permission")
         else:
             return bad_request("Please choose a team to update")
 
@@ -224,14 +224,14 @@ class TeamManager(Component):
     def team_leader_add_template(self, template_name):
         team = self.get_team_by_user_and_hackathon(g.user, g.hackathon)
         if team is None or team.leader_id != g.user.id:
-            return access_denied("team leader required")
+            return forbidden("team leader required")
         else:
             return self.template_manager.add_template_to_hackathon(template_name, team.id)
 
     def team_leader_delete_template(self, template_id):
         team = self.get_team_by_user_and_hackathon(g.user, g.hackathon)
         if team is None or team.leader_id != g.user.id:
-            return access_denied("team leader required")
+            return forbidden("team leader required")
         else:
             return self.template_manager.delete_template_from_hackathon(template_id, team.id)
 

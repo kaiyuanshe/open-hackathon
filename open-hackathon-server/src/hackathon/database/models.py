@@ -225,7 +225,6 @@ class UserProfile(DBBase):
         super(UserProfile, self).__init__(**kwargs)
 
 
-
 class Team(DBBase):
     __tablename__ = 'team'
 
@@ -248,7 +247,6 @@ class Team(DBBase):
         super(Team, self).__init__(**kwargs)
 
 
-
 class UserTeamRel(DBBase):
     __tablename__ = 'user_team_rel'
 
@@ -267,7 +265,6 @@ class UserTeamRel(DBBase):
 
     def __init__(self, **kwargs):
         super(UserTeamRel, self).__init__(**kwargs)
-
 
 
 class Hackathon(DBBase):
@@ -447,7 +444,7 @@ class Template(DBBase):
     __tablename__ = 'template'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String(50))
+    name = Column(String(50), unique=True)
     url = Column(String(200))
     local_path = Column(String(200))
     provider = Column(Integer, default=0)
@@ -470,7 +467,6 @@ class HackathonTemplateRel(DBBase):
     create_time = Column(TZDateTime, default=get_now())
     update_time = Column(TZDateTime)
     team_id = Column(Integer, default=-1)  # -1: avaiable for all teams
-
 
     hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
     hackathon = relationship('Hackathon', backref=backref('hackathon_template_rels', lazy='dynamic'))

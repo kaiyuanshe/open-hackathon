@@ -28,12 +28,9 @@ import sys
 
 sys.path.append("..")
 
-import uuid
-from datetime import timedelta
-
 from flask import request, g
 
-from hackathon.database.models import UserToken, User, UserEmail
+from hackathon.database import UserToken, User, UserEmail
 from hackathon.constants import ReservedUser, HTTP_HEADER
 from hackathon import Component, RequiredFeature
 
@@ -42,7 +39,7 @@ __all__ = ["UserManager"]
 
 class UserManager(Component):
     """Component for user management"""
-    hackathon_manager = RequiredFeature("hackathon_manager")
+    admin_manager = RequiredFeature("admin_manager")
 
     def validate_login(self):
         """Make sure user token is included in http request headers and it must NOT be expired
@@ -73,6 +70,24 @@ class UserManager(Component):
         :return: instance of User or None if user not found
         """
         return self.db.find_first_object_by(User, id=user_id)
+
+    def get_user_by_email(self, email):
+        """Query user by email
+
+        :type email: str|unicode
+        :param email: email address
+
+        :rtype: User
+        :return instance of User or None if user cannot be found
+        """
+        if email is None:
+            return None
+
+        user_email = self.db.find_first_object_by(UserEmail, email=email)
+        if user_email is None:
+            return None
+
+        return user_email.user
 
     def user_display_info(self, user):
         """Return user detail information
@@ -119,7 +134,7 @@ class UserManager(Component):
         if user.id == ReservedUser.DefaultSuperAdmin:
             return True
 
-        return -1 in self.hackathon_manager.get_hackathon_ids_by_admin_user_id(user.id)
+        return -1 in self.admin_manager.get_entitled_hackathon_ids(user.id)
 
     # ----------------------------private methods-------------------------------------
 
