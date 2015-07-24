@@ -40,6 +40,13 @@ class TeamManager(Component):
     user_manager = RequiredFeature("user_manager")
 
     def __validate_permission(self, hid, tname, user):
+        """ validate the current user have certain permission to perform managenment actions
+
+        :param hid:
+        :param tname:
+        :param user:
+        :return:
+        """
         # check if team leader
         if self.db.find_first_object_by(Team, hackathon_id=hid, name=tname, leader_id=user.id) is not None:
             return True
