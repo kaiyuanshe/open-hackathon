@@ -101,7 +101,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
             hosts = self.db.find_all_objects(DockerHostServer)
             alive = 0
             for host in hosts:
-                if self.ping_passed(host):
+                if self.ping(host):
                     alive += 1
             if alive == len(hosts):
                 return {
@@ -287,7 +287,8 @@ class HostedDockerFormation(DockerFormationBase, Component):
         :type docker_container: DockerContainer
         :param docker_container: the container that you want to check
 
-        :return boolean
+        :type boolean
+        :return True: the container running status is running or restarting , else returns False
 
         """
         docker_host = self.db.find_first_object_by(DockerHostServer, id=docker_container.host_server_id)
@@ -299,11 +300,15 @@ class HostedDockerFormation(DockerFormationBase, Component):
         else:
             return False
 
-    def ping_passed(self, docker_host):
-        """
-        Ping docker service in docker host
-        :param docker_host:
-        :return:
+    def ping(self, docker_host):
+        """Ping docker host to check running status
+
+        :type docker_host : DockerHostServer
+        :param docker_host: the hots that you want to check docker service running status
+
+        :type boolean
+        :return: True: running status is OK, else return False
+
         """
         try:
             ping_url = '%s/_ping' % self.__get_vm_url(docker_host)

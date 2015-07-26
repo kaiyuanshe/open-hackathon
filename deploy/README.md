@@ -7,12 +7,11 @@
 * [Introduction](#introduction)
   * [What is OpenHackathon](#what-is-openhackathon)
   * [Why OpenHackathon](#why-openhackathon)
- 
 * [Keywords and interpretation](#keywords-and-interpretation)
 * [User's Guide](#user's-guide)
   * [Implementation and Architecture](#implementation-and-architecture-for-user)
   * [attend hackathons](#how-to-attend-a-hackathon)
-  * [Upload Template](#upload-template)
+  * [Contribute your Template](#upload-template)
   * [FAQ](#FAQ)
 * [Admin's Guid](#admin's-guide)
   * [Implementation and Architecture](#implementation-and-architecture-for-admin)
@@ -33,6 +32,7 @@
     * [Setup Guacamole Env](#setup-guacamole-env)
     * [Setup MysqlDB Env](#setup-mysqlDB-env)
     * [Setup python Env](#setup-python-env)
+  * [Config file](#config-file)
   * [Customize](#customize)
   * [Test](#test)
     * [Unit test](#unit-test)
@@ -52,12 +52,6 @@
 
 
 # Keywords and interpretation
-
-| Keywords        | Interpretation          |
-|:--------:|:-----------------------------------------------------------------------------:|
-| template  | as a description of the Docker container|
-| experiment | correspond with a Docker container|
-| team | every user must join in a team to participate in hackathon event|
 
 # User's-Guide
 ## Implementation and Architecture for User
@@ -118,26 +112,76 @@ src folders introduction:
 ## Try openhackathon quickly
     介绍如何用doker的一个image来run起一个openhackathon
 ## Setup develop environment
+To setup the whole OpenHackathon develop environment, you need those components:
+```
+Docker Service
+Guacamole
+MysqlDB
+Python third part lib
+```
 ### Setup Docker Env
-介绍下docker在OpenHackathon的作用         
-[Docker intsallation on Ubuntu](https://docs.docker.com/installation/ubuntulinux/)
+Docker service takes part in OpenHackathon Platform as a environment provider that will provide to all users. And docker service now is the most populer cloudservice, you could get more details on [docker official website](https://www.docker.com/)                         
+
+In OpenHackathon develop evnironment you should install and setup docker service like this: [Docker intsallation on Ubuntu](https://docs.docker.com/installation/ubuntulinux/)                    
+
+In order to control and manage docker service from OpenHackathon conveniently , we'd better to enable docker's `remote API`. Fllow this steps after installation of docker service,[enable docker remote API](http://blog.trifork.com/2013/12/24/docker-from-a-distance-the-remote-api/)
     
 ### Setup Guacamole Env
-Guacamole is used as a remote client to connect to running environments , SSH RDP VNC are all provided. [Guacamole](http://guac-dev.org/) can give you more details.        
-                 
-[Guacamole installation](http://guac-dev.org/doc/gug/installing-guacamole.html)
+Having got many environments we need to find a way to connect them for users, as you know that we choose Guacamole!Guacamole works as a remote client connecting to running environments, which provides SSH, RDP and VNC protocols. So we can cope with various environments of different hackathons        
+[Guacamole](http://guac-dev.org/) can give you more details.        
 
-Gucamole has its own authentication so does OpenHackathon, in order to unify them we customise a new auth provider and hacked it into guacamole client
-    
+
+Guacamole installation is separated into two pieces: server and client, service need to be built by src and client can be built to tomcat from a war package directly. More details can follow this:[Guacamole installation](http://guac-dev.org/doc/gug/installing-guacamole.html)             
+
+Note:               
+Gucamole has its own authentication so does OpenHackathon, in order to unify them we customise a new auth provider and hacked it into guacamole client. You can use it or you could build a new one.   
+To use it you would make the `guacmaole.properties` like this:
+```
+guacd-hostname: localhost
+guacd-port:     4822
+
+lib-directory: /var/lib/guacamole
+auth-provider: com.openhackathon.guacamole.OpenHackathonAuthenticationProvider
+auth-request-url: http://localhost:15000/api/guacamoleconfig
+```
+And find the `openhackathon-gucamole-authentication-1.0-SNAPSHOT.jar` in src folders and move it to path that configured in `guacamole.propertied`
+
+If you want to make you own Guacamole auth provider, there is a java project named `openhackathon-guacamole-auth-provider` can give a example, you also can find in out src folders! But, this java project just match `version 0.9.7` of guacamole client!
+
 ### Setup MysqlDB Env
+First you need to install the components of Mysql and Python libs:
+```
+sudo apt-get install build-essential python python-dev python-setuptools libmysqlclient-dev
+sudo apt-get install mysql-server
+```
+Then change the ``my.conf` of mysql
+```
+[client]
+default-character-set=utf8
+
+[mysqld]
+default-storage-engine=INNODB
+character-set-server=utf8
+collation-server=utf8_general_ci
+```
+Then login mysql console with root user(`mysql -u root -p`) and then create develope mysql database like this:
+```
+create database hackathon;
+create User 'hackathon'@'localhost' IDENTIFIED by 'hackathon';
+GRANT ALL on hackathon.* TO 'hackathon'@'localhost';
+```
+Finally please remember match your `config.py` options on mysql configuration
+
+
 ### Setup Python Env
-Find out the `requirement.txt` both in `open-hackathon-server` and `open-hackathon-client` in src folders, all dependencies are recorded in , we can install them through a simply command :   
+Find out the `requirement.txt` both in `open-hackathon-server` and `open-hackathon-client` in src folders, all dependencies are recorded in , we could install them through a simply command :   
 ```
 sudo pip install -r open-hackathon-server/requirement.txt
 sudo pip install -r open-hackathon-client/requirement.txt
 ```
 
-config-sample =》config
+Then copy a file `config.py` from `config_sample.py`, and modify it as needed. Below is the instruction:
+
 
 ## customize
     如何自定义，

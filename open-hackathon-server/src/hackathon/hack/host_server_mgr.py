@@ -44,7 +44,7 @@ class DockerHostManager(Component):
         # The new-created VM must run 'cloudvm service by default(either cloud-init or python remote ssh)
         # todo the VM public/private IP will change after reboot, need sync the IP in db with azure in this case
         for docker_host in vms:
-            if self.docker.hosted_docker.ping_passed(docker_host):
+            if self.docker.hosted_docker.ping(docker_host):
                 return docker_host
         raise Exception("No available VM.")
 
