@@ -38,4 +38,62 @@ app.config['SECRET_KEY'] = safe_get_config("app.secret_key", "secret_key")
 app.config['DEBUG_TB_ENABLED'] = False
 toolbar = DebugToolbarExtension(app)
 
+
+class Context(object):
+    '''
+    A collection of parameters that will be passed through threads/databases
+    NEVER put complex object in Context such as instance of db models or business manager
+    '''
+
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            self.__dict__[key] = value
+
+    def __getattr__(self, name):
+        if name in self.__dict__:
+            return self.__dict__[name]
+
+        raise AttributeError()
+
+    def __setattr__(self, key, value):
+        self.__dict__[key] = value
+
+    def __getitem__(self, item):
+        return self.__getattr__(item)
+
+    def __setitem__(self, key, value):
+        return self.__setattr__(key, value)
+
+    def __repr__(self):
+        return repr(self.__dict__)
+
+    def __contains__(self, key):
+        return key in self.__dict__
+
+    def get(self, key, default_value=None):
+        if key in self.__dict__:
+            return self.__dict__[key]
+        else:
+            return default_value
+
+    @staticmethod
+    def from_object(arg):
+
+        if isinstance(arg, list):
+            return map(lambda item: Context.from_object(item), arg)
+        elif not isinstance(arg, dict):
+            return arg
+
+        ctx = Context()
+        for k, v in arg.iteritems():
+            if isinstance(v, dict):
+                setattr(ctx, k, ctx.from_object(v))
+            elif isinstance(v, list):
+                setattr(ctx, k, map(lambda item: ctx.from_object(item), v))
+            else:
+                setattr(ctx, k, v)
+
+        return ctx
+
+
 from views import *

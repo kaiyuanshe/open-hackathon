@@ -1,7 +1,7 @@
 body {
     background-color: #71B1D1;
-    margin-bottom: 40px;
 }
+
 body:after {
     top: 0;
     left: 14.422%;
@@ -12,4 +12,9 @@ body:after {
     background: #fff;
     border-left: 1px solid #fff;
     z-index: 0;
+}
+
+footer {
+    position: relative;
+    z-index: 10;
 }

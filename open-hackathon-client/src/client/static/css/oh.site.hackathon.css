@@ -1,0 +1,55 @@
+.reg-h-name {
+    margin: 0px 0px 15px;
+    font-size: 22px;
+}
+
+.jumbotron p {
+    font-size: 15px;
+}
+
+.oh-main {
+    padding-bottom: 60px;
+}
+
+.oh-share, .oh-share * {
+    -webkit-box-sizing: content-box;
+    -moz-box-sizing: content-box;
+    box-sizing: content-box;
+}
+
+.oh-share a {
+    display: inline-block;
+    overflow: hidden;
+}
+.oh-share .jiathis_style_24x24 .jtico{
+    margin-left: 0;
+}
+
+.users-list {
+  padding: 0px;
+}
+
+.users-list li {
+  min-height: 60px;
+  padding: 10px;
+  list-style: none;
+  font-size: 12px;
+}
+
+.users-list li a img.avatar {
+  height: 40px;
+  width: 40px;
+  float: left;
+  margin-top: 3px;
+  margin-right: 5px;
+  border-radius: 2px;
+}
+
+.users-list li div {
+  margin-left: 50px;
+}
+
+.media-object {
+    width: 50px;
+}
+

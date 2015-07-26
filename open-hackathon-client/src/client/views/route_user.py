@@ -29,12 +29,13 @@ sys.path.append("..")
 
 from client import app
 from . import render
-from flask_login import login_required
+from flask_login import login_required, current_user
 
 
 @app.route("/user/profile")
 @login_required
 def user_profile():
+    current_user
     return render("/user/profile.html")
 
 
@@ -66,5 +67,3 @@ def hackathon_workspace(hackathon_name):
 @login_required
 def register(hackathon_name):
     return render("/register/profile.html")
-
-

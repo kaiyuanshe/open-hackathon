@@ -1,0 +1,52 @@
+@media (min-width: 768px) {
+    .pofile-form {
+        border-left: 1px solid #e4e4e4;;
+    }
+}
+
+.line-title {
+    margin: 18px 0px;
+    font-size: 18px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e4e4e4;
+}
+
+.oh-profile {
+    padding: 80px 40px;
+}
+
+ul.profile-details {
+    margin-top: 10px;
+    padding: 0 5px;
+    list-style: none;
+    color: #7c848d;
+}
+
+ul.profile-details li div {
+    color: #909090;
+}
+
+ul.profile-details li {
+    position: relative;
+    margin: 0 0 20px 0;
+    color: #333;
+}
+
+.pofile-form {
+    border: none;
+}
+
+.oh-profileForm {
+    margin-top: 30px;
+    padding-bottom: 60px;
+}
+
+.profileForm-details {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.profileForm-details li {
+    margin: 0;
+}
