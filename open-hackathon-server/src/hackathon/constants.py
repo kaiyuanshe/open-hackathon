@@ -80,6 +80,7 @@ class HACKATHON_BASIC_INFO:
         WALL_TIME: long, environment will be auto recycled, in seconds
         AUTO_APPROVE: bool, whether manual approve is required, default false
         RECYCLE_ENABLED: bool, whether environment be recycled automatically. default false
+        RECYCLE_MINUTES: int, the maximum time (unit:minute) of recycle for per experiment. default 0
         PRE_ALLOCATE_ENABLED: bool, whether to pre-start several environment. default false
         PRE_ALLOCATE_NUMBER: int, the maximum count of pre-start environment per hackathon and per template. default 1
         ALAUDA_ENABLED: bool,default false, whether to use alauda service, no azure resource needed if true
@@ -95,7 +96,7 @@ class HACKATHON_BASIC_INFO:
     WALL_TIME = "wall_time"
     AUTO_APPROVE = "auto_approve"
     RECYCLE_ENABLED = "recycle_enabled"
-    RECYCLE_TIME = "recycle_time"  # minutes
+    RECYCLE_MINUTES = "recycle_minutes"
     PRE_ALLOCATE_ENABLED = "pre_allocate_enabled"
     PRE_ALLOCATE_NUMBER = "pre_allocate_number"
     ALAUDA_ENABLED = "alauda_enabled"
@@ -161,7 +162,7 @@ class VEStatus:
     FAILED = 2
     STOPPED = 3
     DELETED = 4
-
+    UNEXPECTED_ERROR = 5
 
 class PortBindingType:
     """Type of port binding

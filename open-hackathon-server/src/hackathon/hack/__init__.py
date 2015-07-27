@@ -204,8 +204,8 @@ class HackathonManager(Component):
         value = self.__get_property_from_hackathon_basic_info(hackathon, key)
         return value if value is not None else 1
 
-    def get_recycle_time(self, hackathon):
-        key = HACKATHON_BASIC_INFO.RECYCLE_TIME
+    def get_recycle_minutes(self, hackathon):
+        key = HACKATHON_BASIC_INFO.RECYCLE_MINUTES
         value = self.__get_property_from_hackathon_basic_info(hackathon, key)
         return value if value is not None else 0
 
@@ -230,13 +230,10 @@ class HackathonManager(Component):
             HACKATHON_BASIC_INFO.WALL_TIME: time.strftime("%Y-%m-%d %H:%M:%S"),
             HACKATHON_BASIC_INFO.AUTO_APPROVE: False,
             HACKATHON_BASIC_INFO.RECYCLE_ENABLED: False,
-            HACKATHON_BASIC_INFO.RECYCLE_TIME: 0,   # minutes
+            HACKATHON_BASIC_INFO.RECYCLE_MINUTES: 0,   # minutes
             HACKATHON_BASIC_INFO.PRE_ALLOCATE_ENABLED: False,
             HACKATHON_BASIC_INFO.PRE_ALLOCATE_NUMBER: 1,
             HACKATHON_BASIC_INFO.ALAUDA_ENABLED: False
-
-
-
         }
         args[self.BASIC_INFO] = json.dumps(default_base_info)
         return True, args

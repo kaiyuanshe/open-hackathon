@@ -31,7 +31,7 @@ sys.path.append("..")
 from hackathon import (
     Component,
     RequiredFeature,
-)
+    Context)
 
 from hackathon.constants import (
     EStatus,
@@ -262,6 +262,19 @@ class ExprManager(Component):
                 self.log.error(e)
                 self.log.error("check default experiment failed")
 
+    def assign_expr_to_admin(self,expr):
+        """assign expr to admin to trun expr into pre_allocate_expr
+
+        :type expr: Experiment
+        :param expr: which expr you want to assign
+
+        :return:
+        """
+        try:
+            self.db.update_object(expr, user_id=ReservedUser.DefaultUserID)
+        except Exception as e:
+            self.log.error(e)
+
     # --------------------------------------------- helper function ---------------------------------------------#
 
     def __start_new_expr(self, hackathon, template, user_id):
@@ -308,6 +321,8 @@ class ExprManager(Component):
                 self.log.error(e)
                 return internal_server_error('Failed starting azure vm')
         # after everything is ready, set the expr state to running
+        # check recycle enable
+        self.__recycle_expr(expr)
         # response to caller
         return self.__report_expr_status(expr)
 
@@ -318,7 +333,7 @@ class ExprManager(Component):
             if not self.docker.hosted_docker.check_container_status_is_normal(container):
                 try:
                     self.db.update_object(expr, status=EStatus.UNEXPECTED_ERROR)
-                    self.db.update_object(container.virtual_environment, status=VEStatus.UNEXPECTEDERRORS)
+                    self.db.update_object(container.virtual_environment, status=VEStatus.UNEXPECTED_ERROR)
                     break
                 except Exception as ex:
                     self.log.error(ex)
@@ -527,5 +542,23 @@ class ExprManager(Component):
         return map(lambda x: x.container, ves)
 
     def __recycle_expr(self, expr):
+        """recycle experiment
 
-        return
+        According to the hackathon's basic info on 'recycle_enabled', if True would run the logic, False will do nothing
+        Then if the experiment based on a VM , assign the user_id to super admin, else kill it directly.
+
+        :type expr: Experiment
+        :param expr: which would be recycled
+
+        :return:
+        """
+        if self.hackathon_manager.is_recycle_enabled(expr.hackathon):
+            mins = self.hackathon_manager.get_recycle_minutes(expr.hackathon)
+            # provider is VM
+            if expr.template.provider == VE_PROVIDER.AZURE:
+                context = Context(expr=expr)
+                self.scheduler.add_once("expr_manager","assign_expr_to_admin",context=context, minutes=mins)
+            else:
+                # provider is alauda or docker
+                context = Context(expr_id=expr.id)
+                self.scheduler.add_once("expr_manager","stop_expr",context=context, minutes=mins)
