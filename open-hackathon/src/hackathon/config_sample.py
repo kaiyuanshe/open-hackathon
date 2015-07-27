@@ -62,8 +62,8 @@ Config = {
         "token_expiration_minutes": 60 * 24
     },
     "azure": {
-        "subscriptionId": "31e6e137-4656-4f88-96fb-4c997b14a644",
-        "certPath": "/home/if/If/LABOSS/open-hackathon/src/hackathon/certificates/1-31e6e137-4656-4f88-96fb-4c997b14a644.pem",
+        "subscriptionId": "7946a60d-67b1-43f0-96f9-1c558a9d284c",
+        "certPath": "/home/junbo/azure/7946a60d-67b1-43f0-96f9-1c558a9d284c.pem",
         "managementServiceHostBase": "management.core.chinacloudapi.cn"
     },
     "guacamole": {

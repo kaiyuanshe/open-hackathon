@@ -49,6 +49,8 @@ docker = OssDocker()
 WINDOWS_TEN = "win10"
 WIN10_COUNT_DOWN_MINUTES = safe_get_config("win10.wall_time_minutes", 60)
 WIN10_TOTAL_SEAT = safe_get_config("win10.total_seats", 10)
+
+
 # initial once
 
 def date_serializer(date):
@@ -86,7 +88,8 @@ class ExprManager(object):
             vms = db_adapter.find_all_objects_by(UserResource,
                                                  type=VIRTUAL_MACHINE,
                                                  status=RUNNING,
-                                                 name='opentech-win10-' + str(expr.id),
+                                                 # name='opentech-win10-' + str(expr.id),
+                                                 name='open-tech-role-' + str(expr.id),
                                                  template_id=expr.template.id)
             vms_id = map(lambda v: v.id, vms)
             ves = []
@@ -694,8 +697,11 @@ def check_default_expr(hackathon_id=None):
     if hackathon_id:
         templates = db_adapter.find_all_objects_order_by(Template, hackathon_id=hackathon_id)
     else:
-        templates = db_adapter.find_all_objects(Template)
-    total_azure = safe_get_config("pre_allocate.azure", 1)
+        # hackathon = db_adapter.find_first_object_by(Hackathon, name=WINDOWS_TEN)
+        # templates = db_adapter.find_all_objects_by(Template, hackathon_id=hackathon.id)
+        templates = db_adapter.find_all_objects_by(Template, name=WINDOWS_TEN)
+
+    total_azure = safe_get_config("pre_allocate.azure", 5)
     total_docker = safe_get_config("pre_allocate.docker", 1)
     for template in templates:
         try:
