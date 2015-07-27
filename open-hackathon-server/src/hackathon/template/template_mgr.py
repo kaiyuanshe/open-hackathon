@@ -44,7 +44,7 @@ from hackathon.hackathon_response import (
     bad_request,
     internal_server_error,
     ok,
-    access_denied
+    forbidden
 )
 from hackathon.constants import (
     TEMPLATE_STATUS,
@@ -228,9 +228,9 @@ class TemplateManager(Component):
                 return ok("already removed")
             # user can only delete the template which created by himself except super admin
             if g.user.id != template.creator_id and not self.user_manager.is_super_admin(g.user):
-                return access_denied()
+                return forbidden()
             if len(self.db.find_all_objects_by(Experiment, template_id=id)) > 0:
-                return access_denied("template already in use")
+                return forbidden("template already in use")
 
             # remove template cache , localfile, azurefile
             self.templates.pop(template.id, '')
@@ -383,7 +383,7 @@ class TemplateManager(Component):
             return False, bad_request("template does not exist")
         # user can only modify the template which created by himself except super admin
         if g.user.id != template.creator_id and not self.user_manager.is_super_admin(g.user):
-            return False, access_denied()
+            return False, forbidden()
         return True, template
 
     def __load_template_from_memory(self, template_id):

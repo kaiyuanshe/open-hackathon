@@ -1,10 +1,177 @@
-<!DOCTYPE html>
-<html>
-<head lang="en">
-    <meta charset="UTF-8">
-    <title></title>
-</head>
-<body>
+{% extends "base/base.html" %}
+{% block style %}
+    <link href="/static/css/oh.user.profile.css" rel="stylesheet">
+{% endblock %}
+{% block content %}
+    <div class="oh-main">
+        <div class="container">
+            <h2 class="line-title">个人信息</h2>
 
-</body>
-</html>
+            <div class="oh-profileForm row">
+                <div class="col-md-3 col-sm-4">
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <img src="{{ current_user.avatar_url }}" width="200px">
+                            <h4>详情</h4>
+                            <ul class="profileForm-details">
+                                <li>
+                                    <div>账户类型</div>
+                                    {{ current_user.provider }}
+                                </li>
+                                <li>
+                                    <div> 邮箱</div>
+                                    <p></p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9 col-sm-8 ">
+                    <div class="row ">
+                        <form id="profileForm" class="form-horizontal" novalidate>
+                            <fieldset class="pofile-form">
+                                <div class="form-group">
+                                    <label class="col-md-2 col-sm-3 control-label required">姓名</label>
+
+                                    <div class="col-md-7 col-sm-9">
+                                        <input type="text" class="form-control" name="real_name" placeholder="姓名"
+                                               required
+                                               data-bv-trigger="blur"
+                                               data-bv-notempty-message="姓名必须填写">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-md-2 col-sm-3 control-label required">联系电话</label>
+
+                                    <div class="col-md-7 col-sm-9">
+                                        <input type="text" class="form-control" name="phone" placeholder="联系电话"
+                                               required
+                                               data-bv-trigger="blur"
+                                               data-bv-notempty-message="联系电话必须填写">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-md-2 col-sm-3 control-label required">联系地址</label>
+
+                                    <div class="col-md-7 col-sm-9">
+                                        <input type="text" class="form-control" name="address" placeholder="寄出奖品的默认地址"
+                                               required
+                                               data-bv-trigger="blur"
+                                               data-bv-notempty-message="联系电话必须填写">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-md-2 col-sm-3 control-label">性别</label>
+
+                                    <div class="col-md-7 col-sm-9">
+                                        <select class="form-control" name="gender">
+                                            <option value="-1">秘密</option>
+                                            <option value="1">男</option>
+                                            <option value="0">女</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-md-2 col-sm-3 control-label">年龄</label>
+
+                                    <div class="col-md-7 col-sm-9">
+                                        <input type="number" class="form-control" name="age" placeholder="年龄"
+                                               value="20"
+                                               min="1" max="99"
+                                               data-bv-trigger="blur"
+                                               data-bv-integer-message="请输入年龄">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-md-2 col-sm-3 control-label">行业类型</label>
+
+                                    <div class="col-md-7 col-sm-9">
+                                        <select class="form-control" name="career_type">
+                                            <option value="计算机/互联网/通信">计算机/互联网/通信</option>
+                                            <option value="生产/工艺/制造">生产/工艺/制造</option>
+                                            <option value="医疗/护理/制药">医疗/护理/制药</option>
+                                            <option value="金融/银行/投资/保险">金融/银行/投资/保险</option>
+                                            <option value="商业/服务业/个体经营户">商业/服务业/个体经营户</option>
+                                            <option value="文化/广告/传媒">文化/广告/传媒</option>
+                                            <option value="娱乐/艺术/表演">娱乐/艺术/表演</option>
+                                            <option value="法律/法务">法律/法务</option>
+                                            <option value="教育/培训">教育/培训</option>
+                                            <option value="公务员/行政/事业单位">公务员/行政/事业单位</option>
+                                            <option value="模特">模特</option>
+                                            <option value="空姐">空姐</option>
+                                            <option value="学生">学生</option>
+                                            <option value="其他">其他</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-md-2 col-sm-3 control-label">职务</label>
+
+                                    <div class="col-md-7 col-sm-9">
+                                        <input type="text" class="form-control" name="career" placeholder="职务">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class=" col-md-2 col-sm-3 control-label">Skype</label>
+
+                                    <div class="col-md-7 col-sm-9">
+                                        <input type="text" class="form-control" name="skype" placeholder="Skype">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-md-2 col-sm-3 control-label">微信</label>
+
+                                    <div class="col-md-7 col-sm-9">
+                                        <input type="text" class="form-control" placeholder="微信" name="wechat">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-md-2 col-sm-3 control-label">微博</label>
+
+                                    <div class="col-md-7 col-sm-9">
+                                        <input type="text" class="form-control" placeholder="微博" name="weibo">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-md-2 col-sm-3 control-label">QQ</label>
+
+                                    <div class="col-md-7 col-sm-9">
+                                        <input type="text" class="form-control" name="qq" placeholder="QQ">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-offset-2 col-sm-offset-3 col-md-7 col-sm-9">
+                                        <button type="submit" class="btn btn-primary btn-block">保存</button>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade bs-example-modal-sm" id="alert" tabindex="-1" role="dialog"
+         aria-labelledby="mySmallModalLabel">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">提示</h4>
+                </div>
+                <div class="modal-body">
+                    <p>个人信息保存成功。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="bottom" class="btn btn-primary" data-type="ok">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block script %}
+    <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
+    <script type="text/javascript" src="/static/js/views/oh.user.profile.js"></script>
+{% endblock %}

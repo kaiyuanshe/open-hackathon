@@ -25,7 +25,7 @@
 # -----------------------------------------------------------------------------------
 
 from hackathon import RequiredFeature
-from hackathon_response import unauthorized, bad_request, access_denied
+from hackathon_response import unauthorized, bad_request, forbidden
 
 __all__ = [
     "token_required",
@@ -70,7 +70,7 @@ def admin_privilege_required(func):
             return bad_request("hackathon name invalid")
 
         if not hack_manager.validate_admin_privilege_http():
-            return access_denied("access denied")
+            return forbidden("access denied")
         return func(*args, **kwargs)
 
     return authenticate_and_call

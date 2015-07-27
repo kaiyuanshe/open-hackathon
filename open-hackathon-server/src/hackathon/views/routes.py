@@ -45,6 +45,8 @@ team_manager = RequiredFeature("team_manager")
 
 class HealthResource(Resource):
     def get(self):
+        from werkzeug.exceptions import PreconditionFailed
+        raise Exception("Nofff")
         parser = reqparse.RequestParser()
         parser.add_argument('q', type=str, location='args')
         args = parser.parse_args()

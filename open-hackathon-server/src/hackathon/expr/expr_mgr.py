@@ -59,7 +59,7 @@ from hackathon.hackathon_response import (
     internal_server_error,
     precondition_failed,
     not_found,
-    access_denied,
+    forbidden,
     ok,
 )
 
@@ -102,7 +102,7 @@ class ExprManager(Component):
 
         hackathon = hack_temp[0]
         if not self.register_manager.is_user_registered(user_id, hackathon):
-            return access_denied("user not registered or not approved")
+            return forbidden("user not registered or not approved")
 
         if hackathon.event_end_time < self.util.get_now():
             self.log.warn("hackathon is ended. The expr starting process will be stopped")
