@@ -103,7 +103,7 @@ class HackathonRegisterResource(Resource):
         parse = reqparse.RequestParser()
         parse.add_argument('num', type=int, location='args', default=5)
         args = parse.parse_args()
-        return team_manager.get_hackathon_registration(args['num'])
+        return register_manager.get_hackathon_registration(args['num'])
 
 
 class HackathonTeamListResource(Resource):

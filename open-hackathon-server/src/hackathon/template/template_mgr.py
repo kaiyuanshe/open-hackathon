@@ -172,11 +172,12 @@ class TemplateManager(Component):
                     return internal_server_error("save template failed")
 
                 # step 4: add a record to DB
+                provider = self.__get_provider_from_template_dic(template)
                 self.db.add_object_kwargs(Template,
                                           name=template[BaseTemplate.TEMPLATE_NAME],
                                           url=context.url,
                                           local_path=context.physical_path,
-                                          provider=template[BaseTemplate.VIRTUAL_ENVIRONMENTS_PROVIDER],
+                                          provider=provider,
                                           creator_id=g.user.id,
                                           status=TEMPLATE_STATUS.UNCHECKED,
                                           create_time=self.util.get_now(),
@@ -429,10 +430,10 @@ class TemplateManager(Component):
         if team is None:
             return []
         # get template from team
-        htrs = self.db.find_all_objects(HackathonTemplateRel, hackathon_id=hackathon.id, team_id=team.id)
+        htrs = self.db.find_all_objects_by(HackathonTemplateRel, hackathon_id=hackathon.id, team_id=team.id)
         if len(htrs) == 0:
             # get template from hackathon
-            htrs = self.db.find_all_objects(HackathonTemplateRel, hackathon_id=hackathon.id, team_id=-1)
+            htrs = self.db.find_all_objects_by(HackathonTemplateRel, hackathon_id=hackathon.id, team_id=-1)
 
         templates = map(lambda x: x.template, htrs)
         data = []
