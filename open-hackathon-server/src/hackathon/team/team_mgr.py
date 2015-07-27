@@ -357,7 +357,7 @@ class TeamManager(Component):
             return self.template_manager.delete_template_from_hackathon(template_id, team.id)
 
 
-------------------------------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------------------------
 
 
 def __validate_permission(self, hid, tname, user):
