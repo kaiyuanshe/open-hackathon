@@ -1,0 +1,122 @@
+.container {
+    width: auto !important;
+}
+
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.hackathon .hackathon-nav {
+    position: fixed;
+    width: 200px;
+    left: 0px;
+    bottom: 40px;
+    top: 41px;
+    color: #fff;
+    background: #1F2327;
+    word-wrap: break-word;
+    word-break: normal;
+    overflow-y: auto;
+    z-index: 10;
+    border-right: solid 2px #aaa;
+}
+
+.hackathon .work-fluid {
+    position: absolute;
+    padding: 0 0 0 5px;
+    top: 41px;
+    bottom: 40px;
+    left: 195px;
+    right: 0;
+    width: auto;
+    height: auto;
+    background: #fff;
+}
+
+.hackathon .hackathon-nav .row {
+    margin: 0;
+}
+
+.hackathon .vm-box {
+    display: inline-block;
+    height: 100px;
+    width: 100px;
+    background: #525252;
+    vertical-align: middle;
+    padding: 10px;
+    margin-top: 20px;
+    position: relative;
+}
+
+.hackathon .vm-box:hover, .hackathon .vm-box.active {
+    background: #00abec;
+}
+
+.hackathon .vm-box img {
+    height: 100%;
+}
+
+.hackathon .center {
+    position: relative;
+    display: table;
+    width: 100%;
+    height: 100%;
+}
+
+.hackathon .center iframe {
+    position: absolute;
+    top: 0;
+}
+
+.hackathon #stat span {
+    color: #00abec;
+}
+
+.hackathon .center iframe.work-full {
+    position: fixed;
+    top: 0;
+    z-index: 999999;
+    left: 0;
+}
+
+.hackathon .tooltip.bottom .tooltip-arrow {
+    border-bottom-color: #00abec;
+}
+
+.hackathon .tooltip-inner {
+    background-color: #00abec;
+}
+
+.hackathon .tooltip.bottom {
+    margin-top: -5px;
+    -webkit-filter: inherit;
+    filter: inherit;
+    opacity: inherit;
+}
+
+.hackathon iframe {
+    background-color: #fff;
+}
+
+.smallscreen {
+    display: none;
+    position: fixed;
+    right: 0;
+    top: 0;
+    z-index: 9999999;
+    width: 30px;
+    height: 30px;
+    background: #00abec;
+}
+
+.smallscreen a {
+    color: #fff;
+    font-size: 30px;
+}
+
+.smallscreen a:hover {
+    text-decoration: none;
+}
