@@ -42,10 +42,16 @@ class TeamManager(Component):
     def __validate_permission(self, hid, tname, user):
         """ validate the current user have certain permission to perform managenment actions
 
-        :param hid:
-        :param tname:
-        :param user:
-        :return:
+        :type: hid: int
+        :param hid: key to store hackathon id
+
+        :type: tname: str|unicode
+        :param tname: key to store team name
+
+        :type: user: User
+        :param user: the selected user to examine permission
+
+        :return: True or False. If user has permission, return True.
         """
         # check if team leader
         if self.db.find_first_object_by(Team, hackathon_id=hid, name=tname, leader_id=user.id) is not None:
@@ -60,9 +66,30 @@ class TeamManager(Component):
             return False
 
     def __get_team(self, hid, uid):
+        """ get the given user' team
+
+        :type hid: int
+        :param hid: the key to store hackathon id
+
+        :type uid: int
+        :param uid: the key to store user id
+
+        :return:UserTeamRel
+        """
         return self.db.find_first_object_by(UserTeamRel, hackathon_id=hid, user_id=uid)
 
     def get_team_info(self, hid, tname):
+        """ get user's team basic information stored on table 'team' based on team name
+
+        :type hid: int
+        :param hid: key to store hackathon id
+
+        :type tname: str|unicode
+        :param tname: key to store team name
+
+        :rtype: dict
+        :return: team's information as a dict
+        """
         team = self.db.find_first_object_by(Team, hackathon_id=hid, name=tname)
         if team is not None:
             return team.dic()
@@ -70,6 +97,20 @@ class TeamManager(Component):
             return not_found("no such team")
 
     def get_hackathon_team_list(self, hid, name=None, number=None):
+        """ get the team list of selected hackathon
+
+        :type hid: int
+        :param hid: the key to store hackathon id
+
+        :type name: str|unicode
+        :param name: querying condition, return selected team name list
+
+        :type number: int
+        :param number: querying condition, return number of teams
+
+        :rtype: list
+        :return: a list of team
+        """
         hackathon_team_list = self.db.find_all_objects_by(Team, hackathon_id=hid)
         hackathon_team_list = map(lambda x: x.dic(), hackathon_team_list)
         if name is not None:
@@ -79,6 +120,18 @@ class TeamManager(Component):
         return hackathon_team_list
 
     def get_team_members_by_user(self, hackathon_id, user_id):
+        """ get given user's team member
+
+        :type hackathon_id: int
+        :param hackathon_id: the key to store hackathon id
+
+        :type user_id: int
+        :param user_id: the key to store user id
+
+        :rtype: list
+        :return: a dict of user's team member
+        """
+
         my_team = self.__get_team(hackathon_id, user_id)
         if my_team is not None:
             team_member = self.db.find_all_objects_by(UserTeamRel, team_id=my_team.team_id)
@@ -94,6 +147,16 @@ class TeamManager(Component):
             return []
 
     def create_team(self, kwargs):
+        """ create new team by given args.
+            user only allow to join or create 1 team. So if user joined or created team before, will be get failed
+            when creating new team.
+
+        :type kwargs: dict
+        :param kwargs: a dict of required information to create new team
+
+        :rtype: dict
+        :return: return created team information
+        """
         team = self.db.find_first_object_by(UserTeamRel, hackathon_id=g.hackathon.id, user_id=g.user.id)
         if team is not None:
             return self.db.find_first_object_by(Team, id=team.team_id).dic()

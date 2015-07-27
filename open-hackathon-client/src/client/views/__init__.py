@@ -38,7 +38,7 @@ import re
 
 from datetime import datetime
 from client.constants import LOGIN_PROVIDER
-from flask_login import login_required, login_user, LoginManager
+from flask_login import login_required, login_user, LoginManager, current_user
 from client.user.login import login_providers
 from client.user.user_mgr import user_manager
 from flask import Response, render_template, request, g, redirect, make_response, session, url_for
