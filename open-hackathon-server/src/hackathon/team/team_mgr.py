@@ -39,47 +39,6 @@ class TeamManager(Component):
     template_manager = RequiredFeature("template_manager")
     user_manager = RequiredFeature("user_manager")
 
-    def __validate_permission(self, hid, tname, user):
-        """ validate the current user have certain permission to perform managenment actions
-
-        :type: hid: int
-        :param hid: key to store hackathon id
-
-        :type: tname: str|unicode
-        :param tname: key to store team name
-
-        :type: user: User
-        :param user: the selected user to examine permission
-
-        :rtype: bool
-        :return: True or False. If user has permission, return True. Else, return false
-        """
-        # check if team leader
-        if self.db.find_first_object_by(Team, hackathon_id=hid, name=tname, leader_id=user.id) is not None:
-            return True
-        #check if hackathon admin
-        elif self.db.find_first_object_by(AdminHackathonRel, hackathon_id=hid, user_id=user.id) is not None:
-            return True
-        #check if super admin
-        elif self.user_manager.is_super_admin(user) is True:
-            return True
-        else:
-            return False
-
-    def __get_team(self, hid, uid):
-        """ get the given user' team
-
-        :type hid: int
-        :param hid: the key to store hackathon id
-
-        :type uid: int
-        :param uid: the key to store user id
-
-        :rtype: UserTeamRel
-        :return:get user's team on selected hackathon
-        """
-        return self.db.find_first_object_by(UserTeamRel, hackathon_id=hid, user_id=uid)
-
     def get_team_info(self, hid, tname):
         """ get user's team basic information stored on table 'team' based on team name
 
@@ -397,3 +356,48 @@ class TeamManager(Component):
         else:
             return self.template_manager.delete_template_from_hackathon(template_id, team.id)
 
+
+------------------------------------------------------------------------------------------------------------------------
+
+
+def __validate_permission(self, hid, tname, user):
+    """ validate the current user have certain permission to perform managenment actions
+
+    :type: hid: int
+    :param hid: key to store hackathon id
+
+    :type: tname: str|unicode
+    :param tname: key to store team name
+
+    :type: user: User
+    :param user: the selected user to examine permission
+
+    :rtype: bool
+    :return: True or False. If user has permission, return True. Else, return false
+    """
+    # check if team leader
+    if self.db.find_first_object_by(Team, hackathon_id=hid, name=tname, leader_id=user.id) is not None:
+        return True
+    # check if hackathon admin
+    elif self.db.find_first_object_by(AdminHackathonRel, hackathon_id=hid, user_id=user.id) is not None:
+        return True
+    # check if super admin
+    elif self.user_manager.is_super_admin(user) is True:
+        return True
+    else:
+        return False
+
+
+def __get_team(self, hid, uid):
+    """ get the given user' team
+
+    :type hid: int
+    :param hid: the key to store hackathon id
+
+    :type uid: int
+    :param uid: the key to store user id
+
+    :rtype: UserTeamRel
+    :return:get user's team on selected hackathon
+    """
+    return self.db.find_first_object_by(UserTeamRel, hackathon_id=hid, user_id=uid)
