@@ -1,64 +1,69 @@
 {% extends "base/manage.html" %}
 
 {% block style %}
-<style>
-    body{
-        background:none;
-    }
-    body:after{
-    content:initial;
-    }
-</style>
+    <style>
+        body {
+            background: none;
+        }
+
+        body:after {
+            content: initial;
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
-<div class="col-lg-12">
-    <div class="box">
-        <div class="box-header">
-            <h2>
-              <i class="fa fa-home"></i>
-              我的Hackathon
-          </h2>
-        </div>
-        <div class="box-content">
-            <a href="/manage/create">创建黑客松</a>
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>名称</th>
-                        <th>主办方 </th>
-                        <th>自动审核</th>
-                        <th>开始时间</th>
-                        <th>结束时间</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="hackathon_list" data-toggle="" data-target="#hackathon_template" data-api="oh.api.admin.hackathon.list.get">
-                </tbody>
-            </table>
+    <div id="content">
+        <div class="col-lg-12">
+            <div class="box">
+                <div class="box-header">
+                    <h2>
+                        <i class="fa fa-home"></i>
+                        我的Hackathon
+                    </h2>
+                </div>
+                <div class="box-content">
+                    <a href="/manage/create">创建黑客松</a>
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th>名称</th>
+                            <th>主办方</th>
+                            <th>自动审核</th>
+                            <th>开始时间</th>
+                            <th>结束时间</th>
+                            <th>Status</th>
+                        </tr>
+                        </thead>
+                        <tbody id="hackathon_list" data-toggle="" data-target="#hackathon_template"
+                               data-api="oh.api.admin.hackathon.list.get">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 {% endblock %}
 
 {% block script %}
-{{ super() }}
-<script id="hackathon_template" type="text/x-jquery-tmpl">
-{% raw %}
-<tr>
-<td>${name}</td>
-<td>{{each basic_info.organizers }}<a href="${organizer_url}">${organizer_name}</a>{{/each}}</td>
-<td>${basic_info.auto_approve}</td>
-<td>${moment(event_start_time).format('YYYY/MM/DD HH:mm')}</td>
-<td>${moment(event_end_time).format('YYYY/MM/DD HH:mm')}</td>
-<td>
-    <a href="javascript:void(0);" data-type="select" data-name="status" data-value="${status}" class="editable" data-source='{"0":"草稿","1":"上线","2":"下线"}' data-placement="top"></a>
-    <a href="/manage/${name}/edit" >管理</a>
-</td>
-</tr>
-{% endraw %}
-</script>
-<script type="text/javascript" src="/static/js/bootstrap/bootstrap-editable.js"></script>
-<script type="text/javascript" src="/static/js/jquery/moment.min.js"></script>
-<script type="text/javascript" src="/static/js/views/oh.manage.myhackathon.js"></script>
+    {{ super() }}
+    <script id="hackathon_template" type="text/x-jquery-tmpl">
+    {% raw %}
+    <tr>
+    <td>${name}</td>
+    <td>{{each basic_info.organizers }}<a href="${organizer_url}">${organizer_name}</a>{{/each}}</td>
+    <td>${basic_info.auto_approve}</td>
+    <td>${moment(event_start_time).format('YYYY/MM/DD HH:mm')}</td>
+    <td>${moment(event_end_time).format('YYYY/MM/DD HH:mm')}</td>
+    <td>
+        <a href="javascript:void(0);" data-type="select" data-name="status" data-value="${status}" class="editable" data-source='{"0":"草稿","1":"上线","2":"下线"}' data-placement="top"></a>
+        <a href="/manage/${name}/edit" >管理</a>
+    </td>
+    </tr>
+    {% endraw %}
+
+    </script>
+    <script type="text/javascript" src="/static/js/bootstrap/bootstrap-editable.js"></script>
+    <script type="text/javascript" src="/static/js/jquery/moment.min.js"></script>
+    <script type="text/javascript" src="/static/js/views/oh.manage.myhackathon.js"></script>
 {% endblock %}

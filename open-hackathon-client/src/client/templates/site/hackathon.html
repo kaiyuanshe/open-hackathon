@@ -1,6 +1,6 @@
 {% extends "base/base.html" %}
 {% block style %}
-    <link href="/static/css/oh.hackathon.css" rel="stylesheet">
+    <link href="/static/css/oh.site.hackathon.css" rel="stylesheet">
 {% endblock %}
 {% block content %}
     <div class="oh-main">
@@ -63,15 +63,37 @@
                         {% endfor %}
                     </p>
 
-                    <div>
-                        <button class="btn btn-primary btn-lg">
-                            我要报名
-                        </button>
+                    <div id="status">
+                        {% if hackathon.event_end_time < get_now() %}
+                            <p>活动已结束。</p>
+                        {% elif user == None %}
+                            <a class="btn btn-primary btn-lg" href="{{ url_for('login', return_url=request.path) }}">我要报名</a>
+                        {% elif user.get("user_profile") == None %}
+                            <a class="btn btn-primary btn-lg"
+                               href="{{ url_for('user_profile',return_url=request.path) }}">我要报名</a>
+                        {% elif registration == None %}
+                            <a class="btn btn-primary btn-lg" data-toggle="modal" data-target="#registerModal">我要报名</a>
+                        {% elif hackathon.basic_info.auto_approve or registration.status == 1 or registration.status == 3 %}
+                            {% if experiment == None %}
+                                <a class="btn btn-primary btn-lg"
+                                   href="{{ url_for('tempSettings',hackathon_name=hackathon_name) }}">立即参加</a>
+                            {% else %}
+                                <a class="btn btn-primary btn-lg"
+                                   href="{{ url_for('workspace',hackathon_name=hackathon_name) }}">立即参加</a>
+                            {% endif %}
+                            <p>您的报名已经审核已通过。</p>
+                        {% elif not hackathon.basic_info.auto_approve and registration.status == 3 %}
+                            <a class="btn btn-primary btn-lg" data-toggle="modal" data-target="#registerModal">我要报名</a>
+                        {% elif not hackathon.basic_info.auto_approve and registration.status == 0 %}
+                            <p>您的报名正在审核中，请等待。</p>
+                        {% elif registration.status == 2 %}
+                            <p>您的报名已被拒绝，如有疑问请联系主办方。</p>
+                        {% endif %}
                     </div>
                 </div>
             </div>
 
-            <div class="row">
+            <div class="row oh-detail">
                 <div class="col-md-9">
                     <h2 class="line-title">活动内容</h2>
 
@@ -80,28 +102,107 @@
                 <div class="col-md-3">
                     <h2 class="line-title">活动主办方..</h2>
                     {% for organizer in hackathon.basic_info.organizers %}
-                        <div class="post">
-                            <div class="thumb">
-                                <img src="{{ organizer.organizer_image }}" width="100%">
+                        <div class="media">
+                            <div class="media-left">
+                                <a href="{{ organizer.organizer_url }}">
+                                    <img class="media-object" src="{{ organizer.organizer_image }}"
+                                         alt="{{ organizer.organizer_name }}">
+                                </a>
                             </div>
-                            <div class="body">
-                                <h3><a href="{{ organizer.organizer_url }}">{{ organizer.organizer_name }}</a></h3>
-
-                                <p>{{ organizer.organizer_description }}</p>
+                            <div class="media-body">
+                                <h4 class="media-heading">{{ organizer.organizer_name }}</h4>
+                                {{ organizer.organizer_description }}
                             </div>
                         </div>
                     {% endfor %}
-                    <h2 class="line-title">最近参与者..</h2>
-                    <ul class="users-list">
+                    <h2 class="line-title">最近参与者：</h2>
+                    <ul class="users-list" id="users"></ul>
+                    <h2 class="line-title">分享到：</h2>
 
-                    </ul>
-                    <h2 class="line-title">分享朋友圈.</h2>
-                    <br/>
+                    <div class="oh-share">
+                        <div class="jiathis_style_24x24">
+                            <a class="jiathis_button_qzone"></a>
+                            <a class="jiathis_button_tsina"></a>
+                            <a class="jiathis_button_weixin"></a>
+                            <a class="jiathis_button_cqq"></a>
+                            <a class="jiathis_button_tqq"></a>
+                            <a class="jiathis_button_douban"></a>
 
-                    <div>
-                        <img src="{{ dimensional }}"/>
+                            </br>
+                            <a href="http://www.jiathis.com/share"
+                               class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis"
+                               target="_blank"></a>
+                            <a class="jiathis_counter_style"></a>
+
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="registerModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <form id="registerForm" class="form-horizontal" data-hid="{{ hackathon.id }}" novalidate>
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">申请</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group"
+                             ng-class="{ 'has-error' : registerForm.team_name.$invalid && registerForm.team_name.$touched }">
+                            <label class="col-sm-3 control-label required">团队名称</label>
+
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" name="team_name" placeholder="团队名称"
+                                       required
+                                       data-bv-trigger="blur"
+                                       data-bv-notempty-message="团队名称必须填写">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">代码托管地址</label>
+
+                            <div class="col-sm-9">
+                                <input type="url" class="form-control" name="git_project"
+                                       placeholder="githubx项目地址">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">确定</button>
+                        <button type="button" class="btn btn-warning" data-dismiss="modal">取消</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script id="register_list_temp" type="text/x-jquery-tmpl">
+    {% raw %}
+        <li>
+            <a href="javascript:;">
+              <img class="avatar" alt="Lucas" src="${avatar_url }">
+            </a>
+
+            <div>
+              <strong>${name}</strong>
+            </div>
+            <div class="date">${create_time}</div>
+        </li>
+    {% endraw %}
+
+
+
+
+
+    </script>
+    <script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+    <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
+    <script type="text/javascript" src="/static/js/views/oh.site.hackathon.js"></script>
 {% endblock %}

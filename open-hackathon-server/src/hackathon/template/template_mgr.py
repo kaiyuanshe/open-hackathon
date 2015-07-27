@@ -428,8 +428,8 @@ class TemplateManager(Component):
     def __get_filter_condition(self, **kwargs):
         """parse args and transfer to condition that can be used to query in DB
 
-        :type  args: dict
-        :param args: filter conditions
+        :type  kwargs: dict
+        :param kwargs: filter conditions
 
         :return: condition for query in DB
         """

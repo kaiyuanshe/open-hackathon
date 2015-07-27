@@ -1,9 +1,11 @@
 @import "font-awesome.min.css";
+
 @media screen and (max-width: 961px) {
     body {
         min-width: 620px;
     }
 }
+
 @media (min-width: 1200px) {
     .container #content {
         padding: 20px;
@@ -121,7 +123,7 @@
     }
 
     .pull-right {
-       margin: 0;
+        margin: 0;
     }
 
     .header-nav li {
@@ -143,9 +145,11 @@
         overflow: visible !important;
     }
 }
+
 .navbar-header {
-  float: left!important;;
+    float: left !important;;
 }
+
 @media only screen and (max-width: 479px) {
     body {
         padding: 0;
@@ -165,6 +169,8 @@ body {
     position: relative;
     background: #fff;
     z-index: 1;
+    padding-bottom: 40px;
+    min-height: 610px;
 }
 
 .md-nooverflow #content {
@@ -379,6 +385,8 @@ a#main-menu-toggle {
 .navbar-brand img {
     width: 40px;
     height: 40px;
+    margin-right: 10px;
+    display: inline-block;
 }
 
 .header-nav .account {
@@ -643,18 +651,21 @@ h2 {
 }
 
 footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
     background: #3c454f;
     color: white;
     min-height: 40px;
     line-height: 40px;
-    padding: 0 20px;
     margin: 0 !important;
-    z-index: 4;
+
     font-size: 12px;
+}
+
+.workspace footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 4;
 }
 
 .table thead > tr > th {
@@ -731,9 +742,13 @@ footer {
     white-space: normal !important;
 }
 
+.navbar-nav > li > a {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
 .header-nav a.btn {
     position: relative;
-    height: 30px;
     width: 40px;
     color: #fff !important;
     text-shadow: none !important;
@@ -771,13 +786,12 @@ ul.notifications li .icon {
 
 .dropdown-menu {
     position: absolute;
-    top: 90%;
+    top: 41px;
+    left: auto;
     right: 0;
     z-index: 1000;
     display: none;
     float: left;
-    min-width: 300px;
-    max-width: 300px;
     padding: 0;
     margin: 0;
     list-style: none;
@@ -808,7 +822,7 @@ ul.notifications li .icon {
     height: 40px;
     width: auto;
     padding: 0 0 5px 10px !important;
-    margin: 0 -15px 0 3px;
+    margin: 0 0 0 3px;
 }
 
 .header-nav a.btn .number {
@@ -1383,3 +1397,43 @@ ul.notifications li, ul.tasks li, ul.messages li {
     right: 15px;
 }
 
+.oh-main {
+    padding-bottom: 60px;
+}
+
+.error-container {
+    background-color: #8cc7e5;
+    width: 850px;
+    padding: 15px;
+    margin: 50px auto;
+}
+
+.error-body {
+    background-color: #565551;
+    color: #fff;
+    padding-bottom: 40px;
+}
+
+.error-body .header .error {
+    border-bottom: 1px solid #fff;
+    margin: 0 30px 20px 30px;
+    padding: 20px 0 15px 0;
+    text-align: center;
+}
+
+.error-body .header .error .code {
+    font-size: 72pt;
+    color: #8cc7e5;
+    text-align: right;
+    margin-right: 25px;
+}
+
+.error-body .header .error .message {
+    font-size: 44pt;
+    text-align: left;
+}
+
+.error-body .more-details .more-info {
+    text-align: center;
+    font-size: 30pt;
+}

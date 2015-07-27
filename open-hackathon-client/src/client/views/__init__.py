@@ -30,7 +30,7 @@ sys.path.append("..")
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-from client import app
+from client import app, Context
 import json
 import requests
 import markdown
@@ -38,10 +38,10 @@ import re
 
 from datetime import datetime
 from client.constants import LOGIN_PROVIDER
-from flask_login import login_required, current_user, login_user, LoginManager
+from flask_login import login_required, login_user, LoginManager
 from client.user.login import login_providers
 from client.user.user_mgr import user_manager
-from flask import Response, render_template, request, g, redirect, make_response, session
+from flask import Response, render_template, request, g, redirect, make_response, session, url_for
 from datetime import timedelta
 from client.functions import get_config
 from client.log import log
@@ -49,6 +49,10 @@ from client.log import log
 session_lifetime_minutes = 60
 
 PERMANENT_SESSION_LIFETIME = timedelta(minutes=session_lifetime_minutes)
+API_HACKATHON = "/api/hackathon"
+API_HACKATHON_LIST = "/api/hackathon/list"
+API_HACKATHON_TEMPLATE = "/api/hackathon/template"
+API_HACAKTHON_REGISTRATION = "/api/user/registration"
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -87,7 +91,11 @@ def __login(provider):
         token = admin_with_token["token"].token
         login_user(admin_with_token["admin"])
         session["token"] = token
-        resp = make_response(redirect("/manage"))
+        if session["return_url"] is not None:
+            resp = make_response(redirect(session["return_url"]))
+            session["return_url"] = None;
+        else:
+            resp = make_response(redirect(url_for("index")))
         resp.set_cookie('token', token)
         return resp
     except Exception as ex:
@@ -95,33 +103,26 @@ def __login(provider):
         return __login_failed(provider)
 
 
-def __get_hackthon_list(headers=None):
-    default_headers = {"content-type": "application/json"}
-    req = requests.get(get_config("hackathon-api.endpoint") + "/api/hackathon/list", headers=default_headers,
-                       data={"status": 1})
-    resp = json.loads(req.content)
-
-    return resp
+def __date_serializer(date):
+    return long((date - datetime(1970, 1, 1)).total_seconds() * 1000)
 
 
-def __get_hackathon(headers=None):
+def __get_api(url, headers=None, **kwargs):
     default_headers = {"content-type": "application/json"}
     if headers is not None and isinstance(headers, dict):
         default_headers.update(headers)
-    req = requests.get(get_config("hackathon-api.endpoint") + "/api/hackathon", headers=default_headers)
+    req = requests.get(get_config("hackathon-api.endpoint") + url, headers=default_headers, **kwargs)
     resp = json.loads(req.content)
 
     return resp
 
 
-def __get_hackathon_template(headers=None):
-    default_headers = {"content-type": "application/json"}
-    if headers is not None and isinstance(headers, dict):
-        default_headers.update(headers)
-    req = requests.get(get_config("hackathon-api.endpoint") + "/api/hackathon/template", headers=default_headers)
-    resp = json.loads(req.content)
+@app.context_processor
+def utility_processor():
+    def get_now():
+        return __date_serializer(datetime.now())
 
-    return resp
+    return dict(get_now=get_now)
 
 
 @app.template_filter('mkHTML')
@@ -200,7 +201,7 @@ def live_login():
 @app.route('/')
 @app.route('/index')
 def index():
-    hackathon_list = __get_hackthon_list()
+    hackathon_list = __get_api(API_HACKATHON_LIST, params={"status": 1})
     return render('/home.html', hackathon_list=hackathon_list)
 
 
@@ -227,30 +228,63 @@ def login():
         return __login(LOGIN_PROVIDER.MYSQL)
 
     # todo redirect to the page request login
-
+    session["return_url"] = request.args.get("return_url")
     return render("/login.html", error=None)
 
 
 @app.route("/site/<hackathon_name>")
 def hackathon(hackathon_name):
-    item = __get_hackathon(headers={"hackathon_name": hackathon_name})
-    if "error" in item.keys():
+    if current_user.is_authenticated():
+        data = __get_api(API_HACAKTHON_REGISTRATION, {"hackathon_name": hackathon_name, "token": session["token"]})
+    else:
+        data = __get_api(API_HACKATHON, {"hackathon_name": hackathon_name})
+
+    data = Context.from_object(data)
+    if data.get('error') is not None or data.get('hackathon').status != 1:
         return render("/404.html")
     else:
-        return render("/site/hackathon.html", hackathon=item)
+        return render("/site/hackathon.html",
+                      hackathon_name=hackathon_name,
+                      hackathon=data.get("hackathon", data),
+                      user=data.get("user"),
+                      registration=data.get("registration"),
+                      experiment=data.get("experiment"))
 
 
 @app.route("/site/<hackathon_name>/workspace")
 @login_required
 def workspace(hackathon_name):
-    return render("/site/workspace.html", hackathon_name=hackathon_name)
+    headers = {"hackathon_name": hackathon_name, "token": session["token"]}
+    reg = Context.from_object(__get_api(API_HACAKTHON_REGISTRATION, headers))
+
+    if reg.get('registration') is not None:
+        if reg.registration.status == 1 or (reg.registration.status == 3 and reg.hackathon.basic_info.auto_approve):
+            return render("/site/workspace.html", hackathon_name=hackathon_name,
+                          workspace=True,
+                          hackathon=reg.get("hackathon"),
+                          experiment=reg.get('experiment', {id: 0}))
+        else:
+            return redirect(url_for('hackathon', hackathon_name=hackathon_name))
+    else:
+        return redirect(url_for('hackathon', hackathon_name=hackathon_name))
 
 
 @app.route("/site/<hackathon_name>/settings")
 @login_required
 def tempSettings(hackathon_name):
-    temp = __get_hackathon_template(headers={"hackathon_name": hackathon_name, "token": session["token"]})
-    return render("/site/settings.html", hackathon_name=hackathon_name, temp=temp)
+    headers = {"hackathon_name": hackathon_name, "token": session["token"]}
+    reg = Context.from_object(__get_api(API_HACAKTHON_REGISTRATION, headers))
+
+    if reg.get('registration') is not None:
+        if reg.get('experiment') is not None:
+            return redirect(url_for('workspace', hackathon_name=hackathon_name))
+        elif reg.registration.status == 1 or (reg.registration.status == 3 and reg.hackathon.basic_info.auto_approve):
+            templates = __get_api(API_HACKATHON_TEMPLATE, headers)
+            return render("/site/settings.html", hackathon_name=hackathon_name, templates=templates)
+        else:
+            return redirect(url_for('hackathon', hackathon_name=hackathon_name))
+    else:
+        return redirect(url_for('hackathon', hackathon_name=hackathon_name))
 
 
 from route_manage import *
