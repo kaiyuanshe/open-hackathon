@@ -35,7 +35,7 @@ from client.functions import get_remote, get_config, post_to_remote, convert
 from client.log import log
 import json
 import requests
-from admin_mgr import admin_manager
+from user_mgr import user_manager
 from flask import session, request
 from flask_login import logout_user
 from client.constants import LOGIN_PROVIDER
@@ -44,7 +44,7 @@ from client.constants import LOGIN_PROVIDER
 class LoginBase():
     def logout(self, admin):
         if admin.is_authenticated():
-            if admin_manager.db_logout(admin):
+            if user_manager.db_logout(admin):
                 info = "ok"
             else:
                 info = "log out failed"
@@ -88,13 +88,13 @@ class QQLogin(LoginBase):
         user_info = convert(json.loads(user_info_resp))
         email_list = []
 
-        return admin_manager.oauth_db_login(openid,
-                                            name=user_info["nickname"],
-                                            provider=LOGIN_PROVIDER.QQ,
-                                            nickname=user_info["nickname"],
-                                            access_token=access_token,
-                                            email_list=email_list,
-                                            avatar_url=user_info["figureurl"])
+        return user_manager.oauth_db_login(openid,
+                                           name=user_info["nickname"],
+                                           provider=LOGIN_PROVIDER.QQ,
+                                           nickname=user_info["nickname"],
+                                           access_token=access_token,
+                                           email_list=email_list,
+                                           avatar_url=user_info["figureurl"])
 
 
 class GithubLogin(LoginBase):
@@ -144,13 +144,13 @@ class GithubLogin(LoginBase):
         # email is user's primary email
         email_list = json.loads(email_info_resp)
 
-        return admin_manager.oauth_db_login(openid,
-                                            provider=LOGIN_PROVIDER.GITHUB,
-                                            name=name,
-                                            nickname=nickname,
-                                            access_token=access_token,
-                                            email_list=email_list,
-                                            avatar_url=avatar)
+        return user_manager.oauth_db_login(openid,
+                                           provider=LOGIN_PROVIDER.GITHUB,
+                                           name=name,
+                                           nickname=nickname,
+                                           access_token=access_token,
+                                           email_list=email_list,
+                                           avatar_url=avatar)
 
 
 class GitcafeLogin(LoginBase):
@@ -191,13 +191,13 @@ class GitcafeLogin(LoginBase):
             }
         ]
 
-        return admin_manager.oauth_db_login(id,
-                                            provider=LOGIN_PROVIDER.GITCAFE,
-                                            name=name,
-                                            nickname=nickname,
-                                            access_token=token,
-                                            email_list=email_list,
-                                            avatar_url=avatar_url)
+        return user_manager.oauth_db_login(id,
+                                           provider=LOGIN_PROVIDER.GITCAFE,
+                                           name=name,
+                                           nickname=nickname,
+                                           access_token=token,
+                                           email_list=email_list,
+                                           avatar_url=avatar_url)
 
 
 class WeiboLogin(LoginBase):
@@ -251,13 +251,13 @@ class WeiboLogin(LoginBase):
             }
         ]
 
-        return admin_manager.oauth_db_login(openid,
-                                            provider=LOGIN_PROVIDER.WEIBO,
-                                            name=name,
-                                            nickname=nickname,
-                                            access_token=access_token,
-                                            email_list=email_list,
-                                            avatar_url=avatar)
+        return user_manager.oauth_db_login(openid,
+                                           provider=LOGIN_PROVIDER.WEIBO,
+                                           name=name,
+                                           nickname=nickname,
+                                           access_token=access_token,
+                                           email_list=email_list,
+                                           avatar_url=avatar)
 
 
 class MySQLLogin(LoginBase):
@@ -268,7 +268,7 @@ class MySQLLogin(LoginBase):
             log.warn("login without user or pwd")
             return None
 
-        return admin_manager.mysql_login(user, pwd)
+        return user_manager.mysql_login(user, pwd)
 
 
 class LiveLogin(LoginBase):

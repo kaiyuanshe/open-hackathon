@@ -24,6 +24,7 @@
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
 
+
 class SQLAlchemyAdapterMetaClass(type):
     @staticmethod
     def wrap(func):
@@ -31,6 +32,8 @@ class SQLAlchemyAdapterMetaClass(type):
 
         def auto_commit(self, *args, **kwargs):
             try:
+                # todo a trick for DB transaction issue
+                self.commit()
                 return_value = func(self, *args, **kwargs)
                 self.commit()
                 return return_value
@@ -130,9 +133,9 @@ class SQLAlchemyAdapter(DBAdapter):
             else:
                 raise KeyError("Object '%s' has no field '%s'." % (type(object), key))
 
-    def delete_object(self, object):
+    def delete_object(self, instance):
         """ Delete object 'object'. """
-        self.db_session.delete(object)
+        self.db_session.delete(instance)
 
     def delete_all_objects(self, ObjectClass, *criterion):
         ObjectClass.query.filter(*criterion).delete(synchronize_session=False)

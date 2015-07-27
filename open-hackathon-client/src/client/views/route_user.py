@@ -66,5 +66,3 @@ def hackathon_workspace(hackathon_name):
 @login_required
 def register(hackathon_name):
     return render("/register/profile.html")
-
-

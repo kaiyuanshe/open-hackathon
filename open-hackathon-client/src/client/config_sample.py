@@ -156,7 +156,6 @@ Config = {
                 },
                  "user": {
                     "": ["get"],
-                    "login": ["post", "delete"],
                     "experiment": {
                         "": ["get", "post", "delete", "put"],
                         "list": ["get"]

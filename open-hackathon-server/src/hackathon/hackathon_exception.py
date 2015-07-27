@@ -26,13 +26,13 @@ THE SOFTWARE.
 
 class HackathonException(Exception):
     """Base of open hackathon platform exceptions"""
-    pass
+
+    def __init__(self, code):
+        self.code = code
 
 
 class AlaudaException(HackathonException):
-    '''
-    Exception that indicate failure in http request to Alauda
-    '''
+    """Exception that indicate failure in http request to Alauda"""
 
     def __init__(self, code, message):
         self.code = code
