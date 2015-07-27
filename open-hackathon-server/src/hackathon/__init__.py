@@ -201,8 +201,8 @@ def __init_schedule_jobs():
     # schedule job to check recycle operation
     next_run_time = util.get_now() + timedelta(minutes=1)
     sche.add_interval(feature="expr_manager",
-                      method="recycle_expr",
-                      id="recycle_expr",
+                      method="scheduler_recycle_expr",
+                      id="scheduler_recycle_expr",
                       next_run_time=next_run_time,
                       minutes=10)
 
