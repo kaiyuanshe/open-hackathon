@@ -32,3 +32,16 @@ class AzureStorage(Storage):
 
     def __init__(self):
         return
+
+    def save(self, context):
+
+        pass
+
+    def load(self, context):
+        pass
+
+    def delete(self, context):
+        pass
+
+    def report_health(self):
+        pass
