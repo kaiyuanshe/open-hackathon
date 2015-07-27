@@ -23,31 +23,29 @@
 // -----------------------------------------------------------------------------------
 
 ;
-(function($, w) {
+(function ($, w) {
     var CURRENT_HACKATHON_COOKIE_NAME = 'current_hackathon';
     w.oh = w.oh || {};
     w.oh.comm = {
-        DateFormat: function(milliseconds, formatstr) {
+        DateFormat: function (milliseconds, formatstr) {
             formatstr = formatstr || 'yyyy-MM-dd';
             return new Date(milliseconds).format(formatstr);
         },
-        getCurrentHackathon: function() {
-            var route = '/manage/:hackathon_name';
-            var routeMatcher = new RegExp(route.replace(/:[^\s/]+/g, '([\\w-]+)'));
-            return window.location.pathname.match(routeMatcher)[1] || '';
+        getCurrentHackathon: function () {
+            return $('meta[name="hackathon_name"]').attr('content');
         },
-        createLoading:function(elemt){
+        createLoading: function (elemt) {
             $(elemt).children().hide();
             $(elemt).append($('<div class="text-center" data-type="pageloading"><img src="/static/pic/spinner-lg.gif"></div>'))
         },
-        removeLoading:function(){
+        removeLoading: function () {
             var pageloading = $('[data-type="pageloading"]')
             pageloading.siblings().show();
             pageloading.detach();
         }
     };
 
-    $.getUrlParam = function(name) {
+    $.getUrlParam = function (name) {
         var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
         var r = window.location.search.substr(1).match(reg);
         if (r != null) return unescape(r[2]);
@@ -64,7 +62,7 @@
         return context[func].apply(this, args);
     }
 
-    window.addEventListener("storage", function(e) {
+    window.addEventListener("storage", function (e) {
         var key = e.key;
         var newValue = e.newValue;
         var oldValue = e.oldValue;
@@ -73,36 +71,37 @@
         console.log(e);
     });
 
-    function addTabsEvent(){
-        var tabs = $('[data-type="tabs"]').on('click','a',function(e){
+    function addTabsEvent() {
+        var tabs = $('[data-type="tabs"]').on('click', 'a', function (e) {
             e.preventDefault();
             var a = $(this);
             var toTab = a.attr('href');
-            var li =  a.parent();
+            var li = a.parent();
             li.addClass('active').siblings().removeClass('active');
-            $(toTab).addClass('active').siblings().removeClass('active');;
+            $(toTab).addClass('active').siblings().removeClass('active');
+            ;
         })
     }
 
-    $(function() {
-        if(location.pathname.search('logout','i') != -1){
+    $(function () {
+        if (location.pathname.search('logout', 'i') != -1) {
             location.href = '/login';
             return;
         }
         w.oh.comm.createLoading('[loading]');
         addTabsEvent();
         var menu = $('#sidebar-left .main-menu');
-        menu.find('a').each(function() {
+        menu.find('a').each(function () {
             if ($($(this))[0].href == String(window.location)) {
                 $(this).parent().addClass('active');
-                $(this).parents('ul').add(this).each(function() {
+                $(this).parents('ul').add(this).each(function () {
                     $(this).show();
                     $(this).prev('a').find('.chevron').removeClass('closed').addClass('opened')
                 })
             }
         });
 
-        menu.on('click', '.dropmenu', function(e) {
+        menu.on('click', '.dropmenu', function (e) {
             e.preventDefault();
             var chevron = $(this).find('.chevron');
             if (chevron.hasClass('opened')) {
@@ -121,7 +120,7 @@
                 query: {}
             }
             $.extend(_params, obj.data('options') || {});
-            executeFunctionByName(obj.data('api'), w, _params, function(data) {
+            executeFunctionByName(obj.data('api'), w, _params, function (data) {
                 obj.empty().append($(obj.data('target')).tmpl(data));
                 if (obj.editable) {
                     obj.find('.edit').editable();
@@ -132,7 +131,7 @@
             });
         }
 
-        $('[data-change]').bind('oh.change', function(e) {
+        $('[data-change]').bind('oh.change', function (e) {
             var obj = $(this);
             var tar = $(obj.data('change-target'));
             var data = {
@@ -144,17 +143,17 @@
                 options: data
             });
             bindData(tar);
-        }).change(function(e) {
+        }).change(function (e) {
             $(this).trigger('oh.change');
         });
 
-        var confirm_modal = $('#confirm_modal').on('show.bs.modal', function(e) {
+        var confirm_modal = $('#confirm_modal').on('show.bs.modal', function (e) {
             confirm_modal
                 .data({
                     item: $(e.relatedTarget).parents('tr').data('tmplItem').data,
                     target: $(e.relatedTarget).parents('tbody')
                 });
-        }).on('click', '[data-type="delete"]', function(e) {
+        }).on('click', '[data-type="delete"]', function (e) {
             executeFunctionByName(confirm_modal.data('api'), w, {
                 query: {
                     id: confirm_modal.data('item').id
@@ -162,14 +161,36 @@
                 header: {
                     hackathon_id: confirm_modal.data('item').hackathon_id
                 }
-            }, function(data) {
+            }, function (data) {
                 bindData(confirm_modal.data('target'));
                 confirm_modal.modal('hide');
             });
         });
 
-        $('[data-toggle="bindtemp"]').each(function(i, o) {
+        $('[data-toggle="bindtemp"]').each(function (i, o) {
             bindData($(o));
         });
     })
 })(jQuery, window);
+
+String.prototype.format = function (args) {
+    var result = this;
+    if (arguments.length > 0) {
+        if (arguments.length == 1 && typeof(args) == 'object') {
+            for (var key in args) {
+                if (args[key] != undefined) {
+                    var reg = new RegExp('({' + key + '})', 'g');
+                    result = result.replace(reg, args[key]);
+                }
+            }
+        } else {
+            for (var i = 0; i < arguments.length; i++) {
+                if (arguments[i] != undefined) {
+                    var reg = new RegExp('({[' + i + ']})', 'g');
+                    result = result.replace(reg, arguments[i]);
+                }
+            }
+        }
+    }
+    return result;
+};

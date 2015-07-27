@@ -1,32 +1,32 @@
 <ul class="nav main-menu">
     {% if g.admin.is_super() %}
-    <li>
-        <a class="dropmenu" href="sitemap#">
-            <i class="fa fa-sitemap"></i>
-            <span class="hidden-sm text">站点管理</span>
-            <span class="chevron closed"></span>
-        </a>
-        <ul>
-            <li>
-                <a href="javascript:;">
-                    <i class="fa fa-user"></i>
-                    <span class="hidden-sm text">超级管理员</span>
-                </a>
-            </li>
-            <li>
-                <a href="javascript:;">
-                    <i class="fa  fa-cloud"></i>
-                    <span class="hidden-sm text">黑客松管理</span>
-                </a>
-            </li>
-            <li>
-                <a href="javascript:;">
-                    <i class="fa  fa-list-alt"></i>
-                    <span class="hidden-sm text">日志分析</span>
-                </a>
-            </li>
-        </ul>
-    </li>
+        <li>
+            <a class="dropmenu" href="sitemap#">
+                <i class="fa fa-sitemap"></i>
+                <span class="hidden-sm text">站点管理</span>
+                <span class="chevron closed"></span>
+            </a>
+            <ul>
+                <li>
+                    <a href="javascript:;">
+                        <i class="fa fa-user"></i>
+                        <span class="hidden-sm text">超级管理员</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="javascript:;">
+                        <i class="fa  fa-cloud"></i>
+                        <span class="hidden-sm text">黑客松管理</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="javascript:;">
+                        <i class="fa  fa-list-alt"></i>
+                        <span class="hidden-sm text">日志分析</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
     {% endif %}
     <li>
         <a href="/manage">
@@ -35,37 +35,37 @@
         </a>
     </li>
     <li>
-        <a href="/manage/{{hackathon_name}}/user">
+        <a href="/manage/{{ hackathon_name }}/user">
             <i class="fa fa-users"></i><span class="hidden-sm text"> 用户管理</span>
         </a>
     </li>
     <li>
-        <a href="/manage/{{hackathon_name}}/adminmgr">
+        <a href="/manage/{{ hackathon_name }}/adminmgr">
             <i class="fa fa-adn"></i><span class="hidden-sm text"> 管理员管理</span>
         </a>
     </li>
     <li>
-        <a href="/manage/{{hackathon_name}}/edit">
+        <a href="/manage/{{ hackathon_name }}/edit">
             <i class="fa fa-edit"></i><span class="hidden-sm text"> 编辑黑客松</span>
         </a>
     </li>
     <li>
-        <a href="/manage/{{hackathon_name}}/organizers">
+        <a href="/manage/{{ hackathon_name }}/organizers">
             <i class="fa fa-briefcase"></i><span class="hidden-sm text"> 主办方</span>
         </a>
     </li>
     <li>
-        <a href="/manage/{{hackathon_name}}/azurecert">
+        <a href="/manage/{{ hackathon_name }}/azurecert">
             <i class="fa fa-users"></i><span class="hidden-sm text"> Azure证书管理</span>
         </a>
     </li>
     <li>
-        <a href="/manage/{{hackathon_name}}/template">
+        <a href="/manage/{{ hackathon_name }}/template">
             <i class="fa fa-users"></i><span class="hidden-sm text"> 模板管理</span>
         </a>
     </li>
     <li>
-        <a href="/manage/{{hackathon_name}}/experiment">
+        <a href="/manage/{{ hackathon_name }}/experiment">
             <i class="fa fa-users"></i><span class="hidden-sm text"> 环境管理</span>
         </a>
     </li>

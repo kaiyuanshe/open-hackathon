@@ -1,10 +1,69 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title></title>
-</head>
-<body>
+{% extends "base/base.html" %}
+{% block style %}
+    <link href="/static/css/oh.site.workspace.css" rel="stylesheet">
+{% endblock %}
+{% block content %}
+    <div id="main">
+        <div class="container hackathon" data-experiment="{{ experiment.id }}">
+            <div class="hackathon-nav">
+                <div class="row">
+                    <div class="col-md-12" id="stat">
+                        <h4 class="col-md-offset-1">在线人数：<span id="online">0</span></h4>
+                        <h4 class="col-md-offset-1">参赛人数：<span id="total">0</span></h4>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <a href="javascript:;" title="" class="vm-box" id="baidu" data-url="http://baidu.com">
+                            <img src="{imgUrl}" alt="">
+                        </a>
 
-</body>
-</html>
+                        <p name="dserie">{name}</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <a href="javascript:;" title="" class="vm-box" id="nam" data-url="http://baidu.com">
+                            <img src="{imgUrl}" alt="">
+                        </a>
+
+                        <p name="dserie">{name}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="work-fluid">
+                    <div class="center">
+                        <div id="hack_main" class="bottom">
+                            <div id="hack_main_load">
+                                <div style="width:100%;height:100%;text-align:center;margin-top:150px;" id="load">
+                                    <p>正在为您创建开发、部署环境,请稍等...... </p>
+                                    <img src="/static/pic/spinner-lg.gif">
+                                </div>
+                                <div class="error-container" id="error" style="display: none">
+                                    <div class="error-body">
+                                        <div class="header">
+                                            <div class="error">
+                                                <span class="code">500  </span>
+                                                <span class="message">服务器出错!</span>
+                                            </div>
+                                        </div>
+                                        <div class="more-details">
+                                            <div class="error-info">
+                                                <div class="more-info">请重新刷新页面。</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script type="text/javascript" src="/static/js/views/oh.site.workspace.js"></script>
+{% endblock %}
