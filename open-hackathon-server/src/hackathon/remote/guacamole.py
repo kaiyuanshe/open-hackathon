@@ -39,7 +39,7 @@ from hackathon.database.models import (
     VirtualEnvironment,
 )
 import json
-from hackathon.hackathon_response import access_denied, not_found
+from hackathon.hackathon_response import forbidden, not_found
 from hackathon import Component
 from flask import g
 
@@ -55,7 +55,7 @@ class GuacamoleInfo(Component):
             return not_found("not_found")
 
         if guacamole_config.experiment.user_id != g.user.id:
-            return access_denied("forbidden")
+            return forbidden("forbidden")
 
         self.log.debug("get guacamole config by id: %s, paras: %s" % (connection_name, guacamole_config.remote_paras))
         return json.loads(guacamole_config.remote_paras)

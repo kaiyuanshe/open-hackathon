@@ -218,14 +218,14 @@ class HackathonFileResource(Resource):
 class HackathonAdminListResource(Resource):
     @hackathon_name_required
     def get(self):
-        return admin_manager.get_hackathon_admins()
+        return admin_manager.get_admins_by_hackathon(g.hackathon)
 
 
 class HackathonAdminResource(Resource):
     @admin_privilege_required
     def post(self):
         args = request.get_json()
-        return admin_manager.create_admin(args)
+        return admin_manager.add_admin(args)
 
     @admin_privilege_required
     def put(self):

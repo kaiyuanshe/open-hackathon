@@ -29,7 +29,6 @@ sys.path.append("..")
 from hackathon import api, RequiredFeature, Component
 from flask import g, request
 from flask_restful import Resource, reqparse
-from hackathon.user.login import login_providers
 from hackathon.decorators import token_required, hackathon_name_required
 from hackathon.hackathon_response import internal_server_error, not_found, bad_request
 import json
@@ -53,17 +52,6 @@ class CurrentUserResource(Resource):
     @token_required
     def get(self):
         return user_manager.user_display_info(g.user)
-
-
-class UserLoginResource(Resource, Component):
-    def post(self):
-        body = request.get_json()
-        provider = body["provider"]
-        return login_providers[provider].login(body)
-
-    @token_required
-    def delete(self):
-        return login_providers.values()[0].logout(g.user)
 
 
 class UserHackathonRelResource(Resource, Component):
@@ -193,6 +181,7 @@ class TeamTemplateResource(Resource):
         args = parse.parse_args()
         return team_manager.team_leader_delete_template(args['template_id'])
 
+
 class TeamResource(Resource):
     @hackathon_name_required
     def get(self):
@@ -222,6 +211,7 @@ class TeamResource(Resource):
         args = parse.parse_args()
         return team_manager.dismiss_team(g.hackathon.id, args["team_name"])
 
+
 class TeamManageResource(Resource):
     @token_required
     @hackathon_name_required
@@ -240,10 +230,11 @@ class TeamManageResource(Resource):
         parse.add_argument("team_name", type=str, location="json", required=True)
         args = parse.parse_args()
         return team_manager.update_statues(g.hackathon.id,
-                                        args["team_name"],
-                                        args["status"],
-                                        g.user,
-                                        args["user_id"])
+                                           args["team_name"],
+                                           args["status"],
+                                           g.user,
+                                           args["user_id"])
+
     @token_required
     @hackathon_name_required
     def delete(self):
@@ -269,6 +260,7 @@ class TeamLeaderResource(Resource):
                                            args["team_name"],
                                            args["user_id"])
 
+
 def register_user_routes():
     """
     register API routes for hackathon UI user
@@ -279,7 +271,6 @@ def register_user_routes():
 
     # user API
     api.add_resource(CurrentUserResource, "/api/user")
-    api.add_resource(UserLoginResource, "/api/user/login")
 
     # user-hackathon-relationship, or register, API
     api.add_resource(UserHackathonRelResource, "/api/user/registration")

@@ -23,6 +23,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
+from werkzeug.exceptions import HTTPException
 
 __author__ = 'Junbo Wang'
 __version__ = '2.0'
@@ -35,15 +36,59 @@ from datetime import timedelta
 from util import safe_get_config, get_class, Utility
 from hackathon_factory import factory, RequiredFeature
 from hackathon_scheduler import HackathonScheduler
-from hackathon_response import internal_server_error, bad_request
+from hackathon_response import *
 from log import log
+from context import Context
+
+__all__ = [
+    "app",
+    "Context",
+    "RequiredFeature",
+    "Component",
+]
 
 
 # initialize flask and flask restful
 app = Flask(__name__)
 app.config['SECRET_KEY'] = safe_get_config("app.secret_key", "secret_key")
 app.debug = True
-api = Api(app)
+
+
+class HackathonApi(Api):
+    """Customize Api to give a chance to handle exceptions in framework level
+
+    We can raise HTTPException and it's inheritances directly in components, they will be caught here. Now we have two
+    ways to response with error:
+        - return bad_request("some message")
+        - raise Bad_Request("some message")
+    You can decide to use either way ,they are of the same.
+    """
+
+    def handle_error(self, e):
+        log.error(e)
+        if isinstance(e, HTTPException):
+            if e.code == 400:
+                return self.make_response(bad_request(e.description), 200)
+            if e.code == 401:
+                return self.make_response(unauthorized(e.description), 200)
+            if e.code == 403:
+                return self.make_response(forbidden(e.description), 200)
+            if e.code == 404:
+                return self.make_response(not_found(e.description), 200)
+            if e.code == 409:
+                return self.make_response(conflict(e.description), 200)
+            if e.code == 412:
+                return self.make_response(precondition_failed(e.description), 200)
+            if e.code == 415:
+                return self.make_response(unsupported_mediatype(e.description), 200)
+            if e.code == 500:
+                return self.make_response(internal_server_error(e.description), 200)
+
+        # if exception cannot be handled, return error 500
+        return self.make_response(internal_server_error(e.message), 200)
+
+
+api = HackathonApi(app)
 
 # Enable CORS support
 app.config['CORS_HEADERS'] = 'Content-Type, token, hackathon_name'
@@ -57,6 +102,12 @@ scheduler = HackathonScheduler(app)
 def bad_request_handler(error):
     log.error(error)
     return bad_request(error.message)
+
+
+@app.errorhandler(412)
+def precondition_failed_handler(error):
+    log.error(error)
+    return precondition_failed(error.message)
 
 
 @app.errorhandler(Exception)
@@ -75,44 +126,16 @@ class Component(object):
     util = RequiredFeature("util")
 
 
-class Context(object):
-    '''
-    A collection of parameters that will be passed through threads/databases
-    NEVER put complex object in Context such as instance of db models or business manager
-    '''
-    props = {}
-
-    def __init__(self, **kwargs):
-        for key, value in kwargs.items():
-            self.props[key] = value
-
-    def __getattr__(self, name):
-        if name in self.props:
-            return self.props[name]
-
-        raise AttributeError()
-
-    def __setattr__(self, key, value):
-        self.props[key] = value
-
-    def __repr__(self):
-        return repr(self.props)
-
-    def __contains__(self, key):
-        return key in self.props
-
-
 def init_components():
     from hackathon.database import db_session
     from hackathon.database.db_adapters import SQLAlchemyAdapter
-    from hackathon.user.user_mgr import UserManager
+    from hackathon.user import UserManager
     from hackathon.azureformation.fileService import FileService
     from hackathon.azureformation.azureCertManagement import AzureCertManagement
     from hackathon.hack.host_server_mgr import DockerHostManager
-    from hackathon.hack import HackathonManager
+    from hackathon.hack import HackathonManager, AdminManager
     from hackathon.registration.register_mgr import RegisterManager
     from hackathon.template.template_mgr import TemplateManager
-    from hackathon.admin.admin_mgr import AdminManager
     from hackathon.remote.guacamole import GuacamoleInfo
     from hackathon.expr.expr_mgr import ExprManager
     from hackathon.team.team_mgr import TeamManager

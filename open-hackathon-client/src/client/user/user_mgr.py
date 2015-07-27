@@ -27,32 +27,37 @@
 import sys
 
 sys.path.append("..")
-from hackathon.database.models import UserToken, User, UserEmail
-from datetime import timedelta
-from hackathon.constants import ReservedUser, HTTP_HEADER
+
+from client.database.models import *
+from client.log import log
+from client.database import db_adapter
+from client.constants import HTTP_HEADER
+from client.functions import safe_get_config, get_now
 from flask import request, g
 import uuid
-from hackathon import Component, RequiredFeature
+from client.md5 import encode
+from datetime import timedelta
 
 
-class UserManager(Component):
-    admin_manager = RequiredFeature("admin_manager")
-    hackathon_manager = RequiredFeature("hackathon_manager")
+class UserManager(object):
+    def __init__(self, db_adapter):
+        self.db = db_adapter
 
-    def __generate_api_token(self, user):
-        token_issue_date = self.util.get_now()
+    def __generate_api_token(self, admin):
+        token_issue_date = get_now()
         token_expire_date = token_issue_date + timedelta(
-            minutes=self.util.safe_get_config("login.token_expiration_minutes", 1440))
+            minutes=safe_get_config("login/token_expiration_minutes", 1440))
         user_token = UserToken(token=str(uuid.uuid1()),
-                               user=user,
+                               user=admin,
                                expire_date=token_expire_date,
                                issue_date=token_issue_date)
         self.db.add_object(user_token)
+        self.db.commit()
         return user_token
 
     def __validate_token(self, token):
-        t = self.db.find_first_object_by(UserToken, token=token)
-        if t is not None and t.expire_date >= self.util.get_now():
+        t = self.db.find_first_object(UserToken, token=token)
+        if t is not None and t.expire_date >= get_now():
             return t.user
         return None
 
@@ -84,79 +89,106 @@ class UserManager(Component):
 
         return self.db.find_first_object_by(User, openid=openid)
 
-    def db_logout(self, user):
+    def db_logout(self, admin):
         try:
-            self.db.update_object(user, online=0)
-            return "OK"
+            self.db.update_object(admin, online=0)
+            self.db.commit()
+            return True
         except Exception as e:
-            self.log.error(e)
-            return "log out failed"
+            log.error(e)
+            return False
 
-    def db_login(self, openid, **kwargs):
-        # update db
-        email_list = kwargs['email_list']
-        user = self.__get_existing_user(openid, email_list)
-        if user is not None:
-            self.db.update_object(user,
-                                  name=kwargs["name"],
-                                  nickname=kwargs["nickname"],
-                                  provider=kwargs["provider"],
-                                  access_token=kwargs["access_token"],
-                                  avatar_url=kwargs["avatar_url"],
-                                  last_login_time=self.util.get_now(),
-                                  online=1)
-            map(lambda x: self.__create_or_update_email(user, x), email_list)
-        else:
-            user = User(openid=openid,
-                        provider=kwargs["provider"],
-                        name=kwargs["name"],
-                        nickname=kwargs["nickname"],
-                        access_token=kwargs["access_token"],
-                        avatar_url=kwargs["avatar_url"],
-                        online=1)
+    def mysql_login(self, user, pwd):
+        enc_pwd = encode(pwd)
+        admin = self.db.find_first_object_by(User, name=user, password=enc_pwd)
+        if admin is None:
+            log.warn("invalid user/pwd login: user=%s, encoded pwd=%s" % (user, enc_pwd))
+            return None
 
-            self.db.add_object(user)
-            map(lambda x: self.__create_or_update_email(user, x), email_list)
-
-        # generate API token
-        token = self.__generate_api_token(user)
+        token = self.__generate_api_token(admin)
         return {
             "token": token,
-            "user": user
+            "admin": admin
         }
 
-    def validate_login(self):
+    def oauth_db_login(self, openid, **kwargs):
+        # update db
+        email_list = kwargs['email_list']
+        admin = self.__get_existing_user(openid, email_list)
+        if admin is not None:
+            self.db.update_object(admin,
+                                  provider=kwargs["provider"],
+                                  name=kwargs["name"],
+                                  nickname=kwargs["nickname"],
+                                  access_token=kwargs["access_token"],
+                                  avatar_url=kwargs["avatar_url"],
+                                  last_login_time=get_now(),
+                                  online=1)
+            map(lambda x: self.__create_or_update_email(admin, x), email_list)
+        else:
+            admin = User(openid=openid,
+                         name=kwargs["name"],
+                         provider=kwargs["provider"],
+                         nickname=kwargs["nickname"],
+                         access_token=kwargs["access_token"],
+                         avatar_url=kwargs["avatar_url"],
+                         online=1)
+
+            self.db.add_object(admin)
+            map(lambda x: self.__create_or_update_email(admin, x), email_list)
+
+        # generate API token
+        token = self.__generate_api_token(admin)
+        return {
+            "token": token,
+            "admin": admin
+        }
+
+    def validate_request(self):
         if HTTP_HEADER.TOKEN not in request.headers:
             return False
 
-        user = self.__validate_token(request.headers[HTTP_HEADER.TOKEN])
-        if user is None:
+        admin = self.__validate_token(request.headers[HTTP_HEADER.TOKEN])
+        if admin is None:
             return False
 
-        g.user = user
+        g.admin = admin
         return True
 
-    def get_user_by_id(self, user_id):
-        return self.db.find_first_object_by(User, id=user_id)
+    def get_user_by_id(self, id):
+        return self.db.find_first_object_by(User, id=id)
 
-    def user_display_info(self, user):
-        ret = {
-            "id": user.id,
-            "name": user.name,
-            "nickname": user.nickname,
-            "email": [e.dic() for e in user.emails.all()],
-            "provider": user.provider,
-            "avatar_url": user.avatar_url,
-            "online": user.online,
-            "create_time": str(user.create_time),
-            "last_login_time": str(user.last_login_time)
+    def get_admin_info(self, admin):
+        return {
+            "id": admin.id,
+            "name": admin.name,
+            "nickname": admin.nickname,
+            "emails": [e.dic() for e in admin.emails.all()],
+            "avatar_url": admin.avatar_url,
+            "online": admin.online,
+            "create_time": str(admin.create_time),
+            "last_login_time": str(admin.last_login_time)
         }
-        if user.profile:
-            ret["user_profile"] = user.profile.dic()
-        return ret
+
+    def get_hackid_from_adminid(self, admin_id):
+
+        admin_user_hackathon_rels = self.db.find_all_objects_by(AdminHackathonRel, user_id=admin_id)
+        if len(admin_user_hackathon_rels) == 0:
+            return []
+
+        # get hackathon_ids_from AdminUserHackathonRels details
+        hackathon_ids = map(lambda x: x.hackathon_id, admin_user_hackathon_rels)
+        return list(set(hackathon_ids))
+
+    def is_super(self, admin_id):
+        return -1 in self.get_hackid_from_adminid(admin_id)
 
 
-    def is_super_admin(self, user):
-        if user.id == ReservedUser.DefaultSuperAdmin:
-            return True
-        return -1 in self.hackathon_manager.get_hackathon_ids_by_admin_user_id(user.id)
+user_manager = UserManager(db_adapter)
+
+
+def is_super(admin):
+    return user_manager.is_super(admin.id)
+
+
+User.is_super = is_super
