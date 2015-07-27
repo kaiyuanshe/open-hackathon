@@ -148,8 +148,8 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
                 "displayname": service_name,
                 "name": service_name,
                 "protocol": guacamole[DockerTemplateUnit.REMOTE_PROTOCOL],
-                "hostname": alauda_port[ALAUDA.DEFAULT_DOMAIN],
-                "port": alauda_port[ALAUDA.SERVICE_PORT]
+                "hostname": alauda_port.get(ALAUDA.DEFAULT_DOMAIN),
+                "port": alauda_port.get(ALAUDA.SERVICE_PORT)
             }
             if DockerTemplateUnit.REMOTE_USERNAME in guacamole:
                 gc["username"] = guacamole[DockerTemplateUnit.REMOTE_USERNAME]

@@ -110,7 +110,7 @@ class TeamManager(Component):
 
         userteamrel = UserTeamRel(join_time=self.util.get_now(),
                                   update_time=self.util.get_now(),
-                                  status=TeamMemberStatus.Allow,
+                                  status=TeamMemberStatus.Approved,
                                   hackathon_id=g.hackathon.id,
                                   user_id=g.user.id,
                                   team_id=team.id)

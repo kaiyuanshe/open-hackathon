@@ -40,10 +40,36 @@ toolbar = DebugToolbarExtension(app)
 
 
 class Context(object):
-    '''
-    A collection of parameters that will be passed through threads/databases
+    """Helper class for JSON. We can access dict similarly as literal in JS
+
+    Essentially a collection of parameters that will be passed through threads/databases
     NEVER put complex object in Context such as instance of db models or business manager
-    '''
+
+    ::Example:
+        dic = {"a": "va", "b": {"b1": "b1", "b2": [1, 2, 3], "b3": [{"b3a": "b3a"}]}}
+        c = Context.from_object(dic) # convert existing obj to Context
+
+        print c.a
+        print c["a"] # exactly the same as c.a. But it allows you pass values to key
+
+        key = "test"
+        print c[key] # now c[key] == c["test"] but c.key != c["test"], actually c.key=c["key"]
+
+        print c.b.b1
+        print c.b.b3[0].b3a
+
+        print c.get("c", 3) # unlike c.a or c["a"], get won't raise exception if key not found
+        print c.get("c")
+
+        c.c1 = True # you can set attribute any time
+        print c.get("c1")
+
+        ctx = Context("a"="a-v","b"="b-v") # you can also create instance directly through constructor
+        ctx.c = "c-v"
+        print ctx.a
+        print ctx["c"]
+
+    """
 
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
@@ -78,22 +104,27 @@ class Context(object):
 
     @staticmethod
     def from_object(arg):
+        """Convert JSON-like object to Context recursively
 
+        :returns list of Context if arg is list
+                 instance of Context if arg is dict
+                 the original arg otherwise
+        """
         if isinstance(arg, list):
-            return map(lambda item: Context.from_object(item), arg)
-        elif not isinstance(arg, dict):
+            return [Context.from_object(a) for a in arg]
+        elif isinstance(arg, dict):
+            ctx = Context()
+            for k, v in arg.iteritems():
+                if isinstance(v, dict):
+                    setattr(ctx, k, Context.from_object(v))
+                elif isinstance(v, list):
+                    setattr(ctx, k, [Context.from_object(vv) for vv in v])
+                else:
+                    setattr(ctx, k, v)
+
+            return ctx
+        else:
             return arg
-
-        ctx = Context()
-        for k, v in arg.iteritems():
-            if isinstance(v, dict):
-                setattr(ctx, k, ctx.from_object(v))
-            elif isinstance(v, list):
-                setattr(ctx, k, map(lambda item: ctx.from_object(item), v))
-            else:
-                setattr(ctx, k, v)
-
-        return ctx
 
 
 from views import *

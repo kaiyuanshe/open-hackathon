@@ -402,6 +402,14 @@ class HackathonManager(Component):
         pre_list = filter(lambda h: self.is_pre_allocate_enabled(h), all)
         return [h.id for h in pre_list]
 
+        # ---------------------------- private methods ---------------------------------------------------
+
+
+'''
+Attach extension methods to Hackathon entity so that we can code like 'if hackathon.is_auto_approve(): ....' where
+hackathon is entity of Hackathon that defines in database/models.py.
+'''
+
 
 def is_auto_approve(hackathon):
     hack_manager = RequiredFeature("hackathon_manager")

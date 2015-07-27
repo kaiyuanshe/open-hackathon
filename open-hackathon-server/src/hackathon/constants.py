@@ -302,6 +302,13 @@ class FILE_TYPE:
 
 
 class TeamMemberStatus:
+    """Status of member of team
+
+    Attributes:
+        Init: A newly team member that wants to join the team
+        Approved: member approved by team leader or system administrator
+        Denied: member denied by team leader or system administrator. Member of this status won't be saved in DB
+    """
     Init = 0
-    Allow = 1
-    Deny = 2
+    Approved = 1
+    Denied = 2
