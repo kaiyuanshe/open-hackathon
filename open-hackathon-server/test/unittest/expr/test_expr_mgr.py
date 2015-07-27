@@ -28,7 +28,6 @@ import sys
 
 sys.path.append("../src/hackathon")
 import datetime
-from hackathon.enum import RGStatus
 from hackathon.hack import HackathonManager
 from hackathon.hackathon_response import bad_request, precondition_failed, not_found, ok
 import unittest
@@ -50,4 +49,4 @@ class TestExperimengManager(unittest.TestCase):
     def test_get_expr_status(self):
         expr_id = 11
         expr_manager = RequiredFeature("expr_manager")
-        result = expr_manager.get_expr_status(expr_id)
+        result = expr_manager.recycle_expr()

@@ -58,11 +58,6 @@ class HackathonManager(Component):
 
     admin_manager = RequiredFeature("admin_manager")
 
-    def __is_recycle_enabled(self, hackathon):
-        key = HACKATHON_BASIC_INFO.RECYCLE_ENABLED
-        value = self.__get_property_from_hackathon_basic_info(hackathon, key)
-        return value == 1
-
     def get_hackathon_by_name_or_id(self, hack_id=None, name=None):
         if hack_id is None:
             return self.get_hackathon_by_name(name)
@@ -197,7 +192,7 @@ class HackathonManager(Component):
     def get_recycle_minutes(self, hackathon):
         key = HACKATHON_BASIC_INFO.RECYCLE_MINUTES
         value = self.__get_property_from_hackathon_basic_info(hackathon, key)
-        return value if value is not None else 0
+        return value if value is not None else 60
 
     def get_pre_allocate_number(self, hackathon):
         key = HACKATHON_BASIC_INFO.PRE_ALLOCATE_NUMBER
@@ -404,8 +399,7 @@ class HackathonManager(Component):
 
     def get_recyclable_hackathon_list(self):
         all = self.db.find_all_objects(Hackathon)
-        recyclable = filter(lambda h: self.__is_recycle_enabled(h), all)
-        return [h.id for h in recyclable]
+        return filter(lambda h: self.is_recycle_enabled(h), all)
 
     def get_pre_allocate_enabled_hackathon_list(self):
         # only online hackathons will be in consideration

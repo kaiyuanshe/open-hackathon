@@ -31,7 +31,7 @@ sys.path.append("..")
 from hackathon import (
     Component,
     RequiredFeature,
-    Context)
+)
 
 from hackathon.constants import (
     EStatus,
@@ -191,24 +191,29 @@ class ExprManager(Component):
         return map(lambda u: self.__get_expr_with_user_info(u), experiments)
 
     def recycle_expr(self):
-        """
-        recycle experiment when idle more than 24 hours
+        """recycle experiment acrroding to hackathon basic info on recycle enabled
+
+        According to the hackathon's basic info on 'recycle_enabled', if True would run the logic, False will do nothing
+        Then if the experiment based on a VM , assign the user_id to super admin, else kill it directly.
+
         :return:
         """
         self.log.debug("start checking recyclable experiment ... ")
-
-        recycle_hours = self.util.safe_get_config('recycle.idle_hours', 24)
-        expr_time_cond = Experiment.last_heart_beat_time + timedelta(hours=recycle_hours) > self.util.get_now()
-        recycle_cond = Experiment.hackathon_id.in_(self.hackathon_manager.get_recyclable_hackathon_list())
-        status_cond = Experiment.status == EStatus.RUNNING
-        r = self.db.find_first_object(Experiment, status_cond, expr_time_cond, recycle_cond)
-
-        if r is not None:
-            self.stop_expr(r.id)
-            self.log.debug("it's stopping " + str(r.id) + " inactive experiment now")
-        else:
-            self.log.debug("There is now inactive experiment now")
-            return
+        for hackathon in self.hackathon_manager.get_recyclable_hackathon_list():
+            # check recycle enabled
+            mins = self.hackathon_manager.get_recycle_minutes(hackathon)
+            expr_time_cond = Experiment.create_time  < self.util.get_now() - timedelta(minutes=mins)
+            status_cond = Experiment.status == EStatus.RUNNING
+            # filter out the experiments that need to be recycled
+            exprs = self.db.find_all_objects(Experiment, status_cond, expr_time_cond, Experiment.hackathon_id==hackathon.id)
+            for expr in exprs:
+                # VM experiment
+                if expr.template.provider == VE_PROVIDER.AZURE:
+                    self.assign_expr_to_admin(expr)
+                else:
+                    # docker experiment
+                    self.stop_expr(expr.id)
+                    self.log.debug("it's stopping " + str(expr.id) + " inactive experiment now")
 
     def schedule_pre_allocate_expr_job(self):
         next_run_time = self.util.get_now() + timedelta(seconds=1)
@@ -321,8 +326,6 @@ class ExprManager(Component):
                 self.log.error(e)
                 return internal_server_error('Failed starting azure vm')
         # after everything is ready, set the expr state to running
-        # check recycle enable
-        self.__recycle_expr(expr)
         # response to caller
         return self.__report_expr_status(expr)
 
@@ -540,25 +543,3 @@ class ExprManager(Component):
         """
         ves = self.db.find_all_objects_by(VirtualEnvironment, experiment_id=expr.id, provider=VE_PROVIDER.DOCKER)
         return map(lambda x: x.container, ves)
-
-    def __recycle_expr(self, expr):
-        """recycle experiment
-
-        According to the hackathon's basic info on 'recycle_enabled', if True would run the logic, False will do nothing
-        Then if the experiment based on a VM , assign the user_id to super admin, else kill it directly.
-
-        :type expr: Experiment
-        :param expr: which would be recycled
-
-        :return:
-        """
-        if self.hackathon_manager.is_recycle_enabled(expr.hackathon):
-            mins = self.hackathon_manager.get_recycle_minutes(expr.hackathon)
-            # provider is VM
-            if expr.template.provider == VE_PROVIDER.AZURE:
-                context = Context(expr=expr)
-                self.scheduler.add_once("expr_manager","assign_expr_to_admin",context=context, minutes=mins)
-            else:
-                # provider is alauda or docker
-                context = Context(expr_id=expr.id)
-                self.scheduler.add_once("expr_manager","stop_expr",context=context, minutes=mins)
