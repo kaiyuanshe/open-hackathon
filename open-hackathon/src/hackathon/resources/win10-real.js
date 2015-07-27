@@ -1,51 +1,49 @@
-{
+ {
     "expr_name": "windows",
-    "description" : "one storage account, one container, one cloud service, one deployment, multiple virtual machines (Windows/Linux), multiple input endpoints",
+    "description" : "demo for Windows 10",
     "storage_account" : {
-        "service_name" : "portalvhdsnc364fhj0dlpp",
+        "service_name" : "hackathon",
         "description" : "storage-description",
         "label" : "storage-label",
-        "location" : "China East",
+        "location" : "China North",
         "url_base" : "blob.core.chinacloudapi.cn"
     },
     "container" : "vhds",
     "cloud_service" : {
-        "service_name" : "open-tech-service",
+        "service_name" : "opentech-win10",
         "label" : "cloud-service-label",
-        "location" : "China East"
+        "location" : "China North"
     },
     "deployment" :{
-        "deployment_name" : "open-tech-deployment",
+        "deployment_name" : "opentech-win10",
         "deployment_slot" : "production"
     },
     "virtual_environments": [
         {
             "provider": "azure",
             "label" : "role-label",
-            "role_name" : "open-tech-role",
+            "role_name" : "opentech-win10",
             "system_config" : {
                 "os_family" : "Windows",
                 "host_name" : "hostname",
-                "user_name" : "azureUser888",
-                "user_password" : "PASSword00X"
+                "user_name" : "AzureUser",
+                "user_password" : "Password01!"
             },
             "image" : {
-                "type" : "vm",
-                "name" : "openxml"
+                "type" : "os",
+                "name" : "win10-162"
             },
             "network_config" : {
                 "configuration_set_type" : "NetworkConfiguration",
                 "input_endpoints" : [
                     {
-                        "name" : "http",
+                        "name" : "VNC",
                         "protocol" : "tcp",
-                        "port" : "80",
-                        "local_port" : "80"
+                        "local_port" : "5900"
                     },
                     {
                         "name" : "Deploy",
                         "protocol" : "tcp",
-                        "port" : "3389",
                         "local_port" : "3389"
                     }
                 ]
@@ -53,8 +51,11 @@
             "role_size" : "Basic_A3",
             "remote": {
                 "provider": "guacamole",
-                "protocol": "rdp",
-                "input_endpoint_name" : "Deploy"
+                "protocol": "vnc",
+                "username": "CloudUser",
+                "password": "acoman",
+                "port": 5900,
+                "input_endpoint_name" : "VNC"
             }
         }
     ]
