@@ -1,18 +1,18 @@
 // -----------------------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-//  
+//
 // The MIT License (MIT)
-//  
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-//  
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-//  
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -40,7 +40,7 @@
 var s = angular.module('oh.controllers', []);
 s.controller('main.controller', function ($scope) {
 
-  function openWindow(url, width) {
+ function openWindow(url, width) {
 //    width = width || 600;
 //    var l, t;
 //    l = (screen.width - width ) / 2;
@@ -50,23 +50,28 @@ s.controller('main.controller', function ($scope) {
   }
 
   $scope.githublogin = function () {
-    var url = 'https://github.com/login/oauth/authorize?' +
-      $.param($scope.config.sociallogin.github);
+    var url = config.social.github +
+      $.param(config.sociallogin.github);
     openWindow(url);
   };
   $scope.qqlogin = function () {
-    var url = 'https://graph.qq.com/oauth2.0/authorize?' +
-      $.param($scope.config.sociallogin.qq);
+    var url = config.social.qq +
+      $.param(config.sociallogin.qq);
     openWindow(url);
   };
   $scope.gitcafelogin = function () {
-    var url = 'https://gcs.dgz.sh/oauth/authorize?' +
-      $.param($scope.config.sociallogin.gitcafe);
+    var url = config.social.gitcafe +
+      $.param(config.sociallogin.gitcafe);
+    openWindow(url, 980);
+  };
+  $scope.livelogin = function () {
+    var url = config.social.live +
+      $.param(config.sociallogin.live);
     openWindow(url, 980);
   };
   $scope.weibologin = function () {
-    var url = 'https://api.weibo.com/oauth2/authorize?' +
-      $.param($scope.config.sociallogin.weibo);
+    var url = config.social.weibo +
+      $.param(config.sociallogin.weibo);
     openWindow(url);
   }
 });

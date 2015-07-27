@@ -54,10 +54,10 @@ angular
     'oh.directives'
   ])
   .config(function ($stateProvider, $urlRouterProvider) {
-    $urlRouterProvider.otherwise('/');
+    $urlRouterProvider.otherwise('/login');
     $stateProvider
       .state('index', {
-        url: '/',
+        url: '/sadasdasdasd',
         views: {
           '': {
             templateUrl: 'views/master.html'
@@ -74,6 +74,15 @@ angular
           }
         }
       })
+      .state('login', {
+        url: '/login',
+        views: {
+          '': {
+            templateUrl: 'views/main.html',
+            controller: 'main.controller'
+          }
+        }
+       })
       .state('index.settings', {
         url: 'settings',
         views: {
