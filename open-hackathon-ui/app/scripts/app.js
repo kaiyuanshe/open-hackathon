@@ -57,7 +57,7 @@ angular
     $urlRouterProvider.otherwise('/login');
     $stateProvider
       .state('index', {
-        url: '/sadasdasdasd',
+        url: '/',
         views: {
           '': {
             templateUrl: 'views/master.html'
@@ -67,7 +67,13 @@ angular
           },
           'main@index': {
             templateUrl: 'views/main.html',
-            controller: 'main.controller'
+            controller: function($state,$cookieStore){
+              if (!$cookieStore.get('User')) {
+                $state.go('login');
+              }else{
+                 $state.go('index.hackathon');
+              }
+            }
           },
           'footer@index': {
             templateUrl: 'views/footer.html'
