@@ -1,10 +1,392 @@
-<!DOCTYPE html>
-<html>
-<head lang="en">
-    <meta charset="UTF-8">
-    <title></title>
-</head>
-<body>
+{% extends "base/manage.html" %}
 
-</body>
-</html>
+{% block style %}
+    <style>
+        body {
+            background: none;
+        }
+
+        body:after {
+            content: initial;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div data-type="template-unit-group">
+        <legend></legend>
+        <div class="form-group has-feedback">
+            <label class="col-md-3 control-label">模板单元名称</label>
+            <div class="col-md-6 register">
+                <input type="text" class="form-control" name="name" data-validate="true"
+                    placeholder="请使用英文字母、数字和'_'（下划线）'-'(中划线)"
+                    data-bv-trigger="blur"
+                    required
+                    data-bv-notempty-message="名称是必需的，不能为空"
+                    pattern="^(?!_)(?!.*?_$)[a-zA-Z0-9_-]+$"
+                    data-bv-regexp-message="模板单元名称只能由英文字母的，数字和下划线"
+                    minlength="5"
+                    data-bv-stringlength-message="模板单元名称必须至少有5个字符"
+                    >
+            </div>
+            <button type="button" class="btn btn-danger" data-type="btn_delete_template_unit"> 删除该模板单元</button>
+        </div>
+        <div class="form-group has-feedback">
+            <label class="col-md-3 control-label">类型</label>
+            <div class="col-md-6 register">
+                <select class="form-control" name="type">
+                    <option value="ubuntu terminal">ubuntu terminal</option>
+                    <option value="ubuntu desktop">ubuntu desktop</option>
+                    <option value="windows">windows</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group has-feedback">
+            <label class="col-md-3 control-label">描述</label>
+            <div class="col-md-6 register">
+                <input type="text" class="form-control" name="description" data-validate="true"
+                    data-bv-trigger="blur"
+                    required
+                    data-bv-notempty-message="描述是必需的，不能为空"
+                    >
+            </div>
+        </div>
+        <div class="form-group has-feedback">
+            <label class="col-md-3 control-label">镜像</label>
+            <div class="col-md-6 register">
+                <input type="text" class="form-control" name="image" data-validate="true"
+                    data-bv-trigger="blur"
+                    required
+                    data-bv-notempty-message="镜像是必需的，不能为空"
+                    >
+            </div>
+        </div>
+        <div class="form-group has-feedback">
+            <label class="col-md-3 control-label">环境变量</label>
+            <div class="col-md-6 register">
+                <input type="text" class="form-control" name="env"
+                    placeholder="请用分号隔开">
+            </div>
+        </div>
+        <div class="form-group has-feedback">
+            <label class="col-md-3 control-label">命令行</label>
+            <div class="col-md-6 register">
+                <input type="text" class="form-control" name="cmd">
+            </div>
+        </div>
+        <div class="form-group has-feedback">
+            <label class="col-md-3 control-label">远程连接名称</label>
+            <div class="col-md-6 register">
+                <input type="text" class="form-control" name="remote-name" data-validate="true"
+                    placeholder="请使用英文字母、数字和'_'（下划线）'-'(中划线)"
+                    data-bv-trigger="blur"
+                    required
+                    data-bv-notempty-message="名称是必需的，不能为空"
+                    pattern="^(?!_)(?!.*?_$)[a-zA-Z0-9_-]+$"
+                    data-bv-regexp-message="远程连接名称只能由英文字母的，数字和下划线"
+                    minlength="5"
+                    data-bv-stringlength-message="远程连接名称称必须至少有5个字符"
+                    >
+            </div>
+        </div>
+        <div class="form-group has-feedback">
+            <label class="col-md-3 control-label">提供商</label>
+            <div class="col-md-6 register">
+                <select class="form-control" name="remote-provider">
+                    <option value="guacamole">guacamole</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group has-feedback">
+            <label class="col-md-3 control-label">远程连接协议</label>
+            <div class="col-md-6 register">
+                <select class="form-control" name="remote-protocol">
+                    <option value="ssh">ssh</option>
+                    <option value="vnc">vnc</option>
+                    <option value="rdp">rdp</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group has-feedback">
+            <label class="col-md-3 control-label">远程连接端口</label>
+            <div class="col-md-6 register">
+                <input type="text" class="form-control" name="remote-port" data-validate="true"
+                    data-bv-trigger="blur"
+                    required
+                    data-bv-notempty-message="远程连接端口是必需的，不能为空"
+                    min="0"
+                    data-bv-greaterthan-inclusive="true"
+                    data-bv-greaterthan-message="端口号应该大于0"
+                    max="65535"
+                    data-bv-lessthan-inclusive="true"
+                    data-bv-lessthan-message="端口号应该小于65535"
+                    >
+            </div>
+        </div>
+        <div class="form-group has-feedback">
+            <label class="col-md-3 control-label">用户名</label>
+            <div class="col-md-6 register">
+                <input type="text" class="form-control" name="remote-username" data-validate="true"
+                    data-bv-trigger="blur"
+                    required
+                    data-bv-notempty-message="用户名是必需的，不能为空"
+                    >
+            </div>
+        </div>
+        <div class="form-group has-feedback">
+            <label class="col-md-3 control-label">密码</label>
+            <div class="col-md-6 register">
+                <input type="text" class="form-control" name="remote-password" data-validate="true"
+                    data-bv-trigger="blur"
+                    required
+                    data-bv-notempty-message="密码是必需的，不能为空"
+                    >
+            </div>
+        </div>
+        <div data-type="port-list">
+        </div>
+        <div class="form-group has-feedback">
+            <div class="col-sm-offset-3 col-sm-6 text-center">
+                <button type="button" class="btn btn-default" data-type="btn_add_port"> 添加端口</button>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    {{ super() }}
+    <script id="template_item" type="text/x-jquery-tmpl">
+        <tr>
+            <td>${$item.getIndex()}</td>
+            <td>${name}</td>
+            <td>${virtual_environment_count}</td>
+            <td>${moment(create_time).format('YYYY/MM/DD HH:mm')}</td>
+            {% raw %}
+            <td>{{if update_time}}${moment(update_time).format('YYYY/MM/DD HH:mm')}{{else}} N/A {{/if}}</td>
+            {% endraw %}
+            <td><a href="${azure_url}">下载</a></td>
+            <td class="col-action">
+                <a type="button" class="btn btn-info btn-sm" data-type="template_item_edit">
+                    <i class="fa fa-edit "></i>
+                </a>
+                <a type="button" class="btn btn-danger btn-sm" href="#" data-target="#confirm_modal" data-toggle="modal">
+                    <i class="fa fa-trash-o "></i>
+                </a>
+                <a type="button" class="btn btn-success btn-sm" href="/testtemplate?hackathon_name=${$item.hackathon_name}&temp_name=${name}" target="top" title="诊断">
+                    <i class="fa fa-stethoscope "></i>
+                </a>
+            </td>
+        </tr>
+    </script>
+    <script id="template_unit_item" type="text/x-jquery-tmpl">
+        <div data-type="template-unit-group">
+            <legend></legend>
+            <div class="form-group has-feedback">
+                <label class="col-md-3 control-label">模板单元名称</label>
+                <div class="col-md-6 register">
+                    <input type="text" class="form-control" name="name" data-validate="true"
+                        placeholder="请使用英文字母、数字和'_'（下划线）'-'(中划线)"
+                        data-bv-trigger="blur"
+                        required
+                        data-bv-notempty-message="名称是必需的，不能为空"
+                        pattern="^(?!_)(?!.*?_$)[a-zA-Z0-9_-]+$"
+                        data-bv-regexp-message="模板单元名称只能由英文字母的，数字和下划线"
+                        minlength="5"
+                        data-bv-stringlength-message="模板单元名称必须至少有5个字符"
+                        >
+                </div>
+                <button type="button" class="btn btn-danger" data-type="btn_delete_template_unit"> 删除该模板单元</button>
+            </div>
+            <div class="form-group has-feedback">
+                <label class="col-md-3 control-label">类型</label>
+                <div class="col-md-6 register">
+                    <select class="form-control" name="type">
+                        <option value="ubuntu terminal">ubuntu terminal</option>
+                        <option value="ubuntu desktop">ubuntu desktop</option>
+                        <option value="windows">windows</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group has-feedback">
+                <label class="col-md-3 control-label">描述</label>
+                <div class="col-md-6 register">
+                    <input type="text" class="form-control" name="description" data-validate="true"
+                        data-bv-trigger="blur"
+                        required
+                        data-bv-notempty-message="描述是必需的，不能为空"
+                        >
+                </div>
+            </div>
+            <div class="form-group has-feedback">
+                <label class="col-md-3 control-label">镜像</label>
+                <div class="col-md-6 register">
+                    <input type="text" class="form-control" name="image" data-validate="true"
+                        data-bv-trigger="blur"
+                        required
+                        data-bv-notempty-message="镜像是必需的，不能为空"
+                        >
+                </div>
+            </div>
+            <div class="form-group has-feedback">
+                <label class="col-md-3 control-label">环境变量</label>
+                <div class="col-md-6 register">
+                    <input type="text" class="form-control" name="env"
+                        placeholder="请用分号隔开">
+                </div>
+            </div>
+            <div class="form-group has-feedback">
+                <label class="col-md-3 control-label">命令行</label>
+                <div class="col-md-6 register">
+                    <input type="text" class="form-control" name="cmd">
+                </div>
+            </div>
+            <div class="form-group has-feedback">
+                <label class="col-md-3 control-label">远程连接名称</label>
+                <div class="col-md-6 register">
+                    <input type="text" class="form-control" name="remote-name" data-validate="true"
+                        placeholder="请使用英文字母、数字和'_'（下划线）'-'(中划线)"
+                        data-bv-trigger="blur"
+                        required
+                        data-bv-notempty-message="名称是必需的，不能为空"
+                        pattern="^(?!_)(?!.*?_$)[a-zA-Z0-9_-]+$"
+                        data-bv-regexp-message="远程连接名称只能由英文字母的，数字和下划线"
+                        minlength="5"
+                        data-bv-stringlength-message="远程连接名称称必须至少有5个字符"
+                        >
+                </div>
+            </div>
+            <div class="form-group has-feedback">
+                <label class="col-md-3 control-label">提供商</label>
+                <div class="col-md-6 register">
+                    <select class="form-control" name="remote-provider">
+                        <option value="guacamole">guacamole</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group has-feedback">
+                <label class="col-md-3 control-label">远程连接协议</label>
+                <div class="col-md-6 register">
+                    <select class="form-control" name="remote-protocol">
+                        <option value="ssh">ssh</option>
+                        <option value="vnc">vnc</option>
+                        <option value="rdp">rdp</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group has-feedback">
+                <label class="col-md-3 control-label">远程连接端口</label>
+                <div class="col-md-6 register">
+                    <input type="text" class="form-control" name="remote-port" data-validate="true"
+                        data-bv-trigger="blur"
+                        required
+                        data-bv-notempty-message="远程连接端口是必需的，不能为空"
+                        min="0"
+                        data-bv-greaterthan-inclusive="true"
+                        data-bv-greaterthan-message="端口号应该大于0"
+                        max="65535"
+                        data-bv-lessthan-inclusive="true"
+                        data-bv-lessthan-message="端口号应该小于65535"
+                        >
+                </div>
+            </div>
+            <div class="form-group has-feedback">
+                <label class="col-md-3 control-label">用户名</label>
+                <div class="col-md-6 register">
+                    <input type="text" class="form-control" name="remote-username" data-validate="true"
+                        data-bv-trigger="blur"
+                        required
+                        data-bv-notempty-message="用户名是必需的，不能为空"
+                        >
+                </div>
+            </div>
+            <div class="form-group has-feedback">
+                <label class="col-md-3 control-label">密码</label>
+                <div class="col-md-6 register">
+                    <input type="text" class="form-control" name="remote-password" data-validate="true"
+                        data-bv-trigger="blur"
+                        required
+                        data-bv-notempty-message="密码是必需的，不能为空"
+                        >
+                </div>
+            </div>
+            <div data-type="port-list">
+            </div>
+            <div class="form-group has-feedback">
+                <div class="col-sm-offset-3 col-sm-6 text-center">
+                    <button type="button" class="btn btn-default" data-type="btn_add_port"> 添加端口</button>
+                </div>
+            </div>
+        </div>
+
+    </script>
+    <script id="port_item" type="text/x-jquery-tmpl">
+        <div data-type="port-group">
+            <hr />
+            <div class="form-group has-feedback">
+                <label class="col-md-3 control-label">端口名称</label>
+                <div class="col-md-6 register">
+                    <input type="text" class="form-control" name="name" data-validate="true"
+                        placeholder="请使用英文字母、数字和'_'（下划线）'-'(中划线)"
+                        data-bv-trigger="blur"
+                        required
+                        data-bv-notempty-message="名称是必需的，不能为空"
+                        pattern="^(?!_)(?!.*?_$)[a-zA-Z0-9_-]+$"
+                        data-bv-regexp-message="端口名称只能由英文字母的，数字和下划线"
+                        minlength="5"
+                        data-bv-stringlength-message="端口名称称必须至少有5个字符"
+                        >
+                </div>
+                <button type="button" class="btn btn-danger" data-type="btn_delete_port"> 删除该端口</button>
+            </div>
+            <div class="form-group has-feedback">
+                <label class="col-md-3 control-label">端口号</label>
+                <div class="col-md-6 register">
+                    <input type="text" class="form-control" name="port" data-validate="true"
+                        data-bv-trigger="blur"
+                        required
+                        data-bv-notempty-message="端口号是必需的，不能为空"
+                        min="0"
+                        data-bv-greaterthan-inclusive="true"
+                        data-bv-greaterthan-message="端口号应该大于0"
+                        max="65535"
+                        data-bv-lessthan-inclusive="true"
+                        data-bv-lessthan-message="端口号应该小于65535"
+                        >
+                </div>
+            </div>
+            <div class="form-group has-feedback">
+                <label class="col-md-3 control-label">是否公开</label>
+                <div class="col-md-6 register">
+                    <select class="form-control" name="public">
+                        <option value="true">是</option>
+                        <option value="false">否</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group has-feedback">
+                <label class="col-md-3 control-label">端口协议</label>
+                <div class="col-md-6 register">
+                    <select class="form-control" name="protocol">
+                        <option value="tcp">tcp</option>
+                        <option value="udp">udp</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group has-feedback">
+                <label class="col-md-3 control-label">URL协议</label>
+                <div class="col-md-6 register">
+                    <input type="text" class="form-control" name="url-protocol">
+                </div>
+            </div>
+            <div class="form-group has-feedback">
+                <label class="col-md-3 control-label">URL子路径</label>
+                <div class="col-md-6 register">
+                    <input type="text" class="form-control" name="url-path">
+                </div>
+            </div>
+        </div>
+    </script>
+    <script type="text/javascript" src="/static/js/views/oh.manage.template.js"></script>
+{% endblock %}
+
+

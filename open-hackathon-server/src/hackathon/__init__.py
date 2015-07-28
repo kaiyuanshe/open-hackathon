@@ -199,7 +199,7 @@ def __init_schedule_jobs():
     expr_manager = RequiredFeature("expr_manager")
 
     # schedule job to check recycle operation
-    next_run_time = util.get_now() + timedelta(minutes=1)
+    next_run_time = util.get_now() + timedelta(seconds=10)
     sche.add_interval(feature="expr_manager",
                       method="scheduler_recycle_expr",
                       id="scheduler_recycle_expr",
@@ -219,8 +219,9 @@ def init_app():
     init_components()
 
     from views import init_routes
-
+    log.debug("test")
     init_routes()
+    log.debug("test")
     init_schedule_jobs()
 
 

@@ -48,8 +48,8 @@ from hackathon.database.models import (
     Experiment,
     Hackathon,
     Template,
-    User
-)
+    User,
+    HackathonTemplateRel)
 
 from hackathon.azureformation.azureFormation import (
     AzureFormation,
@@ -223,7 +223,8 @@ class ExprManager(Component):
     def pre_allocate_expr(self):
         # only deal with online hackathons
         hackathon_id_list = self.hackathon_manager.get_pre_allocate_enabled_hackathon_list()
-        templates = self.db.find_all_objects(Template, Template.hackathon_id.in_(hackathon_id_list))
+        htrs = self.db.find_all_objects(HackathonTemplateRel, HackathonTemplateRel.hackathon_id.in_(hackathon_id_list))
+        templates = map(lambda x: x.template, htrs)
         for template in templates:
             try:
                 pre_num = self.hackathon_manager.get_pre_allocate_number(template.hackathon)
@@ -551,7 +552,7 @@ class ExprManager(Component):
 
         :return:
         """
-        providers = map(lambda x: x.provider, expr.virtual_environments)
+        providers = map(lambda x: x.provider, expr.virtual_environments.all())
         # TODO check expr provider from each virtual_environment's provider
         if VE_PROVIDER.DOCKER in providers:
             self.stop_expr(expr.id)

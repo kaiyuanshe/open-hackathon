@@ -462,7 +462,7 @@ class TemplateManager(Component):
 
     def __get_undownloaded_images_on_docker_host(self, docker_host, expected_images):
         images = []
-        current_images = self.docker.get_pulled_images(docker_host)
+        current_images = self.docker.hosted_docker.get_pulled_images(docker_host)
         self.log.debug('already exist images: %s on host: %s' % (current_images, docker_host.vm_name))
         for ex_image in expected_images:
             if ex_image not in current_images:
