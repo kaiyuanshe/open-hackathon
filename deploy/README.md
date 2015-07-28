@@ -11,7 +11,7 @@
 * [User's Guide](#user's-guide)
   * [Implementation and Architecture](#implementation-and-architecture-for-user)
   * [attend hackathons](#how-to-attend-a-hackathon)
-  * [Contribute your Template](#upload-template)
+  * [Contribute your Template](#contribute-your-template)
   * [FAQ](#FAQ)
 * [Admin's Guid](#admin's-guide)
   * [Implementation and Architecture](#implementation-and-architecture-for-admin)
@@ -59,7 +59,7 @@
 ### keys 
 ## How to attend a hackathon
 报名，组队，参赛，提交评审等介绍，以及主干流程的截图
-## Upload Template
+## Contribute your Template
 Templat 上传过程及用户对自己上传的Template的管理操作
 
 
@@ -98,14 +98,13 @@ Hackathon will provider a runnable environment to every player , naturally the h
 OpenHackathon is separated into two pieces: open-hackathon server, which provides the openhackathon proxy and related libraries, and open-hackathon client, which provides the website client to users            
 
 src folders introduction:        
-`deploy`: all components for deployment               
-`open-hackathon-client`: frontend web project src               
-`open-hackathon-server`: backend api server project src              
-`openhackathon-guacamole-auth-provider`: guacamole auth provider java project src                 
-`tools/docker-enter`: tool to quickly connect to a running docker container through container id             
-                  
-                   
- Use Flask to build the whole project.[Flask Introduction](http://flask.pocoo.org/docs/0.10/)
+**deploy**: all components for deployment               
+**open-hackathon-client**: frontend web project src               
+**open-hackathon-server**: backend api server project src              
+**openhackathon-guacamole-auth-provider**: guacamole auth provider java project src                 
+**tools/docker-enter**: tool to quickly connect to a running docker container through container id             
+src framework intriduction：                    
+Use `Flask` to build the whole project.[Flask Introduction](http://flask.pocoo.org/docs/0.10/)
  
  
  
@@ -113,12 +112,12 @@ src folders introduction:
     介绍如何用doker的一个image来run起一个openhackathon
 ## Setup develop environment
 To setup the whole OpenHackathon develop environment, you need those components:
-```
-Docker Service
-Guacamole
-MysqlDB
-Python third part lib
-```
+
+**Docker Service**
+**Guacamole**
+**MysqlDB**
+**Python third part lib**
+
 ### Setup Docker Env
 Docker service takes part in OpenHackathon Platform as a environment provider that will provide to all users. And docker service now is the most populer cloudservice, you could get more details on [docker official website](https://www.docker.com/)                         
 
@@ -154,7 +153,7 @@ First you need to install the components of Mysql and Python libs:
 sudo apt-get install build-essential python python-dev python-setuptools libmysqlclient-dev
 sudo apt-get install mysql-server
 ```
-Then change the ``my.conf` of mysql
+Then change the `my.conf` of mysql like this:
 ```
 [client]
 default-character-set=utf8
@@ -170,8 +169,11 @@ create database hackathon;
 create User 'hackathon'@'localhost' IDENTIFIED by 'hackathon';
 GRANT ALL on hackathon.* TO 'hackathon'@'localhost';
 ```
-Finally please remember match your `config.py` options on mysql configuration
-
+Please remember match your `config.py` options on mysql configuration , finally execute the `setup_db.py` withn command or other ways , like this:
+```
+sudo python open-hackathon/open-hackathon-server/src/setup_db.py
+```
+Now , you can write and design you own OpenHackathon freely !
 
 ### Setup Python Env
 Find out the `requirement.txt` both in `open-hackathon-server` and `open-hackathon-client` in src folders, all dependencies are recorded in , we could install them through a simply command :   
@@ -182,6 +184,12 @@ sudo pip install -r open-hackathon-client/requirement.txt
 
 Then copy a file `config.py` from `config_sample.py`, and modify it as needed. Below is the instruction:
 
+##Config file
+| Item      |    Value | Qty  |
+|:---------:|:--------:| :-----------------------|
+| Computer  | 1600 USD |  5   |
+| Phone     |   12 USD |  12  |
+| Pipe      |    1 USD | 234  |
 
 ## customize
     如何自定义，

@@ -66,7 +66,7 @@ from hackathon import (
     RequiredFeature,
     Context
 )
-from flask import g
+from flask import g, request
 from sqlalchemy import (
     and_
 )
@@ -143,6 +143,50 @@ class TemplateManager(Component):
                                   update_time=self.util.get_now(),
                                   description=args[BaseTemplate.DESCRIPTION],
                                   virtual_environment_count=len(args[BaseTemplate.VIRTUAL_ENVIRONMENTS]))
+        return ok("create template success")
+
+    def create_template_by_file(self):
+        """create a template by a whole template file
+
+        :return:
+            bad_request("invalid template file", ex) : template cannot be formatted as a json object
+            internal_server_error("save template failed") : save template file to storage faild
+            bad_request("template provider invalid") : provider missed or wrong place in template file
+            ok("create template success") : successfully create template by uploaded file
+        """
+        for file_name in request.files:
+            file = request.files[file_name]
+            try:
+                # step 1: check file json format
+                template = json.load(file)
+                self.log.debug("create template: %r" % template)
+
+                # step 2: parse template and check required properties
+                status, return_info = self.__check_create_args(template)
+                if not status:
+                    return return_info
+
+                # step 3: save to storage
+                context = self.__save_template(template)
+                if not context:
+                    return internal_server_error("save template failed")
+
+                # step 4: add a record to DB
+                provider = self.__get_provider_from_template_dic(template)
+                self.db.add_object_kwargs(Template,
+                                          name=template[BaseTemplate.TEMPLATE_NAME],
+                                          url=context.url,
+                                          local_path=context.physical_path,
+                                          provider=provider,
+                                          creator_id=g.user.id,
+                                          status=TEMPLATE_STATUS.UNCHECKED,
+                                          create_time=self.util.get_now(),
+                                          update_time=self.util.get_now(),
+                                          description=template[BaseTemplate.DESCRIPTION],
+                                          virtual_environment_count=len(template[BaseTemplate.VIRTUAL_ENVIRONMENTS]))
+            except Exception as ex:
+                self.log.error(ex)
+                return bad_request("invalid template file", ex)
         return ok("create template success")
 
     def update_template(self, args):
@@ -386,10 +430,10 @@ class TemplateManager(Component):
         if team is None:
             return []
         # get template from team
-        htrs = self.db.find_all_objects(HackathonTemplateRel, hackathon_id=hackathon.id, team_id=team.id)
+        htrs = self.db.find_all_objects_by(HackathonTemplateRel, hackathon_id=hackathon.id, team_id=team.id)
         if len(htrs) == 0:
             # get template from hackathon
-            htrs = self.db.find_all_objects(HackathonTemplateRel, hackathon_id=hackathon.id, team_id=-1)
+            htrs = self.db.find_all_objects_by(HackathonTemplateRel, hackathon_id=hackathon.id, team_id=-1)
 
         templates = map(lambda x: x.template, htrs)
         data = []
@@ -418,7 +462,7 @@ class TemplateManager(Component):
 
     def __get_undownloaded_images_on_docker_host(self, docker_host, expected_images):
         images = []
-        current_images = self.docker.get_pulled_images(docker_host)
+        current_images = self.docker.hosted_docker.get_pulled_images(docker_host)
         self.log.debug('already exist images: %s on host: %s' % (current_images, docker_host.vm_name))
         for ex_image in expected_images:
             if ex_image not in current_images:
@@ -438,9 +482,25 @@ class TemplateManager(Component):
             condition = and_(condition, Template.status == kwargs['status'])
 
         if kwargs['name'] is not None:
-            condition = and_(condition, Template.name.like('%'+kwargs['name']+'%'))
+            condition = and_(condition, Template.name.like('%' + kwargs['name'] + '%'))
 
         if kwargs['description'] is not None:
-            condition = and_(condition, Template.description.like('%'+kwargs['description']+'%'))
+            condition = and_(condition, Template.description.like('%' + kwargs['description'] + '%'))
 
         return condition
+
+    def __get_provider_from_template_dic(self, template):
+        """get the provider from template
+
+        :type template: dict
+        :param template: dict object of template
+
+        :return: provider value , if not exist in template return None
+        """
+        try:
+            if BaseTemplate.VIRTUAL_ENVIRONMENTS_PROVIDER in template:
+                return template[BaseTemplate.VIRTUAL_ENVIRONMENTS_PROVIDER]
+            return template[BaseTemplate.VIRTUAL_ENVIRONMENTS][0][BaseTemplate.VIRTUAL_ENVIRONMENTS]
+        except Exception as e:
+            self.log.error(e)
+            return None

@@ -34,6 +34,7 @@ __all__ = [
 ]
 
 user_manager = RequiredFeature("user_manager")
+admin_manager = RequiredFeature("admin_manager")
 hack_manager = RequiredFeature("hackathon_manager")
 
 
@@ -69,7 +70,7 @@ def admin_privilege_required(func):
         if not hack_manager.validate_hackathon_name():
             return bad_request("hackathon name invalid")
 
-        if not hack_manager.validate_admin_privilege_http():
+        if not admin_manager.validate_admin_privilege_http():
             return forbidden("access denied")
         return func(*args, **kwargs)
 

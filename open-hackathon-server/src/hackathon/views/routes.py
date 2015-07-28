@@ -36,7 +36,6 @@ from hackathon.database.models import Announcement
 import time
 from hackathon.hackathon_response import not_found
 
-
 hackathon_manager = RequiredFeature("hackathon_manager")
 user_manager = RequiredFeature("user_manager")
 register_manager = RequiredFeature("register_manager")
@@ -104,7 +103,7 @@ class HackathonRegisterResource(Resource):
         parse = reqparse.RequestParser()
         parse.add_argument('num', type=int, location='args', default=5)
         args = parse.parse_args()
-        return team_manager.get_hackathon_registration(args['num'])
+        return register_manager.get_hackathon_registration(args['num'])
 
 
 class HackathonTeamListResource(Resource):
@@ -147,6 +146,13 @@ class TemplateResource(Resource):
         return template_manager.delete_template(args['id'])
 
 
+class TemplateCreateByFileResource(Resource):
+    # create template by file
+    @token_required
+    def post(self):
+        return template_manager.create_template_by_file()
+
+
 class TemplateListResource(Resource):
     def get(self):
         parse = reqparse.RequestParser()
@@ -159,11 +165,13 @@ class TemplateListResource(Resource):
                                                        description=args['description'])
         return map(lambda x: x.dic(), templates)
 
+
 class HackathonTemplateListResource(Resource):
     @hackathon_name_required
     def get(self):
         templates = template_manager.get_templates_by_hackathon_id(g.hackathon.id)
         return map(lambda x: x.dic(), templates)
+
 
 def register_routes():
     """
@@ -193,5 +201,6 @@ def register_routes():
 
     # template API
     api.add_resource(TemplateResource, "/api/template")
+    api.add_resource(TemplateCreateByFileResource, "/api/template/createbyfile")
     api.add_resource(TemplateListResource, "/api/template/list")
     api.add_resource(HackathonTemplateListResource, "/api/admin/hackathon/template/list")
