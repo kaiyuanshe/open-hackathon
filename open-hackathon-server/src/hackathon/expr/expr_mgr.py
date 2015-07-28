@@ -191,10 +191,10 @@ class ExprManager(Component):
         return map(lambda u: self.__get_expr_with_user_info(u), experiments)
 
     def scheduler_recycle_expr(self):
-        """recycle experiment acrroding to hackathon basic info on recycle enabled
+        """recycle experiment acrroding to hackathon basic info on recycle configuration
 
-        According to the hackathon's basic info on 'recycle_enabled', if True would run the logic, False will do nothing
-        Then if the experiment based on a VM , assign the user_id to super admin, else kill it directly.
+        According to the hackathon's basic info on 'recycle_enabled', find out time out experiments
+        Then call function to recycle them
 
         :return:
         """
@@ -542,6 +542,15 @@ class ExprManager(Component):
         return map(lambda x: x.container, ves)
 
     def __recycle_expr(self, expr):
+        """recycle expr
+
+        If it is a docker experiment , stop it ; else assign it to default user
+
+        :type expr: Experiment
+        :param expr: the exper which you want to recycle
+
+        :return:
+        """
         providers = map(lambda x: x.provider, expr.virtual_environments)
         # TODO check expr provider from each virtual_environment's provider
         if VE_PROVIDER.DOCKER in providers:
