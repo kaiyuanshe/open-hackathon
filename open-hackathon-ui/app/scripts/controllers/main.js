@@ -38,8 +38,8 @@
  * Controller of the main.controller
  */
 var s = angular.module('oh.controllers', []);
-s.controller('main.controller', function ($scope) {
-
+s.controller('main.controller', function ($rootScope,$scope) {
+  var config = $rootScope.config;
  function openWindow(url, width) {
 //    width = width || 600;
 //    var l, t;
