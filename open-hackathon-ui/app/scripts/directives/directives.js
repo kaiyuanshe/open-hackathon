@@ -199,8 +199,8 @@ angular.module('oh.directives', [])
         }
         scope.user = $cookieStore.get('User');
         element.find('[data-endexpr]').click(function(e){
-          var exprid = $('body').data(exprid) || 0;
-          API.win10.endnow.post({body:{experiment_id: exprid}},function(data){
+          var exprid = $('body').data('exprid') || 0;
+          API.win10.endnow.post(JSON.stringify({experiment_id: exprid}),function(data){
              $state.go('index.introduction');
           })
         })
