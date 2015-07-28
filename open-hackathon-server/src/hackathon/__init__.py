@@ -219,9 +219,7 @@ def init_app():
     init_components()
 
     from views import init_routes
-    log.debug("test")
     init_routes()
-    log.debug("test")
     init_schedule_jobs()
 
 
