@@ -694,12 +694,17 @@ def open_check_expr():
 
 def check_default_expr(hackathon_id=None):
     # todo only pre-allocate env for those needed. It should configured in table hackathon
-    if hackathon_id:
-        templates = db_adapter.find_all_objects_order_by(Template, hackathon_id=hackathon_id)
-    else:
-        # hackathon = db_adapter.find_first_object_by(Hackathon, name=WINDOWS_TEN)
-        # templates = db_adapter.find_all_objects_by(Template, hackathon_id=hackathon.id)
-        templates = db_adapter.find_all_objects_by(Template, name=WINDOWS_TEN)
+    # if hackathon_id:
+    #     templates = db_adapter.find_all_objects_order_by(Template, hackathon_id=hackathon_id)
+    # else:
+    hackathon = db_adapter.find_first_object_by(Hackathon, name=WINDOWS_TEN)
+    total_count = db_adapter.count(Experiment,
+                                   Experiment.hackathon_id == hackathon.id,
+                                   Experiment.status == ExprStatus.Running)
+    if total_count >= WIN10_TOTAL_SEAT:
+        return
+    # templates = db_adapter.find_all_objects_by(Template, hackathon_id=hackathon.id)
+    templates = db_adapter.find_all_objects_by(Template, name=WINDOWS_TEN)
 
     total_azure = safe_get_config("pre_allocate.azure", 5)
     total_docker = safe_get_config("pre_allocate.docker", 1)
