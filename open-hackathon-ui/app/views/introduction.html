@@ -5,11 +5,14 @@
                 <div class="container">
                     <h1>Welcome to TryIt </h1>
 
-                    <p class="text-left">
-                        在整个编程黑客松活动中，我们为各位黑客设计了三个挑战。 我们希望通过这些挑战，让大家更好的去了解 WordProcessingML 的编程。 使用的技能和工具同样可以帮助大家处理 SpreadsheetML 和
-                        PresentationML。 友情提示一下，答案可能会在我们之后推出的各种技术视频中提到！
-                    </p>
-                    <b>在完成挑战后，请大家把代码发布到在 GitCafe 的项目中，我们会检查作业的！</b>
+                    <div class="text-center" style="font-size:18px">
+                        <div>非常感谢您参加我们的本次体验活动。</div>
+                        <div>如果您想进一步了解或使用我们产品，请点击下面的下载链接。</div>
+                        <div>如果您想获得相关的信息或者参加讨论可以加入我们的讨论组。</div>
+                        <div>如果您有任何反馈请在下面更我们留言。</div>
+                        <div>最后,希望您能将我们的产品体验环境给您的朋友，谢谢。</div>
+                    </div>
+
 
                     <h2>Downloads</h2>
 
@@ -87,8 +90,10 @@
 
                                 <input type="email" class="form-control" name="email" placeholder="电子邮件 *"
                                        ng-model="comment.email">
+
                                 <p ng-show="comment.email.$error.required && comment.email.$touched" class="help-block">
                                     电子邮件必须填写</p>
+
                                 <p ng-show="comment.email.$touched && comment.email.$invalid"
                                    class="help-block">请输入正确的电子邮件！</p>
                             </div>
