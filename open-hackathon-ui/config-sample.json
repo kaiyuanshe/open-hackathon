@@ -58,7 +58,8 @@
       "template":["get"]
     },
     "win10":{
-      "stat":["get","post"]
+      "stat":["get","post"],
+      "endnow":["post"]
     }
   },
   "sociallogin": {

@@ -45,9 +45,10 @@ angular.module('oh.controllers')
         $scope.t = data;
     })
 
-    $scope.accessWindowsDownload = function(){
+    $scope.accessWindowsDownload = function(type){
+        var href = type==1?'http://windows.microsoft.com/en-US/windows/downloads': 'https://msdn.microsoft.com/en-us/vstudio/';
         API.win10.stat.post({},function(data){
-            window.location.href = 'http://windows.microsoft.com/en-US/windows/downloads';
+            window.location.href = href;
         });
     }
   });

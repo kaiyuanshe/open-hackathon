@@ -83,6 +83,7 @@ angular.module('oh.directives', [])
 
         var temp = $templateCache.get('hackathon-vm.html');
         API.user.experiment.post(JSON.stringify({cid: 'win10', hackathon: scope.config.name}), function (data) {
+          $('body').data({exprid:data.expr_id});
           if (data.error) {
             $state.go('lineup');
             return;
@@ -177,7 +178,7 @@ angular.module('oh.directives', [])
       scope: {},
       restrict: 'E',
       templateUrl: 'views/tpls/dropdown-menu.html',
-      link: function (scope) {
+      link: function (scope,element) {
         scope.items = [{
           name: '管理我的黑客松',
           link: ''
@@ -197,6 +198,12 @@ angular.module('oh.directives', [])
           location.replace('/#/');
         }
         scope.user = $cookieStore.get('User');
+        element.find('[data-endexpr]').click(function(e){
+          var exprid = $('body').data(exprid) || 0;
+          API.win10.endnow.post({body:{experiment_id: exprid}},function(data){
+             $state.go('index.introduction');
+          })
+        })
       }
     }
   })
