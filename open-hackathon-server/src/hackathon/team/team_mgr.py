@@ -39,23 +39,18 @@ class TeamManager(Component):
     template_manager = RequiredFeature("template_manager")
     user_manager = RequiredFeature("user_manager")
 
-    def __validate_permission(self, hid, tname, user):
-        # check if team leader
-        if self.db.find_first_object_by(Team, hackathon_id=hid, name=tname, leader_id=user.id) is not None:
-            return True
-        #check if hackathon admin
-        elif self.db.find_first_object_by(AdminHackathonRel, hackathon_id=hid, user_id=user.id) is not None:
-            return True
-        #check if super admin
-        elif self.user_manager.is_super_admin(user) is True:
-            return True
-        else:
-            return False
-
-    def __get_team(self, hid, uid):
-        return self.db.find_first_object_by(UserTeamRel, hackathon_id=hid, user_id=uid)
-
     def get_team_info(self, hid, tname):
+        """ get user's team basic information stored on table 'team' based on team name
+
+        :type hid: int
+        :param hid: key to store hackathon id
+
+        :type tname: str|unicode
+        :param tname: key to store team name
+
+        :rtype: dict
+        :return: team's information as a dict
+        """
         team = self.db.find_first_object_by(Team, hackathon_id=hid, name=tname)
         if team is not None:
             return team.dic()
@@ -63,6 +58,20 @@ class TeamManager(Component):
             return not_found("no such team")
 
     def get_hackathon_team_list(self, hid, name=None, number=None):
+        """ get the team list of selected hackathon
+
+        :type hid: int
+        :param hid: the key to store hackathon id
+
+        :type name: str|unicode
+        :param name: querying condition, return selected team name list
+
+        :type number: int
+        :param number: querying condition, return number of teams
+
+        :rtype: list
+        :return: a list of team filter by name and number on selected hackathon
+        """
         hackathon_team_list = self.db.find_all_objects_by(Team, hackathon_id=hid)
         hackathon_team_list = map(lambda x: x.dic(), hackathon_team_list)
         if name is not None:
@@ -72,6 +81,18 @@ class TeamManager(Component):
         return hackathon_team_list
 
     def get_team_members_by_user(self, hackathon_id, user_id):
+        """ get given user's team member
+
+        :type hackathon_id: int
+        :param hackathon_id: the key to store hackathon id
+
+        :type user_id: int
+        :param user_id: the key to store user id
+
+        :rtype: list
+        :return: a dict of user's team member
+        """
+
         my_team = self.__get_team(hackathon_id, user_id)
         if my_team is not None:
             team_member = self.db.find_all_objects_by(UserTeamRel, team_id=my_team.team_id)
@@ -87,6 +108,16 @@ class TeamManager(Component):
             return []
 
     def create_team(self, kwargs):
+        """ create new team by given args.
+            user only allow to join or create 1 team. So if user joined or created team before, will be get failed
+            when creating new team.
+
+        :type kwargs: dict
+        :param kwargs: a dict of required information to create new team
+
+        :rtype: dict
+        :return: return created team information
+        """
         team = self.db.find_first_object_by(UserTeamRel, hackathon_id=g.hackathon.id, user_id=g.user.id)
         if team is not None:
             return self.db.find_first_object_by(Team, id=team.team_id).dic()
@@ -118,6 +149,14 @@ class TeamManager(Component):
         return team.dic()
 
     def update_team(self, kwargs):
+        """ use to update team information
+
+        :type kwargs: kwargs
+        :param kwargs: a dict to store update information for team
+
+        :rtype: dict
+        :return:  return updated team information in a dict
+        """
         if "team_name" in kwargs.keys():
             team_name = kwargs["team_name"]
             team = self.db.find_first_object_by(Team, hackathon_id=g.hackathon.id, name=team_name)
@@ -138,6 +177,20 @@ class TeamManager(Component):
             return bad_request("Please choose a team to update")
 
     def join_team(self, hid, tname, user):
+        """ user join a team will create a record on user_team_rel table which status will be 0.
+        :type hid: int
+        :param hid: the key to store hackathon id
+
+        :type tname: str | unicode
+        :param tname: the key to store team name
+
+        :type user: User
+        :param user: User object which wants join the team
+
+        :rtype: dict
+        :return: if user already joined team or team not exist, return bad request. Else, return a dict of joined
+            details.
+        """
         if self.db.find_first_object_by(UserTeamRel, hackathon_id=hid, user_id=g.user.id):
             return bad_request("You have joined another team, please quit first.")
 
@@ -154,7 +207,28 @@ class TeamManager(Component):
         else:
             return bad_request("team not found !")
 
-    def update_statues(self, hid, tname, status, user, candidate_id):
+    def update_status(self, hid, tname, status, user, candidate_id):
+        """ update user's status on selected team. if current user doesn't have permission, return bad request.
+        Else, update user's status
+
+        :type hid: int
+        :param hid: the key to store hackathon id
+
+        :type tname: str|unicode
+        :param tname: the key to store team name
+
+        :type status: int
+        :param status: the key to indicate the status of the team
+
+        :type user: User
+        :param user: the current log in user
+
+        :type candidate_id: int
+        :param candidate_id: the candidate wait for approve
+
+        :rtype: bool
+        :return: if update success, return ok. if not , return bad request.
+        """
         if self.__validate_permission(hid, tname, user) is not False:
             candidate = self.db.find_first_object_by(UserTeamRel, hackathon_id=hid, user_id=candidate_id)
             if status == 1:
@@ -167,6 +241,17 @@ class TeamManager(Component):
                 return ok("Your request has been denied, please rejoin another team.")
 
     def leave_team(self, hid, tname):
+        """ team member leave team
+
+        :type hid: int
+        :param hid: the key to store hackathon id
+
+        :type tname: str|unicode
+        :param tname: the key to store team name
+
+        :rtype: bool
+        :return: if leave_team success, return ok. if not ,return bad request.
+        """
 
         # if user is not team leader
         if self.db.find_first_object_by(Team, hackathon_id=hid, name=tname, leader_id=g.user.id) is None:
@@ -183,6 +268,17 @@ class TeamManager(Component):
                 return bad_request("You are last one of team, please use \"Dismiss\" button to dismiss team.")
 
     def kick(self, tname, candidate_id):
+        """ team leader and admin kick some one from team
+
+        :type tname: str|unicode
+        :param tname: the key to store team name
+
+        :type candidate_id: int
+        :param candidate_id: the candidate wait for approve
+
+        :rtype: bool
+        :return: if kick success, return ok. if not ,return bad request
+        """
         if self.__validate_permission(g.hackathon.id, tname, g.user) is not False:
             team = self.db.find_first_object_by(Team, hackation_id=g.hackathon.id, name=tname)
             candidate_record = self.db.find_first_object_by(UserTeamRel, team_id=team.id, user_id=candidate_id)
@@ -191,7 +287,21 @@ class TeamManager(Component):
                 self.db.delete_object(candidate_record)
                 return ok("kicked")
 
-    def promote_leader(self, hid, tname, user_id):
+    def promote_leader(self, hid, tname, candidate_id):
+        """ team leader promote some one from team to become team leader
+
+        :type hid: int
+        :param hid: the key to store hackathon id
+
+        :type tname: str|unicode
+        :param tname: the key to store team name
+
+        :type candidate_id: int
+        :param candidate_id: the candidate wait for become leader
+
+        :rtype: bool
+        :return: if promote success, return ok. if not ,return bad request.
+        """
         # check permission
         if self.__validate_permission(hid, tname, g.user):
             # check new leader and old leader in same team
@@ -199,8 +309,8 @@ class TeamManager(Component):
             leader_id = team.leader_id
             team_member = team.user_team_rels.all()
             team_member_id = map(lambda x: x.user_id, team_member)
-            if user_id in team_member_id and leader_id in team_member_id:
-                team.leader_id = user_id
+            if candidate_id in team_member_id and leader_id in team_member_id:
+                team.leader_id = candidate_id
                 self.log.debug(team.leader.name + " has been promote to leader.")
                 self.db.commit()
                 return team.dic()
@@ -208,6 +318,17 @@ class TeamManager(Component):
                 return bad_request("Please promote someone in the same team.")
 
     def dismiss_team(self, hid, tname):
+        """ team leader and admin dismiss team
+
+        :type hid: int
+        :param hid: the key to store hackathon id
+
+        :type tname: str|unicode
+        :param tname: the key to store team name
+
+        :rtype: bool
+        :return: if dismiss success, return ok. if not ,return bad request.
+        """
         if self.__validate_permission(hid, tname, g.user) is not False:
             team = self.db.find_first_object_by(Team, hackathon_id=hid, name=tname)
             self.db.delete_all_objects_by(UserTeamRel, team_id=team.id)
@@ -235,3 +356,48 @@ class TeamManager(Component):
         else:
             return self.template_manager.delete_template_from_hackathon(template_id, team.id)
 
+
+# --------------------------------------------------------------------------------------------------------------------
+
+
+def __validate_permission(self, hid, tname, user):
+    """ validate the current user have certain permission to perform managenment actions
+
+    :type: hid: int
+    :param hid: key to store hackathon id
+
+    :type: tname: str|unicode
+    :param tname: key to store team name
+
+    :type: user: User
+    :param user: the selected user to examine permission
+
+    :rtype: bool
+    :return: True or False. If user has permission, return True. Else, return false
+    """
+    # check if team leader
+    if self.db.find_first_object_by(Team, hackathon_id=hid, name=tname, leader_id=user.id) is not None:
+        return True
+    # check if hackathon admin
+    elif self.db.find_first_object_by(AdminHackathonRel, hackathon_id=hid, user_id=user.id) is not None:
+        return True
+    # check if super admin
+    elif self.user_manager.is_super_admin(user) is True:
+        return True
+    else:
+        return False
+
+
+def __get_team(self, hid, uid):
+    """ get the given user' team
+
+    :type hid: int
+    :param hid: the key to store hackathon id
+
+    :type uid: int
+    :param uid: the key to store user id
+
+    :rtype: UserTeamRel
+    :return:get user's team on selected hackathon
+    """
+    return self.db.find_first_object_by(UserTeamRel, hackathon_id=hid, user_id=uid)

@@ -229,7 +229,7 @@ class TeamManageResource(Resource):
         parse.add_argument("status", type=int, location="json", required=True)
         parse.add_argument("team_name", type=str, location="json", required=True)
         args = parse.parse_args()
-        return team_manager.update_statues(g.hackathon.id,
+        return team_manager.update_status(g.hackathon.id,
                                            args["team_name"],
                                            args["status"],
                                            g.user,
