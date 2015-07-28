@@ -664,11 +664,11 @@ class ExprManager(object):
 
 
 def win10_recycle_task():
-    hack = hack_manager.get_hackathon_by_name(WINDOWS_TEN)
-    if hack is None:
+    template = db_adapter.find_first_object_by(Template, name=WINDOWS_TEN)
+    if not template:
         return
 
-    expr_list = db_adapter.find_all_objects_by(Experiment, hackathon_id=hack.id, status=ExprStatus.Running)
+    expr_list = db_adapter.find_all_objects_by(Experiment, template_id=template.id, status=ExprStatus.Running)
 
     def sub_check(expr):
         if expr.user_id > 0 and expr.create_time + timedelta(minutes=WIN10_COUNT_DOWN_MINUTES) < datetime.utcnow():

@@ -40,7 +40,7 @@
 var s = angular.module('oh.controllers', []);
 s.controller('main.controller', function ($rootScope,$scope) {
   var config = $rootScope.config;
- function openWindow(url, width) {
+  function openWindow(url, width) {
 //    width = width || 600;
 //    var l, t;
 //    l = (screen.width - width ) / 2;
