@@ -106,13 +106,12 @@ a {
 }
 
 #ohp_header .navbar-brand {
-  background: url('/images/icon64.png') no-repeat;
   color: #00abec;
   background-origin: content-box;
-  text-indent: 78px;
   font-size: 30px;
   line-height: 60px;
 }
+
 
 #ohp_header .navbar {
   border-radius: 0;
@@ -138,6 +137,7 @@ a {
 }
 
 .footer {
+  display:none;
   background-color: #1a1a1a;
   bottom: 0;
   width: 100%;
@@ -288,6 +288,7 @@ body.hackathon {
 }
 
 .hackathon .footer {
+  display:none;
   position: absolute;
   bottom: 0;
 }
@@ -300,7 +301,7 @@ body.hackathon {
   position: absolute;
   padding: 0 0 0 5px;
   top: 90px;
-  bottom: 60px;
+  bottom: 0px;
   left: 0px;
   right: 0;
   width: auto;
@@ -701,4 +702,14 @@ body.hackathon {
   font-weight: 400;
   font-size: 1.178em;
   font-family: 'Segoe UI' , 'Segoe' , 'SegoeUI-Regular-final', Tahoma, Helvetica, Arial, sans-serif;
+}
+
+.nav > li[end-countdown],
+.nav > li[endexpr]{
+  display:none;
+}
+
+.hackathon .nav > li[end-countdown],
+.hackathon .nav > li[endexpr]{
+  display:block;
 }
