@@ -86,5 +86,16 @@
       "state": "openhackathon",
       "response_type": "code"
     }
+  },
+  "social":{
+    "github":"https://github.com/login/oauth/authorize?",
+    "gitcafe":"https://gcs.dgz.sh/oauth/authorize?",
+    "weibo":"https://api.weibo.com/oauth2/authorize?",
+    "qq":"https://graph.qq.com/oauth2.0/authorize?",
+    "live":"https://login.live.com/oauth20_authorize.srf?"
+  },
+  "seo":{
+    "keywords":"开放黑客松,Open Hackathon Platform",
+    "description":"open hackathon platform"
   }
 }
