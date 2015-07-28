@@ -40,15 +40,16 @@
  */
 angular.module('oh.controllers')
   .controller('oh.header.controller', function ($scope, $rootScope, $cookieStore, $state,API) {
+    $rootScope.hackathon = true;
+
     if (!$cookieStore.get('User')) {
-      $state.go('index');
+      $state.go('login');
     }
 
      API.win10.stat.get({},function(data){
         $scope.t = data;
      })
 
-    $rootScope.hackathon = true;
     $scope.status = {
       isopen: false
     }
