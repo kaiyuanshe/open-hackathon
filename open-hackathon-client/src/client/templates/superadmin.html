@@ -1,0 +1,73 @@
+{% extends "base/default.html" %}
+
+{% block meta %}
+<title>黑客松登录</title>
+<meta name="keywords" content=""/>
+<meta name="description" content="">
+{% endblock %}
+
+{% block style %}
+<link href="/static/css/oh.login.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="background_branding_container">
+    <img class="background_image" alt="" src="/static/pic/login.png" width="100%" oh-resizebgimage>
+</div>
+<div class="login_panel">
+    <div class="login_panel_center">
+        <div class="inner_container ">
+            <div class="login_workload_logo_container">
+                <span class="fa fa-windows"></span> Microsoft Open Technologies Center&reg;
+            </div>
+            <form class="form-horizontal login" action="superadmin" method="post">
+                <fieldset class="col-sm-12">
+                    <div class="form-group">
+                        <div class="controls row">
+                            <div class="input-group col-sm-12">
+                                <input type="text" class="form-control" id="username" name="username" placeholder="Username or E-mail">
+                                <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="controls row">
+                            <div class="input-group col-sm-12">
+                                <input type="password" class="form-control" id="password" name="password" placeholder="Password">
+                                <span class="input-group-addon"><i class="fa fa-key"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                    {% if error %}
+                    <div class="form-group has-error">
+                        <div class=" controls row">
+                            <div class="input-group col-sm-12">
+                                [{{error}}]
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div class="row">
+                        <button type="submit" class="btn btn-lg btn-primary col-xs-12">Login</button>
+                    </div>
+                </fieldset>
+            </form>
+
+        </div>
+        <footer class="login_footer">
+            <img class="footer_glyph" src="/static/pic/ad_glyph_footer_30x30.png">
+
+            <p class="branding_footer">
+                <a target="_blank" href="http://cn.msopentech.com/%e5%85%b3%e4%ba%8e%e6%88%91%e4%bb%ac/">联系我们</a> |
+                <a target="_blank" href="/PrivacyStatement.html">隐私条款</a> |
+                <a target="_blank" href="TermsOfUse">使用条款</a> | © 2015 Microsoft Open Technologies (Shanghai) Company Limited
+            </p>
+        </footer>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript" src="/static/js/views/oh.login.js"></script>
+{% endblock %}
