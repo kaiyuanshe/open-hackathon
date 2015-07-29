@@ -156,9 +156,9 @@ class TemplateCreateByFileResource(Resource):
 class TemplateListResource(Resource):
     def get(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('status', type=int, location='args')
-        parse.add_argument('name', type=str, location='args')
-        parse.add_argument('description', type=str, location='args')
+        parse.add_argument('status', type=int, location='args',required=False)
+        parse.add_argument('name', type=str, location='args',required=False)
+        parse.add_argument('description', type=str, location='args', required=False)
         args = parse.parse_args()
         templates = template_manager.get_template_list(status=args['status'],
                                                        name=args['name'],
@@ -201,6 +201,6 @@ def register_routes():
 
     # template API
     api.add_resource(TemplateResource, "/api/template")
-    api.add_resource(TemplateCreateByFileResource, "/api/template/createbyfile")
+    api.add_resource(TemplateCreateByFileResource, "/api/template/file")
     api.add_resource(TemplateListResource, "/api/template/list")
     api.add_resource(HackathonTemplateListResource, "/api/admin/hackathon/template/list")

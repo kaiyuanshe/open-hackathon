@@ -26,22 +26,40 @@
 
     // true: PUT to update; false: POST to create
     var is_update = false;
-    var currentHackathon = oh.comm.getCurrentHackathon();
 
-    // Get created template list
-    function bindTemplateList(){
+    // get all templates filter data
+    function getFilterData(){
+        var Data = {
+            name:$.trim($('#template_name').val()),
+            status:$.trim($('#status').val()),
+            description:$.trim($('#template_description').val())
+         }
+        return Data;
+    }
 
-        var list = $('#templatelist');
-        oh.api.admin.hackathon.template.list.get({
-            header:{hackathon_name:currentHackathon}
+    // get all templates
+    function getTemplateList(){
+        var list = $('#alltemplatelist');
+        oh.api.template.list.get({
+            query: getFilterData()
         }, function(data){
             var index = 0;
-            list.empty().append($('#template_item').tmpl(data,{
-                hackathon_name:currentHackathon,
-                getIndex:function(){ return ++index;}
+            list.empty().append($('#all_template_item').tmpl(data,{
+                getIndex:function(){ return ++index;},
+                getStatus:function(status){
+                    if(status == 1){
+                        return '审核通过'
+                    }
+                    if(status == 2){
+                        return '审核失败'
+                    }
+                    return '未审核';
+                }
             }));
         });
+        $('#template_list_filter').find('[data-type="query"]').removeAttr('disabled')
     }
+
 
     // clear template form after create/update template
     function clearTemplateForm(){
@@ -229,7 +247,7 @@
     }
 
     function init(){
-        var templateform = $('#templateform');
+        var templateform = $('#template_list_filter');
         templateform.bootstrapValidator().on('success.form.bv', function(e) {
             e.preventDefault();
             var formData = getFormData();
@@ -239,6 +257,12 @@
                 bindTemplateList();
                 toggleTable();
             })
+        });
+
+        templateform.on('click','[data-type="query"]',function(e){
+            $(this).attr('disabled','disabled')
+            getTemplateList(this);
+
         });
 
         templateform.on('click','[data-type="btn_add_port"]',function(e){
@@ -298,7 +322,7 @@
 
     $(function() {
         init();
-        bindTemplateList();
+        getTemplateList();
         createTemplateUnit();
     })
 

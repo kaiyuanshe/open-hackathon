@@ -27,6 +27,7 @@ import os
 import sys
 import uuid
 import json
+from werkzeug.exceptions import BadRequest, InternalServerError,Forbidden
 
 sys.path.append("..")
 
@@ -117,108 +118,67 @@ class TemplateManager(Component):
         return settings
 
     def create_template(self, args):
-        # create template step 1 : args validate
-        status, return_info = self.__check_create_args(args)
-        if not status:
-            return return_info
-        # create template step 2 : parse args and trans to file
-        context = self.__save_template(args)
+        """ create template
+
+        The whole logic contains 4 main steps:
+        1 : args validate
+        2 : parse args and save to storage
+        3 : save to database
+
+        :type args: dic
+        :param args: description of the template that you want to create
+
+        :return:
+        """
+        self.__check_create_args(args)
+        context = self.__save_template_to_storage(args)
         if not context:
             return internal_server_error("save tempplate failed")
-        # create template step 3 : upload template file to Azure
-        # todo azure storage
-        # azure_url = self.__upload_template_to_azure(url, file_name)
-        # if azure_url is None:
-        # return internal_server_error("upload template file failed")
-        # create template step 4 : insert into DB
         self.log.debug("create template: %r" % args)
-        self.db.add_object_kwargs(Template,
-                                  name=args[BaseTemplate.TEMPLATE_NAME],
-                                  url=context.url,
-                                  local_path=context.physical_path,
-                                  provider=args[BaseTemplate.VIRTUAL_ENVIRONMENTS_PROVIDER],
-                                  creator_id=g.user.id,
-                                  status=TEMPLATE_STATUS.UNCHECKED,
-                                  create_time=self.util.get_now(),
-                                  update_time=self.util.get_now(),
-                                  description=args[BaseTemplate.DESCRIPTION],
-                                  virtual_environment_count=len(args[BaseTemplate.VIRTUAL_ENVIRONMENTS]))
+        self.__save_template_to_database(args, context)
         return ok("create template success")
 
     def create_template_by_file(self):
         """create a template by a whole template file
 
+        The whole logic contains 4 main steps:
+        1 : get template dic from PostRequest
+        2 : args validate
+        3 : parse args and save to storage
+        4 : save to database
+
+        :type args: dic
+        :param args: description of the template that you want to create
+
         :return:
-            bad_request("invalid template file", ex) : template cannot be formatted as a json object
-            internal_server_error("save template failed") : save template file to storage faild
-            bad_request("template provider invalid") : provider missed or wrong place in template file
-            ok("create template success") : successfully create template by uploaded file
+
         """
-        for file_name in request.files:
-            file = request.files[file_name]
-            try:
-                # step 1: check file json format
-                template = json.load(file)
-                self.log.debug("create template: %r" % template)
-
-                # step 2: parse template and check required properties
-                status, return_info = self.__check_create_args(template)
-                if not status:
-                    return return_info
-
-                # step 3: save to storage
-                context = self.__save_template(template)
-                if not context:
-                    return internal_server_error("save template failed")
-
-                # step 4: add a record to DB
-                provider = self.__get_provider_from_template_dic(template)
-                self.db.add_object_kwargs(Template,
-                                          name=template[BaseTemplate.TEMPLATE_NAME],
-                                          url=context.url,
-                                          local_path=context.physical_path,
-                                          provider=provider,
-                                          creator_id=g.user.id,
-                                          status=TEMPLATE_STATUS.UNCHECKED,
-                                          create_time=self.util.get_now(),
-                                          update_time=self.util.get_now(),
-                                          description=template[BaseTemplate.DESCRIPTION],
-                                          virtual_environment_count=len(template[BaseTemplate.VIRTUAL_ENVIRONMENTS]))
-            except Exception as ex:
-                self.log.error(ex)
-                return bad_request("invalid template file", ex)
+        template = self.__get_template_from_request()
+        self.__check_create_args(template)
+        context = self.__save_template_to_storage(template)
+        if not context:
+            return internal_server_error("save template failed")
+        self.__save_template_to_database(template, context)
         return ok("create template success")
 
     def update_template(self, args):
-        """
-        Update template according to post args
-        :param args:
+        """update a exist template
+
+        The whole logic contains 4 main steps:
+        1 : args validate for update operation
+        2 : parse args and save to storage
+        3 : save to database
+
+        :type args: dic
+        :param args: description of the template that you want to create
+
         :return:
         """
-        # update template step 1 : args validate
-        status, return_info = self.__check_update_args(args)
-        if not status:
-            return return_info
-        # update template step 2 : parse args and trans to file
-        context = self.__save_template(args)
+        self.__check_update_args(args)
+        context = self.__save_template_to_storage(args)
         if not context:
             return internal_server_error("save tempplate failed")
-        # update template step 3 : upload template file to Azure
-        # todo azure storage
-        # azure_url = self.__upload_template_to_azure(url, file_name)
-        # if azure_url is None:
-        # return internal_server_error("upload template file failed")
-        # update template step 4 : update DB
-        self.log.debug("update template: %r" % args)
-        template = return_info
-        self.db.update_object(template,
-                              url=context.url,
-                              local_path=context.physical_path,
-                              update_time=self.util.get_now(),
-                              description=args[BaseTemplate.DESCRIPTION],
-                              virtual_environment_count=len(args[BaseTemplate.VIRTUAL_ENVIRONMENTS]))
-        # refresh template in memory after update
-        self.__load_template_from_local_file(template.id, context.physical_path)
+        self.__save_template_to_database(args, context)
         return ok("update template success")
 
     def delete_template(self, id):
@@ -336,22 +296,30 @@ class TemplateManager(Component):
     # ---------------------------------------- helper functions ---------------------------------------- #
 
     def __check_create_args(self, args):
-        if BaseTemplate.TEMPLATE_NAME not in args \
-                or BaseTemplate.DESCRIPTION not in args \
-                or BaseTemplate.VIRTUAL_ENVIRONMENTS_PROVIDER not in args \
-                or BaseTemplate.VIRTUAL_ENVIRONMENTS not in args:
-            return False, bad_request("template args invalid")
-        if self.db.count_by(Template, name=args[BaseTemplate.TEMPLATE_NAME]) > 0:
-            return False, bad_request("template already exists")
-        return True, "pass"
+        if BaseTemplate.TEMPLATE_NAME not in args:
+            raise BadRequest(description="template args: name invalid")
+        if BaseTemplate.DESCRIPTION not in args:
+            raise BadRequest(description="template args: description invalid")
+        if BaseTemplate.VIRTUAL_ENVIRONMENTS_PROVIDER not in args:
+            raise BadRequest(description="template args: provider invalid")
+        if BaseTemplate.VIRTUAL_ENVIRONMENTS not in args:
+            raise BadRequest(description="template args: virtual_environments invalid")
 
-    def __save_template(self, args):
+    def __check_update_args(self, args):
+        self.__check_create_args(args)
+        template = self.db.find_first_object_by(Template, name=args[BaseTemplate.TEMPLATE_NAME])
+        if template is None:
+            raise BadRequest("template does not exist")
+        # user can only modify the template which created by himself except super admin
+        if g.user.id != template.creator_id and not self.user_manager.is_super_admin(g.user):
+            raise Forbidden()
+
+    def __save_template_to_storage(self, args):
         try:
             docker_template_units = [DockerTemplateUnit(ve) for ve in args[BaseTemplate.VIRTUAL_ENVIRONMENTS]]
             docker_template = DockerTemplate(args[BaseTemplate.TEMPLATE_NAME],
                                              args[BaseTemplate.DESCRIPTION],
                                              docker_template_units)
-
             file_name = '%s-%s-%s.js' % (g.user.name, args[BaseTemplate.TEMPLATE_NAME], str(uuid.uuid1())[0:8])
             context = Context(
                 file_name=file_name,
@@ -365,6 +333,35 @@ class TemplateManager(Component):
             self.log.error(ex)
             return None
 
+    def __save_template_to_database(self, args, context):
+        template = self.db.find_first_object_by(Template, name=args[BaseTemplate.TEMPLATE_NAME])
+        try:
+            # insert record
+            if template is None:
+                self.log.debug("create template: %r" % args)
+                provider = self.__get_provider_from_template_dic(args)
+                self.db.add_object_kwargs(Template,
+                                          name=args[BaseTemplate.TEMPLATE_NAME],
+                                          url=context.url,
+                                          local_path=context.physical_path,
+                                          provider=provider,
+                                          creator_id=g.user.id,
+                                          status=TEMPLATE_STATUS.UNCHECKED,
+                                          create_time=self.util.get_now(),
+                                          update_time=self.util.get_now(),
+                                          description=args[BaseTemplate.DESCRIPTION],
+                                          virtual_environment_count=len(args[BaseTemplate.VIRTUAL_ENVIRONMENTS]))
+            # update recorde
+            self.db.update_object(template,
+                                  url=context.url,
+                                  local_path=context.physical_path,
+                                  update_time=self.util.get_now(),
+                                  description=args[BaseTemplate.DESCRIPTION],
+                                  virtual_environment_count=len(args[BaseTemplate.VIRTUAL_ENVIRONMENTS]))
+        except Exception as ex:
+            self.log.error(ex)
+            raise InternalServerError(description="insert or update record in db failed")
+
     def __upload_template_to_azure(self, path, file_name):
         try:
             template_container = self.util.safe_get_config("storage.template_container", "templates")
@@ -372,20 +369,6 @@ class TemplateManager(Component):
         except Exception as ex:
             self.log.error(ex)
             return None
-
-    def __check_update_args(self, args):
-        if BaseTemplate.TEMPLATE_NAME not in args \
-                or BaseTemplate.DESCRIPTION not in args \
-                or BaseTemplate.VIRTUAL_ENVIRONMENTS_PROVIDER not in args \
-                or BaseTemplate.VIRTUAL_ENVIRONMENTS not in args:
-            return False, bad_request("template args invalid")
-        template = self.db.find_first_object_by(Template, name=args[BaseTemplate.TEMPLATE_NAME])
-        if template is None:
-            return False, bad_request("template does not exist")
-        # user can only modify the template which created by himself except super admin
-        if g.user.id != template.creator_id and not self.user_manager.is_super_admin(g.user):
-            return False, forbidden()
-        return True, template
 
     def __load_template_from_memory(self, template_id):
         """
@@ -478,13 +461,13 @@ class TemplateManager(Component):
         :return: condition for query in DB
         """
         condition = Template.status != -1
-        if kwargs['status'] is not None:
+        if kwargs['status'] is not None and kwargs['status'] >= 0:
             condition = and_(condition, Template.status == kwargs['status'])
 
-        if kwargs['name'] is not None:
+        if kwargs['name'] is not None and len(kwargs['name']) > 0:
             condition = and_(condition, Template.name.like('%' + kwargs['name'] + '%'))
 
-        if kwargs['description'] is not None:
+        if kwargs['description'] is not None and len(kwargs['description']) > 0:
             condition = and_(condition, Template.description.like('%' + kwargs['description'] + '%'))
 
         return condition
@@ -504,3 +487,14 @@ class TemplateManager(Component):
         except Exception as e:
             self.log.error(e)
             return None
+
+    def __get_template_from_request(self):
+        for file_name in request.files:
+            try:
+                file = request.files[file_name]
+                template = json.load(file)
+                self.log.debug("create template: %r" % template)
+                return template
+            except Exception as ex:
+                self.log.error(ex)
+                raise BadRequest(description="invalid template file")
