@@ -42,7 +42,6 @@ from hackathon.database.models import (
 )
 from hackathon.hackathon_response import (
     not_found,
-    bad_request,
     internal_server_error,
     ok,
     forbidden
@@ -296,6 +295,14 @@ class TemplateManager(Component):
     # ---------------------------------------- helper functions ---------------------------------------- #
 
     def __check_create_args(self, args):
+        """ validate args when creating a template
+
+        :type args: dict
+        :param args: decription for a template that you want to create
+
+        :return: if validate successed return nothing else raised a BadRequest exception
+
+        """
         if BaseTemplate.TEMPLATE_NAME not in args:
             raise BadRequest(description="template args: name invalid")
         if BaseTemplate.DESCRIPTION not in args:
@@ -306,6 +313,14 @@ class TemplateManager(Component):
             raise BadRequest(description="template args: virtual_environments invalid")
 
     def __check_update_args(self, args):
+        """ validate args when updating a template
+
+        :type args: dict
+        :param args: decription for a template that you want to update
+
+        :return: if validate successed return nothing else raised a BadRequest or Forbidden exceptions
+
+        """
         self.__check_create_args(args)
         template = self.db.find_first_object_by(Template, name=args[BaseTemplate.TEMPLATE_NAME])
         if template is None:
@@ -315,6 +330,16 @@ class TemplateManager(Component):
             raise Forbidden()
 
     def __save_template_to_storage(self, args):
+        """save template to a file in storage which is chooisen by configuration
+
+        Parse out template from args and merge with default tempale value
+        Then generate a file name, and save it to a physical file in storage
+
+        :type args: dict
+        :param args: description of template
+
+        :return: context if no exception raised
+        """
         try:
             docker_template_units = [DockerTemplateUnit(ve) for ve in args[BaseTemplate.VIRTUAL_ENVIRONMENTS]]
             docker_template = DockerTemplate(args[BaseTemplate.TEMPLATE_NAME],
@@ -334,6 +359,19 @@ class TemplateManager(Component):
             return None
 
     def __save_template_to_database(self, args, context):
+        """save template date to db
+
+        According to the args , find out whether it is ought to insert or update a record
+
+        :type args : dict
+        :param args: description of template that you want to insert to DB
+
+        :type context: Context
+        :param context: the context that return from self.__save_template_to_storage
+
+        :return: if raised exception return InternalServerError else return nothing
+
+        """
         template = self.db.find_first_object_by(Template, name=args[BaseTemplate.TEMPLATE_NAME])
         try:
             # insert record
@@ -490,6 +528,12 @@ class TemplateManager(Component):
             return None
 
     def __get_template_from_request(self):
+        """ get template dic from http post request
+
+        get file from request , then josn load it to a dic
+
+        :return: template dic , if load file faild raise BadRequest exception
+        """
         for file_name in request.files:
             try:
                 file = request.files[file_name]
