@@ -14,7 +14,7 @@ Pull request is welcome and appreciated.
 Questions go to [dev team](mailto:msopentechdevsh@microsoft.com)
 
 # Author
-Microsoft Open Technologies (Shanghai) Co. Ltd.
+Microsoft Open Technology Center.
 
 # License
 This project is licensed under [MIT License](https://github.com/msopentechcn/open-hackathon/blob/master/license.txt)

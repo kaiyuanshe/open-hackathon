@@ -48,8 +48,8 @@ from hackathon.database.models import (
     Experiment,
     Hackathon,
     Template,
-    User
-)
+    User,
+    HackathonTemplateRel)
 
 from hackathon.azureformation.azureFormation import (
     AzureFormation,
@@ -190,25 +190,27 @@ class ExprManager(Component):
         experiments = self.db.find_all_objects(Experiment, condition)
         return map(lambda u: self.__get_expr_with_user_info(u), experiments)
 
-    def recycle_expr(self):
-        """
-        recycle experiment when idle more than 24 hours
+    def scheduler_recycle_expr(self):
+        """recycle experiment acrroding to hackathon basic info on recycle configuration
+
+        According to the hackathon's basic info on 'recycle_enabled', find out time out experiments
+        Then call function to recycle them
+
         :return:
         """
         self.log.debug("start checking recyclable experiment ... ")
-
-        recycle_hours = self.util.safe_get_config('recycle.idle_hours', 24)
-        expr_time_cond = Experiment.last_heart_beat_time + timedelta(hours=recycle_hours) > self.util.get_now()
-        recycle_cond = Experiment.hackathon_id.in_(self.hackathon_manager.get_recyclable_hackathon_list())
-        status_cond = Experiment.status == EStatus.RUNNING
-        r = self.db.find_first_object(Experiment, status_cond, expr_time_cond, recycle_cond)
-
-        if r is not None:
-            self.stop_expr(r.id)
-            self.log.debug("it's stopping " + str(r.id) + " inactive experiment now")
-        else:
-            self.log.debug("There is now inactive experiment now")
-            return
+        for hackathon in self.hackathon_manager.get_recyclable_hackathon_list():
+            # check recycle enabled
+            mins = self.hackathon_manager.get_recycle_minutes(hackathon)
+            expr_time_cond = Experiment.create_time < self.util.get_now() - timedelta(minutes=mins)
+            status_cond = Experiment.status == EStatus.RUNNING
+            # filter out the experiments that need to be recycled
+            exprs = self.db.find_all_objects(Experiment,
+                                             status_cond,
+                                             expr_time_cond,
+                                             Experiment.hackathon_id == hackathon.id)
+            for expr in exprs:
+                self.__recycle_expr(expr)
 
     def schedule_pre_allocate_expr_job(self):
         next_run_time = self.util.get_now() + timedelta(seconds=1)
@@ -221,7 +223,8 @@ class ExprManager(Component):
     def pre_allocate_expr(self):
         # only deal with online hackathons
         hackathon_id_list = self.hackathon_manager.get_pre_allocate_enabled_hackathon_list()
-        templates = self.db.find_all_objects(Template, Template.hackathon_id.in_(hackathon_id_list))
+        htrs = self.db.find_all_objects(HackathonTemplateRel, HackathonTemplateRel.hackathon_id.in_(hackathon_id_list))
+        templates = map(lambda x: x.template, htrs)
         for template in templates:
             try:
                 pre_num = self.hackathon_manager.get_pre_allocate_number(template.hackathon)
@@ -261,6 +264,19 @@ class ExprManager(Component):
             except Exception as e:
                 self.log.error(e)
                 self.log.error("check default experiment failed")
+
+    def assign_expr_to_admin(self, expr):
+        """assign expr to admin to trun expr into pre_allocate_expr
+
+        :type expr: Experiment
+        :param expr: which expr you want to assign
+
+        :return:
+        """
+        try:
+            self.db.update_object(expr, user_id=ReservedUser.DefaultUserID)
+        except Exception as e:
+            self.log.error(e)
 
     # --------------------------------------------- helper function ---------------------------------------------#
 
@@ -318,7 +334,7 @@ class ExprManager(Component):
             if not self.docker.hosted_docker.check_container_status_is_normal(container):
                 try:
                     self.db.update_object(expr, status=EStatus.UNEXPECTED_ERROR)
-                    self.db.update_object(container.virtual_environment, status=VEStatus.UNEXPECTEDERRORS)
+                    self.db.update_object(container.virtual_environment, status=VEStatus.UNEXPECTED_ERROR)
                     break
                 except Exception as ex:
                     self.log.error(ex)
@@ -525,3 +541,23 @@ class ExprManager(Component):
         """
         ves = self.db.find_all_objects_by(VirtualEnvironment, experiment_id=expr.id, provider=VE_PROVIDER.DOCKER)
         return map(lambda x: x.container, ves)
+
+    def __recycle_expr(self, expr):
+        """recycle expr
+
+        If it is a docker experiment , stop it ; else assign it to default user
+
+        :type expr: Experiment
+        :param expr: the exper which you want to recycle
+
+        :return:
+        """
+        providers = map(lambda x: x.provider, expr.virtual_environments.all())
+        # TODO check expr provider from each virtual_environment's provider
+        if VE_PROVIDER.DOCKER in providers:
+            self.stop_expr(expr.id)
+            self.log.debug("it's stopping " + str(expr.id) + " inactive experiment now")
+        else:
+            # docker experiment
+            self.assign_expr_to_admin(expr)
+            self.log.debug("assign " + str(expr.id) + " to default admin")

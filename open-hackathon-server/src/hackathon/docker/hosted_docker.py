@@ -271,7 +271,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
 
     def get_pulled_images(self, docker_host):
         get_images_url = self.get_vm_url(docker_host) + "/images/json?all=0"
-        current_images_info = json.loads(self.util.get_remote(get_images_url))  # [{},{},{}]
+        current_images_info = json.loads(requests.get(get_images_url).content)  # [{},{},{}]
         current_images_tags = map(lambda x: x['RepoTags'], current_images_info)  # [[],[],[]]
         return flatten(current_images_tags)  # [ imange:tag, image:tag ]
 

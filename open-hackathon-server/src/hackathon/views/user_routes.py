@@ -132,13 +132,18 @@ class UserExperimentListResource(Resource):
         return expr_manager.get_expr_list_by_user_id(args['user_id'])
 
 
-class GetTeamMembersByUserResource(Resource):
+class TeamMemberListResource(Resource):
     @token_required
     @hackathon_name_required
     def get(self):
-        hackathon_id = g.hackathon.id
-        user_id = g.user.id
-        return team_manager.get_team_members_by_user(hackathon_id, user_id)
+        parse = reqparse.RequestParser()
+        parse.add_argument('team_name', type=str, location='args')
+        args = parse.parse_args()
+
+        if args["team_name"]:
+            return team_manager.get_team_members_by_name(g.hackathon.id, args["team_name"])
+        else:
+            return team_manager.get_team_members_by_user(g.hackathon.id, g.user.id)
 
 
 class UserProfileResource(Resource):
@@ -169,9 +174,7 @@ class TeamTemplateResource(Resource):
     @hackathon_name_required
     def post(self):
         args = request.get_json()
-        if "template_name" not in args:
-            return bad_request("template name invalid")
-        return team_manager.team_leader_add_template(args['template_name'])
+        return team_manager.add_template_for_team(args)
 
     @token_required
     @hackathon_name_required
@@ -179,7 +182,7 @@ class TeamTemplateResource(Resource):
         parse = reqparse.RequestParser()
         parse.add_argument('template_id', type=int, location='args', required=True)
         args = parse.parse_args()
-        return team_manager.team_leader_delete_template(args['template_id'])
+        return team_manager.delete_template_from(args['template_id'])
 
 
 class TeamResource(Resource):
@@ -188,8 +191,7 @@ class TeamResource(Resource):
         parse = reqparse.RequestParser()
         parse.add_argument('team_name', type=str, location='args', required=True)
         args = parse.parse_args()
-        hackathon_id = g.hackathon.id
-        return team_manager.get_team_info(hackathon_id, args["team_name"])
+        return team_manager.get_team_by_name(g.hackathon.id, args["team_name"])
 
     @token_required
     @hackathon_name_required
@@ -212,7 +214,7 @@ class TeamResource(Resource):
         return team_manager.dismiss_team(g.hackathon.id, args["team_name"])
 
 
-class TeamManageResource(Resource):
+class TeamMemberResource(Resource):
     @token_required
     @hackathon_name_required
     def post(self):
@@ -229,11 +231,11 @@ class TeamManageResource(Resource):
         parse.add_argument("status", type=int, location="json", required=True)
         parse.add_argument("team_name", type=str, location="json", required=True)
         args = parse.parse_args()
-        return team_manager.update_statues(g.hackathon.id,
-                                           args["team_name"],
-                                           args["status"],
-                                           g.user,
-                                           args["user_id"])
+        return team_manager.update_team_member_status(g.hackathon.id,
+                                                      args["team_name"],
+                                                      args["status"],
+                                                      g.user,
+                                                      args["user_id"])
 
     @token_required
     @hackathon_name_required
@@ -282,8 +284,8 @@ def register_user_routes():
 
     # team API
     api.add_resource(TeamResource, "/api/team")
-    api.add_resource(GetTeamMembersByUserResource, "/api/user/team")
-    api.add_resource(TeamManageResource, "/api/team/member")
+    api.add_resource(TeamMemberResource, "/api/team/member")
+    api.add_resource(TeamMemberListResource, "/api/team/member/list")
     api.add_resource(TeamLeaderResource, "/api/team/leader")
 
     # user profile API

@@ -84,10 +84,6 @@ Config = {
         "azure": 1,
         "docker": 1
     },
-    "recycle": {
-        "idle_hours": 24,
-        "check_idle_interval_minutes": 5
-    },
     "storage": {
         "type": "local",
         "size_limit_kilo_bytes": 5 * 1024,

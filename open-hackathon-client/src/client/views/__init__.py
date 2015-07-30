@@ -38,7 +38,7 @@ import re
 
 from datetime import datetime
 from client.constants import LOGIN_PROVIDER
-from flask_login import login_required, login_user, LoginManager
+from flask_login import login_required, login_user, LoginManager, current_user
 from client.user.login import login_providers
 from client.user.user_mgr import user_manager
 from flask import Response, render_template, request, g, redirect, make_response, session, url_for
@@ -74,7 +74,7 @@ def render(template_name_or_list, **context):
 def __login_failed(provider, error="Login failed."):
     if provider == "mysql":
         error = "Login failed. username or password invalid."
-    return render("/login.html", error=error)
+    return render("/superadmin.html", error=error)
 
 
 def __login(provider):
@@ -91,7 +91,7 @@ def __login(provider):
         token = admin_with_token["token"].token
         login_user(admin_with_token["admin"])
         session["token"] = token
-        if session["return_url"] is not None:
+        if session.get("return_url") is not None:
             resp = make_response(redirect(session["return_url"]))
             session["return_url"] = None;
         else:
@@ -222,11 +222,8 @@ def logout():
     return redirect("/login")
 
 
-@app.route("/login", methods=['GET', 'POST'])
+@app.route("/login")
 def login():
-    if request.method == 'POST':
-        return __login(LOGIN_PROVIDER.MYSQL)
-
     # todo redirect to the page request login
     session["return_url"] = request.args.get("return_url")
     return render("/login.html", error=None)
@@ -279,13 +276,19 @@ def tempSettings(hackathon_name):
         if reg.get('experiment') is not None:
             return redirect(url_for('workspace', hackathon_name=hackathon_name))
         elif reg.registration.status == 1 or (reg.registration.status == 3 and reg.hackathon.basic_info.auto_approve):
-            templates = __get_api(API_HACKATHON_TEMPLATE, headers)
+            templates = Context.from_object(__get_api(API_HACKATHON_TEMPLATE, headers))
             return render("/site/settings.html", hackathon_name=hackathon_name, templates=templates)
         else:
             return redirect(url_for('hackathon', hackathon_name=hackathon_name))
     else:
         return redirect(url_for('hackathon', hackathon_name=hackathon_name))
 
+@app.route("/superadmin", methods=['GET', 'POST'])
+def superadmin():
+    if request.method == 'POST':
+        return __login(LOGIN_PROVIDER.MYSQL)
+
+    return render("/superadmin.html")
 
 from route_manage import *
 from route_template import *
