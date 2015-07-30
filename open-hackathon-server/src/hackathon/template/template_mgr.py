@@ -351,13 +351,14 @@ class TemplateManager(Component):
                                           update_time=self.util.get_now(),
                                           description=args[BaseTemplate.DESCRIPTION],
                                           virtual_environment_count=len(args[BaseTemplate.VIRTUAL_ENVIRONMENTS]))
-            # update recorde
-            self.db.update_object(template,
-                                  url=context.url,
-                                  local_path=context.physical_path,
-                                  update_time=self.util.get_now(),
-                                  description=args[BaseTemplate.DESCRIPTION],
-                                  virtual_environment_count=len(args[BaseTemplate.VIRTUAL_ENVIRONMENTS]))
+            else:
+                # update recorde
+                self.db.update_object(template,
+                                      url=context.url,
+                                      local_path=context.physical_path,
+                                      update_time=self.util.get_now(),
+                                      description=args[BaseTemplate.DESCRIPTION],
+                                      virtual_environment_count=len(args[BaseTemplate.VIRTUAL_ENVIRONMENTS]))
         except Exception as ex:
             self.log.error(ex)
             raise InternalServerError(description="insert or update record in db failed")

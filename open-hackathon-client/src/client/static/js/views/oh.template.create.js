@@ -27,49 +27,6 @@
     // true: PUT to update; false: POST to create
     var is_update = false;
 
-    // get all templates filter data
-    function getFilterData(){
-        var Data = {
-            name:$.trim($('#template_name').val()),
-            status:$.trim($('#status').val()),
-            description:$.trim($('#template_description').val())
-         }
-        return Data;
-    }
-
-    // get all templates
-    function getTemplateList(){
-        var list = $('#alltemplatelist');
-        oh.api.template.list.get({
-            query: getFilterData()
-        }, function(data){
-            var index = 0;
-            list.empty().append($('#all_template_item').tmpl(data,{
-                getIndex:function(){ return ++index;},
-                getStatus:function(status){
-                    if(status == 1){
-                        return '审核通过'
-                    }
-                    if(status == 2){
-                        return '审核失败'
-                    }
-                    return '未审核';
-                },
-                getColor:function(status){
-                    if(status == 1){
-                        return "#ADFEDC"
-                    }
-                    if(status == 2){
-                        return '审核失败'
-                    }
-                    return '未审核';
-                }
-
-            }));
-        });
-        $('#template_list_filter').find('[data-type="query"]').removeAttr('disabled')
-    }
-
 
     // clear template form after create/update template
     function clearTemplateForm(){
@@ -116,11 +73,6 @@
         template_unit.appendTo(templist);
         addFieldValidate(template_unit);
         return template_unit;
-    }
-
-    // delete template unit form dynamically
-    function deleteTemplateUnit(element, data){
-        $(element).parents('[data-type="template-unit-group"]').detach();
     }
 
     // create port form dynamically
@@ -233,7 +185,7 @@
 
     // PUT to update
     function updateTemplate(data){
-        return oh.api.admin.hackathon.template.put({
+        return oh.api.template.put({
             body: data,
             header: {hackathon_name:currentHackathon}
         }, function(data){
@@ -256,20 +208,15 @@
     }
 
     function init(){
-        var templateform = $('#template_list_filter');
+        var templateform = $('#templateform');
         templateform.bootstrapValidator().on('success.form.bv', function(e) {
             e.preventDefault();
             var formData = getFormData();
             (is_update ? updateTemplate(formData) : createTemplate(formData)).then(function(){
                 if(is_update)
                     is_update = false;
-                    location.href ="default.aspx"
+                location.href = "/template";
             })
-        });
-
-        templateform.on('click','[data-type="query"]',function(e){
-            $(this).attr('disabled','disabled')
-            getTemplateList(this);
         });
 
         templateform.on('click','[data-type="btn_add_port"]',function(e){
@@ -329,7 +276,6 @@
 
     $(function() {
         init();
-        getTemplateList();
         createTemplateUnit();
     })
 

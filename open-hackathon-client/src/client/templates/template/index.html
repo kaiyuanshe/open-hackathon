@@ -86,7 +86,8 @@
 
 {% block script %}
 <script id="all_template_item" type="text/x-jquery-tmpl">
-    <tr>
+    {% raw %}
+    <tr class="{{if status==0}}bg-info{{else status==1}}bg-success{{else}}bg-danger{{/if}}">
         <td>${$item.getIndex()}</td>
         <td>${name}</td>
         <td>${description}</td>
@@ -95,8 +96,9 @@
         <td>${moment(create_time).format('YYYY/MM/DD HH:mm')}</td>
         <td><a href="${azure_url}">下载</a></td>
     </tr>
+    {% endraw %}
 </script>
 <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
 <script type="text/javascript" src="/static/js/jquery/moment.min.js"></script>
-<script type="text/javascript" src="/static/js/views/oh.manage.template.js"></script>
+<script type="text/javascript" src="/static/js/views/oh.template.index.js"></script>
 {% endblock %}

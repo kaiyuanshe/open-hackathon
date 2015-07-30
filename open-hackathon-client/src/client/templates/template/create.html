@@ -29,6 +29,52 @@
                       data-bv-feedbackicons-invalid="glyphicon glyphicon-remove"
                       data-bv-feedbackicons-validating="glyphicon glyphicon-refresh"
                       >
+
+                <legend>
+                    创建/更新模板
+                </legend>
+
+                <div class="form-group has-feedback">
+                    <label class="col-md-3 control-label">模板名称</label>
+
+                    <div class="col-md-6 register">
+                        <input type="text" class="form-control" name="name" id="name"
+                               placeholder="请使用英文字母、数字和'_'（下划线）'-'(中划线)"
+                               data-bv-trigger="blur"
+                               required
+                               data-bv-notempty-message="名称是必需的，不能为空"
+                               pattern="^(?!_)(?!.*?_$)[a-zA-Z0-9_-]+$"
+                               data-bv-regexp-message="模板名称只能由英文字母的，数字和下划线"
+                               minlength="5"
+                               data-bv-stringlength-message="模板名称必须至少有5个字符"
+                                >
+                    </div>
+                </div>
+
+                <div class="form-group has-feedback">
+                    <label class="col-md-3 control-label">提供商</label>
+
+                    <div class="col-md-6 register">
+                        <select class="form-control" name="provider" id="provider">
+                            <option value="0">DOCKER</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group has-feedback">
+                    <label class="col-md-3 control-label">描述</label>
+
+                    <div class="col-md-6 register">
+                        <input type="text" class="form-control" name="description" id="description"
+                                data-bv-trigger="blur"
+                                required
+                                data-bv-notempty-message="描述是必需的，不能为空"
+                                >
+                    </div>
+                </div>
+
+                <legend></legend>
+
                 <div data-type="template-unit-group">
                     <div class="form-group has-feedback">
                         <label class="col-md-3 control-label">模板单元名称</label>
@@ -263,5 +309,5 @@
 
 {% block script %}
 <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
-<script type="text/javascript" src="/static/js/views/oh.manage.template.js"></script>
+<script type="text/javascript" src="/static/js/views/oh.template.create.js"></script>
 {% endblock %}
