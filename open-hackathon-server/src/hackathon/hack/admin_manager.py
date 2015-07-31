@@ -30,7 +30,7 @@ sys.path.append("..")
 from flask import g
 
 from hackathon import Component, RequiredFeature
-from hackathon.database import AdminHackathonRel
+from hackathon.database import AdminHackathonRel, User
 from hackathon.constants import ADMIN_ROLE_TYPE
 from hackathon.hackathon_response import precondition_failed, ok, not_found, internal_server_error, bad_request
 
@@ -180,6 +180,21 @@ class AdminManager(Component):
         except Exception as e:
             self.log.error(e)
             return internal_server_error(e)
+
+    def is_hackathon_admin(self, hackathon_id, user):
+        """Check whether user is admin of specific hackathon
+
+        :type hackathon_id: int
+        :param hackathon_id: id of hackathon
+
+        :type user: User
+        :param user: the user to be checked
+
+        :rtype: bool
+        :return True if user is admin of the hackathon otherwise False
+        """
+        ahr = self.db.find_first_object_by(AdminHackathonRel, hackathon_id=hackathon_id, user_id=user.id)
+        return ahr is not None
 
     def __generate_update_items(self, args):
         """Generate columns of AdminHackathonRel to be updated"""
