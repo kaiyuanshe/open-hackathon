@@ -233,7 +233,7 @@ class TeamMemberResource(Resource):
         args = parse.parse_args()
         return team_manager.update_team_member_status(g.hackathon.id,
                                                       args["team_name"],
-                                                      args["status"],
+                                                      args["member"],
                                                       g.user,
                                                       args["user_id"])
 

@@ -136,7 +136,7 @@ class TeamManager(Component):
         :return: created team information
         """
         user_team_rel = self.__get_team_by_user(g.user.id, g.hackathon.id)
-        if not user_team_rel:
+        if user_team_rel:
             self.log.debug("fail to create team since user is already in some team.")
             return precondition_failed("you must leave the current team first")
 
@@ -364,8 +364,11 @@ class TeamManager(Component):
         self.__validate_team_permission(hackathon_id, team, g.user)
 
         # check new leader and old leader in same team
-        if new_leader_id not in [x.user_id for x in team.user_team_rels.all()]:
+        member = team.user_team_rels.filter_by(user_id=new_leader_id).first()
+        if not member:
             return precondition_failed("Please promote someone in the same team.")
+        if member.status != TeamMemberStatus.Approved:
+            return precondition_failed("The member is not approved yet")
 
         team.leader_id = new_leader_id
         self.db.commit()

@@ -199,6 +199,6 @@ def register_routes():
 
     # template API
     api.add_resource(TemplateResource, "/api/template")
-    api.add_resource(TemplateCreateByFileResource, "/api/template/createbyfile")
+    api.add_resource(TemplateCreateByFileResource, "/api/template/file")
     api.add_resource(TemplateListResource, "/api/template/list")
     api.add_resource(HackathonTemplateListResource, "/api/admin/hackathon/template/list")
