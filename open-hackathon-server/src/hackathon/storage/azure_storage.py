@@ -23,25 +23,93 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 from storage import Storage
+import json
+
+from hackathon import RequiredFeature
+from hackathon.constants import FILE_TYPE, HEALTH_STATUS, HEALTH
+
 
 __all__ = ["AzureStorage"]
 
 
 class AzureStorage(Storage):
-    """Hackathon file storage that saves all templates on MS azure"""
+    """Hackathon file storage that saves all templates on Azure storage
 
-    def __init__(self):
-        return
+    template files will be save at "<hostname>/<container_name>/<blob_name>"
+    uploaded images will be save at "<hostname>/<container_name>/<blob_name>"
+
+    """
+    cache_manager = RequiredFeature("cache_manager")
+    file_service = RequiredFeature("file_service")
 
     def save(self, context):
+        """Save a file to Azure storage
 
-        pass
+        :type context: Context
+        :param context: the execution context of file saving
+
+        :rtype context
+        :return the updated context which should including the full path of saved file
+        """
+        assert ("container_name" in context.keys()) and ("blob_name" in context.keys())
+        if "path" in context.keys():
+            result = self.file_service.upload_file_to_azure_from_path(context.path,
+                                                                      context.container_name,
+                                                                      context.blob_name)
+            if result is not None:
+                self.cache_manager.invalidate(result)
+        else:
+            assert ("file" in context.keys())
+            result = self.file_service.upload_file_to_azure(context.file, context.container_name, context.blob_name)
+            if result is not None:
+                self.cache_manager.invalidate(result)
+        context["azure_file_url"] = result
+        return context
 
     def load(self, context):
-        pass
+        """Load file from storage
+
+        :type context: Context
+        :param context: the execution context of file loading
+
+        :rtype dict
+        :return the file content
+        """
+        assert ("azure_file_url" in context) and ("local_file_path" in context)
+        path = self.cache_manager.get_cache(key=context.azure_file_url,
+                                            createfunc=self.file_service.download_file_from_azure(
+                                                context.azure_file_url,
+                                                context.local_file_path)
+                                            )
+        if path is None:
+            return None
+        file_type = context.file_type
+        if file_type == FILE_TYPE.TEMPLATE:
+            with open(path) as template_file:
+                return json.load(template_file)
+        else:
+            return None
 
     def delete(self, context):
-        pass
+        """Delete file from Azure storage
+
+        :type context: Context
+        :param context: the execution context of file deleting
+
+        :rtype bool
+        :return True if successfully deleted else False
+        """
+        try:
+            self.file_service.delete_file_from_azure(context.container_name, context.blob_name)
+            url = self.file_service.blob_service.make_blob_url(context.container_name, context.blob_name)
+            self.cache_manager.invaildate(url)
+            return True
+        except Exception as e:
+            self.log.error(e)
+            return None
 
     def report_health(self):
-        pass
+        """The status of Azure storage should be always True"""
+        return {
+            HEALTH.STATUS: HEALTH_STATUS.OK
+        }
