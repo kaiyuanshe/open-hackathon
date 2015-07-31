@@ -171,18 +171,6 @@
         data['virtual_environments'].forEach(createTemplateUnit);
     }
 
-    // POST to create
-    function createTemplate(data){
-        return oh.api.template.post({
-            body: data
-        }, function(data){
-            if(data.error){
-                alert(data.error.message);
-            }else{
-            }
-        })
-    }
-
     // PUT to update
     function updateTemplate(data){
         return oh.api.template.put({
@@ -196,16 +184,19 @@
         })
     }
 
-    function toggleTable(){
-        clearTemplateForm();
-        if($('#templatetable').css('display') == 'none' ){
-            $('#templatetable').show();
-            $('#templateform').hide()
-        }else{
-            $('#templatetable').hide();
-            $('#templateform').show()
-        }
+
+    // POST to create
+    function createTemplate(data){
+        return oh.api.template.post({
+            body: data
+        }, function(data){
+            if(data.error){
+                alert(data.error.message);
+            }else{
+            }
+        })
     }
+
 
     function init(){
         var templateform = $('#templateform');
@@ -227,33 +218,6 @@
             deletePort(this);
         });
 
-        var templatelist = $('#templatelist');
-        templatelist.on('click','[data-type="template_item_edit"]',function(e){
-            is_update = true;
-            toggleTable();
-            var item = $(this).parents('tr').data('tmplItem').data;
-            setFormData(item);
-        });
-
-        var confirm_modal = $('#confirm_modal').on('show.bs.modal',function(e){
-            var item = $(e.relatedTarget).parents('tr').data('tmplItem').data;
-            confirm_modal.data({item:item});
-        }).on('click','[data-type="ok"]',function(e){
-            var item = confirm_modal.data('item');
-             oh.api.admin.hackathon.template.delete({
-                query: {id:item.id},
-                header: {hackathon_name:currentHackathon}
-             },
-             function(data){
-                if(data.error){
-                    alert(data.error.message);
-                }else{
-                    bindTemplateList();
-                    confirm_modal.modal('hide');
-                }
-             })
-        })
-
         var add_template_unit = $('#btn_add_template_unit').click(function(e){
             createTemplateUnit();
         })
@@ -265,13 +229,9 @@
         $('[data-type="template_item_add"]').click(function(e){
             $('#name').removeAttr('disabled');
             $('#provider').removeAttr('disabled');
-            toggleTable();
             createTemplateUnit();
         });
 
-        $('[data-type="cancel"]').click(function(e){
-            toggleTable();
-        });
     }
 
     $(function() {

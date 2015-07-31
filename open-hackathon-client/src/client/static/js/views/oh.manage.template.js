@@ -26,50 +26,22 @@
 
     // true: PUT to update; false: POST to create
     var is_update = false;
+    var currentHackathon = oh.comm.getCurrentHackathon();
 
-    // get all templates filter data
-    function getFilterData(){
-        var Data = {
-            name:$.trim($('#template_name').val()),
-            status:$.trim($('#status').val()),
-            description:$.trim($('#template_description').val())
-         }
-        return Data;
-    }
+    // Get created template list
+    function bindTemplateList(){
 
-    // get all templates
-    function getTemplateList(){
-        var list = $('#alltemplatelist');
-        oh.api.template.list.get({
-            query: getFilterData()
+        var list = $('#templatelist');
+        oh.api.admin.hackathon.template.list.get({
+            header:{hackathon_name:currentHackathon}
         }, function(data){
             var index = 0;
-            list.empty().append($('#all_template_item').tmpl(data,{
-                getIndex:function(){ return ++index;},
-                getStatus:function(status){
-                    if(status == 1){
-                        return '审核通过'
-                    }
-                    if(status == 2){
-                        return '审核失败'
-                    }
-                    return '未审核';
-                },
-                getColor:function(status){
-                    if(status == 1){
-                        return "#ADFEDC"
-                    }
-                    if(status == 2){
-                        return '审核失败'
-                    }
-                    return '未审核';
-                }
-
+            list.empty().append($('#template_item').tmpl(data,{
+                hackathon_name:currentHackathon,
+                getIndex:function(){ return ++index;}
             }));
         });
-        $('#template_list_filter').find('[data-type="query"]').removeAttr('disabled')
     }
-
 
     // clear template form after create/update template
     function clearTemplateForm(){
@@ -221,8 +193,9 @@
 
     // POST to create
     function createTemplate(data){
-        return oh.api.template.post({
-            body: data
+        return oh.api.admin.hackathon.template.post({
+            body: data,
+            header: {hackathon_name:currentHackathon}
         }, function(data){
             if(data.error){
                 alert(data.error.message);
@@ -256,20 +229,16 @@
     }
 
     function init(){
-        var templateform = $('#template_list_filter');
+        var templateform = $('#templateform');
         templateform.bootstrapValidator().on('success.form.bv', function(e) {
             e.preventDefault();
             var formData = getFormData();
             (is_update ? updateTemplate(formData) : createTemplate(formData)).then(function(){
                 if(is_update)
                     is_update = false;
-                    location.href ="default.aspx"
+                bindTemplateList();
+                toggleTable();
             })
-        });
-
-        templateform.on('click','[data-type="query"]',function(e){
-            $(this).attr('disabled','disabled')
-            getTemplateList(this);
         });
 
         templateform.on('click','[data-type="btn_add_port"]',function(e){
@@ -329,7 +298,7 @@
 
     $(function() {
         init();
-        getTemplateList();
+        bindTemplateList();
         createTemplateUnit();
     })
 
