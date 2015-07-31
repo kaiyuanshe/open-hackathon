@@ -38,7 +38,7 @@ def template_index():
 
 
 @app.route("/template/create")
-@login_required
+# @login_required
 def template_create():
     return render("/template/create.html")
 

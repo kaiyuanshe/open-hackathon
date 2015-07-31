@@ -29,7 +29,7 @@ import sys
 sys.path.append("..")
 from hackathon import Component, RequiredFeature
 from flask import g
-from hackathon.database.models import UserHackathonRel, Experiment, UserProfile, Team
+from hackathon.database.models import UserHackathonRel, Experiment, UserProfile
 from hackathon.hackathon_response import bad_request, precondition_failed, internal_server_error, not_found, ok
 from hackathon.constants import EStatus, RGStatus, ReservedUser
 import json
@@ -90,6 +90,7 @@ class RegisterManager(Component):
             return return_info
         try:
             args["status"] = hackathon.is_auto_approve() and RGStatus.AUTO_PASSED or RGStatus.UNAUDIT
+            args['create_time'] = self.util.get_now()
             return self.db.add_object_kwargs(UserHackathonRel, **args).dic()
         except Exception as e:
             self.log.error(e)
@@ -168,8 +169,6 @@ class RegisterManager(Component):
             return reg.status == RGStatus.AUTO_PASSED or reg.status == RGStatus.AUDIT_PASSED
 
         return False
-
-
 
     def get_user_profile(self, user_id):
         return self.db.find_first_object_by(UserProfile, user_id=user_id)

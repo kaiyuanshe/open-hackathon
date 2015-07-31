@@ -200,13 +200,13 @@ def __init_schedule_jobs():
     sche = RequiredFeature("scheduler")
     expr_manager = RequiredFeature("expr_manager")
 
-    # schedule job to recycle idle experiments
-    next_run_time = util.get_now() + timedelta(minutes=1)
+    # schedule job to check recycle operation
+    next_run_time = util.get_now() + timedelta(seconds=10)
     sche.add_interval(feature="expr_manager",
-                      method="recycle_expr",
-                      id="recycle_expr",
+                      method="scheduler_recycle_expr",
+                      id="scheduler_recycle_expr",
                       next_run_time=next_run_time,
-                      minutes=util.safe_get_config("recycle.check_idle_interval_minutes", 10))
+                      minutes=10)
 
     # schedule job to pre-allocate environment
     expr_manager.schedule_pre_allocate_expr_job()
@@ -221,7 +221,6 @@ def init_app():
     init_components()
 
     from views import init_routes
-
     init_routes()
     init_schedule_jobs()
 
