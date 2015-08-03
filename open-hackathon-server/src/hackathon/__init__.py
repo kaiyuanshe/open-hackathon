@@ -67,22 +67,25 @@ class HackathonApi(Api):
     def handle_error(self, e):
         log.error(e)
         if isinstance(e, HTTPException):
+            message = e.description
+            if hasattr(e, "data") and "message" in e.data:
+                message = e.data["message"]
             if e.code == 400:
-                return self.make_response(bad_request(e.description), 200)
+                return self.make_response(bad_request(message), 200)
             if e.code == 401:
-                return self.make_response(unauthorized(e.description), 200)
+                return self.make_response(unauthorized(message), 200)
             if e.code == 403:
-                return self.make_response(forbidden(e.description), 200)
+                return self.make_response(forbidden(message), 200)
             if e.code == 404:
-                return self.make_response(not_found(e.description), 200)
+                return self.make_response(not_found(message), 200)
             if e.code == 409:
-                return self.make_response(conflict(e.description), 200)
+                return self.make_response(conflict(message), 200)
             if e.code == 412:
-                return self.make_response(precondition_failed(e.description), 200)
+                return self.make_response(precondition_failed(message), 200)
             if e.code == 415:
-                return self.make_response(unsupported_mediatype(e.description), 200)
+                return self.make_response(unsupported_mediatype(message), 200)
             if e.code == 500:
-                return self.make_response(internal_server_error(e.description), 200)
+                return self.make_response(internal_server_error(message), 200)
 
         # if exception cannot be handled, return error 500
         return self.make_response(internal_server_error(e.message), 200)
@@ -133,7 +136,7 @@ def init_components():
     from hackathon.azureformation.fileService import FileService
     from hackathon.azureformation.azureCertManagement import AzureCertManagement
     from hackathon.hack.host_server_mgr import DockerHostManager
-    from hackathon.hack import HackathonManager, AdminManager
+    from hackathon.hack import HackathonManager, AdminManager, TeamManager
     from hackathon.registration.register_mgr import RegisterManager
     from hackathon.template.template_mgr import TemplateManager
     from hackathon.remote.guacamole import GuacamoleInfo

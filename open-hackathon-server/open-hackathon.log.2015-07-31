@@ -1,0 +1,28 @@
+2015-07-31 09:55:15,134 - DEBUG(MainThread) - 200
+2015-07-31 09:55:18,089 - INFO(MainThread) - APScheduler loaded
+2015-07-31 11:34:49,995 - DEBUG(Dummy-1) - response with code: 404 and message: User doesn't have profile info yet.
+2015-07-31 11:35:04,101 - DEBUG(Dummy-1) - create_user_profile: {u'qq': u'', u'weibo': u'', 'user_id': 2L, u'career_type': u'\u8ba1\u7b97\u673a/\u4e92\u8054\u7f51/\u901a\u4fe1', u'career': u'', u'gender': u'-1', u'age': u'20', u'skype': u'', u'real_name': u'zhou', u'phone': u'110', u'wechat': u'', u'address': u'hell'}
+2015-07-31 11:35:40,637 - DEBUG(Dummy-1) - create_register: {'user_id': 2L, u'hackathon_id': 1}
+2015-07-31 11:42:37,191 - DEBUG(Dummy-1) - update a exist hackathon insert args: {u'registration_start_time': u'2015-07-01T00:00:00+08:00', u'display_name': u'00001', u'description': u'1', u'judge_start_time': u'2015-09-01T00:00:00+08:00', u'judge_end_time': u'2015-09-03T23:59:00+08:00', u'basic_info': {u'organizers': [{u'organizer_description': u'1', u'organizer_image': u'', u'organizer_url': u'', u'organizer_name': u'1'}], u'wall_time': u'', u'location': u'1', u'max_enrollment': u'10', u'alauda_enabled': False, u'banners': u'', u'recycle_enabled': False, u'auto_approve': True}, u'event_start_time': u'2015-08-01T00:00:00+08:00', u'event_end_time': u'2015-08-31T23:59:00+08:00', u'id': 1, u'registration_end_time': u'2015-07-31T23:59:00+08:00', u'name': u'00001'}
+2015-07-31 11:42:37,202 - DEBUG(Dummy-1) - update hackathon items :{u'registration_start_time': u'2015-07-01T00:00:00+08:00', u'display_name': u'00001', u'description': u'1', u'judge_start_time': u'2015-09-01T00:00:00+08:00', u'judge_end_time': u'2015-09-03T23:59:00+08:00', u'basic_info': {u'organizers': [{u'organizer_description': u'1', u'organizer_image': u'', u'organizer_url': u'', u'organizer_name': u'1'}], u'wall_time': u'', u'location': u'1', u'max_enrollment': u'10', u'alauda_enabled': False, u'banners': u'', u'recycle_enabled': False, u'auto_approve': True}, u'event_start_time': u'2015-08-01T00:00:00+08:00', u'event_end_time': u'2015-08-31T23:59:00+08:00', u'id': 1, u'registration_end_time': u'2015-07-31T23:59:00+08:00', u'name': u'00001'}
+2015-07-31 11:43:06,529 - DEBUG(Dummy-1) - update_registration: {u'status': u'3', u'id': 1}
+2015-07-31 11:43:06,532 - DEBUG(Dummy-1) - update a existed register
+2015-07-31 11:47:40,117 - DEBUG(Dummy-1) - response with code: 404 and message: User doesn't have profile info yet.
+2015-07-31 11:47:53,365 - DEBUG(Dummy-1) - create_user_profile: {u'qq': u'', u'weibo': u'', 'user_id': 3L, u'career_type': u'\u8ba1\u7b97\u673a/\u4e92\u8054\u7f51/\u901a\u4fe1', u'career': u'', u'gender': u'-1', u'age': u'20', u'skype': u'', u'real_name': u'zz', u'phone': u'119', u'wechat': u'', u'address': u'paradize'}
+2015-07-31 11:48:32,403 - DEBUG(Dummy-1) - create_register: {'user_id': 3L, u'hackathon_id': 1}
+2015-07-31 14:41:46,639 - INFO(MainThread) - APScheduler loaded
+2015-07-31 14:44:16,945 - INFO(MainThread) - APScheduler loaded
+2015-07-31 14:44:21,037 - DEBUG(MainThread) - 200
+2015-07-31 14:44:21,051 - DEBUG(MainThread) - 200
+2015-07-31 14:44:22,141 - INFO(MainThread) - APScheduler loaded
+2015-07-31 14:44:36,288 - ERROR(Dummy-1) - 405: Method Not Allowed
+Traceback (most recent call last):
+  File "/usr/local/lib/python2.7/dist-packages/flask/app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/usr/local/lib/python2.7/dist-packages/flask/app.py", line 1453, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/usr/local/lib/python2.7/dist-packages/flask/app.py", line 1436, in raise_routing_exception
+    raise request.routing_exception
+MethodNotAllowed: 405: Method Not Allowed
+2015-07-31 14:44:36,288 - DEBUG(Dummy-1) - response with code: 500 and message: 
+2015-07-31 14:47:36,092 - INFO(MainThread) - APScheduler loaded

@@ -46,7 +46,8 @@ team_manager = RequiredFeature("team_manager")
 class HealthResource(Resource):
     def get(self):
         from werkzeug.exceptions import PreconditionFailed
-        #raise Exception("Nofff")
+        # raise Exception("Nofff")
+
         parser = reqparse.RequestParser()
         parser.add_argument('q', type=str, location='args')
         args = parser.parse_args()
@@ -201,6 +202,6 @@ def register_routes():
 
     # template API
     api.add_resource(TemplateResource, "/api/template")
-    api.add_resource(TemplateCreateByFileResource, "/api/template/createbyfile")
+    api.add_resource(TemplateCreateByFileResource, "/api/template/file")
     api.add_resource(TemplateListResource, "/api/template/list")
     api.add_resource(HackathonTemplateListResource, "/api/admin/hackathon/template/list")

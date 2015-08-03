@@ -27,9 +27,6 @@ import sys
 sys.path.append("..")
 
 import abc
-import os
-import uuid
-import time
 
 from hackathon import Component
 

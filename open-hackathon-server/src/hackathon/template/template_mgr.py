@@ -298,8 +298,8 @@ class TemplateManager(Component):
                                         context=context,
                                         seconds=3)
 
-    def add_template_to_hackathon(self, template_name, team_id=-1):
-        template = self.get_template_by_name(template_name)
+    def add_template_to_hackathon(self, template_id, team_id=-1):
+        template = self.db.find_first_object_by(Template, id=template_id)
         if template is None:
             return not_found("template does not exist")
         htr = self.db.find_first_object_by(HackathonTemplateRel,
@@ -320,18 +320,11 @@ class TemplateManager(Component):
             return internal_server_error("add a hackathon template rel record faild")
 
     def delete_template_from_hackathon(self, template_id, team_id=-1):
-        htr = self.db.find_first_object_by(HackathonTemplateRel,
-                                           template_id=template_id,
-                                           hackathon_id=g.hackathon.id,
-                                           team_id=team_id)
-        if htr is None:
-            return ok("already removed")
-        try:
-            self.db.delete_object(htr)
-            return ok()
-        except Exception as ex:
-            self.log.error(ex)
-            return internal_server_error("delete hackathon template rel record faild")
+        htr = self.db.delete_all_objects_by(HackathonTemplateRel,
+                                            template_id=template_id,
+                                            hackathon_id=g.hackathon.id,
+                                            team_id=team_id)
+        return ok()
 
     # ---------------------------------------- helper functions ---------------------------------------- #
 
