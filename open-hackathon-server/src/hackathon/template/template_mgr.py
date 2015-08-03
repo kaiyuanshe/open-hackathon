@@ -27,7 +27,7 @@ import os
 import sys
 import uuid
 import json
-from werkzeug.exceptions import BadRequest, InternalServerError,Forbidden
+from werkzeug.exceptions import BadRequest, InternalServerError, Forbidden
 
 sys.path.append("..")
 
@@ -119,12 +119,12 @@ class TemplateManager(Component):
     def create_template(self, args):
         """ create template
 
-        The whole logic contains 4 main steps:
+        The whole logic contains 3 main steps:
         1 : args validate
         2 : parse args and save to storage
         3 : save to database
 
-        :type args: dic
+        :type args: dict
         :param args: description of the template that you want to create
 
         :return:
@@ -146,9 +146,6 @@ class TemplateManager(Component):
         3 : parse args and save to storage
         4 : save to database
 
-        :type args: dic
-        :param args: description of the template that you want to create
-
         :return:
 
         """
@@ -163,12 +160,12 @@ class TemplateManager(Component):
     def update_template(self, args):
         """update a exist template
 
-        The whole logic contains 4 main steps:
+        The whole logic contains 3 main steps:
         1 : args validate for update operation
         2 : parse args and save to storage
         3 : save to database
 
-        :type args: dic
+        :type args: dict
         :param args: description of the template that you want to create
 
         :return:
@@ -283,6 +280,7 @@ class TemplateManager(Component):
                                             template_id=template_id,
                                             hackathon_id=g.hackathon.id,
                                             team_id=team_id)
+        self.db.delete_object(htr)
         return ok()
 
     # ---------------------------------------- helper functions ---------------------------------------- #
@@ -291,9 +289,9 @@ class TemplateManager(Component):
         """ validate args when creating a template
 
         :type args: dict
-        :param args: decription for a template that you want to create
+        :param args: description for a template that you want to create
 
-        :return: if validate successed return nothing else raised a BadRequest exception
+        :return: if validate passed return nothing else raised a BadRequest exception
 
         """
         if BaseTemplate.TEMPLATE_NAME not in args:
@@ -309,9 +307,9 @@ class TemplateManager(Component):
         """ validate args when updating a template
 
         :type args: dict
-        :param args: decription for a template that you want to update
+        :param args: description for a template that you want to update
 
-        :return: if validate successed return nothing else raised a BadRequest or Forbidden exceptions
+        :return: if validate passed return nothing else raised a BadRequest or Forbidden exceptions
 
         """
         self.__check_create_args(args)
@@ -323,9 +321,9 @@ class TemplateManager(Component):
             raise Forbidden()
 
     def __save_template_to_storage(self, args):
-        """save template to a file in storage which is chooisen by configuration
+        """save template to a file in storage which is chosen by configuration
 
-        Parse out template from args and merge with default tempale value
+        Parse out template from args and merge with default template value
         Then generate a file name, and save it to a physical file in storage
 
         :type args: dict
@@ -383,7 +381,7 @@ class TemplateManager(Component):
                                           description=args[BaseTemplate.DESCRIPTION],
                                           virtual_environment_count=len(args[BaseTemplate.VIRTUAL_ENVIRONMENTS]))
             else:
-                # update recorde
+                # update record
                 self.db.update_object(template,
                                       url=context.url,
                                       local_path=context.physical_path,
@@ -523,14 +521,13 @@ class TemplateManager(Component):
     def __get_template_from_request(self):
         """ get template dic from http post request
 
-        get file from request , then josn load it to a dic
+        get file from request , then json load it to a dic
 
-        :return: template dic , if load file faild raise BadRequest exception
+        :return: template dic , if load file failed raise BadRequest exception
         """
         for file_name in request.files:
             try:
-                file = request.files[file_name]
-                template = json.load(file)
+                template = json.load(request.files[file_name])
                 self.log.debug("create template: %r" % template)
                 return template
             except Exception as ex:
