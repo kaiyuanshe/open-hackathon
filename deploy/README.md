@@ -84,6 +84,29 @@ Templat 上传过程及用户对自己上传的Template的管理操作
 ## Manage registration
 The main content of registration managment is auditing all registers 
 ## Manage administrators
+As a administrator of a hackathon , he can manage other admins in the same hackathon . The major operations of admin's managment are:          
+
+**create admin** : add a common user to admin groups only if he has signed in this platform                  
+**modify admin** : just make role type exchange from ‘judgment’ and 'common admin'                 
+**delete admin** : just remember that : the hackathon owner can not be deleted by anyone !     
+
+The details are as follows:                           
+get the `administrator managment` entrance from the admin site home page :             
+![Imgur](http://i.imgur.com/z80WsFA.png)
+After you get the list of all adminstrators of current hackathon , you can begin your managment on 'administrators'.              
+
+To create a new administrator, click `添加` on the header of the list table :
+![Imgur](http://i.imgur.com/iNsvDKY.png)
+Fill in the form required , and submit you request. If the user never signed in , you should do this step again after he signed in .                             
+
+
+To modify admin , click the modify button in `操作`, as mentioned that only the role type of amin can be modifed
+![Imgur](http://i.imgur.com/iyOifcU.png)
+
+
+To delete a admin, click the delete button in `操作`, as mentioned that the owner of the hackathon can not be deleted in any case !
+![Imgur](http://i.imgur.com/fTKC7Ii.png)
+
 ## Manage Azure certificate
 ## Manage templates
 Hackathon administrators can delete or add a template from templates pool to current hackathon
