@@ -175,7 +175,7 @@
             })
         })
         return {
-            name: $('#name').val(),
+            template_name: $('#name').val(),
             description: $('#description').val(),
             provider: Number($('#provider').val()),
             virtual_environments: data

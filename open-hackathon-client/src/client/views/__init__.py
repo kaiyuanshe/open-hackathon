@@ -38,7 +38,7 @@ import re
 
 from datetime import datetime
 from client.constants import LOGIN_PROVIDER
-from flask_login import login_required, login_user, LoginManager
+from flask_login import login_required, login_user, LoginManager, current_user
 from client.user.login import login_providers
 from client.user.user_mgr import user_manager
 from flask import Response, render_template, request, g, redirect, make_response, session, url_for
@@ -93,7 +93,7 @@ def __login(provider):
         session["token"] = token
         if session["return_url"] is not None:
             resp = make_response(redirect(session["return_url"]))
-            session["return_url"] = None;
+            session["return_url"] = None
         else:
             resp = make_response(redirect(url_for("index")))
         resp.set_cookie('token', token)
@@ -126,22 +126,22 @@ def utility_processor():
 
 
 @app.template_filter('mkHTML')
-def toMarkdownHtml(text):
+def to_markdown_html(text):
     return markdown.markdown(text)
 
 
 @app.template_filter('stripTags')
-def stripTags(html):
+def strip_tags(html):
     return re.sub(r"</?\w+[^>]*>", "", html)
 
 
 @app.template_filter('limitTo')
-def limitTo(text, limit=100):
+def limit_to(text, limit=100):
     return text[0:limit]
 
 
 @app.template_filter('date')
-def toDatetime(datelong, fmt=None):
+def to_datetime(datelong, fmt=None):
     if fmt:
         return datetime.fromtimestamp(datelong / 1e3).strftime(fmt)
     else:
@@ -160,7 +160,7 @@ def before_request():
 
 
 @app.errorhandler(401)
-def custom_401(error):
+def custom_401():
     return render("/login.html", error=None)
 
 
@@ -240,7 +240,7 @@ def hackathon(hackathon_name):
         data = __get_api(API_HACKATHON, {"hackathon_name": hackathon_name})
 
     data = Context.from_object(data)
-    if data.get('error') is not None or data.get('hackathon').status != 1:
+    if data.get('error') is not None or data.get('hackathon', data).status != 1:
         return render("/404.html")
     else:
         return render("/site/hackathon.html",
@@ -271,7 +271,7 @@ def workspace(hackathon_name):
 
 @app.route("/site/<hackathon_name>/settings")
 @login_required
-def tempSettings(hackathon_name):
+def temp_settings(hackathon_name):
     headers = {"hackathon_name": hackathon_name, "token": session["token"]}
     reg = Context.from_object(__get_api(API_HACAKTHON_REGISTRATION, headers))
 
