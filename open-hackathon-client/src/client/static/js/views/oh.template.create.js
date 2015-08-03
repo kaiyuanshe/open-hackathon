@@ -197,6 +197,10 @@
         })
     }
 
+    // delete template unit form dynamically
+    function deleteTemplateUnit(element, data){
+        $(element).parents('[data-type="template-unit-group"]').detach();
+    }
 
     function init(){
         var templateform = $('#templateform');
