@@ -41,10 +41,16 @@ user_manager = RequiredFeature("user_manager")
 register_manager = RequiredFeature("register_manager")
 template_manager = RequiredFeature("template_manager")
 team_manager = RequiredFeature("team_manager")
-
+import inspect
 
 class HealthResource(Resource):
+    @hackathon_name_required
     def get(self):
+        print(inspect.stack()[0][0].f_code.co_name)
+        print(inspect.stack()[0][3])
+        print(inspect.currentframe().f_code.co_name)
+        print(sys._getframe().f_code.co_name)
+        print self.__class__.__name__
         parser = reqparse.RequestParser()
         parser.add_argument('q', type=str, location='args')
         args = parser.parse_args()

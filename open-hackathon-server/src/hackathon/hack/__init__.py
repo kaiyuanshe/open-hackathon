@@ -27,3 +27,4 @@
 from hackathon_manager import HackathonManager
 from admin_manager import AdminManager
 from team_manager import TeamManager
+from host_server_manager import DockerHostManager
