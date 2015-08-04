@@ -81,9 +81,77 @@ Templat 上传过程及用户对自己上传的Template的管理操作
 ![Imgur](http://i.imgur.com/ZpLUYUJ.png)
 
 ### Manage basic info
-## Manage registration
-The main content of registration managment is auditing all registers 
+In this part, you will learn how to change your Hackathon's basic information after completing creation. First of all, click *Edit Hackathon* directly if you want to edit current Hackathon.
+
+![Imgur](http://i.imgur.com/UFN4911.png)
+
+>**Attention:**If you want to edit other Hackathon, please change current Hackathon or go to the page of *Hackathon Management* and click the *Management* button in the status column of the Hackathon which you would like to change, as showing below.
+
+![Imgur](http://i.imgur.com/Cx2ki8h.png)
+
+Then, you will go to the following basic information page, which looks like the page you came to when creating a Hackathon.
+
+![Imgur](http://i.imgur.com/e6vY0AX.png)
+
+In this page, you can edit or change all basic information about your Hackathon, including Hackathon display name, activity location, number of members, several time settings and Hackathon description. You can also choose whether to use  [Alauda](http://www.alauda.cn/) and free registration.
+
+- **Hackathon display name:** the name to be displayed on the web page
+- **Activity location:**the location of Hackathon
+- **Number of members:**the maximum number of members
+- **Activity time:**the start time and the end time of activity
+- **Registration time:**the start time and the end time of registration
+- **Judgement time:**the start time and the end time of judgement
+- **Whether to use Alauda:**whether to use Alauda container
+- **Whether to use free registration:**whether to allow user register freely or after audit
+- **Activity introduction:**some detailed descriptions about this Hackathon
+
+Besides, in the top right corner, you can select the status of this Hackathon,  containing *Online, Offline or Draft*.
+
+![Imgur](http://i.imgur.com/sGqcCbW.png)
+
+>**Attention:**Once you select **Online** mode, this Hackathon will appear on the home page and can be available to anyone.
+
+At last, you can upload extra images by clicking *Activity Pictures* button in the top right corner. And then you go to the  *Upload* page to upload your images.
+
+![Imgur](http://i.imgur.com/2qgvJD3.png)
+
+##Manage registration
+In this part, you will learn how to audit registers.
+
+>**Attention:**If your Hackathon does not need audit, users can register freely and join in the activity directly.
+
+![Imgur](http://i.imgur.com/G0rz1Ql.png)
+
+As the administrator of Hackathon, you should go the *User Management* page, as shown below, where you can check the basic information of every register, including name, team, telephone number, address, status and operation. All you need to do is selecting a status, *approve or reject*, for the register.
+
+![Imgur](http://i.imgur.com/lX62VGv.png)
+
+![Imgur](http://i.imgur.com/Sn7vp1E.png)
+![Imgur](http://i.imgur.com/ppaj2Bv.png) 
 ## Manage administrators
+As a administrator of a hackathon , he can manage other admins in the same hackathon . The major operations of admin's managment are:          
+
+**create admin** : add a common user to admin groups only if he has signed in this platform                  
+**modify admin** : just make role type exchange from ‘judgment’ and 'common admin'                 
+**delete admin** : just remember that : the hackathon owner can not be deleted by anyone !     
+
+The details are as follows:                           
+get the `administrator managment` entrance from the admin site home page :             
+![Imgur](http://i.imgur.com/z80WsFA.png)
+After you get the list of all adminstrators of current hackathon , you can begin your managment on 'administrators'.              
+
+To create a new administrator, click `添加` on the header of the list table :
+![Imgur](http://i.imgur.com/iNsvDKY.png)
+Fill in the form required , and submit you request. If the user never signed in , you should do this step again after he signed in .                             
+
+
+To modify admin , click the modify button in `操作`, as mentioned that only the role type of amin can be modifed
+![Imgur](http://i.imgur.com/iyOifcU.png)
+
+
+To delete a admin, click the delete button in `操作`, as mentioned that the owner of the hackathon can not be deleted in any case !
+![Imgur](http://i.imgur.com/fTKC7Ii.png)
+
 ## Manage Azure certificate
 ## Manage templates
 Hackathon administrators can delete or add a template from templates pool to current hackathon
@@ -108,8 +176,71 @@ Use `Flask` to build the whole project.[Flask Introduction](http://flask.pocoo.o
  
  
  
-## Try openhackathon quickly
-    介绍如何用doker的一个image来run起一个openhackathon
+##Try openhackathon quickly
+
+ In this part, you will learn how to DIY (*Deploy It Yourself*) your openhackathon application with the help of docker.
+ >**Attention：**To begin with this part, you should have [Docker](https://www.docker.com/) pre-installed and get familar with it.
+
+### 1 Get the image for openhackathon
+We have had our openhackathon image built and push it to [Docker Hub](https://hub.docker.com/account/signup/). You can download this image by running `docker pull image_tag` command, where the image_tag is "`42.159.103.213:5000/ohid_0.1`". 
+```bash
+sudo docker pull 42.159.103.213:5000/ohid_0.1
+```
+>**Note1：**To avoid permission problem, please run as **root**.
+
+>**Note2：**The size of openhackathon image is about 2.4GB, so you need pretty time and patience to download it if your network environment is not satisfying.
+
+### 2 Launch docker container
+Now you can launch a container with `docker run` command, after successfully download the image. We expose four tcp posts as listed below. Please make sure the map of these ports is correct.
+<table>
+	<thead>
+		<tr>
+		 <th>Application</th>
+		 <th>Inner port</th>
+		 <th>Outer port</th>
+		</tr>
+	</thead>
+	<tbody>
+	<tr>
+		<td>open-hackathon-ui</td>
+		<td>80</td>
+		<td>N/A</td>
+	</tr>
+	<tr>
+		<td>open-hackathon-client</td>
+		<td>8000</td>
+		<td>N/A</td>
+	</tr>
+	<tr>
+		<td>open-hackathon-server</td>
+		<td>15000</td>
+		<td>N/A</td>
+	</tr>
+	<tr>
+		<td>tomcat/guacamole</td>
+		<td>8080</td>
+		<td>N/A</td>
+	</tr>
+	</tbody>
+</table>
+To launch the container, you can input the command in your terminal, as written below.
+```bash
+sudo docker run -i -t -p 80:80 -p 8000:8000 -p 8080:8080 -p 15000:15000 image_tag
+```
+>**Tip:**For more details about parameters, please refer to [docker userguide](http://docs.docker.com/userguide/dockerimages/).
+
+>**Attention:**Before running this command, you should make sure **outer ports** haven't been used by other applications.
+
+
+### 3 Configure your environment for openhackathon
+Due to the mechanism of the  third-party OAuth, you need *full domain name* and **80** port to guarantee the running of openhackathon application. We have set **hackathon.contoso.com** as our hostname. All you need to do is mapping this domain name to the IP address **127.0.0.1**. To accomplish this, you should run the following command in your terminal.
+```bash
+sudo echo "127.0.0.1 hackathon.contoso.com">>/etc/hosts
+```
+
+### 4 Congratulations!
+Now start your browser, type in *`hackathon.contoso.com`* in your address bar, press the *Enter* button and enjoy your openhackathon application.
+
 ## Setup develop environment
 To setup the whole OpenHackathon develop environment, you need those components:
 
