@@ -46,6 +46,8 @@ def token_required(func):
             return unauthorized("login required")
         return func(*args, **kwargs)
 
+    # keep the original func name for API intput/output validation where original name is required
+    authenticate_and_call.original = func.__name__
     return authenticate_and_call
 
 
@@ -57,6 +59,8 @@ def hackathon_name_required(func):
             return bad_request("hackathon name invalid")
         return func(*args, **kwargs)
 
+    # keep the original func name for API intput/output validation where original name is required
+    authenticate_and_call.original = func.__name__
     return authenticate_and_call
 
 
@@ -74,4 +78,6 @@ def admin_privilege_required(func):
             return forbidden("access denied")
         return func(*args, **kwargs)
 
+    # keep the original func name for API intput/output validation where original name is required
+    authenticate_and_call.original = func.__name__
     return authenticate_and_call

@@ -41,20 +41,6 @@ user_manager = RequiredFeature("user_manager")
 register_manager = RequiredFeature("register_manager")
 template_manager = RequiredFeature("template_manager")
 team_manager = RequiredFeature("team_manager")
-import inspect
-
-class HealthResource(Resource):
-    @hackathon_name_required
-    def get(self):
-        print(inspect.stack()[0][0].f_code.co_name)
-        print(inspect.stack()[0][3])
-        print(inspect.currentframe().f_code.co_name)
-        print(sys._getframe().f_code.co_name)
-        print self.__class__.__name__
-        parser = reqparse.RequestParser()
-        parser.add_argument('q', type=str, location='args')
-        args = parser.parse_args()
-        return report_health(args['q'])
 
 
 class BulletinResource(Resource, Component):
@@ -160,8 +146,8 @@ class TemplateCreateByFileResource(Resource):
 class TemplateListResource(Resource):
     def get(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('status', type=int, location='args',required=False)
-        parse.add_argument('name', type=str, location='args',required=False)
+        parse.add_argument('status', type=int, location='args', required=False)
+        parse.add_argument('name', type=str, location='args', required=False)
         parse.add_argument('description', type=str, location='args', required=False)
         args = parse.parse_args()
         templates = template_manager.get_template_list(status=args['status'],
@@ -182,8 +168,7 @@ def register_routes():
     register API routes that user or admin is not required
     """
 
-    # health page API
-    api.add_resource(HealthResource, "/", "/health")
+
 
     # announcement API
     api.add_resource(BulletinResource, "/api/bulletin")
