@@ -45,7 +45,11 @@
 * [Developer's Guide](#developer's-guide)
   * [Implementation and Architecture](#implementation-and-architecture-for-developer)
     
-     Open Hackathon is a clientless, plugin free platform.
+     Open Hackathon is a clientless, plugin free platform. The following pic shows structure.
+
+     ![Imgur]
+
+     Open Hackathon doesn't have user register service, all users need social login before access any functions. You need config this before you can use social login. Open-hackathon software will manage Azure resource that you provide to create hackathon environment for users. Guacamole is used to display VM in user's web browser, and MySQL server records all necessary data.
 
      * HTML5 Browser
 
