@@ -9,9 +9,8 @@
   * [Why OpenHackathon](#why-openhackathon)
 * [User's Guide](#user's-guide)
   * [Implementation and Architecture](#implementation-and-architecture-for-user)
-User use a HTML5 based browser connect to Open Hackathon.  After third-part login, user will see
-hackathon main page, after hackathon owner approved user’s request, user will
-able to choose an environment to start, hackathon will start environment on
+  User use a HTML5 based browser connect to Open Hackathon.  After third-part login, user will see
+  hackathon main page, after hackathon owner approved user’s request, user will able to choose an environment to start, hackathon will start environment on
 Microsoft Azure and display it on user’s web browser.
 **HTML5 Browser**
 Open Hackathon is a clientless web access software, you don’t have to install any
