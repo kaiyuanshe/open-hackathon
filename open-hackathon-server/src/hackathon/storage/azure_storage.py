@@ -22,8 +22,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
+__author__ = 'ZGQ'
+
 from storage import Storage
 import json
+from uuid import uuid1
+from time import strftime
+from flask import g
+
 
 from hackathon import RequiredFeature
 from hackathon.constants import FILE_TYPE, HEALTH_STATUS, HEALTH
@@ -46,24 +52,33 @@ class AzureStorage(Storage):
         """Save a file to Azure storage
 
         :type context: Context
-        :param context: the execution context of file saving
+        :param context: must have {"content":"***", "file_type":"***"} keys
 
         :rtype context
         :return the updated context which should including the full path of saved file
+
+        :config requirements: in config file, there must exit "storage.azure.image_container",
+                            "storage.azure.template_container"
+                            and "storage.azure.blob_service_host_base" configuration
         """
-        assert ("container_name" in context.keys()) and ("blob_name" in context.keys())
-        if "path" in context.keys():
-            result = self.file_service.upload_file_to_azure_from_path(context.path,
-                                                                      context.container_name,
-                                                                      context.blob_name)
-            if result is not None:
-                self.cache_manager.invalidate(result)
+        if context.file_type == FILE_TYPE.HACK_IMAGE:
+            container_name = self.util.get_config("storage.azure.image_container")
         else:
-            assert ("file" in context.keys())
-            result = self.file_service.upload_file_to_azure(context.file, context.container_name, context.blob_name)
-            if result is not None:
-                self.cache_manager.invalidate(result)
-        context["azure_file_url"] = result
+            container_name = self.util.get_config("storage.azure.template_container")
+        blob_name = self.__generate_file_name(context.file_name)
+
+        if context.get('content'):
+            file_content = context.content
+            result = self.file_service.upload_file_to_azure(file_content, container_name, blob_name)
+        else:
+            assert context.get('file_path')
+            file_path = context.file_path
+            result = self.file_service.upload_file_to_azure_from_path(file_path, container_name, blob_name)
+
+        if result is not None:
+            self.cache_manager.invalidate(result)
+        context["url"] = result
+        self.log.debug("File saved at:" + result)
         return context
 
     def load(self, context):
@@ -75,34 +90,46 @@ class AzureStorage(Storage):
         :rtype dict
         :return the file content
         """
-        assert ("azure_file_url" in context) and ("local_file_path" in context)
-        path = self.cache_manager.get_cache(key=context.azure_file_url,
-                                            createfunc=self.file_service.download_file_from_azure(
-                                                context.azure_file_url,
-                                                context.local_file_path)
-                                            )
-        if path is None:
-            return None
-        file_type = context.file_type
-        if file_type == FILE_TYPE.TEMPLATE:
-            with open(path) as template_file:
-                return json.load(template_file)
-        else:
-            return None
+        assert context.get("url")
+        print context.url, context.path
+
+        def get_temp():
+            temp_path = self.file_service.download_file_from_azure(azure_file_url=context.url,
+                                                                   local_file_path=context.path)
+            if temp_path is None:
+                return None
+            if context.file_type == FILE_TYPE.TEMPLATE:
+                with open(temp_path) as template_file:
+                    return json.load(template_file)
+            else:
+                return None
+
+        return self.cache_manager.get_cache(key=context.url, createfunc=get_temp)
 
     def delete(self, context):
         """Delete file from Azure storage
 
         :type context: Context
-        :param context: the execution context of file deleting
+        :param context: must have {"url":""} key or {"container_name":"***","blob_name":"***"} keys
 
         :rtype bool
         :return True if successfully deleted else False
         """
         try:
-            self.file_service.delete_file_from_azure(context.container_name, context.blob_name)
-            url = self.file_service.blob_service.make_blob_url(context.container_name, context.blob_name)
-            self.cache_manager.invaildate(url)
+            if context.get("url"):
+                url_arr = context.url.split('/')
+                file_name = url_arr[-1]
+                hackathon_name = url_arr[-2]
+                container_name = url_arr[-3]
+                blob_name = hackathon_name + "/" + file_name
+                print container_name, blob_name
+            else:
+                assert context.get("container_name") and context.get("blob_name")
+                container_name = context.container_name
+                blob_name = context.blob_name
+            self.file_service.delete_file_from_azure(container_name, blob_name)
+            url = self.file_service.blob_service.make_blob_url(container_name, blob_name)
+            self.cache_manager.invalidate(url)
             return True
         except Exception as e:
             self.log.error(e)
@@ -113,3 +140,10 @@ class AzureStorage(Storage):
         return {
             HEALTH.STATUS: HEALTH_STATUS.OK
         }
+
+    def __generate_file_name(self, file_name):
+        """refresh file_name = hack_name + uuid(10) + time + suffix
+        """
+        suffix = file_name.split('.')[-1]
+        real_name = g.hackathon.name + "/" + str(uuid1())[0:9] + strftime("%Y%m%d%H%M%S") + "." + suffix
+        return real_name

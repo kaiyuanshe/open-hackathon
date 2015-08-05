@@ -345,7 +345,7 @@ class HackathonManager(Component):
 
     def generate_file_name(self, file):
         # refresh file_name = hack_name + uuid(10) + time + suffix
-        suffix = file.filename.split('.')[1]
+        suffix = file.filename.split('.')[-1]
         real_name = g.hackathon.name + "/" + \
                     str(uuid.uuid1())[0:9] + \
                     time.strftime("%Y%m%d%H%M%S") + "." + suffix
@@ -366,14 +366,13 @@ class HackathonManager(Component):
                 hackathon_name=g.hackathon.name,
                 file_name=file.filename,
                 file_type=FILE_TYPE.HACK_IMAGE,
-                content=file
+                content=file,
             )
             context = storage.save(context)
-
             image = {}
             image['name'] = file.filename
-            image['url'] = context.url
-            image['thumbnailUrl'] = context.url
+            image['url'] = context["url"]
+            image['thumbnailUrl'] = context["url"]
             # context.file_name is a random name created by server, file.filename is the original name
             image['deleteUrl'] = '/api/admin/file?key=' + context.file_name
             images.append(image)
