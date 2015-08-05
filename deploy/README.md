@@ -8,11 +8,44 @@
   * [What is OpenHackathon](#what-is-openhackathon)
   * [Why OpenHackathon](#why-openhackathon)
 * [User's Guide](#user's-guide)
-  * [Implementation and Architecture](#implementation-and-architecture-for-user)
+  * [Quick Guide](#implementation-and-architecture-for-user)
+    
+    Open Hackathon doesn’t have user management service, user and administrator need use social login to log into Open Hackathon.
 
-    User use a HTML5 based browser connect to Open Hackathon.  After third-part login, user will see hackathon main page,        after hackathon owner approved user’s request, user will
-   able to choose an environment to start, hackathon will start environment on
-   Microsoft Azure and display it on user’s web browser.
+    For User:
+      *  Register: On Open Hackathon main page, user will see all available hackathons. Choose any one will direct user to social login, then user will ask to fulfill some basic information.
+      *  Enroll: Choose a hackathon and click enroll. After hackathon administrators approve your request, you will able to attend the hackathon
+      *  Team: User can create or attend a team to co-operate with others. Team will share same Git project and same environment.
+      *  Submit: User can submit  project for judgers to review.
+      
+    For Administrator:
+    
+      *  Management: Admins can create and manage hackathon. Including basic info, register time, competition time, review time and more settings.
+      
+    For All:
+    
+      *  Template: Template is a pre-configured environment that anyone can contribute, and used to specific hackathon on our Template library.
+
+    
+
+  * [attend hackathons](#how-to-attend-a-hackathon)
+  * [Contribute your Template](#contribute-your-template)
+  * [FAQ](#FAQ)
+* [Admin's Guid](#admin's-guide)
+  * [Implementation and Architecture](#implementation-and-architecture-for-admin)
+  * [Manage hackathon](#how-to-manage-a-hackathon)
+    * [Create hackathon](#create-hackathon)
+    * [Manage basic info](#manage-basic-info)
+  * [Manage registration](#manage-registration)
+  * [Manage administrators](#manage-administrators)
+  * [Manage Azure certificate](#manage-azure-certificate)
+  * [Manage templates](#manage-templates)
+  * [Manage experiment](#manage-experiment)
+  * [FAQ](#FAQ)
+* [Developer's Guide](#developer's-guide)
+  * [Implementation and Architecture](#implementation-and-architecture-for-developer)
+    
+     Open Hackathon is a clientless, plugin free platform.
 
      * HTML5 Browser
 
@@ -39,22 +72,10 @@ and RDP.  It’s used to connect virtual machine and present it to user via HTML
       Microsoft Azure is used as our base infrastructure. All environment and virtual machines
 are built on it.
 
-  * [attend hackathons](#how-to-attend-a-hackathon)
-  * [Contribute your Template](#contribute-your-template)
-  * [FAQ](#FAQ)
-* [Admin's Guid](#admin's-guide)
-  * [Implementation and Architecture](#implementation-and-architecture-for-admin)
-  * [Manage hackathon](#how-to-manage-a-hackathon)
-    * [Create hackathon](#create-hackathon)
-    * [Manage basic info](#manage-basic-info)
-  * [Manage registration](#manage-registration)
-  * [Manage administrators](#manage-administrators)
-  * [Manage Azure certificate](#manage-azure-certificate)
-  * [Manage templates](#manage-templates)
-  * [Manage experiment](#manage-experiment)
-  * [FAQ](#FAQ)
-* [Developer's Guide](#developer's-guide)
-  * [Implementation and Architecture](#implementation-and-architecture-for-developer)
+     * Docker
+     
+      Docker containers wrap up a piece of software in a complete file system that contains everything it needs to run: code, runtime, system tools, system libraries – anything you can install on a server. This guarantees that it will always run the same, regardless of the environment it is running in.
+     
   * [Try OpenHackathon quickly](#try-openhackathon-quickly)
   * [Setup develop environment](#setup-develop-environment)
     * [Setup Docker Env](#setup-docker-env)
