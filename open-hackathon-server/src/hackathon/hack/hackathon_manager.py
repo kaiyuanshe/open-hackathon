@@ -366,13 +366,13 @@ class HackathonManager(Component):
                 hackathon_name=g.hackathon.name,
                 file_name=file.filename,
                 file_type=FILE_TYPE.HACK_IMAGE,
-                content=file,
+                content=file
             )
             context = storage.save(context)
             image = {}
             image['name'] = file.filename
-            image['url'] = context["url"]
-            image['thumbnailUrl'] = context["url"]
+            image['url'] = context.url
+            image['thumbnailUrl'] = context.url
             # context.file_name is a random name created by server, file.filename is the original name
             image['deleteUrl'] = '/api/admin/file?key=' + context.file_name
             images.append(image)
