@@ -1,10 +1,104 @@
-<!DOCTYPE html>
-<html>
-<head lang="en">
-    <meta charset="UTF-8">
-    <title></title>
-</head>
-<body>
+{% extends "base/base.html" %}
 
-</body>
-</html>
+{% block style %}
+<style>
+    body {
+    background: none;
+    }
+
+    body:after {
+    content: initial;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="content" class=" container clearfix">
+    <div class="col-lg-12">
+        <div class="box">
+            <div class="box-header">
+                <h2>
+                    <i class="fa fa-home"></i>
+                    模板资源库
+                </h2>
+            </div>
+        <div>
+            <form class="form-horizontal" id="template_list_filter">
+                <table>
+                    <tr>
+                        <td width="5px" height="60px"></td>
+                        <td>模板名称:</td>
+                        <td width="5px" height="60px"></td>
+                        <td width="100px" height="60px">
+                            <input type="text" class="form-control" name="template_name" id="template_name" data-bv-trigger="blur">
+                        </td>
+                        <td width="5px" height="60px"></td>
+                        <td> 状态:</td>
+                        <td width="5px" height="60px"></td>
+                        <td width="110px" height="60px">
+                            <select class="form-control" name="status" id="status">
+                                <option value=-1 selected="selected"> 全部</option>
+                                <option value=0> 未审核</option>
+                                <option value=1> 审核通过</option>
+                                <option value=2> 审核失败</option>
+                            </select>
+                        </td>
+                        <td width="5px" height="60px"></td>
+                        <td>描述:</td>
+                        <td width="251px" height="60px">
+                            <input type="text" class="form-control" name="template_description" id="template_description" data-bv-trigger="blur">
+                        </td>
+                        <td width="300px" height="60px"></td>
+                        <td>
+                            <button type="button" data-type="query" class="btn btn-primary"> 查询</button>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+            <div id="templatetable">
+                <a type="button" href="template/create" class="btn btn-primary btn-sm" data-type="template_item_add">
+                    从模板创建Templated
+                </a>
+                <a type="button" class="btn btn-primary btn-sm" data-type="template_item_add">
+                    从文件创建Template
+                </a>
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>编号</th>
+                        <th>名称</th>
+                        <th>描述</th>
+                        <th>创建者</th>
+                        <th>状态</th>
+                        <th>创建时间</th>
+                        <th>模板文件</th>
+                    </tr>
+                    </thead>
+                    <tbody id="alltemplatelist">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script id="all_template_item" type="text/x-jquery-tmpl">
+    {% raw %}
+    <tr class="{{if status==0}}bg-info{{else status==1}}bg-success{{else}}bg-danger{{/if}}">
+        <td>${$item.getIndex()}</td>
+        <td>${name}</td>
+        <td>${description}</td>
+        <td>${creator_id}</td>
+        <td>${$item.getStatus(status)}</td>
+        <td>${moment(create_time).format('YYYY/MM/DD HH:mm')}</td>
+        <td><a href="${azure_url}">下载</a></td>
+    </tr>
+    {% endraw %}
+</script>
+<script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
+<script type="text/javascript" src="/static/js/jquery/moment.min.js"></script>
+<script type="text/javascript" src="/static/js/views/oh.template.index.js"></script>
+{% endblock %}

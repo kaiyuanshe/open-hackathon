@@ -23,14 +23,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 import sys
+
 sys.path.append("..")
 
 from hackathon import Component, RequiredFeature
 from hackathon.database.models import DockerHostServer
 
+__all__ = ["DockerHostManager"]
+
 
 class DockerHostManager(Component):
-
+    """Component to manage docker host server"""
     docker = RequiredFeature("docker")
 
     def get_available_docker_host(self, req_count, hackathon):
@@ -48,7 +51,5 @@ class DockerHostManager(Component):
                 return docker_host
         raise Exception("No available VM.")
 
-
     def get_host_server_by_id(self, id):
         return self.db.find_first_object_by(DockerHostServer, id=id)
-

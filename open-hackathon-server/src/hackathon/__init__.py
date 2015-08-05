@@ -91,9 +91,10 @@ class HackathonApi(Api):
         return self.make_response(internal_server_error(e.message), 200)
 
 
+# init restful API
 api = HackathonApi(app)
 
-# Enable CORS support
+# Enable CORS support. Currently requests of all methods from all domains are allowed
 app.config['CORS_HEADERS'] = 'Content-Type, token, hackathon_name'
 cors = CORS(app)
 
@@ -130,13 +131,13 @@ class Component(object):
 
 
 def init_components():
+    """Init hackathon factory"""
     from hackathon.database import db_session
     from hackathon.database.db_adapters import SQLAlchemyAdapter
     from hackathon.user import UserManager
     from hackathon.azureformation.fileService import FileService
     from hackathon.azureformation.azureCertManagement import AzureCertManagement
-    from hackathon.hack.host_server_mgr import DockerHostManager
-    from hackathon.hack import HackathonManager, AdminManager, TeamManager
+    from hackathon.hack import HackathonManager, AdminManager, TeamManager, DockerHostManager
     from hackathon.registration.register_mgr import RegisterManager
     from hackathon.template.template_mgr import TemplateManager
     from hackathon.remote.guacamole import GuacamoleInfo
@@ -166,20 +167,27 @@ def init_components():
     factory.provide("guacamole", GuacamoleInfo)
     factory.provide("cache_manager", CacheManagerExt)
 
+    # health check items
     factory.provide("health_check_mysql", get_class("hackathon.health.health_check.MySQLHealthCheck"))
     factory.provide("health_check_hosted_docker", get_class("hackathon.health.health_check.HostedDockerHealthCheck"))
     factory.provide("health_check_alauda_docker", get_class("hackathon.health.health_check.AlaudaDockerHealthCheck"))
     factory.provide("health_check_guacamole", get_class("hackathon.health.health_check.GuacamoleHealthCheck"))
     factory.provide("health_check_azure", get_class("hackathon.health.health_check.AzureHealthCheck"))
 
+    # docker
     factory.provide("docker", get_class("hackathon.docker.docker_helper.DockerHelper"))
     factory.provide("hosted_docker", get_class("hackathon.docker.hosted_docker.HostedDockerFormation"))
     factory.provide("alauda_docker", get_class("hackathon.docker.alauda_docker.AlaudaDockerFormation"))
 
+    # storage
     init_hackathon_storage()
 
 
 def init_hackathon_storage():
+    """Add storage implementation to hackathon factory
+
+    The type of storage is configured by ""storage.type"" in config.py which is 'local' by default
+    """
     from hackathon.storage import AzureStorage, LocalStorage
 
     storage_type = safe_get_config("storage.type", "local")
@@ -190,6 +198,11 @@ def init_hackathon_storage():
 
 
 def init_schedule_jobs():
+    """Init scheduled jobs
+
+    Note that scheduler job will NOT be enabled in main thread. So the real initialization work are completed in a
+    separated thread. Otherwise there might be dead lock in main thread.
+    """
     if safe_get_config("environment", "local") == "local":
         return
 
@@ -200,6 +213,7 @@ def init_schedule_jobs():
 
 
 def __init_schedule_jobs():
+    """Init scheduled jobs in fact"""
     sche = RequiredFeature("scheduler")
     expr_manager = RequiredFeature("expr_manager")
 
@@ -221,6 +235,13 @@ def __init_schedule_jobs():
 
 
 def init_app():
+    """Initialize the application.
+
+    Works including :
+        - setting up hackathon factory,
+        - register restful API routes
+        - initialize scheduled jobs
+    """
     init_components()
 
     from views import init_routes

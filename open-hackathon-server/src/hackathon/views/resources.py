@@ -22,25 +22,29 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
+
 import sys
 
 sys.path.append("..")
+import time
 
-from user_routes import register_user_routes
-from admin_routes import register_admin_routes
-from routes import register_routes
-from hackathon import api
+from flask import g, request
 
-from resources import *
+from hackathon import api, RequiredFeature, Component
+from hackathon.decorators import hackathon_name_required, token_required
+from hackathon.health import report_health
+from hackathon.database import Announcement
+from hackathon.hackathon_response import not_found
+from hackathon_resource import Resource, HackathonResource
 
-__all__ = ["init_routes"]
+hackathon_manager = RequiredFeature("hackathon_manager")
+user_manager = RequiredFeature("user_manager")
+register_manager = RequiredFeature("register_manager")
+template_manager = RequiredFeature("template_manager")
+team_manager = RequiredFeature("team_manager")
 
 
-def init_routes():
-    """Register RESTFul API routes"""
-    register_routes()
-    register_user_routes()
-    register_admin_routes()
-
-    # health page API
-    api.add_resource(HealthResource, "/", "/health")
+class HealthResource(HackathonResource):
+    def get(self):
+        context = self.context()
+        return report_health(context.get("q"))
