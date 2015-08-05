@@ -53,107 +53,16 @@ __all__ = [
 schemas = {}
 
 # schema for api "/" and "/health"
-schemas["HealthResource-222"] = {
+schemas["CurrentTimeResource"] = {
     "get": {
-        "input": {
-            "title": "request of get health report",
-            "description": "GET the health status of hackathon server. Return different items according to query key 'q'",
-            "type": "object",
-            "properties": {
-                "q": {
-                    "type": "string",
-                    "description": "item to report health. For example 'mysql' or 'all'. Report basic items if absent",
-                    "required": False
-                }
-            }
-        },
         "output": {
-            "title": "request of get health report",
-            "description": "output of health status, should contain an overall status and a list of sub items",
+            "title": "response to get current time of hackathon server",
+            "description": "get current time of hackathon server so that client can show right count down time",
             "type": "object",
             "properties": {
-                "status": {
-                    "type": "string",
-                    "description": "overall status of the health report. 'ok' means everything is ok. 'warning' means"
-                                   "it's working but might have issues. 'error' means it's not working.",
-                    "enum": ["ok", "warning", "error"]
-                },
-                "start_time": {
-                    "type": "string",
-                    "description": "time when the application started"
-                },
-                "report_time": {
-                    "type": "string",
-                    "description": "time of current time on server"
-                },
-                "up": {
-                    "type": "string",
-                    "description": "running time lasted since the start of applicaton"
-                },
-                "mysql": {
-                    "type": "object",
-                    "description": "status of MySQL server",
-                    "required": False,
-                    "properties": {
-                        "status": {
-                            "type": "string",
-                            "description": "'ok' means everything is ok. 'warning' means it's working but might have "
-                                           "issues. 'error' means it's not working.",
-                            "enum": ["ok", "warning", "error"]
-                        }
-                    }
-                },
-                "docker": {
-                    "type": "object",
-                    "description": "status of docker host servers",
-                    "required": False,
-                    "properties": {
-                        "status": {
-                            "type": "string",
-                            "description": "'ok' means everything is ok. 'warning' means it's working but might have "
-                                           "issues. 'error' means it's not working.",
-                            "enum": ["ok", "warning", "error"]
-                        }
-                    }
-                },
-                "alauda": {
-                    "type": "object",
-                    "description": "status of Alauda web service",
-                    "required": False,
-                    "properties": {
-                        "status": {
-                            "type": "string",
-                            "description": "'ok' means everything is ok. 'warning' means it's working but might have "
-                                           "issues. 'error' means it's not working.",
-                            "enum": ["ok", "warning", "error"]
-                        }
-                    }
-                },
-                "guacamole": {
-                    "type": "object",
-                    "description": "status of guacamole server",
-                    "required": False,
-                    "properties": {
-                        "status": {
-                            "type": "string",
-                            "description": "'ok' means everything is ok. 'warning' means it's working but might have "
-                                           "issues. 'error' means it's not working.",
-                            "enum": ["ok", "warning", "error"]
-                        }
-                    }
-                },
-                "azure": {
-                    "type": "object",
-                    "description": "status of azure cloud",
-                    "required": False,
-                    "properties": {
-                        "status": {
-                            "type": "string",
-                            "description": "'ok' means everything is ok. 'warning' means it's working but might have "
-                                           "issues. 'error' means it's not working.",
-                            "enum": ["ok", "warning", "error"]
-                        }
-                    }
+                "currenttime": {
+                    "type": "number",
+                    "description": "time in miliseconds"
                 }
             }
         }

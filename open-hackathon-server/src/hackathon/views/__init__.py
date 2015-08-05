@@ -44,3 +44,6 @@ def init_routes():
 
     # health page API
     api.add_resource(HealthResource, "/", "/health")
+
+    # system time API
+    api.add_resource(CurrentTimeResource, "/api/currenttime")

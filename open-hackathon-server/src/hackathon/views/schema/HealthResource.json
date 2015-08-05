@@ -14,7 +14,7 @@
         }
       },
       "output": {
-        "title": "request of get health report",
+        "title": "response of get health report",
         "description": "output of health status, should contain an overall status and a list of sub items",
         "type": "object",
         "properties": {

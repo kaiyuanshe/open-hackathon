@@ -48,6 +48,9 @@ def token_required(func):
 
     # keep the original func name for API intput/output validation where original name is required
     authenticate_and_call.original = func.__name__
+    if hasattr(func, "original"):
+        authenticate_and_call.original = func.original
+
     return authenticate_and_call
 
 
@@ -61,6 +64,9 @@ def hackathon_name_required(func):
 
     # keep the original func name for API intput/output validation where original name is required
     authenticate_and_call.original = func.__name__
+    if hasattr(func, "original"):
+        authenticate_and_call.original = func.original
+
     return authenticate_and_call
 
 
@@ -80,4 +86,7 @@ def admin_privilege_required(func):
 
     # keep the original func name for API intput/output validation where original name is required
     authenticate_and_call.original = func.__name__
+    if hasattr(func, "original"):
+        authenticate_and_call.original = func.original
+
     return authenticate_and_call
