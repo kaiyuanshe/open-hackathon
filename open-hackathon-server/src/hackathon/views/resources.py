@@ -33,7 +33,6 @@ from flask import g, request
 from hackathon import api, RequiredFeature, Component
 from hackathon.decorators import hackathon_name_required, token_required
 from hackathon.health import report_health
-from hackathon.database import Announcement
 from hackathon.hackathon_response import not_found
 from hackathon_resource import Resource, HackathonResource
 
@@ -48,3 +47,10 @@ class HealthResource(HackathonResource):
     def get(self):
         context = self.context()
         return report_health(context.get("q"))
+
+
+class CurrentTimeResource(HackathonResource):
+    def get(self):
+        return {
+            "currenttime": long(time.time() * 1000)
+        }

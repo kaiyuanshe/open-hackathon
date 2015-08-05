@@ -427,19 +427,6 @@ class PortBinding(DBBase):
     url = Column(String(200))  # public url schema for display
 
 
-class Announcement(DBBase):
-    __tablename__ = 'announcement'
-
-    id = Column(Integer, primary_key=True)
-    content = Column(String(200))
-    enabled = Column(Integer, default=1)  # 1=enabled 0=disabled
-    create_time = Column(TZDateTime, default=get_now())
-    update_time = Column(TZDateTime)
-
-    def __init__(self, **kwargs):
-        super(Announcement, self).__init__(**kwargs)
-
-
 class Template(DBBase):
     __tablename__ = 'template'
 

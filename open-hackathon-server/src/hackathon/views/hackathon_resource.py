@@ -78,7 +78,7 @@ def validate(func):
         if input_schema:
             try:
                 validictory.validate(data, input_schema, fail_fast=False)
-                log.debug("input validated")
+                log.debug("input validated for %s.%s" % (class_name, method_name))
             except validictory.MultipleValidationError as me:
                 log.debug("input validation of '%s.%s' failed: %s" % (class_name, method_name, repr(me.errors)))
                 raise BadRequest(repr(me.errors))
@@ -87,7 +87,7 @@ def validate(func):
         if output_schema and "error" not in output_data:
             try:
                 validictory.validate(output_data, output_schema, fail_fast=False)
-                log.debug("output validated")
+                log.debug("output validated for %s.%s" % (class_name, method_name))
             except validictory.MultipleValidationError as me:
                 log.debug("output validation of '%s.%s' failed: %s" % (class_name, method_name, repr(me.errors)))
                 raise InternalServerError(repr(me.errors))
