@@ -9,24 +9,36 @@
   * [Why OpenHackathon](#why-openhackathon)
 * [User's Guide](#user's-guide)
   * [Implementation and Architecture](#implementation-and-architecture-for-user)
-  User use a HTML5 based browser connect to Open Hackathon.  After third-part login, user will see
-  hackathon main page, after hackathon owner approved user’s request, user will able to choose an environment to start, hackathon will start environment on
-Microsoft Azure and display it on user’s web browser.
-**HTML5 Browser**
-Open Hackathon is a clientless web access software, you don’t have to install any
-client software or plugin for browser. Instead,  any browser which can support HTM5 can be used
-to access Open Hackathon.
-**Open-Hackathon**
-Open-Hackathon is main part of Open Hackathon Project. It’s only can be
-install on Linux, provide user interface and admin’s management portal.
-**MySQL**
-MySQL is usedas our Database. It was the world's second most  widely used RDBMS, and the most widely used open-source RDBMS.
-**Guacamole**
-Guacamole is a clientless remote desktop gateway. It supports standard protocols like VNC
+
+    User use a HTML5 based browser connect to Open Hackathon.  After third-part login, user will see hackathon main page,        after hackathon owner approved user’s request, user will
+   able to choose an environment to start, hackathon will start environment on
+   Microsoft Azure and display it on user’s web browser.
+
+     * HTML5 Browser
+
+      Open Hackathon is a clientless web access software, you don’t have to install any
+      client software or plugin for browser. Instead,  any browser which can support HTM5 can be used
+      to access Open Hackathon. 
+
+     * Open-Hackathon
+
+      Open-Hackathon is main part of Open Hackathon Project. It’s only can be
+      install on Linux, provide user interface and admin’s management portal.
+
+     * MySQL
+
+      MySQL is usedas our Database. It was the world's second most  widely used RDBMS, and the most widely used open-source RDBMS.
+
+     * Guacamole
+
+      Guacamole is a clientless remote desktop gateway. It supports standard protocols like VNC
 and RDP.  It’s used to connect virtual machine and present it to user via HTML5 based browser.
-**Azure**
-Microsoft Azure is used as our base infrastructure. All environment and virtual machines
+
+     * Azure
+
+      Microsoft Azure is used as our base infrastructure. All environment and virtual machines
 are built on it.
+
   * [attend hackathons](#how-to-attend-a-hackathon)
   * [Contribute your Template](#contribute-your-template)
   * [FAQ](#FAQ)
