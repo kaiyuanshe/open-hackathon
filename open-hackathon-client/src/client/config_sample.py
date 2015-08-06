@@ -132,9 +132,9 @@ Config = {
                             "list": ["get"]
                         },
                         "template": {
-                                "": ["post", "delete"],
-                                "list": ["get"],
-                                "check": ["get"]
+                            "": ["post", "delete"],
+                            "list": ["get"],
+                            "check": ["get"]
                         }
                     },
                     "registration": {
@@ -150,11 +150,11 @@ Config = {
                     }
                 },
                 "template": {
-                        "": ["get", "post", "delete", "put"],
-                        "list": ["get"],
-                        "check": ["get"]
+                    "": ["get", "post", "delete", "put"],
+                    "list": ["get"],
+                    "check": ["get"]
                 },
-                 "user": {
+                "user": {
                     "": ["get"],
                     "experiment": {
                         "": ["get", "post", "delete", "put"],
@@ -171,9 +171,6 @@ Config = {
                     "team": {
                         "member": ["get"]
                     }
-                },
-                "bulletin": {
-                    "": ["get", "post"]
                 },
                 "hackathon": {
                     "": ["get"],

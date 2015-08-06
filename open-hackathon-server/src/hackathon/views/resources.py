@@ -30,8 +30,8 @@ import time
 
 from flask import g, request
 
-from hackathon import api, RequiredFeature, Component
-from hackathon.decorators import hackathon_name_required, token_required
+from hackathon import RequiredFeature
+from hackathon.decorators import hackathon_name_required, token_required, admin_privilege_required
 from hackathon.health import report_health
 from hackathon.hackathon_response import not_found
 from hackathon_resource import Resource, HackathonResource
@@ -54,3 +54,22 @@ class CurrentTimeResource(HackathonResource):
         return {
             "currenttime": long(time.time() * 1000)
         }
+
+
+class AdminHackathonResource(HackathonResource):
+    """Resource for admin to create/update hackathon
+
+    url path: /api/admin/hackathon
+    """
+
+    @hackathon_name_required
+    def get(self):
+        return g.hackathon.dic()
+
+    @token_required
+    def post(self):
+        return hackathon_manager.create_new_hackathon(self.context())
+
+    @admin_privilege_required
+    def put(self):
+        return hackathon_manager.update_hackathon(request.get_json())

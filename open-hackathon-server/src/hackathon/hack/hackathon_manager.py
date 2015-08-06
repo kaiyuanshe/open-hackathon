@@ -25,6 +25,7 @@
 # -----------------------------------------------------------------------------------
 
 import sys
+from werkzeug.exceptions import PreconditionFailed, InternalServerError
 
 sys.path.append("..")
 import json
@@ -40,7 +41,7 @@ from flask import g, request
 from hackathon.database import Hackathon, User, UserHackathonRel, AdminHackathonRel, DockerHostServer, Template
 from hackathon.hackathon_response import internal_server_error, bad_request, ok
 from hackathon.constants import HACKATHON_BASIC_INFO, ADMIN_ROLE_TYPE, HACK_STATUS, RGStatus, VE_PROVIDER, HTTP_HEADER, \
-    FILE_TYPE
+    FILE_TYPE, HACK_TYPE
 from hackathon import RequiredFeature, Component, Context
 
 __all__ = ["HackathonManager"]
@@ -60,11 +61,8 @@ class HackathonManager(Component):
 
     def get_hackathon_by_name_or_id(self, hack_id=None, name=None):
         if hack_id is None:
-            return self.get_hackathon_by_name(name)
+            return self.__get_hackathon_by_name(name)
         return self.get_hackathon_by_id(hack_id)
-
-    def get_hackathon_by_name(self, name):
-        return self.db.find_first_object_by(Hackathon, name=name)
 
     def get_hackathon_by_id(self, hackathon_id):
         """Query hackathon by id
@@ -148,7 +146,7 @@ class HackathonManager(Component):
         if HTTP_HEADER.HACKATHON_NAME in request.headers:
             try:
                 hackathon_name = request.headers[HTTP_HEADER.HACKATHON_NAME]
-                hackathon = self.get_hackathon_by_name(hackathon_name)
+                hackathon = self.__get_hackathon_by_name(hackathon_name)
                 if hackathon is None:
                     self.log.debug("cannot find hackathon by name %s" % hackathon_name)
                     return False
@@ -184,7 +182,7 @@ class HackathonManager(Component):
         value = self.__get_property_from_hackathon_basic_info(hackathon, key)
         return value if value is not None else False
 
-    def is_recycle_enabled(self,hackathon):
+    def is_recycle_enabled(self, hackathon):
         key = HACKATHON_BASIC_INFO.RECYCLE_ENABLED
         value = self.__get_property_from_hackathon_basic_info(hackathon, key)
         return value if value is not None else False
@@ -199,136 +197,48 @@ class HackathonManager(Component):
         value = self.__get_property_from_hackathon_basic_info(hackathon, key)
         return value if value is not None else 1
 
-    def validate_created_args(self, args):
-        self.log.debug("create_or_update_hackathon: %r" % args)
-        if "name" not in args:
-            return False, bad_request("hackathon name invalid")
+    def create_new_hackathon(self, context):
+        """Create new hackathon based on the http body
 
-        hackathon = self.get_hackathon_by_name(args['name'])
+        Hackathon name is unique so duplicated names are not allowd.
+
+        :type context: Context
+        :param context: the body of http request that contains fields to create a new hackathon
+
+        :rtype: dict
+        """
+        hackathon = self.__get_hackathon_by_name(context.name)
         if hackathon is not None:
-            return False, internal_server_error("hackathon name already exist")
+            raise PreconditionFailed("hackathon name already exists")
 
-        default_base_info = {
-            HACKATHON_BASIC_INFO.ORGANIZERS: [],
-            # HACKATHON_BASIC_INFO.ORGANIZER_NAME: "",
-            # HACKATHON_BASIC_INFO.ORGANIZER_URL: "",
-            # HACKATHON_BASIC_INFO.ORGANIZER_IMAGE: "",
-            # HACKATHON_BASIC_INFO.ORGANIZER_DESCRIPTION: "",
-            HACKATHON_BASIC_INFO.BANNERS: "",
-            HACKATHON_BASIC_INFO.LOCATION: "",
-            HACKATHON_BASIC_INFO.MAX_ENROLLMENT: 0,
-            HACKATHON_BASIC_INFO.WALL_TIME: time.strftime("%Y-%m-%d %H:%M:%S"),
-            HACKATHON_BASIC_INFO.AUTO_APPROVE: False,
-            HACKATHON_BASIC_INFO.RECYCLE_ENABLED: False,
-            HACKATHON_BASIC_INFO.RECYCLE_MINUTES: 0,
-            HACKATHON_BASIC_INFO.PRE_ALLOCATE_ENABLED: False,
-            HACKATHON_BASIC_INFO.PRE_ALLOCATE_NUMBER: 1,
-            HACKATHON_BASIC_INFO.ALAUDA_ENABLED: False
-        }
-        args[self.BASIC_INFO] = json.dumps(default_base_info)
-        return True, args
+        self.log.debug("add a new hackathon:" + repr(context))
+        new_hack = self.__create_hackathon(context)
 
-    def __test_data(self, hackathon):
-        """
-        create test data for new hackathon. Remove this function after template and docker host feature done
-        :param hackathon:
-        :return:
-        """
-        try:
-            # test docker host server
-            docker_host = DockerHostServer(vm_name="OSSLAB-VM-19", public_dns="osslab-vm-19.chinacloudapp.cn",
-                                           public_ip="42.159.97.143", public_docker_api_port=4243,
-                                           private_ip="10.209.14.33",
-                                           private_docker_api_port=4243, container_count=0, container_max_count=100,
-                                           hackathon=hackathon)
-            if self.db.find_first_object_by(DockerHostServer, vm_name=docker_host.vm_name,
-                                            hackathon_id=hackathon.id) is None:
-                self.db.add_object(docker_host)
+        # todo remove the following line ASAP
+        self.__test_data(new_hack)
 
-            # test template: ubuntu terminal
-            template_dir = dirname(dirname(realpath(__file__))) + '/resources'
-            template_url = template_dir + os.path.sep + "kaiyuanshe-ut.js"
-            template = Template(name="ut", url=template_url,
-                                provider=VE_PROVIDER.DOCKER,
-                                status=1,
-                                virtual_environment_count=1,
-                                description="<ul><li>Ubuntu</li><li>SSH</li><li>LAMP</li></ul>",
-                                hackathon=hackathon)
-            if self.db.find_first_object_by(Template, name=template.name, hackathon_id=hackathon.id) is None:
-                self.db.add_object(template)
-        except:
-            self.log.warn("fail to create test data")
-
-        return
-
-    def create_new_hackathon(self, args):
-        status, return_info = self.validate_created_args(args)
-        if not status:
-            return return_info
-        args = return_info
-
-        try:
-            self.log.debug("add a new hackathon:" + str(args))
-            args['update_time'] = self.util.get_now()
-            args['create_time'] = self.util.get_now()
-            args["creator_id"] = g.user.id
-            new_hack = self.db.add_object_kwargs(Hackathon, **args)  # insert into hackathon
-            try:
-                ahl = AdminHackathonRel(user_id=g.user.id,
-                                        role_type=ADMIN_ROLE_TYPE.ADMIN,
-                                        hackathon_id=new_hack.id,
-                                        status=HACK_STATUS.INIT,
-                                        remarks='creator',
-                                        create_time=self.util.get_now())
-                self.db.add_object(ahl)
-            except Exception as ex:
-                # TODO: send out a email to remind administrator to deal with this problems
-                self.log.error(ex)
-                return internal_server_error("fail to insert a record into admin_hackathon_rel")
-
-            # todo remove the following line ASAP
-            self.__test_data(new_hack)
-            return new_hack.id
-        except Exception as  e:
-            self.log.error(e)
-            return internal_server_error("fail to create hackathon")
+        return new_hack.dic()
 
     def update_hackathon(self, args):
+        """Update hackathon properties
+
+        :type args: dict
+        :param args: arguments from http request body that contains properties with new values
+
+        :rtype dict
+        :return hackathon in dict if updated successfully.
+        """
         self.log.debug("update a exist hackathon insert args: %r" % args)
-        if "name" not in args or "id" not in args:
-            return bad_request("name or id are both required when update a hackathon")
-
-        hackathon = self.db.find_first_object(Hackathon, Hackathon.name == args['name'])
-
-        if hackathon.id != args['id']:
-            return bad_request("name and id are not matched in hackathon")
+        hackathon = g.hackathon
 
         try:
-            update_items = self.parse_update_items(args, hackathon)
+            update_items = self.__parse_update_items(args, hackathon)
             self.log.debug("update hackathon items :" + str(args))
             self.db.update_object(hackathon, **update_items)
-            return ok("update hackathon succeed")
-
-        except Exception as  e:
+            return hackathon.dic()
+        except Exception as e:
             self.log.error(e)
             return internal_server_error("fail to update hackathon")
-
-    def parse_update_items(self, args, hackathon):
-        result = {}
-
-        for key in dict(args):
-            if key == self.BASIC_INFO:
-                result[self.BASIC_INFO] = json.dumps(args[self.BASIC_INFO])
-            elif key == self.EXTRA_INFO:
-                result[self.EXTRA_INFO] = json.dumps(args[self.EXTRA_INFO])
-            elif dict(args)[key] != hackathon.dic()[key]:
-                result[key] = dict(args)[key]
-
-        result.pop('id', None)
-        result.pop('create_time', None)
-        result.pop('creator_id', None)
-        result['update_time'] = self.util.get_now()
-        return result
 
     def validate_args(self):
         # check size
@@ -407,7 +317,152 @@ class HackathonManager(Component):
         pre_list = filter(lambda h: self.is_pre_allocate_enabled(h), all)
         return [h.id for h in pre_list]
 
-        # ---------------------------- private methods ---------------------------------------------------
+    # ---------------------------- private methods ---------------------------------------------------
+
+    def __get_default_basic_info(self):
+        """Return the default basic info of hackathon"""
+        default_base_info = {
+            HACKATHON_BASIC_INFO.ORGANIZERS: [],
+            # HACKATHON_BASIC_INFO.ORGANIZER_NAME: "",
+            # HACKATHON_BASIC_INFO.ORGANIZER_URL: "",
+            # HACKATHON_BASIC_INFO.ORGANIZER_IMAGE: "",
+            # HACKATHON_BASIC_INFO.ORGANIZER_DESCRIPTION: "",
+            HACKATHON_BASIC_INFO.BANNERS: "",
+            HACKATHON_BASIC_INFO.LOCATION: "",
+            HACKATHON_BASIC_INFO.MAX_ENROLLMENT: 0,
+            HACKATHON_BASIC_INFO.WALL_TIME: time.strftime("%Y-%m-%d %H:%M:%S"),
+            HACKATHON_BASIC_INFO.AUTO_APPROVE: False,
+            HACKATHON_BASIC_INFO.RECYCLE_ENABLED: False,
+            HACKATHON_BASIC_INFO.RECYCLE_MINUTES: 0,
+            HACKATHON_BASIC_INFO.PRE_ALLOCATE_ENABLED: False,
+            HACKATHON_BASIC_INFO.PRE_ALLOCATE_NUMBER: 1,
+            HACKATHON_BASIC_INFO.ALAUDA_ENABLED: False
+        }
+        return json.dumps(default_base_info)
+
+    def __get_hackathon_by_name(self, name):
+        """Get hackathon accoring the unique name
+
+        :type name: str|unicode
+        :param name: name of hackathon
+
+        :rtype: Hackathon
+        :return hackathon instance if found else None
+        """
+        return self.db.find_first_object_by(Hackathon, name=name)
+
+    def __create_hackathon(self, context):
+        """Insert hackathon and admin_hackathon_rel to database
+
+        We enforce that default basic_info are used during the creation
+
+        :type context: Context
+        :param context: context of the args to create a new hackathon
+
+        :rtype: Hackathon
+        :return hackathon instance
+        """
+
+        new_hack = Hackathon(
+            name=context.name,
+            display_name=context.display_name,
+            description=context.get("description"),
+            status=HACK_STATUS.INIT,
+            creator_id=g.user.id,
+            event_start_time=context.event_start_time,
+            event_end_time=context.event_end_time,
+            registration_start_time=context.registration_start_time,
+            registration_end_time=context.registration_end_time,
+            judge_start_time=context.judge_start_time,
+            judge_end_time=context.judge_end_time,
+            basic_info=self.__get_default_basic_info(),
+            extra_info=context.get("extra_info"),
+            type=context.get("type", HACK_TYPE.HACKATHON)
+        )
+
+        # insert into table hackathon
+        self.db.add_object(new_hack)
+
+        # add the current login user as admin and creator
+        try:
+            ahl = AdminHackathonRel(user_id=g.user.id,
+                                    role_type=ADMIN_ROLE_TYPE.ADMIN,
+                                    hackathon_id=new_hack.id,
+                                    status=HACK_STATUS.INIT,
+                                    remarks='creator',
+                                    create_time=self.util.get_now())
+            self.db.add_object(ahl)
+        except Exception as ex:
+            # TODO: send out a email to remind administrator to deal with this problems
+            self.log.error(ex)
+            raise InternalServerError("fail to create the default administrator")
+
+        return new_hack
+
+    def __parse_update_items(self, args, hackathon):
+        """Parse properties that need to update
+
+        Only those whose value changed items will be returned. Also some static property like id, create_time should
+        NOT be updated.
+
+        :type args: dict
+        :param args: arguments from http body which contains new values
+
+        :type hackathon: Hackathon
+        :param hackathon: the existing Hackathon object which contains old values
+
+        :rtype: dict
+        :return a dict that contains all properties that are updated.
+        """
+        result = {}
+
+        for key in dict(args):
+            if key == self.BASIC_INFO:
+                result[self.BASIC_INFO] = json.dumps(args[self.BASIC_INFO])
+            elif key == self.EXTRA_INFO:
+                result[self.EXTRA_INFO] = json.dumps(args[self.EXTRA_INFO])
+            elif dict(args)[key] != hackathon.dic()[key]:
+                result[key] = dict(args)[key]
+
+        result.pop('id', None)
+        result.pop('create_time', None)
+        result.pop('creator_id', None)
+        result['update_time'] = self.util.get_now()
+        return result
+
+    def __test_data(self, hackathon):
+        """
+        create test data for new hackathon. Remove this function after template and docker host feature done
+        :param hackathon:
+        :return:
+        """
+        try:
+            # test docker host server
+            docker_host = DockerHostServer(vm_name="OSSLAB-VM-19", public_dns="osslab-vm-19.chinacloudapp.cn",
+                                           public_ip="42.159.97.143", public_docker_api_port=4243,
+                                           private_ip="10.209.14.33",
+                                           private_docker_api_port=4243, container_count=0, container_max_count=100,
+                                           hackathon=hackathon)
+            if self.db.find_first_object_by(DockerHostServer, vm_name=docker_host.vm_name,
+                                            hackathon_id=hackathon.id) is None:
+                self.db.add_object(docker_host)
+
+            # test template: ubuntu terminal
+            template_dir = dirname(dirname(realpath(__file__))) + '/resources'
+            template_url = template_dir + os.path.sep + "kaiyuanshe-ut.js"
+            template = Template(name="ut", url=template_url,
+                                provider=VE_PROVIDER.DOCKER,
+                                status=1,
+                                virtual_environment_count=1,
+                                description="<ul><li>Ubuntu</li><li>SSH</li><li>LAMP</li></ul>",
+                                hackathon=hackathon)
+            if self.db.find_first_object_by(Template, name=template.name, hackathon_id=hackathon.id) is None:
+                self.db.add_object(template)
+        except Exception as e:
+            self.log.error(e)
+            self.log.warn("fail to create test data")
+
+        return
 
 
 '''

@@ -47,3 +47,6 @@ def init_routes():
 
     # system time API
     api.add_resource(CurrentTimeResource, "/api/currenttime")
+
+    # API for admin to create or update hackathon
+    api.add_resource(AdminHackathonResource, "/api/admin/hackathon")

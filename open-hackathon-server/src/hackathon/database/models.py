@@ -271,7 +271,7 @@ class Hackathon(DBBase):
     __tablename__ = 'hackathon'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String(100), unique=True, nullable=False)
+    name = Column(String(50), unique=True, nullable=False, index=True)
     display_name = Column(String(64))
     description = Column(Text)
     status = Column(Integer, default=0)  # 0-new 1-online 2-offline

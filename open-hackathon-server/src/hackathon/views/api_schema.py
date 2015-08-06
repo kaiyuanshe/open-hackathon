@@ -41,6 +41,7 @@ validation is unnecessary, it's very simply by just deleting the specific key fr
 to make sure it's understandable by anyone. 'description' MUST be included in every property too.
     - You can define all schemas here or add a json file in 'schema' folder.It's better we create a dedicate json file
 for each Resource to prevent this file from being too large.
+    - For the output, you can only define schemas for those required properties
 """
 from os import listdir
 from os.path import isfile, join, dirname, realpath

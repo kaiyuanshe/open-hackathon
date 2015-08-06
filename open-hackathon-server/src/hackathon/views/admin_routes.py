@@ -44,28 +44,7 @@ admin_manager = RequiredFeature("admin_manager")
 expr_manager = RequiredFeature("expr_manager")
 
 
-class AdminHackathonResource(Resource):
-    """Resource for admin to create/update hackathon
 
-    url path: /api/admin/hackathon
-    """
-
-    @hackathon_name_required
-    def get(self):
-        return g.hackathon.dic()
-
-    @token_required
-    def post(self):
-        args = request.get_json()
-        return hackathon_manager.create_new_hackathon(args)
-
-    @admin_privilege_required
-    def put(self):
-        args = request.get_json()
-        return hackathon_manager.update_hackathon(args)
-
-    def delete(self):
-        pass
 
 
 class AdminHackathonListResource(Resource):
@@ -246,7 +225,7 @@ def register_admin_routes():
     """
 
     # hackathon api
-    api.add_resource(AdminHackathonResource, "/api/admin/hackathon")
+
     api.add_resource(AdminHackathonListResource, "/api/admin/hackathon/list")
     api.add_resource(HackathonCheckNameResource, "/api/admin/hackathon/checkname")
 

@@ -27,6 +27,7 @@ import sys
 sys.path.append("..")
 from functools import wraps
 from werkzeug.exceptions import BadRequest, InternalServerError
+from dateutil import parser
 
 from flask_restful import Resource
 from flask import request
@@ -57,6 +58,18 @@ def __get_schema(class_name, method_name, t):
     return None
 
 
+def validate_date(validator, fieldname, value, format_option):
+    if format_option == "hack_date":
+        try:
+            parser.parse(value)
+        except Exception as e:
+            raise validictory.FieldValidationError(
+                "Could not parse date from string %s, reason: %s" % (value, e), fieldname, value)
+    else:
+        raise validictory.FieldValidationError("Invalid format option for \
+        'validate_uuid': %(format)s" % format_option, fieldname, value)
+
+
 def validate(func):
     """A decorator for RestFul APIs that enables parameter validation"""
 
@@ -77,7 +90,10 @@ def validate(func):
 
         if input_schema:
             try:
-                validictory.validate(data, input_schema, fail_fast=False)
+                formatdict = {
+                    "hack_date": validate_date
+                }
+                validictory.validate(data, input_schema, format_validators=formatdict, fail_fast=False)
                 log.debug("input validated for %s.%s" % (class_name, method_name))
             except validictory.MultipleValidationError as me:
                 log.debug("input validation of '%s.%s' failed: %s" % (class_name, method_name, repr(me.errors)))
