@@ -73,3 +73,9 @@ class AdminHackathonResource(HackathonResource):
     @admin_privilege_required
     def put(self):
         return hackathon_manager.update_hackathon(request.get_json())
+
+
+class HackathonCheckNameResource(HackathonResource):
+    def get(self):
+        context = self.context()
+        return hackathon_manager.is_hackathon_name_existed(context.name)

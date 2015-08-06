@@ -25,7 +25,6 @@
 # -----------------------------------------------------------------------------------
 
 import sys
-from werkzeug.exceptions import PreconditionFailed, InternalServerError
 
 sys.path.append("..")
 import json
@@ -35,6 +34,7 @@ import time
 import os
 from os.path import realpath, dirname
 
+from werkzeug.exceptions import PreconditionFailed, InternalServerError
 from sqlalchemy import or_
 from flask import g, request
 
@@ -112,6 +112,18 @@ class HackathonManager(Component):
             return dic
 
         return map(lambda (hack, reg): to_dict(hack, reg), hackathon_with_user_list)
+
+    def is_hackathon_name_existed(self, name):
+        """Check whether hackathon with specific name exists or not
+
+        :type name: str|unicode
+        :param name: name of hackathon
+
+        :rtype: bool
+        :return True if hackathon with specific name exists otherwise False
+        """
+        hackathon = self.__get_hackathon_by_name(name)
+        return hackathon is not None
 
     def get_online_hackathons(self):
         return self.db.find_all_objects(Hackathon, Hackathon.status == HACK_STATUS.ONLINE)

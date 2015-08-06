@@ -44,9 +44,9 @@ def init_routes():
 
     # health page API
     api.add_resource(HealthResource, "/", "/health")
-
     # system time API
     api.add_resource(CurrentTimeResource, "/api/currenttime")
-
-    # API for admin to create or update hackathon
+    # API for admin to query, create or update hackathon
     api.add_resource(AdminHackathonResource, "/api/admin/hackathon")
+    # check whether hackathon with specific name exists
+    api.add_resource(HackathonCheckNameResource, "/api/admin/hackathon/checkname")

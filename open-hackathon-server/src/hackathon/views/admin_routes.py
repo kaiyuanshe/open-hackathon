@@ -53,12 +53,7 @@ class AdminHackathonListResource(Resource):
         return hackathon_manager.get_permitted_hackathon_list_by_admin_user_id(g.user.id)
 
 
-class HackathonCheckNameResource(Resource):
-    def get(self):
-        parse = reqparse.RequestParser()
-        parse.add_argument('name', type=str, location='args', required=True)
-        args = parse.parse_args()
-        return hackathon_manager.get_hackathon_by_name(args['name']) is None
+
 
 
 class AdminRegisterListResource(Resource):
@@ -227,7 +222,6 @@ def register_admin_routes():
     # hackathon api
 
     api.add_resource(AdminHackathonListResource, "/api/admin/hackathon/list")
-    api.add_resource(HackathonCheckNameResource, "/api/admin/hackathon/checkname")
 
     # registration APIs
     api.add_resource(AdminRegisterListResource, "/api/admin/registration/list")

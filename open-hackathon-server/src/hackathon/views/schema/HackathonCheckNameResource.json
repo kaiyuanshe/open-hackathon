@@ -1,0 +1,21 @@
+{
+  "HackathonCheckNameResource": {
+    "get": {
+      "input": {
+        "description": "check hackathon with specific name exists or not",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 50,
+            "description": "name of hackathon"
+          }
+        }
+      },
+      "output": {
+        "description": "True or False",
+        "type": "boolean"
+      }
+    }
+  }
+}

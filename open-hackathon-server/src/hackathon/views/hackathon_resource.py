@@ -100,7 +100,11 @@ def validate(func):
                 raise BadRequest(repr(me.errors))
 
         output_data = func(*args, **kwargs)
-        if output_schema and "error" not in output_data:
+        if output_schema:
+            # if it's kind of `error` defined in hackathon_response.py, skip the validation
+            if isinstance(output_data, dict) and "error" in output_data:
+                return output_data
+
             try:
                 validictory.validate(output_data, output_schema, fail_fast=False)
                 log.debug("output validated for %s.%s" % (class_name, method_name))
