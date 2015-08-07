@@ -41,6 +41,7 @@ validation is unnecessary, it's very simply by just deleting the specific key fr
 to make sure it's understandable by anyone. 'description' MUST be included in every property too.
     - You can define all schemas here or add a json file in 'schema' folder.It's better we create a dedicate json file
 for each Resource to prevent this file from being too large.
+    - For the output, you can only define schemas for those required properties
 """
 from os import listdir
 from os.path import isfile, join, dirname, realpath
@@ -53,109 +54,38 @@ __all__ = [
 schemas = {}
 
 # schema for api "/" and "/health"
-schemas["HealthResource-222"] = {
+schemas["CurrentTimeResource"] = {
     "get": {
-        "input": {
-            "title": "request of get health report",
-            "description": "GET the health status of hackathon server. Return different items according to query key 'q'",
+        "output": {
+            "title": "response to get current time of hackathon server",
+            "description": "get current time of hackathon server so that client can show right count down time",
             "type": "object",
             "properties": {
-                "q": {
+                "currenttime": {
+                    "type": "number",
+                    "description": "time in miliseconds"
+                }
+            }
+        }
+    }
+}
+
+schemas["HackathonCheckNameResource"] = {
+    "get": {
+        "input": {
+            "description": "check hackathon with specific name exists or not",
+            "type": "object",
+            "properties": {
+                "name": {
                     "type": "string",
-                    "description": "item to report health. For example 'mysql' or 'all'. Report basic items if absent",
-                    "required": False
+                    "maxLength": 50,
+                    "description": "name of hackathon"
                 }
             }
         },
         "output": {
-            "title": "request of get health report",
-            "description": "output of health status, should contain an overall status and a list of sub items",
-            "type": "object",
-            "properties": {
-                "status": {
-                    "type": "string",
-                    "description": "overall status of the health report. 'ok' means everything is ok. 'warning' means"
-                                   "it's working but might have issues. 'error' means it's not working.",
-                    "enum": ["ok", "warning", "error"]
-                },
-                "start_time": {
-                    "type": "string",
-                    "description": "time when the application started"
-                },
-                "report_time": {
-                    "type": "string",
-                    "description": "time of current time on server"
-                },
-                "up": {
-                    "type": "string",
-                    "description": "running time lasted since the start of applicaton"
-                },
-                "mysql": {
-                    "type": "object",
-                    "description": "status of MySQL server",
-                    "required": False,
-                    "properties": {
-                        "status": {
-                            "type": "string",
-                            "description": "'ok' means everything is ok. 'warning' means it's working but might have "
-                                           "issues. 'error' means it's not working.",
-                            "enum": ["ok", "warning", "error"]
-                        }
-                    }
-                },
-                "docker": {
-                    "type": "object",
-                    "description": "status of docker host servers",
-                    "required": False,
-                    "properties": {
-                        "status": {
-                            "type": "string",
-                            "description": "'ok' means everything is ok. 'warning' means it's working but might have "
-                                           "issues. 'error' means it's not working.",
-                            "enum": ["ok", "warning", "error"]
-                        }
-                    }
-                },
-                "alauda": {
-                    "type": "object",
-                    "description": "status of Alauda web service",
-                    "required": False,
-                    "properties": {
-                        "status": {
-                            "type": "string",
-                            "description": "'ok' means everything is ok. 'warning' means it's working but might have "
-                                           "issues. 'error' means it's not working.",
-                            "enum": ["ok", "warning", "error"]
-                        }
-                    }
-                },
-                "guacamole": {
-                    "type": "object",
-                    "description": "status of guacamole server",
-                    "required": False,
-                    "properties": {
-                        "status": {
-                            "type": "string",
-                            "description": "'ok' means everything is ok. 'warning' means it's working but might have "
-                                           "issues. 'error' means it's not working.",
-                            "enum": ["ok", "warning", "error"]
-                        }
-                    }
-                },
-                "azure": {
-                    "type": "object",
-                    "description": "status of azure cloud",
-                    "required": False,
-                    "properties": {
-                        "status": {
-                            "type": "string",
-                            "description": "'ok' means everything is ok. 'warning' means it's working but might have "
-                                           "issues. 'error' means it's not working.",
-                            "enum": ["ok", "warning", "error"]
-                        }
-                    }
-                }
-            }
+            "description": "True or False",
+            "type": "boolean"
         }
     }
 }

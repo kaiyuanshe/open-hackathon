@@ -290,8 +290,8 @@ class HACK_TYPE:
     """
     For type in db model Hackathon
     """
-    PROPOSITION = 1
-    OPEN = 2
+    HACKATHON = 1
+    CONTEST = 2
 
 
 class FILE_TYPE:

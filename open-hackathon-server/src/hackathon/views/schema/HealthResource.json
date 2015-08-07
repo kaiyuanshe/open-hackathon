@@ -5,6 +5,7 @@
         "title": "request of get health report",
         "description": "GET the health status of hackathon server. Return different items according to query key 'q'",
         "type": "object",
+        "additionalProperties": false,
         "properties": {
           "q": {
             "type": "string",
@@ -14,7 +15,7 @@
         }
       },
       "output": {
-        "title": "request of get health report",
+        "title": "response of get health report",
         "description": "output of health status, should contain an overall status and a list of sub items",
         "type": "object",
         "properties": {
