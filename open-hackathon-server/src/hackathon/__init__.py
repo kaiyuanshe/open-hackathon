@@ -165,7 +165,7 @@ def init_components():
     factory.provide("admin_manager", AdminManager)
     factory.provide("team_manager", TeamManager)
     factory.provide("guacamole", GuacamoleInfo)
-    factory.provide("cache_manager", CacheManagerExt)
+    factory.provide("cache", CacheManagerExt)
 
     # health check items
     factory.provide("health_check_mysql", get_class("hackathon.health.health_check.MySQLHealthCheck"))

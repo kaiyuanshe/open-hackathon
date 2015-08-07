@@ -23,7 +23,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
-__author__ = 'ZGQ'
 
 from beaker.cache import CacheManager
 from beaker.util import parse_cache_config_options
@@ -31,17 +30,24 @@ from beaker.util import parse_cache_config_options
 from hackathon import Component
 
 
-__all__ = ["CacheManager"]
+__all__ = ["CacheManagerExt"]
 
 
 class CacheManagerExt(Component):
     """To cache resource"""
     def get_cache(self, key, createfunc):
-        """get cached data
+        """Get cached data of the returns of createfunc depending on the key.
+        If key and createfunc exist in cache, returns the cached data,
+        otherwise caches the returns of createfunc and returns data.
 
-        :param key: key=key_name, present the unique key each time caching
-        :param createfunc: createfunc=func, the function to be cached
+        :type key: String
+        :param key: key name, present the unique key each time caching
 
+        :type createfunc: function object
+        :param createfunc: only the name of function, have no parameters,
+            its return type can be any basic object, like String, int, tuple, list, dict, etc.
+
+        :rtype: String
         :return: the value mapped to the key
 
         :example:
@@ -54,10 +60,11 @@ class CacheManagerExt(Component):
     def invalidate(self, key):
         """remove the key-value pair in the cache
 
-        :param key: the key_name
+        :type key: String
+        :param key: key name, present the unique key each time caching
 
-        :rtype bool
-        :return: if remove the key-value pair correctly
+        :rtype: bool
+        :return: True if remove the key-value pair correctly, otherwise False
 
         """
         try:
@@ -70,8 +77,8 @@ class CacheManagerExt(Component):
     def clear(self):
         """clear all the cache
 
-        :rtype bool
-        :return: if clear the cache correctly
+        :rtype: bool
+        :return: True if clear the cache correctly, otherwise False
         """
         try:
             self.tmpl_cache.clear()
@@ -84,11 +91,16 @@ class CacheManagerExt(Component):
         """initialize the class CacheManager
         More configuration refer to http://beaker.readthedocs.org/en/latest/caching.html#about
         """
+        # store the basic configuration
         self.cache_opts = {
             'cache.type': 'file',
             # can be "memory" or "file"
             'cache.data_dir': '/tmp/cache/data',
             'cache.lock_dir': '/tmp/cache/lock'
         }
+        # create CacheManager instance with cache_opts
         self.cache = CacheManager(**parse_cache_config_options(self.cache_opts))
+        # In addition to the defaults supplied to the CacheManager instance,
+        # any of the Cache options can be changed on a per-namespace basis,
+        # by setting a type, and expire option.
         self.tmpl_cache = self.cache.get_cache('mytemplate', type='file', expire=3600)

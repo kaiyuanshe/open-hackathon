@@ -22,13 +22,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
-__author__ = 'ZGQ'
 
 from storage import Storage
 import json
 from uuid import uuid1
 from time import strftime
-from flask import g
 
 
 from hackathon import RequiredFeature
@@ -41,11 +39,10 @@ __all__ = ["AzureStorage"]
 class AzureStorage(Storage):
     """Hackathon file storage that saves all templates on Azure storage
 
-    template files will be save at "<hostname>/<container_name>/<blob_name>"
-    uploaded images will be save at "<hostname>/<container_name>/<blob_name>"
-
+    template files will be save at "http://hackathon.blob.core.chinacloudapi.cn/templates/<blob_name>"
+    uploaded images will be save at "http://hackathon.blob.core.chinacloudapi.cn/images/<blob_name>"
     """
-    cache_manager = RequiredFeature("cache_manager")
+    cache_manager = RequiredFeature("cache")
     file_service = RequiredFeature("file_service")
 
     def save(self, context):
@@ -54,10 +51,10 @@ class AzureStorage(Storage):
         :type context: Context
         :param context: must have {"content":"***", "file_type":"***"} keys
 
-        :rtype context
-        :return the updated context which should including the full path of saved file
+        :rtype: Context
+        :return: the updated context which should including the full path of saved file
 
-        :config requirements: in config file, there must exit "storage.azure.image_container",
+        :note: in config file, there must exit "storage.azure.image_container",
                             "storage.azure.template_container"
                             and "storage.azure.blob_service_host_base" configuration
         """
@@ -65,7 +62,7 @@ class AzureStorage(Storage):
             container_name = self.util.get_config("storage.azure.image_container")
         else:
             container_name = self.util.get_config("storage.azure.template_container")
-        blob_name = self.__generate_file_name(context.file_name)
+        blob_name = self.__generate_file_name(context.hackathon_name, context.file_name)
 
         if context.get('content'):
             file_content = context.content
@@ -87,8 +84,8 @@ class AzureStorage(Storage):
         :type context: Context
         :param context: the execution context of file loading
 
-        :rtype dict
-        :return the file content
+        :rtype: dict
+        :return: the file content
         """
         assert context.get("url")
         print context.url, context.path
@@ -112,8 +109,8 @@ class AzureStorage(Storage):
         :type context: Context
         :param context: must have {"url":""} key or {"container_name":"***","blob_name":"***"} keys
 
-        :rtype bool
-        :return True if successfully deleted else False
+        :rtype: bool
+        :return: True if successfully deleted, otherwise False
         """
         try:
             if context.get("url"):
@@ -133,17 +130,28 @@ class AzureStorage(Storage):
             return True
         except Exception as e:
             self.log.error(e)
-            return None
+            return False
 
     def report_health(self):
         """The status of Azure storage should be always True"""
-        return {
-            HEALTH.STATUS: HEALTH_STATUS.OK
-        }
+        try:
+            if self.create_container_in_storage('images', 'container'):
+                return {
+                    HEALTH.STATUS: HEALTH_STATUS.OK
+                }
+            else:
+                return {
+                    HEALTH.STATUS: HEALTH_STATUS.ERROR
+                }
+        except Exception as e:
+            self.log.error(e)
+            return {
+                HEALTH.STATUS: HEALTH_STATUS.ERROR
+            }
 
-    def __generate_file_name(self, file_name):
+    def __generate_file_name(self, hackathon_name, file_name):
         """refresh file_name = hack_name + uuid(10) + time + suffix
         """
         suffix = file_name.split('.')[-1]
-        real_name = g.hackathon.name + "/" + str(uuid1())[0:9] + strftime("%Y%m%d%H%M%S") + "." + suffix
+        real_name = hackathon_name + "/" + str(uuid1())[0:9] + strftime("%Y%m%d%H%M%S") + "." + suffix
         return real_name
