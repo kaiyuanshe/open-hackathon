@@ -289,7 +289,7 @@ class ExprManager(Component):
                                          template_id=template.id)
         self.db.commit()
 
-        curr_num = self.db.count(Experiment,
+        current_num = self.db.count(Experiment,
                                  Experiment.user_id == ReservedUser.DefaultUserID,
                                  Experiment.template == template,
                                  (Experiment.status == EStatus.STARTING) |
@@ -298,7 +298,7 @@ class ExprManager(Component):
             try:
                 template_dic = self.template_manager.load_template(template)
                 virtual_environments_list = template_dic[BaseTemplate.VIRTUAL_ENVIRONMENTS]
-                if curr_num != 0 and curr_num >= self.util.get_config("pre_allocate.docker"):
+                if current_num != 0 and current_num >= self.util.get_config("pre_allocate.docker"):
                     return
                 expr.status = EStatus.STARTING
                 self.db.commit()
@@ -313,7 +313,7 @@ class ExprManager(Component):
                 self.__roll_back(expr.id)
                 return internal_server_error('Failed starting containers')
         else:
-            if curr_num != 0 and curr_num >= self.util.get_config("pre_allocate.azure"):
+            if current_num != 0 and current_num >= self.util.get_config("pre_allocate.azure"):
                 return
             expr.status = EStatus.STARTING
             self.db.commit()
@@ -401,13 +401,13 @@ class ExprManager(Component):
         return ret
 
     def __check_template_status(self, hackathon_name, template_name):
-        hackathon = self.db.find_first_object_by(Hackathon, name=hackathon_name)
-        if hackathon is None:
-            return None
-        template = self.db.find_first_object_by(Template, hackathon_id=hackathon.id, name=template_name)
+        #hackathon = self.db.find_first_object_by(Hackathon, name=hackathon_name)
+        #if hackathon is None:
+        #    return None
+        template = self.db.find_first_object_by(Template, name=template_name)
         if template is None or self.template_manager.load_template(template) is None:
             return None
-        return [hackathon, template]
+        return template
 
     def __remote_start_container(self, hackathon, expr, virtual_environment_dic):
         docker_template_unit = DockerTemplateUnit(virtual_environment_dic)
