@@ -77,6 +77,8 @@ Config = {
         },
         "weibo": {
             "meta_content": WEIBO_META_CONTENT,
+            "user_info_url": 'https://api.weibo.com/2/users/show.json?access_token=',
+            "email_info_url": 'https://api.weibo.com/2/account/profile/email.json?access_token=',
             "access_token_url": 'https://api.weibo.com/oauth2/access_token?client_id=%s&client_secret=%s&grant_type=authorization_code&redirect_uri=%s/weibo&code=' % (
                 WEIBO_CLIENT_ID, WEIBO_CLIENT_SECRET, HOSTNAME)
         },
@@ -181,6 +183,16 @@ Config = {
                         "list": ["get"]
                     },
                     "registration": {
+                        "list": ["get"]
+                    }
+                },
+                "team": {
+                    "": ["get", "post"],
+                    "user": ["get"],
+                    "list": ["get"],
+                    "leader": ["put"],
+                    "member": {
+                        "": ["post", "put"],
                         "list": ["get"]
                     }
                 }

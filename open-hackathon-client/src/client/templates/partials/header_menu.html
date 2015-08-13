@@ -8,6 +8,12 @@
                 </a>
             </li>
         </ul>
+    {% else  %}
+         <ul class="nav navbar-nav">
+            <li>
+                <a href="{{ url_for('template_index') }}">模板</a>
+            </li>
+        </ul>
     {% endif %}
     <ul class="nav navbar-nav pull-right">
         <!-- start: User Dropdown -->
@@ -24,6 +30,8 @@
                 </a>
                 <ul class="dropdown-menu">
                     <li><a href="{{ url_for('user_profile') }}"><i class="fa fa-star"></i>个人信息</a></li>
+                    <li><a href="{{ url_for('myhackathon') }}"><i class="fa fa-envelope"></i> 我的活动</a></li>
+                    <li><a href="{{ url_for('team_list') }}"><i class="fa fa-envelope"></i> 我的团队</a></li>
                     <li><a href="{{ url_for('myhackathon') }}"><i class="fa fa-envelope"></i> 我的管理</a></li>
                     <li><a href="{{ url_for('logout') }}"><i class="fa fa-off"></i> 登出</a></li>
                 </ul>
@@ -49,7 +57,7 @@
                         <span class="dropdown-menu-title">团队名称：{{ teamname }}</span>
                     </li>
 
-                    <li><a href="{{ url_for('user_profile') }}"><i class="fa fa-star"></i>个人信息</a></li>
+                    <li></li>
 
                     <li>
                         <span class="dropdown-menu-title" style="height: 22px;"></span>

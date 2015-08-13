@@ -92,4 +92,3 @@ def adminmgr(hackathon_name):
 @login_required
 def experiment(hackathon_name):
     return render("/manage/experiment.html", hackathon_name=hackathon_name)
-

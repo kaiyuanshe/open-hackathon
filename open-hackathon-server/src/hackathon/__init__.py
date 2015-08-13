@@ -146,8 +146,9 @@ def init_components():
     # dependencies MUST be provided in advance
     factory.provide("util", Utility)
     factory.provide("log", log)
+    print '--------factory db---------'
     factory.provide("db", SQLAlchemyAdapter, db_session)
-
+    print '--------end factory db---------'
     # scheduler
     factory.provide("scheduler", scheduler)
 
