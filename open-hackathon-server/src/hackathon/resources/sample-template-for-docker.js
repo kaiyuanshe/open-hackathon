@@ -1,6 +1,7 @@
 {
-    "expr_name": "sample-template-for-docker",
+    "name": "sample-template-for-docker",
     "description": "ampcamp 2015",
+    "provider": "docker",
     "virtual_environments":
     [
         {

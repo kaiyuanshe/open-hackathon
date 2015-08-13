@@ -41,28 +41,9 @@ def user_profile():
 @app.route("/user/hackathon")
 @login_required
 def user_hackathon_list():
-    return render("/user/hackathon.html")
+    return render("/user/team.html")
 
 
-@app.route("/hackathon/<hackathon_name>")
-def hackathon_detail(hackathon_name):
-    return render("/user/hackathon.html")
 
 
-# choose a template to start hackathon
-@app.route("/hackathon/<hackathon_name>/select")
-@login_required
-def settings(hackathon_name):
-    return render("/register/edit.html")
 
-
-@app.route("/hackathon/<hackathon_name>/work")
-@login_required
-def hackathon_workspace(hackathon_name):
-    return render("/register/edit.html")
-
-
-@app.route("/register/<hackathon_name>")
-@login_required
-def register(hackathon_name):
-    return render("/register/profile.html")

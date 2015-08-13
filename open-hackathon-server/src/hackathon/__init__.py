@@ -67,22 +67,25 @@ class HackathonApi(Api):
     def handle_error(self, e):
         log.error(e)
         if isinstance(e, HTTPException):
+            message = e.description
+            if hasattr(e, "data") and "message" in e.data:
+                message = e.data["message"]
             if e.code == 400:
-                return self.make_response(bad_request(e.description), 200)
+                return self.make_response(bad_request(message), 200)
             if e.code == 401:
-                return self.make_response(unauthorized(e.description), 200)
+                return self.make_response(unauthorized(message), 200)
             if e.code == 403:
-                return self.make_response(forbidden(e.description), 200)
+                return self.make_response(forbidden(message), 200)
             if e.code == 404:
-                return self.make_response(not_found(e.description), 200)
+                return self.make_response(not_found(message), 200)
             if e.code == 409:
-                return self.make_response(conflict(e.description), 200)
+                return self.make_response(conflict(message), 200)
             if e.code == 412:
-                return self.make_response(precondition_failed(e.description), 200)
+                return self.make_response(precondition_failed(message), 200)
             if e.code == 415:
-                return self.make_response(unsupported_mediatype(e.description), 200)
+                return self.make_response(unsupported_mediatype(message), 200)
             if e.code == 500:
-                return self.make_response(internal_server_error(e.description), 200)
+                return self.make_response(internal_server_error(message), 200)
 
         # if exception cannot be handled, return error 500
         return self.make_response(internal_server_error(e.message), 200)
@@ -133,12 +136,11 @@ def init_components():
     from hackathon.azureformation.fileService import FileService
     from hackathon.azureformation.azureCertManagement import AzureCertManagement
     from hackathon.hack.host_server_mgr import DockerHostManager
-    from hackathon.hack import HackathonManager, AdminManager
+    from hackathon.hack import HackathonManager, AdminManager, TeamManager
     from hackathon.registration.register_mgr import RegisterManager
     from hackathon.template.template_mgr import TemplateManager
     from hackathon.remote.guacamole import GuacamoleInfo
     from hackathon.expr.expr_mgr import ExprManager
-    from hackathon.team.team_mgr import TeamManager
 
     # dependencies MUST be provided in advance
     factory.provide("util", Utility)
@@ -198,13 +200,13 @@ def __init_schedule_jobs():
     sche = RequiredFeature("scheduler")
     expr_manager = RequiredFeature("expr_manager")
 
-    # schedule job to recycle idle experiments
-    next_run_time = util.get_now() + timedelta(minutes=1)
+    # schedule job to check recycle operation
+    next_run_time = util.get_now() + timedelta(seconds=10)
     sche.add_interval(feature="expr_manager",
-                      method="recycle_expr",
-                      id="recycle_expr",
+                      method="scheduler_recycle_expr",
+                      id="scheduler_recycle_expr",
                       next_run_time=next_run_time,
-                      minutes=util.safe_get_config("recycle.check_idle_interval_minutes", 10))
+                      minutes=10)
 
     # schedule job to pre-allocate environment
     expr_manager.schedule_pre_allocate_expr_job()
@@ -219,7 +221,6 @@ def init_app():
     init_components()
 
     from views import init_routes
-
     init_routes()
     init_schedule_jobs()
 

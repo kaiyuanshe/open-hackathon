@@ -40,3 +40,4 @@ class AlaudaException(HackathonException):
 
     def __repr__(self):
         return "Failure in http request to Alauda: [%s]%s" % (self.code, self.message)
+

@@ -76,7 +76,7 @@
                         {% elif hackathon.basic_info.auto_approve or registration.status == 1 or registration.status == 3 %}
                             {% if experiment == None %}
                                 <a class="btn btn-primary btn-lg"
-                                   href="{{ url_for('tempSettings',hackathon_name=hackathon_name) }}">立即参加</a>
+                                   href="{{ url_for('temp_settings',hackathon_name=hackathon_name) }}">立即参加</a>
                             {% else %}
                                 <a class="btn btn-primary btn-lg"
                                    href="{{ url_for('workspace',hackathon_name=hackathon_name) }}">立即参加</a>
@@ -196,11 +196,6 @@
             <div class="date">${create_time}</div>
         </li>
     {% endraw %}
-
-
-
-
-
     </script>
     <script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
     <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>

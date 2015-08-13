@@ -47,8 +47,8 @@
             } else {
                 return getCmd[obj] = function(options, callback) {
                     var _params = {
-                        query: null,
-                        body: null,
+                        query: {},
+                        body: {},
                         header: {},
                     };
                     callback = callback || new Function();
@@ -58,9 +58,9 @@
                     }
                     options = $.extend(_params, options);
                     var url = name;
-                    var data = JSON.stringify(options.body);
-                    if (options.query) {
-                        url += '?' + ($.isPlainObject(options.query) ? $.param(options.query) : options.query);
+                    var data = $.isEmptyObject(options.body) ? '':JSON.stringify(options.body);
+                    if (!$.isEmptyObject(options.query)) {
+                        url += '?'+$.param(options.query);
                     }
                     options.header.token = $.cookie('token');
                     return $.ajax({

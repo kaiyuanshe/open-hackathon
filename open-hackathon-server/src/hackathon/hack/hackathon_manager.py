@@ -58,11 +58,6 @@ class HackathonManager(Component):
 
     admin_manager = RequiredFeature("admin_manager")
 
-    def __is_recycle_enabled(self, hackathon):
-        key = HACKATHON_BASIC_INFO.RECYCLE_ENABLED
-        value = self.__get_property_from_hackathon_basic_info(hackathon, key)
-        return value == 1
-
     def get_hackathon_by_name_or_id(self, hack_id=None, name=None):
         if hack_id is None:
             return self.get_hackathon_by_name(name)
@@ -189,6 +184,16 @@ class HackathonManager(Component):
         value = self.__get_property_from_hackathon_basic_info(hackathon, key)
         return value if value is not None else False
 
+    def is_recycle_enabled(self,hackathon):
+        key = HACKATHON_BASIC_INFO.RECYCLE_ENABLED
+        value = self.__get_property_from_hackathon_basic_info(hackathon, key)
+        return value if value is not None else False
+
+    def get_recycle_minutes(self, hackathon):
+        key = HACKATHON_BASIC_INFO.RECYCLE_MINUTES
+        value = self.__get_property_from_hackathon_basic_info(hackathon, key)
+        return value if value is not None else 60
+
     def get_pre_allocate_number(self, hackathon):
         key = HACKATHON_BASIC_INFO.PRE_ALLOCATE_NUMBER
         value = self.__get_property_from_hackathon_basic_info(hackathon, key)
@@ -215,6 +220,7 @@ class HackathonManager(Component):
             HACKATHON_BASIC_INFO.WALL_TIME: time.strftime("%Y-%m-%d %H:%M:%S"),
             HACKATHON_BASIC_INFO.AUTO_APPROVE: False,
             HACKATHON_BASIC_INFO.RECYCLE_ENABLED: False,
+            HACKATHON_BASIC_INFO.RECYCLE_MINUTES: 0,
             HACKATHON_BASIC_INFO.PRE_ALLOCATE_ENABLED: False,
             HACKATHON_BASIC_INFO.PRE_ALLOCATE_NUMBER: 1,
             HACKATHON_BASIC_INFO.ALAUDA_ENABLED: False
@@ -393,14 +399,21 @@ class HackathonManager(Component):
 
     def get_recyclable_hackathon_list(self):
         all = self.db.find_all_objects(Hackathon)
-        recyclable = filter(lambda h: self.__is_recycle_enabled(h), all)
-        return [h.id for h in recyclable]
+        return filter(lambda h: self.is_recycle_enabled(h), all)
 
     def get_pre_allocate_enabled_hackathon_list(self):
         # only online hackathons will be in consideration
         all = self.get_online_hackathons()
         pre_list = filter(lambda h: self.is_pre_allocate_enabled(h), all)
         return [h.id for h in pre_list]
+
+        # ---------------------------- private methods ---------------------------------------------------
+
+
+'''
+Attach extension methods to Hackathon entity so that we can code like 'if hackathon.is_auto_approve(): ....' where
+hackathon is entity of Hackathon that defines in database/models.py.
+'''
 
 
 def is_auto_approve(hackathon):

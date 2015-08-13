@@ -13,9 +13,9 @@
                     <div class="page-header">
                         <h1>请选择你所需要的环境</h1>
                     </div>
-                    {% if templates.error %} }}
+                    {% if templates.error %}
                         <div class="row form-group text-center">
-                            <p>{{ temp.error.friendly_message }}</p>
+                            <p>{{ templates.error.friendly_message }}</p>
                         </div>
                     {% else %}
                         <div class="row" id="templates">
@@ -31,7 +31,7 @@
                                         </div>
                                         <div class="media-right media-middle">
                                             <button type="button" class="btn btn-primary"
-                                                    date-value="{{ temp.name }}">使用
+                                                    data-value="{{ temp.name }}">使用
                                             </button>
                                         </div>
                                     </div>

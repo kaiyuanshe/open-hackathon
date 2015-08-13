@@ -28,7 +28,7 @@ __all__ = ["factory", "RequiredFeature"]
 #
 # Hackathon factory
 # call 'factory.provide' to fill object into factory
-# instantiate 'RequiredFeature' to get certain ojbect from factory
+# instantiate 'RequiredFeature' to get certain object from factory
 #
 class HackathonFactory:
     def __init__(self, allow_replace=False):

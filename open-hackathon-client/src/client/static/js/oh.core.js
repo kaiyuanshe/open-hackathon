@@ -147,25 +147,25 @@
             $(this).trigger('oh.change');
         });
 
-        var confirm_modal = $('#confirm_modal').on('show.bs.modal', function (e) {
-            confirm_modal
-                .data({
-                    item: $(e.relatedTarget).parents('tr').data('tmplItem').data,
-                    target: $(e.relatedTarget).parents('tbody')
-                });
-        }).on('click', '[data-type="delete"]', function (e) {
-            executeFunctionByName(confirm_modal.data('api'), w, {
-                query: {
-                    id: confirm_modal.data('item').id
-                },
-                header: {
-                    hackathon_id: confirm_modal.data('item').hackathon_id
-                }
-            }, function (data) {
-                bindData(confirm_modal.data('target'));
-                confirm_modal.modal('hide');
-            });
-        });
+        //var confirm_modal = $('#confirm_modal').on('show.bs.modal', function (e) {
+        //    confirm_modal
+        //        .data({
+        //            item: $(e.relatedTarget).parents('tr').data('tmplItem').data,
+        //            target: $(e.relatedTarget).parents('tbody')
+        //        });
+        //}).on('click', '[data-type="delete"]', function (e) {
+        //    executeFunctionByName(confirm_modal.data('api'), w, {
+        //        query: {
+        //            id: confirm_modal.data('item').id
+        //        },
+        //        header: {
+        //            hackathon_id: confirm_modal.data('item').hackathon_id
+        //        }
+        //    }, function (data) {
+        //        bindData(confirm_modal.data('target'));
+        //        confirm_modal.modal('hide');
+        //    });
+        //});
 
         $('[data-toggle="bindtemp"]').each(function (i, o) {
             bindData($(o));

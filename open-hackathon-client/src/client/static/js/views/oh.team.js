@@ -25,22 +25,20 @@
 (function ($, oh) {
     'use strict';
 
-    var hackathon_name = oh.comm.getCurrentHackathon();
+    function pageLoad(){
+        oh.api.team.user.get().then(function(data){
+            console.log(data);
+        })
+    }
 
-    function init() {
-        $('#templates').on('click', 'button[data-value]', function (e) {
-            var template_name = $(this).data('value');
-            oh.api.user.experiment.post({
-                body: {template_name: template_name, hackathon: hackathon_name}
-            }, function (data) {
-                if(data.error){
-                    // todo Set experiment error
-                }else{
-                     window.location.href = '/site/' + hackathon_name + '/workspace';
-                }
-            });
-        });
-    };
+    function bindEvent(){
+
+    }
+
+    function init(){
+        bindEvent();
+        pageLoad();
+    }
 
     $(function () {
         init();

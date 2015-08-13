@@ -11,7 +11,7 @@
 * [User's Guide](#user's-guide)
   * [Implementation and Architecture](#implementation-and-architecture-for-user)
   * [attend hackathons](#how-to-attend-a-hackathon)
-  * [Contribute your Template](#upload-template)
+  * [Contribute your Template](#contribute-your-template)
   * [FAQ](#FAQ)
 * [Admin's Guid](#admin's-guide)
   * [Implementation and Architecture](#implementation-and-architecture-for-admin)
@@ -59,8 +59,89 @@
 ### keys 
 ## How to attend a hackathon
 报名，组队，参赛，提交评审等介绍，以及主干流程的截图
-## Upload Template
-Templat 上传过程及用户对自己上传的Template的管理操作
+## Contribute your Template
+### Create Template 
+进入创建模板页面
+填写模板表单数据。
+
+>带星号的都为必填项。
+>每个模板可以添加多个image(单元)，而每个image可以添加多个端口号。
+
+### Upload Template
+进入上传模板页面。
+提供默认模板文件下载。
+上传模板文件。
+
+默认template文件格式，可以在原有的基础上进行修改。
+``` json
+{
+    "name": "test-template-1",
+    "display_name":"test template 1"
+    "description" : "a template consists of a list of virtual environments, and a virtual environment is a virtual machine with its storage account, container, cloud service and deployment",
+    "virtual_environments": [
+        {
+            "provider": "docker", 
+            "name": "vnc",
+            "image": "42.159.103.213:5000/mono",
+            "ports":[{
+                "name": "website",
+                "port": 80,
+                "public": true
+            },{
+                "name": "Dev",
+                "port": 5901,
+                "public": true
+            }],
+            "AttachStdin":false,
+            "AttachStdout":true,
+            "AttachStderr":true,
+            "tty": true,
+            "stdin_open": true,
+            "remote": {
+                "provider": "guacamole",
+                "protocol": "vnc",
+                "username": "root",
+                "password": "acoman",
+                "port": 5901
+            }
+        }
+    ]
+}
+```
+**Description**
+
+* `"name"` required , string : There are not special characters
+* `"display_name"` string :
+* `"description"` string :
+* `"virtual_environments"` array: There must be a virtual_environment
+  *  `"provider"` "docker"  | "azure":
+  *  `"name"` string :
+  *  `"image"` url :
+  *  `"ports"` array: There must be a port
+    *  `"name"`: string:
+        *  `"port"`: 0 ~ 65535:
+        *  `"public"`: bool:
+  *  `"AttachStdin"` bool :    
+  *  `"AttachStdout"` bool :
+    *  `"AttachStderr"` bool :
+    *  `"tty"` bool :
+    *  `"stdin_open"` bool :
+    *  `"remote"`: object
+      *  `"provider"` string,
+        *  `"protocol"` string,
+        *  `"username"` string,
+        *  `"password"` string,
+        *  `"port"` 0~65535
+        
+>上传template文件出错，会有相应的提示信息，重新修改模板内容再次上传。
+
+### Manage Template
+**下载** 下载template文件。
+**测试** 测试template是否能启动环境 。
+**更新** 更新template基础信息。
+
+>当添加或者修改模板数据，模板的`'status'`会被设定义为*'untested'*。
+
 
 
 # Admin's Guide

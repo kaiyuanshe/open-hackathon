@@ -150,15 +150,16 @@ class Utility(object):
         """Return the current local date and time without tzinfo"""
         return get_now()
 
-    def convert(self, input):
-        if isinstance(input, dict):
-            return {self.convert(key): self.convert(value) for key, value in input.iteritems()}
-        elif isinstance(input, list):
-            return [self.convert(element) for element in input]
-        elif isinstance(input, unicode):
-            return input.encode('utf-8')
+    def convert(self, value):
+        """Convert unicode string to str"""
+        if isinstance(value, dict):
+            return {self.convert(key): self.convert(value) for key, value in value.iteritems()}
+        elif isinstance(value, list):
+            return [self.convert(element) for element in value]
+        elif isinstance(value, unicode):
+            return value.encode('utf-8')
         else:
-            return input
+            return value
 
     def get_config(self, key):
         """Get configured value from configuration file according to specified key
@@ -182,4 +183,3 @@ class Utility(object):
         if path and not (os.path.exists(path)):
             os.makedirs(path)
         return path
-

@@ -52,7 +52,6 @@ class UserManager(object):
                                expire_date=token_expire_date,
                                issue_date=token_issue_date)
         self.db.add_object(user_token)
-        self.db.commit()
         return user_token
 
     def __validate_token(self, token):

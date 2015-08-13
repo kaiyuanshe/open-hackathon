@@ -1,0 +1,81 @@
+.oh-tempitem {
+    border: 1px solid #dfdfdf;
+    background-color: #f3f3f3;
+    padding: 15px 18px;
+    line-height: 22px;
+    margin-bottom: 30px;
+    cursor: pointer;
+}
+
+.oh-tempitem.active {
+    border: 1px solid #3276B1;
+    position: relative;
+    z-index: 1;
+}
+
+.oh-tempitem.active:before {
+    position: absolute;
+    z-index: 2;
+    font-family: 'FontAwesome';
+    font-style: normal;
+    font-weight: normal;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    content: '\f046';
+    color: #3276B1;
+    top: 10px;
+    right: 10px;
+}
+
+.oh-tempitem.active .oh-temp-head {
+    border-bottom: 1px solid #3276B1;
+}
+
+.oh-tempitem .oh-temp-head {
+    margin: 0;
+    height: 30px;
+    line-height: 30px;
+    margin-bottom: 10px;
+    font-weight: 400;
+    font-size: 15px;
+    border-bottom: 1px solid #dfdfdf;
+    color: #333;
+}
+
+.oh-tempitem .oh-temp-body {
+    height: 100px;
+    overflow: hidden;
+}
+
+.oh-tempitem p {
+    margin: 0;
+    word-wrap: break-word;
+    word-break: normal;
+}
+
+.color-grey {
+    color: #6d6d6d;
+}
+
+.default {
+
+}
+
+.success {
+    background-color: #EEFFEE;
+    border: 1px solid #ACCEC7;
+}
+
+.success .oh-temp-head {
+    border-bottom: 1px solid #ACCEC7;
+}
+
+.failure {
+    background-color: #FFFAFA;
+    border: 1px solid #BD9B9B;
+}
+
+.failure .oh-temp-head {
+    border-bottom: 1px solid #BD9B9B;
+}

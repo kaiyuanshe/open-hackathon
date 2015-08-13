@@ -26,6 +26,7 @@
 
 import json, os, requests, urllib2
 from datetime import datetime
+from urlparse import parse_qs
 from pytz import utc
 
 try:
@@ -112,9 +113,13 @@ def delete_remote(url, headers=None):
     request = urllib2.Request(url, headers=default_headers)
     request.get_method = lambda: 'DELETE'
     opener.open(request)
-    
+
     return "OK"
 
 
 def get_now():
     return datetime.utcnow()  # tzinfo=None
+
+
+def qs_dict(query):
+    return dict([(k, v[0]) for k, v in parse_qs(query).items()])

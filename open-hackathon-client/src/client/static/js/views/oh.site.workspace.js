@@ -40,13 +40,14 @@
     }
 
     function teamMember() {
-        oh.api.user.team.member.get({header: {hackathon_name: hackathon_name}}, function (data) {
+        oh.api.team.member.list.get({header: {hackathon_name: hackathon_name}}, function (data) {
             // todo 'Response team member'
             if (data.error) {
 
             } else {
 
             }
+            console.log(data);
         });
     }
 
@@ -56,7 +57,7 @@
         }, function (data) {
             $('#online').text(data.online);
             $('#total').text(data.total);
-            setTimeout(hacakthonStat(), 60000)
+            //setTimeout(hacakthonStat(), 600000)
         });
     }
 

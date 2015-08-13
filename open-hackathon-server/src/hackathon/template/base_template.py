@@ -26,13 +26,10 @@ THE SOFTWARE.
 import sys
 
 sys.path.append("..")
-from os.path import (
-    realpath,
-    dirname,
-    abspath,
-)
+from os.path import realpath, dirname, abspath
 import json
 import os
+
 from hackathon import Component
 
 
