@@ -174,9 +174,6 @@ Config = {
                         "member": ["get"]
                     }
                 },
-                "bulletin": {
-                    "": ["get", "post"]
-                },
                 "hackathon": {
                     "": ["get"],
                     "list": ["get"],

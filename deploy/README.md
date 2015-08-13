@@ -7,9 +7,27 @@
 * [Introduction](#introduction)
   * [What is OpenHackathon](#what-is-openhackathon)
   * [Why OpenHackathon](#why-openhackathon)
-* [Keywords and interpretation](#keywords-and-interpretation)
 * [User's Guide](#user's-guide)
-  * [Implementation and Architecture](#implementation-and-architecture-for-user)
+  * [Quick Guide](#implementation-and-architecture-for-user)
+    
+    Open Hackathon doesn’t have user management service, user and administrator need use social login to log into Open Hackathon.
+
+    For User:
+      *  Register: On Open Hackathon main page, user will see all available hackathons. Choose any one will direct user to social login, then user will ask to fulfill some basic information.
+      *  Enroll: Choose a hackathon and click enroll. After hackathon administrators approve your request, you will able to attend the hackathon
+      *  Team: User can create or attend a team to co-operate with others. Team will share same Git project and same environment.
+      *  Submit: User can submit  project for judgers to review.
+      
+    For Administrator:
+    
+      *  Management: Admins can create and manage hackathon. Including basic info, register time, competition time, review time and more settings.
+      
+    For All:
+    
+      *  Template: Template is a pre-configured environment that anyone can contribute, and used to specific hackathon on our Template library.
+
+    
+
   * [attend hackathons](#how-to-attend-a-hackathon)
   * [Contribute your Template](#contribute-your-template)
   * [FAQ](#FAQ)
@@ -26,6 +44,42 @@
   * [FAQ](#FAQ)
 * [Developer's Guide](#developer's-guide)
   * [Implementation and Architecture](#implementation-and-architecture-for-developer)
+    
+     Open Hackathon is a clientless, plugin free platform. The following pic shows structure.
+
+     ![Imgur]
+
+     Open Hackathon doesn't have user register service, all users need social login before access any functions. You need config this before you can use social login. Open-hackathon software will manage Azure resource that you provide to create hackathon environment for users. Guacamole is used to display VM in user's web browser, and MySQL server records all necessary data.
+
+     * HTML5 Browser
+
+      Open Hackathon is a clientless web access software, you don’t have to install any
+      client software or plugin for browser. Instead,  any browser which can support HTM5 can be used
+      to access Open Hackathon. 
+
+     * Open-Hackathon
+
+      Open-Hackathon is main part of Open Hackathon Project. It’s only can be
+      install on Linux, provide user interface and admin’s management portal.
+
+     * MySQL
+
+      MySQL is usedas our Database. It was the world's second most  widely used RDBMS, and the most widely used open-source RDBMS.
+
+     * Guacamole
+
+      Guacamole is a clientless remote desktop gateway. It supports standard protocols like VNC
+and RDP.  It’s used to connect virtual machine and present it to user via HTML5 based browser.
+
+     * Azure
+
+      Microsoft Azure is used as our base infrastructure. All environment and virtual machines
+are built on it.
+
+     * Docker
+     
+      Docker containers wrap up a piece of software in a complete file system that contains everything it needs to run: code, runtime, system tools, system libraries – anything you can install on a server. This guarantees that it will always run the same, regardless of the environment it is running in.
+     
   * [Try OpenHackathon quickly](#try-openhackathon-quickly)
   * [Setup develop environment](#setup-develop-environment)
     * [Setup Docker Env](#setup-docker-env)

@@ -46,6 +46,11 @@ def token_required(func):
             return unauthorized("login required")
         return func(*args, **kwargs)
 
+    # keep the original func name for API intput/output validation where original name is required
+    authenticate_and_call.original = func.__name__
+    if hasattr(func, "original"):
+        authenticate_and_call.original = func.original
+
     return authenticate_and_call
 
 
@@ -56,6 +61,11 @@ def hackathon_name_required(func):
         if not hack_manager.validate_hackathon_name():
             return bad_request("hackathon name invalid")
         return func(*args, **kwargs)
+
+    # keep the original func name for API intput/output validation where original name is required
+    authenticate_and_call.original = func.__name__
+    if hasattr(func, "original"):
+        authenticate_and_call.original = func.original
 
     return authenticate_and_call
 
@@ -73,5 +83,10 @@ def admin_privilege_required(func):
         if not admin_manager.validate_admin_privilege_http():
             return forbidden("access denied")
         return func(*args, **kwargs)
+
+    # keep the original func name for API intput/output validation where original name is required
+    authenticate_and_call.original = func.__name__
+    if hasattr(func, "original"):
+        authenticate_and_call.original = func.original
 
     return authenticate_and_call

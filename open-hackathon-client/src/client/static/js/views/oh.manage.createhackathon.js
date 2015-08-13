@@ -120,7 +120,7 @@
                           .updateStatus('name', 'INVALID','remote1')
                           .validateField('name');
                     }else{
-                        hackathonID = data;
+                        hackathonID = data.id;
                         wizard(2);
                     }
                 });

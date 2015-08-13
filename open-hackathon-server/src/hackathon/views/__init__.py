@@ -22,10 +22,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
+import sys
+
+sys.path.append("..")
 
 from user_routes import register_user_routes
 from admin_routes import register_admin_routes
 from routes import register_routes
+from hackathon import api
+
+from resources import *
 
 __all__ = ["init_routes"]
 
@@ -35,3 +41,12 @@ def init_routes():
     register_routes()
     register_user_routes()
     register_admin_routes()
+
+    # health page API
+    api.add_resource(HealthResource, "/", "/health")
+    # system time API
+    api.add_resource(CurrentTimeResource, "/api/currenttime")
+    # API for admin to query, create or update hackathon
+    api.add_resource(AdminHackathonResource, "/api/admin/hackathon")
+    # check whether hackathon with specific name exists
+    api.add_resource(HackathonCheckNameResource, "/api/admin/hackathon/checkname")

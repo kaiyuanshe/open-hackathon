@@ -32,7 +32,6 @@ from flask import g, request
 from flask_restful import Resource, reqparse
 from hackathon.decorators import hackathon_name_required, token_required
 from hackathon.health import report_health
-from hackathon.database.models import Announcement
 import time
 from hackathon.hackathon_response import not_found
 
@@ -41,30 +40,6 @@ user_manager = RequiredFeature("user_manager")
 register_manager = RequiredFeature("register_manager")
 template_manager = RequiredFeature("template_manager")
 team_manager = RequiredFeature("team_manager")
-
-
-class HealthResource(Resource):
-    def get(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument('q', type=str, location='args')
-        args = parser.parse_args()
-        return report_health(args['q'])
-
-
-class BulletinResource(Resource, Component):
-    def get(self):
-        announcement = self.db.find_first_object_by(Announcement, enabled=1)
-        if announcement is not None:
-            return announcement.dic()
-        else:
-            return Announcement(enabled=1, content="Welcome to Open Hackathon Platform!").dic()
-
-
-class CurrentTimeResource(Resource):
-    def get(self):
-        return {
-            "currenttime": long(time.time() * 1000)
-        }
 
 
 class HackathonResource(Resource, Component):
@@ -154,8 +129,8 @@ class TemplateCreateByFileResource(Resource):
 class TemplateListResource(Resource):
     def get(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('status', type=int, location='args',required=False)
-        parse.add_argument('name', type=str, location='args',required=False)
+        parse.add_argument('status', type=int, location='args', required=False)
+        parse.add_argument('name', type=str, location='args', required=False)
         parse.add_argument('description', type=str, location='args', required=False)
         args = parse.parse_args()
         templates = template_manager.get_template_list(status=args['status'],
@@ -175,15 +150,6 @@ def register_routes():
     """
     register API routes that user or admin is not required
     """
-
-    # health page API
-    api.add_resource(HealthResource, "/", "/health")
-
-    # announcement API
-    api.add_resource(BulletinResource, "/api/bulletin")
-
-    # system time API
-    api.add_resource(CurrentTimeResource, "/api/currenttime")
 
     # hackathon API
     api.add_resource(HackathonResource, "/api/hackathon")

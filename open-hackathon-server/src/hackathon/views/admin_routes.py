@@ -44,28 +44,7 @@ admin_manager = RequiredFeature("admin_manager")
 expr_manager = RequiredFeature("expr_manager")
 
 
-class AdminHackathonResource(Resource):
-    """Resource for admin to create/update hackathon
 
-    url path: /api/admin/hackathon
-    """
-
-    @hackathon_name_required
-    def get(self):
-        return g.hackathon.dic()
-
-    @token_required
-    def post(self):
-        args = request.get_json()
-        return hackathon_manager.create_new_hackathon(args)
-
-    @admin_privilege_required
-    def put(self):
-        args = request.get_json()
-        return hackathon_manager.update_hackathon(args)
-
-    def delete(self):
-        pass
 
 
 class AdminHackathonListResource(Resource):
@@ -74,12 +53,7 @@ class AdminHackathonListResource(Resource):
         return hackathon_manager.get_permitted_hackathon_list_by_admin_user_id(g.user.id)
 
 
-class HackathonCheckNameResource(Resource):
-    def get(self):
-        parse = reqparse.RequestParser()
-        parse.add_argument('name', type=str, location='args', required=True)
-        args = parse.parse_args()
-        return hackathon_manager.get_hackathon_by_name(args['name']) is None
+
 
 
 class AdminRegisterListResource(Resource):
@@ -126,9 +100,9 @@ class AdminHackathonTemplateResource(Resource):
     @admin_privilege_required
     def post(self):
         args = request.get_json()
-        if "template_name" not in args:
-            return bad_request("template name invalid")
-        return template_manager.add_template_to_hackathon(args['template_name'])
+        if "template_id" not in args:
+            return bad_request("template id invalid")
+        return template_manager.add_template_to_hackathon(args['template_id'])
 
     # delete a h-t-r for hacakthon
     @admin_privilege_required
@@ -246,9 +220,8 @@ def register_admin_routes():
     """
 
     # hackathon api
-    api.add_resource(AdminHackathonResource, "/api/admin/hackathon")
+
     api.add_resource(AdminHackathonListResource, "/api/admin/hackathon/list")
-    api.add_resource(HackathonCheckNameResource, "/api/admin/hackathon/checkname")
 
     # registration APIs
     api.add_resource(AdminRegisterListResource, "/api/admin/registration/list")
