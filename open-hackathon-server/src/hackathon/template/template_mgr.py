@@ -280,7 +280,7 @@ class TemplateManager(Component):
                                             template_id=template_id,
                                             hackathon_id=g.hackathon.id,
                                             team_id=team_id)
-        self.db.delete_object(htr)
+        #self.db.delete_object(htr)
         return ok()
 
     # ---------------------------------------- helper functions ---------------------------------------- #
