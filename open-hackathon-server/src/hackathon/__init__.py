@@ -142,7 +142,6 @@ def init_components():
     from hackathon.template.template_mgr import TemplateManager
     from hackathon.remote.guacamole import GuacamoleInfo
     from hackathon.expr.expr_mgr import ExprManager
-    from hackathon.team.team_mgr import TeamManager
     from hackathon.cache.cache_mgr import CacheManagerExt
 
     # dependencies MUST be provided in advance
@@ -190,7 +189,7 @@ def init_hackathon_storage():
     """
     from hackathon.storage import AzureStorage, LocalStorage
 
-    storage_type = safe_get_config("storage.type", "local")
+    storage_type = safe_get_config("storage.type", "azure")
     if storage_type == "azure":
         factory.provide("storage", AzureStorage)
     else:
