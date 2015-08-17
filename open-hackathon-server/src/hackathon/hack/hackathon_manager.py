@@ -135,7 +135,7 @@ class HackathonManager(Component):
 
         return [h.dic() for h in user_hack_list]
 
-    def get_permitted_hackathon_list_by_admin_user_id(self, user_id):
+    def get_entitled_hackathon_list(self, user_id):
         hackathon_ids = self.admin_manager.get_entitled_hackathon_ids(user_id)
         if -1 in hackathon_ids:
             hackathon_list = self.db.find_all_objects(Hackathon)
@@ -381,12 +381,12 @@ class HackathonManager(Component):
             description=context.get("description"),
             status=HACK_STATUS.INIT,
             creator_id=g.user.id,
-            event_start_time=context.event_start_time,
-            event_end_time=context.event_end_time,
-            registration_start_time=context.registration_start_time,
-            registration_end_time=context.registration_end_time,
-            judge_start_time=context.judge_start_time,
-            judge_end_time=context.judge_end_time,
+            event_start_time=context.get("event_start_time"),
+            event_end_time=context.get("event_end_time"),
+            registration_start_time=context.get("registration_start_time"),
+            registration_end_time=context.get("registration_end_time"),
+            judge_start_time=context.get("judge_start_time"),
+            judge_end_time=context.get("judge_end_time"),
             basic_info=self.__get_default_basic_info(),
             extra_info=context.get("extra_info"),
             type=context.get("type", HACK_TYPE.HACKATHON)

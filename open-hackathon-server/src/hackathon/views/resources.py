@@ -79,3 +79,9 @@ class HackathonCheckNameResource(HackathonResource):
     def get(self):
         context = self.context()
         return hackathon_manager.is_hackathon_name_existed(context.name)
+
+
+class AdminHackathonListResource(HackathonResource):
+    @token_required
+    def get(self):
+        return hackathon_manager.get_entitled_hackathon_list(g.user.id)

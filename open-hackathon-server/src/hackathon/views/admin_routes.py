@@ -47,10 +47,7 @@ expr_manager = RequiredFeature("expr_manager")
 
 
 
-class AdminHackathonListResource(Resource):
-    @token_required
-    def get(self):
-        return hackathon_manager.get_permitted_hackathon_list_by_admin_user_id(g.user.id)
+
 
 
 
@@ -221,7 +218,7 @@ def register_admin_routes():
 
     # hackathon api
 
-    api.add_resource(AdminHackathonListResource, "/api/admin/hackathon/list")
+
 
     # registration APIs
     api.add_resource(AdminRegisterListResource, "/api/admin/registration/list")
