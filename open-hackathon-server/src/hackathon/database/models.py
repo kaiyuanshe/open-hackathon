@@ -315,6 +315,7 @@ class DockerHostServer(DBBase):
     private_docker_api_port = Column(Integer)
     container_count = Column(Integer, nullable=False)
     container_max_count = Column(Integer, nullable=False)
+    is_auto = Column(Integer, default=0) # 0-started manually 1-started by OHP server
     create_time = Column(TZDateTime, default=get_now())
     update_time = Column(TZDateTime)
 
