@@ -133,11 +133,12 @@ class AzureStorage(Storage):
             return False
 
     def report_health(self):
-        """The status of Azure storage should be always True"""
+        """Report the status of Azure storage"""
         try:
-            if self.create_container_in_storage('images', 'container'):
+            if self.file_service.create_container_in_storage('images', 'container'):
                 return {
-                    HEALTH.STATUS: HEALTH_STATUS.OK
+                    HEALTH.STATUS: HEALTH_STATUS.OK,
+                    HEALTH.DESCRIPTION: "You can use Azure resources now."
                 }
             else:
                 return {
