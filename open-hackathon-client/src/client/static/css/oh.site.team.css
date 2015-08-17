@@ -1,0 +1,24 @@
+.nav-tabs li a {
+    margin: 0 5px 0 0;
+}
+
+fieldset {
+    display: block;
+    padding: 25px 14px 5px;
+}
+
+.team {
+    background: white;
+    padding: 10px;
+    position: relative;
+}
+
+.join {
+    background: #e9ebec;
+    border-top: 1px solid #dbdee0;
+    margin: 12px -10px -10px -10px;
+    padding: 5px 10px;
+    display: block;
+    font-size: 12px;
+    text-align: left;
+}

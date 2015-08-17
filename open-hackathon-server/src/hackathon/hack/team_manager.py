@@ -31,7 +31,7 @@ sys.path.append("..")
 from flask import g
 
 from hackathon import Component, RequiredFeature
-from hackathon.database import Team, UserTeamRel, User
+from hackathon.database import Team, UserTeamRel, User, Hackathon
 from hackathon.hackathon_response import not_found, bad_request, precondition_failed, ok, forbidden
 from hackathon.constants import TeamMemberStatus
 
@@ -43,6 +43,12 @@ class TeamManager(Component):
     user_manager = RequiredFeature("user_manager")
     admin_manager = RequiredFeature("admin_manager")
     template_manager = RequiredFeature("template_manager")
+
+    def get_user_by_teams(self, user_id):
+        teams = self.__get_user_teams(user_id)
+        team_list = map(lambda x: x._asdict(), teams)
+
+        return team_list
 
     def get_team_by_name(self, hackathon_id, team_name):
         """ get user's team basic information stored on table 'team' based on team name
@@ -71,15 +77,18 @@ class TeamManager(Component):
         :type user_id: int
         :param user_id: id of user
 
-        :rtype: list
-        :return: team members list if team exists otherwise emtly list
+        :rtype: dict
+        :return: team's information and team's members list if team is found otherwise not_found()
         """
+        detail = {}
 
         team = self.__get_team_by_user(user_id, hackathon_id)
         if team:
-            return self.__get_team_members(team)
+            detail["team"] = self.__get_team_by_id(team.id).dic()
+            detail["members"] = self.__get_team_members(team)
+            return detail
         else:
-            return []
+            return not_found("no such team's members")
 
     def get_team_members_by_name(self, hackathon_id, team_name):
         """Get team member list of specific team_name
@@ -90,15 +99,20 @@ class TeamManager(Component):
         :type team_name: str|unicode
         :param team_name: name of team
 
-        :rtype: list
-        :return: team members list if team exists otherwise emtly list
+        :rtype: dict
+        :return: team's information and team's members list if team is found otherwise not_found()
         """
+
+        detail = {}
 
         team = self.__get_team_by_name(hackathon_id, team_name)
         if team:
-            return self.__get_team_members(team)
+            detail["team"] = self.__get_team_by_id(team.id).dic()
+            detail["members"] = self.__get_team_members(team)
+            return detail
         else:
-            return []
+            return not_found("no such team's members")
+
 
     def get_hackathon_team_list(self, hackathon_id, name=None, number=None):
         """Get the team list of selected hackathon
@@ -411,6 +425,24 @@ class TeamManager(Component):
     def __init__(self):
         pass
 
+    def __get_user_teams(self, user_id):
+        """Get user teams list and related hackathon display info
+
+        :type user_id: int
+        :param user_id: User id to get teams. Cannot be None
+
+        :rtype: list
+        :return list of all teams as well as hackathon info
+        """
+
+        q = self.db.session().query(UserTeamRel). \
+            join(Hackathon, Hackathon.id == UserTeamRel.hackathon_id). \
+            join(Team, Team.id == UserTeamRel.team_id). \
+            filter(UserTeamRel.user_id == user_id)
+
+        return q.all()
+
+
     def __get_team_members(self, team):
         """Get team members list and related user display info
 
@@ -486,3 +518,12 @@ class TeamManager(Component):
                     raise Forbidden(description="You don't have permission on team '%s'" % team)
 
         return
+
+    def get_team_by_hackathon(self, hackathon_id):
+        return self.db.find_first_object_by(Team, hackathon_id=hackathon_id)
+
+    def get_team_by_user_and_hackathon(self, user, hackathon):
+        utrs = self.db.find_all_objects_by(UserTeamRel, user_id=user.id)
+        team_ids = map(lambda x: x.team_id, utrs)
+        team = self.db.find_first_object(Team, Team.id.in_(team_ids), Team.hackathon_id == hackathon.id)
+        return team

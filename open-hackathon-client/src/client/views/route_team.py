@@ -32,18 +32,13 @@ from . import render
 from flask_login import login_required
 
 
-@app.route("/user/profile")
+@app.route("/team")
 @login_required
-def user_profile():
-    return render("/user/profile.html")
+def team_list():
+    return render("/team/index.html")
 
 
-@app.route("/user/hackathon")
+@app.route("/team/<hackathon_name>")
 @login_required
-def user_hackathon_list():
-    return render("/user/team.html")
-
-
-
-
-
+def user_team_hackathon(hackathon_name):
+    return render("/team/team.html", hackathon_name=hackathon_name)

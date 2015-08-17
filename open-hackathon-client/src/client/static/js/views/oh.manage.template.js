@@ -22,284 +22,159 @@
  * THE SOFTWARE.
  */
 
-(function($, oh) {
-
-    // true: PUT to update; false: POST to create
-    var is_update = false;
+(function ($, oh) {
     var currentHackathon = oh.comm.getCurrentHackathon();
+    var hackathon_templates = [];
 
-    // Get created template list
-    function bindTemplateList(){
+    function getStatus(status) {
+        var str = '';
+        switch (status) {
+            case 0:
+                str = '未诊断';
+                break;
+            case 1:
+                str = '诊断通过';
+                break;
+            case 2:
+                str = '诊断失败';
+                break;
+        }
+        return str;
+    }
 
-        var list = $('#templatelist');
-        oh.api.admin.hackathon.template.list.get({
-            header:{hackathon_name:currentHackathon}
-        }, function(data){
-            var index = 0;
-            list.empty().append($('#template_item').tmpl(data,{
-                hackathon_name:currentHackathon,
-                getIndex:function(){ return ++index;}
+    function getHackathonTemplates() {
+        return oh.api.admin.hackathon.template.list.get({
+            header: {hackathon_name: currentHackathon}
+        }, function (data) {
+            if (data.error) {
+                // todo Get Hackathon tempalte list error
+            } else {
+                hackathon_templates = data;
+                $('#templatelist').empty().append($('#table_template').tmpl(data, {
+                    hackathon_name: currentHackathon,
+                    getStatus: getStatus
+                }));
+            }
+        });
+    };
+
+    function getPublictTempates() {
+        return oh.api.template.list.get({
+            query: {}
+        }, function (data) {
+            var classStatus = {0: 'default', 1: 'success', 2: 'failure'};
+            $('#template_list').empty().append($('#template_item').tmpl(data, {
+                getStatus: getStatus,
+                getItemClass: function (id, status) {
+                    var class_name = '';
+                    $.each(hackathon_templates, function (i, item) {
+                        if (item.id == id) {
+                            class_name += 'active ';
+                            return false;
+                        }
+                    });
+                    class_name += classStatus[status];
+                    return class_name;
+                }
             }));
         });
     }
 
-    // clear template form after create/update template
-    function clearTemplateForm(){
-        $('[data-type="temp-unit-list"]').empty();
-        var form = $('#templateform');
-        form[0].reset();
-        form.data('bootstrapValidator').resetForm(true);
-    }
-
-    // add bootstrap validator when create template unit form and create port form dynamically
-    function addFieldValidate(element){
-         $(element).find('[data-validate="true"]').each(function(i,input){
-            $('#templateform').bootstrapValidator('addField',$(input));
-         })
-    }
-
-    // create template unit form dynamically
-    // data is None: create; empty form
-    // data is not None: update; fill data to form
-    function createTemplateUnit(data){
-        var templist= $('[data-type="temp-unit-list"]');
-        var template_unit = $($('#template_unit_item').html());
-        if(data){
-            template_unit.find('[name="name"]').val(data['name']);
-            template_unit.find('[name="type"]').val(data['type']);
-            template_unit.find('[name="description"]').val(data['description']);
-            template_unit.find('[name="image"]').val(data['Image']);
-            template_unit.find('[name="env"]').val(data['Env'].join(";"));
-            template_unit.find('[name="cmd"]').val(data['Cmd'].join(" "));
-            for(var i = 0; i < data['ports'].length; i++)
-                if(data['ports'][i]['port'] == data['remote']['port']){
-                    template_unit.find('[name="remote-name"]').val(data['ports'][i]['name']);
-                    break;
-                }
-            template_unit.find('[name="remote-provider"]').val(data['remote']['provider']);
-            template_unit.find('[name="remote-protocol"]').val(data['remote']['protocol']);
-            template_unit.find('[name="remote-port"]').val(data['remote']['port']);
-            template_unit.find('[name="remote-username"]').val(data['remote']['username']);
-            template_unit.find('[name="remote-password"]').val(data['remote']['password']);
-            for(var i = 0; i < data['ports'].length; i++)
-                if(data['ports'][i]['port'] != data['remote']['port'])
-                    createPort(template_unit.find('[data-type="port-list"]'), data['ports'][i]);
-        }
-        template_unit.appendTo(templist);
-        addFieldValidate(template_unit);
-        return template_unit;
-    }
-
-    // delete template unit form dynamically
-    function deleteTemplateUnit(element, data){
-        $(element).parents('[data-type="template-unit-group"]').detach();
-    }
-
-    // create port form dynamically
-    // data is None: create; empty form
-    // data is not None: update; fill data to form
-    function createPort(element, data){
-        var portlist= $(element).parents('[data-type="template-unit-group"]').find('[data-type="port-list"]');
-        var port = $($('#port_item').html());
-        if(data){
-            port.find('[name="name"]').val(data['name']);
-            port.find('[name="port"]').val(data['port']);
-            port.find('[name="public"]').val(data['public']);
-            port.find('[name="protocol"]').val(data['protocol']);
-            if('url' in data){
-                var url_protocol = data['url'].substring(0, data['url'].indexOf(":"));
-                port.find('[name="url-protocol"]').val(url_protocol);
-                var url_path = data['url'].substring(data['url'].lastIndexOf("/") + 1, data['url'].length);
-                port.find('[name="url-path"]').val(url_path);
-            }
-        }
-        port.appendTo(portlist);
-        addFieldValidate(port);
-        return port;
-    }
-
-    // delete port form dynamically
-    function deletePort(element, data){
-        $(element).parents('[data-type="port-group"]').detach();
-    }
-
-    // remove empty string produced by split
-    function removeEmptyString(data){
-        var ans = [];
-        for(var i = 0; i < data.length; i++)
-            if(data[i] != '')
-                ans.push(data[i]);
-        return ans;
-    }
-
-    // compose PUT/POST data for back end api
-    function getFormData(){
-        var data = [];
-        $('[data-type="template-unit-group"]').each(function(i,group){
-            var $group = $(group);
-            var remote = {
-                provider: $group.find('[name="remote-provider"]').val(),
-                protocol: $group.find('[name="remote-protocol"]').val(),
-                username: $group.find('[name="remote-username"]').val(),
-                password: $group.find('[name="remote-password"]').val(),
-                port: Number($group.find('[name="remote-port"]').val())
-            }
-            var ports = []
-            ports.push({
-                name: $group.find('[name="remote-name"]').val(),
-                port: remote['port'],
-                public: true,
-                protocol: 'tcp'
-            })
-            $group.find('[data-type="port-group"]').each(function(i,portgroup){
-                var $portgroup = $(portgroup);
-                var port = {
-                    name: $portgroup.find('[name="name"]').val(),
-                    port: Number($portgroup.find('[name="port"]').val()),
-                    public: Boolean($portgroup.find('[name="public"]').val()),
-                    protocol: $portgroup.find('[name="protocol"]').val()
-                }
-                if($portgroup.find('[name="url-protocol"]').val().length > 0)
-                    port['url'] = $portgroup.find('[name="url-protocol"]').val() + '://{0}:{1}/' + $portgroup.find('[name="url-path"]').val()
-                ports.push(port)
-            })
-            data.push({
-                name: $group.find('[name="name"]').val(),
-                type: $group.find('[name="type"]').val(),
-                description: $group.find('[name="description"]').val(),
-                ports: ports,
-                remote: remote,
-                Image: $group.find('[name="image"]').val(),
-                Env: removeEmptyString($group.find('[name="env"]').val().split(";")),
-                Cmd: removeEmptyString($group.find('[name="cmd"]').val().split(" "))
-            })
-        })
-        return {
-            name: $('#name').val(),
-            description: $('#description').val(),
-            provider: Number($('#provider').val()),
-            virtual_environments: data
-        };
-    }
-
-    // fill data to form
-    function setFormData(item){
-        data = item['data']
-        $('#name').val(data['expr_name']).attr({disabled:'disabled'});
-        $('#description').val(data['description']);
-        $('#provider').val(item['provider']).attr({disabled:'disabled'});
-        data['virtual_environments'].forEach(createTemplateUnit);
-    }
-
-    // POST to create
-    function createTemplate(data){
+    function addHackathonTemplate(data) {
         return oh.api.admin.hackathon.template.post({
             body: data,
-            header: {hackathon_name:currentHackathon}
-        }, function(data){
-            if(data.error){
-                alert(data.error.message);
-            }else{
-            }
-        })
+            header: {hackathon_name: currentHackathon}
+        });
+    };
+
+    function removeHackathonTemplate(data) {
+        return oh.api.admin.hackathon.template.delete({
+            query: data,
+            header: {hackathon_name: currentHackathon}
+        });
     }
 
-    // PUT to update
-    function updateTemplate(data){
-        return oh.api.admin.hackathon.template.put({
-            body: data,
-            header: {hackathon_name:currentHackathon}
-        }, function(data){
-            if(data.error){
-                alert(data.error.message);
-            }else{
-            }
-        })
+    function pageLoad() {
+        getHackathonTemplates();
+        getPublictTempates();
     }
 
-    function toggleTable(){
-        clearTemplateForm();
-        if($('#templatetable').css('display') == 'none' ){
-            $('#templatetable').show();
-            $('#templateform').hide()
-        }else{
-            $('#templatetable').hide();
-            $('#templateform').show()
+    function toggleTable() {
+        if ($('#templatetable').is('.hide')) {
+            $('#templatetable').removeClass('hide');
+            $('#templates').addClass('hide');
+        } else {
+            $('#templatetable').addClass('hide');
+            $('#templates').removeClass('hide');
         }
     }
 
-    function init(){
-        var templateform = $('#templateform');
-        templateform.bootstrapValidator().on('success.form.bv', function(e) {
-            e.preventDefault();
-            var formData = getFormData();
-            (is_update ? updateTemplate(formData) : createTemplate(formData)).then(function(){
-                if(is_update)
-                    is_update = false;
-                bindTemplateList();
-                toggleTable();
-            })
-        });
-
-        templateform.on('click','[data-type="btn_add_port"]',function(e){
-            createPort(this);
-        });
-
-        templateform.on('click','[data-type="btn_delete_port"]',function(e){
-            deletePort(this);
-        });
-
-        var templatelist = $('#templatelist');
-        templatelist.on('click','[data-type="template_item_edit"]',function(e){
-            is_update = true;
-            toggleTable();
-            var item = $(this).parents('tr').data('tmplItem').data;
-            setFormData(item);
-        });
-
-        var confirm_modal = $('#confirm_modal').on('show.bs.modal',function(e){
-            var item = $(e.relatedTarget).parents('tr').data('tmplItem').data;
-            confirm_modal.data({item:item});
-        }).on('click','[data-type="ok"]',function(e){
-            var item = confirm_modal.data('item');
-             oh.api.admin.hackathon.template.delete({
-                query: {id:item.id},
-                header: {hackathon_name:currentHackathon}
-             },
-             function(data){
-                if(data.error){
-                    alert(data.error.message);
-                }else{
-                    bindTemplateList();
-                    confirm_modal.modal('hide');
-                }
-             })
-        })
-
-        var add_template_unit = $('#btn_add_template_unit').click(function(e){
-            createTemplateUnit();
-        })
-
-        templateform.on('click','[data-type="btn_delete_template_unit"]',function(e){
-            deleteTemplateUnit(this);
-        });
-
-        $('[data-type="template_item_add"]').click(function(e){
-            $('#name').removeAttr('disabled');
-            $('#provider').removeAttr('disabled');
-            toggleTable();
-            createTemplateUnit();
-        });
-
-        $('[data-type="cancel"]').click(function(e){
-            toggleTable();
-        });
+    function init() {
+        bingEvent();
+        pageLoad();
     }
 
-    $(function() {
+    function bingEvent() {
+        var confirm_modal = $('#confirm_modal').on('show.bs.modal', function (e) {
+            confirm_modal.data({callback: e.relatedTarget})
+        }).on('click', '[data-type="ok"]', function (e) {
+            confirm_modal.data('callback')();
+        })
+
+        $('[data-type="add_template"]').click(function (e) {
+            getPublictTempates();
+            toggleTable();
+        });
+
+        $('[data-type="return"]').click(function (e) {
+            getHackathonTemplates();
+            toggleTable();
+        });
+
+        $('#template_list').on('click', '.oh-tempitem', function (e) {
+            var item = $(this);
+            var data = item.parent().data('tmplItem').data;
+
+            if (item.is('.active')) {
+                confirm_modal.find('.modal-body p').text('确定是否移除该模板？');
+                confirm_modal.modal('show', function () {
+                    removeHackathonTemplate({template_id: data.id}).then(function (data) {
+                        if (data.error) {
+                            //todo remove hackathon template error;
+                        } else {
+                            item.removeClass('active');
+                        }
+                        confirm_modal.modal('hide');
+                    });
+                });
+            } else if (data.status == 1) {
+                addHackathonTemplate({template_id: data.id}).then(function (data) {
+                    if (data.error) {
+                        //todo add hackathon template error;
+                    } else {
+                        item.addClass('active');
+                    }
+                    confirm_modal.modal('hide');
+                });
+            } else {
+                confirm_modal.find('.modal-body p').text('该模板还未诊断成功，是否确定该模板？');
+                confirm_modal.modal('show', function () {
+                    addHackathonTemplate({template_id: data.id}).then(function (data) {
+                        if (data.error) {
+                            //todo add hackathon template error;
+                        } else {
+                            item.addClass('active');
+                        }
+                        confirm_modal.modal('hide');
+                    });
+                });
+            }
+        })
+    }
+
+    $(function () {
         init();
-        bindTemplateList();
-        createTemplateUnit();
     })
 
-})(window.jQuery,window.oh);
+})
+(window.jQuery, window.oh);

@@ -84,6 +84,7 @@ class ExprManager(Component):
     register_manager = RequiredFeature("register_manager")
     user_manager = RequiredFeature("user_manager")
     hackathon_manager = RequiredFeature("hackathon_manager")
+    admin_Manager = RequiredFeature("admin_manager")
     template_manager = RequiredFeature("template_manager")
     docker = RequiredFeature("docker")
     scheduler = RequiredFeature("scheduler")
@@ -101,8 +102,8 @@ class ExprManager(Component):
             return not_found('hackathon or template is not existed')
 
         hackathon = hack_temp[0]
-        if not self.register_manager.is_user_registered(user_id, hackathon):
-            return forbidden("user not registered or not approved")
+        # if not self.register_manager.is_user_registered(user_id, hackathon):
+        #     return forbidden("user not registered or not approved")
 
         if hackathon.event_end_time < self.util.get_now():
             self.log.warn("hackathon is ended. The expr starting process will be stopped")
@@ -404,7 +405,7 @@ class ExprManager(Component):
         hackathon = self.db.find_first_object_by(Hackathon, name=hackathon_name)
         if hackathon is None:
             return None
-        template = self.db.find_first_object_by(Template, hackathon_id=hackathon.id, name=template_name)
+        template = self.db.find_first_object_by(Template, name=template_name)
         if template is None or self.template_manager.load_template(template) is None:
             return None
         return [hackathon, template]
@@ -446,7 +447,7 @@ class ExprManager(Component):
         :return:
         """
         exp_status = [EStatus.RUNNING, EStatus.STARTING]
-        check_temp = Experiment.template_id == template.id if self.hackathon_manager.validate_admin_privilege(user_id,
+        check_temp = Experiment.template_id == template.id if self.admin_Manager.validate_admin_privilege(user_id,
                                                                                                               hackathon.id) else Experiment.id > -1
         expr = self.db.find_first_object(Experiment,
                                          Experiment.status.in_(exp_status),

@@ -100,9 +100,9 @@ class AdminHackathonTemplateResource(Resource):
     @admin_privilege_required
     def post(self):
         args = request.get_json()
-        if "template_name" not in args:
-            return bad_request("template name invalid")
-        return template_manager.add_template_to_hackathon(args['template_name'])
+        if "template_id" not in args:
+            return bad_request("template id invalid")
+        return template_manager.add_template_to_hackathon(args['template_id'])
 
     # delete a h-t-r for hacakthon
     @admin_privilege_required
