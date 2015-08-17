@@ -189,7 +189,7 @@ class TeamResource(Resource):
     @hackathon_name_required
     def get(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('team_name', type=str, location='args', required=True)
+        parse.add_argument('team_name', type=str, location='args')
         args = parse.parse_args()
         return team_manager.get_team_by_name(g.hackathon.id, args["team_name"])
 
@@ -213,6 +213,16 @@ class TeamResource(Resource):
         args = parse.parse_args()
         return team_manager.dismiss_team(g.hackathon.id, args["team_name"])
 
+
+class TeamsResource(Resource):
+    @token_required
+    def get(self):
+        return team_manager.get_user_by_teams(g.user.id)
+
+class TeamListResource(Resource):
+     @hackathon_name_required
+     def get(self):
+        return team_manager.get_team_by_hackathon(g.hackathon.id)
 
 class TeamMemberResource(Resource):
     @token_required
@@ -284,6 +294,8 @@ def register_user_routes():
 
     # team API
     api.add_resource(TeamResource, "/api/team")
+    api.add_resource(TeamsResource, "/api/team/user")
+    api.add_resource(TeamListResource, "/api/team/list")
     api.add_resource(TeamMemberResource, "/api/team/member")
     api.add_resource(TeamMemberListResource, "/api/team/member/list")
     api.add_resource(TeamLeaderResource, "/api/team/leader")

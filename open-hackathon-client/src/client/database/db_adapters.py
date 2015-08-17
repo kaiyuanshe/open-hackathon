@@ -24,6 +24,7 @@
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
 
+
 class SQLAlchemyAdapterMetaClass(type):
     @staticmethod
     def wrap(func):
@@ -109,11 +110,13 @@ class SQLAlchemyAdapter(DBAdapter):
 
     def add_object(self, inst):
         self.db_session.add(inst)
+        self.commit()
 
     def add_object_kwargs(self, ObjectClass, **kwargs):
         """ Add an object of class 'ObjectClass' with fields and values specified in '**kwargs'. """
         object = ObjectClass(**kwargs)
         self.db_session.add(object)
+        self.commit()
         return object
 
     def update_object(self, object, **kwargs):
@@ -121,12 +124,16 @@ class SQLAlchemyAdapter(DBAdapter):
         for key, value in kwargs.items():
             if hasattr(object, key):
                 setattr(object, key, value)
+                self.commit()
             else:
                 raise KeyError("Object '%s' has no field '%s'." % (type(object), key))
+
+
 
     def delete_object(self, object):
         """ Delete object 'object'. """
         self.db_session.delete(object)
+        self.commit()
 
     def delete_all_objects(self, ObjectClass, *criterion):
         ObjectClass.query.filter(*criterion).delete(synchronize_session=False)
@@ -139,5 +146,5 @@ class SQLAlchemyAdapter(DBAdapter):
 
         # query filter by in_ do not support none args, use synchronize_session=False instead
         query.delete(synchronize_session=False)
-
+        self.commit()
         # ------------------------------ auto wrapped 'public' methods  --- end ------------------------------

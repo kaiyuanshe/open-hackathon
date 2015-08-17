@@ -33,7 +33,7 @@ class SQLAlchemyAdapterMetaClass(type):
         def auto_commit(self, *args, **kwargs):
             try:
                 # todo a trick for DB transaction issue
-                self.commit()
+                # self.commit()
                 return_value = func(self, *args, **kwargs)
                 self.commit()
                 return return_value
@@ -66,6 +66,7 @@ class SQLAlchemyAdapter(DBAdapter):
     __metaclass__ = SQLAlchemyAdapterMetaClass
 
     def __init__(self, db_session):
+        print 'net SQLAlchemyAdapter'
         super(SQLAlchemyAdapter, self).__init__(db_session)
 
     # ------------------------------ methods that no need to wrap --- start ------------------------------
@@ -116,6 +117,7 @@ class SQLAlchemyAdapter(DBAdapter):
     def find_first_object_by(self, ObjectClass, **kwargs):
         return ObjectClass.query.filter_by(**kwargs).first()
 
+
     def add_object(self, inst):
         self.db_session.add(inst)
 
@@ -147,6 +149,6 @@ class SQLAlchemyAdapter(DBAdapter):
         query = ObjectClass.query.filter_by(**kwargs)
 
         # query filter by in_ do not support none args, use synchronize_session=False instead
-        query.delete(synchronize_session=False)
+        return query.delete(synchronize_session=False)
 
         # ------------------------------ auto wrapped 'public' methods  --- end ------------------------------
