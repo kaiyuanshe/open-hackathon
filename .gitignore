@@ -68,3 +68,8 @@ docs/_build/
 *.rb~
 *.erb~
 *.json~
+*.py~
+*.txt~
+*.log~
+*.log.*
+

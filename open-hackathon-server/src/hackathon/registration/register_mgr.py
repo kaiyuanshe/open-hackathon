@@ -107,7 +107,8 @@ class RegisterManager(Component):
 
             self.log.debug("update a existed register")
             update_items = dict(dict(args).viewitems() - register.dic().viewitems())
-            if "create_time" in update_items: update_items.pop("create_time")
+            if "create_time" in update_items:
+                update_items.pop("create_time")
             update_items["update_time"] = self.util.get_now()
             self.db.update_object(register, **update_items)
 
