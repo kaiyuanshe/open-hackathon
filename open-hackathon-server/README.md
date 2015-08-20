@@ -32,10 +32,10 @@ sudo apt-get install mysql-server libmysqlclient-dev
 ```
 
 ### Install docker
-Follow [docker instalation guide] to install docker. You can choose install the latest version of docker. But we strongly recommend you to
+Follow [docker installation guide](https://docs.docker.com/installation/ubuntulinux/) to install docker. You can choose install the latest version of docker. But we strongly recommend you to
  install a stable version since docker itself is developing and updating. Usually lasted version has unexpected issues.
 
-after docker installed, you need pull down some required docker images:
+after docker installed, you can try pulling down some docker images:
 ```
 sudo docker pull sffamily/ubuntu-gnome-vnc-eclipse
 sudo docker pull rastasheep/ubuntu-sshd
@@ -43,25 +43,29 @@ sudo docker pull hall/guacamole
 ```
 
 ##### enable docker remote api
-If you want to use docker remote api to visit docker on your host machine or Azure server, please change the following configure:
-Please edit this file: `/etc/init/docker.conf` or `/etc/default/docker` and update the `DOCKER_OPTS` variable to the following:
+Make sure docker remote api enabled. As [Official Docs](https://docs.docker.com/articles/systemd) said, the best way is to update `systemd` in the newer versions of docker. Some articles suggest updating `/etc/default/docker` or `/etc/init.d/docker` but it seems that it doesn't work for me.
+Open file `/lib/systemd/system/docker.service` for editing and change line starting with `ExecStart` to following:
 ```
-DOCKER_OPTS = '-H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock'
+ExecStart=/usr/bin/docker daemon -H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock
 ```
-The daemon process will listen on port '4243', if '4243' port has been occupied on the machine which you want to visit, please change it.
-If you want to know the information of containers, please enter the address like following (Only running containers are shown by default):
-`http://localhost:4243/containers/json`
-If you want to inspect a specified container's information, you can input this:
-`http://localhost:4243/containers/<container id or name>/json`
-More information docker remote api you can visit:
-`https://docs.docker.com/reference/api/docker_remote_api_v1.16/`
-And add user into docker group
+Change `4243` to other port on demand. And then run `systemctl reload` in shell to reload the new configuration. And restart docker by `service docker restart`.
+
+Now, brower to `http://localhost:4243/_ping`. A simple `OK` shown indicates the remote API is working now. 
+Browse to `http://localhost:4243/containers/json` to see the information of running containers. 
+For more API, please refer to [Docker remote API Docs](https://docs.docker.com/reference/api/docker_remote_api/)
+
+##### run docker without sudo(Optional)
+And add user into docker group so that you can run docker commands without sudo
 ```
 sudo groupadd docker
 sudo gpasswd -a ${USER} docker
 ```
-Then restart the docker process: `service docker.io restart`
+Relogin USER and restart the docker process: `sudo service docker restart`
 
+##### enable docker-enter(Optional)
+After you pull down the source codes, copy `<SRC_ROOT>/tools/docker-enter/docker-enter` and `<SRC_ROOT>/tools/docker-enter/nsenter` to `/usr/local/bin`. 
+It's for simplicity that you enter a running docker container. A simple command `sudo docker-enter $(container ID)` help you enter the container.
+See `<SRC_ROOT>/tools/docker-enter/usage.txt` for more information.
 
 ### Clone SourceCode
 

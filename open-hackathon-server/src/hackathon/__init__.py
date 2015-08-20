@@ -142,6 +142,7 @@ def init_components():
     from hackathon.template.template_mgr import TemplateManager
     from hackathon.remote.guacamole import GuacamoleInfo
     from hackathon.expr.expr_mgr import ExprManager
+    from hackathon.cache.cache_mgr import CacheManagerExt
 
     # dependencies MUST be provided in advance
     factory.provide("util", Utility)
@@ -164,6 +165,7 @@ def init_components():
     factory.provide("admin_manager", AdminManager)
     factory.provide("team_manager", TeamManager)
     factory.provide("guacamole", GuacamoleInfo)
+    factory.provide("cache", CacheManagerExt)
 
     # health check items
     factory.provide("health_check_mysql", get_class("hackathon.health.health_check.MySQLHealthCheck"))
@@ -188,7 +190,7 @@ def init_hackathon_storage():
     """
     from hackathon.storage import AzureStorage, LocalStorage
 
-    storage_type = safe_get_config("storage.type", "local")
+    storage_type = safe_get_config("storage.type", "azure")
     if storage_type == "azure":
         factory.provide("storage", AzureStorage)
     else:

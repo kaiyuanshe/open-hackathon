@@ -42,6 +42,7 @@ __all__ = [
     "HostedDockerHealthCheck",
     "AlaudaDockerHealthCheck",
     "GuacamoleHealthCheck",
+    "StorageHealthCheck"
 ]
 
 STATUS = "status"
@@ -146,4 +147,12 @@ class AzureHealthCheck(HealthCheck):
                 STATUS: HEALTH_STATUS.ERROR
             }
 
+class StorageHealthCheck(HealthCheck):
+    """Check the status of storage"""
+
+    def report_health(self):
+        self.storage.report_health()
+
+    def __init__(self):
+        self.storage = RequiredFeature("storage")
 
