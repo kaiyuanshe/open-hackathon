@@ -137,6 +137,11 @@ class AzureHealthCheck(HealthCheck):
 
     def report_health(self):
         azure_key = self.db.find_first_object(AzureKey)
+        if not azure_key:
+            return {
+                STATUS: HEALTH_STATUS.WARNING,
+                DESCRIPTION: "No Azure key found"
+            }
         azure = Service(azure_key.id)
         if azure.ping():
             return {

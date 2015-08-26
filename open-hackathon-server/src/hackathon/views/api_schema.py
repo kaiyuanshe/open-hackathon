@@ -70,26 +70,6 @@ schemas["CurrentTimeResource"] = {
     }
 }
 
-schemas["HackathonCheckNameResource"] = {
-    "get": {
-        "input": {
-            "description": "check hackathon with specific name exists or not",
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string",
-                    "maxLength": 50,
-                    "description": "name of hackathon"
-                }
-            }
-        },
-        "output": {
-            "description": "True or False",
-            "type": "boolean"
-        }
-    }
-}
-
 schema_dir = join(dirname(realpath(__file__)), "schema")
 json_files = [join(schema_dir, f) for f in listdir(schema_dir) if isfile(join(schema_dir, f))]
 

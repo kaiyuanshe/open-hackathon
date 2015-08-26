@@ -69,8 +69,7 @@ Config = {
         "token_expiration_minutes": 60 * 24
     },
     "azure": {
-        "cert_base": "/home/if/If/open-hackathon/open-hackathon/src/hackathon/certificates",
-        "container_name": "certificates"
+        "cert_base": "",
     },
     "guacamole": {
         "host": "http://localhost:8080"
@@ -88,10 +87,11 @@ Config = {
         "type": "local",
         "size_limit_kilo_bytes": 5 * 1024,
         "azure": {
-            "account_name": "hackathon",
-            "account_key": "U4/oE3Ocwk9txQHw2qNOCCW2Fy05FBY3yQfzcKRNss5tnReyYTO7PDyeXQ8TWMMxXF07JrW7UXPyOhGgJlodEQ==",
+            "account_name": "",
+            "account_key": "",
             "image_container": "images",
             "template_container": "templates",
+            "certificates_container": "certificates",
             "blob_service_host_base": ".blob.core.chinacloudapi.cn"
         }
     },

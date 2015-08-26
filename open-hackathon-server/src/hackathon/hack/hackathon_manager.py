@@ -135,7 +135,7 @@ class HackathonManager(Component):
 
         return [h.dic() for h in user_hack_list]
 
-    def get_permitted_hackathon_list_by_admin_user_id(self, user_id):
+    def get_entitled_hackathon_list(self, user_id):
         hackathon_ids = self.admin_manager.get_entitled_hackathon_ids(user_id)
         if -1 in hackathon_ids:
             hackathon_list = self.db.find_all_objects(Hackathon)
@@ -380,12 +380,12 @@ class HackathonManager(Component):
             description=context.get("description"),
             status=HACK_STATUS.INIT,
             creator_id=g.user.id,
-            event_start_time=context.event_start_time,
-            event_end_time=context.event_end_time,
-            registration_start_time=context.registration_start_time,
-            registration_end_time=context.registration_end_time,
-            judge_start_time=context.judge_start_time,
-            judge_end_time=context.judge_end_time,
+            event_start_time=context.get("event_start_time"),
+            event_end_time=context.get("event_end_time"),
+            registration_start_time=context.get("registration_start_time"),
+            registration_end_time=context.get("registration_end_time"),
+            judge_start_time=context.get("judge_start_time"),
+            judge_end_time=context.get("judge_end_time"),
             basic_info=self.__get_default_basic_info(),
             extra_info=context.get("extra_info"),
             type=context.get("type", HACK_TYPE.HACKATHON)
@@ -457,18 +457,6 @@ class HackathonManager(Component):
             if self.db.find_first_object_by(DockerHostServer, vm_name=docker_host.vm_name,
                                             hackathon_id=hackathon.id) is None:
                 self.db.add_object(docker_host)
-
-            # test template: ubuntu terminal
-            template_dir = dirname(dirname(realpath(__file__))) + '/resources'
-            template_url = template_dir + os.path.sep + "kaiyuanshe-ut.js"
-            template = Template(name="ut", url=template_url,
-                                provider=VE_PROVIDER.DOCKER,
-                                status=1,
-                                virtual_environment_count=1,
-                                description="<ul><li>Ubuntu</li><li>SSH</li><li>LAMP</li></ul>",
-                                hackathon=hackathon)
-            if self.db.find_first_object_by(Template, name=template.name, hackathon_id=hackathon.id) is None:
-                self.db.add_object(template)
         except Exception as e:
             self.log.error(e)
             self.log.warn("fail to create test data")

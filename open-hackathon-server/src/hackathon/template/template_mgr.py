@@ -34,6 +34,10 @@ sys.path.append("..")
 from compiler.ast import (
     flatten,
 )
+from os.path import isfile
+
+import requests
+
 from hackathon.database.models import (
     Template,
     DockerHostServer,
@@ -80,8 +84,7 @@ class TemplateManager(Component):
     user_manager = RequiredFeature("user_manager")
     team_manager = RequiredFeature("team_manager")
     storage = RequiredFeature("storage")
-
-    templates = {}  # template in memory {template.id: template_file_dic}
+    cache_manager = RequiredFeature("cache")
 
     def get_template_by_id(self, id):
         return self.db.find_first_object(Template, id=id)
@@ -189,13 +192,9 @@ class TemplateManager(Component):
             if len(self.db.find_all_objects_by(Experiment, template_id=id)) > 0:
                 return forbidden("template already in use")
 
-            # remove template cache , localfile, azurefile
-            self.templates.pop(template.id, '')
-            if os.path.exists(template.local_path):
-                os.remove(template.local_path)
-            container_name = self.util.safe_get_config("storage.template_container", "templates")
-            blob_name = template.url.split("/")[-1]
-            self.file_service.delete_file_from_azure(container_name, blob_name)
+            # remove template cache and storage
+            self.cache_manager.invalidate(self.__get_template_cache_key(id))
+            self.storage.delete(template.url)
 
             # remove record in DB
             self.db.delete_all_objects_by(HackathonTemplateRel, template_id=template.id)
@@ -212,22 +211,22 @@ class TemplateManager(Component):
         :param template:
         :return:
         """
-        template_id = template.id
-        dic_from_memory = self.__load_template_from_memory(template_id)
-        if dic_from_memory is not None:
-            return dic_from_memory
 
-        local_url = template.local_path
-        dic_from_local = self.__load_template_from_local_file(template_id, local_url)
-        if dic_from_local is not None:
-            return dic_from_local
+        def get_template():
+            local_path = template.local_path
+            if local_path is not None and isfile(local_path):
+                with open(local_path) as template_file:
+                    return json.load(template_file)
+            else:
+                try:
+                    req = requests.get(template.url)
+                    return json.loads(req.content)
+                except Exception as e:
+                    self.log.warn("Fail to load template from remote file %s" % template.url)
+                    self.log.error(e)
+                    return None
 
-        remote_url = template.url
-        dic_from_azure = self.__load_template_from_azure(template_id, local_url, remote_url)
-        if dic_from_azure is not None:
-            return dic_from_azure
-
-        return None
+        return self.cache_manager.get_cache(key=self.__get_template_cache_key(template.id), createfunc=get_template)
 
     def pull_images_for_hackathon(self, context):
         hackathon_id = context.hackathon_id
@@ -280,10 +279,13 @@ class TemplateManager(Component):
                                             template_id=template_id,
                                             hackathon_id=g.hackathon.id,
                                             team_id=team_id)
-        #self.db.delete_object(htr)
+        # self.db.delete_object(htr)
         return ok()
 
     # ---------------------------------------- helper functions ---------------------------------------- #
+
+    def __get_template_cache_key(self, template_id):
+        return "__template__%d__" % template_id
 
     def __check_create_args(self, args):
         """ validate args when creating a template
@@ -372,7 +374,7 @@ class TemplateManager(Component):
                 self.db.add_object_kwargs(Template,
                                           name=args[BaseTemplate.TEMPLATE_NAME],
                                           url=context.url,
-                                          local_path=context.physical_path,
+                                          local_path=context.get("physical_path"),
                                           provider=provider,
                                           creator_id=g.user.id,
                                           status=TEMPLATE_STATUS.UNCHECKED,
@@ -384,59 +386,14 @@ class TemplateManager(Component):
                 # update record
                 self.db.update_object(template,
                                       url=context.url,
-                                      local_path=context.physical_path,
+                                      local_path=context.get("physical_path"),
                                       update_time=self.util.get_now(),
                                       description=args[BaseTemplate.DESCRIPTION],
                                       virtual_environment_count=len(args[BaseTemplate.VIRTUAL_ENVIRONMENTS]))
+                self.cache_manager.invalidate(self.__get_template_cache_key(template.id))
         except Exception as ex:
             self.log.error(ex)
             raise InternalServerError(description="insert or update record in db failed")
-
-    def __upload_template_to_azure(self, path, file_name):
-        try:
-            template_container = self.util.safe_get_config("storage.template_container", "templates")
-            return self.file_service.upload_file_to_azure_from_path(path, template_container, file_name)
-        except Exception as ex:
-            self.log.error(ex)
-            return None
-
-    def __load_template_from_memory(self, template_id):
-        """
-        get template_dic from memory
-        :param template_id:
-        :return:
-        """
-        if template_id is None or template_id not in self.templates:
-            return None
-        else:
-            return self.templates[template_id]
-
-    def __load_template_from_local_file(self, template_id, local_url):
-        """
-        get template_dic from local file
-        :param template_id:
-        :param local_url:
-        :return:
-        """
-        if local_url is None or not os.path.exists(local_url):
-            return None
-        else:
-            template_dic = json.load(file(local_url))
-            self.templates[template_id] = template_dic
-            return template_dic
-
-    def __load_template_from_azure(self, template_id, local_url, remote_url):
-        """
-        get template_dic from azure storage
-        :param template_id:
-        :param local_url:
-        :param remote_url:
-        :return:
-        """
-        if remote_url is not None:
-            if self.file_service.download_file_from_azure(remote_url, local_url) is not None:
-                return self.__load_template_from_local_file(template_id, local_url)
-        return None
 
     def __get_templates_by_user(self, user, hackathon):
         team = self.team_manager.get_team_by_user_and_hackathon(user, hackathon)

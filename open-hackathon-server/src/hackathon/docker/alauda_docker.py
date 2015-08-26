@@ -94,7 +94,9 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
     def report_health(self):
         """send a ping for health check"""
         try:
-            self.__get("/v1/auth/profile/")
+            namespace = self.util.get_config("docker.alauda.namespace")
+            path = "/v1/auth/%s/profile/" % namespace
+            self.__get(path)
             return {
                 HEALTH.STATUS: HEALTH_STATUS.OK
             }

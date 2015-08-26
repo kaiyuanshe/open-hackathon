@@ -23,15 +23,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-from storage import Storage
 import json
 from uuid import uuid1
 from time import strftime
 
-
+from storage import Storage
 from hackathon import RequiredFeature
 from hackathon.constants import FILE_TYPE, HEALTH_STATUS, HEALTH
-
 
 __all__ = ["AzureStorage"]
 
@@ -42,7 +40,6 @@ class AzureStorage(Storage):
     template files will be save at "http://hackathon.blob.core.chinacloudapi.cn/templates/<blob_name>"
     uploaded images will be save at "http://hackathon.blob.core.chinacloudapi.cn/images/<blob_name>"
     """
-    cache_manager = RequiredFeature("cache")
     file_service = RequiredFeature("file_service")
 
     def save(self, context):
@@ -58,11 +55,8 @@ class AzureStorage(Storage):
                             "storage.azure.template_container"
                             and "storage.azure.blob_service_host_base" configuration
         """
-        if context.file_type == FILE_TYPE.HACK_IMAGE:
-            container_name = self.util.get_config("storage.azure.image_container")
-        else:
-            container_name = self.util.get_config("storage.azure.template_container")
-        blob_name = self.__generate_file_name(context.hackathon_name, context.file_name)
+        container_name = self.__get_container_by_file_type(context.file_type)
+        blob_name = self.__generate_file_name(context.hackathon_name, context.file_type, context.file_name)
 
         if context.get('content'):
             file_content = context.content
@@ -72,61 +66,26 @@ class AzureStorage(Storage):
             file_path = context.file_path
             result = self.file_service.upload_file_to_azure_from_path(file_path, container_name, blob_name)
 
-        if result is not None:
-            self.cache_manager.invalidate(result)
         context["url"] = result
         self.log.debug("File saved at:" + result)
         return context
 
-    def load(self, context):
-        """Load file from storage
-
-        :type context: Context
-        :param context: the execution context of file loading
-
-        :rtype: dict
-        :return: the file content
-        """
-        assert context.get("url")
-        print context.url, context.path
-
-        def get_temp():
-            temp_path = self.file_service.download_file_from_azure(azure_file_url=context.url,
-                                                                   local_file_path=context.path)
-            if temp_path is None:
-                return None
-            if context.file_type == FILE_TYPE.TEMPLATE:
-                with open(temp_path) as template_file:
-                    return json.load(template_file)
-            else:
-                return None
-
-        return self.cache_manager.get_cache(key=context.url, createfunc=get_temp)
-
-    def delete(self, context):
+    def delete(self, url):
         """Delete file from Azure storage
 
-        :type context: Context
-        :param context: must have {"url":""} key or {"container_name":"***","blob_name":"***"} keys
+        :type url: str|unicode
+        :param url: the url of file to be deleted which are created in 'save'
 
         :rtype: bool
         :return: True if successfully deleted, otherwise False
         """
         try:
-            if context.get("url"):
-                url_arr = context.url.split('/')
-                file_name = url_arr[-1]
-                hackathon_name = url_arr[-2]
-                container_name = url_arr[-3]
-                blob_name = hackathon_name + "/" + file_name
-                print container_name, blob_name
-            else:
-                assert context.get("container_name") and context.get("blob_name")
-                container_name = context.container_name
-                blob_name = context.blob_name
+            url_arr = url.split('/')
+            blob_name = url_arr[-1]
+            container_name = url_arr[-2]
+            print container_name, blob_name
+
             self.file_service.delete_file_from_azure(container_name, blob_name)
-            url = self.file_service.blob_service.make_blob_url(container_name, blob_name)
-            self.cache_manager.invalidate(url)
             return True
         except Exception as e:
             self.log.error(e)
@@ -150,9 +109,32 @@ class AzureStorage(Storage):
                 HEALTH.STATUS: HEALTH_STATUS.ERROR
             }
 
-    def __generate_file_name(self, hackathon_name, file_name):
-        """refresh file_name = hack_name + uuid(10) + time + suffix
+    def __init__(self):
+        self.__containers = {
+            FILE_TYPE.TEMPLATE: self.util.safe_get_config("storage.azure.template_container", "templates"),
+            FILE_TYPE.HACK_IMAGE: self.util.safe_get_config("storage.azure.image_container", "images"),
+            FILE_TYPE.AZURE_CERT: self.util.safe_get_config("storage.azure.certificate_container", "certificate")
+        }
+
+    def __get_container_by_file_type(self, file_type):
+        """Get container name of azure by file type
+
+        :type file_type: str| unicode
+        :param file_type: type of file defined at FILE_TYPE in constants.py
         """
-        suffix = file_name.split('.')[-1]
-        real_name = hackathon_name + "/" + str(uuid1())[0:9] + strftime("%Y%m%d%H%M%S") + "." + suffix
-        return real_name
+        if file_type in self.__containers:
+            return self.__containers[file_type]
+        return "default"
+
+    @staticmethod
+    def __generate_file_name(hackathon_name, file_type, file_name):
+        """refresh file_name = hack_name + uuid(10) + time + suffix
+
+        Only image name will be replaced since it may contain Chinese characters
+        """
+        if file_type == FILE_TYPE.HACK_IMAGE:
+            suffix = file_name.split('.')[-1]
+            real_name = hackathon_name + "/" + str(uuid1())[0:9] + strftime("%Y%m%d%H%M%S") + "." + suffix
+            return real_name
+        else:
+            return file_name

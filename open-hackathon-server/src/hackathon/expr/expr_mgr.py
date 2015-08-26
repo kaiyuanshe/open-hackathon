@@ -319,7 +319,7 @@ class ExprManager(Component):
             expr.status = EStatus.STARTING
             self.db.commit()
             try:
-                af = AzureFormation(self.docker.__load_azure_key_id(expr.id))
+                af = AzureFormation(self.docker.load_azure_key_id(expr.id))
                 af.create(expr.id)
             except Exception as e:
                 self.log.error(e)
