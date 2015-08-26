@@ -30,27 +30,17 @@ sys.path.append("..")
 from flask_restful import Resource, reqparse
 from flask import g, request
 
-from hackathon import api, RequiredFeature, Component
-from hackathon.decorators import token_required, hackathon_name_required, admin_privilege_required
-from hackathon.hackathon_response import not_found, bad_request, internal_server_error
+from hackathon import api, RequiredFeature
+from hackathon.decorators import hackathon_name_required, admin_privilege_required
+from hackathon.hackathon_response import not_found, bad_request
 
 __all__ = ["register_admin_routes"]
 
 hackathon_manager = RequiredFeature("hackathon_manager")
 register_manager = RequiredFeature("register_manager")
 template_manager = RequiredFeature("template_manager")
-azure_cert_management = RequiredFeature("azure_cert_management")
 admin_manager = RequiredFeature("admin_manager")
 expr_manager = RequiredFeature("expr_manager")
-
-
-
-
-
-
-
-
-
 
 
 class AdminRegisterListResource(Resource):
@@ -141,41 +131,6 @@ class AdminExperimentResource(Resource):
         return expr_manager.stop_expr(args['experiment_id'])
 
 
-class AdminAzureResource(Resource, Component):
-    @hackathon_name_required
-    def get(self):
-        certificates = azure_cert_management.get_certificates(g.hackathon.name)
-        if certificates is None:
-            return not_found("no certificates")
-        return certificates, 200
-
-    @hackathon_name_required
-    def post(self):
-        args = request.get_json()
-        if 'subscription_id' not in args or 'management_host' not in args:
-            return bad_request("subscription_id or management_host invalid")
-        subscription_id = args['subscription_id']
-        management_host = args['management_host']
-        try:
-            azure_cert_url = azure_cert_management.create_certificate(subscription_id, management_host,
-                                                                      g.hackathon.name)
-            return {'azure_cert_url': azure_cert_url}, 200
-        except Exception as err:
-            self.log.error(err)
-            return internal_server_error('fail to create certificate due to [%s]' % err)
-
-    @hackathon_name_required
-    def delete(self):
-        args = request.get_json()
-        if 'certificate_id' not in args:
-            return bad_request("certificate_id invalid")
-        certificate_id = args['certificate_id']
-        if azure_cert_management.delete_certificate(certificate_id, g.hackathon.name):
-            return {'message': 'certificate deleted'}, 200
-        else:
-            return internal_server_error("fail to delete certificate")
-
-
 class HackathonFileResource(Resource):
     @admin_privilege_required
     def post(self):
@@ -215,11 +170,6 @@ def register_admin_routes():
     """
     register API routes for admin site
     """
-
-    # hackathon api
-
-
-
     # registration APIs
     api.add_resource(AdminRegisterListResource, "/api/admin/registration/list")
     api.add_resource(AdminRegisterResource, "/api/admin/registration")
@@ -231,9 +181,6 @@ def register_admin_routes():
     # experiment APIs
     api.add_resource(AdminExperimentResource, "/api/admin/experiment")
     api.add_resource(ExperimentListResource, "/api/admin/experiment/list")
-
-    # azure resources
-    api.add_resource(AdminAzureResource, '/api/admin/azure')
 
     # file upload
     api.add_resource(HackathonFileResource, "/api/admin/file")

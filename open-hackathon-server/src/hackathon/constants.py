@@ -164,6 +164,7 @@ class VEStatus:
     DELETED = 4
     UNEXPECTED_ERROR = 5
 
+
 class PortBindingType:
     """Type of port binding
 
@@ -301,6 +302,7 @@ class FILE_TYPE:
     """
     TEMPLATE = "template"
     HACK_IMAGE = "hack_image"
+    AZURE_CERT = "azure_cert"
 
 
 class TeamMemberStatus:

@@ -28,7 +28,6 @@ import sys
 sys.path.append("..")
 from azure.storage import BlobService
 from hackathon import Component
-import urllib
 
 class FileService(Component):
     def __init__(self):
@@ -60,10 +59,10 @@ class FileService(Component):
             self.log.error(e)
             return False
 
-    def upload_file_to_azure(self, file, container_name, blob_name):
+    def upload_file_to_azure(self, stream, container_name, blob_name):
         try:
             if self.create_container_in_storage(container_name, 'container'):
-                self.blob_service.put_block_blob_from_file(container_name, blob_name, file)
+                self.blob_service.put_block_blob_from_file(container_name, blob_name, stream)
                 return self.blob_service.make_blob_url(container_name, blob_name)
             else:
                 return None
@@ -78,14 +77,6 @@ class FileService(Component):
                 return self.blob_service.make_blob_url(container_name, blob_name)
             else:
                 return None
-        except Exception as e:
-            self.log.error(e)
-            return None
-
-    def download_file_from_azure(self, azure_file_url, local_file_path):
-        try:
-            urllib.urlretrieve(azure_file_url, local_file_path)
-            return local_file_path
         except Exception as e:
             self.log.error(e)
             return None

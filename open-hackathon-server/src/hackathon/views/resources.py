@@ -33,14 +33,15 @@ from flask import g, request
 from hackathon import RequiredFeature
 from hackathon.decorators import hackathon_name_required, token_required, admin_privilege_required
 from hackathon.health import report_health
-from hackathon.hackathon_response import not_found
-from hackathon_resource import Resource, HackathonResource
+from hackathon.hackathon_response import bad_request, internal_server_error
+from hackathon_resource import HackathonResource
 
 hackathon_manager = RequiredFeature("hackathon_manager")
 user_manager = RequiredFeature("user_manager")
 register_manager = RequiredFeature("register_manager")
 template_manager = RequiredFeature("template_manager")
 team_manager = RequiredFeature("team_manager")
+azure_cert_manager = RequiredFeature("azure_cert_manager")
 
 
 class HealthResource(HackathonResource):
@@ -85,3 +86,19 @@ class AdminHackathonListResource(HackathonResource):
     @token_required
     def get(self):
         return hackathon_manager.get_entitled_hackathon_list(g.user.id)
+
+
+class AdminAzureResource(HackathonResource):
+    @hackathon_name_required
+    def get(self):
+        return azure_cert_manager.get_certificates(g.hackathon)
+
+    @admin_privilege_required
+    def post(self):
+        ctx = self.context()
+        return azure_cert_manager.create_certificate(ctx.subscription_id, ctx.management_host, g.hackathon)
+
+    @admin_privilege_required
+    def delete(self):
+        ctx = self.context()
+        return azure_cert_manager.delete_certificate(ctx.certificate_id, g.hackathon)

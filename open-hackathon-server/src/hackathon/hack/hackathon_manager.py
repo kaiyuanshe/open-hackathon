@@ -457,18 +457,6 @@ class HackathonManager(Component):
             if self.db.find_first_object_by(DockerHostServer, vm_name=docker_host.vm_name,
                                             hackathon_id=hackathon.id) is None:
                 self.db.add_object(docker_host)
-
-            # test template: ubuntu terminal
-            template_dir = dirname(dirname(realpath(__file__))) + '/resources'
-            template_url = template_dir + os.path.sep + "kaiyuanshe-ut.js"
-            template = Template(name="ut", url=template_url,
-                                provider=VE_PROVIDER.DOCKER,
-                                status=1,
-                                virtual_environment_count=1,
-                                description="<ul><li>Ubuntu</li><li>SSH</li><li>LAMP</li></ul>",
-                                hackathon=hackathon)
-            if self.db.find_first_object_by(Template, name=template.name, hackathon_id=hackathon.id) is None:
-                self.db.add_object(template)
         except Exception as e:
             self.log.error(e)
             self.log.warn("fail to create test data")

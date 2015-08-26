@@ -56,3 +56,6 @@ def init_routes():
 
     # get hackathon list that the current user are entitled to manage
     api.add_resource(AdminHackathonListResource, "/api/admin/hackathon/list")
+
+    # manage azure certificates for hackathon
+    api.add_resource(AdminAzureResource, '/api/admin/azure')

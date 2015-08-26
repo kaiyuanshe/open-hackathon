@@ -31,8 +31,6 @@ from hackathon import api, RequiredFeature, Component
 from flask import g, request
 from flask_restful import Resource, reqparse
 from hackathon.decorators import hackathon_name_required, token_required
-from hackathon.health import report_health
-import time
 from hackathon.hackathon_response import not_found
 
 hackathon_manager = RequiredFeature("hackathon_manager")
