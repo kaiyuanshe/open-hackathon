@@ -152,6 +152,7 @@ class AzureHealthCheck(HealthCheck):
                 STATUS: HEALTH_STATUS.ERROR
             }
 
+
 class StorageHealthCheck(HealthCheck):
     """Check the status of storage"""
 
@@ -160,4 +161,3 @@ class StorageHealthCheck(HealthCheck):
 
     def __init__(self):
         self.storage = RequiredFeature("storage")
-

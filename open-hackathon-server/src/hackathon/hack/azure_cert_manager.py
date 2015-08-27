@@ -69,7 +69,7 @@ class AzureCertManager(Component):
 
         # avoid duplicate pem generation
         if not os.path.isfile(pem_url):
-            pem_command = 'openssl req -x509 -nodes -days 365 -newkey rsa:1024 -keyout %s -out %s -batch' % \
+            pem_command = 'openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout %s -out %s -batch' % \
                           (pem_url, pem_url)
             commands.getstatusoutput(pem_command)
         else:
