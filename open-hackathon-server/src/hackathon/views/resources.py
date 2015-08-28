@@ -102,3 +102,9 @@ class AdminAzureResource(HackathonResource):
     def delete(self):
         ctx = self.context()
         return azure_cert_manager.delete_certificate(ctx.certificate_id, g.hackathon)
+
+
+class AdminRegisterListResource(HackathonResource):
+    @admin_privilege_required
+    def get(self):
+        return register_manager.get_hackathon_registration_list()

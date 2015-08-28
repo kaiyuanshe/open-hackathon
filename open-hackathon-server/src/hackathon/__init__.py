@@ -135,8 +135,8 @@ def init_components():
     from hackathon.database import db_session
     from hackathon.database.db_adapters import SQLAlchemyAdapter
     from hackathon.user import UserManager
-    from hackathon.hack import HackathonManager, AdminManager, TeamManager, DockerHostManager, AzureCertManager
-    from hackathon.registration.register_mgr import RegisterManager
+    from hackathon.hack import HackathonManager, AdminManager, TeamManager, DockerHostManager, AzureCertManager, \
+        RegisterManager
     from hackathon.template.template_mgr import TemplateManager
     from hackathon.remote.guacamole import GuacamoleInfo
     from hackathon.expr.expr_mgr import ExprManager
@@ -145,9 +145,8 @@ def init_components():
     # dependencies MUST be provided in advance
     factory.provide("util", Utility)
     factory.provide("log", log)
-    print '--------factory db---------'
     factory.provide("db", SQLAlchemyAdapter, db_session)
-    print '--------end factory db---------'
+
     # scheduler
     factory.provide("scheduler", scheduler)
 
