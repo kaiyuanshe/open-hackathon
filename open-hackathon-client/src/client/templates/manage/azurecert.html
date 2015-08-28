@@ -3,14 +3,14 @@
 {% endblock %}
 
 {% block body %}
-<div class="col-lg-12">
-    <div class="box">
-        <div class="box-header">
-            <h2><i class="fa fa-edit"></i>Azure证书列表</h2>
-        </div>
-        <div class="box-content">
-            <table class="table table-bordered">
-                <thead>
+    <div class="col-lg-12">
+        <div class="box">
+            <div class="box-header">
+                <h2><i class="fa fa-edit"></i>Azure证书列表</h2>
+            </div>
+            <div class="box-content">
+                <table class="table table-bordered">
+                    <thead>
                     <tr>
                         <th>#</th>
                         <th>订阅序号</th>
@@ -18,12 +18,12 @@
                         <th>证书文件</th>
                         <th>操作</th>
                     </tr>
-                </thead>
-                <tbody id="azurecertlist">
-                </tbody>
-            </table>
-            <div >
-                <form class="form-horizontal" id="azurecertform" method="post"
+                    </thead>
+                    <tbody id="azurecertlist">
+                    </tbody>
+                </table>
+                <div>
+                    <form class="form-horizontal" id="azurecertform" method="post"
                           data-bv-feedbackicons-valid="glyphicon glyphicon-ok"
                           data-bv-feedbackicons-invalid="glyphicon glyphicon-remove"
                           data-bv-feedbackicons-validating="glyphicon glyphicon-refresh">
@@ -33,6 +33,7 @@
                             </legend>
                             <div class="form-group has-feedback">
                                 <label class="col-md-3 control-label">订阅序号</label>
+
                                 <div class="col-md-6 register">
                                     <input type="text" class="form-control" name="subscription_id" id="subscription_id"
                                            placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
@@ -45,9 +46,12 @@
                             </div>
                             <div class="form-group has-feedback">
                                 <label class="col-md-3 control-label">服务URI</label>
+
                                 <div class="col-md-6 register">
                                     <select class="form-control" name="management_host" id="management_host">
-                                        <option value="management.core.chinacloudapi.cn">management.core.chinacloudapi.cn</option>
+                                        <option value="management.core.chinacloudapi.cn">
+                                            management.core.chinacloudapi.cn
+                                        </option>
                                         <option value="management.core.windows.net">management.core.windows.net</option>
                                     </select>
                                 </div>
@@ -58,33 +62,36 @@
                                 </div>
                             </div>
                         </fieldset>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
-<div class="modal fade bs-example-modal-sm" id="confirm_modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-api="oh.api.admin.register.delete">
-    <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">提示</h4>
-            </div>
-            <div class="modal-body">
-                <p>确定删除此Azure证书？</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default wb-btn" data-dismiss="modal">取消</button>
-                <button type="button" class="btn btn-primary wb-btn" data-type="ok">确定</button>
-            </div>
-        </div>
-    </div>
-</div>
+
 {% endblock body %}
 
 {% block script %}
-{{ super() }}
-<script id="azure_cert_item" type="text/x-jquery-tmpl">
+    <div class="modal fade bs-example-modal-sm" id="confirm_modal" tabindex="-1" role="dialog"
+         aria-labelledby="mySmallModalLabel" aria-hidden="true" data-api="oh.api.admin.register.delete">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">提示</h4>
+                </div>
+                <div class="modal-body">
+                    <p>确定删除此Azure证书？</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default wb-btn" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary wb-btn" data-type="ok">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{ super() }}
+    <script id="azure_cert_item" type="text/x-jquery-tmpl">
     <tr>
         <td>${$item.getIndex()}</td>
         <td>${subscription_id}</td>
@@ -96,6 +103,6 @@
             </a>
         </td>
     </tr>
-</script>
-<script type="text/javascript" src="/static/js/views/oh.manage.azurecert.js"></script>
+    </script>
+    <script type="text/javascript" src="/static/js/views/oh.manage.azurecert.js"></script>
 {% endblock %}

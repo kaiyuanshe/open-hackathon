@@ -43,7 +43,8 @@ sudo docker pull hall/guacamole
 ```
 
 ##### enable docker remote api
-Make sure docker remote api enabled. As [Official Docs](https://docs.docker.com/articles/systemd) said, the best way is to update `systemd` in the newer versions of docker. Some articles suggest updating `/etc/default/docker` or `/etc/init.d/docker` but it seems that it doesn't work for me.
+###### Ubuntu 15.04
+Make sure docker remote api enabled. As [Official Docs](https://docs.docker.com/articles/systemd) said, the best way is to update `systemd` in the newer versions of docker.
 Open file `/lib/systemd/system/docker.service` for editing and change line starting with `ExecStart` to following:
 ```
 ExecStart=/usr/bin/docker daemon -H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock
@@ -53,6 +54,10 @@ Change `4243` to other port on demand. And then run `systemctl reload` in shell 
 Now, brower to `http://localhost:4243/_ping`. A simple `OK` shown indicates the remote API is working now. 
 Browse to `http://localhost:4243/containers/json` to see the information of running containers. 
 For more API, please refer to [Docker remote API Docs](https://docs.docker.com/reference/api/docker_remote_api/)
+
+###### Ubuntu 14.10 and lower
+On an old version of Ubuntu, you can edit one of the following files:`/etc/default/docker` or `/etc/init.d/docker`. 
+Add new line `DOCKER_OPTS='-H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock'` and then restart docker by `sudo service docker restart`
 
 ##### run docker without sudo(Optional)
 And add user into docker group so that you can run docker commands without sudo
