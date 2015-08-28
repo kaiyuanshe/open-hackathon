@@ -43,12 +43,6 @@ admin_manager = RequiredFeature("admin_manager")
 expr_manager = RequiredFeature("expr_manager")
 
 
-class AdminRegisterListResource(Resource):
-    @admin_privilege_required
-    def get(self):
-        return register_manager.get_hackathon_registration()
-
-
 class AdminRegisterResource(Resource):
     def get(self):
         parse = reqparse.RequestParser()
@@ -171,7 +165,6 @@ def register_admin_routes():
     register API routes for admin site
     """
     # registration APIs
-    api.add_resource(AdminRegisterListResource, "/api/admin/registration/list")
     api.add_resource(AdminRegisterResource, "/api/admin/registration")
 
     # template APIs

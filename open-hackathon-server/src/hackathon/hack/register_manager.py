@@ -1,58 +1,62 @@
 # -*- coding: utf-8 -*-
-#
-# -----------------------------------------------------------------------------------
-# Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-#
-# The MIT License (MIT)
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-# THE SOFTWARE.
-# -----------------------------------------------------------------------------------
+"""
+Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
+ 
+The MIT License (MIT)
+ 
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+ 
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+ 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+"""
 
 import sys
 
 sys.path.append("..")
-from hackathon import Component, RequiredFeature
+import json
+
 from flask import g
-from hackathon.database.models import UserHackathonRel, Experiment, UserProfile
+
+from hackathon import Component, RequiredFeature
+from hackathon.database import UserHackathonRel, Experiment, UserProfile
 from hackathon.hackathon_response import bad_request, precondition_failed, internal_server_error, not_found, ok
 from hackathon.constants import EStatus, RGStatus, ReservedUser
-import json
+
+__all__ = ["RegisterManager"]
 
 
 class RegisterManager(Component):
+    """Component to manage registered users of a hackathon"""
     hackathon_manager = RequiredFeature("hackathon_manager")
     user_manager = RequiredFeature("user_manager")
 
-    def get_hackathon_registration(self, num=None):
+    def get_hackathon_registration_list(self, num=None):
+        """Get registered users list
+
+        :rtype: list
+        :return all registered usrs if num is None else return the specific number of users order by create_time desc
+        """
         registers = self.db.find_all_objects_order_by(UserHackathonRel,
-                                                      num,  # limit num
+                                                      num,
                                                       UserHackathonRel.create_time.desc(),
                                                       hackathon_id=g.hackathon.id)
-        return map(lambda x: self.get_registration_with_profile(x), registers)
+        return map(lambda x: self.__get_registration_with_profile(x), registers)
 
-    def get_registration_with_profile(self, register):
-        register_dic = register.dic()
-        register_dic['user'] = self.user_manager.user_display_info(register.user)
-        return register_dic
-
-    def get_registration_by_id(self, id):
-        return self.db.get_object(UserHackathonRel, id)
+    def get_registration_by_id(self, registration_id):
+        return self.db.get_object(UserHackathonRel, registration_id)
 
     def get_registration_by_user_and_hackathon(self, user_id, hackathon_id):
         return self.db.find_first_object_by(UserHackathonRel, user_id=user_id, hackathon_id=hackathon_id)
@@ -198,3 +202,16 @@ class RegisterManager(Component):
         except Exception as e:
             self.log.debug(e)
             return internal_server_error("failed to update user profile")
+
+    def __get_registration_with_profile(self, registration):
+        """Return user display info as well as the registration detail in dict
+
+        :type registration: UserHackathonRel
+        :param registration: the detail of the user registration
+
+        :rtype: dict
+        :return the detail of registration as well as user display info
+        """
+        register_dic = registration.dic()
+        register_dic['user'] = self.user_manager.user_display_info(registration.user)
+        return register_dic
