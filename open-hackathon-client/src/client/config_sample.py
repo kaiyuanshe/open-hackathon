@@ -73,7 +73,8 @@ Config = {
         },
         "gitcafe": {
             "access_token_url": 'https://gcas.dgz.sh/oauth/token?client_id=%s&client_secret=%s&redirect_uri=%s/gitcafe&grant_type=authorization_code&code=' % (
-                GITCAFE_CLIENT_ID, GITCAFE_CLIENT_SECRET, HOSTNAME)
+                GITCAFE_CLIENT_ID, GITCAFE_CLIENT_SECRET, HOSTNAME),
+            "user_info_url": "https://gcas.dgz.sh/api/v1/user"
         },
         "weibo": {
             "meta_content": WEIBO_META_CONTENT,

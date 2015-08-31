@@ -299,23 +299,6 @@ class HackathonManager(Component):
             image['deleteUrl'] = '/api/admin/file?key=' + context.file_name
             images.append(image)
 
-        # for file_name in request.files:
-        # file = request.files[file_name]
-        # real_name = self.generate_file_name(file)
-        #     self.log.debug("upload image file : " + real_name)
-        #
-        #     url = self.file_service.upload_file_to_azure(file, image_container_name, real_name)
-        #     if url is not None:
-        #         image = {}
-        #         image['name'] = file.filename
-        #         image['url'] = url
-        #         # frontUI components needed return values
-        #         image['thumbnailUrl'] = url
-        #         image['deleteUrl'] = '/api/file?key=' + real_name
-        #         images.append(image)
-        #     else:
-        #         return internal_server_error("upload file failed")
-
         return {"files": images}
 
     def get_recyclable_hackathon_list(self):

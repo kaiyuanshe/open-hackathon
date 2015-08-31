@@ -48,14 +48,9 @@ def init_routes():
     # system time API
     api.add_resource(CurrentTimeResource, "/api/currenttime")
 
-    # API for admin to query, create or update hackathon
-    api.add_resource(AdminHackathonResource, "/api/admin/hackathon")
-
-    # check whether hackathon with specific name exists
-    api.add_resource(HackathonCheckNameResource, "/api/admin/hackathon/checkname")
-
-    # get hackathon list that the current user are entitled to manage
-    api.add_resource(AdminHackathonListResource, "/api/admin/hackathon/list")
-
-    # manage azure certificates for hackathon
-    api.add_resource(AdminAzureResource, '/api/admin/azure')
+    # APIs for admin to manage hackathon and hackathon features
+    api.add_resource(AdminHackathonResource, "/api/admin/hackathon")  # create/update hackathon
+    api.add_resource(HackathonCheckNameResource, "/api/admin/hackathon/checkname")  # check hackathon name exists
+    api.add_resource(AdminHackathonListResource, "/api/admin/hackathon/list")  # get entitled hackathon list
+    api.add_resource(AdminAzureResource, '/api/admin/azure')  # manage azure subscription and certs
+    api.add_resource(AdminRegisterListResource, "/api/admin/registration/list")  # get registered users

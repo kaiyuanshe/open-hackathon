@@ -108,10 +108,10 @@ class LocalStorage(Storage):
         with open(path, 'w') as f:
             if isinstance(content, dict):
                 json.dump(content, f)
-            elif isinstance(content, file):
+            elif isinstance(content, file) or isinstance(content, FileStorage):
                 f.write(content.read())
-            elif isinstance(content, FileStorage):
-                content.save(path)
+            else:
+                f.write(str(content))
 
     @staticmethod
     def __get_storage_base_dir():

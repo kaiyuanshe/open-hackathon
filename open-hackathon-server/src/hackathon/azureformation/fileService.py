@@ -29,16 +29,12 @@ sys.path.append("..")
 from azure.storage import BlobService
 from hackathon import Component
 
+
 class FileService(Component):
     def __init__(self):
-        self.blob_service = None
-
-    def generate_blob_service(self):
-        if self.blob_service is None:
-            # if storage info doesn't exist in config.py upload file function stop working
-            self.blob_service = BlobService(account_name=self.util.get_config("storage.azure.account_name"),
-                                            account_key=self.util.get_config("storage.azure.account_key"),
-                                            host_base=self.util.get_config("storage.azure.blob_service_host_base"))
+        self.blob_service = BlobService(account_name=self.util.get_config("storage.azure.account_name"),
+                                        account_key=self.util.get_config("storage.azure.account_key"),
+                                        host_base=self.util.get_config("storage.azure.blob_service_host_base"))
 
     def create_container_in_storage(self, container_name, access):
         """
@@ -47,7 +43,6 @@ class FileService(Component):
         :param access:
         :return:
         """
-        self.generate_blob_service()
         try:
             names = map(lambda x: x.name, self.blob_service.list_containers())
             if container_name not in names:
@@ -59,7 +54,21 @@ class FileService(Component):
             self.log.error(e)
             return False
 
-    def upload_file_to_azure(self, stream, container_name, blob_name):
+    def upload_file_to_azure(self, container_name, blob_name, stream):
+        """
+        Creates a new block blob from a file/stream, or updates the content of
+        an existing block blob, with automatic chunking and progress
+        notifications.
+
+        :type container_name: str|unicode
+        :param container_name: Name of existing container.
+
+        :type blob_name: str | unicode
+        :param blob_name: Name of blob to create or update.
+
+        :type stream: file
+        :param stream: Opened file/stream to upload as the blob content.
+        """
         try:
             if self.create_container_in_storage(container_name, 'container'):
                 self.blob_service.put_block_blob_from_file(container_name, blob_name, stream)
@@ -70,7 +79,69 @@ class FileService(Component):
             self.log.error(e)
             return None
 
-    def upload_file_to_azure_from_path(self, path, container_name, blob_name):
+    def upload_file_to_azure_from_bytes(self, container_name, blob_name, blob):
+        """
+        Creates a new block blob from an array of bytes, or updates the content
+        of an existing block blob, with automatic chunking and progress
+        notifications.
+
+        :type container_name: str|unicode
+        :param container_name: Name of existing container.
+
+        :type blob_name: str|unicode
+        :param blob_name: Name of blob to create or update.
+
+        :type blob: bytes
+        :param blob: Content of blob as an array of bytes.
+        """
+        try:
+            if self.create_container_in_storage(container_name, 'container'):
+                self.blob_service.put_block_blob_from_bytes(container_name, blob_name, blob)
+                return self.blob_service.make_blob_url(container_name, blob_name)
+            else:
+                return None
+        except Exception as e:
+            self.log.error(e)
+            return None
+
+    def upload_file_to_azure_from_text(self, container_name, blob_name, text):
+        """
+        Creates a new block blob from str/unicode, or updates the content of an
+        existing block blob, with automatic chunking and progress notifications.
+
+        :type container_name: str|unicode
+        :param container_name: Name of existing container.
+
+        :type blob_name: str|unicode
+        :param blob_name: Name of blob to create or update.
+
+        :type text: str|unicode
+        :param text: Text to upload to the blob.
+        """
+        try:
+            if self.create_container_in_storage(container_name, 'container'):
+                self.blob_service.put_block_blob_from_text(container_name, blob_name, text)
+                return self.blob_service.make_blob_url(container_name, blob_name)
+            else:
+                return None
+        except Exception as e:
+            self.log.error(e)
+            return None
+
+    def upload_file_to_azure_from_path(self, container_name, blob_name, path):
+        """
+        Creates a new page blob from a file path, or updates the content of an
+        existing page blob, with automatic chunking and progress notifications.
+
+        :type container_name: str|unicode
+        :param container_name: Name of existing container.
+
+        :type blob_name: str|unicode
+        :param blob_name: Name of blob to create or update.
+
+        :type path: str|unicode
+        :param path: Path of the file to upload as the blob content.
+        """
         try:
             if self.create_container_in_storage(container_name, 'container'):
                 self.blob_service.put_block_blob_from_path(container_name, blob_name, path)
@@ -88,4 +159,3 @@ class FileService(Component):
         except Exception as e:
             self.log.error(e)
             return None
-
