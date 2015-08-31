@@ -303,7 +303,7 @@ def temp_settings(hackathon_name):
 def create_join_team(hackathon_name):
     headers = {"hackathon_name": hackathon_name, "token": session["token"]}
     member = Context.from_object(__get_api(API_TEAM_MEMBER_LIST, headers))
-    if member.get('team') is None:
+    if member.get('team') is not None:
         return redirect(url_for('user_team_hackathon', hackathon_name=hackathon_name))
     else:
         return render("/site/team.html", hackathon_name=hackathon_name)

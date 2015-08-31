@@ -72,7 +72,8 @@
                             <a class="btn btn-primary btn-lg"
                                href="{{ url_for('user_profile',return_url=request.path) }}">我要报名</a>
                         {% elif registration == None %}
-                            <a class="btn btn-primary btn-lg" data-toggle="modal" data-target="#registerModal">我要报名</a>
+                            <a class="btn btn-primary btn-lg"
+                               href="{{ url_for('create_join_team' ,hackathon_name=hackathon_name) }}">我要报名</a>
                         {% elif hackathon.basic_info.auto_approve or registration.status == 1 or registration.status == 3 %}
                             {% if experiment == None %}
                                 <a class="btn btn-primary btn-lg"
@@ -83,7 +84,7 @@
                             {% endif %}
                             <p>您的报名已经审核已通过。</p>
                         {% elif not hackathon.basic_info.auto_approve and registration.status == 3 %}
-                            <a class="btn btn-primary btn-lg" data-toggle="modal" data-target="#registerModal">我要报名</a>
+                            <p>您的报名正在审核中，请等待。</p>
                         {% elif not hackathon.basic_info.auto_approve and registration.status == 0 %}
                             <p>您的报名正在审核中，请等待。</p>
                         {% elif registration.status == 2 %}
@@ -196,6 +197,7 @@
             <div class="date">${create_time}</div>
         </li>
     {% endraw %}
+
     </script>
     <script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
     <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
