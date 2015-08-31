@@ -72,10 +72,12 @@
                             <a class="btn btn-primary btn-lg"
                                href="{{ url_for('user_profile',return_url=request.path) }}">我要报名</a>
                         {% elif registration == None %}
-                            <a class="btn btn-primary btn-lg"
-                               href="{{ url_for('create_join_team' ,hackathon_name=hackathon_name) }}">我要报名</a>
+                            <a class="btn btn-primary btn-lg" data-type="register">我要报名</a>
                         {% elif hackathon.basic_info.auto_approve or registration.status == 1 or registration.status == 3 %}
-                            {% if experiment == None %}
+                            {% if is_creta_team and hackathon.basic_info.freedom_team %}
+                                <a class="btn btn-primary btn-lg"
+                                    href="{{ url_for('create_join_team' ,hackathon_name=hackathon_name) }}">我要报名</a>
+                            {% elif experiment == None %}
                                 <a class="btn btn-primary btn-lg"
                                    href="{{ url_for('temp_settings',hackathon_name=hackathon_name) }}">立即参加</a>
                             {% else %}

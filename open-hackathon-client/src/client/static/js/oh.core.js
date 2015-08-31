@@ -43,11 +43,12 @@
             pageloading.detach();
         },
         alert: function (title, text, fun) {
-            $('body').Dialog({
+           var alert = $('body').Dialog({
                 title: title,
                 body: text,
-                footer: $('<button class="btn btn-primary">È·¶¨</button>').click(function (e) {
-                    fun()
+                footer: $('<button class="btn btn-primary">ç¡®å®š</button>').click(function (e) {
+                    fun();
+                    alert.hide();
                 }),
                 modal: 'alert'
             });
@@ -236,6 +237,9 @@ String.prototype.format = function (args) {
                 e.target.remove();
             })
             this.layout.modal('show');
+        },
+        hide:function(){
+            this.layout.modal('hide');
         }
     }
     $.fn.Dialog = function (options) {
