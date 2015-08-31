@@ -63,7 +63,8 @@ class UserHackathonRelResource(Resource, Component):
     @token_required
     @hackathon_name_required
     def post(self):
-        args = request.get_json()
+        args = {}
+        args["hackathon_id"] = g.hackathon.id
         args["user_id"] = g.user.id
         return register_manager.create_registration(g.hackathon, args)
 
@@ -198,7 +199,7 @@ class TeamResource(Resource):
     @hackathon_name_required
     def post(self):
         args = request.get_json()
-        register_manager.create_registration(g.hackathon, {"hackathon_id": g.hackathon.id, "user_id": g.user.id})
+        #register_manager.create_registration(g.hackathon, {"hackathon_id": g.hackathon.id, "user_id": g.user.id})
         return team_manager.create_team(args)
 
     @token_required

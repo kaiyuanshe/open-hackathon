@@ -46,7 +46,7 @@ class TeamManager(Component):
 
     def get_user_by_teams(self, user_id):
         teams = self.__get_user_teams(user_id)
-        team_list = map(lambda x: x._asdict(), teams)
+        team_list = map(lambda x: x.dic(), teams)
 
         return team_list
 

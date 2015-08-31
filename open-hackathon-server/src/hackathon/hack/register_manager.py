@@ -91,11 +91,12 @@ class RegisterManager(Component):
     def create_registration(self, hackathon, args):
         state, return_info = self.validate_created_args(hackathon, args)
         if not state:
-            return return_info
+            return {"register": return_info, "hackahton_basic_info": json.loads(hackathon.basic_info)}
         try:
             args["status"] = hackathon.is_auto_approve() and RGStatus.AUTO_PASSED or RGStatus.UNAUDIT
             args['create_time'] = self.util.get_now()
-            return self.db.add_object_kwargs(UserHackathonRel, **args).dic()
+            user_hackathon_rel = self.db.add_object_kwargs(UserHackathonRel, **args).dic()
+            return {"register": user_hackathon_rel, "hackahton_basic_info": json.loads(hackathon.basic_info)}
         except Exception as e:
             self.log.error(e)
             return internal_server_error("fail to create register")
