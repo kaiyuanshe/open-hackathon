@@ -31,8 +31,6 @@ import json
 import imghdr
 import uuid
 import time
-import os
-from os.path import realpath, dirname
 
 from werkzeug.exceptions import PreconditionFailed, InternalServerError
 from sqlalchemy import or_
@@ -144,7 +142,8 @@ class HackathonManager(Component):
 
         return map(lambda u: u.dic(), hackathon_list)
 
-    def __get_property_from_hackathon_basic_info(self, hackathon, key, default=None):
+    def get_basic_property(self, hackathon, key, default=None):
+        """Get basic property of hackathon from hackathon.basic_info"""
         try:
             basic_info = json.loads(hackathon.basic_info)
             return basic_info.get(key, default)
@@ -173,41 +172,13 @@ class HackathonManager(Component):
             self.log.debug("hackathon_name not found in headers")
             return False
 
-    def is_auto_approve(self, hackathon):
-        key = HACKATHON_BASIC_INFO.AUTO_APPROVE
-        value = self.__get_property_from_hackathon_basic_info(hackathon, key)
-        return value == 1
-
-    def is_pre_allocate_enabled(self, hackathon):
-        try:
-            basic_info = json.loads(hackathon.basic_info)
-            k = HACKATHON_BASIC_INFO.PRE_ALLOCATE_ENABLED
-            return k in basic_info and basic_info[k] == 1
-        except Exception as e:
-            self.log.error(e)
-            self.log.warn(
-                "cannot load pre_allocate_enabled from basic info for hackathon %d, will return False" % hackathon.id)
-            return False
-
-    def is_alauda_enabled(self, hackathon):
-        key = HACKATHON_BASIC_INFO.ALAUDA_ENABLED
-        value = self.__get_property_from_hackathon_basic_info(hackathon, key)
-        return value if value is not None else False
-
     def is_recycle_enabled(self, hackathon):
         key = HACKATHON_BASIC_INFO.RECYCLE_ENABLED
-        value = self.__get_property_from_hackathon_basic_info(hackathon, key)
-        return value if value is not None else False
+        return self.get_basic_property(hackathon, key, False)
 
     def get_recycle_minutes(self, hackathon):
         key = HACKATHON_BASIC_INFO.RECYCLE_MINUTES
-        value = self.__get_property_from_hackathon_basic_info(hackathon, key)
-        return value if value is not None else 60
-
-    def get_pre_allocate_number(self, hackathon):
-        key = HACKATHON_BASIC_INFO.PRE_ALLOCATE_NUMBER
-        value = self.__get_property_from_hackathon_basic_info(hackathon, key)
-        return value if value is not None else 1
+        return self.get_basic_property(hackathon, key, 60)
 
     def create_new_hackathon(self, context):
         """Create new hackathon based on the http body
@@ -307,8 +278,8 @@ class HackathonManager(Component):
 
     def get_pre_allocate_enabled_hackathon_list(self):
         # only online hackathons will be in consideration
-        all = self.get_online_hackathons()
-        pre_list = filter(lambda h: self.is_pre_allocate_enabled(h), all)
+        online = self.get_online_hackathons()
+        pre_list = filter(lambda hackathon: hackathon.is_pre_allocate_enabled(), online)
         return [h.id for h in pre_list]
 
     # ---------------------------- private methods ---------------------------------------------------
@@ -456,25 +427,33 @@ hackathon is entity of Hackathon that defines in database/models.py.
 
 def is_auto_approve(hackathon):
     hack_manager = RequiredFeature("hackathon_manager")
-    return hack_manager.is_auto_approve(hackathon)
+    value = hack_manager.get_basic_property(hackathon, HACKATHON_BASIC_INFO.AUTO_APPROVE, 1)
+    return value == 1
 
 
 def is_pre_allocate_enabled(hackathon):
     hack_manager = RequiredFeature("hackathon_manager")
-    return hack_manager.is_pre_allocate_enabled(hackathon)
+    value = hack_manager.get_basic_property(hackathon, HACKATHON_BASIC_INFO.PRE_ALLOCATE_ENABLED, 1)
+    return value == 1
 
 
 def get_pre_allocate_number(hackathon):
     hack_manager = RequiredFeature("hackathon_manager")
-    return hack_manager.get_pre_allocate_number(hackathon)
+    return hack_manager.get_basic_property(hackathon, HACKATHON_BASIC_INFO.PRE_ALLOCATE_NUMBER, 1)
 
 
 def is_alauda_enabled(hackathon):
     hack_manager = RequiredFeature("hackathon_manager")
-    return hack_manager.is_alauda_enabled(hackathon)
+    return hack_manager.get_basic_property(hackathon, HACKATHON_BASIC_INFO.ALAUDA_ENABLED, False)
+
+
+def get_basic_property(hackathon, property_name, default_value=None):
+    hack_manager = RequiredFeature("hackathon_manager")
+    return hack_manager.get_basic_property(hackathon, property_name, default_value)
 
 
 Hackathon.is_auto_approve = is_auto_approve
 Hackathon.is_pre_allocate_enabled = is_pre_allocate_enabled
 Hackathon.get_pre_allocate_number = get_pre_allocate_number
 Hackathon.is_alauda_enabled = is_alauda_enabled
+Hackathon.get_basic_property = get_basic_property

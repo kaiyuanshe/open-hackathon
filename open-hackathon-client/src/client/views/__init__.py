@@ -54,7 +54,7 @@ API_HACKATHON_LIST = "/api/hackathon/list"
 API_HACKATHON_TEMPLATE = "/api/hackathon/template"
 API_HACAKTHON_REGISTRATION = "/api/user/registration"
 API_TEAM_MEMBER_LIST = "/api/team/member/list"
-API_TEAM_USER = "/api/team/user"
+API_TEAM_USER = "/api/user/team/list"
 
 login_manager = LoginManager()
 login_manager.init_app(app)

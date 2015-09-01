@@ -31,9 +31,9 @@ import json
 from flask import g
 
 from hackathon import Component, RequiredFeature
-from hackathon.database import UserHackathonRel, Experiment, UserProfile
+from hackathon.database import UserHackathonRel, Experiment
 from hackathon.hackathon_response import bad_request, precondition_failed, internal_server_error, not_found, ok
-from hackathon.constants import EStatus, RGStatus, ReservedUser
+from hackathon.constants import EStatus, RGStatus, HACKATHON_BASIC_INFO
 
 __all__ = ["RegisterManager"]
 
@@ -42,6 +42,7 @@ class RegisterManager(Component):
     """Component to manage registered users of a hackathon"""
     hackathon_manager = RequiredFeature("hackathon_manager")
     user_manager = RequiredFeature("user_manager")
+    admin_manager = RequiredFeature("admin_manager")
 
     def get_hackathon_registration_list(self, num=None):
         """Get registered users list
@@ -61,42 +62,38 @@ class RegisterManager(Component):
     def get_registration_by_user_and_hackathon(self, user_id, hackathon_id):
         return self.db.find_first_object_by(UserHackathonRel, user_id=user_id, hackathon_id=hackathon_id)
 
-    def check_register_enrollment(self, hackathon):
-        max = int(json.loads(hackathon.basic_info)['max_enrollment'])
-        if max == 0:  # means no limit
-            return True
-        else:
-            current_num = self.db.count(UserHackathonRel, UserHackathonRel.hackathon_id == hackathon.id)
-            return max > current_num
+    def create_registration(self, hackathon, user, args):
+        """Register hackathon for user
 
-    def validate_created_args(self, hackathon, args):
+        Will add a new record in table UserRegistrationRel if precondition fulfilled
+        """
         self.log.debug("create_register: %r" % args)
         user_id = args['user_id']
-        register = self.get_registration_by_user_and_hackathon(user_id, hackathon.id)
-        if register is not None and register.deleted == 0:
+        if self.is_user_registered(user.id, hackathon):
             self.log.debug("user %d already registered on hackathon %d" % (user_id, hackathon.id))
-            return False, register.dic()
+            return self.get_registration_detail(user, hackathon)
+
+        if self.admin_manager.is_hackathon_admin(hackathon.id, user.id):
+            return precondition_failed("administrator cannot register the hackathon", friendly_message="管理员或裁判不能报名")
 
         if hackathon.registration_start_time > self.util.get_now():
-            return False, precondition_failed("hackathon registration not opened", friendly_message="报名尚未开始")
+            return precondition_failed("hackathon registration not opened", friendly_message="报名尚未开始")
 
         if hackathon.registration_end_time < self.util.get_now():
-            return False, precondition_failed("hackathon registration has ended", friendly_message="报名已经结束")
+            return precondition_failed("hackathon registration has ended", friendly_message="报名已经结束")
 
-        if not self.check_register_enrollment(hackathon):
-            return False, precondition_failed("hackathon registers reach the upper threshold",
-                                              friendly_message="报名人数已满")
-        return True, ""
+        if self.__is_hackathon_filled_up(hackathon):
+            return precondition_failed("hackathon registers reach the upper threshold",
+                                       friendly_message="报名人数已满")
 
-    def create_registration(self, hackathon, args):
-        state, return_info = self.validate_created_args(hackathon, args)
-        if not state:
-            return {"register": return_info, "hackahton_basic_info": json.loads(hackathon.basic_info)}
         try:
-            args["status"] = hackathon.is_auto_approve() and RGStatus.AUTO_PASSED or RGStatus.UNAUDIT
+            args["status"] = RGStatus.AUTO_PASSED if hackathon.is_auto_approve() else RGStatus.UNAUDIT
             args['create_time'] = self.util.get_now()
             user_hackathon_rel = self.db.add_object_kwargs(UserHackathonRel, **args).dic()
-            return {"register": user_hackathon_rel, "hackahton_basic_info": json.loads(hackathon.basic_info)}
+            return {
+                "register": user_hackathon_rel,
+                "hackahton_basic_info": json.loads(hackathon.basic_info)
+            }
         except Exception as e:
             self.log.error(e)
             return internal_server_error("fail to create register")
@@ -104,8 +101,8 @@ class RegisterManager(Component):
     def update_registration(self, args):
         self.log.debug("update_registration: %r" % args)
         try:
-            id = args['id']
-            register = self.get_registration_by_id(id)
+            registration_id = args['id']
+            register = self.get_registration_by_id(registration_id)
             if register is None:
                 # we can also create a new object here.
                 return not_found("registration not found")
@@ -134,22 +131,21 @@ class RegisterManager(Component):
             self.log.error(ex)
             return internal_server_error("failed in delete register: %s" % args["id"])
 
-    def get_registration_detail(self, user_id, hackathon):
+    def get_registration_detail(self, user, hackathon):
         detail = {
             "hackathon": hackathon.dic(),
-            "user": self.user_manager.user_display_info(g.user)
+            "user": self.user_manager.user_display_info(user)
         }
 
-        rel = self.get_registration_by_user_and_hackathon(user_id, hackathon.id)
+        rel = self.get_registration_by_user_and_hackathon(user.id, hackathon.id)
         if rel is None:
-            # return nothing
             return detail
 
         detail["registration"] = rel.dic()
-        # experiment
+        # experiment if any
         try:
             experiment = self.db.find_first_object(Experiment,
-                                                   Experiment.user_id == user_id,
+                                                   Experiment.user_id == user.id,
                                                    Experiment.hackathon_id == hackathon.id,
                                                    Experiment.status.in_([EStatus.STARTING, EStatus.RUNNING]))
             if experiment is not None:
@@ -160,49 +156,9 @@ class RegisterManager(Component):
         return detail
 
     def is_user_registered(self, user_id, hackathon):
-        # reservedUser (-1)
-        if user_id == ReservedUser.DefaultUserID:
-            return True
-
-        # admin
-        if self.hackathon_manager.validate_admin_privilege(user_id, hackathon.id):
-            return True
-
-        # user
-        reg = self.get_registration_by_user_and_hackathon(user_id, hackathon.id)
-        if reg is not None:
-            return reg.status == RGStatus.AUTO_PASSED or reg.status == RGStatus.AUDIT_PASSED
-
-        return False
-
-    def get_user_profile(self, user_id):
-        return self.db.find_first_object_by(UserProfile, user_id=user_id)
-
-    def create_user_profile(self, args):
-        self.log.debug("create_user_profile: %r" % args)
-        try:
-            exist = self.get_user_profile(g.user.id)
-            if not exist:
-                return self.db.add_object_kwargs(UserProfile, **args).dic()
-            else:
-                return self.update_user_profile(args)
-        except Exception as e:
-            self.log.debug(e)
-            return internal_server_error("failed to create user profile")
-
-    def update_user_profile(self, args):
-        self.log.debug("update_user_profile")
-        try:
-            u_id = args["user_id"]
-            user_profile = self.db.find_first_object_by(UserProfile, user_id=u_id)
-            if user_profile:
-                self.db.update_object(user_profile, **args)
-                return user_profile.dic()
-            else:
-                return not_found("fail to update user profile")
-        except Exception as e:
-            self.log.debug(e)
-            return internal_server_error("failed to update user profile")
+        """Check whether use registered certain hackathon"""
+        register = self.get_registration_by_user_and_hackathon(user_id, hackathon.id)
+        return register is not None and register.deleted == 0
 
     def __get_registration_with_profile(self, registration):
         """Return user display info as well as the registration detail in dict
@@ -216,3 +172,18 @@ class RegisterManager(Component):
         register_dic = registration.dic()
         register_dic['user'] = self.user_manager.user_display_info(registration.user)
         return register_dic
+
+    def __is_hackathon_filled_up(self, hackathon):
+        """Check whether all seats are occupied or not
+
+        :return False if not all seats occupied or hackathon has no limit at all otherwise True
+        """
+        max = hackathon.get_basic_property(HACKATHON_BASIC_INFO.MAX_ENROLLMENT, 0)
+        if max == 0:  # means no limit
+            return False
+        else:
+            # count of audited users
+            current_num = self.db.count(UserHackathonRel,
+                                        UserHackathonRel.hackathon_id == hackathon.id,
+                                        UserHackathonRel.status.in_(RGStatus.AUDIT_PASSED, RGStatus.AUTO_PASSED))
+            return current_num >= max

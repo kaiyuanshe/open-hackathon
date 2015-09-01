@@ -44,7 +44,14 @@ class TeamManager(Component):
     admin_manager = RequiredFeature("admin_manager")
     template_manager = RequiredFeature("template_manager")
 
-    def get_user_by_teams(self, user_id):
+    def get_teams_by_user(self, user_id):
+        """Get all teams of specific user
+
+        Teams in all participated hackathon are returned
+
+        :type user_id: int
+        :param user_id: id of user
+        """
         teams = self.__get_user_teams(user_id)
         team_list = map(lambda x: x.dic(), teams)
 
@@ -112,7 +119,6 @@ class TeamManager(Component):
             return detail
         else:
             return not_found("no such team's members")
-
 
     def get_hackathon_team_list(self, hackathon_id, name=None, number=None):
         """Get the team list of selected hackathon
@@ -426,7 +432,7 @@ class TeamManager(Component):
         pass
 
     def __get_user_teams(self, user_id):
-        """Get user teams list and related hackathon display info
+        """Get all teams of specific and related hackathon display info
 
         :type user_id: int
         :param user_id: User id to get teams. Cannot be None
@@ -441,7 +447,6 @@ class TeamManager(Component):
             filter(UserTeamRel.user_id == user_id)
 
         return q.all()
-
 
     def __get_team_members(self, team):
         """Get team members list and related user display info
@@ -510,7 +515,7 @@ class TeamManager(Component):
         # check if team leader
         if team.leader_id != user.id:
             # check if hackathon admin
-            if not self.admin_manager.is_hackathon_admin(hackathon_id, user):
+            if not self.admin_manager.is_hackathon_admin(hackathon_id, user.id):
                 # check if super admin
                 if not self.user_manager.is_super_admin(user):
                     self.log.debug("Access denied for user [%s]%s trying to access team '%s' of hackathon %d " %

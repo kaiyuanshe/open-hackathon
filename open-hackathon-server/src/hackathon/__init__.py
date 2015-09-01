@@ -134,7 +134,7 @@ def init_components():
     """Init hackathon factory"""
     from hackathon.database import db_session
     from hackathon.database.db_adapters import SQLAlchemyAdapter
-    from hackathon.user import UserManager
+    from hackathon.user import UserManager, UserProfileManager
     from hackathon.hack import HackathonManager, AdminManager, TeamManager, DockerHostManager, AzureCertManager, \
         RegisterManager
     from hackathon.template.template_mgr import TemplateManager
@@ -152,6 +152,7 @@ def init_components():
 
     # business components
     factory.provide("user_manager", UserManager)
+    factory.provide("user_profile_manager", UserProfileManager)
     factory.provide("hackathon_manager", HackathonManager)
     factory.provide("register_manager", RegisterManager)
     factory.provide("azure_cert_manager", AzureCertManager)

@@ -133,12 +133,12 @@ Config = {
                         "administrator": {
                             "": ["put", "post", "delete"],
                             "list": ["get"]
-                        },
-                        "template": {
-                            "": ["post", "delete"],
-                            "list": ["get"],
-                            "check": ["get"]
                         }
+                    },
+                    "template": {
+                        "": ["post", "delete"],
+                        "list": ["get"],
+                        "check": ["get"]
                     },
                     "registration": {
                         "": ["get", "post", "delete", "put"],
@@ -149,7 +149,7 @@ Config = {
                     },
                     "experiment": {
                         "list": ["get"],
-                        "": ["post", "put"]
+                        "": ["post", "delete"]
                     }
                 },
                 "template": {
@@ -172,7 +172,7 @@ Config = {
                         "": ["get", "post", "put"]
                     },
                     "team": {
-                        "member": ["get"]
+                        "list": ["get"]
                     }
                 },
                 "hackathon": {
@@ -189,7 +189,6 @@ Config = {
                 },
                 "team": {
                     "": ["get", "post"],
-                    "user": ["get"],
                     "list": ["get"],
                     "leader": ["put"],
                     "member": {
