@@ -82,9 +82,9 @@
                 var data = getFormDate();
                 CreateTeam(data).then(function (data) {
                     if (data.error) {
-
+                        oh.comm.alert('´íÎó',data.error.friendly_message);
                     } else {
-
+                        window.location.href = '/site/' + hackathon_name+'/settings';
                     }
                 });
             });

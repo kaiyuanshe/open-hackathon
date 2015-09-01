@@ -41,6 +41,7 @@ from hackathon.constants import RGStatus
 
 hackathon_manager = RequiredFeature("hackathon_manager")
 user_manager = RequiredFeature("user_manager")
+user_profile_manager = RequiredFeature("user_profile_manager")
 register_manager = RequiredFeature("register_manager")
 template_manager = RequiredFeature("template_manager")
 team_manager = RequiredFeature("team_manager")
@@ -179,7 +180,7 @@ class UserProfileResource(HackathonResource):
     @token_required
     def get(self):
         user_id = g.user.id
-        info = register_manager.get_user_profile(user_id)
+        info = user_profile_manager.get_user_profile(user_id)
         if info is not None:
             return info.dic()
         else:
@@ -189,13 +190,13 @@ class UserProfileResource(HackathonResource):
     def post(self):
         args = request.get_json()
         args["user_id"] = g.user.id
-        return register_manager.create_user_profile(args)
+        return user_profile_manager.create_user_profile(args)
 
     @token_required
     def put(self):
         args = request.get_json()
         args["user_id"] = g.user.id
-        return register_manager.update_user_profile(args)
+        return user_profile_manager.update_user_profile(args)
 
 
 class UserTemplateListResource(HackathonResource):
@@ -216,7 +217,8 @@ class UserRegistrationResource(HackathonResource):
     def post(self):
         args = request.get_json()
         args["user_id"] = g.user.id
-        return register_manager.create_registration(g.hackathon, args)
+        args["hackathon_id"] = g.hackathon.id
+        return register_manager.create_registration(g.hackathon, g.user, args)
 
     @token_required
     @hackathon_name_required

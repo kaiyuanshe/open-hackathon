@@ -53,7 +53,7 @@ class TeamManager(Component):
         :param user_id: id of user
         """
         teams = self.__get_user_teams(user_id)
-        team_list = map(lambda x: x._asdict(), teams)
+        team_list = map(lambda x: x.dic(), teams)
 
         return team_list
 
@@ -95,7 +95,7 @@ class TeamManager(Component):
             detail["members"] = self.__get_team_members(team)
             return detail
         else:
-            return not_found("no such team's members")
+            return {}
 
     def get_team_members_by_name(self, hackathon_id, team_name):
         """Get team member list of specific team_name
@@ -515,7 +515,7 @@ class TeamManager(Component):
         # check if team leader
         if team.leader_id != user.id:
             # check if hackathon admin
-            if not self.admin_manager.is_hackathon_admin(hackathon_id, user):
+            if not self.admin_manager.is_hackathon_admin(hackathon_id, user.id):
                 # check if super admin
                 if not self.user_manager.is_super_admin(user):
                     self.log.debug("Access denied for user [%s]%s trying to access team '%s' of hackathon %d " %

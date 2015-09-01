@@ -102,8 +102,6 @@ class ExprManager(Component):
             return not_found('hackathon or template is not existed')
 
         hackathon = hack_temp[0]
-        # if not self.register_manager.is_user_registered(user_id, hackathon):
-        #     return forbidden("user not registered or not approved")
 
         if hackathon.event_end_time < self.util.get_now():
             self.log.warn("hackathon is ended. The expr starting process will be stopped")
@@ -228,7 +226,7 @@ class ExprManager(Component):
         templates = map(lambda x: x.template, htrs)
         for template in templates:
             try:
-                pre_num = self.hackathon_manager.get_pre_allocate_number(template.hackathon)
+                pre_num = template.hackathon.get_pre_allocate_number()
                 curr_num = self.db.count(Experiment,
                                          Experiment.user_id == ReservedUser.DefaultUserID,
                                          Experiment.template_id == template.id,
@@ -447,8 +445,8 @@ class ExprManager(Component):
         :return:
         """
         exp_status = [EStatus.RUNNING, EStatus.STARTING]
-        check_temp = Experiment.template_id == template.id if self.admin_Manager.validate_admin_privilege(user_id,
-                                                                                                              hackathon.id) else Experiment.id > -1
+        is_admin = self.admin_Manager.is_hackathon_admin(hackathon.id, user_id)
+        check_temp = Experiment.template_id == template.id if is_admin else Experiment.id > -1
         expr = self.db.find_first_object(Experiment,
                                          Experiment.status.in_(exp_status),
                                          Experiment.user_id == user_id,
