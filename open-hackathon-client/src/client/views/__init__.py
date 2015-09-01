@@ -329,6 +329,10 @@ def superadmin():
     return render("/superadmin.html")
 
 
+@app.route("/landing")
+def landing():
+     return render("/landing.html")
+
 from route_manage import *
 from route_template import *
 from route_user import *
