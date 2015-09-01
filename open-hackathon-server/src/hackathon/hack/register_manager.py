@@ -133,22 +133,21 @@ class RegisterManager(Component):
             self.log.error(ex)
             return internal_server_error("failed in delete register: %s" % args["id"])
 
-    def get_registration_detail(self, user_id, hackathon):
+    def get_registration_detail(self, user, hackathon):
         detail = {
             "hackathon": hackathon.dic(),
-            "user": self.user_manager.user_display_info(g.user)
+            "user": self.user_manager.user_display_info(user)
         }
 
-        rel = self.get_registration_by_user_and_hackathon(user_id, hackathon.id)
+        rel = self.get_registration_by_user_and_hackathon(user.id, hackathon.id)
         if rel is None:
-            # return nothing
             return detail
 
         detail["registration"] = rel.dic()
-        # experiment
+        # experiment if any
         try:
             experiment = self.db.find_first_object(Experiment,
-                                                   Experiment.user_id == user_id,
+                                                   Experiment.user_id == user.id,
                                                    Experiment.hackathon_id == hackathon.id,
                                                    Experiment.status.in_([EStatus.STARTING, EStatus.RUNNING]))
             if experiment is not None:

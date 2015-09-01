@@ -31,8 +31,6 @@ import json
 import imghdr
 import uuid
 import time
-import os
-from os.path import realpath, dirname
 
 from werkzeug.exceptions import PreconditionFailed, InternalServerError
 from sqlalchemy import or_
