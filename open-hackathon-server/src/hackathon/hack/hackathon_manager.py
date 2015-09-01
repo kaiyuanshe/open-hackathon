@@ -330,7 +330,8 @@ class HackathonManager(Component):
             HACKATHON_BASIC_INFO.RECYCLE_MINUTES: 0,
             HACKATHON_BASIC_INFO.PRE_ALLOCATE_ENABLED: False,
             HACKATHON_BASIC_INFO.PRE_ALLOCATE_NUMBER: 1,
-            HACKATHON_BASIC_INFO.ALAUDA_ENABLED: False
+            HACKATHON_BASIC_INFO.ALAUDA_ENABLED: False,
+            HACKATHON_BASIC_INFO.FREEDOM_TEAM: True
         }
         return json.dumps(default_base_info)
 

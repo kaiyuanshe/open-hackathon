@@ -63,7 +63,8 @@ class UserHackathonRelResource(Resource, Component):
     @token_required
     @hackathon_name_required
     def post(self):
-        args = request.get_json()
+        args = {}
+        args["hackathon_id"] = g.hackathon.id
         args["user_id"] = g.user.id
         return register_manager.create_registration(g.hackathon, args)
 
@@ -191,12 +192,14 @@ class TeamResource(Resource):
         parse = reqparse.RequestParser()
         parse.add_argument('team_name', type=str, location='args')
         args = parse.parse_args()
+
         return team_manager.get_team_by_name(g.hackathon.id, args["team_name"])
 
     @token_required
     @hackathon_name_required
     def post(self):
         args = request.get_json()
+        #register_manager.create_registration(g.hackathon, {"hackathon_id": g.hackathon.id, "user_id": g.user.id})
         return team_manager.create_team(args)
 
     @token_required
@@ -219,10 +222,12 @@ class TeamsResource(Resource):
     def get(self):
         return team_manager.get_user_by_teams(g.user.id)
 
+
 class TeamListResource(Resource):
-     @hackathon_name_required
-     def get(self):
+    @hackathon_name_required
+    def get(self):
         return team_manager.get_team_by_hackathon(g.hackathon.id)
+
 
 class TeamMemberResource(Resource):
     @token_required

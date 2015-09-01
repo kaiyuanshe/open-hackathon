@@ -46,7 +46,7 @@ class TeamManager(Component):
 
     def get_user_by_teams(self, user_id):
         teams = self.__get_user_teams(user_id)
-        team_list = map(lambda x: x._asdict(), teams)
+        team_list = map(lambda x: x.dic(), teams)
 
         return team_list
 
@@ -88,7 +88,7 @@ class TeamManager(Component):
             detail["members"] = self.__get_team_members(team)
             return detail
         else:
-            return not_found("no such team's members")
+            return {}
 
     def get_team_members_by_name(self, hackathon_id, team_name):
         """Get team member list of specific team_name
