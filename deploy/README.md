@@ -11,9 +11,8 @@
 * [User Guide](#user-guide)
   * [Attend Hackathon](#how-to-attend-a-hackathon)
   * [Contribute your Template](#contribute-your-template)
-  * [FAQ](#faq)
-* [Organizer Guid](#organizer-guide)
-  * [Manage Hackathon](#how-to-manage-a-hackathon)
+* [Organizer Guide](#organizer-guide)
+  * [Manage Hackathon](#manage-hackathon)
     * [Create a new hackathon](#create-hackathon)
     * [Manage hackathon basic info](#manage-hackathon-basic-info)
   * [Manage registered users](#manage-registered-users)
@@ -21,15 +20,14 @@
   * [Manage Azure certificate](#manage-azure-certificate)
   * [Manage templates](#manage-templates)
   * [Manage experiment](#manage-experiment)
-  * [FAQ](#FAQ)
 * [Developer Guide](#developer-guide)
   * [Implementation and Architecture](#implementation-and-architecture-for-developer)
   * [Try OpenHackathon quickly](#try-openhackathon-quickly)
   * [Setup develop environment](#setup-develop-environment)
-    * [Setup Docker Env](#setup-docker-env)
-    * [Setup Guacamole Env](#setup-guacamole-env)
-    * [Setup MysqlDB Env](#setup-mysqlDB-env)
-    * [Setup python Env](#setup-python-env)
+    * [Setup Docker](#setup-docker)
+    * [Setup Guacamole](#setup-guacamole)
+    * [Setup MySQLDB](#setup-mysqlDB)
+    * [Setup Python](#setup-python)
   * [Config file](#config-file)
   * [Customize](#customize)
   * [Test](#test)
@@ -39,7 +37,7 @@
   * [Python doc](#python-doc)
   * [DB schema](#db-schema)
   * [Contribution.MD](#contribution.md)
-  * [FAQ](#QA)
+  * [FAQ](#faq)
 
 
 
@@ -136,14 +134,14 @@ To setup the whole OpenHackathon develop environment, you need those components:
 **MysqlDB**
 **Python third part lib**
 
-### Setup Docker Env
+### Setup Docker
 Docker service takes part in OpenHackathon Platform as a environment provider that will provide to all users. And docker service now is the most populer cloudservice, you could get more details on [docker official website](https://www.docker.com/)                         
 
 In OpenHackathon develop evnironment you should install and setup docker service like this: [Docker intsallation on Ubuntu](https://docs.docker.com/installation/ubuntulinux/)                    
 
 In order to control and manage docker service from OpenHackathon conveniently , we'd better to enable docker's `remote API`. Fllow this steps after installation of docker service,[enable docker remote API](http://blog.trifork.com/2013/12/24/docker-from-a-distance-the-remote-api/)
     
-### Setup Guacamole Env
+### Setup Guacamole
 Having got many environments we need to find a way to connect them for users, as you know that we choose Guacamole!Guacamole works as a remote client connecting to running environments, which provides SSH, RDP and VNC protocols. So we can cope with various environments of different hackathons        
 [Guacamole](http://guac-dev.org/) can give you more details.        
 
@@ -165,7 +163,7 @@ And find the `openhackathon-gucamole-authentication-1.0-SNAPSHOT.jar` in src fol
 
 If you want to make you own Guacamole auth provider, there is a java project named `openhackathon-guacamole-auth-provider` can give a example, you also can find in out src folders! But, this java project just match `version 0.9.7` of guacamole client!
 
-### Setup MysqlDB Env
+### Setup MysqlDB
 First you need to install the components of Mysql and Python libs:
 ```
 sudo apt-get install build-essential python python-dev python-setuptools libmysqlclient-dev
@@ -193,7 +191,7 @@ sudo python open-hackathon/open-hackathon-server/src/setup_db.py
 ```
 Now , you can write and design you own OpenHackathon freely !
 
-### Setup Python Env
+### Setup Python
 Find out the `requirement.txt` both in `open-hackathon-server` and `open-hackathon-client` in src folders, all dependencies are recorded in , we could install them through a simply command :   
 ```
 sudo pip install -r open-hackathon-server/requirement.txt
@@ -222,8 +220,4 @@ Then copy a file `config.py` from `config_sample.py`, and modify it as needed. B
 ## Python doc
 ## DB schema
 ## Contribution.MD
-
-
-
-
-
+## FAQ
