@@ -26,7 +26,7 @@
   * [Setup develop environment](#setup-develop-environment)
     * [Setup Docker](#setup-docker)
     * [Setup Guacamole](#setup-guacamole)
-    * [Setup MySQLDB](#setup-mysqlDB)
+    * [Setup MySQLDB](#setup-mysqldb)
     * [Setup Python](#setup-python)
   * [Config file](#config-file)
   * [Customize](#customize)
@@ -44,10 +44,23 @@
 
 # Introduction
 ## What is OpenHackathon
-## Why OpenHackathon
+Open Hackathon Platform is a cloud-based platform to enable Hacakthon organizers to host an offline/online hacakthon with most needed features; Hackathon event participants can use a HTML5 capable web browser to login an Hackathon event, provision his development environment of choice and collaborate with teammates.
 
+The Open Hacakthon can be deployed as a standalone web application, and can leverage Docker based technology to efficiently manage the cloud resources.
+## Why OpenHackathon
+- **Free**. Open Hackathon Platform is an fully open-source under MIT license. 
+- **imple**. Participants don't need to install or configure anything. A html5 capable web browser and a social login account are the only preconditions. Nowadays HTML5 is supported in all modern browsers. And Open Hackathon platform supports several major OAuth providers including QQ, weibo, github, gitcafe and microsoft live login. It's easy to support more.
+- **Scalable**. Every component of open hackathon platform can be scalable.
 
 # Glossary
+- **_OHP_**: abbreviation of Open Hackathon Platform 
+- **_Hackathon_**: an online or offline event in which computer programmers and others involved in software development and hardware development, including graphic designers, interface designers and project managers, collaborate intensively on software projects
+- **_Template_**: a template defines the configurations of  development environment for hackers including both hardware and software. A template consists of one or more virtual environment, see virtual environment for more.
+- **_Virtual Environment_** a virtual environment can be a docker container on linux OS or a windows virtual machine. For docker container, we need to include the image name, exposed ports, login, command and environment variables which are actually parameters for docker remote API. For windows VM,  since we only support Microsoft Azure currently, you should specify the VM image name, OS type, network configurations, storage account, cloud service and deployment and so on. Again, all those configurations are for azure restful API.  A few more words, although we support azure only, it's very easy to support other public cloud such as AWS or Ali cloud.
+- **_Experiment_** a running environments which are started according to some template. It consists of running docker containers and/or running virtual machines.
+- **_User/Participant_**: those who attend certain hackathon
+- **_Administrator_**: those who initiate a hackathon.  Note that one cannot be participant of a hackathon if  he/she is the administrator of that hackathon. But administrator of hackathon A can be user of hackathon B.
+- **_Judge_**:  those who can judge the result committed by users. 
 
 # User Guide
 
@@ -55,7 +68,6 @@
 报名，组队，参赛，提交评审等介绍，以及主干流程的截图
 ## Contribute your Template
 Templat 上传过程及用户对自己上传的Template的管理操作
-## FAQ
 
 # Organizer Guide
 ## Manage Hackathon
@@ -163,7 +175,7 @@ And find the `openhackathon-gucamole-authentication-1.0-SNAPSHOT.jar` in src fol
 
 If you want to make you own Guacamole auth provider, there is a java project named `openhackathon-guacamole-auth-provider` can give a example, you also can find in out src folders! But, this java project just match `version 0.9.7` of guacamole client!
 
-### Setup MysqlDB
+### Setup MySQLDB
 First you need to install the components of Mysql and Python libs:
 ```
 sudo apt-get install build-essential python python-dev python-setuptools libmysqlclient-dev
