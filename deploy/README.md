@@ -11,7 +11,7 @@
 * [User Guide](#user-guide)
   * [Attend Hackathon](#how-to-attend-a-hackathon)
   * [Contribute your Template](#contribute-your-template)
-  * [FAQ](#FAQ)
+  * [FAQ](#faq)
 * [Organizer Guid](#organizer-guide)
   * [Manage Hackathon](#how-to-manage-a-hackathon)
     * [Create a new hackathon](#create-hackathon)
@@ -57,7 +57,7 @@
 报名，组队，参赛，提交评审等介绍，以及主干流程的截图
 ## Contribute your Template
 Templat 上传过程及用户对自己上传的Template的管理操作
-
+## FAQ
 
 # Organizer Guide
 ## Manage Hackathon
