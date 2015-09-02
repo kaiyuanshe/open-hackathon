@@ -7,27 +7,9 @@
 * [Introduction](#introduction)
   * [What is OpenHackathon](#what-is-openhackathon)
   * [Why OpenHackathon](#why-openhackathon)
+* [Keywords and interpretation](#keywords-and-interpretation)
 * [User's Guide](#user's-guide)
-  * [Quick Guide](#implementation-and-architecture-for-user)
-    
-    Open Hackathon doesn’t have user management service, user and administrator need use social login to log into Open Hackathon.
-
-    For User:
-      *  Register: On Open Hackathon main page, user will see all available hackathons. Choose any one will direct user to social login, then user will ask to fulfill some basic information.
-      *  Enroll: Choose a hackathon and click enroll. After hackathon administrators approve your request, you will able to attend the hackathon
-      *  Team: User can create or attend a team to co-operate with others. Team will share same Git project and same environment.
-      *  Submit: User can submit  project for judgers to review.
-      
-    For Administrator:
-    
-      *  Management: Admins can create and manage hackathon. Including basic info, register time, competition time, review time and more settings.
-      
-    For All:
-    
-      *  Template: Template is a pre-configured environment that anyone can contribute, and used to specific hackathon on our Template library.
-
-    
-
+  * [Implementation and Architecture](#implementation-and-architecture-for-user)
   * [attend hackathons](#how-to-attend-a-hackathon)
   * [Contribute your Template](#contribute-your-template)
   * [FAQ](#FAQ)
@@ -44,42 +26,6 @@
   * [FAQ](#FAQ)
 * [Developer's Guide](#developer's-guide)
   * [Implementation and Architecture](#implementation-and-architecture-for-developer)
-    
-     Open Hackathon is a clientless, plugin free platform. The following pic shows structure.
-
-     ![Imgur]
-
-     Open Hackathon doesn't have user register service, all users need social login before access any functions. You need config this before you can use social login. Open-hackathon software will manage Azure resource that you provide to create hackathon environment for users. Guacamole is used to display VM in user's web browser, and MySQL server records all necessary data.
-
-     * HTML5 Browser
-
-      Open Hackathon is a clientless web access software, you don’t have to install any
-      client software or plugin for browser. Instead,  any browser which can support HTM5 can be used
-      to access Open Hackathon. 
-
-     * Open-Hackathon
-
-      Open-Hackathon is main part of Open Hackathon Project. It’s only can be
-      install on Linux, provide user interface and admin’s management portal.
-
-     * MySQL
-
-      MySQL is usedas our Database. It was the world's second most  widely used RDBMS, and the most widely used open-source RDBMS.
-
-     * Guacamole
-
-      Guacamole is a clientless remote desktop gateway. It supports standard protocols like VNC
-and RDP.  It’s used to connect virtual machine and present it to user via HTML5 based browser.
-
-     * Azure
-
-      Microsoft Azure is used as our base infrastructure. All environment and virtual machines
-are built on it.
-
-     * Docker
-     
-      Docker containers wrap up a piece of software in a complete file system that contains everything it needs to run: code, runtime, system tools, system libraries – anything you can install on a server. This guarantees that it will always run the same, regardless of the environment it is running in.
-     
   * [Try OpenHackathon quickly](#try-openhackathon-quickly)
   * [Setup develop environment](#setup-develop-environment)
     * [Setup Docker Env](#setup-docker-env)
@@ -114,88 +60,7 @@ are built on it.
 ## How to attend a hackathon
 报名，组队，参赛，提交评审等介绍，以及主干流程的截图
 ## Contribute your Template
-### Create Template 
-进入创建模板页面
-填写模板表单数据。
-
->带星号的都为必填项。
->每个模板可以添加多个image(单元)，而每个image可以添加多个端口号。
-
-### Upload Template
-进入上传模板页面。
-提供默认模板文件下载。
-上传模板文件。
-
-默认template文件格式，可以在原有的基础上进行修改。
-``` json
-{
-    "name": "test-template-1",
-    "display_name":"test template 1"
-    "description" : "a template consists of a list of virtual environments, and a virtual environment is a virtual machine with its storage account, container, cloud service and deployment",
-    "virtual_environments": [
-        {
-            "provider": "docker", 
-            "name": "vnc",
-            "image": "42.159.103.213:5000/mono",
-            "ports":[{
-                "name": "website",
-                "port": 80,
-                "public": true
-            },{
-                "name": "Dev",
-                "port": 5901,
-                "public": true
-            }],
-            "AttachStdin":false,
-            "AttachStdout":true,
-            "AttachStderr":true,
-            "tty": true,
-            "stdin_open": true,
-            "remote": {
-                "provider": "guacamole",
-                "protocol": "vnc",
-                "username": "root",
-                "password": "acoman",
-                "port": 5901
-            }
-        }
-    ]
-}
-```
-**Description**
-
-* `"name"` required , string : There are not special characters
-* `"display_name"` string :
-* `"description"` string :
-* `"virtual_environments"` array: There must be a virtual_environment
-  *  `"provider"` "docker"  | "azure":
-  *  `"name"` string :
-  *  `"image"` url :
-  *  `"ports"` array: There must be a port
-    *  `"name"`: string:
-        *  `"port"`: 0 ~ 65535:
-        *  `"public"`: bool:
-  *  `"AttachStdin"` bool :    
-  *  `"AttachStdout"` bool :
-    *  `"AttachStderr"` bool :
-    *  `"tty"` bool :
-    *  `"stdin_open"` bool :
-    *  `"remote"`: object
-      *  `"provider"` string,
-        *  `"protocol"` string,
-        *  `"username"` string,
-        *  `"password"` string,
-        *  `"port"` 0~65535
-        
->上传template文件出错，会有相应的提示信息，重新修改模板内容再次上传。
-
-### Manage Template
-**下载** 下载template文件。
-**测试** 测试template是否能启动环境 。
-**更新** 更新template基础信息。
-
->当添加或者修改模板数据，模板的`'status'`会被设定义为*'untested'*。
-
+Templat 上传过程及用户对自己上传的Template的管理操作
 
 
 # Admin's Guide
@@ -219,6 +84,29 @@ are built on it.
 ## Manage registration
 The main content of registration managment is auditing all registers 
 ## Manage administrators
+As a administrator of a hackathon , he can manage other admins in the same hackathon . The major operations of admin's managment are:          
+
+**create admin** : add a common user to admin groups only if he has signed in this platform                  
+**modify admin** : just make role type exchange from ‘judgment’ and 'common admin'                 
+**delete admin** : just remember that : the hackathon owner can not be deleted by anyone !     
+
+The details are as follows:                           
+get the `administrator managment` entrance from the admin site home page :             
+![Imgur](http://i.imgur.com/z80WsFA.png)
+After you get the list of all adminstrators of current hackathon , you can begin your managment on 'administrators'.              
+
+To create a new administrator, click `添加` on the header of the list table :
+![Imgur](http://i.imgur.com/iNsvDKY.png)
+Fill in the form required , and submit you request. If the user never signed in , you should do this step again after he signed in .                             
+
+
+To modify admin , click the modify button in `操作`, as mentioned that only the role type of amin can be modifed
+![Imgur](http://i.imgur.com/iyOifcU.png)
+
+
+To delete a admin, click the delete button in `操作`, as mentioned that the owner of the hackathon can not be deleted in any case !
+![Imgur](http://i.imgur.com/fTKC7Ii.png)
+
 ## Manage Azure certificate
 ## Manage templates
 Hackathon administrators can delete or add a template from templates pool to current hackathon
@@ -233,14 +121,13 @@ Hackathon will provider a runnable environment to every player , naturally the h
 OpenHackathon is separated into two pieces: open-hackathon server, which provides the openhackathon proxy and related libraries, and open-hackathon client, which provides the website client to users            
 
 src folders introduction:        
-`deploy`: all components for deployment               
-`open-hackathon-client`: frontend web project src               
-`open-hackathon-server`: backend api server project src              
-`openhackathon-guacamole-auth-provider`: guacamole auth provider java project src                 
-`tools/docker-enter`: tool to quickly connect to a running docker container through container id             
-                  
-                   
- Use Flask to build the whole project.[Flask Introduction](http://flask.pocoo.org/docs/0.10/)
+**deploy**: all components for deployment               
+**open-hackathon-client**: frontend web project src               
+**open-hackathon-server**: backend api server project src              
+**openhackathon-guacamole-auth-provider**: guacamole auth provider java project src                 
+**tools/docker-enter**: tool to quickly connect to a running docker container through container id             
+src framework intriduction：                    
+Use `Flask` to build the whole project.[Flask Introduction](http://flask.pocoo.org/docs/0.10/)
  
  
  
@@ -248,12 +135,12 @@ src folders introduction:
     介绍如何用doker的一个image来run起一个openhackathon
 ## Setup develop environment
 To setup the whole OpenHackathon develop environment, you need those components:
-```
-Docker Service
-Guacamole
-MysqlDB
-Python third part lib
-```
+
+**Docker Service**
+**Guacamole**
+**MysqlDB**
+**Python third part lib**
+
 ### Setup Docker Env
 Docker service takes part in OpenHackathon Platform as a environment provider that will provide to all users. And docker service now is the most populer cloudservice, you could get more details on [docker official website](https://www.docker.com/)                         
 
@@ -289,7 +176,7 @@ First you need to install the components of Mysql and Python libs:
 sudo apt-get install build-essential python python-dev python-setuptools libmysqlclient-dev
 sudo apt-get install mysql-server
 ```
-Then change the ``my.conf` of mysql
+Then change the `my.conf` of mysql like this:
 ```
 [client]
 default-character-set=utf8
@@ -305,8 +192,11 @@ create database hackathon;
 create User 'hackathon'@'localhost' IDENTIFIED by 'hackathon';
 GRANT ALL on hackathon.* TO 'hackathon'@'localhost';
 ```
-Finally please remember match your `config.py` options on mysql configuration
-
+Please remember match your `config.py` options on mysql configuration , finally execute the `setup_db.py` withn command or other ways , like this:
+```
+sudo python open-hackathon/open-hackathon-server/src/setup_db.py
+```
+Now , you can write and design you own OpenHackathon freely !
 
 ### Setup Python Env
 Find out the `requirement.txt` both in `open-hackathon-server` and `open-hackathon-client` in src folders, all dependencies are recorded in , we could install them through a simply command :   
@@ -317,6 +207,12 @@ sudo pip install -r open-hackathon-client/requirement.txt
 
 Then copy a file `config.py` from `config_sample.py`, and modify it as needed. Below is the instruction:
 
+##Config file
+| Item      |    Value | Qty  |
+|:---------:|:--------:| :-----------------------|
+| Computer  | 1600 USD |  5   |
+| Phone     |   12 USD |  12  |
+| Pipe      |    1 USD | 234  |
 
 ## customize
     如何自定义，
@@ -331,7 +227,6 @@ Then copy a file `config.py` from `config_sample.py`, and modify it as needed. B
 ## Python doc
 ## DB schema
 ## Contribution.MD
-
 
 
 
