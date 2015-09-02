@@ -7,24 +7,22 @@
 * [Introduction](#introduction)
   * [What is OpenHackathon](#what-is-openhackathon)
   * [Why OpenHackathon](#why-openhackathon)
-* [Keywords and interpretation](#keywords-and-interpretation)
-* [User's Guide](#user's-guide)
-  * [Implementation and Architecture](#implementation-and-architecture-for-user)
-  * [attend hackathons](#how-to-attend-a-hackathon)
+* [Glossary](#glossary)
+* [User Guide](#user-guide)
+  * [Attend Hackathon](#how-to-attend-a-hackathon)
   * [Contribute your Template](#contribute-your-template)
   * [FAQ](#FAQ)
-* [Admin's Guid](#admin's-guide)
-  * [Implementation and Architecture](#implementation-and-architecture-for-admin)
-  * [Manage hackathon](#how-to-manage-a-hackathon)
-    * [Create hackathon](#create-hackathon)
-    * [Manage basic info](#manage-basic-info)
-  * [Manage registration](#manage-registration)
+* [Organizer Guid](#organizer-guide)
+  * [Manage Hackathon](#how-to-manage-a-hackathon)
+    * [Create a new hackathon](#create-hackathon)
+    * [Manage hackathon basic info](#manage-hackathon-basic-info)
+  * [Manage registered users](#manage-registered-users)
   * [Manage administrators](#manage-administrators)
   * [Manage Azure certificate](#manage-azure-certificate)
   * [Manage templates](#manage-templates)
   * [Manage experiment](#manage-experiment)
   * [FAQ](#FAQ)
-* [Developer's Guide](#developer's-guide)
+* [Developer Guide](#developer-guide)
   * [Implementation and Architecture](#implementation-and-architecture-for-developer)
   * [Try OpenHackathon quickly](#try-openhackathon-quickly)
   * [Setup develop environment](#setup-develop-environment)
@@ -51,20 +49,17 @@
 ## Why OpenHackathon
 
 
-# Keywords and interpretation
+# Glossary
 
-# User's-Guide
-## Implementation and Architecture for User
-用户角色模块的基础介绍，以及涉及到的各种关键字的解释
-### keys 
+# User Guide
+
 ## How to attend a hackathon
 报名，组队，参赛，提交评审等介绍，以及主干流程的截图
 ## Contribute your Template
 Templat 上传过程及用户对自己上传的Template的管理操作
 
 
-# Admin's Guide
-## Implementation and Architecture for Admin
+# Organizer Guide
 ## Manage Hackathon
 ### Create hackathon
 `Hackathon creation entrance`
@@ -80,8 +75,8 @@ Templat 上传过程及用户对自己上传的Template的管理操作
 `finish creation`:                    
 ![Imgur](http://i.imgur.com/ZpLUYUJ.png)
 
-### Manage basic info
-## Manage registration
+### Manage hackathon basic info
+## Manage registered users
 The main content of registration managment is auditing all registers 
 ## Manage administrators
 As a administrator of a hackathon , he can manage other admins in the same hackathon . The major operations of admin's managment are:          
@@ -114,7 +109,7 @@ Hackathon administrators can delete or add a template from templates pool to cur
 Hackathon will provider a runnable environment to every player , naturally the hackathon administrator could manage them , stop or reset them when necessary
 
 
-#Developer's Guide
+#Developer Guide
 ## Implementation and Architecture for Developer            
 `Project on Github`:`https://github.com/msopentechcn/open-hackathon.git`                         
 `Architecture:`                             
