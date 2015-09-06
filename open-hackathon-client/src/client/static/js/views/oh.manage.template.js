@@ -43,7 +43,7 @@
     }
 
     function getHackathonTemplates() {
-        return oh.api.admin.hackathon.template.list.get({
+        return oh.api.admin.template.list.get({
             header: {hackathon_name: currentHackathon}
         }, function (data) {
             if (data.error) {
@@ -81,14 +81,14 @@
     }
 
     function addHackathonTemplate(data) {
-        return oh.api.admin.hackathon.template.post({
+        return oh.api.admin.template.post({
             body: data,
             header: {hackathon_name: currentHackathon}
         });
     };
 
     function removeHackathonTemplate(data) {
-        return oh.api.admin.hackathon.template.delete({
+        return oh.api.admin.template.delete({
             query: data,
             header: {hackathon_name: currentHackathon}
         });

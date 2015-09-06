@@ -26,7 +26,7 @@
     'use strict';
 
     function pageLoad(){
-        oh.api.team.user.get().then(function(data){
+        oh.api.user.team.list.get().then(function(data){
             console.log(data);
         })
     }

@@ -66,7 +66,6 @@ class SQLAlchemyAdapter(DBAdapter):
     __metaclass__ = SQLAlchemyAdapterMetaClass
 
     def __init__(self, db_session):
-        print 'net SQLAlchemyAdapter'
         super(SQLAlchemyAdapter, self).__init__(db_session)
 
     # ------------------------------ methods that no need to wrap --- start ------------------------------
