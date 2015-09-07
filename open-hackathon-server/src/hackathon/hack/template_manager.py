@@ -46,7 +46,7 @@ class HackathonTemplateManager(Component):
     hackathon_manager = RequiredFeature("hackathon_manager")
     template_library = RequiredFeature("template_library")
     scheduler = RequiredFeature("scheduler")
-    docker = RequiredFeature("docker")
+    hosted_docker = RequiredFeature("hosted_docker")
 
     def add_template_to_hackathon(self, template_id, team_id=-1):
         template = self.db.find_first_object_by(Template, id=template_id)
@@ -167,7 +167,7 @@ class HackathonTemplateManager(Component):
 
     def __get_undownloaded_images_on_docker_host(self, docker_host, expected_images):
         images = []
-        current_images = self.docker.hosted_docker.get_pulled_images(docker_host)
+        current_images = self.hosted_docker.get_pulled_images(docker_host)
         self.log.debug('already exist images: %s on host: %s' % (current_images, docker_host.vm_name))
         for ex_image in expected_images:
             if ex_image not in current_images:

@@ -83,7 +83,8 @@ class ExprManager(Component):
     hackathon_manager = RequiredFeature("hackathon_manager")
     admin_Manager = RequiredFeature("admin_manager")
     template_library = RequiredFeature("template_library")
-    docker = RequiredFeature("docker")
+    hosted_docker = RequiredFeature("hosted_docker")
+    alauda_docker = RequiredFeature("alauda_docker")
     scheduler = RequiredFeature("scheduler")
 
     def start_expr(self, hackathon_name, template_name, user_id):
@@ -133,12 +134,12 @@ class ExprManager(Component):
         expr = self.db.find_first_object_by(Experiment, id=expr_id, status=EStatus.RUNNING)
         if expr is not None:
             # Docker
-            docker = self.docker.get_docker(expr.hackathon)
             if expr.template.provider == VE_PROVIDER.DOCKER:
                 # stop containers
                 for c in expr.virtual_environments.all():
                     try:
                         self.log.debug("begin to stop %s" % c.name)
+                        docker = self.__get_docker(expr.hackathon, c)
                         if force:
                             docker.delete(c.name, virtual_environment=c, container=c.container, expr_id=expr_id)
                             c.status = VEStatus.DELETED
@@ -276,6 +277,17 @@ class ExprManager(Component):
 
     # --------------------------------------------- helper function ---------------------------------------------#
 
+    def __get_docker(self, hackathon, virtual_environment=None):
+        """select which docker implementation"""
+        if virtual_environment:
+            if virtual_environment.provider == VE_PROVIDER.ALAUDA:
+                return self.alauda_docker
+            return self.hosted_docker
+        elif hackathon.is_alauda_enabled():
+            return self.alauda_docker
+        else:
+            return self.hosted_docker
+
     def __start_new_expr(self, hackathon, template, user_id):
         # new expr
         expr = self.db.add_object_kwargs(Experiment,
@@ -314,7 +326,7 @@ class ExprManager(Component):
             expr.status = EStatus.STARTING
             self.db.commit()
             try:
-                af = AzureFormation(self.docker.load_azure_key_id(expr.id))
+                af = AzureFormation(self.hosted_docker.load_azure_key_id(expr.id))
                 af.create(expr.id)
             except Exception as e:
                 self.log.error(e)
@@ -327,7 +339,7 @@ class ExprManager(Component):
         containers = self.__get_containers_by_exper(expr)
         for container in containers:
             # expr status(restarting or running) is not match container running status on docker host
-            if not self.docker.hosted_docker.check_container_status_is_normal(container):
+            if not self.hosted_docker.check_container_status_is_normal(container):
                 try:
                     self.db.update_object(expr, status=EStatus.UNEXPECTED_ERROR)
                     self.db.update_object(container.virtual_environment, status=VEStatus.UNEXPECTED_ERROR)
@@ -422,7 +434,7 @@ class ExprManager(Component):
         self.db.add_object(ve)
 
         # start container remotely , use hosted docker or alauda docker
-        docker = self.docker.get_docker(hackathon)
+        docker = self.__get_docker(hackathon)
         container_ret = docker.start(docker_template_unit,
                                      hackathon=hackathon,
                                      virtual_environment=ve,
@@ -480,7 +492,8 @@ class ExprManager(Component):
                 # delete containers and change expr status
                 for c in expr.virtual_environments:
                     if c.provider == VE_PROVIDER.DOCKER:
-                        self.docker.delete(c.name, container=c.container, expr_id=expr_id)
+                        docker = self.__get_docker(expr.hackathon, c)
+                        docker.delete(c.name, container=c.container, expr_id=expr_id)
                         c.status = VEStatus.DELETED
                         self.db.commit()
             # delete ports
