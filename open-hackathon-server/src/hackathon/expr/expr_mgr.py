@@ -59,16 +59,13 @@ from hackathon.hackathon_response import (
     internal_server_error,
     precondition_failed,
     not_found,
-    forbidden,
     ok,
 )
 
 from hackathon.template.docker_template_unit import (
     DockerTemplateUnit,
 )
-from hackathon.template.base_template import (
-    BaseTemplate,
-)
+from hackathon.template import TEMPLATE
 import json
 import random
 import string
@@ -85,7 +82,7 @@ class ExprManager(Component):
     user_manager = RequiredFeature("user_manager")
     hackathon_manager = RequiredFeature("hackathon_manager")
     admin_Manager = RequiredFeature("admin_manager")
-    template_manager = RequiredFeature("template_manager")
+    template_library = RequiredFeature("template_library")
     docker = RequiredFeature("docker")
     scheduler = RequiredFeature("scheduler")
 
@@ -295,8 +292,8 @@ class ExprManager(Component):
                                  (Experiment.status == EStatus.RUNNING))
         if template.provider == VE_PROVIDER.DOCKER:
             try:
-                template_dic = self.template_manager.load_template(template)
-                virtual_environments_list = template_dic[BaseTemplate.VIRTUAL_ENVIRONMENTS]
+                template_dic = self.template_library.load_template(template)
+                virtual_environments_list = template_dic[TEMPLATE.VIRTUAL_ENVIRONMENTS]
                 if curr_num != 0 and curr_num >= self.util.get_config("pre_allocate.docker"):
                     return
                 expr.status = EStatus.STARTING
@@ -404,7 +401,7 @@ class ExprManager(Component):
         if hackathon is None:
             return None
         template = self.db.find_first_object_by(Template, name=template_name)
-        if template is None or self.template_manager.load_template(template) is None:
+        if template is None or self.template_library.load_template(template) is None:
             return None
         return [hackathon, template]
 
@@ -497,8 +494,6 @@ class ExprManager(Component):
             self.log.info("Rollback failed")
             self.log.error(e)
 
-            # --------------------------------------------- helper function ---------------------------------------------#
-
     def __get_expr_with_user_info(self, experiment):
         info = experiment.dic()
         info['user_info'] = self.user_manager.user_display_info(experiment.user)
@@ -524,8 +519,8 @@ class ExprManager(Component):
             return None
         # http://www.idehub.cn/api/ide/18?git=http://git.idehub.cn/root/test-c.git&user=root&from=hostname(frontend)
         api = self.util.safe_get_config("%s.api" % CLOUD_ECLIPSE.CLOUD_ECLIPSE, "http://www.idehub.cn/api/ide")
-        openId = experiment.user.openid
-        url = "%s/%d?git=%s&user=%s&from=" % (api, experiment.id, reg.git_project, openId)
+        openid = experiment.user.openid
+        url = "%s/%d?git=%s&user=%s&from=" % (api, experiment.id, reg.git_project, openid)
         self.log.debug("cloud eclipse url : %s" % url)
         return url
 

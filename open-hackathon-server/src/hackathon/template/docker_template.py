@@ -24,10 +24,12 @@ THE SOFTWARE.
 """
 
 import sys
+
 sys.path.append("..")
 from hackathon.template.base_template import (
     BaseTemplate,
 )
+from template_constants import TEMPLATE
 
 
 class DockerTemplate(BaseTemplate):
@@ -42,9 +44,9 @@ class DockerTemplate(BaseTemplate):
         self.docker_template_units = docker_template_units
         # set provider as docker
         for docker_template_unit in self.docker_template_units:
-            docker_template_unit.dic[self.VIRTUAL_ENVIRONMENTS_PROVIDER] = self.DOCKER
+            docker_template_unit.dic[TEMPLATE.VIRTUAL_ENVIRONMENTS_PROVIDER] = self.DOCKER
         # set virtual environments as a list of docker template units
-        self.dic[self.VIRTUAL_ENVIRONMENTS] = \
+        self.dic[TEMPLATE.VIRTUAL_ENVIRONMENTS] = \
             [docker_template_unit.dic for docker_template_unit in self.docker_template_units]
 
     def get_docker_template_units(self):

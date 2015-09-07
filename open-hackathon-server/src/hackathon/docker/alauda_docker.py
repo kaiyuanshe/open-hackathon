@@ -43,9 +43,7 @@ from hackathon.database.models import VirtualEnvironment
 from hackathon.hackathon_exception import (
     AlaudaException
 )
-from hackathon.template.docker_template_unit import (
-    DockerTemplateUnit
-)
+from hackathon.template import UNIT
 from hackathon import Component, RequiredFeature, Context
 
 
@@ -142,22 +140,22 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
         ve.status = VEStatus.RUNNING
         guacamole = context.guacamole
         instance_ports = filter(lambda p:
-                                p[ALAUDA.CONTAINER_PORT] == guacamole[DockerTemplateUnit.REMOTE_PORT],
+                                p[ALAUDA.CONTAINER_PORT] == guacamole[UNIT.REMOTE_PORT],
                                 service[ALAUDA.INSTANCE_PORTS])
         if len(instance_ports) > 0:
             alauda_port = instance_ports[0]
             gc = {
                 "displayname": service_name,
                 "name": service_name,
-                "protocol": guacamole[DockerTemplateUnit.REMOTE_PROTOCOL],
+                "protocol": guacamole[UNIT.REMOTE_PROTOCOL],
                 "hostname": alauda_port.get(ALAUDA.DEFAULT_DOMAIN),
                 "port": alauda_port.get(ALAUDA.SERVICE_PORT)
             }
-            if DockerTemplateUnit.REMOTE_USERNAME in guacamole:
-                gc["username"] = guacamole[DockerTemplateUnit.REMOTE_USERNAME]
+            if UNIT.REMOTE_USERNAME in guacamole:
+                gc["username"] = guacamole[UNIT.REMOTE_USERNAME]
 
-            if DockerTemplateUnit.REMOTE_PASSWORD in guacamole:
-                gc["password"] = guacamole[DockerTemplateUnit.REMOTE_PASSWORD]
+            if UNIT.REMOTE_PASSWORD in guacamole:
+                gc["password"] = guacamole[UNIT.REMOTE_PASSWORD]
 
             # save guacamole config into DB
             ve.remote_paras = json.dumps(gc)
@@ -294,7 +292,7 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
     def __request(self, method, path, data=None):
         url = self.__get_full_url(path)
         req = requests.request(method, url, headers=self.__get_headers(), data=data)
-        if req.status_code >= 200 and req.status_code < 300:
+        if 200 <= req.status_code < 300:
             resp = req.content
             self.log.debug("'%s' response %d from alauda api '%s': %s" % (method, req.status_code, path, resp))
             return resp

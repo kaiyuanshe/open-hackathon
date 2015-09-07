@@ -52,9 +52,6 @@ from compiler.ast import (
 from threading import (
     Lock,
 )
-from hackathon.template.docker_template_unit import (
-    DockerTemplateUnit,
-)
 from hackathon.azureformation.endpoint import (
     Endpoint
 )
@@ -70,13 +67,14 @@ from hackathon.hackathon_response import (
 from hackathon.constants import (
     HEALTH_STATUS,
 )
+from hackathon.template import UNIT
 import json
 import requests
 from datetime import timedelta
 
 
 class HostedDockerFormation(DockerFormationBase, Component):
-    template_manager = RequiredFeature("template_manager")
+    hackathon_template_manager = RequiredFeature("hackathon_template_manager")
     hackathon_manager = RequiredFeature("hackathon_manager")
     scheduler = RequiredFeature("scheduler")
     """
@@ -95,7 +93,8 @@ class HostedDockerFormation(DockerFormationBase, Component):
         """Report health of DockerHostServers
 
         :rtype: dict
-        :return health status item of docker. OK when all servers running, Warning if some of them working, Error if no server running
+        :return health status item of docker. OK when all servers running, Warning if some of them working,
+            Error if no server running
         """
         try:
             hosts = self.db.find_all_objects(DockerHostServer)
@@ -160,7 +159,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
             containers_url = '%s/containers/%s/stop' % (self.get_vm_url(docker_host), name)
             req = requests.post(containers_url)
             self.log.debug(req.content)
-        self.__stop_container(expr_id, container, docker_host)
+        self.__stop_container(expr_id, docker_host)
 
     def delete(self, name, **kwargs):
         """
@@ -176,7 +175,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
         req = requests.delete(containers_url)
         self.log.debug(req.content)
 
-        self.__stop_container(expr_id, container, docker_host)
+        self.__stop_container(expr_id, docker_host)
 
     def start(self, unit, **kwargs):
         """
@@ -200,27 +199,27 @@ class HostedDockerFormation(DockerFormationBase, Component):
         self.db.commit()
 
         # port binding
-        ps = map(lambda p:
-                 [p.port_from, p.port_to],
-                 self.__assign_ports(experiment, host_server, virtual_environment, unit.get_ports()))
+        map(lambda p:
+            [p.port_from, p.port_to],
+            self.__assign_ports(experiment, host_server, virtual_environment, unit.get_ports()))
 
         # guacamole config
         guacamole = unit.get_remote()
         port_cfg = filter(lambda p:
-                          p[DockerTemplateUnit.PORTS_PORT] == guacamole[DockerTemplateUnit.REMOTE_PORT],
+                          p[UNIT.PORTS_PORT] == guacamole[UNIT.REMOTE_PORT],
                           unit.get_ports())
         if len(port_cfg) > 0:
             gc = {
                 "displayname": container_name,
                 "name": container_name,
-                "protocol": guacamole[DockerTemplateUnit.REMOTE_PROTOCOL],
+                "protocol": guacamole[UNIT.REMOTE_PROTOCOL],
                 "hostname": host_server.public_ip,
-                "port": port_cfg[0]["public_port"]
+                "port": port_cfg[0].get("public_port")
             }
-            if DockerTemplateUnit.REMOTE_USERNAME in guacamole:
-                gc["username"] = guacamole[DockerTemplateUnit.REMOTE_USERNAME]
-            if DockerTemplateUnit.REMOTE_PASSWORD in guacamole:
-                gc["password"] = guacamole[DockerTemplateUnit.REMOTE_PASSWORD]
+            if UNIT.REMOTE_USERNAME in guacamole:
+                gc["username"] = guacamole[UNIT.REMOTE_USERNAME]
+            if UNIT.REMOTE_PASSWORD in guacamole:
+                gc["password"] = guacamole[UNIT.REMOTE_PASSWORD]
             # save guacamole config into DB
             virtual_environment.remote_paras = json.dumps(gc)
 
@@ -287,7 +286,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
         :type docker_container: DockerContainer
         :param docker_container: the container that you want to check
 
-        :type boolean
+        :type: bool
         :return True: the container running status is running or restarting , else returns False
 
         """
@@ -306,7 +305,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
         :type docker_host : DockerHostServer
         :param docker_host: the hots that you want to check docker service running status
 
-        :type boolean
+        :type: bool
         :return: True: running status is OK, else return False
 
         """
@@ -320,12 +319,6 @@ class HostedDockerFormation(DockerFormationBase, Component):
             return False
 
     # --------------------------------------------- helper function ---------------------------------------------#
-
-    def __name_match(self, id, lists):
-        for list in lists:
-            if id in list:
-                return True
-        return False
 
     def __get_schedule_job_id(self, hackathon):
         return "pull_images_for_hackathon_%s" % hackathon.id
@@ -341,7 +334,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
         self.log.debug("adding schedule job to ensure images for hackathon [%d]%s" % (hackathon.id, hackathon.name))
         next_run_time = self.util.get_now() + timedelta(seconds=3)
         context = Context(hackathon_id=hackathon.id)
-        self.scheduler.add_interval(feature="template_manager",
+        self.scheduler.add_interval(feature="hackathon_template_manager",
                                     method="pull_images_for_hackathon",
                                     id=self.__get_schedule_job_id(hackathon),
                                     context=context,
@@ -366,7 +359,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
         self.log.debug("-----release ports cache successfully------")
         self.host_ports = []
 
-    def __stop_container(self, expr_id, container, docker_host):
+    def __stop_container(self, expr_id, docker_host):
         self.__release_ports(expr_id, docker_host)
         docker_host.container_count -= 1
         if docker_host.container_count < 0:
@@ -464,38 +457,38 @@ class HostedDockerFormation(DockerFormationBase, Component):
         # get 'host_port'
         map(lambda p:
             p.update(
-                {DockerTemplateUnit.PORTS_HOST_PORT: self.get_available_host_port(host_server, p[
-                    DockerTemplateUnit.PORTS_PORT])}
+                {UNIT.PORTS_HOST_PORT: self.get_available_host_port(host_server, p[
+                    UNIT.PORTS_PORT])}
             ),
             port_cfg)
 
         # get 'public' cfg
-        public_ports_cfg = filter(lambda p: DockerTemplateUnit.PORTS_PUBLIC in p, port_cfg)
-        host_ports = [u[DockerTemplateUnit.PORTS_HOST_PORT] for u in public_ports_cfg]
+        public_ports_cfg = filter(lambda p: UNIT.PORTS_PUBLIC in p, port_cfg)
+        host_ports = [u[UNIT.PORTS_HOST_PORT] for u in public_ports_cfg]
         if self.util.safe_get_config("environment", "prod") == "local":
-            map(lambda cfg: cfg.update({DockerTemplateUnit.PORTS_PUBLIC_PORT: cfg[DockerTemplateUnit.PORTS_HOST_PORT]}),
+            map(lambda cfg: cfg.update({UNIT.PORTS_PUBLIC_PORT: cfg[UNIT.PORTS_HOST_PORT]}),
                 public_ports_cfg)
         else:
             public_ports = self.__get_available_public_ports(expr.id, host_server, host_ports)
             for i in range(len(public_ports_cfg)):
-                public_ports_cfg[i][DockerTemplateUnit.PORTS_PUBLIC_PORT] = public_ports[i]
+                public_ports_cfg[i][UNIT.PORTS_PUBLIC_PORT] = public_ports[i]
 
         binding_dockers = []
 
         # update port binding
         for public_cfg in public_ports_cfg:
-            binding_cloud_service = PortBinding(name=public_cfg[DockerTemplateUnit.PORTS_NAME],
-                                                port_from=public_cfg[DockerTemplateUnit.PORTS_PUBLIC_PORT],
-                                                port_to=public_cfg[DockerTemplateUnit.PORTS_HOST_PORT],
+            binding_cloud_service = PortBinding(name=public_cfg[UNIT.PORTS_NAME],
+                                                port_from=public_cfg[UNIT.PORTS_PUBLIC_PORT],
+                                                port_to=public_cfg[UNIT.PORTS_HOST_PORT],
                                                 binding_type=PortBindingType.CLOUD_SERVICE,
                                                 binding_resource_id=host_server.id,
                                                 virtual_environment=ve,
                                                 experiment=expr,
-                                                url=public_cfg[DockerTemplateUnit.PORTS_URL]
-                                                if DockerTemplateUnit.PORTS_URL in public_cfg else None)
-            binding_docker = PortBinding(name=public_cfg[DockerTemplateUnit.PORTS_NAME],
-                                         port_from=public_cfg[DockerTemplateUnit.PORTS_HOST_PORT],
-                                         port_to=public_cfg[DockerTemplateUnit.PORTS_PORT],
+                                                url=public_cfg[UNIT.PORTS_URL]
+                                                if UNIT.PORTS_URL in public_cfg else None)
+            binding_docker = PortBinding(name=public_cfg[UNIT.PORTS_NAME],
+                                         port_from=public_cfg[UNIT.PORTS_HOST_PORT],
+                                         port_to=public_cfg[UNIT.PORTS_PORT],
                                          binding_type=PortBindingType.DOCKER,
                                          binding_resource_id=host_server.id,
                                          virtual_environment=ve,
@@ -505,11 +498,11 @@ class HostedDockerFormation(DockerFormationBase, Component):
             self.db.add_object(binding_docker)
         self.db.commit()
 
-        local_ports_cfg = filter(lambda p: DockerTemplateUnit.PORTS_PUBLIC not in p, port_cfg)
+        local_ports_cfg = filter(lambda p: UNIT.PORTS_PUBLIC not in p, port_cfg)
         for local_cfg in local_ports_cfg:
-            port_binding = PortBinding(name=local_cfg[DockerTemplateUnit.PORTS_NAME],
-                                       port_from=local_cfg[DockerTemplateUnit.PORTS_HOST_PORT],
-                                       port_to=local_cfg[DockerTemplateUnit.PORTS_PORT],
+            port_binding = PortBinding(name=local_cfg[UNIT.PORTS_NAME],
+                                       port_from=local_cfg[UNIT.PORTS_HOST_PORT],
+                                       port_to=local_cfg[UNIT.PORTS_PORT],
                                        binding_type=PortBindingType.DOCKER,
                                        binding_resource_id=host_server.id,
                                        virtual_environment=ve,
@@ -547,7 +540,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
     def __get_container_info_by_container_id(self, docker_host, container_id):
         """get a container info by container_id from a docker host
 
-        :type docker_host: str|unicode
+        :type docker_host: DockerHostServer
         :param: the docker host which you want to search container from
 
         :type container_id: str|unicode
@@ -558,7 +551,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
         try:
             get_container_url = self.get_vm_url(docker_host) + "/container/%s/json?all=0" % container_id
             req = requests.get(get_container_url)
-            if req.status_code >= 200 and req.status_code < 300 :
+            if 300 > req.status_code >= 200:
                 container_info = json.loads(req.content)
                 return container_info
             return None
