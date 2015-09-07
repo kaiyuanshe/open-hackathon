@@ -7,11 +7,46 @@
 {% endblock %}
 
 {% block style %}
+
     <link href="/static/css/oh.landing.css" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
+    <div class="wallpaper blur"></div>
+    <div class="container">
+        <div class="logo">
+            <img src="/static/pic/icon100.png">
 
+            <h1>开发黑客松</h1>
+        </div>
+        <div class="row">
+            <div class="col-lg-6 ">
+
+                <div class="text-center">
+                    <div class="activity">
+                        <i class="activity-icon"></i>
+
+                        <div class="activity-foot">
+                            <a class="btn btn-activity" href="#">参加活动</a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="text-center">
+                    <div class="activity-create">
+                        <i class="activity-icon"></i>
+
+                        <div class="activity-foot">
+                            <a class="btn btn-activity" href="#">发布活动</a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block script %}

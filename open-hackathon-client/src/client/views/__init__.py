@@ -245,6 +245,7 @@ def login():
 
 @app.route("/site/<hackathon_name>")
 def hackathon(hackathon_name):
+    team = []
     if current_user.is_authenticated():
         data = __get_api(API_HACAKTHON_REGISTRATION, {"hackathon_name": hackathon_name, "token": session["token"]})
         team = __get_api(API_TEAM_USER, {"hackathon_name": hackathon_name, "token": session["token"]})
@@ -327,6 +328,11 @@ def superadmin():
         return __login(LOGIN_PROVIDER.MYSQL)
 
     return render("/superadmin.html")
+
+
+@app.route("/landing")
+def landing():
+    return render("/landing.html")
 
 
 from route_manage import *
