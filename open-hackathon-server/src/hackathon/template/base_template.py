@@ -31,21 +31,18 @@ import json
 import os
 
 from hackathon import Component
+from template_constants import TEMPLATE
 
 
 class BaseTemplate(Component):
     """
     Base class of template
     """
-    TEMPLATE_NAME = 'name'
-    DESCRIPTION = 'description'
-    VIRTUAL_ENVIRONMENTS = 'virtual_environments'
-    VIRTUAL_ENVIRONMENTS_PROVIDER = 'provider'
 
     def __init__(self, template_name, description):
         self.dic = {
-            self.TEMPLATE_NAME: template_name,
-            self.DESCRIPTION: description
+            TEMPLATE.TEMPLATE_NAME: template_name,
+            TEMPLATE.DESCRIPTION: description
         }
 
     def to_file(self, file_name):

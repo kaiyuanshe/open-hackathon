@@ -135,9 +135,9 @@ def init_components():
     from hackathon.database import db_session
     from hackathon.database.db_adapters import SQLAlchemyAdapter
     from hackathon.user import UserManager, UserProfileManager
-    from hackathon.hack import HackathonManager, AdminManager, TeamManager, DockerHostManager, AzureCertManager, \
-        RegisterManager
-    from hackathon.template.template_mgr import TemplateManager
+    from hackathon.hack import HackathonManager, AdminManager, TeamManager, DockerHostManager, \
+        AzureCertManager, RegisterManager, HackathonTemplateManager
+    from hackathon.template import TemplateLibrary
     from hackathon.remote.guacamole import GuacamoleInfo
     from hackathon.expr.expr_mgr import ExprManager
     from hackathon.cache.cache_mgr import CacheManagerExt
@@ -157,7 +157,8 @@ def init_components():
     factory.provide("register_manager", RegisterManager)
     factory.provide("azure_cert_manager", AzureCertManager)
     factory.provide("docker_host_manager", DockerHostManager)
-    factory.provide("template_manager", TemplateManager)
+    factory.provide("hackathon_template_manager", HackathonTemplateManager)
+    factory.provide("template_library", TemplateLibrary)
     factory.provide("expr_manager", ExprManager)
     factory.provide("admin_manager", AdminManager)
     factory.provide("team_manager", TeamManager)
