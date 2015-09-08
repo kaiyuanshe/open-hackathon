@@ -43,7 +43,7 @@ from hackathon.database.models import VirtualEnvironment
 from hackathon.hackathon_exception import (
     AlaudaException
 )
-from hackathon.template import UNIT
+from hackathon.template import DOCKER_UNIT
 from hackathon import Component, RequiredFeature, Context
 
 
@@ -140,22 +140,22 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
         ve.status = VEStatus.RUNNING
         guacamole = context.guacamole
         instance_ports = filter(lambda p:
-                                p[ALAUDA.CONTAINER_PORT] == guacamole[UNIT.REMOTE_PORT],
+                                p[ALAUDA.CONTAINER_PORT] == guacamole[DOCKER_UNIT.REMOTE_PORT],
                                 service[ALAUDA.INSTANCE_PORTS])
         if len(instance_ports) > 0:
             alauda_port = instance_ports[0]
             gc = {
                 "displayname": service_name,
                 "name": service_name,
-                "protocol": guacamole[UNIT.REMOTE_PROTOCOL],
+                "protocol": guacamole[DOCKER_UNIT.REMOTE_PROTOCOL],
                 "hostname": alauda_port.get(ALAUDA.DEFAULT_DOMAIN),
                 "port": alauda_port.get(ALAUDA.SERVICE_PORT)
             }
-            if UNIT.REMOTE_USERNAME in guacamole:
-                gc["username"] = guacamole[UNIT.REMOTE_USERNAME]
+            if DOCKER_UNIT.REMOTE_USERNAME in guacamole:
+                gc["username"] = guacamole[DOCKER_UNIT.REMOTE_USERNAME]
 
-            if UNIT.REMOTE_PASSWORD in guacamole:
-                gc["password"] = guacamole[UNIT.REMOTE_PASSWORD]
+            if DOCKER_UNIT.REMOTE_PASSWORD in guacamole:
+                gc["password"] = guacamole[DOCKER_UNIT.REMOTE_PASSWORD]
 
             # save guacamole config into DB
             ve.remote_paras = json.dumps(gc)

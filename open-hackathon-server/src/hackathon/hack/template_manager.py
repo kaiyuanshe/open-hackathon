@@ -32,7 +32,7 @@ from flask import g
 
 from hackathon import Component, RequiredFeature, Context
 from hackathon.database import HackathonTemplateRel, Template, DockerHostServer
-from hackathon.template import TEMPLATE, UNIT
+from hackathon.template import TEMPLATE, DOCKER_UNIT
 from hackathon.constants import VE_PROVIDER, TEMPLATE_STATUS
 from hackathon.hackathon_response import ok, not_found, internal_server_error
 
@@ -89,9 +89,9 @@ class HackathonTemplateManager(Component):
             template_units = []
             for ve in template['data'][TEMPLATE.VIRTUAL_ENVIRONMENTS]:
                 template_units.append({
-                    'name': ve[UNIT.NAME],
-                    'type': ve[UNIT.TYPE] if UNIT.TYPE in ve else "",
-                    'description': ve[UNIT.DESCRIPTION] if UNIT.DESCRIPTION in ve else "",
+                    'name': ve[DOCKER_UNIT.NAME],
+                    'type': ve[DOCKER_UNIT.TYPE] if DOCKER_UNIT.TYPE in ve else "",
+                    'description': ve[DOCKER_UNIT.DESCRIPTION] if DOCKER_UNIT.DESCRIPTION in ve else "",
                 })
             settings.append({
                 'name': template['data'][TEMPLATE.TEMPLATE_NAME],
@@ -152,7 +152,7 @@ class HackathonTemplateManager(Component):
     def __get_images_from_template(self, template):
         template_dic = self.template_library.load_template(template)
         ves = template_dic[TEMPLATE.VIRTUAL_ENVIRONMENTS]
-        images = map(lambda x: x[UNIT.IMAGE], ves)
+        images = map(lambda x: x[DOCKER_UNIT.IMAGE], ves)
         return images  # [image:tag, image:tag]
 
     def __get_templates_for_pull(self, hackathon_id):

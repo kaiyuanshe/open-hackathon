@@ -41,7 +41,7 @@ from hackathon.hackathon_response import not_found, ok, internal_server_error, f
 from hackathon.constants import FILE_TYPE, TEMPLATE_STATUS
 from template_constants import TEMPLATE
 from docker_template_unit import DockerTemplateUnit
-from docker_template import DockerTemplate
+from template_content import TemplateContent
 
 __all__ = ["TemplateLibrary"]
 
@@ -66,7 +66,7 @@ class TemplateLibrary(Component):
 
     def search_template(self, args):
         """Search template by status, name or description"""
-        criterion = self.__generate_search_criterions(args)
+        criterion = self.__generate_search_criterion(args)
         templates = self.db.find_all_objects(Template, criterion)
         return [t.dic() for t in templates]
 
@@ -77,45 +77,30 @@ class TemplateLibrary(Component):
         :return:
         """
 
-        def get_template():
+        def internal_load_template():
             local_path = template.local_path
             if local_path is not None and isfile(local_path):
                 with open(local_path) as template_file:
-                    return json.load(template_file)
+                    return TemplateContent.from_dict(json.load(template_file))
             else:
                 try:
                     req = requests.get(template.url)
-                    return json.loads(req.content)
+                    return TemplateContent.from_dict(json.loads(req.content))
                 except Exception as e:
                     self.log.warn("Fail to load template from remote file %s" % template.url)
                     self.log.error(e)
                     return None
 
-        return self.cache_manager.get_cache(key=self.__get_template_cache_key(template.id), createfunc=get_template)
+        cache_key = self.__get_template_cache_key(template.id)
+        return self.cache_manager.get_cache(key=cache_key, createfunc=internal_load_template)
 
     def create_template(self, args):
-        """ create template
-
-        The whole logic contains 3 main steps:
-        1 : args validate
-        2 : parse args and save to storage
-        3 : save to database
-
-        :type args: dict
-        :param args: description of the template that you want to create
-
-        :return:
-        """
-        self.__check_create_args(args)
-        context = self.__save_template_to_storage(args)
-        if not context:
-            return internal_server_error("save tempplate failed")
-        self.log.debug("create template: %r" % args)
-        self.__save_template_to_database(args, context)
-        return ok("create template success")
+        """ Create template """
+        template_content = self.__load_template_content(args)
+        return self.__create_or_update_template(template_content)
 
     def create_template_by_file(self):
-        """create a template by a whole template file
+        """create a template from uploaded file
 
         The whole logic contains 4 main steps:
         1 : get template dic from PostRequest
@@ -124,15 +109,10 @@ class TemplateLibrary(Component):
         4 : save to database
 
         :return:
-
         """
-        template = self.__get_template_from_request()
-        self.__check_create_args(template)
-        context = self.__save_template_to_storage(template)
-        if not context:
-            return internal_server_error("save template failed")
-        self.__save_template_to_database(template, context)
-        return ok("create template success")
+        template_dic = self.__get_template_from_request()
+        template_content = self.__load_template_content(template_dic)
+        return self.__create_or_update_template(template_content)
 
     def update_template(self, args):
         """update a exist template
@@ -147,12 +127,14 @@ class TemplateLibrary(Component):
 
         :return:
         """
-        self.__check_update_args(args)
-        context = self.__save_template_to_storage(args)
-        if not context:
-            return internal_server_error("save tempplate failed")
-        self.__save_template_to_database(args, context)
-        return ok("update template success")
+        template_content = self.__load_template_content(args)
+        template = self.__get_template_by_name(template_content.name)
+        if template is not None:
+            # user can only modify the template which created by himself except super admin
+            if g.user.id != template.creator_id and not self.user_manager.is_super_admin(g.user):
+                raise Forbidden()
+
+        return self.__create_or_update_template(template_content)
 
     def delete_template(self, template_id):
         self.log.debug("delete template [%d]" % template_id)
@@ -182,27 +164,34 @@ class TemplateLibrary(Component):
     def __init__(self):
         pass
 
-    def __save_template_to_storage(self, args):
-        """save template to a file in storage which is chosen by configuration
+    def __create_or_update_template(self, template_content):
+        """Internally create template
 
-        Parse out template from args and merge with default template value
-        Then generate a file name, and save it to a physical file in storage
+        Save template to storage and then insert into DB
 
-        :type args: dict
-        :param args: description of template
+        :type template_content: TemplateContent
+        :param template_content: instance of TemplateContent that owns the full content of a template
+        """
+        context = self.__save_template_to_storage(template_content)
+        if not context:
+            return internal_server_error("save template failed")
+
+        return self.__save_template_to_database(template_content, context)
+
+    def __save_template_to_storage(self, template_content):
+        """save template to a file in storage whose type is configurable
+
+        :type template_content: TemplateContent
+        :param template_content: instance of TemplateContent that owns the full content of a template
 
         :return: context if no exception raised
         """
         try:
-            docker_template_units = [DockerTemplateUnit(ve) for ve in args[TEMPLATE.VIRTUAL_ENVIRONMENTS]]
-            docker_template = DockerTemplate(args[TEMPLATE.TEMPLATE_NAME],
-                                             args[TEMPLATE.DESCRIPTION],
-                                             docker_template_units)
-            file_name = '%s-%s-%s.js' % (g.user.name, args[TEMPLATE.TEMPLATE_NAME], str(uuid.uuid1())[0:8])
+            file_name = '%s.js' % template_content.name
             context = Context(
                 file_name=file_name,
                 file_type=FILE_TYPE.TEMPLATE,
-                content=docker_template.dic
+                content=template_content.to_dict()
             )
             self.log.debug("save=ing template as file [%s]" % file_name)
             context = self.storage.save(context)
@@ -211,13 +200,13 @@ class TemplateLibrary(Component):
             self.log.error(ex)
             return None
 
-    def __save_template_to_database(self, args, context):
+    def __save_template_to_database(self, template_content, context):
         """save template date to db
 
         According to the args , find out whether it is ought to insert or update a record
 
-        :type args : dict
-        :param args: description of template that you want to insert to DB
+        :type template_content: TemplateContent
+        :param template_content: instance of TemplateContent that owns the full content of a template
 
         :type context: Context
         :param context: the context that return from self.__save_template_to_storage
@@ -225,14 +214,13 @@ class TemplateLibrary(Component):
         :return: if raised exception return InternalServerError else return nothing
 
         """
-        template = self.db.find_first_object_by(Template, name=args[TEMPLATE.TEMPLATE_NAME])
+        template = self.db.find_first_object_by(Template, name=template_content.name)
         try:
-            # insert record
+            provider = self.__get_provider_from_template_dic(template_content)
             if template is None:
-                self.log.debug("create template: %r" % args)
-                provider = self.__get_provider_from_template_dic(args)
+                self.log.debug("insert template info to db: %s" % template_content.name)
                 self.db.add_object_kwargs(Template,
-                                          name=args[TEMPLATE.TEMPLATE_NAME],
+                                          name=template_content.name,
                                           url=context.url,
                                           local_path=context.get("physical_path"),
                                           provider=provider,
@@ -240,55 +228,42 @@ class TemplateLibrary(Component):
                                           status=TEMPLATE_STATUS.UNCHECKED,
                                           create_time=self.util.get_now(),
                                           update_time=self.util.get_now(),
-                                          description=args[TEMPLATE.DESCRIPTION],
-                                          virtual_environment_count=len(args[TEMPLATE.VIRTUAL_ENVIRONMENTS]))
+                                          description=template_content.description,
+                                          virtual_environment_count=len(template_content.units))
             else:
-                # update record
                 self.db.update_object(template,
                                       url=context.url,
                                       local_path=context.get("physical_path"),
                                       update_time=self.util.get_now(),
-                                      description=args[TEMPLATE.DESCRIPTION],
-                                      virtual_environment_count=len(args[TEMPLATE.VIRTUAL_ENVIRONMENTS]))
+                                      description=template_content.description,
+                                      virtual_environment_count=len(template_content.units),
+                                      provider=provider)
                 self.cache_manager.invalidate(self.__get_template_cache_key(template.id))
+
+            return template.dic()
         except Exception as ex:
             self.log.error(ex)
             raise InternalServerError(description="insert or update record in db failed")
 
-    def __get_provider_from_template_dic(self, template):
+    def __get_provider_from_template_dic(self, template_content):
         """get the provider from template
 
-        :type template: dict
-        :param template: dict object of template
-
-        :return: provider value , if not exist in template return None
+        :type template_content: TemplateContent
+        :param template_content: instance of TemplateContent that owns the full content of a template
         """
-        try:
-            if TEMPLATE.VIRTUAL_ENVIRONMENTS_PROVIDER in template:
-                return template[TEMPLATE.VIRTUAL_ENVIRONMENTS_PROVIDER]
-            return template[TEMPLATE.VIRTUAL_ENVIRONMENTS][0][TEMPLATE.VIRTUAL_ENVIRONMENTS]
-        except Exception as e:
-            self.log.error(e)
-            return None
+        providers = [str(u.provider) for u in template_content.units]
+        providers = list(set(providers))
 
-    def __check_update_args(self, args):
-        """ validate args when updating a template
+        if len(providers) >= 1:
+            return ",".join(providers)
+        else:
+            raise Exception("cannot get provider from template. Either no virtual_environment or provider of "
+                            "virtual environment not set")
 
-        :type args: dict
-        :param args: description for a template that you want to update
+    def __get_template_by_name(self, name):
+        return self.db.find_first_object_by(Template, name=name)
 
-        :return: if validate passed return nothing else raised a BadRequest or Forbidden exceptions
-
-        """
-        self.__check_create_args(args)
-        template = self.db.find_first_object_by(Template, name=args[TEMPLATE.TEMPLATE_NAME])
-        if template is None:
-            raise BadRequest("template does not exist")
-        # user can only modify the template which created by himself except super admin
-        if g.user.id != template.creator_id and not self.user_manager.is_super_admin(g.user):
-            raise Forbidden()
-
-    def __generate_search_criterions(self, args):
+    def __generate_search_criterion(self, args):
         """generate DB query criterion according to Querystring of request.
 
         The output will be SQLAlchemy understandable expressions.
@@ -308,23 +283,42 @@ class TemplateLibrary(Component):
     def __get_template_cache_key(self, template_id):
         return "__template__%d__" % template_id
 
-    def __check_create_args(self, args):
+    def __load_template_content(self, args):
+        """ Convert dict of template content into TemplateContent object
+
+        :type args: dict
+        :param args: args to create a template
+
+        :rtype: TemplateContent
+        :return: instance of TemplateContent
+        """
+        self.__validate_template_content(args)
+        return TemplateContent.from_dict(args)
+
+    def __validate_template_content(self, args):
         """ validate args when creating a template
 
         :type args: dict
-        :param args: description for a template that you want to create
+        :param args: args to create a template
 
         :return: if validate passed return nothing else raised a BadRequest exception
 
         """
         if TEMPLATE.TEMPLATE_NAME not in args:
             raise BadRequest(description="template name invalid")
+
         if TEMPLATE.DESCRIPTION not in args:
             raise BadRequest(description="template description invalid")
-        if TEMPLATE.VIRTUAL_ENVIRONMENTS_PROVIDER not in args:
-            raise BadRequest(description="template provider invalid")
+
         if TEMPLATE.VIRTUAL_ENVIRONMENTS not in args:
             raise BadRequest(description="template virtual_environments invalid")
+
+        if len(args[TEMPLATE.VIRTUAL_ENVIRONMENTS]) == 0:
+            raise BadRequest(description="template virtual_environments invalid")
+
+        for unit in args[TEMPLATE.VIRTUAL_ENVIRONMENTS]:
+            if TEMPLATE.VIRTUAL_ENVIRONMENT_PROVIDER not in unit:
+                raise BadRequest(description="virtual_environment provider invalid")
 
     def __get_template_from_request(self):
         """ get template dic from http post request
@@ -336,7 +330,7 @@ class TemplateLibrary(Component):
         for file_name in request.files:
             try:
                 template = json.load(request.files[file_name])
-                self.log.debug("create template: %r" % template)
+                self.log.debug("create template from file: %r" % template)
                 return template
             except Exception as ex:
                 self.log.error(ex)

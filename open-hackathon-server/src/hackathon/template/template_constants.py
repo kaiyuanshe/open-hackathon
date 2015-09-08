@@ -31,11 +31,10 @@ class TEMPLATE:
     TEMPLATE_NAME = 'name'
     DESCRIPTION = 'description'
     VIRTUAL_ENVIRONMENTS = 'virtual_environments'
-    VIRTUAL_ENVIRONMENTS_PROVIDER = 'provider'
+    VIRTUAL_ENVIRONMENT_PROVIDER = "provider"
 
-
-class UNIT:
-    """constants in virtual_environment level"""
+class DOCKER_UNIT:
+    """constants in docker virtual_environment in template"""
     NAME = 'name'
     TYPE = 'type'
     DESCRIPTION = 'description'
@@ -103,3 +102,57 @@ class UNIT:
     HOST_CONFIG_LOG_CONFIG_TYPE = 'Type'
     HOST_CONFIG_LOG_CONFIG_CONFIG = 'Config'
     HOST_CONFIG_CGROUP_PARENT = 'CgroupParent'
+
+
+class AZURE_UNIT:
+    """constants for azure virtual_environment in template file"""
+    T_SA = 'storage_account'
+    T_SA_SN = 'service_name'
+    T_SA_D = 'description'
+    T_SA_LA = 'label'
+    T_SA_LO = 'location'
+    T_SA_UB = 'url_base'
+    T_C = 'container'
+    T_CS = 'cloud_service'
+    T_CS_SN = 'service_name'
+    T_CS_LA = 'label'
+    T_CS_LO = 'location'
+    T_D = 'deployment'
+    T_D_DN = 'deployment_name'
+    T_D_DS = 'deployment_slot'
+    T_L = 'label'
+    T_RN = 'role_name'
+    T_I = 'image'
+    T_I_T = 'type'
+    T_I_N = 'name'
+    T_SC = 'system_config'
+    T_SC_OF = 'os_family'
+    T_SC_HN = 'host_name'
+    T_SC_UN = 'user_name'
+    T_SC_UP = 'user_password'
+    T_NC = 'network_config'
+    T_NC_CST = 'configuration_set_type'
+    T_NC_IE = 'input_endpoints'
+    T_NC_IE_N = 'name'
+    T_NC_IE_PR = 'protocol'
+    T_NC_IE_LP = 'local_port'
+    T_NC_IE_PO = 'port'
+    T_R = 'remote'
+    T_R_PROV = 'provider'
+    T_R_PROT = 'protocol'
+    T_R_IEN = 'input_endpoint_name'
+    T_RS = 'role_size'
+    # image type name
+    OS = 'os'
+    VM = 'vm'
+    # os family name
+    WINDOWS = 'Windows'
+    LINUX = 'Linux'
+    # remote parameter name
+    RP_N = 'name'
+    RP_DN = 'displayname'
+    RP_HN = 'hostname'
+    RP_PR = 'protocol'
+    RP_PO = 'port'
+    RP_UN = 'username'
+    RP_PA = 'password'
