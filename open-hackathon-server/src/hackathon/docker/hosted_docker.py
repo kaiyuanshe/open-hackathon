@@ -67,7 +67,7 @@ from hackathon.hackathon_response import (
 from hackathon.constants import (
     HEALTH_STATUS,
 )
-from hackathon.template import UNIT
+from hackathon.template import DOCKER_UNIT
 import json
 import requests
 from datetime import timedelta
@@ -206,20 +206,20 @@ class HostedDockerFormation(DockerFormationBase, Component):
         # guacamole config
         guacamole = unit.get_remote()
         port_cfg = filter(lambda p:
-                          p[UNIT.PORTS_PORT] == guacamole[UNIT.REMOTE_PORT],
+                          p[DOCKER_UNIT.PORTS_PORT] == guacamole[DOCKER_UNIT.REMOTE_PORT],
                           unit.get_ports())
         if len(port_cfg) > 0:
             gc = {
                 "displayname": container_name,
                 "name": container_name,
-                "protocol": guacamole[UNIT.REMOTE_PROTOCOL],
+                "protocol": guacamole[DOCKER_UNIT.REMOTE_PROTOCOL],
                 "hostname": host_server.public_ip,
                 "port": port_cfg[0].get("public_port")
             }
-            if UNIT.REMOTE_USERNAME in guacamole:
-                gc["username"] = guacamole[UNIT.REMOTE_USERNAME]
-            if UNIT.REMOTE_PASSWORD in guacamole:
-                gc["password"] = guacamole[UNIT.REMOTE_PASSWORD]
+            if DOCKER_UNIT.REMOTE_USERNAME in guacamole:
+                gc["username"] = guacamole[DOCKER_UNIT.REMOTE_USERNAME]
+            if DOCKER_UNIT.REMOTE_PASSWORD in guacamole:
+                gc["password"] = guacamole[DOCKER_UNIT.REMOTE_PASSWORD]
             # save guacamole config into DB
             virtual_environment.remote_paras = json.dumps(gc)
 
@@ -457,38 +457,38 @@ class HostedDockerFormation(DockerFormationBase, Component):
         # get 'host_port'
         map(lambda p:
             p.update(
-                {UNIT.PORTS_HOST_PORT: self.get_available_host_port(host_server, p[
-                    UNIT.PORTS_PORT])}
+                {DOCKER_UNIT.PORTS_HOST_PORT: self.get_available_host_port(host_server, p[
+                    DOCKER_UNIT.PORTS_PORT])}
             ),
             port_cfg)
 
         # get 'public' cfg
-        public_ports_cfg = filter(lambda p: UNIT.PORTS_PUBLIC in p, port_cfg)
-        host_ports = [u[UNIT.PORTS_HOST_PORT] for u in public_ports_cfg]
+        public_ports_cfg = filter(lambda p: DOCKER_UNIT.PORTS_PUBLIC in p, port_cfg)
+        host_ports = [u[DOCKER_UNIT.PORTS_HOST_PORT] for u in public_ports_cfg]
         if self.util.safe_get_config("environment", "prod") == "local":
-            map(lambda cfg: cfg.update({UNIT.PORTS_PUBLIC_PORT: cfg[UNIT.PORTS_HOST_PORT]}),
+            map(lambda cfg: cfg.update({DOCKER_UNIT.PORTS_PUBLIC_PORT: cfg[DOCKER_UNIT.PORTS_HOST_PORT]}),
                 public_ports_cfg)
         else:
             public_ports = self.__get_available_public_ports(expr.id, host_server, host_ports)
             for i in range(len(public_ports_cfg)):
-                public_ports_cfg[i][UNIT.PORTS_PUBLIC_PORT] = public_ports[i]
+                public_ports_cfg[i][DOCKER_UNIT.PORTS_PUBLIC_PORT] = public_ports[i]
 
         binding_dockers = []
 
         # update port binding
         for public_cfg in public_ports_cfg:
-            binding_cloud_service = PortBinding(name=public_cfg[UNIT.PORTS_NAME],
-                                                port_from=public_cfg[UNIT.PORTS_PUBLIC_PORT],
-                                                port_to=public_cfg[UNIT.PORTS_HOST_PORT],
+            binding_cloud_service = PortBinding(name=public_cfg[DOCKER_UNIT.PORTS_NAME],
+                                                port_from=public_cfg[DOCKER_UNIT.PORTS_PUBLIC_PORT],
+                                                port_to=public_cfg[DOCKER_UNIT.PORTS_HOST_PORT],
                                                 binding_type=PortBindingType.CLOUD_SERVICE,
                                                 binding_resource_id=host_server.id,
                                                 virtual_environment=ve,
                                                 experiment=expr,
-                                                url=public_cfg[UNIT.PORTS_URL]
-                                                if UNIT.PORTS_URL in public_cfg else None)
-            binding_docker = PortBinding(name=public_cfg[UNIT.PORTS_NAME],
-                                         port_from=public_cfg[UNIT.PORTS_HOST_PORT],
-                                         port_to=public_cfg[UNIT.PORTS_PORT],
+                                                url=public_cfg[DOCKER_UNIT.PORTS_URL]
+                                                if DOCKER_UNIT.PORTS_URL in public_cfg else None)
+            binding_docker = PortBinding(name=public_cfg[DOCKER_UNIT.PORTS_NAME],
+                                         port_from=public_cfg[DOCKER_UNIT.PORTS_HOST_PORT],
+                                         port_to=public_cfg[DOCKER_UNIT.PORTS_PORT],
                                          binding_type=PortBindingType.DOCKER,
                                          binding_resource_id=host_server.id,
                                          virtual_environment=ve,
@@ -498,11 +498,11 @@ class HostedDockerFormation(DockerFormationBase, Component):
             self.db.add_object(binding_docker)
         self.db.commit()
 
-        local_ports_cfg = filter(lambda p: UNIT.PORTS_PUBLIC not in p, port_cfg)
+        local_ports_cfg = filter(lambda p: DOCKER_UNIT.PORTS_PUBLIC not in p, port_cfg)
         for local_cfg in local_ports_cfg:
-            port_binding = PortBinding(name=local_cfg[UNIT.PORTS_NAME],
-                                       port_from=local_cfg[UNIT.PORTS_HOST_PORT],
-                                       port_to=local_cfg[UNIT.PORTS_PORT],
+            port_binding = PortBinding(name=local_cfg[DOCKER_UNIT.PORTS_NAME],
+                                       port_from=local_cfg[DOCKER_UNIT.PORTS_HOST_PORT],
+                                       port_to=local_cfg[DOCKER_UNIT.PORTS_PORT],
                                        binding_type=PortBindingType.DOCKER,
                                        binding_resource_id=host_server.id,
                                        virtual_environment=ve,

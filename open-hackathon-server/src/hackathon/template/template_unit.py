@@ -23,31 +23,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-import sys
 
-sys.path.append("..")
-from hackathon.template.base_template import (
-    BaseTemplate,
-)
-from template_constants import TEMPLATE
+class TemplateUnit(object):
+    """Unit of TemplateContent.
 
+    An unit is a dict too that includes arguments for docker container or azure VM.
+    Each unit represents a virtual_environment that can be started or stopped independently"""
 
-class DockerTemplate(BaseTemplate):
-    """
-    Docker template class
-    It consists of a list of docker template units
-    """
-    DOCKER = 'docker'
+    def __init__(self, provider):
+        """Construct an new unit
 
-    def __init__(self, template_name, description, docker_template_units):
-        super(DockerTemplate, self).__init__(template_name, description)
-        self.docker_template_units = docker_template_units
-        # set provider as docker
-        for docker_template_unit in self.docker_template_units:
-            docker_template_unit.dic[TEMPLATE.VIRTUAL_ENVIRONMENTS_PROVIDER] = self.DOCKER
-        # set virtual environments as a list of docker template units
-        self.dic[TEMPLATE.VIRTUAL_ENVIRONMENTS] = \
-            [docker_template_unit.dic for docker_template_unit in self.docker_template_units]
-
-    def get_docker_template_units(self):
-        return self.docker_template_units
+        provider should be value of enum VE_PROVIDER.
+        """
+        self.provider = provider

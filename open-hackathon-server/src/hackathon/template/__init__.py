@@ -25,3 +25,5 @@ THE SOFTWARE.
 
 from template_library import TemplateLibrary
 from template_constants import *
+from template_content import TemplateContent
+from docker_template_unit import DockerTemplateUnit
