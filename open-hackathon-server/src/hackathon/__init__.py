@@ -189,10 +189,9 @@ def init_hackathon_storage():
 
     storage_type = safe_get_config("storage.type", "azure")
     if storage_type == "azure":
-        # init FileService first since AzureStorage depends on it. And accountKey must be included in config file
-        from hackathon.azureformation.fileService import FileService
-        factory.provide("file_service", FileService)
-
+        # init BlobServiceAdapter first since AzureStorage depends on it. And accountKey must be included in config file
+        from hackathon.hazure import BlobServiceAdapter
+        factory.provide("azure_blob_service", BlobServiceAdapter)
         factory.provide("storage", AzureStorage)
     else:
         factory.provide("storage", LocalStorage)
