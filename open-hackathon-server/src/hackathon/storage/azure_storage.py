@@ -62,17 +62,17 @@ class AzureStorage(Storage):
         if context.get('content'):
             file_content = context.content
             if isinstance(file_content, file) or isinstance(file_content, FileStorage):
-                result = self.file_service.upload_file_to_azure(container_name, blob_name, file_content)
+                result = self.azure_blob_service.upload_file_to_azure(container_name, blob_name, file_content)
             elif isinstance(file_content, dict):
                 text = json.dumps(file_content)
-                result = self.file_service.upload_file_to_azure_from_text(container_name, blob_name, text)
+                result = self.azure_blob_service.upload_file_to_azure_from_text(container_name, blob_name, text)
             else:
                 text = str(file_content)
-                result = self.file_service.upload_file_to_azure_from_text(container_name, blob_name, text)
+                result = self.azure_blob_service.upload_file_to_azure_from_text(container_name, blob_name, text)
         else:
             assert context.get('file_path')
             file_path = context.file_path
-            result = self.file_service.upload_file_to_azure_from_path(container_name, blob_name, file_path)
+            result = self.azure_blob_service.upload_file_to_azure_from_path(container_name, blob_name, file_path)
 
         context["url"] = result
         self.log.debug("File saved at:" + result)
@@ -93,7 +93,7 @@ class AzureStorage(Storage):
             container_name = url_arr[-2]
             print container_name, blob_name
 
-            self.file_service.delete_file_from_azure(container_name, blob_name)
+            self.azure_blob_service.delete_file_from_azure(container_name, blob_name)
             return True
         except Exception as e:
             self.log.error(e)
@@ -102,7 +102,7 @@ class AzureStorage(Storage):
     def report_health(self):
         """Report the status of Azure storage"""
         try:
-            if self.file_service.create_container_in_storage('images', 'container'):
+            if self.azure_blob_service.create_container_in_storage('images', 'container'):
                 return {
                     HEALTH.STATUS: HEALTH_STATUS.OK,
                     HEALTH.DESCRIPTION: "You can use Azure resources now."
@@ -123,7 +123,7 @@ class AzureStorage(Storage):
             FILE_TYPE.HACK_IMAGE: self.util.safe_get_config("storage.azure.image_container", "images"),
             FILE_TYPE.AZURE_CERT: self.util.safe_get_config("storage.azure.certificate_container", "certificate")
         }
-        self.file_service = RequiredFeature("file_service")
+        self.azure_blob_service = RequiredFeature("azure_blob_service")
 
     def __get_container_by_file_type(self, file_type):
         """Get container name of azure by file type
