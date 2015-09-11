@@ -55,7 +55,8 @@ app.debug = True
 
 
 class HackathonApi(Api):
-    """Customize Api to give a chance to handle exceptions in framework level
+    """Customize Api to give a chance to handle exceptions in framework level.
+    So that our restful APIs will always respond with code 200 even if Exception thrown and not caught in our codes
 
     We can raise HTTPException and it's inheritances directly in components, they will be caught here. Now we have two
     ways to response with error:
@@ -128,6 +129,7 @@ class Component(object):
     log = RequiredFeature("log")
     db = RequiredFeature("db")
     util = RequiredFeature("util")
+    scheduler = RequiredFeature("scheduler")
 
 
 def init_components():

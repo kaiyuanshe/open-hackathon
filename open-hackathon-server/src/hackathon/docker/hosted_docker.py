@@ -76,7 +76,6 @@ from datetime import timedelta
 class HostedDockerFormation(DockerFormationBase, Component):
     hackathon_template_manager = RequiredFeature("hackathon_template_manager")
     hackathon_manager = RequiredFeature("hackathon_manager")
-    scheduler = RequiredFeature("scheduler")
     """
     Docker resource management based on docker remote api v1.18
     Host resource are required. Azure key required in case of azure.

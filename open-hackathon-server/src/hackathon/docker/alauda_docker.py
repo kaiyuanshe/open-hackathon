@@ -44,7 +44,7 @@ from hackathon.hackathon_exception import (
     AlaudaException
 )
 from hackathon.template import DOCKER_UNIT
-from hackathon import Component, RequiredFeature, Context
+from hackathon import Component, Context
 
 
 class ALAUDA:
@@ -58,8 +58,6 @@ class ALAUDA:
 
 
 class AlaudaDockerFormation(DockerFormationBase, Component):
-    scheduler = RequiredFeature("scheduler")
-
     def start(self, unit, **kwargs):
         virtual_environment = kwargs["virtual_environment"]
 

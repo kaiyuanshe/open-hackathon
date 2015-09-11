@@ -64,6 +64,14 @@ class TemplateLibrary(Component):
             return template.dic()
         return not_found("template cannot be found by id %s" % template_id)
 
+    def get_template_info_by_name(self, template_name):
+        """Query template basic info from DB by its id
+
+        :type template_name: str|unicode
+        :param template_name: unique name of Template
+        """
+        return self.db.find_first_object_by(Template, name=template_name)
+
     def search_template(self, args):
         """Search template by status, name or description"""
         criterion = self.__generate_search_criterion(args)
