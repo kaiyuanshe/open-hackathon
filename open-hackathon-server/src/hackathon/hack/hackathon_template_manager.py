@@ -45,7 +45,6 @@ class HackathonTemplateManager(Component):
     team_manager = RequiredFeature("team_manager")
     hackathon_manager = RequiredFeature("hackathon_manager")
     template_library = RequiredFeature("template_library")
-    scheduler = RequiredFeature("scheduler")
     hosted_docker = RequiredFeature("hosted_docker")
 
     def add_template_to_hackathon(self, template_id, team_id=-1):
@@ -79,8 +78,7 @@ class HackathonTemplateManager(Component):
 
     def get_templates_by_hackathon_id(self, hackathon_id):
         """Get all templates used by certain hackathon"""
-        htrs = self.db.find_all_objects_by(HackathonTemplateRel, hackathon_id=hackathon_id)
-        return map(lambda x: x.template.dic(), htrs)
+        return self.db.find_all_objects_by(HackathonTemplateRel, hackathon_id=hackathon_id)
 
     def get_user_templates(self, user, hackathon):
         template_list = self.__get_templates_by_user(user, hackathon)

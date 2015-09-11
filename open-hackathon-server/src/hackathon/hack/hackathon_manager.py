@@ -32,7 +32,7 @@ import imghdr
 import uuid
 import time
 
-from werkzeug.exceptions import PreconditionFailed, InternalServerError
+from werkzeug.exceptions import PreconditionFailed, InternalServerError, BadRequest
 from sqlalchemy import or_
 from flask import g, request
 
@@ -57,10 +57,19 @@ class HackathonManager(Component):
 
     admin_manager = RequiredFeature("admin_manager")
 
-    def get_hackathon_by_name_or_id(self, hack_id=None, name=None):
-        if hack_id is None:
-            return self.__get_hackathon_by_name(name)
-        return self.get_hackathon_by_id(hack_id)
+    def get_hackathon_by_name(self, name):
+        """Get hackathon accoring the unique name
+
+        :type name: str|unicode
+        :param name: name of hackathon
+
+        :rtype: Hackathon
+        :return hackathon instance if found else None
+        """
+        if not name:
+            return None
+
+        return self.db.find_first_object_by(Hackathon, name=name)
 
     def get_hackathon_by_id(self, hackathon_id):
         """Query hackathon by id
@@ -120,7 +129,7 @@ class HackathonManager(Component):
         :rtype: bool
         :return True if hackathon with specific name exists otherwise False
         """
-        hackathon = self.__get_hackathon_by_name(name)
+        hackathon = self.get_hackathon_by_name(name)
         return hackathon is not None
 
     def get_online_hackathons(self):
@@ -157,7 +166,7 @@ class HackathonManager(Component):
         if HTTP_HEADER.HACKATHON_NAME in request.headers:
             try:
                 hackathon_name = request.headers[HTTP_HEADER.HACKATHON_NAME]
-                hackathon = self.__get_hackathon_by_name(hackathon_name)
+                hackathon = self.get_hackathon_by_name(hackathon_name)
                 if hackathon is None:
                     self.log.debug("cannot find hackathon by name %s" % hackathon_name)
                     return False
@@ -190,7 +199,7 @@ class HackathonManager(Component):
 
         :rtype: dict
         """
-        hackathon = self.__get_hackathon_by_name(context.name)
+        hackathon = self.get_hackathon_by_name(context.name)
         if hackathon is not None:
             raise PreconditionFailed("hackathon name already exists")
 
@@ -223,51 +232,37 @@ class HackathonManager(Component):
             self.log.error(e)
             return internal_server_error("fail to update hackathon")
 
-    def validate_args(self):
-        # check size
-        if request.content_length > len(request.files) * self.util.get_config("storage.size_limit_kilo_bytes") * 1024:
-            return False, bad_request("more than the file size limited")
-
-        # check each file type
-        for file_name in request.files:
-            if request.files.get(file_name).filename.endswith('jpg'): continue  # jpg is not considered in imghdr
-            if imghdr.what(request.files.get(file_name)) is None:
-                return False, bad_request("only images can be uploaded")
-
-        return True, "passed"
-
-    def generate_file_name(self, file):
+    def generate_file_name(self, f):
         # refresh file_name = hack_name + uuid(10) + time + suffix
-        suffix = file.filename.split('.')[-1]
+        suffix = f.filename.split('.')[-1]
         real_name = g.hackathon.name + "/" + \
                     str(uuid.uuid1())[0:9] + \
                     time.strftime("%Y%m%d%H%M%S") + "." + suffix
         return real_name
 
     def upload_files(self):
-        status, return_info = self.validate_args()
-        if not status:
-            return return_info
+        """Handle uploaded files from http request"""
+        self.__validate_upload_files()
 
-        image_container_name = self.util.safe_get_config("storage.image_container", "images")
         images = []
         storage = RequiredFeature("storage")
         for file_name in request.files:
-            file = request.files[file_name]
+            file_storage = request.files[file_name]
             self.log.debug("upload image file : " + file_name)
             context = Context(
                 hackathon_name=g.hackathon.name,
-                file_name=file.filename,
+                file_name=file_storage.filename,
                 file_type=FILE_TYPE.HACK_IMAGE,
-                content=file
+                content=file_storage
             )
             context = storage.save(context)
-            image = {}
-            image['name'] = file.filename
-            image['url'] = context.url
-            image['thumbnailUrl'] = context.url
+            image = {
+                "name": file_storage.filename,
+                "url": context.url,
+                "thumbnailUrl": context.url,
+                "deleteUrl": '/api/admin/file?key=' + context.file_name
+            }
             # context.file_name is a random name created by server, file.filename is the original name
-            image['deleteUrl'] = '/api/admin/file?key=' + context.file_name
             images.append(image)
 
         return {"files": images}
@@ -305,17 +300,6 @@ class HackathonManager(Component):
             HACKATHON_BASIC_INFO.FREEDOM_TEAM: True
         }
         return json.dumps(default_base_info)
-
-    def __get_hackathon_by_name(self, name):
-        """Get hackathon accoring the unique name
-
-        :type name: str|unicode
-        :param name: name of hackathon
-
-        :rtype: Hackathon
-        :return hackathon instance if found else None
-        """
-        return self.db.find_first_object_by(Hackathon, name=name)
 
     def __create_hackathon(self, context):
         """Insert hackathon and admin_hackathon_rel to database
@@ -417,6 +401,18 @@ class HackathonManager(Component):
             self.log.warn("fail to create test data")
 
         return
+
+    def __validate_upload_files(self):
+        # check file size
+        if request.content_length > len(request.files) * self.util.get_config("storage.size_limit_kilo_bytes") * 1024:
+            raise BadRequest("more than the file size limited")
+
+        # check each file type
+        for file_name in request.files:
+            if request.files.get(file_name).filename.endswith('jpg'):
+                continue  # jpg is not considered in imghdr
+            if imghdr.what(request.files.get(file_name)) is None:
+                raise BadRequest("only images can be uploaded")
 
 
 '''
