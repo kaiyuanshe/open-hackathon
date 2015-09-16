@@ -65,6 +65,17 @@ class HEALTH:
     VERSION = "version"
 
 
+class HACKATHON_STAT:
+    """Statistics types of a hackathon
+
+    Attributes:
+        LIKE: number of user that likes a hackathon
+        REGISTER: number of registered users
+    """
+    LIKE = "like"
+    REGISTER = "register"
+
+
 class HACKATHON_BASIC_INFO:
     """Basic settings of hackathon that saved into column 'basic_info' of table 'hackathon'
 

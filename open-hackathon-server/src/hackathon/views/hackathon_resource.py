@@ -83,12 +83,12 @@ def validate(func):
         input_schema = get_input_schema(class_name, method_name)
         output_schema = get_output_schema(class_name, method_name)
 
-        if method_name in ["post", "put"]:
-            data = request.get_json(force=True)
-        else:
-            data = request.args
-
         if input_schema:
+            if method_name in ["post", "put"]:
+                data = request.get_json(force=True)
+            else:
+                data = request.args
+
             try:
                 formatdict = {
                     "hack_date": validate_date

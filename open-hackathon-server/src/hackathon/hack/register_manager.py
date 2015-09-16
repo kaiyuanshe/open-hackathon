@@ -33,7 +33,7 @@ from flask import g
 from hackathon import Component, RequiredFeature
 from hackathon.database import UserHackathonRel, Experiment
 from hackathon.hackathon_response import bad_request, precondition_failed, internal_server_error, not_found, ok
-from hackathon.constants import EStatus, RGStatus, HACKATHON_BASIC_INFO
+from hackathon.constants import EStatus, RGStatus, HACKATHON_BASIC_INFO, HACKATHON_STAT
 
 __all__ = ["RegisterManager"]
 
@@ -90,6 +90,7 @@ class RegisterManager(Component):
             args["status"] = RGStatus.AUTO_PASSED if hackathon.is_auto_approve() else RGStatus.UNAUDIT
             args['create_time'] = self.util.get_now()
             user_hackathon_rel = self.db.add_object_kwargs(UserHackathonRel, **args).dic()
+            self.__update_register_stat(hackathon)
             return {
                 "register": user_hackathon_rel,
                 "hackahton_basic_info": json.loads(hackathon.basic_info)
@@ -114,6 +115,9 @@ class RegisterManager(Component):
             update_items["update_time"] = self.util.get_now()
             self.db.update_object(register, **update_items)
 
+            hackathon = self.hackathon_manager.get_hackathon_by_id(register.hackathon_id)
+            self.__update_register_stat(hackathon)
+
             return register.dic()
         except Exception as e:
             self.log.error(e)
@@ -126,6 +130,8 @@ class RegisterManager(Component):
             register = self.db.find_first_object_by(UserHackathonRel, id == args['id'])
             if register is not None:
                 self.db.delete_object(register)
+                hackathon = self.hackathon_manager.get_hackathon_by_id(register.hackathon_id)
+                self.__update_register_stat(hackathon)
             return ok()
         except Exception as ex:
             self.log.error(ex)
@@ -155,6 +161,13 @@ class RegisterManager(Component):
 
         return detail
 
+    def __update_register_stat(self, hackathon):
+        count = self.db.count(UserHackathonRel,
+                              UserHackathonRel.hackathon_id == hackathon.id,
+                              UserHackathonRel.status.in_(RGStatus.AUDIT_PASSED, RGStatus.AUTO_PASSED),
+                              UserHackathonRel.deleted == 0)
+        self.hackathon_manager.update_hackathon_stat(hackathon, HACKATHON_STAT.REGISTER, count)
+
     def is_user_registered(self, user_id, hackathon):
         """Check whether use registered certain hackathon"""
         register = self.get_registration_by_user_and_hackathon(user_id, hackathon.id)
@@ -178,8 +191,8 @@ class RegisterManager(Component):
 
         :return False if not all seats occupied or hackathon has no limit at all otherwise True
         """
-        max = hackathon.get_basic_property(HACKATHON_BASIC_INFO.MAX_ENROLLMENT, 0)
-        if max == 0:  # means no limit
+        maximum = hackathon.get_basic_property(HACKATHON_BASIC_INFO.MAX_ENROLLMENT, 0)
+        if maximum == 0:  # means no limit
             return False
         else:
             # count of audited users

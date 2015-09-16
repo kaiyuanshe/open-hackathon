@@ -116,7 +116,6 @@ class SQLAlchemyAdapter(DBAdapter):
     def find_first_object_by(self, ObjectClass, **kwargs):
         return ObjectClass.query.filter_by(**kwargs).first()
 
-
     def add_object(self, inst):
         self.db_session.add(inst)
 

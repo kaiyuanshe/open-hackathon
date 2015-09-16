@@ -130,6 +130,7 @@ class Component(object):
     db = RequiredFeature("db")
     util = RequiredFeature("util")
     scheduler = RequiredFeature("scheduler")
+    cache = RequiredFeature("cache")
 
 
 def init_components():
@@ -149,6 +150,9 @@ def init_components():
     factory.provide("log", log)
     factory.provide("db", SQLAlchemyAdapter, db_session)
 
+    # cache
+    factory.provide("cache", CacheManagerExt)
+
     # scheduler
     factory.provide("scheduler", scheduler)
 
@@ -165,7 +169,6 @@ def init_components():
     factory.provide("admin_manager", AdminManager)
     factory.provide("team_manager", TeamManager)
     factory.provide("guacamole", GuacamoleInfo)
-    factory.provide("cache", CacheManagerExt)
 
     # health check items
     factory.provide("health_check_mysql", get_class("hackathon.health.health_check.MySQLHealthCheck"))

@@ -183,3 +183,8 @@ class Utility(object):
         if path and not (os.path.exists(path)):
             os.makedirs(path)
         return path
+
+    def str2bool(self, v):
+        if not v:
+            return False
+        return v.lower() in ["yes", "true", "y", "t", "1"]
