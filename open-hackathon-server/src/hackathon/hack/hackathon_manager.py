@@ -30,7 +30,6 @@ sys.path.append("..")
 import imghdr
 
 from werkzeug.exceptions import PreconditionFailed, InternalServerError, BadRequest
-from sqlalchemy import or_
 from flask import g, request
 
 from hackathon.database import Hackathon, User, AdminHackathonRel, DockerHostServer, HackathonLike, \
@@ -153,8 +152,8 @@ class HackathonManager(Component):
         return map(lambda h: self.__get_hackathon_detail(h, user), user_hack_list)
 
     def get_recyclable_hackathon_list(self):
-        all = self.db.find_all_objects(Hackathon)
-        return filter(lambda h: self.is_recycle_enabled(h), all)
+        all_hackathon = self.db.find_all_objects(Hackathon)
+        return filter(lambda h: self.is_recycle_enabled(h), all_hackathon)
 
     def get_entitled_hackathon_list_with_detail(self, user):
         hackathon_ids = self.admin_manager.get_entitled_hackathon_ids(user.id)
@@ -354,12 +353,11 @@ class HackathonManager(Component):
         self.db.delete_all_objects_by(HackathonTag, hackathon_id=hackathon.id)
         for tag in tags:
             t = tag.strip('"').strip("'")
-            self.db.add_object(HackathonTag(tag=tag, hackathon_id=hackathon.id))
+            self.db.add_object(HackathonTag(tag=t, hackathon_id=hackathon.id))
         self.db.commit()
         return ok()
 
     def __get_hackathon_detail(self, hackathon, user=None):
-
         """Return hackathon info as well as its details including configs, stat, organizers, like if user logon"""
         detail = hackathon.dic()
 
@@ -376,6 +374,9 @@ class HackathonManager(Component):
             register = self.register_manager.get_registration_by_user_and_hackathon(user.id, hackathon.id)
             if register:
                 detail["registration"] = register.dic()
+            like = self.db.find_first_object_by(HackathonLike, user_id=user.id, hackathon_id=hackathon.id)
+            if like:
+                detail["like"] = like.dic()
 
         return detail
 
