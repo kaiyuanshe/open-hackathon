@@ -24,10 +24,6 @@
               2
             ]
           },
-          "basic_info": {
-            "description": "the basic configuration of this hackathon",
-            "type": "object"
-          },
           "display_name": {
             "description": "display name of the hackathon which will showed on the  web pages",
             "type": "string"
