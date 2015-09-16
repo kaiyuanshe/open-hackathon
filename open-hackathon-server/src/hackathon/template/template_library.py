@@ -29,7 +29,6 @@ from werkzeug.exceptions import BadRequest, InternalServerError, Forbidden
 sys.path.append("..")
 from os.path import isfile
 import json
-import uuid
 import requests
 
 from sqlalchemy import and_
@@ -40,7 +39,6 @@ from hackathon.database import Template, Experiment, HackathonTemplateRel
 from hackathon.hackathon_response import not_found, ok, internal_server_error, forbidden
 from hackathon.constants import FILE_TYPE, TEMPLATE_STATUS
 from template_constants import TEMPLATE
-from docker_template_unit import DockerTemplateUnit
 from template_content import TemplateContent
 
 __all__ = ["TemplateLibrary"]
@@ -49,7 +47,6 @@ __all__ = ["TemplateLibrary"]
 class TemplateLibrary(Component):
     """Component to manage templates"""
 
-    cache_manager = RequiredFeature("cache")
     storage = RequiredFeature("storage")
     user_manager = RequiredFeature("user_manager")
 
@@ -100,7 +97,7 @@ class TemplateLibrary(Component):
                     return None
 
         cache_key = self.__get_template_cache_key(template.id)
-        return self.cache_manager.get_cache(key=cache_key, createfunc=internal_load_template)
+        return self.cache.get_cache(key=cache_key, createfunc=internal_load_template)
 
     def create_template(self, args):
         """ Create template """
@@ -157,7 +154,7 @@ class TemplateLibrary(Component):
                 return forbidden("template already in use")
 
             # remove template cache and storage
-            self.cache_manager.invalidate(self.__get_template_cache_key(template_id))
+            self.cache.invalidate(self.__get_template_cache_key(template_id))
             self.storage.delete(template.url)
 
             # remove record in DB
@@ -246,7 +243,7 @@ class TemplateLibrary(Component):
                                       description=template_content.description,
                                       virtual_environment_count=len(template_content.units),
                                       provider=provider)
-                self.cache_manager.invalidate(self.__get_template_cache_key(template.id))
+                self.cache.invalidate(self.__get_template_cache_key(template.id))
 
             return template.dic()
         except Exception as ex:

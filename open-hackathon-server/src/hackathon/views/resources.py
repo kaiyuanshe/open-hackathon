@@ -35,7 +35,7 @@ from flask_restful import reqparse
 from hackathon import RequiredFeature, Component
 from hackathon.decorators import hackathon_name_required, token_required, admin_privilege_required
 from hackathon.health import report_health
-from hackathon.hackathon_response import bad_request, not_found, internal_server_error
+from hackathon.hackathon_response import bad_request, not_found
 from hackathon_resource import HackathonResource
 from hackathon.constants import RGStatus
 
@@ -119,11 +119,7 @@ class HackathonResource(HackathonResource):
 
 class HackathonListResource(HackathonResource):
     def get(self):
-        parse = reqparse.RequestParser()
-        parse.add_argument('user_id', type=int, location='args')
-        parse.add_argument('status', type=int, location='args')
-        args = parse.parse_args()
-        return hackathon_manager.get_hackathon_list(args["user_id"], args["status"])
+        return hackathon_manager.get_hackathon_list(request.args)
 
 
 class HackathonStatResource(HackathonResource):
@@ -223,7 +219,19 @@ class UserHackathonListResource(HackathonResource):
         parse = reqparse.RequestParser()
         parse.add_argument('user_id', type=int, location='args', required=True)
         args = parse.parse_args()
-        return hackathon_manager.get_user_hackathon_list(args['user_id'])
+        return hackathon_manager.get_user_hackathon_list_with_detail(args['user_id'])
+
+
+class UserHackathonLikeResource(HackathonResource):
+    @hackathon_name_required
+    @token_required
+    def post(self):
+        return hackathon_manager.like_hackathon(g.user, g.hackathon)
+
+    @hackathon_name_required
+    @token_required
+    def delete(self):
+        return hackathon_manager.unlike_hackathon(g.user, g.hackathon)
 
 
 class UserExperimentResource(HackathonResource, Component):
@@ -369,6 +377,11 @@ class TeamTemplateResource(HackathonResource):
         return team_manager.delete_template_from(args['template_id'])
 
 
+class TalentResource(HackathonResource):
+    def get(self):
+        return user_manager.get_talents()
+
+
 """Resources for hackathon admin to manage hackathon and hackathon related resources and features"""
 
 
@@ -391,6 +404,23 @@ class AdminHackathonResource(HackathonResource):
         return hackathon_manager.update_hackathon(request.get_json())
 
 
+class AdminHackathonConfigResource(HackathonResource):
+    @admin_privilege_required
+    def post(self):
+        return hackathon_manager.set_basic_property(g.hackathon, self.context())
+
+
+class AdminHackathonTags(HackathonResource):
+    @hackathon_name_required
+    def get(self):
+        return hackathon_manager.get_hackathon_tags(g.hackathon)
+
+    @admin_privilege_required
+    def post(self):
+        tags = request.get_data().split(",")
+        return hackathon_manager.set_hackathon_tags(g.hackathon, tags)
+
+
 class HackathonCheckNameResource(HackathonResource):
     def get(self):
         context = self.context()
@@ -400,7 +430,7 @@ class HackathonCheckNameResource(HackathonResource):
 class AdminHackathonListResource(HackathonResource):
     @token_required
     def get(self):
-        return hackathon_manager.get_entitled_hackathon_list(g.user.id)
+        return hackathon_manager.get_entitled_hackathon_list_with_detail(g.user)
 
 
 class AdminAzureResource(HackathonResource):
@@ -520,6 +550,8 @@ class HackathonAdminListResource(HackathonResource):
 
 
 class HackathonAdminResource(HackathonResource):
+    """Resource to add/delete administrators/judges of a hackathon"""
+
     @admin_privilege_required
     def post(self):
         args = request.get_json()
