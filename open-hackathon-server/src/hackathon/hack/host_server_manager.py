@@ -22,6 +22,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
+__author__ = 'ZGQ'
+
 import sys
 import requests
 from uuid import uuid1
@@ -29,9 +31,9 @@ from time import strftime, sleep
 
 sys.path.append("..")
 
-from azure.servicemanagement import *
 from azure.storage.blobservice import BlobService
-from azure.servicemanagement import ConfigurationSet, ConfigurationSetInputEndpoint
+from azure.servicemanagement import (ConfigurationSet, ConfigurationSetInputEndpoint, OSVirtualHardDisk,
+                                     LinuxConfigurationSet, ServiceManagementService)
 
 from hackathon import Component, RequiredFeature, Context
 from hackathon.database.models import DockerHostServer, AzureKey, HackathonAzureKey, Hackathon
