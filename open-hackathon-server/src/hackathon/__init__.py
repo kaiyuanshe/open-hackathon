@@ -215,6 +215,7 @@ def __init_schedule_jobs():
     """Init scheduled jobs in fact"""
     sche = RequiredFeature("scheduler")
     expr_manager = RequiredFeature("expr_manager")
+    host_server_manager = RequiredFeature("docker_host_manager")
 
     # schedule job to check recycle operation
     next_run_time = util.get_now() + timedelta(seconds=10)
@@ -231,6 +232,11 @@ def __init_schedule_jobs():
     if not safe_get_config("docker.alauda.enabled", False):
         docker = RequiredFeature("hosted_docker")
         docker.ensure_images()
+
+    # todo
+    # schedule job to pre-create a docker host server VM
+    # hackathon_id = safe_get_config("hostserver.hackathon_id", 1)
+    # host_server_manager.create_virtual_machine(hackathon_id)
 
 
 def init_app():

@@ -318,6 +318,10 @@ class DockerHostServer(DBBase):
     is_auto = Column(Integer, default=0) # 0-started manually 1-started by OHP server
     create_time = Column(TZDateTime, default=get_now())
     update_time = Column(TZDateTime)
+    state = Column(Integer, default=0)
+    # 0-VM starting, 1-docker init, 2-docker API ready, 3-unavailable
+    disable = Column(Integer, default=1)
+    # 0-disabled by manager, 1-available
 
     hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
     hackathon = relationship('Hackathon', backref=backref('docker_host_servers', lazy='dynamic'))
