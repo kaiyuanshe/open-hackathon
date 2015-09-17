@@ -49,11 +49,9 @@ class GuacamoleResource(Resource):
 
 
 class CurrentUserResource(Resource):
-    #@token_required
+    @token_required
     def get(self):
-        docker_host_manager = RequiredFeature('docker_host_manager')
-        return docker_host_manager.test()
-        #return user_manager.user_display_info(g.user)
+        return user_manager.user_display_info(g.user)
 
 
 class UserHackathonRelResource(Resource, Component):

@@ -235,8 +235,7 @@ def __init_schedule_jobs():
 
     # todo
     # schedule job to pre-create a docker host server VM
-    # hackathon_id = safe_get_config("hostserver.hackathon_id", 1)
-    # host_server_manager.create_virtual_machine(hackathon_id)
+    host_server_manager.schedule_pre_allocate_host_server_job()
 
 
 def init_app():
