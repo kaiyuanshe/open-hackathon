@@ -183,3 +183,28 @@ class Utility(object):
         if path and not (os.path.exists(path)):
             os.makedirs(path)
         return path
+
+    def str2bool(self, v):
+        if not v:
+            return False
+        return v.lower() in ["yes", "true", "y", "t", "1"]
+
+    def paginate(self, pagination, func=None):
+        """Convert pagination results from DB to serializable dict
+
+        :type pagination: Pagination
+        :param pagination: object of Pagination defined in flask-SqlAlchemy
+
+        :type func: function
+        :param func: a function that to be applied to each item
+        """
+        items = pagination.items
+        if func:
+            items = map(lambda item: func(item), pagination.items)
+
+        return {
+            "items": items,
+            "page": pagination.page,
+            "per_page": pagination.per_page,
+            "total": pagination.total
+        }

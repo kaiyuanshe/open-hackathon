@@ -23,42 +23,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-import sys
 
-sys.path.append("..")
-from os.path import realpath, dirname, abspath
-import json
-import os
+class TemplateUnit(object):
+    """Unit of TemplateContent.
 
-from hackathon import Component
+    An unit is a dict too that includes arguments for docker container or azure VM.
+    Each unit represents a virtual_environment that can be started or stopped independently"""
 
+    def __init__(self, provider):
+        """Construct an new unit
 
-class BaseTemplate(Component):
-    """
-    Base class of template
-    """
-    TEMPLATE_NAME = 'name'
-    DESCRIPTION = 'description'
-    VIRTUAL_ENVIRONMENTS = 'virtual_environments'
-    VIRTUAL_ENVIRONMENTS_PROVIDER = 'provider'
-
-    def __init__(self, template_name, description):
-        self.dic = {
-            self.TEMPLATE_NAME: template_name,
-            self.DESCRIPTION: description
-        }
-
-    def to_file(self, file_name):
+        provider should be value of enum VE_PROVIDER.
         """
-        Dump to disk as json file, an existing file with the same name will be erased
-        :return: absolute path of json file
-        """
-        template_dir = '%s/../resources' % dirname(realpath(__file__))
-        # check template dir whether exists
-        if not os.path.isdir(template_dir):
-            self.log.debug('template dir [%s] not exists' % template_dir)
-            os.mkdir(template_dir)
-        template_path = '%s/%s' % (template_dir, file_name)
-        with open(template_path, 'w') as template_file:
-            json.dump(self.dic, template_file)
-        return abspath(template_path)
+        self.provider = provider

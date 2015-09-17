@@ -1,0 +1,46 @@
+{
+  "UserExperimentResource": {
+    "post": {
+      "input": {
+        "description": "create new experiment",
+        "type": "object",
+        "properties": {
+          "template_name": {
+            "type": "string",
+            "maxLength": 50,
+            "description": "description of registration detail"
+          },
+          "hackathon_name": {
+            "type": "string",
+            "maxLength": 50,
+            "required": false
+          }
+        }
+      }
+    },
+    "put": {
+      "input": {
+        "description": "heart beat of experiment",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          }
+        }
+      }
+    },
+    "get": {
+      "input": {
+        "description": "query the status of experiment",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          }
+        }
+      }
+    }
+  }
+}

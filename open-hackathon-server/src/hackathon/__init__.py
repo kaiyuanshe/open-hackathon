@@ -55,7 +55,8 @@ app.debug = True
 
 
 class HackathonApi(Api):
-    """Customize Api to give a chance to handle exceptions in framework level
+    """Customize Api to give a chance to handle exceptions in framework level.
+    So that our restful APIs will always respond with code 200 even if Exception thrown and not caught in our codes
 
     We can raise HTTPException and it's inheritances directly in components, they will be caught here. Now we have two
     ways to response with error:
@@ -128,17 +129,18 @@ class Component(object):
     log = RequiredFeature("log")
     db = RequiredFeature("db")
     util = RequiredFeature("util")
+    scheduler = RequiredFeature("scheduler")
+    cache = RequiredFeature("cache")
 
 
 def init_components():
     """Init hackathon factory"""
     from hackathon.database import db_session
     from hackathon.database.db_adapters import SQLAlchemyAdapter
-    from hackathon.user import UserManager
-    from hackathon.azureformation.fileService import FileService
-    from hackathon.hack import HackathonManager, AdminManager, TeamManager, DockerHostManager, AzureCertManager
-    from hackathon.registration.register_mgr import RegisterManager
-    from hackathon.template.template_mgr import TemplateManager
+    from hackathon.user import UserManager, UserProfileManager
+    from hackathon.hack import HackathonManager, AdminManager, TeamManager, DockerHostManager, \
+        AzureCertManager, RegisterManager, HackathonTemplateManager
+    from hackathon.template import TemplateLibrary
     from hackathon.remote.guacamole import GuacamoleInfo
     from hackathon.expr.expr_mgr import ExprManager
     from hackathon.cache.cache_mgr import CacheManagerExt
@@ -146,25 +148,27 @@ def init_components():
     # dependencies MUST be provided in advance
     factory.provide("util", Utility)
     factory.provide("log", log)
-    print '--------factory db---------'
     factory.provide("db", SQLAlchemyAdapter, db_session)
-    print '--------end factory db---------'
+
+    # cache
+    factory.provide("cache", CacheManagerExt)
+
     # scheduler
     factory.provide("scheduler", scheduler)
 
     # business components
     factory.provide("user_manager", UserManager)
+    factory.provide("user_profile_manager", UserProfileManager)
     factory.provide("hackathon_manager", HackathonManager)
     factory.provide("register_manager", RegisterManager)
-    factory.provide("file_service", FileService)
     factory.provide("azure_cert_manager", AzureCertManager)
     factory.provide("docker_host_manager", DockerHostManager)
-    factory.provide("template_manager", TemplateManager)
+    factory.provide("hackathon_template_manager", HackathonTemplateManager)
+    factory.provide("template_library", TemplateLibrary)
     factory.provide("expr_manager", ExprManager)
     factory.provide("admin_manager", AdminManager)
     factory.provide("team_manager", TeamManager)
     factory.provide("guacamole", GuacamoleInfo)
-    factory.provide("cache", CacheManagerExt)
 
     # health check items
     factory.provide("health_check_mysql", get_class("hackathon.health.health_check.MySQLHealthCheck"))
@@ -174,7 +178,6 @@ def init_components():
     factory.provide("health_check_azure", get_class("hackathon.health.health_check.AzureHealthCheck"))
 
     # docker
-    factory.provide("docker", get_class("hackathon.docker.docker_helper.DockerHelper"))
     factory.provide("hosted_docker", get_class("hackathon.docker.hosted_docker.HostedDockerFormation"))
     factory.provide("alauda_docker", get_class("hackathon.docker.alauda_docker.AlaudaDockerFormation"))
 
@@ -191,6 +194,9 @@ def init_hackathon_storage():
 
     storage_type = safe_get_config("storage.type", "azure")
     if storage_type == "azure":
+        # init BlobServiceAdapter first since AzureStorage depends on it. And accountKey must be included in config file
+        from hackathon.hazure import BlobServiceAdapter
+        factory.provide("azure_blob_service", BlobServiceAdapter)
         factory.provide("storage", AzureStorage)
     else:
         factory.provide("storage", LocalStorage)

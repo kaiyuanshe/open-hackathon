@@ -31,6 +31,8 @@ sys.path.append("..")
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+# noinspection PyUnresolvedReferences
+from flask.ext.sqlalchemy import BaseQuery
 
 from db_adapters import SQLAlchemyAdapter
 from hackathon.util import safe_get_config
@@ -47,7 +49,7 @@ db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=True,
                                          bind=engine))
 Base = declarative_base()
-Base.query = db_session.query_property()
+Base.query = db_session.query_property(BaseQuery)
 db_adapter = SQLAlchemyAdapter(db_session)
 
 from models import *

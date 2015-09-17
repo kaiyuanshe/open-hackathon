@@ -136,6 +136,13 @@ class UserManager(Component):
 
         return -1 in self.admin_manager.get_entitled_hackathon_ids(user.id)
 
+    def get_talents(self):
+        # todo real talents list
+        users = self.db.find_all_objects_order_by(User,
+                                                  10,
+                                                  User.create_time.desc())
+        return [self.user_display_info(u) for u in users]
+
     # ----------------------------private methods-------------------------------------
 
     def __validate_token(self, token):

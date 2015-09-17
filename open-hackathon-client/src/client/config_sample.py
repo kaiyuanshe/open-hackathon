@@ -73,7 +73,8 @@ Config = {
         },
         "gitcafe": {
             "access_token_url": 'https://gcas.dgz.sh/oauth/token?client_id=%s&client_secret=%s&redirect_uri=%s/gitcafe&grant_type=authorization_code&code=' % (
-                GITCAFE_CLIENT_ID, GITCAFE_CLIENT_SECRET, HOSTNAME)
+                GITCAFE_CLIENT_ID, GITCAFE_CLIENT_SECRET, HOSTNAME),
+            "user_info_url": "https://gcas.dgz.sh/api/v1/user"
         },
         "weibo": {
             "meta_content": WEIBO_META_CONTENT,
@@ -132,12 +133,12 @@ Config = {
                         "administrator": {
                             "": ["put", "post", "delete"],
                             "list": ["get"]
-                        },
-                        "template": {
-                            "": ["post", "delete"],
-                            "list": ["get"],
-                            "check": ["get"]
                         }
+                    },
+                    "template": {
+                        "": ["post", "delete"],
+                        "list": ["get"],
+                        "check": ["get"]
                     },
                     "registration": {
                         "": ["get", "post", "delete", "put"],
@@ -148,7 +149,7 @@ Config = {
                     },
                     "experiment": {
                         "list": ["get"],
-                        "": ["post", "put"]
+                        "": ["post", "delete"]
                     }
                 },
                 "template": {
@@ -159,8 +160,7 @@ Config = {
                 "user": {
                     "": ["get"],
                     "experiment": {
-                        "": ["get", "post", "delete", "put"],
-                        "list": ["get"]
+                        "": ["get", "post", "delete", "put"]
                     },
                     "registration": {
                         "": ["put", "post", "get"],
@@ -171,7 +171,7 @@ Config = {
                         "": ["get", "post", "put"]
                     },
                     "team": {
-                        "member": ["get"]
+                        "list": ["get"]
                     }
                 },
                 "hackathon": {
@@ -188,7 +188,6 @@ Config = {
                 },
                 "team": {
                     "": ["get", "post"],
-                    "user": ["get"],
                     "list": ["get"],
                     "leader": ["put"],
                     "member": {

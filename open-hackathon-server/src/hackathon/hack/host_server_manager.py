@@ -69,7 +69,7 @@ class DockerHostManager(Component):
         # todo the VM public/private IP will change after reboot, need sync the IP in db with azure in this case
         for docker_host in vms:
             if self.docker.hosted_docker.ping(docker_host):
-               return docker_host
+                return docker_host
         self.create_docker_host_vm(hackathon.id)
         return None
         # raise Exception("No available VM.")

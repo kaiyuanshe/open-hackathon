@@ -42,11 +42,18 @@ class TeamManager(Component):
     """Component to manage hackathon teams"""
     user_manager = RequiredFeature("user_manager")
     admin_manager = RequiredFeature("admin_manager")
-    template_manager = RequiredFeature("template_manager")
+    hackathon_template_manager = RequiredFeature("hackathon_template_manager")
 
-    def get_user_by_teams(self, user_id):
+    def get_teams_by_user(self, user_id):
+        """Get all teams of specific user
+
+        Teams in all participated hackathon are returned
+
+        :type user_id: int
+        :param user_id: id of user
+        """
         teams = self.__get_user_teams(user_id)
-        team_list = map(lambda x: x._asdict(), teams)
+        team_list = map(lambda x: x.dic(), teams)
 
         return team_list
 
@@ -88,7 +95,7 @@ class TeamManager(Component):
             detail["members"] = self.__get_team_members(team)
             return detail
         else:
-            return not_found("no such team's members")
+            return {}
 
     def get_team_members_by_name(self, hackathon_id, team_name):
         """Get team member list of specific team_name
@@ -112,7 +119,6 @@ class TeamManager(Component):
             return detail
         else:
             return not_found("no such team's members")
-
 
     def get_hackathon_team_list(self, hackathon_id, name=None, number=None):
         """Get the team list of selected hackathon
@@ -309,7 +315,7 @@ class TeamManager(Component):
         """Leave a team by user
 
         :type hackathon_id: int
-        :param hid: hackathon id
+        :param hackathon_id: hackathon id
 
         :type team_name: str|unicode
         :param team_name: team name
@@ -338,7 +344,7 @@ class TeamManager(Component):
         """ team leader and admin kick some one from team
 
         :type team_name: str|unicode
-        :param tname: team name
+        :param team_name: team name
 
         :type candidate_id: int
         :param candidate_id: the candidate to kick off
@@ -404,7 +410,7 @@ class TeamManager(Component):
         if team.leader_id != g.user.id:
             return forbidden("team leader required")
         else:
-            return self.template_manager.add_template_to_hackathon(args["template_id"], team.id)
+            return self.hackathon_template_manager.add_template_to_hackathon(args["template_id"], team.id)
 
     def delete_template_from_team(self, template_id):
         """Delete template from current user's team
@@ -418,7 +424,7 @@ class TeamManager(Component):
         if team.leader_id != g.user.id:
             return forbidden("team leader required")
         else:
-            return self.template_manager.delete_template_from_hackathon(template_id, team.id)
+            return self.hackathon_template_manager.delete_template_from_hackathon(template_id, team.id)
 
     # ------------------------------ private methods ----------------------------------------
 
@@ -426,7 +432,7 @@ class TeamManager(Component):
         pass
 
     def __get_user_teams(self, user_id):
-        """Get user teams list and related hackathon display info
+        """Get all teams of specific and related hackathon display info
 
         :type user_id: int
         :param user_id: User id to get teams. Cannot be None
@@ -441,7 +447,6 @@ class TeamManager(Component):
             filter(UserTeamRel.user_id == user_id)
 
         return q.all()
-
 
     def __get_team_members(self, team):
         """Get team members list and related user display info
@@ -510,7 +515,7 @@ class TeamManager(Component):
         # check if team leader
         if team.leader_id != user.id:
             # check if hackathon admin
-            if not self.admin_manager.is_hackathon_admin(hackathon_id, user):
+            if not self.admin_manager.is_hackathon_admin(hackathon_id, user.id):
                 # check if super admin
                 if not self.user_manager.is_super_admin(user):
                     self.log.debug("Access denied for user [%s]%s trying to access team '%s' of hackathon %d " %

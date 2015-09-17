@@ -26,6 +26,7 @@ THE SOFTWARE.
 import json
 from uuid import uuid1
 from time import strftime
+from werkzeug.datastructures import FileStorage
 
 from storage import Storage
 from hackathon import RequiredFeature
@@ -40,7 +41,6 @@ class AzureStorage(Storage):
     template files will be save at "http://hackathon.blob.core.chinacloudapi.cn/templates/<blob_name>"
     uploaded images will be save at "http://hackathon.blob.core.chinacloudapi.cn/images/<blob_name>"
     """
-    file_service = RequiredFeature("file_service")
 
     def save(self, context):
         """Save a file to Azure storage
@@ -56,15 +56,23 @@ class AzureStorage(Storage):
                             and "storage.azure.blob_service_host_base" configuration
         """
         container_name = self.__get_container_by_file_type(context.file_type)
-        blob_name = self.__generate_file_name(context.hackathon_name, context.file_type, context.file_name)
+        hackathon_name = context.get("hackathon_name")
+        blob_name = self.__generate_file_name(hackathon_name, context.file_type, context.file_name)
 
         if context.get('content'):
             file_content = context.content
-            result = self.file_service.upload_file_to_azure(file_content, container_name, blob_name)
+            if isinstance(file_content, file) or isinstance(file_content, FileStorage):
+                result = self.azure_blob_service.upload_file_to_azure(container_name, blob_name, file_content)
+            elif isinstance(file_content, dict):
+                text = json.dumps(file_content)
+                result = self.azure_blob_service.upload_file_to_azure_from_text(container_name, blob_name, text)
+            else:
+                text = str(file_content)
+                result = self.azure_blob_service.upload_file_to_azure_from_text(container_name, blob_name, text)
         else:
             assert context.get('file_path')
             file_path = context.file_path
-            result = self.file_service.upload_file_to_azure_from_path(file_path, container_name, blob_name)
+            result = self.azure_blob_service.upload_file_to_azure_from_path(container_name, blob_name, file_path)
 
         context["url"] = result
         self.log.debug("File saved at:" + result)
@@ -85,7 +93,7 @@ class AzureStorage(Storage):
             container_name = url_arr[-2]
             print container_name, blob_name
 
-            self.file_service.delete_file_from_azure(container_name, blob_name)
+            self.azure_blob_service.delete_file_from_azure(container_name, blob_name)
             return True
         except Exception as e:
             self.log.error(e)
@@ -94,7 +102,7 @@ class AzureStorage(Storage):
     def report_health(self):
         """Report the status of Azure storage"""
         try:
-            if self.file_service.create_container_in_storage('images', 'container'):
+            if self.azure_blob_service.create_container_in_storage('images', 'container'):
                 return {
                     HEALTH.STATUS: HEALTH_STATUS.OK,
                     HEALTH.DESCRIPTION: "You can use Azure resources now."
@@ -115,6 +123,7 @@ class AzureStorage(Storage):
             FILE_TYPE.HACK_IMAGE: self.util.safe_get_config("storage.azure.image_container", "images"),
             FILE_TYPE.AZURE_CERT: self.util.safe_get_config("storage.azure.certificate_container", "certificate")
         }
+        self.azure_blob_service = RequiredFeature("azure_blob_service")
 
     def __get_container_by_file_type(self, file_type):
         """Get container name of azure by file type
@@ -134,7 +143,8 @@ class AzureStorage(Storage):
         """
         if file_type == FILE_TYPE.HACK_IMAGE:
             suffix = file_name.split('.')[-1]
-            real_name = hackathon_name + "/" + str(uuid1())[0:9] + strftime("%Y%m%d%H%M%S") + "." + suffix
+            hackathon_name = "" if hackathon_name is None else hackathon_name + "/"
+            real_name = hackathon_name + str(uuid1())[0:9] + strftime("%Y%m%d%H%M%S") + "." + suffix
             return real_name
         else:
             return file_name

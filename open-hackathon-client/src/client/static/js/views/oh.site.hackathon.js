@@ -38,34 +38,29 @@
     }
 
     function submintRegister() {
-        var rform = $('#registerForm').bootstrapValidator()
-            .on('success.form.bv', function (e) {
-                e.preventDefault();
-                oh.api.user.registration.post({
-                    body: {
-                        hackathon_id: rform.data('hid')
-                        // todo 'Post hackathon register data'
-                        // team_name: rform.find('[name="team_name"]').val(),
-                        // git_project: rform.find('[name="git_project"]').val()
-                    },
-                    header: {hackathon_name: hackathon_name}
-                }, function (data) {
-                    if (data.error) {
-                        // todo 'Response hackathon register error'
+        var regieter_btn =  $('a[data-type="register"]').click(function (e) {
+            e.preventDefault();
+            oh.api.user.registration.post({
+                header: {hackathon_name: hackathon_name}
+            }, function (data) {
+                if (data.error) {
+                    oh.comm.alert('错误', data.error.friendly_message);
+                } else {
+                    var message = $('#status').empty();
+                    if (data.register.status == 0) {
+                        message.append('<p>您的报名正在审核中，请等待。</p>');
+                    } else if (data.register.status == 2) {
+                        message.append('<p>您的报名已被拒绝，如有疑问请联系主办方。</p>');
+                    } else if(data.hackahton_basic_info.freedom_team){
+                       message.append('<a class="btn btn-primary btn-lg" href="/site/' + hackathon_name + '/team">立即参加</a>\
+                                <p>您的报名已经审核已通过,您可以创建自己的团队或者加入已有的团队。</p>');
                     } else {
-                        var message = $('#status').empty();
-                        if (data.status == 0) {
-                            message.append('<p>您的报名正在审核中，请等待。</p>');
-                        } else if (data.status == 2) {
-                            message.append('<p>您的报名已被拒绝，如有疑问请联系主办方。</p>');
-                        } else {
-                            message.append('<a class="btn btn-primary btn-lg" href="/site/' + hackathon_name + '/settings">立即参加</a>\
+                          message.append('<a class="btn btn-primary btn-lg" href="/site/' + hackathon_name + '/settings">立即参加</a>\
                                 <p>您的报名已经审核已通过。</p>');
-                        }
-                        $('#registerModal').modal('hide');
                     }
-                })
-            });
+                }
+            })
+        });
     }
 
     function init() {

@@ -371,14 +371,6 @@ def load_template_from_experiment(experiment_id):
     t = db_adapter.get_object(Template, e.template_id)
     return load_template(t.url)
 
-
-def set_template_virtual_environment_count(experiment_id, count):
-    e = db_adapter.get_object(Experiment, experiment_id)
-    t = db_adapter.get_object(Template, e.template_id)
-    t.virtual_environment_count = count
-    db_adapter.commit()
-
-
 # --------------------------------------------- scheduler ---------------------------------------------#
 def run_job(mdl_cls_func, cls_args, func_args, second=DEFAULT_TICK):
     exec_time = get_now() + timedelta(seconds=second)

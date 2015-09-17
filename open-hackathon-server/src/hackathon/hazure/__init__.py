@@ -22,18 +22,4 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
-import sys
-
-sys.path.append("..")
-from hackathon import Component, RequiredFeature
-
-
-class DockerHelper(Component):
-    hosted_docker = RequiredFeature("hosted_docker")
-    alauda_docker = RequiredFeature("alauda_docker")
-
-    def get_docker(self, hackathon):
-        if hackathon.is_alauda_enabled():
-            return self.alauda_docker
-        else:
-            return self.hosted_docker
+from blob_service_adapter import BlobServiceAdapter

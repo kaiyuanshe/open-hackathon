@@ -65,6 +65,17 @@ class HEALTH:
     VERSION = "version"
 
 
+class HACKATHON_STAT:
+    """Statistics types of a hackathon
+
+    Attributes:
+        LIKE: number of user that likes a hackathon
+        REGISTER: number of registered users
+    """
+    LIKE = "like"
+    REGISTER = "register"
+
+
 class HACKATHON_BASIC_INFO:
     """Basic settings of hackathon that saved into column 'basic_info' of table 'hackathon'
 
@@ -84,6 +95,7 @@ class HACKATHON_BASIC_INFO:
         PRE_ALLOCATE_ENABLED: bool, whether to pre-start several environment. default false
         PRE_ALLOCATE_NUMBER: int, the maximum count of pre-start environment per hackathon and per template. default 1
         ALAUDA_ENABLED: bool,default false, whether to use alauda service, no azure resource needed if true
+        FREEDOM_TEAM: bool,default true,Whether to allow freedom of the team
     """
     ORGANIZERS = "organizers"
     ORGANIZER_NAME = "organizer_name"
@@ -100,6 +112,7 @@ class HACKATHON_BASIC_INFO:
     PRE_ALLOCATE_ENABLED = "pre_allocate_enabled"
     PRE_ALLOCATE_NUMBER = "pre_allocate_number"
     ALAUDA_ENABLED = "alauda_enabled"
+    FREEDOM_TEAM = "freedom_team"
 
 
 class CLOUD_ECLIPSE:

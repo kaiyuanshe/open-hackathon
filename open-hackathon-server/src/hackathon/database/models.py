@@ -207,7 +207,10 @@ class UserProfile(DBBase):
     __tablename__ = 'user_profile'
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'), unique=True)
+
     real_name = Column(String(80))
+    notes = Column(String(80))  # a short activity or mood
+    self_introduction = Column(Text)
     phone = Column(String(20))
     gender = Column(Integer)  # 0:women 1:man
     age = Column(Integer)
@@ -273,6 +276,9 @@ class Hackathon(DBBase):
     id = Column(Integer, primary_key=True)
     name = Column(String(50), unique=True, nullable=False, index=True)
     display_name = Column(String(64))
+    ribbon = Column(String(64))  # a short sentence of advertisement
+    short_description = Column(String(200))
+    banners = Column(Text)
     description = Column(Text)
     status = Column(Integer, default=0)  # 0-new 1-online 2-offline
     creator_id = Column(Integer, default=-1)
@@ -285,22 +291,80 @@ class Hackathon(DBBase):
     judge_start_time = Column(TZDateTime)
     judge_end_time = Column(TZDateTime)
 
-    basic_info = Column(Text)
-    extra_info = Column(Text)
-
     create_time = Column(TZDateTime, default=get_now())
     update_time = Column(TZDateTime)
     archive_time = Column(TZDateTime)
 
-    def dic(self):
-        d = to_dic(self, self.__class__)
-        d["basic_info"] = json.loads(self.basic_info or "{}")
-
-        d["extra_info"] = json.loads(self.extra_info or "{}")
-        return d
-
     def __init__(self, **kwargs):
         super(Hackathon, self).__init__(**kwargs)
+
+
+class HackathonConfig(DBBase):
+    __tablename__ = 'hackathon_config'
+
+    id = Column(Integer, primary_key=True)
+    key = Column(String(50))
+    value = Column(String(50))
+    create_time = Column(TZDateTime, default=get_now())
+
+    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
+    hackathon = relationship('Hackathon', backref=backref('configs', lazy='dynamic'))
+
+
+class HackathonOrganizer(DBBase):
+    __tablename__ = 'hackathon_organizer'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50))
+    description = Column(String(100))
+    homepage = Column(String(100))
+    logo = Column(String(100))
+
+    create_time = Column(TZDateTime, default=get_now())
+    update_time = Column(TZDateTime)
+
+    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
+    hackathon = relationship('Hackathon', backref=backref('organizers', lazy='dynamic'))
+
+
+class HackathonLike(DBBase):
+    __tablename__ = 'hackathon_like'
+
+    id = Column(Integer, primary_key=True)
+    create_time = Column(TZDateTime, default=get_now())
+
+    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
+    user = relationship('User', backref=backref('likes', lazy='dynamic'))
+
+    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
+    hackathon = relationship('Hackathon', backref=backref('likes', lazy='dynamic'))
+
+    def __init__(self, **kwargs):
+        super(HackathonLike, self).__init__(**kwargs)
+
+
+class HackathonStat(DBBase):
+    __tablename__ = 'hackathon_stat'
+
+    id = Column(Integer, primary_key=True)
+    type = Column(String(50))
+    count = Column(Integer, default=0)
+    create_time = Column(TZDateTime, default=get_now())
+    update_time = Column(TZDateTime)
+
+    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
+    hackathon = relationship('Hackathon', backref=backref('stats', lazy='dynamic'))
+
+
+class HackathonTag(DBBase):
+    __tablename__ = 'hackathon_tag'
+
+    id = Column(Integer, primary_key=True)
+    tag = Column(String(50))
+    create_time = Column(TZDateTime, default=get_now())
+
+    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
+    hackathon = relationship('Hackathon', backref=backref('tags', lazy='dynamic'))
 
 
 class DockerHostServer(DBBase):
@@ -315,7 +379,7 @@ class DockerHostServer(DBBase):
     private_docker_api_port = Column(Integer)
     container_count = Column(Integer, nullable=False)
     container_max_count = Column(Integer, nullable=False)
-    is_auto = Column(Integer, default=0) # 0-started manually 1-started by OHP server
+    is_auto = Column(Integer, default=0)  # 0-started manually 1-started by OHP server
     create_time = Column(TZDateTime, default=get_now())
     update_time = Column(TZDateTime)
     state = Column(Integer, default=0)
