@@ -410,6 +410,23 @@ class AdminHackathonConfigResource(HackathonResource):
         return hackathon_manager.set_basic_property(g.hackathon, self.context())
 
 
+class AdminHackathonOrganizerResource(HackathonResource):
+    def get(self):
+        return hackathon_manager.qet_organizer_by_id(self.context().id)
+
+    @admin_privilege_required
+    def post(self):
+        return hackathon_manager.create_hackathon_organizer(g.hackathon, request.get_json())
+
+    @admin_privilege_required
+    def put(self):
+        return hackathon_manager.update_hackathon_organizer(g.hackathon, request.get_json())
+
+    @admin_privilege_required
+    def delete(self):
+        return hackathon_manager.delete_hackathon_organizer(g.hackathon, self.context().id)
+
+
 class AdminHackathonTags(HackathonResource):
     @hackathon_name_required
     def get(self):
@@ -419,6 +436,11 @@ class AdminHackathonTags(HackathonResource):
     def post(self):
         tags = request.get_data().split(",")
         return hackathon_manager.set_hackathon_tags(g.hackathon, tags)
+
+
+class HackathonTagNamesResource(HackathonResource):
+    def get(self):
+        return hackathon_manager.get_distinct_tags()
 
 
 class HackathonCheckNameResource(HackathonResource):

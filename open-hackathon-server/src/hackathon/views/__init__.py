@@ -53,6 +53,7 @@ def init_routes():
     api.add_resource(HackathonTeamListResource, "/api/hackathon/team/list")  # list teams of hackathon
     api.add_resource(HackathonRegistrationListResource, "/api/hackathon/registration/list")  # list registered users
     api.add_resource(TalentResource, "/api/talent/list")  # list talents(达人)
+    api.add_resource(HackathonTagNamesResource, "/api/tags")  # all distinct tag names
 
     # APIs for user(participant) to join hackathon
     api.add_resource(GuacamoleResource, "/api/user/guacamoleconfig")  # get remote paras for guacamole
@@ -76,6 +77,7 @@ def init_routes():
     # APIs for admin to manage hackathon and hackathon resources, features and users
     api.add_resource(AdminHackathonResource, "/api/admin/hackathon")  # create/update hackathon
     api.add_resource(AdminHackathonConfigResource, "/api/admin/hackathon/config")  # set hackathon config
+    api.add_resource(AdminHackathonOrganizerResource, "/api/admin/hackathon/organizer")  # set hackathon config
     api.add_resource(AdminHackathonTags, "/api/admin/hackathon/tags")  # get or set hackathon tags
     api.add_resource(HackathonCheckNameResource, "/api/admin/hackathon/checkname")  # check hackathon name exists
     api.add_resource(AdminHackathonListResource, "/api/admin/hackathon/list")  # get entitled hackathon list

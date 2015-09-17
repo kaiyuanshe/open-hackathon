@@ -138,7 +138,7 @@ class SQLAlchemyAdapter(DBAdapter):
         self.db_session.delete(instance)
 
     def delete_all_objects(self, object_class, *criterion):
-        object_class.query.filter(*criterion).delete(synchronize_session=False)
+        return object_class.query.filter(*criterion).delete(synchronize_session=False)
 
     def delete_all_objects_by(self, object_class, **kwargs):
         """ Delete all objects matching the case sensitive filters in 'kwargs'. """

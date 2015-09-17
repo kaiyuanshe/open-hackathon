@@ -33,8 +33,8 @@ from werkzeug.exceptions import PreconditionFailed, InternalServerError, BadRequ
 from flask import g, request
 
 from hackathon.database import Hackathon, User, AdminHackathonRel, DockerHostServer, HackathonLike, \
-    HackathonStat, HackathonConfig, HackathonTag, UserHackathonRel
-from hackathon.hackathon_response import internal_server_error, ok
+    HackathonStat, HackathonConfig, HackathonTag, UserHackathonRel, HackathonOrganizer
+from hackathon.hackathon_response import internal_server_error, ok, not_found, forbidden
 from hackathon.constants import HACKATHON_BASIC_INFO, ADMIN_ROLE_TYPE, HACK_STATUS, RGStatus, HTTP_HEADER, \
     FILE_TYPE, HACK_TYPE, HACKATHON_STAT
 from hackathon import RequiredFeature, Component, Context
@@ -357,6 +357,46 @@ class HackathonManager(Component):
         self.db.commit()
         return ok()
 
+    def get_distinct_tags(self):
+        """Return all distinct hackathon tags for auto-complete usage"""
+        return self.db.session().query(HackathonTag.tag).distinct().all()
+
+    def qet_organizer_by_id(self, organizer_id):
+        organizer = self.db.get_object(HackathonOrganizer, organizer_id)
+        if organizer:
+            return organizer.dic()
+        return not_found()
+
+    def create_hackathon_organizer(self, hackathon, body):
+        organizer = HackathonOrganizer(hackathon_id=hackathon.id,
+                                       name=body["name"],
+                                       description=body.get("description"),
+                                       homepage=body.get("homepage"),
+                                       logo=body.get("logo"),
+                                       create_time=self.util.get_now())
+        self.db.add_object(organizer)
+        return organizer.dic()
+
+    def update_hackathon_organizer(self, hackathon, body):
+        organizer = self.db.get_object(HackathonOrganizer, body["id"])
+        if not organizer:
+            return not_found()
+        if organizer.hackathon_id != hackathon.id:
+            return forbidden()
+
+        organizer.name = body.get("name", organizer.name)
+        organizer.description = body.get("description", organizer.description)
+        organizer.homepage = body.get("homepage", organizer.homepage)
+        organizer.logo = body.get("logo", organizer.logo)
+        organizer.update_time = self.util.get_now()
+        self.db.commit()
+
+        return organizer.dic()
+
+    def delete_hackathon_organizer(self, hackathon, organizer_id):
+        self.db.delete_all_objects_by(HackathonOrganizer, id=organizer_id, hackathon_id=hackathon.id)
+        return ok()
+
     def __get_hackathon_detail(self, hackathon, user=None):
         """Return hackathon info as well as its details including configs, stat, organizers, like if user logon"""
         detail = hackathon.dic()
@@ -364,7 +404,7 @@ class HackathonManager(Component):
         detail["config"] = self.__get_hackathon_configs(hackathon)
         detail["stat"] = self.get_hackathon_stat(hackathon)
         detail["tag"] = self.get_hackathon_tags(hackathon)
-        detail["organizer"] = []  # todo organizer
+        detail["organizer"] = self.__get_hackathon_organizers(hackathon)
 
         if user:
             detail["user"] = self.user_manager.user_display_info(user)
@@ -434,6 +474,10 @@ class HackathonManager(Component):
 
         cache_key = self.__get_config_cache_key(hackathon)
         return self.cache.get_cache(key=cache_key, createfunc=__internal_get_config)
+
+    def __get_hackathon_organizers(self, hackathon):
+        organizers = self.db.find_all_objects_by(HackathonOrganizer, hackathon_id=hackathon.id)
+        return [o.dic() for o in organizers]
 
     def __parse_update_items(self, args, hackathon):
         """Parse properties that need to update
