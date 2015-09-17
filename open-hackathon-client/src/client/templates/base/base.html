@@ -28,30 +28,86 @@
     {% block head %} {% endblock %}
 </head>
 
-<body>
+<body data-spy="scroll" data-target="#oh_lift" style="position: relative">
 <header class="navbar navbar-inverse">
     <div class="container">
         <div class="navbar-header">
-            <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".sidebar-nav.nav-collapse">
+            <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#navbar">
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="{{ url_for('index') }}"><img
-                    src="/static/pic/icon64.png"><span>开放黑客松</span></a>
-            <!-- start: Header Menu -->
-            <!-- end: Header Menu -->
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <img src="/static/pic/icon64.png">
+            </a>
         </div>
         {% include  "partials/header_menu.html" %}
     </div>
 </header>
 {% block content %} {% endblock %}
+{% if request.endpoint  != 'index' or  current_user.is_authenticated() %}
+    <div class="oh-grey-bg">
+        <div class="container oh-flow-chart">
+        </div>
+    </div>
+{% endif %}
+{% if request.endpoint  == 'index' %}
+    <div class="oh-share-bar">
+        <div class="oh-wrap">
+            <h3>激情我的小伙伴一起黑客松~</h3>
+
+            <div class="jiathis_style_32x32 share-btn">
+                <a class="jiathis_button_ishare">
+                    <label>一键分享</label>
+                </a>
+                <a class="jiathis_button_tsina">
+                    <label>微博分享</label>
+                </a>
+                <a class="jiathis_button_weixin">
+                    <label>微信分享</label>
+                </a>
+            </div>
+        </div>
+    </div>
+{% endif %}
 <footer>
     <div class="container">
-        <div class="row">
-            <div class="col-sm-12">
-                <b>Hosted by </b><a href=http://www.msopentech.cn>Microsoft Open Technologies (Shanghai) Co. Ltd.</a>
-            </div>
+        <div class="row oh-footer-link">
+
+            <dl>
+                <dt>联系我们</dt>
+                <dd><a target="_blank" href="javascript:;">关于我们</a></dd>
+                <dd><a target="_blank" href="javascript:;">联系我们</a></dd>
+            </dl>
+            <dl>
+                <dt>活动服务</dt>
+                <dd><a target="_blank" href="javascript:;">参赛流程</a></dd>
+                <dd><a target="_blank" href="javascript:;">发布流程</a></dd>
+                <dd><a target="_blank" href="javascript:;">媒体宣传</a></dd>
+                <dd><a target="_blank" href="javascript:;">主办方链接</a></dd>
+            </dl>
+            <dl>
+                <dt>技术支持</dt>
+                <dd><a target="_blank" href="javascript:;">技术支持</a></dd>
+                <dd><a target="_blank" href="javascript:;">合作伙伴</a></dd>
+            </dl>
+            <dl>
+                <dt>帮助中心</dt>
+                <dd><a target="_blank" href="javascript:;">隐私条款</a></dd>
+                <dd><a target="_blank" href="javascript:;">使用条款</a></dd>
+            </dl>
+            <dl class="right">
+                <dt>开发黑客松</dt>
+                <dd>
+                    <a target="_blank" href="javascript:;">
+                        <img src="/static/pic/icon.jpg">
+                    </a>
+                </dd>
+            </dl>
+        </div>
+        <div class="row text-center oh-copyright">
+            <hr>
+            © 2015 Microsoft Open Technologies (Shanghai) Company Limited
         </div>
     </div>
 </footer>
@@ -65,6 +121,15 @@
 <script type="text/javascript" src="/static/js/bootstrap/bootstrap.min.js"></script>
 <script type="text/javascript" src="/static/js/oh.core.js"></script>
 <script type="text/javascript" src="/static/js/oh.api.js"></script>
+<script>
+    var jiathis_config = {
+        appkey: {
+            "tsina": '{{ oauth_api_key.weibo }}',
+            "tqq": '{{ oauth_api_key.qq }}'
+        }
+    }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
 {% block script %}{% endblock %}
 </body>
 

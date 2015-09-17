@@ -1,8 +1,402 @@
 {% extends "base/base.html" %}
+{% block head %}
+    <title>{{ hackathon.display_name }}</title>
+{% endblock %}
 {% block style %}
     <link href="/static/css/oh.site.hackathon.css" rel="stylesheet">
 {% endblock %}
 {% block content %}
+    <div class="oh-main">
+        <div class="container">
+
+            <h1 class="title">{{ hackathon.display_name }}</h1>
+            <ul class="tags">
+                <li><a href="javascript:;">分类一</a></li>
+                <li><a href="javascript:;">分类一</a></li>
+                <li><a href="javascript:;">分类一</a></li>
+            </ul>
+            <div class="row">
+                <div class="col-lg-8 col-md-7">
+                    <div id="banner" class="carousel slide" data-ride="carousel">
+                        <ol class="carousel-indicators">
+                            <li data-target="#banner" data-slide-to="0" class="active"></li>
+                            <li data-target="#banner" data-slide-to="1"></li>
+                        </ol>
+                        <div class="carousel-inner" role="listbox">
+                            <div class="item active">
+                                <img src="/static/pic/HackathonPlatfrom.jpg" alt="...">
+                            </div>
+                            <div class="item">
+                                <img src="/static/pic/HackathonPlatfrom.jpg" alt="...">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="">
+                        <h2 id="detail" class="title">活动详情</h2>
+
+                        <div class="oh-body detail-body">
+                            {{ hackathon.description | mkHTML | safe }}
+                        </div>
+
+                        <h2 id="new" class="title">最新动态 <span>（3）</span></h2>
+
+                        <div class="oh-body grey-text">
+                            <dl class="oh-latest-news">
+                                <dt>昨天</dt>
+                                <dd><span class="t-bullhorn"></span>
+                                    公告消息公告消息公告消息公告消息公告消息公告消息公告消息公告消息
+                                </dd>
+                            </dl>
+                            <dl class="oh-latest-news">
+                                <dt>4天前</dt>
+                                <dd><span class="t-edit"></span>
+                                    2015/09/20 周日 00:00
+                                </dd>
+                            </dl>
+                            <dl class="oh-latest-news">
+                                <dt>2015/09/01</dt>
+                                <dd><span class="t-bullhorn"></span>
+                                    {{ hackathon.basic_info.location }}
+                                </dd>
+                            </dl>
+                        </div>
+
+                        <h2 id="team" class="title">目前组队 <span>（4）</span></h2>
+
+                        <div class="oh-body teams clearfix ">
+                            <div class="col-md-6">
+                                <div class="media">
+                                    <div class="media-left">
+                                        <a href="javascript:;" class="oh-thumb">
+                                            <img class="media-object oh-thumbnail" src="/static/pic/microsoft.jpg"
+                                                 alt="">
+                                        </a>
+                                    </div>
+                                    <div class="media-body">
+                                        <h4 class="media-heading">Open xml</h4>
+                                        sdfasdfa
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="media">
+                                    <div class="media-left">
+                                        <a href="javascript:;" class="oh-thumb">
+                                            <img class="media-object oh-thumbnail" src="/static/pic/microsoft.jpg"
+                                                 alt="">
+                                        </a>
+                                    </div>
+                                    <div class="media-body">
+                                        <h4 class="media-heading">Open xml</h4>
+                                        sdfasdfa
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="media">
+                                    <div class="media-left">
+                                        <a href="javascript:;" class="oh-thumb">
+                                            <img class="media-object oh-thumbnail" src="/static/pic/microsoft.jpg"
+                                                 alt="">
+                                        </a>
+                                    </div>
+                                    <div class="media-body">
+                                        <h4 class="media-heading">Open xml</h4>
+                                        sdfasdfa
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="media">
+                                    <div class="media-left">
+                                        <a href="javascript:;" class="oh-thumb">
+                                            <img class="media-object oh-thumbnail" src="/static/pic/microsoft.jpg"
+                                                 alt="">
+                                        </a>
+                                    </div>
+                                    <div class="media-body">
+                                        <h4 class="media-heading">Open xml</h4>
+                                        sdfasdfa
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="media">
+                                    <div class="media-left">
+                                        <a href="javascript:;" class="oh-thumb">
+                                            <img class="media-object oh-thumbnail" src="/static/pic/microsoft.jpg"
+                                                 alt="">
+                                        </a>
+                                    </div>
+                                    <div class="media-body">
+                                        <h4 class="media-heading">Open xml</h4>
+                                        sdfasdfa
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="media">
+                                    <div class="media-left">
+                                        <a href="javascript:;" class="oh-thumb">
+                                            <img class="media-object oh-thumbnail" src="/static/pic/microsoft.jpg"
+                                                 alt="">
+                                        </a>
+                                    </div>
+                                    <div class="media-body">
+                                        <h4 class="media-heading">Open xml</h4>
+                                        sdfasdfa
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="media">
+                                    <div class="media-left">
+                                        <a href="javascript:;" class="oh-thumb">
+                                            <img class="media-object oh-thumbnail" src="/static/pic/microsoft.jpg"
+                                                 alt="">
+                                        </a>
+                                    </div>
+                                    <div class="media-body">
+                                        <h4 class="media-heading">Open xml</h4>
+                                        sdfasdfa
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h2 id="works" class="title">作品公布 <span>（4）</span></h2>
+
+                        <div class="ob-body clearfix">
+                            <div class="col-md-4">
+                                <div class="">
+                                    <a href="javascirpt:;" class="oh-thumb">
+                                        <img src="/static/pic/homepage.jpg" class="oh-thumbnail">
+                                    </a>
+                                </div>
+                                <a class="grey-link" href="javascript:;">作品名称作品名称作品名称</a>
+
+                                <p class="grey-text">队伍名称</p>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="">
+                                    <a href="javascirpt:;" class="oh-thumb">
+                                        <img src="/static/pic/homepage.jpg" class="oh-thumbnail">
+                                    </a>
+                                </div>
+                                <a class="grey-link" href="javascript:;">作品名称作品名称作品名称</a>
+
+                                <p class="grey-text">队伍名称</p>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="">
+                                    <a href="javascirpt:;" class="oh-thumb">
+                                        <img src="/static/pic/homepage.jpg" class="oh-thumbnail">
+                                    </a>
+                                </div>
+                                <a class="grey-link" href="javascript:;">作品名称作品名称作品名称</a>
+
+                                <p class="grey-text">队伍名称</p>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="">
+                                    <a href="javascirpt:;" class="oh-thumb">
+                                        <img src="/static/pic/homepage.jpg" class="oh-thumbnail">
+                                    </a>
+                                </div>
+                                <a class="grey-link" href="javascript:;">作品名称作品名称作品名称</a>
+
+                                <p class="grey-text">队伍名称</p>
+                            </div>
+                        </div>
+
+                        <h2 id="comment" class="title">活动讨论 <span>（5）</span></h2>
+
+                        <div class="oh-body">
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-5">
+                    <div class="oh-box">
+                        <div class="oh-body">
+                            <dl class="oh-detail-info">
+                                <dt>时间：</dt>
+                                <dd>
+                                    {{ hackathon.event_start_time | date("%Y/%m/%d %A %H:%M") }} <span
+                                        class="grey-text">- 开始</span><br/>
+                                    {{ hackathon.event_end_time | date("%Y/%m/%d %a %H:%M") }} <span
+                                        class="grey-text">- 结束</span>
+                                </dd>
+                                <dt>报名 ：</dt>
+                                <dd>
+                                    2015/09/20 周日 00:00 <span class="grey-text">之前</span>
+                                </dd>
+                                <dt>地址：</dt>
+                                <dd>
+                                    {{ hackathon.basic_info.location }}
+                                </dd>
+                                <dt>限额：</dt>
+                                <dd>
+                                    {{ hackathon.basic_info.max_enrollment }}人 <span class="grey-text">（<span>30</span>人已报名）</span>
+                                </dd>
+                                <dt>主办方：</dt>
+                                <dd>
+                                    {% for organizer in  hackathon.basic_info.organizers %}
+                                        <a href="{{ organizer.organizer_url }}">{{ organizer.organizer_name }}</a>
+                                    {% endfor %}
+                                </dd>
+                            </dl>
+
+                            <div id="status">
+                                {% if hackathon.event_end_time < get_now() %}
+                                    <p>活动已结束。</p>
+                                {% elif user == None %}
+                                    <a class="btn btn-primary btn-lg"
+                                       href="{{ url_for('login', return_url=request.path) }}">我要报名</a>
+                                    <button class="btn btn-default">感兴趣 34</button>
+                                {% elif user.get("user_profile") == None %}
+                                    <a class="btn btn-primary btn-lg"
+                                       href="{{ url_for('user_profile',return_url=request.path) }}">我要报名</a>
+                                    <button class="btn btn-default">感兴趣 34</button>
+                                {% elif registration == None %}
+                                    <a class="btn btn-primary btn-lg" data-type="register">我要报名</a>
+                                    <button class="btn btn-default">感兴趣 34</button>
+                                {% elif hackathon.basic_info.auto_approve or registration.status == 1 or registration.status == 3 %}
+                                    {% if is_creta_team and hackathon.basic_info.freedom_team %}
+                                        <a class="btn btn-primary btn-lg"
+                                           href="{{ url_for('create_join_team' ,hackathon_name=hackathon_name) }}">我要报名</a>
+                                    {% elif experiment == None %}
+                                        <a class="btn btn-primary btn-lg"
+                                           href="{{ url_for('temp_settings',hackathon_name=hackathon_name) }}">立即参加</a>
+                                    {% else %}
+                                        <a class="btn btn-primary btn-lg"
+                                           href="{{ url_for('workspace',hackathon_name=hackathon_name) }}">立即参加</a>
+                                    {% endif %}
+                                    <button class="btn btn-default">感兴趣 34</button>
+                                    <p>您的报名已经审核已通过。</p>
+                                {% elif not hackathon.basic_info.auto_approve and registration.status == 3 %}
+                                    <button class="btn btn-default">感兴趣 34</button>
+                                    <p>您的报名正在审核中，请等待。</p>
+                                {% elif not hackathon.basic_info.auto_approve and registration.status == 0 %}
+                                    <button class="btn btn-default">感兴趣 34</button>
+                                    <p>您的报名正在审核中，请等待。</p>
+                                {% elif registration.status == 2 %}
+                                    <button class="btn btn-default">感兴趣 34</button>
+                                    <p>您的报名已被拒绝，如有疑问请联系主办方。</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="oh-box">
+                        <h3 class="title">关于主办方</h3>
+
+                        <div class="oh-body organizer">
+                            {% for organizer in hackathon.basic_info.organizers %}
+                                <div class="media">
+                                    <div class="media-left">
+                                        <a href="{{ organizer.organizer_url }}" class="oh-thumb">
+                                            <img class="media-object oh-thumbnail" src="{{ organizer.organizer_image }}"
+                                                 alt="{{ organizer.organizer_name }}">
+                                        </a>
+                                    </div>
+                                    <div class="media-body">
+                                        <h4 class="media-heading">{{ organizer.organizer_name }}</h4>
+                                        {{ organizer.organizer_description }}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="oh-box">
+                        <h3 class="title">活动地点</h3>
+
+                        <div id="map" class="baidu-map" title="云岭西路（详细地址请见邀请函）"></div>
+
+
+                    </div>
+
+                    <div class="oh-box">
+                        <h3 class="title">您还可能感兴趣</h3>
+
+                        <div class="oh-body interest">
+                            <div class="media">
+                                <div class="media-left">
+                                    <a href="javascript:;" class="oh-thumb">
+                                        <img class="media-object oh-thumbnail" src="/static/pic/microsoft.jpg" alt="">
+                                    </a>
+                                </div>
+                                <div class="media-body">
+                                    <h4 class="media-heading">Open xml</h4>
+                                    sdfasdfa
+                                </div>
+                            </div>
+
+                            <div class="media">
+                                <div class="media-left">
+                                    <a href="javascript:;" class="oh-thumb">
+                                        <img class="media-object oh-thumbnail" src="/static/pic/microsoft.jpg" alt="">
+                                    </a>
+                                </div>
+                                <div class="media-body">
+                                    <h4 class="media-heading">Open xml</h4>
+                                    sdfasdfa
+                                </div>
+                            </div>
+
+                            <div class="media">
+                                <div class="media-left">
+                                    <a href="javascript:;" class="oh-thumb">
+                                        <img class="media-object oh-thumbnail" src="/static/pic/microsoft.jpg" alt="">
+                                    </a>
+                                </div>
+                                <div class="media-body">
+                                    <h4 class="media-heading">Open xml</h4>
+                                    sdfasdfa
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="oh_lift">
+        <div class="container">
+            <ul class="nav nav-tabs" role="tablist">
+                <li><a href="#detail"><span>活动详情</span><i></i></a></li>
+                <li><a href="#new"><span>最新动态</span><i></i></a></li>
+                <li><a href="#team"><span>目前组队</span><i></i></a></li>
+                <li><a href="#works"><span>作品公布</span><i></i></a></li>
+                <li><a href="#comment"><span>活动讨论</span><i></i></a></li>
+            </ul>
+            <div class="full-shared">
+                <a class="lid">
+                    <i class="fa fa-share-alt"></i>
+                    <span>分享活动</span>
+                </a>
+
+                <div class="jiathis_style_32x32 share-btn">
+                    <a class="jiathis_button_ishare">
+                        <label>一键分享</label>
+                    </a>
+                    <a class="jiathis_button_tsina">
+                        <label>微博分享</label>
+                    </a>
+                    <a class="jiathis_button_tqq">
+                        <label>腾讯微博</label>
+                    </a>
+                    <a class="jiathis_button_qzone">
+                        <label>QQ空间</label>
+                    </a>
+                    <a class="jiathis_button_weixin">
+                        <label>微信分享</label>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="oh-main">
         <div class="container">
             <div class="row jumbotron">
@@ -63,36 +457,7 @@
                         {% endfor %}
                     </p>
 
-                    <div id="status">
-                        {% if hackathon.event_end_time < get_now() %}
-                            <p>活动已结束。</p>
-                        {% elif user == None %}
-                            <a class="btn btn-primary btn-lg" href="{{ url_for('login', return_url=request.path) }}">我要报名</a>
-                        {% elif user.get("user_profile") == None %}
-                            <a class="btn btn-primary btn-lg"
-                               href="{{ url_for('user_profile',return_url=request.path) }}">我要报名</a>
-                        {% elif registration == None %}
-                            <a class="btn btn-primary btn-lg" data-type="register">我要报名</a>
-                        {% elif hackathon.basic_info.auto_approve or registration.status == 1 or registration.status == 3 %}
-                            {% if is_creta_team and hackathon.basic_info.freedom_team %}
-                                <a class="btn btn-primary btn-lg"
-                                    href="{{ url_for('create_join_team' ,hackathon_name=hackathon_name) }}">我要报名</a>
-                            {% elif experiment == None %}
-                                <a class="btn btn-primary btn-lg"
-                                   href="{{ url_for('temp_settings',hackathon_name=hackathon_name) }}">立即参加</a>
-                            {% else %}
-                                <a class="btn btn-primary btn-lg"
-                                   href="{{ url_for('workspace',hackathon_name=hackathon_name) }}">立即参加</a>
-                            {% endif %}
-                            <p>您的报名已经审核已通过。</p>
-                        {% elif not hackathon.basic_info.auto_approve and registration.status == 3 %}
-                            <p>您的报名正在审核中，请等待。</p>
-                        {% elif not hackathon.basic_info.auto_approve and registration.status == 0 %}
-                            <p>您的报名正在审核中，请等待。</p>
-                        {% elif registration.status == 2 %}
-                            <p>您的报名已被拒绝，如有疑问请联系主办方。</p>
-                        {% endif %}
-                    </div>
+
                 </div>
             </div>
 
@@ -124,6 +489,7 @@
 
                     <div class="oh-share">
                         <div class="jiathis_style_24x24">
+                            <a class="jiathis_button_my.csdn.net"></a>
                             <a class="jiathis_button_qzone"></a>
                             <a class="jiathis_button_tsina"></a>
                             <a class="jiathis_button_weixin"></a>
@@ -186,6 +552,7 @@
 {% endblock %}
 
 {% block script %}
+
     <script id="register_list_temp" type="text/x-jquery-tmpl">
     {% raw %}
         <li>
@@ -200,8 +567,121 @@
         </li>
     {% endraw %}
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     </script>
-    <script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+    <script type="text/javascript">
+        function setupScriptDelay(scriptPath, sync, onHead) {
+            var setupScript = document.createElement("script");
+            setupScript.type = 'text/javascript';
+            if (!sync) setupScript.async = true;
+            if (scriptPath.indexOf("http") == 0) setupScript.src = scriptPath;
+            else setupScript.src = (("https:" == document.location.protocol) ? "https://" : "http://") + scriptPath;
+            if (onHead) document.getElementsByTagName("head")[0].appendChild(setupScript);
+            else document.body.appendChild(setupScript);
+        }
+        var opts = {
+            width: 100,     // 信息窗口宽度
+            height: 30       // 信息窗口高度题
+        }
+        function initializeMap() {
+            var map = new BMap.Map('map');
+            map.addControl(new BMap.OverviewMapControl());
+            //map.addControl(new BMap.ScaleControl());
+
+            var point;
+            var position = "121.373572, 31.236193";
+            if (position != '') {
+                var lng = position.substring(0, position.indexOf(','));
+                var lat = position.substring(position.indexOf(',') + 1);
+                point = new BMap.Point(lng, lat);
+
+                var myIcon = new BMap.Icon("http://cdn.huodongxing.com/Content/img/mark1.png", new BMap.Size(32, 32), {"anchor": new BMap.Size(16, 32)});
+                baiduMapMarker = new BMap.Marker(point, {icon: myIcon});
+
+                //var infoWindow = new BMap.InfoWindow("云岭西路（详细地址请见邀请函）",opts);
+                //baiduMapMarker.addEventListener("click", function(){this.openInfoWindow(infoWindow);});
+                map.addOverlay(baiduMapMarker);
+                map.enableScrollWheelZoom();
+                map.centerAndZoom(point, 14);
+            }
+            else {
+                var address = "云岭西路（详细地址请见邀请函）";
+                var prov = "上海";
+                var city = "普陀";
+
+                if (city.indexOf("-") > -1) city = city.replace("-", "");
+                if (city == null || city == "" || city == '其他') city = '北京市';
+                if (prov == "北京" || prov == "天津" || prov == "上海" || prov == "重庆") {
+                    prov += "市";
+                    city += "区";
+                }
+                else if (city.indexOf("市") != (city.length - 1) && city.indexOf("区") != (city.length - 1)) city = city + "市";
+
+                if (address == null || address == "") address = city;
+                else address = city + address;
+                if (prov != null && prov != "") address = prov + address;
+
+                var myGeo = new BMap.Geocoder();
+                // 将地址解析结果显示在地图上，并调整地图视野
+                myGeo.getPoint(address,
+                        function (point) {
+                            if (point) {
+                                var myIcon = new BMap.Icon("http://cdn.huodongxing.com/Content/img/mark1.png", new BMap.Size(32, 32), {"anchor": new BMap.Size(16, 32)});
+                                baiduMapMarker = new BMap.Marker(point, {icon: myIcon});
+                                var infoWindow = new BMap.InfoWindow("云岭西路（详细地址请见邀请函）", opts);
+                                baiduMapMarker.addEventListener("click", function () {
+                                    this.openInfoWindow(infoWindow);
+                                });
+                                map.addOverlay(baiduMapMarker);
+                                map.enableScrollWheelZoom();
+                                map.centerAndZoom(point, 14);
+                                //baiduMapMarker.setAnimation(BMAP_ANIMATION_BOUNCE);
+                            }
+                        }, "普陀");
+            }
+        }
+        $(function () {
+            window.setTimeout("setupScriptDelay('api.map.baidu.com/api?v=2.0&ak=KIpwmISmRtIMMssrIQ4NF9ji&callback=initializeMap', true)", 300);
+        });
+    </script>
     <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
     <script type="text/javascript" src="/static/js/views/oh.site.hackathon.js"></script>
 {% endblock %}

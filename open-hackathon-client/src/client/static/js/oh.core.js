@@ -93,6 +93,7 @@
     }
 
     $(function () {
+        $('[data-toggle="tooltip"]').tooltip();
         if (location.pathname.search('logout', 'i') != -1) {
             location.href = '/login';
             return;

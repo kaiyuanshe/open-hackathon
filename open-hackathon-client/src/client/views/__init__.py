@@ -67,9 +67,20 @@ def __oauth_meta_content():
     }
 
 
+def __oauth_api_key():
+    return {
+        LOGIN_PROVIDER.WEIBO: get_config('login.weibo.client_id'),
+        LOGIN_PROVIDER.QQ: get_config('login.qq.client_id'),
+        LOGIN_PROVIDER.LIVE: get_config('login.live.client_id'),
+        LOGIN_PROVIDER.GITCAFE: get_config('login.gitcafe.client_id'),
+        LOGIN_PROVIDER.GITHUB: get_config('login.github.client_id')
+    }
+
+
 def render(template_name_or_list, **context):
     return render_template(template_name_or_list,
                            meta_content=__oauth_meta_content(),
+                           oauth_api_key=__oauth_api_key(),
                            **context)
 
 
@@ -144,10 +155,15 @@ def limit_to(text, limit=100):
     return text[0:limit]
 
 
+week = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+
+
 @app.template_filter('date')
-def to_datetime(datelong, fmt=None):
+def to_datetime(datelong, fmt=''):
     if fmt:
-        return datetime.fromtimestamp(datelong / 1e3).strftime(fmt)
+        date = datetime.fromtimestamp(datelong / 1e3)
+        fmt = re.compile('%a', re.I).sub(week[date.weekday()], fmt)
+        return date.strftime(fmt)
     else:
         return datetime.fromtimestamp(datelong / 1e3).strftime("%y/%m/%d")
 
@@ -175,7 +191,7 @@ def page_not_found(e):
 
 @app.errorhandler(500)
 def server_error(e):
-    return render_template('error.html', error=e, meta_content=__oauth_meta_content()), 500
+    return render('error.html', error=e), 500
 
 
 # js config

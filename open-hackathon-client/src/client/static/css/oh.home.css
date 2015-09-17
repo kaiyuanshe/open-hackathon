@@ -1,114 +1,887 @@
+.carousel-inner > .item {
+    height: 550px;
+}
+
+.carousel-indicators li {
+    border-width: 2px;
+    margin: 2px 25px 2px 2px;
+    width: 12px;
+    height: 12px;
+    border-radius: 12px;
+    background-color: #fff;
+}
+
+.carousel-indicators li.active {
+    width: 15px;
+    height: 15px;
+    border-radius: 15px;
+    margin: 0 24px 0 0;
+    background-color: #000 \9;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.oh-notice {
+    position: relative;
+}
+
+.oh-notice .btn-group {
+    position: absolute;
+    right: 15px;
+    top: 9px;
+}
+
+.oh-notice .btn-default {
+    color: #888;
+}
+
+.oh-notice .btn-default:hover {
+    color: #21b1d3;
+    background-color: #fff;
+    border-color: #21b1d3;
+}
+
+.oh-notice .btn-group .btn {
+    border-radius: 0px;
+}
+
+.oh-notice-title {
+    color: #505050;
+    display: inline-block;
+    padding: 8px 0;
+}
+
+.oh-notice-list {
+    list-style: none;
+    padding: 0 0 0 15px;
+    margin: 0;
+    display: inline-block;
+    overflow: hidden;
+    height: 40px;
+    vertical-align: middle;
+}
+
+.oh-notice-list li {
+    padding: 10px 0;
+}
+
+.oh-notice-list li span {
+    margin-left: 20px;
+}
+
+.oh-notice-list li a {
+    color: #888;
+}
+
+.oh-notice-list li a:hover {
+    color: #888;
+}
+
+.oh-grey-bg {
+    background-color: #f0f0f0;
+}
+
+.oh-feature {
+    padding: 50px 15px;
+}
+
+.oh-feature-header {
+    margin-bottom: 28px;
+}
+
+.oh-feature-header h2 {
+    font-size: 22px;
+    font-weight: inherit;
+    float: left;
+    margin: 0;
+    line-height: normal;
+}
+
+.oh-feature-header .oh-feature-tabs {
+    float: right;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.oh-feature-header .oh-feature-tabs li {
+    float: left;
+    padding: 8px 12px;
+    border-bottom: 3px solid transparent;
+}
+
+.oh-feature-header .oh-feature-tabs li a {
+    color: #505050;
+}
+
+.oh-feature-header .oh-feature-tabs li.active {
+    border-color: #21b1de;
+}
+
+.oh-feature-header .oh-feature-tabs li a:hover,
+.oh-feature-header .oh-feature-tabs li.active a {
+    color: #21b1de;
+    text-decoration: none;
+}
+
+.oh-feature-header .more {
+    float: right;
+    color: #969696;
+}
+
+.oh-feature-header .more:hover {
+    color: #21b1de;
+    text-decoration: none;
+}
+
+.oh-activity .oh-item{
+    position: relative;
+    background-color: #fff;
+    border: 1px solid #d2d2d2;
+    margin-bottom: 20px;
+    height: 444px;
+}
+.oh-activity  .tab-pane .row{
+    margin: 0 -20px;
+}
+.oh-activity .col-lg-4,
+.oh-activity .col-md-4{
+    padding: 0 20px;
+}
+.oh-activity .oh-header {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+}
+
+.oh-activity .oh-header > img {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    -moz-transition: all 0.2s ease;
+    -o-transition: all 0.2s ease;
+    -webkit-transition: all 0.2s ease;
+}
+
+.oh-activity .oh-header .oh-flag {
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: #fff;
+    padding: 8px 20px;
+    background-color: #ea005e \9;
+    background-color: rgba(234, 0, 94, .9);
+}
+
+.oh-activity .oh-header .oh-collect {
+    border-radius: 5px;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 4px 7px;
+    display: block;
+    background-color: #f58b31;
+}
+
+.oh-activity .oh-header .oh-collect span {
+    display: none;
+    color: #fff;
+    margin: 0 6px;
+}
+
+.oh-activity .oh-header .oh-collect:active,
+.oh-activity .oh-header .oh-collect:hover {
+    width: auto;
+}
+
+.oh-activity .oh-header .oh-collect:active {
+    opacity: 0.9;
+}
+
+.oh-activity .oh-header .oh-collect:active span,
+.oh-activity .oh-header .oh-collect:hover span {
+    display: inline-block;
+}
+
+.oh-activity .oh-header .oh-collect.active img {
+    -moz-transForm: rotate(-30deg);
+    -webkit-transform: rotate(-30deg);
+    transform: rotate(-30deg);
+    -moz-transition: all 0.2s ease;
+    -o-transition: all 0.2s ease;
+    -webkit-transition: all 0.2s ease;
+
+}
+
+.oh-activity .oh-header:hover .oh-collect {
+    display: block;
+}
+
+.oh-activity .oh-body {
+    background-color: #fff;
+    position: absolute;
+    width: 100%;
+    bottom: 0;
+    padding: 20px 20px 14px 20px;
+    border-top: 1px solid #d2d2d2;
+}
+
+.oh-activity .oh-body h3 {
+    font-size: 16px;
+    margin: 0 0 12px;
+}
+
+.oh-activity .oh-body .oh-tags {
+    list-style: none;
+    margin: 0 0 20px 0;
+    padding: 0;
+    font-size: 0;
+}
+
+.oh-activity .oh-body .oh-tags li {
+    font-size: 12px;
+    display: inline-block;
+    margin-right: 5px;
+}
+
+.oh-activity .oh-body .oh-tags li a {
+    color: #1172c6;
+}
+
+.oh-activity .oh-body .oh-desc {
+    max-height: 0;
+    overflow: hidden;
+    font-size: 12px;
+    color: #969696;
+    -moz-transition: all 1s cubic-bezier(0, 1, 0.5, 1);
+    -o-transition: all 1s cubic-bezier(0, 1, 0.5, 1);
+    -webkit-transition: all 1s cubic-bezier(0, 1, 0.5, 1);
+}
+
+.oh-activity .oh-body .oh-time {
+    color: #969696;
+    margin-bottom: 12px;
+}
+
+.oh-activity .oh-body .oh-time {
+    text-align: left;
+}
+
+.oh-activity .oh-body .oh-time div {
+    display: inline-block;
+}
+
+.oh-activity .oh-body .oh-time div:last-child {
+    text-align: right;
+    float: right;
+}
+
+.oh-activity .oh-body .oh-progressbar {
+    margin: 0 -20px 14px;
+    height: 3px;
+    background-color: #eee;
+}
+
+.oh-activity .oh-body .oh-progressbar span {
+    background-color: #21b1de;
+    display: block;
+    height: 100%;
+}
+
+.oh-activity .oh-body table {
+    width: 100%;
+    color: #505050;
+}
+
+.oh-activity .oh-body table td div {
+    display: inline-block;
+    text-align: left;
+}
+
+.oh-activity .oh-body table td span {
+    color: #969696;
+    display: block;
+    font-size: 12px;
+}
+
+.oh-activity .oh-body hr {
+    margin: 14px 0 12px 0;
+}
+
+.oh-activity .oh-body .oh-org a {
+    position: relative;
+    width: 26px;
+    height: 26px;
+    overflow: hidden;
+    margin-right: 10px;
+    display: inline-block;
+}
+
+.oh-activity .oh-body .oh-org a img {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+}
+
+.oh-activity .oh-item:hover .oh-header > img {
+    -moz-transform: scale(1.3);
+    -o-transform: scale(1.3);
+    -webkit-transform: scale(1.3);
+    transform: scale(1.3);
+}
+
+.oh-activity .oh-item:hover .oh-body .oh-desc {
+    max-height: inherit;
+
+}
+
+.oh-def-link,
+.oh-def-link:hover {
+    color: #1172c6 !important;
+    text-decoration: underline !important;
+}
+
+.oh-process {
+    background: url('/static/pic/process-bg.png') no-repeat 50% 50% / cover;
+    min-height: 355px;
+    padding-bottom: 28px;
+}
+
+.oh-process .oh-wrap {
+    margin: 20px 0 40px;
+}
+
+.oh-process .oh-title {
+    color: #fff;
+    margin: 40px 0 48px;
+    font-size: 20px;
+}
+
+.oh-process .oh-item {
+    position: relative;
+}
+
+.oh-process .oh-item:before {
+    position: absolute;
+    content: '';
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 20px;
+    background: url('/static/pic/chevron-right-icon.png') no-repeat center right;
+    -moz-transForm: rotate(0deg);
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+
+}
+
+.btn-help {
+    position: relative;
+    padding: 10px 25px;
+    color: #fff;
+    border: 1px solid #fff;
+    border-radius: 0;
+    box-shadow: none;
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    transition: all 0.15s ease;
+    -moz-transition: all 0.15s ease;
+    -webkit-transition: all 0.15s ease;
+    -o-transition: all 0.15s ease;
+    -ms-transition: all 0.15s ease;
+}
+
+.btn-help span {
+    display: none
+}
+
+.btn-help:focus,
+.btn-help:hover {
+    color: #fff;
+    border-color: transparent;
+    background-color: rgba(33, 177, 222, .5);
+}
+
+.btn-help:focus span,
+.btn-help:hover span {
+    display: inline;
+}
+
+.oh-process .btn-help {
+    width: 130px;
+}
+
+.oh-events {
+    border: 1px solid #f0f0f0;
+}
+
+.oh-events .oh-tabs {
+    font-size: 16px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+}
+
+.oh-events .oh-tabs li {
+    position: relative;
+
+    vertical-align: middle;
+}
+
+.oh-events .oh-tabs li:before {
+    display: none;
+    position: absolute;
+    content: '';
+    right: 0;
+    top: 50%;
+    margin-top: -20px;
+    border-width: 20px 20px 20px 0;
+    border-color: transparent;
+    border-right-color: #fff;
+    border-style: solid;
+}
+
+.oh-events .oh-tabs li.active {
+    background-color: #02bcf2;
+    height: 145px;
+}
+
+.oh-events .oh-tabs li.active:before {
+    display: block;
+}
+
+.oh-events .oh-tabs li a {
+    display: block;
+    padding: 24px 0 24px 20px;
+    white-space: nowrap;
+}
+
+.oh-events .oh-tabs li.active a {
+    color: #fff;
+    padding: 35px 20px 0 20px;
+}
+
+.oh-events .oh-tabs li .oh-org {
+    display: none;
+    margin-top: 15px;
+}
+
+.oh-events .oh-tabs li.active .oh-org {
+    display: block;
+    font-size: 12px;
+}
+
+.oh-events .oh-tabs li.active .oh-org img {
+    width: 50px;
+    margin-right: 10px;
+}
+
+.oh-events .tab-content > .tab-pane {
+    padding-left: 10px;;
+    color: #969696;
+}
+
+.oh-events .oh-title {
+    font-size: 16px;
+    color: #505050;
+}
+
+.oh-events .oh-desc .oh-count {
+    margin-bottom: 10px;
+}
+
+.oh-events .oh-desc .oh-count div {
+    display: inline-block;
+    font-size: 14px;
+}
+
+.oh-events .oh-desc .oh-count div span {
+    font-size: 16px;
+    color: #21b1de;
+}
+
+.oh-events .oh-desc .oh-count div:first-child {
+    margin-right: 10px;
+}
+
+.oh-events .oh-desc .oh-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0;
+}
+
+.oh-events .oh-desc .oh-list li {
+    width: 25%;
+    display: inline-block;
+    font-size: 14px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.oh-events .oh-desc .oh-list li img {
+    width: 48px;
+    margin-bottom: 5px;
+}
+
+.oh-events .oh-show .oh-thumbnail {
+    padding: 15px 20px 0 0;
+}
+
+.oh-events .oh-show .oh-thumbnail .carousel {
+    height: 260px;
+}
+
+.oh-events .oh-show .oh-thumbnail .carousel-inner > .item {
+    height: auto;
+}
+
+.oh-events .oh-show .oh-thumbnail .carousel-indicators {
+    bottom: -30px;
+}
+
+.oh-events .oh-show .carousel-indicators li {
+    background-color: #02bcf2;
+    border-color: #02bcf2;
+    margin-right: 15px;
+}
+
+.oh-events .oh-show .carousel-indicators li.active {
+    background-color: transparent;
+    border-color: #02bcf2;
+}
+
+.oh-events .oh-show .oh-thumbnail .carousel iframe {
+    width: 100%;
+    height: 260px;
+}
+
+@media (max-width: 1200px) {
+    .oh-activity .oh-item{
+        height: 424px;
+    }
+
+    .oh-activity .oh-item .oh-header {
+        height: 180px;
+    }
+}
+
+@media (max-width: 991px) {
+    .oh-process .oh-item {
+        padding-bottom: 88px;
+    }
+
+    .oh-process .oh-item:before {
+        width: 20px;
+        top: auto;
+        height: 40px;
+        left: 50%;
+        bottom: 20px;
+        margin-left: -10px;
+        background: url('/static/pic/chevron-right-icon.png') no-repeat bottom center;
+        -moz-transForm: rotate(90deg);
+        -webkit-transform: rotate(90deg);
+        transform: rotate(90deg);
+    }
+
+    .oh-activity .oh-item {
+        height: 644px;
+    }
+
+    .oh-activity .oh-item .oh-header {
+        height: 400px;
+    }
+
+    .oh-events .oh-tabs {
+        display: none;
+    }
+    .oh-events {
+        border: none;
+    }
+    .oh-events .tab-pane {
+        display: block;
+        padding-bottom: 20px;
+        border: 1px solid #f0f0f0;
+        margin-top:20px ;
+    }
+    .oh-events .tab-pane:first-child{
+         margin-top:0 ;
+    }
+}
+
+.oh-users {
+
+    padding-bottom: 6px;
+}
+
+.oh-users .oh-item {
+    text-align: center;
+}
+
+.oh-users .oh-item a {
+    color: #505050;
+}
+
+.oh-users .oh-item a:hover {
+    color: #21b1de;
+    text-decoration: none;
+}
+
+.oh-users .oh-item:hover .oh-header img {
+    width: 120%;
+    top: -10%;
+    left: -10%;
+}
+
+.oh-users .oh-item:hover .oh-signature {
+    display: block;
+}
+
+.oh-users .oh-header {
+    position: relative;
+    overflow: hidden;
+    width: 96px;
+    height: 96px;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.oh-users .oh-header img {
+    position: absolute;
+    width: 100%;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    -moz-transition: all 0.2s ease;
+    -o-transition: all 0.2s ease;
+    -webkit-transition: all 0.2s ease;
+}
+
+.oh-users .oh-body {
+    position: relative;
+    text-align: left;
+    color: #969696;
+    max-height: 95px;
+    min-height: 95px;
+}
+
+.oh-users .oh-signature {
+    display: none;
+    overflow: hidden;
+    max-height: 39px;
+    font-size: 12px;
+}
+
+.oh-users .oh-count {
+    text-align: left;
+}
+
+.oh-users .oh-count div {
+    display: inline-block;
+    font-size: 12px;
+}
+
+.oh-users .oh-count div:last-child {
+    text-align: right;
+    float: right;
+}
+
+.oh-users .oh-count span {
+    font-size: 14px;
+}
+
+.oh-organizers {
+
+    display: table;
+}
+
+.oh-organizers .oh-item {
+    height: 200px;
+    text-align: center;
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.oh-organizers .oh-body {
+    display: none;
+}
+
+.oh-organizers .oh-item:hover .oh-body {
+    display: block;
+}
+
+.oh-organizers img {
+    width: 80%;
+}
+
+.oh-organizers a {
+    color: #505050;
+}
+
+.oh-organizers a:focus,
+.oh-organizers a:hover {
+    color: #21b1d3;
+    text-decoration: none;
+}
+
+.oh-organizers .oh-count {
+    font-size: 12px;
+    color: #969696;
+    text-align: left;
+}
+
+.oh-organizers .oh-count div {
+    display: inline-block;
+}
+
+.oh-organizers .oh-count div:last-child {
+    text-align: right;
+    float: right;
+}
+
+.oh-organizers .oh-count span {
+    color: #21b1d3;
+    font-size: 15px;
+}
+
+/*------------------------------*/
+
 .hackathon-item {
-  position: relative;
-  padding-top: 56.25%;
-  text-align: left;
-  -webkit-tap-highlight-color: transparent;
-  margin-bottom:30px;
+    position: relative;
+    padding-top: 56.25%;
+    text-align: left;
+    -webkit-tap-highlight-color: transparent;
+    margin-bottom: 30px;
 }
 
 .hakcathon-inner {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  transition-property: width, top, left;
-  transition-duration: 0.2s;
-  -webkit-animation-name: tile-hover-out;
-  animation-name: tile-hover-out;
-  z-index: auto;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition-property: width, top, left;
+    transition-duration: 0.2s;
+    -webkit-animation-name: tile-hover-out;
+    animation-name: tile-hover-out;
+    z-index: auto;
 }
 
 .hakcathon-inner:hover {
-  top: -5%;
-  left: -5%;
-  width: 110%;
-  height: 110%;
-  transition-property: width, top, left;
-  transition-duration: 0.2s;
-  -webkit-animation-name: tile-hover-out;
-  animation-name: tile-hover-out;
-  -webkit-animation-duration: 200ms;
-  animation-duration: 200ms;
-  z-index: 100000;
+    top: -5%;
+    left: -5%;
+    width: 110%;
+    height: 110%;
+    transition-property: width, top, left;
+    transition-duration: 0.2s;
+    -webkit-animation-name: tile-hover-out;
+    animation-name: tile-hover-out;
+    -webkit-animation-duration: 200ms;
+    animation-duration: 200ms;
+    z-index: 100000;
 }
 
 .hackathon-content {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: block;
-  overflow: hidden;
-  text-decoration: none;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: block;
+    overflow: hidden;
+    text-decoration: none;
 }
 
 .hakcathon-inner:hover .hackathon-content {
-  box-shadow: rgba(30, 30, 30, 0.8) 0 0 30px;
+    box-shadow: rgba(30, 30, 30, 0.8) 0 0 30px;
 }
 
 .hackathon-thumb {
-  position: absolute;
-  width: 100%;
-  top: 0;
-  left: 0;
+    position: absolute;
+    width: 100%;
+    top: 0;
+    left: 0;
 }
 
 .hackathon-overlay {
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  top: 0;
-  left: 0;
-  transition: all 0.3s ease-out;
-  background-image: linear-gradient(to bottom, transparent 20%, #000);
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+    transition: all 0.3s ease-out;
+    background-image: linear-gradient(to bottom, transparent 20%, #000);
 }
 
 .hakcathon-inner:hover .hackathon-overlay {
-  height: 200%;
-  top: -100%;
+    height: 200%;
+    top: -100%;
 }
 
 .hackathon-info {
-  position: absolute;
-  font-size: 15px;
-  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.6);
-  color: #FFF;
-  width: 100%;
-  padding: 10px;
-  bottom: 0;
-  left: 0;
-  transition: min-height 200ms ease-out;
-  filter: alpha(Opacity=100);
-  opacity: 1;
+    position: absolute;
+    font-size: 15px;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.6);
+    color: #FFF;
+    width: 100%;
+    padding: 10px;
+    bottom: 0;
+    left: 0;
+    transition: min-height 200ms ease-out;
+    filter: alpha(Opacity=100);
+    opacity: 1;
 }
 
 .hakcathon-inner:hover .hackathon-info {
-  top: 0;
-  bottom: auto;
-  min-height: 100%;
+    top: 0;
+    bottom: auto;
+    min-height: 100%;
 }
 
 .hackathon-details {
-  display: none;
-  text-shadow: none;
+    display: none;
+    text-shadow: none;
 }
 
 .hakcathon-inner:hover .hackathon-details {
-  -webkit-animation-name: tile-supplementary-deco-in;
-  animation-name: tile-supplementary-deco-in;
-  filter: alpha(enabled=false);
-  opacity: 1;
-  -webkit-animation-duration: 400ms;
-  animation-duration: 400ms;
-  display: block;
+    -webkit-animation-name: tile-supplementary-deco-in;
+    animation-name: tile-supplementary-deco-in;
+    filter: alpha(enabled=false);
+    opacity: 1;
+    -webkit-animation-duration: 400ms;
+    animation-duration: 400ms;
+    display: block;
 }
 
 .hackathon-name {
-  margin: 10px 0;
-  font-size: 24px;
+    margin: 10px 0;
+    font-size: 24px;
 }
 
 .hackathon-description {
-  color: #aaa;
+    color: #aaa;
 }
 
+.tooltip .tooltip-inner {
+    border: 1px solid #d2d2d2;
+    background: #fff;
+    color: #21b1de;
+}
+
+.tooltip.top .tooltip-arrow {
+    border-top-color: #d2d2d2;
+}
+
+.tooltip.top .tooltip-arrow:before {
+    position: absolute;
+    content: '';
+    bottom: 1px;
+    margin-left: -5px;
+    border-style: solid;
+    border-width: 5px 5px 0;
+    border-color: transparent;
+    border-top-color: #fff;
+}
