@@ -36,7 +36,11 @@ from azure.servicemanagement import (ConfigurationSet, ConfigurationSetInputEndp
                                      LinuxConfigurationSet, ServiceManagementService)
 
 from hackathon import Component, RequiredFeature, Context
-from hackathon.database.models import DockerHostServer, AzureKey, HackathonAzureKey, Hackathon
+from hackathon.database.models import DockerHostServer, HackathonAzureKey, Hackathon
+from hackathon.constants import (AzureApiExceptionMessage, DockerPingResult, AVMStatus, AzureVMPowerState,
+                                 DockerHostServerStatus, DockerHostServerDisable, AzureVMStartMethod,
+                                 ServiceDeploymentSlot, AzureVMSize, AzureVMEndpointName, TCPProtocol,
+                                 AzureVMEndpointDefaultPort, AzureVMEnpointConfigType, AzureOperationStatus)
 
 __all__ = ["DockerHostManager"]
 
@@ -63,7 +67,9 @@ class DockerHostManager(Component):
         vms = self.db.find_all_objects(DockerHostServer,
                                        DockerHostServer.container_count + req_count <=
                                        DockerHostServer.container_max_count,
-                                       DockerHostServer.hackathon_id == hackathon.id)
+                                       DockerHostServer.hackathon_id == hackathon.id,
+                                       DockerHostServer.state == DockerHostServerStatus.DOCKER_READY,
+                                       DockerHostServer.disable == DockerHostServerDisable.ABLE)
         # todo connect to azure to launch new VM if no existed VM meet the requirement
         # since it takes some time to launch VM,
         # it's more reasonable to launch VM when the existed ones are almost used up.
@@ -76,17 +82,17 @@ class DockerHostManager(Component):
         return None
         # raise Exception("No available VM.")
 
-    def get_host_server_by_id(self, id):
+    def get_host_server_by_id(self, id_):
         """
         Search host server in DB by id
 
-        :param id: the id of host server in DB
-        :type id: integer
+        :param id_: the id of host server in DB
+        :type id_: integer
 
         :return: the found host server information in DB
         :rtype: DockerHostServer object
         """
-        return self.db.find_first_object_by(DockerHostServer, id=id)
+        return self.db.find_first_object_by(DockerHostServer, id=id_)
 
     def schedule_pre_allocate_host_server_job(self):
         """
@@ -113,6 +119,9 @@ class DockerHostManager(Component):
         :rtype: bool
         """
         sms = self.__get_sms_object(hackathon_id)
+        if sms is None:
+            self.log.error('Something wrong with Azure account of Hackathon:%d' % hackathon_id)
+            return False
         # get storage and container
         res, storage_account_name, container_name = self.__get_available_storage_account_and_container(hackathon_id)
         if not res:
@@ -137,7 +146,7 @@ class DockerHostManager(Component):
                                              False, custom_data=customdata)
         endpoint_config = self.__set_endpoint_config(service_name, hackathon_id)
         deployment_exist = True
-        deployment_slot = 'production'
+        deployment_slot = ServiceDeploymentSlot.PRODUCTION
         try:
             deployment_exist = self.__deployment_exists(service_name, deployment_slot, hackathon_id)
         except Exception as e:
@@ -153,7 +162,7 @@ class DockerHostManager(Component):
                                                                role_name=host_name,
                                                                system_config=linux_config,
                                                                os_virtual_hard_disk=os_hd,
-                                                               role_size='Medium')
+                                                               role_size=AzureVMSize.MEDIUM_SIZE)
                 self.log.debug('To create VM:%s in service:%s.(deployment)' % (host_name, service_name))
             except Exception as e:
                 self.log.error(e)
@@ -166,7 +175,7 @@ class DockerHostManager(Component):
                                       system_config=linux_config,
                                       os_virtual_hard_disk=os_hd,
                                       network_config=endpoint_config,
-                                      role_size='Medium')
+                                      role_size=AzureVMSize.MEDIUM_SIZE)
                 self.log.debug('To create VM:%s in service:%s.(add role)' % (host_name, service_name))
             except Exception as e:
                 self.log.error(e)
@@ -200,14 +209,17 @@ class DockerHostManager(Component):
         assert context.get('role_name') and context.get('deployment_name') and context.get('deployment_slot')
         assert context.get('host_name')
         sms = self.__get_sms_object(context.hackathon_id)
+        if sms is None:
+            self.log.error('Something wrong with Azure account of Hackathon:%d' % context.hackathon_id)
+            return
         # check Azure vm creation operation status
         result = sms.get_operation_status(context.request_id)
         try:
-            while result.status == 'InProgress':
+            while result.status == AzureOperationStatus.IN_PROGRESS:
                 sleep(5)
                 result = sms.get_operation_status(context.request_id)
-            if result.status != 'Succeeded':
-                self.log.error('VM creation operation failed when...')
+            if result.status != AzureOperationStatus.SUCCESS:
+                self.log.error('VM creation operation failed according to Azure response.')
                 return
         except Exception as e:
             self.log.error(e)
@@ -218,7 +230,7 @@ class DockerHostManager(Component):
         public_ip = ''
         public_docker_api_port = 0
         private_docker_api_port = 0
-        state = 0
+        state = DockerHostServerStatus.STARTING
         try:
             properties = sms.get_hosted_service_properties(context.service_name, True)
             for deployment in properties.deployments.deployments:
@@ -227,14 +239,14 @@ class DockerHostManager(Component):
                     public_dns = deployment.url[7:-1]
                     for role in deployment.role_instance_list.role_instances:
                         if role.role_name == context.role_name:
-                            if role.instance_status.lower() == 'readyrole' \
-                                    and role.power_state.lower() == 'started':
-                                state = 1
+                            if role.instance_status.lower() == AVMStatus.READY_ROLE.lower() \
+                                    and role.power_state.lower() == AzureVMPowerState.VM_STARTED.lower():
+                                state = DockerHostServerStatus.DOCKER_INIT
                             else:
-                                state = 3
+                                state = DockerHostServerStatus.UNAVAILABLE
                             private_ip = role.ip_address
                             for endpoint in role.instance_endpoints:
-                                if endpoint.name.lower() == 'docker':
+                                if endpoint.name.lower() == AzureVMEndpointName.DOCKER.lower():
                                     private_docker_api_port = int(endpoint.local_port)
                                     public_docker_api_port = int(endpoint.public_port)
                                     public_ip = endpoint.vip
@@ -246,7 +258,8 @@ class DockerHostManager(Component):
         db_object = self.db.add_object_kwargs(DockerHostServer, vm_name=context.host_name, public_dns=public_dns,
                                               public_ip=public_ip, public_docker_api_port=public_docker_api_port,
                                               private_ip=private_ip, private_docker_api_port=private_docker_api_port,
-                                              container_count=0, is_auto=1, state=state, disable=0,
+                                              container_count=0, is_auto=AzureVMStartMethod.AUTO, state=state,
+                                              disable=DockerHostServerDisable.ABLE,
                                               container_max_count=self.util.safe_get_config(
                                                   'dockerhostserver.vm.container_max_count', 50),
                                               hackathon_id=context.hackathon_id)
@@ -256,8 +269,8 @@ class DockerHostManager(Component):
             ping_url = 'http://%s:%d/_ping' % (public_dns, public_docker_api_port)
             req = requests.get(ping_url)
             self.log.debug(req.content)
-            if req.status_code == 200 and req.content == 'OK':
-                self.db.update_object(db_object, state=2)
+            if req.status_code == 200 and req.content == DockerPingResult.OK:
+                self.db.update_object(db_object, state=DockerHostServerStatus.DOCKER_READY)
                 self.db.commit()
         except Exception as e:
             self.log.error(e)
@@ -273,8 +286,12 @@ class DockerHostManager(Component):
         :rtype: class 'azure.servicemanagement.servicemanagementservice.ServiceManagementService'
         """
         hackathon_azure_key = self.db.find_first_object_by(HackathonAzureKey, hackathon_id=hackathon_id)
-        result = self.db.find_first_object_by(AzureKey, id=hackathon_azure_key.azure_key_id)
-        sms = ServiceManagementService(result.subscription_id, result.pem_url, host=result.management_host)
+        if hackathon_azure_key is None:
+            self.log.error('Found no azure key with Hackathon:%d' % hackathon_id)
+            return None
+        sms = ServiceManagementService(hackathon_azure_key.azure_key.subscription_id,
+                                       hackathon_azure_key.azure_key.pem_url,
+                                       host=hackathon_azure_key.azure_key.management_host)
         return sms
 
     def __get_available_storage_account_and_container(self, hackathon_id):
@@ -290,6 +307,9 @@ class DockerHostManager(Component):
         """
         container_name = self.util.safe_get_config('dockerhostserver.azure.container', 'dockerhostprivatecontainer')
         sms = self.__get_sms_object(hackathon_id)
+        if sms is None:
+            self.log.error('Something wrong with Azure account of Hackathon:%d' % hackathon_id)
+            return False, None, None
         storage_accounts = sms.list_storage_accounts()
         # check storage account one by one, return True once find a qualified one
         for storage in storage_accounts.storage_services:
@@ -307,7 +327,7 @@ class DockerHostManager(Component):
                 blob_service.get_container_metadata(container_name)
                 return True, storage.service_name, container_name
             except Exception as e:
-                if e.message != 'Not found (The specified container does not exist.)':
+                if e.message != AzureApiExceptionMessage.CONTAINER_NOT_FOUND:
                     self.log.error('Encounter an error when checking container:%s ' % container_name)
                     self.log.error(e)
                     continue
@@ -335,11 +355,14 @@ class DockerHostManager(Component):
         service_name = config_name + str(hackathon_id)
         service_location = self.util.safe_get_config('dockerhostserver.azure.cloud_service.location', 'China East')
         sms = self.__get_sms_object(hackathon_id)
+        if sms is None:
+            self.log.error('Something wrong with Azure account of Hackathon:%d' % hackathon_id)
+            return False, None
         try:
             sms.get_hosted_service_properties(service_name, True)
             return True, service_name
         except Exception as e:
-            if e.message != 'Not found (Not Found)':
+            if e.message != AzureApiExceptionMessage.SERVICE_NOT_FOUND:
                 self.log.error('Encounter an error when checking cloud service:%s ' % service_name)
                 self.log.error(e)
                 return False, None
@@ -360,11 +383,12 @@ class DockerHostManager(Component):
         """
         Get customdata from local file
 
-        :return: content of file if successfully read, otherwise return None
+        :return: content of file if successfully read, otherwise return None and VM will not do customization work.
         :rtype: str|unicode
         """
         sh_file = []
-        file_path = self.util.safe_get_config('dockerhostserver.vm.customdata', '/home/guiquan/Desktop/test2.sh')
+        file_path = self.util.safe_get_config('dockerhostserver.vm.customdata',
+                                              'open-hackathon-server/customdata.sh')
         try:
             for line in open(file_path):
                 sh_file.append(line)
@@ -389,12 +413,15 @@ class DockerHostManager(Component):
         :rtype: a list of integer
         """
         sms = self.__get_sms_object(hackathon_id)
+        if sms is None:
+            self.log.error('Something wrong with Azure account of Hackathon:%d' % hackathon_id)
+            raise Exception('Something wrong with Azure account of Hackathon:%d' % hackathon_id)
         endpoints = []
         properties = sms.get_hosted_service_properties(service_name, True)
         for deployment in properties.deployments.deployments:
             for role in deployment.role_list.roles:
                 for configuration_set in role.configuration_sets.configuration_sets:
-                    if configuration_set.configuration_set_type == 'NetworkConfiguration':
+                    if configuration_set.configuration_set_type == AzureVMEnpointConfigType.NETWORK:
                         if configuration_set.input_endpoints is not None:
                             for input_endpoint in configuration_set.input_endpoints.input_endpoints:
                                 endpoints.append(input_endpoint.port)
@@ -422,13 +449,15 @@ class DockerHostManager(Component):
             ssh_port += 1
         assert docker_port < 40000 and ssh_port < 40000
         endpoint_config = ConfigurationSet()
-        endpoint_config.configuration_set_type = 'NetworkConfiguration'
-        endpoint1 = ConfigurationSetInputEndpoint(name='docker', protocol='tcp',
-                                                  port=docker_port, local_port='4243',
+        endpoint_config.configuration_set_type = AzureVMEnpointConfigType.NETWORK
+        endpoint1 = ConfigurationSetInputEndpoint(name=AzureVMEndpointName.DOCKER, protocol=TCPProtocol.TCP,
+                                                  port=str(docker_port),
+                                                  local_port=str(AzureVMEndpointDefaultPort.DOCKER),
                                                   load_balanced_endpoint_set_name=None,
                                                   enable_direct_server_return=False)
-        endpoint2 = ConfigurationSetInputEndpoint(name='SSH', protocol='tcp',
-                                                  port=ssh_port, local_port='22',
+        endpoint2 = ConfigurationSetInputEndpoint(name=AzureVMEndpointName.SSH, protocol=TCPProtocol.TCP,
+                                                  port=str(ssh_port),
+                                                  local_port=str(AzureVMEndpointDefaultPort.SSH),
                                                   load_balanced_endpoint_set_name=None,
                                                   enable_direct_server_return=False)
         endpoint_config.input_endpoints.input_endpoints.append(endpoint1)
@@ -457,27 +486,17 @@ class DockerHostManager(Component):
         :type: Exception
         """
         sms = self.__get_sms_object(hackathon_id)
+        if sms is None:
+            self.log.error('Something wrong with Azure account of Hackathon:%d' % hackathon_id)
+            raise Exception('Something wrong with Azure account of Hackathon:%d' % hackathon_id)
         try:
             sms.get_deployment_by_slot(service_name, deployment_slot)
             return True
         except Exception as e:
-            if e.message == 'Not found (Not Found)':
+            if e.message == AzureApiExceptionMessage.DEPLOYMENT_NOT_FOUND:
                 return False
             else:
                 raise Exception('Something wrong with checking deployment of service:' % service_name)
-
-    def __find_all_hackathon_id(self):
-        """
-        Get all ids of hackathon from DB table:hackathon
-
-        :return: the set of all hackathon ids
-        :rtype: the list of integer
-        """
-        hackathon_ids = []
-        hackathon_objects = self.db.find_all_objects(Hackathon)
-        for hackathon in hackathon_objects:
-            hackathon_ids.append(hackathon.id)
-        return hackathon_ids
 
     def __exist_request_host_server_by_hackathon_id(self, request_count, hackathon_id):
         """
@@ -496,8 +515,6 @@ class DockerHostManager(Component):
                                        DockerHostServer.container_count + request_count <=
                                        DockerHostServer.container_max_count,
                                        DockerHostServer.hackathon_id == hackathon_id,
-                                       DockerHostServer.state == 2,
-                                       DockerHostServer.disable == 0)
+                                       DockerHostServer.state == DockerHostServerStatus.DOCKER_READY,
+                                       DockerHostServer.disable == DockerHostServerDisable.ABLE)
         return len(vms) > 0
-
-

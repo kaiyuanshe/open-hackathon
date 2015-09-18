@@ -329,3 +329,149 @@ class TeamMemberStatus:
     Init = 0
     Approved = 1
     Denied = 2
+
+class DockerHostServerStatus:
+    """
+    Status of docker host server VM
+
+    Attributes:
+        STARTING: VM is in the process of starting
+        DOCKER_INIT: VM starts successfully according to the feedback of Azure and docker application is in the process
+                     of initialization
+        DOCKER_READY: VM docker api port is OK
+        UNAVAILABLE: VM is unavailable
+    """
+    STARTING = 0
+    DOCKER_INIT = 1
+    DOCKER_READY = 2
+    UNAVAILABLE = 3
+
+class DockerHostServerDisable:
+    """
+    whether the docker host server VM is disabled by manager or not
+
+    Attributes:
+        ABLE: VM is not disabled by manager
+        DISABLE: VM is disabled by manager
+    """
+    ABLE = 0
+    DISABLE = 1
+
+class AzureVMStartMethod:
+    """
+    the way how Azure VM is started
+
+    Attributes:
+        AUTO: VM is started by OHP server
+        MANUAL: VM is started manually
+    """
+    AUTO = 1
+    MANUAL = 2
+
+class AzureApiExceptionMessage:
+    """
+    The message returned by azure api when exception occurs
+
+    Attributes:
+        SERVICE_NOT_FOUND: the service is not found
+        DEPLOYMENT_NOT_FOUND: the service deployment is not found
+        CONTAINER_NOT_FOUND: the container is not found
+    """
+    SERVICE_NOT_FOUND = 'Not found (Not Found)'
+    DEPLOYMENT_NOT_FOUND = 'Not found (Not Found)'
+    CONTAINER_NOT_FOUND = 'Not found (The specified container does not exist.)'
+
+class AzureOperationStatus:
+    """
+    The status of Azure operation
+
+    Attributes:
+        IN_PROGRESS: the operation is in process
+        SUCCESS: the operation is successful
+    """
+    IN_PROGRESS = 'InProgress'
+    SUCCESS = 'Succeeded'
+
+class ServiceDeploymentSlot:
+    """
+    the slot of service deployment
+
+    Attributes:
+        PRODUCTION: production slot
+        STAGING: staging slot
+    """
+    PRODUCTION = 'production'
+    STAGING = 'staging'
+
+class AzureVMSize:
+    """
+    the size of Azure VM
+
+    Attributes:
+        MEDIUM_SIZE: medium size
+        SMALL_SIZE: small size
+    """
+    MEDIUM_SIZE = 'Medium'
+    SMALL_SIZE = 'Small'
+
+class AzureVMEndpointName:
+    """
+    the name of Azure VM endpoint
+
+    Attributes:
+        DOCKER: docker
+        SSH: ssh
+        HTTP: http
+    """
+    DOCKER = 'docker'
+    SSH = 'SSH'
+    HTTP = 'http'
+
+class AzureVMEndpointDefaultPort:
+    """
+    default local port (private port) of applications in Azure VM
+
+    Attributes:
+        DOCKER: the default local port of docker
+        SSH: the default local port of SSH
+    """
+    DOCKER = 4243
+    SSH = 22
+
+class TCPProtocol:
+    """
+    the protocol of TCP layer
+
+    Attributes:
+        TCP: tcp protocol
+        UDP: udp protocol
+    """
+    TCP = 'tcp'
+    UDP = 'udp'
+
+class DockerPingResult:
+    """
+    the response of ping docker public port
+
+    Attributes:
+        OK: the response content is 'OK'
+    """
+    OK = 'OK'
+
+class AzureVMPowerState:
+    """
+    the state of Azure VM power
+
+    Attributes:
+        VM_STARTED: the VM is started
+    """
+    VM_STARTED = 'started'
+
+class AzureVMEnpointConfigType:
+    """
+    the type of Azure VM endpoint configuration
+
+    Attributes:
+        NETWORK: type is 'NetworkConfiguration'
+    """
+    NETWORK = 'NetworkConfiguration'
