@@ -259,6 +259,7 @@ class UserTeamRel(DBBase):
     status = Column(Integer)  # 0:unaudit ,1:audit_passed, 2:audit_refused
 
     hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
+    hackathon = relationship('Hackathon', backref=backref('user_team_rels', lazy='dynamic'))
 
     user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
     user = relationship('User', backref=backref('user_team_rels', lazy='dynamic'))

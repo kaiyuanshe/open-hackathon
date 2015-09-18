@@ -114,7 +114,7 @@ class TemplateListResource(HackathonResource):
 class HackathonResource(HackathonResource):
     @hackathon_name_required
     def get(self):
-        return g.hackathon.dic()
+        return hackathon_manager.get_hackathon_detail(g.hackathon)
 
 
 class HackathonListResource(HackathonResource):
@@ -126,16 +126,6 @@ class HackathonStatResource(HackathonResource):
     @hackathon_name_required
     def get(self):
         return hackathon_manager.get_hackathon_stat(g.hackathon)
-
-
-class HackathonTeamListResource(HackathonResource):
-    @hackathon_name_required
-    def get(self):
-        parse = reqparse.RequestParser()
-        parse.add_argument('name', type=str, location='args', required=False)
-        parse.add_argument('number', type=int, location='args', required=False)
-        result = parse.parse_args()
-        return team_manager.get_hackathon_team_list(g.hackathon.id, result['name'], result['number'])
 
 
 class HackathonRegistrationListResource(HackathonResource):
@@ -265,11 +255,11 @@ class TeamResource(HackathonResource):
         args = parse.parse_args()
         return team_manager.get_team_by_name(g.hackathon.id, args["team_name"])
 
-    @token_required
-    @hackathon_name_required
-    def post(self):
-        args = request.get_json()
-        return team_manager.create_team(args)
+    # @token_required
+    # @hackathon_name_required
+    # def post(self):
+    #     args = request.get_json()
+    #     return team_manager.create_team(args)
 
     @token_required
     @hackathon_name_required
@@ -278,12 +268,8 @@ class TeamResource(HackathonResource):
         return team_manager.update_team(args)
 
     @token_required
-    @hackathon_name_required
     def delete(self):
-        parse = reqparse.RequestParser()
-        parse.add_argument('team_name', type=str, location='args', required=True)
-        args = parse.parse_args()
-        return team_manager.dismiss_team(g.hackathon.id, args["team_name"])
+        return team_manager.dismiss_team(g.user, self.context().id)
 
 
 class UserTeamsResource(HackathonResource):
@@ -292,73 +278,48 @@ class UserTeamsResource(HackathonResource):
         return team_manager.get_teams_by_user(g.user.id)
 
 
-class TeamListResource(HackathonResource):
-    @hackathon_name_required
-    def get(self):
-        return team_manager.get_team_by_hackathon(g.hackathon.id)
-
-
 class TeamMemberResource(HackathonResource):
     @token_required
-    @hackathon_name_required
     def post(self):
-        args = request.get_json()
-        if "team_name" not in args:
-            return bad_request("Team name is required")
-        return team_manager.join_team(g.hackathon.id, args["team_name"], g.user)
+        return team_manager.join_team(g.user, self.context().team_id)
 
     @token_required
-    @hackathon_name_required
     def put(self):
-        parse = reqparse.RequestParser()
-        parse.add_argument('user_id', type=int, location='json', required=True)
-        parse.add_argument("status", type=int, location="json", required=True)
-        parse.add_argument("team_name", type=str, location="json", required=True)
-        args = parse.parse_args()
-        return team_manager.update_team_member_status(g.hackathon.id,
-                                                      args["team_name"],
-                                                      args["member"],
-                                                      g.user,
-                                                      args["user_id"])
+        ctx = self.context()
+        return team_manager.update_team_member_status(g.user, ctx.id, ctx.status)
 
     @token_required
-    @hackathon_name_required
     def delete(self):
+        ctx = self.context()
+        return team_manager.kick_or_leave(g.user, ctx.id)
+
         parse = reqparse.RequestParser()
         parse.add_argument('user_id', type=int, location='args', required=True)
         parse.add_argument('team_name', type=str, location='args', required=True)
         args = parse.parse_args()
         if g.user.id == args["user_id"]:
-            return team_manager.leave_team(g.hackathon.id, args["team_name"])
+            return team_manager.leave_team(g.hackathon, args["team_name"])
         else:
-            return team_manager.kick(args["team_name"], args["user_id"])
+            return team_manager.kick(g.hackathon, args["team_name"], args["user_id"])
 
 
-class TeamMemberListResource(HackathonResource):
-    @token_required
+class HackathonTeamListResource(HackathonResource):
     @hackathon_name_required
     def get(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('team_name', type=str, location='args')
-        args = parse.parse_args()
-
-        if args["team_name"]:
-            return team_manager.get_team_members_by_name(g.hackathon.id, args["team_name"])
-        else:
-            return team_manager.get_team_members_by_user(g.hackathon.id, g.user.id)
+        parse.add_argument('name', type=str, location='args', required=False)
+        parse.add_argument('number', type=int, location='args', required=False)
+        result = parse.parse_args()
+        return team_manager.get_hackathon_team_list(g.hackathon.id, result['name'], result['number'])
 
 
-class TeamLeaderResource(HackathonResource):
-    @token_required
-    @hackathon_name_required
-    def put(self):
+class TeamMemberListResource(HackathonResource):
+    def get(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('user_id', type=int, location='json', required=True)
-        parse.add_argument('team_name', type=str, location='json', required=True)
+        parse.add_argument('team_id', type=int, location='args')
         args = parse.parse_args()
-        return team_manager.promote_leader(g.hackathon.id,
-                                           args["team_name"],
-                                           args["user_id"])
+
+        return team_manager.get_team_members(args["team_id"])
 
 
 class TeamTemplateResource(HackathonResource):
@@ -393,7 +354,7 @@ class AdminHackathonResource(HackathonResource):
 
     @hackathon_name_required
     def get(self):
-        return g.hackathon.dic()
+        return hackathon_manager.get_hackathon_detail(g.hackathon)
 
     @token_required
     def post(self):
@@ -405,9 +366,38 @@ class AdminHackathonResource(HackathonResource):
 
 
 class AdminHackathonConfigResource(HackathonResource):
+    @hackathon_name_required
+    def get(self):
+        return hackathon_manager.get_all_properties(g.hackathon)
+
     @admin_privilege_required
     def post(self):
         return hackathon_manager.set_basic_property(g.hackathon, self.context())
+
+    @admin_privilege_required
+    def put(self):
+        return hackathon_manager.set_basic_property(g.hackathon, self.context())
+
+    @admin_privilege_required
+    def delete(self):
+        return hackathon_manager.set_basic_property(g.hackathon, self.context().key)
+
+
+class AdminHackathonOrganizerResource(HackathonResource):
+    def get(self):
+        return hackathon_manager.qet_organizer_by_id(self.context().id)
+
+    @admin_privilege_required
+    def post(self):
+        return hackathon_manager.create_hackathon_organizer(g.hackathon, request.get_json())
+
+    @admin_privilege_required
+    def put(self):
+        return hackathon_manager.update_hackathon_organizer(g.hackathon, request.get_json())
+
+    @admin_privilege_required
+    def delete(self):
+        return hackathon_manager.delete_hackathon_organizer(g.hackathon, self.context().id)
 
 
 class AdminHackathonTags(HackathonResource):
@@ -419,6 +409,11 @@ class AdminHackathonTags(HackathonResource):
     def post(self):
         tags = request.get_data().split(",")
         return hackathon_manager.set_hackathon_tags(g.hackathon, tags)
+
+
+class HackathonTagNamesResource(HackathonResource):
+    def get(self):
+        return hackathon_manager.get_distinct_tags()
 
 
 class HackathonCheckNameResource(HackathonResource):

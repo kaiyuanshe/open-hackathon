@@ -80,15 +80,8 @@ class HACKATHON_BASIC_INFO:
     """Basic settings of hackathon that saved into column 'basic_info' of table 'hackathon'
 
     Attributes:
-        ORGANIZERS: array [{ organizer_name:'' , organizer_url:'',  organizer_image:'',organizer_description:''},...]
-        ORGANIZER_NAME: str|unicode, name of organizer
-        ORGANIZER_URL: str|unicode, url link to the organizer. For example its homepage
-        ORGANIZER_IMAGE: str|unicode, logo of the organizer. We don't store the image itself, just a link to target
-        ORGANIZER_DESCRIPTION: str|unicode, description of the organizer.
-        BANNERS: array ['banner_image_url',...], array of images as banners for the hackathon
         LOCATION: str|unicode, the location where the hackathon is held
         MAX_ENROLLMENT: int, maximum users allowed to register
-        WALL_TIME: long, environment will be auto recycled, in seconds
         AUTO_APPROVE: bool, whether manual approve is required, default false
         RECYCLE_ENABLED: bool, whether environment be recycled automatically. default false
         RECYCLE_MINUTES: int, the maximum time (unit:minute) of recycle for per experiment. default 0
@@ -97,15 +90,8 @@ class HACKATHON_BASIC_INFO:
         ALAUDA_ENABLED: bool,default false, whether to use alauda service, no azure resource needed if true
         FREEDOM_TEAM: bool,default true,Whether to allow freedom of the team
     """
-    ORGANIZERS = "organizers"
-    ORGANIZER_NAME = "organizer_name"
-    ORGANIZER_URL = "organizer_url"
-    ORGANIZER_IMAGE = "organizer_image"
-    ORGANIZER_DESCRIPTION = "organizer_description"
-    BANNERS = "banners"
     LOCATION = "location"
     MAX_ENROLLMENT = "max_enrollment"
-    WALL_TIME = "wall_time"
     AUTO_APPROVE = "auto_approve"
     RECYCLE_ENABLED = "recycle_enabled"
     RECYCLE_MINUTES = "recycle_minutes"
