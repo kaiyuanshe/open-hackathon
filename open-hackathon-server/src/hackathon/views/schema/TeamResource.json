@@ -1,0 +1,28 @@
+{
+  "TeamResource": {
+    "put": {
+      "input": {
+        "description": "update team information",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "unique identifier of team",
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "delete": {
+      "input": {
+        "description": "delete team",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "unique identifier of team",
+            "pattern": "^[0-9]+$"
+          }
+        }
+      }
+    }
+  }
+}

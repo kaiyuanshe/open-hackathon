@@ -1,0 +1,47 @@
+{
+  "TeamMemberResource": {
+    "post": {
+      "input": {
+        "description": "join team",
+        "type": "object",
+        "properties": {
+          "team_id": {
+            "description": "unique identifier of team",
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "put": {
+      "input": {
+        "description": "approve or refuse member",
+        "type": "object",
+        "properties": {
+          "status": {
+            "description": "unique identifier of team",
+            "enum": [
+              1,
+              2
+            ]
+          },
+          "id": {
+            "description": "unique identifier of user_team_rel",
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "delete": {
+      "input": {
+        "description": "kick member or leave team",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "unique identifier of user_team_rel",
+            "type": "integer"
+          }
+        }
+      }
+    }
+  }
+}
