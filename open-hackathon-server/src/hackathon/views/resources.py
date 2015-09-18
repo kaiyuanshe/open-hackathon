@@ -316,7 +316,7 @@ class HackathonTeamListResource(HackathonResource):
 class TeamMemberListResource(HackathonResource):
     def get(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('team_id', type=int, location='args')
+        parse.add_argument('team_id', type=int, location='args', required=True)
         args = parse.parse_args()
 
         return team_manager.get_team_members(args["team_id"])

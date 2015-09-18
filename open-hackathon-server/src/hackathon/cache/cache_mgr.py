@@ -93,7 +93,7 @@ class CacheManagerExt(Component):
         """
         # store the basic configuration
         self.cache_opts = {
-            'cache.type': 'file',
+            'cache.type': 'memory',
             # can be "memory" or "file"
             'cache.data_dir': '/tmp/cache/data',
             'cache.lock_dir': '/tmp/cache/lock'
