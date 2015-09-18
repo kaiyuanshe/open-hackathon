@@ -119,7 +119,7 @@ class TeamManager(Component):
 
         Use user name as team name by default. Append user id in case user name is duplicate
         """
-        user_team_rel = self.__get_team_by_user(user.id, hackathon.id)
+        user_team_rel = self.__get_valid_team_by_user(user.id, hackathon.id)
         if user_team_rel:
             self.log.debug("fail to create team since user is already in some team.")
             return precondition_failed("you must leave the current team first")
@@ -161,21 +161,15 @@ class TeamManager(Component):
         self.__validate_team_permission(g.hackathon.id, team, g.user)
         self.db.update_object(team,
                               name=kwargs.get("team_name", team.name),
-                              disdisplay_name=kwargs.get("display_name", team.display_name),
+                              display_name=kwargs.get("display_name", team.display_name),
                               description=kwargs.get("description", team.description),
                               git_project=kwargs.get("git_project", team.git_project),
                               logo=kwargs.get("logo", team.logo),
                               update_time=self.util.get_now())
         return team.dic()
 
-    def dismiss_team(self, user, team_id):
+    def dismiss_team(self, operator, team_id):
         """Dismiss a team by team leader or hackathon admin
-
-        :type hackathon_id: int
-        :param hackathon_id: hackathon id
-
-        :type team_name: str|unicode
-        :param team_name: name of the team to dismiss
 
         :rtype: bool
         :return: if dismiss success, return ok. if not ,return bad request.
@@ -185,7 +179,7 @@ class TeamManager(Component):
             return ok()
 
         hackathon = team.hackathon
-        self.__validate_team_permission(hackathon, team, user)
+        self.__validate_team_permission(hackathon.id, team, operator)
 
         members = self.db.find_all_objects_by(UserTeamRel, team_id=team.id, status=TeamMemberStatus.Approved)
         member_ids = [m.user for m in members]
@@ -216,14 +210,18 @@ class TeamManager(Component):
             details.
         """
         if self.db.find_first_object_by(UserTeamRel, user_id=user.id, team_id=team_id):
-            return precondition_failed("You already joined this team.")
+            return ok("You already joined this team.")
 
         team = self.__get_team_by_id(team_id)
         if not team:
             return not_found()
 
+        cur_team = self.__get_valid_team_by_user(user.id, team.hackathon_id)
+        if cur_team and cur_team.team.user_team_rels.count() > 1:
+            return precondition_failed("Team leader cannot join another team for team member count greater than 1")
+
         if not self.register_manager.is_user_registered(user.id, team.hackathon):
-            return precondition_failed("user not regiseterd")
+            return precondition_failed("user not registerd")
 
         candidate = UserTeamRel(join_time=self.util.get_now(),
                                 update_time=self.util.get_now(),
@@ -251,12 +249,16 @@ class TeamManager(Component):
         team = rel.team
         self.__validate_team_permission(rel.hackathon_id, team, operator)
 
+        if rel.user_id == team.leader_id:
+            return precondition_failed("cannot update status of team leader")
+
         if status == TeamMemberStatus.Approved:
             # disable previous team first
             self.db.delete_all_objects_by(UserTeamRel,
                                           hackathon_id=rel.hackathon_id,
                                           user_id=rel.user_id,
                                           status=TeamMemberStatus.Approved)
+            self.db.delete_all_objects_by(Team, hackathon_id=rel.hackathon_id, leader_id=rel.user_id)
 
             rel.status = TeamMemberStatus.Approved
             rel.update_time = self.util.get_now()
@@ -283,34 +285,9 @@ class TeamManager(Component):
             self.create_default_team(rel.hackathon, rel.user)
         else:  # kick somebody else
             self.__validate_team_permission(hackathon.id, team, operator)
-            self.db.delete(rel)
+            self.db.delete_object(rel)
             self.create_default_team(hackathon, user)
-
-    def kick(self, hackathon, team_name, candidate_id):
-        """ team leader and admin kick some one from team
-
-        :type team_name: str|unicode
-        :param team_name: team name
-
-        :type candidate_id: int
-        :param candidate_id: the candidate to kick off
-
-        :rtype: bool
-        :return: if kick success, return ok. if not ,return bad request
-        """
-        team = self.__get_team_by_name(hackathon.id, team_name)
-        if not team:
-            # if team don't exist, do nothing
-            return ok()
-
-        self.__validate_team_permission(hackathon.id, team, g.user)
-        self.db.delete_all_objects_by(UserTeamRel, team_id=team.id, user_id=candidate_id)
-
-        # create a default team for the kicked user
-        candidate = self.user_manager.get_user_by_id(candidate_id)
-        if candidate:
-            self.create_default_team(hackathon, candidate)
-
+            
         return ok()
 
     def add_template_for_team(self, args):
@@ -321,7 +298,7 @@ class TeamManager(Component):
         if "template_id" not in args:
             return bad_request("template id invalid")
 
-        team = self.__get_team_by_user(g.user.id, g.hackathon.id)
+        team = self.__get_valid_team_by_user(g.user.id, g.hackathon.id)
         if not team:
             return precondition_failed("you don't join any team so you cannot add teamplate")
 
@@ -335,7 +312,7 @@ class TeamManager(Component):
 
         Team should exist and current login user must be the leader
         """
-        team = self.__get_team_by_user(g.user.id, g.hackathon.id)
+        team = self.__get_valid_team_by_user(g.user.id, g.hackathon.id)
         if not team:
             return precondition_failed("you don't join any team so you cannot add teamplate")
 
@@ -400,9 +377,10 @@ class TeamManager(Component):
         """Get team by its primary key"""
         return self.db.find_first_object_by(Team, id=team_id)
 
-    def __get_team_by_user(self, user_id, hackathon_id):
-        """Get User_Team_Rel by user and hackathon
+    def __get_valid_team_by_user(self, user_id, hackathon_id):
+        """Get valid User_Team_Rel by user and hackathon
 
+        "valid" means user is approved. There might be other records where status=Init
         Since foreign keys are defined in User_Team_Rel, one can access team or user through the return result directly
 
         :rtype: UserTeamRel

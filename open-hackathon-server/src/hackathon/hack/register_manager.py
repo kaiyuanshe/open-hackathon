@@ -93,7 +93,7 @@ class RegisterManager(Component):
             user_hackathon_rel = self.db.add_object_kwargs(UserHackathonRel, **args).dic()
             self.team_manager.create_default_team(hackathon, user)
             self.__update_register_stat(hackathon)
-            return user_hackathon_rel.dic()
+            return user_hackathon_rel
         except Exception as e:
             self.log.error(e)
             return internal_server_error("fail to create register")
