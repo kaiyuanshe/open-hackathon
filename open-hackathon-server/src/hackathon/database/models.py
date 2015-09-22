@@ -233,7 +233,6 @@ class Team(DBBase):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(80))
-    display_name = Column(String(20))
     description = Column(Text)
     git_project = Column(String(200))
     logo = Column(String(200))
@@ -248,6 +247,22 @@ class Team(DBBase):
 
     def __init__(self, **kwargs):
         super(Team, self).__init__(**kwargs)
+
+
+class TeamShow(DBBase):
+    __tablename__ = 'team_show'
+
+    id = Column(Integer, primary_key=True)
+    note = Column(String(80))
+    type = Column(String(20))
+    uri = Column(String(200))
+    create_time = Column(TZDateTime, default=get_now())
+
+    team_id = Column(Integer, ForeignKey('team.id', ondelete='CASCADE'))
+    team = relationship('Team', backref=backref('shows', lazy='dynamic'))
+
+    def __init__(self, **kwargs):
+        super(TeamShow, self).__init__(**kwargs)
 
 
 class UserTeamRel(DBBase):

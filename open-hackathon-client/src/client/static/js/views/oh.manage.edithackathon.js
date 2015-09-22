@@ -205,7 +205,7 @@
                 var config_data = getConfig();
                 var tags_data = getTags();
 
-                update_hackathon({body: hack_data}).then(function (data) {
+                update_hackathon({body: hack_data,header: {hackathon_name: hackathonName}}).then(function (data) {
                     if (data.error) {
                         oh.comm.alert('错误', data.error.friendly_message);
                     } else {

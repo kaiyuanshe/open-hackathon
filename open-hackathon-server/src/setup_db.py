@@ -48,14 +48,20 @@ def setup_db():
 
     # default super admin
     if db_adapter.get_object(User, ReservedUser.DefaultSuperAdmin) is None:
-        db_adapter.add_object_kwargs(User, id=ReservedUser.DefaultSuperAdmin, name="admin", nickname="admin",
+        db_adapter.add_object_kwargs(User,
+                                     id=ReservedUser.DefaultSuperAdmin,
+                                     name="admin",
+                                     nickname="admin",
                                      password="e8104164dfc4a479e42a9f6c0aefd2be")
 
     # default admin privilege
-    if db_adapter.find_first_object_by(AdminHackathonRel, user_id=ReservedUser.DefaultSuperAdmin,
+    if db_adapter.find_first_object_by(AdminHackathonRel,
+                                       user_id=ReservedUser.DefaultSuperAdmin,
                                        hackathon_id=-1) is None:
-        db_adapter.add_object_kwargs(AdminHackathonRel, user_id=ReservedUser.DefaultSuperAdmin,
-                                     hackathon_id=-1, role_type=ADMIN_ROLE_TYPE.ADMIN)
+        db_adapter.add_object_kwargs(AdminHackathonRel,
+                                     user_id=ReservedUser.DefaultSuperAdmin,
+                                     hackathon_id=-1,
+                                     role_type=ADMIN_ROLE_TYPE.ADMIN)
 
 
 setup_db()
