@@ -31,6 +31,7 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 from client import app, Context
+import time
 import json
 import requests
 import markdown
@@ -87,7 +88,7 @@ def render(template_name_or_list, **context):
 def __login_failed(provider, error="Login failed."):
     if provider == "mysql":
         error = "Login failed. username or password invalid."
-    return render("/superadmin.html", error=error)
+    return render("/error.html", error=error)
 
 
 def __login(provider):
@@ -137,7 +138,10 @@ def utility_processor():
     def get_now():
         return __date_serializer(datetime.now())
 
-    return dict(get_now=get_now)
+    def activity_progress(starttime, endtime):
+        return (int(time.time() * 1e3) - starttime) / (endtime - starttime)
+
+    return dict(get_now=get_now, activity_progress=activity_progress)
 
 
 @app.template_filter('mkHTML')
@@ -153,6 +157,12 @@ def strip_tags(html):
 @app.template_filter('limitTo')
 def limit_to(text, limit=100):
     return text[0:limit]
+
+
+@app.template_filter('deadline')
+def deadline(endtime):
+    end_date = datetime.fromtimestamp(endtime / 1e3)
+    return (end_date - datetime.now()).days
 
 
 week = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
@@ -231,8 +241,12 @@ def live_login():
 @app.route('/')
 @app.route('/index')
 def index():
-    hackathon_list = __get_api(API_HACKATHON_LIST, params={"status": 1})
-    return render('/home.html', hackathon_list=hackathon_list)
+    newest_hackathons = __get_api(API_HACKATHON_LIST,
+                                  params={"page": 1, "per_page": 3, "order_by": "create_time", "status": 1})
+    hot_hackathons = __get_api(API_HACKATHON_LIST, params={"page": 1, "per_page": 3, "order_by": "", "status": 1})
+    soon_hackathon = __get_api(API_HACKATHON_LIST, params={"page": 1, "per_page": 3, "order_by": "", "status": 1})
+    return render('/home.html', newest_hackathons=newest_hackathons, hot_hackathons=hot_hackathons,
+                  soon_hackathon=soon_hackathon)
 
 
 @app.route('/help')
@@ -262,11 +276,9 @@ def login():
 @app.route("/site/<hackathon_name>")
 def hackathon(hackathon_name):
     team = []
+    data = __get_api(API_HACKATHON, {"hackathon_name": hackathon_name})
     if current_user.is_authenticated():
-        data = __get_api(API_HACAKTHON_REGISTRATION, {"hackathon_name": hackathon_name, "token": session["token"]})
         team = __get_api(API_TEAM_USER, {"hackathon_name": hackathon_name, "token": session["token"]})
-    else:
-        data = __get_api(API_HACKATHON, {"hackathon_name": hackathon_name})
 
     data = Context.from_object(data)
 
@@ -338,7 +350,7 @@ def create_join_team(hackathon_name):
         return redirect(url_for('hackathon', hackathon_name=hackathon_name))
 
 
-@app.route("/superadmin", methods=['GET', 'POST'])
+@app.route("/admin", methods=['GET', 'POST'])
 def superadmin():
     if request.method == 'POST':
         return __login(LOGIN_PROVIDER.MYSQL)

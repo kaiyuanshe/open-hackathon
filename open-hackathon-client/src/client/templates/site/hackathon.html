@@ -11,9 +11,9 @@
 
             <h1 class="title">{{ hackathon.display_name }}</h1>
             <ul class="tags">
-                <li><a href="javascript:;">分类一</a></li>
-                <li><a href="javascript:;">分类一</a></li>
-                <li><a href="javascript:;">分类一</a></li>
+                {% for item  in  hackathon.tag.split(",") %}
+                    <li><a href="javascript:;">{{ item }}</a></li>
+                {% endfor %}
             </ul>
             <div class="row">
                 <div class="col-lg-8 col-md-7">
@@ -56,7 +56,7 @@
                             <dl class="oh-latest-news">
                                 <dt>2015/09/01</dt>
                                 <dd><span class="t-bullhorn"></span>
-                                    {{ hackathon.basic_info.location }}
+                                    {{ hackathon.config.location }}
                                 </dd>
                             </dl>
                         </div>
@@ -233,16 +233,17 @@
                                 </dd>
                                 <dt>地址：</dt>
                                 <dd>
-                                    {{ hackathon.basic_info.location }}
+                                    {{ hackathon.config.location }}
                                 </dd>
                                 <dt>限额：</dt>
                                 <dd>
-                                    {{ hackathon.basic_info.max_enrollment }}人 <span class="grey-text">（<span>30</span>人已报名）</span>
+                                    {{ hackathon.config.max_enrollment == '0'and  '无限' or hackathon.config.max_enrollment +'人' }}
+                                    <span class="grey-text">（<span>30</span>人已报名）</span>
                                 </dd>
                                 <dt>主办方：</dt>
                                 <dd>
-                                    {% for organizer in  hackathon.basic_info.organizers %}
-                                        <a href="{{ organizer.organizer_url }}">{{ organizer.organizer_name }}</a>
+                                    {% for org in  hackathon.organizer %}
+                                        <a href="{{ org.homepage }}">{{ org.name }}</a>
                                     {% endfor %}
                                 </dd>
                             </dl>
@@ -261,7 +262,7 @@
                                 {% elif registration == None %}
                                     <a class="btn btn-primary btn-lg" data-type="register">我要报名</a>
                                     <button class="btn btn-default">感兴趣 34</button>
-                                {% elif hackathon.basic_info.auto_approve or registration.status == 1 or registration.status == 3 %}
+                                {% elif hackathon.config.auto_approve =='1' or registration.status == 1 or registration.status == 3 %}
                                     {% if is_creta_team and hackathon.basic_info.freedom_team %}
                                         <a class="btn btn-primary btn-lg"
                                            href="{{ url_for('create_join_team' ,hackathon_name=hackathon_name) }}">我要报名</a>
@@ -274,10 +275,10 @@
                                     {% endif %}
                                     <button class="btn btn-default">感兴趣 34</button>
                                     <p>您的报名已经审核已通过。</p>
-                                {% elif not hackathon.basic_info.auto_approve and registration.status == 3 %}
+                                {% elif not hackathon.config.auto_approve == '1' and registration.status == 3 %}
                                     <button class="btn btn-default">感兴趣 34</button>
                                     <p>您的报名正在审核中，请等待。</p>
-                                {% elif not hackathon.basic_info.auto_approve and registration.status == 0 %}
+                                {% elif not hackathon.config.auto_approve  == '1' and registration.status == 0 %}
                                     <button class="btn btn-default">感兴趣 34</button>
                                     <p>您的报名正在审核中，请等待。</p>
                                 {% elif registration.status == 2 %}
@@ -291,17 +292,17 @@
                         <h3 class="title">关于主办方</h3>
 
                         <div class="oh-body organizer">
-                            {% for organizer in hackathon.basic_info.organizers %}
+                            {% for org in hackathon.organizer %}
                                 <div class="media">
                                     <div class="media-left">
-                                        <a href="{{ organizer.organizer_url }}" class="oh-thumb">
-                                            <img class="media-object oh-thumbnail" src="{{ organizer.organizer_image }}"
-                                                 alt="{{ organizer.organizer_name }}">
+                                        <a href="{{ org.homepage }}" class="oh-thumb">
+                                            <img class="media-object oh-thumbnail" src="{{ org.logo }}"
+                                                 alt="{{ org.name }}">
                                         </a>
                                     </div>
                                     <div class="media-body">
-                                        <h4 class="media-heading">{{ organizer.organizer_name }}</h4>
-                                        {{ organizer.organizer_description }}
+                                        <h4 class="media-heading">{{ org.name }}</h4>
+                                        {{ org.description | mkHTML | stripTags | limitTo(100) }}
                                     </div>
                                 </div>
                             {% endfor %}
@@ -397,118 +398,6 @@
             </div>
         </div>
     </div>
-    <div class="oh-main">
-        <div class="container">
-            <div class="row jumbotron">
-                <div class="col-md-5">
-                    <div class="row">
-                        <div id="carousel-example-generic" class="carousel slide" data-ride="carousel">
-                            <ol class="carousel-indicators">
-                                {% for banner in hackathon.basic_info.banners.split(";") %}
-                                    <li data-target="#carousel-example-generic" data-slide-to="{{ loop.index - 1 }}"
-                                        class="{% if loop.index == 1 %} active {% endif %} "></li>
-                                {% endfor %}
-                            </ol>
-                            <carousel class="carousel-inner" role="listbox">
-                                {% for banner in hackathon.basic_info.banners.split(";") %}
-                                    {% if banner %}
-                                        <slide class="item {% if loop.index == 1 %}active{% endif %}">
-                                            <img src="{{ banner }}" alt="{{ hackathon.display_name }}">
-                                        </slide>
-                                    {% else %}
-                                        <slide class="item active">
-                                            <img src="{{ url_for('static',filename='pic/homepage.jpg') }}"
-                                                 alt="{{ hackathon.display_name }}">
-                                        </slide>
-                                    {% endif %}
-                                {% endfor %}
-                            </carousel>
-                            <a class="left carousel-control" href="#carousel-example-generic" role="button"
-                               data-slide="prev">
-                                <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
-                                <span class="sr-only">上一张</span>
-                            </a>
-                            <a class="right carousel-control" href="#carousel-example-generic" role="button"
-                               data-slide="next">
-                                <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
-                                <span class="sr-only">下一张</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-7">
-                    <h2 class="reg-h-name">{{ hackathon.display_name }}</h2>
-
-                    <p><span class="glyphicon glyphicon-time"></span>
-                        {{ hackathon.event_start_time | date("%Y年%m月%d日 %H:%M") }} ~
-                        {{ hackathon.event_end_time | date("%Y年%m月%d日 %H:%M") }}
-                    </p>
-
-                    <p><span class="glyphicon glyphicon-map-marker"
-                             aria-hidden="true"></span> {{ hackathon.basic_info.location }}</p>
-
-                    <p><span class="glyphicon glyphicon-user" aria-hidden="true"></span>
-                        限额人数{{ hackathon.basic_info.max_enrollment }}人</p>
-
-                    <p>
-                        <span class="glyphicon glyphicon-heart" aria-hidden="true"></span>
-                        {% for organizer in  hackathon.basic_info.organizers %}
-                            <a href="{{ organizer.organizer_url }}">{{ organizer.organizer_name }}</a>
-                        {% endfor %}
-                    </p>
-
-
-                </div>
-            </div>
-
-            <div class="row oh-detail">
-                <div class="col-md-9">
-                    <h2 class="line-title">活动内容</h2>
-
-                    <div>{{ hackathon.description | mkHTML | safe }}</div>
-                </div>
-                <div class="col-md-3">
-                    <h2 class="line-title">活动主办方..</h2>
-                    {% for organizer in hackathon.basic_info.organizers %}
-                        <div class="media">
-                            <div class="media-left">
-                                <a href="{{ organizer.organizer_url }}">
-                                    <img class="media-object" src="{{ organizer.organizer_image }}"
-                                         alt="{{ organizer.organizer_name }}">
-                                </a>
-                            </div>
-                            <div class="media-body">
-                                <h4 class="media-heading">{{ organizer.organizer_name }}</h4>
-                                {{ organizer.organizer_description }}
-                            </div>
-                        </div>
-                    {% endfor %}
-                    <h2 class="line-title">最近参与者：</h2>
-                    <ul class="users-list" id="users"></ul>
-                    <h2 class="line-title">分享到：</h2>
-
-                    <div class="oh-share">
-                        <div class="jiathis_style_24x24">
-                            <a class="jiathis_button_my.csdn.net"></a>
-                            <a class="jiathis_button_qzone"></a>
-                            <a class="jiathis_button_tsina"></a>
-                            <a class="jiathis_button_weixin"></a>
-                            <a class="jiathis_button_cqq"></a>
-                            <a class="jiathis_button_tqq"></a>
-                            <a class="jiathis_button_douban"></a>
-
-                            </br>
-                            <a href="http://www.jiathis.com/share"
-                               class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis"
-                               target="_blank"></a>
-                            <a class="jiathis_counter_style"></a>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Modal -->
     <div class="modal fade" id="registerModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -566,38 +455,6 @@
             <div class="date">${create_time}</div>
         </li>
     {% endraw %}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -309,7 +309,9 @@
 .oh-activity .oh-body hr {
     margin: 14px 0 12px 0;
 }
-
+.oh-activity .oh-body .oh-org{
+    min-height: 31px;
+}
 .oh-activity .oh-body .oh-org a {
     position: relative;
     width: 26px;

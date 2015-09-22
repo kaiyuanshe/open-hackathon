@@ -13,32 +13,34 @@
 {% endblock %}
 
 {% block content %}
-    <div id="content">
-        <div class="col-lg-12">
-            <div class="box">
-                <div class="box-header">
-                    <h2>
-                        <i class="fa fa-home"></i>
-                        我的Hackathon
-                    </h2>
-                </div>
-                <div class="box-content">
-                    <a href="/manage/create">创建黑客松</a>
-                    <table class="table table-bordered">
-                        <thead>
-                        <tr>
-                            <th>名称</th>
-                            <th>主办方</th>
-                            <th>自动审核</th>
-                            <th>开始时间</th>
-                            <th>结束时间</th>
-                            <th>Status</th>
-                        </tr>
-                        </thead>
-                        <tbody id="hackathon_list" data-toggle="" data-target="#hackathon_template"
-                               data-api="oh.api.admin.hackathon.list.get">
-                        </tbody>
-                    </table>
+    <div id="content" class="container clearfix">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h2>
+                            <i class="fa fa-home"></i>
+                            我的Hackathon
+                        </h2>
+                    </div>
+                    <div class="box-content">
+                        <a href="/manage/create">创建黑客松</a>
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr>
+                                <th>名称</th>
+                                <th>主办方</th>
+                                <th>自动审核</th>
+                                <th>开始时间</th>
+                                <th>结束时间</th>
+                                <th>Status</th>
+                            </tr>
+                            </thead>
+                            <tbody id="hackathon_list" data-toggle="" data-target="#hackathon_template"
+                                   data-api="oh.api.admin.hackathon.list.get">
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -51,8 +53,8 @@
     {% raw %}
     <tr>
     <td>${name}</td>
-    <td>{{each basic_info.organizers }}<a href="${organizer_url}">${organizer_name}</a>{{/each}}</td>
-    <td>${basic_info.auto_approve}</td>
+    <td>{{each organizers }}<a href="${organizer_url}">${organizer_name}</a>{{/each}}</td>
+    <td></td>
     <td>${moment(event_start_time).format('YYYY/MM/DD HH:mm')}</td>
     <td>${moment(event_end_time).format('YYYY/MM/DD HH:mm')}</td>
     <td>

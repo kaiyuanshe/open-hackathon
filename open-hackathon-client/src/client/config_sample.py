@@ -134,15 +134,20 @@ Config = {
                         "": ["get", "post", "put"],
                         "checkname": ["get"],
                         "list": ["get"],
+                        "tags": ["get", "post"],
+                        "config": ["post"],
                         "administrator": {
                             "": ["put", "post", "delete"],
                             "list": ["get"]
+                        },
+                        "template": {
+                            "": ["post", "delete"],
+                            "list": ["get"],
+                            "check": ["get"]
+                        },
+                        "organizer": {
+                            "": ["get", "post", "put", "delete"]
                         }
-                    },
-                    "template": {
-                        "": ["post", "delete"],
-                        "list": ["get"],
-                        "check": ["get"]
                     },
                     "registration": {
                         "": ["get", "post", "delete", "put"],
@@ -153,7 +158,7 @@ Config = {
                     },
                     "experiment": {
                         "list": ["get"],
-                        "": ["post", "delete"]
+                        "": ["post", "put"]
                     }
                 },
                 "template": {
@@ -163,6 +168,7 @@ Config = {
                 },
                 "user": {
                     "": ["get"],
+                    "login": ["post", "delete"],
                     "experiment": {
                         "": ["get", "post", "delete", "put"],
                         "list": ["get"]
@@ -176,8 +182,14 @@ Config = {
                         "": ["get", "post", "put"]
                     },
                     "team": {
-                        "list": ["get"]
+                        "member": ["get"]
+                    },
+                    "hackathon": {
+                        "like": ["post"]
                     }
+                },
+                "bulletin": {
+                    "": ["get", "post"]
                 },
                 "hackathon": {
                     "": ["get"],
@@ -193,6 +205,7 @@ Config = {
                 },
                 "team": {
                     "": ["get", "post"],
+                    "user": ["get"],
                     "list": ["get"],
                     "leader": ["put"],
                     "member": {

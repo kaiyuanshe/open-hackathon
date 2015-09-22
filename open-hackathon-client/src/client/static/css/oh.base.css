@@ -1310,7 +1310,7 @@ ul.notifications li, ul.tasks li, ul.messages li {
     width: 17px;
     height: 17px;
     outline: 0;
-    border: 1px solid transparent;
+    border: 1px solid #ccc;
     background: #FFF;
 }
 
@@ -1501,7 +1501,6 @@ ul.notifications li, ul.tasks li, ul.messages li {
 
 .box .tab-content {
     background: white;
-    border: 1px solid #dbdee0;
     border-top: 0;
     padding: 10px;
 }
