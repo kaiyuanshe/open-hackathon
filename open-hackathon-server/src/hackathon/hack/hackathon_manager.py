@@ -590,10 +590,10 @@ class HackathonManager(Component):
         """Set basic property in table HackathonConfig"""
         config = self.db.find_first_object_by(HackathonConfig, hackathon_id=hackathon.id, key=prop.key)
         if config:
-            config.value = str(prop.value)
+            config.value = prop.value
         else:
             config = HackathonConfig(key=prop.key,
-                                     value=str(prop.value),
+                                     value=prop.value,
                                      hackathon_id=hackathon.id)
             self.db.add_object(config)
         self.db.commit()

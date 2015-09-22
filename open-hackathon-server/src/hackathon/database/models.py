@@ -259,7 +259,7 @@ class TeamShow(DBBase):
     create_time = Column(TZDateTime, default=get_now())
 
     team_id = Column(Integer, ForeignKey('team.id', ondelete='CASCADE'))
-    team = relationship('Team', backref=backref('user_team_rels', lazy='dynamic'))
+    team = relationship('Team', backref=backref('shows', lazy='dynamic'))
 
     def __init__(self, **kwargs):
         super(TeamShow, self).__init__(**kwargs)
