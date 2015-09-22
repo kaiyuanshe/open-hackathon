@@ -25,17 +25,18 @@
 (function ($, oh) {
     var hackathonName = '',
         hackathonID = 0,
-        files = [],
-        basic_info = undefined;
+        files = [];
+
     var currentHackathon = oh.comm.getCurrentHackathon();
 
     function addFile(file) {
         files.push(file);
+        $('#banner_btn').before($('#banner_temp').html().format(file));
     }
 
-    function removeFile(url) {
+    function removeFile(guid) {
         for (var i in files) {
-            if (files[i].deleteUrl === url) {
+            if (files[i].guid === guid) {
                 files.splice(i, 1);
                 break;
             }
@@ -50,8 +51,7 @@
         return filesUrls.join(';');
     }
 
-    function pageload() {
-
+    function gethackathon() {
         oh.api.admin.hackathon.get({
             header: {hackathon_name: currentHackathon}
         }, function (data) {
@@ -62,61 +62,79 @@
         });
     }
 
+    function pageload() {
+        gethackathon();
+        $('.bootstrap-tagsinput input:text').removeAttr('style');
+
+        var banner_form = $('#addBannerForm').bootstrapValidator()
+            .on('success.form.bv', function (e) {
+                e.preventDefault();
+                var banner = banner_form.find('#banner');
+                addFile({guid: oh.comm.guid(), url: banner.val()});
+                banner_form.data().bootstrapValidator.resetForm();
+                bannerModal.modal('hide');
+            });
+
+        $('#markdownEdit').markdown({
+            hiddenButtons: 'cmdCode',
+            language: 'zh'
+        });
+
+        var bannerModal = $('#bannerModal').on('hide.bs.modal', function (e) {
+            banner_form.get(0).reset();
+            banner_form.data().bootstrapValidator.resetForm();
+        });
+
+        $('.btn-upload').bind('click', function (e) {
+            bannerModal.modal('show');
+        });
+
+        $('.fileupload-buttonbar').on('click', '[data-action="close"]', function (e) {
+            var a = $(this);
+            var guid = a.data('guid');
+            a.parents('.template-download').detach();
+            removeFile(guid);
+        });
+    }
+
+    function setDaterange(elem, value) {
+        elem.val(value).daterangepicker({
+            timePicker: true,
+            format: 'YYYY/MM/DD HH:mm',
+            timePickerIncrement: 30,
+            timePicker12Hour: false,
+            timePickerSeconds: false,
+            locale: oh.daterangepickerLocale
+        });
+    }
+
     function setFormData(data) {
-        data.basic_info = data.basic_info || {};
-        $('#hackathon_switch').val(data.status);
-        $('#display_name').val(data.display_name);
-        $('#location').val(data.basic_info.location);
-        $('#max_enrollment').val(data.basic_info.max_enrollment);
-        $('#event_time').val(startTimeAndEndTimeTostring(data.event_start_time, data.event_end_time))
-            .daterangepicker({
-                timePicker: true,
-                format: 'YYYY/MM/DD HH:mm',
-                timePickerIncrement: 30,
-                timePicker12Hour: false,
-                timePickerSeconds: false,
-                locale: oh.daterangepickerLocale
-            });
-        $('#register_time').val(startTimeAndEndTimeTostring(data.registration_start_time, data.registration_end_time))
-            .daterangepicker({
-                timePicker: true,
-                format: 'YYYY/MM/DD HH:mm',
-                timePickerIncrement: 30,
-                timePicker12Hour: false,
-                timePickerSeconds: false,
-                locale: oh.daterangepickerLocale
-            });
-        $('#judge_time').val(startTimeAndEndTimeTostring(data.judge_start_time, data.judge_end_time))
-            .daterangepicker({
-                timePicker: true,
-                format: 'YYYY/MM/DD HH:mm',
-                timePickerIncrement: 30,
-                timePicker12Hour: false,
-                timePickerSeconds: false,
-                locale: oh.daterangepickerLocale
-            });
-        $('#auto_approve').attr({checked: data.basic_info.auto_approve || false});
-        $('#alauda_enabled').attr({checked: data.basic_info.alauda_enabled || false});
-        $('#markdownEdit').val(data.description);
-        $('#freedom_team').attr({checked: data.basic_info.freedom_team || true});
-        basic_info = data.basic_info;
         hackathonID = data.id;
         hackathonName = data.name;
-        initFilesData(data.basic_info.banners);
+        data.basic_info = data.basic_info || {};
+        $('#name').text(data.name);
+        $('#hackathon_switch').val(data.status);
+        $('#display_name').val(data.display_name);
+        $('#short_description').val(data.short_description);
+        $('#ribbon').val(data.ribbon);
+        $('#markdownEdit').val(data.description);
+        setDaterange($('#event_time'), startTimeAndEndTimeTostring(data.event_start_time, data.event_end_time));
+        setDaterange($('#register_time'), startTimeAndEndTimeTostring(data.registration_start_time, data.registration_end_time));
+        setDaterange($('#judge_time'), startTimeAndEndTimeTostring(data.judge_start_time, data.judge_end_time));
+        $('#tags').tagsinput('add', data.tag);
+        $('#location').val(data.config.location);
+        $('#max_enrollment').val(data.config.max_enrollment);
+        $('#auto_approve').attr({checked: Number(data.config.auto_approve) == 1});
+        $('#alauda_enabled').attr({checked: Number(data.config.alauda_enabled) == 1});
+        $('#freedom_team').attr({checked: Number(data.config.freedom_team) == 1});
+        initFilesData(data.banners);
     }
 
     function initFilesData(banners) {
         var images = banners ? banners.split(';') : [];
-        $.each(images, function (i, imageUrl) {
-            var url = new URL(imageUrl);
-            files.push({
-                deleteUrl: CONFIG.apiconfig.proxy + '/api/admin/file?key=' + url.pathname.replace('/images/', ''),
-                name: url.pathname.split('/').pop(),
-                thumbnailUrl: imageUrl,
-                url: imageUrl
-            })
+        $.each(images, function (i, url) {
+            addFile({guid: oh.comm.guid(), url: url});
         });
-        $('.files').prepend($('#hackathon_images_temp').tmpl(files));
     }
 
     function startTimeAndEndTimeTostring(startTime, endTime) {
@@ -132,146 +150,87 @@
         var judge_time = $('#judge_time').data('daterangepicker');
         var data = {
             id: hackathonID,
-            name: hackathonName,
-            display_name: $('#display_name').val(),
+            display_name: $.trim($('#display_name').val()),
+            ribbon: $.trim($('#ribbon').val()),
+            short_description: $.trim($('#short_description').val()),
+            banners: getFilesString(),
             description: $('#markdownEdit').val(),
             event_start_time: event_time.startDate.format(),
             event_end_time: event_time.endDate.format(),
             registration_start_time: register_time.startDate.format(),
             registration_end_time: register_time.endDate.format(),
             judge_start_time: judge_time.startDate.format(),
-            judge_end_time: judge_time.endDate.format(),
-            basic_info: {
-                banners: getFilesString(),
-                location: $.trim($('#location').val()),
-                max_enrollment: $('#max_enrollment').val(),
-                wall_time: '',
-                auto_approve: $('#auto_approve').is(':checked'),
-                alauda_enabled: $('#alauda_enabled').is(':checked'),
-                recycle_enabled: false,
-                freedom_team: $('#freedom_team').is(':checked'),
-                organizers: basic_info.organizers
-            }
-        }
+            judge_end_time: judge_time.endDate.format()
+        };
         return data;
+    }
+
+    function getConfig() {
+        var data = [];
+        data.push({key: 'location', value: $.trim($('#location').val())});
+        data.push({key: 'max_enrollment', value: $('#max_enrollment').val()});
+        data.push({key: 'auto_approve', value: $('#auto_approve').is(':checked')});
+        data.push({key: 'alauda_enabled', value: $('#alauda_enabled').is(':checked')});
+        data.push({key: 'recycle_enabled', value: false});
+        data.push({key: 'recycle_minutes', value: 0});
+        data.push({key: 'pre_allocate_enabled', value: false});
+        data.push({key: 'pre_allocate_number', value: 1});
+        data.push({key: 'freedom_team', value: $('#freedom_team').is(':checked')});
+        return data;
+    }
+
+    function getTags() {
+        var data = $('#tags').tagsinput('items');
+        return data.join(',');
+    }
+
+    function update_hackathon(data) {
+        return oh.api.admin.hackathon.put(data);
+    }
+
+    function update_config(data) {
+        return oh.api.admin.hackathon.config.put(data);
+    }
+
+    function update_tags(data) {
+        return oh.api.admin.hackathon.tags.put(data);
     }
 
     function initControls() {
         $('#editHackathonForm').bootstrapValidator()
             .on('success.form.bv', function (e) {
                 e.preventDefault();
-                oh.api.admin.hackathon.put({
-                    body: getHackthonData(),
-                    header: {
-                        hackathon_name: hackathonName
-                    }
-                }, function (data) {
-                    if (data.error) {
-                        console.log(data);
-                    } else {
-                        alert('成功');
-                    }
-                });
-            });
 
-        $('#editHackathonForm').fileupload({
-            url: CONFIG.apiconfig.proxy + '/api/admin/file',
-            autoUpload: true,
-            prependFiles: true,
-            acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
-            singleFileUploads: true,
-            uploadTemplateId: null,
-            downloadTemplateId: null,
-            uploadTemplate: tmpl(oh.uploadTemplate),
-            downloadTemplate: tmpl(oh.downloadTemplate),
-            messages: {
-                maxNumberOfFiles: '超过最大文件数',
-                acceptFileTypes: '图片文件类型不正确',
-                maxFileSize: '文件过大',
-                minFileSize: '文件过小'
-            },
-            add: function (e, data) {
-                if (e.isDefaultPrevented()) {
-                    return false;
-                }
-                var $this = $(this),
-                    that = $this.data('blueimp-fileupload') ||
-                        $this.data('fileupload'),
-                    options = that.options;
-                data.context = that._renderUpload(data.files)
-                    .data('data', data)
-                    .addClass('processing');
-                options.filesContainer[
-                    options.prependFiles ? 'prepend' : 'append'
-                    ](data.context);
-                that._forceReflow(data.context);
-                that._transition(data.context);
-                data.process(function () {
-                    return $this.fileupload('process', data);
-                }).always(function () {
-                    data.context.each(function (index) {
-                        $(this).find('.size').text(
-                            that._formatFileSize(data.files[index].size)
-                        );
-                    }).removeClass('processing');
-                    that._renderPreviews(data);
-                }).done(function () {
-                    data.context.find('.error').hide();
-                    data.context.find('.start').prop('disabled', false);
-                    if ((that._trigger('added', e, data) !== false) &&
-                        (options.autoUpload || data.autoUpload) &&
-                        data.autoUpload !== false) {
-                        data.submit();
-                    }
-                }).fail(function () {
-                    if (data.files.error) {
-                        data.context.each(function (index) {
-                            var error = data.files[index].error;
-                            if (error) {
-                                $(this).find('.error').text(error);
-                                $(this).find('.preview').append('<img src="/static/pic/warning_spam_file-512.png">');
-                                $(this).find('.progress').hide();
+                var hack_data = getHackthonData();
+                var config_data = getConfig();
+                var tags_data = getTags();
+
+                update_hackathon({body: hack_data}).then(function (data) {
+                    if (data.error) {
+                        oh.comm.alert('错误', data.error.friendly_message);
+                    } else {
+                        update_config({
+                            header: {hackathon_name: hackathonName},
+                            body: config_data
+                        }).then(function (data) {
+                            if (data.error) {
+                                oh.comm.alert('错误', data.error.friendly_message);
+                            } else {
+                                update_tags({
+                                    header: {hackathon_name: hackathonName},
+                                    body: tags_data
+                                }).then(function (data) {
+                                    if (data.error) {
+                                        oh.comm.alert('错误', data.error.friendly_message);
+                                    } else {
+                                        oh.comm.alert('提示', '修改成功');
+                                    }
+                                });
                             }
                         });
                     }
                 });
-            },
-            beforeSend: function (xhr, data) {
-                xhr.setRequestHeader('token', $.cookie('token'));
-                xhr.setRequestHeader('hackathon_name', hackathonName);
-            },
-            destroy: function (e, data) {
-                if (e.isDefaultPrevented()) {
-                    return false;
-                }
-                var that = $(this).data('blueimp-fileupload') ||
-                        $(this).data('fileupload'),
-                    removeNode = function () {
-                        that._transition(data.context).done(
-                            function () {
-                                $(this).remove();
-                                that._trigger('destroyed', e, data);
-                            }
-                        );
-                    };
-                if (data.url) {
-                    data.dataType = data.dataType || that.options.dataType;
-                    data.headers = {
-                        token: $.cookie('token'),
-                        hackathon_name: hackathonName
-                    };
-                    $.ajax(data).done(removeNode).fail(function () {
-                        that._trigger('destroyfailed', e, data);
-                    });
-                } else {
-                    removeNode();
-                }
-            }
-        }).bind('fileuploaddone', function (e, data) {
-            addFile(data.result.files[0])
-        }).bind('fileuploaddestroy', function (e, data) {
-            removeFile(data.url)
-        });
+            });
 
         $('#markdownEdit').markdown({
             language: 'zh'
