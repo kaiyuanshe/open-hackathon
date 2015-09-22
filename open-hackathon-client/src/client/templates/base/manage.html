@@ -31,8 +31,8 @@
 
 <body>
 <header class="navbar navbar-inverse">
-    <div class="container-fluid">
-        <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".sidebar-nav.nav-collapse">
+    <div class="container">
+        <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#navbar">
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
@@ -43,15 +43,6 @@
     </div>
 </header>
 {% block content %} {% endblock %}
-<footer>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-sm-12">
-                <b>Hosted by </b><a href=http://www.msopentech.cn>Microsoft Open Technologies (Shanghai) Co. Ltd.</a>
-            </div>
-        </div>
-    </div>
-</footer>
 {% include "partials/piwikd.html" %}
 <script type="text/javascript" src="/config.js"></script>
 <script type="text/javascript" src="/static/js/jquery/jquery-1.11.1.js"></script>

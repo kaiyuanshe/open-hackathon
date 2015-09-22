@@ -22,28 +22,23 @@
  * THE SOFTWARE.
  */
 
-(function($, oh) {
+(function ($, oh) {
     var hackathonName = '',
-        hackathonID = 0,
-        files = [],
-        basic_info = undefined ;
+        hackathonID = 0;
+
     var currentHackathon = oh.comm.getCurrentHackathon();
 
-    function bindAzurecertList(){
+    function bindAzurecertList() {
         var list = $('#organizerlist');
         oh.api.admin.hackathon.get({
-           header:{hackathon_name:currentHackathon}
-        },function(data){
-            if(!data.error){
-                basic_info = data.basic_info;
+            header: {hackathon_name: currentHackathon}
+        }, function (data) {
+            if (!data.error) {
                 hackathonID = data.id;
                 hackathonName = data.name;
-                list.empty().append($('#hackathon_organizer').tmpl(basic_info.organizers ||[],{
-                    substring:function(str,length){
-                        if(str.length>length){
-                            return str.substring(0,length)+'...';
-                        }
-                        return str;
+                list.empty().append($('#hackathon_organizer').tmpl(data.organizer || [], {
+                    substring: function (str, length) {
+                        return oh.comm.stripTags(markdown.toHTML(str), length);
                     }
                 }));
                 oh.comm.removeLoading();
@@ -51,119 +46,122 @@
         });
     }
 
-    function toggleTable(){
-        if($('#organizertable').css('display') == 'none' ){
+    function toggleTable() {
+        if ($('#organizertable').css('display') == 'none') {
             $('#organizertable').show();
             $('#organizerform').hide()
-        }else{
+        } else {
             $('#organizertable').hide();
             $('#organizerform').show()
         }
     }
 
-    function getFormData(){
+    function getFormData() {
         var formData = {
-            organizer_name:$.trim($('#organizer_name').val()),
-            organizer_url:$('#organizer_url').val(),
-            organizer_image:$('#organizer_image').val(),
-            organizer_description:$('#organizer_description').val()
-         }
+            id: $('#organizerform').data('id') || 0,
+            name: $.trim($('#name').val()),
+            description: $('#description').val(),
+            homepage: $('#homepage').val(),
+            logo: $('#logo').val()
+        }
         return formData;
     }
 
-    function setFormData(data){
-        $('#organizer_name').val(data.organizer_name);
-        $('#organizer_url').val(data.organizer_url);
-        $('#organizer_image').val(data.organizer_image);
-        $('#organizer_description').val(data.organizer_description);
+    function setFormData(data) {
+        $('#organizerform').data({id: data.id});
+        $('#name').val(data.name);
+        $('#description').val(data.description);
+        $('#homepage').val(data.homepage);
+        $('#logo').val(data.logo);
     }
 
-    function getOrganizers(){
+    function getOrganizers() {
         var organizers = [];
-        $('#organizertable tbody>tr').each(function(i,tr){
+        $('#organizertable tbody>tr').each(function (i, tr) {
             var data = $(tr).data('tmplItem').data;
-            if(data){
+            if (data) {
                 organizers.push($(tr).data('tmplItem').data);
             }
         })
         return organizers;
     }
 
-    function updateOrganizers(basic_info){
-        return oh.api.admin.hackathon.put({
-            body:{
-                id:hackathonID,
-                name:hackathonName,
-                basic_info:basic_info
-            },
-            header:{
-                hackathon_name:hackathonName
-            }
-        },function(data){
-            if(data.error){
-                console.log(data);
-            }else{
+    function createOrganizers(data) {
+        return oh.api.admin.hackathon.organizer.post(data, function (data) {
+            if (data.error) {
+                oh.comm.alert('错误', data.error.friendly_message);
+            } else {
                 bindAzurecertList();
                 resetForm();
             }
         });
     }
 
-    function resetForm(){
-         $('#organizerform').data('bootstrapValidator').resetForm(true);
-         $('#organizer_description').val('');
+    function updateOrganizers(data) {
+        return oh.api.admin.hackathon.organizer.put(data, function (data) {
+            if (data.error) {
+                oh.comm.alert('错误', data.error.friendly_message);
+            } else {
+                bindAzurecertList();
+                resetForm();
+            }
+        });
     }
 
-    function init(){
-        var editLi = undefined;
+    function resetForm() {
+        var form = $('#organizerform');
+        form.data({id: 0});
+        form.data('bootstrapValidator').resetForm(true);
+        $('#description').val('');
+    }
+
+    function init() {
         var organizerform = $('#organizerform');
         organizerform.bootstrapValidator()
-            .on('success.form.bv', function(e) {
+            .on('success.form.bv', function (e) {
                 e.preventDefault();
                 var itemData = getFormData();
-                if(editLi){
-                    editLi.data('tmplItem').data = itemData;
-                    basic_info.organizers = getOrganizers();
-                }else{
-                    basic_info.organizers = getOrganizers();
-                    basic_info.organizers.push(itemData);
-                }
-                updateOrganizers(basic_info).then(function(){
-                    toggleTable()
+                var data = {body: itemData, header: {hackathon_name: hackathonName}};
+                (itemData.id == 0 ? createOrganizers(data) : updateOrganizers(data)).then(function () {
+                    toggleTable();
                 })
             });
 
-        $('#organizertable').on('click','[data-type="edit"]',function(e){
+        $('#organizertable').on('click', '[data-type="edit"]', function (e) {
             editLi = $(this).parents('tr')
             var item = editLi.data('tmplItem').data;
             setFormData(item)
             toggleTable();
         });
 
-        $('[data-type="cancel"]').click(function(e){
+        $('[data-type="cancel"]').click(function (e) {
             resetForm();
             toggleTable();
         });
 
-        $('[data-type="new"]').click(function(e){
-            editLi = undefined;
+        $('[data-type="new"]').click(function (e) {
             toggleTable();
         })
 
-        var confirmModal = $('#confirm_modal').on('show.bs.modal',function(e){
+        var confirmModal = $('#confirm_modal').on('show.bs.modal', function (e) {
             console.log(e);
             editLi = $(e.relatedTarget).parents('tr');
-        }).on('click','[data-type="ok"]',function(e){
+        }).on('click', '[data-type="ok"]', function (e) {
             editLi.data('tmplItem').data = undefined;
             basic_info.organizers = getOrganizers();
             updateOrganizers(basic_info);
             confirmModal.modal('hide');
         });
 
+        $('#description').markdown({
+            hiddenButtons: 'cmdCode',
+            language: 'zh'
+        });
+
         bindAzurecertList();
     }
 
-    $(function() {
+    $(function () {
         init();
     })
-})(window.jQuery,window.oh);
+})(window.jQuery, window.oh);

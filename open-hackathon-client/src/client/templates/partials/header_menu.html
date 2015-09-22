@@ -1,5 +1,5 @@
 <!-- start: Header Menu -->
-<div class="nav-no-collapse header-nav">
+<div id="navbar" class="navbar-collapse collapse header-nav">
     {% if workspace %}
         <ul class="nav navbar-nav">
             <li>
@@ -8,27 +8,46 @@
                 </a>
             </li>
         </ul>
-    {% else  %}
-         <ul class="nav navbar-nav">
+    {% else %}
+        <ul class="nav navbar-nav">
+            <li {% if request.endpoint  == 'index' %}class="active"{% endif %}>
+                <a href="{{ url_for('index') }}">首页</a>
+            </li>
             <li>
-                <a href="{{ url_for('template_index') }}">模板</a>
+                <a href="#">预览活动</a>
+            </li>
+            <li>
+                <a href="#">黑客松社区</a>
+            </li>
+            <li>
+                <a href="#">新手帮助</a>
             </li>
         </ul>
     {% endif %}
-    <ul class="nav navbar-nav pull-right">
+    <ul class="nav navbar-nav navbar-right">
+        <li><a href=""><span class="glyphicon glyphicon-search"></span></a></li>
         <!-- start: User Dropdown -->
         {% if current_user.nickname %}
-            <li class="dropdown">
-                <a class="btn account dropdown-toggle" data-toggle="dropdown" href="index.html#">
-                    <div class="avatar">
-                        <img src="{{ current_user.avatar_url }}" alt="Avatar">
-                    </div>
-                    <div class="user">
-                        <div class="hello">Welcome!</div>
-                        <div class="name">{{ current_user.nickname }}</div>
-                    </div>
+            <li><a href="{{ url_for('create_hackathon') }}">发布活动</a></li>
+            <li class="dropdown oh-h-mgs">
+                <a class="dropdown-toggle" data-toggle="dropdown" href="javascirpt:;">
+                    <i class="fa fa-envelope"></i>
+                    消息<span></span>
+                    <span class="oh-caret"></span>
                 </a>
                 <ul class="dropdown-menu">
+                    <li>暂无消息</li>
+                </ul>
+            </li>
+            <li class="dropdown">
+                <a class="dropdown-toggle" data-toggle="dropdown" href="javascirpt:;">
+                    <img class="avatar" src="{{ current_user.avatar_url }}" alt="Avatar">
+                    我的黑客松
+                    <span class="oh-caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a href="{{ url_for('user_profile') }}"><i class="fa fa-star"></i>{{ current_user.nickname }}
+                    </a></li>
                     <li><a href="{{ url_for('user_profile') }}"><i class="fa fa-star"></i>个人信息</a></li>
                     <li><a href="{{ url_for('myhackathon') }}"><i class="fa fa-envelope"></i> 我的活动</a></li>
                     <li><a href="{{ url_for('team_list') }}"><i class="fa fa-envelope"></i> 我的团队</a></li>
@@ -37,12 +56,13 @@
                 </ul>
             </li>
         {% else %}
-            <li><a class="btn" href="{{ url_for('login',return_url=request.path) }}">登陆</a></li>
+            <li><a href="{{ url_for('login',return_url='/manage/create') }}">发布活动</a></li>
+            <li><a href="{{ url_for('login',return_url=request.path) }}">登陆</a></li>
         {% endif %}
         <!-- end: User Dropdown -->
     </ul>
     {% if workspace %}
-        <ul class="nav navbar-nav pull-right">
+        <ul class="nav navbar-nav navbar-right">
             <li>
                 <a id="timer">距离{{ hackathon.name }}结束还有：
                     <span id="end_timer" data-endtiem="{{ hackathon.event_end_time }}"></span>
