@@ -25,9 +25,10 @@ THE SOFTWARE.
 
 
 class Context(object):
-    """Helper class for JSON. We can access dict similarly as literal in JS
+    """Helper class for JSON. We can access dict similarly as literal in JavaScript
 
     Essentially a collection of parameters that will be passed through threads/databases
+
     NEVER put complex object in Context such as instance of db models or business manager
 
     ::Example:

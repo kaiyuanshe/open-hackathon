@@ -50,30 +50,33 @@ def init_routes():
     api.add_resource(HackathonResource, "/api/hackathon")  # query hackathon
     api.add_resource(HackathonListResource, "/api/hackathon/list")  # list hackathons
     api.add_resource(HackathonStatResource, "/api/hackathon/stat")  # get statistics of hackathon
-    api.add_resource(HackathonTeamListResource, "/api/hackathon/team/list")  # list teams of hackathon
     api.add_resource(HackathonRegistrationListResource, "/api/hackathon/registration/list")  # list registered users
+    api.add_resource(TalentResource, "/api/talent/list")  # list talents(达人)
+    api.add_resource(HackathonTagNamesResource, "/api/tags")  # all distinct tag names
 
     # APIs for user(participant) to join hackathon
     api.add_resource(GuacamoleResource, "/api/user/guacamoleconfig")  # get remote paras for guacamole
     api.add_resource(CurrentUserResource, "/api/user")  # get current login user
     api.add_resource(UserProfileResource, "/api/user/profile")  # update user profile
     api.add_resource(UserTemplateListResource, "/api/hackathon/template")  # list templates for specific user
+    api.add_resource(UserHackathonLikeResource, "/api/user/hackathon/like")  # like or unlike hackathon
     api.add_resource(UserRegistrationResource, "/api/user/registration")  # register hackathon
     api.add_resource(UserHackathonListResource, "/api/user/registration/list")  # participated hackathon list of user
     api.add_resource(UserExperimentResource, "/api/user/experiment")  # start or stop experiment
-    api.add_resource(UserExperimentListResource, "/api/user/experiment/list")  # expr list of user
     api.add_resource(UserTeamsResource, "/api/user/team/list")  # list all teams of user
 
     # team APIs
     api.add_resource(TeamResource, "/api/team")  # create, update, dismiss and query team
-    api.add_resource(TeamListResource, "/api/team/list")  # list teams of hackathon
+    api.add_resource(HackathonTeamListResource, "/api/hackathon/team/list")  # list teams of hackathon
     api.add_resource(TeamMemberResource, "/api/team/member")  # join or leave team, approve member
     api.add_resource(TeamMemberListResource, "/api/team/member/list")  # list team members
-    api.add_resource(TeamLeaderResource, "/api/team/leader")  # promote team leader
     api.add_resource(TeamTemplateResource, "/api/team/template")  # select or unselect template for team
 
     # APIs for admin to manage hackathon and hackathon resources, features and users
     api.add_resource(AdminHackathonResource, "/api/admin/hackathon")  # create/update hackathon
+    api.add_resource(AdminHackathonConfigResource, "/api/admin/hackathon/config")  # set hackathon config
+    api.add_resource(AdminHackathonOrganizerResource, "/api/admin/hackathon/organizer")  # manage hackathon organizers
+    api.add_resource(AdminHackathonTags, "/api/admin/hackathon/tags")  # get or set hackathon tags
     api.add_resource(HackathonCheckNameResource, "/api/admin/hackathon/checkname")  # check hackathon name exists
     api.add_resource(AdminHackathonListResource, "/api/admin/hackathon/list")  # get entitled hackathon list
     api.add_resource(AdminAzureResource, '/api/admin/azure')  # manage azure subscription and certs

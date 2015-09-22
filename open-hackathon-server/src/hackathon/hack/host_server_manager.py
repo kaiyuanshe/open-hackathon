@@ -34,7 +34,7 @@ __all__ = ["DockerHostManager"]
 
 class DockerHostManager(Component):
     """Component to manage docker host server"""
-    docker = RequiredFeature("docker")
+    hosted_docker = RequiredFeature("hosted_docker")
 
     def get_available_docker_host(self, req_count, hackathon):
         vms = self.db.find_all_objects(DockerHostServer,
@@ -47,7 +47,7 @@ class DockerHostManager(Component):
         # The new-created VM must run 'cloudvm service by default(either cloud-init or python remote ssh)
         # todo the VM public/private IP will change after reboot, need sync the IP in db with azure in this case
         for docker_host in vms:
-            if self.docker.hosted_docker.ping(docker_host):
+            if self.hosted_docker.ping(docker_host):
                 return docker_host
         raise Exception("No available VM.")
 

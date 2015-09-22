@@ -52,6 +52,7 @@
         if(data){
             template_unit.find('[name="name"]').val(data['name']);
             template_unit.find('[name="type"]').val(data['type']);
+            template_unit.find('[name="provider"]').val(data['provider']);
             template_unit.find('[name="description"]').val(data['description']);
             template_unit.find('[name="image"]').val(data['Image']);
             template_unit.find('[name="env"]').val(data['Env'].join(";"));
@@ -146,6 +147,7 @@
             data.push({
                 name: $group.find('[name="name"]').val(),
                 type: $group.find('[name="type"]').val(),
+                provider: $group.find('[name="provider"]').val(),
                 description: $group.find('[name="description"]').val(),
                 ports: ports,
                 remote: remote,
@@ -157,7 +159,6 @@
         return {
             name: $('#name').val(),
             description: $('#description').val(),
-            provider: Number($('#provider').val()),
             virtual_environments: data
         };
     }

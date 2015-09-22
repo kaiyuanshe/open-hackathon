@@ -22,34 +22,50 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
-
 import sys
 
 sys.path.append("..")
+
 from azure.storage import BlobService
+
 from hackathon import Component
 
+__all__ = ["BlobServiceAdapter"]
 
-class FileService(Component):
+
+class BlobServiceAdapter(Component):
+    """The :class:`BlobServiceAdapter` class is a thin wrapper over azure.storage.BlobService.
+
+    All the attributes of the wrapper stream are proxied by the adapter so
+    it's possible to do ``adapter.create_container()`` instead of the long form
+    ``adapter.blob_service.adapter()``.
+    """
+
     def __init__(self):
         self.blob_service = BlobService(account_name=self.util.get_config("storage.azure.account_name"),
                                         account_key=self.util.get_config("storage.azure.account_key"),
                                         host_base=self.util.get_config("storage.azure.blob_service_host_base"))
 
-    def create_container_in_storage(self, container_name, access):
-        """
-        create a container if doesn't exist
-        :param container_name:
-        :param access:
+    def __getattr__(self, name):
+        return getattr(self.blob_service, name)
+
+    def create_container_in_storage(self, container_name, access="container"):
+        """create a container if doesn't exist
+
+        :type container_name: str|unicode
+        :param container_name: Name of container to create.
+
+        :type access: str|unicode
+        :param access: Optional. Possible values include: container, blob
         :return:
         """
         try:
-            names = map(lambda x: x.name, self.blob_service.list_containers())
+            names = [x.name for x in self.blob_service.list_containers()]
             if container_name not in names:
-                self.blob_service.create_container(container_name, x_ms_blob_public_access=access)
+                return self.blob_service.create_container(container_name, x_ms_blob_public_access=access)
             else:
-                self.log.debug("container already exsit in storage")
-            return True
+                self.log.debug("container already exists in storage")
+                return True
         except Exception as e:
             self.log.error(e)
             return False

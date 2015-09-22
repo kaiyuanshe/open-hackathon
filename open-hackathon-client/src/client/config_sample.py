@@ -170,8 +170,7 @@ Config = {
                     "": ["get"],
                     "login": ["post", "delete"],
                     "experiment": {
-                        "": ["get", "post", "delete", "put"],
-                        "list": ["get"]
+                        "": ["get", "post", "delete", "put"]
                     },
                     "registration": {
                         "": ["put", "post", "get"],
