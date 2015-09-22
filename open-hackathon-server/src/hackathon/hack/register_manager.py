@@ -91,7 +91,11 @@ class RegisterManager(Component):
             args["status"] = RGStatus.AUTO_PASSED if hackathon.is_auto_approve() else RGStatus.UNAUDIT
             args['create_time'] = self.util.get_now()
             user_hackathon_rel = self.db.add_object_kwargs(UserHackathonRel, **args).dic()
-            self.team_manager.create_default_team(hackathon, user)
+
+            # create a team as soon as user registration approved(auto or manually)
+            if hackathon.is_auto_approve():
+                self.team_manager.create_default_team(hackathon, user)
+
             self.__update_register_stat(hackathon)
             return user_hackathon_rel
         except Exception as e:
@@ -113,6 +117,9 @@ class RegisterManager(Component):
                 update_items.pop("create_time")
             update_items["update_time"] = self.util.get_now()
             self.db.update_object(register, **update_items)
+
+            if register.status == RGStatus.AUDIT_PASSED:
+                self.team_manager.create_default_team(register.hackathon, register.user)
 
             hackathon = self.hackathon_manager.get_hackathon_by_id(register.hackathon_id)
             self.__update_register_stat(hackathon)

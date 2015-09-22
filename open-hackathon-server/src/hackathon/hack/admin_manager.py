@@ -67,7 +67,9 @@ class AdminManager(Component):
         :return list of hackathon id
         """
         # get AdminUserHackathonRels from query withn filter by email
-        admin_user_hackathon_rels = self.db.find_all_objects_by(AdminHackathonRel, user_id=user_id)
+        admin_user_hackathon_rels = self.db.find_all_objects_by(AdminHackathonRel,
+                                                                user_id=user_id,
+                                                                role_type=ADMIN_ROLE_TYPE.ADMIN)
 
         # get hackathon_ids_from AdminUserHackathonRels details
         hackathon_ids = [x.hackathon_id for x in admin_user_hackathon_rels]
