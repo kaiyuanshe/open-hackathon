@@ -23,32 +23,32 @@
 // -----------------------------------------------------------------------------------
 
 ;
-(function($, oh) {
+(function ($, oh) {
     var currentHackathon = oh.comm.getCurrentHackathon();
 
-    function pageLoad(){
+    function pageLoad() {
         var list = $('#registe_list');
         oh.api.admin.registration.list.get({
             header: {
                 hackathon_name: currentHackathon
             }
-        }, function(data) {
+        }, function (data) {
             list.empty().append($('#register_list_template').tmpl(data));
             list.find('.editable').editable({
-                url: function(params) {
+                url: function (params) {
                     var id = $(this).parents('tr').data('tmplItem').data.id;
                     var d = new $.Deferred;
                     oh.api.admin.registration.put({
                         body: {
                             id: id,
-                            status: params.value
+                            status: Number(params.value)
                         },
                         header: {
                             hackathon_name: currentHackathon
                         }
-                    }, function(data) {
+                    }, function (data) {
                         if (data.error) {
-                            d.reject(data.message)
+                            d.reject(data.error.friendly_message)
                         } else {
                             d.resolve();
                         }
@@ -59,11 +59,11 @@
         });
     }
 
-    function init(){
+    function init() {
         pageLoad();
     }
 
-    $(function() {
+    $(function () {
         init();
     });
 })(jQuery, window.oh);

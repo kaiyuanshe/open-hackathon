@@ -7,139 +7,152 @@
 {% block content %}
     <div class="oh-main">
         <div class="container">
-            <div class="row ">
-                <div class="col-md-12 text-left">
-                    <div class="page-header">
-                        <h1>我的团队</h1>
+            <h1 class="title">Fendoe {{ name }}</h1>
+
+            <div class="row">
+                <div class="col-lg-3 col-md-4">
+                    <div class="oh-box">
+                        <img src="/static/pic/team-logo.png">
+                    </div>
+                </div>
+                <div class="col-lg-9 col-md-8">
+                    <h2 id="description" class="title">团队介绍</h2>
+
+                    <div class="oh-body">
+                        {{ description }}
                     </div>
                 </div>
             </div>
-            <div class="row ">
-                <div class="col-md-12 text-left">
-                    <ul class="nav nav-tabs" role="tablist">
-                        <li role="presentation" class="active"><a href="#createteam" aria-controls="home" role="tab"
-                                                                  data-toggle="tab">创建我的团队</a></li>
-                        <li role="presentation"><a href="#jointeam" aria-controls="profile" role="tab"
-                                                   data-toggle="tab">加入团队</a>
-                        </li>
-                    </ul>
+            <div class="row">
+                <div class="col-lg-12">
+                    <h2 id="description" class="">团队成员</h2>
 
-                    <!-- Tab panes -->
-                    <div class="tab-content">
-                        <div role="tabpanel" class="tab-pane active" id="createteam">
+                    <div class="oh-body ">
+                        <div class=" oh-users " id="talent_list">
 
-                            <form id="teamForm" class="form-horizontal" novalidate>
-                                <fieldset>
-                                    <div class="form-group">
-                                        <label class="col-md-2 col-sm-3 control-label required">团队名称</label>
-
-                                        <div class="col-md-7 col-sm-9">
-                                            <input type="text" class="form-control" name="team_name" placeholder="团队名称"
-                                                   required
-                                                   data-bv-trigger="blur"
-                                                   data-bv-notempty-message="团队名称必须填写">
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="col-md-2 col-sm-3 control-label">团队Logo</label>
-
-                                        <div class="col-md-7 col-sm-9">
-                                            <input type="url" class="form-control" name="logo" placeholder="团队Logo">
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="col-md-2 col-sm-3 control-label">代码托管地址</label>
-
-                                        <div class="col-md-7 col-sm-9">
-                                            <input type="url" class="form-control" name="git_project"
-                                                   placeholder="githubx项目地址">
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="col-md-2 col-sm-3 control-label">团队描述</label>
-
-                                        <div class="col-md-7 col-sm-9">
-                                            <textarea class="form-control" name="description" placeholder=""></textarea>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <div class="col-md-offset-2 col-sm-offset-3 col-md-7 col-sm-9">
-                                            <button type="submit" class="btn btn-primary btn-block">保存</button>
-                                        </div>
-                                    </div>
-                                </fieldset>
-                            </form>
-                        </div>
-                        <div role="tabpanel" class="tab-pane" id="jointeam">
-                            <div class="row">
-                                <div class="col-lg-4 col-sm-6 col-xs-6 col-xxs-12">
-                                    <div class="team box">
-                                        <img src="/static/pic/icon64.png">
-                                        <span class="title">我的团队名称</span>
-                                        <span class="value"></span>
-                                        <a href="" class="join">
-                                            <span>View More</span>
-                                            <i class="fa fa-chevron-right"></i>
-                                        </a>
+                            <div class="col-lg-2 col-md-4 col-xs-6">
+                                <div class="oh-item">
+                                    <div class="oh-header"><a href="javascript:;"><img
+                                            src="https://avatars.githubusercontent.com/u/5856568?v=3"
+                                            onerror="javascript:this.src='/static/pic/anon_user.png'"></a></div>
+                                    <div class="oh-body"><p class="text-center"><a href="javascript:;">Boli Guan</a></p>
                                     </div>
                                 </div>
-                                <div class="col-lg-4 col-sm-6 col-xs-6 col-xxs-12">
-                                    <div class="team box">
-                                        <div class="media">
-                                            <div class="media-left">
-                                                <a href="#">
-                                                    <img class="media-object" src="/static/pic/icon64.png" alt="...">
-                                                </a>
-                                            </div>
-                                            <div class="media-body">
-                                                <h4 class="media-heading">Middle aligned media</h4>
-                                                <ul>
-                                                    <li>队长：aaa</li>
-                                                    <li>人数：20</li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                        <div href="" class="join clearfix">
-                                            <a href="#">详细</a>
-                                            <button class="btn btn-primary btn-sm">申请加入</button>
-                                        </div>
+                            </div>
+                            <div class="col-lg-2 col-md-4 col-xs-6">
+                                <div class="oh-item">
+                                    <div class="oh-header"><a href="javascript:;"><img
+                                            src="http://tp3.sinaimg.cn/1885895770/180/39996705961/1"
+                                            onerror="javascript:this.src='/static/pic/anon_user.png'"></a></div>
+                                    <div class="oh-body"><p class="text-center"><a href="javascript:;">Fendoe</a></p>
                                     </div>
                                 </div>
-                                <div class="col-lg-4 col-sm-6 col-xs-6 col-xxs-12">
-                                    <div class="team box">
-                                        <img src="/static/pic/icon64.png">
-                                        <span class="title">我的团队名称</span>
-                                        <span class="value"></span>
-                                        <a href="" class="join">
-                                            <span>View More</span>
-                                            <i class="fa fa-chevron-right"></i>
-                                        </a>
+                            </div>
+                            <div class="col-lg-2 col-md-4 col-xs-6">
+                                <div class="oh-item">
+                                    <div class="oh-header"><a href="javascript:;"><img
+                                            src="http://qzapp.qlogo.cn/qzapp/101200890/7A988694CD75E4A16710FADD2D1761FF/30"
+                                            onerror="javascript:this.src='/static/pic/anon_user.png'"></a></div>
+                                    <div class="oh-body"><p class="text-center"><a href="javascript:;">Fendoe/dy</a></p>
                                     </div>
                                 </div>
-                                <div class="col-lg-4 col-sm-6 col-xs-6 col-xxs-12">
-                                    <div class="team box">
-                                        <img src="/static/pic/icon64.png">
-                                        <span class="title">我的团队名称</span>
-                                        <span class="value"></span>
-                                        <a href="" class="join">
-                                            <span>View More</span>
-                                            <i class="fa fa-chevron-right"></i>
-                                        </a>
+                            </div>
+                            <div class="col-lg-2 col-md-4 col-xs-6">
+                                <div class="oh-item">
+                                    <div class="oh-header"><a href="javascript:;"><img src="/static/pic/anon_user.png"
+                                                                                       onerror="javascript:this.src='/static/pic/anon_user.png'"></a>
+                                    </div>
+                                    <div class="oh-body"><p class="text-center"><a href="javascript:;">管伯理</a></p></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-2 col-md-4 col-xs-6">
+                                <div class="oh-item">
+                                    <div class="oh-header"><a href="javascript:;"><img src="/static/pic/anon_user.png"
+                                                                                       onerror="javascript:this.src='/static/pic/anon_user.png'"></a>
+                                    </div>
+                                    <div class="oh-body"><p class="text-center"><a href="javascript:;"></a></p></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-2 col-md-4 col-xs-6">
+                                <div class="oh-item">
+                                    <div class="oh-header"><a href="javascript:;"><img src="/static/pic/anon_user.png"
+                                                                                       onerror="javascript:this.src='/static/pic/anon_user.png'"></a>
+                                    </div>
+                                    <div class="oh-body"><p class="text-center"><a href="javascript:;">admin</a></p>
                                     </div>
                                 </div>
-                                <div class="col-lg-4 col-sm-6 col-xs-6 col-xxs-12">
-                                    <div class="team box">
-                                        <img src="/static/pic/icon64.png">
-                                        <span class="title">我的团队名称</span>
-                                        <span class="value">aasdasd</span>
-                                        <a href="" class="join">
-                                            <span>View More</span>
-                                            <i class="fa fa-chevron-right"></i>
-                                        </a>
+                            </div>
+                            <div class="col-lg-2 col-md-4 col-xs-6">
+                                <div class="oh-item">
+                                    <div class="oh-header"><a href="javascript:;"><img
+                                            src="https://avatars.githubusercontent.com/u/5856568?v=3"
+                                            onerror="javascript:this.src='/static/pic/anon_user.png'"></a></div>
+                                    <div class="oh-body"><p class="text-center"><a href="javascript:;">Boli Guan</a></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-2 col-md-4 col-xs-6">
+                                <div class="oh-item">
+                                    <div class="oh-header"><a href="javascript:;"><img
+                                            src="http://tp3.sinaimg.cn/1885895770/180/39996705961/1"
+                                            onerror="javascript:this.src='/static/pic/anon_user.png'"></a></div>
+                                    <div class="oh-body"><p class="text-center"><a href="javascript:;">Fendoe</a></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-2 col-md-4 col-xs-6">
+                                <div class="oh-item">
+                                    <div class="oh-header"><a href="javascript:;"><img
+                                            src="http://qzapp.qlogo.cn/qzapp/101200890/7A988694CD75E4A16710FADD2D1761FF/30"
+                                            onerror="javascript:this.src='/static/pic/anon_user.png'"></a></div>
+                                    <div class="oh-body"><p class="text-center"><a href="javascript:;">Fendoe/dy</a></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-2 col-md-4 col-xs-6">
+                                <div class="oh-item">
+                                    <div class="oh-header"><a href="javascript:;"><img src="/static/pic/anon_user.png"
+                                                                                       onerror="javascript:this.src='/static/pic/anon_user.png'"></a>
+                                    </div>
+                                    <div class="oh-body"><p class="text-center"><a href="javascript:;">管伯理</a></p></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-2 col-md-4 col-xs-6">
+                                <div class="oh-item">
+                                    <div class="oh-header"><a href="javascript:;"><img src="/static/pic/anon_user.png"
+                                                                                       onerror="javascript:this.src='/static/pic/anon_user.png'"></a>
+                                    </div>
+                                    <div class="oh-body"><p class="text-center"><a href="javascript:;"></a></p></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-2 col-md-4 col-xs-6">
+                                <div class="oh-item">
+                                    <div class="oh-header"><a href="javascript:;"><img src="/static/pic/anon_user.png"
+                                                                                       onerror="javascript:this.src='/static/pic/anon_user.png'"></a>
+                                    </div>
+                                    <div class="oh-body"><p class="text-center"><a href="javascript:;">admin</a></p>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <h2 id="description" class="">团队作品</h2>
+
+                    <div class="oh-body">
+
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <h2 id="description" class="">裁判评分</h2>
+
+                    <div class="oh-body">
+
                     </div>
                 </div>
             </div>
@@ -152,6 +165,21 @@
     {% raw %}
 
     {% endraw %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     </script>
     <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
     <script type="text/javascript" src="/static/js/views/oh.site.team.js"></script>

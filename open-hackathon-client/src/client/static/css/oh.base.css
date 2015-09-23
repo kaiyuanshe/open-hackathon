@@ -534,6 +534,51 @@ footer .oh-copyright hr {
     line-height: 30px;
 }
 
+#navbar .dropdown-menu {
+    padding: 0;
+    background-color: #191919;
+    border: none;
+    border-radius: 0;
+    font-size: 16px;
+}
+
+#navbar .dropdown-menu:before {
+    position: absolute;
+    content: '';
+    top: -9px;
+    right: 30px;
+    border: 0 solid transparent;
+    border-width: 0 8px 9px;
+    border-bottom-color: #191919;
+}
+
+#navbar .dropdown-menu .divider {
+    margin: 0;
+    background-color: #282828;
+}
+
+#navbar .dropdown-menu li {
+}
+
+#navbar .dropdown-menu > li > a {
+    color: #969696;
+    padding: 10px 20px;
+}
+
+#navbar .dropdown-menu > li > a:hover,
+#navbar .dropdown-menu > li > a:focus {
+    text-decoration: none;
+    color: #fff;
+    background-color: #0F0F0F;
+}
+
+#navbar .dropdown-menu-title {
+    background: #e9ebec;
+    color: #34383c;
+    padding: 5px 10px;
+    display: block;
+}
+
 /*----------------------------------*/
 
 .bootstrap-duallistbox-container label,
@@ -1052,38 +1097,6 @@ ul.notifications li .icon {
     width: 40px;
     display: inline-block;
     text-align: center;
-}
-
-.dropdown-menu {
-    /* position: absolute; */
-    /* left: auto; */
-    /* right: 0; */
-    /* z-index: 1000; */
-    /* display: none; */
-    /* float: left; */
-    /* padding: 0; */
-    /* margin: 0; */
-    /* list-style: none; */
-    /* text-shadow: none; */
-    /* background: white; */
-    /* border: 1px solid #dbdee0; */
-    /* -webkit-border-radius: 0; */
-    -moz-border-radius: 0;
-    /* border-radius: 0; */
-    /* -webkit-box-shadow: none; */
-    -moz-box-shadow: none;
-    /* box-shadow: none; */
-}
-
-.dropdown-menu li {
-    border-bottom: 1px solid #e9ebec;
-}
-
-.dropdown-menu-title {
-    background: #e9ebec;
-    color: #34383c;
-    padding: 5px 10px;
-    display: block;
 }
 
 .header-nav a.btn.account {
@@ -1716,4 +1729,47 @@ ul.notifications li, ul.tasks li, ul.messages li {
 
 .open .oh-caret:before {
     content: '\e260';
+}
+
+.fa-live:before {
+    content: "\f17a";
+}
+
+.fa-gitcafe {
+    width: 16px;
+    height: 16px;
+    background: url('/static/pic/gitcafe-icon.png') no-repeat center;
+    vertical-align: text-top;
+}
+
+.oh-box {
+    border: 1px solid #D2D2D2;
+    margin-bottom: 40px;
+}
+
+.oh-body {
+    padding: 20px 20px 28px;
+}
+
+h1.title {
+    margin: 20px 0;
+    font-size: 20px;
+}
+
+h2.title {
+    font-size: 16px;
+    padding-left: 20px;
+    margin: 20px 0 12px;
+    border-left: 2px solid #1172c6;
+}
+
+h3.title {
+    font-size: 16px;
+    margin: 0;
+    padding: 20px 0 14px 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+h4.title {
+
 }
