@@ -315,3 +315,10 @@ class TeamMemberStatus:
     Init = 0
     Approved = 1
     Denied = 2
+
+
+class Team_Show_Type:
+    """Type of resource to be shown"""
+    Image = 0
+    Video = 1
+    SourceCode = 2

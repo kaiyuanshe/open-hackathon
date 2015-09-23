@@ -31,7 +31,7 @@ sys.path.append("..")
 from flask import g
 
 from hackathon import Component, RequiredFeature
-from hackathon.database import Team, UserTeamRel, User, Hackathon
+from hackathon.database import Team, UserTeamRel, User, Hackathon, TeamScore
 from hackathon.hackathon_response import not_found, bad_request, precondition_failed, ok, forbidden
 from hackathon.constants import TeamMemberStatus
 
@@ -126,7 +126,6 @@ class TeamManager(Component):
 
         team_name = self.__generate_team_name(hackathon, user)
         team = Team(name=team_name,
-                    display_name=team_name,
                     leader_id=user.id,
                     hackathon_id=hackathon.id)
         self.db.add_object(team)
@@ -161,7 +160,6 @@ class TeamManager(Component):
         self.__validate_team_permission(g.hackathon.id, team, g.user)
         self.db.update_object(team,
                               name=kwargs.get("team_name", team.name),
-                              display_name=kwargs.get("display_name", team.display_name),
                               description=kwargs.get("description", team.description),
                               git_project=kwargs.get("git_project", team.git_project),
                               logo=kwargs.get("logo", team.logo),
@@ -287,7 +285,7 @@ class TeamManager(Component):
             self.__validate_team_permission(hackathon.id, team, operator)
             self.db.delete_object(rel)
             self.create_default_team(hackathon, user)
-            
+
         return ok()
 
     def add_template_for_team(self, args):
@@ -324,6 +322,23 @@ class TeamManager(Component):
     def get_team_by_user_and_hackathon(self, user, hackathon):
         utrs = self.db.find_first_object_by(UserTeamRel, user_id=user.id, hackathon_id=hackathon.id)
         return utrs.team if utrs else None
+
+    def score_team(self, judge, ctx):
+        team = self.__get_team_by_id(ctx.team_id)
+        if not team:
+            return not_found("team not found")
+
+        if not self.admin_manager.is_hackathon_admin(team.hackathon_id, judge.id):
+            return forbidden()
+
+        score = self.db.find_first_object_by(TeamScore, team_id=team.id, judge_id=judge.id)
+        if score:
+            score.score = ctx.score
+            score.update_time = self.util.get_now()
+            self.db.commit()
+        else:
+            score = TeamScore(score=ctx.score, team_id=team.id, judge_id=judge.id)
+            self.db.add_object(score)
 
     # ------------------------------ private methods ----------------------------------------
 
