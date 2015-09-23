@@ -1,0 +1,32 @@
+{
+  "TeamScoreResource": {
+    "post": {
+      "input": {
+        "description": "score specific team by admin/judge",
+        "type": "object",
+        "properties": {
+          "team_id": {
+            "type": "integer"
+          },
+          "score": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "put": {
+      "input": {
+        "description": "score specific team by admin/judge",
+        "type": "object",
+        "properties": {
+          "team_id": {
+            "type": "integer"
+          },
+          "score": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  }
+}
