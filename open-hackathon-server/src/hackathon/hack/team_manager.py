@@ -54,9 +54,16 @@ class TeamManager(Component):
         :param user_id: id of user
         """
         teams = self.__get_user_teams(user_id)
-        team_list = map(lambda x: x.dic(), teams)
+        team_list = map(lambda x: self.__team_detail(x), teams)
 
         return team_list
+
+    def get_team_by_id(self, team_id):
+        team = self.__get_team_by_id(team_id)
+        if team:
+            return self.__team_detail(team)
+        else:
+            return not_found()
 
     def get_team_by_name(self, hackathon_id, team_name):
         """ get user's team basic information stored on table 'team' based on team name
@@ -72,7 +79,7 @@ class TeamManager(Component):
         """
         team = self.__get_team_by_name(hackathon_id, team_name)
         if team:
-            return team.dic()
+            return self.__team_detail(team)
         else:
             return not_found("no such team")
 
@@ -107,11 +114,12 @@ class TeamManager(Component):
         :return: a list of team filter by name and number on selected hackathon
         """
         hackathon_team_list = self.db.find_all_objects_by(Team, hackathon_id=hackathon_id)
-        hackathon_team_list = map(lambda x: x.dic(), hackathon_team_list)
         if name is not None:
-            hackathon_team_list = filter(lambda x: name in x["name"], hackathon_team_list)
+            hackathon_team_list = filter(lambda t: name in t.name, hackathon_team_list)
         if number is not None:
             hackathon_team_list = hackathon_team_list[0:number]
+
+        hackathon_team_list = map(lambda x: self.__team_detail(x), hackathon_team_list)
         return hackathon_team_list
 
     def create_default_team(self, hackathon, user):
@@ -164,7 +172,7 @@ class TeamManager(Component):
                               git_project=kwargs.get("git_project", team.git_project),
                               logo=kwargs.get("logo", team.logo),
                               update_time=self.util.get_now())
-        return team.dic()
+        return self.__team_detail(team)
 
     def dismiss_team(self, operator, team_id):
         """Dismiss a team by team leader or hackathon admin
@@ -364,6 +372,12 @@ class TeamManager(Component):
 
     def __init__(self):
         pass
+
+    def __team_detail(self, team):
+        resp = team.dic()
+        resp["leader"] = self.user_manager.user_display_info(team.leader)
+        resp["member_count"] = team.user_team_rels.filter_by(status=TeamMemberStatus.Approved).count()
+        return resp
 
     def __generate_team_name(self, hackathon, user):
         """Generate a default team name by user name. It can be updated later by team leader"""

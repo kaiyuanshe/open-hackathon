@@ -245,9 +245,9 @@ class TeamResource(HackathonResource):
     @hackathon_name_required
     def get(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('team_name', type=str, location='args')
+        parse.add_argument('id', type=str, location='args', required=True)
         args = parse.parse_args()
-        return team_manager.get_team_by_name(g.hackathon.id, args["team_name"])
+        return team_manager.get_team_by_id(args["id"])
 
     # @token_required
     # @hackathon_name_required
