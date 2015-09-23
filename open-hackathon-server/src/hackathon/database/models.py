@@ -192,7 +192,6 @@ class UserHackathonRel(DBBase):
     description = Column(String(200))
     status = Column(Integer)  # 0: havn't audit 1: audit passed 2:audit reject
     deleted = Column(Integer, default=0)  # 0:false  1-true
-    git_project = Column(String(200))  # git project url
 
     user = relationship('User', backref=backref('registers', lazy='dynamic'))
 
@@ -234,7 +233,6 @@ class Team(DBBase):
     id = Column(Integer, primary_key=True)
     name = Column(String(80))
     description = Column(Text)
-    git_project = Column(String(200))
     logo = Column(String(200))
     create_time = Column(TZDateTime, default=get_now())
     update_time = Column(TZDateTime)
@@ -254,7 +252,7 @@ class TeamShow(DBBase):
 
     id = Column(Integer, primary_key=True)
     note = Column(String(80))
-    type = Column(String(20))
+    type = Column(Integer)
     uri = Column(String(200))
     create_time = Column(TZDateTime, default=get_now())
 
@@ -263,6 +261,25 @@ class TeamShow(DBBase):
 
     def __init__(self, **kwargs):
         super(TeamShow, self).__init__(**kwargs)
+
+
+class TeamScore(DBBase):
+    __tablename__ = 'team_score'
+
+    id = Column(Integer, primary_key=True)
+    type = Column(Integer, default=0)
+    score = Column(Integer)
+    create_time = Column(TZDateTime, default=get_now())
+    update_time = Column(TZDateTime)
+
+    team_id = Column(Integer, ForeignKey('team.id', ondelete='CASCADE'))
+    team = relationship('Team', backref=backref('scores', lazy='dynamic'))
+
+    judge_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
+    judge = relationship('User', backref=backref('scores', lazy='dynamic'))
+
+    def __init__(self, **kwargs):
+        super(TeamScore, self).__init__(**kwargs)
 
 
 class UserTeamRel(DBBase):

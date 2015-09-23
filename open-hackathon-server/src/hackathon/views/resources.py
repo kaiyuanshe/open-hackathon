@@ -191,17 +191,11 @@ class UserRegistrationResource(HackathonResource):
     @token_required
     @hackathon_name_required
     def post(self):
-        args = request.get_json()
-        args["user_id"] = g.user.id
-        args["hackathon_id"] = g.hackathon.id
+        args = {
+            "user_id": g.user.id,
+            "hackathon_id": g.hackathon.id
+        }
         return register_manager.create_registration(g.hackathon, g.user, args)
-
-    @token_required
-    @hackathon_name_required
-    def put(self):
-        args = request.get_json()
-        args["status"] = RGStatus.UNAUDIT
-        return register_manager.update_registration(args)
 
 
 class UserHackathonListResource(HackathonResource):
@@ -270,6 +264,16 @@ class TeamResource(HackathonResource):
     @token_required
     def delete(self):
         return team_manager.dismiss_team(g.user, self.context().id)
+
+
+class TeamScoreResource(HackathonResource):
+    @token_required
+    def post(self):
+        return team_manager.score_team(g.user, self.context())
+
+    @token_required
+    def put(self):
+        return team_manager.score_team(g.user, self.context())
 
 
 class UserTeamsResource(HackathonResource):
@@ -465,8 +469,7 @@ class AdminRegisterResource(HackathonResource):
 
     @admin_privilege_required
     def put(self):
-        args = request.get_json()
-        return register_manager.update_registration(args)
+        return register_manager.update_registration(self.context())
 
     @admin_privilege_required
     def delete(self):
