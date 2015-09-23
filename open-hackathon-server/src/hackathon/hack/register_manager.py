@@ -102,21 +102,17 @@ class RegisterManager(Component):
             self.log.error(e)
             return internal_server_error("fail to create register")
 
-    def update_registration(self, args):
-        self.log.debug("update_registration: %r" % args)
+    def update_registration(self, context):
         try:
-            registration_id = args['id']
+            registration_id = context.id
             register = self.get_registration_by_id(registration_id)
-            if register is None:
+            if register is None or register.hackathon_id != g.hackathon.id:
                 # we can also create a new object here.
                 return not_found("registration not found")
 
-            self.log.debug("update a existed register")
-            update_items = dict(dict(args).viewitems() - register.dic().viewitems())
-            if "create_time" in update_items:
-                update_items.pop("create_time")
-            update_items["update_time"] = self.util.get_now()
-            self.db.update_object(register, **update_items)
+            register.update_time = self.util.get_now()
+            register.status = context.status
+            self.db.commit()
 
             if register.status == RGStatus.AUDIT_PASSED:
                 self.team_manager.create_default_team(register.hackathon, register.user)
