@@ -268,6 +268,10 @@ class TeamResource(HackathonResource):
 
 class TeamScoreResource(HackathonResource):
     @token_required
+    def get(self):
+        return team_manager.get_score(g.user, self.context().team_id)
+
+    @token_required
     def post(self):
         return team_manager.score_team(g.user, self.context())
 
