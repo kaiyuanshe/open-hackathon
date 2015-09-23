@@ -62,107 +62,9 @@
                             </dl>
                         </div>
 
-                        <h2 id="team" class="title">目前组队 <span>（4）</span></h2>
+                        <h2 id="team" class="title">目前组队 <span>（0）</span></h2>
 
-                        <div class="oh-body teams clearfix ">
-                            <div class="col-md-6">
-                                <div class="media">
-                                    <div class="media-left">
-                                        <a href="javascript:;" class="oh-thumb">
-                                            <img class="media-object oh-thumbnail" src="/static/pic/microsoft.jpg"
-                                                 alt="">
-                                        </a>
-                                    </div>
-                                    <div class="media-body">
-                                        <h4 class="media-heading">Open xml</h4>
-                                        sdfasdfa
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="media">
-                                    <div class="media-left">
-                                        <a href="javascript:;" class="oh-thumb">
-                                            <img class="media-object oh-thumbnail" src="/static/pic/microsoft.jpg"
-                                                 alt="">
-                                        </a>
-                                    </div>
-                                    <div class="media-body">
-                                        <h4 class="media-heading">Open xml</h4>
-                                        sdfasdfa
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="media">
-                                    <div class="media-left">
-                                        <a href="javascript:;" class="oh-thumb">
-                                            <img class="media-object oh-thumbnail" src="/static/pic/microsoft.jpg"
-                                                 alt="">
-                                        </a>
-                                    </div>
-                                    <div class="media-body">
-                                        <h4 class="media-heading">Open xml</h4>
-                                        sdfasdfa
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="media">
-                                    <div class="media-left">
-                                        <a href="javascript:;" class="oh-thumb">
-                                            <img class="media-object oh-thumbnail" src="/static/pic/microsoft.jpg"
-                                                 alt="">
-                                        </a>
-                                    </div>
-                                    <div class="media-body">
-                                        <h4 class="media-heading">Open xml</h4>
-                                        sdfasdfa
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="media">
-                                    <div class="media-left">
-                                        <a href="javascript:;" class="oh-thumb">
-                                            <img class="media-object oh-thumbnail" src="/static/pic/microsoft.jpg"
-                                                 alt="">
-                                        </a>
-                                    </div>
-                                    <div class="media-body">
-                                        <h4 class="media-heading">Open xml</h4>
-                                        sdfasdfa
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="media">
-                                    <div class="media-left">
-                                        <a href="javascript:;" class="oh-thumb">
-                                            <img class="media-object oh-thumbnail" src="/static/pic/microsoft.jpg"
-                                                 alt="">
-                                        </a>
-                                    </div>
-                                    <div class="media-body">
-                                        <h4 class="media-heading">Open xml</h4>
-                                        sdfasdfa
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="media">
-                                    <div class="media-left">
-                                        <a href="javascript:;" class="oh-thumb">
-                                            <img class="media-object oh-thumbnail" src="/static/pic/microsoft.jpg"
-                                                 alt="">
-                                        </a>
-                                    </div>
-                                    <div class="media-body">
-                                        <h4 class="media-heading">Open xml</h4>
-                                        sdfasdfa
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="oh-body teams clearfix " id="team_list">
                         </div>
 
                         <h2 id="works" class="title">作品公布 <span>（4）</span></h2>
@@ -251,40 +153,30 @@
                             </dl>
 
                             <div id="status">
-                                {% if hackathon.event_end_time < get_now() %}
+                                {% if hackathon.registration_end_time < get_now() %}
+                                    <p>报名已经结束。</p>
+                                {% elif hackathon.event_end_time < get_now() %}
                                     <p>活动已结束。</p>
                                 {% elif user == None %}
                                     <a class="btn btn-primary btn-lg"
                                        href="{{ url_for('login', return_url=request.path) }}">我要报名</a>
-                                    <button class="btn btn-default">感兴趣 34</button>
                                 {% elif user.get("user_profile") == None %}
                                     <a class="btn btn-primary btn-lg"
                                        href="{{ url_for('user_profile',return_url=request.path) }}">我要报名</a>
-                                    <button class="btn btn-default">感兴趣 34</button>
                                 {% elif registration == None %}
                                     <a class="btn btn-primary btn-lg" data-type="register">我要报名</a>
-                                    <button class="btn btn-default">感兴趣 34</button>
-                                {% elif hackathon.config.auto_approve =='1' or registration.status == 1 or registration.status == 3 %}
-                                    {% if is_creta_team and hackathon.basic_info.freedom_team %}
-                                        <a class="btn btn-primary btn-lg"
-                                           href="{{ url_for('create_join_team' ,hackathon_name=hackathon_name) }}">我要报名</a>
-                                    {% elif experiment == None %}
+                                {% elif hackathon.config.auto_approve =='1' or registration.status == 1 or (hackathon.config.auto_approve =='0' and registration.status == 3) %}
+                                    {% if experiment == None %}
                                         <a class="btn btn-primary btn-lg"
                                            href="{{ url_for('temp_settings',hackathon_name=hackathon_name) }}">立即参加</a>
                                     {% else %}
                                         <a class="btn btn-primary btn-lg"
                                            href="{{ url_for('workspace',hackathon_name=hackathon_name) }}">立即参加</a>
                                     {% endif %}
-                                    <button class="btn btn-default">感兴趣 34</button>
                                     <p>您的报名已经审核已通过。</p>
-                                {% elif not hackathon.config.auto_approve == '1' and registration.status == 3 %}
-                                    <button class="btn btn-default">感兴趣 34</button>
-                                    <p>您的报名正在审核中，请等待。</p>
-                                {% elif not hackathon.config.auto_approve  == '1' and registration.status == 0 %}
-                                    <button class="btn btn-default">感兴趣 34</button>
+                                {% elif (not hackathon.config.auto_approve == '0' and registration.status == 3 ) or  registration.status == 0 %}
                                     <p>您的报名正在审核中，请等待。</p>
                                 {% elif registration.status == 2 %}
-                                    <button class="btn btn-default">感兴趣 34</button>
                                     <p>您的报名已被拒绝，如有疑问请联系主办方。</p>
                                 {% endif %}
                             </div>
@@ -441,7 +333,23 @@
 {% endblock %}
 
 {% block script %}
-
+    <script id="team_list_temp" type="text/x-jquery-tmpl">
+       {% raw %}
+        <div class="col-md-6">
+            <div class="media">
+                <div class="media-left">
+                    <a href="${$item.get_link(id)}" class="oh-thumb">
+                        <img class="media-object oh-thumbnail" src="${$item.get_logo(logo)}"  onerror="javascript:this.src='/static/pic/team-logo.png'" alt="">
+                    </a>
+                </div>
+                <div class="media-body">
+                    <h4 class="media-heading"><a href="${$item.get_link(id)}">${name}</a></h4>
+                   ${$item.get_description(description)}
+                </div>
+            </div>
+        </div>
+        {% endraw %}
+    </script>
     <script id="register_list_temp" type="text/x-jquery-tmpl">
     {% raw %}
         <li>
@@ -455,6 +363,8 @@
             <div class="date">${create_time}</div>
         </li>
     {% endraw %}
+
+
     </script>
     <script type="text/javascript">
         function setupScriptDelay(scriptPath, sync, onHead) {

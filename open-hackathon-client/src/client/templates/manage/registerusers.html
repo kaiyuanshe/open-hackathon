@@ -1,30 +1,29 @@
 {% extends "manage/main.html" %}
 
 {% block style %}
-{{ super() }}
-<link href="/static/css/bootstrap-editable.css" rel="stylesheet">
+    {{ super() }}
+    <link href="/static/css/bootstrap-editable.css" rel="stylesheet">
 {% endblock %}
 
 {% block body %}
-<div class="col-lg-12">
-    <div class="box">
-        <div class="box-header">
-            <h2>
-              <i class="fa fa-home"></i>
-              用户管理
-          </h2>
-        </div>
-        <div class="box-content">
-            <div class="row">
-                <div class="col-lg-6">
-                    <a href="/edit/register">添加</a>
-                </div>
+    <div class="col-lg-12">
+        <div class="box">
+            <div class="box-header">
+                <h2>
+                    <i class="fa fa-home"></i>
+                    用户管理
+                </h2>
             </div>
-            <table class="table table-bordered">
-                <thead>
+            <div class="box-content">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <a href="/edit/register">添加</a>
+                    </div>
+                </div>
+                <table class="table table-bordered">
+                    <thead>
                     <tr>
                         <th>注册名</th>
-                        <th>团队名</th>
                         <th>邮箱</th>
                         <th>联系电话</th>
                         <th>联系地址</th>
@@ -32,44 +31,45 @@
                         <th>状态</th>
                         <th>操作</th>
                     </tr>
-                </thead>
-                <tbody id="registe_list">
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-<div class="modal fade bs-example-modal-sm" id="confirm_modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-api="oh.api.admin.register.delete">
-    <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">提示</h4>
-            </div>
-            <div class="modal-body">
-                <p>确定删除此地址记录？</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default wb-btn" data-dismiss="modal">取消</button>
-                <button type="button" class="btn btn-primary wb-btn" data-type="delete">确定</button>
+                    </thead>
+                    <tbody id="registe_list">
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
-</div>
+
 {% endblock body %}
 
 {% block script %}
-{{ super() }}
-<script id="hackathon_template" type="text/x-jquery-tmpl">
+    <div class="modal fade bs-example-modal-sm" id="confirm_modal" tabindex="-1" role="dialog"
+         aria-labelledby="mySmallModalLabel" aria-hidden="true" data-api="oh.api.admin.register.delete">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">提示</h4>
+                </div>
+                <div class="modal-body">
+                    <p>确定删除此地址记录？</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default wb-btn" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary wb-btn" data-type="delete">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{ super() }}
+    <script id="hackathon_template" type="text/x-jquery-tmpl">
     <option value=${id}>${name}</option>
-</script>
-<script id="register_list_template" type="text/x-jquery-tmpl">
+
+    </script>
+    <script id="register_list_template" type="text/x-jquery-tmpl">
     <tr>
         <td>
             ${user.name}
-        </td>
-        <td>
-            ${team_name}
         </td>
         <td>{% raw %}{{each user.email}}${email} ,{{/each}}{% endraw %}</td>
         <td>${user.user_profile.phone}</td>
@@ -81,16 +81,13 @@
 
         <td class="col-action">
         {% if current_user.is_super() %}
-            <a class="btn btn-info btn-sm" href="/edit/register?id=${user_id}">
-                <i class="fa fa-edit "></i>
-            </a>
             <a class="btn btn-danger btn-sm" href="#" data-target="#confirm_modal" data-toggle="modal">
                 <i class="fa fa-trash-o "></i>
             </a>
         {% endif %}
         </td>
     </tr>
-</script>
-<script type="text/javascript" src="/static/js/bootstrap/bootstrap-editable.js"></script>
-<script type="text/javascript" src="/static/js/views/oh.manage.register.js"></script>
+    </script>
+    <script type="text/javascript" src="/static/js/bootstrap/bootstrap-editable.js"></script>
+    <script type="text/javascript" src="/static/js/views/oh.manage.register.js"></script>
 {% endblock %}

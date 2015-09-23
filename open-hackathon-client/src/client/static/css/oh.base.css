@@ -1741,3 +1741,35 @@ ul.notifications li, ul.tasks li, ul.messages li {
     background: url('/static/pic/gitcafe-icon.png') no-repeat center;
     vertical-align: text-top;
 }
+
+.oh-box {
+    border: 1px solid #D2D2D2;
+    margin-bottom: 40px;
+}
+
+.oh-body {
+    padding: 20px 20px 28px;
+}
+
+h1.title {
+    margin: 20px 0;
+    font-size: 20px;
+}
+
+h2.title {
+    font-size: 16px;
+    padding-left: 20px;
+    margin: 20px 0 12px;
+    border-left: 2px solid #1172c6;
+}
+
+h3.title {
+    font-size: 16px;
+    margin: 0;
+    padding: 20px 0 14px 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+h4.title {
+
+}

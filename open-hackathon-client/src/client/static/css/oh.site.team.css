@@ -22,3 +22,94 @@ fieldset {
     font-size: 12px;
     text-align: left;
 }
+
+h2 {
+    font-size: 22px;
+}
+
+h2:first-child {
+    margin-top: 0;
+}
+
+.oh-users {
+
+    padding-bottom: 6px;
+}
+
+.oh-users .oh-item {
+    text-align: center;
+}
+
+.oh-users .oh-item a {
+    color: #505050;
+}
+
+.oh-users .oh-item a:hover {
+    color: #21b1de;
+    text-decoration: none;
+}
+
+.oh-users .oh-item:hover .oh-header img {
+    width: 120%;
+    top: -10%;
+    left: -10%;
+}
+
+.oh-users .oh-item:hover .oh-signature {
+    display: block;
+}
+
+.oh-users .oh-header {
+    position: relative;
+    overflow: hidden;
+    width: 96px;
+    height: 96px;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.oh-users .oh-header img {
+    position: absolute;
+    width: 100%;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    -moz-transition: all 0.2s ease;
+    -o-transition: all 0.2s ease;
+    -webkit-transition: all 0.2s ease;
+    transition: all 0.2s ease;
+}
+
+.oh-users .oh-body {
+    position: relative;
+    text-align: left;
+    color: #969696;
+    max-height: 95px;
+    min-height: 95px;
+}
+
+.oh-users .oh-signature {
+    display: none;
+    overflow: hidden;
+    max-height: 39px;
+    font-size: 12px;
+}
+
+.oh-users .oh-count {
+    text-align: left;
+}
+
+.oh-users .oh-count div {
+    display: inline-block;
+    font-size: 12px;
+}
+
+.oh-users .oh-count div:last-child {
+    text-align: right;
+    float: right;
+}
+
+.oh-users .oh-count span {
+    font-size: 14px;
+}

@@ -275,11 +275,7 @@ def login():
 
 @app.route("/site/<hackathon_name>")
 def hackathon(hackathon_name):
-    team = []
-    data = __get_api(API_HACKATHON, {"hackathon_name": hackathon_name})
-    if current_user.is_authenticated():
-        team = __get_api(API_TEAM_USER, {"hackathon_name": hackathon_name, "token": session["token"]})
-
+    data = __get_api(API_HACKATHON, {"hackathon_name": hackathon_name, "token": session.get("token")})
     data = Context.from_object(data)
 
     if data.get('error') is not None or data.get('hackathon', data).status != 1:
@@ -289,7 +285,6 @@ def hackathon(hackathon_name):
                       hackathon_name=hackathon_name,
                       hackathon=data.get("hackathon", data),
                       user=data.get("user"),
-                      is_creta_team=len(team) == 0,
                       registration=data.get("registration"),
                       experiment=data.get("experiment"))
 
@@ -330,24 +325,11 @@ def temp_settings(hackathon_name):
         return redirect(url_for('hackathon', hackathon_name=hackathon_name))
 
 
-@app.route("/site/<hackathon_name>/team")
-@login_required
-def create_join_team(hackathon_name):
-    headers = {"hackathon_name": hackathon_name, "token": session["token"]}
-    reg = Context.from_object(
-        __get_api(API_HACAKTHON_REGISTRATION, {"hackathon_name": hackathon_name, "token": session["token"]}))
-    member = Context.from_object(__get_api(API_TEAM_MEMBER_LIST, headers))
+@app.route("/site/<hackathon_name>/team/<tid>")
+def create_join_team(hackathon_name, tid):
+    headers = {"hackathon_name": hackathon_name, "token": session.get("token")}
 
-    if reg.get('registration') is not None:
-        if reg.registration.status == 1 or (reg.registration.status == 3 and reg.hackathon.basic_info.auto_approve):
-            if reg.hackathon.basic_info.freedom_team and member.get('team') is None:
-                return render("/site/team.html", hackathon_name=hackathon_name)
-            else:
-                return redirect(url_for('user_team_hackathon', hackathon_name=hackathon_name))
-        else:
-            return redirect(url_for('hackathon', hackathon_name=hackathon_name))
-    else:
-        return redirect(url_for('hackathon', hackathon_name=hackathon_name))
+    return render("/site/team.html")
 
 
 @app.route("/admin", methods=['GET', 'POST'])

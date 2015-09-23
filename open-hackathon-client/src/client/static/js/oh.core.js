@@ -54,6 +54,7 @@
             return limit ? text.substr(0, limit) : text;
         },
         alert: function (title, text, fun) {
+            fun = fun || new Function();
             var alert = $('body').Dialog({
                 title: title,
                 body: text,

@@ -8,28 +8,6 @@
     color: #505050;
 }
 
-h1.title {
-    margin: 20px 0;
-    font-size: 20px;
-}
-
-h2.title {
-    font-size: 16px;
-    padding-left: 20px;
-    margin: 20px 0 12px;
-    border-left: 2px solid #1172c6;
-}
-
-h3.title {
-    font-size: 16px;
-    margin: 0;
-    padding: 20px 0 14px 20px;
-    border-bottom: 1px solid #ddd;
-}
-
-h4.title {
-
-}
 
 .tags {
     padding: 0;
@@ -57,14 +35,9 @@ h4.title {
     border-color: #b4b4b4;
 }
 
-.oh-box {
-    border: 1px solid #D2D2D2;
-    margin-bottom: 40px;
-}
 
-.oh-body {
-    padding: 20px 20px 28px;
-}
+
+
 
 .oh-detail-info dt {
     float: left;
@@ -226,3 +199,7 @@ h4.title {
     width: 50px;
 }
 
+.no-team {
+    padding-top:20px;
+    padding-bottom: 20px;
+}
