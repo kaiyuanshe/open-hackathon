@@ -83,7 +83,7 @@
                                                 <span class="oh-flag">{{ item.ribbon }}</span>
                                             {% endif %}
                                             <a href="javascript:void(0);" role="oh-like"
-                                               class="oh-collect"
+                                               class="oh-collect {% if item.like is not none %} active {% endif %}"
                                                data-name="{{ item.name }}"
                                                     ><span>感兴趣</span>
                                                 <img src="/static/pic/pushpin-icon.png">
@@ -110,10 +110,12 @@
                                                 <div><span
                                                         class="fa fa-calendar"></span> {{ item.event_start_time | date("%y/%m/%d %a %H:%M") }}
                                                 </div>
-                                                <div><span class="fa fa-map-marker"></span> 上海</div>
+                                                <div><span
+                                                        class="fa fa-map-marker"></span> {{ item.config.location == '' and '在线' or item.config.location | limitTo(2) }}
+                                                </div>
                                             </div>
                                             <div class="oh-progressbar"><span
-                                                    style="width: {{ activity_progress(item.event_start_time ,item.event_end_time) }}"></span>
+                                                    style="width: {{ activity_progress(item.event_start_time ,item.event_end_time) }}%"></span>
                                             </div>
                                             <table>
                                                 <tbody>
@@ -123,10 +125,12 @@
                                                         </div>
                                                     </td>
                                                     <td class="text-center">
-                                                        <div>{{ item.like or 0 }}<span>感兴趣</span></div>
+                                                        <div>{{ item.stat.like or 0 }}<span>感兴趣</span></div>
                                                     </td>
                                                     <td class="text-right">
-                                                        <div>40/50<span>报名人数</span></div>
+                                                        <div>
+                                                            {{ item.stat.register or 0 }}/{{ item.config.max_enrollment == '0' and '无限' or item.config.max_enrollment }}<span>报名人数</span>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                                 </tbody>
@@ -151,7 +155,7 @@
                     <div role="tabpanel" class="tab-pane" id="soon">
                         <div class="row">
                             {% for item in soon_hackathon.get('items') %}
-                                 <div class="col-lg-4 col-md-4">
+                                <div class="col-lg-4 col-md-4">
                                     <div class="oh-item">
                                         <div class="oh-header">
                                             <img src="{{ item.banners.split(';')[0] or url_for('static',filename='pic/homepage.jpg') }}"
@@ -160,7 +164,7 @@
                                                 <span class="oh-flag">{{ item.ribbon }}</span>
                                             {% endif %}
                                             <a href="javascript:void(0);" role="oh-like"
-                                               class="oh-collect"
+                                               class="oh-collect {% if item.like is not none %} active {% endif %}"
                                                data-name="{{ item.name }}"
                                                     ><span>感兴趣</span>
                                                 <img src="/static/pic/pushpin-icon.png">
@@ -187,10 +191,12 @@
                                                 <div><span
                                                         class="fa fa-calendar"></span> {{ item.event_start_time | date("%y/%m/%d %a %H:%M") }}
                                                 </div>
-                                                <div><span class="fa fa-map-marker"></span> 上海</div>
+                                                <div><span
+                                                        class="fa fa-map-marker"></span> {{ item.config.location == '' and '在线' or item.config.location | limitTo(2) }}
+                                                </div>
                                             </div>
                                             <div class="oh-progressbar"><span
-                                                    style="width: {{ activity_progress(item.event_start_time ,item.event_end_time) }}"></span>
+                                                    style="width: {{ activity_progress(item.event_start_time ,item.event_end_time) }}%"></span>
                                             </div>
                                             <table>
                                                 <tbody>
@@ -200,10 +206,12 @@
                                                         </div>
                                                     </td>
                                                     <td class="text-center">
-                                                        <div>{{ item.like or 0 }}<span>感兴趣</span></div>
+                                                        <div>{{ item.stat.like or 0 }}<span>感兴趣</span></div>
                                                     </td>
                                                     <td class="text-right">
-                                                        <div>40/50<span>报名人数</span></div>
+                                                        <div>
+                                                            {{ item.stat.register or 0 }}/{{ item.config.max_enrollment == '0' and '无限' or item.config.max_enrollment }}<span>报名人数</span>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                                 </tbody>
@@ -237,7 +245,7 @@
                                                 <span class="oh-flag">{{ item.ribbon }}</span>
                                             {% endif %}
                                             <a href="javascript:void(0);" role="oh-like"
-                                               class="oh-collect"
+                                               class="oh-collect {% if item.like is not none %} active {% endif %}"
                                                data-name="{{ item.name }}"
                                                     ><span>感兴趣</span>
                                                 <img src="/static/pic/pushpin-icon.png">
@@ -264,10 +272,12 @@
                                                 <div><span
                                                         class="fa fa-calendar"></span> {{ item.event_start_time | date("%y/%m/%d %a %H:%M") }}
                                                 </div>
-                                                <div><span class="fa fa-map-marker"></span> 上海</div>
+                                                <div><span
+                                                        class="fa fa-map-marker"></span> {{ item.config.location == '' and '在线' or item.config.location | limitTo(2) }}
+                                                </div>
                                             </div>
                                             <div class="oh-progressbar"><span
-                                                    style="width: {{ activity_progress(item.event_start_time ,item.event_end_time) }}"></span>
+                                                    style="width: {{ activity_progress(item.event_start_time ,item.event_end_time) }}%"></span>
                                             </div>
                                             <table>
                                                 <tbody>
@@ -277,10 +287,12 @@
                                                         </div>
                                                     </td>
                                                     <td class="text-center">
-                                                        <div>{{ item.like or 0 }}<span>感兴趣</span></div>
+                                                        <div>{{ item.stat.like or 0 }}<span>感兴趣</span></div>
                                                     </td>
                                                     <td class="text-right">
-                                                        <div>40/50<span>报名人数</span></div>
+                                                        <div>
+                                                            {{ item.stat.register or 0 }}/{{ item.config.max_enrollment == '0' and '无限' or item.config.max_enrollment }}<span>报名人数</span>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                                 </tbody>
@@ -307,27 +319,27 @@
         </div>
     </div>
     {% if current_user.is_authenticated() == False %}
-    <div id="info2" class="oh-process">
-        <div class="container text-center">
-            <h2 class="oh-title">黑客松活动流程</h2>
+        <div id="info2" class="oh-process">
+            <div class="container text-center">
+                <h2 class="oh-title">黑客松活动流程</h2>
 
-            <div class="row oh-wrap">
-                <div class="col-md-3 oh-item">
-                    <img src="/static/pic/release-icon.png" alt="主办方发布活动">
+                <div class="row oh-wrap">
+                    <div class="col-md-3 oh-item">
+                        <img src="/static/pic/release-icon.png" alt="主办方发布活动">
+                    </div>
+                    <div class="col-md-3 oh-item">
+                        <img src="/static/pic/team-icon.png" alt="参加者报名组队">
+                    </div>
+                    <div class="col-md-3 oh-item">
+                        <img src="/static/pic/competition-icon.png" alt="参加者线上竞赛">
+                    </div>
+                    <div class="col-md-3">
+                        <img src="/static/pic/choose-icon.png" alt="主办方评选奖项">
+                    </div>
                 </div>
-                <div class="col-md-3 oh-item">
-                    <img src="/static/pic/team-icon.png" alt="参加者报名组队">
-                </div>
-                <div class="col-md-3 oh-item">
-                    <img src="/static/pic/competition-icon.png" alt="参加者线上竞赛">
-                </div>
-                <div class="col-md-3">
-                    <img src="/static/pic/choose-icon.png" alt="主办方评选奖项">
-                </div>
+                <a href="javscript:;" class="btn btn-help">新手帮助 <span>&gt;</span></a>
             </div>
-            <a href="javscript:;" class="btn btn-help">新手帮助 <span>&gt;</span></a>
         </div>
-    </div>
     {% endif %}
     <div id="info3" class="">
         <div class="container oh-feature">
@@ -449,109 +461,8 @@
                 <a href="#info4" class="more">更多达人&gt;</a>
             </div>
             <div class="ob-feature-body">
-                <div class="row">
-                    <div class="col-lg-2 col-md-4 col-xs-6">
-                        <div class="oh-item">
-                            <div class="oh-header">
-                                <a href="#"><img src="/static/pic/icon.jpg"></a>
-                            </div>
-                            <div class="oh-body">
-                                <p class="text-center"><a href="#">用户昵称</a></p>
+                <div class="row" id="talent_list">
 
-                                <p class="oh-signature">个人简介/个性签名/个人简介/个性签名/</p>
-
-                                <div class="oh-count">
-                                    <div><span>1</span> 奖项</div>
-                                    <div><span>4</span> 粉丝</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-2 col-md-4 col-xs-6">
-                        <div class="oh-item">
-                            <div class="oh-header">
-                                <a href="#"><img src="/static/pic/icon.jpg"></a>
-                            </div>
-                            <div class="oh-body">
-                                <p class="text-center"><a href="#">用户昵称</a></p>
-
-                                <p class="oh-signature">个人简介/个性签名/个人简介/个性签名/</p>
-
-                                <div class="oh-count">
-                                    <div><span>1</span> 奖项</div>
-                                    <div><span>4</span> 粉丝</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-2 col-md-4 col-xs-6">
-                        <div class="oh-item">
-                            <div class="oh-header">
-                                <a href="#"><img src="/static/pic/icon.jpg"></a>
-                            </div>
-                            <div class="oh-body">
-                                <p class="text-center"><a href="#">用户昵称</a></p>
-
-                                <p class="oh-signature">个人简介/个性签名/个人简介/个性签名/</p>
-
-                                <div class="oh-count">
-                                    <div><span>1</span> 奖项</div>
-                                    <div><span>4</span> 粉丝</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-2 col-md-4 col-xs-6">
-                        <div class="oh-item">
-                            <div class="oh-header">
-                                <a href="#"><img src="/static/pic/icon.jpg"></a>
-                            </div>
-                            <div class="oh-body">
-                                <p class="text-center"><a href="#">用户昵称</a></p>
-
-                                <p class="oh-signature">个人简介/个性签名/个人简介/个性签名/</p>
-
-                                <div class="oh-count">
-                                    <div><span>1</span> 奖项</div>
-                                    <div><span>4</span> 粉丝</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-2 col-md-4 col-xs-6">
-                        <div class="oh-item">
-                            <div class="oh-header">
-                                <a href="#"><img src="/static/pic/icon.jpg"></a>
-                            </div>
-                            <div class="oh-body">
-                                <p class="text-center"><a href="#">用户昵称</a></p>
-
-                                <p class="oh-signature">个人简介/个性签名/个人简介/个性签名/</p>
-
-                                <div class="oh-count">
-                                    <div><span>1</span> 奖项</div>
-                                    <div><span>4</span> 粉丝</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-2 col-md-4 col-xs-6">
-                        <div class="oh-item">
-                            <div class="oh-header">
-                                <a href="#"><img src="/static/pic/icon.jpg"></a>
-                            </div>
-                            <div class="oh-body">
-                                <p class="text-center"><a href="#">用户昵称</a></p>
-
-                                <p class="oh-signature">个人简介/个性签名/个人简介/个性签名/</p>
-
-                                <div class="oh-count">
-                                    <div><span>1</span> 奖项</div>
-                                    <div><span>4</span> 粉丝</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -571,10 +482,10 @@
                             <div class="oh-body">
                                 <p><a href="javascirp:;">主办方名称</a></p>
 
-                                <div class="oh-count">
-                                    <div><span>1</span> 活动正在进行</div>
-                                    <div><span>4</span> 活动已经发布</div>
-                                </div>
+                                {#                                <div class="oh-count">#}
+                                {#                                    <div><span>1</span> 活动正在进行</div>#}
+                                {#                                    <div><span>4</span> 活动已经发布</div>#}
+                                {#                                </div>#}
                             </div>
                         </div>
                     </div>
@@ -586,10 +497,10 @@
                             <div class="oh-body">
                                 <p><a href="javascirp:;">主办方名称</a></p>
 
-                                <div class="oh-count">
-                                    <div><span>1</span> 活动正在进行</div>
-                                    <div><span>4</span> 活动已经发布</div>
-                                </div>
+                                {#                                <div class="oh-count">#}
+                                {#                                    <div><span>1</span> 活动正在进行</div>#}
+                                {#                                    <div><span>4</span> 活动已经发布</div>#}
+                                {#                                </div>#}
                             </div>
                         </div>
                     </div>
@@ -600,10 +511,10 @@
                             <div class="oh-body">
                                 <p><a href="javascirp:;">主办方名称</a></p>
 
-                                <div class="oh-count">
-                                    <div><span>1</span> 活动正在进行</div>
-                                    <div><span>4</span> 活动已经发布</div>
-                                </div>
+                                {#                                <div class="oh-count">#}
+                                {#                                    <div><span>1</span> 活动正在进行</div>#}
+                                {#                                    <div><span>4</span> 活动已经发布</div>#}
+                                {#                                </div>#}
                             </div>
                         </div>
                     </div>
@@ -614,10 +525,10 @@
                             <div class="oh-body">
                                 <p><a href="javascirp:;">主办方名称</a></p>
 
-                                <div class="oh-count">
-                                    <div><span>1</span> 活动正在进行</div>
-                                    <div><span>4</span> 活动已经发布</div>
-                                </div>
+                                {#                                <div class="oh-count">#}
+                                {#                                    <div><span>1</span> 活动正在进行</div>#}
+                                {#                                    <div><span>4</span> 活动已经发布</div>#}
+                                {#                                </div>#}
                             </div>
                         </div>
                     </div>
@@ -625,14 +536,12 @@
             </div>
         </div>
     </div>
-
-
     <div id="oh_lift">
         <div class="container">
             <ul class="nav nav-tabs" role="tablist">
                 <li><a href="#info1"><span>推荐活动</span><i></i></a></li>
                 {% if current_user.is_authenticated() == False %}
-                <li><a href="#info2"><span>活动流程</span><i></i></a></li>
+                    <li><a href="#info2"><span>活动流程</span><i></i></a></li>
                 {% endif %}
                 <li><a href="#info3"><span>近期成果</span><i></i></a></li>
                 <li><a href="#info4"><span>本季达人</span><i></i></a></li>
@@ -640,53 +549,24 @@
             </ul>
         </div>
     </div>
-    {#    <div class="oh-main">#}
-    {#        <div class="container">#}
-    {#            <div class="row">#}
-    {#                <div class="col-md-12">#}
-    {#                    <div class="jumbotron">#}
-    {#                        <h1>黑客松活动列表</h1>#}
-    {##}
-    {#                        <p class="lead">#}
-    {##}
-    {#                        <p>#}
-    {#                    </div>#}
-    {#                </div>#}
-    {#                {% for hackathon in hackathon_list %}#}
-    {#                    <div class="col-xs-12 col-md-6">#}
-    {#                        <article class="hackathon-item">#}
-    {#                            <div class="hakcathon-inner">#}
-    {#                                <a href="{{ url_for('hackathon', hackathon_name=hackathon.name) }}" target="_blank">#}
-    {#                                    <section class="hackathon-content">#}
-    {#                                        <img src="{{ hackathon.basic_info.banners.split(';')[0] or url_for('static',filename='pic/homepage.jpg') }}"#}
-    {#                                             class="hackathon-thumb" alt="{{ hackathon.display_name }}">#}
-    {##}
-    {#                                        <div class="hackathon-overlay"></div>#}
-    {#                                        <div class="hackathon-info">#}
-    {#                                            <div class="hackathon-organizers">#}
-    {#                                                {% for organizer in hackathon.basic_info.organizers %}#}
-    {#                                                    <span>{{ organizer.organizer_name }}</span>#}
-    {#                                                {% endfor %}#}
-    {#                                            </div>#}
-    {#                                            <h2 class="hackathon-name">{{ hackathon.display_name }}</h2>#}
-    {##}
-    {#                                            <div class="hackathon-details">#}
-    {#                                                <div class="hackathon-event-time">#}
-    {#                                                    {{ hackathon.event_start_time | date("%Y年%m月%d日 %H:%M") }} ~#}
-    {#                                                    {{ hackathon.event_end_time | date("%Y年%m月%d日 %H:%M") }}#}
-    {#                                                </div>#}
-    {#                                                <div class="hackathon-description">#}
-    {#                                                    {{ hackathon.description | mkHTML | stripTags | limitTo(300) }}#}
-    {#                                                </div>#}
-    {#                                            </div>#}
-    {#                                        </div>#}
-    {#                                    </section>#}
-    {#                                </a>#}
-    {#                            </div>#}
-    {#                        </article>#}
-    {#                    </div>#}
-    {#                {% endfor %}#}
-    {#            </div>#}
-    {#        </div>#}
-    {#    </div>#}
+{% endblock %}
+{% block script %}
+    <script id="talent_list_template" type="text/x-jquery-tmpl">
+          <div class="col-lg-2 col-md-4 col-xs-6">
+                <div class="oh-item">
+                    <div class="oh-header">
+                        <a href="javascript:;"><img src="${avatar_url}" onerror="javascript:this.src='/static/pic/anon_user.png'"></a>
+                    </div>
+                    <div class="oh-body">
+                        <p class="text-center"><a href="javascript:;">${nickname}</a></p>
+                    </div>
+                </div>
+          </div>
+
+
+
+
+
+    </script>
+    <script type="text/javascript" src="/static/js/views/oh.home.js"></script>
 {% endblock %}

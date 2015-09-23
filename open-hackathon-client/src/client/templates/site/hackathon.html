@@ -19,16 +19,17 @@
                 <div class="col-lg-8 col-md-7">
                     <div id="banner" class="carousel slide" data-ride="carousel">
                         <ol class="carousel-indicators">
-                            <li data-target="#banner" data-slide-to="0" class="active"></li>
-                            <li data-target="#banner" data-slide-to="1"></li>
+                            {% for src in hackathon.banners.split(';') %}
+                                <li data-target="#banner" data-slide-to="{{ loop.index - 1 }}" {% if loop.index == 1 %}
+                                    class="active" {% endif %}></li>
+                            {% endfor %}
                         </ol>
                         <div class="carousel-inner" role="listbox">
-                            <div class="item active">
-                                <img src="/static/pic/HackathonPlatfrom.jpg" alt="...">
-                            </div>
-                            <div class="item">
-                                <img src="/static/pic/HackathonPlatfrom.jpg" alt="...">
-                            </div>
+                            {% for src in hackathon.banners.split(';') %}
+                                <div class="item {% if loop.index == 1 %} active {% endif %}">
+                                    <img src="{{ src }}">
+                                </div>
+                            {% endfor %}
                         </div>
                     </div>
                     <div class="">
@@ -41,20 +42,20 @@
                         <h2 id="new" class="title">最新动态 <span>（3）</span></h2>
 
                         <div class="oh-body grey-text">
+                            {#                            <dl class="oh-latest-news">#}
+                            {#                                <dt>昨天</dt>#}
+                            {#                                <dd><span class="t-bullhorn"></span>#}
+                            {#                                    公告消息公告消息公告消息公告消息公告消息公告消息公告消息公告消息#}
+                            {#                                </dd>#}
+                            {#                            </dl>#}
+                            {#                            <dl class="oh-latest-news">#}
+                            {#                                <dt>4天前</dt>#}
+                            {#                                <dd><span class="t-edit"></span>#}
+                            {#                                    2015/09/20 周日 00:00#}
+                            {#                                </dd>#}
+                            {#                            </dl>#}
                             <dl class="oh-latest-news">
-                                <dt>昨天</dt>
-                                <dd><span class="t-bullhorn"></span>
-                                    公告消息公告消息公告消息公告消息公告消息公告消息公告消息公告消息
-                                </dd>
-                            </dl>
-                            <dl class="oh-latest-news">
-                                <dt>4天前</dt>
-                                <dd><span class="t-edit"></span>
-                                    2015/09/20 周日 00:00
-                                </dd>
-                            </dl>
-                            <dl class="oh-latest-news">
-                                <dt>2015/09/01</dt>
+                                <dt>{{ hackathon.create_time |date("%Y/%m/%d") }}</dt>
                                 <dd><span class="t-bullhorn"></span>
                                     {{ hackathon.config.location }}
                                 </dd>
@@ -229,16 +230,17 @@
                                 </dd>
                                 <dt>报名 ：</dt>
                                 <dd>
-                                    2015/09/20 周日 00:00 <span class="grey-text">之前</span>
+                                    {{ hackathon.registration_end_time | date("%Y/%m/%d %a %H:%M") }} <span
+                                        class="grey-text">之前</span>
                                 </dd>
                                 <dt>地址：</dt>
                                 <dd>
-                                    {{ hackathon.config.location }}
+                                    {{ hackathon.config.location == '' and '在线' or hackathon.config.location }}
                                 </dd>
                                 <dt>限额：</dt>
                                 <dd>
-                                    {{ hackathon.config.max_enrollment == '0'and  '无限' or hackathon.config.max_enrollment +'人' }}
-                                    <span class="grey-text">（<span>30</span>人已报名）</span>
+                                    {{ hackathon.config.max_enrollment == '0' and  '无限' or hackathon.config.max_enrollment +'人' }}
+                                    <span class="grey-text">（<span>{{ hackathon.stat.register or 0 }}</span>人已报名）</span>
                                 </dd>
                                 <dt>主办方：</dt>
                                 <dd>
@@ -308,15 +310,13 @@
                             {% endfor %}
                         </div>
                     </div>
+                    {% if hackathon.config.location %}
+                        <div class="oh-box">
+                            <h3 class="title">活动地点</h3>
 
-                    <div class="oh-box">
-                        <h3 class="title">活动地点</h3>
-
-                        <div id="map" class="baidu-map" title="云岭西路（详细地址请见邀请函）"></div>
-
-
-                    </div>
-
+                            <div id="map" class="baidu-map" title="{{ hackathon.config.location }}"></div>
+                        </div>
+                    {% endif %}
                     <div class="oh-box">
                         <h3 class="title">您还可能感兴趣</h3>
 
@@ -372,7 +372,7 @@
                 <li><a href="#works"><span>作品公布</span><i></i></a></li>
                 <li><a href="#comment"><span>活动讨论</span><i></i></a></li>
             </ul>
-            <div class="full-shared">
+            <div class="full-shared hide">
                 <a class="lid">
                     <i class="fa fa-share-alt"></i>
                     <span>分享活动</span>
@@ -463,6 +463,8 @@
 
 
 
+
+
     </script>
     <script type="text/javascript">
         function setupScriptDelay(scriptPath, sync, onHead) {
@@ -481,62 +483,27 @@
         function initializeMap() {
             var map = new BMap.Map('map');
             map.addControl(new BMap.OverviewMapControl());
-            //map.addControl(new BMap.ScaleControl());
-
-            var point;
-            var position = "121.373572, 31.236193";
-            if (position != '') {
-                var lng = position.substring(0, position.indexOf(','));
-                var lat = position.substring(position.indexOf(',') + 1);
-                point = new BMap.Point(lng, lat);
-
-                var myIcon = new BMap.Icon("http://cdn.huodongxing.com/Content/img/mark1.png", new BMap.Size(32, 32), {"anchor": new BMap.Size(16, 32)});
-                baiduMapMarker = new BMap.Marker(point, {icon: myIcon});
-
-                //var infoWindow = new BMap.InfoWindow("云岭西路（详细地址请见邀请函）",opts);
-                //baiduMapMarker.addEventListener("click", function(){this.openInfoWindow(infoWindow);});
-                map.addOverlay(baiduMapMarker);
-                map.enableScrollWheelZoom();
-                map.centerAndZoom(point, 14);
-            }
-            else {
-                var address = "云岭西路（详细地址请见邀请函）";
-                var prov = "上海";
-                var city = "普陀";
-
-                if (city.indexOf("-") > -1) city = city.replace("-", "");
-                if (city == null || city == "" || city == '其他') city = '北京市';
-                if (prov == "北京" || prov == "天津" || prov == "上海" || prov == "重庆") {
-                    prov += "市";
-                    city += "区";
+            var address = "{{ hackathon.config.location }}";
+            var myGeo = new BMap.Geocoder();
+            myGeo.getPoint(address, function (point) {
+                if (point) {
+                    {#                    var s = new BMap.Icon("http://cdn.huodongxing.com/Content/img/mark1.png", new BMap.Size(32, 32), {"anchor": new BMap.Size(16, 32)});#}
+                    {#                    baiduMapMarker = new BMap.Marker(point, {icon: myIcon});#}
+                    {#                    var infoWindow = new BMap.InfoWindow(address, opts);#}
+                    {#                    baiduMapMarker.addEventListener("click", function () {#}
+                    {#                        this.openInfoWindow(infoWindow);#}
+                    {#                    });#}
+                    {#                    map.addOverlay(baiduMapMarker);#}
+                    map.enableScrollWheelZoom();
+                    map.centerAndZoom(point, 14);
                 }
-                else if (city.indexOf("市") != (city.length - 1) && city.indexOf("区") != (city.length - 1)) city = city + "市";
-
-                if (address == null || address == "") address = city;
-                else address = city + address;
-                if (prov != null && prov != "") address = prov + address;
-
-                var myGeo = new BMap.Geocoder();
-                // 将地址解析结果显示在地图上，并调整地图视野
-                myGeo.getPoint(address,
-                        function (point) {
-                            if (point) {
-                                var myIcon = new BMap.Icon("http://cdn.huodongxing.com/Content/img/mark1.png", new BMap.Size(32, 32), {"anchor": new BMap.Size(16, 32)});
-                                baiduMapMarker = new BMap.Marker(point, {icon: myIcon});
-                                var infoWindow = new BMap.InfoWindow("云岭西路（详细地址请见邀请函）", opts);
-                                baiduMapMarker.addEventListener("click", function () {
-                                    this.openInfoWindow(infoWindow);
-                                });
-                                map.addOverlay(baiduMapMarker);
-                                map.enableScrollWheelZoom();
-                                map.centerAndZoom(point, 14);
-                                //baiduMapMarker.setAnimation(BMAP_ANIMATION_BOUNCE);
-                            }
-                        }, "普陀");
-            }
+            });
         }
         $(function () {
-            window.setTimeout("setupScriptDelay('api.map.baidu.com/api?v=2.0&ak=KIpwmISmRtIMMssrIQ4NF9ji&callback=initializeMap', true)", 300);
+            var ismap = {{ hackathon.config.location == '' and 'false' or 'true' }};
+            if (ismap) {
+                window.setTimeout("setupScriptDelay('api.map.baidu.com/api?v=2.0&ak=KIpwmISmRtIMMssrIQ4NF9ji&callback=initializeMap', true)", 300);
+            }
         });
     </script>
     <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>

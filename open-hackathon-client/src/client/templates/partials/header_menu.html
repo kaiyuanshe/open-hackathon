@@ -41,13 +41,19 @@
             </li>
             <li class="dropdown">
                 <a class="dropdown-toggle" data-toggle="dropdown" href="javascirpt:;">
-                    <img class="avatar" src="{{ current_user.avatar_url }}" alt="Avatar">
+                    <img class="avatar" src="{{ current_user.avatar_url }}" alt="{{ current_user.nickname }}" onerror="javascript:this.src='/static/pic/anon_user.png'">
                     我的黑客松
                     <span class="oh-caret"></span>
                 </a>
                 <ul class="dropdown-menu">
-                    <li><a href="{{ url_for('user_profile') }}"><i class="fa fa-star"></i>{{ current_user.nickname }}
-                    </a></li>
+                    <li>
+                        <a href="{{ url_for('user_profile') }}">
+                            <i class="fa fa-star"></i> {{ current_user.nickname }}
+                            <br>
+                            <i class="fa fa-{{ current_user.provider }}"></i> 账号登陆
+                        </a>
+                    </li>
+                    <li class="divider"></li>
                     <li><a href="{{ url_for('user_profile') }}"><i class="fa fa-star"></i>个人信息</a></li>
                     <li><a href="{{ url_for('myhackathon') }}"><i class="fa fa-envelope"></i> 我的活动</a></li>
                     <li><a href="{{ url_for('team_list') }}"><i class="fa fa-envelope"></i> 我的团队</a></li>

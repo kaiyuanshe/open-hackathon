@@ -139,7 +139,7 @@ def utility_processor():
         return __date_serializer(datetime.now())
 
     def activity_progress(starttime, endtime):
-        return (int(time.time() * 1e3) - starttime) / (endtime - starttime)
+        return ((int(time.time() * 1e3) - starttime) * 1.0 / (endtime - starttime) * 1.0) * 100
 
     return dict(get_now=get_now, activity_progress=activity_progress)
 

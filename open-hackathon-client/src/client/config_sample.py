@@ -211,6 +211,9 @@ Config = {
                         "": ["post", "put"],
                         "list": ["get"]
                     }
+                },
+                "talent": {
+                    "list": ["get"]
                 }
             }
         }

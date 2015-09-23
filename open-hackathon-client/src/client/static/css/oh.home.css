@@ -133,20 +133,23 @@
     text-decoration: none;
 }
 
-.oh-activity .oh-item{
+.oh-activity .oh-item {
     position: relative;
     background-color: #fff;
     border: 1px solid #d2d2d2;
     margin-bottom: 20px;
     height: 444px;
 }
-.oh-activity  .tab-pane .row{
+
+.oh-activity .tab-pane .row {
     margin: 0 -20px;
 }
+
 .oh-activity .col-lg-4,
-.oh-activity .col-md-4{
+.oh-activity .col-md-4 {
     padding: 0 20px;
 }
+
 .oh-activity .oh-header {
     position: relative;
     height: 200px;
@@ -163,6 +166,7 @@
     -moz-transition: all 0.2s ease;
     -o-transition: all 0.2s ease;
     -webkit-transition: all 0.2s ease;
+    transition: all 0.2s ease;
 }
 
 .oh-activity .oh-header .oh-flag {
@@ -212,7 +216,7 @@
     -moz-transition: all 0.2s ease;
     -o-transition: all 0.2s ease;
     -webkit-transition: all 0.2s ease;
-
+    transition: all 0.2s ease;
 }
 
 .oh-activity .oh-header:hover .oh-collect {
@@ -258,6 +262,7 @@
     -moz-transition: all 1s cubic-bezier(0, 1, 0.5, 1);
     -o-transition: all 1s cubic-bezier(0, 1, 0.5, 1);
     -webkit-transition: all 1s cubic-bezier(0, 1, 0.5, 1);
+    transition: all 1s cubic-bezier(0, 1, 0.5, 1);
 }
 
 .oh-activity .oh-body .oh-time {
@@ -281,13 +286,19 @@
 .oh-activity .oh-body .oh-progressbar {
     margin: 0 -20px 14px;
     height: 3px;
+    overflow: hidden;
     background-color: #eee;
 }
 
 .oh-activity .oh-body .oh-progressbar span {
     background-color: #21b1de;
     display: block;
+    width: 0;
     height: 100%;
+    -moz-transition: all 2s ease;
+    -o-transition: all 2s ease;
+    -webkit-transition: all 2s ease;
+    transition: all 2s ease;
 }
 
 .oh-activity .oh-body table {
@@ -309,9 +320,11 @@
 .oh-activity .oh-body hr {
     margin: 14px 0 12px 0;
 }
-.oh-activity .oh-body .oh-org{
+
+.oh-activity .oh-body .oh-org {
     min-height: 31px;
 }
+
 .oh-activity .oh-body .oh-org a {
     position: relative;
     width: 26px;
@@ -563,7 +576,7 @@
 }
 
 @media (max-width: 1200px) {
-    .oh-activity .oh-item{
+    .oh-activity .oh-item {
         height: 424px;
     }
 
@@ -601,17 +614,20 @@
     .oh-events .oh-tabs {
         display: none;
     }
+
     .oh-events {
         border: none;
     }
+
     .oh-events .tab-pane {
         display: block;
         padding-bottom: 20px;
         border: 1px solid #f0f0f0;
-        margin-top:20px ;
+        margin-top: 20px;
     }
-    .oh-events .tab-pane:first-child{
-         margin-top:0 ;
+
+    .oh-events .tab-pane:first-child {
+        margin-top: 0;
     }
 }
 
@@ -662,6 +678,7 @@
     -moz-transition: all 0.2s ease;
     -o-transition: all 0.2s ease;
     -webkit-transition: all 0.2s ease;
+    transition: all 0.2s ease;
 }
 
 .oh-users .oh-body {

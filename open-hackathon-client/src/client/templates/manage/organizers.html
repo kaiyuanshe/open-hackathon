@@ -79,6 +79,10 @@
             </div>
         </div>
     </div>
+
+{% endblock body %}
+
+{% block script %}
     <div class="modal fade bs-example-modal-sm" id="confirm_modal" tabindex="-1" role="dialog"
          aria-labelledby="mySmallModalLabel" aria-hidden="true" data-api="oh.api.admin.registration.delete">
         <div class="modal-dialog modal-sm">
@@ -98,15 +102,12 @@
             </div>
         </div>
     </div>
-{% endblock body %}
-
-{% block script %}
     {{ super() }}
     <script id="hackathon_organizer" type="text/x-jquery-tmpl">
     <tr>
         <td>${name}</td>
         <td><a href="${homepage}">${homepage}</a></td>
-        <td><img src="${logo}"></td>
+        <td><div class="oh-thumb"><img class="oh-thumbnail" src="${logo}"><div></td>
         <td>${$item.substring(description,30)}</td>
         <td class="col-action">
             <a class="btn btn-info btn-sm" data-type="edit">
@@ -117,6 +118,7 @@
             </a>
         </td>
     </tr>
+
 
     </script>
     <script type="text/javascript" src="/static/js/jquery/marked.min.js"></script>
