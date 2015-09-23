@@ -31,7 +31,7 @@ sys.path.append("..")
 from flask import g
 
 from hackathon import Component, RequiredFeature
-from hackathon.database import Team, UserTeamRel, User, Hackathon, TeamScore
+from hackathon.database import Team, UserTeamRel, User, Hackathon, TeamScore, TeamShow
 from hackathon.hackathon_response import not_found, bad_request, precondition_failed, ok, forbidden
 from hackathon.constants import TeamMemberStatus
 
@@ -339,6 +339,26 @@ class TeamManager(Component):
         else:
             score = TeamScore(score=ctx.score, team_id=team.id, judge_id=judge.id)
             self.db.add_object(score)
+
+        return self.get_score(judge, team.id)
+
+    def get_score(self, user, team_id):
+        team = self.__get_team_by_id(team_id)
+        if not team:
+            return not_found("team not found")
+
+        if not self.admin_manager.is_hackathon_admin(team.hackathon_id, user.id):
+            return {}
+
+        scores = self.db.find_all_objects_by(TeamScore, team_id=team_id)
+        resp = {
+            "all": [s.dic() for s in scores]
+        }
+        my = filter(lambda sc: sc.judge_id == user.id, scores)
+        if len(my):
+            resp["my"] = my[0].dic()
+
+        return resp
 
     # ------------------------------ private methods ----------------------------------------
 
