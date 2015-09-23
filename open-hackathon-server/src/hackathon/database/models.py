@@ -269,6 +269,7 @@ class TeamScore(DBBase):
     id = Column(Integer, primary_key=True)
     type = Column(Integer, default=0)
     score = Column(Integer)
+    reason = Column(String(200))
     create_time = Column(TZDateTime, default=get_now())
     update_time = Column(TZDateTime)
 

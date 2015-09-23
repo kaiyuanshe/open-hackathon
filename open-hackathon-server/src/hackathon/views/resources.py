@@ -280,10 +280,17 @@ class TeamScoreResource(HackathonResource):
         return team_manager.score_team(g.user, self.context())
 
 
-class UserTeamsResource(HackathonResource):
-    @token_required
+class TeamShowResource(HackathonResource):
     def get(self):
-        return team_manager.get_teams_by_user(g.user.id)
+        return team_manager.get_team_show_list(self.context().team_id)
+
+    @token_required
+    def post(self):
+        return team_manager.add_team_show(g.user, self.context())
+
+    @token_required
+    def delete(self):
+        return team_manager.delete_team_show(g.user, self.context().id)
 
 
 class TeamMemberResource(HackathonResource):
