@@ -191,7 +191,7 @@ class UserRegistrationResource(HackathonResource):
     @token_required
     @hackathon_name_required
     def post(self):
-        args = request.get_json()
+        args = {}
         args["user_id"] = g.user.id
         args["hackathon_id"] = g.hackathon.id
         return register_manager.create_registration(g.hackathon, g.user, args)
