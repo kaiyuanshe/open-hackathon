@@ -83,7 +83,7 @@
                                                 <span class="oh-flag">{{ item.ribbon }}</span>
                                             {% endif %}
                                             <a href="javascript:void(0);" role="oh-like"
-                                               class="oh-collect {% if item.like is not none %} active {% endif %}"
+                                               class="oh-collect {% if item.get('like') is not none %} active {% endif %}"
                                                data-name="{{ item.name }}"
                                                     ><span>感兴趣</span>
                                                 <img src="/static/pic/pushpin-icon.png">

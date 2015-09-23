@@ -45,23 +45,16 @@ class TeamManager(Component):
     register_manager = RequiredFeature("register_manager")
     hackathon_template_manager = RequiredFeature("hackathon_template_manager")
 
-    def get_teams_by_user(self, user_id):
-        """Get all teams of specific user
-
-        Teams in all participated hackathon are returned
-
-        :type user_id: int
-        :param user_id: id of user
-        """
-        teams = self.__get_user_teams(user_id)
-        team_list = map(lambda x: self.__team_detail(x), teams)
-
-        return team_list
-
     def get_team_by_id(self, team_id):
         team = self.__get_team_by_id(team_id)
+
+        # check whether it's anonymous user or not
+        user = None
+        if self.user_manager.validate_login():
+            user = g.user
+
         if team:
-            return self.__team_detail(team)
+            return self.__team_detail(team, user)
         else:
             return not_found()
 
@@ -78,8 +71,14 @@ class TeamManager(Component):
         :return: team's information as a dict if team is found otherwise not_found()
         """
         team = self.__get_team_by_name(hackathon_id, team_name)
+
+        # check whether it's anonymous user or not
+        user = None
+        if self.user_manager.validate_login():
+            user = g.user
+
         if team:
-            return self.__team_detail(team)
+            return self.__team_detail(team, user)
         else:
             return not_found("no such team")
 
@@ -119,7 +118,12 @@ class TeamManager(Component):
         if number is not None:
             hackathon_team_list = hackathon_team_list[0:number]
 
-        hackathon_team_list = map(lambda x: self.__team_detail(x), hackathon_team_list)
+        # check whether it's anonymous user or not
+        user = None
+        if self.user_manager.validate_login():
+            user = g.user
+
+        hackathon_team_list = map(lambda x: self.__team_detail(x, user), hackathon_team_list)
         return hackathon_team_list
 
     def create_default_team(self, hackathon, user):
@@ -169,7 +173,6 @@ class TeamManager(Component):
         self.db.update_object(team,
                               name=kwargs.get("team_name", team.name),
                               description=kwargs.get("description", team.description),
-                              git_project=kwargs.get("git_project", team.git_project),
                               logo=kwargs.get("logo", team.logo),
                               update_time=self.util.get_now())
         return self.__team_detail(team)
@@ -201,12 +204,6 @@ class TeamManager(Component):
 
     def join_team(self, user, team_id):
         """Join a team will create a record on user_team_rel table which status will be 0.
-
-        :type hackathon_id: int
-        :param hackathon_id: hackathon id
-
-        :type team_name: str | unicode
-        :param team_name: team name
 
         :type user: User
         :param user: the user to join a team
@@ -342,10 +339,11 @@ class TeamManager(Component):
         score = self.db.find_first_object_by(TeamScore, team_id=team.id, judge_id=judge.id)
         if score:
             score.score = ctx.score
+            score.reason = ctx.get("reason")
             score.update_time = self.util.get_now()
             self.db.commit()
         else:
-            score = TeamScore(score=ctx.score, team_id=team.id, judge_id=judge.id)
+            score = TeamScore(score=ctx.score, team_id=team.id, judge_id=judge.id, reason=ctx.get("reason"))
             self.db.add_object(score)
 
         return self.get_score(judge, team.id)
@@ -368,15 +366,50 @@ class TeamManager(Component):
 
         return resp
 
-    # ------------------------------ private methods ----------------------------------------
+    def add_team_show(self, user, context):
+        team = self.__get_team_by_id(context.team_id)
+        if not team:
+            return not_found()
+
+        self.__validate_team_permission(team.hackathon_id, team, user)
+        show = TeamShow(
+            note=context.get("note"),
+            type=context.type,
+            uri=context.uri,
+            team_id=context.team_id
+        )
+        self.db.add_object(show)
+        return show.dic()
+
+    def delete_team_show(self, user, show_id):
+        show = self.db.find_first_object_by(TeamShow, id=show_id)
+        if show:
+            self.__validate_team_permission(show.team.hackathon_id, show.team, user)
+            self.db.delete_object(show)
+            self.db.commit()
+
+        return ok()
+
+    def get_team_show_list(self, team_id):
+        show_list = self.db.find_all_objects_by(TeamShow, team_id=team_id)
+        return [s.dic() for s in show_list]
 
     def __init__(self):
         pass
 
-    def __team_detail(self, team):
+    def __team_detail(self, team, user=None):
         resp = team.dic()
         resp["leader"] = self.user_manager.user_display_info(team.leader)
         resp["member_count"] = team.user_team_rels.filter_by(status=TeamMemberStatus.Approved).count()
+        resp["is_admin"] = False
+        resp["is_leader"] = False
+        resp["is_member"] = False
+        if user:
+            resp["is_admin"] = self.admin_manager.is_hackathon_admin(team.hackathon_id, user.id)
+            resp["is_leader"] = team.leader_id == user.id
+            rel = self.db.find_first_object_by(UserTeamRel, team_id=team.id, user_id=user.id)
+            resp["is_member"] = rel is not None
+
         return resp
 
     def __generate_team_name(self, hackathon, user):
