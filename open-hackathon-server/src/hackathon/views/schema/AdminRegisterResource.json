@@ -1,0 +1,24 @@
+{
+  "AdminRegisterResource": {
+    "put": {
+      "input": {
+        "description": "approve or refuse registration",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "id of user_hackathon_rel"
+          },
+          "status": {
+            "type": "integer",
+            "enum": [
+              0,
+              1,
+              2
+            ]
+          }
+        }
+      }
+    }
+  }
+}

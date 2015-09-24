@@ -1,189 +1,266 @@
 {% extends "manage/main.html" %}
 
 {% block style %}
-{{ super() }}
-<link href="/static/css/daterangepicker-bs3.css" rel="stylesheet">
-<link href="/static/css/jquery.fileupload.css" rel="stylesheet">
-<link href="/static/css/bootstrap-markdown.min.css" rel="stylesheet">
+    {{ super() }}
+    <link href="/static/css/daterangepicker-bs3.css" rel="stylesheet">
+    <link href="/static/css/bootstrap-markdown.min.css" rel="stylesheet">
 {% endblock %}
 
 {% block body %}
-<div class="col-lg-12" loading>
-    <div class="box" style="display:none">
-        <div class="box-header">
-            <h2><i class="fa fa-edit"></i>编辑黑客松</h2>
-            <ul class="nav nav-tabs" id="tabs" data-type="tabs">
-                <li class="active"><a href="#info">基础信息</a></li>
-                <li><a href="#banner">活动图片</a></li>
-            </ul>
-        </div>
-        <div class="box-content relative">
-            <div class="oh-switch">
-                <select  class="form-control input-sm" id="hackathon_switch">
-                    <option value="0">草稿</option>
-                    <option value="1">上线</option>
-                    <option value="2">线下</option>
-                </select>
+    <div class="col-lg-12" loading>
+        <div class="box" style="display:none">
+            <div class="box-header">
+                <h2><i class="fa fa-edit"></i>编辑黑客松</h2>
+                <ul class="nav nav-tabs" id="tabs" data-type="tabs">
+                    <li class="active"><a href="#info">基础信息</a></li>
+                    <li><a href="#banner">活动图片</a></li>
+                </ul>
             </div>
-            <form class="form-horizontal" id="editHackathonForm">
-                <div class="tab-content">
-                    <div class="tab-pane" id="banner">
-                        <fieldset>
-                            <legend>
-                                黑客松活动图片(banner)
-                            </legend>
-                        </fieldset>
+            <div class="box-content relative">
+                <div class="oh-switch">
+                    <select class="form-control input-sm" id="hackathon_switch">
+                        <option value="0">草稿</option>
+                        <option value="1">上线</option>
+                        <option value="2">线下</option>
+                    </select>
+                </div>
+                <form class="form-horizontal" id="editHackathonForm">
+                    <div class="tab-content">
+                        <div class="tab-pane" id="banner">
+                            <fieldset>
+                                <legend>
+                                    活动图片 (banner)
+                                </legend>
+                            </fieldset>
 
-                        <div class="files row">
-                            <div class="fileupload-buttonbar">
-                                <div class="col-sm-3 col-xs-6">
-                                    <div class="btn-upload fileinput-button">
-                                        <input type="file" name="files" multiple="">
-
-                                        <div><span class="glyphicon glyphicon-upload"></span>上传活动图片</div>
+                            <div class="files row">
+                                <div class="fileupload-buttonbar">
+                                    <div class="col-sm-3 col-xs-6" id="banner_btn">
+                                        <div class="btn-upload fileinput-button">
+                                            <div><span class="glyphicon glyphicon-upload"></span>添加活动图片</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+
                         </div>
+                        <div class="tab-pane active" id="info">
+                            <fieldset>
+                                <legend>
+                                    编辑黑客松基础信息
+                                </legend>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group has-feedback">
+                                            <label class="col-md-2 control-label">名称</label>
 
+                                            <div class="col-md-10">
+                                                <div class="form-control" id="name"></div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group has-feedback">
+
+                                            <label class="col-md-2 control-label">显示名称</label>
+
+                                            <div class="col-md-10 register">
+                                                <input type="text" class="form-control" name="display_name"
+                                                       id="display_name"
+                                                       required
+                                                       data-bv-trigger="blur"
+                                                       data-bv-notempty-message="Hackathon显示名称是必需的，不能为空">
+                                            </div>
+
+                                        </div>
+
+                                        <div class="form-group has-feedback">
+                                            <label class="col-md-2 control-label">标签</label>
+
+                                            <div class="col-md-10">
+                                                <input type="text" class="form-control" name="tags"
+                                                       data-role="tagsinput"
+                                                       id="tags">
+                                            </div>
+                                        </div>
+                                        <div class="form-group has-feedback">
+                                            <label class="col-md-2 control-label">简介</label>
+
+                                            <div class="col-md-10">
+                                                <textarea class="form-control" name="short_description"
+                                                          id="short_description" maxlength="200"></textarea>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-md-2 control-label">活动介绍</label>
+
+                                            <div class="col-md-10">
+                                                <textarea name="content" id="markdownEdit" rows="10"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group has-feedback">
+                                            <label class="col-md-2 control-label">广告语</label>
+
+                                            <div class="col-md-10">
+                                                <input type="text" class="form-control" name="ribbon"
+                                                       id="ribbon"
+                                                       maxlength="60">
+                                            </div>
+                                        </div>
+                                        <div class="form-group has-feedback">
+                                            <label class="col-md-2 control-label">活动地址</label>
+
+                                            <div class="col-md-10">
+                                                <input type="text" class="form-control" name="location"
+                                                       id="location">
+                                            </div>
+                                        </div>
+                                        <div class="form-group has-feedback">
+                                            <label class="col-md-2 control-label">报名人数</label>
+
+                                            <div class="col-md-10">
+                                                <input type="number" class="form-control" name="max_enrollment"
+                                                       id="max_enrollment" min="0" placeholder="" value="1"
+                                                       required
+                                                       data-bv-trigger="blur"
+                                                       data-bv-notempty-message="报名人数，不能为空"
+                                                       data-bv-integer-message="请输入数字">
+                                            </div>
+                                        </div>
+                                        <div class="form-group has-feedback">
+                                            <label class="col-md-2 control-label" for="event_time">活动时间</label>
+
+                                            <div class="col-md-10">
+                                                <input type="text" class="form-control" id="event_time"
+                                                       name="event_time"
+                                                       placeholder=""
+                                                       required
+                                                       data-bv-notempty-message="活动时间，不能为空">
+                                            </div>
+                                        </div>
+                                        <div class="form-group has-feedback">
+                                            <label class="col-md-2 control-label"
+                                                   for="register_time">报名时间</label>
+
+                                            <div class="col-md-10">
+                                                <input type="text" class="form-control" id="register_time"
+                                                       name="register_time"
+                                                       placeholder=""
+                                                       required
+                                                       data-bv-notempty-message="报名时间，不能为空">
+                                            </div>
+                                        </div>
+                                        <div class="form-group has-feedback">
+                                            <label class="col-md-2 control-label" for="judge_time">评分时间</label>
+
+                                            <div class="col-md-10">
+                                                <input type="text" class="form-control" id="judge_time"
+                                                       name="judge_time"
+                                                       placeholder=""
+                                                       required
+                                                       data-bv-notempty-message="评分时间，不能为空">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-sm-offset-2 col-sm-6">
+                                                <label class="checkbox">
+                                                    <input type="checkbox" class="control-label"
+                                                           name="freedom_team"
+                                                           checked="checked" id="freedom_team"><i></i>
+                                                    <span>自由组队</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-sm-offset-2 col-sm-6">
+                                                <label class="checkbox">
+                                                    <input type="checkbox" class="control-label"
+                                                           name="alauda_enabled"
+                                                           id="alauda_enabled"><i></i>
+                                                    <span>使用云雀</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-sm-offset-2 col-sm-6">
+                                                <label class="checkbox">
+                                                    <input type="checkbox" class="control-label"
+                                                           name="auto_approve"
+                                                           id="auto_approve"><i></i>
+                                                    <span>自动审核</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
                     </div>
-                    <div class="tab-pane active" id="info">
-                        <fieldset>
-                            <legend>
-                                编辑黑客松基础信息
-                            </legend>
-                            <div class="form-group has-feedback">
-
-                                <label class="col-md-3 control-label">Hackathon 显示名称</label>
-
-                                <div class="col-md-6 register">
-                                    <input type="text" class="form-control" name="display_name" id="display_name"
-                                           required
-                                           data-bv-trigger="blur"
-                                           data-bv-notempty-message="Hackathon显示名称是必需的，不能为空">
-                                </div>
-                            </div>
-                            <div class="form-group has-feedback">
-                                <label class="col-md-3 control-label">Hackathon 活动地址</label>
-
-                                <div class="col-md-6">
-                                    <input type="text" class="form-control" name="location" id="location" placeholder=""
-                                           required
-                                           data-bv-trigger="blur"
-                                           data-bv-notempty-message="活动地址，不能为空">
-                                </div>
-                            </div>
-                            <div class="form-group has-feedback">
-                                <label class="col-md-3 control-label">报名人数</label>
-
-                                <div class="col-md-6">
-                                    <input type="number" class="form-control" name="max_enrollment" id="max_enrollment" min="0" placeholder="" value="1"
-                                           required
-                                           data-bv-trigger="blur"
-                                           data-bv-notempty-message="报名人数，不能为空"
-                                           data-bv-integer-message="请输入数字">
-                                </div>
-                            </div>
-                            <div class="form-group has-feedback">
-                                <label class="col-md-3 control-label" for="event_time">活动时间</label>
-
-                                <div class="col-md-6">
-                                    <input type="text" class="form-control" id="event_time" name="event_time" placeholder=""
-                                           required
-                                           data-bv-notempty-message="活动时间，不能为空">
-                                </div>
-                            </div>
-                            <div class="form-group has-feedback">
-                                <label class="col-md-3 control-label" for="register_time">报名时间</label>
-
-                                <div class="col-md-6">
-                                    <input type="text" class="form-control" id="register_time" name="register_time" placeholder=""
-                                           required
-                                           data-bv-notempty-message="报名时间，不能为空">
-                                </div>
-                            </div>
-                            <div class="form-group has-feedback">
-                                <label class="col-md-3 control-label" for="judge_time">评分时间</label>
-
-                                <div class="col-md-6">
-                                    <input type="text" class="form-control" id="judge_time" name="judge_time" placeholder=""
-                                           required
-                                           data-bv-notempty-message="评分时间，不能为空">
-                                </div>
-                            </div>
-                             <div class="form-group">
-                                <div class="col-sm-offset-3 col-sm-6">
-                                    <label class="checkbox">
-                                        <input type="checkbox" class="control-label" name="alauda_enabled" id="alauda_enabled"><i></i>
-                                        <span>是否使用云雀</span>
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <div class="col-sm-offset-3 col-sm-6">
-                                    <label class="checkbox">
-                                        <input type="checkbox" class="control-label" name="auto_approve" id="auto_approve"><i></i>
-                                        <span>报名者无需审核</span>
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">活动介绍</label>
-
-                                <div class="col-md-6">
-                                    <textarea name="content" id="markdownEdit" rows="10"></textarea>
-                                </div>
-                            </div>
-                        </fieldset>
+                    <div class="form-group has-feedback">
+                        <div class="col-sm-offset-3 col-sm-6">
+                            <button type="submit" class="btn btn-primary"> 提交</button>
+                        </div>
                     </div>
-                </div>
-                <div class="form-group has-feedback">
-                    <div class="col-sm-offset-3 col-sm-6">
-                        <button type="submit" class="btn btn-primary"> 提交</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock body %}
+
+{% block script %}
+    {{ super() }}
+    <div class="modal fade" id="bannerModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <form id="addBannerForm" class="form-horizontal" novalidate>
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">添加图片</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group"
+                             ng-class="{ 'has-error' : registerForm.team_name.$invalid && registerForm.team_name.$touched }">
+                            <label class="col-sm-3 control-label required">图片路径</label>
+
+                            <div class="col-sm-9">
+                                <input type="url" class="form-control" id="banner" name="banner" placeholder="图片路径"
+                                       required
+                                       data-bv-trigger="blur"
+                                       data-bv-message="请填写正确的图片访问路径"
+                                       data-bv-notempty-message="请填图片路径">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">确定</button>
+                        <button type="button" class="btn btn-warning" data-dismiss="modal">取消</button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
-</div>
-{% endblock body %}
-
-{% block script %}
-{{ super() }}
-<script id="hackathon_images_temp" type="text/x-jquery-tmpl">
-<div class="col-sm-3 col-xs-6 template-download in">
-    <div class="thumbnail">
-        <span class="preview">
-            <a href="${thumbnailUrl}" title="${name}" data-gallery="">
-                <img src="${thumbnailUrl}">
+    <script id="banner_temp" type="text/x-jquery-tmpl">
+    {% raw %}
+    <div class="col-sm-3 col-xs-6 template-download">
+        <div class="thumbnail">
+            <span class="preview">
+                <a href="javascript:;"><img src="{url}" error=""></a>
+            </span>
+            <a class="delete" data-guid="{guid}"  data-action="close" title="删除">
+                <i class="glyphicon glyphicon-remove"></i>
             </a>
-        </span>
-        <div class="image-info">
-            <p>${name}</p>
         </div>
-        <a class="delete" data-action="close" title="删除" data-type="DELETE" data-url="${deleteUrl}">
-            <i class="glyphicon glyphicon-remove"></i>
-        </a>
     </div>
-</div>
-</script>
-<script type="text/javascript" src="/static/js/daterangepickerlocale.js"></script>
-<script type="text/javascript" src="/static/js/fileuploadTemplate.js"></script>
-<script type="text/javascript" src="/static/js/jquery/jquery.ui.widget.js"></script>
-<script type="text/javascript" src="/static/js/jquery/tmpl.min.js"></script>
-<script type="text/javascript" src="/static/js/jquery/marked.min.js"></script>
-<script type="text/javascript" src="/static/js/jquery/bootstrap-markdown.js"></script>
-<script type="text/javascript" src="/static/js/jquery/bootstrap-markdown.zh.js"></script>
-<script type="text/javascript" src="/static/js/jquery/to-markdown.js"></script>
-<script type="text/javascript" src="/static/js/jquery/load-image.all.min.js"></script>
-<script type="text/javascript" src="/static/js/jquery/jquery.iframe-transport.js"></script>
-<script type="text/javascript" src="/static/js/jquery/jquery.fileupload.js"></script>
-<script type="text/javascript" src="/static/js/jquery/jquery.fileupload-process.js"></script>
-<script type="text/javascript" src="/static/js/jquery/jquery.fileupload-image.js"></script>
-<script type="text/javascript" src="/static/js/jquery/jquery.fileupload-audio.js"></script>
-<script type="text/javascript" src="/static/js/jquery/jquery.fileupload-video.js"></script>
-<script type="text/javascript" src="/static/js/jquery/jquery.fileupload-validate.js"></script>
-<script type="text/javascript" src="/static/js/jquery/jquery.fileupload-ui.js"></script>
-<script type="text/javascript" src="/static/js/jquery/daterangepicker.js"></script>
-<script type="text/javascript" src="/static/js/views/oh.manage.edithackathon.js"></script>
+    {% endraw %}
+    </script>
+    <script type="text/javascript" src="/static/js/daterangepickerlocale.js"></script>
+    <script type="text/javascript" src="/static/js/jquery/bootstrap-tagsinput.min.js"></script>
+    <script type="text/javascript" src="/static/js/jquery/marked.min.js"></script>
+    <script type="text/javascript" src="/static/js/jquery/bootstrap-markdown.js"></script>
+    <script type="text/javascript" src="/static/js/jquery/bootstrap-markdown.zh.js"></script>
+    <script type="text/javascript" src="/static/js/jquery/to-markdown.js"></script>
+    <script type="text/javascript" src="/static/js/jquery/daterangepicker.js"></script>
+    <script type="text/javascript" src="/static/js/views/oh.manage.edithackathon.js"></script>
 {% endblock %}

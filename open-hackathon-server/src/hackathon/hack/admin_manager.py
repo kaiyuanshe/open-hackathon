@@ -44,21 +44,7 @@ class AdminManager(Component):
     """
     user_manager = RequiredFeature("user_manager")
     hackathon_manager = RequiredFeature("hackathon_manager")
-
-    def validate_admin_privilege(self, user_id, hackathon_id):
-        """Check the admin authority on hackathon
-
-        :type user_id: int
-        :param user_id: id of an user
-
-        :type hackathon_id: int
-        :param hackathon_id: id of a hackathon
-
-        :rtype: bool
-        :return True if specific user has admin privilidge on specific hackathon otherwise False
-        """
-        hack_ids = self.get_entitled_hackathon_ids(user_id)
-        return -1 in hack_ids or hackathon_id in hack_ids
+    register_manager = RequiredFeature("register_manager")
 
     def validate_admin_privilege_http(self):
         """Check the admin authority on hackathon for http request
@@ -69,7 +55,7 @@ class AdminManager(Component):
         :rtype: bool
         :return True if specific user has admin privilidge on specific hackathon otherwise False
         """
-        return self.validate_admin_privilege(g.user.id, g.hackathon.id)
+        return self.is_hackathon_admin(g.hackathon.id, g.user.id)
 
     def get_entitled_hackathon_ids(self, user_id):
         """Get hackathon id list that specific user is entitled to manage
@@ -81,7 +67,8 @@ class AdminManager(Component):
         :return list of hackathon id
         """
         # get AdminUserHackathonRels from query withn filter by email
-        admin_user_hackathon_rels = self.db.find_all_objects_by(AdminHackathonRel, user_id=user_id)
+        admin_user_hackathon_rels = self.db.find_all_objects_by(AdminHackathonRel,
+                                                                user_id=user_id)
 
         # get hackathon_ids_from AdminUserHackathonRels details
         hackathon_ids = [x.hackathon_id for x in admin_user_hackathon_rels]
@@ -119,6 +106,10 @@ class AdminManager(Component):
         user = self.user_manager.get_user_by_email(args.get("email"))
         if user is None:
             return not_found("user not found")
+
+        if self.register_manager.is_user_registered(user.id, g.hackathon):
+            return precondition_failed("Cannot add a registered user as admin",
+                                       friendly_message="该用户已报名参赛，不能再被选为裁判或管理员。请先取消其报名")
 
         try:
             ahl = self.db.find_first_object(AdminHackathonRel,
@@ -181,25 +172,26 @@ class AdminManager(Component):
             self.log.error(e)
             return internal_server_error(e)
 
-    def is_hackathon_admin(self, hackathon_id, user):
+    def is_hackathon_admin(self, hackathon_id, user_id):
         """Check whether user is admin of specific hackathon
 
         :type hackathon_id: int
         :param hackathon_id: id of hackathon
 
-        :type user: User
-        :param user: the user to be checked
+        :type user_id: int
+        :param user_id: the id of user to be checked
 
         :rtype: bool
-        :return True if user is admin of the hackathon otherwise False
+        :return True if specific user has admin privilidge on specific hackathon otherwise False
         """
-        ahr = self.db.find_first_object_by(AdminHackathonRel, hackathon_id=hackathon_id, user_id=user.id)
-        return ahr is not None
+        hack_ids = self.get_entitled_hackathon_ids(user_id)
+        return -1 in hack_ids or hackathon_id in hack_ids
 
     def __generate_update_items(self, args):
         """Generate columns of AdminHackathonRel to be updated"""
-        update_items = {}
-        update_items['update_time'] = self.util.get_now()
+        update_items = {
+            'update_time': self.util.get_now()
+        }
         if 'role_type' in args:
             update_items['role_type'] = args['role_type']
         if 'remarks' in args:

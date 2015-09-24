@@ -42,6 +42,7 @@ __all__ = [
     "HostedDockerHealthCheck",
     "AlaudaDockerHealthCheck",
     "GuacamoleHealthCheck",
+    "StorageHealthCheck"
 ]
 
 STATUS = "status"
@@ -136,6 +137,11 @@ class AzureHealthCheck(HealthCheck):
 
     def report_health(self):
         azure_key = self.db.find_first_object(AzureKey)
+        if not azure_key:
+            return {
+                STATUS: HEALTH_STATUS.WARNING,
+                DESCRIPTION: "No Azure key found"
+            }
         azure = Service(azure_key.id)
         if azure.ping():
             return {
@@ -147,3 +153,11 @@ class AzureHealthCheck(HealthCheck):
             }
 
 
+class StorageHealthCheck(HealthCheck):
+    """Check the status of storage"""
+
+    def report_health(self):
+        self.storage.report_health()
+
+    def __init__(self):
+        self.storage = RequiredFeature("storage")

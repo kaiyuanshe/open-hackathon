@@ -24,11 +24,11 @@
             </div>
 
             <div class="box-content">
-                 <form class="form-horizontal" id="templateform" method="post"
+                <form class="form-horizontal" id="templateform" method="post"
                       data-bv-feedbackicons-valid="glyphicon glyphicon-ok"
                       data-bv-feedbackicons-invalid="glyphicon glyphicon-remove"
                       data-bv-feedbackicons-validating="glyphicon glyphicon-refresh"
-                      >
+                        >
                     <fieldset>
                         <legend>
                             创建/更新模板
@@ -44,19 +44,10 @@
                                        data-bv-notempty-message="名称是必需的，不能为空"
                                        pattern="^(?!_)(?!.*?_$)[a-zA-Z0-9_-]+$"
                                        data-bv-regexp-message="模板名称只能由英文字母的，数字和下划线"
-                                       minlength="5"
-                                       data-bv-stringlength-message="模板名称必须至少有5个字符"
+                                       minlength="3"
+                                       maxlength="50"
+                                       data-bv-stringlength-message="模板名称必须至少有3个字符"
                                         >
-                            </div>
-                        </div>
-
-                        <div class="form-group has-feedback">
-                            <label class="col-md-3 control-label">提供商</label>
-
-                            <div class="col-md-6 register">
-                                <select class="form-control" name="provider" id="provider">
-                                    <option value="0">DOCKER</option>
-                                </select>
                             </div>
                         </div>
 
@@ -65,9 +56,9 @@
 
                             <div class="col-md-6 register">
                                 <input type="text" class="form-control" name="description" id="description"
-                                        data-bv-trigger="blur"
-                                        required
-                                        data-bv-notempty-message="描述是必需的，不能为空"
+                                       data-bv-trigger="blur"
+                                       required
+                                       data-bv-notempty-message="描述是必需的，不能为空"
                                         >
                             </div>
                         </div>
@@ -115,14 +106,23 @@
                     data-bv-notempty-message="名称是必需的，不能为空"
                     pattern="^(?!_)(?!.*?_$)[a-zA-Z0-9_-]+$"
                     data-bv-regexp-message="模板单元名称只能由英文字母的，数字和下划线"
-                    minlength="5"
-                    data-bv-stringlength-message="模板单元名称必须至少有5个字符"
+                    minlength="3"
+                    data-bv-stringlength-message="模板单元名称必须至少有3个字符"
                     >
             </div>
             <button type="button" class="btn btn-danger" data-type="btn_delete_template_unit"> 删除该模板单元</button>
         </div>
         <div class="form-group has-feedback">
-            <label class="col-md-3 control-label">类型</label>
+            <label class="col-md-3 control-label">提供商</label>
+            <div class="col-md-6 register">
+                <select class="form-control" name="provider">
+                    <option value="0">Docker</option>
+                    <option value="1">Azure</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group has-feedback">
+            <label class="col-md-3 control-label">系统类型</label>
             <div class="col-md-6 register">
                 <select class="form-control" name="type">
                     <option value="ubuntu terminal">ubuntu terminal</option>
@@ -174,8 +174,8 @@
                     data-bv-notempty-message="名称是必需的，不能为空"
                     pattern="^(?!_)(?!.*?_$)[a-zA-Z0-9_-]+$"
                     data-bv-regexp-message="远程连接名称只能由英文字母的，数字和下划线"
-                    minlength="5"
-                    data-bv-stringlength-message="远程连接名称称必须至少有5个字符"
+                    minlength="3"
+                    data-bv-stringlength-message="远程连接名称称必须至少有3个字符"
                     >
             </div>
         </div>
@@ -204,7 +204,7 @@
                     data-bv-trigger="blur"
                     required
                     data-bv-notempty-message="远程连接端口是必需的，不能为空"
-                    min="0"
+                    min="1"
                     data-bv-greaterthan-inclusive="true"
                     data-bv-greaterthan-message="端口号应该大于0"
                     max="65535"
@@ -243,6 +243,7 @@
     </div>
 
 
+
 </script>
 <script id="port_item" type="text/x-jquery-tmpl">
     <div data-type="port-group">
@@ -257,8 +258,8 @@
                     data-bv-notempty-message="名称是必需的，不能为空"
                     pattern="^(?!_)(?!.*?_$)[a-zA-Z0-9_-]+$"
                     data-bv-regexp-message="端口名称只能由英文字母的，数字和下划线"
-                    minlength="5"
-                    data-bv-stringlength-message="端口名称称必须至少有5个字符"
+                    minlength="3"
+                    data-bv-stringlength-message="端口名称称必须至少有3个字符"
                     >
             </div>
             <button type="button" class="btn btn-danger" data-type="btn_delete_port"> 删除该端口</button>
@@ -310,6 +311,7 @@
             </div>
         </div>
     </div>
+
 
 </script>
 <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>

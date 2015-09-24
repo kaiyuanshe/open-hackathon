@@ -1,0 +1,17 @@
+{
+  "TemplateResource": {
+    "get": {
+      "input": {
+        "description": "GET the basic information of a template by its Id",
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          }
+        }
+      }
+    }
+  }
+}

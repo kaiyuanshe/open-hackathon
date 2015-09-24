@@ -25,3 +25,4 @@
 # -----------------------------------------------------------------------------------
 
 from user_manager import UserManager
+from  user_profile_manager import UserProfileManager

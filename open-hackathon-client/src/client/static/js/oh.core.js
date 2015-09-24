@@ -24,24 +24,46 @@
 
 ;
 (function ($, w) {
-    var CURRENT_HACKATHON_COOKIE_NAME = 'current_hackathon';
     w.oh = w.oh || {};
     w.oh.comm = {
         DateFormat: function (milliseconds, formatstr) {
             formatstr = formatstr || 'yyyy-MM-dd';
             return new Date(milliseconds).format(formatstr);
         },
+        guid: function () {
+            var S4 = function () {
+                return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+            };
+            return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
+        },
         getCurrentHackathon: function () {
             return $('meta[name="hackathon_name"]').attr('content');
         },
         createLoading: function (elemt) {
             $(elemt).children().hide();
-            $(elemt).append($('<div class="text-center" data-type="pageloading"><img src="/static/pic/spinner-lg.gif"></div>'))
+            $(elemt).append($('<div class="text-center" data-type="pageloading"><img src="/static/pic/spinner-lg.gif"></div>'));
         },
         removeLoading: function () {
-            var pageloading = $('[data-type="pageloading"]')
+            var pageloading = $('[data-type="pageloading"]');
             pageloading.siblings().show();
             pageloading.detach();
+        },
+        stripTags: function (html, limit) {
+            limit = limit || 60;
+            var text = html.replace(/(<([^>]+)>)/ig, '');
+            return limit ? text.substr(0, limit) : text;
+        },
+        alert: function (title, text, fun) {
+            fun = fun || new Function();
+            var alert = $('body').Dialog({
+                title: title,
+                body: text,
+                footer: $('<button class="btn btn-primary">确定</button>').click(function (e) {
+                    fun();
+                    alert.hide();
+                }),
+                modal: 'alert'
+            });
         }
     };
 
@@ -50,7 +72,7 @@
         var r = window.location.search.substr(1).match(reg);
         if (r != null) return unescape(r[2]);
         return null;
-    }
+    };
 
     function executeFunctionByName(functionName, context) {
         var args = [].slice.call(arguments).splice(2);
@@ -79,11 +101,24 @@
             var li = a.parent();
             li.addClass('active').siblings().removeClass('active');
             $(toTab).addClass('active').siblings().removeClass('active');
-            ;
         })
     }
 
     $(function () {
+        $('body').on('click', '[role="oh-like"]', function (e) {
+            var like = $(this);
+            var hackathon_name = like.data('name');
+            oh.api.user.hackathon.like.post({header: {hackathon_name: hackathon_name}}, function (data) {
+                if (data.error) {
+                    oh.comm.alert('错误', data.error.friendly_message);
+                } else {
+                    like.addClass('active');
+                }
+            });
+        });
+
+
+        $('[data-toggle="tooltip"]').tooltip();
         if (location.pathname.search('logout', 'i') != -1) {
             location.href = '/login';
             return;
@@ -118,7 +153,7 @@
                 header: {},
                 body: {},
                 query: {}
-            }
+            };
             $.extend(_params, obj.data('options') || {});
             executeFunctionByName(obj.data('api'), w, _params, function (data) {
                 obj.empty().append($(obj.data('target')).tmpl(data));
@@ -194,3 +229,57 @@ String.prototype.format = function (args) {
     }
     return result;
 };
+
+(function ($) {
+    var Dialog = function (select, options) {
+        this.params = {
+            title: '',
+            body: '',
+            footer: '',
+            modal: ''
+        }
+        $.extend(true, this.params, options || {});
+        this.layout = $('<div class="modal fade {modal}"  role="dialog" >\
+                <div class="modal-dialog modal-sm">\
+                    <div class="modal-content">\
+                        <div class="modal-header">\
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>\
+                            <h4 class="modal-title">{title}</h4>\
+                        </div>\
+                        <div class="modal-body">\
+                            {body}\
+                        </div>\
+                        <div class="modal-footer">\
+                        </div>\
+                     </div>\
+                </div>\
+            </div>'.format(this.params));
+        this.layout.find('.modal-footer').append(this.params.footer);
+        this.init();
+    }
+    Dialog.prototype = {
+        init: function () {
+            this.layout.on('hidden.bs.modal', function (e) {
+                e.target.remove();
+            })
+            this.layout.modal('show');
+        },
+        hide: function () {
+            this.layout.modal('hide');
+        }
+    }
+    $.fn.Dialog = function (options) {
+        if ($(this).length > 1) {
+            var _instances = [];
+            $(this).each(function (i) {
+                _instances[i] = new Dialog(this, options);
+            });
+            return _instances;
+        } else {
+            return new Dialog(this, options);
+        }
+    }
+    if (!jQuery.fn.dialog) {
+        $.fn.dialog = $.fn.Dialog;
+    }
+})(jQuery);

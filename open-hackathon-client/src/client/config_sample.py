@@ -59,12 +59,14 @@ Config = {
     },
     "login": {
         "github": {
+            "client_id": GITHUB_CLIENT_ID,
             "access_token_url": 'https://github.com/login/oauth/access_token?client_id=%s&client_secret=%s&redirect_uri=%s/github&code=' % (
                 GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, HOSTNAME),
             "user_info_url": 'https://api.github.com/user?access_token=',
             "emails_info_url": 'https://api.github.com/user/emails?access_token='
         },
         "qq": {
+            "client_id": QQ_CLIENT_ID,
             "meta_content": QQ_META_CONTENT,
             "access_token_url": 'https://graph.qq.com/oauth2.0/token?grant_type=authorization_code&client_id=%s&client_secret=%s&redirect_uri=%s/qq&code=' % (
                 QQ_CLIENT_ID, QQ_CLIENT_SECRET, HOSTNAME),
@@ -72,10 +74,13 @@ Config = {
             "user_info_url": 'https://graph.qq.com/user/get_user_info?access_token=%s&oauth_consumer_key=%s&openid=%s'
         },
         "gitcafe": {
+            "client_id": GITCAFE_CLIENT_ID,
             "access_token_url": 'https://gcas.dgz.sh/oauth/token?client_id=%s&client_secret=%s&redirect_uri=%s/gitcafe&grant_type=authorization_code&code=' % (
-                GITCAFE_CLIENT_ID, GITCAFE_CLIENT_SECRET, HOSTNAME)
+                GITCAFE_CLIENT_ID, GITCAFE_CLIENT_SECRET, HOSTNAME),
+            "user_info_url": "https://gcas.dgz.sh/api/v1/user"
         },
         "weibo": {
+            "client_id": WEIBO_CLIENT_ID,
             "meta_content": WEIBO_META_CONTENT,
             "user_info_url": 'https://api.weibo.com/2/users/show.json?access_token=',
             "email_info_url": 'https://api.weibo.com/2/account/profile/email.json?access_token=',
@@ -129,6 +134,8 @@ Config = {
                         "": ["get", "post", "put"],
                         "checkname": ["get"],
                         "list": ["get"],
+                        "tags": ["get", "post"],
+                        "config": ["post"],
                         "administrator": {
                             "": ["put", "post", "delete"],
                             "list": ["get"]
@@ -137,6 +144,9 @@ Config = {
                             "": ["post", "delete"],
                             "list": ["get"],
                             "check": ["get"]
+                        },
+                        "organizer": {
+                            "": ["get", "post", "put", "delete"]
                         }
                     },
                     "registration": {
@@ -158,9 +168,9 @@ Config = {
                 },
                 "user": {
                     "": ["get"],
+                    "login": ["post", "delete"],
                     "experiment": {
-                        "": ["get", "post", "delete", "put"],
-                        "list": ["get"]
+                        "": ["get", "post", "delete", "put"]
                     },
                     "registration": {
                         "": ["put", "post", "get"],
@@ -172,7 +182,13 @@ Config = {
                     },
                     "team": {
                         "member": ["get"]
+                    },
+                    "hackathon": {
+                        "like": ["post"]
                     }
+                },
+                "bulletin": {
+                    "": ["get", "post"]
                 },
                 "hackathon": {
                     "": ["get"],
@@ -195,6 +211,9 @@ Config = {
                         "": ["post", "put"],
                         "list": ["get"]
                     }
+                },
+                "talent": {
+                    "list": ["get"]
                 }
             }
         }

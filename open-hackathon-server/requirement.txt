@@ -13,3 +13,4 @@ mock==1.0.1
 python-dateutil
 pytz
 validictory
+beaker

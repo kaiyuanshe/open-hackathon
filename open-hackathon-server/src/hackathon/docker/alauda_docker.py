@@ -43,10 +43,8 @@ from hackathon.database.models import VirtualEnvironment
 from hackathon.hackathon_exception import (
     AlaudaException
 )
-from hackathon.template.docker_template_unit import (
-    DockerTemplateUnit
-)
-from hackathon import Component, RequiredFeature, Context
+from hackathon.template import DOCKER_UNIT
+from hackathon import Component, Context
 
 
 class ALAUDA:
@@ -60,8 +58,6 @@ class ALAUDA:
 
 
 class AlaudaDockerFormation(DockerFormationBase, Component):
-    scheduler = RequiredFeature("scheduler")
-
     def start(self, unit, **kwargs):
         virtual_environment = kwargs["virtual_environment"]
 
@@ -94,7 +90,9 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
     def report_health(self):
         """send a ping for health check"""
         try:
-            self.__get("/v1/auth/profile/")
+            namespace = self.util.get_config("docker.alauda.namespace")
+            path = "/v1/auth/%s/profile/" % namespace
+            self.__get(path)
             return {
                 HEALTH.STATUS: HEALTH_STATUS.OK
             }
@@ -140,22 +138,22 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
         ve.status = VEStatus.RUNNING
         guacamole = context.guacamole
         instance_ports = filter(lambda p:
-                                p[ALAUDA.CONTAINER_PORT] == guacamole[DockerTemplateUnit.REMOTE_PORT],
+                                p[ALAUDA.CONTAINER_PORT] == guacamole[DOCKER_UNIT.REMOTE_PORT],
                                 service[ALAUDA.INSTANCE_PORTS])
         if len(instance_ports) > 0:
             alauda_port = instance_ports[0]
             gc = {
                 "displayname": service_name,
                 "name": service_name,
-                "protocol": guacamole[DockerTemplateUnit.REMOTE_PROTOCOL],
+                "protocol": guacamole[DOCKER_UNIT.REMOTE_PROTOCOL],
                 "hostname": alauda_port.get(ALAUDA.DEFAULT_DOMAIN),
                 "port": alauda_port.get(ALAUDA.SERVICE_PORT)
             }
-            if DockerTemplateUnit.REMOTE_USERNAME in guacamole:
-                gc["username"] = guacamole[DockerTemplateUnit.REMOTE_USERNAME]
+            if DOCKER_UNIT.REMOTE_USERNAME in guacamole:
+                gc["username"] = guacamole[DOCKER_UNIT.REMOTE_USERNAME]
 
-            if DockerTemplateUnit.REMOTE_PASSWORD in guacamole:
-                gc["password"] = guacamole[DockerTemplateUnit.REMOTE_PASSWORD]
+            if DOCKER_UNIT.REMOTE_PASSWORD in guacamole:
+                gc["password"] = guacamole[DOCKER_UNIT.REMOTE_PASSWORD]
 
             # save guacamole config into DB
             ve.remote_paras = json.dumps(gc)
@@ -292,7 +290,7 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
     def __request(self, method, path, data=None):
         url = self.__get_full_url(path)
         req = requests.request(method, url, headers=self.__get_headers(), data=data)
-        if req.status_code >= 200 and req.status_code < 300:
+        if 200 <= req.status_code < 300:
             resp = req.content
             self.log.debug("'%s' response %d from alauda api '%s': %s" % (method, req.status_code, path, resp))
             return resp

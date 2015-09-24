@@ -1,109 +1,114 @@
 {% extends "manage/main.html" %}
 
 {% block style %}
+    <link href="/static/css/bootstrap-markdown.min.css" rel="stylesheet">
 {% endblock %}
 
 {% block body %}
-<div class="col-lg-12" loading>
-    <div class="box" style="display:none">
-        <div class="box-header">
-            <h2><i class="fa fa-edit"></i>主办方</h2>
-        </div>
-        <div class="box-content">
-            <div id="organizertable">
-                <a data-type="new" href="javascript:;">添加</a>
-                <table class="table table-bordered" >
-                    <thead>
-                    <tr>
-                        <th>名称</th>
-                        <th>网址</th>
-                        <th>logo</th>
-                        <th>介绍</th>
-                        <th>操作</th>
-                    </tr>
-                    </thead>
-                    <tbody id="organizerlist">
-
-                    </tbody>
-                </table>
+    <div class="col-lg-12" loading>
+        <div class="box" style="display:none">
+            <div class="box-header">
+                <h2><i class="fa fa-edit"></i>主办方</h2>
             </div>
-            <div>
-                <form class="form-horizontal" id="organizerform" style="display:none">
-                    <fieldset>
-                        <legend>
-                            添加主办方信息
-                        </legend>
-                    </fieldset>
-                    <div class="form-group has-feedback">
-                        <label class="col-md-3 control-label">主办方名称</label>
+            <div class="box-content">
+                <div id="organizertable">
+                    <a data-type="new" href="javascript:;">添加</a>
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th>名称</th>
+                            <th>网址</th>
+                            <th>logo</th>
+                            <th>介绍</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody id="organizerlist">
 
-                        <div class="col-md-6">
-                            <input type="text" class="form-control" name="organizer_name" id="organizer_name" placeholder=""
-                                   required
-                                   data-bv-trigger="blur"
-                                   data-bv-notempty-message="主办方名称，不能为空">
-                        </div>
-                    </div>
-                    <div class="form-group has-feedback">
-                        <label class="col-md-3 control-label">主办方网址</label>
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <form class="form-horizontal" id="organizerform" style="display:none">
+                        <fieldset>
+                            <legend>
+                                添加主办方信息
+                            </legend>
+                        </fieldset>
+                        <div class="form-group has-feedback">
+                            <label class="col-md-3 control-label">主办方名称</label>
 
-                        <div class="col-md-6">
-                            <input type="url" class="form-control" name="organizer_url" id="organizer_url" placeholder="">
+                            <div class="col-md-6">
+                                <input type="text" class="form-control" name="name" id="name" placeholder=""
+                                       required
+                                       data-bv-trigger="blur"
+                                       data-bv-notempty-message="主办方名称，不能为空">
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-group has-feedback">
-                        <label class="col-md-3 control-label">主办方logo</label>
+                        <div class="form-group has-feedback">
+                            <label class="col-md-3 control-label">主办方网址</label>
 
-                        <div class="col-md-6">
-                            <input type="url" class="form-control" name="organizer_image" id="organizer_image" placeholder="">
+                            <div class="col-md-6">
+                                <input type="url" class="form-control" name="homepage" id="homepage" placeholder="">
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-group has-feedback">
-                        <label class="col-md-3 control-label">主办方介绍</label>
+                        <div class="form-group has-feedback">
+                            <label class="col-md-3 control-label">主办方logo</label>
 
-                        <div class="col-md-6">
-                            <textarea class="form-control" name="organizer_description" id="organizer_description" placeholder="" rows="4"></textarea>
+                            <div class="col-md-6">
+                                <input type="url" class="form-control" name="logo" id="logo" placeholder="">
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-group has-feedback">
+                        <div class="form-group has-feedback">
+                            <label class="col-md-3 control-label">主办方介绍</label>
 
-                        <div class="col-sm-offset-3 col-sm-6">
-                            <button type="button" class="btn btn btn-default" data-type="cancel"> 取消</button>
-                            <button type="submit" class="btn btn-primary"> 提交</button>
+                            <div class="col-md-6">
+                                <textarea class="form-control" name="description" id="description" placeholder=""
+                                          rows="10"></textarea>
+                            </div>
                         </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="modal fade bs-example-modal-sm" id="confirm_modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-api="oh.api.admin.registration.delete">
-    <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">提示</h4>
-            </div>
-            <div class="modal-body">
-                <p>确定删除此地址记录？</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default wb-btn" data-dismiss="modal">取消</button>
-                <button type="button" class="btn btn-primary wb-btn" data-type="ok">确定</button>
+                        <div class="form-group has-feedback">
+
+                            <div class="col-sm-offset-3 col-sm-6">
+                                <button type="button" class="btn btn btn-default" data-type="cancel"> 取消</button>
+                                <button type="submit" class="btn btn-primary"> 提交</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
+
 {% endblock body %}
 
 {% block script %}
-{{ super() }}
-<script id="hackathon_organizer" type="text/x-jquery-tmpl">
+    <div class="modal fade bs-example-modal-sm" id="confirm_modal" tabindex="-1" role="dialog"
+         aria-labelledby="mySmallModalLabel" aria-hidden="true" data-api="oh.api.admin.registration.delete">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">提示</h4>
+                </div>
+                <div class="modal-body">
+                    <p>确定删除此地址记录？</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default wb-btn" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary wb-btn" data-type="ok">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{ super() }}
+    <script id="hackathon_organizer" type="text/x-jquery-tmpl">
     <tr>
-        <td>${organizer_name}</td>
-        <td><a href="${organizer_url}">${organizer_url}</a></td>
-        <td><img src="${organizer_image}"></td>
-        <td>${$item.substring(organizer_description,30)}</td>
+        <td>${name}</td>
+        <td><a href="${homepage}">${homepage}</a></td>
+        <td><div class="oh-thumb"><img class="oh-thumbnail" src="${logo}"><div></td>
+        <td>${$item.substring(description,30)}</td>
         <td class="col-action">
             <a class="btn btn-info btn-sm" data-type="edit">
                 <i class="fa fa-edit "></i>
@@ -113,6 +118,12 @@
             </a>
         </td>
     </tr>
-</script>
-<script type="text/javascript" src="/static/js/views/oh.manage.organizers.js"></script>
+
+
+    </script>
+    <script type="text/javascript" src="/static/js/jquery/marked.min.js"></script>
+    <script type="text/javascript" src="/static/js/jquery/to-markdown.js"></script>
+    <script type="text/javascript" src="/static/js/jquery/bootstrap-markdown.js"></script>
+    <script type="text/javascript" src="/static/js/jquery/bootstrap-markdown.zh.js"></script>
+    <script type="text/javascript" src="/static/js/views/oh.manage.organizers.js"></script>
 {% endblock %}

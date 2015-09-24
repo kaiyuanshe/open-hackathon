@@ -83,7 +83,7 @@
 
     function postTemplate(name) {
         oh.api.user.experiment.post({
-            body: {template_name: name, hackathon: hackathon_name}
+            body: {template_name: name, hackathon_name: hackathon_name}
         }, function (data) {
             loadExperiment(data);
         });

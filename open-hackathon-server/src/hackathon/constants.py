@@ -65,41 +65,40 @@ class HEALTH:
     VERSION = "version"
 
 
+class HACKATHON_STAT:
+    """Statistics types of a hackathon
+
+    Attributes:
+        LIKE: number of user that likes a hackathon
+        REGISTER: number of registered users
+    """
+    LIKE = "like"
+    REGISTER = "register"
+
+
 class HACKATHON_BASIC_INFO:
     """Basic settings of hackathon that saved into column 'basic_info' of table 'hackathon'
 
     Attributes:
-        ORGANIZERS: array [{ organizer_name:'' , organizer_url:'',  organizer_image:'',organizer_description:''},...]
-        ORGANIZER_NAME: str|unicode, name of organizer
-        ORGANIZER_URL: str|unicode, url link to the organizer. For example its homepage
-        ORGANIZER_IMAGE: str|unicode, logo of the organizer. We don't store the image itself, just a link to target
-        ORGANIZER_DESCRIPTION: str|unicode, description of the organizer.
-        BANNERS: array ['banner_image_url',...], array of images as banners for the hackathon
         LOCATION: str|unicode, the location where the hackathon is held
         MAX_ENROLLMENT: int, maximum users allowed to register
-        WALL_TIME: long, environment will be auto recycled, in seconds
         AUTO_APPROVE: bool, whether manual approve is required, default false
         RECYCLE_ENABLED: bool, whether environment be recycled automatically. default false
         RECYCLE_MINUTES: int, the maximum time (unit:minute) of recycle for per experiment. default 0
         PRE_ALLOCATE_ENABLED: bool, whether to pre-start several environment. default false
         PRE_ALLOCATE_NUMBER: int, the maximum count of pre-start environment per hackathon and per template. default 1
         ALAUDA_ENABLED: bool,default false, whether to use alauda service, no azure resource needed if true
+        FREEDOM_TEAM: bool,default true,Whether to allow freedom of the team
     """
-    ORGANIZERS = "organizers"
-    ORGANIZER_NAME = "organizer_name"
-    ORGANIZER_URL = "organizer_url"
-    ORGANIZER_IMAGE = "organizer_image"
-    ORGANIZER_DESCRIPTION = "organizer_description"
-    BANNERS = "banners"
     LOCATION = "location"
     MAX_ENROLLMENT = "max_enrollment"
-    WALL_TIME = "wall_time"
     AUTO_APPROVE = "auto_approve"
     RECYCLE_ENABLED = "recycle_enabled"
     RECYCLE_MINUTES = "recycle_minutes"
     PRE_ALLOCATE_ENABLED = "pre_allocate_enabled"
     PRE_ALLOCATE_NUMBER = "pre_allocate_number"
     ALAUDA_ENABLED = "alauda_enabled"
+    FREEDOM_TEAM = "freedom_team"
 
 
 class CLOUD_ECLIPSE:
@@ -163,6 +162,7 @@ class VEStatus:
     STOPPED = 3
     DELETED = 4
     UNEXPECTED_ERROR = 5
+
 
 class PortBindingType:
     """Type of port binding
@@ -301,6 +301,7 @@ class FILE_TYPE:
     """
     TEMPLATE = "template"
     HACK_IMAGE = "hack_image"
+    AZURE_CERT = "azure_cert"
 
 
 class TeamMemberStatus:
@@ -314,3 +315,155 @@ class TeamMemberStatus:
     Init = 0
     Approved = 1
     Denied = 2
+
+class DockerHostServerStatus:
+    """
+    Status of docker host server VM
+
+    Attributes:
+        STARTING: VM is in the process of starting
+        DOCKER_INIT: VM starts successfully according to the feedback of Azure and docker application is in the process
+                     of initialization
+        DOCKER_READY: VM docker api port is OK
+        UNAVAILABLE: VM is unavailable
+    """
+    STARTING = 0
+    DOCKER_INIT = 1
+    DOCKER_READY = 2
+    UNAVAILABLE = 3
+
+class DockerHostServerDisable:
+    """
+    whether the docker host server VM is disabled by manager or not
+
+    Attributes:
+        ABLE: VM is not disabled by manager
+        DISABLE: VM is disabled by manager
+    """
+    ABLE = 0
+    DISABLE = 1
+
+class AzureVMStartMethod:
+    """
+    the way how Azure VM is started
+
+    Attributes:
+        AUTO: VM is started by OHP server
+        MANUAL: VM is started manually
+    """
+    AUTO = 1
+    MANUAL = 2
+
+class AzureApiExceptionMessage:
+    """
+    The message returned by azure api when exception occurs
+
+    Attributes:
+        SERVICE_NOT_FOUND: the service is not found
+        DEPLOYMENT_NOT_FOUND: the service deployment is not found
+        CONTAINER_NOT_FOUND: the container is not found
+    """
+    SERVICE_NOT_FOUND = 'Not found (Not Found)'
+    DEPLOYMENT_NOT_FOUND = 'Not found (Not Found)'
+    CONTAINER_NOT_FOUND = 'Not found (The specified container does not exist.)'
+
+class AzureOperationStatus:
+    """
+    The status of Azure operation
+
+    Attributes:
+        IN_PROGRESS: the operation is in process
+        SUCCESS: the operation is successful
+    """
+    IN_PROGRESS = 'InProgress'
+    SUCCESS = 'Succeeded'
+
+class ServiceDeploymentSlot:
+    """
+    the slot of service deployment
+
+    Attributes:
+        PRODUCTION: production slot
+        STAGING: staging slot
+    """
+    PRODUCTION = 'production'
+    STAGING = 'staging'
+
+class AzureVMSize:
+    """
+    the size of Azure VM
+
+    Attributes:
+        MEDIUM_SIZE: medium size
+        SMALL_SIZE: small size
+    """
+    MEDIUM_SIZE = 'Medium'
+    SMALL_SIZE = 'Small'
+
+class AzureVMEndpointName:
+    """
+    the name of Azure VM endpoint
+
+    Attributes:
+        DOCKER: docker
+        SSH: ssh
+        HTTP: http
+    """
+    DOCKER = 'docker'
+    SSH = 'SSH'
+    HTTP = 'http'
+
+class AzureVMEndpointDefaultPort:
+    """
+    default local port (private port) of applications in Azure VM
+
+    Attributes:
+        DOCKER: the default local port of docker
+        SSH: the default local port of SSH
+    """
+    DOCKER = 4243
+    SSH = 22
+
+class TCPProtocol:
+    """
+    the protocol of TCP layer
+
+    Attributes:
+        TCP: tcp protocol
+        UDP: udp protocol
+    """
+    TCP = 'tcp'
+    UDP = 'udp'
+
+class DockerPingResult:
+    """
+    the response of ping docker public port
+
+    Attributes:
+        OK: the response content is 'OK'
+    """
+    OK = 'OK'
+
+class AzureVMPowerState:
+    """
+    the state of Azure VM power
+
+    Attributes:
+        VM_STARTED: the VM is started
+    """
+    VM_STARTED = 'started'
+
+class AzureVMEnpointConfigType:
+    """
+    the type of Azure VM endpoint configuration
+
+    Attributes:
+        NETWORK: type is 'NetworkConfiguration'
+    """
+    NETWORK = 'NetworkConfiguration'
+
+class Team_Show_Type:
+    """Type of resource to be shown"""
+    Image = 0
+    Video = 1
+    SourceCode = 2

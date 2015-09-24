@@ -376,8 +376,8 @@ class WeiboLogin(LoginBase):
         access_token = self.get_token(code)
         user_info = self.get_user_info(access_token["access_token"], access_token["uid"])
 
-        #Get email need to apply high-level interface
-        #email = self.get_email(access_token["access_token"], access_token["uid"])
+        # Get email need to apply high-level interface
+        # email = self.get_email(access_token["access_token"], access_token["uid"])
 
         name = user_info["name"]
         email_list = [
@@ -393,7 +393,7 @@ class WeiboLogin(LoginBase):
                                            provider=LOGIN_PROVIDER.WEIBO,
                                            name=name,
                                            nickname=user_info["screen_name"],
-                                           access_token=access_token,
+                                           access_token=access_token["access_token"],
                                            email_list=email_list,
                                            avatar_url=user_info["avatar_hd"])
 
@@ -408,7 +408,6 @@ class WeiboLogin(LoginBase):
         """
 
         token_resp = post_to_remote(get_config('login.weibo.access_token_url') + code, {})
-
         if token_resp.get("error") is not None:
             raise Exception(token_resp)
 

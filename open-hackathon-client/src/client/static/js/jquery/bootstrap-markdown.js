@@ -255,7 +255,24 @@
         // Merge the main & additional button groups together
         var allBtnGroups = [];
         if (options.buttons.length > 0) allBtnGroups = allBtnGroups.concat(options.buttons[0]);
-        if (options.additionalButtons.length > 0) allBtnGroups = allBtnGroups.concat(options.additionalButtons[0]);
+        if (options.additionalButtons.length > 0) {
+          // iterate the additional button groups
+          $.each(options.additionalButtons[0], function(idx, buttonGroup){
+            
+            // see if the group name of the addional group matches an existing group
+            var matchingGroups = $.grep(allBtnGroups, function(allButtonGroup, allIdx){
+              return allButtonGroup.name === buttonGroup.name;
+            });
+
+            // if it matches add the addional buttons to that group, if not just add it to the all buttons group
+            if(matchingGroups.length > 0) {
+              matchingGroups[0].data = matchingGroups[0].data.concat(buttonGroup.data);
+            } else {              
+              allBtnGroups.push(options.additionalButtons[0][idx]);
+            }
+
+          });
+        } 
 
         // Reduce and/or reorder the button groups
         if (options.reorderButtonGroups.length > 0) {
@@ -496,8 +513,8 @@
 
       // Set the preview element dimensions
       replacementContainer.css({
-       // width: container.outerWidth() + 'px'//,
-        //height: container.outerHeight() + 'px'
+        width: container.outerWidth() + 'px',
+        height: container.outerHeight() + 'px'
       });
 
       if (this.$options.resize) {
@@ -670,16 +687,11 @@
       return;
     }
 
-  , __parseButtonNameParam: function(nameParam) {
-      var buttons = [];
+  , __parseButtonNameParam: function (names) {
+      return typeof names == 'string' ?
+                      names.split(' ') :
+                      names;
 
-      if (typeof nameParam == 'string') {
-        buttons = nameParam.split(',')
-      } else {
-        buttons = nameParam;
-      }
-
-      return buttons;
     }
 
   , enableButtons: function(name) {

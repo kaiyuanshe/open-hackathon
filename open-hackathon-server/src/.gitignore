@@ -55,5 +55,5 @@ docs/_build/
 *config.py
 
 # uploaded images and templates
-hackathon/static/pic/upload/
+hackathon/static/upload/
 hackathon/resources/lib/

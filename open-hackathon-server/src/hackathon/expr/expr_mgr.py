@@ -27,57 +27,24 @@
 import sys
 
 sys.path.append("..")
-
-from hackathon import (
-    Component,
-    RequiredFeature,
-)
-
-from hackathon.constants import (
-    EStatus,
-    VERemoteProvider,
-    VE_PROVIDER,
-    PortBindingType,
-    VEStatus,
-    ReservedUser,
-    AVMStatus,
-)
-from hackathon.database.models import (
-    VirtualEnvironment,
-    DockerHostServer,
-    Experiment,
-    Hackathon,
-    Template,
-    User,
-    HackathonTemplateRel)
-
-from hackathon.azureformation.azureFormation import (
-    AzureFormation,
-)
-
-from hackathon.hackathon_response import (
-    internal_server_error,
-    precondition_failed,
-    not_found,
-    forbidden,
-    ok,
-)
-
-from hackathon.template.docker_template_unit import (
-    DockerTemplateUnit,
-)
-from hackathon.template.base_template import (
-    BaseTemplate,
-)
+from datetime import timedelta
 import json
 import random
 import string
-from sqlalchemy import (
-    and_,
-)
+from werkzeug.exceptions import PreconditionFailed, NotFound
 
-from datetime import timedelta
-from hackathon.constants import CLOUD_ECLIPSE
+from sqlalchemy import and_
+
+from hackathon import Component, RequiredFeature
+from hackathon.constants import EStatus, VERemoteProvider, VE_PROVIDER, PortBindingType, VEStatus, ReservedUser, \
+    AVMStatus, CLOUD_ECLIPSE
+from hackathon.database import VirtualEnvironment, DockerHostServer, Experiment, Hackathon, Template, User, \
+    HackathonTemplateRel
+from hackathon.azureformation.azureFormation import AzureFormation
+from hackathon.hackathon_response import internal_server_error, precondition_failed, not_found, ok
+from hackathon.template import DockerTemplateUnit, TEMPLATE
+
+__all__ = ["ExprManager"]
 
 
 class ExprManager(Component):
@@ -85,11 +52,12 @@ class ExprManager(Component):
     user_manager = RequiredFeature("user_manager")
     hackathon_manager = RequiredFeature("hackathon_manager")
     admin_Manager = RequiredFeature("admin_manager")
-    template_manager = RequiredFeature("template_manager")
-    docker = RequiredFeature("docker")
-    scheduler = RequiredFeature("scheduler")
+    template_library = RequiredFeature("template_library")
+    hackathon_template_manager = RequiredFeature("hackathon_template_manager")
+    hosted_docker = RequiredFeature("hosted_docker")
+    alauda_docker = RequiredFeature("alauda_docker")
 
-    def start_expr(self, hackathon_name, template_name, user_id):
+    def start_expr(self, user_id, template_name, hackathon_name=None):
         """
         A user uses a template to start a experiment under a hackathon
         :param hackathon_name:
@@ -97,21 +65,11 @@ class ExprManager(Component):
         :param user_id:
         :return:
         """
-        hack_temp = self.__check_template_status(hackathon_name, template_name)
-        if hack_temp is None:
-            return not_found('hackathon or template is not existed')
-
-        hackathon = hack_temp[0]
-        # if not self.register_manager.is_user_registered(user_id, hackathon):
-        #     return forbidden("user not registered or not approved")
-
-        if hackathon.event_end_time < self.util.get_now():
-            self.log.warn("hackathon is ended. The expr starting process will be stopped")
-            return precondition_failed('hackathen is ended')
-
-        template = hack_temp[1]
+        hackathon = self.__check_hackathon_event_time(hackathon_name)
+        template = self.__check_template_status(hackathon, template_name)
 
         if user_id > 0:
+
             expr = self.__check_expr_status(user_id, hackathon, template)
             if expr is not None:
                 return self.__report_expr_status(expr)
@@ -122,11 +80,11 @@ class ExprManager(Component):
     def heart_beat(self, expr_id):
         expr = self.db.find_first_object_by(Experiment, id=expr_id, status=EStatus.RUNNING)
         if expr is None:
-            return not_found('Experiment does not running')
+            return not_found('Experiment is not running')
 
         expr.last_heart_beat_time = self.util.get_now()
         self.db.commit()
-        return ok('OK')
+        return ok()
 
     def stop_expr(self, expr_id, force=0):
         """
@@ -138,12 +96,12 @@ class ExprManager(Component):
         expr = self.db.find_first_object_by(Experiment, id=expr_id, status=EStatus.RUNNING)
         if expr is not None:
             # Docker
-            docker = self.docker.get_docker(expr.hackathon)
             if expr.template.provider == VE_PROVIDER.DOCKER:
                 # stop containers
                 for c in expr.virtual_environments.all():
                     try:
                         self.log.debug("begin to stop %s" % c.name)
+                        docker = self.__get_docker(expr.hackathon, c)
                         if force:
                             docker.delete(c.name, virtual_environment=c, container=c.container, expr_id=expr_id)
                             c.status = VEStatus.DELETED
@@ -172,7 +130,7 @@ class ExprManager(Component):
             self.log.debug("experiment %d ended success" % expr_id)
             return ok('OK')
         else:
-            return ok('expr not exist')
+            return ok()
 
     def get_expr_status(self, expr_id):
         expr = self.db.find_first_object_by(Experiment, id=expr_id)
@@ -180,11 +138,6 @@ class ExprManager(Component):
             return self.__report_expr_status(expr)
         else:
             return not_found('Experiment Not found')
-
-    def get_expr_list_by_user_id(self, user_id):
-        return map(lambda u: u.dic(),
-                   self.db.find_all_objects(Experiment, and_(Experiment.user_id == user_id,
-                                                             Experiment.status < 5)))
 
     def get_expr_list_by_hackathon_id(self, hackathon_id, **kwargs):
         condition = self.__get_filter_condition(hackathon_id, **kwargs)
@@ -228,13 +181,12 @@ class ExprManager(Component):
         templates = map(lambda x: x.template, htrs)
         for template in templates:
             try:
-                pre_num = self.hackathon_manager.get_pre_allocate_number(template.hackathon)
+                pre_num = template.hackathon.get_pre_allocate_number()
                 curr_num = self.db.count(Experiment,
                                          Experiment.user_id == ReservedUser.DefaultUserID,
                                          Experiment.template_id == template.id,
                                          (Experiment.status == EStatus.STARTING) | (
                                              Experiment.status == EStatus.RUNNING))
-                # todo test azure, config num
                 if template.provider == VE_PROVIDER.AZURE:
                     if curr_num < pre_num:
                         remain_num = pre_num - curr_num
@@ -281,6 +233,31 @@ class ExprManager(Component):
 
     # --------------------------------------------- helper function ---------------------------------------------#
 
+    def __check_hackathon_event_time(self, hackathon_name):
+        """validate the event_start_time and event_end_time of a hackathon
+
+        Will return None if hackathon not found or current time is not between its start time and end time
+        """
+        hackathon = self.hackathon_manager.get_hackathon_by_name(hackathon_name)
+        if hackathon:
+            if hackathon.event_start_time < self.util.get_now() < hackathon.event_end_time:
+                return hackathon
+            else:
+                raise PreconditionFailed("Hackathon is not started or was ended")
+        else:
+            return None
+
+    def __get_docker(self, hackathon, virtual_environment=None):
+        """select which docker implementation"""
+        if virtual_environment:
+            if virtual_environment.provider == VE_PROVIDER.ALAUDA:
+                return self.alauda_docker
+            return self.hosted_docker
+        elif hackathon.is_alauda_enabled():
+            return self.alauda_docker
+        else:
+            return self.hosted_docker
+
     def __start_new_expr(self, hackathon, template, user_id):
         # new expr
         expr = self.db.add_object_kwargs(Experiment,
@@ -291,15 +268,15 @@ class ExprManager(Component):
         self.db.commit()
 
         current_num = self.db.count(Experiment,
-                                 Experiment.user_id == ReservedUser.DefaultUserID,
-                                 Experiment.template == template,
-                                 (Experiment.status == EStatus.STARTING) |
-                                 (Experiment.status == EStatus.RUNNING))
+                                    Experiment.user_id == ReservedUser.DefaultUserID,
+                                    Experiment.template == template,
+                                    (Experiment.status == EStatus.STARTING) |
+                                    (Experiment.status == EStatus.RUNNING))
         if template.provider == VE_PROVIDER.DOCKER:
             try:
-                template_dic = self.template_manager.load_template(template)
-                virtual_environments_list = template_dic[BaseTemplate.VIRTUAL_ENVIRONMENTS]
-                if current_num != 0 and current_num >= self.util.get_config("pre_allocate.docker"):
+                template_dic = self.template_library.load_template(template)
+                virtual_environments_list = template_dic[TEMPLATE.VIRTUAL_ENVIRONMENTS]
+                if curr_num != 0 and curr_num >= self.util.get_config("pre_allocate.docker"):
                     return
                 expr.status = EStatus.STARTING
                 self.db.commit()
@@ -319,7 +296,7 @@ class ExprManager(Component):
             expr.status = EStatus.STARTING
             self.db.commit()
             try:
-                af = AzureFormation(self.docker.__load_azure_key_id(expr.id))
+                af = AzureFormation(self.hosted_docker.load_azure_key_id(expr.id))
                 af.create(expr.id)
             except Exception as e:
                 self.log.error(e)
@@ -332,7 +309,7 @@ class ExprManager(Component):
         containers = self.__get_containers_by_exper(expr)
         for container in containers:
             # expr status(restarting or running) is not match container running status on docker host
-            if not self.docker.hosted_docker.check_container_status_is_normal(container):
+            if not self.hosted_docker.check_container_status_is_normal(container):
                 try:
                     self.db.update_object(expr, status=EStatus.UNEXPECTED_ERROR)
                     self.db.update_object(container.virtual_environment, status=VEStatus.UNEXPECTED_ERROR)
@@ -401,13 +378,21 @@ class ExprManager(Component):
         ret["public_urls"] = public_urls
         return ret
 
-    def __check_template_status(self, hackathon_name, template_name):
-        #hackathon = self.db.find_first_object_by(Hackathon, name=hackathon_name)
-        #if hackathon is None:
-        #    return None
-        template = self.db.find_first_object_by(Template, name=template_name)
-        if template is None or self.template_manager.load_template(template) is None:
-            return None
+
+    def __check_template_status(self, hackathon, template_name):
+        template = self.template_library.get_template_info_by_name(template_name)
+        if not template:
+            raise NotFound("template cannot be found by name '%s'" % template_name)
+
+        if not hackathon:
+            # hackathon is None means it's starting expr for template testing
+            return template
+
+        hackathon_templates = self.hackathon_template_manager.get_templates_by_hackathon_id(hackathon.id)
+        template_ids = [h.template_id for h in hackathon_templates]
+        if template.id not in template_ids:
+            raise PreconditionFailed("template '%s' not allowed for hackathon '%s'" % (template_name, hackathon.name))
+
         return template
 
     def __remote_start_container(self, hackathon, expr, virtual_environment_dic):
@@ -427,7 +412,7 @@ class ExprManager(Component):
         self.db.add_object(ve)
 
         # start container remotely , use hosted docker or alauda docker
-        docker = self.docker.get_docker(hackathon)
+        docker = self.__get_docker(hackathon)
         container_ret = docker.start(docker_template_unit,
                                      hackathon=hackathon,
                                      virtual_environment=ve,
@@ -447,8 +432,8 @@ class ExprManager(Component):
         :return:
         """
         exp_status = [EStatus.RUNNING, EStatus.STARTING]
-        check_temp = Experiment.template_id == template.id if self.admin_Manager.validate_admin_privilege(user_id,
-                                                                                                              hackathon.id) else Experiment.id > -1
+        is_admin = self.admin_Manager.is_hackathon_admin(hackathon.id, user_id)
+        check_temp = Experiment.template_id == template.id if is_admin else Experiment.id > -1
         expr = self.db.find_first_object(Experiment,
                                          Experiment.status.in_(exp_status),
                                          Experiment.user_id == user_id,
@@ -485,7 +470,8 @@ class ExprManager(Component):
                 # delete containers and change expr status
                 for c in expr.virtual_environments:
                     if c.provider == VE_PROVIDER.DOCKER:
-                        self.docker.delete(c.name, container=c.container, expr_id=expr_id)
+                        docker = self.__get_docker(expr.hackathon, c)
+                        docker.delete(c.name, container=c.container, expr_id=expr_id)
                         c.status = VEStatus.DELETED
                         self.db.commit()
             # delete ports
@@ -498,8 +484,6 @@ class ExprManager(Component):
             self.db.commit()
             self.log.info("Rollback failed")
             self.log.error(e)
-
-            # --------------------------------------------- helper function ---------------------------------------------#
 
     def __get_expr_with_user_info(self, experiment):
         info = experiment.dic()
@@ -526,8 +510,8 @@ class ExprManager(Component):
             return None
         # http://www.idehub.cn/api/ide/18?git=http://git.idehub.cn/root/test-c.git&user=root&from=hostname(frontend)
         api = self.util.safe_get_config("%s.api" % CLOUD_ECLIPSE.CLOUD_ECLIPSE, "http://www.idehub.cn/api/ide")
-        openId = experiment.user.openid
-        url = "%s/%d?git=%s&user=%s&from=" % (api, experiment.id, reg.git_project, openId)
+        openid = experiment.user.openid
+        url = "%s/%d?git=%s&user=%s&from=" % (api, experiment.id, reg.git_project, openid)
         self.log.debug("cloud eclipse url : %s" % url)
         return url
 
@@ -554,11 +538,9 @@ class ExprManager(Component):
         :return:
         """
         providers = map(lambda x: x.provider, expr.virtual_environments.all())
-        # TODO check expr provider from each virtual_environment's provider
         if VE_PROVIDER.DOCKER in providers:
             self.stop_expr(expr.id)
             self.log.debug("it's stopping " + str(expr.id) + " inactive experiment now")
         else:
-            # docker experiment
             self.assign_expr_to_admin(expr)
             self.log.debug("assign " + str(expr.id) + " to default admin")
