@@ -1,3 +1,148 @@
+.title {
+    color: #000;
+    font-weight: 500;
+}
+
+.title span {
+    font-size: 12px;
+    color: #505050;
+}
+
+
+.tags {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    font-size: 0;
+}
+
+.tags li {
+    display: inline-block;
+    font-size: 12px;
+    margin-right: 10px;
+}
+
+.tags li a {
+    display: block;
+    padding: 1px 10px;
+    color: #b4b4b4;
+    border: 1px solid #b4b4b4;
+    margin-bottom: 15px;
+}
+
+.tags li a:hover {
+    color: #969696;
+    border-color: #b4b4b4;
+}
+
+
+
+
+
+.oh-detail-info dt {
+    float: left;
+    width: 60px;
+    clear: left;
+    font-weight: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.oh-detail-info dd {
+    margin: 20px 0 30px 60px;
+}
+
+.oh-latest-news dt {
+    float: left;
+    width: 75px;
+    clear: left;
+    text-align: right;
+    font-weight: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.oh-latest-news {
+    font-size: 12px;
+    margin-bottom: 14px;
+}
+
+.oh-latest-news dd {
+    position: relative;
+    margin: 0px 0 0px 115px;
+    padding: 0 0 12px 0px;
+    border-bottom: 1px solid #D2D2D2;
+}
+
+.oh-latest-news dd span {
+    position: absolute;
+    top: -3px;
+    left: -32px;
+    width: 25px;
+    height: 25px;
+    line-height: 25px;
+    display: block;
+    color: #fff;
+    font-family: 'Glyphicons Halflings';
+    text-align: center;
+    border-radius: 50%;
+    background-color: #21b1de;
+}
+
+.oh-latest-news dd:before {
+    content: '';
+    left: -20px;
+    bottom: -14px;
+    top: 0;
+    position: absolute;
+    border-left: 1px solid rgba(33, 177, 222, 0.7);
+}
+
+.oh-latest-news span.t-edit:before {
+    content: '\e065';
+}
+
+.oh-latest-news span.t-bullhorn:before {
+    content: '\e122';
+}
+
+.oh-latest-news:last-child {
+    margin: 0;
+}
+
+.oh-latest-news:last-child dd,
+.oh-latest-news:last-child dd:before {
+    border: none;
+}
+
+.baidu-map {
+    height: 265px;
+}
+.teams .oh-thumb,
+.organizer .oh-thumb {
+    width: 96px;
+    max-height: 96px;
+}
+
+.interest .oh-thumb {
+    width: 120px;
+    max-height: 96px;
+}
+
+.organizer .media,
+.interest .media {
+    padding-bottom: 14px;
+    border-bottom: 1px solid #D2D2D2;
+}
+
+.organizer .media:last-child,
+.interest .media:last-child {
+    border: none;
+    padding-bottom: 0;
+}
+
 .reg-h-name {
     margin: 0px 0px 15px;
     font-size: 22px;
@@ -21,35 +166,40 @@
     display: inline-block;
     overflow: hidden;
 }
-.oh-share .jiathis_style_24x24 .jtico{
+
+.oh-share .jiathis_style_24x24 .jtico {
     margin-left: 0;
 }
 
 .users-list {
-  padding: 0px;
+    padding: 0px;
 }
 
 .users-list li {
-  min-height: 60px;
-  padding: 10px;
-  list-style: none;
-  font-size: 12px;
+    min-height: 60px;
+    padding: 10px;
+    list-style: none;
+    font-size: 12px;
 }
 
 .users-list li a img.avatar {
-  height: 40px;
-  width: 40px;
-  float: left;
-  margin-top: 3px;
-  margin-right: 5px;
-  border-radius: 2px;
+    height: 40px;
+    width: 40px;
+    float: left;
+    margin-top: 3px;
+    margin-right: 5px;
+    border-radius: 2px;
 }
 
 .users-list li div {
-  margin-left: 50px;
+    margin-left: 50px;
 }
 
 .media-object {
     width: 50px;
 }
 
+.no-team {
+    padding-top:20px;
+    padding-bottom: 20px;
+}

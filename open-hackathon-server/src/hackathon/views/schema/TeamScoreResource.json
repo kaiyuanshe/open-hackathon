@@ -1,0 +1,47 @@
+{
+  "TeamScoreResource": {
+    "get": {
+      "input": {
+        "type": "object",
+        "properties": {
+          "team_id": {
+            "description": "unique identifier of team",
+            "pattern": "^[0-9]+$"
+          }
+        }
+      }
+    },
+    "post": {
+      "input": {
+        "description": "score specific team by admin/judge",
+        "type": "object",
+        "properties": {
+          "team_id": {
+            "type": "integer"
+          },
+          "score": {
+            "type": "integer",
+            "maximum": 10,
+            "minimum": 1
+          }
+        }
+      }
+    },
+    "put": {
+      "input": {
+        "description": "score specific team by admin/judge",
+        "type": "object",
+        "properties": {
+          "team_id": {
+            "type": "integer"
+          },
+          "score": {
+            "type": "integer",
+            "maximum": 10,
+            "minimum": 1
+          }
+        }
+      }
+    }
+  }
+}

@@ -43,6 +43,7 @@ class RegisterManager(Component):
     hackathon_manager = RequiredFeature("hackathon_manager")
     user_manager = RequiredFeature("user_manager")
     admin_manager = RequiredFeature("admin_manager")
+    team_manager = RequiredFeature("team_manager")
 
     def get_hackathon_registration_list(self, num=None):
         """Get registered users list
@@ -76,10 +77,10 @@ class RegisterManager(Component):
         if self.admin_manager.is_hackathon_admin(hackathon.id, user.id):
             return precondition_failed("administrator cannot register the hackathon", friendly_message="管理员或裁判不能报名")
 
-        if hackathon.registration_start_time > self.util.get_now():
+        if hackathon.registration_start_time and hackathon.registration_start_time > self.util.get_now():
             return precondition_failed("hackathon registration not opened", friendly_message="报名尚未开始")
 
-        if hackathon.registration_end_time < self.util.get_now():
+        if hackathon.registration_end_time and hackathon.registration_end_time < self.util.get_now():
             return precondition_failed("hackathon registration has ended", friendly_message="报名已经结束")
 
         if self.__is_hackathon_filled_up(hackathon):
@@ -90,30 +91,31 @@ class RegisterManager(Component):
             args["status"] = RGStatus.AUTO_PASSED if hackathon.is_auto_approve() else RGStatus.UNAUDIT
             args['create_time'] = self.util.get_now()
             user_hackathon_rel = self.db.add_object_kwargs(UserHackathonRel, **args).dic()
+
+            # create a team as soon as user registration approved(auto or manually)
+            if hackathon.is_auto_approve():
+                self.team_manager.create_default_team(hackathon, user)
+
             self.__update_register_stat(hackathon)
-            return {
-                "register": user_hackathon_rel,
-                "hackahton_basic_info": json.loads(hackathon.basic_info)
-            }
+            return user_hackathon_rel
         except Exception as e:
             self.log.error(e)
             return internal_server_error("fail to create register")
 
-    def update_registration(self, args):
-        self.log.debug("update_registration: %r" % args)
+    def update_registration(self, context):
         try:
-            registration_id = args['id']
+            registration_id = context.id
             register = self.get_registration_by_id(registration_id)
-            if register is None:
+            if register is None or register.hackathon_id != g.hackathon.id:
                 # we can also create a new object here.
                 return not_found("registration not found")
 
-            self.log.debug("update a existed register")
-            update_items = dict(dict(args).viewitems() - register.dic().viewitems())
-            if "create_time" in update_items:
-                update_items.pop("create_time")
-            update_items["update_time"] = self.util.get_now()
-            self.db.update_object(register, **update_items)
+            register.update_time = self.util.get_now()
+            register.status = context.status
+            self.db.commit()
+
+            if register.status == RGStatus.AUDIT_PASSED:
+                self.team_manager.create_default_team(register.hackathon, register.user)
 
             hackathon = self.hackathon_manager.get_hackathon_by_id(register.hackathon_id)
             self.__update_register_stat(hackathon)
@@ -164,7 +166,7 @@ class RegisterManager(Component):
     def __update_register_stat(self, hackathon):
         count = self.db.count(UserHackathonRel,
                               UserHackathonRel.hackathon_id == hackathon.id,
-                              UserHackathonRel.status.in_(RGStatus.AUDIT_PASSED, RGStatus.AUTO_PASSED),
+                              UserHackathonRel.status.in_([RGStatus.AUDIT_PASSED, RGStatus.AUTO_PASSED]),
                               UserHackathonRel.deleted == 0)
         self.hackathon_manager.update_hackathon_stat(hackathon, HACKATHON_STAT.REGISTER, count)
 
@@ -198,5 +200,5 @@ class RegisterManager(Component):
             # count of audited users
             current_num = self.db.count(UserHackathonRel,
                                         UserHackathonRel.hackathon_id == hackathon.id,
-                                        UserHackathonRel.status.in_(RGStatus.AUDIT_PASSED, RGStatus.AUTO_PASSED))
+                                        UserHackathonRel.status.in_([RGStatus.AUDIT_PASSED, RGStatus.AUTO_PASSED]))
             return current_num >= max

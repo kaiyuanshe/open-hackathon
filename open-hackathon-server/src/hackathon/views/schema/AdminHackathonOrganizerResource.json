@@ -1,0 +1,53 @@
+{
+  "AdminHackathonOrganizerResource": {
+    "get": {
+      "input": {
+        "title": "query hackathon organizer by PK id",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          }
+        }
+      }
+    },
+    "post": {
+      "input": {
+        "title": "request to add a new hackathon organizer",
+        "description": "args to create new hackathon. Args that not listed here are NOT acceptable.",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 50,
+            "description": "name of hackathon. Required"
+          }
+        }
+      }
+    },
+    "update": {
+      "input": {
+        "title": "request to update an existing hackathon organizer",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "int"
+          }
+        }
+      }
+    },
+    "delete": {
+      "input": {
+        "title": "request to delete a new hackathon organizer",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          }
+        }
+      }
+    }
+  }
+}

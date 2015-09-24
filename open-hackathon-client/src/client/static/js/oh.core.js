@@ -30,6 +30,12 @@
             formatstr = formatstr || 'yyyy-MM-dd';
             return new Date(milliseconds).format(formatstr);
         },
+        guid: function () {
+            var S4 = function () {
+                return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+            };
+            return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
+        },
         getCurrentHackathon: function () {
             return $('meta[name="hackathon_name"]').attr('content');
         },
@@ -42,8 +48,14 @@
             pageloading.siblings().show();
             pageloading.detach();
         },
+        stripTags: function (html, limit) {
+            limit = limit || 60;
+            var text = html.replace(/(<([^>]+)>)/ig, '');
+            return limit ? text.substr(0, limit) : text;
+        },
         alert: function (title, text, fun) {
-           var alert = $('body').Dialog({
+            fun = fun || new Function();
+            var alert = $('body').Dialog({
                 title: title,
                 body: text,
                 footer: $('<button class="btn btn-primary">确定</button>').click(function (e) {
@@ -93,6 +105,20 @@
     }
 
     $(function () {
+        $('body').on('click', '[role="oh-like"]', function (e) {
+            var like = $(this);
+            var hackathon_name = like.data('name');
+            oh.api.user.hackathon.like.post({header: {hackathon_name: hackathon_name}}, function (data) {
+                if (data.error) {
+                    oh.comm.alert('错误', data.error.friendly_message);
+                } else {
+                    like.addClass('active');
+                }
+            });
+        });
+
+
+        $('[data-toggle="tooltip"]').tooltip();
         if (location.pathname.search('logout', 'i') != -1) {
             location.href = '/login';
             return;
@@ -238,7 +264,7 @@ String.prototype.format = function (args) {
             })
             this.layout.modal('show');
         },
-        hide:function(){
+        hide: function () {
             this.layout.modal('hide');
         }
     }

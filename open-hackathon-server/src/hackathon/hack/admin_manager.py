@@ -67,7 +67,8 @@ class AdminManager(Component):
         :return list of hackathon id
         """
         # get AdminUserHackathonRels from query withn filter by email
-        admin_user_hackathon_rels = self.db.find_all_objects_by(AdminHackathonRel, user_id=user_id)
+        admin_user_hackathon_rels = self.db.find_all_objects_by(AdminHackathonRel,
+                                                                user_id=user_id)
 
         # get hackathon_ids_from AdminUserHackathonRels details
         hackathon_ids = [x.hackathon_id for x in admin_user_hackathon_rels]
@@ -188,8 +189,9 @@ class AdminManager(Component):
 
     def __generate_update_items(self, args):
         """Generate columns of AdminHackathonRel to be updated"""
-        update_items = {}
-        update_items['update_time'] = self.util.get_now()
+        update_items = {
+            'update_time': self.util.get_now()
+        }
         if 'role_type' in args:
             update_items['role_type'] = args['role_type']
         if 'remarks' in args:

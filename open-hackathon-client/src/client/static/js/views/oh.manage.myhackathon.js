@@ -43,7 +43,7 @@
                         }
                     }, function(data) {
                         if (data.error) {
-                            d.reject(data.message)
+                            d.reject(data.error.friendly_message)
                         } else {
                             d.resolve();
                         }
