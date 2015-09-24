@@ -5,7 +5,7 @@ flask-cors==1.9.0
 sqlalchemy
 flask-sqlalchemy
 mysql-python
-azure
+azure==0.11.1
 wsgilog
 requests
 apscheduler
