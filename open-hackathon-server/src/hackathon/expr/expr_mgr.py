@@ -378,7 +378,6 @@ class ExprManager(Component):
         ret["public_urls"] = public_urls
         return ret
 
-
     def __check_template_status(self, hackathon, template_name):
         template = self.template_library.get_template_info_by_name(template_name)
         if not template:
