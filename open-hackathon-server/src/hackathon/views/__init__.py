@@ -66,6 +66,7 @@ def init_routes():
 
     # team APIs
     api.add_resource(TeamResource, "/api/team")  # create, update, dismiss and query team
+    api.add_resource(TeamCheckNameResource, "/api/admin/team/checkname")  # check team name exists
     api.add_resource(HackathonTeamListResource, "/api/hackathon/team/list")  # list teams of hackathon
     api.add_resource(TeamMemberResource, "/api/team/member")  # join or leave team, approve member
     api.add_resource(TeamScoreResource, "/api/team/score")  # query or set score by judge
