@@ -69,7 +69,7 @@ class DockerHostManager(Component):
                                        DockerHostServer.container_max_count,
                                        DockerHostServer.hackathon_id == hackathon.id,
                                        DockerHostServer.state == DockerHostServerStatus.DOCKER_READY,
-                                       DockerHostServer.disable == DockerHostServerDisable.ABLE)
+                                       DockerHostServer.disabled == DockerHostServerDisable.ABLE)
         # todo connect to azure to launch new VM if no existed VM meet the requirement
         # since it takes some time to launch VM,
         # it's more reasonable to launch VM when the existed ones are almost used up.
@@ -516,5 +516,5 @@ class DockerHostManager(Component):
                                        DockerHostServer.container_max_count,
                                        DockerHostServer.hackathon_id == hackathon_id,
                                        DockerHostServer.state == DockerHostServerStatus.DOCKER_READY,
-                                       DockerHostServer.disable == DockerHostServerDisable.ABLE)
+                                       DockerHostServer.disabled == DockerHostServerDisable.ABLE)
         return len(vms) > 0
