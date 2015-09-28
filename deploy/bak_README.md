@@ -28,7 +28,7 @@ Note：*guacamole version choose 0.9.3 !!!*
 ###setup guacamole-server
 ```
 sudo apt-get install libtool libcairo2-dev libpng12-dev libossp-uuid-dev
-sudo apt-get install libfreerdp-dev libpango1.0-dev libssh2-1-dev libtelnet-dev 
+sudo apt-get install libfreerdp-dev libpango1.0-dev libssh2-1-dev libtelnet-dev libjpeg62-turbo-dev
 sudo apt-get install libvncserver-dev libpulse-dev libssl-dev libvorbis-dev
 sudo apt-get install autoconf
 
