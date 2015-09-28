@@ -3,14 +3,103 @@
 }
 
 fieldset {
-    display: block;
-    padding: 25px 14px 5px;
+    margin-bottom: 15px;
+    position: relative;
 }
 
 .team {
     background: white;
     padding: 10px;
     position: relative;
+}
+
+.team-banner {
+    background: url('/static/pic/process-bg.png') no-repeat 50% 50% / cover;
+}
+
+.team-banner .container {
+    height: 150px;
+    position: relative;
+}
+
+.team-pic {
+    text-align: right;
+}
+
+.padding-10 {
+    padding: 10px !important;
+}
+
+.font-md {
+    font-size: 130% !important;
+}
+
+.team-box {
+    border: none;
+    margin-bottom: 40px;
+}
+
+.team-pic > img {
+    border-radius: 0;
+    position: relative;
+    border: 10px solid #fff;
+    top: -70px;
+    left: 0px;
+    display: inline-block;
+    background-color: #fff;
+    text-align: right;
+    z-index: 4;
+    max-width: 200px;
+    margin-bottom: -50px;
+}
+
+.team-pic.edit > img {
+    border-color: #21b1de;
+}
+.team-pic.edit > .inner-edit{
+    position:absolute;
+    top:-60px;
+    right: 25px;
+    z-index:6;
+}
+
+#team_name.edit,
+#team_description.edit{
+    position:relative;
+    font-size:18px;
+    padding:5px 0;
+    border: 1px dashed #21b1de;
+
+}
+#team_description.edit{
+    font-size:15px;
+}
+
+#team_name.edit:before,
+#team_description.edit:before{
+      position:absolute;
+      right:0;
+      top:0;
+      display:inline-block;
+      line-height:16px;
+      padding:2px 5px;
+      content:'±à¼­';
+      font-size:14px;
+      color:#fff;
+      background-color:#21b1de;
+
+}
+
+.edit input,
+.edit textarea{
+    width:100%;
+    border:none;
+    resize:none;
+}
+
+.edit input:focus,
+.edit textarea:focus{   
+    outline:none
 }
 
 .join {
@@ -23,16 +112,89 @@ fieldset {
     text-align: left;
 }
 
-h2 {
+h1.title {
+    font-size: 32px;
+}
+
+.oh-header {
+    clear: both;
+    margin-bottom: 28px;
+}
+
+.oh-header h2 {
     font-size: 22px;
+    font-weight: inherit;
+    float: left;
+    margin: 0;
+    line-height: normal;
+}
+
+.oh-header h2 span {
+    font-size: 18px;
+    font-weight: normal;
+    color: #969696;
+}
+
+.oh-header .btn {
+    float: right;
 }
 
 h2:first-child {
     margin-top: 0;
 }
 
-.oh-users {
+.rating {
+    margin-bottom: 4px;
+    padding: 4px 6px;
+    color: #000;
+    font-size: 13px;
+    line-height: 30px;
+    color: #404040;
+}
 
+.rating input {
+    position: absolute;
+    left: -9999px;
+}
+
+.rating label {
+    display: block;
+    float: right;
+    height: 20px;
+    margin-top: 5px;
+    padding: 0 2px;
+    font-size: 20px;
+    line-height: 20px;
+    cursor: pointer;
+    color: #ccc;
+    transition: color .3s;
+    -o-transition: color .3s;
+    -ms-transition: color .3s;
+    -moz-transition: color .3s;
+    -webkit-transition: color .3s;
+}
+
+.rating input + label:hover,
+.rating input + label:hover ~ label {
+    color: #3b9ff3;
+}
+
+.rating input:checked ~ label {
+    color: #21b1de;
+}
+
+.label {
+    display: block;
+    margin-bottom: 6px;
+    line-height: 19px;
+    font-weight: 400;
+    font-size: 13px;
+    color: #000;
+    text-align: left;
+    white-space: normal;
+}
+
+.oh-users {
     padding-bottom: 6px;
 }
 
@@ -62,8 +224,8 @@ h2:first-child {
 .oh-users .oh-header {
     position: relative;
     overflow: hidden;
-    width: 96px;
-    height: 96px;
+    width: 120px;
+    height: 120px;
     display: inline-block;
     margin-bottom: 10px;
 }
@@ -85,8 +247,7 @@ h2:first-child {
     position: relative;
     text-align: left;
     color: #969696;
-    max-height: 95px;
-    min-height: 95px;
+    padding: 0;
 }
 
 .oh-users .oh-signature {
@@ -112,4 +273,18 @@ h2:first-child {
 
 .oh-users .oh-count span {
     font-size: 14px;
+}
+
+.air {
+    position: absolute;
+    z-index: 5;
+}
+
+.air-bottom-right {
+    bottom: 0;
+    right: 0;
+}
+
+.oh-white-text {
+    color: #fff;
 }

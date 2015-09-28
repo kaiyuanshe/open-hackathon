@@ -104,20 +104,25 @@
         })
     }
 
-    $(function () {
+    function mainBindEvent() {
         $('body').on('click', '[role="oh-like"]', function (e) {
             var like = $(this);
             var hackathon_name = like.data('name');
-            oh.api.user.hackathon.like.post({header: {hackathon_name: hackathon_name}}, function (data) {
+            var is_active = like.is('.active');
+            var like_api = is_active ? oh.api.user.hackathon.like.delete : oh.api.user.hackathon.like.post;
+            like_api({header: {hackathon_name: hackathon_name}}).then(function (data) {
                 if (data.error) {
                     oh.comm.alert('错误', data.error.friendly_message);
                 } else {
-                    like.addClass('active');
+                    $('[data-likes="' + hackathon_name + '"]').each(function (i, e) {
+                        var element = $(e);
+                        var likes = Number(element.text());
+                        element.text(is_active ? likes - 1 : likes + 1);
+                    });
+                    $('[role="oh-like"][data-name="' + hackathon_name + '"]')[(is_active ? 'remove' : 'add') + 'Class']('active');
                 }
             });
         });
-
-
         $('[data-toggle="tooltip"]').tooltip();
         if (location.pathname.search('logout', 'i') != -1) {
             location.href = '/login';
@@ -125,18 +130,7 @@
         }
         w.oh.comm.createLoading('[loading]');
         addTabsEvent();
-        var menu = $('#sidebar-left .main-menu');
-        menu.find('a').each(function () {
-            if ($($(this))[0].href == String(window.location)) {
-                $(this).parent().addClass('active');
-                $(this).parents('ul').add(this).each(function () {
-                    $(this).show();
-                    $(this).prev('a').find('.chevron').removeClass('closed').addClass('opened')
-                })
-            }
-        });
-
-        menu.on('click', '.dropmenu', function (e) {
+        var menu = $('#sidebar-left .main-menu').on('click', '.dropmenu', function (e) {
             e.preventDefault();
             var chevron = $(this).find('.chevron');
             if (chevron.hasClass('opened')) {
@@ -145,6 +139,16 @@
             } else {
                 chevron.removeClass('closed').addClass('opened');
                 chevron.parents('li').find('ul').show();
+            }
+        });
+
+        menu.find('a').each(function () {
+            if ($($(this))[0].href == String(window.location)) {
+                $(this).parent().addClass('active');
+                $(this).parents('ul').add(this).each(function () {
+                    $(this).show();
+                    $(this).prev('a').find('.chevron').removeClass('closed').addClass('opened')
+                })
             }
         });
 
@@ -182,29 +186,13 @@
             $(this).trigger('oh.change');
         });
 
-        //var confirm_modal = $('#confirm_modal').on('show.bs.modal', function (e) {
-        //    confirm_modal
-        //        .data({
-        //            item: $(e.relatedTarget).parents('tr').data('tmplItem').data,
-        //            target: $(e.relatedTarget).parents('tbody')
-        //        });
-        //}).on('click', '[data-type="delete"]', function (e) {
-        //    executeFunctionByName(confirm_modal.data('api'), w, {
-        //        query: {
-        //            id: confirm_modal.data('item').id
-        //        },
-        //        header: {
-        //            hackathon_id: confirm_modal.data('item').hackathon_id
-        //        }
-        //    }, function (data) {
-        //        bindData(confirm_modal.data('target'));
-        //        confirm_modal.modal('hide');
-        //    });
-        //});
-
         $('[data-toggle="bindtemp"]').each(function (i, o) {
             bindData($(o));
         });
+    }
+
+    $(function () {
+        mainBindEvent();
     })
 })(jQuery, window);
 

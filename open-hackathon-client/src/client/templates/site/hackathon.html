@@ -344,11 +344,13 @@
                 </div>
                 <div class="media-body">
                     <h4 class="media-heading"><a href="${$item.get_link(id)}">${name}</a></h4>
-                   ${$item.get_description(description)}
+                    <h5>队长：${leader.nickname}</h5>
+                    <p>共 <span class="blue-text">${member_count}</span> 人</p>
                 </div>
             </div>
         </div>
         {% endraw %}
+
     </script>
     <script id="register_list_temp" type="text/x-jquery-tmpl">
     {% raw %}
@@ -363,7 +365,6 @@
             <div class="date">${create_time}</div>
         </li>
     {% endraw %}
-
 
     </script>
     <script type="text/javascript">

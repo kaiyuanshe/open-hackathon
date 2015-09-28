@@ -5,181 +5,236 @@
 {% endblock %}
 
 {% block content %}
-    <div class="oh-main">
+    <div class="team-banner">
         <div class="container">
-            <h1 class="title">Fendoe {{ name }}</h1>
-
-            <div class="row">
-                <div class="col-lg-3 col-md-4">
-                    <div class="oh-box">
-                        <img src="/static/pic/team-logo.png">
-                    </div>
-                </div>
-                <div class="col-lg-9 col-md-8">
-                    <h2 id="description" class="title">团队介绍</h2>
-
-                    <div class="oh-body">
-                        {{ description }}
-                    </div>
-                </div>
+            <div class="air air-bottom-right padding-10">
+                {% if team.is_admin == False and team.is_leader == False %}
+                    {% if team.is_member %}
+                        <a href="javascript:void(0);"
+                           class="btn oh-white-text bg-color-pinkDark btn-lg"><i
+                                class="fa fa-unlink" data-role="leave"></i> 离队</a>
+                    {% else %}
+                        <a href="javascript:void(0);"
+                           class="btn oh-white-text bg-color-pinkDark btn-lg" data-role="join"><i
+                                class="fa fa-link"></i> 加入</a>
+                    {% endif %}
+                {% elif team.is_leader %}
+                    <a href="javascript:void(0);"
+                       class="btn oh-white-text bg-color-pinkDark btn-lg" data-role="edit"><i
+                            class="fa fa-edit"></i> 编辑</a>
+                    <a href="javascript:void(0);"
+                       class="btn oh-white-text bg-color-pinkDark btn-lg hide" data-role="save"><i
+                            class="fa fa-save"></i> 保存</a>
+                {% endif %}
             </div>
+            <div class="air air-top-left padding-10">
+                <h4 class="txt-color-white font-md">Jan 1, 2014</h4>
+            </div>
+        </div>
+    </div>
+    <div class="" data-tid="{{ team.id }}" data-role="{{ role }}" data-lid="{{ team.leader.id }}">
+        <div id="team_info " class="container">
             <div class="row">
-                <div class="col-lg-12">
-                    <h2 id="description" class="">团队成员</h2>
-
-                    <div class="oh-body ">
-                        <div class=" oh-users " id="talent_list">
-
-                            <div class="col-lg-2 col-md-4 col-xs-6">
-                                <div class="oh-item">
-                                    <div class="oh-header"><a href="javascript:;"><img
-                                            src="https://avatars.githubusercontent.com/u/5856568?v=3"
-                                            onerror="javascript:this.src='/static/pic/anon_user.png'"></a></div>
-                                    <div class="oh-body"><p class="text-center"><a href="javascript:;">Boli Guan</a></p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-2 col-md-4 col-xs-6">
-                                <div class="oh-item">
-                                    <div class="oh-header"><a href="javascript:;"><img
-                                            src="http://tp3.sinaimg.cn/1885895770/180/39996705961/1"
-                                            onerror="javascript:this.src='/static/pic/anon_user.png'"></a></div>
-                                    <div class="oh-body"><p class="text-center"><a href="javascript:;">Fendoe</a></p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-2 col-md-4 col-xs-6">
-                                <div class="oh-item">
-                                    <div class="oh-header"><a href="javascript:;"><img
-                                            src="http://qzapp.qlogo.cn/qzapp/101200890/7A988694CD75E4A16710FADD2D1761FF/30"
-                                            onerror="javascript:this.src='/static/pic/anon_user.png'"></a></div>
-                                    <div class="oh-body"><p class="text-center"><a href="javascript:;">Fendoe/dy</a></p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-2 col-md-4 col-xs-6">
-                                <div class="oh-item">
-                                    <div class="oh-header"><a href="javascript:;"><img src="/static/pic/anon_user.png"
-                                                                                       onerror="javascript:this.src='/static/pic/anon_user.png'"></a>
-                                    </div>
-                                    <div class="oh-body"><p class="text-center"><a href="javascript:;">管伯理</a></p></div>
-                                </div>
-                            </div>
-                            <div class="col-lg-2 col-md-4 col-xs-6">
-                                <div class="oh-item">
-                                    <div class="oh-header"><a href="javascript:;"><img src="/static/pic/anon_user.png"
-                                                                                       onerror="javascript:this.src='/static/pic/anon_user.png'"></a>
-                                    </div>
-                                    <div class="oh-body"><p class="text-center"><a href="javascript:;"></a></p></div>
-                                </div>
-                            </div>
-                            <div class="col-lg-2 col-md-4 col-xs-6">
-                                <div class="oh-item">
-                                    <div class="oh-header"><a href="javascript:;"><img src="/static/pic/anon_user.png"
-                                                                                       onerror="javascript:this.src='/static/pic/anon_user.png'"></a>
-                                    </div>
-                                    <div class="oh-body"><p class="text-center"><a href="javascript:;">admin</a></p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-2 col-md-4 col-xs-6">
-                                <div class="oh-item">
-                                    <div class="oh-header"><a href="javascript:;"><img
-                                            src="https://avatars.githubusercontent.com/u/5856568?v=3"
-                                            onerror="javascript:this.src='/static/pic/anon_user.png'"></a></div>
-                                    <div class="oh-body"><p class="text-center"><a href="javascript:;">Boli Guan</a></p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-2 col-md-4 col-xs-6">
-                                <div class="oh-item">
-                                    <div class="oh-header"><a href="javascript:;"><img
-                                            src="http://tp3.sinaimg.cn/1885895770/180/39996705961/1"
-                                            onerror="javascript:this.src='/static/pic/anon_user.png'"></a></div>
-                                    <div class="oh-body"><p class="text-center"><a href="javascript:;">Fendoe</a></p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-2 col-md-4 col-xs-6">
-                                <div class="oh-item">
-                                    <div class="oh-header"><a href="javascript:;"><img
-                                            src="http://qzapp.qlogo.cn/qzapp/101200890/7A988694CD75E4A16710FADD2D1761FF/30"
-                                            onerror="javascript:this.src='/static/pic/anon_user.png'"></a></div>
-                                    <div class="oh-body"><p class="text-center"><a href="javascript:;">Fendoe/dy</a></p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-2 col-md-4 col-xs-6">
-                                <div class="oh-item">
-                                    <div class="oh-header"><a href="javascript:;"><img src="/static/pic/anon_user.png"
-                                                                                       onerror="javascript:this.src='/static/pic/anon_user.png'"></a>
-                                    </div>
-                                    <div class="oh-body"><p class="text-center"><a href="javascript:;">管伯理</a></p></div>
-                                </div>
-                            </div>
-                            <div class="col-lg-2 col-md-4 col-xs-6">
-                                <div class="oh-item">
-                                    <div class="oh-header"><a href="javascript:;"><img src="/static/pic/anon_user.png"
-                                                                                       onerror="javascript:this.src='/static/pic/anon_user.png'"></a>
-                                    </div>
-                                    <div class="oh-body"><p class="text-center"><a href="javascript:;"></a></p></div>
-                                </div>
-                            </div>
-                            <div class="col-lg-2 col-md-4 col-xs-6">
-                                <div class="oh-item">
-                                    <div class="oh-header"><a href="javascript:;"><img src="/static/pic/anon_user.png"
-                                                                                       onerror="javascript:this.src='/static/pic/anon_user.png'"></a>
-                                    </div>
-                                    <div class="oh-body"><p class="text-center"><a href="javascript:;">admin</a></p>
-                                    </div>
-                                </div>
-                            </div>
+                <div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 team-pic">
+                    <img id="team_logo" src="{{ team.logo == None and '/static/pic/team-logo.png' or team.logo }}"
+                         onerror="javascript:this.src='/static/pic/team-logo.png'">
+                    {% if team.is_leader %}
+                        <div class="edit hide">
+                            <button class="btn btn-primary" data-role="logo-edit">编辑</button>
                         </div>
-                    </div>
+                    {% endif %}
+                </div>
+                <div class="col-lg-9 col-md-9 col-sm-8 col-xs-8">
+                    <h1 class="title" id="team_name"> {{ team.name }}  </h1>
+
+                    <div class="" id="team_description">{{ description }}</div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-lg-12">
-                    <h2 id="description" class="">团队作品</h2>
-
-                    <div class="oh-body">
-
-                    </div>
+        </div>
+        <div id="team_member">
+            <div class="container team-box">
+                <div class="oh-header clearfix">
+                    <h2>团队成员 <span>（0）</span></h2>
+                    {% if role == 0 %}
+                        <a href="javascript:" class="btn btn-primary" role="join">加入</a>
+                    {% elif role == 1 %}
+                        <a href="javascript:" class="btn btn-warning" role="leave">离队</a>
+                    {% elif role and 2  == 2 %}
+                        <a href="javascript:" class="btn btn-danger" role="disband">解散</a>
+                    {% endif %}
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-lg-12">
-                    <h2 id="description" class="">裁判评分</h2>
-
-                    <div class="oh-body">
-
-                    </div>
+                <div class="oh-users" id="talent_list">
                 </div>
             </div>
         </div>
     </div>
+    <div id="team_works">
+        <div class="container team-box">
+            <div class="oh-header clearfix">
+                <h2 class="">团队作品 <span>（0）</span></h2>
+                {% if role and 2 == 2 %}
+                    <a href="javascript:" class="btn btn-primary" role="disband">添加作品</a>
+                {% endif %}
+            </div>
+            <div class="works" id="works">
+                <div class="row works_video" id="works_video">
+                </div>
+                <div class="row works_img" id="works_img">
+                </div>
+                <div class="row ">
+                    <ul class="works_code" id="works_code">
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="referee">
+        <div class="container team-box">
+
+            <div class="oh-header clearfix">
+                <h2>裁判评分</h2>
+            </div>
+            <form id="score_form">
+                <fieldset>
+                    <div class="rating">
+                        <div class="oh-inline-block">
+                            <input type="radio" name="trophies-rating" value="10" id="trophies-10">
+                            <label for="trophies-10"><i class="fa fa-trophy"></i></label>
+                            <input type="radio" name="trophies-rating" value="9" id="trophies-9">
+                            <label for="trophies-9"><i class="fa fa-trophy"></i></label>
+                            <input type="radio" name="trophies-rating" value="8" id="trophies-8">
+                            <label for="trophies-8"><i class="fa fa-trophy"></i></label>
+                            <input type="radio" name="trophies-rating" value="7" id="trophies-7">
+                            <label for="trophies-7"><i class="fa fa-trophy"></i></label>
+                            <input type="radio" name="trophies-rating" value="6" id="trophies-6">
+                            <label for="trophies-6"><i class="fa fa-trophy"></i></label>
+                            <input type="radio" name="trophies-rating" value="5" id="trophies-6">
+                            <label for="trophies-5"><i class="fa fa-trophy"></i></label>
+                            <input type="radio" name="trophies-rating" value="4" id="trophies-4">
+                            <label for="trophies-4"><i class="fa fa-trophy"></i></label>
+                            <input type="radio" name="trophies-rating" value="3" id="trophies-3">
+                            <label for="trophies-3"><i class="fa fa-trophy"></i></label>
+                            <input type="radio" name="trophies-rating" value="2" id="trophies-2">
+                            <label for="trophies-2"><i class="fa fa-trophy"></i></label>
+                            <input type="radio" name="trophies-rating" value="1" id="trophies-1">
+                            <label for="trophies-1"><i class="fa fa-trophy"></i></label>
+                            评分：
+                        </div>
+                    </div>
+                                <textarea class="form-control" id="comment" name="comment" rows="4"
+                                          maxlength="200" placeholder="写下您的感想呗！"></textarea>
+                </fieldset>
+                <fieldset class="text-right">
+                    <button class="btn btn-primary">提交</button>
+
+                </fieldset>
+            </form>
+        </div>
+    </div>
+
 {% endblock %}
 
 {% block script %}
+    {% if team.is_leader %}
+        <div class="modal fade" id="teamLogoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <form id="editLogoForm" class="form-horizontal" novalidate>
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                    aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel">修改团队Logo</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group"
+                                 ng-class="{ 'has-error' : registerForm.team_name.$invalid && registerForm.team_name.$touched }">
+                                <label class="col-sm-3 control-label required">图片路径</label>
+
+                                <div class="col-sm-9">
+                                    <input type="url" class="form-control" id="logo" name="logo" placeholder="图片路径"
+                                           required
+                                           data-bv-trigger="blur"
+                                           data-bv-message="请填写正确的图片访问路径"
+                                           data-bv-notempty-message="请填图片路径">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">确定</button>
+                            <button type="button" class="btn btn-warning" data-dismiss="modal">取消</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="modal fade" id="worksModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <form id="addBannerForm" class="form-horizontal" novalidate>
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                    aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel">发布作品</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group"
+                                 ng-class="{ 'has-error' : registerForm.team_name.$invalid && registerForm.team_name.$touched }">
+                                <label class="col-sm-3 control-label required">图片路径</label>
+
+                                <div class="col-sm-9">
+                                    <input type="url" class="form-control" id="banner" name="banner" placeholder="图片路径"
+                                           required
+                                           data-bv-trigger="blur"
+                                           data-bv-message="请填写正确的图片访问路径"
+                                           data-bv-notempty-message="请填图片路径">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">确定</button>
+                            <button type="button" class="btn btn-warning" data-dismiss="modal">取消</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    {% endif %}
+
+
     <script id="team_item" type="text/x-jquery-tmpl">
     {% raw %}
-
+    <div class="col-lg-2 col-md-4 col-xs-6" data-user >
+        <div class="oh-item">
+            <div class="oh-header">
+                <a href="javascript:;">
+                    <img src="${$item.getUserLogo(user.avatar_url)}" onerror="javascript:this.src='/static/pic/anon_user.png'">
+                </a>
+            </div>
+            <div class="oh-body">
+                <p class="text-center">
+                    <a href="javascript:;">${user.nickname}</a><br/>
+                    <span>${$item.getTitle(user_id)}</span>
+                </p>
+            </div>
+        </div>
+    </div>
     {% endraw %}
+    </script>
+    <script id="show_item" type="text/x-jquery-tmpl">
+    {% raw %}
+        {{if type == 0}}
+        <div class="col-md-6">
+            <img src='${uri}' alt="${note}">
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        {{else if type == 1}}
+            <div class="iframe" title="${note}">
+                ${html uri}
+            </div>
+        {{ else }}
+           <li>${note}: <a href="${uri}" >${uri}</a></li>
+        {{/if}}
+    {% endraw %}
     </script>
     <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
     <script type="text/javascript" src="/static/js/views/oh.site.team.js"></script>

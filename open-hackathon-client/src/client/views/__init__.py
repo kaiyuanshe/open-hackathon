@@ -56,6 +56,7 @@ API_HACKATHON_TEMPLATE = "/api/hackathon/template"
 API_HACAKTHON_REGISTRATION = "/api/user/registration"
 API_TEAM_MEMBER_LIST = "/api/team/member/list"
 API_TEAM_USER = "/api/user/team/list"
+API_TEAM = "/api/team"
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -146,16 +147,22 @@ def utility_processor():
 
 @app.template_filter('mkHTML')
 def to_markdown_html(text):
+    if text is None:
+        text = ""
     return markdown.markdown(text)
 
 
 @app.template_filter('stripTags')
 def strip_tags(html):
+    if html is None:
+        html = ""
     return re.sub(r"</?\w+[^>]*>", "", html)
 
 
 @app.template_filter('limitTo')
 def limit_to(text, limit=100):
+    if text is None:
+        text = ""
     return text[0:limit]
 
 
@@ -241,10 +248,12 @@ def live_login():
 @app.route('/')
 @app.route('/index')
 def index():
-    newest_hackathons = __get_api(API_HACKATHON_LIST,
+    newest_hackathons = __get_api(API_HACKATHON_LIST, {"token": session.get("token")},
                                   params={"page": 1, "per_page": 3, "order_by": "create_time", "status": 1})
-    hot_hackathons = __get_api(API_HACKATHON_LIST, params={"page": 1, "per_page": 3, "order_by": "", "status": 1})
-    soon_hackathon = __get_api(API_HACKATHON_LIST, params={"page": 1, "per_page": 3, "order_by": "", "status": 1})
+    hot_hackathons = __get_api(API_HACKATHON_LIST, {"token": session.get("token")},
+                               params={"page": 1, "per_page": 3, "order_by": "", "status": 1})
+    soon_hackathon = __get_api(API_HACKATHON_LIST, {"token": session.get("token")},
+                               params={"page": 1, "per_page": 3, "order_by": "", "status": 1})
     return render('/home.html', newest_hackathons=newest_hackathons, hot_hackathons=hot_hackathons,
                   soon_hackathon=soon_hackathon)
 
@@ -263,7 +272,9 @@ def about():
 @login_required
 def logout():
     login_providers.values()[0].logout(g.admin)
-    return redirect("/login")
+    resp = make_response(redirect(request.args.get("return_url")))
+    resp.set_cookie('token', '', expires=0)
+    return resp
 
 
 @app.route("/login")
@@ -328,8 +339,14 @@ def temp_settings(hackathon_name):
 @app.route("/site/<hackathon_name>/team/<tid>")
 def create_join_team(hackathon_name, tid):
     headers = {"hackathon_name": hackathon_name, "token": session.get("token")}
-
-    return render("/site/team.html")
+    team = Context.from_object(__get_api(API_TEAM, headers, params={"id": tid}))
+    if team.get('error') is not None:
+        return redirect('404')
+    else:
+        role = team.is_admin and 4 or 0
+        role += team.is_leader and 2 or 0
+        role += team.is_member and 1 or 0
+        return render("/site/team.html", team=team, role=role)
 
 
 @app.route("/admin", methods=['GET', 'POST'])
