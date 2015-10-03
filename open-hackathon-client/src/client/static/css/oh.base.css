@@ -318,6 +318,10 @@ footer .oh-copyright hr {
     border-color: #21b1de;
 }
 
+.blue-text {
+    color: #21b1de;
+}
+
 .gery-text,
 .grey-link {
     color: #969696;
@@ -1772,4 +1776,8 @@ h3.title {
 
 h4.title {
 
+}
+
+.oh-inline-block {
+    display: inline-block;
 }

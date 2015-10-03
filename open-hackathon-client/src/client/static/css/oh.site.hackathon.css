@@ -125,6 +125,9 @@
     width: 96px;
     max-height: 96px;
 }
+.teams .media-heading{
+    margin-bottom: 20px;
+}
 
 .interest .oh-thumb {
     width: 120px;

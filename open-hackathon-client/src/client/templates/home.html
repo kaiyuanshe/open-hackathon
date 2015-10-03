@@ -82,12 +82,14 @@
                                             {% if item.ribbon != "" %}
                                                 <span class="oh-flag">{{ item.ribbon }}</span>
                                             {% endif %}
-                                            <a href="javascript:void(0);" role="oh-like"
-                                               class="oh-collect {% if item.get('like') is not none %} active {% endif %}"
-                                               data-name="{{ item.name }}"
-                                                    ><span>感兴趣</span>
-                                                <img src="/static/pic/pushpin-icon.png">
-                                            </a>
+                                            {% if current_user.is_authenticated() %}
+                                                <a href="javascript:void(0);" role="oh-like"
+                                                   class="oh-collect {% if item.get('like') is not none %} active {% endif %}"
+                                                   data-name="{{ item.name }}"
+                                                        ><span>感兴趣</span>
+                                                    <img src="/static/pic/pushpin-icon.png">
+                                                </a>
+                                            {% endif %}
                                         </div>
                                         <div class="oh-body">
                                             <h3><a href="{{ url_for('hackathon', hackathon_name=item.name) }}"
@@ -121,15 +123,21 @@
                                                 <tbody>
                                                 <tr>
                                                     <td class="text-left">
-                                                        <div>{{ item.registration_end_time | deadline }}天<span>报名截止</span>
+                                                        <div>
+                                                            <span>{{ item.registration_end_time | deadline }}天</span>
+                                                            报名截止
                                                         </div>
                                                     </td>
                                                     <td class="text-center">
-                                                        <div>{{ item.stat.like or 0 }}<span>感兴趣</span></div>
+                                                        <div>
+                                                            <span data-likes="{{ item.name }}">{{ item.stat.like or 0 }}</span>
+                                                            感兴趣
+                                                        </div>
                                                     </td>
                                                     <td class="text-right">
                                                         <div>
-                                                            {{ item.stat.register or 0 }}/{{ item.config.max_enrollment == '0' and '无限' or item.config.max_enrollment }}<span>报名人数</span>
+                                                            <span>{{ item.stat.register or 0 }}/{{ item.config.max_enrollment == '0' and '无限' or item.config.max_enrollment }}</span>
+                                                            报名人数
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -163,12 +171,14 @@
                                             {% if item.ribbon != "" %}
                                                 <span class="oh-flag">{{ item.ribbon }}</span>
                                             {% endif %}
-                                            <a href="javascript:void(0);" role="oh-like"
-                                               class="oh-collect {% if item.like is not none %} active {% endif %}"
-                                               data-name="{{ item.name }}"
-                                                    ><span>感兴趣</span>
-                                                <img src="/static/pic/pushpin-icon.png">
-                                            </a>
+                                            {% if current_user.is_authenticated() %}
+                                                <a href="javascript:void(0);" role="oh-like"
+                                                   class="oh-collect {% if item.get('like') is not none %} active {% endif %}"
+                                                   data-name="{{ item.name }}"
+                                                        ><span>感兴趣</span>
+                                                    <img src="/static/pic/pushpin-icon.png">
+                                                </a>
+                                            {% endif %}
                                         </div>
                                         <div class="oh-body">
                                             <h3><a href="{{ url_for('hackathon', hackathon_name=item.name) }}"
@@ -202,15 +212,21 @@
                                                 <tbody>
                                                 <tr>
                                                     <td class="text-left">
-                                                        <div>{{ item.registration_end_time | deadline }}天<span>报名截止</span>
+                                                        <div>
+                                                            <span>{{ item.registration_end_time | deadline }}天</span>
+                                                            报名截止
                                                         </div>
                                                     </td>
                                                     <td class="text-center">
-                                                        <div>{{ item.stat.like or 0 }}<span>感兴趣</span></div>
+                                                        <div>
+                                                            <span data-likes="{{ item.name }}">{{ item.stat.like or 0 }}</span>
+                                                            感兴趣
+                                                        </div>
                                                     </td>
                                                     <td class="text-right">
                                                         <div>
-                                                            {{ item.stat.register or 0 }}/{{ item.config.max_enrollment == '0' and '无限' or item.config.max_enrollment }}<span>报名人数</span>
+                                                            <span>{{ item.stat.register or 0 }}/{{ item.config.max_enrollment == '0' and '无限' or item.config.max_enrollment }}</span>
+                                                            报名人数
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -236,7 +252,7 @@
                     <div role="tabpanel" class="tab-pane" id="newest">
                         <div class="row">
                             {% for item in newest_hackathons.get('items') %}
-                                 <div class="col-lg-4 col-md-4">
+                                <div class="col-lg-4 col-md-4">
                                     <div class="oh-item">
                                         <div class="oh-header">
                                             <img src="{{ item.banners.split(';')[0] or url_for('static',filename='pic/homepage.jpg') }}"
@@ -244,12 +260,14 @@
                                             {% if item.ribbon != "" %}
                                                 <span class="oh-flag">{{ item.ribbon }}</span>
                                             {% endif %}
-                                            <a href="javascript:void(0);" role="oh-like"
-                                               class="oh-collect {% if item.like is not none %} active {% endif %}"
-                                               data-name="{{ item.name }}"
-                                                    ><span>感兴趣</span>
-                                                <img src="/static/pic/pushpin-icon.png">
-                                            </a>
+                                            {% if current_user.is_authenticated() %}
+                                                <a href="javascript:void(0);" role="oh-like"
+                                                   class="oh-collect {% if item.get('like') is not none %} active {% endif %}"
+                                                   data-name="{{ item.name }}"
+                                                        ><span>感兴趣</span>
+                                                    <img src="/static/pic/pushpin-icon.png">
+                                                </a>
+                                            {% endif %}
                                         </div>
                                         <div class="oh-body">
                                             <h3><a href="{{ url_for('hackathon', hackathon_name=item.name) }}"
@@ -283,15 +301,21 @@
                                                 <tbody>
                                                 <tr>
                                                     <td class="text-left">
-                                                        <div>{{ item.registration_end_time | deadline }}天<span>报名截止</span>
+                                                        <div>
+                                                            <span>{{ item.registration_end_time | deadline }}天</span>
+                                                            报名截止
                                                         </div>
                                                     </td>
                                                     <td class="text-center">
-                                                        <div>{{ item.stat.like or 0 }}<span>感兴趣</span></div>
+                                                        <div>
+                                                            <span data-likes="{{ item.name }}">{{ item.stat.like or 0 }}</span>
+                                                            感兴趣
+                                                        </div>
                                                     </td>
                                                     <td class="text-right">
                                                         <div>
-                                                            {{ item.stat.register or 0 }}/{{ item.config.max_enrollment == '0' and '无限' or item.config.max_enrollment }}<span>报名人数</span>
+                                                            <span>{{ item.stat.register or 0 }}/{{ item.config.max_enrollment == '0' and '无限' or item.config.max_enrollment }}</span>
+                                                            报名人数
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -562,11 +586,6 @@
                     </div>
                 </div>
           </div>
-
-
-
-
-
     </script>
     <script type="text/javascript" src="/static/js/views/oh.home.js"></script>
 {% endblock %}

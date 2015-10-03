@@ -184,7 +184,7 @@ Config = {
                         "member": ["get"]
                     },
                     "hackathon": {
-                        "like": ["post"]
+                        "like": ["post", "delete"]
                     }
                 },
                 "bulletin": {
@@ -203,14 +203,14 @@ Config = {
                     }
                 },
                 "team": {
-                    "": ["get", "post"],
-                    "user": ["get"],
-                    "list": ["get"],
-                    "leader": ["put"],
+                    "": ["get", "post", "put", "delete"],
+                    "score": ["get", "post", "put"],
                     "member": {
-                        "": ["post", "put"],
+                        "": ["post", "put", "delete"],
                         "list": ["get"]
-                    }
+                    },
+                    "show": ["get", "post", "delete"],
+                    "template": ["post", "delete"]
                 },
                 "talent": {
                     "list": ["get"]
