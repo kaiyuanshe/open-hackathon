@@ -80,6 +80,7 @@ def __oauth_api_key():
 
 
 def render(template_name_or_list, **context):
+    log.debug("rendering template '%s'" % template_name_or_list)
     return render_template(template_name_or_list,
                            meta_content=__oauth_meta_content(),
                            oauth_api_key=__oauth_api_key(),
@@ -128,8 +129,9 @@ def __get_api(url, headers=None, **kwargs):
         default_headers.update(headers)
     try:
         req = requests.get(get_config("hackathon-api.endpoint") + url, headers=default_headers, **kwargs)
-        resp = json.loads(req.content)
-        return resp
+        resp = req.content
+        log.debug("Get from %s, server responds: %s" % (url, resp))
+        return json.loads(resp)
     except Exception as e:
         abort(500, 'API Service is not yet open')
 
