@@ -41,34 +41,34 @@
                 <img src="/static/pic/icon64.png">
             </a>
         </div>
-        {% include  "partials/header_menu.html" %}
+        {% include "partials/header_menu.html" %}
     </div>
 </header>
 {% block content %} {% endblock %}
-{% if request.endpoint  != 'index' or  current_user.is_authenticated() %}
-    <div class="oh-grey-bg">
-        <div class="container oh-flow-chart">
-        </div>
+{% if request.endpoint != 'index' or current_user.is_authenticated() %}
+<div class="oh-grey-bg">
+    <div class="container oh-flow-chart">
     </div>
+</div>
 {% endif %}
-{% if request.endpoint  == 'index' %}
-    <div class="oh-share-bar">
-        <div class="oh-wrap">
-            <h3>激情我的小伙伴一起黑客松~</h3>
+{% if request.endpoint == 'index' %}
+<div class="oh-share-bar">
+    <div class="oh-wrap">
+        <h3>激情我的小伙伴一起黑客松~</h3>
 
-            <div class="jiathis_style_32x32 share-btn">
-                <a class="jiathis_button_ishare">
-                    <label>一键分享</label>
-                </a>
-                <a class="jiathis_button_tsina">
-                    <label>微博分享</label>
-                </a>
-                <a class="jiathis_button_weixin">
-                    <label>微信分享</label>
-                </a>
-            </div>
+        <div class="jiathis_style_32x32 share-btn">
+            <a class="jiathis_button_ishare">
+                <label>一键分享</label>
+            </a>
+            <a class="jiathis_button_tsina">
+                <label>微博分享</label>
+            </a>
+            <a class="jiathis_button_weixin">
+                <label>微信分享</label>
+            </a>
         </div>
     </div>
+</div>
 {% endif %}
 <footer>
     <div class="container">
@@ -128,6 +128,7 @@
             "tqq": '{{ oauth_api_key.qq }}'
         }
     }
+
 </script>
 <script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
 {% block script %}{% endblock %}
