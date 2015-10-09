@@ -234,7 +234,7 @@ class HackathonManager(Component):
         if hackathon is not None:
             raise PreconditionFailed("hackathon name already exists")
 
-        self.log.debug("add a new hackathon:" + repr(context))
+        self.log.debug("add a new hackathon:" + context.name)
         new_hack = self.__create_hackathon(context)
 
         # todo remove the following line ASAP
@@ -251,12 +251,11 @@ class HackathonManager(Component):
         :rtype dict
         :return hackathon in dict if updated successfully.
         """
-        self.log.debug("update a exist hackathon insert args: %r" % args)
         hackathon = g.hackathon
 
         try:
             update_items = self.__parse_update_items(args, hackathon)
-            self.log.debug("update hackathon items :" + str(args))
+            self.log.debug("update hackathon items :" + str(args.keys()))
             self.db.update_object(hackathon, **update_items)
             return hackathon.dic()
         except Exception as e:
