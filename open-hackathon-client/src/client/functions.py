@@ -27,7 +27,6 @@
 import json, os, requests, urllib2
 from datetime import datetime
 from urlparse import parse_qs
-from pytz import utc
 
 try:
     from config import Config

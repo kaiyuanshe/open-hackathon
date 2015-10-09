@@ -425,6 +425,11 @@ class AdminHackathonTags(HackathonResource):
         tags = request.get_data().split(",")
         return hackathon_manager.set_hackathon_tags(g.hackathon, tags)
 
+    @admin_privilege_required
+    def put(self):
+        tags = request.get_data().split(",")
+        return hackathon_manager.set_hackathon_tags(g.hackathon, tags)
+
 
 class HackathonTagNamesResource(HackathonResource):
     def get(self):

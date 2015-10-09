@@ -24,7 +24,11 @@ THE SOFTWARE.
 """
 
 import hashlib
-from . import app
+import sys
+
+sys.path.append("..")
+
+from client import app
 
 
 def encode(plaintext):

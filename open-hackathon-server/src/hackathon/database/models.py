@@ -350,9 +350,9 @@ class HackathonOrganizer(DBBase):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(50))
-    description = Column(String(100))
+    description = Column(Text)
     homepage = Column(String(100))
-    logo = Column(String(100))
+    logo = Column(String(200))
 
     create_time = Column(TZDateTime, default=get_now())
     update_time = Column(TZDateTime)

@@ -134,8 +134,8 @@ Config = {
                         "": ["get", "post", "put"],
                         "checkname": ["get"],
                         "list": ["get"],
-                        "tags": ["get", "post"],
-                        "config": ["post"],
+                        "tags": ["get", "post", "put", "delete"],
+                        "config": ["post", "put", "delete"],
                         "administrator": {
                             "": ["put", "post", "delete"],
                             "list": ["get"]
