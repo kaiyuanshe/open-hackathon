@@ -112,7 +112,10 @@ def validate(func):
                 log.debug("output validation of '%s.%s' failed: %s" % (class_name, method_name, repr(me.errors)))
                 raise InternalServerError(repr(me.errors))
 
-        log.debug("API %s.%s called and respond with: %s" % (class_name, method_name, output_data))
+        code = "200"
+        if "error" in output_data:
+            code = output_data["error"]["code"]
+        log.debug("API call %s.%s -- %s %d" % (class_name, method_name, code, len(str(output_data))))
         return output_data
 
     return wrapper
