@@ -140,6 +140,9 @@ sudo /etc/init.d/guacd restart
 sudo /etc/init.d/tomcat7 restart
 sudo /etc/init.d/uwsgi start
 ```
+#### Change TimeZone of the Server
+run `sudo dpkg-reconfigure tzdata` on Ubuntu server to change the server timezone to Asia/Shanghai. Otherwise the display of time may not be right. You can also run `more /etc/timezone` to show the current timezone.
+
 # Test the Web-application
 After finishsd those steps you could do some tests on local machine                     
 check guacd service:[http://localhost:8080/guacamole](http://localhost:8080/guacamole)                            
