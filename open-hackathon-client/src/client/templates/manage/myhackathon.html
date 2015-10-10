@@ -30,7 +30,6 @@
                             <tr>
                                 <th>名称</th>
                                 <th>主办方</th>
-                                <th>自动审核</th>
                                 <th>开始时间</th>
                                 <th>结束时间</th>
                                 <th>Status</th>
@@ -52,9 +51,8 @@
     <script id="hackathon_template" type="text/x-jquery-tmpl">
     {% raw %}
     <tr>
-    <td>${name}</td>
+    <td>${display_name}</td>
     <td>{{each organizers }}<a href="${organizer_url}">${organizer_name}</a>{{/each}}</td>
-    <td></td>
     <td>${moment(event_start_time).format('YYYY/MM/DD HH:mm')}</td>
     <td>${moment(event_end_time).format('YYYY/MM/DD HH:mm')}</td>
     <td>
