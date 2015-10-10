@@ -172,7 +172,10 @@ def limit_to(text, limit=100):
 @app.template_filter('deadline')
 def deadline(endtime):
     end_date = datetime.fromtimestamp(endtime / 1e3)
-    return (end_date - datetime.now()).days
+    if end_date > datetime.now():
+        return (end_date - datetime.now()).days
+    else:
+        return "--"
 
 
 week = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
