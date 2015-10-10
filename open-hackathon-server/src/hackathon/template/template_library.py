@@ -224,17 +224,17 @@ class TemplateLibrary(Component):
             provider = self.__get_provider_from_template_dic(template_content)
             if template is None:
                 self.log.debug("insert template info to db: %s" % template_content.name)
-                self.db.add_object_kwargs(Template,
-                                          name=template_content.name,
-                                          url=context.url,
-                                          local_path=context.get("physical_path"),
-                                          provider=provider,
-                                          creator_id=g.user.id,
-                                          status=TEMPLATE_STATUS.UNCHECKED,
-                                          create_time=self.util.get_now(),
-                                          update_time=self.util.get_now(),
-                                          description=template_content.description,
-                                          virtual_environment_count=len(template_content.units))
+                template = self.db.add_object_kwargs(Template,
+                                                     name=template_content.name,
+                                                     url=context.url,
+                                                     local_path=context.get("physical_path"),
+                                                     provider=provider,
+                                                     creator_id=g.user.id,
+                                                     status=TEMPLATE_STATUS.UNCHECKED,
+                                                     create_time=self.util.get_now(),
+                                                     update_time=self.util.get_now(),
+                                                     description=template_content.description,
+                                                     virtual_environment_count=len(template_content.units))
             else:
                 self.db.update_object(template,
                                       url=context.url,
