@@ -1,7 +1,7 @@
 {% extends "base/default.html" %}
 
 {% block meta %}
-    <title>黑客松登录</title>
+    <title>欢迎来到开放黑客松</title>
     <meta name="keywords" content=""/>
     <meta name="description" content="">
 {% endblock %}
@@ -39,7 +39,7 @@
                         <i class="activity-icon"></i>
 
                         <div class="activity-foot">
-                            <a class="btn btn-activity" href="#">发布活动</a>
+                            <a class="btn btn-activity" href="manage/create">发布活动</a>
                         </div>
                     </div>
 
@@ -51,4 +51,5 @@
 
 {% block script %}
     <script type="text/javascript" src="/static/js/views/oh.landing.js"></script>
+    <script type="text/javascript" src="/static/js/jquery/jquery.cookie.js"></script>
 {% endblock %}

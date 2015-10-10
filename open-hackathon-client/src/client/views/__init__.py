@@ -172,7 +172,10 @@ def limit_to(text, limit=100):
 @app.template_filter('deadline')
 def deadline(endtime):
     end_date = datetime.fromtimestamp(endtime / 1e3)
-    return (end_date - datetime.now()).days
+    if end_date > datetime.now():
+        return (end_date - datetime.now()).days
+    else:
+        return "--"
 
 
 week = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
@@ -251,6 +254,10 @@ def live_login():
 @app.route('/')
 @app.route('/index')
 def index():
+    landing_page_visited = request.cookies.get('ohplpv')
+    if not landing_page_visited:
+        return redirect("/landing")
+
     newest_hackathons = __get_api(API_HACKATHON_LIST, {"token": session.get("token")},
                                   params={"page": 1, "per_page": 3, "order_by": "create_time", "status": 1})
     hot_hackathons = __get_api(API_HACKATHON_LIST, {"token": session.get("token")},
