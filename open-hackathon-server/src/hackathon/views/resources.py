@@ -266,6 +266,14 @@ class TeamResource(HackathonResource):
         return team_manager.dismiss_team(g.user, self.context().id)
 
 
+class TeamCheckNameResource(HackathonResource):
+    @hackathon_name_required
+    def get(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('name', type=str, location='args', required=True)
+        args = parse.parse_args()
+        return team_manager.get_team_by_name(g.hackthon.id, args["name"])
+
 class TeamScoreResource(HackathonResource):
     @token_required
     def get(self):

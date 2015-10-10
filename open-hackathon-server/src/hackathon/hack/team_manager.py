@@ -77,10 +77,7 @@ class TeamManager(Component):
         if self.user_manager.validate_login():
             user = g.user
 
-        if team:
-            return self.__team_detail(team, user)
-        else:
-            return not_found("no such team")
+        return team is not None
 
     def get_team_members(self, team_id):
         """Get team member list of specific team

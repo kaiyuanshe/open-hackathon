@@ -267,11 +267,11 @@ class ExprManager(Component):
                                          template_id=template.id)
         self.db.commit()
 
-        curr_num = self.db.count(Experiment,
-                                 Experiment.user_id == ReservedUser.DefaultUserID,
-                                 Experiment.template == template,
-                                 (Experiment.status == EStatus.STARTING) |
-                                 (Experiment.status == EStatus.RUNNING))
+        current_num = self.db.count(Experiment,
+                                    Experiment.user_id == ReservedUser.DefaultUserID,
+                                    Experiment.template == template,
+                                    (Experiment.status == EStatus.STARTING) |
+                                    (Experiment.status == EStatus.RUNNING))
         if template.provider == VE_PROVIDER.DOCKER:
             try:
                 template_dic = self.template_library.load_template(template)
@@ -291,7 +291,7 @@ class ExprManager(Component):
                 self.__roll_back(expr.id)
                 return internal_server_error('Failed starting containers')
         else:
-            if curr_num != 0 and curr_num >= self.util.get_config("pre_allocate.azure"):
+            if current_num != 0 and current_num >= self.util.get_config("pre_allocate.azure"):
                 return
             expr.status = EStatus.STARTING
             self.db.commit()
