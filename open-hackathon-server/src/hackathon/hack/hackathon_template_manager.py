@@ -80,6 +80,12 @@ class HackathonTemplateManager(Component):
         """Get all templates used by certain hackathon"""
         return self.db.find_all_objects_by(HackathonTemplateRel, hackathon_id=hackathon_id)
 
+    def get_templates_with_detail_by_hackathon(self, hackathon_id):
+        """Get all templates as well as its details used by certain hackathon"""
+        templates = self.get_templates_by_hackathon_id(hackathon_id)
+        templates_with_details = [self.__get_template_detail(t) for t in templates]
+        return templates_with_details
+
     def get_user_templates(self, user, hackathon):
         template_list = self.__get_templates_by_user(user, hackathon)
         settings = []
@@ -126,6 +132,12 @@ class HackathonTemplateManager(Component):
 
     def __init__(self):
         pass
+
+    def __get_template_detail(self, rel):
+        """Return Template detail as well as hackathon-template relation"""
+        ret = rel.dic()
+        ret["template"] = rel.template.dic()
+        return ret
 
     def __get_templates_by_user(self, user, hackathon):
         team = self.team_manager.get_team_by_user_and_hackathon(user, hackathon)
