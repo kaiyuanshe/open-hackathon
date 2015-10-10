@@ -62,7 +62,7 @@ auth-request-url: http://localhost:15000/api/guacamoleconfig
 ```
 Then copy the auth-provider jar file to the path that was setted in the config file
 ```
-sudo cp deploy/openhackathon-gucamole-authentication-1.0-SNAPSHOT.jar /var/lib/guacamole/
+sudo cp deploy/openhackathon-guacamole-authentication-1.0-SNAPSHOT.jar /var/lib/guacamole/
 ```
 Note: the `auth-request-url` value must be setted match the _open-hackathon_ src provides
 And every time you change this file , you may need to restart guacd and tomcat7 service
@@ -78,7 +78,7 @@ sudo service guacd restart
 sudo service tomcat7 restart
 ```
 
-#Deploy open-hackathon withn uWsgi
+#Deploy open-hackathon with uWsgi
 
 Before deploy the web application ,we need to setup all the dependencies and do some pre-execution
 ```
@@ -91,7 +91,7 @@ source venv/bin/activate
 cd /opt/open-hackathon/open-hackathon/
 sudo pip install -r requirement.txt
 ```
-####- confi mysql
+#### - config mysql
 edit `/etc/mysql/my.conf` make changes like this:
 ```shell
 [client]
@@ -119,10 +119,10 @@ mysql -u root -p
 use hackathon;
 insert into register (register_name, email, enabled) values("Your Name", "xxx@abc.com", 1);
 ```
-####- deploy withn nginx
+####- deploy with nginx
 To deploy the web application in nginx service , we need to provide:            
 - a conf file to let nginx load it; 
-- a uWsgi to hold the python-flask web application;    - 
+- a uwsgi to hold the python-flask web application;    -
 
 To make it to be easily operational, we would setup a linux demo to hanld the uwsgi process           
 
@@ -141,7 +141,7 @@ sudo /etc/init.d/tomcat7 restart
 sudo /etc/init.d/uwsgi start
 ```
 # Test the Web-application
-After finishsd those steps you could do some tests on local machine                     
+After finished those steps you could do some tests on local machine
 check guacd service:[http://localhost:8080/guacamole](http://localhost:8080/guacamole)                            
 check nginx service for proxy forwarding:[http://hackathon.chinacloudapp.cn/guacamole](http://localhost:8080/guacamole)           
 check open-hackathon web application:[http://localhost](http://localhost:8080/guacamole)                   
