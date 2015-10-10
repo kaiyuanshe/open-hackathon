@@ -254,6 +254,10 @@ def live_login():
 @app.route('/')
 @app.route('/index')
 def index():
+    landing_page_visited = request.cookies.get('ohplpv')
+    if not landing_page_visited:
+        return redirect("/landing")
+
     newest_hackathons = __get_api(API_HACKATHON_LIST, {"token": session.get("token")},
                                   params={"page": 1, "per_page": 3, "order_by": "create_time", "status": 1})
     hot_hackathons = __get_api(API_HACKATHON_LIST, {"token": session.get("token")},

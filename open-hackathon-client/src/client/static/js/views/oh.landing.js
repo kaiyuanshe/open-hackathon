@@ -29,13 +29,19 @@
             activity2.addClass('opacity')
         }, function () {
             activity2.removeClass('opacity');
+        }).click(function(){
+            $.cookie("ohplpv", "true")
+            return true
         });
 
         var activity2 = $('.activity-create').hover(function () {
             activity1.addClass('opacity')
         }, function () {
             activity1.removeClass('opacity')
-        });
+        }).click(function(){
+            $.cookie("ohplpv", "true")
+            return true
+        });;
     }
 
     function init() {
