@@ -498,8 +498,7 @@ class AdminRegisterResource(HackathonResource):
 class AdminHackathonTemplateListResource(HackathonResource):
     @hackathon_name_required
     def get(self):
-        templates = hackathon_template_manager.get_templates_by_hackathon_id(g.hackathon.id)
-        return [t.dic() for t in templates]
+        return hackathon_template_manager.get_templates_with_detail_by_hackathon(g.hackathon.id)
 
 
 class AdminHackathonTemplateResource(HackathonResource):

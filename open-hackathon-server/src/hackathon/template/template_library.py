@@ -274,8 +274,8 @@ class TemplateLibrary(Component):
         The output will be SQLAlchemy understandable expressions.
         """
         criterion = Template.status != -1
-        if 'status' in args:
-            criterion = and_(criterion, Template.status == args['status'])
+        if 'status' in args and int(args["status"]) >= 0:
+            criterion = Template.status == args['status']
 
         if 'name' in args and len(args['name']) > 0:
             criterion = and_(criterion, Template.name.like('%' + args['name'] + '%'))
