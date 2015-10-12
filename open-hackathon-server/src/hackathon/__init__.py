@@ -51,7 +51,6 @@ __all__ = [
 # initialize flask and flask restful
 app = Flask(__name__)
 app.config['SECRET_KEY'] = safe_get_config("app.secret_key", "secret_key")
-app.debug = True
 
 
 class HackathonApi(Api):
@@ -219,6 +218,8 @@ def init_schedule_jobs():
 
 def __init_schedule_jobs():
     """Init scheduled jobs in fact"""
+    log.debug("init scheduled jobs......")
+
     sche = RequiredFeature("scheduler")
     expr_manager = RequiredFeature("expr_manager")
     host_server_manager = RequiredFeature("docker_host_manager")
@@ -239,7 +240,6 @@ def __init_schedule_jobs():
         docker = RequiredFeature("hosted_docker")
         docker.ensure_images()
 
-    # todo
     # schedule job to pre-create a docker host server VM
     host_server_manager.schedule_pre_allocate_host_server_job()
 
