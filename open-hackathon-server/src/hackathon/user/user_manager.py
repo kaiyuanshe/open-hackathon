@@ -140,7 +140,7 @@ class UserManager(Component):
         # todo real talents list
         users = self.db.find_all_objects_order_by(User,
                                                   10,
-                                                  User.create_time.desc())
+                                                  User.login_times.desc())
         return [self.user_display_info(u) for u in users]
 
     # ----------------------------private methods-------------------------------------
