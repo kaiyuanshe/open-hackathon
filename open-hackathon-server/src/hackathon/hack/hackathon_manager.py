@@ -238,7 +238,8 @@ class HackathonManager(Component):
         new_hack = self.__create_hackathon(context)
 
         # todo remove the following line ASAP
-        # self.__test_data(new_hack)
+        if self.util.get_config("environment", "local") == "local":
+            self.__test_data(new_hack)
 
         return new_hack.dic()
 
