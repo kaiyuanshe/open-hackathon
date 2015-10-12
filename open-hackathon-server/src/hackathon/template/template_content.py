@@ -59,8 +59,8 @@ class TemplateContent:
             else:
                 raise Exception("unsupported virtual environment provider")
 
-        virtual_environments = map(convert_to_unit, args[TEMPLATE.VIRTUAL_ENVIRONMENTS])
-        return TemplateContent(name, description, virtual_environments)
+        units = map(convert_to_unit, args[TEMPLATE.VIRTUAL_ENVIRONMENTS])
+        return TemplateContent(name, description, units)
 
     def to_dict(self):
         dic = {

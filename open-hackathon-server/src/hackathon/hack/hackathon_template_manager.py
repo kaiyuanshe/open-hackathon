@@ -89,18 +89,17 @@ class HackathonTemplateManager(Component):
     def get_user_templates(self, user, hackathon):
         template_list = self.__get_templates_by_user(user, hackathon)
         settings = []
-        for template in template_list:
+        for template, content in template_list:
             template_units = []
-            for ve in template['data'][TEMPLATE.VIRTUAL_ENVIRONMENTS]:
+            for unit in content.units:
                 template_units.append({
-                    'name': ve[DOCKER_UNIT.NAME],
-                    'type': ve[DOCKER_UNIT.TYPE] if DOCKER_UNIT.TYPE in ve else "",
-                    'description': ve[DOCKER_UNIT.DESCRIPTION] if DOCKER_UNIT.DESCRIPTION in ve else "",
+                    'name': unit.get_name(),
+                    'type': unit.get_type(),
+                    'description': unit.get_description(),
                 })
             settings.append({
-                'name': template['data'][TEMPLATE.TEMPLATE_NAME],
-                'description': template['data'][TEMPLATE.DESCRIPTION] if TEMPLATE.DESCRIPTION in template[
-                    'data'] else "",
+                'name': template.name,
+                'description': template.description,
                 'units': template_units,
             })
         return settings
@@ -153,9 +152,8 @@ class HackathonTemplateManager(Component):
         templates = map(lambda x: x.template, htrs)
         data = []
         for template in templates:
-            dic = template.dic()
-            dic['data'] = self.template_library.load_template(template)
-            data.append(dic)
+            content = self.template_library.load_template(template)
+            data.append((template, content))
         return data
 
     # template may have multiple images

@@ -38,11 +38,9 @@ from sqlalchemy import and_
 from hackathon import Component, RequiredFeature
 from hackathon.constants import EStatus, VERemoteProvider, VE_PROVIDER, PortBindingType, VEStatus, ReservedUser, \
     AVMStatus, CLOUD_ECLIPSE
-from hackathon.database import VirtualEnvironment, DockerHostServer, Experiment, Hackathon, Template, User, \
-    HackathonTemplateRel
+from hackathon.database import VirtualEnvironment, DockerHostServer, Experiment, User, HackathonTemplateRel
 from hackathon.azureformation.azureFormation import AzureFormation
-from hackathon.hackathon_response import internal_server_error, precondition_failed, not_found, ok
-from hackathon.template import DockerTemplateUnit, TEMPLATE
+from hackathon.hackathon_response import internal_server_error, not_found, ok
 
 __all__ = ["ExprManager"]
 
@@ -274,15 +272,15 @@ class ExprManager(Component):
                                  (Experiment.status == EStatus.RUNNING))
         if template.provider == VE_PROVIDER.DOCKER:
             try:
-                template_dic = self.template_library.load_template(template)
-                virtual_environments_list = template_dic[TEMPLATE.VIRTUAL_ENVIRONMENTS]
+                template_content = self.template_library.load_template(template)
+                virtual_environments_units = template_content.units
                 if curr_num != 0 and curr_num >= self.util.get_config("pre_allocate.docker"):
                     return
                 expr.status = EStatus.STARTING
                 self.db.commit()
-                map(lambda virtual_environment_dic:
-                    self.__remote_start_container(hackathon, expr, virtual_environment_dic),
-                    virtual_environments_list)
+                map(lambda unit:
+                    self.__remote_start_container(hackathon, expr, unit),
+                    virtual_environments_units)
                 expr.status = EStatus.RUNNING
                 self.db.commit()
             except Exception as e:
@@ -394,8 +392,7 @@ class ExprManager(Component):
 
         return template
 
-    def __remote_start_container(self, hackathon, expr, virtual_environment_dic):
-        docker_template_unit = DockerTemplateUnit(virtual_environment_dic)
+    def __remote_start_container(self, hackathon, expr, docker_template_unit):
         old_name = docker_template_unit.get_name()
         suffix = "".join(random.sample(string.ascii_letters + string.digits, 8))
         new_name = '%d-%s-%s' % (expr.id, old_name, suffix)
@@ -468,7 +465,7 @@ class ExprManager(Component):
             if expr is not None:
                 # delete containers and change expr status
                 for c in expr.virtual_environments:
-                    if c.provider == VE_PROVIDER.DOCKER:
+                    if c.provider == VE_PROVIDER.DOCKER and c.container:
                         docker = self.__get_docker(expr.hackathon, c)
                         docker.delete(c.name, container=c.container, expr_id=expr_id)
                         c.status = VEStatus.DELETED

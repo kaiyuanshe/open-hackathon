@@ -124,6 +124,12 @@ class DockerTemplateUnit(TemplateUnit):
     def get_name(self):
         return self.dic[DOCKER_UNIT.NAME]
 
+    def get_type(self):
+        return self.dic[DOCKER_UNIT.TYPE]
+
+    def get_description(self):
+        return self.dic[DOCKER_UNIT.DESCRIPTION]
+
     def get_container_config(self):
         """
         Compose post data for docker remote api create

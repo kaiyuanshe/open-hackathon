@@ -188,6 +188,8 @@ class HostedDockerFormation(DockerFormationBase, Component):
         experiment = kwargs["experiment"]
         container_name = unit.get_name()
         host_server = self.docker_host_manager.get_available_docker_host(1, hackathon)
+        if not host_server:
+            return None
 
         container = DockerContainer(experiment,
                                     name=container_name,
