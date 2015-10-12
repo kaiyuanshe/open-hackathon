@@ -238,7 +238,7 @@ class HackathonManager(Component):
         new_hack = self.__create_hackathon(context)
 
         # todo remove the following line ASAP
-        self.__test_data(new_hack)
+        # self.__test_data(new_hack)
 
         return new_hack.dic()
 
