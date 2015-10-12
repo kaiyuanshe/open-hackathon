@@ -128,6 +128,7 @@ class User(DBBase):
     online = Column(Integer)  # 0:offline 1:online
     create_time = Column(TZDateTime, default=get_now())
     last_login_time = Column(TZDateTime, default=get_now())
+    login_times = Column(Integer, default=1)
 
     def get_user_id(self):
         return self.id

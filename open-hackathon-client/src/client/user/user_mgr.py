@@ -122,6 +122,7 @@ class UserManager(object):
                                   access_token=kwargs["access_token"],
                                   avatar_url=kwargs["avatar_url"],
                                   last_login_time=get_now(),
+                                  login_times=admin.login_times + 1,
                                   online=1)
             map(lambda x: self.__create_or_update_email(admin, x), email_list)
         else:
@@ -131,6 +132,7 @@ class UserManager(object):
                          nickname=kwargs["nickname"],
                          access_token=kwargs["access_token"],
                          avatar_url=kwargs["avatar_url"],
+                         login_times=1,
                          online=1)
 
             self.db.add_object(admin)
