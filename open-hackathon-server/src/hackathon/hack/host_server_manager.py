@@ -78,6 +78,7 @@ class DockerHostManager(Component):
         for docker_host in vms:
             if self.hosted_docker.ping(docker_host):
                 return docker_host
+
         self.create_docker_host_vm(hackathon.id)
         return None
         # raise Exception("No available VM.")
@@ -120,7 +121,7 @@ class DockerHostManager(Component):
         """
         sms = self.__get_sms_object(hackathon_id)
         if sms is None:
-            self.log.error('Something wrong with Azure account of Hackathon:%d' % hackathon_id)
+            self.log.error('No Azure account found for Hackathon:%d' % hackathon_id)
             return False
         # get storage and container
         res, storage_account_name, container_name = self.__get_available_storage_account_and_container(hackathon_id)

@@ -624,7 +624,8 @@ def get_pre_allocate_number(hackathon):
 
 def is_alauda_enabled(hackathon):
     hack_manager = RequiredFeature("hackathon_manager")
-    return hack_manager.get_basic_property(hackathon, HACKATHON_BASIC_INFO.ALAUDA_ENABLED, False)
+    value = hack_manager.get_basic_property(hackathon, HACKATHON_BASIC_INFO.ALAUDA_ENABLED, "0")
+    return util.str2bool(value)
 
 
 def get_basic_property(hackathon, property_name, default_value=None):
