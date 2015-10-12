@@ -222,6 +222,7 @@ class HackathonScheduler():
 
             # add MySQL job store
             if safe_get_config("scheduler.job_store", "memory") == "mysql":
+                log.debug("add aps_cheduler job store based on mysql")
                 self.jobstore = 'sqlalchemy'
                 self.__apscheduler.add_jobstore(self.jobstore, url=get_config("scheduler.job_store_url"))
 
