@@ -40,15 +40,15 @@
     }
 
     function teamMember() {
-        oh.api.team.member.list.get({header: {hackathon_name: hackathon_name}}, function (data) {
-            // todo 'Response team member'
-            if (data.error) {
-
-            } else {
-
-            }
-            console.log(data);
-        });
+//        oh.api.team.member.list.get({header: {hackathon_name: hackathon_name}}, function (data) {
+//            // todo 'Response team member'
+//            if (data.error) {
+//
+//            } else {
+//
+//            }
+//            console.log(data);
+//        });
     }
 
     function hacakthonStat() {
@@ -126,7 +126,7 @@
                     name: data.remote_servers[i].name,
                     surl: data.remote_servers[i].name == 'cloud_eclipse' ? data.remote_servers[i].url + window.location.origin : data.remote_servers[i].url + "&oh=" + $.cookie('token')
                 })
-                $('.hackathon-nav').append(temp.format(dockers[i]));
+                $('.hackathon-nav').append(tmpe.format(dockers[i]));
             }
             heartbeat(def_expid);
         } else if (data.status == 1) {
