@@ -33,7 +33,7 @@ from flask import g
 from hackathon import Component, RequiredFeature
 from hackathon.database import Team, UserTeamRel, User, Hackathon, TeamScore, TeamShow
 from hackathon.hackathon_response import not_found, bad_request, precondition_failed, ok, forbidden
-from hackathon.constants import TeamMemberStatus
+from hackathon.constants import TeamMemberStatus, Team_Show_Type
 
 __all__ = ["TeamManager"]
 
@@ -393,6 +393,9 @@ class TeamManager(Component):
     def get_team_show_list(self, team_id):
         show_list = self.db.find_all_objects_by(TeamShow, team_id=team_id)
         return [s.dic() for s in show_list]
+
+    def get_team_source_code(self, team_id):
+        return self.db.find_first_object_by(TeamShow, team_id=team_id, type=Team_Show_Type.SourceCode)
 
     def __init__(self):
         pass

@@ -54,6 +54,7 @@ class ExprManager(Component):
     hackathon_template_manager = RequiredFeature("hackathon_template_manager")
     hosted_docker = RequiredFeature("hosted_docker")
     alauda_docker = RequiredFeature("alauda_docker")
+    team_manager = RequiredFeature("team_manager")
 
     def start_expr(self, user_id, template_name, hackathon_name=None):
         """
@@ -499,15 +500,18 @@ class ExprManager(Component):
         return condition
 
     def __get_cloud_eclipse_url(self, experiment):
-        reg = self.register_manager.get_registration_by_user_and_hackathon(experiment.user_id, experiment.hackathon_id)
-        if reg is None:
+        team = self.team_manager.get_team_by_user_and_hackathon(experiment.user, experiment.hackathon)
+        if not team:
             return None
-        if reg.git_project is None:
+
+        source = self.team_manager.get_team_source_code(team.id)
+        if not source:
             return None
+
         # http://www.idehub.cn/api/ide/18?git=http://git.idehub.cn/root/test-c.git&user=root&from=hostname(frontend)
         api = self.util.safe_get_config("%s.api" % CLOUD_ECLIPSE.CLOUD_ECLIPSE, "http://www.idehub.cn/api/ide")
         openid = experiment.user.openid
-        url = "%s/%d?git=%s&user=%s&from=" % (api, experiment.id, reg.git_project, openid)
+        url = "%s/%d?git=%s&user=%s&from=" % (api, experiment.id, source.uri, openid)
         self.log.debug("cloud eclipse url : %s" % url)
         return url
 
