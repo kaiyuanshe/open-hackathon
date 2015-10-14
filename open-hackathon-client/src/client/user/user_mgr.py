@@ -55,7 +55,7 @@ class UserManager(object):
         return user_token
 
     def __validate_token(self, token):
-        t = self.db.find_first_object(UserToken, token=token)
+        t = self.db.find_first_object_by(UserToken, token=token)
         if t is not None and t.expire_date >= get_now():
             return t.user
         return None

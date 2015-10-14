@@ -166,6 +166,12 @@ class TemplateLibrary(Component):
             self.log.error(ex)
             return internal_server_error("delete template failed")
 
+    def template_verified(self, template_id):
+        template = self.db.find_first_object_by(Template, id=template_id)
+        if template:
+            template.status = TEMPLATE_STATUS.CHECK_PASS
+            self.db.commit()
+
     def __init__(self):
         pass
 
