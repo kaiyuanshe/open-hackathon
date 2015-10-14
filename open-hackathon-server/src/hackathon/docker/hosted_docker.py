@@ -550,7 +550,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
         :return dic object of the container info if not None
         """
         try:
-            get_container_url = self.get_vm_url(docker_host) + "/container/%s/json?all=0" % container_id
+            get_container_url = self.get_vm_url(docker_host) + "/containers/%s/json?all=0" % container_id
             req = requests.get(get_container_url)
             if 300 > req.status_code >= 200:
                 container_info = json.loads(req.content)
