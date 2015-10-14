@@ -24,12 +24,8 @@
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
 
-#!flask/bin/python
+# !flask/bin/python
 from hackathon import app
-from hackathon.health.health_check import GuacamoleHealthCheck
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=15000, debug=True)
-
-g = GuacamoleHealthCheck()
-print g.report_health()

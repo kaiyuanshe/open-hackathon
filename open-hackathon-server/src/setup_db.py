@@ -24,11 +24,14 @@
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
 
-from hackathon.database import Base, engine
-from hackathon.database.models import AdminHackathonRel, User
-from hackathon.database import db_adapter
-from hackathon.util import get_now
-from hackathon.constants import ADMIN_ROLE_TYPE, ReservedUser
+try:
+    from hackathon.database import Base, engine
+    from hackathon.database.models import AdminHackathonRel, User
+    from hackathon.database import db_adapter
+    from hackathon.util import get_now
+    from hackathon.constants import ADMIN_ROLE_TYPE, ReservedUser
+except ImportError:
+    pass
 
 
 def setup_db():

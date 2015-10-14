@@ -208,3 +208,6 @@ class Utility(object):
             "per_page": pagination.per_page,
             "total": pagination.total
         }
+
+    def is_local(self):
+        return safe_get_config("environment", "local") == "local"
