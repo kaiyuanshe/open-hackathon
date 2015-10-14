@@ -177,10 +177,10 @@ class ExprManager(Component):
         # only deal with online hackathons
         hackathon_id_list = self.hackathon_manager.get_pre_allocate_enabled_hackathon_list()
         htrs = self.db.find_all_objects(HackathonTemplateRel, HackathonTemplateRel.hackathon_id.in_(hackathon_id_list))
-        templates = map(lambda x: x.template, htrs)
-        for template in templates:
+        for rel in htrs:
             try:
-                pre_num = template.hackathon.get_pre_allocate_number()
+                template = rel.template
+                pre_num = rel.hackathon.get_pre_allocate_number()
                 curr_num = self.db.count(Experiment,
                                          Experiment.user_id == ReservedUser.DefaultUserID,
                                          Experiment.template_id == template.id,

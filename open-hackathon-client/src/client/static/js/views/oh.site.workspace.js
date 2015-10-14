@@ -184,7 +184,10 @@
             if (data.error) {
                 // todo 'heartbeat error'
             } else {
-                window.setTimeout(heartbeat(id), 300000)
+                window.setTimeout(function(){
+                        heartbeat(id)
+                    }, 300000)
+                }
             }
         });
     }
