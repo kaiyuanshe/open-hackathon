@@ -199,17 +199,17 @@ class ExprManager(Component):
                         else:
                             self.log.debug(
                                 "no starting template: %s , remain num is %d ... " % (template.name, remain_num))
-                            self.start_expr(template.hackathon.name, template.name, ReservedUser.DefaultUserID)
+                            self.start_expr(rel.hackathon.name, template.name, ReservedUser.DefaultUserID)
                             break
                             # curr_num += 1
                             # self.log.debug("all template %s start complete" % template.name)
                 elif template.provider == VE_PROVIDER.DOCKER:
                     self.log.debug(
-                        "template name is %s, hackathon name is %s" % (template.name, template.hackathon.name))
+                        "template name is %s, hackathon name is %s" % (template.name, rel.hackathon.name))
                     if curr_num < pre_num:
                         remain_num = pre_num - curr_num
                         self.log.debug("no idle template: %s, remain num is %d ... " % (template.name, remain_num))
-                        self.start_expr(template.hackathon.name, template.name, ReservedUser.DefaultUserID)
+                        self.start_expr(rel.hackathon.name, template.name, ReservedUser.DefaultUserID)
                         # curr_num += 1
                         break
                         # self.log.debug("all template %s start complete" % template.name)
