@@ -108,6 +108,15 @@
     }
 
     function loadExperiment(data) {
+        var tmpe = '<div class="row ">\
+                        <div class="col-md-12 text-center">\
+                            <a href="javascript:;" title="" class="vm-box"  id="{name}"  data-url="{surl}">\
+                                <img src="{imgUrl}" alt="">\
+                            </a>\
+                            <h4 name="dserie">{name}<h4>\
+                        </div>\
+                    </div>';
+
         if (data.status == 2) {
             var dockers = []
             for (var i in data.remote_servers) {
@@ -117,7 +126,7 @@
                     name: data.remote_servers[i].name,
                     surl: data.remote_servers[i].name == 'cloud_eclipse' ? data.remote_servers[i].url + window.location.origin : data.remote_servers[i].url + "&oh=" + $.cookie('token')
                 })
-                list.push(temp.format(dockers[i]));
+                $('.hackathon-nav').append(temp.format(dockers[i]));
             }
             heartbeat(def_expid);
         } else if (data.status == 1) {
