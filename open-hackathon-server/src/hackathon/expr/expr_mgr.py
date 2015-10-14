@@ -284,6 +284,8 @@ class ExprManager(Component):
                     virtual_environments_units)
                 expr.status = EStatus.RUNNING
                 self.db.commit()
+
+                self.template_library.template_verified(template.id)
             except Exception as e:
                 self.log.error(e)
                 self.log.error("Failed starting containers")

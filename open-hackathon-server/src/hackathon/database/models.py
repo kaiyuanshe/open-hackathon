@@ -539,7 +539,7 @@ class Template(DBBase):
     url = Column(String(200))
     local_path = Column(String(200))
     provider = Column(Integer, default=0)
-    status = Column(Integer)  # 1=online , 0=offline
+    status = Column(Integer)  # constants.TEMPLATE_STATUS
     create_time = Column(TZDateTime, default=get_now())
     update_time = Column(TZDateTime)
     description = Column(Text)
