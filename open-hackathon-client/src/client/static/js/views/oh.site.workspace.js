@@ -187,7 +187,6 @@
                 window.setTimeout(function(){
                         heartbeat(id)
                     }, 300000)
-                }
             }
         });
     }
