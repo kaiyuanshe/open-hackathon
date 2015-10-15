@@ -326,6 +326,7 @@ class HackathonManager(Component):
         stat = self.db.find_first_object_by(HackathonStat, hackathon_id=hackathon.id, type=stat_type)
         if stat:
             stat.count = count
+            stat.update_time = self.util.get_now()
         else:
             stat = HackathonStat(hackathon_id=hackathon.id, type=stat_type, count=count)
 
