@@ -69,7 +69,7 @@ class HackathonManager(Component):
 
     def is_recycle_enabled(self, hackathon):
         key = HACKATHON_BASIC_INFO.RECYCLE_ENABLED
-        return self.get_basic_property(hackathon, key, False)
+        return self.util.str2bool(self.get_basic_property(hackathon, key, False))
 
     def get_hackathon_by_name(self, name):
         """Get hackathon accoring the unique name
@@ -238,7 +238,7 @@ class HackathonManager(Component):
         new_hack = self.__create_hackathon(context)
 
         # todo remove the following line ASAP
-        if self.util.get_config("environment", "local") == "local":
+        if self.util.safe_get_config("environment", "local") == "local":
             self.__test_data(new_hack)
 
         return new_hack.dic()

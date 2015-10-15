@@ -207,7 +207,8 @@ def init_schedule_jobs():
     Note that scheduler job will NOT be enabled in main thread. So the real initialization work are completed in a
     separated thread. Otherwise there might be dead lock in main thread.
     """
-    if safe_get_config("environment", "local") == "local":
+    u = RequiredFeature("util")
+    if u.is_local():
         return
 
     import threading
@@ -257,6 +258,11 @@ def init_app():
     from views import init_routes
     init_routes()
     init_schedule_jobs()
+
+    health_check_guacamole = RequiredFeature("health_check_guacamole")
+    u = RequiredFeature("util")
+    if u.is_local():
+        log.debug("guacamole status: %s" % health_check_guacamole.report_health())
 
 
 init_app()

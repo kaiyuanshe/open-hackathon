@@ -166,6 +166,12 @@ class TemplateLibrary(Component):
             self.log.error(ex)
             return internal_server_error("delete template failed")
 
+    def template_verified(self, template_id):
+        template = self.db.find_first_object_by(Template, id=template_id)
+        if template:
+            template.status = TEMPLATE_STATUS.CHECK_PASS
+            self.db.commit()
+
     def __init__(self):
         pass
 
@@ -256,14 +262,8 @@ class TemplateLibrary(Component):
         :type template_content: TemplateContent
         :param template_content: instance of TemplateContent that owns the full content of a template
         """
-        providers = [str(u.provider) for u in template_content.units]
-        providers = list(set(providers))
-
-        if len(providers) >= 1:
-            return ",".join(providers)
-        else:
-            raise Exception("cannot get provider from template. Either no virtual_environment or provider of "
-                            "virtual environment not set")
+        providers = [int(u.provider) for u in template_content.units]
+        return providers[0]
 
     def __get_template_by_name(self, name):
         return self.db.find_first_object_by(Template, name=name)

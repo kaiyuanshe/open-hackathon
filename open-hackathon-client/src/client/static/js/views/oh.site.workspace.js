@@ -40,15 +40,15 @@
     }
 
     function teamMember() {
-        oh.api.team.member.list.get({header: {hackathon_name: hackathon_name}}, function (data) {
-            // todo 'Response team member'
-            if (data.error) {
-
-            } else {
-
-            }
-            console.log(data);
-        });
+//        oh.api.team.member.list.get({header: {hackathon_name: hackathon_name}}, function (data) {
+//            // todo 'Response team member'
+//            if (data.error) {
+//
+//            } else {
+//
+//            }
+//            console.log(data);
+//        });
     }
 
     function hacakthonStat() {
@@ -108,6 +108,15 @@
     }
 
     function loadExperiment(data) {
+        var tmpe = '<div class="row ">\
+                        <div class="col-md-12 text-center">\
+                            <a href="javascript:;" title="" class="vm-box"  id="{name}"  data-url="{surl}">\
+                                <img src="{imgUrl}" alt="">\
+                            </a>\
+                            <h4 name="dserie">{name}<h4>\
+                        </div>\
+                    </div>';
+
         if (data.status == 2) {
             var dockers = []
             for (var i in data.remote_servers) {
@@ -117,7 +126,7 @@
                     name: data.remote_servers[i].name,
                     surl: data.remote_servers[i].name == 'cloud_eclipse' ? data.remote_servers[i].url + window.location.origin : data.remote_servers[i].url + "&oh=" + $.cookie('token')
                 })
-                list.push(temp.format(dockers[i]));
+                $('.hackathon-nav').append(tmpe.format(dockers[i]));
             }
             heartbeat(def_expid);
         } else if (data.status == 1) {
@@ -175,7 +184,10 @@
             if (data.error) {
                 // todo 'heartbeat error'
             } else {
-                window.setTimeout(heartbeat(id), 300000)
+                window.setTimeout(function(){
+                        heartbeat(id)
+                    }, 300000)
+                }
             }
         });
     }

@@ -54,6 +54,7 @@ class ExprManager(Component):
     hackathon_template_manager = RequiredFeature("hackathon_template_manager")
     hosted_docker = RequiredFeature("hosted_docker")
     alauda_docker = RequiredFeature("alauda_docker")
+    team_manager = RequiredFeature("team_manager")
 
     def start_expr(self, user_id, template_name, hackathon_name=None):
         """
@@ -176,10 +177,10 @@ class ExprManager(Component):
         # only deal with online hackathons
         hackathon_id_list = self.hackathon_manager.get_pre_allocate_enabled_hackathon_list()
         htrs = self.db.find_all_objects(HackathonTemplateRel, HackathonTemplateRel.hackathon_id.in_(hackathon_id_list))
-        templates = map(lambda x: x.template, htrs)
-        for template in templates:
+        for rel in htrs:
             try:
-                pre_num = template.hackathon.get_pre_allocate_number()
+                template = rel.template
+                pre_num = rel.hackathon.get_pre_allocate_number()
                 curr_num = self.db.count(Experiment,
                                          Experiment.user_id == ReservedUser.DefaultUserID,
                                          Experiment.template_id == template.id,
@@ -198,17 +199,17 @@ class ExprManager(Component):
                         else:
                             self.log.debug(
                                 "no starting template: %s , remain num is %d ... " % (template.name, remain_num))
-                            self.start_expr(template.hackathon.name, template.name, ReservedUser.DefaultUserID)
+                            self.start_expr(ReservedUser.DefaultUserID, template.name, rel.hackathon.name)
                             break
                             # curr_num += 1
                             # self.log.debug("all template %s start complete" % template.name)
                 elif template.provider == VE_PROVIDER.DOCKER:
                     self.log.debug(
-                        "template name is %s, hackathon name is %s" % (template.name, template.hackathon.name))
+                        "template name is %s, hackathon name is %s" % (template.name, rel.hackathon.name))
                     if curr_num < pre_num:
                         remain_num = pre_num - curr_num
                         self.log.debug("no idle template: %s, remain num is %d ... " % (template.name, remain_num))
-                        self.start_expr(template.hackathon.name, template.name, ReservedUser.DefaultUserID)
+                        self.start_expr(ReservedUser.DefaultUserID, template.name, rel.hackathon.name)
                         # curr_num += 1
                         break
                         # self.log.debug("all template %s start complete" % template.name)
@@ -283,6 +284,8 @@ class ExprManager(Component):
                     virtual_environments_units)
                 expr.status = EStatus.RUNNING
                 self.db.commit()
+
+                self.template_library.template_verified(template.id)
             except Exception as e:
                 self.log.error(e)
                 self.log.error("Failed starting containers")
@@ -499,15 +502,18 @@ class ExprManager(Component):
         return condition
 
     def __get_cloud_eclipse_url(self, experiment):
-        reg = self.register_manager.get_registration_by_user_and_hackathon(experiment.user_id, experiment.hackathon_id)
-        if reg is None:
+        team = self.team_manager.get_team_by_user_and_hackathon(experiment.user, experiment.hackathon)
+        if not team:
             return None
-        if reg.git_project is None:
+
+        source = self.team_manager.get_team_source_code(team.id)
+        if not source:
             return None
+
         # http://www.idehub.cn/api/ide/18?git=http://git.idehub.cn/root/test-c.git&user=root&from=hostname(frontend)
         api = self.util.safe_get_config("%s.api" % CLOUD_ECLIPSE.CLOUD_ECLIPSE, "http://www.idehub.cn/api/ide")
         openid = experiment.user.openid
-        url = "%s/%d?git=%s&user=%s&from=" % (api, experiment.id, reg.git_project, openid)
+        url = "%s/%d?git=%s&user=%s&from=" % (api, experiment.id, source.uri, openid)
         self.log.debug("cloud eclipse url : %s" % url)
         return url
 

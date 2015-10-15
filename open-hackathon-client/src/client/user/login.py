@@ -82,13 +82,18 @@ class QQLogin(LoginBase):
         info = self.get_info(access_token)
         user_info = self.get_user_info(access_token, info["openid"], info["client_id"])
 
+        avatar_url = ""
+        if "figureurl_qq_1" in user_info:  # try qq logo first
+            avatar_url = user_info["figureurl_qq_1"]
+        elif "figureurl" in user_info:  # try qzone logo
+            avatar_url = user_info["figureurl"]
         return user_manager.oauth_db_login(info["openid"],
                                            name=user_info["nickname"],
                                            provider=LOGIN_PROVIDER.QQ,
                                            nickname=user_info["nickname"],
                                            access_token=access_token,
                                            email_list=[],
-                                           avatar_url=user_info["figureurl"])
+                                           avatar_url=avatar_url)
 
     def get_token(self, code):
         """ Get qq access token
