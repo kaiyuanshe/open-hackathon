@@ -104,7 +104,9 @@ class AzureCertManager(Component):
                                                            azure_key_id=azure_key.id)
         # avoid duplicate hackathon azure key
         if hackathon_azure_key is None:
-            self.db.add_object_kwargs(AU)
+            self.db.add_object_kwargs(HackathonAzureKey,
+                                      hackathon_id=hackathon.id,
+                                      azure_key_id=azure_key.id)
             self.db.commit()
         else:
             self.log.debug('hackathon azure key exists')
