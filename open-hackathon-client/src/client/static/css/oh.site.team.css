@@ -14,14 +14,52 @@ fieldset {
 }
 
 .team-banner {
-    background: url('/static/pic/process-bg.png') no-repeat 50% 50% / cover;
+    background: url('/static/pic/team-bg.jpg') no-repeat 50% 50% /cover;
+    position: relative;
+    color: #fff;
+}
+.team-banner .title{
+    font-size: 26px;
+    margin: 0;
+}
+.team-banner .description{
+    color: #d2d2d2;
+    font-size: 16px;
+    padding: 5px 0 ;
+}
+.team-banner .oh-nav {
+    font-size: 16px;
+    color: #d2d2d2;
+    margin: 40px 0 0 0;
+}
+
+.team-banner .oh-nav a,
+.team-banner .oh-nav span {
+    color: #969696;
+}
+
+.team-banner .oh-nav a:hover {
+    text-decoration: underline;
 }
 
 .team-banner .container {
-    height: 150px;
+    height: 470px;
     position: relative;
 }
 
+.oh-team-header{
+    text-align: center;
+    width: 600px;
+    margin: 90px auto;
+}
+.oh-team-header .oh-team-logo{
+    height: 210px;
+}
+.oh-team-header #team_logo{
+    width: 120px;
+    height: 120px;
+    background-color: #fff;
+}
 .team-pic {
     text-align: right;
 }
@@ -56,50 +94,40 @@ fieldset {
 .team-pic.edit > img {
     border-color: #21b1de;
 }
-.team-pic.edit > .inner-edit{
-    position:absolute;
-    top:-60px;
+
+.team-pic.edit > .inner-edit {
+    position: absolute;
+    top: -60px;
     right: 25px;
-    z-index:6;
+    z-index: 6;
 }
 
 #team_name.edit,
-#team_description.edit{
-    position:relative;
-    font-size:18px;
-    padding:5px 0;
-    border: 1px dashed #21b1de;
-
-}
-#team_description.edit{
-    font-size:15px;
+#team_description.edit {
+    position: relative;
+    font-size: 18px;
+    padding: 5px 0;
+    border: 1px dashed #f0f0f0;
+    margin-bottom: 2px;
 }
 
-#team_name.edit:before,
-#team_description.edit:before{
-      position:absolute;
-      right:0;
-      top:0;
-      display:inline-block;
-      line-height:16px;
-      padding:2px 5px;
-      content:'±à¼­';
-      font-size:14px;
-      color:#fff;
-      background-color:#21b1de;
-
+#team_description.edit {
+    font-size: 15px;
 }
+
 
 .edit input,
-.edit textarea{
-    width:100%;
-    border:none;
-    resize:none;
+.edit textarea {
+    width: 100%;
+    border: none;
+    resize: none;
+    background-color: transparent;
+    text-align: center;
 }
 
 .edit input:focus,
-.edit textarea:focus{   
-    outline:none
+.edit textarea:focus {
+    outline: none
 }
 
 .join {
@@ -113,7 +141,7 @@ fieldset {
 }
 
 h1.title {
-    font-size: 32px;
+    font-size: 26px;
 }
 
 .oh-header {
@@ -139,6 +167,14 @@ h1.title {
     float: right;
 }
 
+.oh-team-edit{
+    right: 0;
+    margin-top: 40px;
+}
+.oh-team-edit a:hover{
+    color:#fff;
+    text-decoration: underline;
+}
 h2:first-child {
     margin-top: 0;
 }

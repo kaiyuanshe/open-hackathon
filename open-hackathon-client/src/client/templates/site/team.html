@@ -7,7 +7,7 @@
 {% block content %}
     <div class="team-banner">
         <div class="container">
-            <div class="air air-bottom-right padding-10">
+            <div class="air oh-team-edit">
                 {% if team.is_admin == False and team.is_leader == False %}
                     {% if team.is_member %}
                         <a href="javascript:void(0);"
@@ -27,15 +27,12 @@
                             class="fa fa-save"></i> 保存</a>
                 {% endif %}
             </div>
-            <div class="air air-top-left padding-10">
-                <h4 class="txt-color-white font-md">Jan 1, 2014</h4>
+            <div class="air air-top-left oh-nav">
+                <a href="{{ url_for('hackathon', hackathon_name=hackathon_name) }}">{{ hackathon_name }}</a> &gt; <span
+                    data-role="team_name">{{ team.name }}</span>
             </div>
-        </div>
-    </div>
-    <div class="" data-tid="{{ team.id }}" data-role="{{ role }}" data-lid="{{ team.leader.id }}">
-        <div id="team_info " class="container">
-            <div class="row">
-                <div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 team-pic">
+            <div class="oh-team-header">
+                <div class="oh-team-logo">
                     <img id="team_logo" src="{{ team.logo == None and '/static/pic/team-logo.png' or team.logo }}"
                          onerror="javascript:this.src='/static/pic/team-logo.png'">
                     {% if team.is_leader %}
@@ -44,11 +41,20 @@
                         </div>
                     {% endif %}
                 </div>
-                <div class="col-lg-9 col-md-9 col-sm-8 col-xs-8">
-                    <h1 class="title" id="team_name"> {{ team.name }}  </h1>
+                <h1 class="title" id="team_name"> {{ team.name }}  </h1>
 
-                    <div class="" id="team_description">{{ description }}</div>
+                <div class="description" id="team_description">{{ team.description }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="" data-tid="{{ team.id }}" data-role="{{ role }}" data-lid="{{ team.leader.id }}">
+        <div id="team_info " class="container">
+            <div class="row">
+                <div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 team-pic">
+
+
                 </div>
+
             </div>
         </div>
         <div id="team_member">
@@ -220,6 +226,9 @@
         </div>
     </div>
     {% endraw %}
+
+
+
     </script>
     <script id="show_item" type="text/x-jquery-tmpl">
     {% raw %}
@@ -235,6 +244,9 @@
            <li>${note}: <a href="${uri}" >${uri}</a></li>
         {{/if}}
     {% endraw %}
+
+
+
     </script>
     <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
     <script type="text/javascript" src="/static/js/views/oh.site.team.js"></script>

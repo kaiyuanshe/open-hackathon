@@ -31,7 +31,6 @@
     var team_date = {};
 
 
-
     function splitShow(data) {
         var _data = {video: [], img: [], code: []};
         $.each(data, function (i, o) {
@@ -53,6 +52,7 @@
     function pageload() {
         tid = $('[data-tid]').data('tid');
         lid = $('[data-tid]').data('lid');
+        team_date.id = tid;
         getMemberList().then(function (data) {
             $('#talent_list').append($('#team_item').tmpl(data, {
                 getTitle: function (id, status) {
@@ -103,11 +103,11 @@
                     reason: $('#comment').val()
                 };
 
-                (data.id == 0? submitScore(data) :updateScore(data)).then(function(data){
-                    if(data.error){
-                         oh.comm.alert('错误', data.error.friendly_message);
-                    }else{
-                         oh.comm.alert('提示', '评分成功');
+                (data.id == 0 ? submitScore(data) : updateScore(data)).then(function (data) {
+                    if (data.error) {
+                        oh.comm.alert('错误', data.error.friendly_message);
+                    } else {
+                        oh.comm.alert('提示', '评分成功');
                     }
                 })
             });
@@ -144,7 +144,7 @@
     }
 
     function updateTeam(data) {
-        return oh.api.team.put(data);
+        return oh.api.team.put({body: data, header: {hackathon_name: hackathon_name}});
     }
 
     function addShow(data) {
@@ -188,8 +188,7 @@
             edit_btn.addClass('hide');
             seva_btn.removeClass('hide');
             var input_name = $('<input>').attr({type: 'text', value: $('#team_name').text()});
-            var input_des = $('<textarea>').attr({row: '4', value: $('#team_description').text()});
-            $('.team-pic').addClass('edit').append('<div class="inner-edit"><button class="btn btn-primary btn-edit" data-role="logo-edit">编辑</button></div>');
+            var input_des = $('<textarea>').attr({row: '4'}).val( $('#team_description').text());
             $('#team_name').addClass('edit').empty().append(input_name);
             $('#team_description').addClass('edit').empty().append(input_des);
         });
@@ -200,9 +199,9 @@
             $('.team-pic').removeClass('edit').find('inner-edit').detach();
             team_date.name = $('#team_name').removeClass('edit').find('input').val();
             team_date.description = $('#team_description').removeClass('edit').find('textarea').val();
-
+            $('[data-role="team_name"]').text(team_date.name);
             $('#team_name').empty().text(team_date.name);
-            $('#team_description').empty().text(team_date.name);
+            $('#team_description').empty().text(team_date.description);
 
             updateTeam(team_date).then(function (data) {
                 if (data.error) {
