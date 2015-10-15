@@ -49,7 +49,6 @@ from client.log import log
 
 session_lifetime_minutes = 60
 
-PERMANENT_SESSION_LIFETIME = timedelta(minutes=session_lifetime_minutes)
 API_HACKATHON = "/api/hackathon"
 API_HACKATHON_LIST = "/api/hackathon/list"
 API_HACKATHON_TEMPLATE = "/api/hackathon/template"
