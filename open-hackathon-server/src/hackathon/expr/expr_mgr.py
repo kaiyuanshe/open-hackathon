@@ -169,6 +169,7 @@ class ExprManager(Component):
 
     def pre_allocate_expr(self, context):
         hackathon_id = context.hackathon_id
+        self.log.debug("executing pre_allocate_expr for hackathon %s " % hackathon_id)
         htrs = self.db.find_all_objects_by(HackathonTemplateRel, hackathon_id=hackathon_id)
         for rel in htrs:
             try:
