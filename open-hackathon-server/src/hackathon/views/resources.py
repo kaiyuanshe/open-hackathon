@@ -308,15 +308,6 @@ class TeamMemberResource(HackathonResource):
         ctx = self.context()
         return team_manager.kick_or_leave(g.user, ctx.id)
 
-        parse = reqparse.RequestParser()
-        parse.add_argument('user_id', type=int, location='args', required=True)
-        parse.add_argument('team_name', type=str, location='args', required=True)
-        args = parse.parse_args()
-        if g.user.id == args["user_id"]:
-            return team_manager.leave_team(g.hackathon, args["team_name"])
-        else:
-            return team_manager.kick(g.hackathon, args["team_name"], args["user_id"])
-
 
 class HackathonTeamListResource(HackathonResource):
     @hackathon_name_required
