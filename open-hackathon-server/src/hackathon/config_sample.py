@@ -78,11 +78,6 @@ Config = {
         "job_store": "mysql",
         "job_store_url": 'mysql://%s:%s@%s:%s/%s' % (MYSQL_USER, MYSQL_PWD, MYSQL_HOST, MYSQL_PORT, MYSQL_DB)
     },
-    "pre_allocate": {
-        "check_interval_minutes": 5,
-        "azure": 1,
-        "docker": 1
-    },
     "storage": {
         "type": "local",
         "size_limit_kilo_bytes": 5 * 1024,
