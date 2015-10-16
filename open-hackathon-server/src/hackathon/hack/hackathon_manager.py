@@ -28,6 +28,7 @@ import sys
 
 sys.path.append("..")
 import imghdr
+from datetime import timedelta
 
 from werkzeug.exceptions import PreconditionFailed, InternalServerError, BadRequest
 from flask import g, request
@@ -140,12 +141,6 @@ class HackathonManager(Component):
 
         # return serializable items as well as total count
         return self.util.paginate(pagination, func)
-
-    def get_pre_allocate_enabled_hackathon_list(self):
-        # only online hackathons will be in consideration
-        online = self.get_online_hackathons()
-        pre_list = filter(lambda hackathon: hackathon.is_pre_allocate_enabled(), online)
-        return [h.id for h in pre_list]
 
     def get_online_hackathons(self):
         return self.db.find_all_objects(Hackathon, Hackathon.status == HACK_STATUS.ONLINE)
@@ -414,6 +409,36 @@ class HackathonManager(Component):
         self.db.delete_all_objects_by(HackathonOrganizer, id=organizer_id, hackathon_id=hackathon.id)
         return ok()
 
+    def schedule_pre_allocate_expr_job(self):
+        """Add an interval schedule job to check all hackathons"""
+        next_run_time = self.util.get_now() + timedelta(seconds=3)
+        self.scheduler.add_interval(feature="hackathon_manager",
+                                    method="check_hackathon_for_pre_allocate_expr",
+                                    id="check_hackathon_for_pre_allocate_expr",
+                                    next_run_time=next_run_time,
+                                    minutes=10)
+
+    def check_hackathon_for_pre_allocate_expr(self):
+        """Check all hackathon for pre-allocate
+
+        Add an interval job for hackathon if it's pre-allocate is enabled.
+        Otherwise try to remove the schedule job
+        """
+        hackathon_list = self.db.find_all_objects(Hackathon)
+        for hack in hackathon_list:
+            job_id = "pre_allocate_expr_" + hack.id
+            if hack.is_pre_allocate_enabled():
+                next_run_time = self.util.get_now() + timedelta(seconds=hack.id * 10)
+                self.scheduler.add_interval(feature="expr_manager",
+                                            method="pre_allocate_expr",
+                                            id=job_id,
+                                            context=Context(hackathon_id=hack.id),
+                                            next_run_time=next_run_time,
+                                            seconds=300 + hack.id * 10
+                                            )
+            else:
+                self.scheduler.remove_job(job_id)
+
     def __get_hackathon_detail(self, hackathon, user=None):
         """Return hackathon info as well as its details including configs, stat, organizers, like if user logon"""
         detail = hackathon.dic()
@@ -613,6 +638,9 @@ def is_auto_approve(hackathon):
 
 
 def is_pre_allocate_enabled(hackathon):
+    if hackathon.status != HACK_STATUS.ONLINE:
+        return False
+
     hack_manager = RequiredFeature("hackathon_manager")
     value = hack_manager.get_basic_property(hackathon, HACKATHON_BASIC_INFO.PRE_ALLOCATE_ENABLED, "1")
     return util.str2bool(value)
