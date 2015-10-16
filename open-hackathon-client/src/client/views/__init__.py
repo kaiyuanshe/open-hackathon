@@ -335,7 +335,7 @@ def temp_settings(hackathon_name):
     if reg.get('registration') is not None:
         if reg.get('experiment') is not None:
             return redirect(url_for('workspace', hackathon_name=hackathon_name))
-        elif reg.registration.status == 1 or (reg.registration.status == 3 and reg.hackathon.basic_info.auto_approve):
+        elif reg.registration.status == 1 or reg.registration.status == 3:
             templates = Context.from_object(__get_api(API_HACKATHON_TEMPLATE, headers))
             return render("/site/settings.html", hackathon_name=hackathon_name, templates=templates)
         else:
