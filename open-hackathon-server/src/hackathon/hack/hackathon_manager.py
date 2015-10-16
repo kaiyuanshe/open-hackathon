@@ -324,6 +324,7 @@ class HackathonManager(Component):
             stat.update_time = self.util.get_now()
         else:
             stat = HackathonStat(hackathon_id=hackathon.id, type=stat_type, count=count)
+            self.db.add_object(stat)
 
         if stat.count < 0:
             stat.count = 0
@@ -426,7 +427,7 @@ class HackathonManager(Component):
         """
         hackathon_list = self.db.find_all_objects(Hackathon)
         for hack in hackathon_list:
-            job_id = "pre_allocate_expr_" + hack.id
+            job_id = "pre_allocate_expr_" + str(hack.id)
             if hack.is_pre_allocate_enabled():
                 next_run_time = self.util.get_now() + timedelta(seconds=hack.id * 10)
                 self.scheduler.add_interval(feature="expr_manager",
@@ -438,6 +439,7 @@ class HackathonManager(Component):
                                             )
             else:
                 self.scheduler.remove_job(job_id)
+        return True
 
     def __get_hackathon_detail(self, hackathon, user=None):
         """Return hackathon info as well as its details including configs, stat, organizers, like if user logon"""
