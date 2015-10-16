@@ -239,10 +239,10 @@ class ExprManager(Component):
         """
         hackathon = self.hackathon_manager.get_hackathon_by_name(hackathon_name)
         if hackathon:
-            if hackathon.event_start_time < self.util.get_now() < hackathon.event_end_time:
+            if self.util.get_now() < hackathon.event_end_time:
                 return hackathon
             else:
-                raise PreconditionFailed("Hackathon is not started or was ended")
+                raise PreconditionFailed("Hackathon was already ended")
         else:
             return None
 
