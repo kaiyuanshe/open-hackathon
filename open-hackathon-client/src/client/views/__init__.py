@@ -315,7 +315,7 @@ def workspace(hackathon_name):
     reg = Context.from_object(__get_api(API_HACAKTHON_REGISTRATION, headers))
 
     if reg.get('registration') is not None:
-        if reg.registration.status == 1 or (reg.registration.status == 3 and reg.hackathon.basic_info.auto_approve):
+        if reg.registration.status == 1 or reg.registration.status == 3:
             return render("/site/workspace.html", hackathon_name=hackathon_name,
                           workspace=True,
                           hackathon=reg.get("hackathon"),
