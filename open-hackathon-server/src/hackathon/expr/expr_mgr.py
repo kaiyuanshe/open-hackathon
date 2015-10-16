@@ -64,6 +64,7 @@ class ExprManager(Component):
         :param user_id:
         :return:
         """
+        self.log.debug("try to start experiment for hackathon %s using template %s" % (hackathon_name, template_name))
         hackathon = self.__check_hackathon_event_time(hackathon_name)
         template = self.__check_template_status(hackathon, template_name)
 
