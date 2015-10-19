@@ -37,6 +37,7 @@ class LOGIN_PROVIDER:
     GITCAFE = "gitcafe"
     WEIBO = "weibo"
     LIVE = "live"
+    ALAUDA = "alauda"
 
 
 class HTTP_HEADER:

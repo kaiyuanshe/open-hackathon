@@ -106,17 +106,16 @@ class HackathonTemplateManager(Component):
 
     def pull_images_for_hackathon(self, context):
         hackathon_id = context.hackathon_id
-        # get templates which is online and provided by docker
         templates = self.__get_templates_for_pull(hackathon_id)
-        # get expected images on hackathons' templates
         images = map(lambda x: self.__get_images_from_template(x), templates)
-        expected_images = flatten(images)
-        self.log.debug('expected images: %s on hackathon: %s' % (expected_images, hackathon_id))
+        images_to_pull = flatten(images)
+
+        self.log.debug('expected images: %s on hackathon: %s' % (images_to_pull, hackathon_id))
         # get all docker host server on hackathon
         hosts = self.db.find_all_objects_by(DockerHostServer, hackathon_id=hackathon_id)
         # loop to get every docker host
         for docker_host in hosts:
-            download_images = self.__get_undownloaded_images_on_docker_host(docker_host, expected_images)
+            download_images = self.__get_undownloaded_images_on_docker_host(docker_host, images_to_pull)
             self.log.debug('need to pull images: %s on host: %s' % (download_images, docker_host.vm_name))
             for dl_image in download_images:
                 image = dl_image.split(':')[0]
@@ -158,19 +157,16 @@ class HackathonTemplateManager(Component):
 
     # template may have multiple images
     def __get_images_from_template(self, template):
-        template_dic = self.template_library.load_template(template)
-        ves = template_dic[TEMPLATE.VIRTUAL_ENVIRONMENTS]
-        images = map(lambda x: x[DOCKER_UNIT.IMAGE], ves)
-        return images  # [image:tag, image:tag]
+        template_content = self.template_library.load_template(template)
+        docker_units = filter(lambda u: u.provider == VE_PROVIDER.DOCKER, template_content.units)
+        docker_images = [du.get_image_with_tag() for du in docker_units]
+        return docker_images
 
     def __get_templates_for_pull(self, hackathon_id):
-        hackathon = self.hackathon_manager.get_hackathon_by_id(hackathon_id)
-        htrs = hackathon.hackathon_template_rels
-        template_ids = map(lambda x: x.template.id, htrs)
-        templates = self.db.find_all_objects(Template,
-                                             Template.id.in_(template_ids),
-                                             Template.provider == VE_PROVIDER.DOCKER,
-                                             Template.status == TEMPLATE_STATUS.CHECK_PASS)
+        htrs = self.db.find_all_objects_by(HackathonTemplateRel, hackathon_id=hackathon_id)
+        templates = [h.template for h in htrs]
+        templates = filter(lambda t: t.provider == VE_PROVIDER.DOCKER and t.status == TEMPLATE_STATUS.CHECK_PASS,
+                           templates)
         return templates
 
     def __get_undownloaded_images_on_docker_host(self, docker_host, expected_images):
