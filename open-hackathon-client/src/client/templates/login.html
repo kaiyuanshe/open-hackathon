@@ -21,25 +21,41 @@
                     <span class="fa fa-windows"></span> Microsoft Open Technologies Center&reg;
                 </div>
                 <div class="login-box">
+                    {% if "live" in providers %}
                     <p>
                         <a class="btn btn-live" data-login="live"><span>Microsoft Account 登录</span></a>
                     </p>
+                    {% endif %}
 
+                    {% if "github" in providers %}
                     <p>
                         <a class="btn btn-github" data-login="github"><span>github 登录</span></a>
                     </p>
+                    {% endif %}
 
+                    {% if "qq" in providers %}
                     <p>
                         <a class="btn btn-qq" data-login="qq"><span>QQ 登录</span></a>
                     </p>
+                    {% endif %}
 
+                    {% if "weibo" in providers %}
                     <p>
                         <a class="btn btn-weibo" data-login="weibo"><span>Weibo 登录</span></a>
                     </p>
+                    {% endif %}
 
+                    {% if "gitcafe" in providers %}
                     <p>
                         <a class="btn btn-gitcafe" data-login="gitcafe"><span>gitcafe 登录</span></a>
                     </p>
+                    {% endif %}
+
+                    {% if "alauda" in providers %}
+                    <p>
+                        <a class="btn btn-alauda" data-login="alauda"><span>灵雀云 登录</span></a>
+                    </p>
+                    {% endif %}
                 </div>
 
             </div>

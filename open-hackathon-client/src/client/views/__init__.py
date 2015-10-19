@@ -44,7 +44,7 @@ from client.user.login import login_providers
 from client.user.user_mgr import user_manager
 from flask import Response, render_template, request, g, redirect, make_response, session, url_for, abort
 from datetime import timedelta
-from client.functions import get_config
+from client.functions import get_config, safe_get_config
 from client.log import log
 
 session_lifetime_minutes = 60
@@ -249,6 +249,11 @@ def live_login():
     return __login(LOGIN_PROVIDER.LIVE)
 
 
+@app.route('/alauda')
+def alauda_login():
+    return __login(LOGIN_PROVIDER.ALAUDA)
+
+
 @app.route('/')
 @app.route('/index')
 def index():
@@ -289,7 +294,10 @@ def logout():
 def login():
     # todo redirect to the page request login
     session["return_url"] = request.args.get("return_url")
-    return render("/login.html", error=None)
+    return render("/login.html",
+                  error=None,
+                  providers=safe_get_config("login.provider_enabled",
+                                            ["github", "qq", "gitcafe", "weibo", "live", "alauda"]))
 
 
 @app.route("/site/<hackathon_name>")

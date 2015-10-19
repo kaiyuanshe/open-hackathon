@@ -100,7 +100,8 @@
 .btn-github,
 .btn-qq,
 .btn-weibo,
-.btn-gitcafe {
+.btn-gitcafe,
+.btn-alauda{
     color: white;
     position: relative;
     text-align: center;
@@ -116,7 +117,8 @@
 .btn-github:before,
 .btn-qq:before,
 .btn-weibo:before,
-.btn-gitcafe:before {
+.btn-gitcafe:before,
+.btn-alauda:before {
     position: absolute;
     display: block;
     height: 40px;
@@ -139,6 +141,7 @@
 .btn-github:hover,
 .btn-qq:hover,
 .btn-weibo:hover,
+.btn-alauda:hover,
 .btn-gitcafe:hover {
     color: white;
 }
@@ -212,19 +215,36 @@
 }
 
 .btn-gitcafe {
-    background: #4875b4
+    background: #00aced
 }
 
 .btn-gitcafe:before {
+    content: "\f17a";
+    background: #0099d4
+}
+
+.btn-gitcafe:hover {
+    background: #0099d4
+}
+
+.btn-gitcafe:hover:before {
+    background: #0087ba
+}
+
+.btn-alauda {
+    background: #4875b4
+}
+
+.btn-alauda:before {
     content: "";
     background: #4169a2
 }
 
-.btn-gitcafe:hover {
+.btn-alauda:hover {
     background: #4169a2
 }
 
-.btn-gitcafe:hover:before {
+.btn-alauda:hover:before {
     background: #395d90
 }
 
