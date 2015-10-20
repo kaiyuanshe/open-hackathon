@@ -18,15 +18,18 @@ fieldset {
     position: relative;
     color: #fff;
 }
-.team-banner .title{
+
+.team-banner .title {
     font-size: 26px;
     margin: 0;
 }
-.team-banner .description{
+
+.team-banner .description {
     color: #d2d2d2;
     font-size: 16px;
-    padding: 5px 0 ;
+    padding: 5px 0;
 }
+
 .team-banner .oh-nav {
     font-size: 16px;
     color: #d2d2d2;
@@ -47,19 +50,43 @@ fieldset {
     position: relative;
 }
 
-.oh-team-header{
+.oh-team-header {
     text-align: center;
     width: 600px;
     margin: 90px auto;
 }
-.oh-team-header .oh-team-logo{
+
+.oh-team-header .oh-team-logo {
     height: 210px;
 }
-.oh-team-header #team_logo{
+
+.oh-team-header #team_logo {
     width: 120px;
     height: 120px;
     background-color: #fff;
 }
+
+.oh-logo-warp {
+    position: relative;
+    display: inline-block;
+}
+
+.oh-logo-warp .edit {
+    position: absolute;
+    display: none;
+    padding-top: 40px;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    color: #FFF;
+    background-color: rgba(0, 0, 0, .25);
+}
+
+.oh-logo-warp:hover .edit {
+    display: block;
+}
+
 .team-pic {
     text-align: right;
 }
@@ -115,7 +142,6 @@ fieldset {
     font-size: 15px;
 }
 
-
 .edit input,
 .edit textarea {
     width: 100%;
@@ -167,14 +193,16 @@ h1.title {
     float: right;
 }
 
-.oh-team-edit{
+.oh-team-edit {
     right: 0;
     margin-top: 40px;
 }
-.oh-team-edit a:hover{
-    color:#fff;
+
+.oh-team-edit a:hover {
+    color: #fff;
     text-decoration: underline;
 }
+
 h2:first-child {
     margin-top: 0;
 }
@@ -311,9 +339,23 @@ h2:first-child {
     font-size: 14px;
 }
 
+.oh-users .oh-header .action .btn-group-justified {
+    position: absolute;
+    bottom: 0;
+    display: none;
+}
+
+.oh-users .oh-header .action:hover .btn-group-justified {
+    display: block;
+}
+
+.oh-users .oh-header .action .btn {
+    border-radius: 0;
+
+}
+
 .air {
     position: absolute;
-    z-index: 5;
 }
 
 .air-bottom-right {
@@ -323,4 +365,38 @@ h2:first-child {
 
 .oh-white-text {
     color: #fff;
+}
+
+.iframe iframe {
+    width: 100% !important;
+    height: 500px !important;
+}
+.works_video,.works_img,.works_code{
+    padding-bottom:40px;
+}
+.works_video .delete,
+.works_img  .delete{
+    font-size: 20px;
+    text-align: right;
+    padding-right: 5px;
+    color: #fff;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 10px;
+}
+.works_code .delete{
+    display: inline-block;
+    margin-left: 100px;
+    font-size: 20px;
+}
+.works_img img{
+    max-width: 100%;
+}
+.addshow{
+    border-bottom:1px solid #ddd;
+    padding:10px 0;
+    margin-bottom:20px;
+}
+.works_code{
+    padding:0;
+    list-style:none;
 }

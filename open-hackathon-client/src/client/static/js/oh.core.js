@@ -64,6 +64,22 @@
                 }),
                 modal: 'alert'
             });
+        },
+        confirm: function (title, text, fun) {
+            fun = fun || new Function();
+            var ok = $('<button class="btn btn-primary">确定</button>').click(function (e) {
+                alert.hide();
+                fun();
+            })
+            var cancel = $('<button class="btn btn-warning">取消</button>').click(function (e) {
+                alert.hide();
+            });
+            var alert = $('body').Dialog({
+                title: title,
+                body: text,
+                footer: [ok, cancel],
+                modal: 'alert'
+            });
         }
     };
 

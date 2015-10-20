@@ -304,7 +304,7 @@ if (typeof jQuery === 'undefined') {
                 $field.off(events).on(events, function() {
                     that.updateStatus($(this), that.STATUS_NOT_VALIDATED);
                 });
-                
+
                 // Create help block elements for showing the error messages
                 $field.data('bv.messages', $message);
                 for (validatorName in this.options.fields[field].validators) {
@@ -364,7 +364,7 @@ if (typeof jQuery === 'undefined') {
                         $icon.addClass('bv-icon-input-group')
                              .insertAfter($parent.find('.input-group').eq(0));
                     }
-                    
+
                     if (container) {
                         $field
                             // Show tooltip/popover message when field gets focus
@@ -593,7 +593,7 @@ if (typeof jQuery === 'undefined') {
             var cannotType = $.inArray($field.attr('type'), ['button', 'checkbox', 'file', 'hidden', 'image', 'radio', 'reset', 'submit']) !== -1;
             return (cannotType || $field.val().length >= threshold);
         },
-        
+
         // ---
         // Events
         // ---
@@ -947,7 +947,7 @@ if (typeof jQuery === 'undefined') {
                 $(this).data('bv.messages').find('.help-block[data-bv-validator="' + validator + '"][data-bv-for="' + field + '"]').html(message);
             });
         },
-        
+
         /**
          * Update all validating results of field
          *
@@ -1775,7 +1775,7 @@ if (typeof jQuery === 'undefined') {
             validatorError: 'error.validator.bv',
             validatorSuccess: 'success.validator.bv'
         },
-        
+
         // Whether to be verbose when validating a field or not.
         // Possible values:
         // - true:  when a field has multiple validators, all of them will be checked, and respectively - if errors occur in
@@ -2379,7 +2379,7 @@ if (typeof jQuery === 'undefined') {
             if (creditCard === '') {
                 return true;
             }
-            
+
             creditCard = creditCard.replace(/\D/g, '');
 
             // Supported credit card types
@@ -2833,7 +2833,7 @@ if (typeof jQuery === 'undefined') {
                     if (options.minSize && files[i].size < parseInt(options.minSize, 10)) {
                         return false;
                     }
-                    
+
                     // Check the maxSize
                     if (options.maxSize && files[i].size > parseInt(options.maxSize, 10)) {
                         return false;
@@ -3610,7 +3610,7 @@ if (typeof jQuery === 'undefined') {
             if (!/^\d{15}$/.test(value) && !/^\d{17}[\dXx]{1}$/.test(value)) {
                 return false;
             }
-            
+
             // Check China PR Administrative division code
             var adminDivisionCodes = {
                 11: {
@@ -4064,11 +4064,11 @@ if (typeof jQuery === 'undefined') {
                 81: { 0: [0] },
                 82: { 0: [0] }
             };
-            
+
             var provincial  = parseInt(value.substr(0, 2), 10),
                 prefectural = parseInt(value.substr(2, 2), 10),
                 county      = parseInt(value.substr(4, 2), 10);
-            
+
             if (!adminDivisionCodes[provincial] || !adminDivisionCodes[provincial][prefectural]) {
                 return false;
             }
@@ -4086,12 +4086,12 @@ if (typeof jQuery === 'undefined') {
             if (!inRange) {
                 return false;
             }
-            
+
             // Check date of birth
             var dob;
             if (value.length === 18) {
                 dob = value.substr(6, 8);
-            } else /* length == 15 */ { 
+            } else /* length == 15 */ {
                 dob = '19' + value.substr(6, 6);
             }
             var year  = parseInt(dob.substr(0, 4), 10),
@@ -4100,7 +4100,7 @@ if (typeof jQuery === 'undefined') {
             if (!$.fn.bootstrapValidator.helpers.date(year, month, day)) {
                 return false;
             }
-            
+
             // Check checksum (18-digit system only)
             if (value.length === 18) {
                 var sum    = 0,
@@ -4112,10 +4112,10 @@ if (typeof jQuery === 'undefined') {
                 var checksum = (value.charAt(17).toUpperCase() !== 'X') ? parseInt(value.charAt(17), 10) : 10;
                 return checksum === sum;
             }
-            
+
             return true;
         },
-        
+
         /**
          * Validate Czech national identification number (RC)
          * Examples:
@@ -4750,11 +4750,11 @@ if (typeof jQuery === 'undefined') {
             if (!/^IMO \d{7}$/i.test(value)) {
                 return false;
             }
-            
+
             // Grab just the digits
             var sum    = 0,
                 digits = value.replace(/^.*(\d{7})$/, '$1');
-            
+
             // Go over each char, multiplying by the inverse of it's position
             // IMO 9176187
             // (9 * 7) + (1 * 6) + (7 * 5) + (6 * 4) + (1 * 3) + (8 * 2) = 147
@@ -5664,7 +5664,7 @@ if (typeof jQuery === 'undefined') {
 
                 return dfd;
             }
-            
+
             if (options.delay) {
                 // Since the form might have multiple fields with the same name
                 // I have to attach the timer to the field element
@@ -6429,7 +6429,7 @@ if (typeof jQuery === 'undefined') {
 
             return false;
         },
-        
+
         /**
          * Validate Brazilian VAT number (CNPJ)
          *
@@ -7737,7 +7737,7 @@ if (typeof jQuery === 'undefined') {
                 case 'NL':
                     isValid = /^[1-9][0-9]{3} ?(?!sa|sd|ss)[a-z]{2}$/i.test(value);
                     break;
-                    
+
                 case 'RO':
                     isValid = /^(0[1-8]{1}|[1-9]{1}[0-5]{1})?[0-9]{4}$/i.test(value);
                     break;
@@ -7752,7 +7752,7 @@ if (typeof jQuery === 'undefined') {
 
                 case 'SG':
                     isValid = /^([0][1-9]|[1-6][0-9]|[7]([0-3]|[5-9])|[8][0-2])(\d{4})$/i.test(value);
-                    break;                
+                    break;
 
                 case 'SK':
                     // Test: http://regexr.com/39hhr

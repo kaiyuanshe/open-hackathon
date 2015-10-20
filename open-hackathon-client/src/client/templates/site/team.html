@@ -10,21 +10,23 @@
             <div class="air oh-team-edit">
                 {% if team.is_admin == False and team.is_leader == False %}
                     {% if team.is_member %}
-                        <a href="javascript:void(0);"
-                           class="btn oh-white-text bg-color-pinkDark btn-lg"><i
-                                class="fa fa-unlink" data-role="leave"></i> 离队</a>
-                    {% else %}
+                        <a href="javascript:void(0);" class="btn oh-white-text bg-color-pinkDark btn-lg"
+                           data-role="leave">
+                            <i class="fa fa-unlink"></i> 离队</a>
+                    {% elif team.is_admin == False %}
                         <a href="javascript:void(0);"
                            class="btn oh-white-text bg-color-pinkDark btn-lg" data-role="join"><i
                                 class="fa fa-link"></i> 加入</a>
                     {% endif %}
                 {% elif team.is_leader %}
+                    <a href="javascript:void(0)" class="btn oh-white-text bg-color-pinkDark btn-lg" data-role="disband">
+                        <i class="fa fa-bomb"></i> 解散</a>
                     <a href="javascript:void(0);"
-                       class="btn oh-white-text bg-color-pinkDark btn-lg" data-role="edit"><i
-                            class="fa fa-edit"></i> 编辑</a>
+                       class="btn oh-white-text bg-color-pinkDark btn-lg" data-role="edit">
+                        <i class="fa fa-edit"></i> 编辑</a>
                     <a href="javascript:void(0);"
-                       class="btn oh-white-text bg-color-pinkDark btn-lg hide" data-role="save"><i
-                            class="fa fa-save"></i> 保存</a>
+                       class="btn oh-white-text bg-color-pinkDark btn-lg hide" data-role="save">
+                        <i class="fa fa-save"></i> 保存</a>
                 {% endif %}
             </div>
             <div class="air air-top-left oh-nav">
@@ -33,13 +35,13 @@
             </div>
             <div class="oh-team-header">
                 <div class="oh-team-logo">
-                    <img id="team_logo" src="{{ team.logo == None and '/static/pic/team-logo.png' or team.logo }}"
-                         onerror="javascript:this.src='/static/pic/team-logo.png'">
-                    {% if team.is_leader %}
-                        <div class="edit hide">
-                            <button class="btn btn-primary" data-role="logo-edit">编辑</button>
-                        </div>
-                    {% endif %}
+                    <div class="oh-logo-warp">
+                        <img id="team_logo" src="{{ team.logo == None and '/static/pic/team-logo.png' or team.logo }}"
+                             onerror="javascript:this.src='/static/pic/team-logo.png'">
+                        {% if team.is_leader %}
+                            <a href="javascript:;" class="edit" data-role="logo-edit">更新Logo</a>
+                        {% endif %}
+                    </div>
                 </div>
                 <h1 class="title" id="team_name"> {{ team.name }}  </h1>
 
@@ -47,7 +49,8 @@
             </div>
         </div>
     </div>
-    <div class="" data-tid="{{ team.id }}" data-role="{{ role }}" data-lid="{{ team.leader.id }}">
+    <div class="" data-tid="{{ team.id }}" data-role="{{ role }}" data-lid="{{ team.leader.id }}"
+         data-uid="{{ current_user.id }}">
         <div id="team_info " class="container">
             <div class="row">
                 <div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 team-pic">
@@ -61,13 +64,6 @@
             <div class="container team-box">
                 <div class="oh-header clearfix">
                     <h2>团队成员 <span>（0）</span></h2>
-                    {% if role == 0 %}
-                        <a href="javascript:" class="btn btn-primary" role="join">加入</a>
-                    {% elif role == 1 %}
-                        <a href="javascript:" class="btn btn-warning" role="leave">离队</a>
-                    {% elif role and 2  == 2 %}
-                        <a href="javascript:" class="btn btn-danger" role="disband">解散</a>
-                    {% endif %}
                 </div>
                 <div class="oh-users" id="talent_list">
                 </div>
@@ -78,67 +74,81 @@
         <div class="container team-box">
             <div class="oh-header clearfix">
                 <h2 class="">团队作品 <span>（0）</span></h2>
-                {% if role and 2 == 2 %}
-                    <a href="javascript:" class="btn btn-primary" role="disband">添加作品</a>
-                {% endif %}
             </div>
             <div class="works" id="works">
-                <div class="row works_video" id="works_video">
-                </div>
-                <div class="row works_img" id="works_img">
-                </div>
-                <div class="row ">
-                    <ul class="works_code" id="works_code">
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="referee">
-        <div class="container team-box">
-
-            <div class="oh-header clearfix">
-                <h2>裁判评分</h2>
-            </div>
-            <form id="score_form">
-                <fieldset>
-                    <div class="rating">
-                        <div class="oh-inline-block">
-                            <input type="radio" name="trophies-rating" value="10" id="trophies-10">
-                            <label for="trophies-10"><i class="fa fa-trophy"></i></label>
-                            <input type="radio" name="trophies-rating" value="9" id="trophies-9">
-                            <label for="trophies-9"><i class="fa fa-trophy"></i></label>
-                            <input type="radio" name="trophies-rating" value="8" id="trophies-8">
-                            <label for="trophies-8"><i class="fa fa-trophy"></i></label>
-                            <input type="radio" name="trophies-rating" value="7" id="trophies-7">
-                            <label for="trophies-7"><i class="fa fa-trophy"></i></label>
-                            <input type="radio" name="trophies-rating" value="6" id="trophies-6">
-                            <label for="trophies-6"><i class="fa fa-trophy"></i></label>
-                            <input type="radio" name="trophies-rating" value="5" id="trophies-6">
-                            <label for="trophies-5"><i class="fa fa-trophy"></i></label>
-                            <input type="radio" name="trophies-rating" value="4" id="trophies-4">
-                            <label for="trophies-4"><i class="fa fa-trophy"></i></label>
-                            <input type="radio" name="trophies-rating" value="3" id="trophies-3">
-                            <label for="trophies-3"><i class="fa fa-trophy"></i></label>
-                            <input type="radio" name="trophies-rating" value="2" id="trophies-2">
-                            <label for="trophies-2"><i class="fa fa-trophy"></i></label>
-                            <input type="radio" name="trophies-rating" value="1" id="trophies-1">
-                            <label for="trophies-1"><i class="fa fa-trophy"></i></label>
-                            评分：
+                <div class="works_video" id="works_video">
+                    {% if team.is_leader %}
+                        <div class="addshow">
+                            <a href="javascript:" data-role="addVideo"><i class="fa fa-plus"></i>
+                                添加视频展示</a>
                         </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="works_img" id="works_img">
+                {% if team.is_leader %}
+                    <div class="addshow">
+                        <a href="javascript:" data-role="addImg"><i class="fa fa-plus"></i> 添加图片展示</a>
                     </div>
-                                <textarea class="form-control" id="comment" name="comment" rows="4"
-                                          maxlength="200" placeholder="写下您的感想呗！"></textarea>
-                </fieldset>
-                <fieldset class="text-right">
-                    <button class="btn btn-primary">提交</button>
+                {% endif %}
+            </div>
+            {% if team.is_leader %}
+                <div class="addshow">
+                    <a href="javascript:" data-role="addCode"><i class="fa fa-plus"></i>
+                        添加项目地址</a>
+                </div>
+            {% endif %}
+            <ul class="works_code" id="works_code"></ul>
 
-                </fieldset>
-            </form>
         </div>
     </div>
 
+    {% if team.is_admin %}
+        <div id="referee">
+            <div class="container team-box">
+                <div class="oh-header clearfix">
+                    <h2>裁判评分</h2>
+                </div>
+                <form id="score_form" method="post" novalidate>
+                    <fieldset>
+                        <div class="form-group rating">
+                            <div class="oh-inline-block">
+                                <input type="radio" name="trophies-rating" value="10" id="trophies-10">
+                                <label for="trophies-10"><i class="fa fa-trophy"></i></label>
+                                <input type="radio" name="trophies-rating" value="9" id="trophies-9">
+                                <label for="trophies-9"><i class="fa fa-trophy"></i></label>
+                                <input type="radio" name="trophies-rating" value="8" id="trophies-8">
+                                <label for="trophies-8"><i class="fa fa-trophy"></i></label>
+                                <input type="radio" name="trophies-rating" value="7" id="trophies-7">
+                                <label for="trophies-7"><i class="fa fa-trophy"></i></label>
+                                <input type="radio" name="trophies-rating" value="6" id="trophies-6">
+                                <label for="trophies-6"><i class="fa fa-trophy"></i></label>
+                                <input type="radio" name="trophies-rating" value="5" id="trophies-5">
+                                <label for="trophies-5"><i class="fa fa-trophy"></i></label>
+                                <input type="radio" name="trophies-rating" value="4" id="trophies-4">
+                                <label for="trophies-4"><i class="fa fa-trophy"></i></label>
+                                <input type="radio" name="trophies-rating" value="3" id="trophies-3">
+                                <label for="trophies-3"><i class="fa fa-trophy"></i></label>
+                                <input type="radio" name="trophies-rating" value="2" id="trophies-2">
+                                <label for="trophies-2"><i class="fa fa-trophy"></i></label>
+                                <input type="radio" name="trophies-rating" value="1" id="trophies-1">
+                                <label for="trophies-1"><i class="fa fa-trophy"></i></label>
+                                评分：
+                            </div>
+                        </div>
+                        <div class="form-group">
+                        <textarea class="form-control" name="comment" rows="4" maxlength="200"
+                                  data-bv-stringlength="true"
+                                  placeholder="写下您的感想呗！"></textarea>
+                        </div>
+                    </fieldset>
+                    <fieldset class="text-right">
+                        <button type="submit" class="btn btn-primary">提交</button>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+    {% endif %}
 {% endblock %}
 
 {% block script %}
@@ -153,8 +163,7 @@
                             <h4 class="modal-title" id="myModalLabel">修改团队Logo</h4>
                         </div>
                         <div class="modal-body">
-                            <div class="form-group"
-                                 ng-class="{ 'has-error' : registerForm.team_name.$invalid && registerForm.team_name.$touched }">
+                            <div class="form-group">
                                 <label class="col-sm-3 control-label required">图片路径</label>
 
                                 <div class="col-sm-9">
@@ -174,9 +183,9 @@
                 </form>
             </div>
         </div>
-        <div class="modal fade" id="worksModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal fade" id="works_videoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
             <div class="modal-dialog" role="document">
-                <form id="addBannerForm" class="form-horizontal" novalidate>
+                <form id="addWorkVideoForm" class="form-horizontal" novalidate>
                     <div class="modal-content">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
@@ -184,12 +193,57 @@
                             <h4 class="modal-title" id="myModalLabel">发布作品</h4>
                         </div>
                         <div class="modal-body">
-                            <div class="form-group"
-                                 ng-class="{ 'has-error' : registerForm.team_name.$invalid && registerForm.team_name.$touched }">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label required">描述</label>
+
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" name="note" maxlength="80"
+                                           placeholder="描述信息">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label required">视频地址</label>
+
+                                <div class="col-sm-9">
+                                    <textarea type="text" class="form-control" name="work_video"
+                                              placeholder="嵌入视频代码"
+                                              data-bv-trigger="blur"
+                                              data-bv-notempty-message="请填嵌入视频代码"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">确定</button>
+                            <button type="button" class="btn btn-warning" data-dismiss="modal">取消</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="modal fade" id="works_imgModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <form id="addWorkImgForm" class="form-horizontal" novalidate>
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                    aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel">发布作品</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label required">描述</label>
+
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" name="note" maxlength="80"
+                                           placeholder="描述信息">
+                                </div>
+                            </div>
+                            <div class="form-group">
                                 <label class="col-sm-3 control-label required">图片路径</label>
 
                                 <div class="col-sm-9">
-                                    <input type="url" class="form-control" id="banner" name="banner" placeholder="图片路径"
+                                    <input type="url" class="form-control" name="work_img"
+                                           placeholder="图片路径"
                                            required
                                            data-bv-trigger="blur"
                                            data-bv-message="请填写正确的图片访问路径"
@@ -205,45 +259,150 @@
                 </form>
             </div>
         </div>
-    {% endif %}
+        <div class="modal fade" id="works_codeModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <form id="addWorkCodeForm" class="form-horizontal" novalidate>
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                    aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel">发布作品</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label required">项目地址</label>
 
-
-    <script id="team_item" type="text/x-jquery-tmpl">
-    {% raw %}
-    <div class="col-lg-2 col-md-4 col-xs-6" data-user >
-        <div class="oh-item">
-            <div class="oh-header">
-                <a href="javascript:;">
-                    <img src="${$item.getUserLogo(user.avatar_url)}" onerror="javascript:this.src='/static/pic/anon_user.png'">
-                </a>
-            </div>
-            <div class="oh-body">
-                <p class="text-center">
-                    <a href="javascript:;">${user.nickname}</a><br/>
-                    <span>${$item.getTitle(user_id)}</span>
-                </p>
+                                <div class="col-sm-9">
+                                    <input type="url" class="form-control" name="work_code"
+                                           placeholder="项目地址"
+                                           data-bv-trigger="blur"
+                                           data-bv-message="请填写正确的项目地址"
+                                           data-bv-notempty-message="请填项目地址">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">确定</button>
+                            <button type="button" class="btn btn-warning" data-dismiss="modal">取消</button>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
-    </div>
-    {% endraw %}
+    {% endif %}
 
-
-
-    </script>
-    <script id="show_item" type="text/x-jquery-tmpl">
-    {% raw %}
-        {{if type == 0}}
-        <div class="col-md-6">
-            <img src='${uri}' alt="${note}">
-
-        {{else if type == 1}}
-            <div class="iframe" title="${note}">
-                ${html uri}
+    {% if team.is_leader %}
+        <script id="team_item" type="text/x-jquery-tmpl">
+            {% raw %}
+            <div class="col-lg-2 col-md-4 col-xs-6" data-user >
+                <div class="oh-item">
+                    <div class="oh-header">
+                        <div class="action" >
+                            <img src="${$item.getUserLogo(user.avatar_url)}" onerror="javascript:this.src='/static/pic/anon_user.png'">
+                            {{if $item.isNotLeader(user_id) }}
+                                <div class=" btn-group btn-group-justified" role="group" aria-label="Justified button group">
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-sm btn-danger" data-role="denied">踢出</button>
+                                    </div>
+                                    {{if status == 0}}
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-sm btn-info" data-role="approved">同意</button>
+                                    </div>
+                                    {{/if}}
+                                </div>
+                            {{/if}}
+                        </div>
+                    </div>
+                    <div class="oh-body">
+                        <p class="text-center">
+                            <a href="javascript:;">${user.nickname}</a><br/>
+                            <span>${$item.getTitle(user_id)}</span>
+                        </p>
+                    </div>
+                </div>
             </div>
-        {{ else }}
-           <li>${note}: <a href="${uri}" >${uri}</a></li>
-        {{/if}}
-    {% endraw %}
+            {% endraw %}
+
+
+
+        </script>
+    {% else %}
+        <script id="team_item" type="text/x-jquery-tmpl">
+            {% raw %}
+            <div class="col-lg-2 col-md-4 col-xs-6" data-user >
+                <div class="oh-item">
+                    <div class="oh-header">
+                        <div>
+                            <img src="${$item.getUserLogo(user.avatar_url)}" onerror="javascript:this.src='/static/pic/anon_user.png'">
+                        </div>
+                    </div>
+                    <div class="oh-body">
+                        <p class="text-center">
+                            <a href="javascript:;">${user.nickname}</a><br/>
+                            <span>${$item.getTitle(user_id)}</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endraw %}
+
+
+
+        </script>
+    {% endif %}
+    <script id="show_item" type="text/x-jquery-tmpl">
+    {% if team.is_leader %}
+        {% raw %}
+            {{if type == 0 }}
+                <div class="row work_item">
+                     <div class="col-md-3 col-md-push-9">
+                          <div class="delete"><a href="javascript:;" data-role="delete-show" title="删除"><i class="fa fa-trash-o"></i></a></div>
+                          ${note}
+                     </div>
+                     <div class="col-md-9 col-md-pull-3">
+
+                         <img src="${uri}" alt="${note}">
+                     </div>
+                </div>
+            {{else type == 1}}
+                <div class="row work_item">
+                    <div class="col-md-3 col-md-push-9">
+                         <div class="delete"><a href="javascript:;" data-role="delete-show" title="删除"><i class="fa fa-trash-o"></i></a></div>
+                          ${note}
+                    </div>
+                    <div class="col-md-9 col-md-pull-3 iframe">
+                        {{html uri}}
+                    </div>
+                </div>
+            {{else}}
+                <li class="work_item"><a href="${uri}">${uri}</a> <div class="delete"><a href="javascript:;" data-role="delete-show"><i class="fa fa-trash-o"></i></a></div></li>
+            {{/if}}
+        {% endraw %}
+    {% else %}
+        {% raw %}
+            {{if type == 0 }}
+                <div class="row">
+                     <div class="col-md-3 col-md-push-9">
+                          ${note}
+                     </div>
+                     <div class="col-md-9 col-md-pull-3">
+                         <img src="${uri}" alt="${note}">
+                     </div>
+                </div>
+            {{else type == 1}}
+                <div class="row">
+                    <div class="col-md-3 col-md-push-9">
+                          ${note}
+                     </div>
+                     <div class="col-md-9 col-md-pull-3 iframe">
+                         {{html uri}}
+                     </div>
+                </div>
+            {{else}}
+                <li><a href="${uri}">${uri}</a></li>
+            {{/if}}
+        {% endraw %}
+    {% endif %}
 
 
 
