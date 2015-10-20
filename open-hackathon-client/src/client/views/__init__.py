@@ -338,7 +338,8 @@ def workspace(hackathon_name):
 @login_required
 def temp_settings(hackathon_name):
     headers = {"hackathon_name": hackathon_name, "token": session["token"]}
-    reg = Context.from_object(__get_api(API_HACAKTHON_REGISTRATION, headers))
+    reg = Context.from_object(
+        __get_api(API_HACKATHON, {"hackathon_name": hackathon_name, "token": session.get("token")}))
 
     if reg.get('registration') is not None:
         if reg.get('experiment') is not None:
@@ -362,7 +363,7 @@ def create_join_team(hackathon_name, tid):
         role = team.is_admin and 4 or 0
         role += team.is_leader and 2 or 0
         role += team.is_member and 1 or 0
-        return render("/site/team.html", team=team, role=role)
+        return render("/site/team.html", hackathon_name=hackathon_name, team=team, role=role)
 
 
 @app.route("/admin", methods=['GET', 'POST'])
