@@ -430,12 +430,13 @@ class HackathonManager(Component):
             job_id = "pre_allocate_expr_" + str(hack.id)
             if hack.is_pre_allocate_enabled():
                 next_run_time = self.util.get_now() + timedelta(seconds=hack.id * 10)
+                pre_allocate_interval = self.__get_pre_allocate_interval(hack)
                 self.scheduler.add_interval(feature="expr_manager",
                                             method="pre_allocate_expr",
                                             id=job_id,
                                             context=Context(hackathon_id=hack.id),
                                             next_run_time=next_run_time,
-                                            seconds=300 + hack.id * 10
+                                            seconds=pre_allocate_interval
                                             )
             else:
                 self.scheduler.remove_job(job_id)
@@ -511,6 +512,13 @@ class HackathonManager(Component):
             raise InternalServerError("fail to create the default administrator")
 
         return new_hack
+
+    def __get_pre_allocate_interval(self, hackathon):
+        interval = self.get_basic_property(hackathon, HACKATHON_BASIC_INFO.PRE_ALLOCATE_INTERVAL_SECONDS)
+        if interval:
+            return int(interval)
+        else:
+            return 300 + hackathon.id * 10
 
     def __get_hackathon_configs(self, hackathon):
 

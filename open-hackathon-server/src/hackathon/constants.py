@@ -87,6 +87,7 @@ class HACKATHON_BASIC_INFO:
         RECYCLE_MINUTES: int, the maximum time (unit:minute) of recycle for per experiment. default 0
         PRE_ALLOCATE_ENABLED: bool, whether to pre-start several environment. default false
         PRE_ALLOCATE_NUMBER: int, the maximum count of pre-start environment per hackathon and per template. default 1
+        PRE_ALLOCATE_INTERVAL_SECONDS: int, interval seconds for pre-allocate job
         ALAUDA_ENABLED: bool,default false, whether to use alauda service, no azure resource needed if true
         FREEDOM_TEAM: bool,default true,Whether to allow freedom of the team
     """
@@ -97,6 +98,7 @@ class HACKATHON_BASIC_INFO:
     RECYCLE_MINUTES = "recycle_minutes"
     PRE_ALLOCATE_ENABLED = "pre_allocate_enabled"
     PRE_ALLOCATE_NUMBER = "pre_allocate_number"
+    PRE_ALLOCATE_INTERVAL_SECONDS = "pre_allocate_interval_second"
     ALAUDA_ENABLED = "alauda_enabled"
     FREEDOM_TEAM = "freedom_team"
 

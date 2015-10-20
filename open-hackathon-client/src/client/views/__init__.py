@@ -305,7 +305,7 @@ def hackathon(hackathon_name):
     data = __get_api(API_HACKATHON, {"hackathon_name": hackathon_name, "token": session.get("token")})
     data = Context.from_object(data)
 
-    if data.get('error') is not None or data.get('hackathon', data).status != 1:
+    if data.get('error') is not None:
         return render("/404.html")
     else:
         return render("/site/hackathon.html",
