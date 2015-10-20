@@ -707,17 +707,15 @@
     </div>
 </div>
 <div id="oh_lift">
-    <div class="container">
-        <ul class="nav nav-tabs" role="tablist">
-            <li><a href="#info1"><span>推荐活动</span><i></i></a></li>
-            {% if current_user.is_authenticated() == False %}
-            <li><a href="#info2"><span>活动流程</span><i></i></a></li>
-            {% endif %}
-            <li><a href="#info3"><span>近期成果</span><i></i></a></li>
-            <li><a href="#info4"><span>本季达人</span><i></i></a></li>
-            <li><a href="#info5"><span>合作主办</span><i></i></a></li>
-        </ul>
-    </div>
+    <ul class="nav nav-tabs" role="tablist">
+        <li><a href="#info1"><span>推荐活动</span><i></i></a></li>
+        {% if current_user.is_authenticated() == False %}
+        <li><a href="#info2"><span>活动流程</span><i></i></a></li>
+        {% endif %}
+        <li><a href="#info3"><span>近期成果</span><i></i></a></li>
+        <li><a href="#info4"><span>本季达人</span><i></i></a></li>
+        <li><a href="#info5"><span>合作主办</span><i></i></a></li>
+    </ul>
 </div>
 {% endblock %}
 {% block script %}
