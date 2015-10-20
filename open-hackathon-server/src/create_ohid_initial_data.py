@@ -40,16 +40,6 @@ if hackathon is None:
                           registration_start_time=get_now(),
                           registration_end_time=get_now() + timedelta(days=365),
                           judge_start_time=get_now(), judge_end_time=get_now() + timedelta(days=365),
-                          basic_info=json.dumps({
-                              HACKATHON_BASIC_INFO.AUTO_APPROVE: True,
-                              HACKATHON_BASIC_INFO.RECYCLE_ENABLED: False,
-                              HACKATHON_BASIC_INFO.ORGANIZERS: [],
-                              HACKATHON_BASIC_INFO.BANNERS: "",
-                              HACKATHON_BASIC_INFO.LOCATION: "",
-                              HACKATHON_BASIC_INFO.MAX_ENROLLMENT: 0,
-                              HACKATHON_BASIC_INFO.PRE_ALLOCATE_ENABLED: False,
-                              HACKATHON_BASIC_INFO.PRE_ALLOCATE_NUMBER: 1,
-                          }),
                           status=1)
     db_adapter.add_object(hackathon)
 

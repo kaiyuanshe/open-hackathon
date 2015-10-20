@@ -165,13 +165,13 @@ class TeamManager(Component):
             return not_found("team not exists")
 
         # avoid duplicate team with same names
-        if "team_name" in kwargs and kwargs["team_name"] != team.name:
-            if self.__get_team_by_name(g.hackathon.id, kwargs["team_name"]):
+        if "name" in kwargs and kwargs["name"] != team.name:
+            if self.__get_team_by_name(g.hackathon.id, kwargs["name"]):
                 return precondition_failed("team with the same name exists already")
 
         self.__validate_team_permission(g.hackathon.id, team, g.user)
         self.db.update_object(team,
-                              name=kwargs.get("team_name", team.name),
+                              name=kwargs.get("name", team.name),
                               description=kwargs.get("description", team.description),
                               logo=kwargs.get("logo", team.logo),
                               update_time=self.util.get_now())
@@ -268,11 +268,14 @@ class TeamManager(Component):
             self.db.commit()
             return ok("approved")
         if status == TeamMemberStatus.Denied:
+            user = rel.user
+            hackathon = rel.hackathon
             self.db.delete_object(rel)
+            self.create_default_team(hackathon, user)
             return ok("Your request has been denied, please rejoin another team.")
 
-    def kick_or_leave(self, operator, user_team_rel_id):
-        rel = self.db.find_first_object_by(UserTeamRel, id=user_team_rel_id)
+    def kick_or_leave(self, operator, team_id, user_id):
+        rel = self.db.find_first_object_by(UserTeamRel, team_id=team_id, user_id=user_id)
         if not rel:
             return not_found()
 

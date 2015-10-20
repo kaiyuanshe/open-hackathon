@@ -285,7 +285,10 @@ def about():
 @login_required
 def logout():
     login_providers.values()[0].logout(g.admin)
-    resp = make_response(redirect(request.args.get("return_url")))
+    return_url = request.args.get("return_url", "/")
+    if "manage/" in return_url:
+        return_url = "/"
+    resp = make_response(redirect(return_url))
     resp.set_cookie('token', '', expires=0)
     return resp
 
@@ -305,7 +308,7 @@ def hackathon(hackathon_name):
     data = __get_api(API_HACKATHON, {"hackathon_name": hackathon_name, "token": session.get("token")})
     data = Context.from_object(data)
 
-    if data.get('error') is not None or data.get('hackathon', data).status != 1:
+    if data.get('error') is not None:
         return render("/404.html")
     else:
         return render("/site/hackathon.html",

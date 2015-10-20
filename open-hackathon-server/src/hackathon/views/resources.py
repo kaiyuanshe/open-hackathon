@@ -306,7 +306,7 @@ class TeamMemberResource(HackathonResource):
     @token_required
     def delete(self):
         ctx = self.context()
-        return team_manager.kick_or_leave(g.user, ctx.id)
+        return team_manager.kick_or_leave(g.user, ctx.team_id, ctx.user_id)
 
 
 class HackathonTeamListResource(HackathonResource):
