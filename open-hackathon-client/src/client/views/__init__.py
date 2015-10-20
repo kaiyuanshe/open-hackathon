@@ -285,7 +285,10 @@ def about():
 @login_required
 def logout():
     login_providers.values()[0].logout(g.admin)
-    resp = make_response(redirect(request.args.get("return_url")))
+    return_url = request.args.get("return_url", "/")
+    if "manage/" in return_url:
+        return_url = "/"
+    resp = make_response(redirect(return_url))
     resp.set_cookie('token', '', expires=0)
     return resp
 

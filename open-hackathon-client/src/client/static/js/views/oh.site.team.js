@@ -73,7 +73,7 @@
 
     function pageload() {
         tid = $('[data-tid]').data('tid');
-        lid = $('[data-tid]').data('lid');
+        lid = $('[data-lid]').data('lid');
         uid = $('[data-uid]').data('uid');
         team_date.id = tid;
         showMember();
@@ -214,26 +214,25 @@
 
     function leaveTeam(user_id) {
         return oh.api.team.member.delete({
-            body: {team_id: tid, user_id: user_id},
+            query: {user_id: user_id, team_id: tid},
             header: {hackathon_name: hackathon_name}
         });
     }
 
-    function updateMemberStatus(userid, status) {
+    function updateMemberStatus(rel_id, status) {
         var data = {
-            team_id: tid,
-            user_id: userid,
+            id: rel_id,
             status: status
         };
         return oh.api.team.member.put({body: data, header: {hackathon_name: hackathon_name}});
     }
 
-    function deniedMember(userid) {
-        return updateMemberStatus(userid, 2);
+    function deniedMember(rel_id) {
+        return updateMemberStatus(rel_id, 2);
     }
 
-    function approvedMember(userid) {
-        return updateMemberStatus(userid, 1);
+    function approvedMember(rel_id) {
+        return updateMemberStatus(rel_id, 1);
     }
 
     function updateTeam(data) {
@@ -329,9 +328,9 @@
 
 
         $('#talent_list').on('click', '[data-role="denied"]', function (e) {
-            var uid = $(this).data('user_id');
+            var rel_id = $(this).data('id');
             var userItem = $(this).parents('[data-user]');
-            leaveTeam(uid).then(function (data) {
+            deniedMember(rel_id).then(function (data) {
                 if (data.error) {
                     oh.comm.alert('错误', data.error.friendly_message);
                 } else {
@@ -340,9 +339,9 @@
                 }
             });
         }).on('click', '[data-role="approved"]', function (e) {
-            var uid = $(this).data('user_id');
+            var rel_id = $(this).data('id');
             var userItem = $(this).parents('[data-user]');
-            approvedMember(uid).then(function (data) {
+            approvedMember(rel_id).then(function (data) {
                 if (data.error) {
                     oh.comm.alert('错误', data.error.friendly_message);
                 } else {

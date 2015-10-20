@@ -302,11 +302,11 @@
                             {{if $item.isNotLeader(user_id) }}
                                 <div class=" btn-group btn-group-justified" role="group" aria-label="Justified button group">
                                     <div class="btn-group" role="group">
-                                        <button type="button" class="btn btn-sm btn-danger" data-role="denied">踢出</button>
+                                        <button type="button" class="btn btn-sm btn-danger" data-id=${id} data-role="denied">踢出</button>
                                     </div>
                                     {{if status == 0}}
                                     <div class="btn-group" role="group">
-                                        <button type="button" class="btn btn-sm btn-info" data-role="approved">同意</button>
+                                        <button type="button" class="btn btn-sm btn-info" data-id=${id} data-role="approved">同意</button>
                                     </div>
                                     {{/if}}
                                 </div>

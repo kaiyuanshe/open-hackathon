@@ -36,8 +36,12 @@
         "description": "kick member or leave team",
         "type": "object",
         "properties": {
-          "id": {
-            "description": "unique identifier of user_team_rel",
+          "user_id": {
+            "description": "unique identifier of user",
+            "pattern": "^[0-9]+$"
+          },
+          "team_id": {
+            "description": "unique identifier of team",
             "pattern": "^[0-9]+$"
           }
         }

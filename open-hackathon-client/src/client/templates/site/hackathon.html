@@ -209,7 +209,7 @@
                             <div id="map" class="baidu-map" title="{{ hackathon.config.location }}"></div>
                         </div>
                     {% endif %}
-                    <div class="oh-box">
+                    <div class="oh-box" style="display:none">
                         <h3 class="title">您还可能感兴趣</h3>
 
                         <div class="oh-body interest">
@@ -336,7 +336,7 @@
         <div class="col-md-6">
             <div class="media">
                 <div class="media-left">
-                    <a href="${$item.get_link(id)}" class="oh-thumb">
+                    <a href="${$item.get_link(id)}" target="_blank" class="oh-thumb">
                         <img class="media-object oh-thumbnail" src="${$item.get_logo(logo)}"  onerror="javascript:this.src='/static/pic/team-logo.png'" alt="">
                     </a>
                 </div>
