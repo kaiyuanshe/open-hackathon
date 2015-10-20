@@ -64,6 +64,9 @@
                 case 'gitcafe':
                     openWindow(CONFIG.gitcafe.authorize_url);
                     break;
+                case 'alauda':
+                    openWindow(CONFIG.alauda.authorize_url);
+                    break;
             }
         })
     };

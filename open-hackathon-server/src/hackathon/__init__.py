@@ -222,7 +222,7 @@ def __init_schedule_jobs():
     log.debug("init scheduled jobs......")
 
     sche = RequiredFeature("scheduler")
-    expr_manager = RequiredFeature("expr_manager")
+    hackathon_manager = RequiredFeature("hackathon_manager")
     host_server_manager = RequiredFeature("docker_host_manager")
 
     # schedule job to check recycle operation
@@ -234,7 +234,7 @@ def __init_schedule_jobs():
                       minutes=10)
 
     # schedule job to pre-allocate environment
-    expr_manager.schedule_pre_allocate_expr_job()
+    hackathon_manager.schedule_pre_allocate_expr_job()
 
     # schedule job to pull docker images automatically
     if not safe_get_config("docker.alauda.enabled", False):

@@ -44,12 +44,11 @@ from client.user.login import login_providers
 from client.user.user_mgr import user_manager
 from flask import Response, render_template, request, g, redirect, make_response, session, url_for, abort
 from datetime import timedelta
-from client.functions import get_config
+from client.functions import get_config, safe_get_config
 from client.log import log
 
 session_lifetime_minutes = 60
 
-PERMANENT_SESSION_LIFETIME = timedelta(minutes=session_lifetime_minutes)
 API_HACKATHON = "/api/hackathon"
 API_HACKATHON_LIST = "/api/hackathon/list"
 API_HACKATHON_TEMPLATE = "/api/hackathon/template"
@@ -250,6 +249,11 @@ def live_login():
     return __login(LOGIN_PROVIDER.LIVE)
 
 
+@app.route('/alauda')
+def alauda_login():
+    return __login(LOGIN_PROVIDER.ALAUDA)
+
+
 @app.route('/')
 @app.route('/index')
 def index():
@@ -290,7 +294,10 @@ def logout():
 def login():
     # todo redirect to the page request login
     session["return_url"] = request.args.get("return_url")
-    return render("/login.html", error=None)
+    return render("/login.html",
+                  error=None,
+                  providers=safe_get_config("login.provider_enabled",
+                                            ["github", "qq", "gitcafe", "weibo", "live", "alauda"]))
 
 
 @app.route("/site/<hackathon_name>")
@@ -316,7 +323,7 @@ def workspace(hackathon_name):
     reg = Context.from_object(__get_api(API_HACAKTHON_REGISTRATION, headers))
 
     if reg.get('registration') is not None:
-        if reg.registration.status == 1 or (reg.registration.status == 3 and reg.hackathon.basic_info.auto_approve):
+        if reg.registration.status == 1 or reg.registration.status == 3:
             return render("/site/workspace.html", hackathon_name=hackathon_name,
                           workspace=True,
                           hackathon=reg.get("hackathon"),
@@ -337,7 +344,7 @@ def temp_settings(hackathon_name):
     if reg.get('registration') is not None:
         if reg.get('experiment') is not None:
             return redirect(url_for('workspace', hackathon_name=hackathon_name))
-        elif reg.registration.status == 1 or (reg.registration.status == 3 and reg.config.auto_approve == '1'):
+        elif reg.registration.status == 1 or reg.registration.status == 3:
             templates = Context.from_object(__get_api(API_HACKATHON_TEMPLATE, headers))
             return render("/site/settings.html", hackathon_name=hackathon_name, templates=templates)
         else:

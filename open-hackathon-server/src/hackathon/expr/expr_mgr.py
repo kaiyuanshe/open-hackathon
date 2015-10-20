@@ -35,7 +35,7 @@ from werkzeug.exceptions import PreconditionFailed, NotFound
 
 from sqlalchemy import and_
 
-from hackathon import Component, RequiredFeature
+from hackathon import Component, RequiredFeature, Context
 from hackathon.constants import EStatus, VERemoteProvider, VE_PROVIDER, PortBindingType, VEStatus, ReservedUser, \
     AVMStatus, CLOUD_ECLIPSE
 from hackathon.database import VirtualEnvironment, DockerHostServer, Experiment, User, HackathonTemplateRel
@@ -64,6 +64,8 @@ class ExprManager(Component):
         :param user_id:
         :return:
         """
+
+        self.log.debug("try to start experiment for hackathon %s using template %s" % (hackathon_name, template_name))
         hackathon = self.__check_hackathon_event_time(hackathon_name)
         template = self.__check_template_status(hackathon, template_name)
 
@@ -165,24 +167,17 @@ class ExprManager(Component):
             for expr in exprs:
                 self.__recycle_expr(expr)
 
-    def schedule_pre_allocate_expr_job(self):
-        next_run_time = self.util.get_now() + timedelta(seconds=1)
-        self.scheduler.add_interval(feature="expr_manager",
-                                    method="pre_allocate_expr",
-                                    id="pre_allocate_expr",
-                                    next_run_time=next_run_time,
-                                    minutes=self.util.safe_get_config("pre_allocate.check_interval_minutes", 5))
-
-    def pre_allocate_expr(self):
-        # only deal with online hackathons
-        hackathon_id_list = self.hackathon_manager.get_pre_allocate_enabled_hackathon_list()
-        htrs = self.db.find_all_objects(HackathonTemplateRel, HackathonTemplateRel.hackathon_id.in_(hackathon_id_list))
+    def pre_allocate_expr(self, context):
+        hackathon_id = context.hackathon_id
+        self.log.debug("executing pre_allocate_expr for hackathon %s " % hackathon_id)
+        htrs = self.db.find_all_objects_by(HackathonTemplateRel, hackathon_id=hackathon_id)
         for rel in htrs:
             try:
                 template = rel.template
                 pre_num = rel.hackathon.get_pre_allocate_number()
                 curr_num = self.db.count(Experiment,
                                          Experiment.user_id == ReservedUser.DefaultUserID,
+                                         Experiment.hackathon_id == hackathon_id,
                                          Experiment.template_id == template.id,
                                          (Experiment.status == EStatus.STARTING) | (
                                              Experiment.status == EStatus.RUNNING))
@@ -239,10 +234,10 @@ class ExprManager(Component):
         """
         hackathon = self.hackathon_manager.get_hackathon_by_name(hackathon_name)
         if hackathon:
-            if hackathon.event_start_time < self.util.get_now() < hackathon.event_end_time:
+            if self.util.get_now() < hackathon.event_end_time:
                 return hackathon
             else:
-                raise PreconditionFailed("Hackathon is not started or was ended")
+                raise PreconditionFailed("Hackathon was already ended")
         else:
             return None
 
@@ -266,17 +261,11 @@ class ExprManager(Component):
                                          template_id=template.id)
         self.db.commit()
 
-        curr_num = self.db.count(Experiment,
-                                 Experiment.user_id == ReservedUser.DefaultUserID,
-                                 Experiment.template == template,
-                                 (Experiment.status == EStatus.STARTING) |
-                                 (Experiment.status == EStatus.RUNNING))
         if template.provider == VE_PROVIDER.DOCKER:
             try:
                 template_content = self.template_library.load_template(template)
                 virtual_environments_units = template_content.units
-                if curr_num != 0 and curr_num >= self.util.get_config("pre_allocate.docker"):
-                    return
+
                 expr.status = EStatus.STARTING
                 self.db.commit()
                 map(lambda unit:
@@ -292,8 +281,6 @@ class ExprManager(Component):
                 self.__roll_back(expr.id)
                 return internal_server_error('Failed starting containers')
         else:
-            if curr_num != 0 and curr_num >= self.util.get_config("pre_allocate.azure"):
-                return
             expr.status = EStatus.STARTING
             self.db.commit()
             try:
@@ -450,9 +437,6 @@ class ExprManager(Component):
             self.db.update_object(expr, user_id=user_id)
             self.db.commit()
             self.log.debug("experiment had been assigned, check experiment and start new job ... ")
-
-            # add a job to start new pre-allocate experiment
-            self.schedule_pre_allocate_expr_job()
             return expr
 
     def __roll_back(self, expr_id):

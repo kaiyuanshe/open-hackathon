@@ -113,7 +113,7 @@ def validate(func):
                 raise InternalServerError(repr(me.errors))
 
         code = "200"
-        if "error" in output_data:
+        if output_data is not None and "error" in output_data:
             code = output_data["error"]["code"]
         log.debug("API call %s.%s -- %s %d" % (class_name, method_name, code, len(str(output_data))))
         return output_data
