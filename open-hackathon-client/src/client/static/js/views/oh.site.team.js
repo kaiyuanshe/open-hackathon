@@ -52,7 +52,7 @@
     function showMember() {
         getMemberList().then(function (data) {
             $('#team_member h2 span').text('(' + data.length + ')');
-            $('#talent_list').append($('#team_item').tmpl(data, {
+            $('#talent_list').empty().append($('#team_item').tmpl(data, {
                 getTitle: function (id, status) {
                     if (id == lid) {
                         return '队长';
@@ -91,9 +91,12 @@
             }
         });
 
-        getScore().then(function (data) {
+        if (uid !== '') {
+            getScore().then(function (data) {
 
-        });
+            });
+        }
+
 
         var editLogo_form = $('#editLogoForm').bootstrapValidator()
             .on('success.form.bv', function (e) {
@@ -264,7 +267,7 @@
     }
 
     function bindEvent() {
-        $('[data-role="leave"]').click(function (e) {
+        $('.oh-team-edit').on('click', '[data-role="leave"]', function (e) {
             oh.comm.confirm('提示', '确定离队吗？', function () {
                 leaveTeam(uid).then(function (data) {
                     if (data.error) {
@@ -292,6 +295,7 @@
                     oh.comm.alert('错误', data.error.friendly_message);
                 } else {
                     showMember();
+                    $('.oh-team-edit').empty().append('<a href="javascript:void(0);" class="btn oh-white-text bg-color-pinkDark btn-lg" data-role="leave"><i class="fa fa-unlink"></i> 离队</a>');
                 }
             });
         });
