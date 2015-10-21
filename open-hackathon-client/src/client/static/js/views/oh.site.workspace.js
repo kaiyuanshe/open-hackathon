@@ -77,7 +77,7 @@
                             tname = item.name;
                         }
                     });
-                    postTemplate(item.name);
+                    postTemplate(tname);
                 } else {
                     showErrorMsg({
                         error: {
