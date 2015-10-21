@@ -260,6 +260,9 @@ class TeamShow(DBBase):
     team_id = Column(Integer, ForeignKey('team.id', ondelete='CASCADE'))
     team = relationship('Team', backref=backref('shows', lazy='dynamic'))
 
+    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
+    hackathon = relationship('Hackathon', backref=backref('shows', lazy='dynamic'))
+
     def __init__(self, **kwargs):
         super(TeamShow, self).__init__(**kwargs)
 
