@@ -137,6 +137,7 @@
                 })
                 $('.hackathon-nav').append(tmpe.format(dockers[i]));
             }
+            $('.hackathon-nav a.vm-box:eq(0)').trigger('click');
             heartbeat(def_expid);
         } else if (data.status == 1) {
             setTimeout(getExperiment, 60000);
