@@ -29,6 +29,7 @@ from werkzeug.exceptions import Forbidden
 sys.path.append("..")
 
 from flask import g
+from sqlalchemy import and_
 
 from hackathon import Component, RequiredFeature
 from hackathon.database import Team, UserTeamRel, User, Hackathon, TeamScore, TeamShow
@@ -139,6 +140,7 @@ class TeamManager(Component):
         team_name = self.__generate_team_name(hackathon, user)
         team = Team(name=team_name,
                     leader_id=user.id,
+                    logo=user.avatar_url,
                     hackathon_id=hackathon.id)
         self.db.add_object(team)
 
@@ -379,7 +381,8 @@ class TeamManager(Component):
             note=context.get("note"),
             type=context.type,
             uri=context.uri,
-            team_id=context.team_id
+            team_id=context.team_id,
+            hackathon_id=team.hackathon_id
         )
         self.db.add_object(show)
         return show.dic()
@@ -395,6 +398,13 @@ class TeamManager(Component):
 
     def get_team_show_list(self, team_id):
         show_list = self.db.find_all_objects_by(TeamShow, team_id=team_id)
+        return [s.dic() for s in show_list]
+
+    def get_hackathon_show_list(self, hackathon_id, show_type=None, limit=6):
+        criterion = TeamShow.hackathon_id == hackathon_id
+        if show_type:
+            criterion = and_(criterion, TeamShow.type == show_type)
+        show_list = TeamShow.query.filter(criterion).order_by(TeamShow.create_time.desc()).limit(limit)
         return [s.dic() for s in show_list]
 
     def get_team_source_code(self, team_id):

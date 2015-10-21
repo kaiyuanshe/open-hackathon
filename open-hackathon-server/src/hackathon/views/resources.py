@@ -293,6 +293,14 @@ class TeamShowResource(HackathonResource):
         return team_manager.delete_team_show(g.user, self.context().id)
 
 
+class HackathonTeamShowResource(HackathonResource):
+    @hackathon_name_required
+    def get(self):
+        show_type = request.args.get("type")
+        limit = request.args.get("limit", 6)
+        return team_manager.get_hackathon_show_list(g.hackathon.id, show_type, limit)
+
+
 class TeamMemberResource(HackathonResource):
     @token_required
     def post(self):

@@ -70,6 +70,7 @@ def init_routes():
     api.add_resource(TeamMemberResource, "/api/team/member")  # join or leave team, approve member
     api.add_resource(TeamScoreResource, "/api/team/score")  # query or set score by judge
     api.add_resource(TeamShowResource, "/api/team/show")  # query or add show by leader
+    api.add_resource(HackathonTeamShowResource, "/api/hackathon/show/list")  # show list of a hackathon
     api.add_resource(TeamMemberListResource, "/api/team/member/list")  # list team members
     api.add_resource(TeamTemplateResource, "/api/team/template")  # select or unselect template for team
 
