@@ -29,11 +29,12 @@
     var def_expid = 0;
 
     function pageload() {
+        var temp_name = $.getUrlParam('t');
         def_expid = $('[data-experiment]').data('experiment') || 0;
         if (def_expid) {
             getExperiment()
         } else {
-            getTemplate();
+            getTemplate(temp_name);
         }
         teamMember();
         hacakthonStat();
@@ -61,14 +62,22 @@
         });
     }
 
-    function getTemplate() {
+    function getTemplate(name) {
         oh.api.hackathon.template.get({header: {hackathon_name: hackathon_name}}, function (data) {
             if (data.error) {
                 showErrorMsg(data);
             } else {
+                
                 if (data.length > 0) {
                     def_expid = data[0].id;
-                    postTemplate(data[0].name);
+                    var tname = data[0].name;
+                    $.each(data,function(i,item){
+                        if(item.name == name){
+                            def_expid = item.id;
+                            tname = item.name;
+                        }
+                    });
+                    postTemplate(item.name);
                 } else {
                     showErrorMsg({
                         error: {
