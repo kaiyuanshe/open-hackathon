@@ -125,7 +125,7 @@
                             <h4 name="dserie">{name}<h4>\
                         </div>\
                     </div>';
-        var url_tmpe = '<h4>{name}:<a href="{url}">url</a></h4>';
+        var url_tmpe = '<h4><a href="{url}" style="text-decoration:underline;">{name}</a></h4>';
         if (data.status == 2) {
             var dockers = []
             for (var i in data.remote_servers) {
@@ -138,7 +138,9 @@
                 $('.hackathon-nav').append(tmpe.format(dockers[i]));
             }
             $.each(data.public_urls,function(i,url){
-                $('.hackathon-nav').append(url_tmpe.format(url));
+                
+                $('.hackathon-nav').append('<h4 class="col-md-offset-1">您可访问下面地址：</h4>')
+                .append(url_tmpe.format(url));
             });
             
             $('.hackathon-nav a.vm-box:eq(0)').trigger('click');
