@@ -1,6 +1,12 @@
 .container {
     width: auto !important;
 }
+html{
+  height: 100%;
+}
+body {
+  min-height: 100%;
+}
 
 footer {
     position: fixed;
@@ -26,7 +32,7 @@ footer {
 }
 
 .hackathon .work-fluid {
-    position: fixed;
+    position: absolute;
     padding: 0;
     top: 40px;
     bottom: 0px;
