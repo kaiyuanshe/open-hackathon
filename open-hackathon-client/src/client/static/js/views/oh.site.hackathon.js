@@ -48,6 +48,19 @@
                 showNoTeam();
             }
         });
+
+        getShowList().then(function (data) {
+            if (data.error) {
+
+            } else {
+                $('#works span').text('（' + data.length + '）');
+                $('#team_show').append($('#show_list_temp').tmpl(data, {
+                    link: function (team_id) {
+                        return '/site/' + hackathon_name + '/team/' + team_id;
+                    }
+                }));
+            }
+        });
     }
 
     function showNoTeam() {
@@ -56,6 +69,10 @@
 
     function getTeamList() {
         return oh.api.hackathon.team.list.get({header: {hackathon_name: hackathon_name}});
+    }
+
+    function getShowList() {
+        return oh.api.hackathon.show.list.get({query: {type: 0}, header: {hackathon_name: hackathon_name}})
     }
 
     function submintRegister() {

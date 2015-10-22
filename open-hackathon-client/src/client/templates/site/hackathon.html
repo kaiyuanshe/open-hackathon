@@ -69,47 +69,7 @@
 
                         <h2 id="works" class="title">作品公布 <span>（4）</span></h2>
 
-                        <div class="ob-body clearfix">
-                            <div class="col-md-4">
-                                <div class="">
-                                    <a href="javascirpt:;" class="oh-thumb">
-                                        <img src="/static/pic/homepage.jpg" class="oh-thumbnail">
-                                    </a>
-                                </div>
-                                <a class="grey-link" href="javascript:;">作品名称作品名称作品名称</a>
-
-                                <p class="grey-text">队伍名称</p>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="">
-                                    <a href="javascirpt:;" class="oh-thumb">
-                                        <img src="/static/pic/homepage.jpg" class="oh-thumbnail">
-                                    </a>
-                                </div>
-                                <a class="grey-link" href="javascript:;">作品名称作品名称作品名称</a>
-
-                                <p class="grey-text">队伍名称</p>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="">
-                                    <a href="javascirpt:;" class="oh-thumb">
-                                        <img src="/static/pic/homepage.jpg" class="oh-thumbnail">
-                                    </a>
-                                </div>
-                                <a class="grey-link" href="javascript:;">作品名称作品名称作品名称</a>
-
-                                <p class="grey-text">队伍名称</p>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="">
-                                    <a href="javascirpt:;" class="oh-thumb">
-                                        <img src="/static/pic/homepage.jpg" class="oh-thumbnail">
-                                    </a>
-                                </div>
-                                <a class="grey-link" href="javascript:;">作品名称作品名称作品名称</a>
-
-                                <p class="grey-text">队伍名称</p>
-                            </div>
+                        <div class="ob-body clearfix" id="team_show">
                         </div>
 
                         <h2 id="comment" class="title">活动讨论 <span>（5）</span></h2>
@@ -349,7 +309,19 @@
         </div>
         {% endraw %}
 
-
+    </script>
+    <script id="show_list_temp" type="text/x-jquery-tmpl">
+        {% raw %}
+        <div class="col-md-4">
+            <div class="">
+                <a href="${$item.link(team_id)}" class="oh-thumb">
+                    <img src="${uri} " class="oh-thumbnail">
+                </a>
+            </div>
+            <br/>
+            <p class="grey-text"><a class="grey-link grey-text" href="${$item.link(team_id)}">${note}</a></p>
+        </div>
+        {% endraw %}
     </script>
     <script id="register_list_temp" type="text/x-jquery-tmpl">
     {% raw %}
@@ -364,6 +336,7 @@
             <div class="date">${create_time}</div>
         </li>
     {% endraw %}
+
 
 
     </script>
