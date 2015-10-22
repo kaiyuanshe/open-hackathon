@@ -36,7 +36,6 @@ from hackathon.hackathon_factory import RequiredFeature
 from hackathon.util import safe_get_config, get_config, get_now
 from hackathon.log import log
 
-
 __all__ = ["HackathonScheduler"]
 
 
@@ -206,6 +205,13 @@ class HackathonScheduler():
             except Exception as e:
                 log.error(e)
 
+    def has_job(self, job_id):
+        """Check the existence of specific job """
+        if self.__apscheduler:
+            job = self.__apscheduler.get_job(job_id, jobstore=self.jobstore)
+            return job is not None
+        return False
+
     def __init__(self, app):
         """Initialize APScheduler
 
@@ -230,4 +236,3 @@ class HackathonScheduler():
             self.__apscheduler.add_listener(scheduler_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
             log.info("APScheduler loaded")
             self.__apscheduler.start()
-

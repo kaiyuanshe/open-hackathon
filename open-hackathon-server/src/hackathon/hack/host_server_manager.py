@@ -105,7 +105,7 @@ class DockerHostManager(Component):
             if self.__exist_request_host_server_by_hackathon_id(min_avavilabe_container, hackathon.id):
                 continue
             if not self.create_docker_host_vm(hackathon.id):
-                self.log.error('Schedule pre-allocate host server for hackathon:%s failed.' % hackathon.display_name)
+                self.log.error('Schedule pre-allocate host server for hackathon:%s failed.' % hackathon.name)
 
     def create_docker_host_vm(self, hackathon_id):
         """
