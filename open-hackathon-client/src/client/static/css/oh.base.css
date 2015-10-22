@@ -1787,3 +1787,16 @@ h4.title {
 .right{
     float: right;
 }
+
+.soon span{
+    color:#fff;
+    background: #21b1de;
+    font-size: 9px;
+    border: 1px solid #759098;
+    padding: 1px 2px;
+    top: 50px;
+    text-align: center;
+    border-radius: 2px;
+    position: absolute;
+    right: 0;
+}
