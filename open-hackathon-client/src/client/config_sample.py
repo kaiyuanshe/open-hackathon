@@ -213,6 +213,9 @@ Config = {
                     },
                     "registration": {
                         "list": ["get"]
+                    },
+                    "show": {
+                        "list": ["get"]
                     }
                 },
                 "team": {

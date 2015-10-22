@@ -82,6 +82,7 @@
 }
 
 .login_panel_center {
+    position: relative;
     width: 379px;
     height: 100%;
     min-height: 100%;
@@ -249,6 +250,7 @@
 }
 
 .inner_container {
+    padding-top: 45px;
     height: 600px;
     padding-bottom: 18em;
 }
@@ -266,6 +268,8 @@
     position: static;
     background: none;
     line-height: normal;
+    position: absolute;
+    bottom: 0;
 }
 
 .login_footer a {
