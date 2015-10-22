@@ -13,11 +13,13 @@
             <li {% if request.endpoint  == 'index' %}class="active"{% endif %}>
                 <a href="{{ url_for('index') }}">首页</a>
             </li>
-            <li>
+            <li class="soon">
                 <a href="#">预览活动</a>
+                <span>coming soon</span>
             </li>
-            <li>
+            <li class="soon">
                 <a href="#">黑客松社区</a>
+                <span>coming soon</span>
             </li>
             <li>
                 <a href="#">新手帮助</a>
@@ -25,19 +27,19 @@
         </ul>
     {% endif %}
     <ul class="nav navbar-nav navbar-right">
-        <li><a href=""><span class="glyphicon glyphicon-search"></span></a></li>
+        {#        <li><a href=""><span class="glyphicon glyphicon-search"></span></a></li>#}
         <!-- start: User Dropdown -->
         {% if current_user.nickname %}
             <li><a href="{{ url_for('create_hackathon') }}">发布活动</a></li>
             <!--<li class="dropdown oh-h-mgs">-->
-                <!--<a class="dropdown-toggle" data-toggle="dropdown" href="javascirpt:;">-->
-                    <!--<i class="fa fa-envelope"></i>-->
-                    <!--消息<span></span>-->
-                    <!--<span class="oh-caret"></span>-->
-                <!--</a>-->
-                <!--<ul class="dropdown-menu">-->
-                    <!--<li>暂无消息</li>-->
-                <!--</ul>-->
+            <!--<a class="dropdown-toggle" data-toggle="dropdown" href="javascirpt:;">-->
+            <!--<i class="fa fa-envelope"></i>-->
+            <!--消息<span></span>-->
+            <!--<span class="oh-caret"></span>-->
+            <!--</a>-->
+            <!--<ul class="dropdown-menu">-->
+            <!--<li>暂无消息</li>-->
+            <!--</ul>-->
             <!--</li>-->
             <li class="dropdown">
                 <a class="dropdown-toggle" data-toggle="dropdown" href="javascirpt:;">
