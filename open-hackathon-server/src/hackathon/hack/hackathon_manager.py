@@ -428,7 +428,11 @@ class HackathonManager(Component):
         hackathon_list = self.db.find_all_objects(Hackathon)
         for hack in hackathon_list:
             job_id = "pre_allocate_expr_" + str(hack.id)
+            is_job_exists = self.scheduler.has_job(job_id)
             if hack.is_pre_allocate_enabled():
+                if is_job_exists:
+                    return
+
                 next_run_time = self.util.get_now() + timedelta(seconds=hack.id * 10)
                 pre_allocate_interval = self.__get_pre_allocate_interval(hack)
                 self.scheduler.add_interval(feature="expr_manager",
@@ -438,7 +442,7 @@ class HackathonManager(Component):
                                             next_run_time=next_run_time,
                                             seconds=pre_allocate_interval
                                             )
-            else:
+            elif is_job_exists:
                 self.scheduler.remove_job(job_id)
         return True
 
