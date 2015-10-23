@@ -29,20 +29,10 @@ import requests
 import json
 from datetime import datetime, timedelta
 
-from docker_formation_base import (
-    DockerFormationBase
-)
-from hackathon.constants import (
-    HEALTH_STATUS,
-    VE_PROVIDER,
-    VEStatus,
-    EStatus,
-    HEALTH,
-)
-from hackathon.database.models import VirtualEnvironment
-from hackathon.hackathon_exception import (
-    AlaudaException
-)
+from docker_formation_base import DockerFormationBase
+from hackathon.constants import HEALTH_STATUS, VE_PROVIDER, VEStatus, EStatus, HEALTH, OAUTH_PROVIDER
+from hackathon.database import VirtualEnvironment
+from hackathon.hackathon_exception import AlaudaException
 from hackathon.template import DOCKER_UNIT
 from hackathon import Component, Context
 
@@ -203,8 +193,8 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
         service_config["instance_ports"] = unit.get_instance_ports()
         return service_config
 
-    def __get_service_log(self, service_name):
-        namespace = self.util.get_config("docker.alauda.namespace")
+    def __get_service_log(self, service_name, user=None):
+        namespace = self.__get_namespace(user)
         start_time = self.__format_time(datetime.utcnow() + timedelta(hours=-11))
         end_time = self.__format_time(datetime.utcnow() + timedelta(hours=1))
         path = "/v1/services/%s/%s/logs/?start_time=%s&end_time=%s" % (namespace, service_name, start_time, end_time)
@@ -220,28 +210,26 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
         map(lambda li: sub(li), service_logs)
         self.log.debug("\n".join(message))
 
-    def __create_service(self, config):
-        namespace = self.util.get_config("docker.alauda.namespace")
+    def __create_service(self, config, user=None):
+        namespace = self.__get_namespace(user)
         path = "/v1/services/%s" % namespace
         self.__post(path, config)
 
-    def __start_service(self, service_name):
-        namespace = self.util.get_config("docker.alauda.namespace")
+    def __start_service(self, service_name, user=None):
+        namespace = self.__get_namespace(user)
         path = "/v1/services/%s/%s/start/" % (namespace, service_name)
         self.__put(path, None)
 
-    def __stop_service(self, service_name):
-        namespace = self.util.get_config("docker.alauda.namespace")
+    def __stop_service(self, service_name, user=None):
+        namespace = self.__get_namespace(user)
         path = "/v1/services/%s/%s/stop/" % (namespace, service_name)
         self.__put(path, None)
 
-    def __delete_service(self, service_name):
-        namespace = self.util.get_config("docker.alauda.namespace")
+    def __delete_service(self, namespace, service_name, user=None):
         path = "/v1/services/%s/%s/" % (namespace, service_name)
         self.__delete(path)
 
-    def __query_service(self, service_name):
-        namespace = self.util.get_config("docker.alauda.namespace")
+    def __query_service(self, namespace, service_name):
         path = "/v1/services/%s/%s/" % (namespace, service_name)
         return self.__get(path)
 
@@ -263,33 +251,44 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
         base_uri = self.util.safe_get_config("docker.alauda.endpoint", "https://api.alauda.cn")
         return "%s%s%s" % (base_uri, sep, path)
 
-    def __get_headers(self):
+    def __get_namespace(self, user=None):
+        if user and user.provider == OAUTH_PROVIDER.ALAUDA:
+            return user.name
+        else:
+            return self.util.get_config("docker.alauda.namespace")
+
+    def __get_token(self, user=None):
         token = self.util.get_config("docker.alauda.token")
+        if user and user.provider == OAUTH_PROVIDER.ALAUDA:
+            token = user.access_token
+        return token
+
+    def __post(self, path, token, data):
+        if isinstance(data, dict):
+            data = json.dumps(data)
+        return self.__request("post", path, token, data)
+
+    def __put(self, path, token, data):
+        if isinstance(data, dict):
+            data = json.dumps(data)
+        return self.__request("put", path, token, data)
+
+    def __delete(self, path, token):
+        return self.__request("delete", path, token)
+
+    def __get(self, path, token):
+        resp = self.__request("get", path, token)
+        return self.util.convert(json.loads(resp))
+
+    def __get_headers(self, token):
         return {
             "Authorization": "Token %s" % token,
             "Content-Type": "application/json"
         }
 
-    def __post(self, path, data):
-        if isinstance(data, dict):
-            data = json.dumps(data)
-        return self.__request("post", path, data)
-
-    def __put(self, path, data):
-        if isinstance(data, dict):
-            data = json.dumps(data)
-        return self.__request("put", path, data)
-
-    def __delete(self, path):
-        return self.__request("delete", path)
-
-    def __get(self, path):
-        resp = self.__request("get", path)
-        return self.util.convert(json.loads(resp))
-
-    def __request(self, method, path, data=None):
+    def __request(self, method, path, token, data=None):
         url = self.__get_full_url(path)
-        req = requests.request(method, url, headers=self.__get_headers(), data=data)
+        req = requests.request(method, url, headers=self.__get_headers(token), data=data)
         if 200 <= req.status_code < 300:
             resp = req.content
             self.log.debug("'%s' response %d from alauda api '%s': %s" % (method, req.status_code, path, resp))
