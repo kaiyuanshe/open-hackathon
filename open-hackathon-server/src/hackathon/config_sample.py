@@ -94,7 +94,7 @@ Config = {
         "alauda": {
             "token": "",
             "namespace": "",
-            "endpoint": "https://api.alauda.cn"
+            "endpoint": "https://api.console.alauda.io"
         }
     },
     "cloud_eclipse": {
