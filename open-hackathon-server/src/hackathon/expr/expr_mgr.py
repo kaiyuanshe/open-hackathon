@@ -199,6 +199,10 @@ class ExprManager(Component):
                             # curr_num += 1
                             # self.log.debug("all template %s start complete" % template.name)
                 elif template.provider == VE_PROVIDER.DOCKER:
+                    if rel.hackathon.is_alauda_enabled():
+                        # don't create pre-env if alauda used
+                        continue
+
                     self.log.debug(
                         "template name is %s, hackathon name is %s" % (template.name, rel.hackathon.name))
                     if curr_num < pre_num:

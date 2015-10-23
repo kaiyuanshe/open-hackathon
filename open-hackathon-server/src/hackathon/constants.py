@@ -43,6 +43,7 @@ class OAUTH_PROVIDER:
     GITCAFE = "gitcafe"
     WEIBO = "weibo"
     LIVE = "live"
+    ALAUDA = "alauda"
 
 
 class HEALTH_STATUS:
@@ -318,6 +319,7 @@ class TeamMemberStatus:
     Approved = 1
     Denied = 2
 
+
 class DockerHostServerStatus:
     """
     Status of docker host server VM
@@ -334,6 +336,7 @@ class DockerHostServerStatus:
     DOCKER_READY = 2
     UNAVAILABLE = 3
 
+
 class DockerHostServerDisable:
     """
     whether the docker host server VM is disabled by manager or not
@@ -345,6 +348,7 @@ class DockerHostServerDisable:
     ABLE = 0
     DISABLE = 1
 
+
 class AzureVMStartMethod:
     """
     the way how Azure VM is started
@@ -355,6 +359,7 @@ class AzureVMStartMethod:
     """
     AUTO = 1
     MANUAL = 2
+
 
 class AzureApiExceptionMessage:
     """
@@ -369,6 +374,7 @@ class AzureApiExceptionMessage:
     DEPLOYMENT_NOT_FOUND = 'Not found (Not Found)'
     CONTAINER_NOT_FOUND = 'Not found (The specified container does not exist.)'
 
+
 class AzureOperationStatus:
     """
     The status of Azure operation
@@ -379,6 +385,7 @@ class AzureOperationStatus:
     """
     IN_PROGRESS = 'InProgress'
     SUCCESS = 'Succeeded'
+
 
 class ServiceDeploymentSlot:
     """
@@ -391,6 +398,7 @@ class ServiceDeploymentSlot:
     PRODUCTION = 'production'
     STAGING = 'staging'
 
+
 class AzureVMSize:
     """
     the size of Azure VM
@@ -401,6 +409,7 @@ class AzureVMSize:
     """
     MEDIUM_SIZE = 'Medium'
     SMALL_SIZE = 'Small'
+
 
 class AzureVMEndpointName:
     """
@@ -415,6 +424,7 @@ class AzureVMEndpointName:
     SSH = 'SSH'
     HTTP = 'http'
 
+
 class AzureVMEndpointDefaultPort:
     """
     default local port (private port) of applications in Azure VM
@@ -425,6 +435,7 @@ class AzureVMEndpointDefaultPort:
     """
     DOCKER = 4243
     SSH = 22
+
 
 class TCPProtocol:
     """
@@ -437,6 +448,7 @@ class TCPProtocol:
     TCP = 'tcp'
     UDP = 'udp'
 
+
 class DockerPingResult:
     """
     the response of ping docker public port
@@ -445,6 +457,7 @@ class DockerPingResult:
         OK: the response content is 'OK'
     """
     OK = 'OK'
+
 
 class AzureVMPowerState:
     """
@@ -455,6 +468,7 @@ class AzureVMPowerState:
     """
     VM_STARTED = 'started'
 
+
 class AzureVMEnpointConfigType:
     """
     the type of Azure VM endpoint configuration
@@ -463,6 +477,7 @@ class AzureVMEnpointConfigType:
         NETWORK: type is 'NetworkConfiguration'
     """
     NETWORK = 'NetworkConfiguration'
+
 
 class Team_Show_Type:
     """Type of resource to be shown"""

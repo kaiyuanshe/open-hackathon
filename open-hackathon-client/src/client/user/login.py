@@ -189,7 +189,11 @@ class GithubLogin(LoginBase):
         email_list = self.get_emails(access_token)
 
         name = user_info["login"]
-        nickname = user_info["name"] if "name" in user_info else name
+        nickname = name
+        if "name" in user_info:
+            nickname = user_info["name"]
+        if not nickname:
+            nickname = name
 
         return user_manager.oauth_db_login(str(user_info["id"]),
                                            provider=LOGIN_PROVIDER.GITHUB,

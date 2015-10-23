@@ -78,15 +78,13 @@ class UserManager(object):
             existed.name = user.name
             self.db.commit()
 
-    def __get_existing_user(self, openid, email_list):
-        # find user by email first in case that email registered in multiple oauth providers
-        emails = [e["email"] for e in email_list]
-        if len(emails):
-            ues = self.db.find_first_object(UserEmail, UserEmail.email.in_(emails))
-            if ues is not None:
-                return ues.user
-
-        return self.db.find_first_object_by(User, openid=openid)
+    def __get_existing_user(self, openid, provider):
+        # emails = [e["email"] for e in email_list]
+        # if len(emails):
+        #     ues = self.db.find_first_object(UserEmail, UserEmail.email.in_(emails))
+        #     if ues is not None:
+        #         return ues.user
+        return self.db.find_first_object_by(User, openid=openid, provider=provider)
 
     def db_logout(self, admin):
         try:
@@ -113,36 +111,37 @@ class UserManager(object):
     def oauth_db_login(self, openid, **kwargs):
         # update db
         email_list = kwargs['email_list']
-        admin = self.__get_existing_user(openid, email_list)
-        if admin is not None:
-            self.db.update_object(admin,
-                                  provider=kwargs["provider"],
+        provider = kwargs["provider"]
+        user = self.__get_existing_user(openid, provider)
+        if user is not None:
+            self.db.update_object(user,
+                                  provider=provider,
                                   name=kwargs["name"],
                                   nickname=kwargs["nickname"],
                                   access_token=kwargs["access_token"],
                                   avatar_url=kwargs["avatar_url"],
                                   last_login_time=get_now(),
-                                  login_times=admin.login_times + 1,
+                                  login_times=user.login_times + 1,
                                   online=1)
-            map(lambda x: self.__create_or_update_email(admin, x), email_list)
+            map(lambda x: self.__create_or_update_email(user, x), email_list)
         else:
-            admin = User(openid=openid,
-                         name=kwargs["name"],
-                         provider=kwargs["provider"],
-                         nickname=kwargs["nickname"],
-                         access_token=kwargs["access_token"],
-                         avatar_url=kwargs["avatar_url"],
-                         login_times=1,
-                         online=1)
+            user = User(openid=openid,
+                        name=kwargs["name"],
+                        provider=provider,
+                        nickname=kwargs["nickname"],
+                        access_token=kwargs["access_token"],
+                        avatar_url=kwargs["avatar_url"],
+                        login_times=1,
+                        online=1)
 
-            self.db.add_object(admin)
-            map(lambda x: self.__create_or_update_email(admin, x), email_list)
+            self.db.add_object(user)
+            map(lambda x: self.__create_or_update_email(user, x), email_list)
 
         # generate API token
-        token = self.__generate_api_token(admin)
+        token = self.__generate_api_token(user)
         return {
             "token": token,
-            "admin": admin
+            "user": user
         }
 
     def validate_request(self):

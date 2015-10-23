@@ -105,7 +105,7 @@ def __login(provider):
         log.info("login successfully:" + repr(admin_with_token))
 
         token = admin_with_token["token"].token
-        login_user(admin_with_token["admin"])
+        login_user(admin_with_token["user"])
         session["token"] = token
         if session.get("return_url") is not None:
             resp = make_response(redirect(session["return_url"]))
