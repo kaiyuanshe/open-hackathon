@@ -105,7 +105,7 @@ class UserManager(object):
         token = self.__generate_api_token(admin)
         return {
             "token": token,
-            "admin": admin
+            "user": admin
         }
 
     def oauth_db_login(self, openid, **kwargs):
