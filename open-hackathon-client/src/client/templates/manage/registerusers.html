@@ -25,6 +25,7 @@
                     <tr>
                         <th>注册名</th>
                         <th>邮箱</th>
+                        <th>登录方式</th>
                         <th>联系电话</th>
                         <th>联系地址</th>
                         <th>报名时间</th>
@@ -73,6 +74,7 @@
             ${user.name}
         </td>
         <td>{{each user.email}}${email} ,{{/each}}</td>
+        <td>${user.provider}</td>
         <td>{{if user.user_profile}} ${user.user_profile.phone} {{/if}}</td>
         <td>{{if user.user_profile}} ${user.user_profile.address} {{/if}}</td>
         <td>${moment(create_time).format('YYYY-MM-DD HH:mm')}</td>

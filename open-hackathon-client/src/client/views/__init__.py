@@ -96,16 +96,16 @@ def __login_failed(provider, error="Login failed."):
 def __login(provider):
     code = request.args.get('code')
     try:
-        admin_with_token = login_providers[provider].login({
+        user_with_token = login_providers[provider].login({
             "code": code
         })
-        if admin_with_token is None:
+        if user_with_token is None:
             return __login_failed(provider)
 
-        log.info("login successfully:" + repr(admin_with_token))
+        log.info("login successfully:" + repr(user_with_token))
 
-        token = admin_with_token["token"].token
-        login_user(admin_with_token["user"])
+        token = user_with_token["token"].token
+        login_user(user_with_token["user"])
         session["token"] = token
         if session.get("return_url") is not None:
             resp = make_response(redirect(session["return_url"]))
@@ -192,6 +192,14 @@ def to_datetime(datelong, fmt=''):
 @login_manager.user_loader
 def load_user(id):
     return user_manager.get_user_by_id(id)
+
+
+@login_manager.unauthorized_handler
+def unauthorized_log():
+    return render("/login.html",
+                  error=None,
+                  providers=safe_get_config("login.provider_enabled",
+                                            ["github", "qq", "gitcafe", "weibo", "live", "alauda"]))
 
 
 @app.before_request
@@ -288,7 +296,7 @@ def logout():
     return_url = request.args.get("return_url", "/")
     if "manage/" in return_url:
         return_url = "/"
-    resp = make_response(redirect(return_url))
+    resp = redirect(return_url)
     resp.set_cookie('token', '', expires=0)
     return resp
 
