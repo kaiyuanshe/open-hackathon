@@ -176,7 +176,7 @@ def deadline(endtime):
         return "--"
 
 
-week = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+week = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
 
 
 @app.template_filter('date')

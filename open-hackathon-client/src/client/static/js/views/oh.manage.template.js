@@ -131,6 +131,21 @@
             toggleTable();
         });
 
+        $('#templatelist').on('click', 'a[data-role="delete"]', function (e) {
+            var tr = $(this).parents('tr')
+            var data = tr.data('tmplItem').data;
+            confirm_modal.find('.modal-body p').text('确定是否移除该模板？');
+            confirm_modal.modal('show', function () {
+                removeHackathonTemplate({template_id: data.id}).then(function (data) {
+                    if (data.error) {
+                        //todo remove hackathon template error;
+                    } else {
+                        tr.detach();
+                    }
+                    confirm_modal.modal('hide');
+                });
+            });
+        });
         $('#template_list').on('click', '.oh-tempitem', function (e) {
             var item = $(this);
             var data = item.parent().data('tmplItem').data;

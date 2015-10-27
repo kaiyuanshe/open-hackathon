@@ -64,7 +64,7 @@
         }).on('click','[data-type="ok"]',function(e){
             var item = confirm_modal.data('item');
              oh.api.admin.azure.delete({
-                body:{certificate_id:item.id},
+                query:{certificate_id:item.id},
                 header:{hackathon_name:currentHackathon}
              },
              function(data){
