@@ -57,7 +57,7 @@
             header: {hackathon_name: hackathon_name}
         }, function (data) {
             $('#online').text(data.online);
-            $('#total').text(data.total);
+            $('#total').text(data.register);
             //setTimeout(hacakthonStat(), 600000)
         });
     }
