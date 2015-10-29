@@ -117,7 +117,7 @@
                 var data = {
                     id: $('#score_form').data('score_id') || 0,
                     team_id: tid,
-                    score: $('input:radio[name="trophies-rating"]:checked').val(),
+                    score: parseInt($('input:radio[name="trophies-rating"]:checked').val()),
                     reason: $('#comment').val()
                 };
 
