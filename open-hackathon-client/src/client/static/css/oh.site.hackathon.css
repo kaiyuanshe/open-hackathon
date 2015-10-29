@@ -8,7 +8,6 @@
     color: #505050;
 }
 
-
 .tags {
     padding: 0;
     margin: 0;
@@ -34,10 +33,6 @@
     color: #969696;
     border-color: #b4b4b4;
 }
-
-
-
-
 
 .oh-detail-info dt {
     float: left;
@@ -120,12 +115,18 @@
 .baidu-map {
     height: 265px;
 }
+
+.teams .media {
+    margin-bottom: 20px;
+}
+
 .teams .oh-thumb,
 .organizer .oh-thumb {
     width: 96px;
     max-height: 96px;
 }
-.teams .media-heading{
+
+.teams .media-heading {
     margin-bottom: 20px;
 }
 
@@ -203,6 +204,6 @@
 }
 
 .no-team {
-    padding-top:20px;
+    padding-top: 20px;
     padding-bottom: 20px;
 }

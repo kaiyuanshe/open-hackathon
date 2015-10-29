@@ -317,15 +317,12 @@
                     <div class="oh-body">
                         <p class="text-center">
                             <a href="javascript:;">${user.nickname}</a><br/>
-                            <span>${$item.getTitle(user_id)}</span>
+                            <span>${$item.getTitle(user_id,status)}</span>
                         </p>
                     </div>
                 </div>
             </div>
             {% endraw %}
-
-
-
         </script>
     {% else %}
         <script id="team_item" type="text/x-jquery-tmpl">
@@ -340,15 +337,12 @@
                     <div class="oh-body">
                         <p class="text-center">
                             <a href="javascript:;">${user.nickname}</a><br/>
-                            <span>${$item.getTitle(user_id)}</span>
+                            <span>${$item.getTitle(user_id,status)}</span>
                         </p>
                     </div>
                 </div>
             </div>
             {% endraw %}
-
-
-
         </script>
     {% endif %}
     <script id="show_item" type="text/x-jquery-tmpl">
