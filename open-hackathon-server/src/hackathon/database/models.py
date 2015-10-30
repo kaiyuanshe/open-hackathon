@@ -228,86 +228,6 @@ class UserProfile(DBBase):
         super(UserProfile, self).__init__(**kwargs)
 
 
-class Team(DBBase):
-    __tablename__ = 'team'
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String(80))
-    description = Column(Text)
-    logo = Column(String(200))
-    create_time = Column(TZDateTime, default=get_now())
-    update_time = Column(TZDateTime)
-
-    leader_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
-    leader = relationship('User', backref=backref('lead_teams', lazy='dynamic'))
-
-    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
-    hackathon = relationship('Hackathon', backref=backref('teams', lazy='dynamic'))
-
-    def __init__(self, **kwargs):
-        super(Team, self).__init__(**kwargs)
-
-
-class TeamShow(DBBase):
-    __tablename__ = 'team_show'
-
-    id = Column(Integer, primary_key=True)
-    note = Column(String(80))
-    type = Column(Integer)
-    uri = Column(String(300))
-    create_time = Column(TZDateTime, default=get_now())
-
-    team_id = Column(Integer, ForeignKey('team.id', ondelete='CASCADE'))
-    team = relationship('Team', backref=backref('shows', lazy='dynamic'))
-
-    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
-    hackathon = relationship('Hackathon', backref=backref('shows', lazy='dynamic'))
-
-    def __init__(self, **kwargs):
-        super(TeamShow, self).__init__(**kwargs)
-
-
-class TeamScore(DBBase):
-    __tablename__ = 'team_score'
-
-    id = Column(Integer, primary_key=True)
-    type = Column(Integer, default=0)
-    score = Column(Integer)
-    reason = Column(String(200))
-    create_time = Column(TZDateTime, default=get_now())
-    update_time = Column(TZDateTime)
-
-    team_id = Column(Integer, ForeignKey('team.id', ondelete='CASCADE'))
-    team = relationship('Team', backref=backref('scores', lazy='dynamic'))
-
-    judge_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
-    judge = relationship('User', backref=backref('scores', lazy='dynamic'))
-
-    def __init__(self, **kwargs):
-        super(TeamScore, self).__init__(**kwargs)
-
-
-class UserTeamRel(DBBase):
-    __tablename__ = 'user_team_rel'
-
-    id = Column(Integer, primary_key=True)
-    join_time = Column(TZDateTime, default=get_now())
-    update_time = Column(TZDateTime)
-    status = Column(Integer)  # 0:unaudit ,1:audit_passed, 2:audit_refused
-
-    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
-    hackathon = relationship('Hackathon', backref=backref('user_team_rels', lazy='dynamic'))
-
-    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
-    user = relationship('User', backref=backref('user_team_rels', lazy='dynamic'))
-
-    team_id = Column(Integer, ForeignKey('team.id', ondelete='CASCADE'))
-    team = relationship('Team', backref=backref('user_team_rels', lazy='dynamic'))
-
-    def __init__(self, **kwargs):
-        super(UserTeamRel, self).__init__(**kwargs)
-
-
 class Hackathon(DBBase):
     __tablename__ = 'hackathon'
 
@@ -403,6 +323,124 @@ class HackathonTag(DBBase):
 
     hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
     hackathon = relationship('Hackathon', backref=backref('tags', lazy='dynamic'))
+
+
+class Team(DBBase):
+    __tablename__ = 'team'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(80))
+    description = Column(Text)
+    logo = Column(String(200))
+    create_time = Column(TZDateTime, default=get_now())
+    update_time = Column(TZDateTime)
+
+    leader_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
+    leader = relationship('User', backref=backref('lead_teams', lazy='dynamic'))
+
+    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
+    hackathon = relationship('Hackathon', backref=backref('teams', lazy='dynamic'))
+
+    def __init__(self, **kwargs):
+        super(Team, self).__init__(**kwargs)
+
+
+class TeamShow(DBBase):
+    __tablename__ = 'team_show'
+
+    id = Column(Integer, primary_key=True)
+    note = Column(String(80))
+    type = Column(Integer)
+    uri = Column(String(300))
+    create_time = Column(TZDateTime, default=get_now())
+
+    team_id = Column(Integer, ForeignKey('team.id', ondelete='CASCADE'))
+    team = relationship('Team', backref=backref('shows', lazy='dynamic'))
+
+    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
+    hackathon = relationship('Hackathon', backref=backref('shows', lazy='dynamic'))
+
+    def __init__(self, **kwargs):
+        super(TeamShow, self).__init__(**kwargs)
+
+
+class TeamScore(DBBase):
+    __tablename__ = 'team_score'
+
+    id = Column(Integer, primary_key=True)
+    type = Column(Integer, default=0)
+    score = Column(Integer)
+    reason = Column(String(200))
+    create_time = Column(TZDateTime, default=get_now())
+    update_time = Column(TZDateTime)
+
+    team_id = Column(Integer, ForeignKey('team.id', ondelete='CASCADE'))
+    team = relationship('Team', backref=backref('scores', lazy='dynamic'))
+
+    judge_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
+    judge = relationship('User', backref=backref('scores', lazy='dynamic'))
+
+    def __init__(self, **kwargs):
+        super(TeamScore, self).__init__(**kwargs)
+
+
+class UserTeamRel(DBBase):
+    __tablename__ = 'user_team_rel'
+
+    id = Column(Integer, primary_key=True)
+    join_time = Column(TZDateTime, default=get_now())
+    update_time = Column(TZDateTime)
+    status = Column(Integer)  # 0:unaudit ,1:audit_passed, 2:audit_refused
+
+    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
+    hackathon = relationship('Hackathon', backref=backref('user_team_rels', lazy='dynamic'))
+
+    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
+    user = relationship('User', backref=backref('user_team_rels', lazy='dynamic'))
+
+    team_id = Column(Integer, ForeignKey('team.id', ondelete='CASCADE'))
+    team = relationship('Team', backref=backref('user_team_rels', lazy='dynamic'))
+
+    def __init__(self, **kwargs):
+        super(UserTeamRel, self).__init__(**kwargs)
+
+
+class Award(DBBase):
+    __tablename__ = 'award'
+
+    id = Column(Integer, primary_key=True)
+    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
+    name = Column(String(40))
+    level = Column(Integer, default=5)  # 0-10
+    quota = Column(Integer, default=1)
+    award_url = Column(Text)
+    description = Column(Text)
+    create_time = Column(TZDateTime, default=get_now())
+    update_time = Column(TZDateTime)
+
+    hackathon = relationship('Hackathon', backref=backref('award_contents', lazy='dynamic'))
+
+    def __init__(self, **kwargs):
+        super(Award, self).__init__(**kwargs)
+
+
+class TeamAward(DBBase):
+    __tablename__ = 'team_award'
+
+    id = Column(Integer, primary_key=True)
+    team_id = Column(Integer, ForeignKey('team.id', ondelete='CASCADE'))
+    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
+    award_id = Column(Integer, ForeignKey('award.id', ondelete='CASCADE'))
+    reason = Column(Text)
+    level = Column(Integer, default=5)  # duplicate with Award for convenience
+    create_time = Column(TZDateTime, default=get_now())
+
+    team = relationship('Team', backref=backref('team_awards', lazy='dynamic'))
+    award = relationship('Award', backref=backref('team_awards', lazy='dynamic'))
+    hackathon = relationship('Hackathon', backref=backref('team_awards', lazy='dynamic'))
+
+    def __init__(self, **kwargs):
+        super(TeamAward, self).__init__(**kwargs)
 
 
 class DockerHostServer(DBBase):
@@ -570,6 +608,22 @@ class HackathonTemplateRel(DBBase):
 
     def __init__(self, **kwargs):
         super(HackathonTemplateRel, self).__init__(**kwargs)
+
+
+class UserHackathonAsset(DBBase):
+    __tablename__ = 'user_hackathon_asset'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
+    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
+    asset_name = Column(String(50))
+    asset_value = Column(Text)
+    description = Column(Text)
+    create_time = Column(TZDateTime, default=get_now())
+    update_time = Column(TZDateTime)
+
+    def __init__(self, **kwargs):
+        super(UserHackathonAsset, self).__init__(**kwargs)
 
 
 # ------------------------------ Tables are introduced by azure formation ------------------------------

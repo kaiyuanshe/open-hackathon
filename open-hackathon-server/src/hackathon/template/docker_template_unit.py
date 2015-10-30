@@ -149,7 +149,12 @@ class DockerTemplateUnit(TemplateUnit):
         return self.dic
 
     def get_image_with_tag(self):
-        return self.dic[DOCKER_UNIT.IMAGE]
+        image = self.dic[DOCKER_UNIT.IMAGE]
+        data = image.split(':')
+        if len(data) == 2:
+            return image
+        else:
+            return image + ':latest'
 
     def get_ports(self):
         return self.dic[DOCKER_UNIT.PORTS]
@@ -163,11 +168,7 @@ class DockerTemplateUnit(TemplateUnit):
 
     def get_tag(self):
         image = self.get_image_with_tag()
-        data = image.split(':')
-        if len(data) == 2:
-            return data[1]
-        else:
-            return 'latest'
+        return image.split(':')[1]
 
     def get_run_command(self):
         cmd = self.dic[DOCKER_UNIT.CMD]

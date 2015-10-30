@@ -264,7 +264,10 @@ class HostedDockerFormation(DockerFormationBase, Component):
         return 'http://%s:%d' % (docker_host.public_dns, docker_host.public_docker_api_port)
 
     def pull_image(self, context):
-        docker_host, image_name, tag = context.docker_host, context.image_name, context.tag
+        docker_host_id, image_name, tag = context.docker_host, context.image_name, context.tag
+        docker_host = self.db.find_first_object_by(DockerHostServer, id=docker_host_id)
+        if not docker_host:
+            return
         pull_image_url = self.get_vm_url(docker_host) + "/images/create?fromImage=" + image_name + '&tag=' + tag
         self.log.debug(" send request to pull image:" + pull_image_url)
         return requests.post(pull_image_url)
@@ -444,6 +447,8 @@ class HostedDockerFormation(DockerFormationBase, Component):
     def load_azure_key_id(self, expr_id):
         expr = self.db.get_object(Experiment, expr_id)
         hak = self.db.find_first_object_by(HackathonAzureKey, hackathon_id=expr.hackathon_id)
+        if not hak:
+            raise Exception("no azure key configured")
         return hak.azure_key_id
 
     def __assign_ports(self, expr, host_server, ve, port_cfg):

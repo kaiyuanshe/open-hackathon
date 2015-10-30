@@ -40,6 +40,8 @@ from user_mgr import user_manager
 from flask import session, request
 from flask_login import logout_user
 from client.constants import LOGIN_PROVIDER
+from client.database import db_adapter
+from client.database.models import UserHackathonAsset, Hackathon
 
 
 class LoginBase():
@@ -79,6 +81,9 @@ class QQLogin(LoginBase):
 
         log.info("login from QQ")
         code = args.get('code')
+        if not code:
+            return None
+
         access_token = self.get_token(code)
         info = self.get_info(access_token)
         user_info = self.get_user_info(access_token, info["openid"], info["client_id"])
@@ -183,6 +188,8 @@ class GithubLogin(LoginBase):
 
         log.info('login from GitHub')
         code = args.get('code')
+        if not code:
+            return None
 
         access_token = self.get_token(code)
         user_info = self.get_user_info(access_token)
@@ -293,6 +300,9 @@ class GitcafeLogin(LoginBase):
 
         log.info('login from Gitcafe')
         code = args.get('code')
+        if not code:
+            return None
+
         access_token = self.get_token(code)
         user_info = self.get_user_info("Bearer " + access_token)
 
@@ -383,6 +393,9 @@ class WeiboLogin(LoginBase):
 
         log.info("login from Weibo Sina")
         code = args.get("code")
+        if not code:
+            return None
+
         access_token = self.get_token(code)
         user_info = self.get_user_info(access_token["access_token"], access_token["uid"])
 
@@ -529,6 +542,8 @@ class LiveLogin(LoginBase):
 
         log.info('login from  Live')
         code = args.get('code')
+        if not code:
+            return None
 
         access_token = self.get_token(code)
         user_info = self.get_user_info(access_token)
@@ -635,6 +650,9 @@ class AlaudaLogin(LoginBase):
 
     def login(self, args):
         code = args.get('code')
+        if not code:
+            return None
+
         log.info('login from alauda, code = ' + code)
 
         # basic auth header, content_type and post data
@@ -673,13 +691,37 @@ class AlaudaLogin(LoginBase):
                 'primary': 1
             }
         ]
-        return user_manager.oauth_db_login(username,
-                                           provider=LOGIN_PROVIDER.ALAUDA,
-                                           name=username,
-                                           nickname=resp.get("realname", username),
-                                           access_token=resp["access_token"],
-                                           email_list=email_list,
-                                           avatar_url=resp.get("logo_file"))
+
+        user_with_token = user_manager.oauth_db_login(username,
+                                                      provider=LOGIN_PROVIDER.ALAUDA,
+                                                      name=username,
+                                                      nickname=resp.get("realname", username),
+                                                      access_token=resp["access_token"],
+                                                      email_list=email_list,
+                                                      avatar_url=resp.get("logo_file"))
+
+        # for oxford only
+        self.oxford(user_with_token["user"], resp.get("oxford_api"))
+
+        return user_with_token
+
+    def oxford(self, user, oxford_api):
+        if not oxford_api:
+            return
+
+        hackathon = db_adapter.find_first_object_by(Hackathon, name="oxford")
+        if hackathon:
+            exist = db_adapter.find_first_object_by(UserHackathonAsset, asset_value=oxford_api)
+            if exist:
+                return
+
+            asset = UserHackathonAsset(user_id=user.id,
+                                       hackathon_id=hackathon.id,
+                                       asset_name="Oxford Token",
+                                       asset_value=oxford_api,
+                                       description="Token for Oxford API")
+            db_adapter.add_object(asset)
+            db_adapter.commit()
 
 
 login_providers = {

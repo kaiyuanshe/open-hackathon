@@ -1,0 +1,44 @@
+{
+  "TeamAwardResource": {
+    "get": {
+      "input": {
+        "description": "grant award to team",
+        "type": "object",
+        "properties": {
+          "team_id": {
+            "description": "id of team",
+            "pattern": "^[0-9]+$"
+          }
+        }
+      }
+    },
+    "post": {
+      "input": {
+        "description": "grant award to team",
+        "type": "object",
+        "properties": {
+          "award_id": {
+            "description": "id of award",
+            "pattern": "^[0-9]+$"
+          },
+          "team_id": {
+            "description": "id of team",
+            "pattern": "^[0-9]+$"
+          }
+        }
+      }
+    },
+    "delete": {
+      "input": {
+        "description": "delete award content",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "unique identifier of team_award",
+            "pattern": "^[0-9]+$"
+          }
+        }
+      }
+    }
+  }
+}

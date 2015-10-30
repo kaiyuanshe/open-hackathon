@@ -122,7 +122,7 @@ class HackathonTemplateManager(Component):
                 tag = dl_image.split(':')[1]
                 context = Context(image=image,
                                   tag=tag,
-                                  docker_host=docker_host)
+                                  docker_host=docker_host.id)
                 self.scheduler.add_once(feature="hosted_docker",
                                         method="pull_image",
                                         context=context,

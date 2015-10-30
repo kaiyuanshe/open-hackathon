@@ -90,7 +90,7 @@ def __login_failed(provider, error="Login failed."):
     if provider == "mysql":
         error = "Login failed. username or password invalid."
         return render("/superadmin.html", error=error)
-    return render("/error.html", error=error)
+    return redirect("/")
 
 
 def __login(provider):

@@ -36,7 +36,6 @@ import json
 from pytz import utc
 
 
-
 def relationship(*arg, **kw):
     ret = relation(*arg, **kw)
     db_adapter.commit()
@@ -205,3 +204,25 @@ class AdminHackathonRel(DBBase):
     def __init__(self, **kwargs):
         super(AdminHackathonRel, self).__init__(**kwargs)
 
+
+class UserHackathonAsset(DBBase):
+    __tablename__ = 'user_hackathon_asset'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
+    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
+    asset_name = Column(String(50))
+    asset_value = Column(Text)
+    description = Column(Text)
+    create_time = Column(TZDateTime, default=get_now())
+    update_time = Column(TZDateTime)
+
+    def __init__(self, **kwargs):
+        super(UserHackathonAsset, self).__init__(**kwargs)
+
+
+class Hackathon(DBBase):
+    __tablename__ = 'hackathon'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50), unique=True, nullable=False, index=True)

@@ -32,7 +32,7 @@ from flask import g
 from sqlalchemy import and_
 
 from hackathon import Component, RequiredFeature
-from hackathon.database import Team, UserTeamRel, User, Hackathon, TeamScore, TeamShow
+from hackathon.database import Team, UserTeamRel, User, Hackathon, TeamScore, TeamShow, Award, TeamAward
 from hackathon.hackathon_response import not_found, bad_request, precondition_failed, ok, forbidden
 from hackathon.constants import TeamMemberStatus, Team_Show_Type
 
@@ -410,8 +410,54 @@ class TeamManager(Component):
     def get_team_source_code(self, team_id):
         return self.db.find_first_object_by(TeamShow, team_id=team_id, type=Team_Show_Type.SourceCode)
 
+    def query_team_awards(self, team_id):
+        team = self.__get_team_by_id(team_id)
+        if not team:
+            return []
+
+        return [self.__award_with_detail(r) for r in team.team_awards.all()]
+
+    def get_granted_awards(self, hackathon):
+        awards = self.db.find_all_objects_order_by(TeamAward,
+                                                   None,
+                                                   TeamAward.level.desc(), TeamAward.create_time.asc(),
+                                                   hackathon_id=hackathon.id)
+        return [self.__award_with_detail(r) for r in awards]
+
+    def grant_award_to_team(self, hackathon, context):
+        team = self.__get_team_by_id(context.team_id)
+        if not team:
+            return not_found("team not found")
+
+        award = self.db.find_first_object_by(Award, id=context.award_id)
+        if not award:
+            return not_found("award not found")
+
+        if team.hackathon_id != hackathon.id or award.hackathon_id != hackathon.id:
+            return precondition_failed("hackathon doesn't match")
+
+        exist = self.db.find_first_object_by(TeamAward, team_id=context.team_id, award_id=context.award_id)
+        if not exist:
+            exist = TeamAward(team_id=context.team_id,
+                              hackathon_id=hackathon.id,
+                              award_id=context.award_id,
+                              reason=context.get("reason"),
+                              level=award.level)
+            self.db.add_object(exist)
+
+        return self.__award_with_detail(exist)
+
+    def cancel_team_award(self, hackathon, team_award_id):
+        self.db.delete_all_objects_by(TeamAward, hackathon_id=hackathon.id, id=team_award_id)
+        return ok()
+
     def __init__(self):
         pass
+
+    def __award_with_detail(self, team_award_rel):
+        dic = team_award_rel.dic()
+        dic["award"] = team_award_rel.award.dic()
+        return dic
 
     def __team_detail(self, team, user=None):
         resp = team.dic()
