@@ -34,7 +34,7 @@ from werkzeug.exceptions import PreconditionFailed, InternalServerError, BadRequ
 from flask import g, request
 
 from hackathon.database import Hackathon, User, AdminHackathonRel, DockerHostServer, HackathonLike, \
-    HackathonStat, HackathonConfig, HackathonTag, UserHackathonRel, HackathonOrganizer
+    HackathonStat, HackathonConfig, HackathonTag, UserHackathonRel, HackathonOrganizer, Award
 from hackathon.hackathon_response import internal_server_error, ok, not_found, forbidden
 from hackathon.constants import HACKATHON_BASIC_INFO, ADMIN_ROLE_TYPE, HACK_STATUS, RGStatus, HTTP_HEADER, \
     FILE_TYPE, HACK_TYPE, HACKATHON_STAT
@@ -409,6 +409,52 @@ class HackathonManager(Component):
     def delete_hackathon_organizer(self, hackathon, organizer_id):
         self.db.delete_all_objects_by(HackathonOrganizer, id=organizer_id, hackathon_id=hackathon.id)
         return ok()
+
+    def create_hackathon_award(self, hackathon, body):
+        level = int(body.level)
+        if level > 10:
+            level = 10
+
+        award = Award(hackathon_id=hackathon.id,
+                      name=body.name,
+                      level=level,
+                      quota=body.quota,
+                      award_url=body.get("award_url"),
+                      description=body.get("description"))
+        self.db.add_object(award)
+        return award.dic()
+
+    def update_hackathon_award(self, hackathon, body):
+        award = self.db.get_object(Award, body.id)
+        if not award:
+            return not_found("award not found")
+
+        if award.hackathon.name != hackathon.name:
+            return forbidden()
+
+        level = award.level
+        if body.get("level"):
+            level = int(body.level)
+            if level > 10:
+                level = 10
+
+        award.name = body.get("name", award.name)
+        award.level = body.get("level", level)
+        award.quota = body.get("quota", award.quota)
+        award.award_url = body.get("award_url", award.award_url)
+        award.description = body.get("description", award.description)
+        award.update_time = self.util.get_now()
+
+        self.db.commit()
+        return award.dic()
+
+    def delete_hackathon_award(self, hackathon, award_id):
+        self.db.delete_all_objects_by(Award, hackathon_id=hackathon.id, id=award_id)
+        return ok()
+
+    def list_hackathon_awards(self, hackathon):
+        awards = hackathon.award_contents.all()
+        return [a.dic() for a in awards]
 
     def schedule_pre_allocate_expr_job(self):
         """Add an interval schedule job to check all hackathons"""

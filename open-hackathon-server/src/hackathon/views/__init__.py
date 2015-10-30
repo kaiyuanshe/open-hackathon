@@ -51,6 +51,7 @@ def init_routes():
     api.add_resource(HackathonListResource, "/api/hackathon/list")  # list hackathons
     api.add_resource(HackathonStatResource, "/api/hackathon/stat")  # get statistics of hackathon
     api.add_resource(HackathonRegistrationListResource, "/api/hackathon/registration/list")  # list registered users
+    api.add_resource(HackathonGrantedAwardsResource, "/api/hackathon/grantedawards")  # list registered users
     api.add_resource(TalentResource, "/api/talent/list")  # list talents(达人)
     api.add_resource(HackathonTagNamesResource, "/api/tags")  # all distinct tag names
 
@@ -66,7 +67,8 @@ def init_routes():
 
     # team APIs
     api.add_resource(TeamResource, "/api/team")  # create, update, dismiss and query team
-    api.add_resource(HackathonTeamListResource, "/api/hackathon/team/list")  # list teams of hackathon
+    api.add_resource(HackathonTeamListResource, "/api/hackathon/team/list",
+                     "/api/admin/team/list")  # list teams of hackathon
     api.add_resource(TeamMemberResource, "/api/team/member")  # join or leave team, approve member
     api.add_resource(TeamScoreResource, "/api/team/score")  # query or set score by judge
     api.add_resource(TeamShowResource, "/api/team/show")  # query or add show by leader
@@ -92,3 +94,7 @@ def init_routes():
     api.add_resource(AdminHackathonFileResource, "/api/admin/file")  # upload hackathon image
     api.add_resource(HackathonAdminListResource, "/api/admin/hackathon/administrator/list")  # list admin/judges
     api.add_resource(HackathonAdminResource, "/api/admin/hackathon/administrator")  # add or delete admin/judge
+    api.add_resource(AdminTeamScoreListResource, "/api/admin/team/score/list")  # select or unselect template for team
+    api.add_resource(HackathonAwardResource, "/api/admin/hackathon/award")  # manage award content for hackathon
+    api.add_resource(HackathonAwardListResource, "/api/admin/hackathon/award/list")  # list award content for hackathon
+    api.add_resource(TeamAwardResource, "/api/admin/team/award")  # list award content for hackathon

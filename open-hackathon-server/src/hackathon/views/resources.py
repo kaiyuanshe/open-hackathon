@@ -580,3 +580,48 @@ class HackathonAdminResource(HackathonResource):
         parse.add_argument('id', type=int, location='args', required=True)
         args = parse.parse_args()
         return admin_manager.delete_admin(args['id'])
+
+
+class AdminTeamScoreListResource(HackathonResource):
+    @token_required
+    def get(self):
+        return team_manager.get_score(g.user, self.context().team_id)
+
+
+class HackathonAwardResource(HackathonResource):
+    @admin_privilege_required
+    def post(self):
+        return hackathon_manager.create_hackathon_award(g.hackathon, self.context())
+
+    @admin_privilege_required
+    def put(self):
+        return hackathon_manager.update_hackathon_award(g.hackathon, self.context())
+
+    @admin_privilege_required
+    def delete(self):
+        return hackathon_manager.delete_hackathon_award(g.hackathon, self.context().id)
+
+
+class HackathonAwardListResource(HackathonResource):
+    @hackathon_name_required
+    def get(self):
+        return hackathon_manager.list_hackathon_awards(g.hackathon)
+
+
+class TeamAwardResource(HackathonResource):
+    def get(self):
+        return team_manager.query_team_awards(self.context().team_id)
+
+    @admin_privilege_required
+    def post(self):
+        return team_manager.grant_award_to_team(g.hackathon, self.context())
+
+    @admin_privilege_required
+    def delete(self):
+        return team_manager.cancel_team_award(g.hackathon, self.context().id)
+
+
+class HackathonGrantedAwardsResource(HackathonResource):
+    @hackathon_name_required
+    def get(self):
+        return team_manager.get_granted_awards(g.hackathon)

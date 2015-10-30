@@ -1,0 +1,15 @@
+{
+  "AdminTeamScoreListResource": {
+    "get": {
+      "input": {
+        "type": "object",
+        "properties": {
+          "team_id": {
+            "description": "unique identifier of team",
+            "pattern": "^[0-9]+$"
+          }
+        }
+      }
+    }
+  }
+}

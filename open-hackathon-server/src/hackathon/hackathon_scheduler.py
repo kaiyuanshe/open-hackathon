@@ -47,10 +47,10 @@ def scheduler_listener(event):
     :param event: the event executed and related to the apscheduler job
     """
     if event.code == EVENT_JOB_ERROR:
-        print('The job crashed :(')
+        log.debug('The job crashed :(')
         log.warn("The schedule job crashed because of %s" % repr(event.exception))
     else:
-        print('The job executed :)')
+        log.debug('The job executed :)')
         log.debug("The schedule job %s executed and return value is '%s'" % (event.job_id, event.retval))
 
 
