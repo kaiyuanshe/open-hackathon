@@ -72,7 +72,7 @@
     }
 
     function getShowList() {
-        return oh.api.hackathon.show.list.get({query: {type: 0}, header: {hackathon_name: hackathon_name}})
+        return oh.api.hackathon.show.list.get({header: {hackathon_name: hackathon_name}})
     }
 
     function submintRegister() {

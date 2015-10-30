@@ -99,7 +99,8 @@
                 </div>
             {% endif %}
             <div>
-               <span>链接地址：</span> <ul class="works_code" id="works_code"></ul>
+                <span>链接地址：</span>
+                <ul class="works_code" id="works_code"></ul>
             </div>
         </div>
     </div>
@@ -110,7 +111,7 @@
                 <div class="oh-header clearfix">
                     <h2>裁判评分</h2>
                 </div>
-                <form id="score_form" method="post" novalidate>
+                <form id="score_form" method="post" novalidate class="hide">
                     <fieldset>
                         <div class="form-group rating">
                             <div class="oh-inline-block">
@@ -138,7 +139,7 @@
                             </div>
                         </div>
                         <div class="form-group">
-                        <textarea class="form-control" name="comment" rows="4" maxlength="200"
+                        <textarea class="form-control" id="comment" name="comment" rows="4" maxlength="200"
                                   data-bv-stringlength="true"
                                   placeholder="写下您的感想呗！"></textarea>
                         </div>
@@ -147,6 +148,7 @@
                         <button type="submit" class="btn btn-primary">提交</button>
                     </fieldset>
                 </form>
+                <ul id="score_list" class="list-unstyled"></ul>
             </div>
         </div>
     {% endif %}
@@ -323,6 +325,8 @@
                 </div>
             </div>
             {% endraw %}
+
+
         </script>
     {% else %}
         <script id="team_item" type="text/x-jquery-tmpl">
@@ -343,6 +347,8 @@
                 </div>
             </div>
             {% endraw %}
+
+
         </script>
     {% endif %}
     <script id="show_item" type="text/x-jquery-tmpl">
@@ -401,6 +407,16 @@
 
 
 
+
+
+    </script>
+    <script id="score_item" type="text/x-jquery-tmpl">
+        {% raw %}
+            <li>
+                <span>分值：</span> ${score}
+                <span>点评：</span> ${reason}
+            </li>
+        {% endraw %}
     </script>
     <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
     <script type="text/javascript" src="/static/js/views/oh.site.team.js"></script>

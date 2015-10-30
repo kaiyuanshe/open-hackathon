@@ -1777,7 +1777,9 @@ h3.title {
 h4.title {
 
 }
-
+.hide{
+    display: none;
+}
 .oh-inline-block {
     display: inline-block;
 }
