@@ -343,6 +343,8 @@ class ExprManager(Component):
 
                 except Exception as e:
                     self.log.error(e)
+                    ret["status"] = EStatus.STARTING
+                    return ret
 
         if expr.status == EStatus.RUNNING:
             ret["remote_servers"] = remote_servers
