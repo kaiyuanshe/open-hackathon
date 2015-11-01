@@ -49,6 +49,7 @@ class ALAUDA:
 
 class AlaudaDockerFormation(DockerFormationBase, Component):
     user_manager = RequiredFeature("user_manager")
+    expr_manager = RequiredFeature("expr_manager")
 
     def start(self, unit, **kwargs):
         virtual_environment = kwargs["virtual_environment"]
@@ -163,10 +164,7 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
         self.db.commit()
 
         # update experiment status
-        virtual_environment_list = ve.experiment.virtual_environments.all()
-        if all(x.status == VEStatus.RUNNING for x in virtual_environment_list):
-            ve.experiment.status = EStatus.RUNNING
-            self.db.commit()
+        self.expr_manager.check_expr_status(ve.experiment)
 
     def __service_failed_handler(self, context):
         user = self.__get_user_by_context(context)
