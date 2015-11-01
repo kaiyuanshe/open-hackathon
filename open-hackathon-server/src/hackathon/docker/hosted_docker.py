@@ -76,6 +76,7 @@ from datetime import timedelta
 class HostedDockerFormation(DockerFormationBase, Component):
     hackathon_template_manager = RequiredFeature("hackathon_template_manager")
     hackathon_manager = RequiredFeature("hackathon_manager")
+    expr_manager = RequiredFeature("expr_manager")
     """
     Docker resource management based on docker remote api v1.18
     Host resource are required. Azure key required in case of azure.
@@ -258,6 +259,9 @@ class HostedDockerFormation(DockerFormationBase, Component):
         self.log.debug("starting container %s is ended ... " % container_name)
         virtual_environment.status = VEStatus.RUNNING
         self.db.commit()
+
+        self.expr_manager.check_expr_status(virtual_environment.experiment)
+
         return container
 
     def get_vm_url(self, docker_host):
