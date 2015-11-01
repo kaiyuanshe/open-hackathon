@@ -184,7 +184,7 @@ class DockerTemplateUnit(TemplateUnit):
             if len(arr) == 2:
                 env_vars[arr[0]] = arr[1]
 
-        map(lambda env: convert(env), DOCKER_UNIT.ENV or [])
+        map(lambda env: convert(env), self.dic[DOCKER_UNIT.ENV] or [])
         return env_vars
 
     def get_instance_ports(self):
