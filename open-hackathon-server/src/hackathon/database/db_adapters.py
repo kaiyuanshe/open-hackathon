@@ -33,7 +33,7 @@ class SQLAlchemyAdapterMetaClass(type):
         def auto_commit(self, *args, **kwargs):
             try:
                 # todo a trick for DB transaction issue
-                # self.commit()
+                self.commit()
                 return_value = func(self, *args, **kwargs)
                 self.commit()
                 return return_value

@@ -32,7 +32,7 @@
         var temp_name = $.getUrlParam('t');
         def_expid = $('[data-experiment]').data('experiment') || 0;
         if (def_expid) {
-            getExperiment()
+            getExperiment(def_expid)
         } else {
             getTemplate(temp_name);
         }
@@ -110,8 +110,8 @@
         errorbox.show();
     }
 
-    function getExperiment() {
-        oh.api.user.experiment.get({query: {id: def_expid}}, function (data) {
+    function getExperiment(expr_id) {
+        oh.api.user.experiment.get({query: {id: expr_id}}, function (data) {
             loadExperiment(data);
         });
     }
@@ -145,9 +145,15 @@
             });
             
             $('.hackathon-nav a.vm-box:eq(0)').trigger('click');
+<<<<<<< HEAD
             heartbeat(data.id);
+=======
+            heartbeat(data.expr_id);
+>>>>>>> upstream/master
         } else if (data.status == 1) {
-            setTimeout(getExperiment, 60000);
+            setTimeout(function(){
+                           getExperiment(data.expr_id)
+                       }, 5000);
         } else {
             showErrorMsg(data);
         }

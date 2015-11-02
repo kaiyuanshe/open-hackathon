@@ -140,6 +140,15 @@ class ExprManager(Component):
         else:
             return not_found('Experiment Not found')
 
+    def check_expr_status(self, experiment):
+        # update experiment status
+        virtual_environment_list = experiment.virtual_environments.all()
+        if all(x.status == VEStatus.RUNNING for x in virtual_environment_list) \
+                and len(virtual_environment_list) == experiment.template.virtual_environment_count:
+            experiment.status = EStatus.RUNNING
+            self.db.commit()
+            self.template_library.template_verified(experiment.template.id)
+
     def get_expr_list_by_hackathon_id(self, hackathon_id, **kwargs):
         condition = self.__get_filter_condition(hackathon_id, **kwargs)
         experiments = self.db.find_all_objects(Experiment, condition)
@@ -275,10 +284,6 @@ class ExprManager(Component):
                 map(lambda unit:
                     self.__remote_start_container(hackathon, expr, unit),
                     virtual_environments_units)
-                expr.status = EStatus.RUNNING
-                self.db.commit()
-
-                self.template_library.template_verified(template.id)
             except Exception as e:
                 self.log.error(e)
                 self.log.error("Failed starting containers")
@@ -343,6 +348,8 @@ class ExprManager(Component):
 
                 except Exception as e:
                     self.log.error(e)
+                    ret["status"] = EStatus.STARTING
+                    return ret
 
         if expr.status == EStatus.RUNNING:
             ret["remote_servers"] = remote_servers
