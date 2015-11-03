@@ -31,9 +31,9 @@ import json
 from flask import g
 
 from hackathon import Component, RequiredFeature
-from hackathon.database import UserHackathonRel, Experiment
+from hackathon.database import UserHackathonRel, Experiment,HackathonConfig
 from hackathon.hackathon_response import bad_request, precondition_failed, internal_server_error, not_found, ok
-from hackathon.constants import EStatus, RGStatus, HACKATHON_BASIC_INFO, HACKATHON_STAT
+from hackathon.constants import EStatus, RGStatus, HACKATHON_BASIC_INFO, HACKATHON_STAT, LoginProvider
 
 __all__ = ["RegisterManager"]
 
@@ -70,6 +70,10 @@ class RegisterManager(Component):
         """
         self.log.debug("create_register: %r" % args)
         user_id = args['user_id']
+
+        if self.__is_user_hackathon_login_provider(user, hackathon):
+            return precondition_failed("hackathon registration not login provider", friendly_message="请使用指定的登录方式")
+
         if self.is_user_registered(user.id, hackathon):
             self.log.debug("user %d already registered on hackathon %d" % (user_id, hackathon.id))
             return self.get_registration_detail(user, hackathon)
@@ -202,3 +206,33 @@ class RegisterManager(Component):
                                         UserHackathonRel.hackathon_id == hackathon.id,
                                         UserHackathonRel.status.in_([RGStatus.AUDIT_PASSED, RGStatus.AUTO_PASSED]))
             return current_num >= max
+
+    def __is_user_hackathon_login_provider(self, user, hackathon):
+        """Check whether login prpvoder
+
+        :return False if not all seats occupied or hackathon has no limit at all otherwise True
+        """
+        login_provider = self.db.find_first_object(HackathonConfig,
+                           HackathonConfig.hackathon_id == hackathon.id,
+                           HackathonConfig.key == 'login_provider')
+        user_provider = 0
+        if login_provider is None:
+            return False
+        else:
+            if user.provider == "live":
+                user_provider = LoginProvider.live
+            if user.provider == "github":
+                user_provider = LoginProvider.github
+            if user.provider == "qq":
+                user_provider = LoginProvider.qq
+            if user.provider == "weibo":
+                user_provider = LoginProvider.weibo
+            if user.provider == "gitcafe":
+                user_provider = LoginProvider.gitcafe
+            if user.provider == "alauda":
+                user_provider = LoginProvider.alauda
+
+            if int(login_provider.value) & user_provider == user_provider:
+                return False
+            else:
+                return True

@@ -484,3 +484,12 @@ class Team_Show_Type:
     Image = 0
     Video = 1
     SourceCode = 2
+
+
+class LoginProvider:
+    live = 1
+    github = 2
+    qq = 4
+    weibo = 8
+    gitcafe = 16
+    alauda = 32
