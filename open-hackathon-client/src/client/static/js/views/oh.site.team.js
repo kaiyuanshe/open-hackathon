@@ -93,7 +93,12 @@
 
         if (uid !== '') {
             getScore().then(function (data) {
-
+                if (data.my) {
+                    $('#score_form').detach();
+                    $('#score_list').append($('#score_item').tmpl(data.all));
+                } else {
+                    $('#score_form').removeClass('hide');
+                }
             });
         }
 
@@ -126,6 +131,8 @@
                         oh.comm.alert('错误', data.error.friendly_message);
                     } else {
                         oh.comm.alert('提示', '评分成功');
+                        $('#score_form').detach();
+                        $('#score_list').append($('#score_item').tmpl(data.all));
                     }
                 })
             });

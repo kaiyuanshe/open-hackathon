@@ -72,11 +72,11 @@
                         <div class="ob-body clearfix" id="team_show">
                         </div>
 
-{#                        <h2 id="comment" class="title">活动讨论 <span>（5）</span></h2>#}
-{##}
-{#                        <div class="oh-body">#}
+                        {#                        <h2 id="comment" class="title">活动讨论 <span>（5）</span></h2>#}
+                        {##}
+                        {#                        <div class="oh-body">#}
 
-{#                        </div>#}
+                        {#                        </div>#}
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-5">
@@ -109,6 +109,11 @@
                                     {% for org in  hackathon.organizer %}
                                         <a href="{{ org.homepage }}">{{ org.name }}</a>
                                     {% endfor %}
+                                    &nbsp;
+                                </dd>
+                                <dt>登录：</dt>
+                                <dd>
+                                    {{get_provider(hackathon.config.login_provider)}}
                                 </dd>
                             </dl>
 
@@ -119,7 +124,7 @@
                                     <p>活动已结束。</p>
                                 {% elif user == None %}
                                     <a class="btn btn-primary btn-lg"
-                                       href="{{ url_for('login', return_url=request.path) }}">我要报名</a>
+                                       href="{{ url_for('login', return_url=request.path, provider=get_provider(hackathon.config.login_provider)) }}">我要报名</a>
                                 {% elif user.get("user_profile") == None %}
                                     <a class="btn btn-primary btn-lg"
                                        href="{{ url_for('user_profile',return_url=request.path) }}">我要报名</a>
@@ -138,7 +143,9 @@
                                     <p>您的报名正在审核中，请等待。</p>
                                 {% elif registration.status == 2 %}
                                     <p>您的报名已被拒绝，如有疑问请联系主办方。</p>
+
                                 {% endif %}
+
                             </div>
                         </div>
                     </div>
@@ -221,7 +228,7 @@
             <li><a href="#new"><span>最新动态</span><i></i></a></li>
             <li><a href="#team"><span>目前组队</span><i></i></a></li>
             <li><a href="#works"><span>作品公布</span><i></i></a></li>
-{#            <li><a href="#comment"><span>活动讨论</span><i></i></a></li>#}
+            {#            <li><a href="#comment"><span>活动讨论</span><i></i></a></li>#}
         </ul>
         <div class="full-shared hide">
             <a class="lid">
@@ -309,10 +316,12 @@
         </div>
         {% endraw %}
 
+
     </script>
     <script id="show_list_temp" type="text/x-jquery-tmpl">
         {% raw %}
-        <div class="col-md-4">
+        {{if type == 0 }}
+        <div class="col-md-12">
             <div class="">
                 <a href="${$item.link(team_id)}" class="oh-thumb">
                     <img src="${uri} " class="oh-thumbnail">
@@ -321,7 +330,17 @@
             <br/>
             <p class="grey-text"><a class="grey-link grey-text" href="${$item.link(team_id)}">${note}</a></p>
         </div>
+        {{else type == 1}}
+            <div class="col-md-12">
+                <div class="iframe">
+                    {{html uri}}
+                </div>
+                <br/>
+                <p class="grey-text"><a class="grey-link grey-text" href="${$item.link(team_id)}">${note}</a></p>
+            </div>
+        {{else}}{{/if}}
         {% endraw %}
+
     </script>
     <script id="register_list_temp" type="text/x-jquery-tmpl">
     {% raw %}
@@ -329,15 +348,12 @@
             <a href="javascript:;">
               <img class="avatar" alt="Lucas" src="${avatar_url }">
             </a>
-
             <div>
               <strong>${name}</strong>
             </div>
             <div class="date">${create_time}</div>
         </li>
     {% endraw %}
-
-
 
     </script>
     <script type="text/javascript">

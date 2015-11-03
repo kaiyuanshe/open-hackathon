@@ -127,7 +127,16 @@
         $('#auto_approve').attr({checked: Number(data.config.auto_approve) == 1});
         $('#alauda_enabled').attr({checked: Number(data.config.alauda_enabled) == 1});
         $('#freedom_team').attr({checked: Number(data.config.freedom_team) == 1});
+        setLoginPprovider(Number(data.config.login_provider || 0))
         initFilesData(data.banners);
+    }
+
+    function setLoginPprovider(value) {
+        $('[data-role="login_provider"]').each(function (i, ele) {
+            var box = $(ele);
+            var v = Number(box.val());
+            box.attr({checked: value & v == v});
+        });
     }
 
     function initFilesData(banners) {
@@ -176,7 +185,17 @@
         data.push({key: 'pre_allocate_enabled', value: false});
         data.push({key: 'pre_allocate_number', value: 1});
         data.push({key: 'freedom_team', value: $('#freedom_team').is(':checked')});
+        data.push({key: 'login_provider', value: getLoginProviderValue()});
         return data;
+    }
+
+    function getLoginProviderValue() {
+        var value = 0;
+        $('[data-role="login_provider"]:checked').each(function (i, ele) {
+            var box = $(ele);
+            value += Number(box.val());
+        });
+        return value;
     }
 
     function getTags() {
@@ -205,7 +224,7 @@
                 var config_data = getConfig();
                 var tags_data = getTags();
 
-                update_hackathon({body: hack_data,header: {hackathon_name: hackathonName}}).then(function (data) {
+                update_hackathon({body: hack_data, header: {hackathon_name: hackathonName}}).then(function (data) {
                     if (data.error) {
                         oh.comm.alert('错误', data.error.friendly_message);
                     } else {
