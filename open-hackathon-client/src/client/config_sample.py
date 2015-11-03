@@ -160,6 +160,10 @@ Config = {
                         },
                         "organizer": {
                             "": ["get", "post", "put", "delete"]
+                        },
+                        "award": {
+                            "": ["get", "post", "put", "delete"],
+                            "list": ["get"]
                         }
                     },
                     "registration": {
@@ -172,6 +176,13 @@ Config = {
                     "experiment": {
                         "list": ["get"],
                         "": ["post", "put"]
+                    },
+                    "team": {
+                        "list": ["get"],
+                        "score": {
+                            "list": ["get"]
+                        },
+                        "award": ["get", "post", "delete"]
                     }
                 },
                 "template": {
@@ -216,7 +227,8 @@ Config = {
                     },
                     "show": {
                         "list": ["get"]
-                    }
+                    },
+                    "grantedawards": ["get"]
                 },
                 "team": {
                     "": ["get", "post", "put", "delete"],

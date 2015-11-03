@@ -97,7 +97,7 @@
                     $('#score_form').detach();
                     $('#score_list').append($('#score_item').tmpl(data.all));
                 } else {
-                    $('#score_form').removerClass('hide');
+                    $('#score_form').removeClass('hide');
                 }
             });
         }

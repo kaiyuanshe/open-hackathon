@@ -92,3 +92,15 @@ def adminmgr(hackathon_name):
 @login_required
 def experiment(hackathon_name):
     return render("/manage/experiment.html", hackathon_name=hackathon_name)
+
+
+@app.route("/manage/<hackathon_name>/team")
+@login_required
+def team(hackathon_name):
+    return render("/manage/team.html", hackathon_name=hackathon_name)
+
+
+@app.route("/manage/<hackathon_name>/award")
+@login_required
+def award(hackathon_name):
+    return render("/manage/award.html", hackathon_name=hackathon_name)

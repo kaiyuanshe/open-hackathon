@@ -28,17 +28,17 @@
 
     var currentHackathon = oh.comm.getCurrentHackathon();
 
-    function bindAzurecertList() {
-        var list = $('#organizerlist');
-        oh.api.admin.hackathon.get({
+    function bindAwardList() {
+        var list = $('#awardlist');
+        oh.api.admin.hackathon.award.list.get({
             header: {hackathon_name: currentHackathon}
         }, function (data) {
             if (!data.error) {
                 hackathonID = data.id;
                 hackathonName = data.name;
-                list.empty().append($('#hackathon_organizer').tmpl(data.organizer || [], {
+                list.empty().append($('#hackathon_award').tmpl(data || [], {
                     substring: function (str, length) {
-                        return oh.comm.stripTags(markdown.toHTML(str), length);
+                        return oh.comm.stripTags(str, length);
                     }
                 }));
                 oh.comm.removeLoading();
@@ -47,87 +47,93 @@
     }
 
     function toggleTable() {
-        if ($('#organizertable').css('display') == 'none') {
-            $('#organizertable').show();
-            $('#organizerform').hide()
+        if ($('#awardtable').css('display') == 'none') {
+            $('#awardtable').show();
+            $('#awardform').hide()
         } else {
-            $('#organizertable').hide();
-            $('#organizerform').show()
+            $('#awardtable').hide();
+            $('#awardform').show()
         }
     }
 
     function getFormData() {
         var formData = {
-            id: $('#organizerform').data('id') || 0,
+            id: $('#awardform').data('id') || 0,
             name: $.trim($('#name').val()),
-            description: $('#description').val(),
-            homepage: $('#homepage').val(),
-            logo: $('#logo').val()
+            level: $('#level').val(),
+            quota: $('#quota').val(),
+            description: $('#description').val()
         }
         return formData;
     }
 
     function setFormData(data) {
-        $('#organizerform').data({id: data.id});
+        $('#awardform').data({id: data.id});
         $('#name').val(data.name);
+        $('#level').val(data.level);
+        $('#quota').val(data.quota);
         $('#description').val(data.description);
-        $('#homepage').val(data.homepage);
-        $('#logo').val(data.logo);
     }
 
-    function getOrganizers() {
-        var organizers = [];
-        $('#organizertable tbody>tr').each(function (i, tr) {
+    function getAward() {
+        var list = [];
+        $('#awardtable tbody>tr').each(function (i, tr) {
             var data = $(tr).data('tmplItem').data;
             if (data) {
-                organizers.push($(tr).data('tmplItem').data);
+                list.push($(tr).data('tmplItem').data);
             }
         })
-        return organizers;
+        return list;
     }
 
-    function createOrganizers(data) {
-        return oh.api.admin.hackathon.organizer.post(data, function (data) {
+    function createAward(data) {
+        return oh.api.admin.hackathon.award.post(data, function (data) {
             if (data.error) {
                 oh.comm.alert('错误', data.error.friendly_message);
             } else {
-                bindAzurecertList();
+                bindAwardList();
                 resetForm();
             }
         });
     }
 
-    function updateOrganizers(data) {
-        return oh.api.admin.hackathon.organizer.put(data, function (data) {
+    function updateAward(data) {
+        return oh.api.admin.hackathon.award.put(data, function (data) {
             if (data.error) {
                 oh.comm.alert('错误', data.error.friendly_message);
             } else {
-                bindAzurecertList();
+                bindAwardList();
                 resetForm();
             }
         });
+    }
+
+    function deleteAward(data) {
+        return oh.api.admin.hackathon.award.delete(data);
     }
 
     function resetForm() {
-        var form = $('#organizerform');
+        var form = $('#awardform');
         form.data({id: 0});
-        form.data('bootstrapValidator').resetForm(true);
+        form.find('bootstrapValidator').resetForm(true);
+        $('#level').val(5);
+        $('#quota').val(1);
         $('#description').val('');
     }
 
     function init() {
-        var organizerform = $('#organizerform');
-        organizerform.bootstrapValidator()
+        var awardform = $('#awardform');
+        awardform.bootstrapValidator()
             .on('success.form.bv', function (e) {
                 e.preventDefault();
                 var itemData = getFormData();
                 var data = {body: itemData, header: {hackathon_name: currentHackathon}};
-                (itemData.id == 0 ? createOrganizers(data) : updateOrganizers(data)).then(function () {
+                (itemData.id == 0 ? createAward(data) : updateAward(data)).then(function () {
                     toggleTable();
                 })
             });
 
-        $('#organizertable').on('click', '[data-type="edit"]', function (e) {
+        $('#awardtable').on('click', '[data-type="edit"]', function (e) {
             editLi = $(this).parents('tr')
             var item = editLi.data('tmplItem').data;
             setFormData(item)
@@ -147,18 +153,19 @@
             console.log(e);
             editLi = $(e.relatedTarget).parents('tr');
         }).on('click', '[data-type="ok"]', function (e) {
-            editLi.data('tmplItem').data = undefined;
-            basic_info.organizers = getOrganizers();
-            updateOrganizers(basic_info);
+            var id = editLi.data('tmplItem').data.id;
             confirmModal.modal('hide');
+            deleteAward({query: {id: id}, header: {hackathon_name: currentHackathon}}).then(function (data) {
+                if (data.error) {
+                    oh.comm.alert('错误', data.error.friendly_message);
+                } else {
+                    editLi.detach();
+                }
+            });
+
         });
 
-        $('#description').markdown({
-            hiddenButtons: 'cmdCode',
-            language: 'zh'
-        });
-
-        bindAzurecertList();
+        bindAwardList();
     }
 
     $(function () {

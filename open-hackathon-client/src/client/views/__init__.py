@@ -25,6 +25,7 @@
 # -----------------------------------------------------------------------------------
 
 import sys
+from client.enum import LoginProvider
 
 sys.path.append("..")
 reload(sys)
@@ -143,7 +144,30 @@ def utility_processor():
     def activity_progress(starttime, endtime):
         return ((int(time.time() * 1e3) - starttime) * 1.0 / (endtime - starttime) * 1.0) * 100
 
-    return dict(get_now=get_now, activity_progress=activity_progress)
+    def get_provider(value):
+        prs = []
+        if value is None:
+            return ""
+        else:
+            value = int(value)
+            if value == 127:
+                return ""
+            else:
+                if value & LoginProvider.live == LoginProvider.live:
+                    prs.append("live")
+                if value & LoginProvider.github == LoginProvider.github:
+                    prs.append("github")
+                if value & LoginProvider.weibo == LoginProvider.weibo:
+                    prs.append("weibo")
+                if value & LoginProvider.qq == LoginProvider.qq:
+                    prs.append("qq")
+                if value & LoginProvider.gitcafe == LoginProvider.gitcafe:
+                    prs.append("gitcafe")
+                if value & LoginProvider.alauda == LoginProvider.alauda:
+                    prs.append("alauda")
+        return ",".join(prs)
+
+    return dict(get_now=get_now, activity_progress=activity_progress, get_provider=get_provider)
 
 
 @app.template_filter('mkHTML')
@@ -305,10 +329,15 @@ def logout():
 def login():
     # todo redirect to the page request login
     session["return_url"] = request.args.get("return_url")
+    provider = request.args.get("provider")
+    prs = ["github", "qq", "gitcafe", "weibo", "live", "alauda"]
+    if provider is None:
+        provider = safe_get_config("login.provider_enabled", prs)
+    else:
+        provider = provider.split(',')
     return render("/login.html",
                   error=None,
-                  providers=safe_get_config("login.provider_enabled",
-                                            ["github", "qq", "gitcafe", "weibo", "live", "alauda"]))
+                  providers=provider)
 
 
 @app.route("/site/<hackathon_name>")
