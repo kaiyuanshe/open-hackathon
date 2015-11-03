@@ -145,7 +145,7 @@
             });
             
             $('.hackathon-nav a.vm-box:eq(0)').trigger('click');
-            heartbeat(data.expr_id);
+            heartbeat(data.id);
         } else if (data.status == 1) {
             setTimeout(function(){
                            getExperiment(data.expr_id)

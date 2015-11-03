@@ -207,3 +207,8 @@
     padding-top: 20px;
     padding-bottom: 20px;
 }
+
+.iframe iframe {
+    width: 100% !important;
+    height: 500px!important;
+}

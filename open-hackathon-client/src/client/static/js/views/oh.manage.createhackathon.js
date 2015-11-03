@@ -116,9 +116,18 @@
         data.push({key: 'pre_allocate_enabled', value: false});
         data.push({key: 'pre_allocate_number', value: 1});
         data.push({key: 'freedom_team', value: $('#freedom_team').is(':checked')});
+        data.push({key: 'login_provider', value: getLoginProviderValue()});
         return data;
     }
 
+    function getLoginProviderValue() {
+        var value = 0;
+        $('[data-role="login_provider"]:checked').each(function (i, ele) {
+            var box = $(ele);
+            value += Number(box.val());
+        });
+        return value;
+    }
 
     function getTags() {
         var data = $('#tags').tagsinput('items');
@@ -219,7 +228,7 @@
             create_hackathon({body: hack_data}).then(function (data) {
                 if (data.error) {
                     if (data.error.code == 412) {
-                     $('#stepform1').data('bootstrapValidator')
+                        $('#stepform1').data('bootstrapValidator')
                             .updateStatus('name', 'INVALID', 'remote1')
                             .validateField('name');
                     } else {
