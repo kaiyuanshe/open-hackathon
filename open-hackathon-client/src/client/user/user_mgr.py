@@ -37,6 +37,7 @@ from flask import request, g
 import uuid
 from client.md5 import encode
 from datetime import timedelta
+from sqlalchemy.exc import IntegrityError
 
 
 class UserManager(object):
@@ -137,7 +138,14 @@ class UserManager(object):
                         login_times=1,
                         online=1)
 
-            self.db.add_object(user)
+            try:
+                self.db.add_object(user)
+            except IntegrityError as e:
+                if "1062" in e.message:
+                    return self.oauth_db_login(openid, **kwargs)
+                else:
+                    raise
+
             map(lambda x: self.__create_or_update_email(user, x), email_list)
 
         # generate API token
