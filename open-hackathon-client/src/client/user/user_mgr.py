@@ -102,6 +102,9 @@ class UserManager(object):
             log.warn("invalid user/pwd login: user=%s, encoded pwd=%s" % (user, enc_pwd))
             return None
 
+        admin.online = 1
+        db_adapter.commit()
+
         token = self.__generate_api_token(admin)
         return {
             "token": token,
