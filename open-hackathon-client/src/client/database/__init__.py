@@ -40,6 +40,7 @@ DEFAULT_URL = 'mysql://root:root@localhost/hackathon'
 engine = create_engine(safe_get_config(MYSQL_CONNECTION, DEFAULT_URL),
                        convert_unicode=True,
                        pool_size=50,
+                       pool_recycle=3600,
                        max_overflow=100,
                        echo=False)
 db_session = scoped_session(sessionmaker(autocommit=False,
