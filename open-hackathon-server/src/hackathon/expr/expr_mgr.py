@@ -271,7 +271,8 @@ class ExprManager(Component):
                                          user_id=user_id,
                                          hackathon_id=hackathon.id,
                                          status=EStatus.INIT,
-                                         template_id=template.id)
+                                         template_id=template.id,
+                                         create_time=self.util.get_now())
         self.db.commit()
 
         if template.provider == VE_PROVIDER.DOCKER:
