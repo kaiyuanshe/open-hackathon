@@ -6,12 +6,24 @@
     <div id="main">
         <div class="container hackathon" data-experiment="{{ experiment.id }}">
             <div class="hackathon-nav">
-                <div class="row">
-                    <div class="col-md-12" id="stat">
-                        <h4 class="col-md-offset-1">在线人数：<span id="online">0</span></h4>
-                        <h4 class="col-md-offset-1">参加人数：<span id="total">0</span></h4>
+                <div id="show">
+                    <div class="row">
+                        <div class="col-md-12" id="stat">
+                            <h4 class="col-md-offset-1">在线人数：<span id="online">0</span></h4>
+                            <h4 class="col-md-offset-1">参加人数：<span id="total">0</span></h4>
+                        </div>
                     </div>
                 </div>
+                {% if asset %}
+                <div class="row">
+                     <div class="col-md-12" id="stat">
+                         <h4 class="col-md-offset-1">当前资源：</h4>
+                         {% for item in asset %}
+                             <p>{{ item.asset_value }}</p>
+                         {% endfor %}
+                     </div>
+                </div>
+                {% endif %}
 {#                <div class="row">#}
 {#                    <div class="col-md-12 text-center">#}
 {#                        <a href="javascript:;" title="" class="vm-box" id="baidu" data-url="http://baidu.com">#}

@@ -135,7 +135,7 @@
         $('[data-role="login_provider"]').each(function (i, ele) {
             var box = $(ele);
             var v = Number(box.val());
-            box.attr({checked: value & v == v});
+            box.attr({checked: (value & v) == v});
         });
     }
 

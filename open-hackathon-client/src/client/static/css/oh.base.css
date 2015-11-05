@@ -1793,3 +1793,10 @@ h4.title {
 .soon .tooltip.top{
    margin-top:32px ;
 }
+
+.required:before {
+    position: absolute;
+    content: '*';
+    right: 5px;
+    color: #cc0000;
+}
