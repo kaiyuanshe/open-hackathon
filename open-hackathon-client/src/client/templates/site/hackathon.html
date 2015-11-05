@@ -111,10 +111,6 @@
                                     {% endfor %}
                                     &nbsp;
                                 </dd>
-                                <dt>登录：</dt>
-                                <dd>
-                                    {{get_provider(hackathon.config.login_provider)}}
-                                </dd>
                             </dl>
 
                             <div id="status">
@@ -124,7 +120,7 @@
                                     <p>活动已结束。</p>
                                 {% elif user == None %}
                                     <a class="btn btn-primary btn-lg"
-                                       href="{{ url_for('login', return_url=request.path, provider=get_provider(hackathon.config.login_provider)) }}">我要报名</a>
+                                       href="{{ url_for('login', return_url=request.path, provides=get_provides(hackathon.config.login_provider)) }}">我要报名</a>
                                 {% elif user.get("user_profile") == None %}
                                     <a class="btn btn-primary btn-lg"
                                        href="{{ url_for('user_profile',return_url=request.path) }}">我要报名</a>

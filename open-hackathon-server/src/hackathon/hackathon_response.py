@@ -109,6 +109,20 @@ def unsupported_mediatype(message="",
     return __response_with_code(415, message, friendly_message)
 
 
+def login_provider_error(message="",
+                          friendly_message=(
+                                  'Current hackathon must be logged in to use a specific way.'
+                          ), provides=""):
+    return {
+        "error": {
+            "code": 420,
+            "message": message,
+            "friendly_message": friendly_message,
+            "provides": provides
+        }
+    }
+
+
 def internal_server_error(message="",
                           friendly_message=(
                                   'The server encountered an internal error and was unable to '
@@ -116,6 +130,8 @@ def internal_server_error(message="",
                                   'is an error in the application.'
                           )):
     return __response_with_code(500, message, friendly_message)
+
+
 
 
 def ok(message=""):

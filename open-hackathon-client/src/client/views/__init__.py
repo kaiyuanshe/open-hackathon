@@ -144,7 +144,7 @@ def utility_processor():
     def activity_progress(starttime, endtime):
         return ((int(time.time() * 1e3) - starttime) * 1.0 / (endtime - starttime) * 1.0) * 100
 
-    def get_provider(value):
+    def get_provides(value):
         prs = []
         if value is None:
             return ""
@@ -167,7 +167,7 @@ def utility_processor():
                     prs.append("alauda")
         return ",".join(prs)
 
-    return dict(get_now=get_now, activity_progress=activity_progress, get_provider=get_provider)
+    return dict(get_now=get_now, activity_progress=activity_progress, get_provides=get_provides)
 
 
 @app.template_filter('mkHTML')
@@ -329,7 +329,7 @@ def logout():
 def login():
     # todo redirect to the page request login
     session["return_url"] = request.args.get("return_url")
-    provider = request.args.get("provider")
+    provider = request.args.get("provides")
     prs = ["github", "qq", "gitcafe", "weibo", "live", "alauda"]
     if provider is None:
         provider = safe_get_config("login.provider_enabled", prs)
@@ -366,6 +366,7 @@ def workspace(hackathon_name):
         if reg.registration.status == 1 or reg.registration.status == 3:
             return render("/site/workspace.html", hackathon_name=hackathon_name,
                           workspace=True,
+                          asset=reg.get("asset"),
                           hackathon=reg.get("hackathon"),
                           experiment=reg.get('experiment', {id: 0}))
         else:

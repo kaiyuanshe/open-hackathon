@@ -135,13 +135,13 @@
                     name: data.remote_servers[i].name,
                     surl: data.remote_servers[i].name == 'cloud_eclipse' ? data.remote_servers[i].url + window.location.origin : data.remote_servers[i].url + "&oh=" + $.cookie('token')
                 })
-                $('.hackathon-nav').append(tmpe.format(dockers[i]));
+                $('#show').append(tmpe.format(dockers[i]));
             }
             if(data.public_urls.length>0){
-                $('.hackathon-nav').append('<h4 class="col-md-offset-1">您可访问下面地址：</h4>');
+                $('#show').append('<h4 class="col-md-offset-1">您可访问下面地址：</h4>');
             }
             $.each(data.public_urls,function(i,url){
-                $('.hackathon-nav').append(url_tmpe.format(url));
+                $('#show').append(url_tmpe.format(url));
             });
             
             $('.hackathon-nav a.vm-box:eq(0)').trigger('click');

@@ -83,7 +83,26 @@
                 header: {hackathon_name: hackathon_name}
             }, function (data) {
                 if (data.error) {
-                    oh.comm.alert('错误', data.error.friendly_message);
+
+                    if (data.error.code == 420) {
+                        var confim = $('body').Dialog({
+                            title: '提示',
+                            body: data.error.friendly_message,
+                            footer: [
+
+                                $('<button class="btn btn-warning">取消</button>').click(function (e) {
+                                    confim.hide();
+                                }),
+                                $('<button class="btn btn-primary">切换登录</button>').click(function (e) {
+                                    confim.hide();
+                                    window.location.href = '/logout?return_url=/login?return_url='+ encodeURIComponent('/site/' + hackathon_name + '&provides=' + data.error.provides);
+                                })
+                            ],
+                            modal: 'confirm'
+                        });
+                    } else {
+                        oh.comm.alert('错误', data.error.friendly_message);
+                    }
                 } else {
                     var message = $('#status').empty();
                     if (data.status == 0) {
