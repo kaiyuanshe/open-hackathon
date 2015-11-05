@@ -94,7 +94,8 @@ Config = {
         "alauda": {
             "token": "",
             "namespace": "",
-            "endpoint": "http://api.int.alauda.io"
+            "endpoint": "http://api.int.alauda.io",
+            "region_name": "BEIJING1"
         }
     },
     "cloud_eclipse": {
