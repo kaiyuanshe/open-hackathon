@@ -17,9 +17,9 @@
                 {% if asset %}
                 <div class="row">
                      <div class="col-md-12" id="stat">
-                         <h4 class="col-md-offset-1">当前资源：</h4>
+                         <h4 class="col-md-offset-1 blue-text">当前资源：</h4>
                          {% for item in asset %}
-                             <p>{{ item.asset_value }}</p>
+                             <p>{{ item.asset_name }}:{{ item.asset_value }}</p>
                          {% endfor %}
                      </div>
                 </div>
