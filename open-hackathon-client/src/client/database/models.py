@@ -27,7 +27,7 @@
 import sys
 
 sys.path.append("..")
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text, TypeDecorator
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text, TypeDecorator, UniqueConstraint
 from sqlalchemy.orm import backref, relation
 from . import Base, db_adapter
 from datetime import datetime
@@ -134,6 +134,8 @@ class User(DBBase):
     create_time = Column(TZDateTime, default=get_now())
     last_login_time = Column(TZDateTime, default=get_now())
     login_times = Column(Integer, default=1)
+
+    __table_args__ = (UniqueConstraint('provider', 'openid', name='_user_provider_openid_uc'),)
 
     def get_user_id(self):
         return self.id
