@@ -31,8 +31,8 @@ import json
 from flask import g
 
 from hackathon import Component, RequiredFeature
-from hackathon.database import UserHackathonRel, Experiment,HackathonConfig
-from hackathon.hackathon_response import bad_request, precondition_failed, internal_server_error, not_found, ok
+from hackathon.database import UserHackathonRel, Experiment,HackathonConfig, UserHackathonAsset
+from hackathon.hackathon_response import bad_request, precondition_failed, internal_server_error, not_found, ok, login_provider_error
 from hackathon.constants import EStatus, RGStatus, HACKATHON_BASIC_INFO, HACKATHON_STAT, LoginProvider
 
 __all__ = ["RegisterManager"]
@@ -71,8 +71,11 @@ class RegisterManager(Component):
         self.log.debug("create_register: %r" % args)
         user_id = args['user_id']
 
-        if self.__is_user_hackathon_login_provider(user, hackathon):
-            return precondition_failed("hackathon registration not login provider", friendly_message="请使用指定的登录方式")
+        check_login_provider = self.__is_user_hackathon_login_provider(user, hackathon)
+        if check_login_provider["fail"]:
+            return login_provider_error("hackathon registration not login provider",
+                                        friendly_message="当前黑客松活动只是使用"+",".join(check_login_provider["provides"])+"账户才能报名",
+                                        provides=",".join(check_login_provider["provides"]))
 
         if self.is_user_registered(user.id, hackathon):
             self.log.debug("user %d already registered on hackathon %d" % (user_id, hackathon.id))
@@ -146,8 +149,13 @@ class RegisterManager(Component):
     def get_registration_detail(self, user, hackathon):
         detail = {
             "hackathon": hackathon.dic(),
-            "user": self.user_manager.user_display_info(user)
+            "user": self.user_manager.user_display_info(user),
+            "asset":[]
         }
+
+        asset = self.db.find_all_objects_by(UserHackathonAsset, user_id=user.id, hackathon_id=hackathon.id)
+        if asset:
+            detail["asset"] = [o.dic() for o in asset]
 
         rel = self.get_registration_by_user_and_hackathon(user.id, hackathon.id)
         if rel is None:
@@ -215,24 +223,33 @@ class RegisterManager(Component):
         login_provider = self.db.find_first_object(HackathonConfig,
                            HackathonConfig.hackathon_id == hackathon.id,
                            HackathonConfig.key == 'login_provider')
-        user_provider = 0
-        if login_provider is None:
-            return False
-        else:
-            if user.provider == "live":
-                user_provider = LoginProvider.live
-            if user.provider == "github":
-                user_provider = LoginProvider.github
-            if user.provider == "qq":
-                user_provider = LoginProvider.qq
-            if user.provider == "weibo":
-                user_provider = LoginProvider.weibo
-            if user.provider == "gitcafe":
-                user_provider = LoginProvider.gitcafe
-            if user.provider == "alauda":
-                user_provider = LoginProvider.alauda
 
-            if int(login_provider.value) & user_provider == user_provider:
-                return False
-            else:
-                return True
+        data = {"fail": False, "provides": []}
+        hackathon_login_provider = int(login_provider.value)
+
+        if hackathon_login_provider & LoginProvider.live == LoginProvider.live:
+            data["provides"].append("live")
+
+        if hackathon_login_provider & LoginProvider.github == LoginProvider.github:
+            data["provides"].append("github")
+
+        if hackathon_login_provider & LoginProvider.qq == LoginProvider.qq:
+            data["provides"].append("qq")
+
+        if hackathon_login_provider & LoginProvider.weibo == LoginProvider.weibo:
+            data["provides"].append("weibo")
+
+        if hackathon_login_provider & LoginProvider.gitcafe == LoginProvider.gitcafe:
+            data["provides"].append("gitcafe")
+
+        if hackathon_login_provider & LoginProvider.alauda == LoginProvider.alauda:
+            data["provides"].append("alauda")
+
+
+        if login_provider is None:
+            data["fail"] = False
+        elif user.provider in data["provides"]:
+            data["fail"] = False
+        else:
+            data["fail"] = True
+        return data
