@@ -96,7 +96,6 @@
 
     function pageLoad() {
         getHackathonTemplates();
-        getPublictTempates();
     }
 
     function toggleTable() {
