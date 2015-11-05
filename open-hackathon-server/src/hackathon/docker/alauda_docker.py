@@ -191,6 +191,7 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
             "custom_domain_name": "",
             "linked_to_apps": "{}",
             "target_num_instances": "1",
+            "region_name": "SHANGHAI1",
             "instance_envvars": {},
             "instance_ports": [],
             "volumes": []  # todo volumes not implemented for now
