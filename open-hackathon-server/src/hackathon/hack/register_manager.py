@@ -136,7 +136,7 @@ class RegisterManager(Component):
         if "id" not in args:
             return bad_request("id not invalid")
         try:
-            register = self.db.find_first_object_by(UserHackathonRel, id == args['id'])
+            register = self.db.find_first_object_by(UserHackathonRel, id = args['id'])
             if register is not None:
                 self.db.delete_object(register)
                 hackathon = self.hackathon_manager.get_hackathon_by_id(register.hackathon_id)
