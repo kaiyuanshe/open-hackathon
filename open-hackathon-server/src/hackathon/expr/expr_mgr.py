@@ -397,7 +397,7 @@ class ExprManager(Component):
     def __remote_start_container(self, hackathon, expr, docker_template_unit):
         old_name = docker_template_unit.get_name()
         suffix = "".join(random.sample(string.ascii_letters + string.digits, 8))
-        new_name = '%d-%s-%s' % (expr.id, old_name, suffix)
+        new_name = '%d-%s-%s' % (expr.id, old_name, suffix.lower())
         docker_template_unit.set_name(new_name)
         self.log.debug("starting to start container: %s" % new_name)
         # db entity
