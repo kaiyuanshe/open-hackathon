@@ -140,17 +140,16 @@ class RegisterManager(Component):
             return bad_request("id not invalid")
         try:
             register = self.db.find_first_object_by(UserHackathonRel, id = args['id'])
+            user = register.user
             if register is not None:
                 self.db.delete_object(register)
                 hackathon = self.hackathon_manager.get_hackathon_by_id(register.hackathon_id)
                 self.__update_register_stat(hackathon)
 
-                user = self.user_manager.get_user_by_id(register.user_id)
-                if not user:
-                    return ok("this registered user is not found!")
                 team = self.team_manager.get_team_by_user_and_hackathon(user, hackathon)
                 if not team:
-                    return ok("team of this registered user is not found!")
+                    self.log.warn("team of this registered user is not found!")
+                    return ok()
                 self.team_manager.quit_team_forcedly(team, user)
 
             return ok()

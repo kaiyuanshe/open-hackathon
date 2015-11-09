@@ -293,14 +293,6 @@ class TeamManager(Component):
         if rel.user_id == team.leader_id:
             return precondition_failed("cannot update status of team leader")
 
-        # check if the user is already in this team.
-        members = self.db.find_all_objects_by(UserTeamRel, team_id=team.id, status=TeamMemberStatus.Approved)
-        if not members or len(members) == 0:
-            return not_found("this team doesn't have any members")
-        member_users_id = [m.user.id for m in members]
-        if rel.user_id in member_users_id:
-            return not_found("the user is already in this team.")
-
         if status == TeamMemberStatus.Approved:
             # disable previous team first
             self.db.delete_all_objects_by(UserTeamRel,
