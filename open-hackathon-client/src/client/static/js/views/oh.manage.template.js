@@ -68,7 +68,7 @@
                 getItemClass: function (id, status) {
                     var class_name = '';
                     $.each(hackathon_templates, function (i, item) {
-                        if (item.id == id) {
+                        if (item.template_id == id) {
                             class_name += 'active ';
                             return false;
                         }
