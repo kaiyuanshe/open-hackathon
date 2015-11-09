@@ -133,6 +133,9 @@ class RegisterManager(Component):
             return internal_server_error("fail to  update register")
 
     def delete_registration(self, args):
+        """
+        Delete the registration of a user in a hackathon, also do operation on the user's team.
+        """
         if "id" not in args:
             return bad_request("id not invalid")
         try:
@@ -141,6 +144,15 @@ class RegisterManager(Component):
                 self.db.delete_object(register)
                 hackathon = self.hackathon_manager.get_hackathon_by_id(register.hackathon_id)
                 self.__update_register_stat(hackathon)
+
+                user = self.user_manager.get_user_by_id(register.user_id)
+                if not user:
+                    return not_found("this registered user is not found!")
+                team = self.team_manager.get_team_by_user_and_hackathon(user, hackathon)
+                if not team:
+                    return not_found("team of this registered user is not found!")
+                self.team_manager.quit_team_forcedly(team.id, user)
+
             return ok()
         except Exception as ex:
             self.log.error(ex)
