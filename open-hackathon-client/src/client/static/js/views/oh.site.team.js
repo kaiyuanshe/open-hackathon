@@ -350,13 +350,15 @@
                 }
             });
         }).on('click', '[data-role="approved"]', function (e) {
-            var rel_id = $(this).data('id');
-            var userItem = $(this).parents('[data-user]');
+            var btn = $(this);
+            var rel_id = btn.data('id');
+            var userItem = btn.parents('[data-user]');
             approvedMember(rel_id).then(function (data) {
                 if (data.error) {
                     oh.comm.alert('错误', data.error.friendly_message);
                 } else {
-
+                    btn.parents('.btn-group').detach();
+                    userItem.find('.oh-body span').text('成员')
                 }
             });
         });
