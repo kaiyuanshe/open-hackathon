@@ -204,7 +204,7 @@ class TeamManager(Component):
 
         return ok()
 
-    def quit_team_forcedly(self, team_id, user):
+    def quit_team_forcedly(self, team, user):
         """
         The operator(admin or superadmin) forces a user(team leader or other members) to quit a team.
         If the user is the only member of the team, the team will be deleted.
@@ -215,15 +215,11 @@ class TeamManager(Component):
         :rtype: bool
         :return: if dismiss success, return ok. if not ,return bad request.
         """
-        team = self.__get_team_by_id(team_id)
-        if not team:
-            return not_found("team not exists")
 
         # here we don't check whether the operator has the permission,
-
         members = self.db.find_all_objects_by(UserTeamRel, team_id=team.id, status=TeamMemberStatus.Approved)
         if not members or len(members) == 0:
-            return not_found("this team doesn't have any members")
+            return ok("this team doesn't have any members")
         member_users = [m.user for m in members]
 
         num_team_members = len(member_users)
@@ -236,12 +232,11 @@ class TeamManager(Component):
                     if u.id != user.id:
                         self.create_default_team(hackathon, u)
             else:
-                self.db.delete_all_objects_by(UserTeamRel, user_id=user.id, team_id=team_id)
-        elif num_team_members == 1:
+                self.db.delete_all_objects_by(UserTeamRel, user_id=user.id, team_id=team.id)
+        else:
+            #num_team_members == 1
             self.db.delete_all_objects_by(UserTeamRel, team_id=team.id)
             self.db.delete_object(team)
-        else:
-            return not_found("this team doesn't have any members")
 
         return ok()
 

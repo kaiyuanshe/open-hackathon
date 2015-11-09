@@ -147,11 +147,11 @@ class RegisterManager(Component):
 
                 user = self.user_manager.get_user_by_id(register.user_id)
                 if not user:
-                    return not_found("this registered user is not found!")
+                    return ok("this registered user is not found!")
                 team = self.team_manager.get_team_by_user_and_hackathon(user, hackathon)
                 if not team:
-                    return not_found("team of this registered user is not found!")
-                self.team_manager.quit_team_forcedly(team.id, user)
+                    return ok("team of this registered user is not found!")
+                self.team_manager.quit_team_forcedly(team, user)
 
             return ok()
         except Exception as ex:
