@@ -206,7 +206,7 @@ class TeamManager(Component):
 
     def quit_team_forcedly(self, team_id, user):
         """
-        The operator(team leader, admin or superadmin) forces a user(team leader or other members) to quit a team.
+        The operator(admin or superadmin) forces a user(team leader or other members) to quit a team.
         If the user is the only member of the team, the team will be deleted.
         Else if the user is the leader of a team with several members, the team will be decomposed into several
         new teams.
