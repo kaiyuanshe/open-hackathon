@@ -28,7 +28,7 @@
 
     var currentHackathon = oh.comm.getCurrentHackathon();
 
-    function bindAzurecertList() {
+    function bindOrganizerList() {
         var list = $('#organizerlist');
         oh.api.admin.hackathon.get({
             header: {hackathon_name: currentHackathon}
@@ -91,7 +91,7 @@
             if (data.error) {
                 oh.comm.alert('错误', data.error.friendly_message);
             } else {
-                bindAzurecertList();
+                bindOrganizerList();
                 resetForm();
             }
         });
@@ -102,7 +102,7 @@
             if (data.error) {
                 oh.comm.alert('错误', data.error.friendly_message);
             } else {
-                bindAzurecertList();
+                bindOrganizerList();
                 resetForm();
             }
         });
@@ -113,7 +113,7 @@
             if (data.error) {
                 oh.comm.alert('错误', data.error.friendly_message);
             } else {
-                bindAzurecertList();
+                bindOrganizerList();
             }
         });
     }
@@ -168,7 +168,7 @@
             language: 'zh'
         });
 
-        bindAzurecertList();
+        bindOrganizerList();
     }
 
     $(function () {
