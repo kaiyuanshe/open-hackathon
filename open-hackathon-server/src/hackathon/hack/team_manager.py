@@ -219,7 +219,8 @@ class TeamManager(Component):
         # here we don't check whether the operator has the permission,
         members = self.db.find_all_objects_by(UserTeamRel, team_id=team.id, status=TeamMemberStatus.Approved)
         if not members or len(members) == 0:
-            return ok("this team doesn't have any members")
+            self.log.warn("this team doesn't have any members")
+            return ok()
         member_users = [m.user for m in members]
 
         num_team_members = len(member_users)
