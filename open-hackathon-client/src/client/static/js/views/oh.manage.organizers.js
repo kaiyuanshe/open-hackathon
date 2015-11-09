@@ -108,6 +108,16 @@
         });
     }
 
+    function deleteOrganizers(data){
+        return oh.api.admin.hackathon.organizer.delete(data, function(data){
+            if (data.error) {
+                oh.comm.alert('错误', data.error.friendly_message);
+            } else {
+                bindAzurecertList();
+            }
+        });
+    }
+
     function resetForm() {
         var form = $('#organizerform');
         form.data({id: 0});
@@ -147,9 +157,9 @@
             console.log(e);
             editLi = $(e.relatedTarget).parents('tr');
         }).on('click', '[data-type="ok"]', function (e) {
-            editLi.data('tmplItem').data = undefined;
-            basic_info.organizers = getOrganizers();
-            updateOrganizers(basic_info);
+            var data_organizer_id = editLi.data('tmplItem').data.id;
+            var data = {header: {hackathon_name: currentHackathon}, query: {id: data_organizer_id}};
+            deleteOrganizers(data);
             confirmModal.modal('hide');
         });
 
