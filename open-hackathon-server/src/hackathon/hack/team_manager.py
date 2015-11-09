@@ -223,7 +223,7 @@ class TeamManager(Component):
 
         members = self.db.find_all_objects_by(UserTeamRel, team_id=team.id, status=TeamMemberStatus.Approved)
         if not members or len(members) == 0:
-            return not_found("team_id: " + team.id + " doesn't have any members")
+            return not_found("this team doesn't have any members")
         member_users = [m.user for m in members]
 
         num_team_members = len(member_users)
@@ -238,10 +238,10 @@ class TeamManager(Component):
             else:
                 self.db.delete_all_objects_by(UserTeamRel, user_id=user.id, team_id=team_id)
         elif num_team_members == 1:
-                self.db.delete_all_objects_by(UserTeamRel, team_id=team.id)
-                self.db.delete_object(team)
+            self.db.delete_all_objects_by(UserTeamRel, team_id=team.id)
+            self.db.delete_object(team)
         else:
-            return not_found("team doesn't have any members")
+            return not_found("this team doesn't have any members")
 
         return ok()
 
