@@ -27,6 +27,10 @@
                     <a href="javascript:void(0);"
                        class="btn oh-white-text bg-color-pinkDark btn-lg hide" data-role="save">
                         <i class="fa fa-save"></i> 保存</a>
+                {% elif team.is_admin %}
+                    <a href="/manage/{{ hackathon_name }}/team/{{ team.id }}"
+                       class="btn oh-white-text bg-color-pinkDark btn-lg" target="manage">
+                        <i class="fa fa-gears"></i> 管理</a>
                 {% endif %}
             </div>
             <div class="air air-top-left oh-nav">
@@ -326,6 +330,9 @@
             {% endraw %}
 
 
+
+
+
         </script>
     {% else %}
         <script id="team_item" type="text/x-jquery-tmpl">
@@ -346,6 +353,9 @@
                 </div>
             </div>
             {% endraw %}
+
+
+
 
 
         </script>
@@ -408,6 +418,9 @@
 
 
 
+
+
+
     </script>
     <script id="score_item" type="text/x-jquery-tmpl">
         {% raw %}
@@ -431,6 +444,9 @@
                 <span>点评：</span> ${reason}
             </li>
         {% endraw %}
+
+
+
     </script>
     <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
     <script type="text/javascript" src="/static/js/views/oh.site.team.js"></script>
