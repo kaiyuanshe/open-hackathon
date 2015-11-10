@@ -62,6 +62,7 @@
             name: $.trim($('#name').val()),
             level: $('#level').val(),
             quota: $('#quota').val(),
+            award_url:$('#award_url').val(),
             description: $('#description').val()
         }
         return formData;
@@ -71,6 +72,7 @@
         $('#awardform').data({id: data.id});
         $('#name').val(data.name);
         $('#level').val(data.level);
+        $('#award_url').val(data.award_url);
         $('#quota').val(data.quota);
         $('#description').val(data.description);
     }
@@ -115,7 +117,7 @@
     function resetForm() {
         var form = $('#awardform');
         form.data({id: 0});
-        form.find('bootstrapValidator').resetForm(true);
+        form.data('bootstrapValidator').resetForm(true);
         $('#level').val(5);
         $('#quota').val(1);
         $('#description').val('');

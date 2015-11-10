@@ -99,7 +99,6 @@
                 </div>
             {% endif %}
             <div>
-                <span>链接地址：</span>
                 <ul class="works_code" id="works_code"></ul>
             </div>
         </div>
@@ -413,7 +412,22 @@
     <script id="score_item" type="text/x-jquery-tmpl">
         {% raw %}
             <li>
-                <span>分值：</span> ${score}
+                <div class=" rating">
+                    <div class="oh-inline-block">
+                        <label for="10" {{if score==10 }}class="active"{{/if}} ><i class="fa fa-trophy"></i></label>
+                        <label for="9" {{if score==9 }}class="active"{{/if}}><i class="fa fa-trophy"></i></label>
+                        <label for="8" {{if score==8 }}class="active"{{/if}}><i class="fa fa-trophy"></i></label>
+                        <label for="7" {{if score==7 }}class="active"{{/if}}><i class="fa fa-trophy"></i></label>
+                        <label for="6" {{if score==6 }}class="active"{{/if}}><i class="fa fa-trophy"></i></label>
+                        <label for="5" {{if score==5 }}class="active"{{/if}}><i class="fa fa-trophy"></i></label>
+                        <label for="4" {{if score==4 }}class="active"{{/if}}><i class="fa fa-trophy"></i></label>
+                        <label for="3" {{if score==3 }}class="active"{{/if}}><i class="fa fa-trophy"></i></label>
+                        <label for="2" {{if score==2 }}class="active"{{/if}}><i class="fa fa-trophy"></i></label>
+                        <label for="1" {{if score==1 }}class="active"{{/if}}><i class="fa fa-trophy"></i></label>
+                        评分：
+                    </div>
+                </div>
+                ${score}分
                 <span>点评：</span> ${reason}
             </li>
         {% endraw %}

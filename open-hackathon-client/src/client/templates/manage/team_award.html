@@ -1,0 +1,57 @@
+{% extends "manage/main.html" %}
+
+{% block style %}
+
+{% endblock %}
+
+{% block body %}
+    <div class="col-lg-12" data-team="{{ team_id }}" loading>
+        <div class="box" style="display:none">
+            <div class="box-header">
+                <h2><i class="fa fa-edit"></i>评奖</h2>
+            </div>
+            <div class="box-content">
+                <div id="scoretable">
+                    <form class="form-inline" id="awardform" style="margin-bottom: 10px;">
+                        <div class="form-group has-feedback">
+                            <div class="form-group">
+                                <label for="award">评奖：</label>
+                                <select class="form-control" id="award">
+                                    <option value="0">未得奖</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-success">提交</button>
+                            <a class="link" href="/site/{{ hackathon_name }}/team/{{ team_id }}" target="team">团队作品</a>
+                        </div>
+                    </form>
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th>分数</th>
+                            <th>评论</th>
+                            <th>时间</th>
+                        </tr>
+                        </thead>
+                        <tbody id="scorelist">
+
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+{% endblock body %}
+
+{% block script %}
+    {{ super() }}
+    <script id="team_award" type="text/x-jquery-tmpl">
+    <tr>
+        <td>${score}</td>
+        <td>${reason}</td>
+        <td>${moment(create_time).format('YYYY-MM-DD HH:mm')}</td>
+    </tr>
+    </script>
+    <script type="text/javascript" src="/static/js/views/oh.manage.team_award.js"></script>
+{% endblock %}
