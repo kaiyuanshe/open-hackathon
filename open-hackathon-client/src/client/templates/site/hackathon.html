@@ -62,21 +62,24 @@
                             </dl>
                         </div>
 
-                        <h2 id="team" class="title">目前组队 <span>（0）</span></h2>
+                        <h2 id="team" class="title">目前组队 </h2>
 
                         <div class="oh-body teams clearfix " id="team_list">
                         </div>
 
-                        <h2 id="works" class="title">作品公布 <span>（4）</span></h2>
+                        <h2 id="works" class="title">作品公布 </h2>
 
                         <div class="ob-body clearfix" id="team_show">
                         </div>
 
-                        {#                        <h2 id="comment" class="title">活动讨论 <span>（5）</span></h2>#}
-                        {##}
-                        {#                        <div class="oh-body">#}
+                        <h2 id="comment" class="title">活动讨论</h2>
 
-                        {#                        </div>#}
+                        <div class="oh-body">
+                            <div class="ds-thread"
+                                 data-thread-key="hackathon-{{ hackathon.name }}"
+                                 data-title="{{ hackathon.display_name }}"
+                                 data-url="http://hacking.kaiyuanshe.cn/site/{{ hackathon.name }}"></div>
+                        </div>
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-5">
@@ -224,7 +227,7 @@
             <li><a href="#new"><span>最新动态</span><i></i></a></li>
             <li><a href="#team"><span>目前组队</span><i></i></a></li>
             <li><a href="#works"><span>作品公布</span><i></i></a></li>
-            {#            <li><a href="#comment"><span>活动讨论</span><i></i></a></li>#}
+            <li><a href="#comment"><span>活动讨论</span><i></i></a></li>
         </ul>
         <div class="full-shared hide">
             <a class="lid">
@@ -394,4 +397,15 @@
     </script>
     <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
     <script type="text/javascript" src="/static/js/views/oh.site.hackathon.js"></script>
+    <script type="text/javascript">
+        var duoshuoQuery = {short_name:"ohp"};
+        (function() {
+            var ds = document.createElement('script');
+            ds.type = 'text/javascript';ds.async = true;
+            ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+            ds.charset = 'UTF-8';
+            (document.getElementsByTagName('head')[0]
+             || document.getElementsByTagName('body')[0]).appendChild(ds);
+        })();
+    </script>
 {% endblock %}
