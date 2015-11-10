@@ -100,6 +100,12 @@ def team(hackathon_name):
     return render("/manage/team.html", hackathon_name=hackathon_name)
 
 
+@app.route("/manage/<hackathon_name>/team/<team_id>")
+@login_required
+def team_award(hackathon_name, team_id):
+    return render("/manage/team_award.html", hackathon_name=hackathon_name, team_id=team_id)
+
+
 @app.route("/manage/<hackathon_name>/award")
 @login_required
 def award(hackathon_name):

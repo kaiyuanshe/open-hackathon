@@ -1,7 +1,16 @@
 {% extends "manage/main.html" %}
 
 {% block style %}
+    <style>
+        .a_img {
+            width: 120px;
+        }
 
+        .a_img img {
+            max-width: 100px;
+            max-height: 100px;
+        }
+    </style>
 {% endblock %}
 
 {% block body %}
@@ -10,7 +19,7 @@
             <div class="box-header">
                 <h2><i class="fa fa-edit"></i>奖项</h2>
             </div>
-             <div class="box-content">
+            <div class="box-content">
                 <div id="awardtable">
                     <a data-type="new" href="javascript:;">添加</a>
                     <table class="table table-bordered">
@@ -20,7 +29,6 @@
                             <th>团队名称</th>
                             <th>组长名称</th>
                             <th>成员人数</th>
-                            <th>评分</th>
                             <th></th>
                         </tr>
                         </thead>
@@ -50,14 +58,16 @@
                             <label class="col-md-3 control-label">等级</label>
 
                             <div class="col-md-6">
-                                <input type="number" class="form-control" name="level" id="level" placeholder="" value="5"  max="10" min="0">
+                                <input type="number" class="form-control" name="level" id="level" placeholder=""
+                                       value="5" max="10" min="0">
                             </div>
                         </div>
                         <div class="form-group has-feedback">
                             <label class="col-md-3 control-label">限额</label>
 
                             <div class="col-md-6">
-                                <input type="number" class="form-control" name="quota" id="quota" placeholder="" value="1" max="100" min="1">
+                                <input type="number" class="form-control" name="quota" id="quota" placeholder=""
+                                       value="1" max="100" min="1">
                             </div>
                         </div>
                         <div class="form-group has-feedback">
@@ -106,14 +116,13 @@
     {{ super() }}
     <script id="hackathon_award" type="text/x-jquery-tmpl">
     <tr>
-        <td><img src="${logo}"></td>
+        <td class="a_img"><img src="${logo}"></td>
         <td>${name}</td>
         <td>${leader.name}</td>
         <td>${member_count}</td>
-        <td>${}</td>
         <td class="col-action">
-            <a class="btn btn-info btn-sm" data-type="view">
-                <i class="fa fa-edit "></i>
+            <a class="btn btn-success" href="/manage/open-xml-sdk/team/${id}">
+                <i class="fa fa-search-plus "></i>
             </a>
         </td>
     </tr>

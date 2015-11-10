@@ -207,6 +207,14 @@ h2:first-child {
     margin-top: 0;
 }
 
+.list-unstyled .rating {
+    display: inline-block;
+}
+
+.list-unstyled .rating label {
+    cursor: default;
+}
+
 .rating {
     margin-bottom: 4px;
     padding: 4px 6px;
@@ -243,6 +251,8 @@ h2:first-child {
     color: #3b9ff3;
 }
 
+.rating label.active,
+.rating label.active ~ label,
 .rating input:checked ~ label {
     color: #21b1de;
 }
@@ -371,11 +381,13 @@ h2:first-child {
     width: 100% !important;
     height: 500px !important;
 }
-.works_video,.works_img,.works_code{
-    padding-bottom:40px;
+
+.works_video, .works_img, .works_code {
+    padding-bottom: 40px;
 }
+
 .works_video .delete,
-.works_img  .delete{
+.works_img .delete {
     font-size: 20px;
     text-align: right;
     padding-right: 5px;
@@ -383,20 +395,24 @@ h2:first-child {
     border-bottom: 1px solid #ddd;
     margin-bottom: 10px;
 }
-.works_code .delete{
+
+.works_code .delete {
     display: inline-block;
     margin-left: 100px;
     font-size: 20px;
 }
-.works_img img{
+
+.works_img img {
     max-width: 100%;
 }
-.addshow{
-    border-bottom:1px solid #ddd;
-    padding:10px 0;
-    margin-bottom:20px;
+
+.addshow {
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+    margin-bottom: 20px;
 }
-.works_code{
-    padding:0;
-    list-style:none;
+
+.works_code {
+    padding: 0;
+    list-style: none;
 }

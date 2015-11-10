@@ -84,7 +84,12 @@
                 var temp = $('#show_item');
                 $('#works_video').append(temp.tmpl(slipt_data.video));
                 $('#works_img').append(temp.tmpl(slipt_data.img));
-                $('#works_code').append(temp.tmpl(slipt_data.code));
+                if (slipt_data.code.length > 0) {
+                    $('#works_code')
+                        .before('<span>链接地址：</span>')
+                        .append(temp.tmpl(slipt_data.code));
+                }
+
                 $('#team_works h2 span').text('(' + data.length + ')');
             } else {
 
