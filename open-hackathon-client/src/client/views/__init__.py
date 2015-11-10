@@ -345,7 +345,7 @@ def login():
 
 @app.route("/site/<hackathon_name>")
 def hackathon(hackathon_name):
-    headers = {"hackathon_name": hackathon_name, "token": session["token"]}
+    headers = {"hackathon_name": hackathon_name, "token": session.get("token")}
     data = __get_api(API_HACKATHON, headers)
     data = Context.from_object(data)
     reg = Context.from_object(__get_api(API_HACAKTHON_REGISTRATION, headers))
@@ -363,7 +363,7 @@ def hackathon(hackathon_name):
 @app.route("/site/<hackathon_name>/workspace")
 @login_required
 def workspace(hackathon_name):
-    headers = {"hackathon_name": hackathon_name, "token": session["token"]}
+    headers = {"hackathon_name": hackathon_name, "token": session.get("token")}
     reg = Context.from_object(__get_api(API_HACAKTHON_REGISTRATION, headers))
 
     if reg.get('registration') is not None:
@@ -382,7 +382,7 @@ def workspace(hackathon_name):
 @app.route("/site/<hackathon_name>/settings")
 @login_required
 def temp_settings(hackathon_name):
-    headers = {"hackathon_name": hackathon_name, "token": session["token"]}
+    headers = {"hackathon_name": hackathon_name, "token": session.get("token")}
     reg = Context.from_object(
         __get_api(API_HACKATHON, {"hackathon_name": hackathon_name, "token": session.get("token")}))
 
