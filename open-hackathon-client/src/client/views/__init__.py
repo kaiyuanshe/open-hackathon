@@ -345,9 +345,10 @@ def login():
 
 @app.route("/site/<hackathon_name>")
 def hackathon(hackathon_name):
-    data = __get_api(API_HACKATHON, {"hackathon_name": hackathon_name, "token": session.get("token")})
+    headers = {"hackathon_name": hackathon_name, "token": session["token"]}
+    data = __get_api(API_HACKATHON, headers)
     data = Context.from_object(data)
-
+    reg = Context.from_object(__get_api(API_HACAKTHON_REGISTRATION, headers))
     if data.get('error') is not None:
         return render("/404.html")
     else:
@@ -356,7 +357,7 @@ def hackathon(hackathon_name):
                       hackathon=data.get("hackathon", data),
                       user=data.get("user"),
                       registration=data.get("registration"),
-                      experiment=data.get("experiment"))
+                      experiment=reg.get("experiment"))
 
 
 @app.route("/site/<hackathon_name>/workspace")

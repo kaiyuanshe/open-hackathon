@@ -1800,3 +1800,63 @@ h4.title {
     right: 5px;
     color: #cc0000;
 }
+.full-shared{
+    position:absolute;
+    right: 15px;
+    width: 40px;
+    top: 140px;
+    border-radius: 25px;
+    border: 1px solid #ddd;
+}
+.full-shared .share-btn a{
+    font-size: 16px;
+    width: 38px;
+    height: 38px;
+    display: inline-block;
+    border-radius: 50%;
+    text-align: center;
+    cursor: pointer;
+}
+.full-shared .share-btn a>span{
+    background: none!important;
+    color: #b4b4b4;
+    padding: 0!important;
+    margin: 0;
+    float: none!important;
+    text-align: center;
+}
+.full-shared .share-btn a>span:before{
+    vertical-align: -3px;
+    font-family: 'FontAwesome';
+}
+.full-shared .share-btn a label{
+    font-size: 11px;
+    color:#fff;
+    font-weight: normal;
+    padding: 2px;
+    cursor: pointer;
+    line-height: 16px;
+}
+
+.full-shared .share-btn a:hover{
+    background-color: #b4b4b4;
+}
+.full-shared .share-btn a:hover>span:before{
+    content:'';
+    position: absolute;
+}
+.full-shared .share-btn .jiathis_button_ishare>span:before{
+    content: "\f1d8";
+}
+.full-shared .share-btn .jiathis_button_tsina>span:before{
+    content: "\f18a";
+}
+.full-shared .share-btn .jiathis_button_tqq>span:before{
+    content: "\f1d6";
+}
+.full-shared .share-btn .jiathis_button_qzone>span:before{
+    content: "\f1d8";
+}
+.full-shared .share-btn .jiathis_button_weixin>span:before{
+    content: "\f1d7";
+}
