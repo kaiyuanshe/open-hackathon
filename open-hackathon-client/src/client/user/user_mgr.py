@@ -155,17 +155,6 @@ class UserManager(object):
             "user": user
         }
 
-    def validate_request(self):
-        if HTTP_HEADER.TOKEN not in request.headers:
-            return False
-
-        admin = self.__validate_token(request.headers[HTTP_HEADER.TOKEN])
-        if admin is None:
-            return False
-
-        g.admin = admin
-        return True
-
     def get_user_by_id(self, id):
         return self.db.find_first_object_by(User, id=id)
 

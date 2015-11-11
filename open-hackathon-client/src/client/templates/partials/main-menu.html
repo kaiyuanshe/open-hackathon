@@ -1,5 +1,5 @@
 <ul class="nav main-menu">
-    {% if g.admin.is_super() %}
+    {% if g.user.is_super() %}
         <li>
             <a class="dropmenu" href="sitemap#">
                 <i class="fa fa-sitemap"></i>

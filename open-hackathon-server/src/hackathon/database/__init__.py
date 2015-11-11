@@ -28,7 +28,7 @@ import sys
 
 sys.path.append("..")
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, exc, event, select
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 # noinspection PyUnresolvedReferences
@@ -46,6 +46,36 @@ engine = create_engine(safe_get_config(MYSQL_CONNECTION, DEFAULT_CONNECTION_URL)
                        pool_recycle=3600,
                        max_overflow=100,
                        echo=False)
+
+
+@event.listens_for(engine, "engine_connect")
+def ping_connection(connection, branch):
+    if branch:
+        # "branch" refers to a sub-connection of a connection,
+        # we don't want to bother pinging on these.
+        return
+
+    try:
+        # run a SELECT 1.   use a core select() so that
+        # the SELECT of a scalar value without a table is
+        # appropriately formatted for the backend
+        connection.scalar(select([1]))
+    except exc.DBAPIError as err:
+        # catch SQLAlchemy's DBAPIError, which is a wrapper
+        # for the DBAPI's exception.  It includes a .connection_invalidated
+        # attribute which specifies if this connection is a "disconnect"
+        # condition, which is based on inspection of the original exception
+        # by the dialect in use.
+        if err.connection_invalidated:
+            # run the same SELECT again - the connection will re-validate
+            # itself and establish a new connection.  The disconnect detection
+            # here also causes the whole connection pool to be invalidated
+            # so that all stale connections are discarded.
+            connection.scalar(select([1]))
+        else:
+            raise
+
+
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=True,
                                          bind=engine))
@@ -54,3 +84,17 @@ Base.query = db_session.query_property(BaseQuery)
 db_adapter = SQLAlchemyAdapter(db_session)
 
 from models import *
+
+
+def init_db():
+    # import all modules here that might define models so that
+    # they will be registered properly on the metadata.  Otherwise
+    # you will have to import them first before calling init_db()
+    Base.metadata.create_all(bind=engine)
+
+
+def drop_db():
+    # import all modules here that might define models so that
+    # they will be registered properly on the metadata.  Otherwise
+    # you will have to import them first before calling init_db()
+    Base.metadata.drop_all(bind=engine)
