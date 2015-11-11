@@ -125,6 +125,15 @@ class HackathonManager(Component):
 
         if order_by == "create_time":
             query = query.order_by(Hackathon.create_time.desc())
+        elif order_by == "event_start_time":
+            #all started and coming hackathon-activities would be shown based on event_start_time.
+            query = query.order_by(Hackathon.event_start_time.desc())
+
+            #just coming hackathon-activities would be shown based on event_start_time.
+            #query = query.order_by(Hackathon.event_start_time.asc()).filter(Hackathon.event_start_time > self.util.get_now())
+        elif order_by == "registered_users_num":
+            #hackathons with zero registered users would not be shown.
+            query = query.join(HackathonStat).order_by(HackathonStat.count.desc())
         else:
             query = query.order_by(Hackathon.id.desc())
 

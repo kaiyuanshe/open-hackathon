@@ -299,9 +299,9 @@ def index():
     newest_hackathons = __get_api(API_HACKATHON_LIST, {"token": session.get("token")},
                                   params={"page": 1, "per_page": 3, "order_by": "create_time", "status": 1})
     hot_hackathons = __get_api(API_HACKATHON_LIST, {"token": session.get("token")},
-                               params={"page": 1, "per_page": 3, "order_by": "", "status": 1})
+                               params={"page": 1, "per_page": 3, "order_by": "registered_users_num", "status": 1})
     soon_hackathon = __get_api(API_HACKATHON_LIST, {"token": session.get("token")},
-                               params={"page": 1, "per_page": 3, "order_by": "", "status": 1})
+                               params={"page": 1, "per_page": 3, "order_by": "event_start_time", "status": 1})
     return render('/home.html', newest_hackathons=newest_hackathons, hot_hackathons=hot_hackathons,
                   soon_hackathon=soon_hackathon)
 
