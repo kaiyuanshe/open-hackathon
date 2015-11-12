@@ -34,12 +34,8 @@
             header: {hackathon_name: currentHackathon}
         }, function (data) {
             if (!data.error) {
-                hackathonID = data.id;
-                hackathonName = data.name;
                 list.empty().append($('#hackathon_award').tmpl(data || [], {
-                    substring: function (str, length) {
-                        return str;
-                    }
+                    hackathon_name: currentHackathon
                 }));
                 oh.comm.removeLoading();
             }
