@@ -452,7 +452,7 @@ class TeamManager(Component):
         if not team:
             return []
 
-        return [self.__award_with_detail(r) for r in team.team_awards.all()]
+        return [self.__award_with_detail(r) for r in team.team_awards.order_by(TeamAward.level.desc()).all()]
 
     def get_granted_awards(self, hackathon):
         awards = self.db.find_all_objects_order_by(TeamAward,
@@ -481,6 +481,9 @@ class TeamManager(Component):
                               reason=context.get("reason"),
                               level=award.level)
             self.db.add_object(exist)
+        else:
+            exist.reason = context.get("reason", exist.reason)
+            self.db.commit()
 
         return self.__award_with_detail(exist)
 
