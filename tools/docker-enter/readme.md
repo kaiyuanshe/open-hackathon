@@ -3,7 +3,7 @@
 docker-enter is a tool that help you enter your docker containers easily. Find more about `nsenter` and `docker-enter` in [nsenter repository](https://github.com/jpetazzo/nsenter).
 
 
-### quickstart
+### Quick start
 
 Copy executable `nsenter` and `docker-enter` to your path:
 ```
