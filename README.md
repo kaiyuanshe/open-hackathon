@@ -20,5 +20,5 @@ Microsoft Open Technology Center.
 This project is licensed under [MIT License](https://github.com/msopentechcn/open-hackathon/blob/master/license.txt)
 
 # Copyright
-Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
+Copyright (c) 2015 Microsoft
 
