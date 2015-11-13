@@ -62,7 +62,7 @@ auth-request-url: http://localhost:15000/api/guacamoleconfig
 ```
 Then copy the auth-provider jar file to the path that was setted in the config file
 ```
-sudo cp deploy/openhackathon-guacamole-authentication-1.0-SNAPSHOT.jar /var/lib/guacamole/
+sudo cp deploy/guacamole/openhackathon-gucamole-authentication-1.0-SNAPSHOT.jar /var/lib/guacamole/
 ```
 Note: the `auth-request-url` value must be setted match the _open-hackathon_ src provides
 And every time you change this file , you may need to restart guacd and tomcat7 service
