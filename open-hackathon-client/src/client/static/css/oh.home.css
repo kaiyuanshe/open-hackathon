@@ -156,7 +156,7 @@
     overflow: hidden;
 }
 
-.oh-activity .oh-header > img {
+.oh-activity .oh-header .hackathon-thumb {
     position: absolute;
     left: 0;
     top: 0;
@@ -341,7 +341,7 @@
     width: 100%;
 }
 
-.oh-activity .oh-item:hover .oh-header > img {
+.oh-activity .oh-item:hover .oh-header .hackathon-thumb {
     -moz-transform: scale(1.3);
     -o-transform: scale(1.3);
     -webkit-transform: scale(1.3);
