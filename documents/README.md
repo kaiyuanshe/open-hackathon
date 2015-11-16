@@ -20,7 +20,7 @@
   * [Manage Azure certificate](#manage-azure-certificate)
   * [Manage templates](#manage-templates)
   * [Manage experiment](#manage-experiment)
-* [Developer Guide](#developer-guide)
+* [Developer Guide](https://github.com/msopentechcn/open-hackathon/blob/master/documents/developer_guide.md)
   * [Implementation and Architecture](https://github.com/msopentechcn/open-hackathon/blob/master/documents/developer_guide.md#implementation-and-architecture)
   * [Try OpenHackathon quickly](#try-openhackathon-quickly)
   * [Setup develop environment](#setup-develop-environment)
@@ -57,30 +57,5 @@ The Open Hacakthon can be deployed as a standalone web application, and can leve
 # Organizer Guide
 To be done
 
-#Developer Guide
-## Implementation and Architecture for Developer
-`Project on Github`:`https://github.com/msopentechcn/open-hackathon.git`
-`Architecture:`
-OpenHackathon is separated into two pieces: open-hackathon server, which provides the openhackathon proxy and related libraries, and open-hackathon client, which provides the website client to users
-
-src folders introduction:
-**deploy**: all components for deployment
-**open-hackathon-client**: frontend web project src
-**open-hackathon-server**: backend api server project src
-**openhackathon-guacamole-auth-provider**: guacamole auth provider java project src
-**tools/docker-enter**: tool to quickly connect to a running docker container through container id
-src framework intriduction：
-Use `Flask` to build the whole project.[Flask Introduction](http://flask.pocoo.org/docs/0.10/)
-
-
-
-## Try openhackathon quickly
-## Setup develop environment
-## customize
-## Test
-## API document
-## Python doc
-## DB schema
-## Contribution.MD
 
 # FAQ
