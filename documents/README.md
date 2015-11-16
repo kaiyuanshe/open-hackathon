@@ -29,7 +29,7 @@
   * [Python doc](#python-doc)
   * [DB schema](#db-schema)
   * [Contribution.MD](#contribution.md)
-  * [FAQ](#faq)
+* [FAQ](#faq)
 
 
 
@@ -82,4 +82,5 @@ Use `Flask` to build the whole project.[Flask Introduction](http://flask.pocoo.o
 ## Python doc
 ## DB schema
 ## Contribution.MD
-## FAQ
+
+# FAQ
