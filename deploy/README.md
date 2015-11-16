@@ -88,11 +88,11 @@ sudo mkdir /var/log/open-hackathon
 cd /opt/open-hackathon
 virtualenv venv
 source venv/bin/activate
-cd /opt/open-hackathon/open-hackathon/
+cd /opt/open-hackathon/open-hackathon-server/
 sudo pip install -r requirement.txt
 ```
 #### - config mysql
-edit `/etc/mysql/my.conf` make changes like this:
+edit `/etc/mysql/my.cnf` make changes like this:
 ```shell
 [client]
 default-character-set=utf8
