@@ -1,7 +1,6 @@
 
 <h1 align = "center">OpenHackathon Manual</h1>
 <p align = "center">Microsot Open Technology Center</p>
-<p align = "center">[Contact us](mailto:msopentechdevsh@microsoft.com)</p>
 <p align = "center">Copyright (c) 2015 Microsoft</p>
 
 
