@@ -21,7 +21,7 @@
   * [Manage templates](#manage-templates)
   * [Manage experiment](#manage-experiment)
 * [Developer Guide](#developer-guide)
-  * [Implementation and Architecture](#implementation-and-architecture-for-developer)
+  * [Implementation and Architecture](https://github.com/msopentechcn/open-hackathon/blob/master/documents/developer_guide.md#implementation-and-architecture)
   * [Try OpenHackathon quickly](#try-openhackathon-quickly)
   * [Setup develop environment](#setup-develop-environment)
   * [Test](#test)
