@@ -20,8 +20,8 @@
   * [Manage Azure certificate](#manage-azure-certificate)
   * [Manage templates](#manage-templates)
   * [Manage experiment](#manage-experiment)
-* [Developer Guide](https://github.com/msopentechcn/open-hackathon/blob/master/documents/developer_guide.md)
-  * [Implementation and Architecture](https://github.com/msopentechcn/open-hackathon/blob/master/documents/developer_guide.md#implementation-and-architecture)
+* [Developer Guide](https://github.com/msopentechcn/open-hackathon/blob/master/documents/developer_guide.md){:target="_blank"}
+  * [Implementation and Architecture](https://github.com/msopentechcn/open-hackathon/blob/master/documents/developer_guide.md#implementation-and-architecture){:target="_blank"}
   * [Try OpenHackathon quickly](#try-openhackathon-quickly)
   * [Setup develop environment](#setup-develop-environment)
   * [Test](#test)
