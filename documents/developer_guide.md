@@ -209,7 +209,22 @@ make sure `debug` mode is set `True` in `run.py` files. Start PyCharm and:
 - click Debug Icon(a spider icon) in toolbar to start debugging
 
 ## Deploy
-deploy
+
+To deploy open hackathon to staging or production environment, you need follow all steps of [Setup Development Environment](https://github.com/msopentechcn/open-hackathon/blob/master/documents/developer_guide.md#setup-development-environement) except `Install Docker`, `Run` and `Debug` section. Instead, you should choose one of the python web containers for production usage. For example, [Apache2](http://flask.pocoo.org/docs/0.10/deploying/mod_wsgi/#creating-a-wsgi-file), [DotCloud](http://flask.pocoo.org/snippets/48/), [uwsgi](https://uwsgi-docs.readthedocs.org/en/latest/), [gunicorn](http://gunicorn.org/) and so on.
+
+As an example, we show how to deploy open hackathon using `uwsgi` in the following section. However, both `open hackathon platform` and `flask` don't have any limitation on this, choose whatever application you like.
+
+### deploy open hackathon with uwsgi
+
+### things to know
+- You can deploy DB, open hackathon server, open hackathon client to different VM, correct configurations in `config.py` and `/etc/guacamole/guacamole.properties` then if you do so.
+- It's getting harder to debug on staging/production environment. One of the most useful tools is logging. By default, logs are in directory `/var/log/open-hackathon` where `open-hackathon-server.log` and `open-hackathon-client.log` are logs for open hackathon API server and UI respectively. Logs for guacamole are `/var/log/syslog` for guacd and `/var/log/tomcat7/*.log` for guacamole client.
+- **Very Important**, update `environment` in `config.py` files for both client and server because many features not enabled in default `local` environment. You can change to any value other than `local`.
+- And also, review the whole `config.py` files, update values suitable for your environment. For example, oauth key/secrets, DB connections, storage type and configurations.
+- By default, Port 80(open hackathon UI), 15000(open hackathon API), 8080(guacamole) should be accessed from public. Which means you have to allow it in your firewall and configure the endpoints in you CloudService(azure), Security group(AWS) and so on.
+- By default, the password of super admin, who has the highest privilege and cannot be deleted, is not secure. Don't forgot to update it.
+- `Docker` is not required in your server. Actually it's part of resources related to certain hackathon event. So you can install docker on any other VM(even in any other cloud), and then configure it on your hackathon console. See more about [organizer guide](https://github.com/msopentechcn/open-hackathon/blob/master/documents/organizer_guide.md);
+
 ## Test
 ## Python doc
 ## DB schema
