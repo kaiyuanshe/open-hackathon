@@ -50,6 +50,8 @@ cp open-hackathon-server/src/hackathon/config_sample.py open-hackathon-server/sr
 cp open-hackathon-client/src/client/config_sample.py open-hackathon-client/src/client/config.py
 ```
 
+As a convention, we put default configurations suitable for development environment in `config_sample.py`. And everytime you want to add/update/delete a configuration section, please update `config_sample.py` first.  By contrast, `config.py` can contains whatever customized or private data, they are ignored automatically by git and will **NEVER** be pushed to github.
+
 ### Install Python Packages
 By default, Pythoon is already included in Ubuntu. Run `python -V` to check your python version. We are currently develeping and running OHP under python 2.7. If python not installed, please [download Python 2.7](https://www.python.org/downloads/) and add script `python` to your `$PATH`. Again, make sure the version of python is 2.7. python 3.* may be supported but we didn't test it.
 
