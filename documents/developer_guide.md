@@ -15,7 +15,7 @@ On this page:
   * [Install and Configure MySQL](#install-and-configure-mysql)
   * [Install Docker](#install-docker)
 * [Test](#test)
-* [API documemt](#api-documemt)
+* [API documemt](https://github.com/msopentechcn/open-hackathon/wiki/Open-hackathon-Restful-API)
 * [Python doc](#python-doc)
 * [DB schema](#db-schema)
 
@@ -168,6 +168,5 @@ See `https://github.com/msopentechcn/open-hackathon/tree/master/tools/docker-ent
 
 
 ### Test
-### API documemt
 ### Python doc
 ### DB schema
