@@ -14,7 +14,9 @@ On this page:
   * [Install and Configure guacamole](#install-and-configure-guacamole)
   * [Install and Configure MySQL](#install-and-configure-mysql)
   * [Install Docker](#install-docker)
-  * [Logging && Hosts](#Loggingosts)
+  * [Logging && Hosts](#logging--hosts)
+  * [Run](#run)
+  * [DEBUG](#debug)
 * [Test](#test)
 * [API documemt](https://github.com/msopentechcn/open-hackathon/wiki/Open-hackathon-Restful-API)
 * [Python doc](#python-doc)
@@ -183,14 +185,18 @@ cd /opt/open-hackathon
 sudo python open-hackathon-server/src/run.py
 sudo python open-hackathon-client/src/run.py
 ```
-open your brower and navigate to the health page, by default it should be http://localhost:15000
+open your brower and try browsing pages:
+- open hackathon server health page: http://open-hackathon-dev.chinacloudapp.cn:15000. The output is json-like and  status should be OK
+- open hackathon client: http://open-hackathon-dev.chinacloudapp.cn, the entrance of open hackathon web UI
+- super admin page: http://open-hackathon-dev.chinacloudapp.cn/admin, a  login page specially for super admin. Default user/pwd is `admin`/`admin`
+- guacamole page: http://open-hackathon-dev.chinacloudapp.cn:8080/guacamole. An almost blank page, just tell you guacamole is running
 
-if the status shown is "OK", everything is done.
+You can start with '发布活动'. More details about [发布活动](https://github.com/msopentechcn/open-hackathon/blob/master/documents/organizer_guide.md)
 
 ### Debug
 We recommend you install [PyCharm Community Version](https://www.jetbrains.com/pycharm/download/) to debug our code. Of course you can
 choose other IDE but you need to figure out how to debug by yourself.
-make sure `debug` mode is set `True` in file `/opt/open-hackathon/open-hackathon/src/run.py`. Start PyCharm and:
+make sure `debug` mode is set `True` in `run.py` files. Start PyCharm and:
 - open your project
 - and click`Run -> Edit Configuration`
 - add an new `python` configuration. Fill the required blanks and Apply
