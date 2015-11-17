@@ -13,6 +13,7 @@ On this page:
   * [Install Python Packages](#install-python-packages)
   * [Install and Configure guacamole](#install-and-configure-guacamole)
   * [Install and Configure MySQL](#install-and-configure-mysql)
+  * [Install Docker](#install-docker)
 * Test
 
 ## Implementation and Architecture
@@ -121,3 +122,43 @@ sudo python open-hackathon-server/src/setup_db.py
 ```
 
 You can run `sudo python open-hackathon-server/src/reset_db.py` to re-create all tables. But remember, the existing data will be erased while reset the database. 
+
+
+### Install Docker
+Follow [docker installation guide](https://docs.docker.com/installation/ubuntulinux/) to install docker. You can choose install the latest version of docker. But we strongly recommend you to
+ install a stable version since docker itself is developing and updating. Usually lasted version has unexpected issues.
+
+after docker installed, you can try pulling down some docker images:
+```
+sudo docker pull rastasheep/ubuntu-sshd
+```
+
+##### enable docker remote api
+###### Ubuntu 15.04
+Make sure docker remote api enabled. As [Official Docs](https://docs.docker.com/articles/systemd) said, the best way is to update `systemd` in the newer versions of docker.
+Open file `/lib/systemd/system/docker.service` for editing and change line starting with `ExecStart` to following:
+```
+ExecStart=/usr/bin/docker daemon -H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock
+```
+Change `4243` to other port on demand. And then run `systemctl reload` in shell to reload the new configuration. And restart docker by `service docker restart`.
+
+Now, brower to `http://localhost:4243/_ping`. A simple `OK` shown indicates the remote API is working now. 
+Browse to `http://localhost:4243/containers/json` to see the information of running containers. 
+For more API, please refer to [Docker remote API Docs](https://docs.docker.com/reference/api/docker_remote_api/)
+
+###### Ubuntu 14.10 and lower
+On an old version of Ubuntu, you can edit one of the following files:`/etc/default/docker` or `/etc/init.d/docker`. 
+Add new line `DOCKER_OPTS='-H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock'` and then restart docker by `sudo service docker restart`
+
+##### run docker without sudo(Optional)
+And add user into docker group so that you can run docker commands without sudo
+```
+sudo groupadd docker
+sudo gpasswd -a ${USER} docker
+```
+Relogin USER and restart the docker process: `sudo service docker restart`
+
+##### enable docker-enter(Optional)
+After you pull down the source codes, copy `<SRC_ROOT>/tools/docker-enter/docker-enter` and `<SRC_ROOT>/tools/docker-enter/nsenter` to `/usr/local/bin`. 
+It's for simplicity that you enter a running docker container. A simple command `sudo docker-enter $(container ID)` help you enter the container.
+See `https://github.com/msopentechcn/open-hackathon/tree/master/tools/docker-enter` for more information.
