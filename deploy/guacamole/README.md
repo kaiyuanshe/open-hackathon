@@ -9,4 +9,4 @@ authentication following the [guacamole mannual](http://guac-dev.org/doc/gug/cus
 deploy customized guacamole authentication provider. 
 
 #### Quick instructioins for OHP
-We assume you have installed guacamole server/client already. If not, see [installation guide](http://guac-dev.org/doc/gug/installing-guacamole.html). And see `install and configure guacamole` for more.
+We assume you have installed guacamole server/client already. If not, see [installation guide](http://guac-dev.org/doc/gug/installing-guacamole.html). And see [install and configure guacamole](https://github.com/msopentechcn/open-hackathon/blob/master/documents/developer_guide.md#install-and-configure-guacamole) for more.
