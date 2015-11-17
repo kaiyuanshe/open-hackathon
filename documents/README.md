@@ -27,7 +27,7 @@
   * [API documemt](https://github.com/msopentechcn/open-hackathon/blob/master/documents/developer_guide.md#api-documemt)
   * [Python doc](https://github.com/msopentechcn/open-hackathon/blob/master/documents/developer_guide.md#python-doc)
   * [DB schema](https://github.com/msopentechcn/open-hackathon/blob/master/documents/developer_guide.md#db-schema)
-* [Contribution.MD](#https://github.com/msopentechcn/open-hackathon/blob/master/CONTRIBUTION.md)
+* [Contribution.MD](https://github.com/msopentechcn/open-hackathon/blob/master/CONTRIBUTION.md)
 * [FAQ](#faq)
 
 
