@@ -78,8 +78,13 @@ Firstly please [download](http://guac-dev.org/release/release-notes-0-9-6) and [
 
 Since open hackathon has [customized guacamole authentication provider](https://github.com/msopentechcn/open-hackathon/tree/master/openhackathon-guacamole-auth-provider), we need additional steps for it:
 ```
+sudo mkdir /usr/share/tomcat7/.guacamole
+sudo mkdir /etc/guacamole
+
 cp guacamole-sample.properties /etc/guacamole/guacamole.properties
 cp *.jar /etc/guacamole
+sudo ln -s /etc/guacamole/guacamole.properties /usr/share/tomcat7/.guacamole/guacamole.properties
+
 cp guacamole-0.9.6.war /var/lib/tomcat7/webapps/guacamole.war
 sudo service guacd restart
 sudo service tomcat7 restart
