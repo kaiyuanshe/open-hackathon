@@ -23,11 +23,11 @@
 * [Developer Guide](https://github.com/msopentechcn/open-hackathon/blob/master/documents/developer_guide.md)
   * [Implementation and Architecture](https://github.com/msopentechcn/open-hackathon/blob/master/documents/developer_guide.md#implementation-and-architecture)
   * [Setup develop environment](https://github.com/msopentechcn/open-hackathon/blob/master/documents/developer_guide.md#setup-development-environement)
-  * [Test](#test)
-  * [API documemt](#api-document)
-  * [Python doc](#python-doc)
-  * [DB schema](#db-schema)
-  * [Contribution.MD](#contribution.md)
+  * [Test](https://github.com/msopentechcn/open-hackathon/blob/master/documents/developer_guide.md#test)
+  * [API documemt](https://github.com/msopentechcn/open-hackathon/blob/master/documents/developer_guide.md#api-documemt)
+  * [Python doc](https://github.com/msopentechcn/open-hackathon/blob/master/documents/developer_guide.md#python-doc)
+  * [DB schema](https://github.com/msopentechcn/open-hackathon/blob/master/documents/developer_guide.md#db-schema)
+* [Contribution.MD](#https://github.com/msopentechcn/open-hackathon/blob/master/CONTRIBUTION.md)
 * [FAQ](#faq)
 
 
@@ -55,6 +55,3 @@ The Open Hacakthon can be deployed as a standalone web application, and can leve
 
 # Organizer Guide
 To be done
-
-
-# FAQ
