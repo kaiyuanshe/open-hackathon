@@ -14,6 +14,7 @@ On this page:
   * [Install and Configure guacamole](#install-and-configure-guacamole)
   * [Install and Configure MySQL](#install-and-configure-mysql)
   * [Install Docker](#install-docker)
+  * [Logging && Hosts](#Loggingosts)
 * [Test](#test)
 * [API documemt](https://github.com/msopentechcn/open-hackathon/wiki/Open-hackathon-Restful-API)
 * [Python doc](#python-doc)
@@ -166,7 +167,35 @@ After you pull down the source codes, copy `<SRC_ROOT>/tools/docker-enter/docker
 It's for simplicity that you enter a running docker container. A simple command `sudo docker-enter $(container ID)` help you enter the container.
 See `https://github.com/msopentechcn/open-hackathon/tree/master/tools/docker-enter` for more information.
 
+### Logging && Hosts
+Make sure log folder is created and properly authorized. By default it's `/var/log/openhackathon`. You can update the logging path in `open-hacakthon-server/src/hackathon/logging.conf` and `open-hackathon-client/src/client/logging.conf`.
+```
+sudo mkdir /var/log/open-hackathon
+sudo chmod -R 644 /var/log/open-hackathon
+```
 
-### Test
-### Python doc
-### DB schema
+And also, please adding row `127.0.0.1 open-hackathon-dev.chinacloudapp.cn` to your local `/etc/hosts`. That's because most oauth login providers doest't accept domain `localhost` and the default oauth parameters in `config_sample.py` are binded to domain `open-hackathon-dev.chinacloudapp.cn`
+
+### Run
+Everything is OK now! Start the API server in command line:
+```
+cd /opt/open-hackathon
+sudo python open-hackathon-server/src/run.py
+sudo python open-hackathon-client/src/run.py
+```
+open your brower and navigate to the health page, by default it should be http://localhost:15000
+
+if the status shown is "OK", everything is done.
+
+### Debug
+We recommend you install [PyCharm Community Version](https://www.jetbrains.com/pycharm/download/) to debug our code. Of course you can
+choose other IDE but you need to figure out how to debug by yourself.
+make sure `debug` mode is set `True` in file `/opt/open-hackathon/open-hackathon/src/run.py`. Start PyCharm and:
+- open your project
+- and click`Run -> Edit Configuration`
+- add an new `python` configuration. Fill the required blanks and Apply
+- click Debug Icon(a spider icon) in toolbar to start debugging
+
+## Test
+## Python doc
+## DB schema
