@@ -9,7 +9,10 @@
 On this page:
 * [Implementation and Architecture](#implementation-and-architecture)
 * [Setup development Environement](#setup-development-environement)
+  * [Clone SourceCode](#clone-sourcecode)
+  * [Install Python Packages](#install-python-packages)
   * [Install and Configure guacamole](#install-and-configure-guacamole)
+  * [Install and Configure MySQL](#install-and-configure-mysql)
 * Test
 
 ## Implementation and Architecture
@@ -27,5 +30,68 @@ major parts of Open Hackathon:
 ## Setup Development Environement
 This section shows you how to setup local dev environment for both open-hackathon-serve and open-hackathon-client.
 
-#### Install and Configure guacamole
-Install and Configure guacamole
+### Clone SourceCode
+
+First of all, make sure `git` installed. Please follow the [Git installation guide](http://git-scm.com/book/en/v2/Getting-Started-Installing-Git) in case it's not ready.
+And then clone source code from github to your local system. Any local folder is OK, we will clone to `/opt` in this document. However you
+can change it to any directory you want.
+```
+cd /opt/
+git clone https://github.com/msopentechcn/open-hackathon.git
+```
+
+**_Notice that you MUST [folk](http://www.worldhello.net/gotgithub/04-work-with-others/010-fork-and-pull.html) the repository to your account/organization before contributing any changes. Pull Requests are welcome._**
+
+### Install Python Packages
+By default, Pythoon is already included in Ubuntu. Run `python -V` to check your python version. We are currently develeping and running OHP under python 2.7. If python not installed, please [download Python 2.7](https://www.python.org/downloads/) and add script `python` to your `$PATH`. Again, make sure the version of python is 2.7. python 3.* may be supported but we didn't test it.
+
+And install required libs:
+```
+sudo apt-get install python-dev python-setuptools
+sudo easy_install pip
+cd /opt/open-hackathon/
+sudo pip install -r open-hackathon-server/requirement.txt
+sudo pip install -r open-hackathon-client/requirement.txt
+```
+
+
+### Install and Configure guacamole
+
+Firstly please [download](http://guac-dev.org/release/release-notes-0-9-6) and [install](http://guac-dev.org/doc/gug/installing-guacamole.html) guacamole 0.9.6 firstly. Make sure all protocols including VNC, RDP, ssh and telnet are properly installed.
+
+Since open hackathon has [customized guacamole authentication provider](https://github.com/msopentechcn/open-hackathon/tree/master/openhackathon-guacamole-auth-provider), we need additional steps for it:
+```
+cp guacamole-sample.properties /etc/guacamole/guacamole.properties
+cp *.jar /etc/guacamole
+cp guacamole-0.9.6.war /var/lib/tomcat7/webapps/guacamole.war
+sudo service guacd restart
+sudo service tomcat7 restart
+```
+By default you don't need to change `/etc/guacamole/guacamole.properties` on your local machine. And usually the only config need to update is `auth-request-url` if your open-hackathon-server listens on a different port other than `15000`. _You need to restart tomcat7 and guacd service if `guacamole.properties` updated_.
+
+
+[Click](http://guac-dev.org/doc/gug/custom-authentication.html) for more about custom authentication.
+
+
+### Install and Configure MySQL
+
+1.install MySQL on ubuntu by:
+
+```
+sudo apt-get update
+sudo apt-get install mysql-server libmysqlclient-dev
+```
+  
+Follow [MySQL installation guide](https://dev.mysql.com/doc/refman/5.7/en/installing.html) for other OS. 
+
+2.set MySQL charset to utf8. Make sure the MySQL is using `utf-8` charset. Edit `/etc/mysql/my.conf` make changes like this:
+```
+[client]
+default-character-set=utf8
+
+[mysqld]
+default-storage-engine=INNODB
+character-set-server=utf8
+collation-server=utf8_general_ci
+```
+Then restart the `mysqld` service by `service mysqld restart`
