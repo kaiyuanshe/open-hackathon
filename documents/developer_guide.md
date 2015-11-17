@@ -42,6 +42,14 @@ git clone https://github.com/msopentechcn/open-hackathon.git
 
 **_Notice that you MUST [folk](http://www.worldhello.net/gotgithub/04-work-with-others/010-fork-and-pull.html) the repository to your account/organization before contributing any changes. Pull Requests are welcome._**
 
+##### Copy configuration files
+There some several `config_sample.py` files in open hackathon repo. Please copy them to the same directory and remove `_sample`. Update the content if neccessary.
+```
+cd /opt/open-hackathon
+cp open-hackathon-server/src/hackathon/config_sample.py open-hackathon-server/src/hackathon/config.py
+cp open-hackathon-client/src/client/config_sample.py open-hackathon-client/src/client/config.py
+```
+
 ### Install Python Packages
 By default, Pythoon is already included in Ubuntu. Run `python -V` to check your python version. We are currently develeping and running OHP under python 2.7. If python not installed, please [download Python 2.7](https://www.python.org/downloads/) and add script `python` to your `$PATH`. Again, make sure the version of python is 2.7. python 3.* may be supported but we didn't test it.
 
@@ -103,3 +111,11 @@ create database hackathon;
 create User 'hackathon'@'localhost' IDENTIFIED by 'hackathon';
 GRANT ALL on hackathon.* TO 'hackathon'@'localhost';
 ```
+
+4.Create tables.
+Update MySQL connection parameters in `open-hackathon-client/src/client/config_sample.py` and `open-hackathon-server/src/hackathon/config_sample.py`. And then setup DB tables by:
+```
+sudo python open-hackathon-server/src/setup_db.py
+```
+
+You can run `sudo python open-hackathon-server/src/reset_db.py` to re-create all tables. But remember, the existing data will be erased while reset the database. 
