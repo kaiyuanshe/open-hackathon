@@ -17,6 +17,7 @@ On this page:
   * [Logging && Hosts](#logging--hosts)
   * [Run](#run)
   * [DEBUG](#debug)
+* [Deploy](#deploy)
 * [Test](#test)
 * [API documemt](https://github.com/msopentechcn/open-hackathon/wiki/Open-hackathon-Restful-API)
 * [Python doc](#python-doc)
@@ -207,6 +208,8 @@ make sure `debug` mode is set `True` in `run.py` files. Start PyCharm and:
 - add an new `python` configuration. Fill the required blanks and Apply
 - click Debug Icon(a spider icon) in toolbar to start debugging
 
+## Deploy
+deploy
 ## Test
 ## Python doc
 ## DB schema
