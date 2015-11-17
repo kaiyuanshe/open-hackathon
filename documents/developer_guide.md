@@ -14,11 +14,10 @@ On this page:
   * [Install and Configure guacamole](#install-and-configure-guacamole)
   * [Install and Configure MySQL](#install-and-configure-mysql)
   * [Install Docker](#install-docker)
-* Test
-* API documemt
-* Python doc
-* DB schema
-* Contribution.MD
+* [Test](#test)
+* [API documemt](#api-documemt)
+* [Python doc](#python-doc)
+* [DB schema](#db-schema)
 
 ## Implementation and Architecture
 Open Hackathon is is made up of many parts. The UI(client) application is actually intended to be simple and minimal, with the majority of the gruntwork performed by backend API server.
@@ -172,4 +171,3 @@ See `https://github.com/msopentechcn/open-hackathon/tree/master/tools/docker-ent
 ### API documemt
 ### Python doc
 ### DB schema
-### Contribution.MD
