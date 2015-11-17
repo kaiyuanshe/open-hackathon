@@ -95,3 +95,11 @@ character-set-server=utf8
 collation-server=utf8_general_ci
 ```
 Then restart the `mysqld` service by `service mysqld restart`
+
+3.create database and user
+Refer to [MySQL Documentation](https://dev.mysql.com/doc/refman/5.6/en/create-user.html) about how to create user and grant privileges to that user. Following are some quick instructions. Logon mysql console with root user(`mysql -u root -p`) and then:
+```mysql
+create database hackathon;
+create User 'hackathon'@'localhost' IDENTIFIED by 'hackathon';
+GRANT ALL on hackathon.* TO 'hackathon'@'localhost';
+```
