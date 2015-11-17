@@ -15,6 +15,10 @@ On this page:
   * [Install and Configure MySQL](#install-and-configure-mysql)
   * [Install Docker](#install-docker)
 * Test
+* API documemt
+* Python doc
+* DB schema
+* Contribution.MD
 
 ## Implementation and Architecture
 Open Hackathon is is made up of many parts. The UI(client) application is actually intended to be simple and minimal, with the majority of the gruntwork performed by backend API server.
@@ -162,3 +166,10 @@ Relogin USER and restart the docker process: `sudo service docker restart`
 After you pull down the source codes, copy `<SRC_ROOT>/tools/docker-enter/docker-enter` and `<SRC_ROOT>/tools/docker-enter/nsenter` to `/usr/local/bin`. 
 It's for simplicity that you enter a running docker container. A simple command `sudo docker-enter $(container ID)` help you enter the container.
 See `https://github.com/msopentechcn/open-hackathon/tree/master/tools/docker-enter` for more information.
+
+
+### Test
+### API documemt
+### Python doc
+### DB schema
+### Contribution.MD
