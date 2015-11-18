@@ -13,12 +13,12 @@
           },
           "page": {
             "description": "page num",
-            "pattern": "^[0-9]+$"
+            "pattern": "^[0-9]+$",
             "required": false
           }
           "per_page": {
             "description": "users num in each page",
-            "pattern": "^[0-9]+$"
+            "pattern": "^[0-9]+$",
             "required": false
           }
         }
