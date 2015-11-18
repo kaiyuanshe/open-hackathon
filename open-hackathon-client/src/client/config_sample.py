@@ -183,6 +183,9 @@ Config = {
                             "list": ["get"]
                         },
                         "award": ["get", "post", "delete"]
+                    },
+                    "user": {
+                        "list": ["get"]
                     }
                 },
                 "template": {
@@ -192,7 +195,6 @@ Config = {
                 },
                 "user": {
                     "": ["get"],
-                    "list": ["get"],
                     "login": ["post", "delete"],
                     "experiment": {
                         "": ["get", "post", "delete", "put"]

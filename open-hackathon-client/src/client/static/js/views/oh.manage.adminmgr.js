@@ -174,7 +174,7 @@
 
     // call api to fuzzy search related users
     function searchUser(formData){
-        return oh.api.user.list.get({
+        return oh.api.admin.user.list.get({
             header: {
                 hackathon_name: currentHackathon,
             },
@@ -214,11 +214,16 @@
                     url: function (params) {
                         var data = $(this).parents('tr').data('tmplItem').data;
 
-                        switch(params.value){
-                            case "0": data.role_type = 0; break;
-                            case "1": data.role_type = 1; break;
-                            case "2": data.role_type = 2; break;
-                            default: data.role_type = 3;
+                        if(data.role_type == 3){
+                            switch(params.value){
+                                case "0": data.role_type = 0; break;
+                                case "1": data.role_type = 1; break;
+                                case "2": data.role_type = 2; break;
+                                default: data.role_type = 3;
+                            }
+                        }
+                        else{
+                            alert("已经是管理员或裁判，请勿在此添加页面操作");
                         }
                     }
                 });
