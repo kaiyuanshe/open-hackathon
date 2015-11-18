@@ -152,6 +152,12 @@ class CurrentUserResource(HackathonResource):
         return user_manager.user_display_info(g.user)
 
 
+class UserListResource(HackathonResource):
+    @admin_privilege_required
+    def get(self):
+        return user_manager.get_user_fezzy_search(g.hackathon, self.context())
+
+
 class UserProfileResource(HackathonResource):
     @token_required
     def get(self):

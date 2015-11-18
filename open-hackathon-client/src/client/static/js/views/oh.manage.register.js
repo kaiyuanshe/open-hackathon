@@ -74,7 +74,7 @@
             confirmModal.modal('hide');
             deleteuRegister({query: {id: id}, header: {hackathon_name: currentHackathon}}).then(function (data) {
                 if (data.error) {
-                    oh.comm.alert('´íÎó', data.error.friendly_message);
+                    oh.comm.alert('delete registered user fail: ', data.error.friendly_message);
                 } else {
                     editLi.detach();
                 }

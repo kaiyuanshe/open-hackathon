@@ -98,3 +98,4 @@ def init_routes():
     api.add_resource(HackathonAwardResource, "/api/admin/hackathon/award")  # manage award content for hackathon
     api.add_resource(HackathonAwardListResource, "/api/admin/hackathon/award/list")  # list award content for hackathon
     api.add_resource(TeamAwardResource, "/api/admin/team/award")  # list award content for hackathon
+    api.add_resource(UserListResource, "/api/admin/user/list") # search and get all related users
