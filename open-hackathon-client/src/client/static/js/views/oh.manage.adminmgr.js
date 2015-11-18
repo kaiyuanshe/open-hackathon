@@ -135,7 +135,7 @@
 
     // call api to update a admin
     function updateAdmin(itemData){
-        if(itemData.user_info.name != "admin" && itemData.role_type != "0"){
+        if(itemData.user_info.name != "admin" && itemData.role_type != "0" && itemData.role_type != "3"){
             return oh.api.admin.hackathon.administrator.put({
                 body: itemData,
                 header: {
