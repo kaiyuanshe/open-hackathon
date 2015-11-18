@@ -121,7 +121,6 @@ class UserManager(Component):
             return user_info
 
         # return serializable items as well as total count
-        temdata = self.util.paginate(pagination, get_user_details)
         return self.util.paginate(pagination, get_user_details)
 
 
