@@ -24,6 +24,15 @@ body {
     background: -webkit-linear-gradient(top, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('/static/pic/hackthon-bg.jpg') no-repeat 50% 50%;
     background: -ms-linear-gradient(top, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('/static/pic/hackthon-bg.jpg') no-repeat 50% 50%;
     background-size: cover;
+
+}
+
+.wallpaper.active {
+    background: linear-gradient(top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('/static/pic/hackthon-bg.jpg') no-repeat 50% 50%;
+    background: -moz-linear-gradient(top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('/static/pic/hackthon-bg.jpg') no-repeat 50% 50%;
+    background: -webkit-linear-gradient(top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('/static/pic/hackthon-bg.jpg') no-repeat 50% 50%;
+    background: -ms-linear-gradient(top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('/static/pic/hackthon-bg.jpg') no-repeat 50% 50%;
+    background-size: cover;
 }
 
 .blur {

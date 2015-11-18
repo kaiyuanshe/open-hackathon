@@ -39,6 +39,7 @@ from hackathon_scheduler import HackathonScheduler
 from hackathon_response import *
 from log import log
 from context import Context
+from database import db_session
 
 __all__ = [
     "app",
@@ -100,6 +101,11 @@ cors = CORS(app)
 
 # initialize hackathon scheduler
 scheduler = HackathonScheduler(app)
+
+
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db_session.remove()
 
 
 @app.errorhandler(400)

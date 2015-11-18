@@ -464,7 +464,7 @@ class HackathonManager(Component):
         return ok()
 
     def list_hackathon_awards(self, hackathon):
-        awards = hackathon.award_contents.all()
+        awards = hackathon.award_contents.order_by(Award.level.desc()).all()
         return [a.dic() for a in awards]
 
     def schedule_pre_allocate_expr_job(self):

@@ -25,7 +25,7 @@
 # -----------------------------------------------------------------------------------
 
 try:
-    from hackathon.database import Base, engine
+    from hackathon.database import init_db
     from hackathon.database.models import AdminHackathonRel, User
     from hackathon.database import db_adapter
     from hackathon.util import get_now
@@ -40,7 +40,7 @@ def setup_db():
     make sure database and user correctly created in mysql
     in case upgrade the table structure, the origin table need be dropped firstly
     """
-    Base.metadata.create_all(bind=engine)
+    init_db()
 
     # init REQUIRED db data.
 

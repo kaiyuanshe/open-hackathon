@@ -1,74 +1,32 @@
 openhackathon-guacamole-auth-provider
 ==================================
-This document is talking about how to setup the local Guacamole development environment with custom authentication provider.
 
-Steps are as follows:
+## What's openhackathon-guacamole-auth-provider?
+Following [custom authentication guide](http://guac-dev.org/doc/gug/custom-authentication.html), we have our implementation here. The major authentication flow for open hackathon is(Assume user logined in, registered on certain hackathon and successfully launched his/her experiment environment):
 
-## Install commponents
-After Ubuntu 14.04 LTS finished installation, you should install some components, like these commands:
-```
-sudo apt-get update
-sudo apt-get install vim git maven openssh-server vnc4server
-sudo apt-get install libguac-dev libcairo-dev libvncserver0
-sudo apt-get install guacamole libguac-client-ssh0 libguac-client-vnc0 
-sudo apt-get install tomcat7
-sudo apt-get install openjdk-7-jdk
-```
-Note：    
-Never do `apt-get install guacamole-tomcat` !   
-Because it would make the connection between tomcat6 and guacd very frail !     
-it is better to separate them when install the two commponents !
+- when user enter `/workspace` page, client requests the URIs of the experiment where each URI is in fact the address of guacamole client followed by an unique name of an virtual environment. An experiment may contain one or more virtual environments so there might be an array of URI and each has a unique name.
+- client append a token to each URI and try to load it in iframe.
+- then guacamole client receives the request and begin to authenticate. Just at this time, our customized authentication provider is called.
+- inside our implementaion, we call open hackathon server API to get the connection parameters using the token and unique name. Connection parameters include host, port, username, password and so on.
+- guacamole client talks to guacamole server and try to connect to remote environment through the connection parameters and present to end users.
 
-##build custom authentication project
-To build the project you need to check your java and maven environment withn commands like this:
+## how to build?
+This project is java based so make sure you have installed `java` and `maven` properly:
 ```
 java -version
 mvn -version
 ```
-Check the results wheather the versions are matched
+We build with `JDK 7`(minor version doesn't matter) and `maven 3`
 
-
-Then download the maven project sourece codes from github withn command:
+Simply build this project by:
 ```
-https://github.com/msopentechcn/open-hackathon.git
+git clone https://github.com/msopentechcn/open-hackathon.git
 cd openhackathon-guacamole-auth-provider
 mvn verify
 ```
 
-After project build successfully you will find the `openhackathon-gucamole-authentication-1.0-SNAPSHOT.jar` in the `target` folder, this jar file will provide the authentication service
+After project build successfully you will find the `openhackathon-gucamole-authentication-1.0-SNAPSHOT.jar` in the `target` folder, this jar file will provide the authentication service.
 
-## config guacamole
-Check the guacamole config file `/etc/guacamole.properties`, and edit the file like this:
-```shell
-# Hostname and port of guacamole proxy
-guacd-hostname: 42.159.29.99
-guacd-port:     4822
+**_important_**
 
-lib-directory: /var/lib/guacamole
-auth-provider: com.openhackathon.guacamole.OpenHackathonAuthenticationProvider
-auth-request-url: http://localhost:15000/api/guacamoleconfig
-
-```
-Note: never left any 'namespace' at ends of every line!        
-then copy the maven build out jar file into the property `lib-directory` path;     
-```
-sudo cp openhackathon-guacamole-auth-provider/target/openhackathon-gucamole-authentication-1.0-SNAPSHOT.jar /var/lib/guacamole
-```
-#config tomcat7
-After install tomcat7 we need to make tomcat load the guacamole web application, we just need to copy the `guacamole.war` to `webapps` and some other necessary operations. And the guacamole.war was provided after we install guacamole commponent.     
-So we can config tomcat7 like these steps:
-```
-sudo ln -s /var/lib/tomcat7/conf /usr/share/tomcat7/conf
-sudo ln -s /var/lib/tomcat7/webapps /usr/share/tomcat7/webapps
-sudo chmod 777 /usr/share/tomcat7/webapps
-sudo cp /var/lib/guacamole/guacamole.war /usr/share/tomcat7/webapps/
-
-sudo mkdir /usr/share/tomcat7/.guacamole
-sudo ln -s /etc/guacamole/guacamole.properties /usr/share/tomcat7/.guacamole/guacamole.properties
-sudo chmod 777 /usr/share/tomcat7/.guacamole/guacamole.properties
-
-sudo service guacd restart
-sudo service tomcat7 restart
-```
-
-##Test withn an example
+We have already include the jar file in `deploy/guacamole` folder, so if only want to use it rather than contribute codes, making use of this jar file directly is the best choice. [How to install and configure guacamole for OHP?](https://github.com/msopentechcn/open-hackathon/blob/master/documents/developer_guide.md#install-and-configure-guacamole)

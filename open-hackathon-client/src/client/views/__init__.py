@@ -31,20 +31,20 @@ sys.path.append("..")
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-from client import app, Context
 import time
+from datetime import datetime, timedelta
+import re
+
 import json
 import requests
 import markdown
-import re
-
-from datetime import datetime
-from client.constants import LOGIN_PROVIDER
 from flask_login import login_required, login_user, LoginManager, current_user
+from flask import Response, render_template, request, g, redirect, make_response, session, url_for, abort
+
+from client import app, Context
+from client.constants import LOGIN_PROVIDER
 from client.user.login import login_providers
 from client.user.user_mgr import user_manager
-from flask import Response, render_template, request, g, redirect, make_response, session, url_for, abort
-from datetime import timedelta
 from client.functions import get_config, safe_get_config
 from client.log import log
 
@@ -231,7 +231,7 @@ def unauthorized_log():
 
 @app.before_request
 def before_request():
-    g.admin = current_user
+    g.user = current_user
     app.permanent_session_lifetime = timedelta(minutes=session_lifetime_minutes)
 
 
@@ -296,12 +296,20 @@ def index():
     if not landing_page_visited:
         return redirect("/landing")
 
+    empty_items = {
+        "items": []
+    }
     newest_hackathons = __get_api(API_HACKATHON_LIST, {"token": session.get("token")},
                                   params={"page": 1, "per_page": 3, "order_by": "create_time", "status": 1})
     hot_hackathons = __get_api(API_HACKATHON_LIST, {"token": session.get("token")},
                                params={"page": 1, "per_page": 3, "order_by": "registered_users_num", "status": 1})
     soon_hackathon = __get_api(API_HACKATHON_LIST, {"token": session.get("token")},
                                params={"page": 1, "per_page": 3, "order_by": "event_start_time", "status": 1})
+
+    newest_hackathons = empty_items if "error" in newest_hackathons else newest_hackathons
+    hot_hackathons = empty_items if "error" in hot_hackathons else hot_hackathons
+    soon_hackathon = empty_items if "error" in soon_hackathon else soon_hackathon
+
     return render('/home.html', newest_hackathons=newest_hackathons, hot_hackathons=hot_hackathons,
                   soon_hackathon=soon_hackathon)
 
@@ -319,7 +327,7 @@ def about():
 @app.route("/logout")
 @login_required
 def logout():
-    login_providers.values()[0].logout(g.admin)
+    login_providers.values()[0].logout(g.user)
     return_url = request.args.get("return_url", "/")
     if "manage/" in return_url:
         return_url = "/"
