@@ -284,6 +284,12 @@ class ADMIN_ROLE_TYPE:
     JUDGE = 2
     USER = 3
 
+class ORGANIZATION_TYPE:
+    """
+    Organization role type
+    """
+    ORGANIZER = 1
+    PARTNER = 2
 
 class HACK_STATUS:
     INIT = 0

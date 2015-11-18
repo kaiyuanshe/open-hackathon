@@ -39,6 +39,13 @@
                 list.empty().append($('#hackathon_organizer').tmpl(data.organizer || [], {
                     substring: function (str, length) {
                         return oh.comm.stripTags(markdown.toHTML(str), length);
+                    },
+                    get_organization_type: function (organization_type) {
+                        switch(organization_type){
+                            case 1: return "主办方"; break;
+                            case 2: return "合作伙伴"; break;
+                            default: return "未识别";
+                        }
                     }
                 }));
                 oh.comm.removeLoading();
@@ -57,9 +64,11 @@
     }
 
     function getFormData() {
+        var organizationtype = $('#organization_type').val()=="主办方"? 1:2;
         var formData = {
             id: $('#organizerform').data('id') || 0,
             name: $.trim($('#name').val()),
+            organization_type: organizationtype,
             description: $('#description').val(),
             homepage: $('#homepage').val(),
             logo: $('#logo').val()
@@ -70,6 +79,11 @@
     function setFormData(data) {
         $('#organizerform').data({id: data.id});
         $('#name').val(data.name);
+        switch(data.organization_type){
+            case 1: $('#organization_type').val("主办方"); break;
+            case 2: $('#organization_type').val("合作伙伴"); break;
+            default: alert("no such organization_type");
+        }
         $('#description').val(data.description);
         $('#homepage').val(data.homepage);
         $('#logo').val(data.logo);

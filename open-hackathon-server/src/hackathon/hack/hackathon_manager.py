@@ -392,6 +392,7 @@ class HackathonManager(Component):
     def create_hackathon_organizer(self, hackathon, body):
         organizer = HackathonOrganizer(hackathon_id=hackathon.id,
                                        name=body["name"],
+                                       organization_type= body.get("organization_type"),
                                        description=body.get("description"),
                                        homepage=body.get("homepage"),
                                        logo=body.get("logo"),
@@ -407,6 +408,7 @@ class HackathonManager(Component):
             return forbidden()
 
         organizer.name = body.get("name", organizer.name)
+        organizer.organization_type = body.get("organization_type", organizer.organization_type)
         organizer.description = body.get("description", organizer.description)
         organizer.homepage = body.get("homepage", organizer.homepage)
         organizer.logo = body.get("logo", organizer.logo)
