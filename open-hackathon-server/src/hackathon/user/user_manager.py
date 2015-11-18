@@ -123,8 +123,6 @@ class UserManager(Component):
         # return serializable items as well as total count
         return self.util.paginate(pagination, get_user_details)
 
-
-
     def user_display_info(self, user):
         """Return user detail information
 
