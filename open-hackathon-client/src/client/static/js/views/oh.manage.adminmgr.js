@@ -26,39 +26,21 @@
     var currentHackathon = oh.comm.getCurrentHackathon();
     var isupdate = false;
 
-    function toggleTable(){
-        if($('#adminlisttable').css('display') == 'none' ){
+    function toggleTable(status){
+        //status 0:show all admin users, 1:show search bar, 2:show search results
+        if(status == 0){
             $('#adminlisttable').show();
-            $('#adminform').hide()
+            $('#adminsearchbartable').hide();
+            $('#adminsearchlisttable').hide()
+        }else if(status == 1){
+            $('#adminlisttable').hide();
+            $('#adminsearchbartable').show();
+            $('#adminsearchlisttable').hide()
         }else{
             $('#adminlisttable').hide();
-            $('#adminform').show()
+            $('#adminsearchbartable').show();
+            $('#adminsearchlisttable').show()
         }
-    }
-
-    //get form-data for submit
-    function getFormData(){
-        var formData = {
-            id:$('#adminform').data('id'),
-            email:$.trim($('#admin_email').val()),
-            role_type:$.trim($('#role_type').val()),
-            remarks:$.trim($('#remarks').val())
-         }
-        return formData;
-    }
-
-    //set form-data for edit
-    function setFormData(data){
-        $('#admin_email').val(getPriEmail(data.user_info.email)).attr({disabled:'disabled'});
-        $('#role_type').val(data.role_type);
-        $('#remarks').val(data.remarks);
-        $('#adminform').data({id:data.id}).find('[type="submit"]').removeAttr('disabled')
-    }
-
-    // set an empty form for new
-    function resetForm(){
-         $('#adminform').data('bootstrapValidator').resetForm(true);
-         $('#remarks').val('')
     }
 
     // initial table to show admin list
@@ -78,15 +60,47 @@
                     return '下线';
                 },
                 getRole:function(role_type){
-                    if(role_type == 2){
+                    if(role_type == 3){
+                        return '普通用户'
+                    }
+                    else if(role_type == 2){
                         return '裁判'
                     }
-                    return '管理员';
+                    else if(role_type == 1)
+                        return '管理员'
+                    else
+                        return '超级管理员';
+                },
+                getRoleStr(role_type){
+                    return str(role_type);
                 },
                 getEmails:function(emails){
                     return getPriEmail(emails);
                 }
             }));
+            list.find('.editable').editable({
+                url: function (params) {
+                    var data = $(this).parents('tr').data('tmplItem').data;
+
+                    if(data.user_info.name == "admin"){
+                        alert("修改admin管理员权限是无效的");
+                        pageLoad();
+                    }
+                    else{
+                        if(params.value == '0')
+                            alert("设置成超级管理员是无效的");
+                        else{
+                            switch(params.value){
+                                case "0": data.role_type = 0; break;
+                                case "1": data.role_type = 1; break;
+                                case "2": data.role_type = 2; break;
+                                default: data.role_type = 3;
+                            }
+                            updateAdmin(data);
+                        }
+                    }
+                }
+            });
             oh.comm.removeLoading();
         });
     }
@@ -104,32 +118,36 @@
 
     // call api to add a admin
     function createAdmin(itemData){
-        return oh.api.admin.hackathon.administrator.post({
-            body: itemData,
-            header: {
-                hackathon_name: currentHackathon
-            }
-        }, function(data) {
-            if(data.error){
-                alert(data.error.message)
-            }else{
-            }
-        });
+        if(itemData.role_type != "3" && itemData.role_type != "0"){
+            return oh.api.admin.hackathon.administrator.post({
+                body: itemData,
+                header: {
+                    hackathon_name: currentHackathon
+                }
+            }, function(data) {
+                if(data.error){
+                    alert(data.error.message)
+                }else{
+                }
+            });
+        }
     }
 
     // call api to update a admin
     function updateAdmin(itemData){
-        return oh.api.admin.hackathon.administrator.put({
-            body: itemData,
-            header: {
-                hackathon_name: currentHackathon
-            }
-        }, function(data) {
-            if(data.error){
-                alert(data.error.message)
-            }else{
-            }
-        });
+        if(itemData.user_info.name != "admin" && itemData.role_type != "0"){
+            return oh.api.admin.hackathon.administrator.put({
+                body: itemData,
+                header: {
+                    hackathon_name: currentHackathon
+                }
+            }, function(data) {
+                if(data.error){
+                    alert(data.error.message)
+                }else{
+                }
+            });
+        }
     }
 
     // call api to delete a admin
@@ -147,50 +165,130 @@
         });
     }
 
-    // initial submit button events
-    function forminit(){
-        var adminform = $('#adminform');
-        adminform.bootstrapValidator().on('success.form.bv', function(e) {
+    function getSearchBarData(){
+        var formData = {
+            keyword:$.trim($('#admin_searchbar').val()),
+         };
+        return formData;
+    }
+
+    // call api to fuzzy search related users
+    function searchUser(formData){
+        return oh.api.user.list.get({
+            header: {
+                hackathon_name: currentHackathon,
+            },
+            query:{
+                keyword: formData['keyword']
+            }
+        }, function(data){
+            if(data.error){
+                alert(data.error.message)
+            }else{
+                var list = $('#hackathon_search_list');
+                list.empty().append($('#hackathon_admin_search_list_template').tmpl(data.items,{
+                    getOnline:function(online){
+                        if(online == 1){
+                            return '在线'
+                        }
+                        return '下线';
+                    },
+                    getRole:function(role_type){
+                        if(role_type == 3){
+                            return '普通用户'
+                        }
+                        else if(role_type == 2){
+                            return '裁判'
+                        }
+                        else if(role_type == 1){
+                            return '管理员'
+                        }
+                        else
+                            return '超级管理员';
+                    },
+                    getEmails:function(emails){
+                        return getPriEmail(emails);
+                    }
+                }));
+                list.find('.editable').editable({
+                    url: function (params) {
+                        var data = $(this).parents('tr').data('tmplItem').data;
+
+                        switch(params.value){
+                            case "0": data.role_type = 0; break;
+                            case "1": data.role_type = 1; break;
+                            case "2": data.role_type = 2; break;
+                            default: data.role_type = 3;
+                        }
+                    }
+                });
+                list.find('[data-name="icon_add_admin"]').on('click', function(e){
+                    var data = $(e.target).parents('tr').data('tmplItem').data;
+                    if(data.role_type == 0)
+                        alert("不允许设置成超级管理员");
+                    else{
+                        createAdmin(data).then(function(){
+                            toggleTable(0);
+                            pageLoad();
+                        });
+                    }
+                });
+                oh.comm.removeLoading();
+            }
+        });
+    }
+
+    function searchBarValidator() {
+        var fromValidator = $(adminsearchbarform).bootstrapValidator().on('success.form.bv', function (e, ok){
             e.preventDefault();
-            var itemData = getFormData();
-            (isupdate ? updateAdmin(itemData): createAdmin(itemData)).then(function(){
-                pageLoad()
-                toggleTable()
-            })
+            var formData = getSearchBarData();
+            searchUser(formData);
+            toggleTable(2);
         });
     }
 
     function init(){
-        var editLi = undefined;
         pageLoad();
-        forminit();
+        toggleTable(0);
+        searchBarValidator();
 
-        $('[data-type="new"],[data-type="cancel"]').click(function(e){
-            isupdate = false ;
-            $('#adminform').data({id:undefined}).find('[type="submit"]').removeAttr('disabled')
-            $('#adminform').data({id:undefined}).find('#admin_email').removeAttr('disabled')
-            resetForm();
-            toggleTable();
+        $('[data-type="new"]').click(function(e){
+            toggleTable(1);
         });
 
-        $('#adminlisttable').on('click','[data-type="edit"]',function(e){
-            editLi = $(this).parents('tr');
-            var item = editLi.data('tmplItem').data;
-            setFormData(item);
-            isupdate = true ;
-            toggleTable();
+        $('[data-type="cancel"]').click(function(e){
+            $('#admin_searchbar').val("");
+            toggleTable(0);
         });
 
-        var confirmModal = $('#confirm_modal').on('show.bs.modal',function(e){
-            console.log(e);
-            editLi = $(e.relatedTarget).parents('tr');
+        $('[data-type="search"]').click(function(e){
+            var formData = getSearchBarData();
+            searchUser(formData);
+            toggleTable(2);
+        });
+
+        var editRemarkModal = $('#edit_remark_modal').on('show.bs.modal',function(e){
+            data = $(e.relatedTarget).parents('tr').data('tmplItem').data;
+            $('#remarks').val(data.remarks)
         }).on('click','[data-type="ok"]',function(e){
-            var item = editLi.data('tmplItem').data;
-            deleteAdmin(item.id).then(function(){
-                pageLoad()
-            });
-            confirmModal.modal('hide');
+            data.remarks = $('#remarks').val();
+            editRemarkModal.modal('hide');
         });
+
+        var deleteAdminModal = $('#delete_admin_modal').on('show.bs.modal',function(e){
+            list = $(e.relatedTarget).parents('tr');
+        }).on('click','[data-type="ok"]',function(e){
+            var data = list.data('tmplItem').data;
+            if(data.user_info.name == "admin")
+                alert("不允许删除admin管理员");
+            else{
+                deleteAdmin(data.id).then(function(){
+                    pageLoad()
+                });
+            }
+            deleteAdminModal.modal('hide');
+        });
+
     }
 
     $(function() {

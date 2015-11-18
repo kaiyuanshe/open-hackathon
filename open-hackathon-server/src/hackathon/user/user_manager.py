@@ -30,7 +30,8 @@ sys.path.append("..")
 
 from flask import request, g
 
-from hackathon.database import UserToken, User, UserEmail
+from hackathon.hackathon_response import internal_server_error, not_found
+from hackathon.database import UserToken, User, UserEmail, UserProfile, AdminHackathonRel
 from hackathon.constants import ReservedUser, HTTP_HEADER
 from hackathon import Component, RequiredFeature
 
@@ -88,6 +89,42 @@ class UserManager(Component):
             return None
 
         return user_email.user
+
+    def get_user_fezzy_search(self, hackathon, args):
+        """fezzy search user by name,kickname and email
+
+        :type **kwargs: dict
+        :param **kwargs: dict should has key['condition']
+
+        :rtype: list
+        :return a list of users or empty list if not user match conditions
+        """
+
+        keyword = str(args.get("keyword", ""))
+        page = int(args.get("page", 1))
+        per_page = int(args.get("per_page", 20))
+
+        query = User.query
+        query = query.outerjoin(UserEmail).filter(User.name.like("%" + keyword + "%") |
+                                        User.nickname.like("%" + keyword + "%") |
+                                        UserEmail.email.like("%" + keyword + "%"))
+
+        # perform db query with pagination
+        pagination = self.db.paginate(query, page, per_page)
+
+        def get_user_details(user):
+            user_info = self.user_display_info(user)
+            admin_hackathon_rel = self.db.find_first_object_by(AdminHackathonRel, hackathon_id=hackathon.id, user_id=user.id)
+            user_info["role_type"] = admin_hackathon_rel.role_type if admin_hackathon_rel else 3 # admin:1 judge:2 user:3
+            user_info["remarks"] = admin_hackathon_rel.remarks if admin_hackathon_rel else ""
+
+            return user_info
+
+        # return serializable items as well as total count
+        temdata = self.util.paginate(pagination, get_user_details)
+        return self.util.paginate(pagination, get_user_details)
+
+
 
     def user_display_info(self, user):
         """Return user detail information

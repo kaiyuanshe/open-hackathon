@@ -152,6 +152,15 @@ class CurrentUserResource(HackathonResource):
         return user_manager.user_display_info(g.user)
 
 
+class UserResource(HackathonResource):
+    @admin_privilege_required
+    def get(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('keyword', type=str, location='args', required=True)
+        args = parse.parse_args()
+        return user_manager.get_user_fezzy_search(g.hackathon, args)
+
+
 class UserProfileResource(HackathonResource):
     @token_required
     def get(self):
