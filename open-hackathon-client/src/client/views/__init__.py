@@ -44,6 +44,7 @@ from flask import Response, render_template, request, g, redirect, make_response
 from client import app, Context
 from client.constants import LOGIN_PROVIDER
 from client.user.login import login_providers
+from client.user.login_manager import login_manager_helper
 from client.user.user_mgr import user_manager
 from client.functions import get_config, safe_get_config
 from client.log import log
@@ -90,7 +91,7 @@ def render(template_name_or_list, **context):
                            **context)
 
 
-def __login_failed(provider, error="Login failed."):
+def __login_failed(provider):
     if provider == "mysql":
         error = "Login failed. username or password invalid."
         return render("/superadmin.html", error=error)
@@ -218,7 +219,7 @@ def to_datetime(datelong, fmt=''):
 
 @login_manager.user_loader
 def load_user(id):
-    return user_manager.get_user_by_id(id)
+    return login_manager_helper.load_user(id)
 
 
 @login_manager.unauthorized_handler

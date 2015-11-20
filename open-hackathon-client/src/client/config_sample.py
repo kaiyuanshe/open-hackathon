@@ -26,16 +26,19 @@
 
 # "javascript" section for javascript. see @app.route('/config.js') in app/views.py
 
-# oauth constants
 # NOTE: all following key/secrets for test purpose.
 HOSTNAME = "http://localhost"  # host name of the UI site
 # HOSTNAME = "http://open-hackathon-dev.chinacloudapp.cn"  # host name of the UI site
+
 QQ_OAUTH_STATE = "openhackathon"  # todo state should be constant. Actually it should be unguessable to prevent CSFA
 HACKATHON_API_ENDPOINT = "http://localhost:15000"
 # HACKATHON_API_ENDPOINT = "http://open-hackathon-dev.chinacloudapp.cn:15000"
 
+# github key for `localhost`
 GITHUB_CLIENT_ID = "b44f3d47bdeb26b9c4e6"
 GITHUB_CLIENT_SECRET = "98de14161c4b2ed3ea7a19787d62cda73b8e292c"
+
+# github oauth key for `open-hackathon-dev.chinacloudapp.cn`
 # GITHUB_CLIENT_ID = "b8e407813350f26bf537"
 # GITHUB_CLIENT_SECRET = "daa78ae27e13c9f5b4a884bd774cadf2f75a199f"
 

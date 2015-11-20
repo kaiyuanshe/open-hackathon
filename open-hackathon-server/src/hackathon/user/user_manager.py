@@ -72,6 +72,11 @@ class UserManager(Component):
         """
         return self.db.find_first_object_by(User, id=user_id)
 
+    def load_user(self, user_id):
+        '''get user for flask_login user_loader'''
+        user = self.get_user_by_id(user_id)
+        return user.dic() if user else not_found()
+
     def get_user_by_email(self, email):
         """Query user by email
 
@@ -100,22 +105,24 @@ class UserManager(Component):
         :return a list of users or empty list if not user match conditions
         """
 
-        keyword = str(args.get("keyword", ""))
+        keyword = args.get("keyword", "")
         page = int(args.get("page", 1))
         per_page = int(args.get("per_page", 20))
 
         query = User.query
         query = query.outerjoin(UserEmail).filter(User.name.like("%" + keyword + "%") |
-                                        User.nickname.like("%" + keyword + "%") |
-                                        UserEmail.email.like("%" + keyword + "%"))
+                                                  User.nickname.like("%" + keyword + "%") |
+                                                  UserEmail.email.like("%" + keyword + "%"))
 
         # perform db query with pagination
         pagination = self.db.paginate(query, page, per_page)
 
         def get_user_details(user):
             user_info = self.user_display_info(user)
-            admin_hackathon_rel = self.db.find_first_object_by(AdminHackathonRel, hackathon_id=hackathon.id, user_id=user.id)
-            user_info["role_type"] = admin_hackathon_rel.role_type if admin_hackathon_rel else 3 # admin:1 judge:2 user:3
+            admin_hackathon_rel = self.db.find_first_object_by(AdminHackathonRel, hackathon_id=hackathon.id,
+                                                               user_id=user.id)
+            user_info[
+                "role_type"] = admin_hackathon_rel.role_type if admin_hackathon_rel else 3  # admin:1 judge:2 user:3
             user_info["remarks"] = admin_hackathon_rel.remarks if admin_hackathon_rel else ""
 
             return user_info

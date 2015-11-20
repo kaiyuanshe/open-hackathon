@@ -1,0 +1,16 @@
+{
+  "UserLoginResource": {
+    "get": {
+      "input": {
+        "title": "search for the user by id",
+        "type": "object",
+        "properties": {
+          "id": {
+            "pattern": "^[0-9]+$",
+            "description": "identifier of User"
+          }
+        }
+      }
+    }
+  }
+}

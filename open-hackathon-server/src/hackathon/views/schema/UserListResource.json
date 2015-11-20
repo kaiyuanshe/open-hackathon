@@ -8,8 +8,7 @@
         "properties": {
           "keyword": {
             "type": "string",
-            "description": "keyword to search for users",
-            "required": true
+            "description": "keyword to search for users"
           },
           "page": {
             "description": "page num",

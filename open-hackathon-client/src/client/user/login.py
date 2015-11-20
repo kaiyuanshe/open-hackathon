@@ -31,15 +31,18 @@ import urllib2
 
 sys.path.append("..")
 
-from client.functions import get_remote, get_config, post_to_remote, convert, qs_dict
-from client.log import log
 import json
 import requests
 from requests.auth import HTTPBasicAuth
-from user_mgr import user_manager
+
 from flask import session, request
 from flask_login import logout_user
+
+from client.functions import get_remote, get_config, post_to_remote, convert, qs_dict
+from client.log import log
 from client.constants import LOGIN_PROVIDER
+
+from user_mgr import user_manager
 from client.database import db_adapter
 from client.database.models import UserHackathonAsset, Hackathon
 
