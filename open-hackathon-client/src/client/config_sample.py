@@ -27,12 +27,17 @@
 # "javascript" section for javascript. see @app.route('/config.js') in app/views.py
 
 # oauth constants
-HOSTNAME = "http://open-hackathon-dev.chinacloudapp.cn"  # host name of the UI site
+# NOTE: all following key/secrets for test purpose.
+HOSTNAME = "http://localhost"  # host name of the UI site
+# HOSTNAME = "http://open-hackathon-dev.chinacloudapp.cn"  # host name of the UI site
 QQ_OAUTH_STATE = "openhackathon"  # todo state should be constant. Actually it should be unguessable to prevent CSFA
-HACKATHON_API_ENDPOINT = "http://open-hackathon-dev.chinacloudapp.cn:15000"
+HACKATHON_API_ENDPOINT = "http://localhost:15000"
+# HACKATHON_API_ENDPOINT = "http://open-hackathon-dev.chinacloudapp.cn:15000"
 
-GITHUB_CLIENT_ID = "b8e407813350f26bf537"
-GITHUB_CLIENT_SECRET = "daa78ae27e13c9f5b4a884bd774cadf2f75a199f"
+GITHUB_CLIENT_ID = "b44f3d47bdeb26b9c4e6"
+GITHUB_CLIENT_SECRET = "98de14161c4b2ed3ea7a19787d62cda73b8e292c"
+# GITHUB_CLIENT_ID = "b8e407813350f26bf537"
+# GITHUB_CLIENT_SECRET = "daa78ae27e13c9f5b4a884bd774cadf2f75a199f"
 
 QQ_CLIENT_ID = "101200890"
 QQ_CLIENT_SECRET = "88ad67bd4521c4cc47136854781cb9b5"
@@ -103,7 +108,7 @@ Config = {
             "redirect_uri": '%s/alauda' % HOSTNAME,
             "access_token_url": 'http://console.int.alauda.io/oauth/token'
         },
-        "provider_enabled": ["github", "qq", "live", "weibo", "gitcafe", "alauda"],
+        "provider_enabled": ["github"],
         "session_minutes": 60,
         "token_expiration_minutes": 60 * 24
     },
