@@ -8,7 +8,7 @@
     <div class="col-lg-12" loading>
         <div class="box" style="display:none">
             <div class="box-header">
-                <h2><i class="fa fa-edit"></i>主办方</h2>
+                <h2><i class="fa fa-edit"></i>组织</h2>
             </div>
             <div class="box-content">
                 <div id="organizertable">
@@ -17,6 +17,7 @@
                         <thead>
                         <tr>
                             <th>名称</th>
+                            <th>类型</th>
                             <th>网址</th>
                             <th>logo</th>
                             <th>介绍</th>
@@ -32,35 +33,48 @@
                     <form class="form-horizontal" id="organizerform" style="display:none">
                         <fieldset>
                             <legend>
-                                添加主办方信息
+                                添加组织信息
                             </legend>
                         </fieldset>
                         <div class="form-group has-feedback">
-                            <label class="col-md-3 control-label">主办方名称</label>
+                            <label class="col-md-3 control-label">组织名称</label>
 
                             <div class="col-md-6">
                                 <input type="text" class="form-control" name="name" id="name" placeholder=""
                                        required
                                        data-bv-trigger="blur"
-                                       data-bv-notempty-message="主办方名称，不能为空">
+                                       data-bv-notempty-message="组织名称，不能为空">
                             </div>
                         </div>
                         <div class="form-group has-feedback">
-                            <label class="col-md-3 control-label">主办方网址</label>
+                            <label class="col-md-3 control-label">组织类型</label>
+
+                            <div class="col-md-6">
+                                <select class="form-control" name="organization_type" id="organization_type" placeholder="选择类型"
+                                        required
+                                        data-bv-trigger="blur"
+                                        data-bv-notempty-message="组织类型，不能为空">
+                                    <option>主办方</option>
+                                    <option>合作伙伴</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group has-feedback">
+                            <label class="col-md-3 control-label">组织网址</label>
 
                             <div class="col-md-6">
                                 <input type="url" class="form-control" name="homepage" id="homepage" placeholder="">
                             </div>
                         </div>
                         <div class="form-group has-feedback">
-                            <label class="col-md-3 control-label">主办方logo</label>
+                            <label class="col-md-3 control-label">组织logo</label>
 
                             <div class="col-md-6">
                                 <input type="url" class="form-control" name="logo" id="logo" placeholder="">
                             </div>
                         </div>
                         <div class="form-group has-feedback">
-                            <label class="col-md-3 control-label">主办方介绍</label>
+                            <label class="col-md-3 control-label">组织介绍</label>
 
                             <div class="col-md-6">
                                 <textarea class="form-control" name="description" id="description" placeholder=""
@@ -106,6 +120,7 @@
     <script id="hackathon_organizer" type="text/x-jquery-tmpl">
     <tr>
         <td>${name}</td>
+        <td>${$item.get_organization_type(organization_type)}</td>
         <td><a href="${homepage}">${homepage}</a></td>
         <td><div class="oh-thumb"><img class="oh-thumbnail" src="${logo}"><div></td>
         <td>${$item.substring(description,30)}</td>

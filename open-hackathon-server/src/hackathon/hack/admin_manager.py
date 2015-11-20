@@ -103,7 +103,7 @@ class AdminManager(Component):
             'not_found' if email is invalid or user not found.
             'internal_server_error' if any other unexpected exception caught
         """
-        user = self.user_manager.get_user_by_email(args.get("email"))
+        user = self.user_manager.get_user_by_id(args.get("id"))
         if user is None:
             return not_found("user not found")
 

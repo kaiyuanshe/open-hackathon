@@ -188,6 +188,9 @@ Config = {
                             "list": ["get"]
                         },
                         "award": ["get", "post", "delete"]
+                    },
+                    "user": {
+                        "list": ["get"]
                     }
                 },
                 "template": {

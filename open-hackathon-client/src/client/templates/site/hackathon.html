@@ -153,18 +153,42 @@
 
                         <div class="oh-body organizer">
                             {% for org in hackathon.organizer %}
-                                <div class="media">
-                                    <div class="media-left">
-                                        <a href="{{ org.homepage }}" class="oh-thumb">
-                                            <img class="media-object oh-thumbnail" src="{{ org.logo }}"
-                                                 alt="{{ org.name }}">
-                                        </a>
+                                {% if org.organization_type == 1 %}
+                                    <div class="media">
+                                        <div class="media-left">
+                                            <a href="{{ org.homepage }}" class="oh-thumb">
+                                                <img class="media-object oh-thumbnail" src="{{ org.logo }}"
+                                                     alt="{{ org.name }}">
+                                            </a>
+                                        </div>
+                                        <div class="media-body">
+                                            <h4 class="media-heading">{{ org.name }}</h4>
+                                            {{ org.description | mkHTML | stripTags | limitTo(100) }}
+                                        </div>
                                     </div>
-                                    <div class="media-body">
-                                        <h4 class="media-heading">{{ org.name }}</h4>
-                                        {{ org.description | mkHTML | stripTags | limitTo(100) }}
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="oh-box">
+                        <h3 class="title">关于合作伙伴</h3>
+
+                        <div class="oh-body parter">
+                            {% for org in hackathon.organizer %}
+                                {% if org.organization_type == 2 %}
+                                    <div class="media">
+                                        <div class="media-left">
+                                            <a href="{{ org.homepage }}" class="oh-thumb">
+                                                <img class="media-object oh-thumbnail" src="{{ org.logo }}"
+                                                     alt="{{ org.name }}">
+                                            </a>
+                                        </div>
+                                        <div class="media-body">
+                                            <h4 class="media-heading">{{ org.name }}</h4>
+                                            {{ org.description | mkHTML | stripTags | limitTo(100) }}
+                                        </div>
                                     </div>
-                                </div>
+                                {% endif %}
                             {% endfor %}
                         </div>
                     </div>

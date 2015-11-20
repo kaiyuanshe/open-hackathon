@@ -23,12 +23,12 @@
 * [Developer Guide](https://github.com/msopentechcn/open-hackathon/blob/master/documents/developer_guide.md)
   * [Implementation and Architecture](https://github.com/msopentechcn/open-hackathon/blob/master/documents/developer_guide.md#implementation-and-architecture)
   * [Setup develop environment](https://github.com/msopentechcn/open-hackathon/blob/master/documents/developer_guide.md#setup-development-environement)
-  * [Test](#test)
-  * [API documemt](#api-document)
-  * [Python doc](#python-doc)
-  * [DB schema](#db-schema)
-  * [Contribution.MD](#contribution.md)
-* [FAQ](#faq)
+  * [Test](https://github.com/msopentechcn/open-hackathon/blob/master/documents/developer_guide.md#test)
+  * [API documemt](https://github.com/msopentechcn/open-hackathon/blob/master/documents/developer_guide.md#api-documemt)
+  * [Python doc](https://github.com/msopentechcn/open-hackathon/blob/master/documents/developer_guide.md#python-doc)
+  * [DB schema](https://github.com/msopentechcn/open-hackathon/blob/master/documents/developer_guide.md#db-schema)
+* [Contribution.MD](https://github.com/msopentechcn/open-hackathon/blob/master/CONTRIBUTION.md)
+* [FAQ](https://github.com/msopentechcn/open-hackathon/blob/master/documents/FAQ.md)
 
 
 
@@ -53,8 +53,5 @@ The Open Hacakthon can be deployed as a standalone web application, and can leve
 - **_Administrator_**: those who initiate a hackathon.  Note that one cannot be participant of a hackathon if  he/she is the administrator of that hackathon. But administrator of hackathon A can be user of hackathon B.
 - **_Judge_**:  those who can judge the result committed by users.
 
-# Organizer Guide
-To be done
 
-
-# FAQ
+[Next to User Guide](https://github.com/msopentechcn/open-hackathon/blob/master/documents/user_guide.md)
