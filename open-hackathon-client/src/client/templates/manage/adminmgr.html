@@ -26,9 +26,9 @@
                             <th>角色类型</th>
                             <th>状态</th>
                             <th>账户类别</th>
-                            <th>备注</th>
                             <th>最后登录时间</th>
                             <th>创建时间</th>
+                            <th>备注</th>
                             <th>操作</th>
                         </tr>
                     </thead>
@@ -59,7 +59,7 @@
                     <div class="form-group has-feedback">
                         <div class="col-sm-offset-3 col-sm-6">
                             <button type="button" class="btn btn-primary" data-type="search"> 搜索</button>
-                            <button type="button" class="btn btn btn-default" data-type="cancel"> 取消</button>
+                            <button type="button" class="btn btn btn-default" data-type="cancel"> 返回</button>
                         </div>
                     </div>
                 </form>
@@ -71,15 +71,14 @@
                         <tr>
                             <th>名称</th>
                             <th>昵称</th>
+                            <th>真名</th>
                             <th>邮箱</th>
                             <th>状态</th>
                             <th>账户类别</th>
-                            <th>最后登录时间</th>
-                            <th>创建时间</th>
-                            <th>角色类型</th>
+                            <th>电话</th>
+                            <th>地址</th>
                             <th>备注</th>
-                            <th>设置备注</th>
-                            <th>确认修改</th>
+                            <th>角色类型</th>
                         </tr>
                     </thead>
                     <tbody id="hackathon_search_list">
@@ -140,15 +139,18 @@
         <td>${user_info.nickname}</td>
         <td>${$item.getEmails(user_info.email)}</td>
         <td>
-            <a href="javascript:void(0);" id="searchlist_roletype" data-type="select" data-name="role_type" data-value="${role_type}" class="editable" data-source='{"0":"超级管理员","1":"管理员", "2":"裁判", "3":"普通用户"}' data-placement="top"></a>
+            <a href="javascript:void(0);" id="searchlist_roletype" data-type="select" data-name="role_type" data-value="${role_type}" class="editable" data-source='{"1":"管理员", "2":"裁判"}' data-placement="top"></a>
         </td>
         <td>${$item.getOnline(user_info.online)}</td>
         <td>${user_info.provider}</td>
-        <td>${remarks}</td>
         <td>${moment(user_info.last_login_time).format('YYYY-MM-DD HH:mm')}</td>
         <td>${moment(create_time).format('YYYY-MM-DD HH:mm')}</td>
 
+        <td>${remarks}</td>
         <td class="col-action">
+            <a class="btn btn-info btn-sm" data-type="edit" href="#" data-target="#edit_remark_modal" data-toggle="modal">
+                <i class="fa fa-edit"></i>
+            </a>
             <a class="btn btn-danger btn-sm" href="#" data-target="#delete_admin_modal" data-toggle="modal">
                 <i class="fa fa-trash-o "></i>
             </a>
@@ -160,26 +162,15 @@
     <tr>
         <td>${name}</td>
         <td>${nickname}</td>
+        <td>${user_profile.real_name}</td>
         <td>${$item.getEmails(email)}</td>
         <td>${$item.getOnline(online)}</td>
         <td>${provider}</td>
-        <td>${moment(last_login_time).format('YYYY-MM-DD HH:mm')}</td>
-        <td>${moment(create_time).format('YYYY-MM-DD HH:mm')}</td>
-        <td>
-            <a href="javascript:void(0);" id="searchlist_roletype" data-type="select" data-name="role_type" data-value="${role_type}" class="editable" data-source='{"0":"超级管理员","1":"管理员", "2":"裁判", "3":"普通用户"}' data-placement="top"></a>
-        </td>
+        <td>${user_profile.phone}</td>
+        <td>${user_profile.address}</td>
         <td>${remarks}</td>
-
-        <td class="col-action">
-            <a class="btn btn-info btn-sm" data-type="edit" href="#" data-target="#edit_remark_modal" data-toggle="modal">
-                <i class="fa fa-edit"></i>
-            </a>
-        </td>
-
-        <td class="col-action" data-name="icon_add_admin">
-            <a class="btn btn-danger btn-sm">
-                <i class="fa fa-plus"></i>
-            </a>
+        <td>
+            <a href="javascript:void(0);" id="searchlist_roletype" data-type="select" data-name="role_type" data-value="${role_type}" class="editable" data-source='{"1":"管理员", "2":"裁判", "3":"普通用户"}' data-placement="top"></a>
         </td>
     </tr>
 </script>

@@ -42,9 +42,8 @@
                     },
                     get_organization_type: function (organization_type) {
                         switch(organization_type){
-                            case 1: return "主办方"; break;
                             case 2: return "合作伙伴"; break;
-                            default: return "未识别";
+                            default: return "主办方";
                         }
                     }
                 }));
