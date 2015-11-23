@@ -151,6 +151,8 @@ class UserManager(Component):
         }
         if user.profile:
             ret["user_profile"] = user.profile.dic()
+        else:
+            ret["user_profile"] = {"real_name":"", "phone":"", "address":""};
 
         return ret
 

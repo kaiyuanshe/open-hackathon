@@ -24,7 +24,6 @@
 
 (function($, oh) {
     var currentHackathon = oh.comm.getCurrentHackathon();
-    var isupdate = false;
 
     function toggleTable(status){
         //status 0:show all admin users, 1:show search bar, 2:show search results
@@ -60,16 +59,13 @@
                     return '下线';
                 },
                 getRole:function(role_type){
-                    if(role_type == 3){
-                        return '普通用户'
-                    }
-                    else if(role_type == 2){
+                    if(role_type == 2){
                         return '裁判'
                     }
                     else if(role_type == 1)
                         return '管理员'
                     else
-                        return '超级管理员';
+                        return '普通用户';
                 },
                 getRoleStr(role_type){
                     return str(role_type);
@@ -87,17 +83,14 @@
                         pageLoad();
                     }
                     else{
-                        if(params.value == '0')
-                            alert("设置成超级管理员是无效的");
-                        else{
-                            switch(params.value){
-                                case "0": data.role_type = 0; break;
-                                case "1": data.role_type = 1; break;
-                                case "2": data.role_type = 2; break;
-                                default: data.role_type = 3;
-                            }
-                            updateAdmin(data);
+                        switch(params.value){
+                            case "1": data.role_type = 1; break;
+                            case "2": data.role_type = 2; break;
+                            default: data.role_type = 3;
                         }
+                        updateAdmin(data).then(function(){
+                            pageLoad();
+                        });
                     }
                 }
             });
@@ -118,7 +111,7 @@
 
     // call api to add a admin
     function createAdmin(itemData){
-        if(itemData.role_type != "3" && itemData.role_type != "0"){
+        if(itemData.role_type != "3"){
             return oh.api.admin.hackathon.administrator.post({
                 body: itemData,
                 header: {
@@ -135,7 +128,7 @@
 
     // call api to update a admin
     function updateAdmin(itemData){
-        if(itemData.user_info.name != "admin" && itemData.role_type != "0" && itemData.role_type != "3"){
+        if(itemData.user_info.name != "admin" && itemData.role_type != "3"){
             return oh.api.admin.hackathon.administrator.put({
                 body: itemData,
                 header: {
@@ -194,17 +187,14 @@
                         return '下线';
                     },
                     getRole:function(role_type){
-                        if(role_type == 3){
-                            return '普通用户'
-                        }
-                        else if(role_type == 2){
+                        if(role_type == 2){
                             return '裁判'
                         }
                         else if(role_type == 1){
                             return '管理员'
                         }
                         else
-                            return '超级管理员';
+                            return '普通用户';
                     },
                     getEmails:function(emails){
                         return getPriEmail(emails);
@@ -216,26 +206,17 @@
 
                         if(data.role_type == 3){
                             switch(params.value){
-                                case "0": data.role_type = 0; break;
                                 case "1": data.role_type = 1; break;
                                 case "2": data.role_type = 2; break;
                                 default: data.role_type = 3;
                             }
+                            createAdmin(data).then(function(){
+                                pageLoad()
+                            });
                         }
                         else{
-                            alert("已经是管理员或裁判，请勿在此添加页面操作");
+                            alert("该用户已经是管理员或裁判，无须再次添加，如需修改或删除管理员，请返回前一页面操作。")
                         }
-                    }
-                });
-                list.find('[data-name="icon_add_admin"]').on('click', function(e){
-                    var data = $(e.target).parents('tr').data('tmplItem').data;
-                    if(data.role_type == 0)
-                        alert("不允许设置成超级管理员");
-                    else{
-                        createAdmin(data).then(function(){
-                            toggleTable(0);
-                            pageLoad();
-                        });
                     }
                 });
                 oh.comm.removeLoading();
@@ -277,6 +258,11 @@
             $('#remarks').val(data.remarks)
         }).on('click','[data-type="ok"]',function(e){
             data.remarks = $('#remarks').val();
+            if(data.user_info.name != "admin"){
+                updateAdmin(data).then(function(){
+                    pageLoad()
+                });
+            }
             editRemarkModal.modal('hide');
         });
 

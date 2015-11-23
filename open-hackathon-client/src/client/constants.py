@@ -26,7 +26,6 @@
 
 # DEFAULT ROLES
 class ROLE:
-    SUPER_ADMIN = 0
     ADMIN = 1
     JUDGE = 2
     USER = 3

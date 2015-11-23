@@ -279,10 +279,8 @@ class ADMIN_ROLE_TYPE:
     """
     admin role types
     """
-    SUPER_ADMIN = 0
     ADMIN = 1
     JUDGE = 2
-    USER = 3
 
 class ORGANIZATION_TYPE:
     """

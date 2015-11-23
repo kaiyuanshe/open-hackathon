@@ -78,8 +78,8 @@ class DockerHostManager(Component):
         for docker_host in vms:
             if self.hosted_docker.ping(docker_host):
                 return docker_host
-
-        self.create_docker_host_vm(hackathon.id)
+        if not self.util.is_local():
+            self.create_docker_host_vm(hackathon.id)
         return None
         # raise Exception("No available VM.")
 
