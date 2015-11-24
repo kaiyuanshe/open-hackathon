@@ -492,10 +492,10 @@ class Team_Show_Type:
     SourceCode = 2
 
 
-class LoginProvider:
-    live = 1
-    github = 2
-    qq = 4
-    weibo = 8
-    gitcafe = 16
-    alauda = 32
+class LOGIN_PROVIDER:
+    LIVE = 1
+    GITHUB = 2
+    QQ = 4
+    WEIBO = 8
+    GITCAFE = 16
+    ALAUDA = 32

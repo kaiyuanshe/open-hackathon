@@ -47,25 +47,6 @@ Config = {
         "connection": 'mysql://%s:%s@%s:%s/%s' % (MYSQL_USER, MYSQL_PWD, MYSQL_HOST, MYSQL_PORT, MYSQL_DB)
     },
     "login": {
-        "github": {
-            "user_info_url": 'https://api.github.com/user?access_token=',
-            "emails_info_url": 'https://api.github.com/user/emails?access_token='
-        },
-        "qq": {
-            "openid_url": 'https://graph.qq.com/oauth2.0/me?access_token=',
-            "user_info_url": 'https://graph.qq.com/user/get_user_info?access_token=%s&oauth_consumer_key=%s&openid=%s'
-        },
-        "gitcafe": {
-            # gitcafe domain:  gcas.dgz.sh/gcs.dgz.sh for Staging, api.gitcafe.com/gitcafe.com for Production
-            "user_info_url": "https://gcas.dgz.sh/api/v1/user"
-        },
-        "weibo": {
-            "user_info_url": 'https://api.weibo.com/2/users/show.json?access_token=',
-            "email_info_url": 'https://api.weibo.com/2/account/profile/email.json?access_token='
-        },
-        "live": {
-            "user_info_url": 'https://apis.live.net/v5.0/me?access_token='
-        },
         "token_expiration_minutes": 60 * 24
     },
     "azure": {

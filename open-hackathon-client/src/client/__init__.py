@@ -28,21 +28,14 @@ from flask import Flask
 from flask_debugtoolbar import DebugToolbarExtension
 
 from functions import safe_get_config
-from database import db_session
 
 # flask
 app = Flask(__name__)
 
-app.config["SQLALCHEMY_DATABASE_URI"] = safe_get_config("mysql.connection", "mysql://root:root@localhost/hackathon")
 app.config['SECRET_KEY'] = safe_get_config("app.secret_key", "secret_key")
 
 app.config['DEBUG_TB_ENABLED'] = False
 toolbar = DebugToolbarExtension(app)
-
-
-@app.teardown_appcontext
-def shutdown_session(exception=None):
-    db_session.remove()
 
 
 class Context(object):
