@@ -11,6 +11,22 @@
           }
         }
       }
+    },
+    "post": {
+      "input": {
+        "title": "user login",
+        "type": "object",
+        "properties": {
+          "openid": {
+            "type": "string",
+            "description": "unique identifier of user in certain oauth provider"
+          },
+          "provider": {
+            "type": "string",
+            "description": "login provider"
+          }
+        }
+      }
     }
   }
 }

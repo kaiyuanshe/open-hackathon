@@ -155,10 +155,13 @@ class UserLoginResource(HackathonResource):
 
     def post(self):
         '''user login'''
-        pass
+        context = self.context()
+        return user_manager.login(context.provider, context)
 
+    @token_required
     def delete(self):
         '''User logout'''
+        return user_manager.logout(g.user.id)
 
 
 class CurrentUserResource(HackathonResource):

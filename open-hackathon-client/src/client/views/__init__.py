@@ -43,9 +43,7 @@ from flask import Response, render_template, request, g, redirect, make_response
 
 from client import app, Context
 from client.constants import LOGIN_PROVIDER
-from client.user.login import login_providers
 from client.user.login_manager import login_manager_helper
-from client.user.user_mgr import user_manager
 from client.functions import get_config, safe_get_config
 from client.log import log
 
@@ -99,17 +97,15 @@ def __login_failed(provider):
 
 
 def __login(provider):
-    code = request.args.get('code')
     try:
-        user_with_token = login_providers[provider].login({
-            "code": code
-        })
+        user_with_token = login_manager_helper.login(provider)
+
         if user_with_token is None:
             return __login_failed(provider)
 
         log.info("login successfully:" + repr(user_with_token))
 
-        token = user_with_token["token"].token
+        token = user_with_token["token"]
         login_user(user_with_token["user"])
         session["token"] = token
         if session.get("return_url") is not None:
@@ -328,7 +324,7 @@ def about():
 @app.route("/logout")
 @login_required
 def logout():
-    login_providers.values()[0].logout(g.user)
+    login_manager_helper.logout(session.get("token"))
     return_url = request.args.get("return_url", "/")
     if "manage/" in return_url:
         return_url = "/"

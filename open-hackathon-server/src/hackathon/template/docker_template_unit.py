@@ -148,6 +148,8 @@ class DockerTemplateUnit(TemplateUnit):
         self.dic.pop(DOCKER_UNIT.REMOTE, None)
         if not self.dic[DOCKER_UNIT.CMD]:
             self.dic.pop(DOCKER_UNIT.CMD, [])
+        if not self.dic[DOCKER_UNIT.ENTRY_POINT]:
+            self.dic.pop(DOCKER_UNIT.ENTRY_POINT, "")
         return self.dic
 
     def get_image_with_tag(self):

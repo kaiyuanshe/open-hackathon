@@ -29,14 +29,20 @@ sys.path.append("..")
 import requests
 import json
 
+from flask import session, request
+from flask_login import logout_user
+
 from client.functions import get_config
 from client.log import log
+from client.md5 import encode
+from client.constants import LOGIN_PROVIDER
 from user import User
+from oauth_login import login_providers
 
 
 class LoginManagerHelper():
     '''Helper class for flask-login.LoginManager'''
-    headers = {"content-type": "application/json"}
+    headers = {"Content-Type": "application/json"}
     login_url = get_config("hackathon-api.endpoint") + "/api/user/login"
 
     def load_user(self, id):
@@ -46,6 +52,58 @@ class LoginManagerHelper():
             return login_user
         except Exception as e:
             log.errer(e)
+            return None
+
+    def logout(self, token):
+        try:
+            requests.delete(self.login_url, headers={"token": token})
+        except Exception as e:
+            log.errer(e)
+
+        session.pop("token", "")
+        logout_user()
+
+    def login(self, provider):
+        if provider == LOGIN_PROVIDER.MYSQL:
+            return self.__mysql_login()
+        else:
+            return self.__oauth_login(provider)
+
+    def __oauth_login(self, provider):
+        code = request.args.get('code')
+        oauth_resp = login_providers[provider].login({
+            "code": code
+        })
+
+        return self.__remote_login(oauth_resp)
+
+    def __mysql_login(self):
+
+        data = {
+            "provider": LOGIN_PROVIDER.MYSQL,
+            "openid": request.form['username'],
+            "username": request.form['username'],
+            "password": encode(request.form['password'])
+        }
+
+        return self.__remote_login(data)
+
+    def __remote_login(self, data):
+        try:
+            req = requests.post(self.login_url, json=data, headers=self.headers)
+            resp = req.json()
+            if "error" in resp:
+                log.debug("login failed: %r" % resp)
+                return None
+            else:
+                login_user = User(resp["user"])
+                token = resp["token"]
+                return {
+                    "user": login_user,
+                    "token": token["token"]
+                }
+        except Exception as e:
+            log.error(e)
             return None
 
 

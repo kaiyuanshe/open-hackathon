@@ -47,3 +47,9 @@ class User():
 
     def get_id(self):
         return unicode(self.get_user_id())
+
+    def is_super(self):
+        return self.is_super
+
+    def __repr__(self):
+        return repr(self.__dict__)
