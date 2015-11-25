@@ -32,7 +32,7 @@
     var team_date = {};
 
     function splitShow(data) {
-        var _data = {video: [], img: [], code: []};
+        var _data = {video: [], img: [], code: [], office: []};
         $.each(data, function (i, o) {
             switch (o.type) {
                 case 0:
@@ -42,6 +42,9 @@
                     _data.video.push(o);
                     break;
                 case 2:
+                    _data.code.push(o);
+                    break;
+                case 3:
                     _data.code.push(o);
                     break;
             }
@@ -80,6 +83,7 @@
 
         getShow().then(function (data) {
             if (!data.error) {
+                $("#show_count").val("（" + data.length + "）")
                 var slipt_data = splitShow(data);
                 var temp = $('#show_item');
                 $('#works_video').append(temp.tmpl(slipt_data.video));

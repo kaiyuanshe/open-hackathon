@@ -406,6 +406,10 @@ h2:first-child {
     max-width: 100%;
 }
 
+.works_img div {
+    margin-top: 10px
+}
+
 .addshow {
     border-bottom: 1px solid #ddd;
     padding: 10px 0;

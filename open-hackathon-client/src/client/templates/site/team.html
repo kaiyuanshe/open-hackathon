@@ -77,7 +77,7 @@
     <div id="team_works">
         <div class="container team-box">
             <div class="oh-header clearfix">
-                <h2 class="">团队作品 <span>（0）</span></h2>
+                <h2 class="">团队作品 <span>(0)</span></h2>
             </div>
             <div class="works" id="works">
                 <div class="works_video" id="works_video">
@@ -384,8 +384,10 @@
                         {{html uri}}
                     </div>
                 </div>
-            {{else}}
+            {{else type==2}}
                 <li class="work_item"><a href="${uri}">${uri}</a> <div class="delete"><a href="javascript:;" data-role="delete-show"><i class="fa fa-trash-o"></i></a></div></li>
+            {{else}}
+                <li></li>
             {{/if}}
         {% endraw %}
     {% else %}
@@ -406,6 +408,15 @@
                      </div>
                      <div class="col-md-9 col-md-pull-3 iframe">
                          {{html uri}}
+                     </div>
+                </div>
+            {{else type == 3}}
+                <div class="row">
+                    <div class="col-md-3 col-md-push-9">
+                          ${note}
+                     </div>
+                     <div class="col-md-9 col-md-pull-3 iframe">
+                        <iframe src="${uri}"></iframe>
                      </div>
                 </div>
             {{else}}
