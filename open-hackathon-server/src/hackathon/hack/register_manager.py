@@ -33,7 +33,7 @@ from flask import g
 from hackathon import Component, RequiredFeature
 from hackathon.database import UserHackathonRel, Experiment,HackathonConfig, UserHackathonAsset
 from hackathon.hackathon_response import bad_request, precondition_failed, internal_server_error, not_found, ok, login_provider_error
-from hackathon.constants import EStatus, RGStatus, HACKATHON_BASIC_INFO, HACKATHON_STAT, LoginProvider
+from hackathon.constants import EStatus, RGStatus, HACKATHON_BASIC_INFO, HACKATHON_STAT, LOGIN_PROVIDER
 
 __all__ = ["RegisterManager"]
 
@@ -238,22 +238,22 @@ class RegisterManager(Component):
         data = {"fail": False, "provides": []}
         hackathon_login_provider = int(login_provider.value)
 
-        if hackathon_login_provider & LoginProvider.live == LoginProvider.live:
+        if hackathon_login_provider & LOGIN_PROVIDER.LIVE == LOGIN_PROVIDER.LIVE:
             data["provides"].append("live")
 
-        if hackathon_login_provider & LoginProvider.github == LoginProvider.github:
+        if hackathon_login_provider & LOGIN_PROVIDER.GITHUB == LOGIN_PROVIDER.GITHUB:
             data["provides"].append("github")
 
-        if hackathon_login_provider & LoginProvider.qq == LoginProvider.qq:
+        if hackathon_login_provider & LOGIN_PROVIDER.QQ == LOGIN_PROVIDER.QQ:
             data["provides"].append("qq")
 
-        if hackathon_login_provider & LoginProvider.weibo == LoginProvider.weibo:
+        if hackathon_login_provider & LOGIN_PROVIDER.WEIBO == LOGIN_PROVIDER.WEIBO:
             data["provides"].append("weibo")
 
-        if hackathon_login_provider & LoginProvider.gitcafe == LoginProvider.gitcafe:
+        if hackathon_login_provider & LOGIN_PROVIDER.GITCAFE == LOGIN_PROVIDER.GITCAFE:
             data["provides"].append("gitcafe")
 
-        if hackathon_login_provider & LoginProvider.alauda == LoginProvider.alauda:
+        if hackathon_login_provider & LOGIN_PROVIDER.ALAUDA == LOGIN_PROVIDER.ALAUDA:
             data["provides"].append("alauda")
 
 

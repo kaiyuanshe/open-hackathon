@@ -31,31 +31,18 @@ import urllib2
 
 sys.path.append("..")
 
-from client.functions import get_remote, get_config, post_to_remote, convert, qs_dict
-from client.log import log
 import json
 import requests
 from requests.auth import HTTPBasicAuth
-from user_mgr import user_manager
-from flask import session, request
-from flask_login import logout_user
+
+from client.functions import get_remote, get_config, post_to_remote, convert, qs_dict
+from client.log import log
 from client.constants import LOGIN_PROVIDER
-from client.database import db_adapter
-from client.database.models import UserHackathonAsset, Hackathon
 
 
 class LoginBase():
-    def logout(self, admin):
-        if admin.is_authenticated():
-            if user_manager.db_logout(admin):
-                info = "ok"
-            else:
-                info = "log out failed"
-            session.pop("token")
-            logout_user()
-            return info
-        else:
-            return "ok"
+    def login(self, args):
+        pass
 
 
 class QQLogin(LoginBase):
@@ -93,13 +80,18 @@ class QQLogin(LoginBase):
             avatar_url = user_info["figureurl_qq_1"]
         elif "figureurl" in user_info:  # try qzone logo
             avatar_url = user_info["figureurl"]
-        return user_manager.oauth_db_login(info["openid"],
-                                           name=user_info["nickname"],
-                                           provider=LOGIN_PROVIDER.QQ,
-                                           nickname=user_info["nickname"],
-                                           access_token=access_token,
-                                           email_list=[],
-                                           avatar_url=avatar_url)
+
+        required_info = {
+            "openid": info["openid"],
+            "provider": LOGIN_PROVIDER.QQ,
+            "name": user_info["nickname"],
+            "nickname": user_info["nickname"],
+            "access_token": access_token,
+            "email_list": [],
+            "avatar_url": avatar_url
+        }
+
+        return required_info
 
     def get_token(self, code):
         """ Get qq access token
@@ -202,13 +194,17 @@ class GithubLogin(LoginBase):
         if not nickname:
             nickname = name
 
-        return user_manager.oauth_db_login(str(user_info["id"]),
-                                           provider=LOGIN_PROVIDER.GITHUB,
-                                           name=user_info["login"],
-                                           nickname=nickname,
-                                           access_token=access_token,
-                                           email_list=email_list,
-                                           avatar_url=user_info["avatar_url"])
+        required_info = {
+            "openid": str(user_info["id"]),
+            "provider": LOGIN_PROVIDER.GITHUB,
+            "name": name,
+            "nickname": nickname,
+            "access_token": access_token,
+            "email_list": email_list,
+            "avatar_url": user_info["avatar_url"]
+        }
+
+        return required_info
 
     def get_token(self, code):
         """ Get github access token
@@ -326,13 +322,17 @@ class GitcafeLogin(LoginBase):
             }
         ]
 
-        return user_manager.oauth_db_login(user_info['id'],
-                                           provider=LOGIN_PROVIDER.GITCAFE,
-                                           name=name,
-                                           nickname=nickname,
-                                           access_token=access_token,
-                                           email_list=email_list,
-                                           avatar_url=avatar_url)
+        required_info = {
+            "openid": user_info['id'],
+            "provider": LOGIN_PROVIDER.GITCAFE,
+            "name": name,
+            "nickname": nickname,
+            "access_token": access_token,
+            "email_list": email_list,
+            "avatar_url": avatar_url
+        }
+
+        return required_info
 
     def get_token(self, code):
         """ Get gitcafe access token
@@ -412,13 +412,17 @@ class WeiboLogin(LoginBase):
             }
         ]
 
-        return user_manager.oauth_db_login(user_info["id"],
-                                           provider=LOGIN_PROVIDER.WEIBO,
-                                           name=name,
-                                           nickname=user_info["screen_name"],
-                                           access_token=access_token["access_token"],
-                                           email_list=email_list,
-                                           avatar_url=user_info["avatar_hd"])
+        required_info = {
+            "openid": str(user_info["id"]),
+            "provider": LOGIN_PROVIDER.WEIBO,
+            "name": name,
+            "nickname": user_info["screen_name"],
+            "access_token": access_token["access_token"],
+            "email_list": email_list,
+            "avatar_url": user_info["avatar_hd"]
+        }
+
+        return required_info
 
     def get_token(self, code):
         """ Get weibo access token
@@ -489,36 +493,6 @@ class WeiboLogin(LoginBase):
         return email_info_resp_json['email']
 
 
-class MySQLLogin(LoginBase):
-    """Sign in with mysql
-
-    :Example:
-        from client.user.login import MySQLLogin
-
-        MySQLLogin()
-
-    .. notes::
-    """
-
-    def login(self, args):
-        """ mysql Login
-
-        :type args: dict
-        :param args:
-
-        :rtype: dict
-        :return: token and instance of user
-        """
-
-        user = request.form['username']
-        pwd = request.form['password']
-        if user is None or pwd is None:
-            log.warn("login without user or pwd")
-            return None
-
-        return user_manager.mysql_login(user, pwd)
-
-
 class LiveLogin(LoginBase):
     """Sign in with live
 
@@ -559,13 +533,17 @@ class LiveLogin(LoginBase):
             }
         ]
 
-        return user_manager.oauth_db_login(user_info["id"],
-                                           provider=LOGIN_PROVIDER.LIVE,
-                                           name=name,
-                                           nickname=name,
-                                           access_token=access_token,
-                                           email_list=email_list,
-                                           avatar_url=None)
+        required_info = {
+            "openid": user_info["id"],
+            "provider": LOGIN_PROVIDER.LIVE,
+            "name": name,
+            "nickname": name,
+            "access_token": access_token,
+            "email_list": email_list,
+            "avatar_url": None
+        }
+
+        return required_info
 
     def get_token(self, code):
         """ Get live access token
@@ -692,36 +670,18 @@ class AlaudaLogin(LoginBase):
             }
         ]
 
-        user_with_token = user_manager.oauth_db_login(username,
-                                                      provider=LOGIN_PROVIDER.ALAUDA,
-                                                      name=username,
-                                                      nickname=resp.get("realname", username),
-                                                      access_token=resp["access_token"],
-                                                      email_list=email_list,
-                                                      avatar_url=resp.get("logo_file"))
+        required_info = {
+            "openid": username,
+            "provider": LOGIN_PROVIDER.ALAUDA,
+            "name": username,
+            "nickname": resp.get("realname", username),
+            "access_token": resp["access_token"],
+            "email_list": email_list,
+            "avatar_url": resp.get("logo_file"),
+            "oxford_api": resp.get("oxford_api")
+        }
 
-        # for oxford only
-        self.oxford(user_with_token["user"], resp.get("oxford_api"))
-
-        return user_with_token
-
-    def oxford(self, user, oxford_api):
-        if not oxford_api:
-            return
-
-        hackathon = db_adapter.find_first_object_by(Hackathon, name="oxford")
-        if hackathon:
-            exist = db_adapter.find_first_object_by(UserHackathonAsset, asset_value=oxford_api)
-            if exist:
-                return
-
-            asset = UserHackathonAsset(user_id=user.id,
-                                       hackathon_id=hackathon.id,
-                                       asset_name="Oxford Token",
-                                       asset_value=oxford_api,
-                                       description="Token for Oxford API")
-            db_adapter.add_object(asset)
-            db_adapter.commit()
+        return required_info
 
 
 login_providers = {
@@ -729,7 +689,6 @@ login_providers = {
     LOGIN_PROVIDER.WEIBO: WeiboLogin(),
     LOGIN_PROVIDER.QQ: QQLogin(),
     LOGIN_PROVIDER.GITCAFE: GitcafeLogin(),
-    LOGIN_PROVIDER.MYSQL: MySQLLogin(),
     LOGIN_PROVIDER.ALAUDA: AlaudaLogin(),
     LOGIN_PROVIDER.LIVE: LiveLogin()
 }

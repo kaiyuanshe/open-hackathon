@@ -146,6 +146,24 @@ class GuacamoleResource(HackathonResource):
         return guacamole.getConnectInfo()
 
 
+class UserLoginResource(HackathonResource):
+    '''User login/logout processing'''
+
+    def get(self):
+        '''Get user by id'''
+        return user_manager.load_user(self.context().id)
+
+    def post(self):
+        '''user login'''
+        context = self.context()
+        return user_manager.login(context.provider, context)
+
+    @token_required
+    def delete(self):
+        '''User logout'''
+        return user_manager.logout(g.user.id)
+
+
 class CurrentUserResource(HackathonResource):
     @token_required
     def get(self):
