@@ -117,7 +117,23 @@
                             </dl>
 
                             <div id="status">
-                                {% if hackathon.registration_end_time < get_now() %}
+                                {% if hackathon.registration_end_time < get_now() and  hackathon.event_end_time > get_now() %}
+                                    {% if registration != None %} 
+                                        {% if hackathon.config.auto_approve =='1' or registration.status == 1 or (hackathon.config.auto_approve =='0' and registration.status == 3) %}
+                                            {% if experiment == None %}
+                                                <a class="btn btn-primary btn-lg"
+                                                   href="{{ url_for('temp_settings',hackathon_name=hackathon_name) }}">立即参加</a>
+                                            {% else %}
+                                                <a class="btn btn-primary btn-lg"
+                                                   href="{{ url_for('workspace',hackathon_name=hackathon_name) }}">立即参加</a>
+                                            {% endif %}
+                                            <p>您的报名已经审核已通过。</p>
+                                        {% elif (not hackathon.config.auto_approve == '0' and registration.status == 3 ) or  registration.status == 0 %}
+                                            <p>您的报名正在审核中，请等待。</p>
+                                        {% elif registration.status == 2 %}
+                                            <p>您的报名已被拒绝，如有疑问请联系主办方。</p>
+                                        {% endif %}
+                                    {% endif %}
                                     <p>报名已经结束。</p>
                                 {% elif hackathon.event_end_time < get_now() %}
                                     <p>活动已结束。</p>
