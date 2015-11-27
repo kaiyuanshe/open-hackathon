@@ -143,6 +143,7 @@ class DockerTemplateUnit(TemplateUnit):
                   DOCKER_UNIT.HOST_CONFIG_HOST_PORT: str(p[DOCKER_UNIT.PORTS_HOST_PORT])}]
         self.dic.pop(DOCKER_UNIT.NAME, "")
         self.dic.pop(DOCKER_UNIT.TYPE, "")
+        self.dic.pop(DOCKER_UNIT.PROVIDER, "")
         self.dic.pop(DOCKER_UNIT.DESCRIPTION, "")
         self.dic.pop(DOCKER_UNIT.PORTS, None)
         self.dic.pop(DOCKER_UNIT.REMOTE, None)

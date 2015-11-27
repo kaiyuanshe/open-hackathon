@@ -5,7 +5,7 @@
     "virtual_environments":
     [
         {
-            "provider": "docker",
+            "provider": 0,
             "name": "web",
             "type": "ubuntu terminal",
             "description": "sample environment for ampcamp 2015",
