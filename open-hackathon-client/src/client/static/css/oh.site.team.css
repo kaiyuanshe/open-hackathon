@@ -142,6 +142,10 @@ fieldset {
     font-size: 15px;
 }
 
+.work_item span {
+    margin-right: 20px
+}
+
 .edit input,
 .edit textarea {
     width: 100%;
@@ -382,20 +386,21 @@ h2:first-child {
     height: 500px !important;
 }
 
-.works_video, .works_img, .works_code {
+.works_video, .works_img, .works_code, .works_other {
     padding-bottom: 40px;
 }
 
 .works_video .delete,
+.works_doc .delete,
 .works_img .delete {
     font-size: 20px;
-    text-align: right;
     padding-right: 5px;
     color: #fff;
     border-bottom: 1px solid #ddd;
     margin-bottom: 10px;
 }
 
+.works_other .delete,
 .works_code .delete {
     display: inline-block;
     margin-left: 100px;
@@ -420,7 +425,7 @@ h2:first-child {
     margin-bottom: 20px;
 }
 
-.works_code {
+.works_code, .works_other {
     padding: 0;
     list-style: none;
 }

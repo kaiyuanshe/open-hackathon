@@ -81,36 +81,48 @@
             </div>
             <div class="works" id="works">
                 <div class="works_video" id="works_video">
-                    {% if team.is_leader %}
-                        <div class="addshow">
-                            <a href="javascript:" data-role="addVideo"><i class="fa fa-plus"></i>
-                                添加视频展示</a>
-                        </div>
-                    {% endif %}
+                    <div class="addshow">
+                        <span>视频展示</span>
+                        {% if team.is_leader %}
+                            <a href="javascript:" data-role="addVideo"><i class="fa fa-plus"></i></a>
+                        {% endif %}
+                    </div>
+
                 </div>
             </div>
             <div class="works_img" id="works_img">
-                {% if team.is_leader %}
-                    <div class="addshow">
-                        <a href="javascript:" data-role="addImg"><i class="fa fa-plus"></i> 添加图片展示</a>
-                    </div>
-                {% endif %}
+                <div class="addshow">
+                    <span>图片展示</span>
+                    {% if team.is_leader %}
+                        <a href="javascript:" data-role="addImg"><i class="fa fa-plus"></i></a>
+                    {% endif %}
+                </div>
             </div>
             <div class="works_doc" id="works_doc">
-                {% if team.is_leader %}
-                    <div class="addshow">
-                        <a href="javascript:" data-role="addDoc"><i class="fa fa-plus"></i> 添加文档说明</a>
-                    </div>
-                {% endif %}
-            </div>
-            {% if team.is_leader %}
                 <div class="addshow">
-                    <a href="javascript:" data-role="addCode"><i class="fa fa-plus"></i>
-                        添加源代码地址</a>
+                    <span>文档说明</span>
+                    {% if team.is_leader %}
+                        <a href="javascript:" data-role="addDoc"><i class="fa fa-plus"></i></a>
+                    {% endif %}
                 </div>
-            {% endif %}
+            </div>
             <div>
-                <ul class="works_code show_item" id="works_code"></ul>
+                <div class="addshow">
+                    <span>源代码地址</span>
+                    {% if team.is_leader %}
+                        <a href="javascript:" data-role="addCode"><i class="fa fa-plus"></i></a>
+                    {% endif %}
+                </div>
+                <ul class="works_code" id="works_code"></ul>
+            </div>
+            <div>
+                <div class="addshow">
+                    <span>其他展示</span>
+                    {% if team.is_leader %}
+                        <a href="javascript:" data-role="addOther"><i class="fa fa-plus"></i></a>
+                    {% endif %}
+                </div>
+                <ul class="works_other" id="works_other"></ul>
             </div>
         </div>
     </div>
@@ -335,11 +347,6 @@
                 </div>
             </div>
             {% endraw %}
-
-
-
-
-
         </script>
     {% else %}
         <script id="team_item" type="text/x-jquery-tmpl">
@@ -371,7 +378,7 @@
     {% if team.is_leader %}
         {% raw %}
             {{if type == 0 }}
-                <div class="row work_item">
+                <div class="row work_item show_item">
                      <div class="col-md-3 col-md-push-9">
                           <div class="delete"><a href="javascript:;" data-role="delete-show" title="删除"><i class="fa fa-trash-o"></i></a></div>
                           ${note}
@@ -382,7 +389,7 @@
                      </div>
                 </div>
             {{else type == 1}}
-                <div class="row work_item">
+                <div class="row work_item show_item">
                     <div class="col-md-3 col-md-push-9">
                          <div class="delete"><a href="javascript:;" data-role="delete-show" title="删除"><i class="fa fa-trash-o"></i></a></div>
                           ${note}
@@ -392,9 +399,51 @@
                     </div>
                 </div>
             {{else type==2}}
-                <li class="work_item"><a href="${uri}">${uri}</a> <div class="delete"><a href="javascript:;" data-role="delete-show"><i class="fa fa-trash-o"></i></a></div></li>
+                <li class="work_item"><span>${note}:</span><a href="${uri}" target="_blank">${uri}</a> <div class="delete"><a href="javascript:;" data-role="delete-show"><i class="fa fa-trash-o"></i></a></div></li>
+            {{else type==3}}
+                <div class="row show_item">
+                    <div class="col-md-3 col-md-push-9">
+                        <div class="delete"><a href="javascript:;" data-role="delete-show" title="删除"><i class="fa fa-trash-o"></i></a></div>
+                        ${note}
+                    </div>
+                    <div class="col-md-9 col-md-pull-3 iframe">
+                        <iframe src="${uri}" seamless="seamless" frameborder="0" scrolling="yes"></iframe>
+                    </div>
+                </div>
+            {{else type==4}}
+                <div class="row show_item">
+                    <div class="col-md-3 col-md-push-9">
+                        <div class="delete"><a href="javascript:;" data-role="delete-show" title="删除"><i class="fa fa-trash-o"></i></a></div>
+                        ${note}
+                    </div>
+                    <div class="col-md-9 col-md-pull-3 iframe">
+                        <iframe src="${uri}" seamless="seamless" frameborder="0" scrolling="yes"></iframe>
+                    </div>
+                </div>
+            {{else type==5}}
+                <div class="row show_item">
+                    <div class="col-md-3 col-md-push-9">
+                        <div class="delete"><a href="javascript:;" data-role="delete-show" title="删除"><i class="fa fa-trash-o"></i></a></div>
+                        ${note}
+                    </div>
+                    <div class="col-md-9 col-md-pull-3 iframe">
+                        <iframe src="${uri}" seamless="seamless" frameborder="0" scrolling="yes"></iframe>
+                    </div>
+                </div>
+            {{else type == 6}}
+                <div class="row show_item">
+                    <div class="col-md-3 col-md-push-9">
+                        <div class="delete"><a href="javascript:;" data-role="delete-show" title="删除"><i class="fa fa-trash-o"></i></a></div>
+                        ${note}
+                    </div>
+                    <div class="col-md-9 col-md-pull-3 pdf">
+                        <object data="${uri}" type="application/pdf" width="100%" height="100%">
+                            <p>Your browser doesn't support PDF viewing. Please install PDF viewer plugin!</p>
+                        </object>
+                    </div>
+                </div>
             {{else}}
-                <li></li>
+                <li class="work_item"><a href="${uri}" target="_blank">${note}</a> <div class="delete"><a href="javascript:;" data-role="delete-show"><i class="fa fa-trash-o"></i></a></div></li>
             {{/if}}
         {% endraw %}
     {% else %}
@@ -418,7 +467,34 @@
                      </div>
                 </div>
             {{else type == 2}}
-                <li><a href="${uri}">${uri}</a></li>
+                <li><span>${note}:</span><a href="${uri}" target="_blank">${uri}</a></li>
+            {{else type==3}}
+                <div class="row show_item">
+                    <div class="col-md-3 col-md-push-9">
+                          ${note}
+                     </div>
+                     <div class="col-md-9 col-md-pull-3 iframe">
+                         <iframe src="${uri}" seamless="seamless" frameborder="0" scrolling="yes"></iframe>
+                     </div>
+                </div>
+            {{else type==4}}
+                <div class="row show_item">
+                    <div class="col-md-3 col-md-push-9">
+                          ${note}
+                     </div>
+                     <div class="col-md-9 col-md-pull-3 iframe">
+                         <iframe src="${uri}" seamless="seamless" frameborder="0" scrolling="yes"></iframe>
+                     </div>
+                </div>
+            {{else type==5}}
+                <div class="row show_item">
+                    <div class="col-md-3 col-md-push-9">
+                          ${note}
+                     </div>
+                     <div class="col-md-9 col-md-pull-3 iframe">
+                         <iframe src="${uri}" seamless="seamless" frameborder="0" scrolling="yes"></iframe>
+                     </div>
+                </div>
             {{else type == 6}}
                 <div class="row show_item">
                     <div class="col-md-3 col-md-push-9">
@@ -431,14 +507,7 @@
                      </div>
                 </div>
             {{else}}
-                <div class="row show_item">
-                    <div class="col-md-3 col-md-push-9">
-                          ${note}
-                     </div>
-                     <div class="col-md-9 col-md-pull-3 iframe">
-                         <iframe src="${uri}" seamless="seamless" frameborder="0" scrolling="yes"></iframe>
-                     </div>
-                </div>
+                <li><a href="${uri}" target="_blank">${note}</a></li>
             {{/if}}
         {% endraw %}
     {% endif %}

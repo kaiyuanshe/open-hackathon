@@ -496,6 +496,7 @@ class Team_Show_Type:
     Excel = 4  # excel
     Word = 5  # word
     Pdf = 6  # pdf
+    Other = 99  # other
 
 
 class LOGIN_PROVIDER:

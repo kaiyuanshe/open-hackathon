@@ -37,7 +37,7 @@
     }
 
     function splitShow(data) {
-        var _data = {video: [], img: [], code: [], doc: []};
+        var _data = {video: [], img: [], code: [], doc: [], other: []};
         $.each(data, function (i, o) {
             switch (o.type) {
                 case 0:
@@ -56,6 +56,10 @@
                 case 4:
                 case 5:
                     _data.doc.push(office_app(o))
+                    break;
+                default:
+                    _data.other.push(o)
+                    break;
             }
         });
         return _data;
@@ -98,11 +102,8 @@
                 $('#works_video').append(temp.tmpl(split_data.video));
                 $('#works_img').append(temp.tmpl(split_data.img));
                 $('#works_doc').append(temp.tmpl(split_data.doc));
-                if (split_data.code.length > 0) {
-                    $('#works_code')
-                        .before('<span>源代码地址：</span>')
-                        .append(temp.tmpl(split_data.code));
-                }
+                $('#works_code').append(temp.tmpl(split_data.code));
+                $('#works_other').append(temp.tmpl(split_data.other));
 
                 $('#team_works h2 span').text('(' + data.length + ')');
             } else {
