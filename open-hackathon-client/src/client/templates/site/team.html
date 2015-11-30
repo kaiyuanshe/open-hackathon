@@ -96,14 +96,21 @@
                     </div>
                 {% endif %}
             </div>
+            <div class="works_doc" id="works_doc">
+                {% if team.is_leader %}
+                    <div class="addshow">
+                        <a href="javascript:" data-role="addDoc"><i class="fa fa-plus"></i> 添加文档说明</a>
+                    </div>
+                {% endif %}
+            </div>
             {% if team.is_leader %}
                 <div class="addshow">
                     <a href="javascript:" data-role="addCode"><i class="fa fa-plus"></i>
-                        添加项目地址</a>
+                        添加源代码地址</a>
                 </div>
             {% endif %}
             <div>
-                <ul class="works_code" id="works_code"></ul>
+                <ul class="works_code show_item" id="works_code"></ul>
             </div>
         </div>
     </div>
@@ -393,7 +400,7 @@
     {% else %}
         {% raw %}
             {{if type == 0 }}
-                <div class="row">
+                <div class="row show_item">
                      <div class="col-md-3 col-md-push-9">
                           ${note}
                      </div>
@@ -402,7 +409,7 @@
                      </div>
                 </div>
             {{else type == 1}}
-                <div class="row">
+                <div class="row show_item">
                     <div class="col-md-3 col-md-push-9">
                           ${note}
                      </div>
@@ -410,28 +417,31 @@
                          {{html uri}}
                      </div>
                 </div>
-            {{else type == 3}}
-                <div class="row">
+            {{else type == 2}}
+                <li><a href="${uri}">${uri}</a></li>
+            {{else type == 6}}
+                <div class="row show_item">
+                    <div class="col-md-3 col-md-push-9">
+                          ${note}
+                     </div>
+                     <div class="col-md-9 col-md-pull-3 pdf">
+                         <object data="${uri}" type="application/pdf" width="100%" height="100%">
+                             <p>Your browser doesn't support PDF viewing. Please install PDF viewer plugin!</p>
+                         </object>
+                     </div>
+                </div>
+            {{else}}
+                <div class="row show_item">
                     <div class="col-md-3 col-md-push-9">
                           ${note}
                      </div>
                      <div class="col-md-9 col-md-pull-3 iframe">
-                        <iframe src="${uri}"></iframe>
+                         <iframe src="${uri}" seamless="seamless" frameborder="0" scrolling="yes"></iframe>
                      </div>
                 </div>
-            {{else}}
-                <li><a href="${uri}">${uri}</a></li>
             {{/if}}
         {% endraw %}
     {% endif %}
-
-
-
-
-
-
-
-
     </script>
     <script id="score_item" type="text/x-jquery-tmpl">
         {% raw %}

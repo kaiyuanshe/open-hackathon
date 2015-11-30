@@ -492,7 +492,10 @@ class Team_Show_Type:
     Image = 0  # image
     Video = 1  # e.g. Youku link
     SourceCode = 2  # e.g. github
-    Office = 3  # ppt, word or excel
+    PowerPoint = 3  # ppt
+    Excel = 4  # excel
+    Word = 5  # word
+    Pdf = 6  # pdf
 
 
 class LOGIN_PROVIDER:

@@ -406,8 +406,12 @@ h2:first-child {
     max-width: 100%;
 }
 
-.works_img div {
-    margin-top: 10px
+.show_item {
+    margin-top: 20px
+}
+
+.show_item .pdf {
+    height: 583px
 }
 
 .addshow {

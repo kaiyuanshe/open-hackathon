@@ -31,8 +31,13 @@
     var uid = 0;
     var team_date = {};
 
+    function office_app(team_show) {
+        team_show.uri = "https://view.officeapps.live.com/op/embed.aspx?src=" + encodeURIComponent(team_show.uri)
+        return team_show
+    }
+
     function splitShow(data) {
-        var _data = {video: [], img: [], code: [], office: []};
+        var _data = {video: [], img: [], code: [], doc: []};
         $.each(data, function (i, o) {
             switch (o.type) {
                 case 0:
@@ -44,9 +49,13 @@
                 case 2:
                     _data.code.push(o);
                     break;
-                case 3:
-                    _data.code.push(o);
+                case 6:
+                    _data.doc.push(o)
                     break;
+                case 3:
+                case 4:
+                case 5:
+                    _data.doc.push(office_app(o))
             }
         });
         return _data;
@@ -84,14 +93,15 @@
         getShow().then(function (data) {
             if (!data.error) {
                 $("#show_count").val("（" + data.length + "）")
-                var slipt_data = splitShow(data);
+                var split_data = splitShow(data);
                 var temp = $('#show_item');
-                $('#works_video').append(temp.tmpl(slipt_data.video));
-                $('#works_img').append(temp.tmpl(slipt_data.img));
-                if (slipt_data.code.length > 0) {
+                $('#works_video').append(temp.tmpl(split_data.video));
+                $('#works_img').append(temp.tmpl(split_data.img));
+                $('#works_doc').append(temp.tmpl(split_data.doc));
+                if (split_data.code.length > 0) {
                     $('#works_code')
-                        .before('<span>链接地址：</span>')
-                        .append(temp.tmpl(slipt_data.code));
+                        .before('<span>源代码地址：</span>')
+                        .append(temp.tmpl(split_data.code));
                 }
 
                 $('#team_works h2 span').text('(' + data.length + ')');
