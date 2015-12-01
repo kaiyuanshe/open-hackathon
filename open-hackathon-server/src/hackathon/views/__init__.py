@@ -52,6 +52,7 @@ def init_routes():
     api.add_resource(HackathonStatResource, "/api/hackathon/stat")  # get statistics of hackathon
     api.add_resource(HackathonRegistrationListResource, "/api/hackathon/registration/list")  # list registered users
     api.add_resource(HackathonGrantedAwardsResource, "/api/hackathon/grantedawards")  # list registered users
+    api.add_resource(GranteAwardsResource, "/api/grantedawards")
     api.add_resource(TalentResource, "/api/talent/list")  # list talents(达人)
     api.add_resource(HackathonTagNamesResource, "/api/tags")  # all distinct tag names
 
