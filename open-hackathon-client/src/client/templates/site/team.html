@@ -215,7 +215,7 @@
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                                     aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title" id="myModalLabel">发布作品</h4>
+                            <h4 class="modal-title" id="myModalLabel">发布视频</h4>
                         </div>
                         <div class="modal-body">
                             <div class="form-group">
@@ -231,7 +231,7 @@
 
                                 <div class="col-sm-9">
                                     <textarea type="text" class="form-control" name="work_video"
-                                              placeholder="嵌入视频代码"
+                                              placeholder="<embed src='http://player.youku.com/......"
                                               data-bv-trigger="blur"
                                               data-bv-notempty-message="请填嵌入视频代码"></textarea>
                                 </div>
@@ -252,7 +252,7 @@
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                                     aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title" id="myModalLabel">发布作品</h4>
+                            <h4 class="modal-title" id="myModalLabel2">发布图片</h4>
                         </div>
                         <div class="modal-body">
                             <div class="form-group">
@@ -268,11 +268,101 @@
 
                                 <div class="col-sm-9">
                                     <input type="url" class="form-control" name="work_img"
-                                           placeholder="图片路径"
+                                           placeholder="http://"
                                            required
                                            data-bv-trigger="blur"
                                            data-bv-message="请填写正确的图片访问路径"
                                            data-bv-notempty-message="请填图片路径">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">确定</button>
+                            <button type="button" class="btn btn-warning" data-dismiss="modal">取消</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="modal fade" id="works_docModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <form id="addWorkDocForm" class="form-horizontal" novalidate>
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                    aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myDocLabel">发布文档</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label required">类型</label>
+
+                                <div class="col-sm-9">
+                                    <select class="form-control" name="type">
+                                        <option value="3">PowerPoint</option>
+                                        <option value="5">Word</option>
+                                        <option value="4">Excel</option>
+                                        <option value="6">PDF</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label required">描述</label>
+
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" name="note" maxlength="80"
+                                           placeholder="描述信息">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label required">文档路径</label>
+
+                                <div class="col-sm-9">
+                                    <input type="url" class="form-control" name="work_doc"
+                                           placeholder="http://"
+                                           required
+                                           data-bv-trigger="blur"
+                                           data-bv-message="请填写正确的文档访问路径"
+                                           data-bv-notempty-message="请填文档路径">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">确定</button>
+                            <button type="button" class="btn btn-warning" data-dismiss="modal">取消</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="modal fade" id="works_otherModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <form id="addWorkOtherForm" class="form-horizontal" novalidate>
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                    aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel">发布其他作品</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label required">描述</label>
+
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" name="note" maxlength="80"
+                                           placeholder="描述信息">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label required">作品路径</label>
+
+                                <div class="col-sm-9">
+                                    <input type="url" class="form-control" name="work_other"
+                                           placeholder="http://"
+                                           required
+                                           data-bv-trigger="blur"
+                                           data-bv-message="请填写正确的访问路径"
+                                           data-bv-notempty-message="请填路径">
                                 </div>
                             </div>
                         </div>
@@ -291,15 +381,23 @@
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                                     aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title" id="myModalLabel">发布作品</h4>
+                            <h4 class="modal-title" id="myModalLabel">发布其他作品</h4>
                         </div>
                         <div class="modal-body">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label required">描述</label>
+
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" name="note" maxlength="80"
+                                           placeholder="描述信息">
+                                </div>
+                            </div>
                             <div class="form-group">
                                 <label class="col-sm-3 control-label required">项目地址</label>
 
                                 <div class="col-sm-9">
                                     <input type="url" class="form-control" name="work_code"
-                                           placeholder="项目地址"
+                                           placeholder="https://github.com/......"
                                            data-bv-trigger="blur"
                                            data-bv-message="请填写正确的项目地址"
                                            data-bv-notempty-message="请填项目地址">
@@ -401,7 +499,7 @@
             {{else type==2}}
                 <li class="work_item"><span>${note}:</span><a href="${uri}" target="_blank">${uri}</a> <div class="delete"><a href="javascript:;" data-role="delete-show"><i class="fa fa-trash-o"></i></a></div></li>
             {{else type==3}}
-                <div class="row show_item">
+                <div class="row work_item show_item">
                     <div class="col-md-3 col-md-push-9">
                         <div class="delete"><a href="javascript:;" data-role="delete-show" title="删除"><i class="fa fa-trash-o"></i></a></div>
                         ${note}
@@ -411,7 +509,7 @@
                     </div>
                 </div>
             {{else type==4}}
-                <div class="row show_item">
+                <div class="row work_item show_item">
                     <div class="col-md-3 col-md-push-9">
                         <div class="delete"><a href="javascript:;" data-role="delete-show" title="删除"><i class="fa fa-trash-o"></i></a></div>
                         ${note}
@@ -421,7 +519,7 @@
                     </div>
                 </div>
             {{else type==5}}
-                <div class="row show_item">
+                <div class="row work_item show_item">
                     <div class="col-md-3 col-md-push-9">
                         <div class="delete"><a href="javascript:;" data-role="delete-show" title="删除"><i class="fa fa-trash-o"></i></a></div>
                         ${note}
@@ -431,7 +529,7 @@
                     </div>
                 </div>
             {{else type == 6}}
-                <div class="row show_item">
+                <div class="row work_item show_item">
                     <div class="col-md-3 col-md-push-9">
                         <div class="delete"><a href="javascript:;" data-role="delete-show" title="删除"><i class="fa fa-trash-o"></i></a></div>
                         ${note}
