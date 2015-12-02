@@ -32,6 +32,24 @@
                 $('#talent_list').append($('#talent_list_template').tmpl(data.splice(0, 6)));
             }
         });
+
+        getGrantedawards().then(function (data) {
+            if (data.error) {
+
+            } else {
+                var infn3 = $('#info3');
+                var tabs = infn3.find('.oh-tabs').append($('#award_title_template').tmpl(data));
+                infn3.find('.tab-content').append($('#award_list_template').tmpl(data));
+                tabs.tab();
+                tabs.find('a:eq(0)').trigger('click');
+                infn3.find('.carousel').each(function (i, o) {
+                    $(o).find('.carousel-indicators>li:eq(0)').addClass('active');
+                    $(o).find('.carousel-inner>.item:eq(0)').addClass('active');
+                })
+                infn3.find('.carousel').carousel();
+                infn3.removeClass('hide');
+            }
+        })
     }
 
     function bindEvent() {
@@ -40,6 +58,10 @@
 
     function getTalentList() {
         return oh.api.talent.list.get();
+    }
+
+    function getGrantedawards() {
+        return oh.api.grantedawards.get({query: {limit: 4}});
     }
 
     function init() {
