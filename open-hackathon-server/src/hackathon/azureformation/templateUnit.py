@@ -201,6 +201,8 @@ class TemplateUnit(Component):
             AZURE_UNIT.RP_PR: r[AZURE_UNIT.T_R_PROT],
             AZURE_UNIT.RP_PO: port,
             AZURE_UNIT.RP_UN: sc[AZURE_UNIT.T_SC_UN],
-            AZURE_UNIT.RP_PA: sc[AZURE_UNIT.T_SC_UP]
+            AZURE_UNIT.RP_PA: sc[AZURE_UNIT.T_SC_UP],
+            "enable-sftp": True
         }
+
         return remote
