@@ -354,7 +354,7 @@ class TeamShow(DBBase):
     id = Column(Integer, primary_key=True)
     note = Column(String(80))
     type = Column(Integer)
-    uri = Column(String(300))
+    uri = Column(Text)
     create_time = Column(TZDateTime, default=get_now())
 
     team_id = Column(Integer, ForeignKey('team.id', ondelete='CASCADE'))

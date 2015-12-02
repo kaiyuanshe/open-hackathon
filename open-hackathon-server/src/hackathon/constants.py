@@ -282,12 +282,14 @@ class ADMIN_ROLE_TYPE:
     ADMIN = 1
     JUDGE = 2
 
+
 class ORGANIZATION_TYPE:
     """
     Organization role type
     """
     ORGANIZER = 1
     PARTNER = 2
+
 
 class HACK_STATUS:
     INIT = 0
@@ -486,10 +488,15 @@ class AzureVMEnpointConfigType:
 
 
 class Team_Show_Type:
-    """Type of resource to be shown"""
-    Image = 0
-    Video = 1
-    SourceCode = 2
+    """Type of resource to be shown. """
+    Image = 0  # image
+    Video = 1  # e.g. Youku link
+    SourceCode = 2  # e.g. github
+    PowerPoint = 3  # ppt
+    Excel = 4  # excel
+    Word = 5  # word
+    Pdf = 6  # pdf
+    Other = 99  # other
 
 
 class LOGIN_PROVIDER:
