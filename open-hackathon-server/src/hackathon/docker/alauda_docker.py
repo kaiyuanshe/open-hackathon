@@ -151,8 +151,11 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
                 "name": service_name,
                 "protocol": guacamole[DOCKER_UNIT.REMOTE_PROTOCOL],
                 "hostname": alauda_port.get(ALAUDA.DEFAULT_DOMAIN),
-                "port": alauda_port.get(ALAUDA.SERVICE_PORT)
+                "port": alauda_port.get(ALAUDA.SERVICE_PORT),
+                "enable-sftp": True
             }
+
+
             if DOCKER_UNIT.REMOTE_USERNAME in guacamole:
                 gc["username"] = guacamole[DOCKER_UNIT.REMOTE_USERNAME]
 
