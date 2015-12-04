@@ -1,5 +1,5 @@
 <ul class="nav main-menu">
-    {% if g.user.is_super() %}
+    {% if g.user.is_super %}
         <li>
             <a class="dropmenu" href="sitemap#">
                 <i class="fa fa-sitemap"></i>
@@ -77,6 +77,11 @@
     <li>
         <a href="/manage/{{ hackathon_name }}/experiment">
             <i class="fa fa-desktop"></i><span class="hidden-sm text"> 环境管理</span>
+        </a>
+    </li>
+    <li>
+        <a href="/manage/{{ hackathon_name }}/host_server">
+            <i class="fa fa-server"></i><span class="hidden-sm text"> 服务器管理</span>
         </a>
     </li>
 </ul>

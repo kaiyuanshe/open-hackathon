@@ -49,7 +49,8 @@
                         <label class="col-md-3 control-label">搜索用户</label>
 
                         <div class="col-md-6">
-                            <input type="searchadminuser" class="form-control" name="admin_searchbar" id="admin_searchbar" placeholder="用户名/昵称/邮箱"
+                            <input type="searchadminuser" class="form-control" name="admin_searchbar"
+                                   id="admin_searchbar" placeholder="用户名/昵称/邮箱"
                                    required
                                    data-bv-trigger="blur"
                                    data-bv-notempty-message="搜索内容不能为空">
@@ -91,11 +92,14 @@
 {% endblock body %}
 
 {% block script %}
-<div class="modal fade bs-example-modal-sm" id="delete_admin_modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-api="oh.api.admin.register.delete">
+<div class="modal fade bs-example-modal-sm" id="delete_admin_modal" tabindex="-1" role="dialog"
+     aria-labelledby="mySmallModalLabel" aria-hidden="true" data-api="oh.api.admin.register.delete">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
                 <h4 class="modal-title">提示</h4>
             </div>
             <div class="modal-body">
@@ -109,11 +113,14 @@
     </div>
 </div>
 
-<div class="modal fade bs-example-modal-sm" id="edit_remark_modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-api="">
+<div class="modal fade bs-example-modal-sm" id="edit_remark_modal" tabindex="-1" role="dialog"
+     aria-labelledby="mySmallModalLabel" aria-hidden="true" data-api="">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
                 <h4 class="modal-title">提示</h4>
             </div>
             <div class="modal-body">
@@ -139,7 +146,9 @@
         <td>${user_info.nickname}</td>
         <td>${$item.getEmails(user_info.email)}</td>
         <td>
-            <a href="javascript:void(0);" id="searchlist_roletype" data-type="select" data-name="role_type" data-value="${role_type}" class="editable" data-source='{"1":"管理员", "2":"裁判"}' data-placement="top"></a>
+            <a href="javascript:void(0);" id="searchlist_roletype" data-type="select" data-name="role_type"
+            data-value="${role_type}" class="editable" data-source='{"1":"管理员", "2":"裁判"}' data-placement="top">
+            </a>
         </td>
         <td>${$item.getOnline(user_info.online)}</td>
         <td>${user_info.provider}</td>
@@ -148,7 +157,8 @@
 
         <td>${remarks}</td>
         <td class="col-action">
-            <a class="btn btn-info btn-sm" data-type="edit" href="#" data-target="#edit_remark_modal" data-toggle="modal">
+            <a class="btn btn-info btn-sm" data-type="edit" href="#" data-target="#edit_remark_modal"
+                data-toggle="modal">
                 <i class="fa fa-edit"></i>
             </a>
             <a class="btn btn-danger btn-sm" href="#" data-target="#delete_admin_modal" data-toggle="modal">
@@ -170,7 +180,9 @@
         <td>${user_profile.address}</td>
         <td>${remarks}</td>
         <td>
-            <a href="javascript:void(0);" id="searchlist_roletype" data-type="select" data-name="role_type" data-value="${role_type}" class="editable" data-source='{"1":"管理员", "2":"裁判", "3":"普通用户"}' data-placement="top"></a>
+            <a href="javascript:void(0);" id="searchlist_roletype" data-type="select" data-name="role_type"
+                data-value="${role_type}" class="editable" data-source='{"1":"管理员", "2":"裁判", "3":"普通用户"}'
+                data-placement="top"></a>
         </td>
     </tr>
 </script>

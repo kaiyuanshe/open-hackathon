@@ -38,7 +38,8 @@ from sqlalchemy import and_
 from hackathon import Component, RequiredFeature, Context
 from hackathon.constants import EStatus, VERemoteProvider, VE_PROVIDER, PortBindingType, VEStatus, ReservedUser, \
     AVMStatus, CLOUD_ECLIPSE
-from hackathon.database import VirtualEnvironment, DockerHostServer, Experiment, User, HackathonTemplateRel
+from hackathon.database import VirtualEnvironment, DockerHostServer, Experiment, User, HackathonTemplateRel, \
+    DockerContainer
 from hackathon.azureformation.azureFormation import AzureFormation
 from hackathon.hackathon_response import internal_server_error, not_found, ok
 
@@ -152,7 +153,22 @@ class ExprManager(Component):
     def get_expr_list_by_hackathon_id(self, hackathon_id, **kwargs):
         condition = self.__get_filter_condition(hackathon_id, **kwargs)
         experiments = self.db.find_all_objects(Experiment, condition)
-        return map(lambda u: self.__get_expr_with_user_info(u), experiments)
+
+        hostservers = self.db.find_all_objects(DockerHostServer)
+        hash_id_vmname = {}
+        for hostserver in hostservers:
+            hash_id_vmname[hostserver.id] = hostserver.vm_name
+
+        data_experiments = map(lambda u: self.__get_expr_with_user_info(u), experiments)
+        for data_experiment in data_experiments:
+            container = self.db.find_first_object_by(DockerContainer,
+                                                     virtual_environment_id = data_experiment["id"])
+            if container and (container.host_server_id in hash_id_vmname) :
+                data_experiment["vm_name"] = hash_id_vmname[container.host_server_id]
+            else:
+                data_experiment["vm_name"] = "Unknown"
+
+        return data_experiments
 
     def scheduler_recycle_expr(self):
         """recycle experiment acrroding to hackathon basic info on recycle configuration

@@ -51,7 +51,7 @@ class LoginManagerHelper():
             login_user = User(json.loads(req.content))
             return login_user
         except Exception as e:
-            log.errer(e)
+            log.error(e)
             return None
 
     def logout(self, token):

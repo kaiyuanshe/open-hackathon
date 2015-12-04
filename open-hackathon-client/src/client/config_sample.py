@@ -194,6 +194,10 @@ Config = {
                     },
                     "user": {
                         "list": ["get"]
+                    },
+                    "hostserver": {
+                        "": ["get", "post", "delete", "put"],
+                        "list": ["get"]
                     }
                 },
                 "template": {
