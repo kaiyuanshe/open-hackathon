@@ -50,7 +50,8 @@
                             <label class="col-md-3 control-label">组织类型</label>
 
                             <div class="col-md-6">
-                                <select class="form-control" name="organization_type" id="organization_type" placeholder="选择类型"
+                                <select class="form-control" name="organization_type" id="organization_type"
+                                        placeholder="选择类型"
                                         required
                                         data-bv-trigger="blur"
                                         data-bv-notempty-message="组织类型，不能为空">
@@ -98,7 +99,7 @@
 
 {% block script %}
     <div class="modal fade bs-example-modal-sm" id="confirm_modal" tabindex="-1" role="dialog"
-         aria-labelledby="mySmallModalLabel" aria-hidden="true" data-api="">
+         aria-labelledby="mySmallModalLabel" aria-hidden="true" data-api="oh.api.admin.hackathon.organizer.delete">
         <div class="modal-dialog modal-sm">
             <div class="modal-content">
                 <div class="modal-header">

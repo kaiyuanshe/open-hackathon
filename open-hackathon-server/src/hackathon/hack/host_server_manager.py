@@ -34,6 +34,8 @@ sys.path.append("..")
 from azure.storage.blobservice import BlobService
 from azure.servicemanagement import (ConfigurationSet, ConfigurationSetInputEndpoint, OSVirtualHardDisk,
                                      LinuxConfigurationSet, ServiceManagementService)
+import json
+
 from hackathon import Component, RequiredFeature, Context
 from hackathon.database.models import DockerHostServer, HackathonAzureKey, Hackathon
 from hackathon.constants import (AzureApiExceptionMessage, DockerPingResult, AVMStatus, AzureVMPowerState,
@@ -42,7 +44,6 @@ from hackathon.constants import (AzureApiExceptionMessage, DockerPingResult, AVM
                                  AzureVMEndpointDefaultPort, AzureVMEnpointConfigType, AzureOperationStatus)
 from hackathon.hackathon_response import precondition_failed, internal_server_error, ok
 
-import json
 
 __all__ = ["DockerHostManager"]
 
