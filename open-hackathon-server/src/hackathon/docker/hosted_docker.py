@@ -216,8 +216,10 @@ class HostedDockerFormation(DockerFormationBase, Component):
                 "name": container_name,
                 "protocol": guacamole[DOCKER_UNIT.REMOTE_PROTOCOL],
                 "hostname": host_server.public_ip,
-                "port": port_cfg[0].get("public_port")
+                "port": port_cfg[0].get("public_port"),
+                "enable-sftp": True
             }
+
             if DOCKER_UNIT.REMOTE_USERNAME in guacamole:
                 gc["username"] = guacamole[DOCKER_UNIT.REMOTE_USERNAME]
             if DOCKER_UNIT.REMOTE_PASSWORD in guacamole:

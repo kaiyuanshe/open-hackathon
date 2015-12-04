@@ -37,7 +37,7 @@ from hackathon.hackathon_response import not_found, bad_request, precondition_fa
 from hackathon.constants import TeamMemberStatus, Team_Show_Type
 
 __all__ = ["TeamManager"]
-
+hack_manager = RequiredFeature("hackathon_manager")
 
 class TeamManager(Component):
     """Component to manage hackathon teams"""
@@ -461,6 +461,18 @@ class TeamManager(Component):
                                                    hackathon_id=hackathon.id)
         return [self.__award_with_detail(r) for r in awards]
 
+
+    def get_all_granted_awards(self, limit):
+        q = self.db.session().query(TeamAward).\
+             join(Award, TeamAward.award_id == Award.id).\
+             filter_by().\
+             group_by(TeamAward.hackathon_id).\
+             order_by(TeamAward.level.desc(), TeamAward.create_time.desc()).\
+             limit(limit)
+        list = [self.__get_hackathon_and_show_detail(s) for s in q]
+        return list
+
+
     def grant_award_to_team(self, hackathon, context):
         team = self.__get_team_by_id(context.team_id)
         if not team:
@@ -617,3 +629,12 @@ class TeamManager(Component):
                     raise Forbidden(description="You don't have permission on team '%s'" % team)
 
         return
+
+    def __get_hackathon_and_show_detail(self,Team_Award):
+        ta = Team_Award.dic()
+        team = self.get_team_by_id(ta.get("team_id"))
+        team["hackathon"] = hack_manager.get_hackathon_detail(hack_manager.get_hackathon_by_id(ta.get("hackathon_id")))
+        team["show"] = self.get_team_show_list(ta.get("team_id"))
+        team["award"] = ta
+        team["members"] = self.get_team_members(ta.get("team_id"))
+        return team

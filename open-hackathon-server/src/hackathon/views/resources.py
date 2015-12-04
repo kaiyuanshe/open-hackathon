@@ -649,3 +649,7 @@ class HackathonGrantedAwardsResource(HackathonResource):
     @hackathon_name_required
     def get(self):
         return team_manager.get_granted_awards(g.hackathon)
+
+class GranteAwardsResource(HackathonResource):
+    def get(self):
+        return team_manager.get_all_granted_awards(self.context().limit)
