@@ -362,6 +362,7 @@ def hackathon(hackathon_name):
                       hackathon=data.get("hackathon", data),
                       user=data.get("user"),
                       registration=data.get("registration"),
+                      team=data.get("team"),
                       experiment=reg.get("experiment"))
 
 
