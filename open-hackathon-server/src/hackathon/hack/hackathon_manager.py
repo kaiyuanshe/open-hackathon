@@ -34,7 +34,8 @@ from werkzeug.exceptions import PreconditionFailed, InternalServerError, BadRequ
 from flask import g, request
 
 from hackathon.database import Hackathon, User, AdminHackathonRel, DockerHostServer, HackathonLike, \
-    HackathonStat, HackathonConfig, HackathonTag, UserHackathonRel, HackathonOrganizer, Award,UserHackathonAsset
+    HackathonStat, HackathonConfig, HackathonTag, UserHackathonRel, HackathonOrganizer, Award,UserHackathonAsset,\
+    UserTeamRel
 from hackathon.hackathon_response import internal_server_error, ok, not_found, forbidden
 from hackathon.constants import HACKATHON_BASIC_INFO, ADMIN_ROLE_TYPE, HACK_STATUS, RGStatus, HTTP_HEADER, \
     FILE_TYPE, HACK_TYPE, HACKATHON_STAT
@@ -527,6 +528,10 @@ class HackathonManager(Component):
             register = self.register_manager.get_registration_by_user_and_hackathon(user.id, hackathon.id)
             if register:
                 detail["registration"] = register.dic()
+
+            team_rel = self.db.find_first_object_by(UserTeamRel, user_id=user.id, hackathon_id=hackathon.id)
+            if team_rel:
+                detail["team"] = team_rel.team.dic()
 
         return detail
 
