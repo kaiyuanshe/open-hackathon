@@ -349,7 +349,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
             self.log.error(e)
             return False
 
-    def get_docker_containers_detail_by_api(self,  docker_address, docker_port, timeout=20):
+    def get_docker_containers_detail_by_api(self, docker_address, docker_port, timeout=20):
         """Get the info of all started docker containers
 
         :type docker_address: str
@@ -385,8 +385,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
         def get_detail(container):
             container["docker_host_server"] = self.docker_host_manager.get_hostserver_info(container['host_server_id'])
             return container
-        list = [get_detail(container.dic()) for container in containers]
-        return list
+        return [get_detail(container.dic()) for container in containers]
 
     # --------------------------------------------- helper function ---------------------------------------------#
 

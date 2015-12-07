@@ -154,9 +154,6 @@ class ExprManager(Component):
         # get the list of all experiments, and info of containers and related host_servers of a experiment
         condition = self.__get_filter_condition(hackathon_id, **kwargs)
         experiments = self.db.find_all_objects(Experiment, condition)
-        def get_detail(self, experiment):
-            experiment["containers"] = self.hosted_docker.get_containers_info_by_experimentid(experiment.id)
-            return experiment
         return [self.__get_expr_with_detail(experiment) for experiment in experiments]
 
     def scheduler_recycle_expr(self):

@@ -661,7 +661,7 @@ class AdminHostserverListResource(HackathonResource):
     @admin_privilege_required
     @hackathon_name_required
     def get(self):
-        return docker_host_manager.get_all_docker_hosts(g.hackathon.id)
+        return docker_host_manager.get_docker_hosts_list(g.hackathon.id)
 
 
 class AdminHostserverResource(HackathonResource):

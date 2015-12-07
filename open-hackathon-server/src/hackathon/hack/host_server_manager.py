@@ -53,7 +53,7 @@ class DockerHostManager(Component):
     hosted_docker = RequiredFeature("hosted_docker")
     sche = RequiredFeature("scheduler")
 
-    def get_all_docker_hosts(self, hackathon_id):
+    def get_docker_hosts_list(self, hackathon_id):
         """
         Get all host servers of a hackathon
         :param hackathon_id: the id of this hackathon
@@ -260,12 +260,12 @@ class DockerHostManager(Component):
             return None
         vm_data = vm.dic()
 
-        jsonObject = self.hosted_docker.get_docker_containers_detail_by_api(vm_data["public_ip"],
-                                                                            vm_data["public_docker_api_port"],
-                                                                            5)
-        if not vm_data["container_count"] == len(jsonObject):
-            self.db.update_object(vm, container_count = len(jsonObject))
-            vm_data["container_count"] = len(jsonObject)
+        containers_json = self.hosted_docker.get_docker_containers_detail_by_api(vm_data["public_ip"],
+                                                                                 vm_data["public_docker_api_port"],
+                                                                                 5)
+        if not vm_data["container_count"] == len(containers_json):
+            self.db.update_object(vm, container_count = len(containers_json))
+            vm_data["container_count"] = len(containers_json)
 
         return vm_data
 
@@ -318,9 +318,9 @@ class DockerHostManager(Component):
         if vm is None:
             self.log.warn('delete docker_host fail, not find hostserver_id:' + host_server_id
                           + 'hackathon_id:' + hackathon_id)
-            return not_found("", "host_server not found")
-        if not vm.container_count == 0:
             return ok()
+        if not vm.container_count == 0:
+            return precondition_failed("", "fail to delete: there are some containers running in this server")
         self.db.delete_object(vm)
         return ok()
 
