@@ -175,6 +175,12 @@
     margin-left: 0;
 }
 
+.oh-def-link,
+.oh-def-link:hover {
+    color: #1172c6 !important;
+    text-decoration: underline !important;
+}
+
 .users-list {
     padding: 0px;
 }

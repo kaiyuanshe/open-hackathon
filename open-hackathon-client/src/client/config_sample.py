@@ -257,7 +257,8 @@ Config = {
                 },
                 "talent": {
                     "list": ["get"]
-                }
+                },
+                "grantedawards":["get"]
             }
         }
     }

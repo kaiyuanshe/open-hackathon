@@ -58,7 +58,7 @@ class LoginManagerHelper():
         try:
             requests.delete(self.login_url, headers={"token": token})
         except Exception as e:
-            log.errer(e)
+            log.error(e)
 
         session.pop("token", "")
         logout_user()
