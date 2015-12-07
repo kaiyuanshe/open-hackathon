@@ -81,6 +81,13 @@
                 },
                 getEmails:function(emails){
                     return getPriEmail(emails);
+                },
+                getAllHostservers:function(containers){
+                    all_vm_names = "";
+                    for(var index in containers){
+                        all_vm_names += containers[index].docker_host_server.vm_name + ",";
+                    }
+                    return all_vm_names.substring(0, all_vm_names.length-1);
                 }
             }));
             oh.comm.removeLoading();

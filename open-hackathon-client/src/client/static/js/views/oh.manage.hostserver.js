@@ -39,14 +39,6 @@
         }
     }
 
-    function validateIp(ip) {
-        var reg = ip.match(/([0-9]{1,3}\.{1}){3}[0-9]{1,3}/);
-        if(reg == null)
-            return false;
-        else
-            return true;
-    }
-
     function setFormData(data) {
         $('#vm_name').val(data.vm_name);
         $('#public_dns').val(data.public_dns);
@@ -83,7 +75,7 @@
     }
 
     function createHostServer(data) {
-        alert("该请求需要测试Host Server的Docker服务是否可用,点击确认/ok开始，请等待最多5秒");
+        oh.comm.alert("提示", "该请求需要测试Host Server的Docker服务是否可用，请等待最多5秒");
         return oh.api.admin.hostserver.post({
             header: {
                 hackathon_name: currentHackathon
@@ -95,14 +87,14 @@
             } else {
                 clearFormData();
                 toggleTable();
-                pageLoad();
+                reload_host_server();
                 $("#submit_button").removeAttr("disabled")
             }
         });
     }
 
     function updateHostServer(data) {
-        alert("该请求需要测试Host Server的Docker服务是否可用,点击确认/ok开始，请等待最多5秒");
+        oh.comm.alert("提示", "该请求需要测试Host Server的Docker服务是否可用，请等待最多5秒");
         return oh.api.admin.hostserver.put({
             header: {
                 hackathon_name: currentHackathon
@@ -114,7 +106,7 @@
             } else{
                 clearFormData();
                 toggleTable();
-                pageLoad();
+                reload_host_server();
                 $("#submit_button").removeAttr("disabled")
             }
         });
@@ -128,11 +120,12 @@
             if(response.error){
                 oh.comm.alert('错误', response.error.friendly_message);
             }else{
-                pageLoad();
+                reload_host_server();
             }
         });
     }
 
+    //refresh and check the container_count of a hostserver
     function refreshHostServerContainerCount(host_server_id) {
         var hostServerInfo = oh.api.admin.hostserver.get({
             header: {hackathon_name: currentHackathon},
@@ -141,14 +134,14 @@
             if(response.error){
                 oh.comm.alert('错误', response.error.friendly_message);
             }else{
-                pageLoad();
+                reload_host_server();
             }
         });
         return hostServerInfo.container_count;
     }
 
-    // initial table to show admin list
-    function pageLoad() {
+    // reload and show host_server list
+    function reload_host_server() {
         var list = $('#host_server_list');
 
         oh.api.admin.hostserver.list.get({
@@ -190,7 +183,7 @@
 
 
     function init(){
-        pageLoad();
+        reload_host_server();
 
         var deleteconfirmModal = $('#confirm_delete_modal').on('show.bs.modal',function(e){
             editLi = $(e.relatedTarget).parents('tr');
@@ -227,11 +220,7 @@
 
             var data = getFormData();
             data.id = updateHostserverId;
-            if(validateIp(data.public_dns) && validateIp(data.public_ip) && validateIp(data.private_ip)){
-                isUpdateOperation ? updateHostServer(data) : createHostServer(data);
-            }else{
-                alert("请输入有效格式的IP/DNS, 如127.0.0.1");
-            }
+            isUpdateOperation ? updateHostServer(data) : createHostServer(data);
         });
 
         //edit host_server

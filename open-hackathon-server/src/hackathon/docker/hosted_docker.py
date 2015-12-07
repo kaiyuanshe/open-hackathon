@@ -326,6 +326,66 @@ class HostedDockerFormation(DockerFormationBase, Component):
             self.log.error(e)
             return False
 
+    def ping_docker_server(self, docker_address, docker_port, timeout=20):
+        """Ping docker host by ip and port
+
+        :type docker_address: str
+        :param docker_address: the ip address that provide the docker service
+
+        :type docker_port: str
+        :param docker_port: the port of docker service
+
+        :rtype: bool
+        :return: 'True' if running status is Ok, else return 'False'
+
+        """
+        try:
+            ping_url = 'http://%s:%d/_ping' % (docker_address, int(docker_port))
+            req = requests.get(ping_url, timeout=timeout)
+            return req.status_code == 200 and req.content == 'OK'
+        except Exception as e:
+            self.log.error(e)
+            return False
+
+    def get_docker_containers_detail_by_api(self,  docker_address, docker_port, timeout=20):
+        """Get the info of all started docker containers
+
+        :type docker_address: str
+        :param docker_address: the ip address that provide the docker service
+
+        :type docker_port: str
+        :param docker_port: the port of docker service
+
+        :rtype: json object
+        :return: get the info of all started containers
+
+        """
+        try:
+            containers_url = 'http://%s:%d/containers/json' % (docker_address, int(docker_port))
+            res = requests.get(containers_url, timeout=timeout)
+            if res.status_code == 200:
+                return json.loads(res.content)
+        except Exception as e:
+            self.log.error(e)
+        return json.loads("[]")
+
+    def get_containers_info_by_experimentid(self, experiment_id):
+        """Get all containers by the virtual_environment_id
+
+        :type virtual_environment_id: int
+        :param virtual_environment_id: the virtual_environment id
+
+        :rtype: list
+        :return: get the info of all containers
+
+        """
+        containers = self.db.find_all_objects_by(DockerContainer, virtual_environment_id=experiment_id)
+        def get_detail(container):
+            container["docker_host_server"] = self.docker_host_manager.get_hostserver_info(container['host_server_id'])
+            return container
+        list = [get_detail(container.dic()) for container in containers]
+        return list
+
     # --------------------------------------------- helper function ---------------------------------------------#
 
     def __get_schedule_job_id(self, hackathon):

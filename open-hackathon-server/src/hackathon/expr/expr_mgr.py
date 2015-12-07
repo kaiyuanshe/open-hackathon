@@ -151,24 +151,13 @@ class ExprManager(Component):
             self.template_library.template_verified(experiment.template.id)
 
     def get_expr_list_by_hackathon_id(self, hackathon_id, **kwargs):
+        # get the list of all experiments, and info of containers and related host_servers of a experiment
         condition = self.__get_filter_condition(hackathon_id, **kwargs)
         experiments = self.db.find_all_objects(Experiment, condition)
-
-        hostservers = self.db.find_all_objects(DockerHostServer)
-        hash_id_vmname = {}
-        for hostserver in hostservers:
-            hash_id_vmname[hostserver.id] = hostserver.vm_name
-
-        data_experiments = map(lambda u: self.__get_expr_with_user_info(u), experiments)
-        for data_experiment in data_experiments:
-            container = self.db.find_first_object_by(DockerContainer,
-                                                     virtual_environment_id = data_experiment["id"])
-            if container and (container.host_server_id in hash_id_vmname) :
-                data_experiment["vm_name"] = hash_id_vmname[container.host_server_id]
-            else:
-                data_experiment["vm_name"] = "Unknown"
-
-        return data_experiments
+        def get_detail(self, experiment):
+            experiment["containers"] = self.hosted_docker.get_containers_info_by_experimentid(experiment.id)
+            return experiment
+        return [self.__get_expr_with_detail(experiment) for experiment in experiments]
 
     def scheduler_recycle_expr(self):
         """recycle experiment acrroding to hackathon basic info on recycle configuration
@@ -496,9 +485,10 @@ class ExprManager(Component):
             self.log.info("Rollback failed")
             self.log.error(e)
 
-    def __get_expr_with_user_info(self, experiment):
+    def __get_expr_with_detail(self, experiment):
         info = experiment.dic()
         info['user_info'] = self.user_manager.user_display_info(experiment.user)
+        info['containers'] = self.hosted_docker.get_containers_info_by_experimentid(experiment.id)
         return info
 
     def __get_filter_condition(self, hackathon_id, **kwargs):

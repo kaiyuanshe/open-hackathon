@@ -101,7 +101,7 @@
         <td>${$item.getStatus(status)}</td>
         <td>${moment(last_heart_beat_time).format('YYYY-MM-DD HH:mm')}</td>
         <td>${moment(create_time).format('YYYY-MM-DD HH:mm')}</td>
-        <td>${vm_name}</td>
+        <td>${$item.getAllHostservers(containers)}</td>
         <td>
             <a href="#" data-target="#confirm_reset_modal" data-toggle="modal" data-name="reset" data-value="reset" class="editable" data-placement="top">重置</a>
         </td>

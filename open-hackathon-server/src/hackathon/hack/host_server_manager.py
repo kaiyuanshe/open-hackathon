@@ -42,7 +42,7 @@ from hackathon.constants import (AzureApiExceptionMessage, DockerPingResult, AVM
                                  DockerHostServerStatus, DockerHostServerDisable, AzureVMStartMethod,
                                  ServiceDeploymentSlot, AzureVMSize, AzureVMEndpointName, TCPProtocol,
                                  AzureVMEndpointDefaultPort, AzureVMEnpointConfigType, AzureOperationStatus)
-from hackathon.hackathon_response import precondition_failed, internal_server_error, ok
+from hackathon.hackathon_response import ok, not_found, precondition_failed
 
 
 __all__ = ["DockerHostManager"]
@@ -63,11 +63,7 @@ class DockerHostManager(Component):
         :rtype: list
         """
         vms = self.db.find_all_objects(DockerHostServer, DockerHostServer.hackathon_id == hackathon_id)
-        def get_data(vm):
-            data = vm.dic()
-            return data
-
-        return map(lambda vm: get_data(vm), vms)
+        return [vm.dic() for vm in vms]
 
     def get_available_docker_host(self, req_count, hackathon):
         """
@@ -221,15 +217,9 @@ class DockerHostManager(Component):
         :rtype: bool
         """
 
-        try:
-            ping_url = 'http://%s:%d/_ping' % (args.public_dns, int(args.public_docker_api_port))
-            req = requests.get(ping_url, timeout=5)
-            if req.status_code == 200 and req.content == DockerPingResult.OK:
-                args['state'] = DockerHostServerStatus.DOCKER_READY
-            else:
-                args['state'] = DockerHostServerStatus.UNAVAILABLE
-        except Exception as e:
-            self.log.error(e)
+        if self.hosted_docker.ping_docker_server(args.public_ip, args.public_docker_api_port, 5):
+            args['state'] = DockerHostServerStatus.DOCKER_READY
+        else:
             args['state'] = DockerHostServerStatus.UNAVAILABLE
 
         self.db.add_object_kwargs(DockerHostServer,
@@ -268,18 +258,14 @@ class DockerHostManager(Component):
             self.log.warn('get docker_host fail, not find hostserver_id:' + host_server_id
                           + 'hackathon_id:' + hackathon_id)
             return None
-
         vm_data = vm.dic()
-        try:
-            containers_url = 'http://%s:%d/containers/json' % (vm.public_dns, int(vm.public_docker_api_port))
-            res = requests.get(containers_url, timeout=5)
-            if res.status_code == 200:
-                jsonObject = json.loads(res.content)
-                if not vm_data["container_count"] == len(jsonObject):
-                    self.db.update_object(vm, container_count = len(jsonObject))
-                    vm_data["container_count"] = len(jsonObject)
-        except Exception as e:
-            self.log.error(e)
+
+        jsonObject = self.hosted_docker.get_docker_containers_detail_by_api(vm_data["public_ip"],
+                                                                            vm_data["public_docker_api_port"],
+                                                                            5)
+        if not vm_data["container_count"] == len(jsonObject):
+            self.db.update_object(vm, container_count = len(jsonObject))
+            vm_data["container_count"] = len(jsonObject)
 
         return vm_data
 
@@ -291,23 +277,17 @@ class DockerHostManager(Component):
         :type hackathon_id: Integer
 
         :return: ok() if succeed.
-                 precondition_failed(...) if fail to update the docker_host's information
+                 not_found(...) if fail to update the docker_host's information
         """
         vm = self.db.find_first_object_by(DockerHostServer, id=args.id, hackathon_id=hackathon_id)
         if vm is None:
             self.log.warn('delete docker_host fail, not find hostserver_id:' + args.id
                           + 'hackathon_id:' + hackathon_id)
-            return precondition_failed("", "host_server not found")
+            return not_found("", "host_server not found")
 
-        try:
-            ping_url = 'http://%s:%d/_ping' % (args.public_dns, int(args.public_docker_api_port))
-            req = requests.get(ping_url, timeout=5)
-            if req.status_code == 200 and req.content == DockerPingResult.OK:
-                args['state'] = DockerHostServerStatus.DOCKER_READY
-            else:
-                args['state'] = DockerHostServerStatus.UNAVAILABLE
-        except Exception as e:
-            self.log.error(e)
+        if self.hosted_docker.ping_docker_server(args.public_ip, args.public_docker_api_port, 5):
+            args['state'] = DockerHostServerStatus.DOCKER_READY
+        else:
             args['state'] = DockerHostServerStatus.UNAVAILABLE
 
         self.db.update_object(vm, vm_name = args.vm_name,
@@ -332,16 +312,15 @@ class DockerHostManager(Component):
         :param host_server_id: the id of host_server in DB
         :type host_server_id: Integer
 
-        :return: ok() if succeeds.
-                 precondition_failed(...) if fail to delete the docker_host
+        :return: ok() if succeeds or this host_server doesn't exist
         """
         vm = self.db.find_first_object_by(DockerHostServer, id=host_server_id, hackathon_id=hackathon_id)
         if vm is None:
             self.log.warn('delete docker_host fail, not find hostserver_id:' + host_server_id
                           + 'hackathon_id:' + hackathon_id)
-            return precondition_failed("", "host_server not found")
+            return not_found("", "host_server not found")
         if not vm.container_count == 0:
-            return precondition_failed("", "Fail: there are still some docker containers running in this host_server")
+            return ok()
         self.db.delete_object(vm)
         return ok()
 
@@ -422,7 +401,7 @@ class DockerHostManager(Component):
         self.db.commit()
         # check docker _ping port
         try:
-            ping_url = 'http://%s:%d/_ping' % (public_dns, public_docker_api_port)
+            ping_url = 'http://%s:%d/_ping' % (public_ip, public_docker_api_port)
             req = requests.get(ping_url)
             self.log.debug(req.content)
             if req.status_code == 200 and req.content == DockerPingResult.OK:
@@ -430,6 +409,19 @@ class DockerHostManager(Component):
                 self.db.commit()
         except Exception as e:
             self.log.error(e)
+
+    def get_hostserver_info(self, host_server_id):
+        """
+        Get the info detail for a hostserver
+
+        :type host_server_id: int
+        :param host_server_id: the id of host_server
+
+        :rtype: dict
+        :return: the dict of host_server detail information
+        """
+        host_server = self.db.find_first_object_by(DockerHostServer, id=host_server_id)
+        return host_server.dic()
 
     def __get_sms_object(self, hackathon_id):
         """
