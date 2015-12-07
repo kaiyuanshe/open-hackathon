@@ -344,21 +344,22 @@
         {% raw %}
         {{if type == 0 }}
         <div class="col-md-12">
+            <p class="grey-text"><a class="grey-link grey-text" href="${$item.link(team_id)}">${note}</a></p>
             <div class="">
                 <a href="${$item.link(team_id)}" class="oh-thumb">
                     <img src="${uri} " class="oh-thumbnail">
                 </a>
             </div>
             <br/>
-            <p class="grey-text"><a class="grey-link grey-text" href="${$item.link(team_id)}">${note}</a></p>
+
         </div>
         {{else type == 1}}
             <div class="col-md-12">
+                <p class="grey-text"><a class="grey-link grey-text" href="${$item.link(team_id)}">${note}</a></p>
                 <div class="iframe">
                     {{html uri}}
                 </div>
                 <br/>
-                <p class="grey-text"><a class="grey-link grey-text" href="${$item.link(team_id)}">${note}</a></p>
             </div>
         {{else}}{{/if}}
         {% endraw %}
