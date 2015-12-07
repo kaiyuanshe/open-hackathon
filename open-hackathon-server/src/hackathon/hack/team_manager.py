@@ -438,7 +438,7 @@ class TeamManager(Component):
         show_list = self.db.find_all_objects_by(TeamShow, team_id=team_id)
         return [s.dic() for s in show_list]
 
-    def get_hackathon_show_list(self, hackathon_id, show_type=None, limit=6):
+    def get_hackathon_show_list(self, hackathon_id, show_type=None, limit=10):
         criterion = TeamShow.hackathon_id == hackathon_id
         if show_type:
             st = [int(t) for t in show_type.split(',')]
@@ -470,8 +470,7 @@ class TeamManager(Component):
             group_by(TeamAward.hackathon_id). \
             order_by(TeamAward.level.desc(), TeamAward.create_time.desc()). \
             limit(limit)
-        list = [self.__get_hackathon_and_show_detail(s) for s in q]
-        return list
+        return [self.__get_hackathon_and_show_detail(s) for s in q]
 
     def grant_award_to_team(self, hackathon, context):
         team = self.__get_team_by_id(context.team_id)
