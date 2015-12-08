@@ -217,4 +217,19 @@
 .iframe iframe {
     width: 100% !important;
     height: 500px!important;
+}.oh-thumb img.oh-thumbnail {
+    height: auto;
+    max-height: 450px;
+    width: 100%;
+}
+#team_show .media{
+    min-height: 266px;
+    margin-bottom:20px;
+}
+#team_show .media p{
+    margin-top:10px;
+    color: #969696;
+}
+#team_show .media p a{
+    margin-right:5px;
 }
