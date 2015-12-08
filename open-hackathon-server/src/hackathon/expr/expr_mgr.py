@@ -31,8 +31,10 @@ from datetime import timedelta
 import json
 import random
 import string
-from werkzeug.exceptions import PreconditionFailed, NotFound
+import pexpect
 
+from werkzeug.exceptions import PreconditionFailed, NotFound
+from os.path import dirname, realpath, abspath
 from sqlalchemy import and_
 
 from hackathon import Component, RequiredFeature, Context
@@ -415,9 +417,14 @@ class ExprManager(Component):
                                      hackathon=hackathon,
                                      virtual_environment=ve,
                                      experiment=expr)
+
         if container_ret is None:
             self.log.error("container %s fail to run" % new_name)
             raise Exception("container_ret is none")
+
+        remote = json.loads(ve.remote_paras)
+        self.__docker_completed(remote)
+
         self.log.debug("starting container %s is ended ... " % new_name)
         return ve
 
@@ -542,3 +549,24 @@ class ExprManager(Component):
         else:
             self.assign_expr_to_admin(expr)
             self.log.debug("assign " + str(expr.id) + " to default admin")
+
+
+    def __docker_completed(self, remote):
+        try:
+            p = pexpect.spawn("scp -P %s %s %s@%s:/usr/local/sbin/guacctl.sh" % (remote["port"],
+                        abspath("%s/../docker/guacctl" % dirname(realpath(__file__))), remote["username"],
+                        remote["hostname"]))
+            i = p.expect([pexpect.TIMEOUT, 'yes/no', 'password: '])
+
+            if i == 1:
+                p.sendline("yes")
+                i = p.expect([pexpect.TIMEOUT, 'password:'])
+
+            p.sendline(remote["password"])
+            p.expect(pexpect.EOF)
+            p.close()
+        except Exception as e:
+            self.log.info("scp file error")
+            self.log.error(e)
+
+        return True

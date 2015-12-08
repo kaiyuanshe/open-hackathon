@@ -72,10 +72,7 @@
     }
 
     function getShowList() {
-        return oh.api.hackathon.show.list.get({
-            header: {hackathon_name: hackathon_name},
-            query: {type: "1,0"}
-        })
+        return oh.api.hackathon.show.list.get({query:  query: {type: '1,0'}, header: {hackathon_name: hackathon_name}})
     }
 
     function submintRegister() {
@@ -98,7 +95,7 @@
                                 }),
                                 $('<button class="btn btn-primary">切换登录</button>').click(function (e) {
                                     confim.hide();
-                                    window.location.href = '/logout?return_url=/login?return_url='+ encodeURIComponent('/site/' + hackathon_name + '&provides=' + data.error.provides);
+                                    window.location.href = '/logout?return_url=/login?return_url=' + encodeURIComponent('/site/' + hackathon_name + '&provides=' + data.error.provides);
                                 })
                             ],
                             modal: 'confirm'
