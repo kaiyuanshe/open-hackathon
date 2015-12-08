@@ -51,14 +51,14 @@ class LoginManagerHelper():
             login_user = User(json.loads(req.content))
             return login_user
         except Exception as e:
-            log.errer(e)
+            log.error(e)
             return None
 
     def logout(self, token):
         try:
             requests.delete(self.login_url, headers={"token": token})
         except Exception as e:
-            log.errer(e)
+            log.error(e)
 
         session.pop("token", "")
         logout_user()

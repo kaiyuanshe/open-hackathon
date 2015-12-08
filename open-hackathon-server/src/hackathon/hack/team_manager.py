@@ -39,6 +39,7 @@ from hackathon.constants import TeamMemberStatus, Team_Show_Type
 __all__ = ["TeamManager"]
 hack_manager = RequiredFeature("hackathon_manager")
 
+
 class TeamManager(Component):
     """Component to manage hackathon teams"""
     user_manager = RequiredFeature("user_manager")
@@ -235,7 +236,7 @@ class TeamManager(Component):
             else:
                 self.db.delete_all_objects_by(UserTeamRel, user_id=user.id, team_id=team.id)
         else:
-            #num_team_members == 1
+            # num_team_members == 1
             self.db.delete_all_objects_by(UserTeamRel, team_id=team.id)
             self.db.delete_object(team)
 
@@ -437,10 +438,11 @@ class TeamManager(Component):
         show_list = self.db.find_all_objects_by(TeamShow, team_id=team_id)
         return [s.dic() for s in show_list]
 
-    def get_hackathon_show_list(self, hackathon_id, show_type=None, limit=6):
+    def get_hackathon_show_list(self, hackathon_id, show_type=None, limit=10):
         criterion = TeamShow.hackathon_id == hackathon_id
         if show_type:
-            criterion = and_(criterion, TeamShow.type == show_type)
+            st = [int(t) for t in show_type.split(',')]
+            criterion = and_(criterion, TeamShow.type.in_(st))
         show_list = TeamShow.query.filter(criterion).order_by(TeamShow.create_time.desc()).limit(limit)
         return [s.dic() for s in show_list]
 
@@ -461,17 +463,14 @@ class TeamManager(Component):
                                                    hackathon_id=hackathon.id)
         return [self.__award_with_detail(r) for r in awards]
 
-
     def get_all_granted_awards(self, limit):
-        q = self.db.session().query(TeamAward).\
-             join(Award, TeamAward.award_id == Award.id).\
-             filter_by().\
-             group_by(TeamAward.hackathon_id).\
-             order_by(TeamAward.level.desc(), TeamAward.create_time.desc()).\
-             limit(limit)
-        list = [self.__get_hackathon_and_show_detail(s) for s in q]
-        return list
-
+        q = self.db.session().query(TeamAward). \
+            join(Award, TeamAward.award_id == Award.id). \
+            filter_by(). \
+            group_by(TeamAward.hackathon_id). \
+            order_by(TeamAward.level.desc(), TeamAward.create_time.desc()). \
+            limit(limit)
+        return [self.__get_hackathon_and_show_detail(s) for s in q]
 
     def grant_award_to_team(self, hackathon, context):
         team = self.__get_team_by_id(context.team_id)
@@ -630,7 +629,7 @@ class TeamManager(Component):
 
         return
 
-    def __get_hackathon_and_show_detail(self,Team_Award):
+    def __get_hackathon_and_show_detail(self, Team_Award):
         ta = Team_Award.dic()
         team = self.get_team_by_id(ta.get("team_id"))
         team["hackathon"] = hack_manager.get_hackathon_detail(hack_manager.get_hackathon_by_id(ta.get("hackathon_id")))
