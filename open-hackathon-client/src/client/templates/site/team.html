@@ -9,16 +9,16 @@
         <div class="container">
             <div class="air oh-team-edit">
                 {% if team.is_admin == False and team.is_leader == False %}
-                    {% if team.is_member %}
+                    {% if team.is_member and not team.is_frozen %}
                         <a href="javascript:void(0);" class="btn oh-white-text bg-color-pinkDark btn-lg"
                            data-role="leave">
                             <i class="fa fa-unlink"></i> 离队</a>
-                    {% elif team.is_admin == False %}
+                    {% elif team.is_admin == False and not team.is_frozen %}
                         <a href="javascript:void(0);"
                            class="btn oh-white-text bg-color-pinkDark btn-lg" data-role="join"><i
                                 class="fa fa-link"></i> 加入</a>
                     {% endif %}
-                {% elif team.is_leader %}
+                {% elif team.is_leader and not team.is_frozen %}
                     <a href="javascript:void(0)" class="btn oh-white-text bg-color-pinkDark btn-lg" data-role="disband">
                         <i class="fa fa-bomb"></i> 解散</a>
                     <a href="javascript:void(0);"
@@ -77,33 +77,52 @@
     <div id="team_works">
         <div class="container team-box">
             <div class="oh-header clearfix">
-                <h2 class="">团队作品 <span>（0）</span></h2>
+                <h2 class="">团队作品 <span>(0)</span></h2>
             </div>
             <div class="works" id="works">
                 <div class="works_video" id="works_video">
-                    {% if team.is_leader %}
-                        <div class="addshow">
-                            <a href="javascript:" data-role="addVideo"><i class="fa fa-plus"></i>
-                                添加视频展示</a>
-                        </div>
-                    {% endif %}
+                    <div class="addshow">
+                        <span>视频展示</span>
+                        {% if team.is_leader and not team.is_frozen %}
+                            <a href="javascript:" data-role="addVideo"><i class="fa fa-plus"></i></a>
+                        {% endif %}
+                    </div>
+
                 </div>
             </div>
             <div class="works_img" id="works_img">
-                {% if team.is_leader %}
-                    <div class="addshow">
-                        <a href="javascript:" data-role="addImg"><i class="fa fa-plus"></i> 添加图片展示</a>
-                    </div>
-                {% endif %}
-            </div>
-            {% if team.is_leader %}
                 <div class="addshow">
-                    <a href="javascript:" data-role="addCode"><i class="fa fa-plus"></i>
-                        添加项目地址</a>
+                    <span>图片展示</span>
+                    {% if team.is_leader and not team.is_frozen %}
+                        <a href="javascript:" data-role="addImg"><i class="fa fa-plus"></i></a>
+                    {% endif %}
                 </div>
-            {% endif %}
+            </div>
+            <div class="works_doc" id="works_doc">
+                <div class="addshow">
+                    <span>文档说明</span>
+                    {% if team.is_leader and not team.is_frozen %}
+                        <a href="javascript:" data-role="addDoc"><i class="fa fa-plus"></i></a>
+                    {% endif %}
+                </div>
+            </div>
             <div>
+                <div class="addshow">
+                    <span>源代码地址</span>
+                    {% if team.is_leader and not team.is_frozen %}
+                        <a href="javascript:" data-role="addCode"><i class="fa fa-plus"></i></a>
+                    {% endif %}
+                </div>
                 <ul class="works_code" id="works_code"></ul>
+            </div>
+            <div>
+                <div class="addshow">
+                    <span>其他展示</span>
+                    {% if team.is_leader and not team.is_frozen %}
+                        <a href="javascript:" data-role="addOther"><i class="fa fa-plus"></i></a>
+                    {% endif %}
+                </div>
+                <ul class="works_other" id="works_other"></ul>
             </div>
         </div>
     </div>
@@ -196,7 +215,7 @@
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                                     aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title" id="myModalLabel">发布作品</h4>
+                            <h4 class="modal-title" id="myModalLabel">发布视频</h4>
                         </div>
                         <div class="modal-body">
                             <div class="form-group">
@@ -212,7 +231,7 @@
 
                                 <div class="col-sm-9">
                                     <textarea type="text" class="form-control" name="work_video"
-                                              placeholder="嵌入视频代码"
+                                              placeholder="<embed src='http://player.youku.com/......"
                                               data-bv-trigger="blur"
                                               data-bv-notempty-message="请填嵌入视频代码"></textarea>
                                 </div>
@@ -233,7 +252,7 @@
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                                     aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title" id="myModalLabel">发布作品</h4>
+                            <h4 class="modal-title" id="myModalLabel2">发布图片</h4>
                         </div>
                         <div class="modal-body">
                             <div class="form-group">
@@ -249,11 +268,101 @@
 
                                 <div class="col-sm-9">
                                     <input type="url" class="form-control" name="work_img"
-                                           placeholder="图片路径"
+                                           placeholder="http://"
                                            required
                                            data-bv-trigger="blur"
                                            data-bv-message="请填写正确的图片访问路径"
                                            data-bv-notempty-message="请填图片路径">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">确定</button>
+                            <button type="button" class="btn btn-warning" data-dismiss="modal">取消</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="modal fade" id="works_docModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <form id="addWorkDocForm" class="form-horizontal" novalidate>
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                    aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myDocLabel">发布文档</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label required">类型</label>
+
+                                <div class="col-sm-9">
+                                    <select class="form-control" name="type">
+                                        <option value="3">PowerPoint</option>
+                                        <option value="5">Word</option>
+                                        <option value="4">Excel</option>
+                                        <option value="6">PDF</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label required">描述</label>
+
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" name="note" maxlength="80"
+                                           placeholder="描述信息">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label required">文档路径</label>
+
+                                <div class="col-sm-9">
+                                    <input type="url" class="form-control" name="work_doc"
+                                           placeholder="http://"
+                                           required
+                                           data-bv-trigger="blur"
+                                           data-bv-message="请填写正确的文档访问路径"
+                                           data-bv-notempty-message="请填文档路径">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">确定</button>
+                            <button type="button" class="btn btn-warning" data-dismiss="modal">取消</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="modal fade" id="works_otherModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <form id="addWorkOtherForm" class="form-horizontal" novalidate>
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                    aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel">发布其他作品</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label required">描述</label>
+
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" name="note" maxlength="80"
+                                           placeholder="描述信息">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label required">作品路径</label>
+
+                                <div class="col-sm-9">
+                                    <input type="url" class="form-control" name="work_other"
+                                           placeholder="http://"
+                                           required
+                                           data-bv-trigger="blur"
+                                           data-bv-message="请填写正确的访问路径"
+                                           data-bv-notempty-message="请填路径">
                                 </div>
                             </div>
                         </div>
@@ -272,15 +381,23 @@
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                                     aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title" id="myModalLabel">发布作品</h4>
+                            <h4 class="modal-title" id="myModalLabel">发布其他作品</h4>
                         </div>
                         <div class="modal-body">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label required">描述</label>
+
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" name="note" maxlength="80"
+                                           placeholder="描述信息">
+                                </div>
+                            </div>
                             <div class="form-group">
                                 <label class="col-sm-3 control-label required">项目地址</label>
 
                                 <div class="col-sm-9">
                                     <input type="url" class="form-control" name="work_code"
-                                           placeholder="项目地址"
+                                           placeholder="https://github.com/......"
                                            data-bv-trigger="blur"
                                            data-bv-message="请填写正确的项目地址"
                                            data-bv-notempty-message="请填项目地址">
@@ -297,7 +414,7 @@
         </div>
     {% endif %}
 
-    {% if team.is_leader %}
+    {% if team.is_leader and not team.is_frozen %}
         <script id="team_item" type="text/x-jquery-tmpl">
             {% raw %}
             <div class="col-lg-2 col-md-4 col-xs-6" data-user >
@@ -328,11 +445,6 @@
                 </div>
             </div>
             {% endraw %}
-
-
-
-
-
         </script>
     {% else %}
         <script id="team_item" type="text/x-jquery-tmpl">
@@ -361,21 +473,21 @@
         </script>
     {% endif %}
     <script id="show_item" type="text/x-jquery-tmpl">
-    {% if team.is_leader %}
+    {% if team.is_leader and not team.is_frozen %}
         {% raw %}
             {{if type == 0 }}
-                <div class="row work_item">
+                <div class="row work_item show_item">
                      <div class="col-md-3 col-md-push-9">
                           <div class="delete"><a href="javascript:;" data-role="delete-show" title="删除"><i class="fa fa-trash-o"></i></a></div>
                           ${note}
                      </div>
                      <div class="col-md-9 col-md-pull-3">
 
-                         <img src="${uri}" alt="${note}">
+                         <img src="${uri} " alt="${note}" class="oh-thumbnail">
                      </div>
                 </div>
             {{else type == 1}}
-                <div class="row work_item">
+                <div class="row work_item show_item">
                     <div class="col-md-3 col-md-push-9">
                          <div class="delete"><a href="javascript:;" data-role="delete-show" title="删除"><i class="fa fa-trash-o"></i></a></div>
                           ${note}
@@ -384,14 +496,58 @@
                         {{html uri}}
                     </div>
                 </div>
+            {{else type==2}}
+                <li class="work_item"><span>${note}:</span><a href="${uri}" target="_blank">${uri}</a> <div class="delete"><a href="javascript:;" data-role="delete-show"><i class="fa fa-trash-o"></i></a></div></li>
+            {{else type==3}}
+                <div class="row work_item show_item">
+                    <div class="col-md-3 col-md-push-9">
+                        <div class="delete"><a href="javascript:;" data-role="delete-show" title="删除"><i class="fa fa-trash-o"></i></a></div>
+                        ${note}
+                    </div>
+                    <div class="col-md-9 col-md-pull-3 iframe">
+                        <iframe src="${uri}" seamless="seamless" frameborder="0" scrolling="yes"></iframe>
+                    </div>
+                </div>
+            {{else type==4}}
+                <div class="row work_item show_item">
+                    <div class="col-md-3 col-md-push-9">
+                        <div class="delete"><a href="javascript:;" data-role="delete-show" title="删除"><i class="fa fa-trash-o"></i></a></div>
+                        ${note}
+                    </div>
+                    <div class="col-md-9 col-md-pull-3 iframe">
+                        <iframe src="${uri}" seamless="seamless" frameborder="0" scrolling="yes"></iframe>
+                    </div>
+                </div>
+            {{else type==5}}
+                <div class="row work_item show_item">
+                    <div class="col-md-3 col-md-push-9">
+                        <div class="delete"><a href="javascript:;" data-role="delete-show" title="删除"><i class="fa fa-trash-o"></i></a></div>
+                        ${note}
+                    </div>
+                    <div class="col-md-9 col-md-pull-3 iframe">
+                        <iframe src="${uri}" seamless="seamless" frameborder="0" scrolling="yes"></iframe>
+                    </div>
+                </div>
+            {{else type == 6}}
+                <div class="row work_item show_item">
+                    <div class="col-md-3 col-md-push-9">
+                        <div class="delete"><a href="javascript:;" data-role="delete-show" title="删除"><i class="fa fa-trash-o"></i></a></div>
+                        ${note}
+                    </div>
+                    <div class="col-md-9 col-md-pull-3 pdf">
+                        <object data="${uri}" type="application/pdf" width="100%" height="100%">
+                            <p>Your browser doesn't support PDF viewing. Please install PDF viewer plugin!</p>
+                        </object>
+                    </div>
+                </div>
             {{else}}
-                <li class="work_item"><a href="${uri}">${uri}</a> <div class="delete"><a href="javascript:;" data-role="delete-show"><i class="fa fa-trash-o"></i></a></div></li>
+                <li class="work_item"><a href="${uri}" target="_blank">${note}</a> <div class="delete"><a href="javascript:;" data-role="delete-show"><i class="fa fa-trash-o"></i></a></div></li>
             {{/if}}
         {% endraw %}
     {% else %}
         {% raw %}
             {{if type == 0 }}
-                <div class="row">
+                <div class="row show_item">
                      <div class="col-md-3 col-md-push-9">
                           ${note}
                      </div>
@@ -400,7 +556,7 @@
                      </div>
                 </div>
             {{else type == 1}}
-                <div class="row">
+                <div class="row show_item">
                     <div class="col-md-3 col-md-push-9">
                           ${note}
                      </div>
@@ -408,19 +564,51 @@
                          {{html uri}}
                      </div>
                 </div>
+            {{else type == 2}}
+                <li><span>${note}:</span><a href="${uri}" target="_blank">${uri}</a></li>
+            {{else type==3}}
+                <div class="row show_item">
+                    <div class="col-md-3 col-md-push-9">
+                          ${note}
+                     </div>
+                     <div class="col-md-9 col-md-pull-3 iframe">
+                         <iframe src="${uri}" seamless="seamless" frameborder="0" scrolling="yes"></iframe>
+                     </div>
+                </div>
+            {{else type==4}}
+                <div class="row show_item">
+                    <div class="col-md-3 col-md-push-9">
+                          ${note}
+                     </div>
+                     <div class="col-md-9 col-md-pull-3 iframe">
+                         <iframe src="${uri}" seamless="seamless" frameborder="0" scrolling="yes"></iframe>
+                     </div>
+                </div>
+            {{else type==5}}
+                <div class="row show_item">
+                    <div class="col-md-3 col-md-push-9">
+                          ${note}
+                     </div>
+                     <div class="col-md-9 col-md-pull-3 iframe">
+                         <iframe src="${uri}" seamless="seamless" frameborder="0" scrolling="yes"></iframe>
+                     </div>
+                </div>
+            {{else type == 6}}
+                <div class="row show_item">
+                    <div class="col-md-3 col-md-push-9">
+                          ${note}
+                     </div>
+                     <div class="col-md-9 col-md-pull-3 pdf">
+                         <object data="${uri}" type="application/pdf" width="100%" height="100%">
+                             <p>Your browser doesn't support PDF viewing. Please install PDF viewer plugin!</p>
+                         </object>
+                     </div>
+                </div>
             {{else}}
-                <li><a href="${uri}">${uri}</a></li>
+                <li><a href="${uri}" target="_blank">${note}</a></li>
             {{/if}}
         {% endraw %}
     {% endif %}
-
-
-
-
-
-
-
-
     </script>
     <script id="score_item" type="text/x-jquery-tmpl">
         {% raw %}

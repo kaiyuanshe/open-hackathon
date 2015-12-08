@@ -438,7 +438,7 @@ class TeamManager(Component):
         show_list = self.db.find_all_objects_by(TeamShow, team_id=team_id)
         return [s.dic() for s in show_list]
 
-    def get_hackathon_show_list(self, hackathon_id, show_type=None, limit=6):
+    def get_hackathon_show_list(self, hackathon_id, show_type=None, limit=10):
         criterion = TeamShow.hackathon_id == hackathon_id
         if show_type:
             criterion = and_(criterion, TeamShow.type == show_type)
@@ -458,10 +458,8 @@ class TeamManager(Component):
 
         return [s._asdict() for s in show_list]
 
-
     def get_team_source_code(self, team_id):
         return self.db.find_first_object_by(TeamShow, team_id=team_id, type=Team_Show_Type.SourceCode)
-
 
     def query_team_awards(self, team_id):
         team = self.__get_team_by_id(team_id)
@@ -470,14 +468,12 @@ class TeamManager(Component):
 
         return [self.__award_with_detail(r) for r in team.team_awards.order_by(TeamAward.level.desc()).all()]
 
-
     def get_granted_awards(self, hackathon):
         awards = self.db.find_all_objects_order_by(TeamAward,
                                                    None,
                                                    TeamAward.level.desc(), TeamAward.create_time.asc(),
                                                    hackathon_id=hackathon.id)
         return [self.__award_with_detail(r) for r in awards]
-
 
     def get_all_granted_awards(self, limit):
         q = self.db.session().query(TeamAward). \
@@ -486,9 +482,8 @@ class TeamManager(Component):
             group_by(TeamAward.hackathon_id). \
             order_by(TeamAward.level.desc(), TeamAward.create_time.desc()). \
             limit(limit)
-        list = [self.__get_hackathon_and_show_detail(s) for s in q]
-        return list
 
+        return [self.__get_hackathon_and_show_detail(s) for s in q]
 
     def grant_award_to_team(self, hackathon, context):
         team = self.__get_team_by_id(context.team_id)
@@ -516,26 +511,24 @@ class TeamManager(Component):
 
         return self.__award_with_detail(exist)
 
-
     def cancel_team_award(self, hackathon, team_award_id):
         self.db.delete_all_objects_by(TeamAward, hackathon_id=hackathon.id, id=team_award_id)
         return ok()
 
-
     def __init__(self):
         pass
-
 
     def __award_with_detail(self, team_award_rel):
         dic = team_award_rel.dic()
         dic["award"] = team_award_rel.award.dic()
         return dic
 
-
     def __team_detail(self, team, user=None):
         resp = team.dic()
         resp["leader"] = self.user_manager.user_display_info(team.leader)
         resp["member_count"] = team.user_team_rels.filter_by(status=TeamMemberStatus.Approved).count()
+        # all team action not allowed if frozen
+        resp["is_frozen"] = team.hackathon.judge_start_time < self.util.get_now()
         resp["is_admin"] = False
         resp["is_leader"] = False
         resp["is_member"] = False
@@ -547,14 +540,12 @@ class TeamManager(Component):
 
         return resp
 
-
     def __generate_team_name(self, hackathon, user):
         """Generate a default team name by user name. It can be updated later by team leader"""
         team_name = user.name
         if self.db.find_first_object_by(Team, hackathon_id=hackathon.id, name=team_name):
             team_name = "%s (%s)" % (user.name, user.id)
         return team_name
-
 
     def __get_user_teams(self, user_id):
         """Get all teams of specific and related hackathon display info
@@ -572,7 +563,6 @@ class TeamManager(Component):
             filter(UserTeamRel.user_id == user_id)
 
         return q.all()
-
 
     def __get_team_members(self, team):
         """Get team members list and related user display info
@@ -593,11 +583,9 @@ class TeamManager(Component):
         team_members = map(lambda x: get_info(x), team_members)
         return team_members
 
-
     def __get_team_by_id(self, team_id):
         """Get team by its primary key"""
         return self.db.find_first_object_by(Team, id=team_id)
-
 
     def __get_valid_team_by_user(self, user_id, hackathon_id):
         """Get valid User_Team_Rel by user and hackathon
@@ -613,7 +601,6 @@ class TeamManager(Component):
                                             user_id=user_id,
                                             status=TeamMemberStatus.Approved)
 
-
     def __get_team_by_name(self, hackathon_id, team_name):
         """ get user's team basic information stored on table 'team' based on team name
 
@@ -627,7 +614,6 @@ class TeamManager(Component):
         :return: instance of Team if team found otherwise None
         """
         return self.db.find_first_object_by(Team, hackathon_id=hackathon_id, name=team_name)
-
 
     def __validate_team_permission(self, hackathon_id, team, user):
         """Validate current login user whether has proper right on specific team.
@@ -657,7 +643,6 @@ class TeamManager(Component):
                     raise Forbidden(description="You don't have permission on team '%s'" % team)
 
         return
-
 
     def __get_hackathon_and_show_detail(self, Team_Award):
         ta = Team_Award.dic()
