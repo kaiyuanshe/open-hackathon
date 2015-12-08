@@ -9,16 +9,16 @@
         <div class="container">
             <div class="air oh-team-edit">
                 {% if team.is_admin == False and team.is_leader == False %}
-                    {% if team.is_member %}
+                    {% if team.is_member and not team.is_frozen %}
                         <a href="javascript:void(0);" class="btn oh-white-text bg-color-pinkDark btn-lg"
                            data-role="leave">
                             <i class="fa fa-unlink"></i> 离队</a>
-                    {% elif team.is_admin == False %}
+                    {% elif team.is_admin == False and not team.is_frozen %}
                         <a href="javascript:void(0);"
                            class="btn oh-white-text bg-color-pinkDark btn-lg" data-role="join"><i
                                 class="fa fa-link"></i> 加入</a>
                     {% endif %}
-                {% elif team.is_leader %}
+                {% elif team.is_leader and not team.is_frozen %}
                     <a href="javascript:void(0)" class="btn oh-white-text bg-color-pinkDark btn-lg" data-role="disband">
                         <i class="fa fa-bomb"></i> 解散</a>
                     <a href="javascript:void(0);"
@@ -83,7 +83,7 @@
                 <div class="works_video" id="works_video">
                     <div class="addshow">
                         <span>视频展示</span>
-                        {% if team.is_leader %}
+                        {% if team.is_leader and not team.is_frozen %}
                             <a href="javascript:" data-role="addVideo"><i class="fa fa-plus"></i></a>
                         {% endif %}
                     </div>
@@ -93,7 +93,7 @@
             <div class="works_img" id="works_img">
                 <div class="addshow">
                     <span>图片展示</span>
-                    {% if team.is_leader %}
+                    {% if team.is_leader and not team.is_frozen %}
                         <a href="javascript:" data-role="addImg"><i class="fa fa-plus"></i></a>
                     {% endif %}
                 </div>
@@ -101,7 +101,7 @@
             <div class="works_doc" id="works_doc">
                 <div class="addshow">
                     <span>文档说明</span>
-                    {% if team.is_leader %}
+                    {% if team.is_leader and not team.is_frozen %}
                         <a href="javascript:" data-role="addDoc"><i class="fa fa-plus"></i></a>
                     {% endif %}
                 </div>
@@ -109,7 +109,7 @@
             <div>
                 <div class="addshow">
                     <span>源代码地址</span>
-                    {% if team.is_leader %}
+                    {% if team.is_leader and not team.is_frozen %}
                         <a href="javascript:" data-role="addCode"><i class="fa fa-plus"></i></a>
                     {% endif %}
                 </div>
@@ -118,7 +118,7 @@
             <div>
                 <div class="addshow">
                     <span>其他展示</span>
-                    {% if team.is_leader %}
+                    {% if team.is_leader and not team.is_frozen %}
                         <a href="javascript:" data-role="addOther"><i class="fa fa-plus"></i></a>
                     {% endif %}
                 </div>
@@ -414,7 +414,7 @@
         </div>
     {% endif %}
 
-    {% if team.is_leader %}
+    {% if team.is_leader and not team.is_frozen %}
         <script id="team_item" type="text/x-jquery-tmpl">
             {% raw %}
             <div class="col-lg-2 col-md-4 col-xs-6" data-user >
@@ -473,7 +473,7 @@
         </script>
     {% endif %}
     <script id="show_item" type="text/x-jquery-tmpl">
-    {% if team.is_leader %}
+    {% if team.is_leader and not team.is_frozen %}
         {% raw %}
             {{if type == 0 }}
                 <div class="row work_item show_item">
