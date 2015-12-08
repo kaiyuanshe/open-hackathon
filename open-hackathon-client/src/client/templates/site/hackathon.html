@@ -341,28 +341,23 @@
 
     </script>
     <script id="show_list_temp" type="text/x-jquery-tmpl">
-
         {% raw %}
-        {{if type == 0 }}
         <div class="col-md-6">
-            <p class="grey-text"><a class="grey-link grey-text" href="${$item.link(team_id)}">${note}</a></p>
-            <div class="">
-                <a href="${$item.link(team_id)}" class="oh-thumb">
-                    <img src="${uri} " class="oh-thumbnail">
+            <div class="media">
+              <div class="media-left">
+                <a href="${$item.link(team_id)}">
+                  <img class="media-object" src="${logo}" onerror="javascript:this.src='/static/pic/team-logo.png'">
                 </a>
+              </div>
+              <div class="media-body">
+                <h4 class="media-heading">${name}</h4>
+                <a href="${$item.link(team_id)}" class="oh-thumb">
+                    <img src="${$item.getImage(uri)}" class="oh-thumbnail" alt="${$item.getAlt(uri,note)}" >
+                </a>
+                <p> 查看更多作品：{{html $item.getlinks(uri,team_id)}}</p>
+              </div>
             </div>
-            <br/>
-
         </div>
-        {{else type == 1}}
-            <div class="col-md-6">
-                <p class="grey-text"><a class="grey-link grey-text" href="${$item.link(team_id)}">${note}</a></p>
-                <div class="iframe">
-                    {{html uri}}
-                </div>
-                <br/>
-            </div>
-        {{else}}{{/if}}
         {% endraw %}
     </script>
     <script id="register_list_temp" type="text/x-jquery-tmpl">

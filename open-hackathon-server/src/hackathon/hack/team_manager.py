@@ -29,7 +29,7 @@ from werkzeug.exceptions import Forbidden
 sys.path.append("..")
 
 from flask import g
-from sqlalchemy import and_
+from sqlalchemy import and_, func
 
 from hackathon import Component, RequiredFeature
 from hackathon.database import Team, UserTeamRel, User, Hackathon, TeamScore, TeamShow, Award, TeamAward
@@ -441,10 +441,22 @@ class TeamManager(Component):
     def get_hackathon_show_list(self, hackathon_id, show_type=None, limit=10):
         criterion = TeamShow.hackathon_id == hackathon_id
         if show_type:
-            st = [int(t) for t in show_type.split(',')]
-            criterion = and_(criterion, TeamShow.type.in_(st))
-        show_list = TeamShow.query.filter(criterion).order_by(TeamShow.create_time.desc()).limit(limit)
-        return [s.dic() for s in show_list]
+            criterion = and_(criterion, TeamShow.type == show_type)
+        # show_list = TeamShow.query.filter(criterion).order_by(TeamShow.create_time.desc()).limit(limit)
+
+        show_list = self.db.session().query(
+            TeamShow.id,
+            TeamShow.note,
+            TeamShow.team_id,
+            TeamShow.hackathon_id,
+            Team.name,
+            Team.description,
+            Team.logo,
+            func.group_concat(func.concat(TeamShow.uri, ":::", TeamShow.type)).label('uri')
+        ).join(Team, Team.id == TeamShow.team_id).filter(criterion).group_by(TeamShow.team_id).order_by(
+            TeamShow.create_time.desc()).all()
+
+        return [s._asdict() for s in show_list]
 
     def get_team_source_code(self, team_id):
         return self.db.find_first_object_by(TeamShow, team_id=team_id, type=Team_Show_Type.SourceCode)
@@ -470,6 +482,7 @@ class TeamManager(Component):
             group_by(TeamAward.hackathon_id). \
             order_by(TeamAward.level.desc(), TeamAward.create_time.desc()). \
             limit(limit)
+
         return [self.__get_hackathon_and_show_detail(s) for s in q]
 
     def grant_award_to_team(self, hackathon, context):
