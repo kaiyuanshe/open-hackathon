@@ -659,28 +659,23 @@ class GranteAwardsResource(HackathonResource):
 
 class AdminHostserverListResource(HackathonResource):
     @admin_privilege_required
-    @hackathon_name_required
     def get(self):
         return docker_host_manager.get_docker_hosts_list(g.hackathon.id)
 
 
 class AdminHostserverResource(HackathonResource):
     @admin_privilege_required
-    @hackathon_name_required
     def get(self):
-        return docker_host_manager.get_and_check_host_server(g.hackathon.id, self.context().id)
+        return docker_host_manager.get_and_check_host_server(self.context().id)
 
     @admin_privilege_required
-    @hackathon_name_required
     def post(self):
         return docker_host_manager.create_host_server(g.hackathon.id, self.context())
 
     @admin_privilege_required
-    @hackathon_name_required
     def put(self):
-        return docker_host_manager.update_host_server(g.hackathon.id, self.context())
+        return docker_host_manager.update_host_server(self.context())
 
     @admin_privilege_required
-    @hackathon_name_required
     def delete(self):
-        return docker_host_manager.delete_host_server(g.hackathon.id, self.context().id)
+        return docker_host_manager.delete_host_server(self.context().id)

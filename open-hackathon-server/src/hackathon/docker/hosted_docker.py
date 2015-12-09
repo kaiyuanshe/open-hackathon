@@ -309,7 +309,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
         else:
             return False
 
-    def ping(self, docker_host):
+    def ping(self, docker_host, timeout=20):
         """Ping docker host to check running status
 
         :type docker_host : DockerHostServer
@@ -321,35 +321,13 @@ class HostedDockerFormation(DockerFormationBase, Component):
         """
         try:
             ping_url = '%s/_ping' % self.__get_vm_url(docker_host)
-            req = requests.get(ping_url)
-            self.log.debug(req.content)
-            return req.status_code == 200 and req.content == 'OK'
-        except Exception as e:
-            self.log.error(e)
-            return False
-
-    def ping_docker_server(self, docker_address, docker_port, timeout=20):
-        """Ping docker host by ip and port
-
-        :type docker_address: str
-        :param docker_address: the ip address that provide the docker service
-
-        :type docker_port: str
-        :param docker_port: the port of docker service
-
-        :rtype: bool
-        :return: 'True' if running status is Ok, else return 'False'
-
-        """
-        try:
-            ping_url = 'http://%s:%d/_ping' % (docker_address, int(docker_port))
             req = requests.get(ping_url, timeout=timeout)
             return req.status_code == 200 and req.content == 'OK'
         except Exception as e:
             self.log.error(e)
             return False
 
-    def get_docker_containers_detail_by_api(self, docker_address, docker_port, timeout=20):
+    def get_docker_containers_detail_by_api(self, docker_host, timeout=20):
         """Get the info of all started docker containers
 
         :type docker_address: str
@@ -358,34 +336,32 @@ class HostedDockerFormation(DockerFormationBase, Component):
         :type docker_port: str
         :param docker_port: the port of docker service
 
-        :rtype: json object
+        :rtype: json object(list)
         :return: get the info of all started containers
 
         """
         try:
-            containers_url = 'http://%s:%d/containers/json' % (docker_address, int(docker_port))
-            res = requests.get(containers_url, timeout=timeout)
-            if res.status_code == 200:
-                return json.loads(res.content)
+            return self.__containers_info(docker_host, timeout)
         except Exception as e:
             self.log.error(e)
         return json.loads("[]")
 
-    def get_containers_info_by_experimentid(self, experiment_id):
-        """Get all containers by the virtual_environment_id
+    def get_containers_detail_by_ve(self, ve):
+        """Get all containers by the virtual_environment
 
-        :type virtual_environment_id: int
-        :param virtual_environment_id: the virtual_environment id
+        :type virtual_environment: object
+        :param virtual_environment: a virtual_environment object
 
-        :rtype: list
+        :rtype: dict
         :return: get the info of all containers
 
         """
-        containers = self.db.find_all_objects_by(DockerContainer, virtual_environment_id=experiment_id)
-        def get_detail(container):
-            container["docker_host_server"] = self.docker_host_manager.get_hostserver_info(container['host_server_id'])
-            return container
-        return [get_detail(container.dic()) for container in containers]
+        container = self.db.find_first_object_by(DockerContainer, virtual_environment_id=ve.id)
+        if container:
+            dict = container.dic()
+            dict["docker_host_server"] = self.docker_host_manager.get_hostserver_info(dict['host_server_id'])
+            return dict
+        return {}
 
     # --------------------------------------------- helper function ---------------------------------------------#
 
@@ -411,7 +387,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
                                     minutes=60)
 
     def __get_vm_url(self, docker_host):
-        return 'http://%s:%d' % (docker_host.public_dns, docker_host.public_docker_api_port)
+        return 'http://%s:%d' % (docker_host.public_dns, int(docker_host.public_docker_api_port))
 
     def __clear_ports_cache(self):
         """
@@ -435,9 +411,12 @@ class HostedDockerFormation(DockerFormationBase, Component):
             docker_host.container_count = 0
         self.db.commit()
 
-    def __containers_info(self, docker_host):
+    def __containers_info(self, docker_host, timeout=20):
+        """
+        return: json list according to Docker restful API
+        """
         containers_url = '%s/containers/json' % self.get_vm_url(docker_host)
-        req = requests.get(containers_url)
+        req = requests.get(containers_url, timeout=timeout)
         self.log.debug(req.content)
         return self.util.convert(json.loads(req.content))
 

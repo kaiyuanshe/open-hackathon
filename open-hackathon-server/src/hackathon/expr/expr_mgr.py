@@ -485,7 +485,17 @@ class ExprManager(Component):
     def __get_expr_with_detail(self, experiment):
         info = experiment.dic()
         info['user_info'] = self.user_manager.user_display_info(experiment.user)
-        info['containers'] = self.hosted_docker.get_containers_info_by_experimentid(experiment.id)
+        virtual_environments = self.db.find_all_objects_by(VirtualEnvironment, experiment_id=experiment.id)
+
+        def get_virtual_environment_detail(virtual_environment):
+            dict = virtual_environment.dic()
+
+            containers_detail = self.hosted_docker.get_containers_detail_by_ve(virtual_environment)
+            if not containers_detail == {}:
+                dict["hosted_docker"] = containers_detail
+            return dict
+
+        info['virtual_environments'] = [get_virtual_environment_detail(ve) for ve in virtual_environments]
         return info
 
     def __get_filter_condition(self, hackathon_id, **kwargs):

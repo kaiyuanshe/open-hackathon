@@ -20,17 +20,9 @@
         "description": "args to create new hackathon. Args that not listed here are NOT acceptable.",
         "type": "object",
         "properties": {
-          "id": {
-            "description": "id of the host_server",
-            "pattern": "^[0-9]+$",
-          },
-          "hackathon_id": {
-            "description": "id of the hackathon",
-            "pattern": "^[0-9]+$",
-          },
           "vm_name": {
             "description": "the name of vm/host_server",
-            "pattern": "^[0-9]+$",
+            "type": "string"
           },
           "public_dns": {
             "description": "the public_dns of vm/host_server",
@@ -42,7 +34,7 @@
           },
           "public_docker_api_port": {
             "description": "the public_docker_api_port of vm/host_server",
-            "pattern": "^[0-9]+$",
+            "pattern": "^[0-9]+$"
           },
           "private_ip": {
             "description": "the private ip of vm/host_server",
@@ -50,18 +42,15 @@
           },
           "private_docker_api_port": {
             "description": "the private_docker_api_port of vm/host_server",
-            "pattern": "^[0-9]+$",
-            "required": true
-          },
-          "container_count": {
-            "description": "the container count of vm/host_server",
-            "pattern": "^[0-9]+$",
-            "required": true
+            "pattern": "^[0-9]+$"
           },
           "container_max_count": {
             "description": "the max container count of vm/host_server",
-            "pattern": "^[0-9]+$",
-            "required": true
+            "pattern": "^[0-9]+$"
+          },
+          "disabled": {
+            "description": "the max container count of vm/host_server",
+            "pattern": "^[0-9]+$"
           }
         }
       }
@@ -75,17 +64,11 @@
         "properties": {
           "id": {
             "description": "id of the host_server",
-            "pattern": "^[0-9]+$",
-            "required": false
-          },
-          "hackathon_id": {
-            "description": "id of the hackathon",
-            "pattern": "^[0-9]+$",
-            "required": false
+            "pattern": "^[0-9]+$"
           },
           "vm_name": {
             "description": "the name of vm/host_server",
-            "pattern": "^[0-9]+$",
+            "type": "string",
             "required": false
           },
           "public_dns": {
@@ -113,12 +96,12 @@
             "pattern": "^[0-9]+$",
             "required": false
           },
-          "container_count": {
-            "description": "the container count of vm/host_server",
+          "container_max_count": {
+            "description": "the max container count of vm/host_server",
             "pattern": "^[0-9]+$",
             "required": false
           },
-          "container_max_count": {
+          "disabled": {
             "description": "the max container count of vm/host_server",
             "pattern": "^[0-9]+$",
             "required": false
