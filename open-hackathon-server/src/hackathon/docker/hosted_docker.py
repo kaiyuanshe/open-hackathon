@@ -327,8 +327,8 @@ class HostedDockerFormation(DockerFormationBase, Component):
             self.log.error(e)
             return False
 
-    def get_docker_containers_detail_by_api(self, docker_host, timeout=20):
-        """Get the info of all started docker containers
+    def get_docker_containers_info_through_api(self, docker_host, timeout=20):
+        """Get the info of all started docker containers through "Docker Restful API"
 
         :type docker_address: str
         :param docker_address: the ip address that provide the docker service
@@ -347,7 +347,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
         return json.loads("[]")
 
     def get_containers_detail_by_ve(self, ve):
-        """Get all containers by the virtual_environment
+        """Get all containers' detail from "Database" filtered by related virtual_environment
 
         :type virtual_environment: object
         :param virtual_environment: a virtual_environment object
@@ -413,7 +413,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
 
     def __containers_info(self, docker_host, timeout=20):
         """
-        return: json list according to Docker restful API
+        return: json(as list form) through "Docker restful API"
         """
         containers_url = '%s/containers/json' % self.get_vm_url(docker_host)
         req = requests.get(containers_url, timeout=timeout)

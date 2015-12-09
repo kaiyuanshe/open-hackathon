@@ -62,8 +62,8 @@ class DockerHostManager(Component):
         :return: a list of all docker hosts
         :rtype: list
         """
-        vms = self.db.find_all_objects(DockerHostServer, DockerHostServer.hackathon_id == hackathon_id)
-        return [vm.dic() for vm in vms]
+        host_servers = self.db.find_all_objects(DockerHostServer, DockerHostServer.hackathon_id == hackathon_id)
+        return [host_server.dic() for host_server in host_servers]
 
     def get_available_docker_host(self, req_count, hackathon):
         """
@@ -241,8 +241,9 @@ class DockerHostManager(Component):
 
     def get_and_check_host_server(self, host_server_id):
         """
-        first get the docker host DB object for a hackathon.
-        and check whether the container_count is correct, if not, update this value in the database.
+        first get the docker host DB object for a hackathon,
+        and check whether the container_count is correct through "Docker Restful API",
+        if not, update this value in the database.
 
         :param hackathon_id: the id of hackathon in DB
         :type hackathon_id: Integer
@@ -257,18 +258,18 @@ class DockerHostManager(Component):
         if vm is None:
             self.log.warn('get docker_host fail, not find hostserver_id:' + host_server_id)
             return None
-        vm_data = vm.dic()
+        vm_dic = vm.dic()
 
-        containers_json = self.hosted_docker.get_docker_containers_detail_by_api(vm, 5)
-        if not vm_data["container_count"] == len(containers_json):
+        containers_json = self.hosted_docker.get_docker_containers_info_through_api(vm, 5)
+        if not vm_dic["container_count"] == len(containers_json):
             self.db.update_object(vm, container_count = len(containers_json))
-            vm_data["container_count"] = len(containers_json)
+            vm_dic["container_count"] = len(containers_json)
 
-        return vm_data
+        return vm_dic
 
     def update_host_server(self, args):
         """
-        update a docker host's information for a hackathon.
+        update a docker host_server's information for a hackathon.
 
         :param hackathon_id: the id of hackathon in DB
         :type hackathon_id: Integer
@@ -306,7 +307,7 @@ class DockerHostManager(Component):
 
     def delete_host_server(self, host_server_id):
         """
-        delete a docker host for a hackathon.
+        delete a docker host_server for a hackathon.
 
         :param hackathon_id: the id of a hackathon in DB
         :type hackathon_id: Integer
@@ -315,6 +316,7 @@ class DockerHostManager(Component):
         :type host_server_id: Integer
 
         :return: ok() if succeeds or this host_server doesn't exist
+                 precondition_failed() if there are still some containers running
         """
         vm = self.db.find_first_object_by(DockerHostServer, id=host_server_id)
         if vm is None:
@@ -413,7 +415,7 @@ class DockerHostManager(Component):
 
     def get_hostserver_info(self, host_server_id):
         """
-        Get the info detail for a hostserver
+        Get the infomation of a hostserver by host_server_id
 
         :type host_server_id: int
         :param host_server_id: the id of host_server

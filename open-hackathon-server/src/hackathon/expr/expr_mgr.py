@@ -151,7 +151,7 @@ class ExprManager(Component):
             self.template_library.template_verified(experiment.template.id)
 
     def get_expr_list_by_hackathon_id(self, hackathon_id, **kwargs):
-        # get the list of all experiments, and info of containers and related host_servers of a experiment
+        # get a list of all experiments' detail
         condition = self.__get_filter_condition(hackathon_id, **kwargs)
         experiments = self.db.find_all_objects(Experiment, condition)
         return [self.__get_expr_with_detail(experiment) for experiment in experiments]
@@ -489,7 +489,6 @@ class ExprManager(Component):
 
         def get_virtual_environment_detail(virtual_environment):
             dict = virtual_environment.dic()
-
             containers_detail = self.hosted_docker.get_containers_detail_by_ve(virtual_environment)
             if not containers_detail == {}:
                 dict["hosted_docker"] = containers_detail

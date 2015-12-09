@@ -57,7 +57,7 @@
         $('#public_docker_api_port').val("4243");
         $('#private_ip').val("");
         $('#private_docker_api_port').val("4243");
-        $('#container_max_count').val("1");
+        $('#container_max_count').val("10");
     }
 
     function getFormData() {
