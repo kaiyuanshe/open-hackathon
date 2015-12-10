@@ -125,9 +125,14 @@
     width: 96px;
     max-height: 96px;
 }
-
+.teams .item{
+    margin-bottom:20px;
+}
+.teams .logo{
+    height:96px;
+}
 .teams .media-heading {
-    margin-bottom: 20px;
+    margin: 10px 0;
 }
 
 .interest .oh-thumb {
