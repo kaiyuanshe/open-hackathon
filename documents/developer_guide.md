@@ -186,7 +186,7 @@ sudo chmod -R 644 /var/log/open-hackathon
 And also, please adding row `127.0.0.1 open-hackathon-dev.chinacloudapp.cn` to your local `/etc/hosts`. That's because most oauth login providers doest't accept domain `localhost` and the default oauth parameters in `config_sample.py` are binded to domain `open-hackathon-dev.chinacloudapp.cn`
 
 ### Run
-Everything is OK now! Start the API server in command line:
+Everything is OK now! Start the open hackathon in command line:
 ```
 cd /opt/open-hackathon
 sudo python open-hackathon-server/src/run.py
