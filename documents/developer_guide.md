@@ -36,7 +36,7 @@ major parts of Open Hackathon:
 - [guacamole](http://guac-dev.org/) is an open-source html5-based clientless remote client. OHP leverage guacamole to enable client users access to remote VM/docker throw browers. And we provide a [customized authentication provider](https://github.com/msopentechcn/open-hackathon/tree/master/openhackathon-guacamole-auth-provider) to fit OHP.
 
 ## Setup Development Environement
-This section shows you how to setup local dev environment for both open-hackathon-serve and open-hackathon-client.
+This section shows you how to setup local dev environment for both open-hackathon-server and open-hackathon-client.
 
 ### Clone SourceCode
 
@@ -82,6 +82,7 @@ Since open hackathon has [customized guacamole authentication provider](https://
 sudo mkdir /usr/share/tomcat7/.guacamole
 sudo mkdir /etc/guacamole
 
+cd /opt/open-hackathon/deploy/guacamole
 cp guacamole-sample.properties /etc/guacamole/guacamole.properties
 cp *.jar /etc/guacamole
 sudo ln -s /etc/guacamole/guacamole.properties /usr/share/tomcat7/.guacamole/guacamole.properties
@@ -185,13 +186,13 @@ sudo chmod -R 644 /var/log/open-hackathon
 And also, please adding row `127.0.0.1 open-hackathon-dev.chinacloudapp.cn` to your local `/etc/hosts`. That's because most oauth login providers doest't accept domain `localhost` and the default oauth parameters in `config_sample.py` are binded to domain `open-hackathon-dev.chinacloudapp.cn`
 
 ### Run
-Everything is OK now! Start the API server in command line:
+Everything is OK now! Start the open hackathon in command line:
 ```
 cd /opt/open-hackathon
 sudo python open-hackathon-server/src/run.py
 sudo python open-hackathon-client/src/run.py
 ```
-open your brower and try browsing pages:
+open your browser and try browsing pages:
 - open hackathon server health page: http://open-hackathon-dev.chinacloudapp.cn:15000. The output is json-like and  status should be OK
 - open hackathon client: http://open-hackathon-dev.chinacloudapp.cn, the entrance of open hackathon web UI
 - super admin page: http://open-hackathon-dev.chinacloudapp.cn/admin, a  login page specially for super admin. Default user/pwd is `admin`/`admin`
