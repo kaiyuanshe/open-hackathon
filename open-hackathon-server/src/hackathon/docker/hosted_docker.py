@@ -309,7 +309,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
         else:
             return False
 
-    def ping(self, docker_host):
+    def ping(self, docker_host, timeout=20):
         """Ping docker host to check running status
 
         :type docker_host : DockerHostServer
@@ -321,12 +321,47 @@ class HostedDockerFormation(DockerFormationBase, Component):
         """
         try:
             ping_url = '%s/_ping' % self.__get_vm_url(docker_host)
-            req = requests.get(ping_url)
-            self.log.debug(req.content)
+            req = requests.get(ping_url, timeout=timeout)
             return req.status_code == 200 and req.content == 'OK'
         except Exception as e:
             self.log.error(e)
             return False
+
+    def get_docker_containers_info_through_api(self, docker_host, timeout=20):
+        """Get the info of all started docker containers through "Docker Restful API"
+
+        :type docker_address: str
+        :param docker_address: the ip address that provide the docker service
+
+        :type docker_port: str
+        :param docker_port: the port of docker service
+
+        :rtype: json object(list)
+        :return: get the info of all started containers
+
+        """
+        try:
+            return self.__containers_info(docker_host, timeout)
+        except Exception as e:
+            self.log.error(e)
+        return json.loads("[]")
+
+    def get_containers_detail_by_ve(self, ve):
+        """Get all containers' detail from "Database" filtered by related virtual_environment
+
+        :type virtual_environment: object
+        :param virtual_environment: a virtual_environment object
+
+        :rtype: dict
+        :return: get the info of all containers
+
+        """
+        container = self.db.find_first_object_by(DockerContainer, virtual_environment_id=ve.id)
+        if container:
+            dict = container.dic()
+            dict["docker_host_server"] = self.docker_host_manager.get_hostserver_info(dict['host_server_id'])
+            return dict
+        return {}
 
     # --------------------------------------------- helper function ---------------------------------------------#
 
@@ -352,7 +387,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
                                     minutes=60)
 
     def __get_vm_url(self, docker_host):
-        return 'http://%s:%d' % (docker_host.public_dns, docker_host.public_docker_api_port)
+        return 'http://%s:%d' % (docker_host.public_dns, int(docker_host.public_docker_api_port))
 
     def __clear_ports_cache(self):
         """
@@ -376,9 +411,12 @@ class HostedDockerFormation(DockerFormationBase, Component):
             docker_host.container_count = 0
         self.db.commit()
 
-    def __containers_info(self, docker_host):
+    def __containers_info(self, docker_host, timeout=20):
+        """
+        return: json(as list form) through "Docker restful API"
+        """
         containers_url = '%s/containers/json' % self.get_vm_url(docker_host)
-        req = requests.get(containers_url)
+        req = requests.get(containers_url, timeout=timeout)
         self.log.debug(req.content)
         return self.util.convert(json.loads(req.content))
 

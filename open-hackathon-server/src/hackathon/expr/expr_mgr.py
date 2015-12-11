@@ -40,7 +40,8 @@ from sqlalchemy import and_
 from hackathon import Component, RequiredFeature, Context
 from hackathon.constants import EStatus, VERemoteProvider, VE_PROVIDER, PortBindingType, VEStatus, ReservedUser, \
     AVMStatus, CLOUD_ECLIPSE
-from hackathon.database import VirtualEnvironment, DockerHostServer, Experiment, User, HackathonTemplateRel
+from hackathon.database import VirtualEnvironment, DockerHostServer, Experiment, User, HackathonTemplateRel, \
+    DockerContainer
 from hackathon.azureformation.azureFormation import AzureFormation
 from hackathon.hackathon_response import internal_server_error, not_found, ok
 
@@ -152,9 +153,10 @@ class ExprManager(Component):
             self.template_library.template_verified(experiment.template.id)
 
     def get_expr_list_by_hackathon_id(self, hackathon_id, **kwargs):
+        # get a list of all experiments' detail
         condition = self.__get_filter_condition(hackathon_id, **kwargs)
         experiments = self.db.find_all_objects(Experiment, condition)
-        return map(lambda u: self.__get_expr_with_user_info(u), experiments)
+        return [self.__get_expr_with_detail(experiment) for experiment in experiments]
 
     def scheduler_recycle_expr(self):
         """recycle experiment acrroding to hackathon basic info on recycle configuration
@@ -487,9 +489,19 @@ class ExprManager(Component):
             self.log.info("Rollback failed")
             self.log.error(e)
 
-    def __get_expr_with_user_info(self, experiment):
+    def __get_expr_with_detail(self, experiment):
         info = experiment.dic()
         info['user_info'] = self.user_manager.user_display_info(experiment.user)
+        virtual_environments = self.db.find_all_objects_by(VirtualEnvironment, experiment_id=experiment.id)
+
+        def get_virtual_environment_detail(virtual_environment):
+            dict = virtual_environment.dic()
+            containers_detail = self.hosted_docker.get_containers_detail_by_ve(virtual_environment)
+            if not containers_detail == {}:
+                dict["hosted_docker"] = containers_detail
+            return dict
+
+        info['virtual_environments'] = [get_virtual_environment_detail(ve) for ve in virtual_environments]
         return info
 
     def __get_filter_condition(self, hackathon_id, **kwargs):

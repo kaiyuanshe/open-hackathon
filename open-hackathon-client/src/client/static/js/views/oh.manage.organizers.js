@@ -140,15 +140,14 @@
 
     function init() {
         var organizerform = $('#organizerform');
-        organizerform.bootstrapValidator()
-            .on('success.form.bv', function (e) {
-                e.preventDefault();
-                var itemData = getFormData();
-                var data = {body: itemData, header: {hackathon_name: currentHackathon}};
-                (itemData.id == 0 ? createOrganizers(data) : updateOrganizers(data)).then(function () {
-                    toggleTable();
-                })
-            });
+        organizerform.bootstrapValidator().on('success.form.bv', function (e) {
+            e.preventDefault();
+            var itemData = getFormData();
+            var data = {body: itemData, header: {hackathon_name: currentHackathon}};
+            (itemData.id == 0 ? createOrganizers(data) : updateOrganizers(data)).then(function () {
+                toggleTable();
+            })
+        });
 
         $('#organizertable').on('click', '[data-type="edit"]', function (e) {
             editLi = $(this).parents('tr')

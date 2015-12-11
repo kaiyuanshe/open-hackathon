@@ -50,6 +50,7 @@ azure_cert_manager = RequiredFeature("azure_cert_manager")
 expr_manager = RequiredFeature("expr_manager")
 admin_manager = RequiredFeature("admin_manager")
 guacamole = RequiredFeature("guacamole")
+docker_host_manager = RequiredFeature("docker_host_manager")
 
 """Resources for OHP itself"""
 
@@ -650,6 +651,31 @@ class HackathonGrantedAwardsResource(HackathonResource):
     def get(self):
         return team_manager.get_granted_awards(g.hackathon)
 
+
 class GranteAwardsResource(HackathonResource):
     def get(self):
         return team_manager.get_all_granted_awards(self.context().limit)
+
+
+class AdminHostserverListResource(HackathonResource):
+    @admin_privilege_required
+    def get(self):
+        return docker_host_manager.get_docker_hosts_list(g.hackathon.id)
+
+
+class AdminHostserverResource(HackathonResource):
+    @admin_privilege_required
+    def get(self):
+        return docker_host_manager.get_and_check_host_server(self.context().id)
+
+    @admin_privilege_required
+    def post(self):
+        return docker_host_manager.create_host_server(g.hackathon.id, self.context())
+
+    @admin_privilege_required
+    def put(self):
+        return docker_host_manager.update_host_server(self.context())
+
+    @admin_privilege_required
+    def delete(self):
+        return docker_host_manager.delete_host_server(self.context().id)

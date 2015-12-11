@@ -36,7 +36,6 @@
         return Data;
     }
 
-
     // initial table to show admin list
     function pageLoad(){
         var list = $('#experiment_list');
@@ -81,13 +80,20 @@
                 },
                 getEmails:function(emails){
                     return getPriEmail(emails);
+                },
+                getAllHostservers:function(virtual_environments){
+                    all_vm_names = "";
+                    for(var index in virtual_environments){
+                        if('hosted_docker' in virtual_environments[index])
+                            all_vm_names += virtual_environments[index].hosted_docker.docker_host_server.vm_name + ",";
+                    }
+                    return all_vm_names.substring(0, all_vm_names.length-1);
                 }
             }));
             oh.comm.removeLoading();
         });
         $('#expr_list_filter').find('[type="submit"]').removeAttr('disabled')
     }
-
 
     // call api to get experiment list by filter
     function getExprListByFilter(data){
