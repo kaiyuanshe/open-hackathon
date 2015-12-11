@@ -34,6 +34,7 @@ sys.path.append("..")
 from azure.storage.blobservice import BlobService
 from azure.servicemanagement import (ConfigurationSet, ConfigurationSetInputEndpoint, OSVirtualHardDisk,
                                      LinuxConfigurationSet, ServiceManagementService)
+import json
 
 from hackathon import Component, RequiredFeature, Context
 from hackathon.database.models import DockerHostServer, HackathonAzureKey, Hackathon
@@ -41,6 +42,8 @@ from hackathon.constants import (AzureApiExceptionMessage, DockerPingResult, AVM
                                  DockerHostServerStatus, DockerHostServerDisable, AzureVMStartMethod,
                                  ServiceDeploymentSlot, AzureVMSize, AzureVMEndpointName, TCPProtocol,
                                  AzureVMEndpointDefaultPort, AzureVMEnpointConfigType, AzureOperationStatus)
+from hackathon.hackathon_response import ok, not_found, precondition_failed
+
 
 __all__ = ["DockerHostManager"]
 
@@ -49,6 +52,18 @@ class DockerHostManager(Component):
     """Component to manage docker host server"""
     hosted_docker = RequiredFeature("hosted_docker")
     sche = RequiredFeature("scheduler")
+
+    def get_docker_hosts_list(self, hackathon_id):
+        """
+        Get all host servers of a hackathon
+        :param hackathon_id: the id of this hackathon
+        :type hackathon_id: integer
+
+        :return: a list of all docker hosts
+        :rtype: list
+        """
+        host_servers = self.db.find_all_objects(DockerHostServer, DockerHostServer.hackathon_id == hackathon_id)
+        return [host_server.dic() for host_server in host_servers]
 
     def get_available_docker_host(self, req_count, hackathon):
         """
@@ -190,6 +205,128 @@ class DockerHostManager(Component):
         self.sche.add_once('docker_host_manager', 'check_vm_status', context=context, minutes=5)
         return True
 
+    def create_host_server(self, hackathon_id, args):
+        """
+        create a docker host DB object for a hackathon and insert record into the database.
+        param-"args" contain all necessary infos to new a docker_host
+
+        :param hackathon_id: the id of hackathon in DB
+        :type hackathon_id: Integer
+
+        :return: return True if succeed, otherwise return False
+        :rtype: bool
+        """
+
+        host_server = DockerHostServer(vm_name = args.vm_name,
+                                       public_dns = args.public_dns,
+                                       public_ip = args.public_ip,
+                                       public_docker_api_port = args.public_docker_api_port,
+                                       private_ip = args.private_ip,
+                                       private_docker_api_port = args.private_docker_api_port,
+                                       container_count = 0,
+                                       container_max_count = args.container_max_count,
+                                       is_auto = AzureVMStartMethod.MANUAL,
+                                       disabled = args.disabled,
+                                       create_time = self.util.get_now(),
+                                       update_time = self.util.get_now(),
+                                       hackathon_id = hackathon_id)
+
+        if self.hosted_docker.ping(host_server, 5):
+            host_server.state = DockerHostServerStatus.DOCKER_READY
+        else:
+            host_server.state = DockerHostServerStatus.UNAVAILABLE
+
+        self.db.add_object(host_server)
+        return ok()
+
+    def get_and_check_host_server(self, host_server_id):
+        """
+        first get the docker host DB object for a hackathon,
+        and check whether the container_count is correct through "Docker Restful API",
+        if not, update this value in the database.
+
+        :param hackathon_id: the id of hackathon in DB
+        :type hackathon_id: Integer
+
+        :param host_server_id: the id of host_server in DB
+        :type host_server_id: Integer
+
+        :return: A object of docker_host_server
+        :rtype: DockerHostServer object or None
+        """
+        vm = self.db.find_first_object_by(DockerHostServer, id=host_server_id)
+        if vm is None:
+            self.log.warn('get docker_host fail, not find hostserver_id:' + host_server_id)
+            return None
+        vm_dic = vm.dic()
+
+        containers_json = self.hosted_docker.get_docker_containers_info_through_api(vm, 5)
+        if not vm_dic["container_count"] == len(containers_json):
+            self.db.update_object(vm, container_count = len(containers_json))
+            vm_dic["container_count"] = len(containers_json)
+
+        return vm_dic
+
+    def update_host_server(self, args):
+        """
+        update a docker host_server's information for a hackathon.
+
+        :param hackathon_id: the id of hackathon in DB
+        :type hackathon_id: Integer
+
+        :return: ok() if succeed.
+                 not_found(...) if fail to update the docker_host's information
+        """
+        vm = self.db.find_first_object_by(DockerHostServer, id=args.id)
+        if vm is None:
+            self.log.warn('delete docker_host fail, not find hostserver_id:' + args.id)
+            return not_found("", "host_server not found")
+
+        vm.public_dns = args.get("public_dns", vm.public_dns)
+        vm.public_ip = args.get("public_ip", vm.public_ip)
+        vm.private_ip = args.get("private_ip", vm.private_ip)
+        vm.public_docker_api_port = args.get("public_docker_api_port",vm.public_docker_api_port)
+        vm.private_docker_api_port = args.get("private_docker_api_port",vm.private_docker_api_port),
+        if self.hosted_docker.ping(vm, 5):
+            args['state'] = DockerHostServerStatus.DOCKER_READY
+        else:
+            args['state'] = DockerHostServerStatus.UNAVAILABLE
+
+        self.db.update_object(vm, vm_name = args.get("vm_name", vm.vm_name),
+                                  public_dns = args.get("public_dns", vm.public_dns),
+                                  public_ip = args.get("public_ip", vm.public_ip),
+                                  public_docker_api_port = args.get("public_docker_api_port",vm.public_docker_api_port),
+                                  private_ip = args.get("private_ip", vm.private_ip),
+                                  private_docker_api_port = args.get("private_docker_api_port",
+                                                                     vm.private_docker_api_port),
+                                  container_max_count = args.get("container_max_count", vm.container_max_count),
+                                  state = args.get("state", vm.state),
+                                  disabled = args.get("disabled", vm.disabled),
+                                  update_time = self.util.get_now())
+        return ok()
+
+    def delete_host_server(self, host_server_id):
+        """
+        delete a docker host_server for a hackathon.
+
+        :param hackathon_id: the id of a hackathon in DB
+        :type hackathon_id: Integer
+
+        :param host_server_id: the id of host_server in DB
+        :type host_server_id: Integer
+
+        :return: ok() if succeeds or this host_server doesn't exist
+                 precondition_failed() if there are still some containers running
+        """
+        vm = self.db.find_first_object_by(DockerHostServer, id=host_server_id)
+        if vm is None:
+            self.log.warn('delete docker_host fail, not find hostserver_id:' + host_server_id)
+            return ok()
+        if not vm.container_count == 0:
+            return precondition_failed("", "fail to delete: there are some containers running in this server")
+        self.db.delete_object(vm)
+        return ok()
+
     def check_vm_status(self, context):
         """
         Check vm status, including Azure creation operation feedback and docker api port
@@ -267,7 +404,7 @@ class DockerHostManager(Component):
         self.db.commit()
         # check docker _ping port
         try:
-            ping_url = 'http://%s:%d/_ping' % (public_dns, public_docker_api_port)
+            ping_url = 'http://%s:%d/_ping' % (public_ip, public_docker_api_port)
             req = requests.get(ping_url)
             self.log.debug(req.content)
             if req.status_code == 200 and req.content == DockerPingResult.OK:
@@ -275,6 +412,19 @@ class DockerHostManager(Component):
                 self.db.commit()
         except Exception as e:
             self.log.error(e)
+
+    def get_hostserver_info(self, host_server_id):
+        """
+        Get the infomation of a hostserver by host_server_id
+
+        :type host_server_id: int
+        :param host_server_id: the id of host_server
+
+        :rtype: dict
+        :return: the dict of host_server detail information
+        """
+        host_server = self.db.find_first_object_by(DockerHostServer, id=host_server_id)
+        return host_server.dic()
 
     def __get_sms_object(self, hackathon_id):
         """

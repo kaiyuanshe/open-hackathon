@@ -37,6 +37,7 @@ class DOCKER_UNIT:
     """constants in docker virtual_environment in template"""
     NAME = 'name'
     TYPE = 'type'
+    PROVIDER = 'provider'
     DESCRIPTION = 'description'
     PORTS = 'ports'
     PORTS_NAME = 'name'
