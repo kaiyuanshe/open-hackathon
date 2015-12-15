@@ -45,6 +45,29 @@ class LoginBase():
         pass
 
 
+class WeixinLogin(LoginBase):
+    """Sign in with Weixin OAuth 2.0 [https://wohugb.gitbooks.io/wechat/content/qrconnent/README.html]
+
+    :Example:
+        from client.user.login import WeixinLogin
+
+        WeixinLogin()
+
+    .. notes::
+    """
+
+    def login(self, args):
+        """ Weixin Login
+
+        :type args: dict
+        :param args:
+
+        :rtype: dict
+        :return: token and instance of user
+        """
+        log.info("login from Weixin")
+        pass
+
 class QQLogin(LoginBase):
     """Sign in with QQ
 
@@ -690,5 +713,6 @@ login_providers = {
     LOGIN_PROVIDER.QQ: QQLogin(),
     LOGIN_PROVIDER.GITCAFE: GitcafeLogin(),
     LOGIN_PROVIDER.ALAUDA: AlaudaLogin(),
-    LOGIN_PROVIDER.LIVE: LiveLogin()
+    LOGIN_PROVIDER.LIVE: LiveLogin(),
+    LOGIN_PROVIDER.WEIXIN: WeixinLogin()
 }
