@@ -153,7 +153,7 @@ Open file `/lib/systemd/system/docker.service` for editing and change line start
 ```
 ExecStart=/usr/bin/docker daemon -H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock
 ```
-Change `4243` to other port on demand. And then run `systemctl reload` in shell to reload the new configuration. And restart docker by `service docker restart`.
+Change `4243` to other port on demand. And then run `systemctl daemon-reload` in shell to reload the new configuration. And restart docker by `service docker restart`.
 
 Now, brower to `http://localhost:4243/_ping`. A simple `OK` shown indicates the remote API is working now. 
 Browse to `http://localhost:4243/containers/json` to see the information of running containers. 
