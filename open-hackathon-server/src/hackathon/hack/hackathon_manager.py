@@ -270,7 +270,7 @@ class HackathonManager(Component):
             self.log.debug("update hackathon items :" + str(args.keys()))
 
             #basic xss prevention
-            if 'description' in update_items:
+            if 'description' in update_items and update_items['description']:
                 update_items['description'] = self.cleaner.clean_html(update_items['description'])
                 self.log.debug("hackathon description :" + update_items['description'])
 
@@ -578,7 +578,8 @@ class HackathonManager(Component):
         )
 
         #basic xss prevention
-        new_hack.description = self.cleaner.clean_html(new_hack.description)
+        if new_hack.description: #case None type
+            new_hack.description = self.cleaner.clean_html(new_hack.description)
         
         # insert into table hackathon
         self.db.add_object(new_hack)
