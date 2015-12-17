@@ -41,6 +41,9 @@ from hackathon.constants import HACKATHON_BASIC_INFO, ADMIN_ROLE_TYPE, HACK_STAT
     FILE_TYPE, HACK_TYPE, HACKATHON_STAT
 from hackathon import RequiredFeature, Component, Context
 
+import lxml
+from lxml.html.clean import Cleaner
+
 __all__ = ["HackathonManager"]
 
 util = RequiredFeature("util")
@@ -56,6 +59,9 @@ class HackathonManager(Component):
     admin_manager = RequiredFeature("admin_manager")
     user_manager = RequiredFeature("user_manager")
     register_manager = RequiredFeature("register_manager")
+
+    #basic xss prevention
+    cleaner = Cleaner(safe_attrs=lxml.html.defs.safe_attrs | set(['style'])) #preserve style
 
     def is_hackathon_name_existed(self, name):
         """Check whether hackathon with specific name exists or not
@@ -262,6 +268,12 @@ class HackathonManager(Component):
         try:
             update_items = self.__parse_update_items(args, hackathon)
             self.log.debug("update hackathon items :" + str(args.keys()))
+
+            #basic xss prevention
+            if 'description' in update_items:
+                update_items['description'] = self.cleaner.clean_html(update_items['description'])
+                self.log.debug("hackathon description :" + update_items['description'])
+
             self.db.update_object(hackathon, **update_items)
             return hackathon.dic()
         except Exception as e:
@@ -565,6 +577,9 @@ class HackathonManager(Component):
             type=context.get("type", HACK_TYPE.HACKATHON)
         )
 
+        #basic xss prevention
+        new_hack.description = self.cleaner.clean_html(new_hack.description)
+        
         # insert into table hackathon
         self.db.add_object(new_hack)
 
