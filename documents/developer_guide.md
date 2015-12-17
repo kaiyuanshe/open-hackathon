@@ -153,7 +153,7 @@ Open file `/lib/systemd/system/docker.service` for editing and change line start
 ```
 ExecStart=/usr/bin/docker daemon -H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock
 ```
-Change `4243` to other port on demand. And then run `systemctl reload` in shell to reload the new configuration. And restart docker by `service docker restart`.
+Change `4243` to other port on demand. And then run `systemctl daemon-reload` in shell to reload the new configuration. And restart docker by `service docker restart`.
 
 Now, brower to `http://localhost:4243/_ping`. A simple `OK` shown indicates the remote API is working now. 
 Browse to `http://localhost:4243/containers/json` to see the information of running containers. 
@@ -216,6 +216,26 @@ To deploy open hackathon to staging or production environment, you need follow a
 As an example, we show how to deploy open hackathon using `uwsgi` in the following section. However, both `open hackathon platform` and `flask` don't have any limitation on this, choose whatever application you like.
 
 ### deploy open hackathon with uwsgi
+ **We assume the source codes are cloned to /home/opentech/openhackathon**. If not, please rectify the file path of following files:
+```
+<src_root>/open-hackathon-server/src/app.wsgi
+<src_root>/open-hackathon-server/src/open-hackathon-server.conf
+<src_root>/open-hackathon-server/src/open-hackathon-server.ini
+<src_root>/open-hackathon-client/src/app.wsgi
+<src_root>/open-hackathon-client/src/open-hackathon-client.conf
+<src_root>/open-hackathon-client/src/open-hackathon-client.ini
+```
+
+- Follow [uwsgi install guide](http://uwsgi-docs.readthedocs.org/en/latest/Install.html) to install uwsgi
+- Deploy open hackathon server and client as ubuntu upstart services:
+```
+sudo cp /home/opentech/open-hackathon/open-hackathon-server/src/open-hackathon-server.conf /etc/init/
+sudo service open-hackathon-server start
+
+sudo cp /home/opentech/open-hackathon/open-hackathon-client/src/open-hackathon-client.conf /etc/init/
+sudo service open-hackathon-client start
+```
+- by default, open hackahton server and client listen on port 15000 and 80 respectively. Update the ini file if you want as well as other uwsgi configurations.
 
 ### things to know
 - You can deploy DB, open hackathon server, open hackathon client to different VM, correct configurations in `config.py` and `/etc/guacamole/guacamole.properties` then if you do so.
