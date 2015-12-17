@@ -73,6 +73,7 @@ def __oauth_api_key():
         LOGIN_PROVIDER.WEIBO: get_config('login.weibo.client_id'),
         LOGIN_PROVIDER.QQ: get_config('login.qq.client_id'),
         LOGIN_PROVIDER.LIVE: get_config('login.live.client_id'),
+        LOGIN_PROVIDER.WEIXIN: get_config("login.weixin.client_id"),
         LOGIN_PROVIDER.GITCAFE: get_config('login.gitcafe.client_id'),
         LOGIN_PROVIDER.GITHUB: get_config('login.github.client_id')
     }
@@ -264,6 +265,11 @@ def github_login():
 @app.route('/weibo')
 def weibo_login():
     return __login(LOGIN_PROVIDER.WEIBO)
+
+
+@app.route('/weixin')
+def weixin_login():
+    return __login(LOGIN_PROVIDER.WEIXIN)
 
 
 @app.route('/qq')

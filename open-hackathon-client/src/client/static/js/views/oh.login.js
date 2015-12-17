@@ -61,6 +61,9 @@
                 case 'weibo':
                     openWindow(CONFIG.weibo.authorize_url);
                     break;
+                case 'weixin':
+                    openWindow(CONFIG.weixin.authorize_url);
+                    break;
                 case 'gitcafe':
                     openWindow(CONFIG.gitcafe.authorize_url);
                     break;
