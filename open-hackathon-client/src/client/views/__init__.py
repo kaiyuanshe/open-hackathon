@@ -139,7 +139,7 @@ def __get_api(url, headers=None, **kwargs):
 @app.context_processor
 def utility_processor():
     def get_now():
-        return __date_serializer(datetime.now())
+        return __date_serializer(datetime.utcnow())
 
     def activity_progress(starttime, endtime):
         return ((int(time.time() * 1e3) - starttime) * 1.0 / (endtime - starttime) * 1.0) * 100
