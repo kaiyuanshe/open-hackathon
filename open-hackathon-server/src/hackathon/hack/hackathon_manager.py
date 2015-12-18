@@ -32,6 +32,8 @@ from datetime import timedelta
 
 from werkzeug.exceptions import PreconditionFailed, InternalServerError, BadRequest
 from flask import g, request
+import lxml
+from lxml.html.clean import Cleaner
 
 from hackathon.database import Hackathon, User, AdminHackathonRel, DockerHostServer, HackathonLike, \
     HackathonStat, HackathonConfig, HackathonTag, UserHackathonRel, HackathonOrganizer, Award,UserHackathonAsset,\
@@ -40,9 +42,6 @@ from hackathon.hackathon_response import internal_server_error, ok, not_found, f
 from hackathon.constants import HACKATHON_BASIC_INFO, ADMIN_ROLE_TYPE, HACK_STATUS, RGStatus, HTTP_HEADER, \
     FILE_TYPE, HACK_TYPE, HACKATHON_STAT
 from hackathon import RequiredFeature, Component, Context
-
-import lxml
-from lxml.html.clean import Cleaner
 
 __all__ = ["HackathonManager"]
 
