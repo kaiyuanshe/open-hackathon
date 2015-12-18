@@ -25,6 +25,7 @@ package com.openhackathon.guacamole;
 
 
 import com.google.inject.AbstractModule;
+import com.openhackathon.guacamole.connection.ConnectionService;
 import org.glyptodon.guacamole.GuacamoleException;
 import org.glyptodon.guacamole.environment.Environment;
 import org.glyptodon.guacamole.environment.LocalEnvironment;
@@ -74,6 +75,6 @@ public class OpenHackthonAuthenticationProviderModule extends AbstractModule {
         bind(Environment.class).toInstance(environment);
 
         //Bind OpenHackthon-specific services
-
+        bind(ConnectionService.class);
     }
 }

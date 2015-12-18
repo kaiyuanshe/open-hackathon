@@ -21,11 +21,16 @@
  */
 package com.openhackathon.guacamole;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.openhackathon.guacamole.connection.ConnectionService;
+import com.openhackathon.guacamole.user.AuthenticatedUser;
 import org.glyptodon.guacamole.GuacamoleException;
-import org.glyptodon.guacamole.net.auth.AuthenticatedUser;
 import org.glyptodon.guacamole.net.auth.Connection;
 import org.glyptodon.guacamole.net.auth.Credentials;
 import org.glyptodon.guacamole.net.auth.UserContext;
+import org.glyptodon.guacamole.net.auth.credentials.CredentialsInfo;
+import org.glyptodon.guacamole.net.auth.credentials.GuacamoleInvalidCredentialsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +45,24 @@ public class AuthenticationProviderService {
      * Logger for this class.
      */
     private final Logger logger = LoggerFactory.getLogger(AuthenticationProviderService.class);
+
+    /**
+     * Provider for AuthenticatedUser objects.
+     */
+    @Inject
+    private Provider<AuthenticatedUser> authenticatedUserProvider;
+
+    /**
+     * Service which provides connections to open hackthon instances.
+     */
+    @Inject
+    private ConnectionService connectionService;
+
+    /**
+     * Provider for UserContext objects.
+     */
+    @Inject
+    private Provider<UserContext> userContextProvider;
 
     /**
      * Returns an AuthenticatedUser representing the user authenticated by the
@@ -59,8 +82,17 @@ public class AuthenticationProviderService {
     public AuthenticatedUser authenticateUser(Credentials credentials)
             throws GuacamoleException {
 
+        //Validate login
+        Map<String, Connection> connections = connectionService.getConnections(credentials);
+        if (connections == null) {
+            throw new GuacamoleInvalidCredentialsException("Invalid login.",
+                    CredentialsInfo.USERNAME_PASSWORD);
+        }
 
-        return null;
+        // Return AuthenticatedUser if login succeeds, caching retrieved connections
+        AuthenticatedUser authenticatedUser = authenticatedUserProvider.get();
+        authenticatedUser.init(credentials, connections);
+        return authenticatedUser;
     }
 
 
