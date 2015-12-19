@@ -68,21 +68,27 @@ public class OpenHackathonAuthenticationProvider implements AuthenticationProvid
 
     @Override
     public AuthenticatedUser authenticateUser(Credentials credentials) throws GuacamoleException {
-        return null;
+        //TODO credentials may be updated???
+        AuthenticationProviderService authProviderService = injector.getInstance(AuthenticationProviderService.class);
+        return authProviderService.authenticateUser(credentials);
     }
 
     @Override
     public AuthenticatedUser updateAuthenticatedUser(AuthenticatedUser authenticatedUser, Credentials credentials) throws GuacamoleException {
+        //TODO credentials may be updated???
         return authenticatedUser;
     }
 
     @Override
     public UserContext getUserContext(AuthenticatedUser authenticatedUser) throws GuacamoleException {
-        return null;
+        //TODO credentials may be updated???
+        AuthenticationProviderService authProviderService = injector.getInstance(AuthenticationProviderService.class);
+        return authProviderService.getUserContext(authenticatedUser);
     }
 
     @Override
     public UserContext updateUserContext(UserContext context, AuthenticatedUser authenticatedUser) throws GuacamoleException {
+        //TODO credentials may be updated???
         return context;
     }
 }

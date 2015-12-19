@@ -28,6 +28,7 @@ import com.openhackathon.guacamole.OpenHackathonAuthenticationProvider;
 import org.glyptodon.guacamole.GuacamoleException;
 import org.glyptodon.guacamole.form.Form;
 import org.glyptodon.guacamole.net.auth.*;
+import org.glyptodon.guacamole.net.auth.AuthenticatedUser;
 import org.glyptodon.guacamole.net.auth.simple.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,7 +98,7 @@ public class UserContext implements org.glyptodon.guacamole.net.auth.UserContext
      *     The Map of Connections that this UserContext should provide access
      *     to.
      */
-    public void init(AuthenticationProvider user,
+    public void init(AuthenticatedUser user,
                      Map<String, Connection> connections) {
         //There may be some problem here.
         // Init self with basic permissions

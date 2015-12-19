@@ -25,10 +25,10 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.openhackathon.guacamole.connection.ConnectionService;
 import com.openhackathon.guacamole.user.AuthenticatedUser;
+import com.openhackathon.guacamole.user.UserContext;
 import org.glyptodon.guacamole.GuacamoleException;
 import org.glyptodon.guacamole.net.auth.Connection;
 import org.glyptodon.guacamole.net.auth.Credentials;
-import org.glyptodon.guacamole.net.auth.UserContext;
 import org.glyptodon.guacamole.net.auth.credentials.CredentialsInfo;
 import org.glyptodon.guacamole.net.auth.credentials.GuacamoleInvalidCredentialsException;
 import org.slf4j.Logger;
@@ -112,8 +112,20 @@ public class AuthenticationProviderService {
      */
     public UserContext getUserContext(org.glyptodon.guacamole.net.auth.AuthenticatedUser authenticatedUser)
             throws GuacamoleException {
+        Map<String, Connection> connections;
 
-        return null;
+        // Pull connections from authenticated user if they came from the AWS auth provider
+        if (authenticatedUser instanceof AuthenticatedUser)
+            connections = ((AuthenticatedUser) authenticatedUser).getConnections();
+        else
+            connections = connectionService.getConnections(authenticatedUser.getCredentials());
+        // Do not generate a user context if this user has no data
+        if (connections == null)
+            return null;
+        // Return UserContext which provides access to the given connections
+        UserContext userContext = userContextProvider.get();
+        userContext.init(authenticatedUser, connections);
+        return userContext;
     }
 
 }

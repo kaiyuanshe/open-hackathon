@@ -40,10 +40,10 @@ import java.util.Iterator;
  */
 public class Trans2GuacdConfiguration {
 
-    private final Logger logger = LoggerFactory.getLogger(Trans2GuacdConfiguration.class.getClass());
+    private final static Logger logger = LoggerFactory.getLogger(Trans2GuacdConfiguration.class.getClass());
 
 
-    public GuacamoleConfiguration getConfiguration(final String jsonString) {
+    public static GuacamoleConfiguration getConfiguration(final String jsonString) {
         try {
 
             final JSONObject json = new JSONObject(jsonString);
