@@ -230,18 +230,7 @@
                 timing.minute = Math.floor(timing.distance / 60000)
                 timing.distance -= timing.minute * 60000;
                 timing.second = Math.floor(timing.distance / 1000)
-                if (timing.day == 0) {
-                    timing.day = null
-                }
-                if (timing.hour == 0 && timing.day == null) {
-                    timing.hour = null
-                }
-                if (timing.minute == 0 && timing.hour == null) {
-                    timing.minute = null
-                }
-                if (timing.second == 0 && timing.minute == null) {
-                    timing.second = null
-                }
+                
                 return timing;
             } else {
                 return null;
