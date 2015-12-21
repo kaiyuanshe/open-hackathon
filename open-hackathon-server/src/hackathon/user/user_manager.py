@@ -248,9 +248,14 @@ class UserManager(Component):
         :rtype: User
         :return user related to the token or None if token is invalid
         """
-        t = self.db.find_first_object_by(UserToken, token=token)
-        if t is not None and t.expire_date >= self.util.get_now():
-            return t.user
+        if "authenticateUser" in g and g.authenticateUser:
+            return g.user
+        else:
+            t = self.db.find_first_object_by(UserToken, token=token)
+            if t is not None and t.expire_date >= self.util.get_now():
+                g.authenticateUser = True
+                g.user = t.user
+                return t.user
 
         return None
 
