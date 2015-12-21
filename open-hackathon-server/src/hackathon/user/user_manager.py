@@ -41,6 +41,7 @@ from hackathon import Component, RequiredFeature
 
 __all__ = ["UserManager"]
 
+users_operation_time = {}
 
 class UserManager(Component):
     """Component for user management"""
@@ -81,6 +82,34 @@ class UserManager(Component):
             return self.__mysql_login(context)
         else:
             return self.__oauth_login(provider, context)
+
+    def update_user_operation_time(self):
+        """Update the user's last operation time.
+
+        :rtype:bool
+        :return True if success in updating, return False if token not found or token is overtime.
+        """
+        if HTTP_HEADER.TOKEN not in request.headers:
+            return False
+
+        user = self.__validate_token(request.headers[HTTP_HEADER.TOKEN])
+        if user is None:
+            return False
+
+        users_operation_time[user.id] = self.util.get_now()
+        return True
+
+    def check_user_online_status(self):
+        """Check whether the user is offline. If the answer is yes, update its status in DB."""
+        overtime_user_ids = []
+        for user_id in users_operation_time:
+            if (self.util.get_now() - users_operation_time[user_id]).seconds > 1800: # 1800s-half hour
+                overtime_user_ids.append(user_id)
+        for user_id in overtime_user_ids:
+            users_operation_time.pop(user_id)
+            user = self.get_user_by_id(user_id)
+            if user:
+                self.db.update_object(user, online=0)  # 0-offline
 
     def get_user_by_id(self, user_id):
         """Query user by unique id
