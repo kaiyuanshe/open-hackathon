@@ -80,6 +80,7 @@ def init_routes():
 
     # APIs for admin to manage hackathon and hackathon resources, features and users
     api.add_resource(AdminHackathonResource, "/api/admin/hackathon")  # create/update hackathon
+    api.add_resource(AdminHackathonCanOnLineResource, "/api/admin/hackathon/canonline")
     api.add_resource(AdminHackathonConfigResource, "/api/admin/hackathon/config")  # set hackathon config
     api.add_resource(AdminHackathonOrganizerResource, "/api/admin/hackathon/organizer")  # manage hackathon organizers
     api.add_resource(AdminHackathonTags, "/api/admin/hackathon/tags")  # get or set hackathon tags

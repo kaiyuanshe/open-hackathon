@@ -679,3 +679,9 @@ class AdminHostserverResource(HackathonResource):
     @admin_privilege_required
     def delete(self):
         return docker_host_manager.delete_host_server(self.context().id)
+
+class AdminHackathonCanOnLineResource(HackathonResource):
+    @hackathon_name_required
+    @admin_privilege_required
+    def get(self):
+        return hackathon_manager.check_hackathon_online(g.hackathon)
