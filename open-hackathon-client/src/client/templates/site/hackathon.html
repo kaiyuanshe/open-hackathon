@@ -394,12 +394,12 @@
         function initializeMap() {
             var address = "{{ hackathon.config.location }}";
 
-            var map = new BMap.Map("allmap");
+            var map = new BMap.Map("map");
             var myGeo = new BMap.Geocoder();
             myGeo.getPoint(address, function (point) {
                 if (point) {
                     map.enableScrollWheelZoom();
-                    map.centerAndZoom(point, 10);
+                    map.centerAndZoom(point, 14);
                 }else{
                     map.enableScrollWheelZoom();
                     point = new BMap.Point(116.331398,39.897445);
