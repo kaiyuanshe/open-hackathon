@@ -146,7 +146,9 @@
 (function ($, oh) {
 
     function getEvents() {
-        return oh.api.hackathon.list.get({});
+        return oh.api.hackathon.list.get({
+            query: {status: 1}
+        });
     }
 
     function pageLoad() {
