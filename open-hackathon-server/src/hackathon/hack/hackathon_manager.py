@@ -36,11 +36,11 @@ import lxml
 from lxml.html.clean import Cleaner
 
 from hackathon.database import Hackathon, User, AdminHackathonRel, DockerHostServer, HackathonLike, \
-    HackathonStat, HackathonConfig, HackathonTag, UserHackathonRel, HackathonOrganizer, Award,UserHackathonAsset,\
+    HackathonStat, HackathonConfig, HackathonTag, UserHackathonRel, HackathonOrganizer, Award, UserHackathonAsset, \
     UserTeamRel
 from hackathon.hackathon_response import internal_server_error, ok, not_found, forbidden
 from hackathon.constants import HACKATHON_BASIC_INFO, ADMIN_ROLE_TYPE, HACK_STATUS, RGStatus, HTTP_HEADER, \
-    FILE_TYPE, HACK_TYPE, HACKATHON_STAT
+    FILE_TYPE, HACK_TYPE, HACKATHON_STAT, DockerHostServerStatus
 from hackathon import RequiredFeature, Component, Context
 docker_host_manager = RequiredFeature("docker_host_manager")
 __all__ = ["HackathonManager"]
@@ -132,13 +132,13 @@ class HackathonManager(Component):
         if order_by == "create_time":
             query = query.order_by(Hackathon.create_time.desc())
         elif order_by == "event_start_time":
-            #all started and coming hackathon-activities would be shown based on event_start_time.
+            # all started and coming hackathon-activities would be shown based on event_start_time.
             query = query.order_by(Hackathon.event_start_time.desc())
 
-            #just coming hackathon-activities would be shown based on event_start_time.
-            #query = query.order_by(Hackathon.event_start_time.asc()).filter(Hackathon.event_start_time > self.util.get_now())
+            # just coming hackathon-activities would be shown based on event_start_time.
+            # query = query.order_by(Hackathon.event_start_time.asc()).filter(Hackathon.event_start_time > self.util.get_now())
         elif order_by == "registered_users_num":
-            #hackathons with zero registered users would not be shown.
+            # hackathons with zero registered users would not be shown.
             query = query.join(HackathonStat).order_by(HackathonStat.count.desc())
         else:
             query = query.order_by(Hackathon.id.desc())
@@ -246,10 +246,10 @@ class HackathonManager(Component):
 
         self.log.debug("add a new hackathon:" + context.name)
         new_hack = self.__create_hackathon(context)
-        new_hack["is_local"] = self.util.is_local()
-        # todo remove the following line ASAP
-        if new_hack["is_local"]:
-            self.__test_data(new_hack)
+
+        # init data is for local only
+        if self.util.is_local():
+            self.__create_default_data_for_local(new_hack)
 
         return new_hack.dic()
 
@@ -404,7 +404,7 @@ class HackathonManager(Component):
     def create_hackathon_organizer(self, hackathon, body):
         organizer = HackathonOrganizer(hackathon_id=hackathon.id,
                                        name=body["name"],
-                                       organization_type= body.get("organization_type"),
+                                       organization_type=body.get("organization_type"),
                                        description=body.get("description"),
                                        homepage=body.get("homepage"),
                                        logo=body.get("logo"),
@@ -687,18 +687,19 @@ class HackathonManager(Component):
     def __get_config_cache_key(self, hackathon):
         return "hackathon_config_%s" % hackathon.id
 
-    def __test_data(self, hackathon):
+    def __create_default_data_for_local(self, hackathon):
         """
-        create test data for new hackathon. Remove this function after template and docker host feature done
+        create test data for new hackathon. It's for local development only
         :param hackathon:
         :return:
         """
         try:
             # test docker host server
-            docker_host = DockerHostServer(vm_name="OSSLAB-VM-19", public_dns="osslab-vm-19.chinacloudapp.cn",
-                                           public_ip="42.159.97.143", public_docker_api_port=4243,
-                                           private_ip="10.209.14.33",
-                                           private_docker_api_port=4243, container_count=0, container_max_count=100,
+            docker_host = DockerHostServer(vm_name="localhost", public_dns="localhost",
+                                           public_ip="127.0.0.1", public_docker_api_port=4243,
+                                           private_ip="127.0.0.1", private_docker_api_port=4243,
+                                           container_count=0, container_max_count=100,
+                                           disabled=0, state=DockerHostServerStatus.DOCKER_READY,
                                            hackathon=hackathon)
             if self.db.find_first_object_by(DockerHostServer, vm_name=docker_host.vm_name,
                                             hackathon_id=hackathon.id) is None:
