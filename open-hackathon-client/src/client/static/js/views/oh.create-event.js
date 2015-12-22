@@ -47,9 +47,9 @@
 (function ($, oh) {
 
     var hackathonName = '',
-        hackathonID = 0;
-
-    _create_data = {};
+        hackathonID = 0,
+        is_local = true,
+        _create_data = {};
 
     function getHackthonData() {
         var event_time = $('#event_time').data('daterangepicker');
@@ -105,6 +105,12 @@
         return str;
     }
 
+    function get_is_local() {
+        return oh.api.islocal.get({}, function (data) {
+            is_local = data.message;
+        });
+    }
+
     function create_hackathon(data) {
         return oh.api.admin.hackathon.post(data);
     }
@@ -123,14 +129,14 @@
     function addHackathonTemplate(data) {
         return oh.api.admin.hackathon.template.post({
             body: data,
-            header: {hackathon_name: currentHackathon}
+            header: {hackathon_name: hackathonName}
         });
     };
 
     function removeHackathonTemplate(data) {
         return oh.api.admin.hackathon.template.delete({
             query: data,
-            header: {hackathon_name: currentHackathon}
+            header: {hackathon_name: hackathonName}
         });
     }
 
@@ -160,12 +166,18 @@
             if (data.error) {
             } else {
                 var classStatus = {0: 'default', 1: 'success', 2: 'failure'};
-                $('#template_list').empty().append($('#template_item').tmpl(data, {
+                var teml_list = $('#template_list').empty();
+                teml_list.append($('#template_item').tmpl(data, {
                     getStatus: getTemplateStatus,
                     getItemClass: function (id, status) {
+                        var items = teml_list.data('items') || [];
                         var class_name = '';
-
-                        //class_name += classStatus[status];
+                        $.each(items, function (i, item) {
+                            if (item.id == id) {
+                                class_name += 'active ';
+                                return false;
+                            }
+                        });
                         return class_name;
                     }
                 }));
@@ -200,6 +212,23 @@
         });
     }
 
+    //setup ckeditor
+    function ckeditorSetup() {
+        var editorElement = CKEDITOR.document.getById('markdownEdit');
+        CKEDITOR.replace(editorElement, {
+            language: 'zh-cn'
+            , width: 'auto'
+            , height: '220'
+        });
+    }
+
+    //update before uploading, otherwise changes won't be saved
+    function ckeditorUpdateTextarea() {
+        for (instance in CKEDITOR.instances) {
+            CKEDITOR.instances[instance].updateElement();
+        }
+    }
+
     function init() {
         bindEvent();
         pageload();
@@ -216,11 +245,8 @@
         });
 
         $('.bootstrap-tagsinput input:text').removeAttr('style');
-
-        $('#markdownEdit').markdown({
-            hiddenButtons: 'cmdCode',
-            language: 'zh'
-        });
+        get_is_local();
+        ckeditorSetup();
     }
 
 
@@ -249,7 +275,7 @@
             }
         }).on('success.form.bv', function (e) {
             e.preventDefault();
-
+            ckeditorUpdateTextarea();
             var hack_data = getHackthonData();
             var config_data = getConfig();
 
@@ -282,25 +308,35 @@
         $('#stepform2').bootstrapValidator().on('success.form.bv', function (e) {
             e.preventDefault();
             var items = temp_list.data('items');
-            if (items.length > 0) {
+            if (items.length == 0) {
                 oh.comm.alert('提示', '请选中image模板');
             } else {
                 nextStep('step3');
             }
         });
 
-        $('#stepform4').bootstrapValidator().on('success.form.bv', function (e) {
+        var form4 = $('#stepform4').bootstrapValidator().on('success.form.bv', function (e) {
             e.preventDefault();
-            $('#azure_list a[data-type="check"]:eq(0)').trigger('click', [function (isPass) {
+            var check_btn = $('#azure_list a[data-type="check"]:eq(0)').trigger('click', [function (isPass) {
                 if (isPass) {
                     nextStep('step5');
                 }
             }]);
+            if (check_btn.length == 0) {
+                $('[data-target="#crate_azure_modal"]').trigger('click');
+            }
+            form4.removeAttr('disabled');
+            form4.find('button:submit').removeAttr('disabled');
         });
 
-        $('#new_azurecertform').bootstrapValidator()
+        var azure_form = $('#new_azurecertform');
+        azure_form.bootstrapValidator()
             .on('success.form.bv', function (e) {
                 e.preventDefault();
+                var azure_div = azure_list.find('.azure:eq(0)');
+                if (azure_div.length > 0) {
+                    deleteAzure(azure_div.data('tmplItem').data.id);
+                }
                 postAzure().then(function (data) {
                     if (data.error) {
 
@@ -308,12 +344,13 @@
                         getAzureList(hackathonName);
                         $('#crate_azure_modal').modal('hide');
                     }
+                    azure_form.get(0).reset();
+                    azure_form.data().bootstrapValidator.resetForm();
                 });
             });
 
         $('#refresh_tmp').click(function (e) {
             getPublictTempates();
-            temp_list.data({'items': []});
             $('#step2').find('from').attr({disabled: 'disabled'});
             $('#step2').find('button:submit').attr({disabled: 'disabled'});
         })
@@ -345,7 +382,7 @@
                     $('#step2').find('button:submit').removeAttr('disabled');
                 }
             });
-        });
+        }).data({'items': []});
 
         $('#step3').on('click', 'button[data-name]', function (e) {
             var name = $(this).data('name');
@@ -357,35 +394,36 @@
                         nextStep('step5');
                     }
                 });
-            } else if (name == 'azure' && !_create_data.is_local) {
+            } else if (name == 'azure' && !is_local) {
                 nextStep('step4');
             } else {
                 nextStep('step5');
             }
         });
 
-        $('#azure_list').on('click', 'a[data-type="check"]', function (e, fun) {
+        var azure_list = $('#azure_list').on('click', 'a[data-type="check"]', function (e, fun) {
             var azure = $(this).parents('.azure').data('tmplItem').data;
+            azure_list.data({'id': azure.id});
             can_online().then(function (data) {
                 if (data.message) {
-                    deleteAzure(azure.id);
-                    oh.comm.alert('提示', '证书授权失败，请检验SUBSCRIPTION ID是否正确。');
-                    if (fun) {
-                        fun(false);
-                    }
-                } else {
                     if (fun) {
                         fun(true);
                     } else {
                         oh.comm.alert('提示', '证书授权成功。');
                     }
+                } else {
+                    deleteAzure(azure.id);
+                    oh.comm.alert('提示', '证书授权失败，请检验SUBSCRIPTION ID是否正确。');
+                    if (fun) {
+                        fun(false);
+                    }
                 }
             });
-        });
+        }).data({id: 0});
 
         $('#online').click(function (e) {
             online().then(function (data) {
-                oh.comm.alert('提示', '证书授权成功。', null, function () {
+                oh.comm.alert('提示', '<p>活动已经上线。<a href="/site/' + hackathonName + '">前往活动页</a></p>', null, function () {
                     window.location.href = 'manage/' + hackathonName + '/edit';
                 });
             });

@@ -265,10 +265,11 @@ String.prototype.format = function (args) {
     }
     Dialog.prototype = {
         init: function () {
+            var _seft = this;
             this.layout.on('hidden.bs.modal', function (e) {
                 e.target.remove();
-                if(this.params.hidefun){
-                    this.params.hidefun();
+                if(_seft.params.hidefun){
+                    _seft.params.hidefun();
                 }
             });
             this.layout.modal('show');

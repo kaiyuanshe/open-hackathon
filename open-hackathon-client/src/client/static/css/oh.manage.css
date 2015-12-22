@@ -185,3 +185,9 @@ footer {
 .failure .oh-temp-head {
     border-bottom: 1px solid #BD9B9B;
 }
+a{
+    color: #21b1de;
+}
+a:hover, a:focus {
+    text-decoration: underline;
+}
