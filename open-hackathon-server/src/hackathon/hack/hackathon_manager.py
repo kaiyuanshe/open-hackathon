@@ -42,7 +42,7 @@ from hackathon.hackathon_response import internal_server_error, ok, not_found, f
 from hackathon.constants import HACKATHON_BASIC_INFO, ADMIN_ROLE_TYPE, HACK_STATUS, RGStatus, HTTP_HEADER, \
     FILE_TYPE, HACK_TYPE, HACKATHON_STAT, DockerHostServerStatus
 from hackathon import RequiredFeature, Component, Context
-
+docker_host_manager = RequiredFeature("docker_host_manager")
 __all__ = ["HackathonManager"]
 
 util = RequiredFeature("util")
@@ -515,6 +515,19 @@ class HackathonManager(Component):
                 self.scheduler.remove_job(job_id)
         return True
 
+
+    def check_hackathon_online(self, hackathon):
+        alauda_enabled = self.get_basic_property(hackathon, "alauda_enabled", 0)
+        canOnline = True
+        if alauda_enabled == "0":
+            if self.util.is_local():
+                canOnline = True
+            else:
+                canOnline = docker_host_manager.check_subscription_id(hackathon.id)
+
+        return ok(canOnline);
+
+
     def __get_hackathon_detail(self, hackathon, user=None):
         """Return hackathon info as well as its details including configs, stat, organizers, like if user logon"""
         detail = hackathon.dic()
@@ -758,6 +771,9 @@ def is_alauda_enabled(hackathon):
 def get_basic_property(hackathon, property_name, default_value=None):
     hack_manager = RequiredFeature("hackathon_manager")
     return hack_manager.get_basic_property(hackathon, property_name, default_value)
+
+
+
 
 
 Hackathon.is_auto_approve = is_auto_approve

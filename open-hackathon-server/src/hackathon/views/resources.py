@@ -35,7 +35,7 @@ from flask_restful import reqparse
 from hackathon import RequiredFeature, Component
 from hackathon.decorators import hackathon_name_required, token_required, admin_privilege_required
 from hackathon.health import report_health
-from hackathon.hackathon_response import bad_request, not_found
+from hackathon.hackathon_response import bad_request, not_found, ok
 from hackathon_resource import HackathonResource
 from hackathon.constants import RGStatus
 
@@ -52,6 +52,7 @@ admin_manager = RequiredFeature("admin_manager")
 guacamole = RequiredFeature("guacamole")
 docker_host_manager = RequiredFeature("docker_host_manager")
 
+util = RequiredFeature("util")
 """Resources for OHP itself"""
 
 
@@ -67,6 +68,9 @@ class CurrentTimeResource(HackathonResource):
             "currenttime": long(time.time() * 1000)
         }
 
+class IsLocalResource(HackathonResource):
+   def get(self):
+       return ok(util.is_local())
 
 """Resources for templates library"""
 
@@ -679,3 +683,14 @@ class AdminHostserverResource(HackathonResource):
     @admin_privilege_required
     def delete(self):
         return docker_host_manager.delete_host_server(self.context().id)
+
+class AdminHackathonCanOnLineResource(HackathonResource):
+    @hackathon_name_required
+    @admin_privilege_required
+    def get(self):
+        return hackathon_manager.check_hackathon_online(g.hackathon)
+
+class AdminIsLocalResource():
+    @admin_privilege_required
+    def get(self):
+        return admin_manager.is_local()
