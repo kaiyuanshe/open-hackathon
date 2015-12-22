@@ -53,7 +53,7 @@
             var text = html.replace(/(<([^>]+)>)/ig, '');
             return limit ? text.substr(0, limit) : text;
         },
-        alert: function (title, text, fun) {
+        alert: function (title, text, fun, hideFun) {
             fun = fun || new Function();
             var alert = $('body').Dialog({
                 title: title,
@@ -62,6 +62,7 @@
                     fun();
                     alert.hide();
                 }),
+                hidefun: hideFun,
                 modal: 'alert'
             });
         },
@@ -240,6 +241,7 @@ String.prototype.format = function (args) {
             title: '',
             body: '',
             footer: '',
+            hidefun: function(){},
             modal: ''
         }
         $.extend(true, this.params, options || {});
@@ -265,7 +267,10 @@ String.prototype.format = function (args) {
         init: function () {
             this.layout.on('hidden.bs.modal', function (e) {
                 e.target.remove();
-            })
+                if(this.params.hidefun){
+                    this.params.hidefun();
+                }
+            });
             this.layout.modal('show');
         },
         hide: function () {

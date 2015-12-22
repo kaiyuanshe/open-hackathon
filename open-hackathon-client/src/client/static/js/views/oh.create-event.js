@@ -49,6 +49,8 @@
     var hackathonName = '',
         hackathonID = 0;
 
+    _create_data = {};
+
     function getHackthonData() {
         var event_time = $('#event_time').data('daterangepicker');
         var register_time = $('#register_time').data('daterangepicker');
@@ -111,24 +113,47 @@
         return oh.api.admin.hackathon.config.post(data);
     }
 
-    //
-    //function getHackathonTemplates(hackathon_name) {
-    //    var name = hackathon_name || hackathonName;
-    //    if (name) {
-    //        return oh.api.admin.hackathon.template.list.get({
-    //            header: {hackathon_name: name}
-    //        }, function (data) {
-    //            if (data.error) {
-    //            } else {
-    //                hackathon_templates = data;
-    //                $('#template_list').empty().append($('#template_item').tmpl(data, {
-    //                    hackathon_name: name,
-    //                    getStatus: getTemplateStatus
-    //                }));
-    //            }
-    //        });
-    //    }
-    //};
+    function set_alauda_enabled() {
+        return oh.api.admin.hackathon.config.put({
+            header: {hackathon_name: hackathonName},
+            body: [{key: 'alauda_enabled', value: 1}]
+        });
+    }
+
+    function addHackathonTemplate(data) {
+        return oh.api.admin.hackathon.template.post({
+            body: data,
+            header: {hackathon_name: currentHackathon}
+        });
+    };
+
+    function removeHackathonTemplate(data) {
+        return oh.api.admin.hackathon.template.delete({
+            query: data,
+            header: {hackathon_name: currentHackathon}
+        });
+    }
+
+    function can_online() {
+        return oh.api.admin.hackathon.canonline.get({header: {hackathon_name: hackathonName}});
+    }
+
+    function online() {
+        return oh.api.admin.hackathon.put({
+            body: {
+                id: _create_data.id,
+                name: hackathonName,
+                status: 1
+            },
+            header: {
+                hackathon_name: hackathonName
+            }
+        }, function (data) {
+            if (data.error) {
+                console.log(data);
+            }
+        });
+    }
 
     function getPublictTempates() {
         return oh.api.template.list.get({query: {}}, function (data) {
@@ -148,14 +173,31 @@
         });
     }
 
-    function getAzureList() {
+    function getAzureList(hackathon_name) {
         var name = hackathon_name || hackathonName;
         if (name) {
             return oh.api.admin.azure.get({header: {hackathon_name: name}}, function (data) {
                 $('#azure_list').empty().append($('#azure_cert_item').tmpl(data));
             });
         }
+    }
 
+    function postAzure() {
+        return oh.api.admin.azure.post({
+            body: {
+                subscription_id: $('#subscription_id').val(),
+                management_host: $('#management_host').val()
+            },
+            query: {},
+            header: {hackathon_name: hackathonName}
+        });
+    }
+
+    function deleteAzure(id) {
+        return oh.api.admin.azure.delete({
+            query: {certificate_id: id},
+            header: {hackathon_name: hackathonName}
+        });
     }
 
     function init() {
@@ -183,31 +225,6 @@
 
 
     function bindEvent() {
-        //var bannerModal = $('#bannerModal').on('hide.bs.modal', function (e) {
-        //    banner_form.get(0).reset();
-        //    banner_form.data().bootstrapValidator.resetForm();
-        //});
-
-        //$('.btn-upload').bind('click', function (e) {
-        //    bannerModal.modal('show');
-        //});
-        //
-        //$('.fileupload-buttonbar').on('click', '[data-action="close"]', function (e) {
-        //    var a = $(this);
-        //    var guid = a.data('guid');
-        //    a.parents('.template-download').detach();
-        //    removeFile(guid);
-        //});
-
-        //var banner_form = $('#addBannerForm').bootstrapValidator()
-        //    .on('success.form.bv', function (e) {
-        //        e.preventDefault();
-        //        var banner = $('#banner');
-        //        addFile({guid: oh.comm.guid(), url: banner.val()});
-        //        banner_form.data().bootstrapValidator.resetForm();
-        //        bannerModal.modal('hide');
-        //    });
-
         $('#stepform1').bootstrapValidator({
             fields: {
                 name: {
@@ -253,19 +270,156 @@
                         if (data.error) {
                             oh.comm.alert('错误', data.error.friendly_message);
                         } else {
-
+                            _create_data = data;
+                            nextStep('step2', function () {
+                                $('#refresh_tmp').trigger('click');
+                            });
                         }
                     });
                 }
             })
         });
+        $('#stepform2').bootstrapValidator().on('success.form.bv', function (e) {
+            e.preventDefault();
+            var items = temp_list.data('items');
+            if (items.length > 0) {
+                oh.comm.alert('提示', '请选中image模板');
+            } else {
+                nextStep('step3');
+            }
+        });
+
+        $('#stepform4').bootstrapValidator().on('success.form.bv', function (e) {
+            e.preventDefault();
+            $('#azure_list a[data-type="check"]:eq(0)').trigger('click', [function (isPass) {
+                if (isPass) {
+                    nextStep('step5');
+                }
+            }]);
+        });
+
+        $('#new_azurecertform').bootstrapValidator()
+            .on('success.form.bv', function (e) {
+                e.preventDefault();
+                postAzure().then(function (data) {
+                    if (data.error) {
+
+                    } else {
+                        getAzureList(hackathonName);
+                        $('#crate_azure_modal').modal('hide');
+                    }
+                });
+            });
 
         $('#refresh_tmp').click(function (e) {
             getPublictTempates();
-        }).trigger('click');
+            temp_list.data({'items': []});
+            $('#step2').find('from').attr({disabled: 'disabled'});
+            $('#step2').find('button:submit').attr({disabled: 'disabled'});
+        })
+
+        var temp_list = $('#template_list').on('click', '.oh-tempitem', function (e) {
+            var item = $(this);
+            var items = temp_list.data('items')
+            var data = item.parent().data('tmplItem').data;
+            item.toggleClass('active', function (cla) {
+                if ($(this).is('.active')) {
+                    items.push(data);
+                    addHackathonTemplate({template_id: data.id})
+                } else {
+                    var index = -1;
+                    $.each(items, function (i, o) {
+                        if (o.id == data.id) {
+                            index = i;
+                            return false;
+                        }
+                    });
+                    items.splice(index, 1);
+                    removeHackathonTemplate({template_id: data.id})
+                }
+                if (items.length == 0) {
+                    $('#step2').find('from').attr({disabled: 'disabled'});
+                    $('#step2').find('button:submit').attr({disabled: 'disabled'});
+                } else {
+                    $('#step2').find('from').removeAttr('disabled');
+                    $('#step2').find('button:submit').removeAttr('disabled');
+                }
+            });
+        });
+
+        $('#step3').on('click', 'button[data-name]', function (e) {
+            var name = $(this).data('name');
+            if (name == 'alauda') {
+                set_alauda_enabled().then(function (data) {
+                    if (data.error) {
+                        oh.comm.alert('错误', data.error.friendly_message);
+                    } else {
+                        nextStep('step5');
+                    }
+                });
+            } else if (name == 'azure' && !_create_data.is_local) {
+                nextStep('step4');
+            } else {
+                nextStep('step5');
+            }
+        });
+
+        $('#azure_list').on('click', 'a[data-type="check"]', function (e, fun) {
+            var azure = $(this).parents('.azure').data('tmplItem').data;
+            can_online().then(function (data) {
+                if (data.message) {
+                    deleteAzure(azure.id);
+                    oh.comm.alert('提示', '证书授权失败，请检验SUBSCRIPTION ID是否正确。');
+                    if (fun) {
+                        fun(false);
+                    }
+                } else {
+                    if (fun) {
+                        fun(true);
+                    } else {
+                        oh.comm.alert('提示', '证书授权成功。');
+                    }
+                }
+            });
+        });
+
+        $('#online').click(function (e) {
+            online().then(function (data) {
+                oh.comm.alert('提示', '证书授权成功。', null, function () {
+                    window.location.href = 'manage/' + hackathonName + '/edit';
+                });
+            });
+        });
+        $('#perfect_link').click(function (e) {
+            window.location.href = 'manage/' + hackathonName + '/edit';
+        })
+    }
+
+    var steps = {};
+
+    function nextStep(id, fun) {
+        fun = fun || new Function();
+        var _index = 0;
+        steps.each(function (i, step) {
+            var s = $(step);
+            if (s.attr('id') != id) {
+                s.detach();
+            } else {
+                $('.step-content').append(s.addClass('active'));
+                fun();
+                _index = i + 2;
+            }
+        });
+        return _index;
     }
 
     $(function () {
+        steps = $('.step-pane');
         init();
+        var i = nextStep('step1');
+
+        //$('#next').click(function (e) {
+        //    i = nextStep('step' + i);
+        //});
     })
 })(window.jQuery, window.oh);
