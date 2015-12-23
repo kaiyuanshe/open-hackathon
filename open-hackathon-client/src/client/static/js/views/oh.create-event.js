@@ -48,7 +48,7 @@
 
     var hackathonName = '',
         hackathonID = 0,
-        is_local = true,
+        is_local = islocal,
         _create_data = {};
 
     function getHackthonData() {
@@ -103,12 +103,6 @@
                 break;
         }
         return str;
-    }
-
-    function get_is_local() {
-        return oh.api.islocal.get({}, function (data) {
-            is_local = data.message;
-        });
     }
 
     function create_hackathon(data) {
@@ -245,7 +239,7 @@
         });
 
         $('.bootstrap-tagsinput input:text').removeAttr('style');
-        get_is_local();
+
         ckeditorSetup();
     }
 
@@ -421,15 +415,16 @@
             });
         }).data({id: 0});
 
-        $('#online').click(function (e) {
+        var online_btn = $('#online').click(function (e) {
             online().then(function (data) {
                 oh.comm.alert('提示', '<p>活动已经上线。<a href="/site/' + hackathonName + '">前往活动页</a></p>', null, function () {
-                    window.location.href = 'manage/' + hackathonName + '/edit';
+                    online_btn.detach();
                 });
             });
         });
-        $('#perfect_link').click(function (e) {
-            window.location.href = 'manage/' + hackathonName + '/edit';
+        $('#links').on('click', 'a', function (e) {
+            var name = $(this).data('name');
+            window.location.href = 'manage/' + hackathonName + '/' + name;
         })
     }
 
@@ -456,8 +451,8 @@
         init();
         var i = nextStep('step1');
 
-        //$('#next').click(function (e) {
-        //    i = nextStep('step' + i);
-        //});
+        $('#next').click(function (e) {
+            i = nextStep('step' + i);
+        });
     })
 })(window.jQuery, window.oh);

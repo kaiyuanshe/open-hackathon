@@ -259,8 +259,7 @@ Config = {
                 "talent": {
                     "list": ["get"]
                 },
-                "grantedawards":["get"],
-                "islocal": ["get"]
+                "grantedawards":["get"]
             }
         }
     }
