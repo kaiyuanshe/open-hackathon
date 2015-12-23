@@ -122,3 +122,6 @@ def get_now():
 
 def qs_dict(query):
     return dict([(k, v[0]) for k, v in parse_qs(query).items()])
+
+def is_local():
+    return safe_get_config("environment", "local") == "local"

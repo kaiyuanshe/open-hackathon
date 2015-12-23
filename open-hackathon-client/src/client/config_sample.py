@@ -155,6 +155,7 @@ Config = {
                         "": ["get", "post", "put"],
                         "checkname": ["get"],
                         "list": ["get"],
+                        "canonline": ["get"],
                         "tags": ["get", "post", "put", "delete"],
                         "config": ["post", "put", "delete"],
                         "administrator": {
