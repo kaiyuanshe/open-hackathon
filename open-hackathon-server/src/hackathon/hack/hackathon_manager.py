@@ -59,8 +59,8 @@ class HackathonManager(Component):
     user_manager = RequiredFeature("user_manager")
     register_manager = RequiredFeature("register_manager")
 
-    #basic xss prevention
-    cleaner = Cleaner(safe_attrs=lxml.html.defs.safe_attrs | set(['style'])) #preserve style
+    # basic xss prevention
+    cleaner = Cleaner(safe_attrs=lxml.html.defs.safe_attrs | set(['style']))  # preserve style
 
     def is_hackathon_name_existed(self, name):
         """Check whether hackathon with specific name exists or not
@@ -268,7 +268,7 @@ class HackathonManager(Component):
             update_items = self.__parse_update_items(args, hackathon)
             self.log.debug("update hackathon items :" + str(args.keys()))
 
-            #basic xss prevention
+            # basic xss prevention
             if 'description' in update_items and update_items['description']:
                 update_items['description'] = self.cleaner.clean_html(update_items['description'])
                 self.log.debug("hackathon description :" + update_items['description'])
@@ -502,6 +502,7 @@ class HackathonManager(Component):
                 if is_job_exists:
                     continue
 
+                self.log.debug("add job for hackathon %s" % str(hack.id))
                 next_run_time = self.util.get_now() + timedelta(seconds=hack.id * 10)
                 pre_allocate_interval = self.__get_pre_allocate_interval(hack)
                 self.scheduler.add_interval(feature="expr_manager",
@@ -512,6 +513,7 @@ class HackathonManager(Component):
                                             seconds=pre_allocate_interval
                                             )
             elif is_job_exists:
+                self.log.debug("remove job for hackathon %s since pre_allocate is disabled" % str(hack.id))
                 self.scheduler.remove_job(job_id)
         return True
 
@@ -576,10 +578,10 @@ class HackathonManager(Component):
             type=context.get("type", HACK_TYPE.HACKATHON)
         )
 
-        #basic xss prevention
-        if new_hack.description: #case None type
+        # basic xss prevention
+        if new_hack.description:  # case None type
             new_hack.description = self.cleaner.clean_html(new_hack.description)
-        
+
         # insert into table hackathon
         self.db.add_object(new_hack)
 
