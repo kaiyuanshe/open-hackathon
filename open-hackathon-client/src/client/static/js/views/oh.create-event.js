@@ -450,9 +450,5 @@
         steps = $('.step-pane');
         init();
         var i = nextStep('step1');
-
-        $('#next').click(function (e) {
-            i = nextStep('step' + i);
-        });
     })
 })(window.jQuery, window.oh);
