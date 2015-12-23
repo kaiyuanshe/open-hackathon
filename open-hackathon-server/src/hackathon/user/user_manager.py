@@ -101,15 +101,13 @@ class UserManager(Component):
 
     def check_user_online_status(self):
         """Check whether the user is offline. If the answer is yes, update its status in DB."""
-        overtime_user_ids = []
-        for user_id in users_operation_time:
-            if (self.util.get_now() - users_operation_time[user_id]).seconds > 1800: # 1800s-half hour
-                overtime_user_ids.append(user_id)
+        overtime_user_ids = [user_id for user_id in users_operation_time
+                             if (self.util.get_now() - users_operation_time[user_id]).seconds > 1800] # 1800s-half hour
+
+        User.query.filter(User.id.in_(overtime_user_ids)).update({User.online: 0}, synchronize_session=False)
+        self.db.commit()
         for user_id in overtime_user_ids:
-            users_operation_time.pop(user_id)
-            user = self.get_user_by_id(user_id)
-            if user:
-                self.db.update_object(user, online=0)  # 0-offline
+            users_operation_time.pop(user_id, "")
 
     def get_user_by_id(self, user_id):
         """Query user by unique id
@@ -248,12 +246,12 @@ class UserManager(Component):
         :rtype: User
         :return user related to the token or None if token is invalid
         """
-        if "authenticateUser" in g and g.authenticateUser:
+        if "authenticated" in g and g.authenticated:
             return g.user
         else:
             t = self.db.find_first_object_by(UserToken, token=token)
             if t is not None and t.expire_date >= self.util.get_now():
-                g.authenticateUser = True
+                g.authenticated = True
                 g.user = t.user
                 return t.user
 
