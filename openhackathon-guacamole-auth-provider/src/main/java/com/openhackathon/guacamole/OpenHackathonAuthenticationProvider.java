@@ -109,7 +109,7 @@ public class OpenHackathonAuthenticationProvider extends SimpleAuthenticationPro
     public String getIdentifier() {
         return "openhackathon";
     }
-    
+
 
     private GuacamoleConfiguration getConfiguration(final String jsonString) {
         try {
