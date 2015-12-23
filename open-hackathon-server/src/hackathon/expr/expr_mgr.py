@@ -340,7 +340,8 @@ class ExprManager(Component):
                     name = guacamole_config["name"]
                     url = guacamole_host + '/guacamole/#/client/c/%s?name=%s' % (name, name)
                     remote_servers.append({
-                        "name": guacamole_config["displayname"],
+                        "name": guacamole_config["name"],
+                        "guacamole_host": guacamole_host,
                         "url": url
                     })
                     # cloud eclipse
