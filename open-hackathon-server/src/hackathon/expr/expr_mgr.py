@@ -574,8 +574,10 @@ class ExprManager(Component):
                 p.sendline("yes")
                 i = p.expect([pexpect.TIMEOUT, 'password:'])
 
-            p.sendline(remote["password"])
-            p.expect(pexpect.EOF)
+            if i != 0:
+                p.sendline(remote["password"])
+                p.expect(pexpect.EOF)
+
             p.close()
         except Exception as e:
             self.log.info("scp file error")

@@ -517,7 +517,7 @@ class HackathonManager(Component):
 
 
     def check_hackathon_online(self, hackathon):
-        alauda_enabled = self.get_basic_property(hackathon, "alauda_enabled", 0)
+        alauda_enabled = is_alauda_enabled(hackathon)
         canOnline = True
         if alauda_enabled == "0":
             if self.util.is_local():
@@ -525,7 +525,7 @@ class HackathonManager(Component):
             else:
                 canOnline = docker_host_manager.check_subscription_id(hackathon.id)
 
-        return ok(canOnline);
+        return ok(canOnline)
 
 
     def __get_hackathon_detail(self, hackathon, user=None):

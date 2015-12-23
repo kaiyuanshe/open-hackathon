@@ -68,10 +68,6 @@ class CurrentTimeResource(HackathonResource):
             "currenttime": long(time.time() * 1000)
         }
 
-class IsLocalResource(HackathonResource):
-   def get(self):
-       return ok(util.is_local())
-
 """Resources for templates library"""
 
 
@@ -685,12 +681,7 @@ class AdminHostserverResource(HackathonResource):
         return docker_host_manager.delete_host_server(self.context().id)
 
 class AdminHackathonCanOnLineResource(HackathonResource):
-    @hackathon_name_required
     @admin_privilege_required
     def get(self):
         return hackathon_manager.check_hackathon_online(g.hackathon)
 
-class AdminIsLocalResource():
-    @admin_privilege_required
-    def get(self):
-        return admin_manager.is_local()

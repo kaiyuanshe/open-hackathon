@@ -41,9 +41,6 @@ def init_routes():
     # system time API
     api.add_resource(CurrentTimeResource, "/api/currenttime")
 
-    # config is local API
-    api.add_resource(IsLocalResource, "/api/islocal")
-
     # APIs for template library
     api.add_resource(TemplateResource, "/api/template")  # query, create or delete template
     api.add_resource(TemplateCreateByFileResource, "/api/template/file")  # create template from file
