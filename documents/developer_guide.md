@@ -75,22 +75,26 @@ sudo pip install -r open-hackathon-client/requirement.txt
 
 ### Install and Configure guacamole
 
-Firstly please [download](http://guac-dev.org/release/release-notes-0-9-6) and [install](http://guac-dev.org/doc/gug/installing-guacamole.html) guacamole 0.9.6 firstly. Make sure all protocols including VNC, RDP, ssh and telnet are properly installed.
+Firstly please [download](http://guac-dev.org/release/release-notes-0-9-9) guacamole-server-0.9.9.tar.gz, and then [install](http://guac-dev.org/doc/gug/installing-guacamole.html) guacamole server 0.9.9 firstly. Make sure all protocols including VNC, RDP, ssh and telnet are properly installed.
 
 Since open hackathon has [customized guacamole authentication provider](https://github.com/msopentechcn/open-hackathon/tree/master/openhackathon-guacamole-auth-provider), we need additional steps for it:
+
 ```
 sudo mkdir /usr/share/tomcat7/.guacamole
 sudo mkdir /etc/guacamole
-
 cd /opt/open-hackathon/deploy/guacamole
 cp guacamole-sample.properties /etc/guacamole/guacamole.properties
 cp *.jar /etc/guacamole
 sudo ln -s /etc/guacamole/guacamole.properties /usr/share/tomcat7/.guacamole/guacamole.properties
+```
 
-cp guacamole-0.9.6.war /var/lib/tomcat7/webapps/guacamole.war
+Then [download] (http://guac-dev.org/release/release-notes-0-9-9) guacamole-0.9.9.war, and then copy it to /var/lib/tomcat7/webapps/guacamole.war:
+```
+cp guacamole-0.9.9.war /var/lib/tomcat7/webapps/guacamole.war
 sudo service guacd restart
 sudo service tomcat7 restart
 ```
+
 By default you don't need to change `/etc/guacamole/guacamole.properties` on your local machine. And usually the only config need to update is `auth-request-url` if your open-hackathon-server listens on a different port other than `15000`. _You need to restart tomcat7 and guacd service if `guacamole.properties` updated_.
 
 
