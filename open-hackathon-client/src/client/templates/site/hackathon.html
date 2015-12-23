@@ -36,7 +36,7 @@
                         <h2 id="detail" class="title">活动详情</h2>
 
                         <div class="oh-body detail-body">
-                            {{ hackathon.description | mkHTML | safe }}
+                            {{ hackathon.description | safe }}
                         </div>
 
                         <h2 id="new" class="title">最新动态 <span>（1）</span></h2>
@@ -392,21 +392,18 @@
             height: 30       // 信息窗口高度题
         }
         function initializeMap() {
-            var map = new BMap.Map('map');
-            map.addControl(new BMap.OverviewMapControl());
             var address = "{{ hackathon.config.location }}";
+
+            var map = new BMap.Map("map");
             var myGeo = new BMap.Geocoder();
             myGeo.getPoint(address, function (point) {
                 if (point) {
-                    {#                    var s = new BMap.Icon("http://cdn.huodongxing.com/Content/img/mark1.png", new BMap.Size(32, 32), {"anchor": new BMap.Size(16, 32)});#}
-                    {#                    baiduMapMarker = new BMap.Marker(point, {icon: myIcon});#}
-                    {#                    var infoWindow = new BMap.InfoWindow(address, opts);#}
-                    {#                    baiduMapMarker.addEventListener("click", function () {#}
-                    {#                        this.openInfoWindow(infoWindow);#}
-                    {#                    });#}
-                    {#                    map.addOverlay(baiduMapMarker);#}
                     map.enableScrollWheelZoom();
                     map.centerAndZoom(point, 14);
+                }else{
+                    map.enableScrollWheelZoom();
+                    point = new BMap.Point(116.331398,39.897445);
+                    map.centerAndZoom(point, 1);
                 }
             });
         }
