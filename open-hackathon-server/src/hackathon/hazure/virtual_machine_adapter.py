@@ -24,5 +24,3 @@ THE SOFTWARE.
 """
 
 __author__ = "rapidhere"
-
-from blob_service_adapter import BlobServiceAdapter
