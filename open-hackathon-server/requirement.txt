@@ -5,7 +5,7 @@ flask-cors==1.9.0
 sqlalchemy==1.0.8
 flask-sqlalchemy==2.0
 mysql-python==1.2.5
-azure==0.11.1
+azure==1.0.2
 requests
 apscheduler==3.0.3
 mock==1.0.1

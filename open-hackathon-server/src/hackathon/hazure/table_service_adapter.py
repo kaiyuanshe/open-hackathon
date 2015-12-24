@@ -24,3 +24,17 @@ THE SOFTWARE.
 """
 
 __author__ = "rapidhere"
+__all__ = ["TableServiceAdapter"]
+
+from azure.storage.tableservice import TableService
+
+from service_adapter import ServiceAdapter
+
+
+class TableServiceAdapter(ServiceAdapter):
+    """This adapater is a part of AzureStorage Python SDK adapter
+
+    this is just a thin proxy on azure.storage.queueservice.QueueService, and have the same usage as BlobServiceAdapter
+    """
+
+    # TODO

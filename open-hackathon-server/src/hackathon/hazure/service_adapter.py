@@ -24,17 +24,20 @@ THE SOFTWARE.
 """
 
 __author__ = "rapidhere"
-__all__ = ["QueueServiceAdapter"]
+__all__ = ["ServiceAdapter"]
 
-from azure.storage.queueservice import QueueService
-
-from service_adapter import ServiceAdapter
+from hackathon import Component
 
 
-class QueueServiceAdapter(ServiceAdapter):
-    """This adapater is a part of AzureStorage Python SDK adapter
+class ServiceAdapter(Component):
+    """the abstract ServiceAdapter with proxy pattern
 
-    this is just a thin proxy on azure.storage.queueservice.QueueService, and have the same usage as BlobServiceAdapter
+    this adapter delegate the method and properties to the inner proxy, so make
+    the adpater has all functions that adaptee has
     """
 
-    # TODO
+    def __init__(self, service):
+        self.service = service
+
+    def __getattr__(self, name):
+        return getattr(self.service, name)
