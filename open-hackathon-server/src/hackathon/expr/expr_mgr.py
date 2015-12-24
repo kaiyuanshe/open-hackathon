@@ -340,7 +340,8 @@ class ExprManager(Component):
                     name = guacamole_config["name"]
                     url = guacamole_host + '/guacamole/#/client/c/%s?name=%s' % (name, name)
                     remote_servers.append({
-                        "name": guacamole_config["displayname"],
+                        "name": guacamole_config["name"],
+                        "guacamole_host": guacamole_host,
                         "url": url
                     })
                     # cloud eclipse
@@ -565,7 +566,7 @@ class ExprManager(Component):
 
     def __docker_completed(self, remote):
         try:
-            p = pexpect.spawn("scp -P %s %s %s@%s:/usr/local/sbin/guacctl.sh" % (remote["port"],
+            p = pexpect.spawn("scp -P %s %s %s@%s:/usr/local/sbin/guacctl" % (remote["port"],
                         abspath("%s/../docker/guacctl" % dirname(realpath(__file__))), remote["username"],
                         remote["hostname"]))
             i = p.expect([pexpect.TIMEOUT, 'yes/no', 'password: '])
@@ -574,8 +575,10 @@ class ExprManager(Component):
                 p.sendline("yes")
                 i = p.expect([pexpect.TIMEOUT, 'password:'])
 
-            p.sendline(remote["password"])
-            p.expect(pexpect.EOF)
+            if i != 0:
+                p.sendline(remote["password"])
+                p.expect(pexpect.EOF)
+
             p.close()
         except Exception as e:
             self.log.info("scp file error")

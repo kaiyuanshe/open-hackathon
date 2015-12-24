@@ -151,7 +151,26 @@
         pageload();
     }
 
+    //setup ckeditor
+    function ckeditorSetup() {
+        var editorElement = CKEDITOR.document.getById( 'markdownEdit' );
+        CKEDITOR.replace(editorElement, {
+            language: 'zh-cn'
+            , width:  'auto'
+            , height: '220'
+        });
+    }
+
+    //update before uploading, otherwise changes won't be saved
+    function ckeditorUpdateTextarea() {
+        for (instance in CKEDITOR.instances ) {
+            CKEDITOR.instances[instance].updateElement();
+        }
+    }
+
     function pageload() {
+        ckeditorSetup();
+
         $('#event_time,#register_time,#judge_time').daterangepicker({
             timePicker: true,
             format: 'YYYY/MM/DD HH:mm',
@@ -162,11 +181,6 @@
         });
 
         $('.bootstrap-tagsinput input:text').removeAttr('style');
-
-        $('#markdownEdit').markdown({
-            hiddenButtons: 'cmdCode',
-            language: 'zh'
-        });
     }
 
 
@@ -221,10 +235,12 @@
         }).on('success.form.bv', function (e) {
             e.preventDefault();
 
+            ckeditorUpdateTextarea();
+            
             var hack_data = getHackthonData();
             var config_data = getConfig();
             var tags_data = getTags();
-
+            
             create_hackathon({body: hack_data}).then(function (data) {
                 if (data.error) {
                     if (data.error.code == 412) {

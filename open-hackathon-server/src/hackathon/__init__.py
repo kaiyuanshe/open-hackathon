@@ -126,6 +126,12 @@ def exception_handler(error):
     return internal_server_error(error.message)
 
 
+@app.before_request
+def before_request():
+    user_manager = RequiredFeature("user_manager")
+    user_manager.update_user_operation_time()
+
+
 class Component(object):
     """Base class of business object
 
@@ -213,10 +219,6 @@ def init_schedule_jobs():
     Note that scheduler job will NOT be enabled in main thread. So the real initialization work are completed in a
     separated thread. Otherwise there might be dead lock in main thread.
     """
-    u = RequiredFeature("util")
-    if u.is_local():
-        return
-
     import threading
 
     t = threading.Thread(target=__init_schedule_jobs)
@@ -227,28 +229,36 @@ def __init_schedule_jobs():
     """Init scheduled jobs in fact"""
     log.debug("init scheduled jobs......")
 
+    util = RequiredFeature("util")
     sche = RequiredFeature("scheduler")
-    hackathon_manager = RequiredFeature("hackathon_manager")
-    # host_server_manager = RequiredFeature("docker_host_manager")
+    if not util.is_local():
+        hackathon_manager = RequiredFeature("hackathon_manager")
+        # host_server_manager = RequiredFeature("docker_host_manager")
 
-    # schedule job to check recycle operation
-    next_run_time = util.get_now() + timedelta(seconds=10)
-    sche.add_interval(feature="expr_manager",
-                      method="scheduler_recycle_expr",
-                      id="scheduler_recycle_expr",
-                      next_run_time=next_run_time,
+        # schedule job to check recycle operation
+        next_run_time = util.get_now() + timedelta(seconds=10)
+        sche.add_interval(feature="expr_manager",
+                          method="scheduler_recycle_expr",
+                          id="scheduler_recycle_expr",
+                          next_run_time=next_run_time,
+                          minutes=10)
+
+        # schedule job to pre-allocate environment
+        hackathon_manager.schedule_pre_allocate_expr_job()
+
+        # # schedule job to pull docker images automatically
+        # if not safe_get_config("docker.alauda.enabled", False):
+        #     docker = RequiredFeature("hosted_docker")
+        #     docker.ensure_images()
+
+        # schedule job to pre-create a docker host server VM
+        # host_server_manager.schedule_pre_allocate_host_server_job()
+
+    # init the overtime-sessions detection to update users' online status
+    sche.add_interval(feature="user_manager",
+                      method="check_user_online_status",
+                      id="check_user_online_status",
                       minutes=10)
-
-    # schedule job to pre-allocate environment
-    hackathon_manager.schedule_pre_allocate_expr_job()
-
-    # # schedule job to pull docker images automatically
-    # if not safe_get_config("docker.alauda.enabled", False):
-    #     docker = RequiredFeature("hosted_docker")
-    #     docker.ensure_images()
-
-    # schedule job to pre-create a docker host server VM
-    # host_server_manager.schedule_pre_allocate_host_server_job()
 
 
 def init_app():

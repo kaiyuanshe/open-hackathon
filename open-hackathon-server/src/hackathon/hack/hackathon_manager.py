@@ -32,15 +32,17 @@ from datetime import timedelta
 
 from werkzeug.exceptions import PreconditionFailed, InternalServerError, BadRequest
 from flask import g, request
+import lxml
+from lxml.html.clean import Cleaner
 
 from hackathon.database import Hackathon, User, AdminHackathonRel, DockerHostServer, HackathonLike, \
-    HackathonStat, HackathonConfig, HackathonTag, UserHackathonRel, HackathonOrganizer, Award,UserHackathonAsset,\
+    HackathonStat, HackathonConfig, HackathonTag, UserHackathonRel, HackathonOrganizer, Award, UserHackathonAsset, \
     UserTeamRel
 from hackathon.hackathon_response import internal_server_error, ok, not_found, forbidden
 from hackathon.constants import HACKATHON_BASIC_INFO, ADMIN_ROLE_TYPE, HACK_STATUS, RGStatus, HTTP_HEADER, \
-    FILE_TYPE, HACK_TYPE, HACKATHON_STAT
+    FILE_TYPE, HACK_TYPE, HACKATHON_STAT, DockerHostServerStatus
 from hackathon import RequiredFeature, Component, Context
-
+docker_host_manager = RequiredFeature("docker_host_manager")
 __all__ = ["HackathonManager"]
 
 util = RequiredFeature("util")
@@ -56,6 +58,9 @@ class HackathonManager(Component):
     admin_manager = RequiredFeature("admin_manager")
     user_manager = RequiredFeature("user_manager")
     register_manager = RequiredFeature("register_manager")
+
+    #basic xss prevention
+    cleaner = Cleaner(safe_attrs=lxml.html.defs.safe_attrs | set(['style'])) #preserve style
 
     def is_hackathon_name_existed(self, name):
         """Check whether hackathon with specific name exists or not
@@ -127,13 +132,13 @@ class HackathonManager(Component):
         if order_by == "create_time":
             query = query.order_by(Hackathon.create_time.desc())
         elif order_by == "event_start_time":
-            #all started and coming hackathon-activities would be shown based on event_start_time.
+            # all started and coming hackathon-activities would be shown based on event_start_time.
             query = query.order_by(Hackathon.event_start_time.desc())
 
-            #just coming hackathon-activities would be shown based on event_start_time.
-            #query = query.order_by(Hackathon.event_start_time.asc()).filter(Hackathon.event_start_time > self.util.get_now())
+            # just coming hackathon-activities would be shown based on event_start_time.
+            # query = query.order_by(Hackathon.event_start_time.asc()).filter(Hackathon.event_start_time > self.util.get_now())
         elif order_by == "registered_users_num":
-            #hackathons with zero registered users would not be shown.
+            # hackathons with zero registered users would not be shown.
             query = query.join(HackathonStat).order_by(HackathonStat.count.desc())
         else:
             query = query.order_by(Hackathon.id.desc())
@@ -242,9 +247,9 @@ class HackathonManager(Component):
         self.log.debug("add a new hackathon:" + context.name)
         new_hack = self.__create_hackathon(context)
 
-        # todo remove the following line ASAP
+        # init data is for local only
         if self.util.is_local():
-            self.__test_data(new_hack)
+            self.__create_default_data_for_local(new_hack)
 
         return new_hack.dic()
 
@@ -262,6 +267,12 @@ class HackathonManager(Component):
         try:
             update_items = self.__parse_update_items(args, hackathon)
             self.log.debug("update hackathon items :" + str(args.keys()))
+
+            #basic xss prevention
+            if 'description' in update_items and update_items['description']:
+                update_items['description'] = self.cleaner.clean_html(update_items['description'])
+                self.log.debug("hackathon description :" + update_items['description'])
+
             self.db.update_object(hackathon, **update_items)
             return hackathon.dic()
         except Exception as e:
@@ -393,7 +404,7 @@ class HackathonManager(Component):
     def create_hackathon_organizer(self, hackathon, body):
         organizer = HackathonOrganizer(hackathon_id=hackathon.id,
                                        name=body["name"],
-                                       organization_type= body.get("organization_type"),
+                                       organization_type=body.get("organization_type"),
                                        description=body.get("description"),
                                        homepage=body.get("homepage"),
                                        logo=body.get("logo"),
@@ -489,7 +500,7 @@ class HackathonManager(Component):
             is_job_exists = self.scheduler.has_job(job_id)
             if hack.is_pre_allocate_enabled():
                 if is_job_exists:
-                    return
+                    continue
 
                 next_run_time = self.util.get_now() + timedelta(seconds=hack.id * 10)
                 pre_allocate_interval = self.__get_pre_allocate_interval(hack)
@@ -503,6 +514,19 @@ class HackathonManager(Component):
             elif is_job_exists:
                 self.scheduler.remove_job(job_id)
         return True
+
+
+    def check_hackathon_online(self, hackathon):
+        alauda_enabled = is_alauda_enabled(hackathon)
+        canOnline = True
+        if alauda_enabled == "0":
+            if self.util.is_local():
+                canOnline = True
+            else:
+                canOnline = docker_host_manager.check_subscription_id(hackathon.id)
+
+        return ok(canOnline)
+
 
     def __get_hackathon_detail(self, hackathon, user=None):
         """Return hackathon info as well as its details including configs, stat, organizers, like if user logon"""
@@ -565,6 +589,10 @@ class HackathonManager(Component):
             type=context.get("type", HACK_TYPE.HACKATHON)
         )
 
+        #basic xss prevention
+        if new_hack.description: #case None type
+            new_hack.description = self.cleaner.clean_html(new_hack.description)
+        
         # insert into table hackathon
         self.db.add_object(new_hack)
 
@@ -659,18 +687,19 @@ class HackathonManager(Component):
     def __get_config_cache_key(self, hackathon):
         return "hackathon_config_%s" % hackathon.id
 
-    def __test_data(self, hackathon):
+    def __create_default_data_for_local(self, hackathon):
         """
-        create test data for new hackathon. Remove this function after template and docker host feature done
+        create test data for new hackathon. It's for local development only
         :param hackathon:
         :return:
         """
         try:
             # test docker host server
-            docker_host = DockerHostServer(vm_name="OSSLAB-VM-19", public_dns="osslab-vm-19.chinacloudapp.cn",
-                                           public_ip="42.159.97.143", public_docker_api_port=4243,
-                                           private_ip="10.209.14.33",
-                                           private_docker_api_port=4243, container_count=0, container_max_count=100,
+            docker_host = DockerHostServer(vm_name="localhost", public_dns="localhost",
+                                           public_ip="127.0.0.1", public_docker_api_port=4243,
+                                           private_ip="127.0.0.1", private_docker_api_port=4243,
+                                           container_count=0, container_max_count=100,
+                                           disabled=0, state=DockerHostServerStatus.DOCKER_READY,
                                            hackathon=hackathon)
             if self.db.find_first_object_by(DockerHostServer, vm_name=docker_host.vm_name,
                                             hackathon_id=hackathon.id) is None:
@@ -742,6 +771,9 @@ def is_alauda_enabled(hackathon):
 def get_basic_property(hackathon, property_name, default_value=None):
     hack_manager = RequiredFeature("hackathon_manager")
     return hack_manager.get_basic_property(hackathon, property_name, default_value)
+
+
+
 
 
 Hackathon.is_auto_approve = is_auto_approve

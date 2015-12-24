@@ -62,7 +62,25 @@
         });
     }
 
+    //setup ckeditor
+    function ckeditorSetup() {
+        var editorElement = CKEDITOR.document.getById( 'markdownEdit' );
+        CKEDITOR.replace(editorElement, {
+            language: 'zh-cn'
+            , width:  'auto'
+            , height: '220'
+        });
+    }
+
+    //update before uploading, otherwise changes won't be saved
+    function ckeditorUpdateTextarea() {
+        for (instance in CKEDITOR.instances ) {
+            CKEDITOR.instances[instance].updateElement();
+        }
+    }
+
     function pageload() {
+        ckeditorSetup();
         gethackathon();
         $('.bootstrap-tagsinput input:text').removeAttr('style');
 
@@ -74,11 +92,6 @@
                 banner_form.data().bootstrapValidator.resetForm();
                 bannerModal.modal('hide');
             });
-
-        $('#markdownEdit').markdown({
-            hiddenButtons: 'cmdCode',
-            language: 'zh'
-        });
 
         var bannerModal = $('#bannerModal').on('hide.bs.modal', function (e) {
             banner_form.get(0).reset();
@@ -220,6 +233,8 @@
             .on('success.form.bv', function (e) {
                 e.preventDefault();
 
+                ckeditorUpdateTextarea();
+
                 var hack_data = getHackthonData();
                 var config_data = getConfig();
                 var tags_data = getTags();
@@ -250,10 +265,6 @@
                     }
                 });
             });
-
-        $('#markdownEdit').markdown({
-            language: 'zh'
-        })
 
         $('#hackathon_switch').change(function (e) {
             var status = $(this).val();
