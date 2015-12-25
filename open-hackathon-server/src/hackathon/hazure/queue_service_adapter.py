@@ -37,4 +37,6 @@ class QueueServiceAdapter(ServiceAdapter):
     this is just a thin proxy on azure.storage.queueservice.QueueService, and have the same usage as BlobServiceAdapter
     """
 
-    # TODO
+    def __init__(self, account_name, account_key, *args, **kwargs):
+        super(QueueServiceAdapter, self).__init__(
+            QueueService(account_name, account_key, *args, **kwargs))

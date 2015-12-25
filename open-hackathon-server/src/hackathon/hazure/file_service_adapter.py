@@ -37,4 +37,6 @@ class FileServiceAdapter(ServiceAdapter):
     this is just a thin proxy on azure.storage.file.FileService, and have the same usage as BlobServiceAdapter
     """
 
-    # TODO
+    def __init__(self, account_name, account_key, *args, **kwargs):
+        super(FileServiceAdapter, self).__init__(
+            FileService(account_name, account_key, *args, **kwargs))

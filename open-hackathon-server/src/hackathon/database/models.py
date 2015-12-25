@@ -671,27 +671,30 @@ class HackathonAzureKey(DBBase):
     azure_key = relationship('AzureKey', backref=backref('hackathon_azure_key_a', lazy='dynamic'))
 
 
-class AzureLog(DBBase):
-    """
-    Azure operation log for every experiment
-    """
-    __tablename__ = 'azure_log'
-
-    id = Column(Integer, primary_key=True)
-    # ALOperation in enum.py
-    operation = Column(String(50))
-    # ALStatus in enum.py
-    status = Column(String(50))
-    # Note if no info and error
-    note = Column(String(500))
-    # None if no error
-    code = Column(Integer)
-    experiment_id = Column(Integer, ForeignKey('experiment.id', ondelete='CASCADE'))
-    experiment = relationship('Experiment', backref=backref('azure_log', lazy='dynamic'))
-    exec_time = Column(TZDateTime, default=get_now())
-
-    def __init__(self, **kwargs):
-        super(AzureLog, self).__init__(**kwargs)
+# disabled by: rapidhere
+# current i don't known the usage of the log
+# so i just disable this table
+# class AzureLog(DBBase):
+#     """
+#     Azure operation log for every experiment
+#     """
+#     __tablename__ = 'azure_log'
+#
+#     id = Column(Integer, primary_key=True)
+#     # ALOperation in enum.py
+#     operation = Column(String(50))
+#     # ALStatus in enum.py
+#     status = Column(String(50))
+#     # Note if no info and error
+#     note = Column(String(500))
+#     # None if no error
+#     code = Column(Integer)
+#     experiment_id = Column(Integer, ForeignKey('experiment.id', ondelete='CASCADE'))
+#     experiment = relationship('Experiment', backref=backref('azure_log', lazy='dynamic'))
+#     exec_time = Column(TZDateTime, default=get_now())
+#
+#     def __init__(self, **kwargs):
+#         super(AzureLog, self).__init__(**kwargs)
 
 
 class AzureStorageAccount(DBBase):
@@ -728,8 +731,15 @@ class AzureCloudService(DBBase):
     location = Column(String(50))
     # ACSStatus in enum.py
     status = Column(String(50))
-    experiment_id = Column(Integer, ForeignKey('experiment.id', ondelete='CASCADE'))
-    experiment = relationship('Experiment', backref=backref('azure_cloud_service', lazy='dynamic'))
+
+    # AzureCloudService should have nothing to do with experiment
+    # instead, it should belong to a azure_key
+    #
+    # experiment_id = Column(Integer, ForeignKey('experiment.id', ondelete='CASCADE'))
+    # experiment = relationship('Experiment', backref=backref('azure_cloud_service', lazy='dynamic'))
+    azure_key_id = Column(Integer, ForeignKey("azure_key.id", ondelete='CASCADE'))
+    azure_key = relationship('AzureKey', backref=backref("azure_cloud_service", lazy="dynamic"))
+
     create_time = Column(TZDateTime, default=get_now())
     last_modify_time = Column(TZDateTime, default=get_now())
 

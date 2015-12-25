@@ -24,3 +24,100 @@ THE SOFTWARE.
 """
 
 __author__ = "rapidhere"
+
+from azure.servicemanagement.servicemanagementservice import ServiceManagementService
+from azure.common import AzureHttpError
+
+from hackathon.database import AzureCloudService
+from hackathon.constants import ACSStatus
+
+from service_adapter import ServiceAdapter
+
+
+class CloudServiceAdapter(ServiceAdapter):
+    """A thin wrapper on ServiceManagementServie class
+
+    wrap up some interface to work with Azure Cloud Service
+
+    NOTE: the deployment must be done on a cloud service in Azure,
+    so we won't split a signle deployment adapter, instead, we do it in CloudServiceAdapter
+    """
+
+    def __init__(self, subscription_id, cert_url, *args, **kwargs):
+        super(CloudServiceAdapter, self).__init__(
+            ServiceManagementService(subscription_id, cert_url, *args, **kwargs))
+
+    def cloud_service_exists(self, name):
+        """Link to azure and check whether specific cloud service exist in specific azure subscription
+
+        :type name: string|unicode
+        :param name: the name of the coloud service
+
+        :rtype: boolean
+        :return:
+        """
+        try:
+            props = self.service.get_hosted_service_properties(name)
+        except Exception as e:
+            if e.message != self.NOT_FOUND:
+                self.log.error(e)
+                raise e
+            return False
+        return props is not None
+
+    def create_cloud_service(self, azure_key_id, name, label, location, **extra):
+        """Link to azure and create the CloudService if the CloudService hasn't been created.
+        Then store the CloudService info into db for future usage, so the azure_key_id is needed to perform
+        store commit.
+
+        NOTE: this function is designed to used with database, but the CloudServiceAdapter can
+        work without database. If you don't want to store the info into database automatically,
+        you should use CloudService.create_hosted_service
+
+        name, label and location are required variable by Azure
+        you can pass extra variables if there is more info need to pass
+
+        for full list of variables, please refer to ServiceManagementService.create_hosted_service
+
+        :rtype: boolean
+        :return: True on success, False on failed, the error message will be logged
+        """
+        if not self.cloud_service_exists(name):
+            # DON'T DO ERROR CHECK AS azureformation.cloudService did
+            # Micrsoft has checked the error up in server side
+            # you don't have to do it again
+            try:
+                self.create_cloud_service(
+                    name=name,
+                    label=label,
+                    location=location,
+                    **extra)
+            except AzureHttpError as e:
+                self.log.error(e)
+                return False
+
+            # first delete the possible old CloudService
+            self.db.delete_all_objects_by(AzureCloudService, name=name)
+
+        # update the table
+        if self.db.count_by(AzureCloudService, name=name) == 0:
+            self.db.add_object_kwargs(
+                AzureCloudService,
+                name=name,
+                label=label,
+                location=location,
+                status=ACSStatus.CREATED,
+                azure_key_id=azure_key_id)
+
+        # commit changes
+        self.db.commit()
+
+        return True
+
+    def update_cloud_service(self):
+        # TODO
+        raise NotImplementedError
+
+    def delete_cloud_service(self):
+        # TODO
+        raise NotImplementedError

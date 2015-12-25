@@ -24,3 +24,18 @@ THE SOFTWARE.
 """
 
 __author__ = "rapidhere"
+
+from azure.servicemanagement.servicemanagementservice import ServiceManagementService
+
+from service_adapter import ServiceAdapter
+
+
+class VirtualMachineAdapter(ServiceAdapter):
+    """A thin wrapper on ServiceManagementServie class
+
+    wrap up some interface to work with Azure Virtual Machine
+    """
+
+    def __init__(self, subscription_id, cert_url, *args, **kwargs):
+        super(VirtualMachineAdapter, self).__init__(
+            ServiceManagementService(subscription_id, cert_url, *args, **kwargs))
