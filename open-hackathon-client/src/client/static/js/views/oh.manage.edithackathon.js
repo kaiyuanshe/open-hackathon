@@ -66,9 +66,9 @@
     function ckeditorSetup() {
         var editorElement = CKEDITOR.document.getById( 'markdownEdit' );
         CKEDITOR.replace(editorElement, {
-            language: 'zh-cn'
-            , width:  'auto'
-            , height: '220'
+            language: 'zh-cn',
+            width:  'auto',
+            height: '220'
         });
     }
 
@@ -130,7 +130,7 @@
         $('#display_name').val(data.display_name);
         $('#short_description').val(data.short_description);
         $('#ribbon').val(data.ribbon);
-        $('#markdownEdit').val(data.description);
+        CKEDITOR.instances["markdownEdit"].setData(data.description)
         setDaterange($('#event_time'), startTimeAndEndTimeTostring(data.event_start_time, data.event_end_time));
         setDaterange($('#register_time'), startTimeAndEndTimeTostring(data.registration_start_time, data.registration_end_time));
         setDaterange($('#judge_time'), startTimeAndEndTimeTostring(data.judge_start_time, data.judge_end_time));

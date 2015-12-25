@@ -435,7 +435,7 @@ def events():
     return render("/events.html")
 
 
-@app.route("/create_event")
+@app.route("/manage/create_event")
 @login_required
 def create_event():
     return render("/create_event.html", islocal=is_local())
