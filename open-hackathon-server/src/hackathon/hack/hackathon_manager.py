@@ -42,6 +42,7 @@ from hackathon.hackathon_response import internal_server_error, ok, not_found, f
 from hackathon.constants import HACKATHON_BASIC_INFO, ADMIN_ROLE_TYPE, HACK_STATUS, RGStatus, HTTP_HEADER, \
     FILE_TYPE, HACK_TYPE, HACKATHON_STAT, DockerHostServerStatus
 from hackathon import RequiredFeature, Component, Context
+
 docker_host_manager = RequiredFeature("docker_host_manager")
 __all__ = ["HackathonManager"]
 
@@ -517,18 +518,16 @@ class HackathonManager(Component):
                 self.scheduler.remove_job(job_id)
         return True
 
-
     def check_hackathon_online(self, hackathon):
         alauda_enabled = is_alauda_enabled(hackathon)
-        canOnline = True
+        can_online = True
         if alauda_enabled == "0":
             if self.util.is_local():
-                canOnline = True
+                can_online = True
             else:
-                canOnline = docker_host_manager.check_subscription_id(hackathon.id)
+                can_online = docker_host_manager.check_subscription_id(hackathon.id)
 
-        return ok(canOnline)
-
+        return ok(can_online)
 
     def __get_hackathon_detail(self, hackathon, user=None):
         """Return hackathon info as well as its details including configs, stat, organizers, like if user logon"""
@@ -541,9 +540,9 @@ class HackathonManager(Component):
 
         if user:
             detail["user"] = self.user_manager.user_display_info(user)
+            detail["user"]["is_admin"] = self.admin_manager.is_hackathon_admin(hackathon.id, user.id)
 
             asset = self.db.find_all_objects_by(UserHackathonAsset, user_id=user.id, hackathon_id=hackathon.id)
-
             if asset:
                 detail["asset"] = [o.dic() for o in asset]
 
@@ -753,6 +752,9 @@ def is_pre_allocate_enabled(hackathon):
     if hackathon.status != HACK_STATUS.ONLINE:
         return False
 
+    if hackathon.event_end_time < util.get_now():
+        return False
+
     hack_manager = RequiredFeature("hackathon_manager")
     value = hack_manager.get_basic_property(hackathon, HACKATHON_BASIC_INFO.PRE_ALLOCATE_ENABLED, "1")
     return util.str2bool(value)
@@ -773,9 +775,6 @@ def is_alauda_enabled(hackathon):
 def get_basic_property(hackathon, property_name, default_value=None):
     hack_manager = RequiredFeature("hackathon_manager")
     return hack_manager.get_basic_property(hackathon, property_name, default_value)
-
-
-
 
 
 Hackathon.is_auto_approve = is_auto_approve
