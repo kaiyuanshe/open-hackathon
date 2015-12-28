@@ -673,6 +673,7 @@
                     </div>
                 </div>
           </div>
+
     </script>
     <script id="award_title_template" type="text/x-jquery-tmpl">
      {% raw %}
@@ -690,6 +691,7 @@
             </a>
         </li>
     {% endraw %}
+
     </script>
     <script id="award_list_template" type="text/x-jquery-tmpl">
     {% raw %}
@@ -719,25 +721,28 @@
                 <div id="hackathon-${hackathon.id}" class="carousel slide" data-ride="carousel" data-wrap="true">
                     <ol class="carousel-indicators">
                         {{each show}}
-                            {{if type != 2 }}
                             <li data-target="#hackathon-${$data.hackathon.id}" data-slide-to="${$index}"></li>
-                            {{/if}}
                         {{/each}}
                     </ol>
                     <div class="carousel-inner" role="listbox">
                         {{each show}}
-                        {{if type != 2 }}
                             <div class="item">
-                               {{if type == 0 }}
-                                 <img src="${uri}" alt="${note}">
-                               {{/if}}
-                               {{if type == 1 }}
-                                   <div>
-                                        {{html uri }}
-                                   </div>
-                               {{/if}}
+                                {{if type == 0}}
+                                    <img src="${uri}" alt="${note}">
+                                {{else type == 1}}
+                                     {{html uri}}
+                                {{else type == 2}}
+                                     ${note}:<a href="${uri}" target="_blank">${uri}</a>
+                                {{else type >= 3 && type<=5}}
+                                     <iframe src="https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(uri)}" seamless="seamless" frameborder="0" scrolling="yes"></iframe>
+                                {{else type == 6}}
+                                     <object data="${uri}" type="application/pdf" width="100%" height="100%">
+                                         <p>Your browser doesn't support PDF viewing. Please install PDF viewer plugin!</p>
+                                     </object>
+                                {{else}}
+                                    <li><a href="${uri}" target="_blank">${note}</a></li>
+                                {{/if}}
                             </div>
-                        {{/if}}
                         {{/each}}
                     </div>
                 </div>
@@ -747,6 +752,7 @@
     </div>
 </div>
   {% endraw %}
+
     </script>
     <script type="text/javascript" src="/static/js/views/oh.home.js"></script>
 {% endblock %}

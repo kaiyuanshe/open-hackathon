@@ -68,8 +68,8 @@
 
         getShowList().then(function (data) {
             if (data.error) {
-
-            } else {
+                noShow();
+            } else if (data.length > 0) {
                 $('#works span').text('（' + data.length + '）');
                 $('#team_show').append($('#show_list_temp').tmpl(data, {
                     getImage: function (uri) {
@@ -118,8 +118,14 @@
                         return getTeamlink(team_id, '');
                     }
                 }));
+            }else{
+                noShow();
             }
         });
+    }
+
+    function noShow() {
+        $('#works').append('<div class="col-md-12 text-center no-team"><img  src="/static/pic/no-show.png"><div>')
     }
 
     function showNoTeam() {
