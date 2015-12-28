@@ -13,3 +13,4 @@ python-dateutil
 pytz
 validictory==1.0.0
 beaker==1.7.0
+mailthon==0.1.1
