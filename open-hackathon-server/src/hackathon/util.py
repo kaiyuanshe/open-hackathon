@@ -27,7 +27,13 @@
 import importlib
 import json
 import os
+import hashlib
+import base64
+import urllib2
 from datetime import datetime
+from mailthon import email
+from mailthon.postman import Postman
+from mailthon.middleware import TLS, Auth
 
 from hackathon.log import log
 
@@ -211,3 +217,132 @@ class Utility(object):
 
     def is_local(self):
         return safe_get_config("environment", "local") == "local"
+
+    def send_emails(self, sender, receivers, subject, content, host, port, username, password,
+                    cc=[], bcc=[], attachments=[]):
+        """Send emails
+        notes: No all email-service providers support.
+        if using Gmail, enable "Access for less secure apps" for the sender's account,
+
+        :type sender: str|unicode
+        :param sender: Example-'James james2015@gmail.com' or 'james2015@gmail.com'
+
+        :type receivers: list
+        :param receivers: Example-['a@gmail.com', 'b@gmail.com']
+
+        :type subject: str|unicode
+        :param subject: subject of email's header. Example-'Hello'
+
+        :type content: str|unicode
+        :param content: content of the email. Example-'<b>Hi!</b>'
+
+        :type host: str|unicode
+        :param host: domain name or ip address. Example-'smtp.gmail.com',
+
+        :type port: integer
+        :param port: the port of email service. (SMTP)Example-587
+
+        :type username: str|unicode
+        :param username: username to log in the email service. Example-'james@gmail.com'
+
+        :type password: str|unicode
+        :param password: password to log in the email service
+
+        :type cc: list
+        :param cc: CarbonCopy. Example-['a@gmail.com', 'b@gmail.com']
+
+        :type bcc: list
+        :param bcc: BlindCarbonCopy. Example-['a@gmail.com', 'b@gmail.com']
+
+        :type attachments: list
+        :param attachments: Example-['C:/Users/Administrator/Downloads/apache-maven-3.3.3-bin.zip']
+
+        :rtype object
+        :return 'response' object. response.status_code==250(SMTP) if succeed in sending.
+        """
+        e = email(
+            sender=sender,
+            receivers=receivers,
+            cc=cc,
+            bcc=bcc,
+            subject=subject,
+            content=content
+        )
+
+        postman = Postman(
+            host=host,
+            port=port,
+            middlewares=[
+                TLS(force=True),
+                Auth(username=username, password=password)
+            ]
+        )
+
+        response = postman.send(e)
+        return response
+
+    def send_template_SMS_by_RongLian(self, to, tempId, datas):
+        """ Send template-SMS through RongLian_YunTongXun service
+
+        :type to: integer
+        :param to: the telephone number. Example-18217511111
+
+        :type tempId: integer
+        :param tempId: SMS-template-Id that would be used, could be editted in RongLian officaial website. Example-1
+
+        :type datas: list
+        :param datas: datas to replace blanks in this SMS-template. Example-['10','30']
+
+        :rtype boolean
+        :return True if sms sends successfully. False if fails to send.
+        """
+        serverIP = 'sandboxapp.cloopen.com'
+        serverPort = '8883'
+        softVersion = '2013-12-26'
+
+        accountSid = self.get_config("sms.rong_lian.account_sid")
+        accountToken = self.get_config("sms.rong_lian.account_token")
+        appId = self.get_config("sms.rong_lian.app_id")
+
+        if accountSid == "":
+            log.error("Send SMS Fail: RongLian_AccountSid is empty")
+            return False
+        if accountToken == "":
+            log.error("Send SMS Fail: RongLian_AccountToken is empty")
+            return False
+        if appId == "":
+            log.error("Send SMS Fail: RongLian_AppId is empty")
+            return False
+
+        nowdate = datetime.now().strftime("%Y%m%d%H%M%S")
+        signature = accountSid + accountToken + nowdate
+        sig = hashlib.md5(signature).hexdigest().upper()
+        url = "https://" + serverIP + ":" + serverPort + "/" + softVersion + "/Accounts/" + accountSid +\
+              "/SMS/TemplateSMS?sig=" + sig
+        auth = base64.encodestring(accountSid + ":" + nowdate).strip()
+
+        # generate request
+        req = urllib2.Request(url)
+        req.add_header("Accept", "application/json")
+        req.add_header("Content-Type", "application/json;charset=utf-8")
+        req.add_header("Authorization", auth)
+
+        # generate request-body
+        b = '['
+        for data in datas:
+            b += '"%s",' % (data)
+        b += ']'
+        body = '''{"to": "%s", "datas": %s, "templateId": "%s", "appId": "%s"}''' % (to, b, tempId, appId)
+        req.add_data(body)
+
+        try:
+            res = urllib2.urlopen(req)
+            data = res.read()
+            res.close()
+            response = json.loads(data)
+            log.info(response)
+            # statusCode == "000000" if sends successfully
+            return response["statusCode"] == "000000"
+        except Exception as e:
+            log.error(e)
+            return False

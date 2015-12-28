@@ -81,5 +81,12 @@ Config = {
     },
     "cloud_eclipse": {
         "api": "http://www.idehub.cn/api/ide"
+    },
+    "sms": {
+        "rong_lian": {
+            "account_sid": "",
+            "account_token": "",
+            "app_id": ""
+        }
     }
 }
