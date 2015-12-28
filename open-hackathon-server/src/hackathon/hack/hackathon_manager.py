@@ -501,9 +501,10 @@ class HackathonManager(Component):
             is_job_exists = self.scheduler.has_job(job_id)
             if hack.is_pre_allocate_enabled():
                 if is_job_exists:
+                    self.log.debug("pre_allocate job already exists for hackathon %s" % str(hack.id))
                     continue
 
-                self.log.debug("add job for hackathon %s" % str(hack.id))
+                self.log.debug("add pre_allocate job for hackathon %s" % str(hack.id))
                 next_run_time = self.util.get_now() + timedelta(seconds=hack.id * 10)
                 pre_allocate_interval = self.__get_pre_allocate_interval(hack)
                 self.scheduler.add_interval(feature="expr_manager",
