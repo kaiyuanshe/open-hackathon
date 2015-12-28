@@ -44,7 +44,7 @@ from flask import Response, render_template, request, g, redirect, make_response
 from client import app, Context
 from client.constants import LOGIN_PROVIDER
 from client.user.login_manager import login_manager_helper
-from client.functions import get_config, safe_get_config
+from client.functions import get_config, safe_get_config, get_now, is_local
 from client.log import log
 
 session_lifetime_minutes = 60
@@ -138,8 +138,8 @@ def __get_api(url, headers=None, **kwargs):
 
 @app.context_processor
 def utility_processor():
-    def get_now():
-        return __date_serializer(datetime.now())
+    def get_now_serialized():
+        return __date_serializer(get_now())
 
     def activity_progress(starttime, endtime):
         return ((int(time.time() * 1e3) - starttime) * 1.0 / (endtime - starttime) * 1.0) * 100
@@ -167,7 +167,7 @@ def utility_processor():
                     prs.append("alauda")
         return ",".join(prs)
 
-    return dict(get_now=get_now, activity_progress=activity_progress, get_provides=get_provides)
+    return dict(get_now=get_now_serialized, activity_progress=activity_progress, get_provides=get_provides)
 
 
 @app.template_filter('mkHTML')
@@ -428,6 +428,17 @@ def superadmin():
 @app.route("/landing")
 def landing():
     return render("/landing.html")
+
+
+@app.route("/events")
+def events():
+    return render("/events.html")
+
+
+@app.route("/manage/create_event")
+@login_required
+def create_event():
+    return render("/create_event.html", islocal=is_local())
 
 
 from route_manage import *

@@ -36,10 +36,10 @@
                         <h2 id="detail" class="title">活动详情</h2>
 
                         <div class="oh-body detail-body">
-                            {{ hackathon.description | mkHTML | safe }}
+                            {{ hackathon.description | safe }}
                         </div>
 
-                        <h2 id="new" class="title">最新动态 <span>（3）</span></h2>
+                        <h2 id="new" class="title">最新动态 <span>（1）</span></h2>
 
                         <div class="oh-body grey-text">
                             {#                            <dl class="oh-latest-news">#}
@@ -62,9 +62,9 @@
                             </dl>
                         </div>
 
-                        <h2 id="team" class="title">目前组队 </h2>
+                        <h2 id="team" class="title">目前组队 <span>（0）</span></h2>
 
-                        <div class="oh-body teams clearfix " id="team_list">
+                        <div class="teams clearfix " id="team_list">
                         </div>
 
                         <h2 id="works" class="title">作品公布 </h2>
@@ -120,7 +120,8 @@
                                 {% if hackathon.event_end_time < get_now() %}
                                     {% if team != None %}
                                         <a class="oh-def-link"
-                                               href="{{ url_for('create_join_team',hackathon_name=hackathon_name, tid=team.id) }}">查看我的队伍 &gt;</a>
+                                           href="{{ url_for('create_join_team',hackathon_name=hackathon_name, tid=team.id) }}">查看我的队伍
+                                            &gt;</a>
                                     {% endif %}
                                     <p>活动已结束。</p>
                                 {% elif registration != None %}
@@ -133,7 +134,8 @@
                                                href="{{ url_for('workspace',hackathon_name=hackathon_name) }}">立即参加</a>
                                         {% endif %}
                                         <a class="oh-def-link"
-                                               href="{{ url_for('create_join_team',hackathon_name=hackathon_name, tid=team.id) }}">查看我的队伍 &gt;</a>
+                                           href="{{ url_for('create_join_team',hackathon_name=hackathon_name, tid=team.id) }}">查看我的队伍
+                                            &gt;</a>
                                         <p>您的报名已经审核已通过。</p>
                                     {% elif (hackathon.config.auto_approve == '0' and registration.status == 3 ) or  registration.status == 0 %}
                                         <p>您的报名正在审核中，请等待。</p>
@@ -145,6 +147,9 @@
                                 {% elif user == None %}
                                     <a class="btn btn-primary btn-lg"
                                        href="{{ url_for('login', return_url=request.path, provides=get_provides(hackathon.config.login_provider)) }}">我要报名</a>
+                                {% elif user.is_admin %}
+                                    <a class="btn btn-primary btn-lg"
+                                       href="{{ url_for('edithackathon',hackathon_name=hackathon_name) }}">管理</a>
                                 {% elif user.get("user_profile") == None %}
                                     <a class="btn btn-primary btn-lg"
                                        href="{{ url_for('user_profile',return_url=request.path) }}">我要报名</a>
@@ -322,14 +327,14 @@
 {% block script %}
     <script id="team_list_temp" type="text/x-jquery-tmpl">
        {% raw %}
-        <div class="col-md-6">
-            <div class="media">
-                <div class="media-left">
-                    <a href="${$item.get_link(id)}" target="_blank" class="oh-thumb">
-                        <img class="media-object oh-thumbnail" src="${$item.get_logo(logo)}"  onerror="javascript:this.src='/static/pic/team-logo.png'" alt="">
-                    </a>
+        <div class="col-xs-3">
+            <div class="item">
+                <div class="logo">
+                <a href="${$item.get_link(id)}" target="_blank" class="oh-thumb">
+                     <img class="media-object oh-thumbnail" src="${$item.get_logo(logo)}"  onerror="javascript:this.src='/static/pic/team-logo.png'" alt="">
+                </a>
                 </div>
-                <div class="media-body">
+                <div class="">
                     <h4 class="media-heading"><a target="_blank" href="${$item.get_link(id)}">${name}</a></h4>
                     <h5>队长：${leader.nickname}</h5>
                     <p>共 <span class="blue-text">${member_count}</span> 人</p>
@@ -337,35 +342,31 @@
             </div>
         </div>
         {% endraw %}
-
-
     </script>
     <script id="show_list_temp" type="text/x-jquery-tmpl">
         {% raw %}
-        {{if type == 0 }}
-        <div class="col-md-12">
-            <div class="">
-                <a href="${$item.link(team_id)}" class="oh-thumb">
-                    <img src="${uri} " class="oh-thumbnail">
+        <div class="col-md-6">
+            <div class="media">
+              <div class="media-left">
+                <a href="${$item.link(team_id)}">
+                  <img class="media-object" src="${logo}" onerror="javascript:this.src='/static/pic/team-logo.png'">
                 </a>
+              </div>
+              <div class="media-body">
+                <h4 class="media-heading">${name}</h4>
+                <a href="${$item.link(team_id)}" class="oh-thumb">
+                    <img src="${$item.getImage(uri)}" class="oh-thumbnail" alt="${$item.getAlt(uri,note)}" >
+                </a>
+                <p> 查看更多作品：{{html $item.getlinks(uri,team_id)}}</p>
+              </div>
             </div>
-            <br/>
-            <p class="grey-text"><a class="grey-link grey-text" href="${$item.link(team_id)}">${note}</a></p>
         </div>
-        {{else type == 1}}
-            <div class="col-md-12">
-                <div class="iframe">
-                    {{html uri}}
-                </div>
-                <br/>
-                <p class="grey-text"><a class="grey-link grey-text" href="${$item.link(team_id)}">${note}</a></p>
-            </div>
-        {{else}}{{/if}}
         {% endraw %}
 
     </script>
     <script id="register_list_temp" type="text/x-jquery-tmpl">
     {% raw %}
+
         <li>
             <a href="javascript:;">
               <img class="avatar" alt="Lucas" src="${avatar_url }">
@@ -376,6 +377,7 @@
             <div class="date">${create_time}</div>
         </li>
     {% endraw %}
+
 
     </script>
     <script type="text/javascript">
@@ -393,21 +395,18 @@
             height: 30       // 信息窗口高度题
         }
         function initializeMap() {
-            var map = new BMap.Map('map');
-            map.addControl(new BMap.OverviewMapControl());
             var address = "{{ hackathon.config.location }}";
+
+            var map = new BMap.Map("map");
             var myGeo = new BMap.Geocoder();
             myGeo.getPoint(address, function (point) {
                 if (point) {
-                    {#                    var s = new BMap.Icon("http://cdn.huodongxing.com/Content/img/mark1.png", new BMap.Size(32, 32), {"anchor": new BMap.Size(16, 32)});#}
-                    {#                    baiduMapMarker = new BMap.Marker(point, {icon: myIcon});#}
-                    {#                    var infoWindow = new BMap.InfoWindow(address, opts);#}
-                    {#                    baiduMapMarker.addEventListener("click", function () {#}
-                    {#                        this.openInfoWindow(infoWindow);#}
-                    {#                    });#}
-                    {#                    map.addOverlay(baiduMapMarker);#}
                     map.enableScrollWheelZoom();
                     map.centerAndZoom(point, 14);
+                }else{
+                    map.enableScrollWheelZoom();
+                    point = new BMap.Point(116.331398,39.897445);
+                    map.centerAndZoom(point, 1);
                 }
             });
         }
@@ -421,14 +420,15 @@
     <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
     <script type="text/javascript" src="/static/js/views/oh.site.hackathon.js"></script>
     <script type="text/javascript">
-        var duoshuoQuery = {short_name:"ohp"};
-        (function() {
+        var duoshuoQuery = {short_name: "ohp"};
+        (function () {
             var ds = document.createElement('script');
-            ds.type = 'text/javascript';ds.async = true;
+            ds.type = 'text/javascript';
+            ds.async = true;
             ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
             ds.charset = 'UTF-8';
             (document.getElementsByTagName('head')[0]
-             || document.getElementsByTagName('body')[0]).appendChild(ds);
+            || document.getElementsByTagName('body')[0]).appendChild(ds);
         })();
     </script>
 {% endblock %}

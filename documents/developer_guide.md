@@ -36,7 +36,7 @@ major parts of Open Hackathon:
 - [guacamole](http://guac-dev.org/) is an open-source html5-based clientless remote client. OHP leverage guacamole to enable client users access to remote VM/docker throw browers. And we provide a [customized authentication provider](https://github.com/msopentechcn/open-hackathon/tree/master/openhackathon-guacamole-auth-provider) to fit OHP.
 
 ## Setup Development Environement
-This section shows you how to setup local dev environment for both open-hackathon-serve and open-hackathon-client.
+This section shows you how to setup local dev environment for both open-hackathon-server and open-hackathon-client.
 
 ### Clone SourceCode
 
@@ -75,21 +75,26 @@ sudo pip install -r open-hackathon-client/requirement.txt
 
 ### Install and Configure guacamole
 
-Firstly please [download](http://guac-dev.org/release/release-notes-0-9-6) and [install](http://guac-dev.org/doc/gug/installing-guacamole.html) guacamole 0.9.6 firstly. Make sure all protocols including VNC, RDP, ssh and telnet are properly installed.
+Firstly please [download](http://guac-dev.org/release/release-notes-0-9-9) guacamole-server-0.9.9.tar.gz, and then [install](http://guac-dev.org/doc/gug/installing-guacamole.html) guacamole server 0.9.9 firstly. Make sure all protocols including VNC, RDP, ssh and telnet are properly installed.
 
 Since open hackathon has [customized guacamole authentication provider](https://github.com/msopentechcn/open-hackathon/tree/master/openhackathon-guacamole-auth-provider), we need additional steps for it:
+
 ```
 sudo mkdir /usr/share/tomcat7/.guacamole
 sudo mkdir /etc/guacamole
-
+cd /opt/open-hackathon/deploy/guacamole
 cp guacamole-sample.properties /etc/guacamole/guacamole.properties
 cp *.jar /etc/guacamole
 sudo ln -s /etc/guacamole/guacamole.properties /usr/share/tomcat7/.guacamole/guacamole.properties
+```
 
-cp guacamole-0.9.6.war /var/lib/tomcat7/webapps/guacamole.war
+Then [download] (http://guac-dev.org/release/release-notes-0-9-9) guacamole-0.9.9.war, and then copy it to /var/lib/tomcat7/webapps/guacamole.war:
+```
+cp guacamole-0.9.9.war /var/lib/tomcat7/webapps/guacamole.war
 sudo service guacd restart
 sudo service tomcat7 restart
 ```
+
 By default you don't need to change `/etc/guacamole/guacamole.properties` on your local machine. And usually the only config need to update is `auth-request-url` if your open-hackathon-server listens on a different port other than `15000`. _You need to restart tomcat7 and guacd service if `guacamole.properties` updated_.
 
 
@@ -152,7 +157,7 @@ Open file `/lib/systemd/system/docker.service` for editing and change line start
 ```
 ExecStart=/usr/bin/docker daemon -H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock
 ```
-Change `4243` to other port on demand. And then run `systemctl reload` in shell to reload the new configuration. And restart docker by `service docker restart`.
+Change `4243` to other port on demand. And then run `systemctl daemon-reload` in shell to reload the new configuration. And restart docker by `service docker restart`.
 
 Now, brower to `http://localhost:4243/_ping`. A simple `OK` shown indicates the remote API is working now. 
 Browse to `http://localhost:4243/containers/json` to see the information of running containers. 
@@ -185,13 +190,13 @@ sudo chmod -R 644 /var/log/open-hackathon
 And also, please adding row `127.0.0.1 open-hackathon-dev.chinacloudapp.cn` to your local `/etc/hosts`. That's because most oauth login providers doest't accept domain `localhost` and the default oauth parameters in `config_sample.py` are binded to domain `open-hackathon-dev.chinacloudapp.cn`
 
 ### Run
-Everything is OK now! Start the API server in command line:
+Everything is OK now! Start the open hackathon in command line:
 ```
 cd /opt/open-hackathon
 sudo python open-hackathon-server/src/run.py
 sudo python open-hackathon-client/src/run.py
 ```
-open your brower and try browsing pages:
+open your browser and try browsing pages:
 - open hackathon server health page: http://open-hackathon-dev.chinacloudapp.cn:15000. The output is json-like and  status should be OK
 - open hackathon client: http://open-hackathon-dev.chinacloudapp.cn, the entrance of open hackathon web UI
 - super admin page: http://open-hackathon-dev.chinacloudapp.cn/admin, a  login page specially for super admin. Default user/pwd is `admin`/`admin`
@@ -215,6 +220,26 @@ To deploy open hackathon to staging or production environment, you need follow a
 As an example, we show how to deploy open hackathon using `uwsgi` in the following section. However, both `open hackathon platform` and `flask` don't have any limitation on this, choose whatever application you like.
 
 ### deploy open hackathon with uwsgi
+ **We assume the source codes are cloned to /home/opentech/openhackathon**. If not, please rectify the file path of following files:
+```
+<src_root>/open-hackathon-server/src/app.wsgi
+<src_root>/open-hackathon-server/src/open-hackathon-server.conf
+<src_root>/open-hackathon-server/src/open-hackathon-server.ini
+<src_root>/open-hackathon-client/src/app.wsgi
+<src_root>/open-hackathon-client/src/open-hackathon-client.conf
+<src_root>/open-hackathon-client/src/open-hackathon-client.ini
+```
+
+- Follow [uwsgi install guide](http://uwsgi-docs.readthedocs.org/en/latest/Install.html) to install uwsgi
+- Deploy open hackathon server and client as ubuntu upstart services:
+```
+sudo cp /home/opentech/open-hackathon/open-hackathon-server/src/open-hackathon-server.conf /etc/init/
+sudo service open-hackathon-server start
+
+sudo cp /home/opentech/open-hackathon/open-hackathon-client/src/open-hackathon-client.conf /etc/init/
+sudo service open-hackathon-client start
+```
+- by default, open hackahton server and client listen on port 15000 and 80 respectively. Update the ini file if you want as well as other uwsgi configurations.
 
 ### things to know
 - You can deploy DB, open hackathon server, open hackathon client to different VM, correct configurations in `config.py` and `/etc/guacamole/guacamole.properties` then if you do so.

@@ -37,7 +37,7 @@ from azure.servicemanagement import (ConfigurationSet, ConfigurationSetInputEndp
 import json
 
 from hackathon import Component, RequiredFeature, Context
-from hackathon.database.models import DockerHostServer, HackathonAzureKey, Hackathon
+from hackathon.database.models import DockerHostServer, HackathonAzureKey, Hackathon, HackathonConfig, AzureKey
 from hackathon.constants import (AzureApiExceptionMessage, DockerPingResult, AVMStatus, AzureVMPowerState,
                                  DockerHostServerStatus, DockerHostServerDisable, AzureVMStartMethod,
                                  ServiceDeploymentSlot, AzureVMSize, AzureVMEndpointName, TCPProtocol,
@@ -46,7 +46,6 @@ from hackathon.hackathon_response import ok, not_found, precondition_failed
 
 
 __all__ = ["DockerHostManager"]
-
 
 class DockerHostManager(Component):
     """Component to manage docker host server"""
@@ -217,19 +216,19 @@ class DockerHostManager(Component):
         :rtype: bool
         """
 
-        host_server = DockerHostServer(vm_name = args.vm_name,
-                                       public_dns = args.public_dns,
-                                       public_ip = args.public_ip,
-                                       public_docker_api_port = args.public_docker_api_port,
-                                       private_ip = args.private_ip,
-                                       private_docker_api_port = args.private_docker_api_port,
-                                       container_count = 0,
-                                       container_max_count = args.container_max_count,
-                                       is_auto = AzureVMStartMethod.MANUAL,
-                                       disabled = args.disabled,
-                                       create_time = self.util.get_now(),
-                                       update_time = self.util.get_now(),
-                                       hackathon_id = hackathon_id)
+        host_server = DockerHostServer(vm_name=args.vm_name,
+                                       public_dns=args.public_dns,
+                                       public_ip=args.public_ip,
+                                       public_docker_api_port=args.public_docker_api_port,
+                                       private_ip=args.private_ip,
+                                       private_docker_api_port=args.private_docker_api_port,
+                                       container_count=0,
+                                       container_max_count=args.container_max_count,
+                                       is_auto=AzureVMStartMethod.MANUAL,
+                                       disabled=args.disabled,
+                                       create_time=self.util.get_now(),
+                                       update_time=self.util.get_now(),
+                                       hackathon_id=hackathon_id)
 
         if self.hosted_docker.ping(host_server, 5):
             host_server.state = DockerHostServerStatus.DOCKER_READY
@@ -262,7 +261,7 @@ class DockerHostManager(Component):
 
         containers_json = self.hosted_docker.get_docker_containers_info_through_api(vm, 5)
         if not vm_dic["container_count"] == len(containers_json):
-            self.db.update_object(vm, container_count = len(containers_json))
+            self.db.update_object(vm, container_count=len(containers_json))
             vm_dic["container_count"] = len(containers_json)
 
         return vm_dic
@@ -285,24 +284,24 @@ class DockerHostManager(Component):
         vm.public_dns = args.get("public_dns", vm.public_dns)
         vm.public_ip = args.get("public_ip", vm.public_ip)
         vm.private_ip = args.get("private_ip", vm.private_ip)
-        vm.public_docker_api_port = args.get("public_docker_api_port",vm.public_docker_api_port)
-        vm.private_docker_api_port = args.get("private_docker_api_port",vm.private_docker_api_port),
+        vm.public_docker_api_port = args.get("public_docker_api_port", vm.public_docker_api_port)
+        vm.private_docker_api_port = args.get("private_docker_api_port", vm.private_docker_api_port),
         if self.hosted_docker.ping(vm, 5):
             args['state'] = DockerHostServerStatus.DOCKER_READY
         else:
             args['state'] = DockerHostServerStatus.UNAVAILABLE
 
-        self.db.update_object(vm, vm_name = args.get("vm_name", vm.vm_name),
-                                  public_dns = args.get("public_dns", vm.public_dns),
-                                  public_ip = args.get("public_ip", vm.public_ip),
-                                  public_docker_api_port = args.get("public_docker_api_port",vm.public_docker_api_port),
-                                  private_ip = args.get("private_ip", vm.private_ip),
-                                  private_docker_api_port = args.get("private_docker_api_port",
-                                                                     vm.private_docker_api_port),
-                                  container_max_count = args.get("container_max_count", vm.container_max_count),
-                                  state = args.get("state", vm.state),
-                                  disabled = args.get("disabled", vm.disabled),
-                                  update_time = self.util.get_now())
+        self.db.update_object(vm, vm_name=args.get("vm_name", vm.vm_name),
+                              public_dns=args.get("public_dns", vm.public_dns),
+                              public_ip=args.get("public_ip", vm.public_ip),
+                              public_docker_api_port=args.get("public_docker_api_port", vm.public_docker_api_port),
+                              private_ip=args.get("private_ip", vm.private_ip),
+                              private_docker_api_port=args.get("private_docker_api_port",
+                                                               vm.private_docker_api_port),
+                              container_max_count=args.get("container_max_count", vm.container_max_count),
+                              state=args.get("state", vm.state),
+                              disabled=args.get("disabled", vm.disabled),
+                              update_time=self.util.get_now())
         return ok()
 
     def delete_host_server(self, host_server_id):
@@ -426,6 +425,16 @@ class DockerHostManager(Component):
         host_server = self.db.find_first_object_by(DockerHostServer, id=host_server_id)
         return host_server.dic()
 
+    def check_subscription_id(self, hackathon_id):
+        try:
+            sms = self.__get_sms_object(hackathon_id)
+            sms.list_hosted_services()
+        except Exception:
+            return False
+
+        return True
+
+
     def __get_sms_object(self, hackathon_id):
         """
         Get ServiceManagementService object by Azure account which is related to hackathon_id
@@ -437,6 +446,7 @@ class DockerHostManager(Component):
         :rtype: class 'azure.servicemanagement.servicemanagementservice.ServiceManagementService'
         """
         hackathon_azure_key = self.db.find_first_object_by(HackathonAzureKey, hackathon_id=hackathon_id)
+
         if hackathon_azure_key is None:
             self.log.error('Found no azure key with Hackathon:%d' % hackathon_id)
             return None
@@ -669,3 +679,5 @@ class DockerHostManager(Component):
                                        DockerHostServer.state == DockerHostServerStatus.DOCKER_READY,
                                        DockerHostServer.disabled == DockerHostServerDisable.ABLE)
         return len(vms) > 0
+
+

@@ -125,9 +125,14 @@
     width: 96px;
     max-height: 96px;
 }
-
+.teams .item{
+    margin-bottom:20px;
+}
+.teams .logo{
+    height:96px;
+}
 .teams .media-heading {
-    margin-bottom: 20px;
+    margin: 10px 0;
 }
 
 .interest .oh-thumb {
@@ -217,4 +222,19 @@
 .iframe iframe {
     width: 100% !important;
     height: 500px!important;
+}.oh-thumb img.oh-thumbnail {
+    height: auto;
+    max-height: 450px;
+    width: 100%;
+}
+#team_show .media{
+    min-height: 266px;
+    margin-bottom:20px;
+}
+#team_show .media p{
+    margin-top:10px;
+    color: #969696;
+}
+#team_show .media p a{
+    margin-right:5px;
 }

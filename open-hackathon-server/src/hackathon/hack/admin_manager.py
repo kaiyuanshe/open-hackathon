@@ -37,6 +37,7 @@ from hackathon.hackathon_response import precondition_failed, ok, not_found, int
 __all__ = ["AdminManager"]
 
 
+
 class AdminManager(Component):
     """Component to access/control administrators and judges of hackathon
 

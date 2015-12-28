@@ -27,27 +27,44 @@
 
     var hackathon_name = oh.comm.getCurrentHackathon();
 
+    function teamsbind(data) {
+        var list = $('#team_list').append($('#team_list_temp').tmpl(data, {
+            get_logo: function (logo) {
+                return logo ? logo : '/static/pic/team-logo.png';
+            },
+            get_description: function (description) {
+                return (description || '').substr(0, 60);
+            },
+            get_link: function (id) {
+                return '/site/' + hackathon_name + '/team/' + id;
+            }
+        }));
+    }
+
     function pageLoad() {
         getTeamList().then(function (data) {
             if (data.error) {
                 showNoTeam();
             } else if (data.length > 0) {
                 $('#team span').text('（' + data.length + '）');
-                var list = $('#team_list').append($('#team_list_temp').tmpl(data, {
-                    get_logo: function (logo) {
-                        return logo ? logo : '/static/pic/team-logo.png';
-                    },
-                    get_description: function (description) {
-                        return (description || '').substr(0, 60);
-                    },
-                    get_link: function (id) {
-                        return '/site/' + hackathon_name + '/team/' + id;
-                    }
-                }));
+                var btn = $('<button>')
+                    .addClass('btn btn-default btn-sm btn-block')
+                    .text('更多')
+                    .bind('click', function (e) {
+                        teamsbind(data.splice(0, 8))
+                        if (data.length == 0) {
+                            btn.detach();
+                        }
+                    }).trigger('click');
+                $('#team_list').after(btn);
             } else {
                 showNoTeam();
             }
         });
+
+        function getTeamlink(team_id, tag) {
+            return '/site/' + hackathon_name + '/team/' + team_id + tag;
+        }
 
         getShowList().then(function (data) {
             if (data.error) {
@@ -55,8 +72,50 @@
             } else {
                 $('#works span').text('（' + data.length + '）');
                 $('#team_show').append($('#show_list_temp').tmpl(data, {
+                    getImage: function (uri) {
+                        var uris = uri.split(',');
+                        var image_url = '/static/pic/wutu.jpg';
+                        $.each(uris, function (i, o) {
+                            var u_t = o.split(':::');
+                            if (u_t[1] == '0') {
+                                image_url = u_t[0];
+                                return;
+                            }
+                        });
+                        return image_url;
+                    },
+                    getAlt: function (uri, note) {
+                        var uris = uri.split(',');
+                        var src = note;
+                        $.each(uris, function (i, o) {
+                            var u_t = o.split(':::');
+                            if (u_t[1] == '0' && u_t[0].search('.baidu.com') > -1) {
+                                src = '百度图片拒绝外链！';
+                                return;
+                            }
+                        });
+                        return src
+                    },
+                    getlinks: function (uri, team_id) {
+                        var uris = uri.split(',');
+                        var links = '';
+                        $.each(uris, function (i, o) {
+                            var u_t = o.split(':::');
+                            var type = +u_t[1];
+                            if (type == 0 && links.search('#works_img') == -1) {
+                                links += '<a href="' + getTeamlink(team_id, '#works_img') + '">图片</a>';
+                            } else if (type == 1 && links.search('#works_video') == -1) {
+                                links += '<a href="' + getTeamlink(team_id, '#works_video') + '">视频</a>';
+                            } else if (type == 2 && links.search('#works_code') == -1) {
+                                links += '<a href="' + getTeamlink(team_id, '#works_code') + '">源代码</a>';
+                            } else if (type >= 3 && type <= 6 && links.search('#works_doc') == -1) {
+                                links += '<a href="' + getTeamlink(team_id, '#works_doc') + '">文档</a>';
+                            }
+                        });
+                        return links;
+                    },
                     link: function (team_id) {
-                        return '/site/' + hackathon_name + '/team/' + team_id;
+                        return getTeamlink(team_id, '');
                     }
                 }));
             }
@@ -95,7 +154,7 @@
                                 }),
                                 $('<button class="btn btn-primary">切换登录</button>').click(function (e) {
                                     confim.hide();
-                                    window.location.href = '/logout?return_url=/login?return_url='+ encodeURIComponent('/site/' + hackathon_name + '&provides=' + data.error.provides);
+                                    window.location.href = '/logout?return_url=/login?return_url=' + encodeURIComponent('/site/' + hackathon_name + '&provides=' + data.error.provides);
                                 })
                             ],
                             modal: 'confirm'
