@@ -68,6 +68,12 @@ def edithackathon(hackathon_name):
     return render("/manage/edithackathon.html", hackathon_name=hackathon_name)
 
 
+@app.route("/manage/<hackathon_name>/notice")
+@login_required
+def hackathon_notice(hackathon_name):
+    return render("/manage/notice.html", hackathon_name=hackathon_name)
+
+
 @app.route("/manage/<hackathon_name>/template")
 @login_required
 def template(hackathon_name):

@@ -49,8 +49,6 @@
             <div class="col-md-12">
                 <div class="oh-notice-title"><img src="/static/pic/notice1-icon.png"> 最新公告：</div>
                 <ul class="oh-notice-list">
-                    <li><a href="http://www.huodongxing.com/event/reg_submit?id=9308149000700">牛津计划·Docker黑客松马拉松中场充电站！
-                        <span>2015-11-22 13:30</span></a></li>
                 </ul>
             </div>
             {#
@@ -76,11 +74,10 @@
         </div>
         #}
         </div>
-        <!--<div class="btn-group btn-group-xs" role="group">-->
-        <!--<button type="button" class="btn btn-default"><span class="glyphicon glyphicon-menu-down"></span>-->
-        <!--</button>-->
-        <!--<button type="button" class="btn btn-default"><span class="glyphicon glyphicon-menu-up"></span></button>-->
-        <!--</div>-->
+        <div class="btn-group btn-group-xs" role="group">
+            <button type="button" class="btn btn-default" id="btn-notice-down"><span class="glyphicon glyphicon-menu-down"></span></button>
+            <button type="button" class="btn btn-default" id="btn-notice-up"><span class="glyphicon glyphicon-menu-up"></span></button>
+        </div>
     </div>
 
 
@@ -754,5 +751,6 @@
   {% endraw %}
 
     </script>
+    <script type="text/javascript" src="/static/js/jquery/moment.min.js"></script>
     <script type="text/javascript" src="/static/js/views/oh.home.js"></script>
 {% endblock %}

@@ -39,7 +39,7 @@
                             {{ hackathon.description | safe }}
                         </div>
 
-                        <h2 id="new" class="title">最新动态 <span>（1）</span></h2>
+                        <h2 id="new" class="title">最新动态 <span></span></h2>
 
                         <div class="oh-body grey-text">
                             {#                            <dl class="oh-latest-news">#}
@@ -54,11 +54,7 @@
                             {#                                    2015/09/20 周日 00:00#}
                             {#                                </dd>#}
                             {#                            </dl>#}
-                            <dl class="oh-latest-news">
-                                <dt>{{ hackathon.create_time |date("%Y/%m/%d") }}</dt>
-                                <dd><span class="t-bullhorn"></span>
-                                    {{ hackathon.config.location }}
-                                </dd>
+                            <dl class="oh-latest-news" id="oh-latest-news">
                             </dl>
                         </div>
 
@@ -418,6 +414,7 @@
         });
     </script>
     <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
+    <script type="text/javascript" src="/static/js/jquery/moment.min.js"></script>
     <script type="text/javascript" src="/static/js/views/oh.site.hackathon.js"></script>
     <script type="text/javascript">
         var duoshuoQuery = {short_name: "ohp"};

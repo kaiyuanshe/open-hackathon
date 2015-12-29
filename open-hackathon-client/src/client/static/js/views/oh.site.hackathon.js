@@ -122,6 +122,28 @@
                 noShow();
             }
         });
+        
+        //get hackathon notice
+        var LOCAL_HACKATHON_NOTICE = 1;
+        oh.api.admin.hackathon.notice.get({
+            header: {
+                hackathon_name: hackathon_name
+            },
+            query: {
+                type: LOCAL_HACKATHON_NOTICE
+            }
+        }, function(data) {
+            $('#new > span').html('（' + data.length + '）');
+
+            var tmpl = '<dt>{update_time}</dt>\
+                        <dd style="word-break: break-all">\
+                            <span class="t-bullhorn"></span><a href="{link}">{content}</a>\
+                        </dd>';
+            for(var i = 0; i < data.length; ++i) {
+                var param = {update_time: moment(data[i].update_time).format('YYYY/MM/DD'), link: data[i].link, content: data[i].content};
+                $('#oh-latest-news').append(tmpl.format(param));
+            }
+        });
     }
 
     function noShow() {

@@ -173,6 +173,10 @@ Config = {
                         "award": {
                             "": ["get", "post", "put", "delete"],
                             "list": ["get"]
+                        },
+                        "notice": {
+                            "": ["get", "post", "put", "delete"],
+                            "list": ["get"]
                         }
                     },
                     "registration": {

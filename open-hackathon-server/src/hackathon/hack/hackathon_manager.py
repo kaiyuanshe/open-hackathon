@@ -36,8 +36,8 @@ import lxml
 from lxml.html.clean import Cleaner
 
 from hackathon.database import Hackathon, User, AdminHackathonRel, DockerHostServer, HackathonLike, \
-    HackathonStat, HackathonConfig, HackathonTag, UserHackathonRel, HackathonOrganizer, Award, UserHackathonAsset, \
-    UserTeamRel
+    HackathonStat, HackathonConfig, HackathonTag, UserHackathonRel, HackathonOrganizer, Award, UserHackathonAsset,\
+    UserTeamRel, HackathonNotice
 from hackathon.hackathon_response import internal_server_error, ok, not_found, forbidden
 from hackathon.constants import HACKATHON_BASIC_INFO, ADMIN_ROLE_TYPE, HACK_STATUS, RGStatus, HTTP_HEADER, \
     FILE_TYPE, HACK_TYPE, HACKATHON_STAT, DockerHostServerStatus
@@ -479,6 +479,61 @@ class HackathonManager(Component):
     def list_hackathon_awards(self, hackathon):
         awards = hackathon.award_contents.order_by(Award.level.desc()).all()
         return [a.dic() for a in awards]
+
+    def get_hackathon_notice(self, hackathon, type):
+        hackathon_notice = None
+
+        #type 0: global notice, 1: local notice, 2: all notice
+        if type == '2':
+            hackathon_notice = self.db.find_all_objects_by(HackathonNotice, hackathon_id=hackathon.id)
+        else:
+            hackathon_notice = self.db.find_all_objects_by(HackathonNotice, hackathon_id=hackathon.id, type=type)
+        return [hn.dic() for hn in hackathon_notice]
+
+    def create_hackathon_notice(self, hackathon, body):
+        #server validation
+        if not body.get("content"):
+            return internal_server_error("Content should exist.")
+        if not body.get("type") or body.get("type") not in ['0', '1']:
+            return internal_server_error("Invalid type.")
+
+        hackathon_notice = HackathonNotice(hackathon_id=hackathon.id, 
+                                           content=body.get("content", "..."),
+                                           link=body.get("link", ""),
+                                           type=body.get("type", 1),
+                                           create_time=self.util.get_now(),
+                                           update_time=self.util.get_now())
+        self.db.add_object(hackathon_notice)
+        return hackathon_notice.dic()
+
+    def update_hackathon_notice(self, hackathon, body):
+        hackathon_notice = self.db.get_object(HackathonNotice, body.id)
+        if not hackathon_notice:
+            return not_found("hackathon_notice not found")
+        if hackathon.id != body.hackathon_id:
+            return forbidden()
+
+        #server validation
+        if not body.get("content"):
+            return internal_server_error("Content should exist.")
+        if not body.get("type") or body.get("type") not in ['0', '1']:
+            return internal_server_error("Invalid type.")
+
+        hackathon_notice.content = body.get("content", hackathon_notice.content)
+        hackathon_notice.link = body.get("link", hackathon_notice.link)
+        hackathon_notice.type = body.get("type", hackathon_notice.type)
+        hackathon_notice.update_time = self.util.get_now()
+
+        self.db.commit()
+        return hackathon_notice.dic()
+
+    def delete_hackathon_notice(self, hackathon, notice_id):
+        self.db.delete_all_objects_by(HackathonNotice, hackathon_id=hackathon.id, id=notice_id)
+        return ok()
+
+    def get_hackathon_notice_global(self):
+        hackathon_notice = self.db.find_all_objects_by(HackathonNotice, type=0)  #type 0: global notice, 1: local notice
+        return [hn.dic() for hn in hackathon_notice]
 
     def schedule_pre_allocate_expr_job(self):
         """Add an interval schedule job to check all hackathons"""

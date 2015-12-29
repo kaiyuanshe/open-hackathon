@@ -104,3 +104,5 @@ def init_routes():
     api.add_resource(UserListResource, "/api/admin/user/list")  # search and get all related users
     api.add_resource(AdminHostserverListResource, "/api/admin/hostserver/list")  # get the list of host server
     api.add_resource(AdminHostserverResource, "/api/admin/hostserver")  # create/update/delete/get a host server
+    api.add_resource(AdminHackathonNoticeResource, "/api/admin/hackathon/notice")  # create/update/delete/get hackathon notice
+    api.add_resource(HackathonNoticeListResource, "/api/admin/hackathon/notice/list")  # get all notice

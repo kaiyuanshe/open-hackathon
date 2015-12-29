@@ -328,6 +328,27 @@ class HackathonTag(DBBase):
     hackathon = relationship('Hackathon', backref=backref('tags', lazy='dynamic'))
 
 
+class HackathonNotice(DBBase):
+    __tablename__ = 'hackathon_notice'
+
+    id = Column(Integer, primary_key=True)
+    type = Column(Integer, default=0) #0: global, 1: local
+    create_time = Column(TZDateTime, default=get_now())
+    update_time = Column(TZDateTime, default=get_now())
+    content = Column(Text)
+    related_id = Column(Integer)
+    link = Column(String(100))
+
+    creator_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
+    user = relationship('User', backref=backref('notice', lazy='dynamic'))
+
+    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
+    hackathon = relationship('Hackathon', backref=backref('notice', lazy='dynamic'))
+
+    def __init__(self, **kwargs):
+        super(HackathonNotice, self).__init__(**kwargs)
+
+
 class Team(DBBase):
     __tablename__ = 'team'
 
