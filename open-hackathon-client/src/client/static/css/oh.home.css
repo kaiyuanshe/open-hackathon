@@ -574,7 +574,10 @@
     width: 100%;
     height: 260px;
 }
-
+.oh-events .oh-show .oh-thumbnail .carousel video {
+    width: 100% !important;;
+    height: 260px !important;;
+}
 @media (max-width: 1200px) {
     .oh-activity .oh-item {
         height: 424px;
