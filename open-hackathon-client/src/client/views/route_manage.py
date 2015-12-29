@@ -44,14 +44,6 @@ def myhackathon():
     return render("/manage/myhackathon.html", hackathon_name="")
 
 
-# get registered user list of a hackathon
-
-# @app.route("/manage/<hackathon_name>")
-# @login_required
-# def hackathon_manage_detail(hackathon_name):
-#     return render("/manage/detail.html", hackathon_name=hackathon_name)
-
-
 @app.route("/manage/<hackathon_name>/user")
 @login_required
 def registerusers(hackathon_name):
