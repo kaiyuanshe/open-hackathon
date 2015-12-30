@@ -81,5 +81,22 @@ Config = {
     },
     "cloud_eclipse": {
         "api": "http://www.idehub.cn/api/ide"
+    },
+    "email": {
+        "sender": "",
+        "host": "",
+        "port": 587,
+        "username": "",
+        "password": ""
+    },
+    "sms": {
+        "rong_lian": {
+            "account_sid": "",
+            "auth_token": "",
+            "app_id": "",
+            "server_ip": "sandboxapp.cloopen.com",
+            "server_port": "8883",
+            "soft_version": "2013-12-26"
+        }
     }
 }

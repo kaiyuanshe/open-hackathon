@@ -506,3 +506,24 @@ class LOGIN_PROVIDER:
     WEIBO = 8
     GITCAFE = 16
     ALAUDA = 32
+
+
+class EMAIL_SMTP_STATUSCODE:
+    """Status Code of email service(SMTP protocol)"""
+    SUCCESS = 250
+    SERVICE_NOT_AVAILABLE = 421
+    ACCESS_DENIED = 530
+
+
+class SMS_RONGLIAN_STATUSCODE:
+    """Status Code of Rong_Lian_Yun_Tong_Xun SMS service"""
+    SUCCESS = "000000"
+    PHONE_NUMBER_EMPTY = "112300"
+    TEMPLATE_NOT_EXIST = "112311"
+    INSUFFICIENT_BALANCE = "160014"
+    WRONG_PHONE_NUMBER = "160042"
+
+
+class SMS_RONGLIAN_TEMPLATE:
+    """Template ID of Rong_Lian_Yun_Tong_Xun SMS service"""
+    DEFAULT_TEMPLATE = 1
