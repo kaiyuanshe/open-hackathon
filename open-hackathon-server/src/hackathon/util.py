@@ -36,6 +36,7 @@ from mailthon.postman import Postman
 from mailthon.middleware import TLS, Auth
 
 from hackathon.log import log
+from hackathon.constants import EMAIL_SMTP_STATUSCODE, SMS_RONGLIAN_STATUSCODE, SMS_RONGLIAN_TEMPLATE
 
 try:
     from config import Config
@@ -218,14 +219,62 @@ class Utility(object):
     def is_local(self):
         return safe_get_config("environment", "local") == "local"
 
-    def send_emails(self, sender, receivers, subject, content, host, port, username, password,
-                    cc=[], bcc=[], attachments=[]):
+
+class Email(object):
+    """ Provide Emails Sending Service
+
+    Example for config.py:
+    "email": {
+        "sender": "James james2015@gmail.com",
+        "host": "smtp.gmail.com",
+        "port": 587,
+        "username": "james2015@gmail.com",
+        "password": "88888888"
+    }
+    """
+    sender = get_config("email.sender")
+    host = get_config("email.host")
+    port = get_config("email.port")
+    username = get_config("email.username")
+    password = get_config("email.password")
+    postman = None
+    available = False
+    error_message = ""
+
+    def __init__(self):
+        """check email-service parameters from config.py"""
+        if self.sender == "":
+            self.error_message = "email-sender is empty"
+        elif self.host == "":
+            self.error_message = "email-host is empty"
+        elif self.username == "":
+            self.error_message = "email-username is empty"
+        elif self.password == "":
+            self.error_message = "email-password is empty"
+        else:
+            self.available = True
+            # initial postman
+            self.postman = Postman(
+                host=self.host,
+                port=self.port,
+                middlewares=[
+                    TLS(force=True),
+                    Auth(username=self.username, password=self.password)
+                ]
+            )
+
+    def send_emails(self, receivers, subject, content, cc=[], bcc=[], attachments=[]):
         """Send emails
         notes: No all email-service providers support.
         if using Gmail, enable "Access for less secure apps" for the sender's account,
 
-        :type sender: str|unicode
-        :param sender: Example-'James james2015@gmail.com' or 'james2015@gmail.com'
+        Examples:
+            xxx.send_emails(['receiver1@gmail.com', 'receiver2@gmail.com'],
+                            'Subject: Hello',
+                            '<b>Hi! Here is the content of email</b>',
+                            ['cc1@gmail.com', 'cc2@gmail.com'],
+                            ['bcc1@gmail.com', 'bcc2@gmail.com'],
+                            ['C:/apache-maven-3.3.3-bin.zip'])
 
         :type receivers: list
         :param receivers: Example-['a@gmail.com', 'b@gmail.com']
@@ -236,18 +285,6 @@ class Utility(object):
         :type content: str|unicode
         :param content: content of the email. Example-'<b>Hi!</b>'
 
-        :type host: str|unicode
-        :param host: domain name or ip address. Example-'smtp.gmail.com',
-
-        :type port: integer
-        :param port: the port of email service. (SMTP)Example-587
-
-        :type username: str|unicode
-        :param username: username to log in the email service. Example-'james@gmail.com'
-
-        :type password: str|unicode
-        :param password: password to log in the email service
-
         :type cc: list
         :param cc: CarbonCopy. Example-['a@gmail.com', 'b@gmail.com']
 
@@ -257,11 +294,15 @@ class Utility(object):
         :type attachments: list
         :param attachments: Example-['C:/Users/Administrator/Downloads/apache-maven-3.3.3-bin.zip']
 
-        :rtype object
-        :return 'response' object. response.status_code==250(SMTP) if succeed in sending.
+        :rtype boolean
+        :return True if send emails successfully. False if fails to send.
         """
+        if not self.available:
+            log.error("Send emails fail: " + self.error_message)
+            return False
+
         e = email(
-            sender=sender,
+            sender=self.sender,
             receivers=receivers,
             cc=cc,
             bcc=bcc,
@@ -269,26 +310,73 @@ class Utility(object):
             content=content
         )
 
-        postman = Postman(
-            host=host,
-            port=port,
-            middlewares=[
-                TLS(force=True),
-                Auth(username=username, password=password)
-            ]
-        )
+        try:
+            response = self.postman.send(e)
+            if response.status_code == EMAIL_SMTP_STATUSCODE.SUCCESS:
+                return True
+            log.error("Send emails fail: " + response.message)
+            return False
+        except Exception as e:
+            log.error(e)
+            return False
 
-        response = postman.send(e)
-        return response
 
-    def send_template_SMS_by_RongLian(self, to, tempId, datas):
+class SMS(object):
+    """ Provide SMS Sending Service
+
+    Example for config.py:
+    "sms": {
+        "rong_lian": {
+            "account_sid": "aaf98f8951d38e890151d80000000000",
+            "auth_token": "81225da0fcab460ea87a3b0000000000",
+            "app_id": "8a48b55151d688bc0151d80000000000",
+            "server_ip": "sandboxapp.cloopen.com",
+            "server_port": "8883",
+            "soft_version": "2013-12-26"
+        }
+    }
+
+    notes: "account_sid, auth_token, app_id" are shown in the RongLianYunTongXun "management console" website.
+    """
+    account_sid = get_config("sms.rong_lian.account_sid")
+    auth_token = get_config("sms.rong_lian.auth_token")
+    app_id = get_config("sms.rong_lian.app_id")
+    server_ip = get_config("sms.rong_lian.server_ip")
+    server_port = get_config("sms.rong_lian.server_port")
+    soft_version = get_config("sms.rong_lian.soft_version")
+    available = False
+    error_message = ""
+
+    def __init__(self):
+        """check sms service parameters from config.py"""
+        if self.account_sid == "":
+            self.error_message = "SMS(RongLian)-account_sid is empty"
+        elif self.auth_token == "":
+            self.error_message = "SMS(RongLian)-auth_token is empty"
+        elif self.app_id == "":
+            self.error_message = "SMS(RongLian)-app_id is empty"
+        elif self.server_ip == "":
+            self.error_message = "SMS(RongLian)-server_ip is empty"
+        elif self.server_port == "":
+            self.error_message = "SMS(RongLian)-server_port is empty"
+        elif self.soft_version == "":
+            self.error_message = "SMS(RongLian)-soft_version is empty"
+        else:
+            self.available = True
+
+    def send_template_SMS_by_RongLian(self, receiver, templateId, datas):
         """ Send template-SMS through RongLian_YunTongXun service
 
-        :type to: integer
-        :param to: the telephone number. Example-18217511111
+        Example:
+            XXX.send_template_SMS_by_RongLian(18217511111,
+                                              SMS_RONGLIAN_TEMPLATE.DEFAULT_TEMPLATE,
+                                              ['10','30'])
 
-        :type tempId: integer
-        :param tempId: SMS-template-Id that would be used, could be editted in RongLian officaial website. Example-1
+        :type receiver: integer
+        :param receiver: the telephone number. Example-18217511111
+
+        :type templateId: integer
+        :param templateId: SMS-template-Id that would be used, Example: SMS_RONGLIAN_TEMPLATE.DEFAULT_TEMPLATE
 
         :type datas: list
         :param datas: datas to replace blanks in this SMS-template. Example-['10','30']
@@ -296,30 +384,46 @@ class Utility(object):
         :rtype boolean
         :return True if sms sends successfully. False if fails to send.
         """
-        serverIP = 'sandboxapp.cloopen.com'
-        serverPort = '8883'
-        softVersion = '2013-12-26'
 
-        accountSid = self.get_config("sms.rong_lian.account_sid")
-        accountToken = self.get_config("sms.rong_lian.account_token")
-        appId = self.get_config("sms.rong_lian.app_id")
-
-        if accountSid == "":
-            log.error("Send SMS Fail: RongLian_AccountSid is empty")
-            return False
-        if accountToken == "":
-            log.error("Send SMS Fail: RongLian_AccountToken is empty")
-            return False
-        if appId == "":
-            log.error("Send SMS Fail: RongLian_AppId is empty")
+        if not self.available:
+            log.error("Send SMS(RongLian) fail: " + self.error_message)
             return False
 
+        # generate sms request
+        req = self.__generate_sms_request_RongLian()
+
+        try:
+            # generate request-body
+            body = {"to": receiver, "datas": datas, "templateId": templateId, "appId": self.app_id}
+            req.add_data(str(body))
+
+            res = urllib2.urlopen(req)
+            data = res.read()
+            res.close()
+            response = json.loads(data)
+            if response["statusCode"] == SMS_RONGLIAN_STATUSCODE.SUCCESS:
+                return True
+            log.error("Send SMS(RongLian) fail: " + str(response))
+            return False
+        except Exception as e:
+            log.error(e)
+            return False
+
+    def __generate_sms_request_RongLian(self):
+        """ private function to generate SMS-request through RongLianYunTongXun-service
+
+        :rtype object(request)
+        :return sms-request-object
+        """
         nowdate = datetime.now().strftime("%Y%m%d%H%M%S")
-        signature = accountSid + accountToken + nowdate
+        # generate signature
+        signature = self.account_sid + self.auth_token + nowdate
+        # hash signature
         sig = hashlib.md5(signature).hexdigest().upper()
-        url = "https://" + serverIP + ":" + serverPort + "/" + softVersion + "/Accounts/" + accountSid +\
-              "/SMS/TemplateSMS?sig=" + sig
-        auth = base64.encodestring(accountSid + ":" + nowdate).strip()
+        url = "https://%s:%s/%s/Accounts/%s/SMS/TemplateSMS?sig=%s" % (self.server_ip, self.server_port,
+                                                                       self.soft_version, self.account_sid, sig)
+        # auth
+        auth = base64.encodestring(self.account_sid + ":" + nowdate).strip()
 
         # generate request
         req = urllib2.Request(url)
@@ -327,22 +431,4 @@ class Utility(object):
         req.add_header("Content-Type", "application/json;charset=utf-8")
         req.add_header("Authorization", auth)
 
-        # generate request-body
-        b = '['
-        for data in datas:
-            b += '"%s",' % (data)
-        b += ']'
-        body = '''{"to": "%s", "datas": %s, "templateId": "%s", "appId": "%s"}''' % (to, b, tempId, appId)
-        req.add_data(body)
-
-        try:
-            res = urllib2.urlopen(req)
-            data = res.read()
-            res.close()
-            response = json.loads(data)
-            log.info(response)
-            # statusCode == "000000" if sends successfully
-            return response["statusCode"] == "000000"
-        except Exception as e:
-            log.error(e)
-            return False
+        return req
