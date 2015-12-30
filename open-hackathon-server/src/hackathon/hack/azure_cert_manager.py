@@ -111,17 +111,32 @@ class AzureCertManager(Component):
         else:
             self.log.debug('hackathon azure key exists')
 
-        file_name = subscription_id + '.cer'
-        context = Context(
+        cer_file_name = subscription_id + '.cer'
+        cer_context = Context(
             hackathon_name=hackathon.name,
-            file_name=file_name,
+            file_name=cer_file_name,
             file_type=FILE_TYPE.AZURE_CERT,
             content=file(cert_url)
         )
-        self.log.debug("saving cerf file [%s] to azure" % file_name)
-        context = self.storage.save(context)
-        azure_key.cert_url = context.url
+        self.log.debug("saving cerf file [%s] to azure" % cer_file_name)
+        cer_context = self.storage.save(cer_context)
+        azure_key.cert_url = cer_context.url
         self.db.commit()
+
+        ###store pem file
+        """
+        pem_file_name = subscription_id + '.pem'
+        pem_contex = Context(
+            hackathon_name=hackathon.name,
+            file_name=pem_file_name,
+            file_type=FILE_TYPE.AZURE_PEM,
+            content=file(pem_url)
+        )
+        self.log.debug("saving pem file [%s] to azure" % pem_file_name)
+        pem_contex = self.storage.save(pem_contex)
+        azure_key.pem_url = pem_contex.url
+        self.db.commit()
+        """
         return azure_key.cert_url
 
     def get_certificates(self, hackathon):
@@ -165,6 +180,10 @@ class AzureCertManager(Component):
                         os.remove(azure_key.cert_url)
                     else:
                         self.storage.delete(azure_key.cert_url)
+                    if isfile(azure_key.pem_url):
+                        os.remove(azure_key.pem_url)
+                    else:
+                        self.storage.delete(azure_key.pem_url)
                 except Exception as e:
                     self.log.error(e)
 

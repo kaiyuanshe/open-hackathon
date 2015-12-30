@@ -57,7 +57,7 @@ def scheduler_listener(event):
 def scheduler_executor(feature, method, context):
     """task for all apscheduler jobs
 
-    While the context of apscheduler job will be serialized and saved into MySQL, it's hard that add a instance method
+    While the context of apscheduler job will be serialized and saved into MySQL, it's hard that add an instance method
     as an apscheduler job because the context is usually very complicate and not easy to be serialized. For example, see
     we want to add an new job to execute 'user_mgr.get_user_info' in 5 minutes, then the whole 'user_mgr' which involves
     many other classes will be serialized and saved which probably fail for many of them including 'user_mgr' itself are
