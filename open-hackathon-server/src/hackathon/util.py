@@ -232,11 +232,11 @@ class Email(object):
         "password": "88888888"
     }
     """
-    sender = get_config("email.sender")
-    host = get_config("email.host")
-    port = get_config("email.port")
-    username = get_config("email.username")
-    password = get_config("email.password")
+    sender = safe_get_config("email.sender", "")
+    host = safe_get_config("email.host", "")
+    port = safe_get_config("email.port", 587)
+    username = safe_get_config("email.username", "")
+    password = safe_get_config("email.password", "")
     postman = None
     available = False
     error_message = ""
@@ -338,12 +338,12 @@ class SMS(object):
 
     notes: "account_sid, auth_token, app_id" are shown in the RongLianYunTongXun "management console" website.
     """
-    account_sid = get_config("sms.rong_lian.account_sid")
-    auth_token = get_config("sms.rong_lian.auth_token")
-    app_id = get_config("sms.rong_lian.app_id")
-    server_ip = get_config("sms.rong_lian.server_ip")
-    server_port = get_config("sms.rong_lian.server_port")
-    soft_version = get_config("sms.rong_lian.soft_version")
+    account_sid = safe_get_config("sms.rong_lian.account_sid", "")
+    auth_token = safe_get_config("sms.rong_lian.auth_token", "")
+    app_id = safe_get_config("sms.rong_lian.app_id", "")
+    server_ip = safe_get_config("sms.rong_lian.server_ip", "")
+    server_port = safe_get_config("sms.rong_lian.server_port", "")
+    soft_version = safe_get_config("sms.rong_lian.soft_version", "")
     available = False
     error_message = ""
 
