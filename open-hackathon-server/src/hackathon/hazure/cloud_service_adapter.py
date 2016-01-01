@@ -26,12 +26,13 @@ THE SOFTWARE.
 __author__ = "rapidhere"
 
 from azure.servicemanagement.servicemanagementservice import ServiceManagementService
-from azure.common import AzureHttpError
+from azure.common import AzureHttpError, AzureMissingResourceHttpError
 
 from hackathon.database import AzureCloudService
 from hackathon.constants import ACSStatus
 
 from service_adapter import ServiceAdapter
+from constants import ASYNC_OP_RESULT
 
 
 class CloudServiceAdapter(ServiceAdapter):
@@ -58,12 +59,48 @@ class CloudServiceAdapter(ServiceAdapter):
         """
         try:
             props = self.service.get_hosted_service_properties(name)
-        except Exception as e:
-            if e.message != self.NOT_FOUND:
-                self.log.error(e)
-                raise e
+        except AzureMissingResourceHttpError:
             return False
+        except Exception as e:
+            self.log.error(e)
+            raise e
+
         return props is not None
+
+    def create_hosted_service(self, name, label, location, **extra):
+        """the sync version of ServiceManagementService.create_hosted_service
+
+        for full list of arguments, please refr to ServiceManagementService.create_hosted_service
+
+        :rtype: boolean
+        :return: True on success
+        """
+        # DON'T DO ERROR CHECK AS azureformation.cloudService did
+        # Micrsoft has checked the error up in server side
+        # you don't have to do it again
+        try:
+            req = self.service.create_hosted_service(
+                service_name=name,
+                label=label,
+                location=location,
+                **extra)
+        except AzureHttpError as e:
+            self.log.debug("create cloud service %s failed: %s" % (name, e.message))
+            return False
+
+        self.log.debug("service cloud %s, creation in progress" % name)
+        res = self.service.wait_for_operation_status(
+            req.request_id,
+            progress_callback=None,
+            success_callback=None,
+            failure_callback=None)
+
+        if res and res.status == ASYNC_OP_RESULT.SUCCEEDED:
+            self.log.debug("service cloud %s, creation done" % name)
+            return True
+        else:
+            self.log.debug("service cloud %s, creation failed" % name)
+            return False
 
     def create_cloud_service(self, azure_key_id, name, label, location, **extra):
         """Link to azure and create the CloudService if the CloudService hasn't been created.
@@ -72,7 +109,7 @@ class CloudServiceAdapter(ServiceAdapter):
 
         NOTE: this function is designed to used with database, but the CloudServiceAdapter can
         work without database. If you don't want to store the info into database automatically,
-        you should use CloudService.create_hosted_service
+        you should use create_hosted_service
 
         name, label and location are required variable by Azure
         you can pass extra variables if there is more info need to pass
@@ -83,17 +120,11 @@ class CloudServiceAdapter(ServiceAdapter):
         :return: True on success, False on failed, the error message will be logged
         """
         if not self.cloud_service_exists(name):
-            # DON'T DO ERROR CHECK AS azureformation.cloudService did
-            # Micrsoft has checked the error up in server side
-            # you don't have to do it again
-            try:
-                self.create_cloud_service(
-                    name=name,
+            if not self.create_hosted_service(
+                    service_name=name,
                     label=label,
                     location=location,
-                    **extra)
-            except AzureHttpError as e:
-                self.log.error(e)
+                    **extra):
                 return False
 
             # first delete the possible old CloudService

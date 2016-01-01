@@ -673,28 +673,28 @@ class HackathonAzureKey(DBBase):
 
 # disabled by: rapidhere
 # current i don't known the usage of the log
-# so i just disable this table
-# class AzureLog(DBBase):
-#     """
-#     Azure operation log for every experiment
-#     """
-#     __tablename__ = 'azure_log'
-#
-#     id = Column(Integer, primary_key=True)
-#     # ALOperation in enum.py
-#     operation = Column(String(50))
-#     # ALStatus in enum.py
-#     status = Column(String(50))
-#     # Note if no info and error
-#     note = Column(String(500))
-#     # None if no error
-#     code = Column(Integer)
-#     experiment_id = Column(Integer, ForeignKey('experiment.id', ondelete='CASCADE'))
-#     experiment = relationship('Experiment', backref=backref('azure_log', lazy='dynamic'))
-#     exec_time = Column(TZDateTime, default=get_now())
-#
-#     def __init__(self, **kwargs):
-#         super(AzureLog, self).__init__(**kwargs)
+# so i plan to  disable this table
+class AzureLog(DBBase):
+    """
+    Azure operation log for every experiment
+    """
+    __tablename__ = 'azure_log'
+
+    id = Column(Integer, primary_key=True)
+    # ALOperation in enum.py
+    operation = Column(String(50))
+    # ALStatus in enum.py
+    status = Column(String(50))
+    # Note if no info and error
+    note = Column(String(500))
+    # None if no error
+    code = Column(Integer)
+    experiment_id = Column(Integer, ForeignKey('experiment.id', ondelete='CASCADE'))
+    experiment = relationship('Experiment', backref=backref('azure_log', lazy='dynamic'))
+    exec_time = Column(TZDateTime, default=get_now())
+
+    def __init__(self, **kwargs):
+        super(AzureLog, self).__init__(**kwargs)
 
 
 class AzureStorageAccount(DBBase):

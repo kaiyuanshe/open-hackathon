@@ -26,7 +26,7 @@ import sys
 
 sys.path.append("..")
 
-from azure.storage import BlobService
+from azure.storage.blob import BlobService
 
 from service_adapter import ServiceAdapter
 

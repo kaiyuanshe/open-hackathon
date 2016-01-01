@@ -41,7 +41,7 @@ from threading import (
     current_thread,
 )
 from hackathon import Component
-from hackathon.template import AZURE_UNIT
+from template_constants import AZURE_UNIT
 
 
 class AzureTemplateUnit(Component):
