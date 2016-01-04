@@ -515,15 +515,15 @@ class EMAIL_SMTP_STATUSCODE:
     ACCESS_DENIED = 530
 
 
-class SMS_RONGLIAN_STATUSCODE:
-    """Status Code of Rong_Lian_Yun_Tong_Xun SMS service"""
+class VOICEVERIFY_PROVIDER:
+    """Voice_Verify service providers"""
+    RONGLIAN = "rong_lian"
+
+
+class VOICEVERIFY_RONGLIAN_STATUSCODE:
+    """Status Code of RongLianYunTongXun Voice_Verify service"""
     SUCCESS = "000000"
-    PHONE_NUMBER_EMPTY = "112300"
-    TEMPLATE_NOT_EXIST = "112311"
+    CONTENT_EMPTY = "111318"
+    CONTENT_LENGTH_WRONG = "111319"
     INSUFFICIENT_BALANCE = "160014"
     WRONG_PHONE_NUMBER = "160042"
-
-
-class SMS_RONGLIAN_TEMPLATE:
-    """Template ID of Rong_Lian_Yun_Tong_Xun SMS service"""
-    DEFAULT_TEMPLATE = 1

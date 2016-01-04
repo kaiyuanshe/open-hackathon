@@ -36,7 +36,7 @@ from mailthon.postman import Postman
 from mailthon.middleware import TLS, Auth
 
 from hackathon.log import log
-from hackathon.constants import EMAIL_SMTP_STATUSCODE, SMS_RONGLIAN_STATUSCODE, SMS_RONGLIAN_TEMPLATE
+from hackathon.constants import EMAIL_SMTP_STATUSCODE, VOICEVERIFY_RONGLIAN_STATUSCODE, VOICEVERIFY_PROVIDER
 
 try:
     from config import Config
@@ -321,107 +321,183 @@ class Email(object):
             return False
 
 
-class SMS(object):
-    """ Provide SMS Sending Service
+class VoiceVerify(object):
+    """ Provide uniform and transparent VoiceVerify Service Interface
+    so that the invoker can use uniform interface without caring that the provider is RongLianYunTongXun or the other.
 
     Example for config.py:
-    "sms": {
-        "rong_lian": {
-            "account_sid": "aaf98f8951d38e890151d80000000000",
-            "auth_token": "81225da0fcab460ea87a3b0000000000",
-            "app_id": "8a48b55151d688bc0151d80000000000",
-            "server_ip": "sandboxapp.cloopen.com",
-            "server_port": "8883",
-            "soft_version": "2013-12-26"
-        }
+    "voice_verify": {
+        "enabled": True,
+        "provider": "rong_lian",
+        ... ...
     }
-
-    notes: "account_sid, auth_token, app_id" are shown in the RongLianYunTongXun "management console" website.
     """
-    account_sid = safe_get_config("sms.rong_lian.account_sid", "")
-    auth_token = safe_get_config("sms.rong_lian.auth_token", "")
-    app_id = safe_get_config("sms.rong_lian.app_id", "")
-    server_ip = safe_get_config("sms.rong_lian.server_ip", "")
-    server_port = safe_get_config("sms.rong_lian.server_port", "")
-    soft_version = safe_get_config("sms.rong_lian.soft_version", "")
+    provider_name = safe_get_config("voice_verify.provider", "")
+    enabled = safe_get_config("voice_verify.enabled", False)
+    # the available status of voice_verify service
     available = False
     error_message = ""
+    # the object of VoiceVerify Provider, For example: VoiceVerify_RongLian()
+    provider = None
 
     def __init__(self):
-        """check sms service parameters from config.py"""
-        if self.account_sid == "":
-            self.error_message = "SMS(RongLian)-account_sid is empty"
-        elif self.auth_token == "":
-            self.error_message = "SMS(RongLian)-auth_token is empty"
-        elif self.app_id == "":
-            self.error_message = "SMS(RongLian)-app_id is empty"
-        elif self.server_ip == "":
-            self.error_message = "SMS(RongLian)-server_ip is empty"
-        elif self.server_port == "":
-            self.error_message = "SMS(RongLian)-server_port is empty"
-        elif self.soft_version == "":
-            self.error_message = "SMS(RongLian)-soft_version is empty"
+        """
+        initial the voice_verify provider and check whether the service is enabled.
+        """
+        if self.provider_name == "" or safe_get_config("voice_verify." + self.provider_name, "") == "":
+            self.error_message = "VoiceVerify provider is not found"
+        elif not self.enabled:
+            self.error_message = "VoiceVerify service is not enabled."
         else:
             self.available = True
+            if self.provider_name == VOICEVERIFY_PROVIDER.RONGLIAN:
+                self.provider = VoiceVerify_RongLian()
 
-    def send_template_SMS_by_RongLian(self, receiver, templateId, datas):
-        """ Send template-SMS through RongLian_YunTongXun service
+    def send_voice_verify(self, receiver, content):
+        """ Send voice_verify through the service provider
 
         Example:
-            XXX.send_template_SMS_by_RongLian(18217511111,
-                                              SMS_RONGLIAN_TEMPLATE.DEFAULT_TEMPLATE,
-                                              ['10','30'])
+            XXX.send_voice_verify(18217511111, "1849")
 
         :type receiver: integer
         :param receiver: the telephone number. Example-18217511111
 
-        :type templateId: integer
-        :param templateId: SMS-template-Id that would be used, Example: SMS_RONGLIAN_TEMPLATE.DEFAULT_TEMPLATE
-
-        :type datas: list
-        :param datas: datas to replace blanks in this SMS-template. Example-['10','30']
+        :type content: str|unicode
+        :param content: the content of voice-verify. Example-"1849"
 
         :rtype boolean
-        :return True if sms sends successfully. False if fails to send.
+        :return True if voice verify sends successfully. False if fails to send.
+        """
+        if not self.available:
+            log.error(self.error_message)
+            return False
+
+        try:
+            if self.provider_name == VOICEVERIFY_PROVIDER.RONGLIAN:
+                return self.provider.send_voice_verify_by_RongLian(receiver, content)
+            else:
+                log.error("VoiceVerify provider is not found")
+                return False
+        except Exception as e:
+            log.error(e)
+            return False
+
+
+class VoiceVerify_RongLian(object):
+    """ Provide VoiceVerify Service through RongLianYunTongXun
+
+    Example for config.py:
+    "voice_verify": {
+        "enabled": True,
+        "provider": "rong_lian",
+        "rong_lian": {
+            "account_sid": "aaf98f8951d38e890151d80ba4000000",
+            "auth_token": "81225da0fcab460ea87a3b6ce9000000",
+            "app_id": "8a48b55151d688bc0151d80bf9000000",
+            "server_ip": "sandboxapp.cloopen.com",
+            "server_port": "8883",
+            "soft_version": "2013-12-26",
+            "play_times": 3,
+            "display_number": "",
+            "response_url": "",
+            "language": "zh"
+        }
+    }
+
+    notes:  "account_sid", "auth_token", "app_id" are shown in the RongLianYunTongXun "management console" website.
+            "play_times" is the times to replay voice-verify content.
+            "language" could be "zh" or "en",
+            Optional parameter-"display_number" is the phone number of sender that shown in receivers' telephone.
+            Optional parameter-"response_url" is the callback url of the response.
+            Set Optional parameters as "" to use the default value.
+    """
+    account_sid = safe_get_config("voice_verify.rong_lian.account_sid", "")
+    auth_token = safe_get_config("voice_verify.rong_lian.auth_token", "")
+    app_id = safe_get_config("voice_verify.rong_lian.app_id", "")
+    server_ip = safe_get_config("voice_verify.rong_lian.server_ip", "")
+    server_port = safe_get_config("voice_verify.rong_lian.server_port", "")
+    soft_version = safe_get_config("voice_verify.rong_lian.soft_version", "")
+    # optional parameters
+    play_times = safe_get_config("voice_verify.rong_lian.play_times", 3)
+    display_number = safe_get_config("voice_verify.rong_lian.display_number", "")
+    response_url = safe_get_config("voice_verify.rong_lian.response_url", "")
+    language = safe_get_config("voice_verify.rong_lian.response_url", "zh")
+    # RongLianYunTongXun available status
+    available = False
+    error_message = ""
+
+    def __init__(self):
+        """check voice-verify service parameters from config.py"""
+        if self.account_sid == "":
+            self.error_message = "VoiceVerify(RongLian) Error: account_sid is empty"
+        elif self.auth_token == "":
+            self.error_message = "VoiceVerify(RongLian) Error: auth_token is empty"
+        elif self.app_id == "":
+            self.error_message = "VoiceVerify(RongLian) Error: app_id is empty"
+        elif self.server_ip == "":
+            self.error_message = "VoiceVerify(RongLian) Error: server_ip is empty"
+        elif self.server_port == "":
+            self.error_message = "VoiceVerify(RongLian) Error: server_port is empty"
+        elif self.soft_version == "":
+            self.error_message = "VoiceVerify(RongLian) Error: soft_version is empty"
+        else:
+            self.available = True
+
+    def send_voice_verify_by_RongLian(self, receiver, content):
+        """ Send voice_verify through RongLian_YunTongXun service
+
+        Example:
+            XXX.send_voice_verify_by_RongLian(18217511111, "1849")
+
+        :type receiver: integer
+        :param receiver: the telephone number. Example-18217511111
+
+        :type content: str|unicode
+        :param content: the content of voice-verify. It should contain 4 words or numbers. Example-"1849"
+
+        :rtype boolean
+        :return True if voice verify sends successfully. False if fails to send.
         """
 
         if not self.available:
-            log.error("Send SMS(RongLian) fail: " + self.error_message)
+            log.error(self.error_message)
             return False
 
-        # generate sms request
-        req = self.__generate_sms_request_RongLian()
+        # generate voice_verify request
+        req = self.__generate_voice_verify_request()
 
         try:
             # generate request-body
-            body = {"to": receiver, "datas": datas, "templateId": templateId, "appId": self.app_id}
+            body = {"to": receiver, "verifyCode": content, "playTimes": self.play_times,
+                    "displayNum": self.display_number, "respUrl": self.response_url,
+                    "lang": self.language, "appId": self.app_id}
             req.add_data(str(body))
 
             res = urllib2.urlopen(req)
             data = res.read()
             res.close()
             response = json.loads(data)
-            if response["statusCode"] == SMS_RONGLIAN_STATUSCODE.SUCCESS:
+            if response["statusCode"] == VOICEVERIFY_RONGLIAN_STATUSCODE.SUCCESS:
                 return True
-            log.error("Send SMS(RongLian) fail: " + str(response))
+            log.error("Send VoiceVerify(RongLian) fails: " + str(response))
             return False
         except Exception as e:
             log.error(e)
             return False
 
-    def __generate_sms_request_RongLian(self):
-        """ private function to generate SMS-request through RongLianYunTongXun-service
+    def __generate_voice_verify_request(self):
+        """ private function to generate voice-verify request through RongLian_YunTongXun_Service
 
         :rtype object(request)
-        :return sms-request-object
+        :return the object of voice_verify request
         """
         nowdate = datetime.now().strftime("%Y%m%d%H%M%S")
         # generate signature
         signature = self.account_sid + self.auth_token + nowdate
         # hash signature
         sig = hashlib.md5(signature).hexdigest().upper()
-        url = "https://%s:%s/%s/Accounts/%s/SMS/TemplateSMS?sig=%s" % (self.server_ip, self.server_port,
-                                                                       self.soft_version, self.account_sid, sig)
+        url = "https://%s:%s/%s/Accounts/%s/Calls/VoiceVerify?sig=%s" % (self.server_ip, self.server_port,
+                                                                         self.soft_version, self.account_sid, sig)
         # auth
         auth = base64.encodestring(self.account_sid + ":" + nowdate).strip()
 

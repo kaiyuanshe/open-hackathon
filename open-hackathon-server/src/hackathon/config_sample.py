@@ -89,14 +89,20 @@ Config = {
         "username": "",
         "password": ""
     },
-    "sms": {
+    "voice_verify": {
+        "enabled": False,
+        "provider": "",
         "rong_lian": {
             "account_sid": "",
             "auth_token": "",
             "app_id": "",
-            "server_ip": "sandboxapp.cloopen.com",
+            "server_ip": "",
             "server_port": "8883",
-            "soft_version": "2013-12-26"
+            "soft_version": "2013-12-26",
+            "play_times": 3,
+            "display_number": "",
+            "response_url": "",
+            "language": "zh"
         }
     }
 }
