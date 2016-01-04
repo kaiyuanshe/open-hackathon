@@ -634,14 +634,20 @@ class UserHackathonAsset(DBBase):
 class AzureKey(DBBase):
     """
     Azure certificate information of user/hackathon
+    Open-hackathon will try to use local certification file, if it doesn't exist, open-hackathon will try to
+    recover it from azure. If it runs in local environment, azure url actually equals local url.
     """
     __tablename__ = 'azure_key'
 
     id = Column(Integer, primary_key=True)
-    # cert_url is cert file path in azure
+    # local_cert_url is the local cert file path
     cert_url = Column(String(200))
-    # pem_url is pem file path in local
+    # cert_url is the cert file path in azure
+    azure_cert_url = Column(String(200))
+    # local_pem_url is the local pem file path
     pem_url = Column(String(200))
+    # pem_url is the pem file path in local
+    azure_pem_url = Column(String(200))
     subscription_id = Column(String(100))
     management_host = Column(String(100))
     create_time = Column(TZDateTime, default=get_now())

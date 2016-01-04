@@ -25,3 +25,4 @@ THE SOFTWARE.
 
 from local_storage import LocalStorage
 from azure_storage import AzureStorage
+from cryptor import Cryptor

@@ -450,6 +450,7 @@ class DockerHostManager(Component):
         if hackathon_azure_key is None:
             self.log.error('Found no azure key with Hackathon:%d' % hackathon_id)
             return None
+        #todo
         sms = ServiceManagementService(hackathon_azure_key.azure_key.subscription_id,
                                        hackathon_azure_key.azure_key.pem_url,
                                        host=hackathon_azure_key.azure_key.management_host)

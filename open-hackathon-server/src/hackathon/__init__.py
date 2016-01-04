@@ -41,6 +41,7 @@ from log import log
 from context import Context
 from database import db_session
 
+
 __all__ = [
     "app",
     "Context",
