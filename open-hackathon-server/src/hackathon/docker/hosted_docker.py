@@ -376,15 +376,26 @@ class HostedDockerFormation(DockerFormationBase, Component):
             self.scheduler.remove_job(self.__get_schedule_job_id(hackathon))
             return
 
-        self.log.debug("adding schedule job to ensure images for hackathon [%d]%s" % (hackathon.id, hackathon.name))
-        next_run_time = self.util.get_now() + timedelta(seconds=3)
-        context = Context(hackathon_id=hackathon.id)
-        self.scheduler.add_interval(feature="hackathon_template_manager",
-                                    method="pull_images_for_hackathon",
-                                    id=self.__get_schedule_job_id(hackathon),
-                                    context=context,
-                                    next_run_time=next_run_time,
-                                    minutes=60)
+        job_id = self.__get_schedule_job_id(hackathon)
+        job_exist = self.scheduler.has_job(job_id)
+        if hackathon.event_end_time < self.util.get_now():
+            if job_exist:
+                self.scheduler.remove_job(job_id)
+            return
+        else:
+            if job_exist:
+                self.log.debug("job %s existed" % job_id)
+            else:
+                self.log.debug(
+                    "adding schedule job to ensure images for hackathon [%d]%s" % (hackathon.id, hackathon.name))
+                next_run_time = self.util.get_now() + timedelta(seconds=3)
+                context = Context(hackathon_id=hackathon.id)
+                self.scheduler.add_interval(feature="hackathon_template_manager",
+                                            method="pull_images_for_hackathon",
+                                            id=job_id,
+                                            context=context,
+                                            next_run_time=next_run_time,
+                                            minutes=60)
 
     def __get_vm_url(self, docker_host):
         return 'http://%s:%d' % (docker_host.public_dns, int(docker_host.public_docker_api_port))

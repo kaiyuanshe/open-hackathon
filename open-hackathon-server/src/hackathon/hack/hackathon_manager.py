@@ -43,6 +43,7 @@ from hackathon.constants import HACKATHON_BASIC_INFO, ADMIN_ROLE_TYPE, HACK_STAT
     FILE_TYPE, HACK_TYPE, HACKATHON_STAT, DockerHostServerStatus
 from hackathon import RequiredFeature, Component, Context
 
+docker_host_manager = RequiredFeature("docker_host_manager")
 __all__ = ["HackathonManager"]
 
 util = RequiredFeature("util")
@@ -59,8 +60,8 @@ class HackathonManager(Component):
     user_manager = RequiredFeature("user_manager")
     register_manager = RequiredFeature("register_manager")
 
-    #basic xss prevention
-    cleaner = Cleaner(safe_attrs=lxml.html.defs.safe_attrs | set(['style'])) #preserve style
+    # basic xss prevention
+    cleaner = Cleaner(safe_attrs=lxml.html.defs.safe_attrs | set(['style']))  # preserve style
 
     def is_hackathon_name_existed(self, name):
         """Check whether hackathon with specific name exists or not
@@ -268,7 +269,7 @@ class HackathonManager(Component):
             update_items = self.__parse_update_items(args, hackathon)
             self.log.debug("update hackathon items :" + str(args.keys()))
 
-            #basic xss prevention
+            # basic xss prevention
             if 'description' in update_items and update_items['description']:
                 update_items['description'] = self.cleaner.clean_html(update_items['description'])
                 self.log.debug("hackathon description :" + update_items['description'])
@@ -500,8 +501,10 @@ class HackathonManager(Component):
             is_job_exists = self.scheduler.has_job(job_id)
             if hack.is_pre_allocate_enabled():
                 if is_job_exists:
-                    return
+                    self.log.debug("pre_allocate job already exists for hackathon %s" % str(hack.id))
+                    continue
 
+                self.log.debug("add pre_allocate job for hackathon %s" % str(hack.id))
                 next_run_time = self.util.get_now() + timedelta(seconds=hack.id * 10)
                 pre_allocate_interval = self.__get_pre_allocate_interval(hack)
                 self.scheduler.add_interval(feature="expr_manager",
@@ -512,8 +515,20 @@ class HackathonManager(Component):
                                             seconds=pre_allocate_interval
                                             )
             elif is_job_exists:
+                self.log.debug("remove job for hackathon %s since pre_allocate is disabled" % str(hack.id))
                 self.scheduler.remove_job(job_id)
         return True
+
+    def check_hackathon_online(self, hackathon):
+        alauda_enabled = is_alauda_enabled(hackathon)
+        can_online = True
+        if alauda_enabled == "0":
+            if self.util.is_local():
+                can_online = True
+            else:
+                can_online = docker_host_manager.check_subscription_id(hackathon.id)
+
+        return ok(can_online)
 
     def __get_hackathon_detail(self, hackathon, user=None):
         """Return hackathon info as well as its details including configs, stat, organizers, like if user logon"""
@@ -526,9 +541,9 @@ class HackathonManager(Component):
 
         if user:
             detail["user"] = self.user_manager.user_display_info(user)
+            detail["user"]["is_admin"] = self.admin_manager.is_hackathon_admin(hackathon.id, user.id)
 
             asset = self.db.find_all_objects_by(UserHackathonAsset, user_id=user.id, hackathon_id=hackathon.id)
-
             if asset:
                 detail["asset"] = [o.dic() for o in asset]
 
@@ -576,10 +591,10 @@ class HackathonManager(Component):
             type=context.get("type", HACK_TYPE.HACKATHON)
         )
 
-        #basic xss prevention
-        if new_hack.description: #case None type
+        # basic xss prevention
+        if new_hack.description:  # case None type
             new_hack.description = self.cleaner.clean_html(new_hack.description)
-        
+
         # insert into table hackathon
         self.db.add_object(new_hack)
 
@@ -736,6 +751,9 @@ def is_auto_approve(hackathon):
 
 def is_pre_allocate_enabled(hackathon):
     if hackathon.status != HACK_STATUS.ONLINE:
+        return False
+
+    if hackathon.event_end_time < util.get_now():
         return False
 
     hack_manager = RequiredFeature("hackathon_manager")

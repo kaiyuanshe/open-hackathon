@@ -44,7 +44,7 @@ from flask import Response, render_template, request, g, redirect, make_response
 from client import app, Context
 from client.constants import LOGIN_PROVIDER
 from client.user.login_manager import login_manager_helper
-from client.functions import get_config, safe_get_config, get_now
+from client.functions import get_config, safe_get_config, get_now, is_local
 from client.log import log
 
 session_lifetime_minutes = 60
@@ -429,9 +429,11 @@ def superadmin():
 def landing():
     return render("/landing.html")
 
+
 @app.route("/events")
 def events():
     return render("/events.html")
+
 
 from route_manage import *
 from route_template import *

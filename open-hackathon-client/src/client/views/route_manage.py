@@ -30,26 +30,18 @@ sys.path.append("..")
 from client import app
 from . import render
 from flask_login import login_required
+from client.functions import is_local
 
-
-@app.route("/manage/create")
+@app.route("/manage/create_event")
 @login_required
-def create_hackathon():
-    return render("/manage/createhackathon.html", hackathon_name="")
+def create_event():
+    return render("/create_event.html", islocal=is_local())
 
 
 @app.route("/manage")
 @login_required
 def myhackathon():
     return render("/manage/myhackathon.html", hackathon_name="")
-
-
-# get registered user list of a hackathon
-
-@app.route("/manage/<hackathon_name>")
-@login_required
-def hackathon_manage_detail(hackathon_name):
-    return render("/manage/detail.html", hackathon_name=hackathon_name)
 
 
 @app.route("/manage/<hackathon_name>/user")
