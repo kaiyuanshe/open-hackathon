@@ -129,7 +129,7 @@ class AzureFormation(Component):
 
         try:
             if not adapter.cloud_service_exists(name):
-                if not adapter.create_hosted_service(
+                if not adapter.create_cloud_service(
                         name=name,
                         label=label,
                         location=location):

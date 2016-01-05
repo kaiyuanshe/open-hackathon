@@ -80,10 +80,10 @@ class CloudServiceAdapterTest(unittest.TestCase):
             test_conf.meanless_name))
 
     @unittest.skip("heavy test require real connection to azure cloud")
-    def test_create_hosted_service_real(self):
+    def test_create_cloud_service_real(self):
         print "After run this test, don't forget to delete resources on azure cloud"
 
-        self.assertTrue(self.service.create_hosted_service(
+        self.assertTrue(self.service.create_cloud_service(
             test_conf.azure_cloud_service_to_create["name"],
             test_conf.azure_cloud_service_to_create["label"],
             test_conf.azure_cloud_service_to_create["location"]))
@@ -91,7 +91,7 @@ class CloudServiceAdapterTest(unittest.TestCase):
         self.assertTrue(self.service.cloud_service_exists(
             test_conf.azure_cloud_service_to_create["name"]))
 
-        self.assertFalse(self.service.create_hosted_service(
+        self.assertFalse(self.service.create_cloud_service(
             test_conf.azure_cloud_service_to_create["name"],
             test_conf.azure_cloud_service_to_create["label"],
             test_conf.azure_cloud_service_to_create["location"]))
@@ -99,18 +99,18 @@ class CloudServiceAdapterTest(unittest.TestCase):
     def test_creat_hosted_service(self):
         mock_create = Mock()
         mock_wait = Mock()
-        self.service.service.create_hosted_service = mock_create
+        self.service.service.create_cloud_service = mock_create
         self.service.service.wait_for_operation_status = mock_wait
 
         mock_create.return_value = Context(request_id=test_conf.meanless_id)
         mock_wait.return_value = Context(status=ASYNC_OP_RESULT.SUCCEEDED)
-        self.assertTrue(self.service.create_hosted_service(
+        self.assertTrue(self.service.create_cloud_service(
             test_conf.meanless_name,
             test_conf.meanless_name,
             test_conf.meanless_name))
 
         mock_create.side_effect = AzureHttpError(233, 233)
-        self.assertFalse(self.service.create_hosted_service(
+        self.assertFalse(self.service.create_cloud_service(
             test_conf.meanless_name,
             test_conf.meanless_name,
             test_conf.meanless_name))
@@ -120,7 +120,7 @@ class CloudServiceAdapterTest(unittest.TestCase):
         mock_create = Mock()
         mock_db = Mock()
         self.service.cloud_service_exists = mock_exist
-        self.service.create_hosted_service = mock_create
+        self.service.create_cloud_service = mock_create
         self.service.db = mock_db
 
         mock_exist.return_value = False

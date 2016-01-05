@@ -28,9 +28,6 @@ __author__ = "rapidhere"
 from azure.servicemanagement.servicemanagementservice import ServiceManagementService
 from azure.common import AzureHttpError, AzureMissingResourceHttpError
 
-from hackathon.database import AzureCloudService
-from hackathon.constants import ACSStatus
-
 from service_adapter import ServiceAdapter
 from constants import ASYNC_OP_RESULT
 
@@ -67,7 +64,7 @@ class CloudServiceAdapter(ServiceAdapter):
 
         return props is not None
 
-    def create_hosted_service(self, name, label, location, **extra):
+    def create_cloud_service(self, name, label, location, **extra):
         """the sync version of ServiceManagementService.create_hosted_service
 
         for full list of arguments, please refr to ServiceManagementService.create_hosted_service
@@ -101,49 +98,6 @@ class CloudServiceAdapter(ServiceAdapter):
         else:
             self.log.debug("service cloud %s, creation failed" % name)
             return False
-
-    def create_cloud_service(self, azure_key_id, name, label, location, **extra):
-        """Link to azure and create the CloudService if the CloudService hasn't been created.
-        Then store the CloudService info into db for future usage, so the azure_key_id is needed to perform
-        store commit.
-
-        NOTE: this function is designed to used with database, but the CloudServiceAdapter can
-        work without database. If you don't want to store the info into database automatically,
-        you should use create_hosted_service
-
-        name, label and location are required variable by Azure
-        you can pass extra variables if there is more info need to pass
-
-        for full list of variables, please refer to ServiceManagementService.create_hosted_service
-
-        :rtype: boolean
-        :return: True on success, False on failed, the error message will be logged
-        """
-        if not self.cloud_service_exists(name):
-            if not self.create_hosted_service(
-                    service_name=name,
-                    label=label,
-                    location=location,
-                    **extra):
-                return False
-
-            # first delete the possible old CloudService
-            self.db.delete_all_objects_by(AzureCloudService, name=name)
-
-        # update the table
-        if self.db.count_by(AzureCloudService, name=name) == 0:
-            self.db.add_object_kwargs(
-                AzureCloudService,
-                name=name,
-                label=label,
-                location=location,
-                status=ACSStatus.CREATED,
-                azure_key_id=azure_key_id)
-
-        # commit changes
-        self.db.commit()
-
-        return True
 
     def update_cloud_service(self):
         # TODO
