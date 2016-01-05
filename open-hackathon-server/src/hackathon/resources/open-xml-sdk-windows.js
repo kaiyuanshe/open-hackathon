@@ -1,9 +1,9 @@
 {
-    "expr_name": "test template 1",
+    "name": "test-template-1",
     "description" : "a template consists of a list of virtual environments, and a virtual environment is a virtual machine with its storage account, container, cloud service and deployment",
     "virtual_environments": [
         {
-            "provider": "azure",
+            "provider": "1",
             "storage_account" : {
                 "service_name" : "portalvhdsnc364fhj0dlpp",
                 "description" : "storage-description",

@@ -58,6 +58,7 @@ class ExprManager(Component):
     hosted_docker = RequiredFeature("hosted_docker")
     alauda_docker = RequiredFeature("alauda_docker")
     team_manager = RequiredFeature("team_manager")
+    azure_formation = RequiredFeature("azure_formation")
 
     def start_expr(self, user_id, template_name, hackathon_name=None):
         """
@@ -298,8 +299,11 @@ class ExprManager(Component):
             expr.status = EStatus.STARTING
             self.db.commit()
             try:
-                af = AzureFormation(self.hosted_docker.load_azure_key_id(expr.id))
-                af.create(expr.id)
+                # af = AzureFormation(self.hosted_docker.load_azure_key_id(expr.id))
+                # af.create(expr.id)
+                template_content = self.template_library.load_template(template)
+                azure_key = self.hosted_docker.load_azure_key_id(expr.id)
+                self.azure_formation.setup(azure_key, template_content)
             except Exception as e:
                 self.log.error(e)
                 return internal_server_error('Failed starting azure vm')

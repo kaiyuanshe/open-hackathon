@@ -72,6 +72,8 @@ class TemplateContent:
         def convert_to_dict(unit):
             if unit.provider == VE_PROVIDER.DOCKER:
                 return unit.dic
+            elif unit.provider == VE_PROVIDER.AZURE:
+                return unit.virtual_environment
             return unit
 
         dic[TEMPLATE.VIRTUAL_ENVIRONMENTS] = map(convert_to_dict, self.units)

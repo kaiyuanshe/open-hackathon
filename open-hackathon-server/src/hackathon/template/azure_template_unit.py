@@ -51,8 +51,17 @@ class AzureTemplateUnit(TemplateUnit):
     MEDIA_BASE = 'https://%s.%s/%s/%s'
 
     def __init__(self, virtual_environment):
-        super(self, AzureTemplateUnit).__init__(VE_PROVIDER.AZURE)
+        super(AzureTemplateUnit, self).__init__(VE_PROVIDER.AZURE)
         self.virtual_environment = virtual_environment
+
+    def get_name(self):
+        return "TODO: name"
+
+    def get_type(self):
+        return "TODO: type"
+
+    def get_description(self):
+        return "TODO: description"
 
     def get_image_type(self):
         return self.virtual_environment[AZURE_UNIT.IMAGE][AZURE_UNIT.IMAGE_TYPE]

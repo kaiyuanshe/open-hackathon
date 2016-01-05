@@ -27,6 +27,8 @@ __author__ = "rapidhere"
 
 
 from hackathon import Component, Context
+from hackathon.database import AzureCloudService
+from hackathon.constants import ACSStatus
 
 from cloud_service_adapter import CloudServiceAdapter
 
@@ -46,19 +48,34 @@ class AzureFormation(Component):
     def __init__(self):
         pass
 
-    def setup(self, azure_key, unit):
+    def setup(self, azure_key, template):
         """setup the resources needed by the template unit
 
         this will create the missed VirtualMachine, CloudService and Storages
         this function is not blocked, it will run in the background and return immediatly
 
-        :param unit: a AzureTemplateUnit, contains the data need by azure formation
+        :param template: the azure template, contains the data need by azure formation
         :param azure_key: the azure_key object, use to access azure
         """
-        ctx = Context(
-            azure_template_unit=unit,
-            azure_key=azure_key)
-        self.scheduler.add_once("azure_formation", "__schedule_setup", context=ctx, seconds=3)
+        # the setup of each unit must be SERLIALLY EXECUTED
+        # to avoid the creation of same resource in same time
+        # TODO: we still have't void the parrallel excution of the setup of same template
+        job_ctxs = []
+        ctx = Context(job_ctxs=job_ctxs, current_job_index=0)
+
+        for unit in template.units:
+            job_ctxs.append(Context(
+                cloud_service_name=unit.get_cloud_service_name(),
+                cloud_service_label=unit.get_cloud_service_label(),
+                cloud_service_host=unit.get_cloud_service_location(),
+
+                azure_key_id=azure_key.id,
+                subscription_id=azure_key.subscription_id,
+                pem_url=azure_key.pem_url,
+                management_host=azure_key.management_host))
+
+        # execute from first job context
+        self.scheduler.add_once("azure_formation", "__schedule_setup", context=ctx, seconds=0)
 
     def stop_vm(self):
         """stop the virtual machine
@@ -72,34 +89,90 @@ class AzureFormation(Component):
 
     # private functions
     def __schedule_setup(self, ctx):
-        self.log.debug("azure formation '%r' setup progress begin" % ctx)
-        unit = ctx.azure_template_unit
-        azure_key = ctx.azure_key
+        current_job_index = ctx.current_job_index
+        job_ctxs = ctx.job_ctxs
 
-        self.__setup_cloud_service(azure_key, unit)
-        self.log.debug("azure formation '%r': cloud service setup done" % ctx)
+        if current_job_index >= len(job_ctxs):
+            self.log.debug("azure virtual environment setup finish")
+            return True
 
-        self.__setup_storage(azure_key, unit)
-        self.log.debug("azure formation '%r': storage setup done" % ctx)
+        # excute current setup from setup cloud service
+        # whole stage:
+        #  __setup_cloud_service -> __setup_storage -> __setup_virtual_machine ->(index + 1) __schedule_setup
+        # on whatever stage when error occurs, will turn into __on_setup_failed
+        self.log.debug(
+            "azure virtual environment %d: '%r' setup progress begin" %
+            (current_job_index, job_ctxs[current_job_index]))
+        self.scheduler.add_once("azure_formation", "__setup_cloud_service", context=ctx, seconds=0)
 
-        self.__setup_virtual_machine(azure_key, unit)
-        self.log.debug("azure formation '%r' : virtual machine setup done" % ctx)
+    def __on_setup_failed(self, sctx):
+        # TODO: rollback
+        pass
 
-    def __setup_cloud_service(self, azure_key, unit):
-        name = unit.get_cloud_service_name()
-        label = unit.get_cloud_service_label()
-        location = unit.get_cloud_service_location()
+        # after rollback done, step into next unit
+        sctx.current_job_index += 1
+        self.scheduler.add_once("azure_formation", "__schedule_setup", context=sctx, seconds=0)
+
+    def __setup_cloud_service(self, sctx):
+        # get context from super context
+        ctx = sctx.job_ctxs[sctx.current_job_index]
 
         adapter = CloudServiceAdapter(
-            subscription_id=azure_key.subscription_id,
-            pem_url=azure_key.pem_url,
-            host=azure_key.management_host)
+            subscription_id=ctx.subscription_id,
+            pem_url=ctx.pem_url,
+            host=ctx.management_host)
 
-        if not adapter.create_cloud_service(azure_key.id, name, label, location):
-            pass  # TODO: handle failing
+        name = ctx.cloud_service_name
+        label = ctx.cloud_service_label
+        location = ctx.cloud_service_host
+        azure_key_id = ctx.azure_key_id
 
-    def __setup_storage(self, azure_key, unit):
-        pass
+        if not adapter.cloud_service_exists(name):
+            if not adapter.create_hosted_service(
+                    service_name=name,
+                    label=label,
+                    location=location):
+                self.log.error("azure virtual environment %d create remote cloud service failed")
+                self.__on_setup_failed(sctx)
+                return
 
-    def __setup_virtual_machine(self, azure_key, unit):
-        pass
+            # first delete the possible old CloudService
+            # TODO: is this necessary?
+            self.db.delete_all_objects_by(AzureCloudService, name=name)
+
+        # update the table
+        if self.db.count_by(AzureCloudService, name=name) == 0:
+            self.db.add_object_kwargs(
+                AzureCloudService,
+                name=name,
+                label=label,
+                location=location,
+                status=ACSStatus.CREATED,
+                azure_key_id=azure_key_id)
+
+        # commit changes
+        self.db.commit()
+        self.log.debug("azure virtual environment %d cloud service setup done" % sctx.current_job_index)
+
+        # next step: setup storage
+        self.scheduler.add_once("azure_formation", "__setup_storage", context=sctx, seconds=0)
+        return
+
+    def __setup_storage(self, sctx):
+        # get context from super context
+        # ctx = sctx.job_ctxs[sctx.current_job_index]
+
+        self.log.debug("azure virtual environment %d storage setup done" % sctx.current_job_index)
+
+        # next step: setup virtual machine
+        self.scheduler.add_once("azure_formation", "__setup_virtual_machine", context=sctx, seconds=0)
+
+    def __setup_virtual_machine(self, sctx):
+        # get context from super context
+        # ctx = sctx.job_ctxs[sctx.current_job_index]
+
+        self.log.debug("azure virtual environment %d vm setup done" % sctx.current_job_index)
+
+        # step to config next unit
+        sctx.current_job_index += 1
+        self.scheduler.add_once("azure_formation", "__schedule_setup", context=sctx, seconds=0)
