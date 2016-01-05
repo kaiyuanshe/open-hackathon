@@ -424,7 +424,7 @@
         });
         $('#links').on('click', 'a', function (e) {
             var name = $(this).data('name');
-            window.location.href = 'manage/' + hackathonName + '/' + name;
+            window.location.href = '/manage/' + hackathonName + '/' + name;
         })
     }
 
