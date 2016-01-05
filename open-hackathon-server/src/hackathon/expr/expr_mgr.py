@@ -41,7 +41,7 @@ from hackathon import Component, RequiredFeature, Context
 from hackathon.constants import EStatus, VERemoteProvider, VE_PROVIDER, PortBindingType, VEStatus, ReservedUser, \
     AVMStatus, CLOUD_ECLIPSE
 from hackathon.database import VirtualEnvironment, DockerHostServer, Experiment, User, HackathonTemplateRel, \
-    DockerContainer
+    DockerContainer, AzureKey
 from hackathon.azureformation.azureFormation import AzureFormation
 from hackathon.hackathon_response import internal_server_error, not_found, ok
 
@@ -302,7 +302,8 @@ class ExprManager(Component):
                 # af = AzureFormation(self.hosted_docker.load_azure_key_id(expr.id))
                 # af.create(expr.id)
                 template_content = self.template_library.load_template(template)
-                azure_key = self.hosted_docker.load_azure_key_id(expr.id)
+                azure_key_id = self.hosted_docker.load_azure_key_id(expr.id)
+                azure_key = self.db.get_object(AzureKey, azure_key_id)
                 self.azure_formation.setup(azure_key, template_content)
             except Exception as e:
                 self.log.error(e)

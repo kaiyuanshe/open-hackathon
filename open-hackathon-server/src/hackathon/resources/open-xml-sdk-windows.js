@@ -13,7 +13,7 @@
             },
             "container" : "vhds",
             "cloud_service" : {
-                "service_name" : "ot-service-test",
+                "service_name" : "rapid-test",
                 "label" : "cloud-service-label",
                 "location" : "China East"
             },

@@ -40,7 +40,7 @@ meanless_id = "-233"
 meanless_name = "random-meanless-name-" + str(random.random())
 
 # used for real test cases
-azure_cloud_service_name_should_exist = "ampcamp00"
+azure_cloud_service_name_should_exist = "ot-service-test"
 azure_cloud_service_to_create = {
     "name": "rapid-test",
     "label": "rapid-test",

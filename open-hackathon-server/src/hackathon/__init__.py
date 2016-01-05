@@ -155,11 +155,15 @@ def init_components():
     from hackathon.remote.guacamole import GuacamoleInfo
     from hackathon.expr.expr_mgr import ExprManager
     from hackathon.cache.cache_mgr import CacheManagerExt
+    from hackathon.hazure.azure_formation import AzureFormation
 
     # dependencies MUST be provided in advance
     factory.provide("util", Utility)
     factory.provide("log", log)
     factory.provide("db", SQLAlchemyAdapter, db_session)
+
+    # hazure
+    factory.provide("azure_formation", AzureFormation)
 
     # cache
     factory.provide("cache", CacheManagerExt)
