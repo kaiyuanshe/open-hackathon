@@ -35,7 +35,7 @@ subscription_id = "bc41bdcd-7387-483f-a929-488fa27616a0"
 pem_url = "/home/rapid/tmp/azure-test.pem"
 management_host = "management.core.chinacloudapi.cn"
 
-# general date for all test cases
+# general data for all test cases
 meanless_id = "-233"
 meanless_name = "random-meanless-name-" + str(random.random())
 
