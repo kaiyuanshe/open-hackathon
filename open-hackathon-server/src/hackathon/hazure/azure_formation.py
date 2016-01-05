@@ -27,10 +27,11 @@ __author__ = "rapidhere"
 
 
 from hackathon import Component, Context
-from hackathon.database import AzureCloudService
-from hackathon.constants import ACSStatus
+from hackathon.database import AzureCloudService, AzureStorageAccount
+from hackathon.constants import ACSStatus, ASAStatus
 
 from cloud_service_adapter import CloudServiceAdapter
+from storage_account_adapter import StorageAcountAdapter
 
 
 class AzureFormation(Component):
@@ -68,6 +69,11 @@ class AzureFormation(Component):
                 cloud_service_name=unit.get_cloud_service_name(),
                 cloud_service_label=unit.get_cloud_service_label(),
                 cloud_service_host=unit.get_cloud_service_location(),
+
+                storage_account_name=unit.get_storage_account_name(),
+                storage_account_description=unit.get_storage_account_description(),
+                storage_account_label=unit.get_storage_account_label(),
+                storage_account_location=unit.get_storage_account_location(),
 
                 azure_key_id=azure_key.id,
                 subscription_id=azure_key.subscription_id,
@@ -141,8 +147,10 @@ class AzureFormation(Component):
                 # first delete the possible old CloudService
                 # TODO: is this necessary?
                 self.db.delete_all_objects_by(AzureCloudService, name=name)
-        except Exception:
-            self.log.error("azure virtual environment %d create remote cloud service failed" % sctx.current_job_index)
+        except Exception as e:
+            self.log.error(
+                "azure virtual environment %d create remote cloud service failed: %r"
+                % (sctx.current_job_index, str(e)))
             self.__on_setup_failed(sctx)
             return
 
@@ -166,8 +174,47 @@ class AzureFormation(Component):
 
     def setup_storage(self, sctx):
         # get context from super context
-        # ctx = sctx.job_ctxs[sctx.current_job_index]
+        ctx = sctx.job_ctxs[sctx.current_job_index]
 
+        adapter = StorageAcountAdapter(
+            ctx.subscription_id,
+            ctx.pem_url,
+            host=ctx.management_host)
+
+        name = ctx.storage_account_name
+        label = ctx.storage_account_label
+        location = ctx.storage_account_location
+        description = ctx.storage_account_description
+        azure_key_id = ctx.azure_key_id
+
+        try:
+            if not adapter.storage_account_exists(name):
+                if not adapter.create_storage_account(name, description, label, location):
+                    self.log.error("azure virtual environment %d create storage account failed via creation" %
+                                   sctx.current_job_index)
+                    self.__on_setup_failed(sctx)
+                    return
+
+                # delete possible old accounts
+                self.db.delete_all_objects_by(AzureStorageAccount, name=name)
+        except Exception as e:
+            self.log.error(
+                "azure virtual environment %d create storage account failed: %r"
+                % (sctx.current_job_index, str(e)))
+            self.__on_setup_failed(sctx)
+            return
+
+        if self.count_by(AzureStorageAccount, name=name) != 0:
+            self.db.add_object_kwargs(
+                AzureStorageAccount,
+                name=name,
+                description=description,
+                label=label,
+                location=location,
+                status=ASAStatus.ONLINE,
+                azure_key_id=azure_key_id)
+
+        self.db.commit()
         self.log.debug("azure virtual environment %d storage setup done" % sctx.current_job_index)
 
         # next step: setup virtual machine

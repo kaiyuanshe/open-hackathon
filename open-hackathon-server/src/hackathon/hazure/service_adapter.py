@@ -41,7 +41,3 @@ class ServiceAdapter(Component):
 
     def __getattr__(self, name):
         return getattr(self.service, name)
-
-    def azure_log(self):
-        # TODO
-        pass
