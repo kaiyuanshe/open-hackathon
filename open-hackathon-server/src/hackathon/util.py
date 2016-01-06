@@ -549,7 +549,7 @@ class ChinaTelecomSms(Sms):
         if not self.available:
             log.error(self.error_message)
             return False
-        elif not self.access_token_expiration_time or self.access_token_expiration_time > get_now():
+        elif not self.access_token_expiration_time or self.access_token_expiration_time < get_now():
             if not self.__get_access_token():
                 return False
 
