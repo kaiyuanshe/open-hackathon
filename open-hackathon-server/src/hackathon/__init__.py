@@ -210,6 +210,8 @@ def init_hackathon_storage():
         from hackathon.hazure import BlobServiceAdapter
         factory.provide("azure_blob_service", BlobServiceAdapter)
         factory.provide("storage", AzureStorage)
+        factory.provide("cryptor", get_class("hackathon.storage.cryptor.Cryptor"))
+
     else:
         factory.provide("storage", LocalStorage)
 

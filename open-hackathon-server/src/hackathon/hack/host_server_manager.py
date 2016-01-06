@@ -25,6 +25,7 @@ THE SOFTWARE.
 __author__ = 'ZGQ'
 
 import sys
+from os.path import isfile
 import requests
 from uuid import uuid1
 from time import strftime, sleep
@@ -450,7 +451,10 @@ class DockerHostManager(Component):
         if hackathon_azure_key is None:
             self.log.error('Found no azure key with Hackathon:%d' % hackathon_id)
             return None
-        #todo
+
+        if not isfile(hackathon_azure_key.azure_key.pem_url):
+            cryptor = RequiredFeature("cryptor")
+            cryptor.recover_local_file(hackathon_azure_key.azure_key.azure_pem_url, hackathon_azure_key.azure_key.pem_url)
         sms = ServiceManagementService(hackathon_azure_key.azure_key.subscription_id,
                                        hackathon_azure_key.azure_key.pem_url,
                                        host=hackathon_azure_key.azure_key.management_host)

@@ -65,7 +65,7 @@ class Service(ServiceManagementService, Component):
         self.azure_key_id = azure_key_id
         azure_key = self.db.get_object(AzureKey, self.azure_key_id)
 
-        if isfile(azure_key.pem_url):
+        if not isfile(azure_key.pem_url):
             cryptor = RequiredFeature("cryptor")
             cryptor.recover_local_file(azure_key.azure_pem_url, azure_key.pem_url)
 

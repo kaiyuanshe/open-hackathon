@@ -62,7 +62,7 @@ class Cryptor(Component):
                 padding_length = (bs - len(chunk) % bs) or bs
                 chunk += padding_length * chr(padding_length)
                 finished = True
-            out_file.write(cipher.__encrypt(chunk))
+            out_file.write(cipher.encrypt(chunk))
 
     def decrypt(self, in_file_name, out_file_name, key_length=32):
         in_file = open(in_file_name, 'rb')
