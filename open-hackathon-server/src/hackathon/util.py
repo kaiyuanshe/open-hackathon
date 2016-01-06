@@ -29,6 +29,7 @@ import json
 import os
 import hashlib
 import base64
+import urllib
 import urllib2
 from datetime import datetime
 from mailthon import email
@@ -50,7 +51,10 @@ __all__ = [
     "load_template",
     "call",
     "get_now",
-    "Utility"
+    "Utility",
+    "Email",
+    "VoiceVerify",
+    "VoiceVerify_RongLian"
 ]
 
 
@@ -225,14 +229,12 @@ class Email(object):
 
     Example for config.py:
     "email": {
-        "sender": "James james2015@gmail.com",
         "host": "smtp.gmail.com",
         "port": 587,
         "username": "james2015@gmail.com",
         "password": "88888888"
     }
     """
-    sender = safe_get_config("email.sender", "")
     host = safe_get_config("email.host", "")
     port = safe_get_config("email.port", 587)
     username = safe_get_config("email.username", "")
@@ -243,14 +245,12 @@ class Email(object):
 
     def __init__(self):
         """check email-service parameters from config.py"""
-        if self.sender == "":
-            self.error_message = "email-sender is empty"
-        elif self.host == "":
-            self.error_message = "email-host is empty"
+        if self.host == "":
+            self.error_message = "Email Error: host is empty"
         elif self.username == "":
-            self.error_message = "email-username is empty"
+            self.error_message = "Email Error: username is empty"
         elif self.password == "":
-            self.error_message = "email-password is empty"
+            self.error_message = "Email Error: password is empty"
         else:
             self.available = True
             # initial postman
@@ -263,18 +263,22 @@ class Email(object):
                 ]
             )
 
-    def send_emails(self, receivers, subject, content, cc=[], bcc=[], attachments=[]):
+    def send_emails(self, sender, receivers, subject, content, cc=[], bcc=[], attachments=[]):
         """Send emails
         notes: No all email-service providers support.
         if using Gmail, enable "Access for less secure apps" for the sender's account,
 
         Examples:
-            xxx.send_emails(['receiver1@gmail.com', 'receiver2@gmail.com'],
+            xxx.send_emails("James jame2015@gmail.com",
+                            ['receiver1@gmail.com', 'receiver2@gmail.com'],
                             'Subject: Hello',
                             '<b>Hi! Here is the content of email</b>',
                             ['cc1@gmail.com', 'cc2@gmail.com'],
                             ['bcc1@gmail.com', 'bcc2@gmail.com'],
                             ['C:/apache-maven-3.3.3-bin.zip'])
+
+        :type sender: str|unicode
+        :param sender: Example-"James jame2015@gmail.com"
 
         :type receivers: list
         :param receivers: Example-['a@gmail.com', 'b@gmail.com']
@@ -298,17 +302,15 @@ class Email(object):
         :return True if send emails successfully. False if fails to send.
         """
         if not self.available:
-            log.error("Send emails fail: " + self.error_message)
+            log.error(self.error_message)
             return False
 
-        e = email(
-            sender=self.sender,
-            receivers=receivers,
-            cc=cc,
-            bcc=bcc,
-            subject=subject,
-            content=content
-        )
+        e = email(sender=sender,
+                  receivers=receivers,
+                  cc=cc,
+                  bcc=bcc,
+                  subject=subject,
+                  content=content)
 
         try:
             response = self.postman.send(e)
@@ -345,9 +347,9 @@ class VoiceVerify(object):
         initial the voice_verify provider and check whether the service is enabled.
         """
         if self.provider_name == "" or safe_get_config("voice_verify." + self.provider_name, "") == "":
-            self.error_message = "VoiceVerify provider is not found"
+            self.error_message = "VoiceVerify Error: provider is not found"
         elif not self.enabled:
-            self.error_message = "VoiceVerify service is not enabled."
+            self.error_message = "VoiceVerify Error: service is not enabled."
         else:
             self.available = True
             if self.provider_name == VOICEVERIFY_PROVIDER.RONGLIAN:
@@ -376,7 +378,7 @@ class VoiceVerify(object):
             if self.provider_name == VOICEVERIFY_PROVIDER.RONGLIAN:
                 return self.provider.send_voice_verify_by_RongLian(receiver, content)
             else:
-                log.error("VoiceVerify provider is not found")
+                log.error("VoiceVerify Error: provider is not found")
                 return False
         except Exception as e:
             log.error(e)
@@ -508,3 +510,9 @@ class VoiceVerify_RongLian(object):
         req.add_header("Authorization", auth)
 
         return req
+
+class SMS_ChinaTelecom(object):
+    """ Provider SMS service through China Telecom
+    """
+    def __init__(self):
+
