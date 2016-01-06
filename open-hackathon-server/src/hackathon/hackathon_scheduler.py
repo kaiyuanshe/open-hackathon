@@ -88,9 +88,9 @@ def scheduler_executor(feature, method, context):
         mtd(context)
 
 
-class HackathonScheduler():
+class HackathonScheduler(object):
     """An helper class for apscheduler"""
-    jobstore = None
+    jobstore = "ohp"
 
     def get_scheduler(self):
         """Return the apscheduler instance in case you have to call it directly
@@ -145,6 +145,7 @@ class HackathonScheduler():
                                        id=id,
                                        max_instances=1,
                                        replace_existing=replace_existing,
+                                       jobstore=self.jobstore,
                                        args=[feature, method, context])
 
     def add_interval(self, feature, method, context=None, id=None, replace_existing=True, next_run_time=undefined,
@@ -188,6 +189,7 @@ class HackathonScheduler():
                                        max_instances=1,
                                        replace_existing=replace_existing,
                                        next_run_time=next_run_time,
+                                       jobstore=self.jobstore,
                                        args=[feature, method, context],
                                        **interval)
 
@@ -229,8 +231,9 @@ class HackathonScheduler():
             # add MySQL job store
             if safe_get_config("scheduler.job_store", "memory") == "mysql":
                 log.debug("add aps_cheduler job store based on mysql")
-                self.jobstore = 'sqlalchemy'
-                self.__apscheduler.add_jobstore(self.jobstore, url=get_config("scheduler.job_store_url"))
+                self.__apscheduler.add_jobstore('sqlalchemy',
+                                                alias=self.jobstore,
+                                                url=get_config("scheduler.job_store_url"))
 
             # add event listener
             self.__apscheduler.add_listener(scheduler_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)

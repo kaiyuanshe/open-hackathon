@@ -435,12 +435,6 @@ def events():
     return render("/events.html")
 
 
-@app.route("/manage/create_event")
-@login_required
-def create_event():
-    return render("/create_event.html", islocal=is_local())
-
-
 from route_manage import *
 from route_template import *
 from route_user import *

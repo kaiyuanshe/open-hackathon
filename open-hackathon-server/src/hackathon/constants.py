@@ -534,8 +534,8 @@ class SMS_PROVIDER:
     CHINA_TELECOM = "china_telecom"
 
 
-class SMS_CHINATELECOM_TEMPLATE_ID:
-    """ID of ChinaTelecom SMS-template"""
+class SMS_CHINATELECOM_TEMPLATE:
+    """SMS-template of ChinaTelecom"""
     DEFAULT = ""
 
 
@@ -544,3 +544,8 @@ class SMS_CHINATELECOM_STATUSCODE:
     SUCCESS = 0
     INVALID_ACCESS_TOKEN = 110
     ACCESS_TOKEN_EXPIRED = 111
+
+
+class CHINATELECOM_ACCESS_TOKEN_STATUSCODE:
+    """Status Code of requesting ChinaTelecom access_token"""
+    SUCCESS = "0"

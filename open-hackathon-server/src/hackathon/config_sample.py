@@ -109,7 +109,9 @@ Config = {
         "provider": "",
         "china_telecom": {
             "url": "http://api.189.cn/v2/emp/templateSms/sendSms",
-            "app_id": ""
+            "app_id": "",
+            "app_secret": "",
+            "url_access_token": "https://oauth.api.189.cn/emp/oauth2/v3/access_token"
         }
     }
 }

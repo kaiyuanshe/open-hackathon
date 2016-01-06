@@ -31,13 +31,16 @@ import hashlib
 import base64
 import urllib
 import urllib2
-from datetime import datetime
+import abc
+from datetime import datetime, timedelta
 from mailthon import email
 from mailthon.postman import Postman
 from mailthon.middleware import TLS, Auth
 
+from hackathon_factory import RequiredFeature
 from hackathon.log import log
-from hackathon.constants import EMAIL_SMTP_STATUSCODE, VOICEVERIFY_RONGLIAN_STATUSCODE, VOICEVERIFY_PROVIDER
+from hackathon.constants import EMAIL_SMTP_STATUSCODE, VOICEVERIFY_RONGLIAN_STATUSCODE, SMS_CHINATELECOM_TEMPLATE, \
+        SMS_CHINATELECOM_STATUSCODE, CHINATELECOM_ACCESS_TOKEN_STATUSCODE
 
 try:
     from config import Config
@@ -53,8 +56,10 @@ __all__ = [
     "get_now",
     "Utility",
     "Email",
-    "VoiceVerify",
-    "VoiceVerify_RongLian"
+    "DisabledVoiceVerify",
+    "RonglianVoiceVerify",
+    "DisabledSms",
+    "ChinaTelecomSms"
 ]
 
 
@@ -223,6 +228,18 @@ class Utility(object):
     def is_local(self):
         return safe_get_config("environment", "local") == "local"
 
+    def send_emails(self, receivers, subject, content, cc=[], bcc=[], attachments=[]):
+        email_service = RequiredFeature("email")
+        return email_service.send_emails(receivers, subject, content, cc, bcc, attachments)
+
+    def send_voice_verify(self, receiver, content):
+        voice_verify_service = RequiredFeature("voice_verify")
+        return voice_verify_service.send_voice_verify(receiver, content)
+
+    def send_sms(self, receiver, template_id, content):
+        sms_service = RequiredFeature("sms")
+        return sms_service.send_sms(receiver, template_id, content)
+
 
 class Email(object):
     """ Provide Emails Sending Service
@@ -235,12 +252,13 @@ class Email(object):
         "password": "88888888"
     }
     """
+    available = False
+
     host = safe_get_config("email.host", "")
     port = safe_get_config("email.port", 587)
     username = safe_get_config("email.username", "")
     password = safe_get_config("email.password", "")
     postman = None
-    available = False
     error_message = ""
 
     def __init__(self):
@@ -278,25 +296,25 @@ class Email(object):
                             ['C:/apache-maven-3.3.3-bin.zip'])
 
         :type sender: str|unicode
-        :param sender: Example-"James jame2015@gmail.com"
+        :param sender: the nickname and email address of sender. Example:"James jame2015@gmail.com"
 
         :type receivers: list
-        :param receivers: Example-['a@gmail.com', 'b@gmail.com']
+        :param receivers: receivers' emails address. Example:['a@gmail.com', 'b@gmail.com']
 
         :type subject: str|unicode
-        :param subject: subject of email's header. Example-'Hello'
+        :param subject: subject of email's header. Example:'Hello'
 
         :type content: str|unicode
-        :param content: content of the email. Example-'<b>Hi!</b>'
+        :param content: content of the email. Example:'<b>Hi!</b>'
 
         :type cc: list
-        :param cc: CarbonCopy. Example-['a@gmail.com', 'b@gmail.com']
+        :param cc: CarbonCopy. Example:['a@gmail.com', 'b@gmail.com']
 
         :type bcc: list
-        :param bcc: BlindCarbonCopy. Example-['a@gmail.com', 'b@gmail.com']
+        :param bcc: BlindCarbonCopy. Example:['a@gmail.com', 'b@gmail.com']
 
         :type attachments: list
-        :param attachments: Example-['C:/Users/Administrator/Downloads/apache-maven-3.3.3-bin.zip']
+        :param attachments: Example:['C:/Users/Administrator/Downloads/apache-maven-3.3.3-bin.zip']
 
         :rtype boolean
         :return True if send emails successfully. False if fails to send.
@@ -324,95 +342,39 @@ class Email(object):
 
 
 class VoiceVerify(object):
-    """ Provide uniform and transparent VoiceVerify Service Interface
-    so that the invoker can use uniform interface without caring that the provider is RongLianYunTongXun or the other.
+    """Base and abstract class for voice verify"""
+    __metaclass__ = abc.ABCMeta
 
-    Example for config.py:
-    "voice_verify": {
-        "enabled": True,
-        "provider": "rong_lian",
-        ... ...
-    }
-    """
-    provider_name = safe_get_config("voice_verify.provider", "")
-    enabled = safe_get_config("voice_verify.enabled", False)
-    # the available status of voice_verify service
-    available = False
-    error_message = ""
-    # the object of VoiceVerify Provider, For example: VoiceVerify_RongLian()
-    provider = None
-
-    def __init__(self):
-        """
-        initial the voice_verify provider and check whether the service is enabled.
-        """
-        if self.provider_name == "" or safe_get_config("voice_verify." + self.provider_name, "") == "":
-            self.error_message = "VoiceVerify Error: provider is not found"
-        elif not self.enabled:
-            self.error_message = "VoiceVerify Error: service is not enabled."
-        else:
-            self.available = True
-            if self.provider_name == VOICEVERIFY_PROVIDER.RONGLIAN:
-                self.provider = VoiceVerify_RongLian()
-
+    @abc.abstractmethod
     def send_voice_verify(self, receiver, content):
         """ Send voice_verify through the service provider
 
         Example:
-            XXX.send_voice_verify(18217511111, "1849")
+            XXX.send_voice_verify("18217511111", "1849")
 
-        :type receiver: integer
-        :param receiver: the telephone number. Example-18217511111
+        :type receiver: str|unicode
+        :param receiver: the telephone number. Example:"18217511111"
 
         :type content: str|unicode
-        :param content: the content of voice-verify. Example-"1849"
+        :param content: the content of voice-verify. Example:"1849"
 
         :rtype boolean
         :return True if voice verify sends successfully. False if fails to send.
         """
-        if not self.available:
-            log.error(self.error_message)
-            return False
-
-        try:
-            if self.provider_name == VOICEVERIFY_PROVIDER.RONGLIAN:
-                return self.provider.send_voice_verify_by_RongLian(receiver, content)
-            else:
-                log.error("VoiceVerify Error: provider is not found")
-                return False
-        except Exception as e:
-            log.error(e)
-            return False
+        pass
 
 
-class VoiceVerify_RongLian(object):
-    """ Provide VoiceVerify Service through RongLianYunTongXun
+class DisabledVoiceVerify(VoiceVerify):
+    """Do nothing but return False since it's used when the feature is disabled"""
 
-    Example for config.py:
-    "voice_verify": {
-        "enabled": True,
-        "provider": "rong_lian",
-        "rong_lian": {
-            "account_sid": "aaf98f8951d38e890151d80ba4000000",
-            "auth_token": "81225da0fcab460ea87a3b6ce9000000",
-            "app_id": "8a48b55151d688bc0151d80bf9000000",
-            "server_ip": "sandboxapp.cloopen.com",
-            "server_port": "8883",
-            "soft_version": "2013-12-26",
-            "play_times": 3,
-            "display_number": "",
-            "response_url": "",
-            "language": "zh"
-        }
-    }
+    def send_voice_verify(self, receiver, content):
+        log.debug("voice verify is disabled.")
+        return False
 
-    notes:  "account_sid", "auth_token", "app_id" are shown in the RongLianYunTongXun "management console" website.
-            "play_times" is the times to replay voice-verify content.
-            "language" could be "zh" or "en",
-            Optional parameter-"display_number" is the phone number of sender that shown in receivers' telephone.
-            Optional parameter-"response_url" is the callback url of the response.
-            Set Optional parameters as "" to use the default value.
-    """
+
+class RonglianVoiceVerify(VoiceVerify):
+    available = False
+
     account_sid = safe_get_config("voice_verify.rong_lian.account_sid", "")
     auth_token = safe_get_config("voice_verify.rong_lian.auth_token", "")
     app_id = safe_get_config("voice_verify.rong_lian.app_id", "")
@@ -424,8 +386,7 @@ class VoiceVerify_RongLian(object):
     display_number = safe_get_config("voice_verify.rong_lian.display_number", "")
     response_url = safe_get_config("voice_verify.rong_lian.response_url", "")
     language = safe_get_config("voice_verify.rong_lian.response_url", "zh")
-    # RongLianYunTongXun available status
-    available = False
+    # error message if initialization fails
     error_message = ""
 
     def __init__(self):
@@ -445,20 +406,20 @@ class VoiceVerify_RongLian(object):
         else:
             self.available = True
 
-    def send_voice_verify_by_RongLian(self, receiver, content):
+    def send_voice_verify(self, receiver, content):
         """ Send voice_verify through RongLian_YunTongXun service
 
         Example:
-            XXX.send_voice_verify_by_RongLian(18217511111, "1849")
+            XXX.send_voice_verify_by_RongLian("18217511111", "1849")
 
-        :type receiver: integer
-        :param receiver: the telephone number. Example-18217511111
+        :type receiver: str|unicode
+        :param receiver: the telephone number. Example:"18217511111"
 
         :type content: str|unicode
-        :param content: the content of voice-verify. It should contain 4 words or numbers. Example-"1849"
+        :param content: the content of voice-verify. It should contain 4 words or numbers. Example:"1849"
 
         :rtype boolean
-        :return True if voice verify sends successfully. False if fails to send.
+        :return True if voice-verify sends successfully. False if fails to send.
         """
 
         if not self.available:
@@ -511,8 +472,132 @@ class VoiceVerify_RongLian(object):
 
         return req
 
-class SMS_ChinaTelecom(object):
-    """ Provider SMS service through China Telecom
-    """
-    def __init__(self):
 
+class Sms(object):
+    """Base and abstract class for SMS"""
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
+    def send_sms(self, receiver, template_id, content):
+        """ Send sms through the service provider
+
+        Example:
+            XXX.send_sms("18217511111", SMS_CHINATELECOM_TEMPLATE.DEFAULT, {"param1": "1849"})
+
+        :type receiver: str|unicode
+        :param receiver: the telephone number. Example: "18217511111"
+
+        :type template_id: constant integer
+        :param template_id: the id of sms-template. Example: SMS_CHINATELECOM_TEMPLATE.DEFAULT
+
+        :type content: dict
+        :param content: the content of SMS to replace the slots in sms-template. Example: {"param1":"1849"}
+
+        :rtype boolean
+        :return True if SMS sends successfully. False if fails to send.
+        """
+        pass
+
+
+class DisabledSms(Sms):
+    """Do nothing but return False since it's used when the feature is disabled"""
+
+    def send_sms(self, receiver, template_id, content):
+        log.debug("SMS service is disabled.")
+        return False
+
+
+class ChinaTelecomSms(Sms):
+    """ Provider SMS service through China Telecom"""
+    available = False
+
+    url = safe_get_config("sms.china_telecom.url", "")
+    app_id = safe_get_config("sms.china_telecom.app_id", "")
+    app_secret = safe_get_config("sms.china_telecom.app_secret", "")
+    # url to request access_token
+    url_access_token = safe_get_config("sms.china_telecom.url_access_token", "")
+    # access_token's expiration time is 30 days.
+    access_token = ""
+    access_token_expiration_time = None
+    # error message if initialization fails
+    error_message = ""
+
+    def __init__(self):
+        if self.app_id == "":
+            self.error_message = "ChinaTelecom-SMS Error: app_id is empty"
+        elif self.app_secret == "":
+            self.error_message = "ChinaTelecom-SMS Error: app_secret is empty"
+        else:
+            self.available = True
+            self.__get_access_token()
+
+    def send_sms(self, receiver, template_id, content):
+        """ Send SMS through ChinaTelecom Plateform
+
+        :type receiver: str|unicode
+        :param receiver: the telephone number. Example: "18217511111"
+
+        :type template_id: constant integer
+        :param template_id: the id of sms-template. Example: SMS_CHINATELECOM_TEMPLATE.DEFAULT
+
+        :type content: dict
+        :param content: the content of SMS to replace slots in sms-template. Example: {"param1":"1849"}
+
+        :rtype boolean
+        :return True if SMS sends successfully. False if fails to send.
+        """
+        if not self.available:
+            log.error(self.error_message)
+            return False
+        elif not self.access_token_expiration_time or self.access_token_expiration_time > get_now():
+            if not self.__get_access_token():
+                return False
+
+        try:
+            # timestamp should be Beijing local time
+            timestamp = (get_now() + timedelta(hours = 8)).strftime("%Y-%m-%d %H:%M:%S")
+            data = {"acceptor_tel": receiver,
+                    "template_id": template_id,
+                    "template_param": str(content),
+                    "app_id": self.app_id,
+                    "access_token": self.access_token,
+                    "timestamp": timestamp}
+            req = urllib2.Request(self.url)
+            post_data = urllib.urlencode(data)
+            req.add_data(post_data)
+            response = urllib2.urlopen(req)
+            response_json = json.loads(response.read())
+            if response_json["res_code"] == SMS_CHINATELECOM_STATUSCODE.SUCCESS:
+                return True
+            log.error("Send SMS(ChinaTelecom) fails: " + str(response_json))
+            return False
+        except Exception as e:
+            log.error(e)
+            return False
+
+    def __get_access_token(self):
+        """ Request access_token from ChinaTelecom
+
+        :rtype boolean
+        :return True if get access_token successfully. False if fails to get.
+        """
+        data = {"grant_type": "client_credentials",
+                "app_id": self.app_id,
+                "app_secret": self.app_secret}
+
+        try:
+            req = urllib2.Request(self.url_access_token)
+            post_data = urllib.urlencode(data)
+            req.add_data(post_data)
+            response = urllib2.urlopen(req)
+            response_json = json.loads(response.read())
+            if response_json["res_code"] == CHINATELECOM_ACCESS_TOKEN_STATUSCODE.SUCCESS:
+                # access_token's expiration time is 30 days.
+                self.access_token = response_json["access_token"]
+                self.access_token_expiration_time = get_now() + timedelta(days = 30)
+                return True
+            log.error("ChinaTelecom-SMS Error: request access_token fails")
+            return False
+        except Exception as e:
+            log.error(e)
+            return False
