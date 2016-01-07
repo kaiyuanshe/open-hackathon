@@ -5,7 +5,7 @@
         {
             "provider": "1",
             "storage_account" : {
-                "service_name" : "portalvhdsnc364fhj0dlpp",
+                "service_name" : "rapidtest",
                 "description" : "storage-description",
                 "label" : "storage-label",
                 "location" : "China East",

@@ -65,6 +65,9 @@ class StorageAcountAdapter(ServiceAdapter):
 
         for full list of arguments, please refer to ServiceManagementService.create_storage_account
 
+        NOTE: the creation of storage account may take up a lot of time, and may cause timeout error in this
+        sync function, please consider use the async way
+
         :rtype: boolean
         :return: True on success
         """
@@ -82,6 +85,7 @@ class StorageAcountAdapter(ServiceAdapter):
         self.log.debug("storage account %s, creation in progress" % name)
         res = self.service.wait_for_operation_status(
             req.request_id,
+            timeout=1800,  # to avoid timeout error
             progress_callback=None,
             success_callback=None,
             failure_callback=None)

@@ -189,6 +189,7 @@ class AzureFormation(Component):
 
         try:
             if not adapter.storage_account_exists(name):
+                # TODO: use the async way
                 if not adapter.create_storage_account(name, description, label, location):
                     self.log.error("azure virtual environment %d create storage account failed via creation" %
                                    sctx.current_job_index)
@@ -204,7 +205,7 @@ class AzureFormation(Component):
             self.__on_setup_failed(sctx)
             return
 
-        if self.count_by(AzureStorageAccount, name=name) != 0:
+        if self.db.count_by(AzureStorageAccount, name=name) != 0:
             self.db.add_object_kwargs(
                 AzureStorageAccount,
                 name=name,
