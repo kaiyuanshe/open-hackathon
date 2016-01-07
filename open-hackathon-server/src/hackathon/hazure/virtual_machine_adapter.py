@@ -25,7 +25,8 @@ THE SOFTWARE.
 
 __author__ = "rapidhere"
 
-from azure.servicemanagement.servicemanagementservice import ServiceManagementService
+from azure.servicemanagement.servicemanagementservice import ServiceManagementService, Deployment
+from azure.common import AzureHttpError, AzureMissingResourceHttpError
 
 from service_adapter import ServiceAdapter
 
@@ -34,8 +35,125 @@ class VirtualMachineAdapter(ServiceAdapter):
     """A thin wrapper on ServiceManagementServie class
 
     wrap up some interface to work with Azure Virtual Machine
+
+    NOTE: the deployment must be done on a cloud service in Azure, and used in a virtual machine,
+    so we won't split a signle deployment adapter, instead, we do it in this adapter
     """
 
     def __init__(self, subscription_id, cert_url, *args, **kwargs):
         super(VirtualMachineAdapter, self).__init__(
             ServiceManagementService(subscription_id, cert_url, *args, **kwargs))
+
+    def deployment_exists(self, cloud_service_name, deployment_slot):
+        """check if the specified cloud service is under specified deployment slot(production or staging)
+
+        :rtype: boolean
+        :return: True if deployment_slot exists; NOTE if the cloud service not exists, will return False
+        """
+        try:
+            props = self.service.get_deployment_by_slot(cloud_service_name, deployment_slot)
+        except AzureMissingResourceHttpError:
+            return False
+        except Exception as e:
+            self.log.error(e)
+            raise e
+
+        return props is not None
+
+    def get_deployment_name(self, cloud_service_name, deployment_slot):
+        """get the cloud service's deployment's name under slot
+        """
+        try:
+            props = self.service.get_deployment_by_slot(cloud_service_name, deployment_slot)
+        except Exception as e:
+            self.log.error(e)
+            raise e
+        return None if props is None else props.name
+
+    def get_deployment_by_name(self, cloud_service_name, deployment_name):
+        """get the deployment's properties by it's name
+        """
+        try:
+            return self.service.get_deployment_by_name(cloud_service_name, deployment_name)
+        except Exception as e:
+            self.log.error(e)
+            raise e
+
+    def get_deployment_by_slot(self, cloud_service_name, deployment_slot):
+        """get the deployment's properties by it's slot
+        """
+        try:
+            return self.service.get_deployment_by_slot(cloud_service_name, deployment_slot)
+        except Exception as e:
+            self.log.error(e)
+            raise e
+
+    def virtual_machine_exists(self, cloud_service_name, deployment_name, role_name):
+        """check if the specified virtual machine exists
+
+        :rtype: boolean
+        :return: True if virtual machine exists; NOTE if the cloud service or deployment not exists, will return False
+        """
+        try:
+            props = self.service.get_role(cloud_service_name, deployment_name, role_name)
+        except AzureMissingResourceHttpError:
+            return False
+        except Exception as e:
+            self.log.error(e)
+            raise e
+
+        return props is not None
+
+    def get_virtual_machine_instance_status(self, cloud_service_name, deployment_slot, vm_name):
+        """get the virtual machine instance named vm_name's status under deployment
+        """
+        props = self.get_deployment_by_slot(cloud_service_name, deployment_slot)
+
+        if not props or not isinstance(props, Deployment):
+            return None
+
+        for role_instance in props.role_instance_list:
+            if role_instance.instance_name == vm_name:
+                return role_instance.instance_status
+
+        return None
+
+    def add_virtual_machine(self, *args, **kwargs):
+        """a thin wrap on ServiceManagementService.add_role
+
+        return None on AzureHttpError
+        """
+        try:
+            return self.service.add_role(*args, **kwargs)
+        except AzureHttpError as e:
+            self.log.error("add virtual machine failed: %r" % e.message)
+            return None
+
+    def create_virtual_machine_deployment(self, *args, **kwargs):
+        """a thin wrap on ServiceManagementService.create_virtual_machine_deployment
+
+        return None on AzureHttpError
+        """
+        try:
+            return self.service.create_virtual_machine_deployment(self, *args, **kwargs)
+        except AzureHttpError as e:
+            self.log.error("creation of virtual machine failed: %r" % e.message)
+            return None
+
+    def get_assigned_endpoints(self, cloud_service_name):
+        """Return a list of assigned endpoints of given cloud service
+
+        if cloud service not exists, will raise a exception
+
+        :return: endpoints: a list of int
+        """
+        properties = self.service.get_hosted_service_properties(cloud_service_name, True)
+        endpoints = []
+        for deployment in properties.deployments.deployments:
+            for role in deployment.role_list.roles:
+                for configuration_set in role.configuration_sets.configuration_sets:
+                    if configuration_set.configuration_set_type == self.NETWORK_CONFIGURATION:
+                        if configuration_set.input_endpoints is not None:
+                            for input_endpoint in configuration_set.input_endpoints.input_endpoints:
+                                endpoints.append(input_endpoint.port)
+        return map(int, endpoints)

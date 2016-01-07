@@ -36,9 +36,6 @@ class CloudServiceAdapter(ServiceAdapter):
     """A thin wrapper on ServiceManagementServie class
 
     wrap up some interface to work with Azure Cloud Service
-
-    NOTE: the deployment must be done on a cloud service in Azure,
-    so we won't split a signle deployment adapter, instead, we do it in CloudServiceAdapter
     """
 
     def __init__(self, subscription_id, cert_url, *args, **kwargs):

@@ -28,3 +28,6 @@ __author__ = "rapidhere"
 
 class ASYNC_OP_RESULT:
     SUCCEEDED = "Succeeded"
+    IN_PROGRESS = "InProgress"
+
+ASYNC_OP_QUERY_INTERVAL = 5  # in seconds

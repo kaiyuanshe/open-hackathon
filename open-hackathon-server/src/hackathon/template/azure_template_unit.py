@@ -25,19 +25,8 @@ THE SOFTWARE.
 
 __author__ = 'rapidhere'
 
-from hackathon.azureformation.utility import (
-    find_unassigned_endpoints,
-)
-from azure.servicemanagement import (
-    WindowsConfigurationSet,
-    LinuxConfigurationSet,
-    OSVirtualHardDisk,
-    ConfigurationSet,
-    ConfigurationSetInputEndpoint,
-)
-from threading import (
-    current_thread,
-)
+from azure.servicemanagement import WindowsConfigurationSet, LinuxConfigurationSet, OSVirtualHardDisk
+from threading import current_thread
 from hackathon.constants import VE_PROVIDER
 from template_constants import AZURE_UNIT
 from template_unit import TemplateUnit
@@ -128,36 +117,10 @@ class AzureTemplateUnit(TemplateUnit):
         os_virtual_hard_disk = OSVirtualHardDisk(i[AZURE_UNIT.IMAGE_NAME], media_link)
         return os_virtual_hard_disk
 
-    def get_network_config(self, service, update):
+    def get_raw_network_config(self):
+        """raw, unprocessed network configs
         """
-        Return None if image type is vm and not update
-        Public endpoint should be assigned in real time
-        :param service:
-        :return:
-        """
-        if self.is_vm_image() and not update:
-            return None
-        cs = self.virtual_environment[AZURE_UNIT.CLOUD_SERVICE]
-        nc = self.virtual_environment[AZURE_UNIT.NETWORK_CONFIG]
-        network_config = ConfigurationSet()
-        network_config.configuration_set_type = nc[AZURE_UNIT.NETWORK_CONFIG_CONFIGURATION_SET_TYPE]
-        input_endpoints = nc[AZURE_UNIT.NETWORK_CONFIG_INPUT_ENDPOINTS]
-        # avoid duplicate endpoint under same cloud service
-        # TODO: ?
-        assigned_endpoints = service.get_assigned_endpoints(cs[AZURE_UNIT.CLOUD_SERVICE_SERVICE_NAME])
-        endpoints = map(lambda i: i[AZURE_UNIT.NETWORK_CONFIG_INPUT_ENDPOINTS_LOCAL_PORT], input_endpoints)
-        unassigned_endpoints = map(str, find_unassigned_endpoints(endpoints, assigned_endpoints))
-        map(lambda (i, u): i.update({AZURE_UNIT.NETWORK_CONFIG_INPUT_ENDPOINTS_PORT: u}), zip(input_endpoints, unassigned_endpoints))
-        for input_endpoint in input_endpoints:
-            network_config.input_endpoints.input_endpoints.append(
-                ConfigurationSetInputEndpoint(
-                    input_endpoint[AZURE_UNIT.NETWORK_CONFIG_INPUT_ENDPOINTS_NAME],
-                    input_endpoint[AZURE_UNIT.NETWORK_CONFIG_INPUT_ENDPOINTS_PROTOCOL],
-                    input_endpoint[AZURE_UNIT.NETWORK_CONFIG_INPUT_ENDPOINTS_PORT],
-                    input_endpoint[AZURE_UNIT.NETWORK_CONFIG_INPUT_ENDPOINTS_LOCAL_PORT]
-                )
-            )
-        return network_config
+        return self.virtual_environment[AZURE_UNIT.NETWORK_CONFIG]
 
     def get_storage_account_name(self):
         return self.virtual_environment[AZURE_UNIT.STORAGE_ACCOUNT][AZURE_UNIT.STORAGE_ACCOUNT_SERVICE_NAME]
