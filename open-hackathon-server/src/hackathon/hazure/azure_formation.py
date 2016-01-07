@@ -60,7 +60,7 @@ class AzureFormation(Component):
         """
         # the setup of each unit must be SERLIALLY EXECUTED
         # to avoid the creation of same resource in same time
-        # TODO: we still have't void the parrallel excution of the setup of same template
+        # TODO: we still have't avoid the parrallel excution of the setup of same template
         job_ctxs = []
         ctx = Context(job_ctxs=job_ctxs, current_job_index=0)
 
