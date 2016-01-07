@@ -93,11 +93,14 @@ class CloudServiceAdapter(ServiceAdapter):
             failure_callback=None)
 
         if res and res.status == ASYNC_OP_RESULT.SUCCEEDED:
-            self.log.debug("service cloud %s, creation done" % name)
-            return True
-        else:
-            self.log.debug("service cloud %s, creation failed" % name)
-            return False
+            # make sure the cloud service is here
+            # it may delete by someone else
+            if self.cloud_service_exists(name):
+                self.log.debug("service cloud %s, creation done" % name)
+                return True
+
+        self.log.debug("service cloud %s, creation failed" % name)
+        return False
 
     def update_cloud_service(self):
         # TODO

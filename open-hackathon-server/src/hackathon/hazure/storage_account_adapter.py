@@ -91,11 +91,12 @@ class StorageAcountAdapter(ServiceAdapter):
             failure_callback=None)
 
         if res and res.status == ASYNC_OP_RESULT.SUCCEEDED:
-            self.log.debug("storage account %s, creation done" % name)
-            return True
-        else:
-            self.log.debug("storage account %s, creation failed" % name)
-            return False
+            if self.storage_account_exists(name):
+                self.log.debug("storage account %s, creation done" % name)
+                return True
+
+        self.log.debug("storage account %s, creation failed" % name)
+        return False
 
     def update_storage_account(self):
         # TODO
