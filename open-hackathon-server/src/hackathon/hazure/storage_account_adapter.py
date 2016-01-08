@@ -24,6 +24,7 @@ THE SOFTWARE.
 """
 
 __author__ = "rapidhere"
+__all__ = ["StorageAcountAdapter"]
 
 from azure.servicemanagement.servicemanagementservice import ServiceManagementService
 from azure.common import AzureHttpError, AzureMissingResourceHttpError

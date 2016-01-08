@@ -304,7 +304,7 @@ class ExprManager(Component):
                 template_content = self.template_library.load_template(template)
                 azure_key_id = self.hosted_docker.load_azure_key_id(expr.id)
                 azure_key = self.db.get_object(AzureKey, azure_key_id)
-                self.azure_formation.setup(azure_key, template_content)
+                self.azure_formation.setup(26, azure_key, template_content)
             except Exception as e:
                 self.log.error(e)
                 return internal_server_error('Failed starting azure vm')

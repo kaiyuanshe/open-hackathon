@@ -27,14 +27,14 @@ __author__ = 'rapidhere'
 
 from azure.servicemanagement import WindowsConfigurationSet, LinuxConfigurationSet, OSVirtualHardDisk
 from threading import current_thread
+from hackathon import RequiredFeature
 from hackathon.constants import VE_PROVIDER
 from template_constants import AZURE_UNIT
 from template_unit import TemplateUnit
 
 
 class AzureTemplateUnit(TemplateUnit):
-    # template name in virtual_environment
-
+    util = RequiredFeature("util")
     # other constants
     BLOB_BASE = '%s-%s-%s-%s-%s-%s-%s-%s.vhd'
     MEDIA_BASE = 'https://%s.%s/%s/%s'
@@ -58,23 +58,13 @@ class AzureTemplateUnit(TemplateUnit):
     def is_vm_image(self):
         return self.get_image_type() == AZURE_UNIT.VM
 
-    def get_vm_image_name(self):
-        """
-        Return None if image type is not vm
-        :return:
-        """
-        return self.virtual_environment[AZURE_UNIT.IMAGE][AZURE_UNIT.IMAGE_NAME] if self.is_vm_image() else None
-
     def get_image_name(self):
         return self.virtual_environment[AZURE_UNIT.IMAGE][AZURE_UNIT.IMAGE_NAME]
 
     def get_system_config(self):
-        """
-        Return None if image type is vm
-        :return:
-        """
-        if self.is_vm_image():
+        if self.is_vm_image:
             return None
+
         sc = self.virtual_environment[AZURE_UNIT.SYSTEM_CONFIG]
         # check whether virtual machine is Windows or Linux
         if sc[AZURE_UNIT.SYSTEM_CONFIG_OS_FAMILY] == AZURE_UNIT.WINDOWS:
@@ -91,13 +81,9 @@ class AzureTemplateUnit(TemplateUnit):
         return system_config
 
     def get_os_virtual_hard_disk(self):
-        """
-        Return None if image type is vm
-        Media link should be unique
-        :return:
-        """
-        if self.is_vm_image():
+        if self.is_vm_image:
             return None
+
         i = self.virtual_environment[AZURE_UNIT.IMAGE]
         sa = self.virtual_environment[AZURE_UNIT.STORAGE_ACCOUNT]
         c = self.virtual_environment[AZURE_UNIT.CONTAINER]
@@ -156,6 +142,9 @@ class AzureTemplateUnit(TemplateUnit):
         return self.virtual_environment[AZURE_UNIT.LABEL]
 
     def get_virtual_machine_size(self):
+        if self.is_vm_image():
+            return None
+
         return self.virtual_environment[AZURE_UNIT.ROLE_SIZE]
 
     def get_remote_provider_name(self):

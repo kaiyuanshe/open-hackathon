@@ -24,6 +24,7 @@ THE SOFTWARE.
 """
 
 __author__ = "rapidhere"
+__all__ = ["ASYNC_OP_RESULT", "ASYNC_OP_QUERY_INTERVAL", "ASYNC_OP_QUERY_INTERVAL_LONG"]
 
 
 class ASYNC_OP_RESULT:
@@ -31,3 +32,4 @@ class ASYNC_OP_RESULT:
     IN_PROGRESS = "InProgress"
 
 ASYNC_OP_QUERY_INTERVAL = 5  # in seconds
+ASYNC_OP_QUERY_INTERVAL_LONG = 20  # for heavy works like wait of vm ready

@@ -29,7 +29,7 @@ __all__ = ["get_network_config"]
 from azure.servicemanagement import ConfigurationSet, ConfigurationSetInputEndpoint
 
 
-def get_network_config(is_vm_image, network_config, assigned_endpoints, update):
+def get_network_config(network_config, assigned_endpoints):
     """A helper to generate network config from azure_template_unit's network config
 
     # NOTE: refactor: de-couple from azure_template unit
@@ -38,9 +38,6 @@ def get_network_config(is_vm_image, network_config, assigned_endpoints, update):
     Public endpoint should be assigned in real time
     """
     from hackathon.template.template_constants import AZURE_UNIT
-
-    if is_vm_image and not update:
-        return None
 
     nc = network_config
 

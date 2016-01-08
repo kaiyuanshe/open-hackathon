@@ -1,6 +1,6 @@
 {
-    "name": "test-template-1",
-    "description" : "a template consists of a list of virtual environments, and a virtual environment is a virtual machine with its storage account, container, cloud service and deployment",
+    "name": "azure-windows-vm-image",
+    "description" : "use azure vm image to create a windows virtual machine",
     "virtual_environments": [
         {
             "provider": "1",
@@ -24,8 +24,8 @@
             "label" : "rapid-test",
             "role_name" : "rapid-test",
             "image" : {
-                "type" : "os",
-                "name" : "0c5c79005aae478e8883bf950a861ce0__Windows-Server-2012-Essentials-20131018-enus"
+                "type" : "vm",
+                "name" : "rapid-test-24-20160108-783064"
             },
             "system_config" : {
                 "os_family" : "Windows",

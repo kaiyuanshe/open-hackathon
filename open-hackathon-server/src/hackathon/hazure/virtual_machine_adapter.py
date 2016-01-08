@@ -24,9 +24,10 @@ THE SOFTWARE.
 """
 
 __author__ = "rapidhere"
+__all__ = ["VirtualMachineAdapter"]
 
 from azure.servicemanagement.servicemanagementservice import ServiceManagementService, Deployment
-from azure.common import AzureHttpError, AzureMissingResourceHttpError
+from azure.common import AzureMissingResourceHttpError
 
 from service_adapter import ServiceAdapter
 
@@ -120,25 +121,18 @@ class VirtualMachineAdapter(ServiceAdapter):
 
     def add_virtual_machine(self, *args, **kwargs):
         """a thin wrap on ServiceManagementService.add_role
-
-        return None on AzureHttpError
         """
-        try:
-            return self.service.add_role(*args, **kwargs)
-        except AzureHttpError as e:
-            self.log.error("add virtual machine failed: %r" % e.message)
-            return None
+        return self.service.add_role(*args, **kwargs)
 
-    def create_virtual_machine_deployment(self, *args, **kwargs):
-        """a thin wrap on ServiceManagementService.create_virtual_machine_deployment
-
-        return None on AzureHttpError
+    def update_virtual_machine_network_config(
+            self, cloud_service_name, deployment_name, virtual_machine_name, network_config):
+        """update the network config of a vm
         """
-        try:
-            return self.service.create_virtual_machine_deployment(self, *args, **kwargs)
-        except AzureHttpError as e:
-            self.log.error("creation of virtual machine failed: %r" % e.message)
-            return None
+        return self.service.update_role(
+            cloud_service_name,
+            deployment_name,
+            virtual_machine_name,
+            network_config=network_config)
 
     def get_assigned_endpoints(self, cloud_service_name):
         """Return a list of assigned endpoints of given cloud service
@@ -152,7 +146,7 @@ class VirtualMachineAdapter(ServiceAdapter):
         for deployment in properties.deployments.deployments:
             for role in deployment.role_list.roles:
                 for configuration_set in role.configuration_sets.configuration_sets:
-                    if configuration_set.configuration_set_type == self.NETWORK_CONFIGURATION:
+                    if configuration_set.configuration_set_type == "NetworkConfiguration":
                         if configuration_set.input_endpoints is not None:
                             for input_endpoint in configuration_set.input_endpoints.input_endpoints:
                                 endpoints.append(input_endpoint.port)
