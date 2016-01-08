@@ -24,20 +24,18 @@ THE SOFTWARE.
 """
 
 __author__ = "rapidhere"
-__all__ = ["get_network_config"]
+__all__ = ["get_network_config", "get_remote_parameters"]
 
 from azure.servicemanagement import ConfigurationSet, ConfigurationSetInputEndpoint
+from hackathon.template.template_constants import AZURE_UNIT
 
 
 def get_network_config(network_config, assigned_endpoints):
     """A helper to generate network config from azure_template_unit's network config
 
-    # NOTE: refactor: de-couple from azure_template unit
-
-    Return None if image type is vm and not update
+    decouple from azure_template_unit.get_network_config
     Public endpoint should be assigned in real time
     """
-    from hackathon.template.template_constants import AZURE_UNIT
 
     nc = network_config
 
@@ -60,6 +58,26 @@ def get_network_config(network_config, assigned_endpoints):
         )
 
     return network_config
+
+
+def get_remote_parameters(system_config, remote, name, hostname, port):
+    """A helper to generate remote parameter from azure_template_unit
+
+    decouple from azure_template_unit.get_remote_paras
+    """
+    r = remote
+    sc = system_config
+
+    return {
+        AZURE_UNIT.REMOTE_PARAMETER_NAME: name,
+        AZURE_UNIT.REMOTE_PARAMETER_DISPLAY_NAME: r[AZURE_UNIT.REMOTE_INPUT_ENDPOINT_NAME],
+        AZURE_UNIT.REMOTE_PARAMETER_HOST_NAME: hostname,
+        AZURE_UNIT.REMOTE_PARAMETER_PROTOCOL: r[AZURE_UNIT.REMOTE_PROTOCOL],
+        AZURE_UNIT.REMOTE_PARAMETER_PORT: port,
+        AZURE_UNIT.REMOTE_PARAMETER_USER_NAME: sc[AZURE_UNIT.SYSTEM_CONFIG_USER_NAME],
+        AZURE_UNIT.REMOTE_PARAMETER_PASSWORD: sc[AZURE_UNIT.SYSTEM_CONFIG_USER_PASSWORD],
+        "enable-sftp": True
+    }
 
 
 def __find_unassigned_endpoints(endpoints, assigned_endpoints):

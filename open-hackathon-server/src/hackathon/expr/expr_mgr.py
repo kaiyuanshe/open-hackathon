@@ -304,7 +304,26 @@ class ExprManager(Component):
                 template_content = self.template_library.load_template(template)
                 azure_key_id = self.hosted_docker.load_azure_key_id(expr.id)
                 azure_key = self.db.get_object(AzureKey, azure_key_id)
-                self.azure_formation.setup(26, azure_key, template_content)
+
+                # create virtual environments for units
+                # TODO: the expr_id for debug usage
+                # expr_id = expr.id
+                expr_id = 25
+                ves = []
+                for unit in template_content.units:
+                    ve = VirtualEnvironment(
+                        provider=VE_PROVIDER.AZURE,
+                        # TODO: when to set name?
+                        name=self.azure_formation.get_virtual_machine_name(unit.get_virtual_machine_name(), expr_id),
+                        image=unit.get_image_name(),
+                        status=VEStatus.INIT,
+                        remote_provider=VERemoteProvider.Guacamole,
+                        experiment=expr)
+                    self.db.add_object(ve)
+                    ves.append(ve)
+
+                # TODO: elimate virtual_environments arg
+                self.azure_formation.setup(expr_id, azure_key, template_content.units, ves)
             except Exception as e:
                 self.log.error(e)
                 return internal_server_error('Failed starting azure vm')

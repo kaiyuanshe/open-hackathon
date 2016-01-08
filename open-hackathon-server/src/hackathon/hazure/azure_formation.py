@@ -26,15 +26,17 @@ THE SOFTWARE.
 __author__ = "rapidhere"
 __all__ = ["AzureFormation"]
 
+import json
 
-from hackathon import Component, Context
-from hackathon.database import AzureCloudService, AzureStorageAccount
-from hackathon.constants import ACSStatus, ASAStatus, ADStatus, AVMStatus
+from hackathon import Component, Context, RequiredFeature
+from hackathon.database import AzureCloudService, AzureStorageAccount, VirtualEnvironment
+from hackathon.constants import (
+    ACSStatus, ASAStatus, ADStatus, AVMStatus, VEStatus, EStatus)
 
 from cloud_service_adapter import CloudServiceAdapter
 from storage_account_adapter import StorageAcountAdapter
 from virtual_machine_adapter import VirtualMachineAdapter
-from utils import get_network_config
+from utils import get_network_config, get_remote_parameters
 from constants import ASYNC_OP_QUERY_INTERVAL, ASYNC_OP_RESULT, ASYNC_OP_QUERY_INTERVAL_LONG
 
 
@@ -50,18 +52,24 @@ class AzureFormation(Component):
 
     usage: RequiredFeature("azuire_formation").setup(template_unit)
     """
+    # NOTE: the only purpose of use exprmgr is to update the
+    # status of experiment, see the function __setup_virtual_machine_done
+    # this requirment will be removed in future after callbacks have been implied
+    expr_manager = RequiredFeature("expr_manager")
+
     def __init__(self):
         pass
 
-    def setup(self, resource_id, azure_key, template):
+    def setup(self, resource_id, azure_key, template_units, virtual_environments):
         """setup the resources needed by the template unit
 
         this will create the missed VirtualMachine, CloudService and Storages
         this function is not blocked, it will run in the background and return immediatly
 
         :param resouce_id: a integer that can indentify the creation of azure resource, is reusable to checkout created virtual machine name
-        :param template: the azure template, contains the data need by azure formation
+        :param template_units: the azure template units, contains the data need by azure formation
         :param azure_key: the azure_key object, use to access azure
+        :param virtual_environments: the virtual envrionments associated with this setup NOTE: this is a workaround
         """
         # the setup of each unit must be SERLIALLY EXECUTED
         # to avoid the creation of same resource in same time
@@ -69,7 +77,15 @@ class AzureFormation(Component):
         job_ctxs = []
         ctx = Context(job_ctxs=job_ctxs, current_job_index=0, resource_id=resource_id)
 
-        for unit in template.units:
+        assert len(template_units) == len(virtual_environments)
+
+        for i in xrange(0, len(template_units)):
+            unit = template_units[i]
+            ve = virtual_environments[i]
+
+            name = self.get_virtual_machine_name(unit.get_virtual_machine_name(), resource_id)
+
+            # construct current virutal envrionment's context
             job_ctxs.append(Context(
                 cloud_service_name=unit.get_cloud_service_name(),
                 cloud_service_label=unit.get_cloud_service_label(),
@@ -80,16 +96,22 @@ class AzureFormation(Component):
                 storage_account_label=unit.get_storage_account_label(),
                 storage_account_location=unit.get_storage_account_location(),
 
-                virtual_machine_name=unit.get_virtual_machine_name(),
+                virtual_machine_name=name,
                 virtual_machine_label=unit.get_virtual_machine_label(),
                 deployment_name=unit.get_deployment_name(),
                 deployment_slot=unit.get_deployment_slot(),
                 system_config=unit.get_system_config(),
+                raw_system_config=unit.get_raw_system_config(),
                 os_virtual_hard_disk=unit.get_os_virtual_hard_disk(),
                 virtual_machine_size=unit.get_virtual_machine_size(),
                 image_name=unit.get_image_name(),
                 raw_network_config=unit.get_raw_network_config(),
                 is_vm_image=unit.is_vm_image(),
+                remote=unit.get_remote(),
+                endpoint_name=unit.get_remote_port_name(),
+
+                # NOTE: ONLY callback purpose functions can depend on virutal_environment_id
+                virtual_environment_id=ve.id,
 
                 azure_key_id=azure_key.id,
                 subscription_id=azure_key.subscription_id,
@@ -136,14 +158,6 @@ class AzureFormation(Component):
             "azure virtual environment %d: '%r' setup progress begin" %
             (current_job_index, job_ctxs[current_job_index]))
         self.scheduler.add_once("azure_formation", "setup_cloud_service", context=ctx, seconds=0)
-
-    def __on_setup_failed(self, sctx):
-        # TODO: rollback
-        pass
-
-        # after rollback done, step into next unit
-        sctx.current_job_index += 1
-        self.__schedule_setup(sctx)
 
     def setup_cloud_service(self, sctx):
         # get context from super context
@@ -255,7 +269,6 @@ class AzureFormation(Component):
         # get context from super context
         ctx = sctx.job_ctxs[sctx.current_job_index]
 
-        vm_name = self.get_virtual_machine_name(ctx.virtual_machine_name, sctx.resource_id)
         adapter = VirtualMachineAdapter(ctx.subscription_id, ctx.pem_url, host=ctx.management_host)
 
         deployment_name = adapter.get_deployment_name(ctx.cloud_service_name, ctx.deployment_slot)
@@ -269,24 +282,28 @@ class AzureFormation(Component):
         # add virtual machine to deployment
         try:
             # create if vm is not created
-            if not adapter.virtual_machine_exists(ctx.cloud_service_name, deployment_name, vm_name):
+            if not adapter.virtual_machine_exists(ctx.cloud_service_name, deployment_name, ctx.virtual_machine_name):
                 req = adapter.add_virtual_machine(
                     ctx.cloud_service_name,
                     deployment_name,
-                    vm_name,
+                    ctx.virtual_machine_name,
                     ctx.system_config,
                     ctx.os_virtual_hard_disk,
                     network_config=network_config,
                     role_size=ctx.virtual_machine_size,
                     vm_image_name=ctx.image_name if ctx.is_vm_image else None)
-            else:  # if vm is created, then we need to config the vm
-                ctx.vm_need_config = True
-                self.__wait_for_virtual_machine_ready(sctx)
+            # NOTE: if the vm is created, we think is well configured
+            # else:  # if vm is created, then we need to config the vm
+            #    ctx.vm_need_config = True
+            #    self.__wait_for_virtual_machine_ready(sctx)
+            #    return
+            else:
+                self.__setup_virtual_machine_done(sctx)
                 return
         except Exception as e:
             self.log.error(
                 "azure virtual environment %d create virtual machine %r failed: %r"
-                % (sctx.current_job_index, vm_name, str(e)))
+                % (sctx.current_job_index, ctx.virtual_machine_name, str(e)))
             self.__on_setup_failed(sctx)
             return
 
@@ -298,7 +315,6 @@ class AzureFormation(Component):
     def __setup_virtual_machine_without_deployment_existed(self, sctx):
         ctx = sctx.job_ctxs[sctx.current_job_index]
 
-        vm_name = self.get_virtual_machine_name(ctx.virtual_machine_name, sctx.resource_id)
         adapter = VirtualMachineAdapter(ctx.subscription_id, ctx.pem_url, host=ctx.management_host)
 
         if not ctx.is_vm_image:
@@ -314,7 +330,7 @@ class AzureFormation(Component):
                 ctx.deployment_name,
                 ctx.deployment_slot,
                 ctx.virtual_machine_label,
-                vm_name,
+                ctx.virtual_machine_name,
                 ctx.system_config,
                 ctx.os_virtual_hard_disk,
                 network_config,
@@ -323,7 +339,7 @@ class AzureFormation(Component):
         except Exception as e:
             self.log.error(
                 "azure virtual environment %d create virtual machine %r failed: %r"
-                % (sctx.current_job_index, vm_name, str(e)))
+                % (sctx.current_job_index, ctx.virtual_machine_name, str(e)))
             self.__on_setup_failed(sctx)
             return
 
@@ -376,16 +392,20 @@ class AzureFormation(Component):
         ctx.vm_need_config = False
         adapter = VirtualMachineAdapter(ctx.subscription_id, ctx.pem_url, host=ctx.management_host)
 
-        vm_name = self.get_virtual_machine_name(ctx.virtual_machine_name, sctx.resource_id)
         network_config = get_network_config(
             ctx.raw_network_config,
             adapter.get_assigned_endpoints(ctx.cloud_service_name))
+
+        if len(network_config.input_endpoints.input_endpoints) == 0:
+            # don't need to config, skip
+            self.__setup_virtual_machine_done(sctx)
+            return
 
         try:
             req = adapter.update_virtual_machine_network_config(
                 ctx.cloud_service_name,
                 ctx.deployment_name,
-                vm_name,
+                ctx.virtual_machine_name,
                 network_config)
         except Exception as e:
             self.log.error(
@@ -444,8 +464,8 @@ class AzureFormation(Component):
         ctx = sctx.job_ctxs[sctx.current_job_index]
         adapter = VirtualMachineAdapter(ctx.subscription_id, ctx.pem_url, host=ctx.management_host)
 
-        vm_name = self.get_virtual_machine_name(ctx.virtual_machine_name, sctx.resource_id)
-        status = adapter.get_virtual_machine_instance_status(ctx.cloud_service_name, ctx.deployment_slot, vm_name)
+        status = adapter.get_virtual_machine_instance_status(
+            ctx.cloud_service_name, ctx.deployment_slot, ctx.virtual_machine_name)
 
         if not status:
             self.log.error(
@@ -454,6 +474,9 @@ class AzureFormation(Component):
             self.__on_setup_failed(sctx)
             return
 
+        self.log.debug(
+            "waiting for virtual machine ready, vm: %s, status: %s" %
+            (ctx.virtual_machine_name, str(status)))
         if status == AVMStatus.READY_ROLE:
             if ctx.vm_need_config:
                 ctx.vm_need_config = False
@@ -463,9 +486,57 @@ class AzureFormation(Component):
         else:
             self.__wait_for_virtual_machine_ready(sctx)
 
+    # callbacks will be called here
+    def __on_setup_failed(self, sctx):
+        try:
+            self.log.debug("azure virtual environment %d vm setup failed" % sctx.current_job_index)
+            # TODO: rollback
+
+            ctx = sctx.job_ctxs[sctx.current_job_index]
+            ve = self.db.find_first_object_by(VirtualEnvironment, id=ctx.virtual_environment_id)
+
+            if ve:
+                ve.status = VEStatus.FAILED
+                ve.experiment.status = EStatus.FAILED
+                self.db.commit()
+        finally:
+            self.log.debug("azure virtual environment %d vm fail callback done, step to next" % sctx.current_job_index)
+            # after rollback done, step into next unit
+            sctx.current_job_index += 1
+            self.__schedule_setup(sctx)
+
     def __setup_virtual_machine_done(self, sctx):
         self.log.debug("azure virtual environment %d vm setup done" % sctx.current_job_index)
+        ctx = sctx.job_ctxs[sctx.current_job_index]
 
+        # update the status of virtual environment
+        ve = self.db.find_first_object_by(VirtualEnvironment, id=ctx.virtual_environment_id)
+
+        adapter = VirtualMachineAdapter(ctx.subscription_id, ctx.pem_url, host=ctx.management_host)
+        if ve:
+            ve.status = VEStatus.RUNNING
+
+            public_ip, port = adapter.get_virtual_machine_public_endpoint(
+                ctx.cloud_service_name,
+                ctx.deployment_name,
+                ctx.virtual_machine_name,
+                ctx.endpoint_name)
+
+            if not public_ip:
+                self.log.warn("unable to find public ip for vm %s, set guacamole failed" % ctx.virtual_machine_name)
+            else:
+                remote_para = get_remote_parameters(
+                    ctx.raw_system_config,
+                    ctx.remote,
+                    ctx.virtual_machine_name,
+                    public_ip, port)
+
+                ve.remote_paras = json.dumps(remote_para)
+
+            self.db.commit()
+            self.expr_manager.check_expr_status(ve.experiment)
+
+        self.log.debug("azure virtual environment %d vm success callback done, step to next" % sctx.current_job_index)
         # step to config next unit
         sctx.current_job_index += 1
         self.__schedule_setup(sctx)

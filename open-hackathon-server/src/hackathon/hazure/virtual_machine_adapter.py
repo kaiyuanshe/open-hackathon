@@ -151,3 +151,31 @@ class VirtualMachineAdapter(ServiceAdapter):
                             for input_endpoint in configuration_set.input_endpoints.input_endpoints:
                                 endpoints.append(input_endpoint.port)
         return map(int, endpoints)
+
+    def get_virtual_machine_public_ip(self, cloud_service_name, deployment_name, virtual_machine_name):
+        """get the public ip of the virtual machine
+
+        return None if not found
+        """
+        # TODO: full copy from azureformation module, is this way of finding public ip correct?
+        deployment = self.get_deployment_by_name(cloud_service_name, deployment_name)
+        for role in deployment.role_instance_list:
+            if role.role_name == virtual_machine_name:
+                if role.instance_endpoints is not None:
+                    return role.instance_endpoints.instance_endpoints[0].vip
+        return None
+
+    def get_virtual_machine_public_endpoint(
+            self, cloud_service_name, deployment_name, virtual_machine_name, endpoint_name):
+        """get the (public_ip, public_port) of the virtual machine on specified endpoint
+
+        return (None, None) if not find
+        """
+        deployment = self.get_deployment_by_name(cloud_service_name, deployment_name)
+        for role in deployment.role_instance_list:
+            if role.role_name == virtual_machine_name:
+                if role.instance_endpoints is not None:
+                    for instance_endpoint in role.instance_endpoints:
+                        if instance_endpoint.name == endpoint_name:
+                            return instance_endpoint.vip, instance_endpoint.public_port
+        return None, None

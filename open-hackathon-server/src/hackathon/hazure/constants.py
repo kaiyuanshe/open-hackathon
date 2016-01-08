@@ -32,4 +32,4 @@ class ASYNC_OP_RESULT:
     IN_PROGRESS = "InProgress"
 
 ASYNC_OP_QUERY_INTERVAL = 5  # in seconds
-ASYNC_OP_QUERY_INTERVAL_LONG = 20  # for heavy works like wait of vm ready
+ASYNC_OP_QUERY_INTERVAL_LONG = 10  # for heavy works like wait of vm ready

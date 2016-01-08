@@ -62,7 +62,7 @@ class AzureTemplateUnit(TemplateUnit):
         return self.virtual_environment[AZURE_UNIT.IMAGE][AZURE_UNIT.IMAGE_NAME]
 
     def get_system_config(self):
-        if self.is_vm_image:
+        if self.is_vm_image():
             return None
 
         sc = self.virtual_environment[AZURE_UNIT.SYSTEM_CONFIG]
@@ -79,6 +79,11 @@ class AzureTemplateUnit(TemplateUnit):
                                                   user_password=sc[AZURE_UNIT.SYSTEM_CONFIG_USER_PASSWORD],
                                                   disable_ssh_password_authentication=False)
         return system_config
+
+    def get_raw_system_config(self):
+        """return raw, unprocessed system config from json
+        """
+        return self.virtual_environment[AZURE_UNIT.SYSTEM_CONFIG]
 
     def get_os_virtual_hard_disk(self):
         if self.is_vm_image:
@@ -153,18 +158,5 @@ class AzureTemplateUnit(TemplateUnit):
     def get_remote_port_name(self):
         return self.virtual_environment[AZURE_UNIT.REMOTE][AZURE_UNIT.REMOTE_INPUT_ENDPOINT_NAME]
 
-    def get_remote_paras(self, name, hostname, port):
-        r = self.virtual_environment[AZURE_UNIT.REMOTE]
-        sc = self.virtual_environment[AZURE_UNIT.SYSTEM_CONFIG]
-        remote = {
-            AZURE_UNIT.REMOTE_PARAMETER_NAME: name,
-            AZURE_UNIT.REMOTE_PARAMETER_DISPLAY_NAME: r[AZURE_UNIT.REMOTE_INPUT_ENDPOINT_NAME],
-            AZURE_UNIT.REMOTE_PARAMETER_HOST_NAME: hostname,
-            AZURE_UNIT.REMOTE_PARAMETER_PROTOCOL: r[AZURE_UNIT.REMOTE_PROTOCOL],
-            AZURE_UNIT.REMOTE_PARAMETER_PORT: port,
-            AZURE_UNIT.REMOTE_PARAMETER_USER_NAME: sc[AZURE_UNIT.SYSTEM_CONFIG_USER_NAME],
-            AZURE_UNIT.REMOTE_PARAMETER_PASSWORD: sc[AZURE_UNIT.SYSTEM_CONFIG_USER_PASSWORD],
-            "enable-sftp": True
-        }
-
-        return remote
+    def get_remote(self):
+        return self.virtual_environment[AZURE_UNIT.REMOTE]
