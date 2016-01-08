@@ -81,5 +81,28 @@ Config = {
     },
     "cloud_eclipse": {
         "api": "http://www.idehub.cn/api/ide"
+    },
+    "email": {
+        "sender": "",
+        "host": "",
+        "port": 587,
+        "username": "",
+        "password": ""
+    },
+    "voice_verify": {
+        "enabled": False,
+        "provider": "",
+        "rong_lian": {
+            "account_sid": "",
+            "auth_token": "",
+            "app_id": "",
+            "server_ip": "",
+            "server_port": "8883",
+            "soft_version": "2013-12-26",
+            "play_times": 3,
+            "display_number": "",
+            "response_url": "",
+            "language": "zh"
+        }
     }
 }

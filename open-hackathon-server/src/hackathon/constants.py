@@ -506,3 +506,24 @@ class LOGIN_PROVIDER:
     WEIBO = 8
     GITCAFE = 16
     ALAUDA = 32
+
+
+class EMAIL_SMTP_STATUSCODE:
+    """Status Code of email service(SMTP protocol)"""
+    SUCCESS = 250
+    SERVICE_NOT_AVAILABLE = 421
+    ACCESS_DENIED = 530
+
+
+class VOICEVERIFY_PROVIDER:
+    """Voice_Verify service providers"""
+    RONGLIAN = "rong_lian"
+
+
+class VOICEVERIFY_RONGLIAN_STATUSCODE:
+    """Status Code of RongLianYunTongXun Voice_Verify service"""
+    SUCCESS = "000000"
+    CONTENT_EMPTY = "111318"
+    CONTENT_LENGTH_WRONG = "111319"
+    INSUFFICIENT_BALANCE = "160014"
+    WRONG_PHONE_NUMBER = "160042"
