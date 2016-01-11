@@ -527,3 +527,25 @@ class VOICEVERIFY_RONGLIAN_STATUSCODE:
     CONTENT_LENGTH_WRONG = "111319"
     INSUFFICIENT_BALANCE = "160014"
     WRONG_PHONE_NUMBER = "160042"
+
+
+class SMS_PROVIDER:
+    """SMS service providers"""
+    CHINA_TELECOM = "china_telecom"
+
+
+class SMS_CHINATELECOM_TEMPLATE:
+    """SMS-template of ChinaTelecom"""
+    DEFAULT = ""
+
+
+class SMS_CHINATELECOM_STATUSCODE:
+    """Status Code of ChinaTelecom SMS service"""
+    SUCCESS = 0
+    INVALID_ACCESS_TOKEN = 110
+    ACCESS_TOKEN_EXPIRED = 111
+
+
+class CHINATELECOM_ACCESS_TOKEN_STATUSCODE:
+    """Status Code of requesting ChinaTelecom access_token"""
+    SUCCESS = "0"
