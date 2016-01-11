@@ -135,7 +135,7 @@ class ExprManager(Component):
 
                     # TODO: elimate virtual_environments arg and expr_id arg
                     self.azure_formation.stop_vm(
-                        25, azure_key, template_content.units, expr.virtual_environments.all(), expr_id)
+                        expr_id, azure_key, template_content.units, expr.virtual_environments.all(), expr_id)
                 except Exception as e:
                     self.log.error(e)
                     return internal_server_error('Failed stopping azure')
@@ -314,9 +314,7 @@ class ExprManager(Component):
                 azure_key = self.db.get_object(AzureKey, azure_key_id)
 
                 # create virtual environments for units
-                # TODO: the expr_id for debug usage
-                # expr_id = expr.id
-                expr_id = 25
+                expr_id = expr.id
                 ves = []
                 for unit in template_content.units:
                     ve = VirtualEnvironment(
