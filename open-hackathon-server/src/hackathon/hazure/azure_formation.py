@@ -60,8 +60,8 @@ class AzureFormation(Component):
     def __init__(self):
         pass
 
-    def setup(self, resource_id, azure_key, template_units, virtual_environments):
-        """setup the resources needed by the template unit
+    def start_vm(self, resource_id, azure_key, template_units, virtual_environments):
+        """setup the resources needed by the template unit and start the virtual machine
 
         this will create the missed VirtualMachine, CloudService and Storages
         this function is not blocked, it will run in the background and return immediatly
@@ -123,11 +123,6 @@ class AzureFormation(Component):
 
     def stop_vm(self):
         """stop the virtual machine
-        """
-        pass
-
-    def start_vm(self):
-        """start the virtual machine
         """
         pass
 
