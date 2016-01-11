@@ -25,7 +25,7 @@
             "role_name" : "rapid-test",
             "image" : {
                 "type" : "vm",
-                "name" : "rapid-test-24-20160108-783064"
+                "name" : "rapid-test-25-20160111-203213"
             },
             "system_config" : {
                 "os_family" : "Windows",

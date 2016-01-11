@@ -76,7 +76,6 @@ def get_remote_parameters(system_config, remote, name, hostname, port):
         AZURE_UNIT.REMOTE_PARAMETER_PORT: port,
         AZURE_UNIT.REMOTE_PARAMETER_USER_NAME: sc[AZURE_UNIT.SYSTEM_CONFIG_USER_NAME],
         AZURE_UNIT.REMOTE_PARAMETER_PASSWORD: sc[AZURE_UNIT.SYSTEM_CONFIG_USER_PASSWORD],
-        "enable-sftp": True
     }
 
 
