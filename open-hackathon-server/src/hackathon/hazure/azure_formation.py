@@ -29,7 +29,7 @@ __all__ = ["AzureFormation"]
 import json
 
 from hackathon import Component, Context, RequiredFeature
-from hackathon.database import AzureCloudService, AzureStorageAccount, VirtualEnvironment
+from hackathon.database import AzureCloudService, AzureStorageAccount, VirtualEnvironment, Experiment
 from hackathon.constants import (
     ACSStatus, ASAStatus, ADStatus, AVMStatus, VEStatus, EStatus)
 
@@ -121,10 +121,35 @@ class AzureFormation(Component):
         # execute from first job context
         self.__schedule_setup(ctx)
 
-    def stop_vm(self):
-        """stop the virtual machine
+    def stop_vm(self, resource_id, azure_key, template_units, virtual_environments, expr_id):
+        """stop the virtual machine, and deallocate the resouces of the virtual machine
+
+        NOTE: virtual_environments and expr_id are just a workaround to update db status, it will be elimated in future
         """
-        pass
+        assert len(template_units) == len(virtual_environments)
+
+        job_ctxs = []
+        ctx = Context(job_ctxs=job_ctxs, current_job_index=0, resource_id=resource_id)
+
+        for i in xrange(0, len(template_units)):
+            unit = template_units[i]
+            ve = virtual_environments[i]
+
+            job_ctxs.append(Context(
+                cloud_service_name=unit.get_cloud_service_name(),
+                deployment_slot=unit.get_deployment_slot(),
+                virtual_machine_name=self.get_virtual_machine_name(unit.get_virtual_machine_name(), resource_id),
+
+                # NOTE: ONLY callback purpose functions can depend on virutal_environment_id and expr id
+                virtual_environment_id=ve.id,
+                expr_id=expr_id,
+
+                azure_key_id=azure_key.id,
+                subscription_id=azure_key.subscription_id,
+                pem_url=azure_key.pem_url,
+                management_host=azure_key.management_host))
+
+        self.__schedule_stop(ctx)
 
     def get_virtual_machine_name(self, virtual_machine_base_name, resource_id):
         """retrieve the virtual machine name by resource_id
@@ -530,6 +555,99 @@ class AzureFormation(Component):
 
             self.db.commit()
             self.expr_manager.check_expr_status(ve.experiment)
+
+        self.log.debug("azure virtual environment %d vm success callback done, step to next" % sctx.current_job_index)
+        # step to config next unit
+        sctx.current_job_index += 1
+        self.__schedule_setup(sctx)
+
+    def __schedule_stop(self, sctx):
+        self.scheduler.add_once("azure_formation", "schedule_stop", context=sctx, seconds=0)
+
+    def schedule_stop(self, sctx):
+        current_job_index = sctx.current_job_index
+        job_ctxs = sctx.job_ctxs
+
+        if current_job_index >= len(job_ctxs):
+            self.log.debug("azure virtual environment stop finish")
+            return True
+
+        self.log.debug(
+            "azure virtual environment %d: '%r' stop progress begin" %
+            (current_job_index, job_ctxs[current_job_index]))
+        self.scheduler.add_once("azure_formation", "stop_virtual_machine", context=sctx, seconds=0)
+
+    def stop_virtual_machine(self, sctx):
+        ctx = sctx.job_ctxs[sctx.current_job_index]
+        adapter = VirtualMachineAdapter(ctx.subscription_id, ctx.pem_url, host=ctx.management_host)
+
+        deployment_name = adapter.get_deployment_name(ctx.cloud_service_name, ctx.deployment_slot)
+        now_status = adapter.get_virtual_machine_instance_status(
+            ctx.cloud_service_name, ctx.deployment_slot, ctx.virtual_machine_name)
+
+        if now_status is None:
+            self.log.error(
+                "azure virtual environment %d stop vm failed: cannot get status of vm %r" %
+                (sctx.current_job_index, ctx.virtual_machine_name))
+            self.__on_stop_virtual_machine_failed(sctx)
+        elif now_status != AVMStatus.STOPPED_DEALLOCATED:
+            try:
+                req = adapter.stop_virtual_machine(
+                    ctx.cloud_service_name, deployment_name, ctx.virtual_machine_name, AVMStatus.STOPPED_DEALLOCATED)
+            except Exception as e:
+                self.log.error(
+                    "azure virtual environment %d stop vm failed: %r" %
+                    (sctx.current_job_index, str(e.message)))
+                self.__on_stop_virtual_machine_failed(sctx)
+                return False
+
+            ctx.request_id = req.request_id
+            self.__wait_for_stop_virtual_machine(sctx)
+        else:
+            self.__stop_virtual_machine_done(sctx)
+
+    def __wait_for_stop_virtual_machine(self, sctx):
+        self.log.debug("azure virtual environment %d, waiting for stop virtual machine" % sctx.current_job_index)
+        self.scheduler.add_once(
+            "azure_formation", "wait_for_stop_virtual_machine", context=sctx, seconds=ASYNC_OP_QUERY_INTERVAL)
+
+    def wait_for_stop_virtual_machine(self, sctx):
+        self.__check_vm_operation_status(
+            sctx,
+            self.__stop_virtual_machine_done,
+            self.__on_stop_virtual_machine_failed,
+            self.__wait_for_stop_virtual_machine)
+
+    def __on_stop_virtual_machine_failed(self, sctx):
+        try:
+            self.log.debug("azure virtual environment %d stop vm failed" % sctx.current_job_index)
+            # TODO: rollback
+        finally:
+            self.log.debug(
+                "azure virtual environment %d vm setup fail callback done, step to next" % sctx.current_job_index)
+            # after rollback done, step into next unit
+            sctx.current_job_index += 1
+            self.__schedule_stop(sctx)
+
+    def __stop_virtual_machine_done(self, sctx):
+        self.log.debug("azure virtual environment %d stop vm done" % sctx.current_job_index)
+        ctx = sctx.job_ctxs[sctx.current_job_index]
+
+        # update the status of virtual environment
+        ve = self.db.find_first_object_by(VirtualEnvironment, id=ctx.virtual_environment_id)
+
+        if ve:
+            ve.status = VEStatus.STOPPED
+            self.expr_manager.check_expr_status(ve.experiment)
+
+        # all stopped
+        # TODO: alter this as a hook, and trigger this hook in __schedule_stop, where the last job index should be checked
+        if sctx.current_job_index == len(sctx.job_ctxs) - 1:
+            self.log.debug("resource id: %d all unit stop succeeded!" % sctx.resource_id)
+            expr = self.db.find_first_object_by(Experiment, id=ctx.expr_id)
+            expr.status = EStatus.STOPPED
+
+        self.db.commit()
 
         self.log.debug("azure virtual environment %d vm success callback done, step to next" % sctx.current_job_index)
         # step to config next unit

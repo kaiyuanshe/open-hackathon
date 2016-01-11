@@ -41,7 +41,7 @@ from hackathon import Component, RequiredFeature, Context
 from hackathon.constants import EStatus, VERemoteProvider, VE_PROVIDER, PortBindingType, VEStatus, ReservedUser, \
     AVMStatus, CLOUD_ECLIPSE
 from hackathon.database import VirtualEnvironment, DockerHostServer, Experiment, User, HackathonTemplateRel, \
-    DockerContainer, AzureKey
+    DockerContainer, AzureKey, Template
 from hackathon.azureformation.azureFormation import AzureFormation
 from hackathon.hackathon_response import internal_server_error, not_found, ok
 
@@ -125,9 +125,17 @@ class ExprManager(Component):
             else:
                 try:
                     # todo support delete azure vm
-                    hosted_docker = RequiredFeature("hosted_docker")
-                    af = AzureFormation(hosted_docker.load_azure_key_id(expr_id))
-                    af.stop(expr_id, AVMStatus.STOPPED_DEALLOCATED)
+                    # hosted_docker = RequiredFeature("hosted_docker")
+                    # af = AzureFormation(hosted_docker.load_azure_key_id(expr_id))
+                    # af.stop(expr_id, AVMStatus.STOPPED_DEALLOCATED)
+                    template = self.db.get_object(Template, expr.template_id)
+                    template_content = self.template_library.load_template(template)
+                    azure_key_id = self.hosted_docker.load_azure_key_id(expr.id)
+                    azure_key = self.db.get_object(AzureKey, azure_key_id)
+
+                    # TODO: elimate virtual_environments arg and expr_id arg
+                    self.azure_formation.stop_vm(
+                        25, azure_key, template_content.units, expr.virtual_environments.all(), expr_id)
                 except Exception as e:
                     self.log.error(e)
                     return internal_server_error('Failed stopping azure')

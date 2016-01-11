@@ -124,6 +124,11 @@ class VirtualMachineAdapter(ServiceAdapter):
         """
         return self.service.add_role(*args, **kwargs)
 
+    def stop_virtual_machine(self, *args, **kwargs):
+        """a thin wrap on ServiceManagementService.shutdown_role
+        """
+        return self.service.shutdown_role(*args, **kwargs)
+
     def update_virtual_machine_network_config(
             self, cloud_service_name, deployment_name, virtual_machine_name, network_config):
         """update the network config of a vm
