@@ -252,7 +252,7 @@ class UserExperimentResource(HackathonResource, Component):
         context = self.context()
         return expr_manager.start_expr(g.user.id, context.template_name, context.get("hackathon_name"))
 
-    # @token_required
+    @token_required
     def delete(self):
         # id is experiment id
         parser = reqparse.RequestParser()
