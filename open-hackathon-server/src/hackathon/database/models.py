@@ -640,13 +640,11 @@ class AzureKey(DBBase):
     __tablename__ = 'azure_key'
 
     id = Column(Integer, primary_key=True)
-    # local_cert_url is the local cert file path
+    # cert_url is cert file path in azure
     cert_url = Column(String(200))
-    # cert_url is the cert file path in azure
-    azure_cert_url = Column(String(200))
-    # local_pem_url is the local pem file path
+    # pem_url is the local pem file path
     pem_url = Column(String(200))
-    # pem_url is the pem file path in local
+    # azure_pem_url is the pem file path in azure
     azure_pem_url = Column(String(200))
     subscription_id = Column(String(100))
     management_host = Column(String(100))

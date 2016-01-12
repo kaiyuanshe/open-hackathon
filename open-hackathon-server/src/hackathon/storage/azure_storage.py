@@ -67,7 +67,8 @@ class AzureStorage(Storage):
                 # encrypt certification file before upload to azure.
                 file_content = self.__encrypt_content(context)
                 result = self.azure_blob_service.upload_file_to_azure(container_name, blob_name, file_content)
-                os.remove(file_content.name)
+                if context.file_type == FILE_TYPE.AZURE_PEM:
+                    os.remove(file_content.name)
             elif isinstance(file_content, dict):
                 text = json.dumps(file_content)
                 result = self.azure_blob_service.upload_file_to_azure_from_text(container_name, blob_name, text)
@@ -155,10 +156,11 @@ class AzureStorage(Storage):
             return file_name
 
     def __encrypt_content(self, context):
-        if context.file_type == FILE_TYPE.AZURE_CERT:
+        if context.file_type == FILE_TYPE.AZURE_PEM:
             input_file_name = context.content.name
             output_file_name = context.content.name + ".encrypted"
             cryptor = RequiredFeature("cryptor")
-            #cryptor = Cryptor()
             cryptor.encrypt(input_file_name, output_file_name)
             return file(output_file_name)
+        else:
+            return context.content

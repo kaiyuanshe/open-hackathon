@@ -206,13 +206,6 @@
         });
     }
 
-    function downloadAuzre(id) {
-        return oh.api.admin.azure.downloadAuzre.get({
-            query: {certificate_id: id},
-            header: {hackathon_name: hackathonName}
-        });
-    }
-
     //setup ckeditor
     function ckeditorSetup() {
         var editorElement = CKEDITOR.document.getById('markdownEdit');

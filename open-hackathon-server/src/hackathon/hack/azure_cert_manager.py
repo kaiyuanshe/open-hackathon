@@ -84,17 +84,12 @@ class AzureCertManager(Component):
             self.log.debug('%s exists' % cert_url)
 
         azure_key = self.db.find_first_object_by(AzureKey,
-                                                 cert_url=cert_url,
-                                                 azure_cert_url=cert_url,
-                                                 pem_url=pem_url,
-                                                 azure_pem_url=pem_url,
                                                  subscription_id=subscription_id,
                                                  management_host=management_host)
         # avoid duplicate azure key
         if azure_key is None:
             azure_key = self.db.add_object_kwargs(AzureKey,
                                                   cert_url=cert_url,
-                                                  azure_cert_url=cert_url,
                                                   pem_url=pem_url,
                                                   azure_pem_url=pem_url,
                                                   subscription_id=subscription_id,
@@ -124,7 +119,7 @@ class AzureCertManager(Component):
         )
         self.log.debug("saving cerf file [%s] to azure" % cer_file_name)
         cer_context = self.storage.save(cer_context)
-        azure_key.azure_cert_url = cer_context.url
+        azure_key.cert_url = cer_context.url
         self.db.commit()
 
         # store pem file
@@ -178,10 +173,10 @@ class AzureCertManager(Component):
             azure_key = self.db.get_object(AzureKey, certificate_id)
             if azure_key:
                 try:
-                    if isfile(azure_key.azure_cert_url):
-                        os.remove(azure_key.azure_cert_url)
+                    if isfile(azure_key.cert_url):
+                        os.remove(azure_key.cert_url)
                     else:
-                        self.storage.delete(azure_key.azure_cert_url)
+                        self.storage.delete(azure_key.cert_url)
                     if isfile(azure_key.azure_pem_url):
                         os.remove(azure_key.azure_pem_url)
                     else:
