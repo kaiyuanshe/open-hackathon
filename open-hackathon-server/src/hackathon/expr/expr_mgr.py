@@ -329,7 +329,7 @@ class ExprManager(Component):
                     ves.append(ve)
 
                 # TODO: elimate virtual_environments arg
-                self.azure_formation.setup(expr_id, azure_key, template_content.units, ves)
+                self.azure_formation.start_vm(expr_id, azure_key, template_content.units, ves)
             except Exception as e:
                 self.log.error(e)
                 return internal_server_error('Failed starting azure vm')

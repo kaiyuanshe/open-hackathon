@@ -29,9 +29,9 @@ __all__ = ["AzureFormation"]
 import json
 
 from hackathon import Component, Context, RequiredFeature
-from hackathon.database import AzureCloudService, AzureStorageAccount, VirtualEnvironment, Experiment
+from hackathon.database import VirtualEnvironment, Experiment
 from hackathon.constants import (
-    ACSStatus, ASAStatus, ADStatus, AVMStatus, VEStatus, EStatus)
+    ADStatus, AVMStatus, VEStatus, EStatus)
 
 from cloud_service_adapter import CloudServiceAdapter
 from storage_account_adapter import StorageAcountAdapter
@@ -75,7 +75,20 @@ class AzureFormation(Component):
         # to avoid the creation of same resource in same time
         # TODO: we still have't avoid the parrallel excution of the setup of same template
         job_ctxs = []
-        ctx = Context(job_ctxs=job_ctxs, current_job_index=0, resource_id=resource_id)
+        ctx = Context(
+            job_ctxs=job_ctxs,
+            current_job_index=0,
+            resource_id=resource_id,
+
+            subscription_id=azure_key.subscription_id,
+            pem_url=azure_key.pem_url,
+            management_host=azure_key.management_host,
+
+            # remote_created is used to store the resources we create we create remote
+            # so we can do rollback
+            # TODO: if the user create a virtual machine with vm_image, we have to config the network of it
+            #       but so far we have no way to rollback the network settings of it
+            remote_created=[])
 
         assert len(template_units) == len(virtual_environments)
 
@@ -113,7 +126,7 @@ class AzureFormation(Component):
                 # NOTE: ONLY callback purpose functions can depend on virutal_environment_id
                 virtual_environment_id=ve.id,
 
-                azure_key_id=azure_key.id,
+                # TODO: this part of info should move to super context
                 subscription_id=azure_key.subscription_id,
                 pem_url=azure_key.pem_url,
                 management_host=azure_key.management_host))
@@ -144,7 +157,6 @@ class AzureFormation(Component):
                 virtual_environment_id=ve.id,
                 expr_id=expr_id,
 
-                azure_key_id=azure_key.id,
                 subscription_id=azure_key.subscription_id,
                 pem_url=azure_key.pem_url,
                 management_host=azure_key.management_host))
@@ -184,25 +196,21 @@ class AzureFormation(Component):
         ctx = sctx.job_ctxs[sctx.current_job_index]
         adapter = CloudServiceAdapter(ctx.subscription_id, ctx.pem_url, host=ctx.management_host)
 
-        name = ctx.cloud_service_name
-        label = ctx.cloud_service_label
-        location = ctx.cloud_service_host
-        azure_key_id = ctx.azure_key_id
-
         try:
-            if not adapter.cloud_service_exists(name):
+            if not adapter.cloud_service_exists(ctx.cloud_service_name):
                 if not adapter.create_cloud_service(
-                        name=name,
-                        label=label,
-                        location=location):
+                        name=ctx.cloud_service_name,
+                        label=ctx.cloud_service_label,
+                        location=ctx.cloud_service_host):
                     self.log.error("azure virtual environment %d create remote cloud service failed via creation" %
                                    sctx.current_job_index)
                     self.__on_setup_failed(sctx)
                     return
 
-                # first delete the possible old CloudService
-                # TODO: is this necessary?
-                self.db.delete_all_objects_by(AzureCloudService, name=name)
+                # create the cloud service remote successfully, record
+                sctx.remote_created.append(Context(
+                    type="cloud_service",
+                    name=ctx.cloud_service_name))
         except Exception as e:
             self.log.error(
                 "azure virtual environment %d create remote cloud service failed: %r"
@@ -210,18 +218,6 @@ class AzureFormation(Component):
             self.__on_setup_failed(sctx)
             return
 
-        # update the table
-        if self.db.count_by(AzureCloudService, name=name) == 0:
-            self.db.add_object_kwargs(
-                AzureCloudService,
-                name=name,
-                label=label,
-                location=location,
-                status=ACSStatus.CREATED,
-                azure_key_id=azure_key_id)
-
-        # commit changes
-        self.db.commit()
         self.log.debug("azure virtual environment %d cloud service setup done" % sctx.current_job_index)
 
         # next step: setup storage
@@ -233,23 +229,23 @@ class AzureFormation(Component):
         ctx = sctx.job_ctxs[sctx.current_job_index]
         adapter = StorageAcountAdapter(ctx.subscription_id, ctx.pem_url, host=ctx.management_host)
 
-        name = ctx.storage_account_name
-        label = ctx.storage_account_label
-        location = ctx.storage_account_location
-        description = ctx.storage_account_description
-        azure_key_id = ctx.azure_key_id
-
         try:
-            if not adapter.storage_account_exists(name):
+            if not adapter.storage_account_exists(ctx.storage_account_name):
                 # TODO: use the async way
-                if not adapter.create_storage_account(name, description, label, location):
+                if not adapter.create_storage_account(
+                        ctx.storage_account_name,
+                        ctx.storage_account_description,
+                        ctx.storage_account_label,
+                        ctx.storage_account_location):
                     self.log.error("azure virtual environment %d create storage account failed via creation" %
                                    sctx.current_job_index)
                     self.__on_setup_failed(sctx)
                     return
 
-                # delete possible old accounts
-                self.db.delete_all_objects_by(AzureStorageAccount, name=name)
+                # create storage account remote successfully, record
+                sctx.remote_created.append(Context(
+                    type="storage_account",
+                    name=ctx.storage_account_name))
         except Exception as e:
             self.log.error(
                 "azure virtual environment %d create storage account failed: %r"
@@ -257,17 +253,6 @@ class AzureFormation(Component):
             self.__on_setup_failed(sctx)
             return
 
-        if self.db.count_by(AzureStorageAccount, name=name) != 0:
-            self.db.add_object_kwargs(
-                AzureStorageAccount,
-                name=name,
-                description=description,
-                label=label,
-                location=location,
-                status=ASAStatus.ONLINE,
-                azure_key_id=azure_key_id)
-
-        self.db.commit()
         self.log.debug("azure virtual environment %d storage setup done" % sctx.current_job_index)
 
         # next step: setup virtual machine
@@ -390,9 +375,20 @@ class AzureFormation(Component):
     def wait_for_add_virtual_machine(self, sctx):
         self.__check_vm_operation_status(
             sctx,
-            self.__wait_for_virtual_machine_ready,
+            self.__on_add_virtual_machine_success,
             self.__on_setup_failed,
             self.__wait_for_add_virtual_machine)
+
+    def __on_add_virtual_machine_success(self, sctx):
+        ctx = sctx.job_ctxs[sctx.current_job_index]
+        # add virtual machine success, record
+        sctx.remote_created.append(Context(
+            type="add_virtual_machine",
+            cloud_service_name=ctx.cloud_service_name,
+            deployment_name=ctx.deployment_name,
+            virtual_machine_name=ctx.virtual_machine_name))
+
+        self.__wait_for_virtual_machine_ready(sctx)
 
     def __wait_for_create_virtual_machine_deployment(self, sctx):
         self.log.debug("azure virtual environment: %d, waiting for create vm_deployment" % sctx.current_job_index)
@@ -403,9 +399,20 @@ class AzureFormation(Component):
     def wait_for_create_virtual_machine_deployment(self, sctx):
         self.__check_vm_operation_status(
             sctx,
-            self.__wait_for_deployment_ready,
+            self.__on_create_virtual_machine_deployment_success,
             self.__on_setup_failed,
             self.__wait_for_create_virtual_machine_deployment)
+
+    def __on_create_virtual_machine_deployment_success(self, sctx):
+        ctx = sctx.job_ctxs[sctx.current_job_index]
+        # create virtual machine deployment success, record
+        sctx.remote_created.append(Context(
+            type="create_virtual_machine_deployment",
+            cloud_service_name=ctx.cloud_service_name,
+            deployment_name=ctx.deployment_name,
+            virtual_machine_name=ctx.virtual_machine_name))
+
+        self.__wait_for_deployment_ready(sctx)
 
     def __config_virtual_machine(self, sctx):
         ctx = sctx.job_ctxs[sctx.current_job_index]
@@ -446,6 +453,8 @@ class AzureFormation(Component):
     def wait_for_config_virtual_machine(self, sctx):
         self.__check_vm_operation_status(
             sctx,
+
+            # currently we cannot rollback configs, so we don't record here
             self.__wait_for_virtual_machine_ready,
             self.__on_setup_failed,
             self.__wait_for_config_virtual_machine)
@@ -510,8 +519,6 @@ class AzureFormation(Component):
     def __on_setup_failed(self, sctx):
         try:
             self.log.debug("azure virtual environment %d vm setup failed" % sctx.current_job_index)
-            # TODO: rollback
-
             ctx = sctx.job_ctxs[sctx.current_job_index]
             ve = self.db.find_first_object_by(VirtualEnvironment, id=ctx.virtual_environment_id)
 
@@ -520,10 +527,45 @@ class AzureFormation(Component):
                 ve.experiment.status = EStatus.FAILED
                 self.db.commit()
         finally:
-            self.log.debug("azure virtual environment %d vm fail callback done, step to next" % sctx.current_job_index)
-            # after rollback done, step into next unit
-            sctx.current_job_index += 1
-            self.__schedule_setup(sctx)
+            self.log.debug(
+                "azure virtual environment %d vm fail callback done, roll back start"
+                % sctx.current_job_index)
+            try:
+                # rollback reverse
+                self.__setup_rollback(sctx.remote_created[::-1], sctx)
+                self.log.debug("azure virtual environment %d rollback done" % sctx.current_job_index)
+            except Exception as e:
+                self.log.error(
+                    "azure virtual environment %d error while rollback: %r" %
+                    (sctx.current_job_index, str(e)))
+
+    def __setup_rollback(self, record, sctx):
+        # TODO: the rollback process should use a async way same
+        #       as previous setup process, but for convinence,
+        #       we do it in a sync way
+        for rec in record:
+            if rec.type == "cloud_service":
+                adapter = CloudServiceAdapter(sctx.subscription_id, sctx.pem_url, host=sctx.management_host)
+                adapter.delete_cloud_service(rec.name, complete=True)
+            elif rec.type == "storage_account":
+                adapter = StorageAcountAdapter(sctx.subscription_id, sctx.pem_url, host=sctx.management_host)
+                adapter.delete_storage_account(rec.name)
+            elif rec.type == "add_virtual_machine" or rec.type == "create_virtual_machine_deployment":
+                adapter = VirtualMachineAdapter(sctx.subscription_id, sctx.pem_url, host=sctx.management_host)
+
+                if rec.type == "add_virtual_machine":
+                    adapter.delete_virtual_machine(
+                        rec.cloud_service_name,
+                        rec.deployment_name,
+                        rec.virtual_machine_name,
+                        True)
+                else:
+                    adapter.delete_deployment(
+                        rec.cloud_service_name,
+                        rec.deployment_name,
+                        True)
+            else:
+                self.log.warn("unknown record type: %s" % rec.type)
 
     def __setup_virtual_machine_done(self, sctx):
         self.log.debug("azure virtual environment %d vm setup done" % sctx.current_job_index)

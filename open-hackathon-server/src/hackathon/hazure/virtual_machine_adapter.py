@@ -30,6 +30,7 @@ from azure.servicemanagement.servicemanagementservice import ServiceManagementSe
 from azure.common import AzureMissingResourceHttpError
 
 from service_adapter import ServiceAdapter
+from constants import ASYNC_OP_RESULT
 
 
 class VirtualMachineAdapter(ServiceAdapter):
@@ -184,3 +185,47 @@ class VirtualMachineAdapter(ServiceAdapter):
                         if instance_endpoint.name == endpoint_name:
                             return instance_endpoint.vip, instance_endpoint.public_port
         return None, None
+
+    def delete_virtual_machine(self, service_name, deployment_name, role_name, complete=False):
+        """delete a virutal machine from azure
+
+        this is the sync wrapper of ServiceManagementService.delete_role
+        """
+        try:
+            req = self.service.delete_role(service_name, deployment_name, role_name, complete=complete)
+        except Exception as e:
+            self.log.error("delete vm %s failed: %r" % (role_name, str(e)))
+            raise e
+
+        res = self.service.wait_for_operation_status(
+            req.request_id,
+            progress_callback=None,
+            success_callback=None,
+            failure_callback=None)
+
+        if res and res.status == ASYNC_OP_RESULT.SUCCEEDED:
+            self.log.debug("vm %s, delete done" % role_name)
+        else:
+            self.log.debug("vm %s, delete failed" % role_name)
+
+    def delete_deployment(self, service_name, deployment_name, complete=False):
+        """delete a deployment from azure
+
+        this is the sync wrapper of ServiceManagementService.delete_deployment
+        """
+        try:
+            req = self.service.delete_deployment(service_name, deployment_name, delete_vhd=complete)
+        except Exception as e:
+            self.log.error("delete deployment %s failed: %r" % (deployment_name, str(e)))
+            raise e
+
+        res = self.service.wait_for_operation_status(
+            req.request_id,
+            progress_callback=None,
+            success_callback=None,
+            failure_callback=None)
+
+        if res and res.status == ASYNC_OP_RESULT.SUCCEEDED:
+            self.log.debug("deployment %s, delete done" % deployment_name)
+        else:
+            self.log.debug("deployment %s, delete failed" % deployment_name)

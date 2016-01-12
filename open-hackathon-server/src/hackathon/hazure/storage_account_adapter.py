@@ -103,6 +103,25 @@ class StorageAcountAdapter(ServiceAdapter):
         # TODO
         raise NotImplemented
 
-    def delete_storage_account(self):
-        # TODO
-        raise NotImplemented
+    def delete_storage_account(self, service_name):
+        """delete a storage account from azure
+
+        this is the sync wrapper of ServiceManagementService.delete_storage_account
+        """
+        try:
+            req = self.service.delete_storage_account(service_name)
+        except Exception as e:
+            self.log.error("delete storage account failed %r" % service_name)
+            raise e
+
+        res = self.service.wait_for_operation_status(
+            req.request_id,
+            timeout=1800,  # to avoid timeout error
+            progress_callback=None,
+            success_callback=None,
+            failure_callback=None)
+
+        if res and res.status == ASYNC_OP_RESULT.SUCCEEDED:
+            self.log.debug("storage account %s, delete done" % service_name)
+        else:
+            self.log.debug("storage account %s, delete failed" % service_name)

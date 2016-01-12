@@ -86,7 +86,7 @@ class AzureTemplateUnit(TemplateUnit):
         return self.virtual_environment[AZURE_UNIT.SYSTEM_CONFIG]
 
     def get_os_virtual_hard_disk(self):
-        if self.is_vm_image:
+        if self.is_vm_image():
             return None
 
         i = self.virtual_environment[AZURE_UNIT.IMAGE]

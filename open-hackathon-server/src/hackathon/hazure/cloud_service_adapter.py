@@ -104,6 +104,25 @@ class CloudServiceAdapter(ServiceAdapter):
         # TODO
         raise NotImplementedError
 
-    def delete_cloud_service(self):
-        # TODO
-        raise NotImplementedError
+    def delete_cloud_service(self, service_name, complete=False):
+        """delete a could service on azure
+        set complete to True to delete all OS/data disks
+
+        this is a sync wrapper on ServiceManagementService.delete_hosted_service
+        """
+        try:
+            req = self.service.delete_hosted_service(service_name, complete)
+        except Exception as e:
+            self.log.error("delete cloud service %s failed: %r" % (service_name, str(e)))
+            raise e
+
+        res = self.service.wait_for_operation_status(
+            req.request_id,
+            progress_callback=None,
+            success_callback=None,
+            failure_callback=None)
+
+        if res and res.status == ASYNC_OP_RESULT.SUCCEEDED:
+            self.log.debug("service cloud %s, delete done" % service_name)
+        else:
+            self.log.debug("service cloud %s, delete failed" % service_name)
