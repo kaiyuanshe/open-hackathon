@@ -34,7 +34,7 @@ from hackathon.constants import (
     ADStatus, AVMStatus, VEStatus, EStatus)
 
 from cloud_service_adapter import CloudServiceAdapter
-from storage_account_adapter import StorageAcountAdapter
+from storage_account_adapter import StorageAccountAdapter
 from virtual_machine_adapter import VirtualMachineAdapter
 from utils import get_network_config, get_remote_parameters
 from constants import ASYNC_OP_QUERY_INTERVAL, ASYNC_OP_RESULT, ASYNC_OP_QUERY_INTERVAL_LONG
@@ -227,7 +227,7 @@ class AzureFormation(Component):
     def setup_storage(self, sctx):
         # get context from super context
         ctx = sctx.job_ctxs[sctx.current_job_index]
-        adapter = StorageAcountAdapter(ctx.subscription_id, ctx.pem_url, host=ctx.management_host)
+        adapter = StorageAccountAdapter(ctx.subscription_id, ctx.pem_url, host=ctx.management_host)
 
         try:
             if not adapter.storage_account_exists(ctx.storage_account_name):
@@ -548,7 +548,7 @@ class AzureFormation(Component):
                 adapter = CloudServiceAdapter(sctx.subscription_id, sctx.pem_url, host=sctx.management_host)
                 adapter.delete_cloud_service(rec.name, complete=True)
             elif rec.type == "storage_account":
-                adapter = StorageAcountAdapter(sctx.subscription_id, sctx.pem_url, host=sctx.management_host)
+                adapter = StorageAccountAdapter(sctx.subscription_id, sctx.pem_url, host=sctx.management_host)
                 adapter.delete_storage_account(rec.name)
             elif rec.type == "add_virtual_machine" or rec.type == "create_virtual_machine_deployment":
                 adapter = VirtualMachineAdapter(sctx.subscription_id, sctx.pem_url, host=sctx.management_host)

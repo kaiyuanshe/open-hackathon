@@ -24,7 +24,7 @@ THE SOFTWARE.
 """
 
 __author__ = "rapidhere"
-__all__ = ["StorageAcountAdapter"]
+__all__ = ["StorageAccountAdapter"]
 
 from azure.servicemanagement.servicemanagementservice import ServiceManagementService
 from azure.common import AzureHttpError, AzureMissingResourceHttpError
@@ -33,13 +33,13 @@ from service_adapter import ServiceAdapter
 from constants import ASYNC_OP_RESULT
 
 
-class StorageAcountAdapter(ServiceAdapter):
+class StorageAccountAdapter(ServiceAdapter):
     """A thin wrapper on ServiceManagementServie class
 
     wrap up some interface to work with Azure Storage Account
     """
     def __init__(self, subscription_id, cert_url, *args, **kwargs):
-        super(StorageAcountAdapter, self).__init__(
+        super(StorageAccountAdapter, self).__init__(
             ServiceManagementService(subscription_id, cert_url, *args, **kwargs))
 
     def storage_account_exists(self, name):
