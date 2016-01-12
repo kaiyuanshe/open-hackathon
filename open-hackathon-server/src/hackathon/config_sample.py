@@ -83,7 +83,6 @@ Config = {
         "api": "http://www.idehub.cn/api/ide"
     },
     "email": {
-        "sender": "",
         "host": "",
         "port": 587,
         "username": "",
@@ -96,13 +95,23 @@ Config = {
             "account_sid": "",
             "auth_token": "",
             "app_id": "",
-            "server_ip": "",
+            "server_ip": "https://app.cloopen.com",
             "server_port": "8883",
             "soft_version": "2013-12-26",
             "play_times": 3,
             "display_number": "",
             "response_url": "",
             "language": "zh"
+        }
+    },
+    "sms": {
+        "enabled": False,
+        "provider": "",
+        "china_telecom": {
+            "url": "http://api.189.cn/v2/emp/templateSms/sendSms",
+            "app_id": "",
+            "app_secret": "",
+            "url_access_token": "https://oauth.api.189.cn/emp/oauth2/v3/access_token"
         }
     }
 }
