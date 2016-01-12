@@ -127,7 +127,7 @@ class AzureCertManager(Component):
         pem_contex = Context(
             hackathon_name=hackathon.name,
             file_name=pem_file_name,
-            file_type=FILE_TYPE.AZURE_CERT,
+            file_type=FILE_TYPE.AZURE_PEM,
             content=file(pem_url)
         )
         self.log.debug("saving pem file [%s] to azure" % pem_file_name)

@@ -80,6 +80,7 @@ class Cryptor(Component):
                 chunk = chunk[:-padding_length]
                 finished = True
             out_file.write(chunk)
+        out_file.close()
 
     def recover_local_file(self, remote_url, local_url):
         remote_pem = urlopen(remote_url)
