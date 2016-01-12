@@ -1,0 +1,42 @@
+{
+  "HackathonNoticeListResource": {
+    "get": {
+      "input": {
+        "description": "list hackathon notices",
+        "type": "object",
+        "properties": {
+          "hackathon_name": {
+            "description": "filter by hackathon_name",
+            "type": "string",
+            "required": false
+          },
+          "type": {
+            "description": "filter by hackathon_notice type",
+            "pattern": "^[0-9]+$",
+            "required": false
+          },
+          "order_by": {
+            "description": "order by time or type",
+            "type": "string",
+            "required": false
+          },
+          "show": {
+            "description": "show all hackathon_notices or use pagination",
+            "type": "string",
+            "required": false
+          },
+          "page": {
+            "description": "page number, start from 1",
+            "pattern": "^[0-9]+$",
+            "required": false
+          },
+          "per_page": {
+            "description": "number of items shown in each page",
+            "pattern": "^[0-9]+$",
+            "required": false
+          },
+        }
+      }
+    }
+  }
+}

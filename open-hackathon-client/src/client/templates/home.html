@@ -659,6 +659,20 @@
 {% endblock %}
 
 {% block script %}
+    <script id="notice_list_template" type="text/x-jquery-tmpl">
+     {% raw %}
+        <li>
+        {{if link==''}}
+            ${content}<span>${moment(update_time).format('YYYY-MM-DD')}</span>
+        {{else}}
+            <a href="${link}">
+                ${content}<span>${moment(update_time).format('YYYY-MM-DD')}</span>
+            </a>
+        {{/if}}
+        </li>
+    {% endraw %}
+
+    </script>
     <script id="talent_list_template" type="text/x-jquery-tmpl">
           <div class="col-lg-2 col-md-4 col-xs-6">
                 <div class="oh-item">

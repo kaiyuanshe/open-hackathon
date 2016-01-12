@@ -55,6 +55,7 @@ def init_routes():
     api.add_resource(GranteAwardsResource, "/api/grantedawards")
     api.add_resource(TalentResource, "/api/talent/list")  # list talents(达人)
     api.add_resource(HackathonTagNamesResource, "/api/tags")  # all distinct tag names
+    api.add_resource(HackathonNoticeListResource, "/api/hackathon/notice/list")  # get all notice
 
     # APIs for user(participant) to join hackathon
     api.add_resource(GuacamoleResource, "/api/user/guacamoleconfig")  # get remote paras for guacamole
@@ -105,4 +106,3 @@ def init_routes():
     api.add_resource(AdminHostserverListResource, "/api/admin/hostserver/list")  # get the list of host server
     api.add_resource(AdminHostserverResource, "/api/admin/hostserver")  # create/update/delete/get a host server
     api.add_resource(AdminHackathonNoticeResource, "/api/admin/hackathon/notice")  # create/update/delete/get hackathon notice
-    api.add_resource(HackathonNoticeListResource, "/api/admin/hackathon/notice/list")  # get all notice

@@ -332,18 +332,18 @@ class HackathonNotice(DBBase):
     __tablename__ = 'hackathon_notice'
 
     id = Column(Integer, primary_key=True)
-    type = Column(Integer, default=0) #0: global, 1: local
+    type = Column(Integer)
     create_time = Column(TZDateTime, default=get_now())
     update_time = Column(TZDateTime, default=get_now())
     content = Column(Text)
     related_id = Column(Integer)
-    link = Column(String(100))
+    link = Column(Text)
 
     creator_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
-    user = relationship('User', backref=backref('notice', lazy='dynamic'))
+    user = relationship('User', backref=backref('notices', lazy='dynamic'))
 
     hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
-    hackathon = relationship('Hackathon', backref=backref('notice', lazy='dynamic'))
+    hackathon = relationship('Hackathon', backref=backref('notices', lazy='dynamic'))
 
     def __init__(self, **kwargs):
         super(HackathonNotice, self).__init__(**kwargs)

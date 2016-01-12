@@ -51,58 +51,58 @@
             }
         })
 
-        oh.api.admin.hackathon.notice.list.get({
-            
+        oh.api.hackathon.notice.list.get({
+            query: {
+                order_by: 'time',
+                show: 'pagination',
+                page: 1,
+                per_page: 6
+            }
         }, function(data) {
-            var tmpl = '<li><a href="{link}">{content}\
-                        <span>{update_time}</span></a></li>';
-
-            if(data.length > 0) {
-                //order: last, first, second, ..., last, first
-                var param = {update_time: moment(data[data.length-1].update_time).format('YYYY-MM-DD'), link: data[data.length-1].link, content: data[data.length-1].content};
-                $('.oh-notice-list').append(tmpl.format(param));
-                for(var i = 0; i < data.length; ++i) {
-                    param = {update_time: moment(data[i].update_time).format('YYYY-MM-DD'), link: data[i].link, content: data[i].content};
-                    $('.oh-notice-list').append(tmpl.format(param));
-                }
-                param = {update_time: moment(data[0].update_time).format('YYYY-MM-DD'), link: data[0].link, content: data[0].content};
-                $('.oh-notice-list').append(tmpl.format(param));
+            if(data.error) {
+                alert(data.error.message);
+            } else if(data.items.length > 0) {
+                data = data.items;
+                //order: last', first, second, ..., last, first'
+                //rolling loop, if it reaches last'/first', moves to last/first
+                $('.oh-notice-list').append($('#notice_list_template').tmpl([].concat(data[data.length-1], data, data[0])));
 
                 var totoalNoticeCount = data.length;
-                var firstNoticeElement = $('.oh-notice-list > li:first');
-                var minMarginVal = -40*(totoalNoticeCount+1);
-                var maxMarginVal = 0;
-                firstNoticeElement.css({"margin-top":  "-40px"});
+                var firstNotice = $('.oh-notice-list > li:first');
+                var noticeHeight = 40;
+                var minMarginTopVal = -noticeHeight*(totoalNoticeCount+1);
+                var maxMarginTopVal = 0;
+                firstNotice.css({"margin-top":  "-" + noticeHeight + "px"});
                 
                 $('#btn-notice-up').click(function(){
-                    firstNoticeElement.stop(true, true).animate({"margin-top": "-=40px"}, 500, function() {
-                        var marginVal = parseInt(firstNoticeElement.css("margin-top").slice(0, -2));
-                        if(marginVal == minMarginVal) {
-                            firstNoticeElement.css({"margin-top": (maxMarginVal-40) + "px"});
+                    firstNotice.stop(true, true).animate({"margin-top": "-=" + noticeHeight + "px"}, 500, function() {
+                        var marginVal = parseInt(firstNotice.css("margin-top").slice(0, -2));
+                        if(marginVal == minMarginTopVal) {
+                            firstNotice.css({"margin-top": (maxMarginTopVal-noticeHeight) + "px"});
                         }
                     });
                 });
 
                 $('#btn-notice-down').click(function(){
-                    firstNoticeElement.stop(true, true).animate({"margin-top": "+=40px"}, 500, function() {
-                        var marginVal = parseInt(firstNoticeElement.css("margin-top").slice(0, -2));
-                        if(marginVal == maxMarginVal) {
-                            firstNoticeElement.css({"margin-top": (minMarginVal+40) + "px"});
+                    firstNotice.stop(true, true).animate({"margin-top": "+="+ noticeHeight + "px"}, 500, function() {
+                        var marginVal = parseInt(firstNotice.css("margin-top").slice(0, -2));
+                        if(marginVal == maxMarginTopVal) {
+                            firstNotice.css({"margin-top": (minMarginTopVal+noticeHeight) + "px"});
                         }
                     });
                 });
 
-                //automacally scrolling notice
+                //automatically rolling notice
                 setInterval(function() {
-                    firstNoticeElement.stop(true, true).animate({"margin-top": "-=40px"}, 500, function() {
-                        var marginVal = parseInt(firstNoticeElement.css("margin-top").slice(0, -2));
-                        if(marginVal == minMarginVal) {
-                            firstNoticeElement.css({"margin-top": (maxMarginVal-40) + "px"});
+                    firstNotice.stop(true, true).animate({"margin-top": "-=" + noticeHeight + "px"}, 500, function() {
+                        var marginVal = parseInt(firstNotice.css("margin-top").slice(0, -2));
+                        if(marginVal == minMarginTopVal) {
+                            firstNotice.css({"margin-top": (maxMarginTopVal-noticeHeight) + "px"});
                         }
                     });
                 }, 5000);
-            }
-            else { //no notice
+                
+            } else { //no notice
                 $('.oh-notice-list').append("<li>无</li>");
                 $('#btn-notice-up').css("display", "none");
                 $('#btn-notice-down').css("display", "none");

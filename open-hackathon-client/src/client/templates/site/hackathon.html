@@ -41,21 +41,7 @@
 
                         <h2 id="new" class="title">最新动态 <span></span></h2>
 
-                        <div class="oh-body grey-text">
-                            {#                            <dl class="oh-latest-news">#}
-                            {#                                <dt>昨天</dt>#}
-                            {#                                <dd><span class="t-bullhorn"></span>#}
-                            {#                                    公告消息公告消息公告消息公告消息公告消息公告消息公告消息公告消息#}
-                            {#                                </dd>#}
-                            {#                            </dl>#}
-                            {#                            <dl class="oh-latest-news">#}
-                            {#                                <dt>4天前</dt>#}
-                            {#                                <dd><span class="t-edit"></span>#}
-                            {#                                    2015/09/20 周日 00:00#}
-                            {#                                </dd>#}
-                            {#                            </dl>#}
-                            <dl class="oh-latest-news" id="oh-latest-news">
-                            </dl>
+                        <div class="oh-body grey-text" id="oh-latest-news">
                         </div>
 
                         <h2 id="team" class="title">目前组队 <span>（0）</span></h2>
@@ -321,6 +307,21 @@
 {% endblock %}
 
 {% block script %}
+    <script id="notice_list_temp" type="text/x-jquery-tmpl">
+     {% raw %}
+     <dl class="oh-latest-news">
+        <dt>${moment(update_time).format('YYYY/MM/DD')}</dt>
+        <dd style="word-break: break-all">
+        {{if link==''}}
+            <span class="t-bullhorn"></span>${content}
+        {{else}}
+            <span class="t-bullhorn"></span><a href="${link}">${content}</a>
+        {{/if}}
+        </dd>
+    </dl>
+    {% endraw %}
+
+    </script>
     <script id="team_list_temp" type="text/x-jquery-tmpl">
        {% raw %}
         <div class="col-xs-3">

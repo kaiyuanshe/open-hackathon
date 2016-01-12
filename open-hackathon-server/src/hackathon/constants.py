@@ -506,3 +506,10 @@ class LOGIN_PROVIDER:
     WEIBO = 8
     GITCAFE = 16
     ALAUDA = 32
+
+
+class HACKATHON_NOTICE_TYPE:
+    DEFAULT = 0  # default hackathon notice type
+    STATE = 1    # hackathon state changes, e.g. create/edit/online/offline
+    AWARDS = 2   # hackathon awards
+    ENVIRONMENT = 3 # hackathon environment changes

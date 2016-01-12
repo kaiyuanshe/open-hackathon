@@ -22,7 +22,7 @@
                     <thead>
                         <tr>
                             <th>内容</th>
-                            <th>链接</th>
+                            <th>跳转链接</th>
                             <th>类型</th>
                             <th>发布时间</th>
                             <th>更新时间</th>
@@ -51,22 +51,12 @@
                         </div>
                     </div>
                     <div class="form-group has-feedback">
-                        <label class="col-md-3 control-label">动态链接</label>
+                        <label class="col-md-3 control-label">跳转链接</label>
                         <div class="col-md-6">
                             <input class="form-control" name="add_notice_link"
                                    id="add_notice_link" placeholder="动态跳转链接">
                         </div>
                     </div>
-                    <div class="form-group has-feedback">
-                        <label class="col-md-3 control-label">动态类型</label>
-                        <div class="col-md-6">
-                            <div class="form-control" style="border-width: 0">
-                                <input type="radio" name="add_notice_type" value="0"> 在首页显示
-                                <input type="radio" name="add_notice_type" value="1" checked="true"> 在活动页显示
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="form-group has-feedback">
                         <div class="col-sm-offset-3 col-sm-6">
                             <button type="submit" class="btn btn-primary"> 确定</button>
@@ -113,7 +103,7 @@
                 </button>
                 <h4 class="modal-title">更改动态内容</h4>
             </div>
-            <form class="form-horizontal" id="update_hackathon_notice_form"> 
+            <form class="form-horizontal" id="hackathon_notice_update_form"> 
                 <div class="modal-body">
                     <div class="form-group has-feedback">
                         <label class="col-md-3 control-label">动态内容</label>
@@ -124,19 +114,10 @@
                         </div>
                     </div>
                     <div class="form-group has-feedback">
-                        <label class="col-md-3 control-label">动态链接</label>
+                        <label class="col-md-3 control-label">跳转链接</label>
                         <div class="col-md-6">
                             <input class="form-control" name="update_notice_link"
                                    id="update_notice_link" placeholder="动态跳转链接">
-                        </div>
-                    </div>
-                    <div class="form-group has-feedback">
-                        <label class="col-md-3 control-label">动态类型</label>
-                        <div class="col-md-6">
-                            <div class="form-control" style="border-width: 0">
-                                <input type="radio" name="update_notice_type" value="0" id="update_notice_type_0"> 在首页显示
-                                <input type="radio" name="update_notice_type" value="1" id="update_notice_type_1"> 在活动页显示
-                            </div>
                         </div>
                     </div>
                 </div>

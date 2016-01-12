@@ -138,7 +138,6 @@ class HackathonRegistrationListResource(HackathonResource):
         return register_manager.get_hackathon_registration_list(args['num'])
 
 
-
 """Resources for user(participant) to join hackathon"""
 
 
@@ -689,17 +688,17 @@ class AdminHackathonCanOnLineResource(HackathonResource):
 
 
 class AdminHackathonNoticeResource(HackathonResource):
-    @hackathon_name_required
+    @admin_privilege_required
     def get(self):
-        return hackathon_manager.get_hackathon_notice(g.hackathon, self.context().type)
+        return hackathon_manager.get_hackathon_notice(self.context().id)
 
     @admin_privilege_required
     def post(self):
-        return hackathon_manager.create_hackathon_notice(g.hackathon, self.context())
+        return hackathon_manager.create_hackathon_notice(g.hackathon, g.user, self.context())
 
     @admin_privilege_required
     def put(self):
-        return hackathon_manager.update_hackathon_notice(g.hackathon, self.context())
+        return hackathon_manager.update_hackathon_notice(g.hackathon, g.user, self.context())
 
     @admin_privilege_required
     def delete(self):
@@ -708,4 +707,4 @@ class AdminHackathonNoticeResource(HackathonResource):
 
 class HackathonNoticeListResource(HackathonResource):
     def get(self):
-        return hackathon_manager.get_hackathon_notice_global()
+        return hackathon_manager.get_hackathon_notice_list(self.context())

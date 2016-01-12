@@ -25,8 +25,21 @@
 (function($, oh) {
     var currentHackathon = oh.comm.getCurrentHackathon();
 
+    function changeNoticeTypeDescription(items) {
+        var noticeTypeDescription = {
+            0: '默认',
+            1: '活动信息变更',
+            2: '获奖信息',
+            3: '环境变更'
+        }
+
+        var length = items.length;
+        for(var i = 0; i < length; ++i) {
+            items[i].type = noticeTypeDescription[items[i].type];
+        }
+    }
+
     function toggleTable(status){
-        //status 0:show all admin users, 1:show search bar, 2:show search results
         if(status == 0){
             $('#hackathon_notice_list_table').show();
             $('#hackathon_notice_add_table').hide();
@@ -36,31 +49,22 @@
         }
     }
 
-    // initial table to show admin list
-    function pageLoad(){
-        var list = $('#hackathon_notice_list');
-
-        var ALL_HACKATHON_NOTICE = 2;
-        oh.api.admin.hackathon.notice.get({
-            header: {
-                hackathon_name: currentHackathon
-            },
+    // call api to get hackathon notices
+    function getHackathonNotices(){
+        oh.api.hackathon.notice.list.get({
             query: {
-                type: ALL_HACKATHON_NOTICE
+                hackathon_name: currentHackathon,
+                order_by: 'time'
             }
         }, function(data) {
-            for(var i = 0; i < data.length; ++i) {
-                if(data[i].type == '0') data[i].type = '在首页显示';
-                else                    data[i].type = '在活动页显示';
+            if(data.error){
+                alert(data.error.message);
+            }else{
+                changeNoticeTypeDescription(data.items);
+                $('#hackathon_notice_list').empty().append($('#hackathon_notice_list_template').tmpl(data.items));
+                oh.comm.removeLoading();
             }
-            list.empty().append($('#hackathon_notice_list_template').tmpl(data, {}));
-            oh.comm.removeLoading();
         });
-    }
-
-    function clearNoticeVal() {
-        $('#add_notice_content').val('');
-        $('#add_notice_link').val('');
     }
 
     // call api to add hackathon notice
@@ -68,7 +72,7 @@
         data = {};
         data.content = $.trim($('#add_notice_content').val());
         data.link    = $.trim($('#add_notice_link').val());
-        data.type    = $.trim($('input[name="add_notice_type"]:checked').val());
+        data.type    = 0;
 
         return oh.api.admin.hackathon.notice.post({
             body: data,
@@ -94,7 +98,7 @@
             }
         }, function(data) {
             if(data.error){
-                alert(data.error.message)
+                alert(data.error.message);
             }else{
                 oh.comm.alert('提示', '更新成功');
             }
@@ -110,21 +114,25 @@
             }
         }, function(data) {
             if(data.error){
-                alert(data.error.message)
+                alert(data.error.message);
             }else{
                 oh.comm.alert('提示', '删除成功');
             }
         });
     }
 
-    function getHackathonNoticeUpdate(data) {
+    function clearHackathonNoticeVal() {
+        $('#add_notice_content').val('');
+        $('#add_notice_link').val('');
+    }
+
+    function setUpdateHackathonNotice(data) {
         data.content = $.trim($('#update_notice_content').val());
         data.link    = $.trim($('#update_notice_link').val());
-        data.type    = $.trim($('input[name="update_notice_type"]:checked').val());
     }
 
     function init(){
-        pageLoad();
+        getHackathonNotices();
         toggleTable(0);
         $('#hackathon_notice_update_form').bootstrapValidator({
             submitButtons: 'button[data-type="submit"]'
@@ -133,12 +141,12 @@
         $('#hackathon_notice_add_form').bootstrapValidator().on('success.form.bv', function (e) {
             e.preventDefault();
             addHackathonNotice().then(function(){
-                pageLoad();
+                getHackathonNotices();
             });
         });
 
         $('[data-type="new"]').click(function(e){
-            clearNoticeVal();
+            clearHackathonNoticeVal();
             toggleTable(1);
         });
 
@@ -151,7 +159,7 @@
         }).on('click','[data-type="ok"]',function(e){
             var data = list.data('tmplItem').data;
             deleteHackathonNotice(data.id).then(function(){
-                pageLoad();
+                getHackathonNotices();
             });
 
             deleteHackathonNoticeModal.modal('hide');
@@ -163,18 +171,12 @@
             $('#update_notice_content').val(data.content);
             $('#update_notice_link').val(data.link);
 
-            if(data.type == '0') {
-                $('#update_notice_type_0').prop("checked", true);
-            }
-            else {
-                $('#update_notice_type_1').prop("checked", true);
-            }
             
         }).on('click','[data-type="submit"]',function(e){
             var data = list.data('tmplItem').data;
-            getHackathonNoticeUpdate(data);
+            setUpdateHackathonNotice(data);
             updateHackathonNotice(data).then(function(){
-                pageLoad();
+                getHackathonNotices();
             });
 
             updateHackathonNoticeModal.modal('hide');
