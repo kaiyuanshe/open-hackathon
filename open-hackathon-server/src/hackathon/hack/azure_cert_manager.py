@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 """
 Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
- 
+
 The MIT License (MIT)
- 
+
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -30,7 +30,7 @@ import os
 from os.path import dirname, realpath, abspath, isfile
 import commands
 
-from hackathon.database import AzureKey, HackathonAzureKey, Hackathon
+from hackathon.database import AzureKey, HackathonAzureKey, Hackathon, Experiment
 from hackathon import RequiredFeature, Component, Context
 from hackathon.hackathon_response import not_found, ok
 from hackathon.constants import FILE_TYPE
@@ -123,6 +123,16 @@ class AzureCertManager(Component):
         azure_key.cert_url = context.url
         self.db.commit()
         return azure_key.cert_url
+
+    def get_certificates_by_expr(self, expr_id):
+        """Get certificates by experiment id
+        """
+        expr = self.db.get_object(Experiment, expr_id)
+        hak = self.db.find_all_objects_by(HackathonAzureKey, hackathon_id=expr.hackathon_id)
+        if not hak:
+            raise Exception("no azure key configured")
+
+        return map(lambda key: self.db.get_object(AzureKey, key.azure_key_id), hak)
 
     def get_certificates(self, hackathon):
         """Get certificates by hackathon

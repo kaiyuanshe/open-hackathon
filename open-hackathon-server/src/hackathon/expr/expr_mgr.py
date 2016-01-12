@@ -59,6 +59,7 @@ class ExprManager(Component):
     alauda_docker = RequiredFeature("alauda_docker")
     team_manager = RequiredFeature("team_manager")
     azure_formation = RequiredFeature("azure_formation")
+    azure_cert_manager = RequiredFeature("azure_cert_manager")
 
     def start_expr(self, user_id, template_name, hackathon_name=None):
         """
@@ -130,8 +131,9 @@ class ExprManager(Component):
                     # af.stop(expr_id, AVMStatus.STOPPED_DEALLOCATED)
                     template = self.db.get_object(Template, expr.template_id)
                     template_content = self.template_library.load_template(template)
-                    azure_key_id = self.hosted_docker.load_azure_key_id(expr.id)
-                    azure_key = self.db.get_object(AzureKey, azure_key_id)
+                    azure_keys = self.azure_cert_manager.get_certificates_by_expr(expr_id)
+                    # TODO: which key to use
+                    azure_key = azure_keys[0]
 
                     # TODO: elimate virtual_environments arg and expr_id arg
                     self.azure_formation.stop_vm(
@@ -310,8 +312,9 @@ class ExprManager(Component):
                 # af = AzureFormation(self.hosted_docker.load_azure_key_id(expr.id))
                 # af.create(expr.id)
                 template_content = self.template_library.load_template(template)
-                azure_key_id = self.hosted_docker.load_azure_key_id(expr.id)
-                azure_key = self.db.get_object(AzureKey, azure_key_id)
+                azure_keys = self.azure_cert_manager.get_certificates_by_expr(expr.id)
+                # TODO: which key to use?
+                azure_key = azure_keys[0]
 
                 # create virtual environments for units
                 expr_id = expr.id
