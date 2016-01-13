@@ -671,6 +671,9 @@ class HackathonAzureKey(DBBase):
     azure_key = relationship('AzureKey', backref=backref('hackathon_azure_key_a', lazy='dynamic'))
 
 
+# disabled by: rapidhere
+# current i don't known the usage of the log
+# so i plan to  disable this table
 class AzureLog(DBBase):
     """
     Azure operation log for every experiment
@@ -728,8 +731,15 @@ class AzureCloudService(DBBase):
     location = Column(String(50))
     # ACSStatus in enum.py
     status = Column(String(50))
-    experiment_id = Column(Integer, ForeignKey('experiment.id', ondelete='CASCADE'))
-    experiment = relationship('Experiment', backref=backref('azure_cloud_service', lazy='dynamic'))
+
+    # AzureCloudService should have nothing to do with experiment
+    # instead, it should belong to a azure_key
+    #
+    # experiment_id = Column(Integer, ForeignKey('experiment.id', ondelete='CASCADE'))
+    # experiment = relationship('Experiment', backref=backref('azure_cloud_service', lazy='dynamic'))
+    azure_key_id = Column(Integer, ForeignKey("azure_key.id", ondelete='CASCADE'))
+    azure_key = relationship('AzureKey', backref=backref("azure_cloud_service", lazy="dynamic"))
+
     create_time = Column(TZDateTime, default=get_now())
     last_modify_time = Column(TZDateTime, default=get_now())
 
