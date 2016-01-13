@@ -32,7 +32,7 @@ from time import strftime, sleep
 
 sys.path.append("..")
 
-from azure.storage.blobservice import BlobService
+from azure.storage.blob import BlobService
 from azure.servicemanagement import (ConfigurationSet, ConfigurationSetInputEndpoint, OSVirtualHardDisk,
                                      LinuxConfigurationSet, ServiceManagementService)
 import json
@@ -681,5 +681,3 @@ class DockerHostManager(Component):
                                        DockerHostServer.state == DockerHostServerStatus.DOCKER_READY,
                                        DockerHostServer.disabled == DockerHostServerDisable.ABLE)
         return len(vms) > 0
-
-

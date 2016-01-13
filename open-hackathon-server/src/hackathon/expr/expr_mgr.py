@@ -41,7 +41,7 @@ from hackathon import Component, RequiredFeature, Context
 from hackathon.constants import EStatus, VERemoteProvider, VE_PROVIDER, PortBindingType, VEStatus, ReservedUser, \
     AVMStatus, CLOUD_ECLIPSE
 from hackathon.database import VirtualEnvironment, DockerHostServer, Experiment, User, HackathonTemplateRel, \
-    DockerContainer
+    DockerContainer, AzureKey, Template
 from hackathon.azureformation.azureFormation import AzureFormation
 from hackathon.hackathon_response import internal_server_error, not_found, ok
 
@@ -58,6 +58,8 @@ class ExprManager(Component):
     hosted_docker = RequiredFeature("hosted_docker")
     alauda_docker = RequiredFeature("alauda_docker")
     team_manager = RequiredFeature("team_manager")
+    azure_formation = RequiredFeature("azure_formation")
+    azure_cert_manager = RequiredFeature("azure_cert_manager")
 
     def start_expr(self, user_id, template_name, hackathon_name=None):
         """
@@ -124,9 +126,18 @@ class ExprManager(Component):
             else:
                 try:
                     # todo support delete azure vm
-                    hosted_docker = RequiredFeature("hosted_docker")
-                    af = AzureFormation(hosted_docker.load_azure_key_id(expr_id))
-                    af.stop(expr_id, AVMStatus.STOPPED_DEALLOCATED)
+                    # hosted_docker = RequiredFeature("hosted_docker")
+                    # af = AzureFormation(hosted_docker.load_azure_key_id(expr_id))
+                    # af.stop(expr_id, AVMStatus.STOPPED_DEALLOCATED)
+                    template = self.db.get_object(Template, expr.template_id)
+                    template_content = self.template_library.load_template(template)
+                    azure_keys = self.azure_cert_manager.get_certificates_by_expr(expr_id)
+                    # TODO: which key to use
+                    azure_key = azure_keys[0]
+
+                    # TODO: elimate virtual_environments arg and expr_id arg
+                    self.azure_formation.stop_vm(
+                        expr_id, azure_key, template_content.units, expr.virtual_environments.all(), expr_id)
                 except Exception as e:
                     self.log.error(e)
                     return internal_server_error('Failed stopping azure')
@@ -298,8 +309,30 @@ class ExprManager(Component):
             expr.status = EStatus.STARTING
             self.db.commit()
             try:
-                af = AzureFormation(self.hosted_docker.load_azure_key_id(expr.id))
-                af.create(expr.id)
+                # af = AzureFormation(self.hosted_docker.load_azure_key_id(expr.id))
+                # af.create(expr.id)
+                template_content = self.template_library.load_template(template)
+                azure_keys = self.azure_cert_manager.get_certificates_by_expr(expr.id)
+                # TODO: which key to use?
+                azure_key = azure_keys[0]
+
+                # create virtual environments for units
+                expr_id = expr.id
+                ves = []
+                for unit in template_content.units:
+                    ve = VirtualEnvironment(
+                        provider=VE_PROVIDER.AZURE,
+                        # TODO: when to set name?
+                        name=self.azure_formation.get_virtual_machine_name(unit.get_virtual_machine_name(), expr_id),
+                        image=unit.get_image_name(),
+                        status=VEStatus.INIT,
+                        remote_provider=VERemoteProvider.Guacamole,
+                        experiment=expr)
+                    self.db.add_object(ve)
+                    ves.append(ve)
+
+                # TODO: elimate virtual_environments arg
+                self.azure_formation.start_vm(expr_id, azure_key, template_content.units, ves)
             except Exception as e:
                 self.log.error(e)
                 return internal_server_error('Failed starting azure vm')

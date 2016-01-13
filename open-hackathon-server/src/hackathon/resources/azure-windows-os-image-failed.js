@@ -1,6 +1,6 @@
 {
-    "name": "test-template-1",
-    "description" : "a template consists of a list of virtual environments, and a virtual environment is a virtual machine with its storage account, container, cloud service and deployment",
+    "name": "azure-windows-os-image-failed",
+    "description" : "use azure os image to create a windows vm",
     "virtual_environments": [
         {
             "provider": "1",
