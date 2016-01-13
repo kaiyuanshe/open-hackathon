@@ -24,15 +24,15 @@ THE SOFTWARE.
 """
 
 import json
-from uuid import uuid1
-from time import strftime
-from werkzeug.datastructures import FileStorage
 import os
+from time import strftime
+from uuid import uuid1
 
-from hackathon.storage.cryptor import Cryptor
-from storage import Storage
+from werkzeug.datastructures import FileStorage
+
 from hackathon import RequiredFeature
 from hackathon.constants import FILE_TYPE, HEALTH_STATUS, HEALTH
+from storage import Storage
 
 __all__ = ["AzureStorage"]
 
@@ -64,11 +64,7 @@ class AzureStorage(Storage):
         if context.get('content'):
             file_content = context.content
             if isinstance(file_content, file) or isinstance(file_content, FileStorage):
-                # encrypt certification file before upload to azure.
-                file_content = self.__encrypt_content(context)
                 result = self.azure_blob_service.upload_file_to_azure(container_name, blob_name, file_content)
-                if context.file_type == FILE_TYPE.AZURE_PEM:
-                    os.remove(file_content.name)
             elif isinstance(file_content, dict):
                 text = json.dumps(file_content)
                 result = self.azure_blob_service.upload_file_to_azure_from_text(container_name, blob_name, text)
@@ -127,8 +123,7 @@ class AzureStorage(Storage):
         self.__containers = {
             FILE_TYPE.TEMPLATE: self.util.safe_get_config("storage.azure.template_container", "templates"),
             FILE_TYPE.HACK_IMAGE: self.util.safe_get_config("storage.azure.image_container", "images"),
-            FILE_TYPE.AZURE_CERT: self.util.safe_get_config("storage.azure.certificate_container", "certificate"),
-            FILE_TYPE.AZURE_PEM: self.util.safe_get_config("storage.azure.certificate_container", "certificate")
+            FILE_TYPE.AZURE_CERT: self.util.safe_get_config("storage.azure.certificate_container", "certificate")
         }
         self.azure_blob_service = RequiredFeature("azure_blob_service")
 
@@ -155,13 +150,3 @@ class AzureStorage(Storage):
             return real_name
         else:
             return file_name
-
-    def __encrypt_content(self, context):
-        if context.file_type == FILE_TYPE.AZURE_PEM:
-            input_file_name = context.content.name
-            output_file_name = context.content.name + ".encrypted"
-            cryptor = RequiredFeature("cryptor")
-            cryptor.encrypt(input_file_name, output_file_name)
-            return file(output_file_name)
-        else:
-            return context.content

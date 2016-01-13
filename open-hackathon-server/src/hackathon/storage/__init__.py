@@ -23,6 +23,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-from local_storage import LocalStorage
 from azure_storage import AzureStorage
-from cryptor import Cryptor
+from local_storage import LocalStorage
+

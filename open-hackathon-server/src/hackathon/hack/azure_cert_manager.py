@@ -91,7 +91,6 @@ class AzureCertManager(Component):
             azure_key = self.db.add_object_kwargs(AzureKey,
                                                   cert_url=cert_url,
                                                   pem_url=pem_url,
-                                                  azure_pem_url=pem_url,
                                                   subscription_id=subscription_id,
                                                   management_host=management_host)
             self.db.commit()
@@ -124,15 +123,18 @@ class AzureCertManager(Component):
 
         # store pem file
         pem_file_name = subscription_id + '.pem'
+        # encrypt certification file before upload to storage
+        encrypted_pem_url = self.__encrypt_content(pem_url)
         pem_contex = Context(
             hackathon_name=hackathon.name,
             file_name=pem_file_name,
-            file_type=FILE_TYPE.AZURE_PEM,
-            content=file(pem_url)
+            file_type=FILE_TYPE.AZURE_CERT,
+            content=file(encrypted_pem_url)
         )
         self.log.debug("saving pem file [%s] to azure" % pem_file_name)
         pem_contex = self.storage.save(pem_contex)
-        azure_key.azure_pem_url = pem_contex.url
+        os.remove(encrypted_pem_url)
+        azure_key.pem_url = pem_contex.url
         self.db.commit()
         return azure_key.cert_url
 
@@ -177,10 +179,10 @@ class AzureCertManager(Component):
                         os.remove(azure_key.cert_url)
                     else:
                         self.storage.delete(azure_key.cert_url)
-                    if isfile(azure_key.azure_pem_url):
-                        os.remove(azure_key.azure_pem_url)
+                    if isfile(azure_key.pem_url):
+                        os.remove(azure_key.pem_url)
                     else:
-                        self.storage.delete(azure_key.azure_pem_url)
+                        self.storage.delete(azure_key.pem_url)
                 except Exception as e:
                     self.log.error(e)
 
@@ -200,3 +202,17 @@ class AzureCertManager(Component):
 
         if not os.path.exists(self.CERT_BASE):
             os.makedirs(self.CERT_BASE)
+
+    def __encrypt_content(self, pem_url):
+        encrypted_pem_url = pem_url + ".encrypted"
+        cryptor = RequiredFeature("cryptor")
+        cryptor.encrypt(pem_url, encrypted_pem_url)
+        return encrypted_pem_url
+
+    def get_local_pem_url(self, pem_url):
+        local_pem_url = self.CERT_BASE + "/" + pem_url.split("/")[-1]
+        if not isfile(local_pem_url):
+            self.log.debug("Recover local %s.pem file from azure storage %s" % (local_pem_url, pem_url))
+            cryptor = RequiredFeature("cryptor")
+            cryptor.recover_local_file(pem_url, local_pem_url)
+        return local_pem_url

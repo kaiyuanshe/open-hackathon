@@ -313,7 +313,6 @@ class FILE_TYPE:
     TEMPLATE = "template"
     HACK_IMAGE = "hack_image"
     AZURE_CERT = "azure_cert"
-    AZURE_PEM = "azure_pem"
 
 
 class TeamMemberStatus:
