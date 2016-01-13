@@ -204,7 +204,7 @@ class TemplateLibrary(Component):
                 file_type=FILE_TYPE.TEMPLATE,
                 content=template_content.to_dict()
             )
-            self.log.debug("saveing template as file [%s]" % file_name)
+            self.log.debug("saving template as file [%s]" % file_name)
             context = self.storage.save(context)
             return context
         except Exception as ex:
