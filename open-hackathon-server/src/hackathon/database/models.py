@@ -643,7 +643,7 @@ class AzureKey(DBBase):
     id = Column(Integer, primary_key=True)
     # cert_url is cert file path in azure
     cert_url = Column(String(200))
-    # pem_url is pem file path in azure
+    # pem_url is "encrypted" pem file path in azure, so be careful to use this, at the most time you should use get_local_pem_url()
     pem_url = Column(String(200))
     subscription_id = Column(String(100))
     management_host = Column(String(100))
@@ -652,11 +652,6 @@ class AzureKey(DBBase):
 
     def __init__(self, **kwargs):
         super(AzureKey, self).__init__(**kwargs)
-
-    # recover a pem file from azure
-    def get_local_pem_url(self):
-        azure_cert_manager = RequiredFeature("azure_cert_manager")
-        return azure_cert_manager.get_local_pem_url(self.pem_url)
 
 
 class UserAzureKey(DBBase):

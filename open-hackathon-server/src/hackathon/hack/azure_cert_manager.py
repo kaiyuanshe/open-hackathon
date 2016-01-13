@@ -226,3 +226,11 @@ class AzureCertManager(Component):
             cryptor = RequiredFeature("cryptor")
             cryptor.recover_local_file(pem_url, local_pem_url)
         return local_pem_url
+
+
+# recover a pem file from azure
+def get_local_pem_url(azureKey):
+    azure_cert_manager = RequiredFeature("azure_cert_manager")
+    return azure_cert_manager.get_local_pem_url(azureKey.pem_url)
+
+AzureKey.get_local_pem_url = get_local_pem_url

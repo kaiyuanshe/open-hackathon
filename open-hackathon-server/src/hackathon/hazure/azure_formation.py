@@ -47,8 +47,8 @@ class AzureFormation(Component):
     but Azure VirtualMachine depends on lots of Azure Resources like CloudService and Deployment
     this class will manage all of this resouces, like a formation of Azure Resources
 
-    dislike the old AzureFormation class, this class depend on independ Azure Service Adapters to
-    finish its job, this is just a high level intergration of these adapters
+    dislike the old AzureFormation class, this class depend on independent Azure Service Adapters to
+    finish its job, this is just a high level integration of these adapters
 
     usage: RequiredFeature("azuire_formation").setup(template_unit)
     """
@@ -64,7 +64,7 @@ class AzureFormation(Component):
         """setup the resources needed by the template unit and start the virtual machine
 
         this will create the missed VirtualMachine, CloudService and Storages
-        this function is not blocked, it will run in the background and return immediatly
+        this function is not blocked, it will run in the background and return immediately
 
         :param resouce_id: a integer that can indentify the creation of azure resource, is reusable to checkout created virtual machine name
         :param template_units: the azure template units, contains the data need by azure formation
@@ -81,7 +81,7 @@ class AzureFormation(Component):
             resource_id=resource_id,
 
             subscription_id=azure_key.subscription_id,
-            pem_url=azure_key.pem_url,
+            pem_url=azure_key.get_local_pem_url(),
             management_host=azure_key.management_host,
 
             # remote_created is used to store the resources we create we create remote
@@ -98,7 +98,7 @@ class AzureFormation(Component):
 
             name = self.get_virtual_machine_name(unit.get_virtual_machine_name(), resource_id)
 
-            # construct current virutal envrionment's context
+            # construct current virtual environment's context
             job_ctxs.append(Context(
                 cloud_service_name=unit.get_cloud_service_name(),
                 cloud_service_label=unit.get_cloud_service_label(),
@@ -128,7 +128,7 @@ class AzureFormation(Component):
 
                 # TODO: this part of info should move to super context
                 subscription_id=azure_key.subscription_id,
-                pem_url=azure_key.pem_url,
+                pem_url=azure_key.get_local_pem_url(),
                 management_host=azure_key.management_host))
 
         # execute from first job context
@@ -158,7 +158,7 @@ class AzureFormation(Component):
                 expr_id=expr_id,
 
                 subscription_id=azure_key.subscription_id,
-                pem_url=azure_key.pem_url,
+                pem_url=azure_key.get_local_pem_url(),
                 management_host=azure_key.management_host))
 
         self.__schedule_stop(ctx)
