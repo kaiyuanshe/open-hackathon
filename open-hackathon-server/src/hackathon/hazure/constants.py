@@ -24,7 +24,7 @@ THE SOFTWARE.
 """
 
 __author__ = "rapidhere"
-__all__ = ["ASYNC_OP_RESULT", "ASYNC_OP_QUERY_INTERVAL", "ASYNC_OP_QUERY_INTERVAL_LONG"]
+__all__ = ["ASYNC_OP_RESULT", "ASYNC_OP_QUERY_INTERVAL", "ASYNC_OP_QUERY_INTERVAL_LONG", "REMOTE_CREATED_RECORD"]
 
 
 class ASYNC_OP_RESULT:
@@ -33,3 +33,10 @@ class ASYNC_OP_RESULT:
 
 ASYNC_OP_QUERY_INTERVAL = 5  # in seconds
 ASYNC_OP_QUERY_INTERVAL_LONG = 10  # for heavy works like wait of vm ready
+
+
+class REMOTE_CREATED_RECORD:
+    TYPE_CLOUD_SERVICE = "cloud_service"
+    TYPE_STORAGE_ACCOUNT = "storage_account"
+    TYPE_ADD_VIRTUAL_MACHINE = "add_virtual_machine"
+    TYPE_CREATE_VIRTUAL_MACHINE_DEPLOYMENT = "create_virtual_machine_deployment"
