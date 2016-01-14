@@ -58,19 +58,19 @@
                 })
             })
 
-        var confirm_modal = $('#confirm_modal').on('show.bs.modal',function(e){
+        var confirm_modal = $('#confirm_modal').on('show.bs.modal', function(e) {
             var item = $(e.relatedTarget).parents('tr').data('tmplItem').data;
             confirm_modal.data({item:item});
-        }).on('click','[data-type="ok"]',function(e){
+        }).on('click', '[data-type="ok"]', function(e) {
             var item = confirm_modal.data('item');
              oh.api.admin.azure.delete({
                 query:{certificate_id:item.id},
                 header:{hackathon_name:currentHackathon}
              },
-             function(data){
-                if(data.error){
+             function(data) {
+                if(data.error) {
                     //todo;
-                }else{
+                } else {
                     bindAzurecertList();
                     confirm_modal.modal('hide');
                 }

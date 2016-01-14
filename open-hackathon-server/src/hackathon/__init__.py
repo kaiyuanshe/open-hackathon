@@ -43,6 +43,7 @@ from log import log
 from context import Context
 from database import db_session
 
+
 __all__ = [
     "app",
     "Context",
@@ -152,7 +153,7 @@ def init_components():
     from hackathon.database.db_adapters import SQLAlchemyAdapter
     from hackathon.user import UserManager, UserProfileManager
     from hackathon.hack import HackathonManager, AdminManager, TeamManager, DockerHostManager, \
-        AzureCertManager, RegisterManager, HackathonTemplateManager
+        AzureCertManager, RegisterManager, HackathonTemplateManager, Cryptor
     from hackathon.template import TemplateLibrary
     from hackathon.remote.guacamole import GuacamoleInfo
     from hackathon.expr.expr_mgr import ExprManager
@@ -184,6 +185,7 @@ def init_components():
     factory.provide("hackathon_manager", HackathonManager)
     factory.provide("register_manager", RegisterManager)
     factory.provide("azure_cert_manager", AzureCertManager)
+    factory.provide("cryptor", Cryptor)
     factory.provide("docker_host_manager", DockerHostManager)
     factory.provide("hackathon_template_manager", HackathonTemplateManager)
     factory.provide("template_library", TemplateLibrary)

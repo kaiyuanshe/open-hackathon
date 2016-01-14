@@ -32,6 +32,7 @@ from hackathon.util import get_now
 import json
 from pytz import utc
 from dateutil import parser
+from hackathon import RequiredFeature
 
 
 def relationship(*arg, **kw):
@@ -634,13 +635,15 @@ class UserHackathonAsset(DBBase):
 class AzureKey(DBBase):
     """
     Azure certificate information of user/hackathon
+    Open-hackathon will try to use local certification file, if it doesn't exist, open-hackathon will try to
+    recover it from azure.
     """
     __tablename__ = 'azure_key'
 
     id = Column(Integer, primary_key=True)
     # cert_url is cert file path in azure
     cert_url = Column(String(200))
-    # pem_url is pem file path in local
+    # pem_url is "encrypted" pem file path in azure, so be careful to use this, at the most time you should use get_local_pem_url()
     pem_url = Column(String(200))
     subscription_id = Column(String(100))
     management_host = Column(String(100))

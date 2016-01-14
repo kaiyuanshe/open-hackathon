@@ -24,13 +24,15 @@ THE SOFTWARE.
 """
 
 import json
-from uuid import uuid1
+import os
 from time import strftime
+from uuid import uuid1
+
 from werkzeug.datastructures import FileStorage
 
-from storage import Storage
 from hackathon import RequiredFeature
 from hackathon.constants import FILE_TYPE, HEALTH_STATUS, HEALTH
+from storage import Storage
 
 __all__ = ["AzureStorage"]
 

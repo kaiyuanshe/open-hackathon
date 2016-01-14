@@ -84,8 +84,6 @@ class AzureCertManager(Component):
             self.log.debug('%s exists' % cert_url)
 
         azure_key = self.db.find_first_object_by(AzureKey,
-                                                 cert_url=cert_url,
-                                                 pem_url=pem_url,
                                                  subscription_id=subscription_id,
                                                  management_host=management_host)
         # avoid duplicate azure key
@@ -111,16 +109,32 @@ class AzureCertManager(Component):
         else:
             self.log.debug('hackathon azure key exists')
 
-        file_name = subscription_id + '.cer'
-        context = Context(
+        cer_file_name = subscription_id + '.cer'
+        cer_context = Context(
             hackathon_name=hackathon.name,
-            file_name=file_name,
+            file_name=cer_file_name,
             file_type=FILE_TYPE.AZURE_CERT,
             content=file(cert_url)
         )
-        self.log.debug("saving cerf file [%s] to azure" % file_name)
-        context = self.storage.save(context)
-        azure_key.cert_url = context.url
+        self.log.debug("saving cerf file [%s] to azure" % cer_file_name)
+        cer_context = self.storage.save(cer_context)
+        azure_key.cert_url = cer_context.url
+        self.db.commit()
+
+        # store pem file
+        pem_file_name = subscription_id + '.pem'
+        # encrypt certification file before upload to storage
+        encrypted_pem_url = self.__encrypt_content(pem_url)
+        pem_contex = Context(
+            hackathon_name=hackathon.name,
+            file_name=pem_file_name,
+            file_type=FILE_TYPE.AZURE_CERT,
+            content=file(encrypted_pem_url)
+        )
+        self.log.debug("saving pem file [%s] to azure" % pem_file_name)
+        pem_contex = self.storage.save(pem_contex)
+        os.remove(encrypted_pem_url)
+        azure_key.pem_url = pem_contex.url
         self.db.commit()
         return azure_key.cert_url
 
@@ -175,6 +189,10 @@ class AzureCertManager(Component):
                         os.remove(azure_key.cert_url)
                     else:
                         self.storage.delete(azure_key.cert_url)
+                    if isfile(azure_key.pem_url):
+                        os.remove(azure_key.pem_url)
+                    else:
+                        self.storage.delete(azure_key.pem_url)
                 except Exception as e:
                     self.log.error(e)
 
@@ -194,3 +212,25 @@ class AzureCertManager(Component):
 
         if not os.path.exists(self.CERT_BASE):
             os.makedirs(self.CERT_BASE)
+
+    def __encrypt_content(self, pem_url):
+        encrypted_pem_url = pem_url + ".encrypted"
+        cryptor = RequiredFeature("cryptor")
+        cryptor.encrypt(pem_url, encrypted_pem_url)
+        return encrypted_pem_url
+
+    def get_local_pem_url(self, pem_url):
+        local_pem_url = self.CERT_BASE + "/" + pem_url.split("/")[-1]
+        if not isfile(local_pem_url):
+            self.log.debug("Recover local %s.pem file from azure storage %s" % (local_pem_url, pem_url))
+            cryptor = RequiredFeature("cryptor")
+            cryptor.recover_local_file(pem_url, local_pem_url)
+        return local_pem_url
+
+
+# recover a pem file from azure
+def get_local_pem_url(azureKey):
+    azure_cert_manager = RequiredFeature("azure_cert_manager")
+    return azure_cert_manager.get_local_pem_url(azureKey.pem_url)
+
+AzureKey.get_local_pem_url = get_local_pem_url
