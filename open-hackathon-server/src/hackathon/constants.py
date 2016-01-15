@@ -511,5 +511,5 @@ class LOGIN_PROVIDER:
 class HACKATHON_NOTICE_TYPE:
     DEFAULT = 0  # default hackathon notice type
     STATE = 1    # hackathon state changes, e.g. create/edit/online/offline
-    AWARDS = 2   # hackathon awards
+    AWARDS = 2   # hackathon awards information
     ENVIRONMENT = 3 # hackathon environment changes

@@ -25,8 +25,8 @@
 (function($, oh) {
     var currentHackathon = oh.comm.getCurrentHackathon();
 
-    function changeNoticeTypeDescription(items) {
-        var noticeTypeDescription = {
+    function getNoticeDescription(items) {
+        var noticeDescriptionByType = {
             0: '默认',
             1: '活动信息变更',
             2: '获奖信息',
@@ -35,7 +35,7 @@
 
         var length = items.length;
         for(var i = 0; i < length; ++i) {
-            items[i].type = noticeTypeDescription[items[i].type];
+            items[i].type = noticeDescriptionByType[items[i].type];
         }
     }
 
@@ -60,7 +60,7 @@
             if(data.error){
                 alert(data.error.message);
             }else{
-                changeNoticeTypeDescription(data.items);
+                getNoticeDescription(data.items);
                 $('#hackathon_notice_list').empty().append($('#hackathon_notice_list_template').tmpl(data.items));
                 oh.comm.removeLoading();
             }

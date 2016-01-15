@@ -48,6 +48,7 @@
     color: #505050;
     display: inline-block;
     padding: 8px 0;
+    float: left;
 }
 
 .oh-notice-list {
@@ -61,7 +62,9 @@
 }
 
 .oh-notice-list li {
-    padding: 10px 0;
+    height: 40px;
+    line-height: 40px;
+    overflow: hidden;
 }
 
 .oh-notice-list li span {

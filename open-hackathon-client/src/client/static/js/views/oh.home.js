@@ -92,7 +92,7 @@
                     });
                 });
 
-                //automatically rolling notice
+                // automatically rolling notice
                 setInterval(function() {
                     firstNotice.stop(true, true).animate({"margin-top": "-=" + noticeHeight + "px"}, 500, function() {
                         var marginVal = parseInt(firstNotice.css("margin-top").slice(0, -2));
