@@ -119,6 +119,7 @@ class AzureFormation(Component):
                 virtual_machine_size=unit.get_virtual_machine_size(),
                 image_name=unit.get_image_name(),
                 raw_network_config=unit.get_raw_network_config(),
+                resource_extension_references=unit.get_resource_extension_references(),
                 is_vm_image=unit.is_vm_image(),
                 remote=unit.get_remote(),
                 endpoint_name=unit.get_remote_port_name(),
@@ -295,6 +296,8 @@ class AzureFormation(Component):
                     ctx.system_config,
                     ctx.os_virtual_hard_disk,
                     network_config=network_config,
+                    provision_guest_agent=True,
+                    resource_extension_references=ctx.resource_extension_references,
                     role_size=ctx.virtual_machine_size,
                     vm_image_name=ctx.image_name if ctx.is_vm_image else None)
             # NOTE: if the vm is created, we think is well configured
@@ -339,6 +342,8 @@ class AzureFormation(Component):
                 ctx.system_config,
                 ctx.os_virtual_hard_disk,
                 network_config,
+                provision_guest_agent=True,
+                resource_extension_references=ctx.resource_extension_references,
                 role_size=ctx.virtual_machine_size,
                 vm_image_name=ctx.image_name if ctx.is_vm_image else None)
         except Exception as e:
