@@ -5,7 +5,7 @@
         {
             "provider": "1",
             "storage_account" : {
-                "service_name" : "rapidtest",
+                "service_name" : "opentech0storage",
                 "description" : "storage-description",
                 "label" : "storage-label",
                 "location" : "China East",

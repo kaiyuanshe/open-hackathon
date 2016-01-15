@@ -25,7 +25,11 @@ THE SOFTWARE.
 
 __author__ = 'rapidhere'
 
-from azure.servicemanagement import WindowsConfigurationSet, LinuxConfigurationSet, OSVirtualHardDisk
+import json
+import base64
+
+from azure.servicemanagement import WindowsConfigurationSet, LinuxConfigurationSet, OSVirtualHardDisk, \
+    ResourceExtensionReference, ResourceExtensionParameterValue
 from threading import current_thread
 from hackathon import RequiredFeature
 from hackathon.constants import VE_PROVIDER
@@ -60,6 +64,31 @@ class AzureTemplateUnit(TemplateUnit):
 
     def get_image_name(self):
         return self.virtual_environment[AZURE_UNIT.IMAGE][AZURE_UNIT.IMAGE_NAME]
+
+    def get_resource_extension_references(self):
+        if self.is_vm_image():
+            return None
+
+        ext = ResourceExtensionReference(
+            AZURE_UNIT.DISABLE_NLA_EXTENSION_REFRENCE.REFRENCE_NAME,
+            AZURE_UNIT.DISABLE_NLA_EXTENSION_REFRENCE.PUBLISHER,
+            AZURE_UNIT.DISABLE_NLA_EXTENSION_REFRENCE.EXTENSION_NAME,
+            AZURE_UNIT.DISABLE_NLA_EXTENSION_REFRENCE.VERSION)
+
+        # construct par value
+        par_value = ResourceExtensionParameterValue()
+        par_value.key = AZURE_UNIT.RESOUCE_EXTENSION_PUBLIC_KEY
+        setting = {
+            AZURE_UNIT.DISABLE_NLA_EXTENSION_REFRENCE.CONFIG_KEY_FILE_URIS:
+                AZURE_UNIT.DISABLE_NLA_EXTENSION_REFRENCE.FILE_URIS,
+
+            AZURE_UNIT.DISABLE_NLA_EXTENSION_REFRENCE.CONFIG_KEY_RUN:
+                AZURE_UNIT.DISABLE_NLA_EXTENSION_REFRENCE.RUN}
+        par_value.value = base64.standard_b64encode(json.dumps(setting))
+        par_value.type = AZURE_UNIT.RESOUCE_EXTENSION_PUBLIC_TYPE
+        ext.resource_extension_parameter_values = [par_value]
+
+        return [ext]
 
     def get_system_config(self):
         if self.is_vm_image():
