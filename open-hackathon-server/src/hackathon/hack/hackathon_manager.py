@@ -853,15 +853,11 @@ class HackathonManager(Component):
         else:
             pass
 
-
-        # every event belongs to a specific type, which influences the icons/descriptions shown at front-end
-        if notice_event in [HACK_NOTICE_EVENT.HACK_CREATE, HACK_NOTICE_EVENT.HACK_EDIT, 
-                                HACK_NOTICE_EVENT.HACK_ONLINE, HACK_NOTICE_EVENT.HACK_OFFLINE]:
-            hackathon_notice.type = HACK_NOTICE_TYPE.HACK_STATE
-        elif notice_event in [HACK_NOTICE_EVENT.EXPR_JOIN]:
-            hackathon_notice.type = HACK_NOTICE_TYPE.EXPR
+        # every event belongs to a specific type, which influences the icons/descriptions of the notice shown at front-end
+        if notice_event in [HACK_NOTICE_EVENT.EXPR_JOIN]:
+            hackathon_notice.type = HACK_NOTICE_TYPE.EXPERIMENT
         else:
-            hackathon_notice.type = HACK_NOTICE_TYPE.MANUAL
+            hackathon_notice.type = HACK_NOTICE_TYPE.HACKATHON
 
         self.db.add_object(hackathon_notice)
 

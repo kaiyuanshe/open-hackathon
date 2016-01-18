@@ -509,10 +509,11 @@ class LOGIN_PROVIDER:
 
 
 class HACK_NOTICE_TYPE:
-    MANUAL = 0  # manually created hackatohon notice
-    HACK_STATE = 1   # hackathon state changes, e.g. create/edit/online/offline
-    AWARDS = 2   # hackathon awards information
-    EXPR = 3 # hackathon expr changes
+    HACKATHON = 0  # hackathon related notice
+    USER = 1   # user related notice
+    EXPERIMENT = 2   # experiment related notice
+    AWARD = 3 # award related notice
+    TEMPLATE = 4  # template related notice
 
 
 class HACK_NOTICE_EVENT:

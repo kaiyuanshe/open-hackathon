@@ -332,8 +332,8 @@ class HackathonNotice(DBBase):
     __tablename__ = 'hackathon_notice'
 
     id = Column(Integer, primary_key=True)
-    type = Column(Integer)  # type: Class HACK_NOTICE_TYPE, indicates the type of the 'event'
-    event = Column(Integer) # event: Class HACK_NOTICE_EVENT, indicates the specfic event that triggers current notice 
+    type = Column(Integer)  # type: Class HACK_NOTICE_TYPE, controls how icons/descriptions are shown at front-end
+    event = Column(Integer) # event: Class HACK_NOTICE_EVENT, records the specfic event that triggers current notice 
     create_time = Column(TZDateTime, default=get_now())
     update_time = Column(TZDateTime, default=get_now())
     content = Column(Text)

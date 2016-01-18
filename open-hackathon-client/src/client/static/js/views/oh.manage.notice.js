@@ -27,10 +27,11 @@
 
     function getNoticeDescription(items) {
         var noticeDescriptionByType = {
-            0: '手动发布',
-            1: '活动信息变更',
-            2: '获奖信息',
-            3: '活动参与信息'
+            0: '黑客松信息',
+            1: '用户信息',
+            2: '实验信息',
+            3: '获奖信息',
+            4: '模板信息'
         }
 
         var length = items.length;
