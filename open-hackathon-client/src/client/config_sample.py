@@ -220,6 +220,9 @@ Config = {
                     "profile": {
                         "": ["get", "post", "put"]
                     },
+                    "picture": {
+                        "": ["put"]
+                    },
                     "team": {
                         "member": ["get"]
                     },
