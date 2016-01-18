@@ -16,7 +16,7 @@
             "required": false
           },
           "order_by": {
-            "description": "order by time or type",
+            "description": "order by update_time, type, event, etc",
             "type": "string",
             "required": false
           },

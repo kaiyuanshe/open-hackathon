@@ -39,7 +39,7 @@ from sqlalchemy import and_
 
 from hackathon import Component, RequiredFeature, Context
 from hackathon.constants import EStatus, VERemoteProvider, VE_PROVIDER, PortBindingType, VEStatus, ReservedUser, \
-    AVMStatus, CLOUD_ECLIPSE
+    AVMStatus, CLOUD_ECLIPSE, HACK_NOTICE_EVENT
 from hackathon.database import VirtualEnvironment, DockerHostServer, Experiment, User, HackathonTemplateRel, \
     DockerContainer
 from hackathon.azureformation.azureFormation import AzureFormation
@@ -78,6 +78,7 @@ class ExprManager(Component):
             if expr is not None:
                 return self.__report_expr_status(expr)
 
+            self.hackathon_manager.create_hackathon_notice(hackathon, {'event': HACK_NOTICE_EVENT.EXPR_JOIN, 'user_id': user_id})
         # new expr
         return self.__start_new_expr(hackathon, template, user_id)
 

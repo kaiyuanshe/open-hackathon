@@ -27,10 +27,10 @@
 
     function getNoticeDescription(items) {
         var noticeDescriptionByType = {
-            0: '默认',
+            0: '手动发布',
             1: '活动信息变更',
             2: '获奖信息',
-            3: '环境变更'
+            3: '活动参与信息'
         }
 
         var length = items.length;
@@ -72,7 +72,6 @@
         data = {};
         data.content = $.trim($('#add_notice_content').val());
         data.link    = $.trim($('#add_notice_link').val());
-        data.type    = 0;
 
         return oh.api.admin.hackathon.notice.post({
             body: data,

@@ -508,8 +508,17 @@ class LOGIN_PROVIDER:
     ALAUDA = 32
 
 
-class HACKATHON_NOTICE_TYPE:
-    DEFAULT = 0  # default hackathon notice type
-    STATE = 1    # hackathon state changes, e.g. create/edit/online/offline
+class HACK_NOTICE_TYPE:
+    MANUAL = 0  # manually created hackatohon notice
+    HACK_STATE = 1   # hackathon state changes, e.g. create/edit/online/offline
     AWARDS = 2   # hackathon awards information
-    ENVIRONMENT = 3 # hackathon environment changes
+    EXPR = 3 # hackathon expr changes
+
+
+class HACK_NOTICE_EVENT:
+    MANUAL = 0  # manually created hackatohon notice
+    HACK_CREATE = 1
+    HACK_EDIT = 2
+    HACK_ONLINE = 3
+    HACK_OFFLINE = 4 # hackathon create/edit/online/offline
+    EXPR_JOIN = 5 # user start to program

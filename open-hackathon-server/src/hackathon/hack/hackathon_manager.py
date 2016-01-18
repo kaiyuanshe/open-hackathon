@@ -40,7 +40,7 @@ from hackathon.database import Hackathon, User, AdminHackathonRel, DockerHostSer
     UserTeamRel, HackathonNotice
 from hackathon.hackathon_response import internal_server_error, ok, not_found, forbidden
 from hackathon.constants import HACKATHON_BASIC_INFO, ADMIN_ROLE_TYPE, HACK_STATUS, RGStatus, HTTP_HEADER, \
-    FILE_TYPE, HACK_TYPE, HACKATHON_STAT, DockerHostServerStatus, HACKATHON_NOTICE_TYPE
+    FILE_TYPE, HACK_TYPE, HACKATHON_STAT, DockerHostServerStatus, HACK_NOTICE_TYPE, HACK_NOTICE_EVENT
 from hackathon import RequiredFeature, Component, Context
 
 docker_host_manager = RequiredFeature("docker_host_manager")
@@ -252,6 +252,8 @@ class HackathonManager(Component):
         if self.util.is_local():
             self.__create_default_data_for_local(new_hack)
 
+        self.__create_hackathon_notice(new_hack, HACK_NOTICE_EVENT.HACK_CREATE)
+
         return new_hack.dic()
 
     def update_hackathon(self, args):
@@ -268,6 +270,12 @@ class HackathonManager(Component):
         try:
             update_items = self.__parse_update_items(args, hackathon)
             self.log.debug("update hackathon items :" + str(args.keys()))
+
+            if update_items:
+                if 'status' in update_items and int(update_items['status']) == HACK_STATUS.ONLINE:
+                    self.__create_hackathon_notice(hackathon, HACK_NOTICE_EVENT.HACK_ONLINE) #hackathon online
+                else:
+                    pass #other hackathon properties changes
 
             # basic xss prevention
             if 'description' in update_items and update_items['description']:
@@ -484,25 +492,16 @@ class HackathonManager(Component):
         hackathon_notice = self.db.get_object(HackathonNotice, notice_id)
         return hackathon_notice.dic()
 
-    def create_hackathon_notice(self, hackathon, user, body):
-        hackathon_notice = HackathonNotice(hackathon_id=hackathon.id, 
-                                           creator_id=user.id,
-                                           content=body.get("content", ""),
-                                           link=body.get("link", ""),
-                                           type=body.get("type", HACKATHON_NOTICE_TYPE.DEFAULT),
-                                           create_time=self.util.get_now(),
-                                           update_time=self.util.get_now())
-        self.db.add_object(hackathon_notice)
-        return hackathon_notice.dic()
+    def create_hackathon_notice(self, hackathon, body):
+        return self.__create_hackathon_notice(hackathon, body.get('event', HACK_NOTICE_EVENT.MANUAL), body)
 
-    def update_hackathon_notice(self, hackathon, user, body):
+    def update_hackathon_notice(self, hackathon, body):
         hackathon_notice = self.db.get_object(HackathonNotice, body.get("id"))
         if not hackathon_notice:
             return not_found("hackathon_notice not found")
         if hackathon.id != body.get("hackathon_id"):
             return forbidden()
         
-        hackathon_notice.creator_id = user.id
         hackathon_notice.content = body.get("content", hackathon_notice.content)
         hackathon_notice.link = body.get("link", hackathon_notice.link)
         hackathon_notice.update_time = self.util.get_now()
@@ -519,10 +518,11 @@ class HackathonManager(Component):
 
         hackathon_name = body.get("hackathon_name")
         notice_type = body.get("type")
+        notice_event = body.get("event")
         order_by = body.get("order_by", "time") 
         show = body.get("show")
 
-        #filter by hackathon_name and type
+        #filter by hackathon_name, type or event
         if hackathon_name:
             hackathon = self.get_hackathon_by_name(hackathon_name)
             if hackathon:
@@ -531,12 +531,18 @@ class HackathonManager(Component):
                 return []
         if notice_type:
             query = query.filter(HackathonNotice.type == int(notice_type))
+        if notice_event:
+            query = query.filter(HackathonNotice.event == int(notice_event))
 
         #order by time or type
         if order_by == 'time':
             query = query.order_by(HackathonNotice.update_time.desc())
         elif order_by == 'type':
             query = query.order_by(HackathonNotice.type)
+        elif order_by == 'event':
+            query = query.order_by(HackathonNotice.event)
+        else:
+            query = query.order_by(HackathonNotice.update_time.desc())
 
         #return all notices or use pagination
         if show == 'pagination':
@@ -810,6 +816,58 @@ class HackathonManager(Component):
                                      hackathon_id=hackathon.id)
             self.db.add_object(config)
         self.db.commit()
+
+    def __create_hackathon_notice(self, hackathon, notice_event, args=None):
+        """
+        create hackathon notice
+        :type hackathon: Hackathon
+        :param hackathon: an existing Hackathon object that the notice belongs to
+
+        :type notice_event: Class HACK_NOTICE_EVENT
+        :param notice_event: a specfic event that the notice is triggered by
+
+        :return: hackathon_notice in dict
+        """
+        hackathon_notice = HackathonNotice(hackathon_id=hackathon.id, 
+                                           content="",
+                                           link="",
+                                           event=notice_event,
+                                           create_time=self.util.get_now(),
+                                           update_time=self.util.get_now())
+
+        if notice_event == HACK_NOTICE_EVENT.MANUAL:
+            hackathon_notice.content = args.get('content', '')
+            hackathon_notice.link = args.get('link', '')
+        elif notice_event == HACK_NOTICE_EVENT.HACK_CREATE:
+            hackathon_notice.content = u"Hachathon: %s 创建成功" %(hackathon.name)
+        elif notice_event == HACK_NOTICE_EVENT.HACK_EDIT:
+            hackathon_notice.content = u"Hachathon: %s 信息变更" %(hackathon.name)
+        elif notice_event == HACK_NOTICE_EVENT.HACK_ONLINE:
+            hackathon_notice.content = u"Hachathon: %s 正式上线" %(hackathon.name)
+        elif notice_event == HACK_NOTICE_EVENT.HACK_OFFLINE:
+            hackathon_notice.content = u"Hachathon: %s 下线" %(hackathon.name)
+        elif notice_event == HACK_NOTICE_EVENT.EXPR_JOIN and args.get('user_id'):
+            user_id = int(args.get('user_id'))
+            user = self.user_manager.get_user_by_id(user_id)
+            hackathon_notice.content = u"用户 %s 开始编程" %(user.nickname)
+        else:
+            pass
+
+
+        # every event belongs to a specific type, which influences the icons/descriptions shown at front-end
+        if notice_event in [HACK_NOTICE_EVENT.HACK_CREATE, HACK_NOTICE_EVENT.HACK_EDIT, 
+                                HACK_NOTICE_EVENT.HACK_ONLINE, HACK_NOTICE_EVENT.HACK_OFFLINE]:
+            hackathon_notice.type = HACK_NOTICE_TYPE.HACK_STATE
+        elif notice_event in [HACK_NOTICE_EVENT.EXPR_JOIN]:
+            hackathon_notice.type = HACK_NOTICE_TYPE.EXPR
+        else:
+            hackathon_notice.type = HACK_NOTICE_TYPE.MANUAL
+
+        self.db.add_object(hackathon_notice)
+
+        self.log.debug("a new notice for %s is created" %(hackathon.name))
+        return hackathon_notice.dic()
+
 
 
 '''

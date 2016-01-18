@@ -145,10 +145,10 @@
     function getNoticeIcon(notice) {
         var length = notice.length;
         var noticeIconByType = {
-            0: 'glyphicon glyphicon-bullhorn', //'默认'
+            0: 'glyphicon glyphicon-bullhorn', //'手动发布'
             1: 'glyphicon glyphicon-edit', //'活动信息变更'
             2: 'glyphicon glyphicon-gift', //'获奖信息'
-            3: 'glyphicon glyphicon-th-list' //'环境变更'
+            3: 'glyphicon glyphicon-th-list' //'活动参与信息'
         }
         for(var i = 0; i < length; ++i) {
             notice[i].icon = noticeIconByType[notice[i].type];
