@@ -227,7 +227,7 @@ Config = {
                         "member": ["get"]
                     },
                     "hackathon": {
-                        "like": ["post", "delete"]
+                        "like": ["get", "post", "delete"]
                     }
                 },
                 "bulletin": {
