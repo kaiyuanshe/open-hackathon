@@ -169,3 +169,17 @@ class AZURE_UNIT:
     REMOTE_PARAMETER_PORT = 'port'
     REMOTE_PARAMETER_USER_NAME = 'username'
     REMOTE_PARAMETER_PASSWORD = 'password'
+
+    RESOUCE_EXTENSION_PUBLIC_KEY = "PublicConfig"
+    RESOUCE_EXTENSION_PUBLIC_TYPE = "Public"
+
+    class DISABLE_NLA_EXTENSION_REFRENCE:
+        REFRENCE_NAME = "CustomScriptExtension"
+        EXTENSION_NAME = "CustomScriptExtension"
+        PUBLISHER = "Microsoft.Compute"
+        VERSION = "1.*"
+        FILE_URIS = ["https://opentech0storage.blob.core.chinacloudapi.cn/public-scripts/disablenla.ps1"]
+        RUN = "powershell -ExecutionPolicy Unrestricted -file disablenla.ps1"
+
+        CONFIG_KEY_FILE_URIS = "fileUris"
+        CONFIG_KEY_RUN = "commandToExecute"
