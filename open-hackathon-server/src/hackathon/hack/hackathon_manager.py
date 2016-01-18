@@ -163,8 +163,8 @@ class HackathonManager(Component):
 
     def get_user_hackathon_list_with_detail(self, user_id):
         user = self.user_manager.get_user_by_id(user_id)
-        user_hack_list = self.db.session().query(Hackathon, UserHackathonRel) \
-            .outerjoin(UserHackathonRel, UserHackathonRel.user_id == user_id) \
+        user_hack_list = self.db.session().query(Hackathon) \
+            .join(UserHackathonRel, UserHackathonRel.hackathon_id == Hackathon.id) \
             .filter(UserHackathonRel.deleted != 1, UserHackathonRel.user_id == user_id).all()
 
         return map(lambda h: self.__get_hackathon_detail(h, user), user_hack_list)
@@ -306,6 +306,20 @@ class HackathonManager(Component):
             images.append(image)
 
         return {"files": images}
+
+    def get_userlike_all_hackathon(self, user_id):
+
+        hackathons = self.db.session().query(
+            Hackathon.id,
+            Hackathon.banners,
+            Hackathon.name,
+            Hackathon.display_name,
+            Hackathon.short_description,
+            ). \
+            join(HackathonLike, HackathonLike.hackathon_id == Hackathon.id). \
+            filter(HackathonLike.user_id == user_id).all()
+        return [a._asdict() for a in hackathons]
+
 
     def like_hackathon(self, user, hackathon):
         like = self.db.find_first_object_by(HackathonLike, user_id=user.id, hackathon_id=hackathon.id)
