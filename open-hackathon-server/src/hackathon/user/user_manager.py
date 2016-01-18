@@ -235,6 +235,10 @@ class UserManager(Component):
                                                   User.login_times.desc())
         return [self.user_display_info(u) for u in users]
 
+
+    def update_user_avatar_url(self, user, url):
+        self.db.update_object(user, avatar_url=url)
+        return True
     # ----------------------------private methods-------------------------------------
 
     def __validate_token(self, token):
@@ -377,3 +381,4 @@ class UserManager(Component):
                                        description="Token for Oxford API")
             self.db.add_object(asset)
             self.db.commit()
+
