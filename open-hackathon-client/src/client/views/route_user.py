@@ -29,21 +29,32 @@ sys.path.append("..")
 
 from client import app
 from . import render
-from flask_login import login_required
+from flask_login import login_required, current_user
+from flask import request
 
+
+@app.route("/user/p_<user_id>")
+def profile(user_id):
+    return render("/user/profile.html")
 
 @app.route("/user/profile")
 @login_required
 def user_profile():
     return render("/user/profile.html")
 
+@app.route("/user/edit")
+@login_required
+def user_profile_edit():
+    return render("/user/profile_edit.html")
+
+@app.route("/user/picture", methods=['POST'])
+@login_required
+def user_picture():
+    args = request.get_json()
+    current_user.avatar_url = args["url"] or current_user.avatar_url
+
 
 @app.route("/user/hackathon")
 @login_required
 def user_hackathon_list():
     return render("/user/team.html")
-
-
-
-
-
