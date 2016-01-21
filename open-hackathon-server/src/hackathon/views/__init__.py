@@ -62,6 +62,7 @@ def init_routes():
     api.add_resource(CurrentUserResource, "/api/user")  # get current login user
     api.add_resource(UserLoginResource, "/api/user/login")  # user login/logout
     api.add_resource(UserProfileResource, "/api/user/profile")  # update user profile
+    api.add_resource(UserPictureResource, "/api/user/picture")  # update user picture
     api.add_resource(UserTemplateListResource, "/api/hackathon/template")  # list templates for specific user
     api.add_resource(UserHackathonLikeResource, "/api/user/hackathon/like")  # like or unlike hackathon
     api.add_resource(UserRegistrationResource, "/api/user/registration")  # register hackathon

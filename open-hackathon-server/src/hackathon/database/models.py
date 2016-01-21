@@ -32,6 +32,7 @@ from hackathon.util import get_now
 import json
 from pytz import utc
 from dateutil import parser
+from hackathon import RequiredFeature
 
 
 def relationship(*arg, **kw):
@@ -656,13 +657,15 @@ class UserHackathonAsset(DBBase):
 class AzureKey(DBBase):
     """
     Azure certificate information of user/hackathon
+    Open-hackathon will try to use local certification file, if it doesn't exist, open-hackathon will try to
+    recover it from azure.
     """
     __tablename__ = 'azure_key'
 
     id = Column(Integer, primary_key=True)
     # cert_url is cert file path in azure
     cert_url = Column(String(200))
-    # pem_url is pem file path in local
+    # pem_url is "encrypted" pem file path in azure, so be careful to use this, at the most time you should use get_local_pem_url()
     pem_url = Column(String(200))
     subscription_id = Column(String(100))
     management_host = Column(String(100))
@@ -693,6 +696,9 @@ class HackathonAzureKey(DBBase):
     azure_key = relationship('AzureKey', backref=backref('hackathon_azure_key_a', lazy='dynamic'))
 
 
+# disabled by: rapidhere
+# current i don't known the usage of the log
+# so i plan to  disable this table
 class AzureLog(DBBase):
     """
     Azure operation log for every experiment
@@ -750,8 +756,15 @@ class AzureCloudService(DBBase):
     location = Column(String(50))
     # ACSStatus in enum.py
     status = Column(String(50))
-    experiment_id = Column(Integer, ForeignKey('experiment.id', ondelete='CASCADE'))
-    experiment = relationship('Experiment', backref=backref('azure_cloud_service', lazy='dynamic'))
+
+    # AzureCloudService should have nothing to do with experiment
+    # instead, it should belong to a azure_key
+    #
+    # experiment_id = Column(Integer, ForeignKey('experiment.id', ondelete='CASCADE'))
+    # experiment = relationship('Experiment', backref=backref('azure_cloud_service', lazy='dynamic'))
+    azure_key_id = Column(Integer, ForeignKey("azure_key.id", ondelete='CASCADE'))
+    azure_key = relationship('AzureKey', backref=backref("azure_cloud_service", lazy="dynamic"))
+
     create_time = Column(TZDateTime, default=get_now())
     last_modify_time = Column(TZDateTime, default=get_now())
 

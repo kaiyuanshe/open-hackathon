@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 """
 Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
- 
+
 The MIT License (MIT)
- 
+
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -176,16 +176,29 @@ class UserListResource(HackathonResource):
     def get(self):
         return user_manager.get_user_fezzy_search(g.hackathon, self.context())
 
-
 class UserProfileResource(HackathonResource):
-    @token_required
     def get(self):
-        user_id = g.user.id
-        info = user_profile_manager.get_user_profile(user_id)
-        if info is not None:
-            return info.dic()
+        parse = reqparse.RequestParser()
+        parse.add_argument('user_id', type=int, location='args', required=False)
+        args = parse.parse_args()
+        query_uid = args["user_id"] or 0
+        if query_uid == g.user.id or query_uid == 0:
+            user = user_manager.get_user_by_id(g.user.id)
         else:
-            return not_found("User doesn't have profile info yet.")
+            user = user_manager.get_user_by_id(query_uid)
+
+        info = user_profile_manager.get_user_profile(user.id)
+        profile = {}
+        if info is not None:
+            profile = info.dic()
+
+        profile["avatar_url"] = user.avatar_url
+        profile["provider"] = user.provider
+        profile["name"] = user.name
+        profile["nickname"] = user.nickname
+
+        return profile
+
 
     @token_required
     def post(self):
@@ -199,6 +212,11 @@ class UserProfileResource(HackathonResource):
         args["user_id"] = g.user.id
         return user_profile_manager.update_user_profile(args)
 
+class UserPictureResource(HackathonResource):
+    @token_required
+    def put(self):
+        args = request.get_json()
+        return user_manager.update_user_avatar_url(g.user, args["url"])
 
 class UserTemplateListResource(HackathonResource):
     @token_required
@@ -226,12 +244,28 @@ class UserRegistrationResource(HackathonResource):
 class UserHackathonListResource(HackathonResource):
     def get(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('user_id', type=int, location='args', required=True)
+        parse.add_argument('user_id', type=int, location='args', required=False)
         args = parse.parse_args()
-        return hackathon_manager.get_user_hackathon_list_with_detail(args['user_id'])
+        query_uid = args["user_id"] or 0
+        if query_uid == g.user.id or query_uid == 0:
+            user_id = g.user.id
+        else:
+            user_id = query_uid
+        return hackathon_manager.get_user_hackathon_list_with_detail(user_id)
 
 
 class UserHackathonLikeResource(HackathonResource):
+    def get(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('user_id', type=int, location='args', required=False)
+        args = parse.parse_args()
+        query_uid = args["user_id"] or 0
+        if query_uid == g.user.id or query_uid == 0:
+            user_id = g.user.id
+        else:
+            user_id = query_uid
+        return hackathon_manager.get_userlike_all_hackathon(user_id)
+
     @hackathon_name_required
     @token_required
     def post(self):
@@ -486,7 +520,6 @@ class AdminAzureResource(HackathonResource):
     def delete(self):
         ctx = self.context()
         return azure_cert_manager.delete_certificate(ctx.certificate_id, g.hackathon)
-
 
 class AdminRegisterListResource(HackathonResource):
     @admin_privilege_required

@@ -25,6 +25,7 @@ THE SOFTWARE.
 __author__ = 'Yifu Huang'
 
 import sys
+from os.path import isfile
 
 sys.path.append("..")
 from hackathon.constants import (
@@ -46,8 +47,9 @@ from azure.servicemanagement import (
     ServiceManagementService,
     Deployment,
 )
+
 import time
-from hackathon import Component
+from hackathon import Component, RequiredFeature
 
 
 class Service(ServiceManagementService, Component):
@@ -62,7 +64,7 @@ class Service(ServiceManagementService, Component):
     def __init__(self, azure_key_id):
         self.azure_key_id = azure_key_id
         azure_key = self.db.get_object(AzureKey, self.azure_key_id)
-        super(Service, self).__init__(azure_key.subscription_id, azure_key.pem_url, azure_key.management_host)
+        super(Service, self).__init__(azure_key.subscription_id, azure_key.get_local_pem_url(), azure_key.management_host)
 
     # ---------------------------------------- subscription ---------------------------------------- #
 

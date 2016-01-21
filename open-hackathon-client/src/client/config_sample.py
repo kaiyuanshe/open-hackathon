@@ -223,11 +223,14 @@ Config = {
                     "profile": {
                         "": ["get", "post", "put"]
                     },
+                    "picture": {
+                        "": ["put"]
+                    },
                     "team": {
                         "member": ["get"]
                     },
                     "hackathon": {
-                        "like": ["post", "delete"]
+                        "like": ["get", "post", "delete"]
                     }
                 },
                 "bulletin": {

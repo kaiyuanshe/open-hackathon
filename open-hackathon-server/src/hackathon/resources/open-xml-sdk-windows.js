@@ -1,11 +1,11 @@
 {
-    "expr_name": "test template 1",
+    "name": "test-template-1",
     "description" : "a template consists of a list of virtual environments, and a virtual environment is a virtual machine with its storage account, container, cloud service and deployment",
     "virtual_environments": [
         {
-            "provider": "azure",
+            "provider": "1",
             "storage_account" : {
-                "service_name" : "portalvhdsnc364fhj0dlpp",
+                "service_name" : "rapidtest",
                 "description" : "storage-description",
                 "label" : "storage-label",
                 "location" : "China East",
@@ -13,19 +13,19 @@
             },
             "container" : "vhds",
             "cloud_service" : {
-                "service_name" : "ot-service-test",
+                "service_name" : "rapid-test",
                 "label" : "cloud-service-label",
                 "location" : "China East"
             },
             "deployment" :{
-                "deployment_name" : "ot-deployment-test",
+                "deployment_name" : "rapid-test-deployment",
                 "deployment_slot" : "production"
             },
-            "label" : "role-label",
-            "role_name" : "ot-role-test",
+            "label" : "rapid-test",
+            "role_name" : "rapid-test",
             "image" : {
-                "type" : "vm",
-                "name" : "openxml"
+                "type" : "os",
+                "name" : "0c5c79005aae478e8883bf950a861ce0__Windows-Server-2012-Essentials-20131018-enus"
             },
             "system_config" : {
                 "os_family" : "Windows",

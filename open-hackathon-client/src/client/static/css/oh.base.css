@@ -1,10 +1,10 @@
 @import "font-awesome.min.css";
 
-@media screen and (max-width: 961px) {
-    body {
-        min-width: 620px;
+
+    body,navbar-inverse {
+        min-width: 1152px!important;
     }
-}
+
 
 @media (min-width: 1200px) {
     .container #content {
@@ -129,10 +129,10 @@
     }
 
     .navbar-collapse.collapse {
-        display: block !important;
-        height: auto !important;
-        padding-bottom: 0;
-        overflow: visible !important;
+        /* display: block !important; */
+        /* height: auto !important; */
+        /* padding-bottom: 0; */
+        /* overflow: visible !important; */
     }
 }
 
@@ -155,7 +155,7 @@
 
 body {
     font-family: "Helvetica Neue", Helvetica, Hiragino Sans GB, WenQuanYi Micro Hei, stheiti, Microsoft Yahei, Simsun, sans-serif;
-    color: #505050;
+    color: #141415;
 }
 
 a {
@@ -170,6 +170,11 @@ a:hover, a:focus {
 
 a:active, a:hover {
     outline: 0;
+}
+
+.btn-default {
+    color: #939597;
+    border-color: #d1d2d4;
 }
 
 label {
@@ -257,6 +262,22 @@ footer .oh-copyright hr {
     footer .oh-footer-link dt {
         width: 103px;
     }
+}
+
+.container {
+    width: 1152px !important;
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
+.col-xs-1, .col-sm-1, .col-md-1, .col-lg-1, .col-xs-2, .col-sm-2, .col-md-2, .col-lg-2, .col-xs-3, .col-sm-3, .col-md-3, .col-lg-3, .col-xs-4, .col-sm-4, .col-md-4, .col-lg-4, .col-xs-5, .col-sm-5, .col-md-5, .col-lg-5, .col-xs-6, .col-sm-6, .col-md-6, .col-lg-6, .col-xs-7, .col-sm-7, .col-md-7, .col-lg-7, .col-xs-8, .col-sm-8, .col-md-8, .col-lg-8, .col-xs-9, .col-sm-9, .col-md-9, .col-lg-9, .col-xs-10, .col-sm-10, .col-md-10, .col-lg-10, .col-xs-11, .col-sm-11, .col-md-11, .col-lg-11, .col-xs-12, .col-sm-12, .col-md-12, .col-lg-12 {
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
+.row {
+    margin-left: -6px;
+    margin-right: -6px;
 }
 
 #oh_lift {
@@ -602,9 +623,9 @@ legend {
 .input-lg,
 .input-sm,
 .input-xs {
-    border-radius: 0 !important;
-    -webkit-border-radius: 0 !important;
-    -moz-border-radius: 0 !important
+    border-radius: 2px !important;
+    -webkit-border-radius: 2px !important;
+    -moz-border-radius: 2px !important
 }
 
 .form-control {
@@ -688,7 +709,7 @@ fieldset[disabled] .btn-primary:hover {
 }
 
 .btn-sm {
-    padding: 6px 10px 5px
+    padding: 2px 8px 2px;
 }
 
 .btn-lg {
@@ -705,9 +726,9 @@ button {
     border-radius: 2px;
     -webkit-border-radius: 2px;
     -moz-border-radius: 2px;
-    box-shadow: inset 0 -2px 0 rgba(0, 0, 0, .05);
-    -moz-box-shadow: inset 0 -2px 0 rgba(0, 0, 0, .05);
-    -webkit-box-shadow: inset 0 -2px 0 rgba(0, 0, 0, .05)
+    box-shadow: none;
+    -moz-box-shadow:none;
+    -webkit-box-shadow: none
 }
 
 .btn:active {
@@ -741,6 +762,16 @@ button {
     font-size: 111%
 }
 
+.btn-success {
+    color: #fff;
+    background-color: #7dba41;
+    border-color: #7dba41;
+ }
+.btn-success:hover {
+    color: #fff;
+    background-color: #12a148;
+    border-color: #12a148;
+}
 a#main-menu-toggle {
     background: #1c1e21;
     width: 40px;
@@ -1777,38 +1808,42 @@ h3.title {
 h4.title {
 
 }
-.hide{
+
+.hide {
     display: none;
 }
+
 .oh-inline-block {
     display: inline-block;
 }
-.left{
+
+.left {
     float: left;
 }
-.right{
+
+.right {
     float: right;
 }
 
-.soon .tooltip.top{
-   margin-top:32px ;
+.soon .tooltip.top {
+    margin-top: 32px;
 }
 
-.required:before {
-    position: absolute;
+.required:after {
     content: '*';
-    right: 5px;
-    color: #cc0000;
+    text-align: right;
 }
-.full-shared{
-    position:absolute;
+
+.full-shared {
+    position: absolute;
     right: 15px;
     width: 40px;
     top: 180px;
     border-radius: 25px;
     border: 1px solid #ddd;
 }
-.full-shared .share-btn a{
+
+.full-shared .share-btn a {
     font-size: 16px;
     width: 38px;
     height: 38px;
@@ -1817,46 +1852,55 @@ h4.title {
     text-align: center;
     cursor: pointer;
 }
-.full-shared .share-btn a>span{
-    background: none!important;
+
+.full-shared .share-btn a > span {
+    background: none !important;
     color: #b4b4b4;
-    padding: 0!important;
+    padding: 0 !important;
     margin: 0;
-    float: none!important;
+    float: none !important;
     text-align: center;
 }
-.full-shared .share-btn a>span:before{
+
+.full-shared .share-btn a > span:before {
     vertical-align: -3px;
     font-family: 'FontAwesome';
 }
-.full-shared .share-btn a label{
+
+.full-shared .share-btn a label {
     font-size: 11px;
-    color:#fff;
+    color: #fff;
     font-weight: normal;
     padding: 2px;
     cursor: pointer;
     line-height: 16px;
 }
 
-.full-shared .share-btn a:hover{
+.full-shared .share-btn a:hover {
     background-color: #b4b4b4;
 }
-.full-shared .share-btn a:hover>span:before{
-    content:'';
+
+.full-shared .share-btn a:hover > span:before {
+    content: '';
     position: absolute;
 }
-.full-shared .share-btn .jiathis_button_ishare>span:before{
+
+.full-shared .share-btn .jiathis_button_ishare > span:before {
     content: "\f1d8";
 }
-.full-shared .share-btn .jiathis_button_tsina>span:before{
+
+.full-shared .share-btn .jiathis_button_tsina > span:before {
     content: "\f18a";
 }
-.full-shared .share-btn .jiathis_button_tqq>span:before{
+
+.full-shared .share-btn .jiathis_button_tqq > span:before {
     content: "\f1d6";
 }
-.full-shared .share-btn .jiathis_button_qzone>span:before{
+
+.full-shared .share-btn .jiathis_button_qzone > span:before {
     content: "\f1d8";
 }
-.full-shared .share-btn .jiathis_button_weixin>span:before{
+
+.full-shared .share-btn .jiathis_button_weixin > span:before {
     content: "\f1d7";
 }

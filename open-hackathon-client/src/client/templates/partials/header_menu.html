@@ -41,9 +41,9 @@
             <!--</li>-->
             <li class="dropdown">
                 <a class="dropdown-toggle" data-toggle="dropdown" href="javascirpt:;">
-                    <img class="avatar"
-                         src="{{ current_user.avatar_url == none and  '/static/pic/anon_user.png' or current_user.avatar_url }}"
-                         alt="{{ current_user.nickname }}" onerror="javascript:this.src='/static/pic/anon_user.png'">
+                    <img class="avatar" data-role="picture"
+                         src="{{ current_user.avatar_url == none and  '/static/pic/monkey-32-32px.png' or current_user.avatar_url }}"
+                         alt="{{ current_user.nickname }}" onerror="javascript:this.src='/static/pic/monkey-32-32px.png'">
                     我的黑客松
                     <span class="oh-caret"></span>
                 </a>

@@ -33,13 +33,16 @@ from flask_restful import Api
 from flask_cors import CORS
 from datetime import timedelta
 
-from util import safe_get_config, get_class, Utility
+from util import safe_get_config, get_class, Utility, Email, DisabledVoiceVerify, RonglianVoiceVerify, DisabledSms,\
+                ChinaTelecomSms
 from hackathon_factory import factory, RequiredFeature
 from hackathon_scheduler import HackathonScheduler
 from hackathon_response import *
+from hackathon_exception import *
 from log import log
 from context import Context
 from database import db_session
+
 
 __all__ = [
     "app",
@@ -150,16 +153,25 @@ def init_components():
     from hackathon.database.db_adapters import SQLAlchemyAdapter
     from hackathon.user import UserManager, UserProfileManager
     from hackathon.hack import HackathonManager, AdminManager, TeamManager, DockerHostManager, \
-        AzureCertManager, RegisterManager, HackathonTemplateManager
+        AzureCertManager, RegisterManager, HackathonTemplateManager, Cryptor
     from hackathon.template import TemplateLibrary
     from hackathon.remote.guacamole import GuacamoleInfo
     from hackathon.expr.expr_mgr import ExprManager
     from hackathon.cache.cache_mgr import CacheManagerExt
+    from hackathon.hazure.azure_formation import AzureFormation
 
     # dependencies MUST be provided in advance
     factory.provide("util", Utility)
     factory.provide("log", log)
     factory.provide("db", SQLAlchemyAdapter, db_session)
+
+    # hazure
+    factory.provide("azure_formation", AzureFormation)
+
+    # utils
+    init_voice_verify()
+    init_sms()
+    factory.provide("email", Email)
 
     # cache
     factory.provide("cache", CacheManagerExt)
@@ -173,6 +185,7 @@ def init_components():
     factory.provide("hackathon_manager", HackathonManager)
     factory.provide("register_manager", RegisterManager)
     factory.provide("azure_cert_manager", AzureCertManager)
+    factory.provide("cryptor", Cryptor)
     factory.provide("docker_host_manager", DockerHostManager)
     factory.provide("hackathon_template_manager", HackathonTemplateManager)
     factory.provide("template_library", TemplateLibrary)
@@ -194,6 +207,47 @@ def init_components():
 
     # storage
     init_hackathon_storage()
+
+
+def init_voice_verify():
+    """ initial voice verify service
+    Example for config.py:
+    "voice_verify": {
+        "enabled": True,
+        "provider": "rong_lian",
+        "rong_lian": {
+            ... ...
+        }
+    }
+    """
+    provider_name = safe_get_config("voice_verify.provider", None)
+    enabled = safe_get_config("voice_verify.enabled", False)
+    if not enabled:
+        log.warn("voice verify disabled")
+        factory.provide("voice_verify", DisabledVoiceVerify)
+    elif provider_name and safe_get_config("voice_verify." + provider_name, None):
+        log.warn("Voice verify initialized to:" + provider_name)
+        # if provider other than Ronglian is supported, update following lines
+        factory.provide("voice_verify", RonglianVoiceVerify)
+    else:
+        log.warn("either voice verify provider name or provider config is missing, Please check your configuration")
+        raise ConfigurationException("voice_verify.provider")
+
+
+def init_sms():
+    """ initial SMS service """
+    provider_name = safe_get_config("sms.provider", None)
+    enabled = safe_get_config("sms.enabled", False)
+    if not enabled:
+        log.warn("SMS service disabled")
+        factory.provide("sms", DisabledSms)
+    elif provider_name and safe_get_config("sms." + provider_name, None):
+        log.warn("SMS initialized to:" + provider_name)
+        # if provider other than ChinaTelecom is supported, update following lines
+        factory.provide("sms", ChinaTelecomSms)
+    else:
+        log.warn("Either SMS provider name or provider config is missing, Please check your configuration")
+        raise ConfigurationException("sms.provider")
 
 
 def init_hackathon_storage():

@@ -32,6 +32,7 @@ from . import render
 from flask_login import login_required
 from client.functions import is_local
 
+
 @app.route("/manage/create_event")
 @login_required
 def create_event():
@@ -108,6 +109,7 @@ def team_award(hackathon_name, team_id):
 @login_required
 def award(hackathon_name):
     return render("/manage/award.html", hackathon_name=hackathon_name)
+
 
 @app.route("/manage/<hackathon_name>/host_server")
 @login_required

@@ -677,7 +677,7 @@
           <div class="col-lg-2 col-md-4 col-xs-6">
                 <div class="oh-item">
                     <div class="oh-header">
-                        <a href="javascript:;"><img src="${avatar_url}" onerror="javascript:this.src='/static/pic/anon_user.png'"></a>
+                        <a href="/user/p_${id}"><img src="${avatar_url}" onerror="javascript:this.src='/static/pic/anon_user.png'"></a>
                     </div>
                     <div class="oh-body">
                         <p class="text-center"><a href="javascript:;">${nickname}</a></p>
@@ -720,7 +720,7 @@
             <ul class="oh-list">
                 {{each members}}
                     <li>
-                        <a href="javascript:;"><img src="${user.avatar_url}"></a>
+                        <a href="/user/p_${id}"><img src="${user.avatar_url}"></a>
                         <p><a class="grey-link" href="javasript:;">${user.nicknam}</a></p>
                     </li>
                 {{/each}}
