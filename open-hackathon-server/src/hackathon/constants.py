@@ -508,7 +508,7 @@ class LOGIN_PROVIDER:
     ALAUDA = 32
 
 
-class HACK_NOTICE_TYPE:
+class HACK_NOTICE_CATEGORY:
     HACKATHON = 0  # hackathon related notice
     USER = 1   # user related notice
     EXPERIMENT = 2   # experiment related notice

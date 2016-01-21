@@ -694,15 +694,16 @@ class AdminHackathonNoticeResource(HackathonResource):
 
     @admin_privilege_required
     def post(self):
-        return hackathon_manager.create_hackathon_notice(g.hackathon, self.context())
+        ctx = self.context()
+        return hackathon_manager.create_hackathon_notice(g.hackathon.id, int(ctx.get('event', 0)), int(ctx.get('category', 0)), ctx)
 
     @admin_privilege_required
     def put(self):
-        return hackathon_manager.update_hackathon_notice(g.hackathon, self.context())
+        return hackathon_manager.update_hackathon_notice(self.context())
 
     @admin_privilege_required
     def delete(self):
-        return hackathon_manager.delete_hackathon_notice(g.hackathon, self.context().id)
+        return hackathon_manager.delete_hackathon_notice(self.context().id)
 
 
 class HackathonNoticeListResource(HackathonResource):

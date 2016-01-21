@@ -310,12 +310,12 @@
     <script id="notice_list_temp" type="text/x-jquery-tmpl">
      {% raw %}
      <dl class="oh-latest-news">
-        <dt>${update_time}</dt>
+        <dt>${$item.getNoticeTime(update_time)}</dt>
         <dd style="word-break: break-all">
         {{if link==''}}
-            <span class="${icon}"></span>${content}
+            <span class="${$item.getNoticeIcon(category)}"></span>${content}
         {{else}}
-            <span class="${icon}"></span><a href="${link}">${content}</a>
+            <span class="${$item.getNoticeIcon(category)}"></span><a href="${link}">${content}</a>
         {{/if}}
         </dd>
     </dl>

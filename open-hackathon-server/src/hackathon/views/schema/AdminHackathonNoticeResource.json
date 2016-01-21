@@ -32,10 +32,6 @@
           "id": {
             "description": "hackathon notice id",
             "pattern": "^[0-9]+$"
-          },
-          "content": {
-            "description": "hackathon notice content",
-            "type": "string"
           }
         }
       }

@@ -10,18 +10,13 @@
             "type": "string",
             "required": false
           },
-          "type": {
-            "description": "filter by hackathon_notice type",
+          "category": {
+            "description": "filter by hackathon_notice category",
             "pattern": "^[0-9]+$",
             "required": false
           },
           "order_by": {
-            "description": "order by update_time, type, event, etc",
-            "type": "string",
-            "required": false
-          },
-          "show": {
-            "description": "show all hackathon_notices or use pagination",
+            "description": "order by update_time, category, event, etc",
             "type": "string",
             "required": false
           },

@@ -122,7 +122,7 @@
                 </div>
                 <div class="modal-footer form-group has-feedback">
                     <button type="button" class="btn btn-default wb-btn" data-dismiss="modal">取消</button>
-                    <button type="button" class="btn btn-primary wb-btn" data-type="submit">确定</button>
+                    <button type="submit" class="btn btn-primary wb-btn" data-type="submit">确定</button>
                 </div>
             </form>
         </div>
@@ -135,7 +135,7 @@
     <tr>
         <td style="max-width: 300px;">${content}</td>
         <td style="max-width: 300px; word-break: break-all;">${link}</td>
-        <td>${type}</td>
+        <td>${$item.getNoticeDescription(category)}</td>
         <td>${moment(update_time).format('YYYY-MM-DD HH:mm')}</td>
 
         <td class="col-action">

@@ -40,7 +40,7 @@ from hackathon.database import Hackathon, User, AdminHackathonRel, DockerHostSer
     UserTeamRel, HackathonNotice
 from hackathon.hackathon_response import internal_server_error, ok, not_found, forbidden
 from hackathon.constants import HACKATHON_BASIC_INFO, ADMIN_ROLE_TYPE, HACK_STATUS, RGStatus, HTTP_HEADER, \
-    FILE_TYPE, HACK_TYPE, HACKATHON_STAT, DockerHostServerStatus, HACK_NOTICE_TYPE, HACK_NOTICE_EVENT
+    FILE_TYPE, HACK_TYPE, HACKATHON_STAT, DockerHostServerStatus, HACK_NOTICE_CATEGORY, HACK_NOTICE_EVENT
 from hackathon import RequiredFeature, Component, Context
 
 docker_host_manager = RequiredFeature("docker_host_manager")
@@ -252,7 +252,7 @@ class HackathonManager(Component):
         if self.util.is_local():
             self.__create_default_data_for_local(new_hack)
 
-        self.__create_hackathon_notice(new_hack, HACK_NOTICE_EVENT.HACK_CREATE)
+        self.create_hackathon_notice(new_hack.id, HACK_NOTICE_EVENT.HACK_CREATE, HACK_NOTICE_CATEGORY.HACKATHON)
 
         return new_hack.dic()
 
@@ -273,7 +273,7 @@ class HackathonManager(Component):
 
             if update_items:
                 if 'status' in update_items and int(update_items['status']) == HACK_STATUS.ONLINE:
-                    self.__create_hackathon_notice(hackathon, HACK_NOTICE_EVENT.HACK_ONLINE) #hackathon online
+                    self.create_hackathon_notice(hackathon.id, HACK_NOTICE_EVENT.HACK_ONLINE, HACK_NOTICE_CATEGORY.HACKATHON) #hackathon online
                 else:
                     pass #other hackathon properties changes
 
@@ -492,15 +492,80 @@ class HackathonManager(Component):
         hackathon_notice = self.db.get_object(HackathonNotice, notice_id)
         return hackathon_notice.dic()
 
-    def create_hackathon_notice(self, hackathon, body):
-        return self.__create_hackathon_notice(hackathon, body.get('event', HACK_NOTICE_EVENT.MANUAL), body)
+    def create_hackathon_notice(self, hackathon_id, notice_event, notice_category, body={}):
+        """
+        create hackathon notice with hackathon_id, notice_event, notice_category. 
+        notice 'content' and 'link' can be included in body (optional)
 
-    def update_hackathon_notice(self, hackathon, body):
-        hackathon_notice = self.db.get_object(HackathonNotice, body.get("id"))
+        :type hackathon_id: int
+        :param hackathon_id: id of hackathon that the notice belongs to (-1 if the notice doesn't belong to a specfic hackathon)
+
+        :type notice_event: Class HACK_NOTICE_EVENT
+        :param notice_event: event that the notice is triggered by, used for notice filtering (see get_hackathon_notice_list())
+                             more specfic than notice_category, new events can be added without disturbing front-end code
+
+        :type notice_category: Class HACK_NOTICE_CATEGORY
+        :param notice_category: category that the notice belongs to, used for notice filtering and notice properties display 
+                                at front-end (e.g. icons/descriptions, see oh.manage.notice.js & oh.site.hackathon.js), 
+                                more general than notice_event, if you want to add a new category in HACK_NOTICE_CATEGORY, 
+                                remember to update front-end js code as well.
+                                
+        :type body: dict/Context, default value: {}
+        :param body: other necessary information, e.g.: 'content'(notice's content), 'link'(notice's link), other keys for specfic uses
+
+        :return: hackathon_notice in dict
+
+        ::Example:
+        :create_hackathon_notice(2, HACK_NOTICE_EVENT.xx, HACK_NOTICE_CATEGORY.yy, {'content': 'zz'})
+            a new notice for a hackathon with id 2 is created for the propose of HACK_NOTICE_EVENT.xx. The notice's front-end icon 
+            and description is determined by HACK_NOTICE_CATEGORY.yy, while its content is 'zz' and its link url is ''
+        
+        :create_hackathon_notice(-1, HACK_NOTICE_EVENT.xx, HACK_NOTICE_CATEGORY.yy)
+            a new notice not belongs to any hackathon is created for the propose of HACK_NOTICE_EVENT.xx. The notice's front-end icon 
+            and description is determined by HACK_NOTICE_CATEGORY.yy, while its content and link url is ''
+        """
+        hackathon_notice = HackathonNotice(hackathon_id=hackathon_id, 
+                                           content='',
+                                           link='',
+                                           event=notice_event,
+                                           category=notice_category,
+                                           create_time=self.util.get_now(),
+                                           update_time=self.util.get_now())
+
+        hackathon = self.get_hackathon_by_id(hackathon_id)
+        #notice creation logic for different notice_events
+        if hackathon:
+            if notice_event == HACK_NOTICE_EVENT.HACK_CREATE:
+                hackathon_notice.content = u"Hachathon: %s 创建成功" %(hackathon.name)
+            elif notice_event == HACK_NOTICE_EVENT.HACK_EDIT and hackathon:
+                hackathon_notice.content = u"Hachathon: %s 信息变更" %(hackathon.name)
+            elif notice_event == HACK_NOTICE_EVENT.HACK_ONLINE and hackathon:
+                hackathon_notice.content = u"Hachathon: %s 正式上线" %(hackathon.name)
+            elif notice_event == HACK_NOTICE_EVENT.HACK_OFFLINE and hackathon:
+                hackathon_notice.content = u"Hachathon: %s 下线" %(hackathon.name)
+            else:
+                pass
+
+        if notice_event == HACK_NOTICE_EVENT.EXPR_JOIN and body.get('user_id'):
+            user_id = int(body.get('user_id'))
+            user = self.user_manager.get_user_by_id(user_id)
+            hackathon_notice.content = u"用户 %s 开始编程" %(user.nickname)
+        else:
+            pass
+
+        #use assigned value if content or link is assigned in body
+        hackathon_notice.content = body.get('content', hackathon_notice.content)
+        hackathon_notice.link = body.get('link', hackathon_notice.link)
+
+        self.db.add_object(hackathon_notice)
+
+        self.log.debug("a new notice is created: hackathon_id: %d, event: %d, category: %d" %(hackathon_id, notice_event, notice_category))
+        return hackathon_notice.dic()
+
+    def update_hackathon_notice(self, body):
+        hackathon_notice = self.db.get_object(HackathonNotice, body.get('id'))
         if not hackathon_notice:
             return not_found("hackathon_notice not found")
-        if hackathon.id != body.get("hackathon_id"):
-            return forbidden()
         
         hackathon_notice.content = body.get("content", hackathon_notice.content)
         hackathon_notice.link = body.get("link", hackathon_notice.link)
@@ -509,56 +574,75 @@ class HackathonManager(Component):
         self.db.commit()
         return hackathon_notice.dic()
 
-    def delete_hackathon_notice(self, hackathon, notice_id):
-        self.db.delete_all_objects_by(HackathonNotice, hackathon_id=hackathon.id, id=notice_id)
+    def delete_hackathon_notice(self, notice_id):
+        self.db.delete_all_objects_by(HackathonNotice, id=notice_id)
         return ok()
 
     def get_hackathon_notice_list(self, body):
+        """
+        list hackathon notices, notices are paginated, can be filtered by hackathon_name, event and category, 
+        can be ordered by update_time, event and category.
+
+        :type body: Context
+        :param body: valid key/values(all key/values are optional)
+            body = {
+                hackathon_name: string,                  // filter by hackathon_name, default unfiltered
+                category: 'int[,int...]',                // filter by category, default unfiltered
+                event: 'int[,int...]',                   // filter by event, default unfiltered
+                order_by: 'time' | 'event' | 'category', // order by update_time, event, category, default by time
+                page: int,                               // page number after pagination, start from 1, default 1
+                per_page: int                            // items per page, default 1000
+            }
+
+        :return: json style text, see util.Utility
+
+        ::Example:
+        : body = { order_by: 'time', category: '1,2,3', page: 1, per_page: 6 }
+            search first 6 notices ordered by time, filtered by: category in [1,2,3]
+        : body = { hackathon_name: 'hackathon', event: '1', order_by: 'event' }
+            search first 1000 notices ordered by event, filtered by event == 1 and hackathon_name == 'hackathon'
+        """
+
         query = HackathonNotice.query
 
         hackathon_name = body.get("hackathon_name")
-        notice_type = body.get("type")
+        notice_category = body.get("category")
         notice_event = body.get("event")
         order_by = body.get("order_by", "time") 
-        show = body.get("show")
+        page = int(body.get("page", 1))
+        per_page = int(body.get("per_page", 1000))
 
-        #filter by hackathon_name, type or event
+        #filter by hackathon_name, category or event
         if hackathon_name:
             hackathon = self.get_hackathon_by_name(hackathon_name)
             if hackathon:
                 query = query.filter(HackathonNotice.hackathon_id == hackathon.id)
             else:
-                return []
-        if notice_type:
-            query = query.filter(HackathonNotice.type == int(notice_type))
+                return not_found("hackathon_name not found")
+        if notice_category:
+            notice_category_tuple = tuple([int(category) for category in notice_category.split(',')])
+            query = query.filter(HackathonNotice.category.in_(notice_category_tuple))
         if notice_event:
-            query = query.filter(HackathonNotice.event == int(notice_event))
+            notice_event_tuple = tuple([int(event) for event in notice_event.split(',')])
+            query = query.filter(HackathonNotice.event.in_(notice_event_tuple))
 
-        #order by time or type
+        #order by time, category or event
         if order_by == 'time':
             query = query.order_by(HackathonNotice.update_time.desc())
-        elif order_by == 'type':
-            query = query.order_by(HackathonNotice.type)
+        elif order_by == 'category':
+            query = query.order_by(HackathonNotice.category)
         elif order_by == 'event':
             query = query.order_by(HackathonNotice.event)
         else:
             query = query.order_by(HackathonNotice.update_time.desc())
 
-        #return all notices or use pagination
-        if show == 'pagination':
-            page = int(body.get("page", 1))
-            per_page = int(body.get("per_page", 10))
-            pagination = self.db.paginate(query, page, per_page)
+        pagination = self.db.paginate(query, page, per_page)
 
-            def func(hackathon_notice):
-                detail = hackathon_notice.dic()
-                return detail
+        def func(hackathon_notice):
+            detail = hackathon_notice.dic()
+            return detail
 
-            return self.util.paginate(pagination, func)    
-        else:
-            hackathon_notice = {}
-            hackathon_notice['items'] = [a.dic() for a in query]
-            return hackathon_notice
+        return self.util.paginate(pagination, func)    
 
 
     def schedule_pre_allocate_expr_job(self):
@@ -816,54 +900,6 @@ class HackathonManager(Component):
                                      hackathon_id=hackathon.id)
             self.db.add_object(config)
         self.db.commit()
-
-    def __create_hackathon_notice(self, hackathon, notice_event, args=None):
-        """
-        create hackathon notice
-        :type hackathon: Hackathon
-        :param hackathon: an existing Hackathon object that the notice belongs to
-
-        :type notice_event: Class HACK_NOTICE_EVENT
-        :param notice_event: a specfic event that the notice is triggered by
-
-        :return: hackathon_notice in dict
-        """
-        hackathon_notice = HackathonNotice(hackathon_id=hackathon.id, 
-                                           content="",
-                                           link="",
-                                           event=notice_event,
-                                           create_time=self.util.get_now(),
-                                           update_time=self.util.get_now())
-
-        if notice_event == HACK_NOTICE_EVENT.MANUAL:
-            hackathon_notice.content = args.get('content', '')
-            hackathon_notice.link = args.get('link', '')
-        elif notice_event == HACK_NOTICE_EVENT.HACK_CREATE:
-            hackathon_notice.content = u"Hachathon: %s 创建成功" %(hackathon.name)
-        elif notice_event == HACK_NOTICE_EVENT.HACK_EDIT:
-            hackathon_notice.content = u"Hachathon: %s 信息变更" %(hackathon.name)
-        elif notice_event == HACK_NOTICE_EVENT.HACK_ONLINE:
-            hackathon_notice.content = u"Hachathon: %s 正式上线" %(hackathon.name)
-        elif notice_event == HACK_NOTICE_EVENT.HACK_OFFLINE:
-            hackathon_notice.content = u"Hachathon: %s 下线" %(hackathon.name)
-        elif notice_event == HACK_NOTICE_EVENT.EXPR_JOIN and args.get('user_id'):
-            user_id = int(args.get('user_id'))
-            user = self.user_manager.get_user_by_id(user_id)
-            hackathon_notice.content = u"用户 %s 开始编程" %(user.nickname)
-        else:
-            pass
-
-        # every event belongs to a specific type, which influences the icons/descriptions of the notice shown at front-end
-        if notice_event in [HACK_NOTICE_EVENT.EXPR_JOIN]:
-            hackathon_notice.type = HACK_NOTICE_TYPE.EXPERIMENT
-        else:
-            hackathon_notice.type = HACK_NOTICE_TYPE.HACKATHON
-
-        self.db.add_object(hackathon_notice)
-
-        self.log.debug("a new notice for %s is created" %(hackathon.name))
-        return hackathon_notice.dic()
-
 
 
 '''
