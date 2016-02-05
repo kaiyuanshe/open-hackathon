@@ -30,7 +30,7 @@ sys.path.append("..")
 from flask import g
 
 from hackathon import Component, RequiredFeature
-from hackathon.database import AdminHackathonRel, User
+from hackathon.database import AdminHackathonRel, User, Hackathon
 from hackathon.constants import ADMIN_ROLE_TYPE
 from hackathon.hackathon_response import precondition_failed, ok, not_found, internal_server_error, bad_request
 
@@ -75,6 +75,33 @@ class AdminManager(Component):
         hackathon_ids = [x.hackathon_id for x in admin_user_hackathon_rels]
 
         return list(set(hackathon_ids))
+
+    def get_entitled_hackathons_simple(self, user_id):
+        """Get hackathon id list that specific user is entitled to manage
+
+        :type user_id: int
+        :param user_id: id of user
+
+        :rtype: list
+        :return list of hackathon simple
+        """
+
+        admin_user_hackathon_simple = self.db.session().query(
+            Hackathon.id,
+            Hackathon.name,
+            Hackathon.display_name,
+            Hackathon.ribbon,
+            Hackathon.short_description,
+            Hackathon.banners,
+            Hackathon.status,
+            Hackathon.creator_id,
+            Hackathon.type
+        ).join(AdminHackathonRel, AdminHackathonRel.hackathon_id == Hackathon.id or AdminHackathonRel.hackathon_id == -1)\
+            .filter(AdminHackathonRel.user_id == user_id)\
+            .order_by(Hackathon.event_start_time.desc())\
+            .all()
+
+        return [h._asdict() for h in admin_user_hackathon_simple]
 
     def get_admins_by_hackathon(self, hackathon):
         """Get all admins of a hackathon
