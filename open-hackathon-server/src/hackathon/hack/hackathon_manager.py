@@ -182,6 +182,9 @@ class HackathonManager(Component):
 
         return map(lambda h: self.__get_hackathon_detail(h, user), hackathon_list)
 
+    def get_entitled_hackathon_simple_list(self, user):
+        return self.admin_manager.get_entitled_hackathons_simple(user.id)
+
     def get_basic_property(self, hackathon, key, default=None):
         """Get basic property of hackathon from HackathonConfig"""
         config = self.db.find_first_object_by(HackathonConfig, key=key, hackathon_id=hackathon.id)
