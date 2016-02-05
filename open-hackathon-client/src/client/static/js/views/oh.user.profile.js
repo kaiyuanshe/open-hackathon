@@ -26,63 +26,110 @@
     'use strict';
 
     var isProfile = false;
+    var user_id = 0;
+    var edit_tmpl = '<a class="right btn btn-success btn-sm" href="/user/edit"><i class="fa fa-pencil"></i> 编辑个人资料</a>';
 
-    function pageload() {
-        oh.api.user.profile.get({}, function (data) {
+    function getUserProfile(query) {
+        return oh.api.user.profile.get(query, function (data) {
             if (!data.error) {
-                setFormData(data);
-                isProfile = true;
+                bingUser(data);
+                if (user_id == 0) {
+                    $('.user-name').append(edit_tmpl);
+                }
+                getUserLikeHackathons(query)
             } else {
+                if (data.error.code == 404) {
+
+                } else {
+                    getUserLikeHackathons(query)
+                }
                 console.log(data.error);
             }
         });
     }
 
-    function setFormData(data) {
-        var pform = $('#profileForm');
-        $.each(data, function (key, value) {
-            pform.find('input[name="' + key + '"]').val(value);
-        })
-    }
-
-    function getFormDate() {
-        var pform = $('#profileForm');
-        var data = {};
-        pform.find('input,select,textarea').each(function (i, elm) {
-            var input = $(elm);
-            data[input.attr('name')] = input.val();
+    function getUserLikeHackathons(data) {
+        return oh.api.user.hackathon.like.get(data, function (data) {
+            if (!data.error) {
+                $('#like_events').append($('#like_event_item').tmpl(data, {
+                    get_banner: function (banners) {
+                        return banners.split(';')[0] || ''
+                    }
+                }));
+            }
         });
-        return data;
     }
 
-    function profileFormValidator() {
-        var pform = $('#profileForm').bootstrapValidator()
-            .on('success.form.bv', function (e, ok) {
-                e.preventDefault();
-                var data = getFormDate()
-                if (isProfile) {
-                    oh.api.user.profile.put({body: data}).then(callback);
+    function getMyEvents() {
+        var status_data = {"0": "草稿", "1": "上线", "2": "下线"};
+        return oh.api.admin.hackathon.list.get(function (data) {
+            var panel = $('#my_events').empty();
+            if (!data.error) {
+                if (data.length > 0) {
+                    panel.append($('#my_event_item').tmpl(data, {
+                        get_banner: function (banners) {
+                            return banners.split(';')[0] || ''
+                        },
+                        get_status: function (status) {
+                            return status_data[status];
+                        }
+                    }));
                 } else {
-                    oh.api.user.profile.post({body: data}).then(callback);
+                    panel.append('<h5>没有发布任何活动,<a href="/manage/create_event">发布活动</a></h5>');
                 }
-                function callback(data) {
-                    //console.log(data);
-                    $('#alert').modal('show')
+            }
+        });
+    }
+
+    function getMyRegisterEvents(query) {
+        return oh.api.user.registration.list.get(query, function (data) {
+            var panel = $('#my_register_events').empty()
+            if (!data.error) {
+                if (data.length > 0) {
+                    panel.append($('#my_register_event_item').tmpl(data, {
+                        get_banner: function (banners) {
+                            return banners.split(';')[0] || '';
+                        },
+                        get_location: function (location) {
+                            return location.length > 0 ? location.substring(0, 2) : '在线';
+                        }
+                    }));
+                } else {
+                    panel.append('<h5>没有参加过任何活动。。。</h5>');
                 }
-            });
+            }
+        });
+    }
+
+    function pageload() {
+        user_id = +location.pathname.replace(/\/user\/p_/ig, '') || 0;
+        var query = user_id == 0 ? {} : {query: {user_id: user_id}};
+        getUserProfile(query);
+        getMyRegisterEvents(query);
+        var li = $('a[href="#my_events"]').parents('li');
+        var li_join = $('a[href="#my_register_events"]');
+        if (user_id == 0) {
+            li.removeClass('hide');
+            li_join.text('我参与的活动');
+            getMyEvents();
+        } else {
+            li.detach();
+            li_join.text('TA参与的活动');
+            $('#my_events').detach();
+        }
+    }
+
+    function bingUser(data) {
+        $('.user-name').text(data.nickname);
+        $('.user-picture>img').load(function (e) {
+            oh.comm.imgLoad(this);
+        }).attr({src: data.avatar_url});
+        $('.career').html((data.career_type || '') + '</br>' + (data.career || ''));
+        $('.' + data.provider).addClass('active');
     }
 
     function init() {
         pageload();
-        profileFormValidator();
-        var alert = $('#alert').on('click', ' [data-type="ok"]', function (e) {
-            var url = $.getUrlParam('return_url');
-            if (url) {
-                window.location.href = url;
-            } else {
-                alert.modal('hide');
-            }
-        });
     }
 
     $(function () {

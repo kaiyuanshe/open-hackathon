@@ -289,10 +289,11 @@ h2:first-child {
     text-decoration: none;
 }
 
-.oh-users .oh-item:hover .oh-header img {
-    width: 120%;
-    top: -10%;
-    left: -10%;
+.oh-users .oh-item .oh-header:hover img {
+     -moz-transform:scale(1.2,1.2);
+    -o-transform: scale(1.2,1.2);
+    -webkit-transform: scale(1.2,1.2);
+    transform: scale(1.2,1.2);
 }
 
 .oh-users .oh-item:hover .oh-signature {
@@ -310,7 +311,7 @@ h2:first-child {
 
 .oh-users .oh-header img {
     position: absolute;
-    width: 100%;
+    /* width: 100%; */
     left: 0;
     right: 0;
     top: 0;
