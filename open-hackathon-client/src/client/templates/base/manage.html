@@ -1,58 +1,198 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-de" ng-app="manageView" ng-controller="MainController">
 
 <head>
-    <!-- start: Meta -->
-    <meta property="wb:webmaster" content="{{ meta_content.weibo }}"/>
-    <meta property="qc:admins" content="{{ meta_content.qq }}"/>
-    {% block meta %} {% endblock %}
-    <meta name="hackathon_name" content="{{ hackathon_name }}">
-    <meta name="author" content="Boli Guan">
-    <meta name="copyright" content="Microsoft Open Technologies Center">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- end: Meta -->
-    <!-- start: CSS -->
-    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/static/css/oh.base.css" rel="stylesheet">
-    <link href="/static/css/oh.manage.css" rel="stylesheet">
-    {% block style %}{% endblock %}
-    <!-- end: CSS -->
-    <!-- The HTML5 shim, for IE6-8 support of HTML5 elements -->
-    <!--[if lt IE 9]>
-    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <script src="/static/js/respond.min.js"></script>
-    <![endif]-->
-    <!-- start: Favicon and Touch Icons -->
-    <link rel="icon" href="/static/pic/icon.jpg">
-    <!-- end: Favicon and Touch Icons -->
-    {% block head %} {% endblock %}
+  <!-- start: Meta -->
+  <meta property="wb:webmaster" content="{{ meta_content.weibo }}" />
+  <meta property="qc:admins" content="{{ meta_content.qq }}" /> {% block meta %} {% endblock %}
+  <meta name="hackathon_name" content="{{ hackathon_name }}">
+  <meta name="author" content="Boli Guan">
+  <meta name="copyright" content="Microsoft Open Technologies Center">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script type="text/javascript">
+  (function() {
+    var indexFile = (location.pathname.match(/\/(manage[^\.]*)/) || ['', ''])[1],
+      rUrl = /(#!\/[^\.]*).*$/,
+      baseUrl = location.href.replace(rUrl, indexFile),
+      production = location.hostname === 'open-hackathon-dev.chinacloudapp.cn',
+      headEl = document.getElementsByTagName('head')[0],
+      sync = true;
+
+    addTag('base', {
+      href: location.origin + '/manage/'
+    });
+
+
+    addTag('link', {
+      rel: 'stylesheet',
+      href: '/static/css/bootstrap.css',
+      type: 'text/css'
+    });
+    addTag('link', {
+      rel: 'stylesheet',
+      href: '/static/css/oh.manage.css',
+      type: 'text/css'
+    });
+
+
+    addTag('script', {
+      src: '/static/components/angular-1.5.0/angular.js'
+    }, sync);
+    addTag('script', {
+      src: '/static/components/angular-1.5.0/angular-resource.js'
+    }, sync);
+    addTag('script', {
+      src: '/static/components/angular-1.5.0/angular-cookies.js'
+    }, sync);
+    addTag('script', {
+      src: '/static/components/angular-1.5.0/angular-sanitize.js'
+    }, sync);
+    addTag('script', {
+      src: '/static/components/marked-0.3.3/marked.js'
+    }, sync);
+
+    addTag('script', {
+      src: '/static/components/angular-translate-2.9.0/angular-translate.js'
+    }, sync);
+    addTag('script', {
+      src: '/static/components/angular-translate-2.9.0/angular-translate-loader-static-files.js'
+    }, sync);
+    addTag('script', {
+      src: '/static/components/angular-translate-2.9.0/angular-translate-storage-cookie.js'
+    }, sync);
+    addTag('script', {
+      src: '/static/components/angular-translate-2.9.0/angular-translate-storage-local.js'
+    }, sync);
+    addTag('script', {
+      src: '/static/components/angularUI-Router/angular-ui-router.js'
+    }, sync);
+
+    addTag('script', {
+      src: '/static/components/angular-bootstrap/bootstrap.js'
+    }, sync);
+    addTag('script', {
+      src: '/static/components/angular-bootstrap/dropdown-toggle.js'
+    }, sync);
+    addTag('script', {
+      src: '/static/components/angular-paging/paging.js'
+    }, sync);
+    addTag('script', {
+      src: '/config.js'
+    }, sync);
+    addTag('script', {
+      src: '/static/js/manage.directives.js'
+    }, sync);
+    addTag('script', {
+      src: '/static/js/manage.controller.js'
+    }, sync);
+    addTag('script', {
+      src: '/static/js/manage.nav-data.js'
+    }, sync);
+    addTag('script', {
+      src: '/static/js/manage.app.js'
+    }, sync);
+
+
+    function addTag(name, attributes, sync) {
+      var el = document.createElement(name),
+        attrName;
+
+      for (attrName in attributes) {
+        el.setAttribute(attrName, attributes[attrName]);
+      }
+
+      sync ? document.write(outerHTML(el)) : headEl.appendChild(el);
+    }
+
+    function outerHTML(node) {
+      // if IE, Chrome take the internal method otherwise build one
+      return node.outerHTML || (function(n) {
+        var div = document.createElement('div'),
+          h;
+        div.appendChild(n);
+        h = div.innerHTML;
+        div = null;
+        return h;
+      })(node);
+    }
+  })();
+  </script>
 </head>
+{% raw %}
 
 <body>
-<header class="navbar navbar-inverse">
-    <div class="container">
-        <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#navbar">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-        </button>
-        <a class="navbar-brand" href="{{ url_for('index') }}"><img
-                src="/static/pic/icon64.png"><span>我的管理</span></a>
-        {% include  "partials/header_menu.html" %}
+  <div id="wrapper">
+    <header class="header">
+      <section class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+          <div class="navbar-header">
+            <a class="brand navbar-brand" href="/">
+              <img class="logo" alt="{{'NAVBAR.LOGO_ATR' | translate}}" ng-src="/static/images/logo.jpg">
+            </a>
+          </div>
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+              <li class="active"><a href="/" translate="NAVBAR.HOME">Home</a></li>
+              <li><a href="/" translate="NAVBAR.COMMUNITY">Community</a></li>
+              <li><a href="/" translate="NAVBAR.HELP">Help</a></li>
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li><a href="#">Action</a></li>
+                  <li><a href="#">Another action</a></li>
+                  <li><a href="#">Something else here</a></li>
+                  <li role="separator" class="divider"></li>
+                  <li class="dropdown-header">Nav header</li>
+                  <li><a href="#">Separated link</a></li>
+                  <li><a href="#">One more separated link</a></li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </header>
+    <section role="main" class="container-fluid main-body">
+      <div class="main-body-grid">
+        <div class="grid-left">
+          <div class="side-navigation">
+            <div class="person">
+              <div class="person-pic">
+                <img src="/static/pic/monkey-104-104px.jpg">
+              </div>
+              <span>Name</span>
+            </div>
+            <ul class="nav">
+              <li ng-repeat="navManage in currentArea track by navManage.name" class="nav-index-group">
+                <h3 translate="{{navManage.name}}"></h3>
+                <ul class="nav">
+                  <li ng-repeat="navItem in navManage.navGroups" ng-class="isActive(navItem)">
+                    <a href="{{navLink(navItem)}}" translate="{{navItem.name}}"></a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="grid-right">
+          <nav class="top-navigation">
+            <a class="btn btn-default" ui-sref="manage()"><i class="fa fa-wrench" ></i> 我的管理</a> &gt; 当前黑客松：
+            <a href="">{{currentActivity.name}}</a> &gt; {{ page.name | translate}}
+            <img src="/static/images/wait.gif">
+          </nav>
+          <div ui-view></div>
+        </div>
+      </div>
+    </section>
+  </div>
+  <tips tip="tip"></tips>
+  <div class="loading" ng-show="loading">
+    <img src="/static/images/page-loading.gif">
+    <div class="modal-backdrop fade in">
     </div>
-</header>
-{% block content %} {% endblock %}
-{% include "partials/piwikd.html" %}
-<script type="text/javascript" src="/config.js"></script>
-<script type="text/javascript" src="/static/js/jquery/jquery-1.11.1.js"></script>
-<script type="text/javascript" src="/static/js/jquery/jquery.cookie.js"></script>
-<script type="text/javascript" src="/static/js/jquery/jquery.ui-1.8.18.min.js"></script>
-<script type="text/javascript" src="/static/js/jquery/jquery.validate-1.9.min.js"></script>
-<script type="text/javascript" src="/static/js/jquery/jquery.tmpl.min.js"></script>
-<script type="text/javascript" src="/static/js/bootstrap/bootstrap.min.js"></script>
-<script type="text/javascript" src="/static/js/oh.core.js"></script>
-<script type="text/javascript" src="/static/js/oh.api.js"></script>
-{% block script %}{% endblock %}
+  </div>
 </body>
+
 </html>
+{% endraw %}
