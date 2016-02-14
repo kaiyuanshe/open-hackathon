@@ -81,7 +81,13 @@
       src: '/config.js'
     }, sync);
     addTag('script', {
+      src: '/static/js/manage.router.js'
+    }, sync);
+    addTag('script', {
       src: '/static/js/manage.directives.js'
+    }, sync);
+    addTag('script', {
+      src: '/static/js/manage.services.js'
     }, sync);
     addTag('script', {
       src: '/static/js/manage.controller.js'
@@ -125,7 +131,7 @@
   <div id="wrapper">
     <header class="header">
       <section class="navbar navbar-inverse navbar-fixed-top">
-        <div class="container">
+        <div class="container-fluid">
           <div class="navbar-header">
             <a class="brand navbar-brand" href="/">
               <img class="logo" alt="{{'NAVBAR.LOGO_ATR' | translate}}" ng-src="/static/images/logo.jpg">
@@ -154,36 +160,7 @@
       </section>
     </header>
     <section role="main" class="container-fluid main-body">
-      <div class="main-body-grid">
-        <div class="grid-left">
-          <div class="side-navigation">
-            <div class="person">
-              <div class="person-pic">
-                <img src="/static/pic/monkey-104-104px.jpg">
-              </div>
-              <span>Name</span>
-            </div>
-            <ul class="nav">
-              <li ng-repeat="navManage in currentArea track by navManage.name" class="nav-index-group">
-                <h3 translate="{{navManage.name}}"></h3>
-                <ul class="nav">
-                  <li ng-repeat="navItem in navManage.navGroups" ng-class="isActive(navItem)">
-                    <a href="{{navLink(navItem)}}" translate="{{navItem.name}}"></a>
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </div>
-        </div>
-        <div class="grid-right">
-          <nav class="top-navigation">
-            <a class="btn btn-default" ui-sref="manage()"><i class="fa fa-wrench" ></i> 我的管理</a> &gt; 当前黑客松：
-            <a href="">{{currentActivity.name}}</a> &gt; {{ page.name | translate}}
-            <img src="/static/images/wait.gif">
-          </nav>
-          <div ui-view></div>
-        </div>
-      </div>
+      <div ui-view></div>
     </section>
   </div>
   <tips tip="tip"></tips>

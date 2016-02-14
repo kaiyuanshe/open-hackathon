@@ -46,37 +46,37 @@ angular.module('oh.pages', [])
       name: "SETTINGS.MAIN",
       navGroups: [{
         name: "SETTINGS.EDIT_ACTIVITY",
-        state: "edit"
+        state: "manage.edit"
       }, {
         name: "SETTINGS.USERS",
-        state: "users"
+        state: "manage.users"
       }, {
         name: "SETTINGS.ADMINISTRATORS",
-        state: "admin"
+        state: "manage.admin"
       }, {
         name: "SETTINGS.ORGANIZERS",
-        state: "organizers"
+        state: "manage.organizers"
       }, {
         name: "SETTINGS.PRIZES",
-        state: "prizes"
+        state: "manage.prizes"
       }, {
         name: "SETTINGS.AWARDS",
-        state: "awards"
+        state: "manage.awards"
       }]
     }, {
       name: "ADVANCED_SETTINGS.MAIN",
       navGroups: [{
         name: "ADVANCED_SETTINGS.VIRTUAL_ENVIRONMENT",
-        state: "ve"
+        state: "manage.ve"
       }, {
         name: "ADVANCED_SETTINGS.ENVIRONMENTAL_MONITOR",
-        state: "monitor"
+        state: "manage.monitor"
       }, {
         name: "ADVANCED_SETTINGS.CLOUD_RESOURCES",
-        state: "cloud"
+        state: "manage.cloud"
       }, {
         name: "ADVANCED_SETTINGS.SERVERS",
-        state: "servers"
+        state: "manage.servers"
       }]
     }]
   });
