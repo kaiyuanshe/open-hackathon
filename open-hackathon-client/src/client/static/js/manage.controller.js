@@ -1,11 +1,40 @@
+// -----------------------------------------------------------------------------------
+// Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
+//  
+// The MIT License (MIT)
+//  
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//  
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//  
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+// -----------------------------------------------------------------------------------
+
 angular.module('oh.controllers', [])
-  .controller('MainController', MainController = function($scope, $rootScope, $location, $window, $cookies, $state, api, activityService, NAV) {
+  .controller('MainController', MainController = function($scope, $rootScope, $location, $window, $cookies, $state, $translate, api, activityService, NAV) {
     $scope.isloaded = true;
     $scope.loading = false;
-    activityService.load();
-    $scope.currentActivity = {
-      name: 'sss'
+    $scope.page = {
+      name: ''
     };
+
+    $rootScope.$on('pageName', function(event, pageName) {
+      $scope.page.name = pageName;
+      event.preventDefault();
+      event.stopPropagation();
+    });
 
 
     $rootScope.$on("$stateChangeStart", function(event, toState, toParams, fromState, fromParams) {
@@ -14,7 +43,7 @@ angular.module('oh.controllers', [])
       $scope.currentActivity = {
         name: toParams.name
       };
-      if (activity.name == toParams.name) {
+      if (toParams.name === undefined || activity.name == toParams.name) {
         $scope.loading = false;
       } else {
         activity = activityService.getByName(toParams.name)
@@ -44,66 +73,53 @@ angular.module('oh.controllers', [])
       }
     });
 
+  }).controller('manageController', function($scope, $state, NAV) {
+    $scope.currentArea = NAV.manage;
+    $scope.$emit('pageName', '');
+    $scope.isActive = function(item) {
+      return {
+        active: $state.includes(item.state)
+      }
+    }
 
-    // $scope.$on('changeCurrenActivity', function(e, activity) {
-    //   $scope.currentActivity = activity;
-    //   e.preventDefault()
-    // });
+    $scope.navLink = function(item) {
+      return $state.href(item.state, {
+        name: $scope.currentActivity.name
+      }, {});
+    }
 
-    // $scope.$watch('currentActivity', function(newValue, oldValue, scope) {
-    //   console.log(newValue, oldValue);
-    // }, true);
+  }).controller('editController', function($rootScope, $scope, activityService, api) {
+    $scope.$emit('pageName', 'SETTINGS.EDIT_ACTIVITY');
+    $scope.showTip = function() {
+      $scope.$emit('showTip', {
+        level: 'tip-success',
+        content: '保存成功'
+      });
+    }
+  }).controller('usersController', function($rootScope, $scope, activityService, api) {
+    $scope.$emit('pageName', 'SETTINGS.USERS');
 
-    // $scope.currentArea = NAV.manage;
+  }).controller('adminController', function($rootScope, $scope, activityService, api) {
+    $scope.$emit('pageName', 'SETTINGS.ADMINISTRATORS');
 
-    $rootScope.$on('getActivity', function(event, activities) {
-      console.log('111111111111111111');
-      $scope.activities = activityService.getAll();
-    })
+  }).controller('organizersController', function($rootScope, $scope, activityService, api) {
+    $scope.$emit('pageName', 'SETTINGS.ORGANIZERS');
 
-    // $scope.navLink = function(item) {
-    //   return $state.href(item.state, {
-    //     name: $scope.currentActivity.name
-    //   }, {});
-    // }
+  }).controller('prizesController', function($rootScope, $scope, activityService, api) {
+    $scope.$emit('pageName', 'SETTINGS.PRIZES');
 
-    // $scope.isActive = function(item) {
+  }).controller('awardsController', function($rootScope, $scope, activityService, api) {
+    $scope.$emit('pageName', 'SETTINGS.AWARDS');
 
-    //   return {
-    //     active: $state.includes(item.state)
-    //   }
-    // }
-    // $scope.navClass = function(item) {
+  }).controller('veController', function($rootScope, $scope, activityService, api) {
+    $scope.$emit('pageName', 'ADVANCED_SETTINGS.VIRTUAL_ENVIRONMENT');
 
-    //   //console.log($state.current.name);
-    // }
+  }).controller('monitorController', function($rootScope, $scope, activityService, api) {
+    $scope.$emit('pageName', 'ADVANCED_SETTINGS.ENVIRONMENTAL_MONITOR');
 
-    // $scope.stateGo = function(state) {
-    //   // $state.go(state, {
-    //   //     name: $scope.currentActivity.name
-    //   // })
+  }).controller('cloudController', function($rootScope, $scope, activityService, api) {
+    $scope.$emit('pageName', 'ADVANCED_SETTINGS.CLOUD_RESOURCES');
 
-    // }
-    // $scope.changeActivity = function() {
-    //   // activityService.getAll().then(function(data) {
-    //   //     console.log(data);
-    //   // })
-    //   $scope.currentActivity.name = 333;
-
-    // }
-
-  })
-  // .controller('EditController', function($rootScope, $scope, activityService) {
-  //   // activityService.getAll().then(function(data) {
-  //   //     console.log(data);
-  //   // })
-  //   // $rootScope.page = {
-  //   //   name: 'SETTINGS.ADMINISTRATORS'
-  //   // }
-  //   $scope.showTip = function() {
-  //     $scope.$emit('showTip', {
-  //       level: 'tip-success',
-  //       content: '保存成功'
-  //     });
-  //   }
-  // });
+  }).controller('serversController', function($rootScope, $scope, activityService, api) {
+    $scope.$emit('pageName', 'ADVANCED_SETTINGS.SERVERS');
+  });

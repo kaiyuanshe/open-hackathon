@@ -12,7 +12,7 @@
           <h3 translate="{{navManage.name}}"></h3>
           <ul class="nav">
             <li ng-repeat="navItem in navManage.navGroups" ng-class="isActive(navItem)">
-              <a href="{{navLink(navItem)}}" translate="{{navItem.name}}"></a>
+              <a href="{{navLink(navItem)}}"><i class="fa {{navItem.icon}}"></i><ANY translate="{{navItem.name}}"></ANY></a>
             </li>
           </ul>
         </li>
@@ -21,9 +21,15 @@
   </div>
   <div class="grid-right">
     <nav class="top-navigation">
-      <a class="btn btn-default" ui-sref="main()"><i class="fa fa-wrench" ></i> 我的管理</a> &gt; 当前黑客松：
-      <a href="">{{currentActivity.name}}</a> &gt; {{ page.name | translate}}
-      <img src="/static/images/wait.gif">
+      <a class="btn btn-default" ui-sref="main()">
+        <i class="fa fa-wrench"></i>
+        <ANY translate="MY_MANAGEMENT">MY_MANAGEMENT</ANY>
+      </a> 
+      &gt;
+      <ANY translate="CURRENT_ACTIVITIES">CURRENT_ACTIVITIES</ANY>
+      <a href="javascript:;">{{currentActivity.name}}</a> 
+      &gt;
+      <ANY translate="{{page.name}}">page.name</ANY>
     </nav>
     <div ui-view></div>
   </div>

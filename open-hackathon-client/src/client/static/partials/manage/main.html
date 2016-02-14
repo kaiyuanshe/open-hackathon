@@ -4,9 +4,9 @@
   </nav>
   <article class="activity-list clearfix">
     <div class="item" ng-repeat="activity in activities">
-      <a ui-sref="manage.edit({name:activity.name})" class="btn btn-sm btn-success"><i class="fa fa-cog"></i> 管理</a>
+      <a ui-sref="manage.edit({name:activity.name})" class="btn btn-sm btn-success"><i class="fa fa-cog"></i> {{'MANAGE' | translate}}</a>
       <header>
-        <a href="/site/{{activity.name}}" target="_blank"><img src="/static/pic/homepage.jpg" static-image max-width="298" max-height="168"></a>
+        <a href="/site/{{activity.name}}" target="_blank"><img src="{{activity.banners | split:',' | defBanner}}" static-image max-width="298" max-height="168"></a>
         <span>{{activity.display_name}}</span>
       </header>
       <div class="item-body">
@@ -18,9 +18,9 @@
       </div>
       <footer>
         <div class="btn-group btn-group-justified">
-          <a class="btn" ng-class="activity.status == 1? 'btn-success': 'btn-default'" ng-disabled="activity.status == 1" translate="ACTIVITY_STATUS.ONLINE">ONLINE</a>
+          <a class="btn" ng-class="activity.status == 1? 'btn-success': 'btn-default'" ng-disabled="activity.status == 1" translate="ACTIVITY_STATUS.ONLINE" ng-click="online(activity)">ONLINE</a>
           <a class="btn" ng-class="activity.status == 0? 'btn-success': 'btn-default'" ng-disabled="true" translate="ACTIVITY_STATUS.DEFAULT">DEFAULT</a>
-          <a class="btn" ng-class="activity.status == 2? 'btn-success': 'btn-default'" ng-disabled="activity.status == 2" translate="ACTIVITY_STATUS.OFFLINE">OFFLINE</a>
+          <a class="btn" ng-class="activity.status == 2? 'btn-success': 'btn-default'" ng-disabled="activity.status == 2" translate="ACTIVITY_STATUS.OFFLINE" ng-click="offline(activity)">OFFLINE</a>
         </div>
       </footer>
     </div>
