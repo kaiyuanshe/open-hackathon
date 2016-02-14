@@ -1,10 +1,10 @@
 <div class="main-inner">
   <nav class="top-navigation">
-    <a class="btn btn-default" ui-sref="create()"><i class="fa fa-plus-square" ></i> {{'CREATE_ACTIVITY' | translate}}</a>
+    <a class="btn btn-default" ui-sref="create()"><i class="fa fa-plus-square" ></i> <ANY translate="CREATE_ACTIVITY">CREATE_ACTIVITY</ANY></a>
   </nav>
   <article class="activity-list clearfix">
     <div class="item" ng-repeat="activity in activities">
-      <a ui-sref="manage.edit({name:activity.name})" class="btn btn-sm btn-success"><i class="fa fa-cog"></i> {{'MANAGE' | translate}}</a>
+      <a ui-sref="manage.edit({name:activity.name})" class="btn btn-sm btn-success"><i class="fa fa-cog"></i> <ANY translate="MANAGE">MANAGE</ANY></a>
       <header>
         <a href="/site/{{activity.name}}" target="_blank"><img src="{{activity.banners | split:',' | defBanner}}" static-image max-width="298" max-height="168"></a>
         <span>{{activity.display_name}}</span>
