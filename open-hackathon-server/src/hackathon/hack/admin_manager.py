@@ -28,7 +28,7 @@ import sys
 sys.path.append("..")
 
 from flask import g
-
+from sqlalchemy import func
 from hackathon import Component, RequiredFeature
 from hackathon.database import AdminHackathonRel, User, Hackathon
 from hackathon.constants import ADMIN_ROLE_TYPE
@@ -95,7 +95,9 @@ class AdminManager(Component):
             Hackathon.banners,
             Hackathon.status,
             Hackathon.creator_id,
-            Hackathon.type
+            Hackathon.type,
+            (func.unix_timestamp(Hackathon.event_start_time)*1000).label('event_start_time'),
+            (func.unix_timestamp(Hackathon.event_end_time)*1000).label('event_end_time')
         ).join(AdminHackathonRel, AdminHackathonRel.hackathon_id == Hackathon.id or AdminHackathonRel.hackathon_id == -1)\
             .filter(AdminHackathonRel.user_id == user_id)\
             .order_by(Hackathon.event_start_time.desc())\
