@@ -26,15 +26,7 @@ angular.module('oh.controllers', [])
   .controller('MainController', MainController = function($scope, $rootScope, $location, $window, $cookies, $state, $translate, api, activityService, NAV) {
     $scope.isloaded = true;
     $scope.loading = false;
-    $scope.page = {
-      name: ''
-    };
 
-    $rootScope.$on('pageName', function(event, pageName) {
-      $scope.page.name = pageName;
-      event.preventDefault();
-      event.stopPropagation();
-    });
 
 
     $rootScope.$on("$stateChangeStart", function(event, toState, toParams, fromState, fromParams) {
@@ -44,13 +36,12 @@ angular.module('oh.controllers', [])
         name: toParams.name
       };
       if (toParams.name === undefined || activity.name == toParams.name) {
-        $scope.loading = false;
+
       } else {
         activity = activityService.getByName(toParams.name)
         if (activity.name != undefined) {
           activity.name = toParams.name;
           activityService.setCurrentActivity(activity);
-          $scope.loading = false;
           $scope.$emit('changeCurrenActivity', activity);
         } else {
           api.admin.hackathon.get({
@@ -68,12 +59,26 @@ angular.module('oh.controllers', [])
             }
           });
           event.preventDefault();
-          return false;
         }
       }
     });
 
-  }).controller('manageController', function($scope, $state, NAV) {
+    $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) {
+      $scope.loading = false;
+    });
+
+  }).controller('manageController', function($scope, $state, session, NAV) {
+    $scope.page = {
+      name: ''
+    };
+    $scope.currentUser = session.user;
+    $scope.$on('pageName', function(event, pageName) {
+      $scope.page.name = pageName;
+      event.preventDefault();
+      event.stopPropagation();
+    });
+
+
     $scope.currentArea = NAV.manage;
     $scope.$emit('pageName', '');
     $scope.isActive = function(item) {
@@ -88,8 +93,9 @@ angular.module('oh.controllers', [])
       }, {});
     }
 
-  }).controller('editController', function($rootScope, $scope, activityService, api) {
+  }).controller('editController', function($rootScope, $scope, session, activityService, api) {
     $scope.$emit('pageName', 'SETTINGS.EDIT_ACTIVITY');
+
     $scope.showTip = function() {
       $scope.$emit('showTip', {
         level: 'tip-success',

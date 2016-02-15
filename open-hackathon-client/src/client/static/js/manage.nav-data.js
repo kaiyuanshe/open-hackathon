@@ -23,52 +23,53 @@
 // -----------------------------------------------------------------------------------
 
 angular.module('oh.pages', [])
+  .constant('VERSION', '0.1.2')
   .value('NAV', {
     manage: [{
       name: "SETTINGS.MAIN",
       navGroups: [{
         name: "SETTINGS.EDIT_ACTIVITY",
         state: "manage.edit",
-        icon:'fa-edit'
+        icon: 'fa-edit'
       }, {
         name: "SETTINGS.USERS",
         state: "manage.users",
-        icon:'fa-users'
+        icon: 'fa-users'
       }, {
         name: "SETTINGS.ADMINISTRATORS",
         state: "manage.admin",
-        icon:'fa-users'
+        icon: 'fa-users'
       }, {
         name: "SETTINGS.ORGANIZERS",
         state: "manage.organizers",
-        icon:'fa-sitemap'
+        icon: 'fa-sitemap'
       }, {
         name: "SETTINGS.PRIZES",
         state: "manage.prizes",
-        icon:'fa-trophy'
+        icon: 'fa-trophy'
       }, {
         name: "SETTINGS.AWARDS",
         state: "manage.awards",
-        icon:'fa-diamond'
+        icon: 'fa-diamond'
       }]
     }, {
       name: "ADVANCED_SETTINGS.MAIN",
       navGroups: [{
         name: "ADVANCED_SETTINGS.VIRTUAL_ENVIRONMENT",
         state: "manage.ve",
-        icon:'fa-th-large'
+        icon: 'fa-th-large'
       }, {
         name: "ADVANCED_SETTINGS.ENVIRONMENTAL_MONITOR",
         state: "manage.monitor",
-        icon:'fa-desktop'
+        icon: 'fa-desktop'
       }, {
         name: "ADVANCED_SETTINGS.CLOUD_RESOURCES",
         state: "manage.cloud",
-        icon:'fa-upload'
+        icon: 'fa-upload'
       }, {
         name: "ADVANCED_SETTINGS.SERVERS",
         state: "manage.servers",
-        icon:'fa-server'
+        icon: 'fa-server'
       }]
     }]
   });

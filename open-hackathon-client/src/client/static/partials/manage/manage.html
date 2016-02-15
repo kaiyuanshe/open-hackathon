@@ -3,9 +3,9 @@
     <div class="side-navigation">
       <div class="person">
         <div class="person-pic">
-          <img src="/static/pic/monkey-104-104px.jpg">
+          <img src="{{currentUser.avatar_url}}" onerror="javascript:this.src='/static/pic/monkey-104-104px.jpg'">
         </div>
-        <span>Name</span>
+        <span>{{currentUser.nickname}}</span>
       </div>
       <ul class="nav">
         <li ng-repeat="navManage in currentArea track by navManage.name" class="nav-index-group">
