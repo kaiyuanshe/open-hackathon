@@ -1,5 +1,4 @@
 {
-
   "NAVBAR": {
     "HOME": "首页",
     "LOGO_ATR": "进入首页",
@@ -42,5 +41,14 @@
   "OK": "确认",
   "CANCEL": "取消",
   "CAPTION": "提示",
-  "MANAGE":"管理"
+  "MANAGE": "管理",
+  "EDIT_ACTIVITY_TABS": {
+    "INFORMATION": "基本信息",
+    "BANNER": "海报图",
+    "DETAILS": "活动详情",
+    "PROVIDERS": "登陆方式"
+  },
+  "ACTIVITY_FIELDS": {
+
+  }
 }

@@ -23,7 +23,7 @@
 // -----------------------------------------------------------------------------------
 
 angular.module('oh.pages', [])
-  .constant('VERSION', '0.1.2')
+  .constant('VERSION', '0.1.5')
   .value('NAV', {
     manage: [{
       name: "SETTINGS.MAIN",

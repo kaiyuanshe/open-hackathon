@@ -25,25 +25,23 @@
 angular.module('manageView', [
     'ngCookies',
     'ngSanitize',
-    'bootstrap',
-    'oh.manage.router',
+    'pascalprecht.translate',
     'ui.router',
+    'ui.bootstrap',
+    'oh.manage.router',
     'oh.pages',
     'oh.providers',
     'oh.filters',
     'oh.controllers',
     'oh.directives',
-    'oh.api',
-    'ui.bootstrap.dropdown',
-    'pascalprecht.translate',
-    'bw.paging'
+    'oh.api'
   ])
   .config(function($locationProvider, $translateProvider, $stateProvider, $urlRouterProvider, VERSION) {
     $translateProvider.useStaticFilesLoader({
         prefix: '/static/languages/',
         suffix: '.json'
       }).preferredLanguage('zh-de')
-      .useSanitizeValueStrategy('sanitize')
+      .useSanitizeValueStrategy()
       .useLocalStorage();
 
     $urlRouterProvider.otherwise('/main');

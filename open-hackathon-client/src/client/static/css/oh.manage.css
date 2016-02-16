@@ -1,11 +1,10 @@
 @import "font-awesome.min.css";
 @import "oh.button.css";
 @import "oh.manage.main.css";
-
 html,
 body {
   position: relative;
-  height: 100%;
+  min-height: 100%;
 }
 
 body {
@@ -214,3 +213,45 @@ body {
   z-index: 2000;
 }
 
+.right-main {
+  min-height: 300px;
+  border: 1px solid #d0d2d3;
+  background-color: #fff;
+}
+
+.m-tabs .nav-tabs {
+  font-size: 0;
+  text-align: center;
+}
+
+.m-tabs .nav-tabs > li {
+  display: inline-block;
+  font-size: 15px;
+  float: none;
+  margin-bottom: 0;
+  margin-right: 90px;
+  margin-bottom: -1px;
+}
+
+.m-tabs .nav-tabs > li:last-child {
+  margin-right: 0;
+}
+
+.m-tabs .nav-tabs > li > a {
+  margin-right: 0px;
+  border: none;
+  border-radius: 0;
+  padding: 10px 0;
+  color: #929497;
+  line-height: 1.6;
+}
+
+.m-tabs .nav-tabs > li > a:hover,
+.m-tabs .nav-tabs > li.active > a,
+.m-tabs .nav-tabs > li.active > a:hover,
+.m-tabs .nav-tabs > li.active > a:focus {
+  color: #151516;
+  background-color: #ffffff;
+  border: none;
+  border-bottom: 1px solid #151516;
+}

@@ -1,39 +1,21 @@
-<div class="">
-  <h1 translate="SETTINGS.EDIT_ACTIVITY">EDIT_ACTIVITY</h1>
-  <button class="btn btn-primary" ng-click="showTip()">showTip()</button>
-  <table class="table">
-    <thead>
-      <tr>
-        <th>
-          <label class="checkbox checkbox-success checkbox-inline">
-            <input type="checkbox">
-            <span>注册名</span>
-          </label>
-        </th>
-        <th>邮箱</th>
-        <th>登陆方式</th>
-        <th>联系电话</th>
-        <th>联系地址</th>
-        <th>报名时间</th>
-        <th>状态</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>
-          <label class="checkbox checkbox-success checkbox-inline">
-            <input type="checkbox">
-            <span> namesss </span>
-          </label>
-        </td>
-        <td>邮箱</td>
-        <td>登陆方式</td>
-        <td>联系电话</td>
-        <td>联系地址</td>
-        <td>报名时间</td>
-        <td>状态</td>
-      </tr>
-    </tbody>
-  </table>
-  <a ui-sref="manage.edit({name:'xzcvzvqweq'})">sdfasf</a>
+<div>
+  <uib-tabset class="m-tabs">
+    <uib-tab heading="{{'EDIT_ACTIVITY_TABS.INFORMATION' | translate}}" class="ssss">
+      <ng-form name="activitForm">
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" class="form-control" required ng-model="model.name" />
+        </div>
+      </ng-form>
+    </uib-tab>
+    <uib-tab heading="{{'EDIT_ACTIVITY_TABS.BANNER' | translate | safe}}">
+      Some Tab Content
+    </uib-tab>
+    <uib-tab heading="{{'EDIT_ACTIVITY_TABS.DETAILS' | translate}}">
+      More Tab Content
+    </uib-tab>
+    <uib-tab heading="{{'EDIT_ACTIVITY_TABS.PROVIDERS' | translate}}">
+      More Tab Content
+    </uib-tab>
+  </uib-tabset>
 </div>
