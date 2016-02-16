@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   manage.filters.js                                  :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: anonymous <anonymous@student.42.fr>        +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2016/02/15 01:11:41 by anonymous         #+#    #+#             */
-/*   Updated: 2016/02/16 15:42:30 by anonymous        ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 // -----------------------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
 //  
@@ -34,7 +22,7 @@
 // THE SOFTWARE.
 // -----------------------------------------------------------------------------------
 
-angular.module('oh.filters', ['pascalprecht.translate'])
+angular.module('oh.filters', [])
   .filter('stripTags', function() {
     return function(html) {
       html = html || '';
@@ -56,8 +44,4 @@ angular.module('oh.filters', ['pascalprecht.translate'])
     return function(longTime) {
       return new Date(longTime);
     }
-  }).filter('safe', function($sce) {
-    return function(val) {
-      return $sce.trustAsHtml(val);
-    };
   });
