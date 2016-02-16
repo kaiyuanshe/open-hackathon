@@ -50,6 +50,59 @@
                 infn3.removeClass('hide');
             }
         })
+
+        oh.api.hackathon.notice.list.get({
+            query: {
+                order_by: 'time',
+                page: 1,
+                per_page: 6 //the latest 6 notices are shown
+            }
+        }, function(data) {
+            if(data.error) {
+                oh.comm.alert(data.error.message);
+            } else if(data.items.length > 0) {
+                data = data.items;
+                //order: last', first, second, ..., last, first'
+                //rolling loop, if it reaches last'/first', moves to last/first
+                $('.oh-notice-list').append($('#notice_list_template').tmpl([].concat(data[data.length-1], data, data[0])));
+
+                var totoalNoticeCount = data.length;
+                var firstNotice = $('.oh-notice-list > li:first');
+                var noticeHeight = 40;
+                var minMarginTopVal = -noticeHeight*(totoalNoticeCount+1);
+                var maxMarginTopVal = 0;
+                firstNotice.css({"margin-top":  "-" + noticeHeight + "px"});
+                
+                $('#btn-notice-up').click(function(){
+                    firstNotice.stop(true, true).animate({"margin-top": "-=" + noticeHeight + "px"}, 500, function() {
+                        var marginVal = parseInt(firstNotice.css("margin-top").slice(0, -2));
+                        if(marginVal == minMarginTopVal) {
+                            firstNotice.css({"margin-top": (maxMarginTopVal-noticeHeight) + "px"});
+                        }
+                    });
+                });
+
+                $('#btn-notice-down').click(function(){
+                    firstNotice.stop(true, true).animate({"margin-top": "+="+ noticeHeight + "px"}, 500, function() {
+                        var marginVal = parseInt(firstNotice.css("margin-top").slice(0, -2));
+                        if(marginVal == maxMarginTopVal) {
+                            firstNotice.css({"margin-top": (minMarginTopVal+noticeHeight) + "px"});
+                        }
+                    });
+                });
+
+                // automatically rolling notice
+                setInterval(function() {
+                    $('#btn-notice-up').trigger('click');
+                }, 5000);
+                
+            } else { //no notice
+                $('.oh-notice-list').append("<li>无</li>");
+                $('#btn-notice-up').css("display", "none");
+                $('#btn-notice-down').css("display", "none");
+            }
+        });
+        
     }
 
     function bindEvent() {

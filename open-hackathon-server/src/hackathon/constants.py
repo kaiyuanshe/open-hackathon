@@ -508,6 +508,23 @@ class LOGIN_PROVIDER:
     ALAUDA = 32
 
 
+class HACK_NOTICE_CATEGORY:
+    HACKATHON = 0  # hackathon related notice
+    USER = 1   # user related notice
+    EXPERIMENT = 2   # experiment related notice
+    AWARD = 3 # award related notice
+    TEMPLATE = 4  # template related notice
+
+
+class HACK_NOTICE_EVENT:
+    MANUAL = 0  # manually created hackatohon notice
+    HACK_CREATE = 1
+    HACK_EDIT = 2
+    HACK_ONLINE = 3
+    HACK_OFFLINE = 4 # hackathon create/edit/online/offline
+    EXPR_JOIN = 5 # user start to program
+
+
 class EMAIL_SMTP_STATUSCODE:
     """Status Code of email service(SMTP protocol)"""
     SUCCESS = 250

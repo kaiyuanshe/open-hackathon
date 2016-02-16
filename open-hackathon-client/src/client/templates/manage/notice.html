@@ -1,0 +1,154 @@
+{% extends "manage/main.html" %}
+
+{% block style %}
+{{ super() }}
+<link href="/static/css/bootstrap-editable.css" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<div class="col-lg-12" loading>
+    <div class="box" style="display:none">
+        <div class="box-header">
+            <h2>
+              <i class="fa fa-home"></i>
+              动态管理
+          </h2>
+        </div>
+        <div class="box-content">
+
+            <div id="hackathon_notice_list_table">
+                <a data-type="new" href="javascript:;">发布动态</a>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>内容</th>
+                            <th>跳转链接</th>
+                            <th>类型</th>
+                            <th>更新时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="hackathon_notice_list">
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="hackathon_notice_add_table">
+                <form class="form-horizontal" id="hackathon_notice_add_form" style="">
+                    <fieldset>
+                        <legend>
+                            发布动态
+                        </legend>
+                    </fieldset>
+
+                    <div class="form-group has-feedback">
+                        <label class="col-md-3 control-label">动态内容</label>
+                        <div class="col-md-6">
+                            <input class="form-control" name="add_notice_content"
+                                   id="add_notice_content" placeholder="动态内容" 
+                                   required data-bv-trigger="blur" data-bv-notempty-message="动态内容不能为空">
+                        </div>
+                    </div>
+                    <div class="form-group has-feedback">
+                        <label class="col-md-3 control-label">跳转链接</label>
+                        <div class="col-md-6">
+                            <input class="form-control" name="add_notice_link"
+                                   id="add_notice_link" placeholder="动态跳转链接">
+                        </div>
+                    </div>
+                    <div class="form-group has-feedback">
+                        <div class="col-sm-offset-3 col-sm-6">
+                            <button type="submit" class="btn btn-primary"> 确定</button>
+                            <button type="button" class="btn btn btn-default" data-type="cancel"> 返回</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock body %}
+
+{% block script %}
+<div class="modal fade bs-example-modal-sm" id="hackathon_notice_delete_modal" tabindex="-1" role="dialog"
+     aria-labelledby="mySmallModalLabel" aria-hidden="true" data-api="oh.api.admin.hackathon.notice.delete">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">提示</h4>
+            </div>
+            <div class="modal-body">
+                <p>确定删除此条动态？</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default wb-btn" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary wb-btn" data-type="ok">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade bs-example-modal-sm" id="hackathon_notice_update_modal" tabindex="-1" role="dialog"
+     aria-labelledby="mySmallModalLabel" aria-hidden="true" data-api="oh.api.admin.hackathon.notice.update">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">更改动态内容</h4>
+            </div>
+            <form class="form-horizontal" id="hackathon_notice_update_form"> 
+                <div class="modal-body">
+                    <div class="form-group has-feedback">
+                        <label class="col-md-3 control-label">动态内容</label>
+                        <div class="col-md-6">
+                            <input class="form-control" name="update_notice_content"
+                                   id="update_notice_content" placeholder="动态内容" 
+                                   required data-bv-trigger="blur" data-bv-notempty-message="动态内容不能为空">
+                        </div>
+                    </div>
+                    <div class="form-group has-feedback">
+                        <label class="col-md-3 control-label">跳转链接</label>
+                        <div class="col-md-6">
+                            <input class="form-control" name="update_notice_link"
+                                   id="update_notice_link" placeholder="动态跳转链接">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer form-group has-feedback">
+                    <button type="button" class="btn btn-default wb-btn" data-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-primary wb-btn" data-type="submit">确定</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+{{ super() }}
+<script id="hackathon_notice_list_template" type="text/x-jquery-tmpl">
+    <tr>
+        <td style="max-width: 300px;">${content}</td>
+        <td style="max-width: 300px; word-break: break-all;">${link}</td>
+        <td>${$item.getNoticeDescription(category)}</td>
+        <td>${moment(update_time).format('YYYY-MM-DD HH:mm')}</td>
+
+        <td class="col-action">
+            <a class="btn btn-info btn-sm" href="#" data-target="#hackathon_notice_update_modal" data-toggle="modal">
+                <i class="glyphicon glyphicon-edit"></i>
+            </a>
+            <a class="btn btn-danger btn-sm" href="#" data-target="#hackathon_notice_delete_modal" data-toggle="modal">
+                <i class="glyphicon glyphicon-trash"></i>
+            </a>
+        </td>
+    </tr>
+</script>
+
+<script type="text/javascript" src="/static/js/bootstrap/bootstrap-editable.js"></script>
+<script type="text/javascript" src="/static/js/views/oh.manage.notice.js"></script>
+{% endblock %}

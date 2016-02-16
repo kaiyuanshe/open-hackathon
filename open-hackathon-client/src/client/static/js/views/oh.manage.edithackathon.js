@@ -130,7 +130,11 @@
         $('#display_name').val(data.display_name);
         $('#short_description').val(data.short_description);
         $('#ribbon').val(data.ribbon);
-        CKEDITOR.instances["markdownEdit"].setData(data.description)
+        //ckeditor may be either ready or not ready here.
+        CKEDITOR.instances["markdownEdit"].on('instanceReady', function() {
+            CKEDITOR.instances["markdownEdit"].setData(data.description);
+        }); //if ckeditor is not ready, wait 'instanceReady' signal and setFormData, else not effective
+        CKEDITOR.instances["markdownEdit"].setData(data.description); //if ckeditor is ready, setFormData, else not effective
         setDaterange($('#event_time'), startTimeAndEndTimeTostring(data.event_start_time, data.event_end_time));
         setDaterange($('#register_time'), startTimeAndEndTimeTostring(data.registration_start_time, data.registration_end_time));
         setDaterange($('#judge_time'), startTimeAndEndTimeTostring(data.judge_start_time, data.judge_end_time));
