@@ -22,53 +22,5 @@
 // THE SOFTWARE.
 // -----------------------------------------------------------------------------------
 
-angular.module('oh.pages', [])
-  .value('NAV', {
-    manage: [{
-      name: "SETTINGS.MAIN",
-      navGroups: [{
-        name: "SETTINGS.EDIT_ACTIVITY",
-        state: "manage.edit",
-        icon:'fa-edit'
-      }, {
-        name: "SETTINGS.USERS",
-        state: "manage.users",
-        icon:'fa-users'
-      }, {
-        name: "SETTINGS.ADMINISTRATORS",
-        state: "manage.admin",
-        icon:'fa-users'
-      }, {
-        name: "SETTINGS.ORGANIZERS",
-        state: "manage.organizers",
-        icon:'fa-sitemap'
-      }, {
-        name: "SETTINGS.PRIZES",
-        state: "manage.prizes",
-        icon:'fa-trophy'
-      }, {
-        name: "SETTINGS.AWARDS",
-        state: "manage.awards",
-        icon:'fa-diamond'
-      }]
-    }, {
-      name: "ADVANCED_SETTINGS.MAIN",
-      navGroups: [{
-        name: "ADVANCED_SETTINGS.VIRTUAL_ENVIRONMENT",
-        state: "manage.ve",
-        icon:'fa-th-large'
-      }, {
-        name: "ADVANCED_SETTINGS.ENVIRONMENTAL_MONITOR",
-        state: "manage.monitor",
-        icon:'fa-desktop'
-      }, {
-        name: "ADVANCED_SETTINGS.CLOUD_RESOURCES",
-        state: "manage.cloud",
-        icon:'fa-upload'
-      }, {
-        name: "ADVANCED_SETTINGS.SERVERS",
-        state: "manage.servers",
-        icon:'fa-server'
-      }]
-    }]
-  });
+angular.module('oh.providers', [])
+

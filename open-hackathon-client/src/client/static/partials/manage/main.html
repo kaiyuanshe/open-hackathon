@@ -1,153 +1,28 @@
-<article class="activity-list clearfix">
-  <div class="item" ng-repeat="activity in activities">
-    <header>
-      <img src="/static/pic/homepage.jpg" static-image max-width="298" max-height="168">
-      <span>{{activity.display_name}}</span>
-      <a ui-sref="edit({name:activity.name})" class="btn btn-sm btn-success"><i class="fa fa-cog"></i> 管理</a>
-    </header>
-    <div class="item-body">
-      <h3>{{activity.name}}</h3>
+<div class="main-inner">
+  <nav class="top-navigation">
+    <a class="btn btn-default" ui-sref="create()"><i class="fa fa-plus-square" ></i> <ANY translate="CREATE_ACTIVITY">CREATE_ACTIVITY</ANY></a>
+  </nav>
+  <article class="activity-list clearfix">
+    <div class="item" ng-repeat="activity in activities">
+      <a ui-sref="manage.edit({name:activity.name})" class="btn btn-sm btn-success"><i class="fa fa-cog"></i> <ANY translate="MANAGE">MANAGE</ANY></a>
+      <header>
+        <a href="/site/{{activity.name}}" target="_blank"><img src="{{activity.banners | split:',' | defBanner}}" static-image max-width="298" max-height="168"></a>
+        <span>{{activity.display_name}}</span>
+      </header>
+      <div class="item-body">
+        <h3 class="name"><a href="/site/{{activity.name}}" target="_blank">{{activity.name}}</a></h3>
+        <time><i class="color-success fa fa-calendar"></i> {{activity.start_time}} - {{activity.end_time}}</time>
+        <p class="description">
+          {{activity.short_description}}
+        </p>
+      </div>
+      <footer>
+        <div class="btn-group btn-group-justified">
+          <a class="btn" ng-class="activity.status == 1? 'btn-success': 'btn-default'" ng-disabled="activity.status == 1" translate="ACTIVITY_STATUS.ONLINE" ng-click="online(activity)">ONLINE</a>
+          <a class="btn" ng-class="activity.status == 0? 'btn-success': 'btn-default'" ng-disabled="true" translate="ACTIVITY_STATUS.DEFAULT">DEFAULT</a>
+          <a class="btn" ng-class="activity.status == 2? 'btn-success': 'btn-default'" ng-disabled="activity.status == 2" translate="ACTIVITY_STATUS.OFFLINE" ng-click="offline(activity)">OFFLINE</a>
+        </div>
+      </footer>
     </div>
-    <footer>
-      <button class="btn btn-default" translate="ACTIVITY_STATUS.ONLINE">ONLINE</button>
-      <button class="btn btn-default" translate="ACTIVITY_STATUS.OFFLINE">OFFLINE</button>
-    </footer>
-  </div>
-</article>
-<h1>main</h1>
-<button class="btn btn-default">样式 default</button>
-<button class="btn btn-primary">样式 primary</button>
-<button class="btn btn-success">样式 success</button>
-<button class="btn btn-info">样式 info</button>
-<button class="btn btn-warning">样式 warning</button>
-<button class="btn btn-danger">样式 danger</button>
-<div class="">
-  <label class="checkbox">
-    <input type="checkbox">
-    <span>Checkbox 2</span>
-  </label>
-</div>
-<div>
-  <label class="checkbox checkbox-primary">
-    <input type="checkbox">
-    <span>Checkbox primary</span>
-  </label>
-</div>
-<div>
-  <label class="checkbox checkbox-success">
-    <input type="checkbox">
-    <span>Checkbox success</span>
-  </label>
-</div>
-<div>
-  <label class="checkbox checkbox-info">
-    <input type="checkbox">
-    <span>Checkbox info</span>
-  </label>
-</div>
-<div>
-  <label class="checkbox checkbox-warning">
-    <input type="checkbox">
-    <span>Checkbox warning</span>
-  </label>
-</div>
-<div>
-  <label class="checkbox checkbox-danger">
-    <input type="checkbox">
-    <span>Checkbox danger</span>
-  </label>
-</div>
-<div>
-  <label class="checkbox checkbox-primary checkbox-lg">
-    <input type="checkbox">
-    <span>Checkbox primary</span>
-  </label>
-</div>
-<div>
-  <label class="checkbox checkbox-success checkbox-lg">
-    <input type="checkbox" disabled="disabled" checked="checked">
-    <span>Checkbox primary</span>
-  </label>
-</div>
-<div>
-  <label class="radiobox">
-    <input type="radio" checked="checked">
-    <span>Radiobox 1</span>
-  </label>
-</div>
-<div>
-  <label class="radiobox radiobox-primary">
-    <input type="radio" checked="checked">
-    <span>Radiobox 1</span>
-  </label>
-</div>
-<div>
-  <label class="radiobox radiobox-success">
-    <input type="radio" checked="checked">
-    <span>Radiobox 1</span>
-  </label>
-</div>
-<div>
-  <label class="radiobox radiobox-info">
-    <input type="radio" checked="checked">
-    <span>Radiobox 1</span>
-  </label>
-</div>
-<div>
-  <label class="radiobox radiobox-warning">
-    <input type="radio" checked="checked">
-    <span>Radiobox 1</span>
-  </label>
-</div>
-<div>
-  <label class="radiobox radiobox-danger">
-    <input type="radio">
-    <span>Radiobox 1</span>
-  </label>
-</div>
-<div>
-  <label class="radiobox radiobox-info radiobox-lg">
-    <input type="radio" checked="checked">
-    <span>Radiobox 1</span>
-  </label>
-</div>
-<div>
-  <label class="radiobox radiobox-success radiobox-lg">
-    <input type="radio" checked="checked" disabled="disabled">
-    <span>Radiobox 1</span>
-  </label>
-</div>
-<div>
-  <label class="switchbox switchbox-inline">
-    <input type="checkbox">
-    <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
-  </label>
-  <label class="switchbox switchbox-primary switchbox-inline">
-    <input type="checkbox">
-    <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
-  </label>
-  <label class="switchbox switchbox-success">
-    <input type="checkbox">
-    <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
-  </label>
-  <label class="switchbox switchbox-info">
-    <input type="checkbox">
-    <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
-  </label>
-  <label class="switchbox switchbox-warning">
-    <input type="checkbox">
-    <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
-  </label>
-  <label class="switchbox switchbox-danger">
-    <input type="checkbox">
-    <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
-  </label>
-  <label class="switchbox switchbox-primary  switchbox-lg ">
-    <input type="checkbox">
-    <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
-  </label>
-  <label class="switchbox switchbox-primary  switchbox-lg ">
-    <input type="checkbox" disabled="disabled" checked="checked">
-    <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
-  </label>
+  </article>
 </div>

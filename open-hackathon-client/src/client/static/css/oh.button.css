@@ -1,3 +1,27 @@
+.color-default {
+  color: #6d6e70;
+}
+
+.color-primary {
+  color: #019e48;
+}
+
+.color-success {
+  color: #7dba43;
+}
+
+.color-info {
+  color: #00a4ee;
+}
+
+.color-warning {
+  color: #ffb800;
+}
+
+.color-danger {
+  color: #cf3c0e;
+}
+
 .btn {
   border-radius: 2px;
 }
@@ -19,6 +43,11 @@
   outline: thin auto;
   outline: 1px auto #7dba43;
   outline-offset: -2px;
+}
+
+.btn-default {
+  background-color: #f1f1f2;
+  color: #6d6e70;
 }
 
 .btn-primary {

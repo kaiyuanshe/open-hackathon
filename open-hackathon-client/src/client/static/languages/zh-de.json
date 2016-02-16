@@ -8,22 +8,23 @@
     "HELP": "新手帮助"
   },
   "MY_MANAGEMENT": "我的管理",
+  "CREATE_ACTIVITY": "创建黑客松",
   "CURRENT_ACTIVITIES": "当前黑客松：",
   "SETTINGS": {
     "MAIN": "基础设置",
-    "EDIT_ACTIVITY": "<i class=\"fa fa-edit\"></i>编辑活动",
-    "USERS": "<i class=\"fa fa-users\"></i>报名用户",
-    "ADMINISTRATORS": "<i class=\"fa fa-user\"></i>管理员",
-    "ORGANIZERS": "<i class=\"fa fa-sitemap\"></i>主办方",
-    "PRIZES": "<i class=\"fa fa-trophy\"></i>奖项设置",
-    "AWARDS": "<i class=\"fa fa-diamond\"></i>评奖"
+    "EDIT_ACTIVITY": "编辑活动",
+    "USERS": "报名用户",
+    "ADMINISTRATORS": "管理员",
+    "ORGANIZERS": "主办方",
+    "PRIZES": "奖项设置",
+    "AWARDS": "评奖"
   },
   "ADVANCED_SETTINGS": {
     "MAIN": "高级设置",
-    "VIRTUAL_ENVIRONMENT": "<i class=\"fa fa-th-large\"></i>虚拟环境",
-    "ENVIRONMENTAL_MONITOR": "<i class=\"fa fa-desktop\"></i>环境监控",
-    "CLOUD_RESOURCES": "<i class=\"fa fa-cloud-upload\"></i>云资源",
-    "SERVERS": "<i class=\"fa fa-server\"></i>服务器"
+    "VIRTUAL_ENVIRONMENT": "虚拟环境",
+    "ENVIRONMENTAL_MONITOR": "环境监控",
+    "CLOUD_RESOURCES": "云资源",
+    "SERVERS": "服务器"
   },
   "ACTIVITY_STATUS": {
     "DEFAULT": "草稿",
@@ -40,5 +41,6 @@
   "DELETE": "删除",
   "OK": "确认",
   "CANCEL": "取消",
-  "CAPTION": "提示"
+  "CAPTION": "提示",
+  "MANAGE":"管理"
 }
