@@ -1,0 +1,44 @@
+{
+
+  "NAVBAR": {
+    "HOME": "首页",
+    "LOGO_ATR": "进入首页",
+    "SITE_NAME": "黑客松",
+    "COMMUNITY": "黑客松社区 <i class=\"fa fa-angle-down\"></i>",
+    "HELP": "新手帮助"
+  },
+  "MY_MANAGEMENT": "我的管理",
+  "CURRENT_ACTIVITIES": "当前黑客松：",
+  "SETTINGS": {
+    "MAIN": "基础设置",
+    "EDIT_ACTIVITY": "<i class=\"fa fa-edit\"></i>编辑活动",
+    "USERS": "<i class=\"fa fa-users\"></i>报名用户",
+    "ADMINISTRATORS": "<i class=\"fa fa-user\"></i>管理员",
+    "ORGANIZERS": "<i class=\"fa fa-sitemap\"></i>主办方",
+    "PRIZES": "<i class=\"fa fa-trophy\"></i>奖项设置",
+    "AWARDS": "<i class=\"fa fa-diamond\"></i>评奖"
+  },
+  "ADVANCED_SETTINGS": {
+    "MAIN": "高级设置",
+    "VIRTUAL_ENVIRONMENT": "<i class=\"fa fa-th-large\"></i>虚拟环境",
+    "ENVIRONMENTAL_MONITOR": "<i class=\"fa fa-desktop\"></i>环境监控",
+    "CLOUD_RESOURCES": "<i class=\"fa fa-cloud-upload\"></i>云资源",
+    "SERVERS": "<i class=\"fa fa-server\"></i>服务器"
+  },
+  "ACTIVITY_STATUS": {
+    "DEFAULT": "草稿",
+    "ONLINE": "上线",
+    "OFFLINE": "下线"
+  },
+  "USER_STATUS": {
+    "PASS": "通过",
+    "UNAPPROVED": "未审核",
+    "REJECT": "拒绝",
+    "AUTO_PASS": "自动通过"
+  },
+  "ALL_USERS": "全部用户",
+  "DELETE": "删除",
+  "OK": "确认",
+  "CANCEL": "取消",
+  "CAPTION": "提示"
+}

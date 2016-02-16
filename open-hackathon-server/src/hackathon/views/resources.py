@@ -503,7 +503,7 @@ class HackathonCheckNameResource(HackathonResource):
 class AdminHackathonListResource(HackathonResource):
     @token_required
     def get(self):
-        return hackathon_manager.get_entitled_hackathon_list_with_detail(g.user)
+        return hackathon_manager.get_entitled_hackathon_simple_list(g.user)
 
 
 class AdminAzureResource(HackathonResource):
