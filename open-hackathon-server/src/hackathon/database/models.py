@@ -329,6 +329,28 @@ class HackathonTag(DBBase):
     hackathon = relationship('Hackathon', backref=backref('tags', lazy='dynamic'))
 
 
+class HackathonNotice(DBBase):
+    __tablename__ = 'hackathon_notice'
+
+    id = Column(Integer, primary_key=True)
+    category = Column(Integer)  # category: Class HACK_NOTICE_CATEGORY, controls how icons/descriptions are shown at front-end
+    event = Column(Integer) # event: Class HACK_NOTICE_EVENT, records the specfic event that triggers current notice 
+    create_time = Column(TZDateTime, default=get_now())
+    update_time = Column(TZDateTime, default=get_now())
+    content = Column(Text)
+    related_id = Column(Integer)
+    link = Column(Text)
+
+    creator_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
+    creator = relationship('User', backref=backref('notices', lazy='dynamic'))
+
+    hackathon_id = Column(Integer, ForeignKey('hackathon.id', ondelete='CASCADE'))
+    hackathon = relationship('Hackathon', backref=backref('notices', lazy='dynamic'))
+
+    def __init__(self, **kwargs):
+        super(HackathonNotice, self).__init__(**kwargs)
+
+
 class Team(DBBase):
     __tablename__ = 'team'
 

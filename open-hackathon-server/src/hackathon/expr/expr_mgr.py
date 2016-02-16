@@ -39,7 +39,7 @@ from sqlalchemy import and_
 
 from hackathon import Component, RequiredFeature, Context
 from hackathon.constants import EStatus, VERemoteProvider, VE_PROVIDER, PortBindingType, VEStatus, ReservedUser, \
-    AVMStatus, CLOUD_ECLIPSE
+    AVMStatus, CLOUD_ECLIPSE, HACK_NOTICE_EVENT, HACK_NOTICE_CATEGORY
 from hackathon.database import VirtualEnvironment, DockerHostServer, Experiment, User, HackathonTemplateRel, \
     DockerContainer, AzureKey, Template
 from hackathon.azureformation.azureFormation import AzureFormation
@@ -338,6 +338,8 @@ class ExprManager(Component):
                 return internal_server_error('Failed starting azure vm')
         # after everything is ready, set the expr state to running
         # response to caller
+
+        self.hackathon_manager.create_hackathon_notice(hackathon.id, HACK_NOTICE_EVENT.EXPR_JOIN, HACK_NOTICE_CATEGORY.EXPERIMENT, {'user_id': user_id})
         return self.__report_expr_status(expr)
 
     def __report_expr_status(self, expr):

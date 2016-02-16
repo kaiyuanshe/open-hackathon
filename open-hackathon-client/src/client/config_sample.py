@@ -173,6 +173,9 @@ Config = {
                         "award": {
                             "": ["get", "post", "put", "delete"],
                             "list": ["get"]
+                        },
+                        "notice": {
+                            "": ["get", "post", "put", "delete"]
                         }
                     },
                     "registration": {
@@ -247,7 +250,10 @@ Config = {
                     "show": {
                         "list": ["get"]
                     },
-                    "grantedawards": ["get"]
+                    "grantedawards": ["get"],
+                    "notice": {
+                        "list": ["get"]
+                    }
                 },
                 "team": {
                     "": ["get", "post", "put", "delete"],
