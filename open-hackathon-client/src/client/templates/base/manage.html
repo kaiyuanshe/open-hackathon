@@ -4,7 +4,7 @@
 <head>
   <!-- start: Meta -->
   <meta property="wb:webmaster" content="{{ meta_content.weibo }}" />
-  <meta property="qc:admins" content="{{ meta_content.qq }}" /> {% block meta %} {% endblock %}
+  <meta property="qc:admins" content="{{ meta_content.qq }}" /> 
   <meta name="hackathon_name" content="{{ hackathon_name }}">
   <meta name="author" content="Boli Guan">
   <meta name="copyright" content="Microsoft Open Technologies Center">
@@ -22,8 +22,6 @@
     addTag('base', {
       href: location.origin + '/manage/'
     });
-
-
     addTag('link', {
       rel: 'stylesheet',
       href: '/static/css/bootstrap.css',
@@ -31,10 +29,14 @@
     });
     addTag('link', {
       rel: 'stylesheet',
+      href: '/static/components/angular-ui-bootstrap/ui-bootstrap-csp.css',
+      type: 'text/css'
+    });
+    addTag('link', {
+      rel: 'stylesheet',
       href: '/static/css/oh.manage.css',
       type: 'text/css'
     });
-
 
     addTag('script', {
       src: '/static/components/angular-1.5.0/angular.js'
@@ -65,17 +67,13 @@
       src: '/static/components/angular-translate-2.9.0/angular-translate-storage-local.js'
     }, sync);
     addTag('script', {
-      src: '/static/components/angularUI-Router/angular-ui-router.js'
-    }, sync);
-
-    addTag('script', {
-      src: '/static/components/angular-bootstrap/bootstrap.js'
+      src: '/static/components/angular-ui-router/angular-ui-router.js'
     }, sync);
     addTag('script', {
-      src: '/static/components/angular-bootstrap/dropdown-toggle.js'
+      src: '/static/components/angular-ui-bootstrap/ui-bootstrap.js'
     }, sync);
     addTag('script', {
-      src: '/static/components/angular-paging/paging.js'
+      src: '/static/components/angular-ui-bootstrap/ui-bootstrap-tpls.js'
     }, sync);
     addTag('script', {
       src: '/config.js'
@@ -140,7 +138,7 @@
         <div class="container-fluid">
           <div class="navbar-header">
             <a class="brand navbar-brand" href="/">
-              <img class="logo" alt="{{'NAVBAR.LOGO_ATR' | translate}}" ng-src="/static/images/logo.jpg">
+              <img class="logo" ng-attr-alt="{{'NAVBAR.LOGO_ATR' | translate}}" ng-src="/static/images/logo.jpg">
             </a>
           </div>
           <div id="navbar" class="navbar-collapse collapse">
@@ -148,16 +146,16 @@
               <li class="active"><a href="/" translate="NAVBAR.HOME">Home</a></li>
               <li><a href="/" translate="NAVBAR.COMMUNITY">Community</a></li>
               <li><a href="/" translate="NAVBAR.HELP">Help</a></li>
-              <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
-                <ul class="dropdown-menu">
-                  <li><a href="#">Action</a></li>
-                  <li><a href="#">Another action</a></li>
-                  <li><a href="#">Something else here</a></li>
-                  <li role="separator" class="divider"></li>
-                  <li class="dropdown-header">Nav header</li>
-                  <li><a href="#">Separated link</a></li>
-                  <li><a href="#">One more separated link</a></li>
+              <li class="dropdown" uib-dropdown>
+                <a href="#" class="dropdown-toggle" uib-dropdown-toggle>Dropdown <span class="caret"></span></a>
+                <ul class="dropdown-menu" uib-dropdown-menu role="menu">
+                  <li role="menuitem"><a href="#">Action</a></li>
+                  <li role="menuitem"><a href="#">Another action</a></li>
+                  <li role="menuitem"><a href="#">Something else here</a></li>
+                  <li role="menuitem" class="divider"></li>
+                  <li role="menuitem" class="dropdown-header">Nav header</li>
+                  <li role="menuitem"><a href="#">Separated link</a></li>
+                  <li role="menuitem"><a href="#">One more separated link</a></li>
                 </ul>
               </li>
             </ul>

@@ -21,39 +21,34 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 // -----------------------------------------------------------------------------------
-
+  
 angular.module('manageView', [
     'ngCookies',
     'ngSanitize',
-    'bootstrap',
-    'oh.manage.router',
+    'pascalprecht.translate',
     'ui.router',
+    'ui.bootstrap',
+    'oh.manage.router',
     'oh.pages',
     'oh.providers',
     'oh.filters',
     'oh.controllers',
     'oh.directives',
-    'oh.api',
-    'ui.bootstrap.dropdown',
-    'pascalprecht.translate',
-    'bw.paging'
+    'oh.api'
   ])
-  .config(['$locationProvider', '$translateProvider', '$stateProvider', '$urlRouterProvider', function($locationProvider,
-    $translateProvider,
-    $stateProvider,
-    $urlRouterProvider) {
+  .config(function($locationProvider, $translateProvider, $stateProvider, $urlRouterProvider, VERSION) {
     $translateProvider.useStaticFilesLoader({
         prefix: '/static/languages/',
         suffix: '.json'
       }).preferredLanguage('zh-de')
-      .useSanitizeValueStrategy('sanitize')
+      .useSanitizeValueStrategy()
       .useLocalStorage();
 
     $urlRouterProvider.otherwise('/main');
 
     $stateProvider.state('main', {
       url: '/main',
-      templateUrl: '/static/partials/manage/main.html',
+      templateUrl: '/static/partials/manage/main.html?v=' + VERSION,
       controller: function($scope, $rootScope, activityService) {
         activityService.reload();
 
@@ -72,16 +67,17 @@ angular.module('manageView', [
     });
     $stateProvider.state('create', {
       url: '/create',
-      templateUrl: '/static/partials/manage/create.html'
+      templateUrl: '/static/partials/manage/create.html?v=' + VERSION,
     });
     $stateProvider.state('404', {
       url: '/404',
-      templateUrl: '/static/partials/manage/404.html'
+      templateUrl: '/static/partials/manage/404.html?v=' + VERSION,
     });
 
     $locationProvider.html5Mode(true).hashPrefix('!');
 
-  }]).run(function($rootScope, $state, api, activityService) {
+  }).run(function($rootScope, $state, authService, api, activityService) {
+    authService.getUser();
     $rootScope.$on('showTip', function(event, obj) {
       $rootScope.tip = obj;
       event.preventDefault();

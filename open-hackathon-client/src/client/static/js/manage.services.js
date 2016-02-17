@@ -154,4 +154,24 @@ angular.module('oh.api', [])
         return currentActivity;
       }
     }
+  }).factory('authService', function(api, session) {
+
+    var user = api.user.profile.get().then(function(data) {
+      session.create(data)
+      return data;
+    })
+
+    var factory = {};
+    factory.getUser = function() {
+      return user;
+    };
+    return factory;
+  }).service('session', function() {
+    this.create = function(user) {
+      this.user = user;
+    };
+    this.destroy = function() {
+      this.user = undefined;
+    };
+    return this;
   });
