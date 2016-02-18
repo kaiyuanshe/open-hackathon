@@ -95,7 +95,7 @@ angular.module('oh.controllers', [])
 
   }).controller('editController', function($rootScope, $scope, session, activityService, api) {
     $scope.$emit('pageName', 'SETTINGS.EDIT_ACTIVITY');
-
+    $scope.sss = 'ssfdsss';
     $scope.showTip = function() {
       $scope.$emit('showTip', {
         level: 'tip-success',
@@ -104,6 +104,7 @@ angular.module('oh.controllers', [])
     }
   }).controller('usersController', function($rootScope, $scope, activityService, api) {
     $scope.$emit('pageName', 'SETTINGS.USERS');
+
 
   }).controller('adminController', function($rootScope, $scope, activityService, api) {
     $scope.$emit('pageName', 'SETTINGS.ADMINISTRATORS');

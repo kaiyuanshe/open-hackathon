@@ -12,10 +12,69 @@
       Some Tab Content
     </uib-tab>
     <uib-tab heading="{{'EDIT_ACTIVITY_TABS.DETAILS' | translate}}">
-      More Tab Content
+      <form class="">
+        <div class="form-group">
+          <textarea name="description" ckeditor ng-model="models.description"></textarea>
+        </div>
+      </form>
     </uib-tab>
     <uib-tab heading="{{'EDIT_ACTIVITY_TABS.PROVIDERS' | translate}}">
-      More Tab Content
+      <form class="provider-group-default text-center">
+        <div class="form-group">
+          <label class="provider provider-success windows">
+            Microsoft Account
+          </label>
+          <label class="switchbox switchbox-success switchbox-inline">
+            <input type="checkbox">
+            <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
+          </label>
+        </div>
+        <div class="form-group">
+          <label class="provider provider-success github">
+            Github
+          </label>
+          <label class="switchbox switchbox-success switchbox-inline">
+            <input type="checkbox">
+            <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
+          </label>
+        </div>
+        <div class="form-group">
+          <label class="provider provider-success qq">
+            QQ
+          </label>
+          <label class="switchbox switchbox-success switchbox-inline">
+            <input type="checkbox">
+            <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
+          </label>
+        </div>
+        <div class="form-group">
+          <label class="provider provider-success weibo">
+            Weibo
+          </label>
+          <label class="switchbox switchbox-success switchbox-inline">
+            <input type="checkbox">
+            <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
+          </label>
+        </div>
+        <div class="form-group">
+          <label class="provider provider-success alauda">
+            alauda 灵雀云
+          </label>
+          <label class="switchbox switchbox-success switchbox-inline">
+            <input type="checkbox">
+            <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
+          </label>
+        </div>
+        <div class="form-group">
+          <label class="provider provider-success gitcafe">
+            Gitcafe
+          </label>
+          <label class="switchbox switchbox-success switchbox-inline">
+            <input type="checkbox">
+            <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
+          </label>
+        </div>
+      </form>
     </uib-tab>
   </uib-tabset>
 </div>

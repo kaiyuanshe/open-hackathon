@@ -772,3 +772,102 @@ label.switchbox input[type=checkbox][disabled]:checked ~ .switchbox-handle i {
   background-image: -o-linear-gradient(top, #eee 40%, #f0f0f0);
   background-image: linear-gradient(to bottom, #eee 40%, #f0f0f0);
 }
+
+.form-group label.switchbox {
+  margin-top: 0;
+}
+
+.provider-group-block .provider {
+  width: 100%;
+}
+
+.provider-group-default .provider {
+  width: 276px;
+}
+
+.provider-group-sm .provider {
+  width: 36px;
+  font-size: 0;
+}
+
+.provider {
+  position: relative;
+  margin-right: 10px;
+  border-radius: 2px;
+  background-color: #f1f1f2;
+  height: 36px;
+  line-height: 36px;
+  padding-left: 36px;
+  text-align: center;
+  font-size: 12px;
+  margin-bottom: 0;
+  font-weight: normal;
+  color: #939597;
+}
+
+.provider:before {
+  font-family: 'FontAwesome';
+  display: block;
+  width: 36px;
+  height: 36px;
+  border-radius: 2px;
+  color: #fff;
+  background-color: #d1d2d4;
+  font-size: 21px;
+  text-align: center;
+  position: absolute;
+  left: 0;
+}
+
+.provider-default:before {
+  background-color: #6d6e70;
+}
+
+.provider-primary:before {
+  background-color: #019e48;
+}
+
+.provider-success:before {
+  background-color: #7dba43;
+}
+
+.provider-info:before {
+  background-color: #00a4ee;
+}
+
+.provider-warning:before {
+  background-color: #ffb800;
+}
+
+.provider-danger:before {
+  background-color: #cf3c0e;
+}
+
+.provider.windows:before {
+  content: "\f17a";
+}
+
+.provider.github:before {
+  content: "\f09b";
+}
+
+.provider.qq:before {
+  content: "\f1d6";
+}
+
+.provider.weibo:before {
+  content: "\f18a";
+}
+
+.provider.alauda:before {
+  content: "";
+  background-image: url('/static/pic/alauda-21-21.png');
+  background-repeat: no-repeat;
+  background-position: 7px 7px;
+}
+
+.provider.gitcafe:before {
+  content: "";
+  background-repeat: no-repeat;
+  background-position: 7px 7px;
+}

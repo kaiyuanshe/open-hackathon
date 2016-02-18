@@ -42,13 +42,13 @@ angular.module('oh.directives', [])
             if (height > FitHeight) {
               var h = (height - FitHeight) / 2;
               img.width = FitWidth;
-      
+
               if (h < FitHeight) {
                 img.style.marginTop = -h + 'px';
               }
             } else {
               img.style.marginLeft = -(width - FitWidth) / 2 + 'px';
-              
+
               img.height = FitHeight
             }
           });
@@ -85,3 +85,40 @@ angular.module('oh.directives', [])
       }
     }
   })
+  .directive('ckeditor', function() {
+    return {
+      restrict: 'A',
+      require: '?ngModel',
+      link: function(scope, element, attrs, ngModel) {
+        var ck = CKEDITOR.replace(element[0]);
+        if (!ngModel) return;
+
+        ck.on('save', function() {
+          scope.$apply(function() {
+            ngModel.$setViewValue(ck.getData());
+          });
+        });
+        // ck.on('pasteState', function() {
+        //   scope.$apply(function() {
+        //     ngModel.$setViewValue(ck.getData());
+        //   });
+        // });
+        ck.on('keydown', function(e) {
+          console.log(e);
+        })
+        ck.on('instanceReady', function() {
+          ck.setData(ngModel.$viewValue);
+        });
+      }
+    }
+  }).directive('keydown', function() {
+    return {
+      restrict: 'A',
+      link: function(scope, element, attrs) {
+        element.bind('keydown', function(e) {
+          //console.log(e);
+        })
+      }
+    }
+
+  });
