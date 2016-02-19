@@ -9,16 +9,15 @@ CKEDITOR.editorConfig = function(config) {
   // Define changes to default configuration here.
   // For complete reference see:
   // http://docs.ckeditor.com/#!/api/CKEDITOR.config
-  config.extraPlugins = 'save';
+  config.extraPlugins = 'save,div,colordialog,liststyle,font,colorbutton,showblocks,justify';
   // The toolbar groups arrangement, optimized for two toolbar rows.
   config.language = 'zh-cn';
+
+  config.allowedContent  = true;
 
   config.toolbarGroups = [{
     name: 'clipboard',
     groups: ['save', 'clipboard', 'undo']
-  }, {
-    name: 'editing',
-    groups: ['find', 'selection', 'spellchecker']
   }, {
     name: 'links'
   }, {
@@ -32,7 +31,9 @@ CKEDITOR.editorConfig = function(config) {
     groups: ['basicstyles', 'cleanup']
   }, {
     name: 'paragraph',
-    groups: ['list', 'indent', 'blocks', 'align', 'bidi']
+    groups: ['list', 'indent', 'blocks', 'bidi']
+  }, '/', {
+    name: 'align'
   }, {
     name: 'styles'
   }, {
@@ -50,10 +51,12 @@ CKEDITOR.editorConfig = function(config) {
   config.removeButtons = 'Underline,Subscript,Superscript';
 
   // Set the most common block elements.
-  config.format_tags = 'p;h1;h2;h3;pre';
+  //config.format_tags = 'p;h1;h2;h3;pre';
 
   // Simplify the dialog windows.
   config.removeDialogTabs = 'image:advanced;link:advanced';
+
+  config.div_wrapTable = true;
 
   config.inlinecancel = {
     onCancel: function(editor) {
@@ -61,5 +64,82 @@ CKEDITOR.editorConfig = function(config) {
     }
   };
 
-  // 
+  config.enterMode = CKEDITOR.ENTER_BR;
+  config.shiftEnterMode = CKEDITOR.ENTER_P;
+
+
 };
+CKEDITOR.on('instanceReady', function(ev) {
+  with(ev.editor.dataProcessor.writer) {
+    setRules("p", {
+      indent: false,
+      breakAfterOpen: false,
+      breakBeforeClose: false
+    });
+    setRules("h1", {
+      indent: false,
+      breakAfterOpen: false,
+      breakBeforeClose: false
+    });
+    setRules("h2", {
+      indent: false,
+      breakAfterOpen: false,
+      breakBeforeClose: false
+    });
+    setRules("h3", {
+      indent: false,
+      breakAfterOpen: false,
+      breakBeforeClose: false
+    });
+    setRules("h4", {
+      indent: false,
+      breakAfterOpen: false,
+      breakBeforeClose: false
+    });
+    setRules("h5", {
+      indent: false,
+      breakAfterOpen: false,
+      breakBeforeClose: false
+    });
+    setRules("div", {
+      indent: false,
+      breakAfterOpen: false,
+      breakBeforeClose: false
+    });
+    setRules("table", {
+      indent: false,
+      breakAfterOpen: false,
+      breakBeforeClose: false
+    });
+    setRules("tr", {
+      indent: false,
+      breakAfterOpen: false,
+      breakBeforeClose: false
+    });
+    setRules("td", {
+      indent: false,
+      breakAfterOpen: false,
+      breakBeforeClose: false
+    });
+    setRules("iframe", {
+      indent: false,
+      breakAfterOpen: false,
+      breakBeforeClose: false
+    });
+    setRules("li", {
+      indent: false,
+      breakAfterOpen: false,
+      breakBeforeClose: false
+    });
+    setRules("ul", {
+      indent: false,
+      breakAfterOpen: false,
+      breakBeforeClose: false
+    });
+    setRules("ol", {
+      indent: false,
+      breakAfterOpen: false,
+      breakBeforeClose: false
+    });
+  }
+});
