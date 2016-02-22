@@ -33,7 +33,10 @@ angular.module('oh.filters', [])
     return function(text, limit) {
       limit = limit || ','
       console.log('split');
-      return text.split(limit);
+      if (text) {
+        return text.split(limit);
+      }
+      return [];
     }
   })
   .filter('defBanner', function() {
@@ -43,5 +46,10 @@ angular.module('oh.filters', [])
   }).filter('toDate', function() {
     return function(longTime) {
       return new Date(longTime);
+    }
+  }).filter('isProvider', function() {
+    return function(providers, value) {
+      providers = parseInt(providers, 10) || 0;
+      return value == (providers & value);
     }
   });

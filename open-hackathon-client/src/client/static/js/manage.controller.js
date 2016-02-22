@@ -91,14 +91,17 @@ angular.module('oh.controllers', [])
       }, {});
     }
 
-  }).controller('editController', function($rootScope, $scope, $filter, dialog, session, activityService, api) {
-    $scope.$emit('pageName', 'SETTINGS.EDIT_ACTIVITY');
-    $scope.animationsEnabled = true;
 
-    var banners = $filter('split')('http://img.zcool.cn/community/03320dd554c75c700000158fce17209.jpg,http://www.bz55.com/uploads/allimg/100719/1_100719110156_1.jpg');
-    $scope.modules = {
-      banners: banners
-    }
+
+  }).controller('editController', function($rootScope, $scope, $filter, dialog, session, activityService, api, activity) {
+    //
+    $scope.$emit('pageName', 'SETTINGS.EDIT_ACTIVITY');
+
+
+    $scope.animationsEnabled = true;
+    activity.banners = $filter('split')(activity.banners, ',');
+    //var banners = $filter('split')('http://img.zcool.cn/community/03320dd554c75c700000158fce17209.jpg,http://www.bz55.com/uploads/allimg/100719/1_100719110156_1.jpg');
+    $scope.modules = activity;
 
     $scope.delBanner = function(index) {
       $scope.modules.banners.splice(index, 1);
@@ -113,6 +116,26 @@ angular.module('oh.controllers', [])
       $scope.$emit('showTip', {
         level: 'tip-success',
         content: '保存成功'
+      });
+    }
+
+    $scope.provider = {
+      windows: $filter('isProvider')($scope.modules.config.login_provider, 1),
+      github: $filter('isProvider')($scope.modules.config.login_provider, 2),
+      qq: $filter('isProvider')($scope.modules.config.login_provider, 4),
+      weibo: $filter('isProvider')($scope.modules.config.login_provider, 8),
+      alauda: $filter('isProvider')($scope.modules.config.login_provider, 32),
+      gitcafe: $filter('isProvider')($scope.modules.config.login_provider, 16),
+    };
+    $scope.providerChange = function(checked, value) {
+      if (checked) {
+        $scope.modules.config.login_provider = ((+$scope.modules.config.login_provider) || 0) | value;
+      } else {
+        $scope.modules.config.login_provider = ((+$scope.modules.config.login_provider) || 0) ^ value;
+      }
+      $scope.$emit('showTip', {
+        level: 'tip-success',
+        content: '登录方式修改成功'
       });
     }
 

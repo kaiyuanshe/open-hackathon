@@ -30,7 +30,7 @@
       <ng-form name="descriptionForm">
         <fieldset class="description-wrapper">
           <div>
-            <textarea name="description" ckeditor ng-model="models.description" height="500"></textarea>
+            <textarea name="description" ckeditor ng-model="modules.description" height="500"></textarea>
           </div>
         </fieldset>
       </ng-form>
@@ -43,7 +43,7 @@
               Microsoft Account
             </label>
             <label class="switchbox switchbox-success switchbox-inline">
-              <input type="checkbox">
+              <input type="checkbox" ng-model="provider.windows" ng-change="providerChange(provider.windows,1)">
               <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
             </label>
           </div>
@@ -52,7 +52,7 @@
               Github
             </label>
             <label class="switchbox switchbox-success switchbox-inline">
-              <input type="checkbox">
+              <input type="checkbox" ng-model="provider.github" ng-change="providerChange(provider.github,2)">
               <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
             </label>
           </div>
@@ -61,7 +61,7 @@
               QQ
             </label>
             <label class="switchbox switchbox-success switchbox-inline">
-              <input type="checkbox">
+              <input type="checkbox" ng-model="provider.qq" ng-change="providerChange(provider.qq,4)">
               <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
             </label>
           </div>
@@ -70,7 +70,7 @@
               Weibo
             </label>
             <label class="switchbox switchbox-success switchbox-inline">
-              <input type="checkbox">
+              <input type="checkbox" ng-model="provider.weibo" ng-change="providerChange(provider.weibo,8)">
               <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
             </label>
           </div>
@@ -79,7 +79,7 @@
               alauda 灵雀云
             </label>
             <label class="switchbox switchbox-success switchbox-inline">
-              <input type="checkbox">
+              <input type="checkbox" ng-model="provider.alauda" ng-change="providerChange(provider.alauda,32)">
               <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
             </label>
           </div>
@@ -88,10 +88,11 @@
               Gitcafe
             </label>
             <label class="switchbox switchbox-success switchbox-inline">
-              <input type="checkbox">
+              <input type="checkbox" ng-model="provider.gitcafe" ng-change="providerChange(provider.gitcafe,16)">
               <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
             </label>
           </div>
+          {{modules.config.login_provider}}
         </fieldset>
       </ng-form>
     </uib-tab>
