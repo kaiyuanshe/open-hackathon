@@ -89,8 +89,15 @@ angular.module('oh.directives', [])
     return {
       restrict: 'A',
       require: '?ngModel',
+      scope: {
+        height: '@',
+        width: '@'
+      },
       link: function(scope, element, attrs, ngModel) {
-        var ck = CKEDITOR.replace(element[0]);
+        var ck = CKEDITOR.replace(element[0], {
+          width: scope.width || 'auto',
+          height: scope.height || 'auto'
+        });
         if (!ngModel) return;
 
         ck.on('save', function() {
@@ -121,4 +128,38 @@ angular.module('oh.directives', [])
       }
     }
 
+  }).directive('dragable', function($document) {
+    return {
+      restrict: 'A',
+      link: function(scope, elm, attrs) {
+        var startX, startY, initialMouseX, initialMouseY;
+        var parent = elm.parent();
+        elm.on('mousedown', function($event) {
+          startX = parent.prop('offsetLeft');
+          startY = parent.prop('offsetTop');
+          initialMouseX = $event.clientX;
+          initialMouseY = $event.clientY;
+          $document.bind('mousemove', mousemove);
+          $document.bind('mouseup', mouseup);
+          $document.addClass('cursor-move');
+          return false;
+        });
+
+        function mousemove($event) {
+          var dx = $event.clientX - initialMouseX;
+          var dy = $event.clientY - initialMouseY;
+          parent.css({
+            top: startY + dy + 'px',
+            left: startX + dx + 'px'
+          });
+          return false;
+        }
+
+        function mouseup() {
+          $document.removeClass('cursor-move');
+          $document.unbind('mousemove', mousemove);
+          $document.unbind('mouseup', mouseup);
+        }
+      }
+    }
   });

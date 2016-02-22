@@ -1,20 +1,32 @@
-CKEDITOR.plugins.registered['save'] = {
-  init: function(editor) {
-    var command = editor.addCommand('save', {
-      modes: {
-        wysiwyg: 1,
-        source: 1
-      },
-      readOnly: 1,
-      exec: function(editor) {
-        editor.fire('save');
-      }
-    });
+(function() {
 
-    editor.ui.addButton('Save', {
-      label: editor.lang.save,
-      command: 'save',
-      toolbar: 'clipboard,0'
-    });
-  }
-};
+  CKEDITOR.plugins.add('save', {
+    hidpi: true,
+    init: function(editor) {
+      if (editor.blockless)
+        return;
+      var command = editor.addCommand('save', {
+        readOnly: 1,
+        preserveState: true,
+        editorFocus: false,
+        exec: function(editor) {
+          editor.fire('save');
+        }
+      });
+
+      editor.ui.addButton('Save', {
+        label: editor.lang.save,
+        command: 'save',
+        toolbar: 'clipboard,0'
+      });
+
+      if (editor.contextMenu) {
+        editor.contextMenu.addListener(function(element) {
+          if (!element || element.isReadOnly())
+            return null;
+        });
+      }
+    }
+  });
+
+})();

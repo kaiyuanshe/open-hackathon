@@ -27,8 +27,6 @@ angular.module('oh.controllers', [])
     $scope.isloaded = true;
     $scope.loading = false;
 
-
-
     $rootScope.$on("$stateChangeStart", function(event, toState, toParams, fromState, fromParams) {
       $scope.loading = true;
       var activity = activityService.getCurrentActivity();
@@ -93,15 +91,31 @@ angular.module('oh.controllers', [])
       }, {});
     }
 
-  }).controller('editController', function($rootScope, $scope, session, activityService, api) {
+  }).controller('editController', function($rootScope, $scope, $filter, dialog, session, activityService, api) {
     $scope.$emit('pageName', 'SETTINGS.EDIT_ACTIVITY');
-    $scope.sss = 'ssfdsss';
+    $scope.animationsEnabled = true;
+
+    var banners = $filter('split')('http://img.zcool.cn/community/03320dd554c75c700000158fce17209.jpg,http://www.bz55.com/uploads/allimg/100719/1_100719110156_1.jpg');
+    $scope.modules = {
+      banners: banners
+    }
+
+    $scope.delBanner = function(index) {
+      $scope.modules.banners.splice(index, 1);
+    }
+
+
+    $scope.showAddBannerDialog = function() {
+      $scope.modules.banners.push('http://image5.tuku.cn/pic/wallpaper/fengjing/shanshuilantian/014.jpg');
+    }
+
     $scope.showTip = function() {
       $scope.$emit('showTip', {
         level: 'tip-success',
         content: '保存成功'
       });
     }
+
   }).controller('usersController', function($rootScope, $scope, activityService, api) {
     $scope.$emit('pageName', 'SETTINGS.USERS');
 
