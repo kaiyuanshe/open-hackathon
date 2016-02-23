@@ -174,4 +174,51 @@ angular.module('oh.api', [])
       this.user = undefined;
     };
     return this;
+  }).factory('dialog', function($uibModal, VERSION) {
+
+    function open(modal) {
+      var modalInstance = $uibModal.open({
+        animation: true,
+        templateUrl: modal.url,
+        size: modal.size + ' ' + modal.class,
+        resolve: modal.resolve,
+        controller: modal.controller
+      });
+      return modalInstance;
+    }
+
+    this.alert = function(modal, callback) {
+      modal.url = '/static/partials/dialogs/alert.html?v=' + VERSION;
+      modal.controller = function($scope, $uibModalInstance) {
+        $scope.title = modal.title;
+        $scope.body = modal.body;
+        $scope.ok = function() {
+          $uibModalInstance.close(modal.ok());
+        };
+        $scope.cancel = function() {
+          $uibModalInstance.dismiss('cancel');
+        };
+      }
+      return open(modal).result;
+    }
+
+    this.confirm = function(modal) {
+      modal.url = '/static/partials/dialogs/confirm.html?v=' + VERSION;
+      modal.controller = function($scope, $uibModalInstance) {
+        $scope.title = modal.title;
+        $scope.body = modal.body;
+        $scope.ok = function() {
+          $uibModalInstance.close(modal.ok());
+        };
+        $scope.cancel = function() {
+          $uibModalInstance.dismiss('cancel');
+        };
+      }
+      return open(modal).result;
+    }
+
+    this.customize = function(modal) {
+      open(modal);
+    }
+    return this;
   });

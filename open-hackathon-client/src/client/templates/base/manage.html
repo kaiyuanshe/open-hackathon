@@ -4,13 +4,14 @@
 <head>
   <!-- start: Meta -->
   <meta property="wb:webmaster" content="{{ meta_content.weibo }}" />
-  <meta property="qc:admins" content="{{ meta_content.qq }}" /> 
+  <meta property="qc:admins" content="{{ meta_content.qq }}" />
   <meta name="hackathon_name" content="{{ hackathon_name }}">
   <meta name="author" content="Boli Guan">
   <meta name="copyright" content="Microsoft Open Technologies Center">
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script type="text/javascript">
+  var CKEDITOR_BASEPATH = '/static/components/ckeditor/';
   (function() {
     var indexFile = (location.pathname.match(/\/(manage[^\.]*)/) || ['', ''])[1],
       rUrl = /(#!\/[^\.]*).*$/,
@@ -34,6 +35,11 @@
     });
     addTag('link', {
       rel: 'stylesheet',
+      href: '/static/components/ckeditor/contents.css',
+      type: 'text/css'
+    });
+    addTag('link', {
+      rel: 'stylesheet',
       href: '/static/css/oh.manage.css',
       type: 'text/css'
     });
@@ -53,7 +59,9 @@
     addTag('script', {
       src: '/static/components/marked-0.3.3/marked.js'
     }, sync);
-
+    addTag('script', {
+      src: '/static/components/ckeditor/ckeditor.js'
+    }, sync);
     addTag('script', {
       src: '/static/components/angular-translate-2.9.0/angular-translate.js'
     }, sync);
@@ -131,7 +139,7 @@
 </head>
 {% raw %}
 
-<body>
+<body keydown>
   <div id="wrapper">
     <header class="header">
       <section class="navbar navbar-inverse navbar-fixed-top">

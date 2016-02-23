@@ -34,7 +34,18 @@ angular.module('oh.manage.router', [
     }).state('manage.edit', {
       url: 'edit/:name',
       templateUrl: '/static/partials/manage/edit.html?v=' + VERSION,
-      controller: 'editController'
+      controller: 'editController',
+      resolve: {
+        activity: function($stateParams, api) {
+          return api.admin.hackathon.get({
+            header: {
+              hackathon_name: $stateParams.name
+            }
+          }).then(function(data) {
+            return data;
+          });
+        }
+      }
     })
     .state('manage.users', {
       url: 'users/:name',

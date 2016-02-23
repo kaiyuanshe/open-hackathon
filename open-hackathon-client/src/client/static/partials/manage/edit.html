@@ -1,21 +1,100 @@
-<div>
+<div class="manage-edit">
   <uib-tabset class="m-tabs">
-    <uib-tab heading="{{'EDIT_ACTIVITY_TABS.INFORMATION' | translate}}" class="ssss">
+    <uib-tab heading="{{'EDIT_ACTIVITY_TABS.INFORMATION' | translate}}">
       <ng-form name="activitForm">
-        <div class="form-group">
-          <label>Name</label>
-          <input type="text" class="form-control" required ng-model="model.name" />
-        </div>
+        <fieldset class="col-xs-9 center">
+          <div class="form-group">
+            <label>Name</label>
+            <input type="text" class="form-control" required ng-model="model.name" />
+          </div>
+        </fieldset>
       </ng-form>
     </uib-tab>
     <uib-tab heading="{{'EDIT_ACTIVITY_TABS.BANNER' | translate }}">
-      Some Tab Content
+      <ng-form name="bannersForm">
+        <fieldset class="banners clearfix">
+          <div class="item" ng-repeat="banner in modules.banners track by $index">
+            <img src="{{banner}}" static-image max-width="298" max-height="168">
+            <button class="btn btn-sm btn-danger" ng-click="delBanner($index)"><i class="fa fa-times"></i>
+              <ANY translate="DELETE">DELETE</ANY>
+            </button>
+          </div>
+          <div class="item create" ng-click="showAddBannerDialog()">
+            <h3><i class="fa fa-cloud-upload"></i> 添加图片</h3>
+            <small>推荐尺寸<span class="text-red">752*420</span>px 图片</small>
+          </div>
+        </fieldset>
+      </ng-form>
     </uib-tab>
     <uib-tab heading="{{'EDIT_ACTIVITY_TABS.DETAILS' | translate}}">
-      More Tab Content
+      <ng-form name="descriptionForm">
+        <fieldset class="description-wrapper">
+          <div>
+            <textarea name="description" ckeditor ng-model="modules.description" height="500"></textarea>
+          </div>
+        </fieldset>
+      </ng-form>
     </uib-tab>
     <uib-tab heading="{{'EDIT_ACTIVITY_TABS.PROVIDERS' | translate}}">
-      More Tab Content
+      <ng-form name="providerForm">
+        <fieldset class="provider-wrapper text-center provider-group-default">
+          <div class="form-group">
+            <label class="provider provider-success windows">
+              Microsoft Account
+            </label>
+            <label class="switchbox switchbox-success switchbox-inline">
+              <input type="checkbox" ng-model="provider.windows" ng-change="providerChange(provider.windows,1)">
+              <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
+            </label>
+          </div>
+          <div class="form-group">
+            <label class="provider provider-success github">
+              Github
+            </label>
+            <label class="switchbox switchbox-success switchbox-inline">
+              <input type="checkbox" ng-model="provider.github" ng-change="providerChange(provider.github,2)">
+              <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
+            </label>
+          </div>
+          <div class="form-group">
+            <label class="provider provider-success qq">
+              QQ
+            </label>
+            <label class="switchbox switchbox-success switchbox-inline">
+              <input type="checkbox" ng-model="provider.qq" ng-change="providerChange(provider.qq,4)">
+              <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
+            </label>
+          </div>
+          <div class="form-group">
+            <label class="provider provider-success weibo">
+              Weibo
+            </label>
+            <label class="switchbox switchbox-success switchbox-inline">
+              <input type="checkbox" ng-model="provider.weibo" ng-change="providerChange(provider.weibo,8)">
+              <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
+            </label>
+          </div>
+          <div class="form-group">
+            <label class="provider provider-success alauda">
+              alauda 灵雀云
+            </label>
+            <label class="switchbox switchbox-success switchbox-inline">
+              <input type="checkbox" ng-model="provider.alauda" ng-change="providerChange(provider.alauda,32)">
+              <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
+            </label>
+          </div>
+          <div class="form-group">
+            <label class="provider provider-success gitcafe">
+              Gitcafe
+            </label>
+            <label class="switchbox switchbox-success switchbox-inline">
+              <input type="checkbox" ng-model="provider.gitcafe" ng-change="providerChange(provider.gitcafe,16)">
+              <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
+            </label>
+          </div>
+          {{modules.config.login_provider}}
+        </fieldset>
+      </ng-form>
     </uib-tab>
   </uib-tabset>
 </div>

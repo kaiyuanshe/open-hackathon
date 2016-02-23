@@ -1,24 +1,32 @@
-.color-default {
+.text-default {
   color: #6d6e70;
 }
 
-.color-primary {
+.text-gery {
+  color: #929497;
+}
+
+.text-red {
+  color: #bc1f2b;
+}
+
+.text-primary {
   color: #019e48;
 }
 
-.color-success {
+.text-success {
   color: #7dba43;
 }
 
-.color-info {
+.text-info {
   color: #00a4ee;
 }
 
-.color-warning {
+.text-warning {
   color: #ffb800;
 }
 
-.color-danger {
+.text-danger {
   color: #cf3c0e;
 }
 
@@ -771,4 +779,180 @@ label.switchbox input[type=checkbox][disabled]:checked ~ .switchbox-handle i {
   background-image: -moz-linear-gradient(top, #eee 40%, #f0f0f0);
   background-image: -o-linear-gradient(top, #eee 40%, #f0f0f0);
   background-image: linear-gradient(to bottom, #eee 40%, #f0f0f0);
+}
+
+.form-group label.switchbox {
+  margin-top: 0;
+}
+
+.provider-group-block .provider {
+  width: 100%;
+}
+
+.provider-group-default .provider {
+  width: 276px;
+}
+
+.provider-group-sm .provider {
+  width: 36px;
+  font-size: 0;
+}
+
+.provider {
+  position: relative;
+  margin-right: 10px;
+  border-radius: 2px;
+  background-color: #f1f1f2;
+  height: 36px;
+  line-height: 36px;
+  padding-left: 36px;
+  text-align: center;
+  font-size: 12px;
+  margin-bottom: 0;
+  font-weight: normal;
+  color: #939597;
+}
+
+.provider:before {
+  font-family: 'FontAwesome';
+  display: block;
+  width: 36px;
+  height: 36px;
+  border-radius: 2px;
+  color: #fff;
+  background-color: #d1d2d4;
+  font-size: 21px;
+  text-align: center;
+  position: absolute;
+  left: 0;
+}
+
+.provider-default:before {
+  background-color: #6d6e70;
+}
+
+.provider-primary:before {
+  background-color: #019e48;
+}
+
+.provider-success:before {
+  background-color: #7dba43;
+}
+
+.provider-info:before {
+  background-color: #00a4ee;
+}
+
+.provider-warning:before {
+  background-color: #ffb800;
+}
+
+.provider-danger:before {
+  background-color: #cf3c0e;
+}
+
+.provider.windows:before {
+  content: "\f17a";
+}
+
+.provider.github:before {
+  content: "\f09b";
+}
+
+.provider.qq:before {
+  content: "\f1d6";
+}
+
+.provider.weibo:before {
+  content: "\f18a";
+}
+
+.provider.alauda:before {
+  content: "";
+  background-image: url('/static/pic/alauda-21-21.png');
+  background-repeat: no-repeat;
+  background-position: 7px 7px;
+}
+
+.provider.gitcafe:before {
+  content: "";
+  background-repeat: no-repeat;
+  background-position: 7px 7px;
+}
+
+@media (min-width: 768px) {
+  .modal-dialog {
+    margin: 60px auto;
+  }
+}
+
+.modal-content {
+  border-radius: 0;
+  border: 2px solid #6d6e70;
+}
+
+.modal-header {
+  color: #fff;
+  padding: 4px 10px;
+  background-color: #6d6e70;
+}
+
+.modal-title {
+  font-size: 15px;
+}
+
+.modal-footer {
+  padding: 5px 10px;
+}
+
+.modal-footer .btn-sm {
+  padding: 5px 20px;
+}
+
+.modal-default .modal-content {
+  border-color: #6d6e70;
+}
+
+.modal-default .modal-header {
+  background-color: #6d6e70;
+}
+
+.modal-primary .modal-content {
+  border-color: #019e48;
+}
+
+.modal-primary .modal-header {
+  background-color: #019e48;
+}
+
+.modal-success .modal-content {
+  border-color: #7dba43;
+}
+
+.modal-success .modal-header {
+  background-color: #7dba43;
+}
+
+.modal-info .modal-content {
+  border-color: #00a4ee;
+}
+
+.modal-info .modal-header {
+  background-color: #00a4ee;
+}
+
+.modal-warning .modal-content {
+  border-color: #ffb800;
+}
+
+.modal-warning .modal-header {
+  background-color: #ffb800;
+}
+
+.modal-danger .modal-content {
+  border-color: #ffb800;
+}
+
+.modal-danger .modal-header {
+  background-color: #ffb800;
 }

@@ -42,13 +42,13 @@ angular.module('oh.directives', [])
             if (height > FitHeight) {
               var h = (height - FitHeight) / 2;
               img.width = FitWidth;
-      
+
               if (h < FitHeight) {
                 img.style.marginTop = -h + 'px';
               }
             } else {
               img.style.marginLeft = -(width - FitWidth) / 2 + 'px';
-              
+
               img.height = FitHeight
             }
           });
@@ -85,3 +85,81 @@ angular.module('oh.directives', [])
       }
     }
   })
+  .directive('ckeditor', function() {
+    return {
+      restrict: 'A',
+      require: '?ngModel',
+      scope: {
+        height: '@',
+        width: '@'
+      },
+      link: function(scope, element, attrs, ngModel) {
+        var ck = CKEDITOR.replace(element[0], {
+          width: scope.width || 'auto',
+          height: scope.height || 'auto'
+        });
+        if (!ngModel) return;
+
+        ck.on('save', function() {
+          scope.$apply(function() {
+            ngModel.$setViewValue(ck.getData());
+          });
+        });
+        // ck.on('pasteState', function() {
+        //   scope.$apply(function() {
+        //     ngModel.$setViewValue(ck.getData());
+        //   });
+        // });
+        ck.on('keydown', function(e) {
+          console.log(e);
+        })
+        ck.on('instanceReady', function() {
+          ck.setData(ngModel.$viewValue);
+        });
+      }
+    }
+  }).directive('keydown', function() {
+    return {
+      restrict: 'A',
+      link: function(scope, element, attrs) {
+        element.bind('keydown', function(e) {
+          //console.log(e);
+        })
+      }
+    }
+
+  }).directive('dragable', function($document) {
+    return {
+      restrict: 'A',
+      link: function(scope, elm, attrs) {
+        var startX, startY, initialMouseX, initialMouseY;
+        var parent = elm.parent();
+        elm.on('mousedown', function($event) {
+          startX = parent.prop('offsetLeft');
+          startY = parent.prop('offsetTop');
+          initialMouseX = $event.clientX;
+          initialMouseY = $event.clientY;
+          $document.bind('mousemove', mousemove);
+          $document.bind('mouseup', mouseup);
+          $document.addClass('cursor-move');
+          return false;
+        });
+
+        function mousemove($event) {
+          var dx = $event.clientX - initialMouseX;
+          var dy = $event.clientY - initialMouseY;
+          parent.css({
+            top: startY + dy + 'px',
+            left: startX + dx + 'px'
+          });
+          return false;
+        }
+
+        function mouseup() {
+          $document.removeClass('cursor-move');
+          $document.unbind('mousemove', mousemove);
+          $document.unbind('mouseup', mouseup);
+        }
+      }
+    }
+  });

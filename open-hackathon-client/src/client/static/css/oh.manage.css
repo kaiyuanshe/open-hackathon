@@ -1,6 +1,7 @@
 @import "font-awesome.min.css";
 @import "oh.button.css";
 @import "oh.manage.main.css";
+@import "oh.manage.edit.css";
 html,
 body {
   position: relative;
@@ -254,4 +255,12 @@ body {
   background-color: #ffffff;
   border: none;
   border-bottom: 1px solid #151516;
+}
+
+.center {
+  margin: 0 auto;
+}
+
+.cursor-move {
+  cursor: move;
 }
