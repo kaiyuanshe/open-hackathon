@@ -41,7 +41,7 @@ angular.module('oh.filters', [])
   })
   .filter('defBanner', function() {
     return function(array) {
-      return array[0].length > 0 ? array[0] : '/static/pic/homepage.jpg';
+      return array.length > 0 ? array[0] : '/static/pic/homepage.jpg';
     }
   }).filter('toDate', function() {
     return function(longTime) {
