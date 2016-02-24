@@ -15,6 +15,12 @@ body {
   color: #151516;
   background-color: #f4f7f7;
   /* overflow: hidden; */
+  min-width: 768px;
+  margin: 0;
+}
+
+*:focus {
+  outline: 0;
 }
 
 #wrapper {
@@ -77,6 +83,7 @@ body {
   background-color: #505050;
   -webkit-box-shadow: 0 2px 3px rgba(0, 0, 0, .3);
   box-shadow: 0 2px 3px rgba(0, 0, 0, .3);
+  z-index: 10;
 }
 
 .main-body-grid > .grid-right {
@@ -126,29 +133,92 @@ body {
 }
 
 .side-navigation .nav > li > a:hover,
-.side-navigation .nav > li > a:focus,
+.side-navigation .nav > li > a:focus {
+  color: #fff;
+  background-color: #7dba41;
+}
+
 .side-navigation .nav > li.active > a {
   color: #fff;
   background-color: #019e48;
 }
 
-@media (min-width: 768px) {
-  .header .navbar-nav > li > a {
-    padding-top: 25px;
-    padding-bottom: 25px;
-  }
+.header .navbar-nav > li > a {
+  padding-top: 25px;
+  padding-bottom: 25px;
 }
 
-@media only screen and (max-width: 768px) {
+@media only screen and (max-width: 992px) {
+  .navbar-header {
+    float: left;
+  }
+  .navbar-nav {
+    margin: 0;
+  }
+  .navbar-nav > li {
+    float: left;
+  }
+  .navbar-collapse {
+    width: auto;
+    border-top: 0;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+  }
+  #wrapper .header .container-fluid {
+    padding-left: 40px;
+  }
   .main-body-grid > .grid-left {
-    position: static!important;
-    display: block;
-    float: none;
-    margin-left: -1em;
-    margin-right: -1em;
-    padding: 1em;
-    width: auto!important;
-    overflow: visible;
+    width: 40px;
+  }
+  .side-navigation .nav > li > a {
+    padding: 10px 0px;
+    text-align: center;
+  }
+  .side-navigation .nav > li > a i {
+    margin: 0;
+  }
+  .side-navigation .person {
+    padding: 0;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+  .side-navigation .person .person-pic {
+    width: 40px;
+    height: 40px;
+    margin-right: 0;
+    border: 1px solid #505050;
+  }
+  .main-body-grid > .grid-right {
+    margin-left: 40px;
+    padding: 40px 20px;
+  }
+  .side-navigation>.nav>li {
+    margin-bottom: 0;
+    border-top: 1px solid #a7a9ac;
+  }
+  .side-navigation>.nav>li:first-child {
+    border-top: none;
+  }
+  .grid-left .nav h3,
+  .side-navigation .person span,
+  .grid-left .nav> li > a> span {
+    display: none;
+  }
+  .navbar-nav .open .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    float: left;
+    width: inherit;
+    background-color: #ffffff;
+    border: 1px solid #cccccc;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+    -webkit-background-clip: padding-box;
+    background-clip: padding-box;
   }
 }
 
@@ -263,4 +333,69 @@ body {
 
 .cursor-move {
   cursor: move;
+}
+
+tags-input .tags {
+  border-radius: 2px;
+  border-color: #d0d2d3;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+}
+
+tags-input .tags.focused {
+  border: 1px solid #7dba43;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+}
+
+tags-input .control-icon {
+  position: absolute;
+  z-index: 2;
+  width: 30px;
+  text-align: center;
+  font-size: 18px;
+  padding: 8px 0;
+  top: 0px;
+  color: #bbbdbf;
+}
+
+tags-input .tags.focused+.control-icon {
+  color: #7dba43;
+}
+
+tags-input .tags .input {
+  margin: 0px;
+  padding: 0;
+  padding-left: 0px;
+  float: left;
+  height: 26px;
+  font: 14px "Helvetica Neue", Helvetica, Hiragino Sans GB, WenQuanYi Micro Hei, stheiti, Microsoft Yahei, Simsun, sans-serif;
+}
+
+tags-input.ng-invalid .tags {
+  border-color: #cf3c0e;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+}
+
+tags-input.ng-invalid .tags+.control-icon {
+  color: #cf3c0e;
+}
+
+tags-input .tags .tag-item {
+  border-radius: 2px;
+  border: 1px solid #7dba43;
+  background-color: #7dba43;
+  font-family: "Helvetica Neue", Helvetica, Hiragino Sans GB, WenQuanYi Micro Hei, stheiti, Microsoft Yahei, Simsun, sans-serif;
+}
+
+tags-input .tags .tag-item .remove-button {
+  color: #cf3c0e;
+}
+
+.control-addon tags-input .tags {
+  padding-left: 30px;
 }

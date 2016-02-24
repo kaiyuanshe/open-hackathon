@@ -40,10 +40,19 @@
     });
     addTag('link', {
       rel: 'stylesheet',
+      href: '/static/components/ng-tags-input/ng-tags-input.css',
+      type: 'text/css'
+    });
+    addTag('link', {
+      rel: 'stylesheet',
+      href: '/static/components/ng-tags-input/ng-tags-input.bootstrap.css',
+      type: 'text/css'
+    });
+    addTag('link', {
+      rel: 'stylesheet',
       href: '/static/css/oh.manage.css',
       type: 'text/css'
     });
-
     addTag('script', {
       src: '/static/components/angular-1.5.0/angular.js'
     }, sync);
@@ -82,6 +91,18 @@
     }, sync);
     addTag('script', {
       src: '/static/components/angular-ui-bootstrap/ui-bootstrap-tpls.js'
+    }, sync);
+    addTag('script', {
+      src: '/static/components/bootstrap-ui-datetime-picker/datetime-picker.js'
+    }, sync);
+    addTag('script', {
+      src: '/static/components/bootstrap-ui-datetime-picker/datetime-picker.tpls.js'
+    }, sync);
+    addTag('script', {
+      src: '/static/components/ng-tags-input/ng-tags-input.js'
+    }, sync);
+    addTag('script', {
+      src: '/static/components/angular-1.5.0/i18n/angular-locale_zh-cn.js'
     }, sync);
     addTag('script', {
       src: '/config.js'
@@ -149,7 +170,7 @@
               <img class="logo" ng-attr-alt="{{'NAVBAR.LOGO_ATR' | translate}}" ng-src="/static/images/logo.jpg">
             </a>
           </div>
-          <div id="navbar" class="navbar-collapse collapse">
+          <div id="navbar" class="navbar-collapse">
             <ul class="nav navbar-nav">
               <li class="active"><a href="/" translate="NAVBAR.HOME">Home</a></li>
               <li><a href="/" translate="NAVBAR.COMMUNITY">Community</a></li>

@@ -1,11 +1,86 @@
 <div class="manage-edit">
   <uib-tabset class="m-tabs">
     <uib-tab heading="{{'EDIT_ACTIVITY_TABS.INFORMATION' | translate}}">
-      <ng-form name="activitForm">
-        <fieldset class="col-xs-9 center">
+      <ng-form name="activitForm" class="form-horizontal">
+        <fieldset class="detail-wrapper">
           <div class="form-group">
-            <label>Name</label>
-            <input type="text" class="form-control" required ng-model="model.name" />
+            <label class="col-sm-2 control-label">名称</label>
+            <div class="col-sm-10">
+              <p class="form-control-static">{{modules.name}}</p>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="inputPassword" class="col-sm-2 control-label">显示名称</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" placeholder="显示名称" ng-model="modules.display_name" ng-trim="true">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="inputPassword" class="col-sm-2 control-label">标签</label>
+            <div class="col-sm-10 control-addon">
+              <tags-input ng-model="tag" placeholder="tag" min-length="1">
+                <i class="control-icon fa fa-tag"></i>
+              </tags-input>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="inputPassword" class="col-sm-2 control-label">活动地址</label>
+            <div class="col-sm-10 control-addon">
+              <input type="text" class="form-control" required placeholder="线上/线下地址" ng-model="modules.config.location">
+              <i class="control-icon fa fa-map-marker"></i>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="inputPassword" class="col-sm-2 control-label">活动时间</label>
+            <div class="col-sm-5 control-addon">
+              <input type="text" class="form-control" placeholder="开始时间" datetime-picker="yyyy/MM/dd hh:mm" ng-model="modules.event_start_time" min-date="minDate" >
+              <i class="control-icon fa fa-calendar"></i>
+            </div>
+            <div class="col-sm-5 control-addon">
+              <input type="text" class="form-control" placeholder="结束时间" datetime-picker="yyyy/MM/dd hh:mm" ng-model="modules.event_end_time" min-date="modules.event_start_time" ng-click="openDatetime()">
+              <i class="control-icon fa fa-calendar"></i>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="inputPassword" class="col-sm-2 control-label">报名时间</label>
+            <div class="col-sm-5 control-addon">
+              <input type="text" class="form-control" placeholder="开始时间" ng-model="modules.registration_start_time">
+              <i class="control-icon fa fa-calendar"></i>
+            </div>
+            <div class="col-sm-5 control-addon">
+              <input type="text" class="form-control" placeholder="结束时间" ng-model="modules.registration_end_time">
+              <i class="control-icon fa fa-calendar"></i>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="inputPassword" class="col-sm-2 control-label">评分时间</label>
+            <div class="col-sm-5 control-addon">
+              <input type="text" class="form-control" placeholder="开始时间" ng-model="modules.judge_start_time">
+              <i class="control-icon fa fa-calendar"></i>
+            </div>
+            <div class="col-sm-5 control-addon">
+              <input type="text" class="form-control" placeholder="结束时间" ng-model="modules.judge_end_time">
+              <i class="control-icon fa fa-calendar"></i>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="inputPassword" class="col-sm-2 control-label">广告语</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" placeholder="" ng-model="modules.ribbon">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="inputPassword" class="col-sm-2 control-label">报名人数</label>
+            <div class="col-sm-10 control-addon">
+              <input type="text" class="form-control" string-to-number ng-model="modules.config.max_enrollment">
+              <i class="control-icon fa fa-user-plus"></i>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="inputPassword" class="col-sm-2 control-label">简介</label>
+            <div class="col-sm-10">
+              <textarea class="form-control" ng-model="modules.short_description"></textarea>
+            </div>
           </div>
         </fieldset>
       </ng-form>

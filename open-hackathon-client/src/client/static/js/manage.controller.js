@@ -100,9 +100,12 @@ angular.module('oh.controllers', [])
 
     $scope.animationsEnabled = true;
     activity.banners = $filter('split')(activity.banners, ',');
+
+    activity.event_start_time = new Date(activity.event_start_time);
+
     //var banners = $filter('split')('http://img.zcool.cn/community/03320dd554c75c700000158fce17209.jpg,http://www.bz55.com/uploads/allimg/100719/1_100719110156_1.jpg');
     $scope.modules = activity;
-
+    //$scope.minDate = new Date();
     $scope.delBanner = function(index) {
       $scope.modules.banners.splice(index, 1);
     }
@@ -117,6 +120,13 @@ angular.module('oh.controllers', [])
         level: 'tip-success',
         content: '保存成功'
       });
+    }
+    $scope.open = {
+      date1: false
+    }
+
+    $scope.openDatetime = function() {
+      $scope.open.date1 = true;
     }
 
     $scope.provider = {

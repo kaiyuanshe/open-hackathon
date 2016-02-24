@@ -1,7 +1,10 @@
+.manage-edit .detail-wrapper {
+  width: 700px;
+  margin: 0 auto;
+}
 
-
-.manage-edit .description-wrapper{
-   padding:0;
+.manage-edit .description-wrapper {
+  padding: 0;
 }
 
 .manage-edit .banners {
@@ -49,5 +52,5 @@
 }
 
 .manage-edit .provider-wrapper {
-  padding: 80px 0 120px 70px;
+  padding: 80px 0 120px 0px;
 }

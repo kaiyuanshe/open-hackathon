@@ -950,9 +950,80 @@ label.switchbox input[type=checkbox][disabled]:checked ~ .switchbox-handle i {
 }
 
 .modal-danger .modal-content {
-  border-color: #ffb800;
+  border-color: #cf3c0e;
 }
 
 .modal-danger .modal-header {
-  background-color: #ffb800;
+  background-color: #cf3c0e;
+}
+
+.form-horizontal label {
+  font-weight: normal;
+  padding-left: 0;
+  padding-right: 7px;
+}
+
+.form-control {
+  border-radius: 2px;
+  border-color: #d0d2d3;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+
+.form-control:focus {
+  border-color: #7dba43;
+  outline: 0;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+
+.form-control::-webkit-input-placeholder,
+.form-control:-moz-placeholder,
+.form-control:-ms-input-placeholder {
+  color: #bbbdbf;
+  font-size: 14px;
+}
+
+.form-control-primary:focus {
+  border-color: #019e48;
+}
+
+.form-control-success:focus {
+  border-color: #7dba43;
+}
+
+.form-control-info:focus {
+  border-color: #00a4ee;
+}
+
+.form-control-warning:focus {
+  border-color: #ffb800;
+}
+
+.form-control-danger:focus {
+  border-color: #cf3c0e;
+}
+
+.control-addon>.form-control {
+  padding-left: 30px;
+}
+
+.control-addon>.control-icon {
+  position: absolute;
+  z-index: 2;
+  width: 30px;
+  text-align: center;
+  font-size: 18px;
+  padding: 8px 0;
+  top: 0px;
+  color: #bbbdbf;
+}
+
+.control-addon>.form-control:focus+.control-icon {
+  color: #7dba43;
+}
+
+.input-lg {
+  border-radius: 2px;
+  font-size: 15px;
 }

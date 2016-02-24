@@ -21,13 +21,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 // -----------------------------------------------------------------------------------
-  
+
 angular.module('manageView', [
     'ngCookies',
     'ngSanitize',
     'pascalprecht.translate',
     'ui.router',
     'ui.bootstrap',
+    'ui.bootstrap.datetimepicker',
+    'ngTagsInput',
     'oh.manage.router',
     'oh.pages',
     'oh.providers',
