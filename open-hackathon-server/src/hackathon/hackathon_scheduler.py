@@ -229,11 +229,18 @@ class HackathonScheduler(object):
             self.__apscheduler = BackgroundScheduler(timezone=utc)
 
             # add MySQL job store
-            if safe_get_config("scheduler.job_store", "memory") == "mysql":
+            job_store_type = safe_get_config("scheduler.job_store", "memory")
+            if job_store_type == "mysql":
                 log.debug("add aps_cheduler job store based on mysql")
                 self.__apscheduler.add_jobstore('sqlalchemy',
                                                 alias=self.jobstore,
                                                 url=get_config("scheduler.job_store_url"))
+            elif job_store_type == "mongodb":
+                log.debug("add aps_cheduler job store based on mongodb")
+                self.__apscheduler.add_jobstore('mongodb',
+                                                alias=self.jobstore,
+                                                host=get_config("scheduler.host"),
+                                                port=get_config("scheduler.port"))
 
             # add event listener
             self.__apscheduler.add_listener(scheduler_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)

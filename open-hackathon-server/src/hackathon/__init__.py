@@ -33,8 +33,8 @@ from flask_restful import Api
 from flask_cors import CORS
 from datetime import timedelta
 
-from util import safe_get_config, get_class, Utility, Email, DisabledVoiceVerify, RonglianVoiceVerify, DisabledSms,\
-                ChinaTelecomSms
+from util import safe_get_config, get_class, Utility, Email, DisabledVoiceVerify, RonglianVoiceVerify, DisabledSms, \
+    ChinaTelecomSms
 from hackathon_factory import factory, RequiredFeature
 from hackathon_scheduler import HackathonScheduler
 from hackathon_response import *
@@ -42,7 +42,6 @@ from hackathon_exception import *
 from log import log
 from context import Context
 from database import db_session
-
 
 __all__ = [
     "app",
@@ -149,8 +148,6 @@ class Component(object):
 
 def init_components():
     """Init hackathon factory"""
-    from hackathon.database import db_session
-    from hackathon.database.db_adapters import SQLAlchemyAdapter
     from hackathon.user import UserManager, UserProfileManager
     from hackathon.hack import HackathonManager, AdminManager, TeamManager, DockerHostManager, \
         AzureCertManager, RegisterManager, HackathonTemplateManager, Cryptor
@@ -163,7 +160,7 @@ def init_components():
     # dependencies MUST be provided in advance
     factory.provide("util", Utility)
     factory.provide("log", log)
-    factory.provide("db", SQLAlchemyAdapter, db_session)
+    init_db()
 
     # hazure
     factory.provide("azure_formation", AzureFormation)
@@ -207,6 +204,16 @@ def init_components():
 
     # storage
     init_hackathon_storage()
+
+
+def init_db():
+    # from hackathon.database import db_session
+    # from hackathon.database.db_adapters import SQLAlchemyAdapter
+    # factory.provide("db", SQLAlchemyAdapter, db_session)
+    from pymongo import MongoClient
+    mongodb_host = safe_get_config("mongodb.host", "localhost")
+    mongodb_port = safe_get_config("mongodb.port", 27017)
+    factory.provide("db", MongoClient, host=mongodb_host, port=mongodb_port)
 
 
 def init_voice_verify():
