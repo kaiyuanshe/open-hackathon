@@ -49,6 +49,49 @@
     "PROVIDERS": "登陆方式"
   },
   "ACTIVITY_FIELDS": {
+    "NAME": "名称",
+    "DISPLAY_NAME": "显示名称",
+    "TAGS": "标签",
+    "LOCATION": "活动地址",
+    "EVENT_TIME": "活动时间",
+    "REGISTRATION_TIME": "报名时间",
+    "JUDGE_TIME": "评分时间",
+    "RIBBON": "广告语",
+    "MAX_ENROLLMENT": "报名人数",
+    "SHORT_DESCRIPTION": "简介",
+    "ADD_BANNER": "添加图片",
+    "ADD_BANNER_TIP": "推荐尺寸<span class=\"text-red\">752*420</span>px 图片"
+  },
+  "CREATE_ACTIVITY_WIZARD": {
+    "STEP1": "填写基本信息",
+    "STEP2": "选择云服务商",
+    "STEP3": "选择虚拟环境",
+    "STEP4": "完成"
+  },
+  "PLACEHOLDERS": {
+    "LOCATION": "线上/线下地址",
+    "START_TIME": "开始时间",
+    "END_TIME": "结束时间",
+    "MAX_ENROLLMENT": "限制人数，0表不限制"
+  },
+  "VALIDATE": {
+    "datetime": "请填写正确的日期时间",
+    "EVENT_START_TIME_REQUIRED": "请填写活动开始时间",
+    "EVENT_START_TIME_MAX": "开始时间不能大于结束时间",
+    "EVENT_END_TIME_REQUIRED": "请填写活动结束时间",
+    "EVENT_END_TIME_MIN": "结束时间不能小于开始时间",
 
+    "REGISTRATION_START_TIME_REQUIRED": "请填写报名开始时间",
+    "REGISTRATION_START_TIME_MAX": "报名开始时间不能大于结束时间",
+    "REGISTRATION_END_TIME_REQUIRED": "请填写报名结束时间",
+    "REGISTRATION_END_TIME_MIN": "报名结束时间不能小于开始时间",
+
+    "JUDGE_START_TIME_REQUIRED": "请填写评分开始时间",
+    "JUDGE_START_TIME_MAX": "评分开始时间不能大于结束时间",
+    "JUDGE_END_TIME_REQUIRED": "请填写评分结束时间",
+    "JUDGE_END_TIME_MIN": "评分结束时间不能小于开始时间",
+
+    "MAX_ENROLLMENT_MIN": "不能小于0，而0则表示无线人数",
+    "MAX_ENROLLMENT_PATTERN": "请输入整数"
   }
 }
