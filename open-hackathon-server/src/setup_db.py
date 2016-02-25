@@ -25,9 +25,7 @@
 # -----------------------------------------------------------------------------------
 
 try:
-    from hackathon.database import init_db
-    from hackathon.database.models import AdminHackathonRel, User
-    from hackathon.database import db_adapter
+    from hackathon.hmongo import db
     from hackathon.util import get_now
     from hackathon.constants import ADMIN_ROLE_TYPE, ReservedUser
 except ImportError:
@@ -40,31 +38,23 @@ def setup_db():
     make sure database and user correctly created in mysql
     in case upgrade the table structure, the origin table need be dropped firstly
     """
-    init_db()
-
     # init REQUIRED db data.
 
-    # reserved user
-    res_u = db_adapter.get_object(User, ReservedUser.DefaultUserID)
-    if res_u is None:
-        db_adapter.add_object_kwargs(User, id=ReservedUser.DefaultUserID, create_time=get_now())
+    # reserved user is deleted, may not need in mongodb implementation
 
     # default super admin
-    if db_adapter.get_object(User, ReservedUser.DefaultSuperAdmin) is None:
-        db_adapter.add_object_kwargs(User,
-                                     id=ReservedUser.DefaultSuperAdmin,
-                                     name="admin",
-                                     nickname="admin",
-                                     password="e8104164dfc4a479e42a9f6c0aefd2be")
+    admin = db.users.find_one({"name": "admin"})
+    if not admin:
+        admin = {
+            "name": "admin",
+            "nickname": "admin",
+            "password": "e8104164dfc4a479e42a9f6c0aefd2be",
+            "is_super": True,
+            "profile": {}
+        }
+        db.users.insert_one(admin)
 
-    # default admin privilege
-    if db_adapter.find_first_object_by(AdminHackathonRel,
-                                       user_id=ReservedUser.DefaultSuperAdmin,
-                                       hackathon_id=-1) is None:
-        db_adapter.add_object_kwargs(AdminHackathonRel,
-                                     user_id=ReservedUser.DefaultSuperAdmin,
-                                     hackathon_id=-1,
-                                     role_type=ADMIN_ROLE_TYPE.ADMIN)
+    db.client.close()
 
 
 setup_db()

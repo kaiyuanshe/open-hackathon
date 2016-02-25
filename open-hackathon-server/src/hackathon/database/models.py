@@ -334,7 +334,7 @@ class HackathonNotice(DBBase):
 
     id = Column(Integer, primary_key=True)
     category = Column(Integer)  # category: Class HACK_NOTICE_CATEGORY, controls how icons/descriptions are shown at front-end
-    event = Column(Integer) # event: Class HACK_NOTICE_EVENT, records the specfic event that triggers current notice 
+    event = Column(Integer) # event: Class HACK_NOTICE_EVENT, records the specfic event that triggers current notice
     create_time = Column(TZDateTime, default=get_now())
     update_time = Column(TZDateTime, default=get_now())
     content = Column(Text)

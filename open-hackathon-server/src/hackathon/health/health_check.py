@@ -84,6 +84,25 @@ class MySQLHealthCheck(HealthCheck):
             }
 
 
+class MongoDBHealthCheck(HealthCheck):
+    """Check the health status of MongoDB."""
+
+    def report_health(self):
+        """ Report the status by querying mongodb server info
+
+        Will return OK if server info returned
+       """
+        try:
+            server_info = self.db.client.server_info()
+            server_info[STATUS] = HEALTH_STATUS.OK
+            return server_info
+        except Exception as e:
+            return {
+                STATUS: HEALTH_STATUS.ERROR,
+                DESCRIPTION: e.message
+            }
+
+
 class HostedDockerHealthCheck(HealthCheck):
     """Report status of hostdd docker
 
