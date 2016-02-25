@@ -39,8 +39,9 @@ ohp_db = safe_get_config("mongodb.database", "hackathon")
 # mongodb client
 client = MongoClient(host=mongodb_host, port=mongodb_port)
 
-# mongodb collection for OHP
+# mongodb collection for OHP, authentication disabled for now.
 db = client[ohp_db]
+# db.authenticate('user', 'password', mechanism='SCRAM-SHA-1')
 
 
 def drop_db():
