@@ -33,6 +33,7 @@ HACKATHON_SERVER_ENDPOINT = "http://localhost:15000"
 
 MONGODB_HOST = "localhost"
 MONGODB_PORT = 27017
+MONGODB_DB = "hackathon"
 
 Config = {
     "environment": "local",
@@ -41,6 +42,7 @@ Config = {
         "secret_key": "secret_key"
     },
     "mongodb": {
+        "database": MONGODB_DB,
         "host": MONGODB_HOST,
         "port": MONGODB_PORT
     },
@@ -57,6 +59,8 @@ Config = {
         # "job_store": "mysql",
         # "job_store_url": 'mysql://%s:%s@%s:%s/%s' % (MYSQL_USER, MYSQL_PWD, MYSQL_HOST, MYSQL_PORT, MYSQL_DB)
         "job_store": "mongodb",
+        "database": MONGODB_DB,
+        "collection": "jobs",
         "host": MONGODB_HOST,
         "port": MONGODB_PORT
     },

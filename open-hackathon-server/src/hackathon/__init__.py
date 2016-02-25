@@ -197,6 +197,7 @@ def init_components():
     factory.provide("health_check_alauda_docker", get_class("hackathon.health.health_check.AlaudaDockerHealthCheck"))
     factory.provide("health_check_guacamole", get_class("hackathon.health.health_check.GuacamoleHealthCheck"))
     factory.provide("health_check_azure", get_class("hackathon.health.health_check.AzureHealthCheck"))
+    factory.provide("health_check_mongodb", get_class("hackathon.health.health_check.MongoDBHealthCheck"))
 
     # docker
     factory.provide("hosted_docker", get_class("hackathon.docker.hosted_docker.HostedDockerFormation"))
@@ -210,10 +211,8 @@ def init_db():
     # from hackathon.database import db_session
     # from hackathon.database.db_adapters import SQLAlchemyAdapter
     # factory.provide("db", SQLAlchemyAdapter, db_session)
-    from pymongo import MongoClient
-    mongodb_host = safe_get_config("mongodb.host", "localhost")
-    mongodb_port = safe_get_config("mongodb.port", 27017)
-    factory.provide("db", MongoClient, host=mongodb_host, port=mongodb_port)
+    from hmongo import db
+    factory.provide("db", db, suspend_callable=True)
 
 
 def init_voice_verify():

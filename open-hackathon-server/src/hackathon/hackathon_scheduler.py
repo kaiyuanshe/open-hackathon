@@ -239,8 +239,10 @@ class HackathonScheduler(object):
                 log.debug("add aps_cheduler job store based on mongodb")
                 self.__apscheduler.add_jobstore('mongodb',
                                                 alias=self.jobstore,
-                                                host=get_config("scheduler.host"),
-                                                port=get_config("scheduler.port"))
+                                                database=safe_get_config("scheduler.database", "apscheduler"),
+                                                collection=safe_get_config("scheduler.collection", "jobs"),
+                                                host=safe_get_config("scheduler.host", "localhost"),
+                                                port=safe_get_config("scheduler.port", 27017))
 
             # add event listener
             self.__apscheduler.add_listener(scheduler_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
