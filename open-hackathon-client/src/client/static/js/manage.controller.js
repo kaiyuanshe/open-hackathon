@@ -102,10 +102,10 @@ angular.module('oh.controllers', [])
     activity.banners = $filter('split')(activity.banners, ',');
 
     activity.event_start_time = new Date(activity.event_start_time);
-
+    activity.event_end_time = new Date(activity.event_end_time);
     //var banners = $filter('split')('http://img.zcool.cn/community/03320dd554c75c700000158fce17209.jpg,http://www.bz55.com/uploads/allimg/100719/1_100719110156_1.jpg');
-    $scope.modules = activity;
-    //$scope.minDate = new Date();
+    $scope.modules = activity
+      //$scope.minDate = new Date();
     $scope.delBanner = function(index) {
       $scope.modules.banners.splice(index, 1);
     }

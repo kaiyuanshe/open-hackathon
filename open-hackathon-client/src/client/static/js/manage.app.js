@@ -25,6 +25,9 @@
 angular.module('manageView', [
     'ngCookies',
     'ngSanitize',
+    'ngMessages',
+    'ngMessageFormat',
+    'ngAnimate',
     'pascalprecht.translate',
     'ui.router',
     'ui.bootstrap',

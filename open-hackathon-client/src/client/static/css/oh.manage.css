@@ -396,6 +396,158 @@ tags-input .tags .tag-item .remove-button {
   color: #cf3c0e;
 }
 
+.has-error>.form-control,
+.has-success>.form-control,
+.has-success .control-addon tags-input .tags {
+  padding-right: 30px;
+}
+
 .control-addon tags-input .tags {
   padding-left: 30px;
+}
+
+.has-success .form-control {
+  border-color: #029f49!important;
+}
+
+.has-success .control-icon {
+  color: #029f49!important;
+}
+
+.has-success .form-control:focus {
+  border-color: #029f49;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+
+.has-success .messages .fa {
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background-color: #029f49;
+  color: #fff;
+  text-align: center;
+  font-size: 12px;
+  line-height: 17px;
+}
+
+.has-success tags-input .tags {
+  border-color: #029f49;
+}
+
+.has-success tags-input .tags.focused {
+  border-color: #029f49;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+}
+
+.has-success .control-label,
+.has-error .control-label {
+  color: initial;
+}
+
+.has-error .form-control {
+  border-color: #ba141a!important;
+}
+
+.has-error .control-icon {
+  color: #ba141a!important;
+}
+
+.has-error .form-control:focus {
+  border-color: #ba141a;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+
+.has-success .messages,
+.has-error .messages {
+  position: absolute;
+  right: 20px;
+  top: 5px;
+}
+
+.has-error .messages .fa {
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background-color: #ba141a;
+  color: #fff;
+  text-align: center;
+  font-size: 12px;
+  line-height: 16px;
+  cursor: pointer;
+}
+
+.has-error .tooltip-inner {
+  opacity: 1!important;
+  padding: 14px;
+  width: 200px;
+  text-align: left;
+  background-color: #d04732;
+  border: 1px solid #ba141a;
+}
+
+.has-error .tooltip.in {
+  opacity: 1!important;
+}
+
+.has-error .tooltip.left {
+  margin-left: -15px;
+}
+
+.has-error .tooltip.left .tooltip-arrow {
+  right: -7px;
+  margin-top: -12px;
+  border-width: 12px 0 12px 12px;
+  border-left-color: #ba141a;
+}
+
+.has-error .tooltip.left .tooltip-arrow:before {
+  content: '';
+  width: 100%;
+  position: absolute;
+  right: 1px;
+  margin-top: -12px;
+  border-style: solid;
+  border-width: 12px 0 12px 12px;
+  border-color: transparent;
+  border-left-color: #d04732;
+}
+
+.has-error .tooltip.right {
+  margin-left: 15px;
+}
+
+.has-error .tooltip.right .tooltip-arrow {
+  left: -7px;
+  margin-top: -12px;
+  border-width: 12px 12px 12px 0;
+  border-right-color: #ba141a;
+}
+
+.has-error .tooltip.right .tooltip-arrow:before {
+  content: '';
+  width: 100%;
+  position: absolute;
+  left: 1px;
+  margin-top: -12px;
+  border-style: solid;
+  border-width: 12px 12px 12px 0;
+  border-color: transparent;
+  border-right-color: #d04732;
+}
+
+.required:before {
+  position: absolute;
+  content: '*';
+  left: 0;
+  top: 50%;
+  margin-top: -10px;
+  color: #bc1f2b;
+}
+
+.form-group .messages span {
+  position: relative;
 }
