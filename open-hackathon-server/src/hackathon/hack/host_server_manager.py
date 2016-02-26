@@ -25,17 +25,16 @@ THE SOFTWARE.
 __author__ = 'ZGQ'
 
 import sys
-from os.path import isfile
 import requests
 from uuid import uuid1
 from time import strftime, sleep
+import thread
 
 sys.path.append("..")
 
 from azure.storage.blob import BlobService
 from azure.servicemanagement import (ConfigurationSet, ConfigurationSetInputEndpoint, OSVirtualHardDisk,
                                      LinuxConfigurationSet, ServiceManagementService)
-import json
 
 from hackathon import Component, RequiredFeature, Context
 from hackathon.database.models import DockerHostServer, HackathonAzureKey, Hackathon, HackathonConfig, AzureKey
@@ -46,12 +45,13 @@ from hackathon.constants import (AzureApiExceptionMessage, DockerPingResult, AVM
 from hackathon.hackathon_response import ok, not_found, precondition_failed
 
 
-__all__ = ["DockerHostManager"]
+__all__ = ["DockerHostManager", "DockerHostAvailable"]
 
 class DockerHostManager(Component):
     """Component to manage docker host server"""
     hosted_docker = RequiredFeature("hosted_docker")
     sche = RequiredFeature("scheduler")
+    docker_host_available = RequiredFeature("docker_host_available")
 
     def get_docker_hosts_list(self, hackathon_id):
         """
@@ -91,7 +91,7 @@ class DockerHostManager(Component):
         # The new-created VM must run 'cloudvm service by default(either cloud-init or python remote ssh)
         # todo the VM public/private IP will change after reboot, need sync the IP in db with azure in this case
         for docker_host in vms:
-            if self.hosted_docker.ping(docker_host):
+            if self.hosted_docker.ping(docker_host) & self.docker_host_available.isAvailable(docker_host.public_ip):
                 return docker_host
         if not self.util.is_local():
             self.create_docker_host_vm(hackathon.id)
@@ -681,3 +681,38 @@ class DockerHostManager(Component):
                                        DockerHostServer.state == DockerHostServerStatus.DOCKER_READY,
                                        DockerHostServer.disabled == DockerHostServerDisable.ABLE)
         return len(vms) > 0
+
+
+class DockerHostAvailable:
+    """
+    Since different docker hosts in the same cloud service can only create one container at the same time,
+    DockerHostAvailable is used to check whether a docker host in a cloud service is creating a container.
+    """
+    __cloud_service_set = set()
+    __host_lock = thread.allocate_lock()
+
+    def isAvailable(self, public_ip):
+        """
+        check whether a docker host in a cloud service is ready to create a container.
+        :param public_ip: the public ip of a cloud service
+        :return: string such as 123.321.32.3
+        """
+        self.__host_lock.acquire()
+        if self.__cloud_service_set.__contains__(public_ip):
+            self.__host_lock.release()
+            return False
+        else:
+            self.__cloud_service_set.add(public_ip)
+            self.__host_lock.release()
+            return True
+
+    def release(self, public_ip):
+        """
+        release the cloud service for other docker host in the same cloud service to create another container.
+        :param public_ip:
+        :return:
+        """
+        if self.__cloud_service_set.__contains__(public_ip):
+            self.__host_lock.acquire()
+            self.__cloud_service_set.remove(public_ip)
+            self.__host_lock.release()
