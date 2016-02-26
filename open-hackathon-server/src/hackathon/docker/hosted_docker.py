@@ -85,7 +85,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
     host_ports = []
     host_port_max_num = 30
     docker_host_manager = RequiredFeature("docker_host_manager")
-    docker_host_available = RequiredFeature("docker_host_available")
+    cloud_service_available = RequiredFeature("cloud_service_available")
 
     def __init__(self):
         self.lock = Lock()
@@ -243,7 +243,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
                 self.log.error("container %s fail to create" % container_name)
                 return None
             finally:
-                self.docker_host_available.release(host_server.public_ip)
+                self.cloud_service_available.release(host_server.public_ip)
             container.container_id = container_create_result["Id"]
             # start container
             try:

@@ -28,7 +28,7 @@ from hackathon_manager import HackathonManager
 from admin_manager import AdminManager
 from team_manager import TeamManager
 from host_server_manager import DockerHostManager
-from host_server_manager import DockerHostAvailable
+from host_server_manager import CloudServiceAvailable
 from azure_cert_manager import AzureCertManager
 from register_manager import RegisterManager
 from hackathon_template_manager import HackathonTemplateManager
