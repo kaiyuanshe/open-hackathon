@@ -329,6 +329,7 @@ body {
 }
 
 .center {
+  float: none;
   margin: 0 auto;
 }
 
@@ -602,9 +603,14 @@ tags-input .tags .tag-item .remove-button {
 
 .wizard li:before {
   position: absolute;
-  right: 0;
+  right: -7px;
   content: '>';
   color: #d8d8d8;
+  font-family: '宋体';
+  font-size: 28px;
+  top: 50%;
+  line-height: 20px;
+  margin-top: -10px;
 }
 
 .wizard li:last-child:before {
@@ -629,4 +635,8 @@ tags-input .tags .tag-item .remove-button {
 
 .step-content {
   padding: 32px 0;
+}
+
+.form-horizontal [class|="col-xs"].control-label {
+  text-align: right;
 }
