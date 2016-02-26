@@ -686,7 +686,7 @@ class DockerHostManager(Component):
 class CloudServiceAvailable:
     """
     Since different docker hosts in the same cloud service can only create one container at the same time,
-    DockerHostAvailable is used to check whether a docker host in a cloud service is creating a container.
+    CloudServiceAvailable is used to check whether a docker host in a cloud service is creating a container.
     """
     __cloud_service_set = set()
     __host_lock = thread.allocate_lock()
