@@ -73,6 +73,7 @@ angular.module('manageView', [
     $stateProvider.state('create', {
       url: '/create',
       templateUrl: '/static/partials/manage/create.html?v=' + VERSION,
+      controller:'createController'
     });
     $stateProvider.state('404', {
       url: '/404',
@@ -81,7 +82,34 @@ angular.module('manageView', [
 
     $locationProvider.html5Mode(true).hashPrefix('!');
 
-  }).run(function($rootScope, $state, authService, api, activityService) {
+  }).run(function($rootScope, $state, authService, api, activityService, uiDatetimePickerConfig) {
+    uiDatetimePickerConfig.buttonBar = {
+      show: true,
+      now: {
+        show: true,
+        text: '现在'
+      },
+      today: {
+        show: true,
+        text: '今天'
+      },
+      clear: {
+        show: true,
+        text: '取消'
+      },
+      date: {
+        show: true,
+        text: '日期'
+      },
+      time: {
+        show: true,
+        text: '时间'
+      },
+      close: {
+        show: true,
+        text: '关闭'
+      }
+    };
     authService.getUser();
     $rootScope.$on('showTip', function(event, obj) {
       $rootScope.tip = obj;
