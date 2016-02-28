@@ -72,6 +72,8 @@ class HDocumentBase(Document):
         return '%s: %s' % (self.__class__.__name__, self.to_json())
 
 
+# Example
+#
 # class Email(EmbeddedDocument):
 #     email = EmailField()
 #     test_date = DateTimeField(default=get_now())
@@ -106,3 +108,23 @@ class HDocumentBase(Document):
 #
 #     def __init__(self, **kwargs):
 #         super(User, self).__init__(**kwargs)
+
+class User(HDocumentBase):
+    # todo not all fields defined
+    name = StringField(max_length=50, min_length=1, required=True)
+    nickname = StringField(max_length=50, min_length=1, required=True)
+    password = StringField(max_length=100)
+    provider = StringField(max_length=20)
+
+    def __init__(self, **kwargs):
+        super(User, self).__init__(**kwargs)
+
+
+class UserToken(HDocumentBase):
+    token = UUIDField(required=True)
+    user_id = ReferenceField(User)
+    issue_date = DateTimeField(default=get_now())
+    expire_date = DateTimeField(required=True)
+
+    def __init__(self, **kwargs):
+        super(UserToken, self).__init__(**kwargs)
