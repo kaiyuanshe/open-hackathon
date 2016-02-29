@@ -91,25 +91,45 @@ angular.module('oh.controllers', [])
       }, {});
     }
 
+  }).controller('editController', function($rootScope, $scope, $filter, dialog, session, activityService, api, activity, speech) {
 
-
-  }).controller('editController', function($rootScope, $scope, $filter, dialog, session, activityService, api, activity) {
-    //
     $scope.$emit('pageName', 'SETTINGS.EDIT_ACTIVITY');
 
-
     $scope.animationsEnabled = true;
+
     activity.banners = $filter('split')(activity.banners, ',');
-
     activity.event_start_time = new Date(activity.event_start_time);
+    activity.event_end_time = new Date(activity.event_end_time);
+    activity.registration_start_time = new Date(activity.registration_start_time);
+    activity.registration_end_time = new Date(activity.registration_end_time);
+    activity.judge_start_time = new Date(activity.judge_start_time);
+    activity.judge_end_time = new Date(activity.judge_end_time);
 
-    //var banners = $filter('split')('http://img.zcool.cn/community/03320dd554c75c700000158fce17209.jpg,http://www.bz55.com/uploads/allimg/100719/1_100719110156_1.jpg');
+    $scope.provider = {
+      windows: $filter('isProvider')(activity.config.login_provider, 1),
+      github: $filter('isProvider')(activity.config.login_provider, 2),
+      qq: $filter('isProvider')(activity.config.login_provider, 4),
+      weibo: $filter('isProvider')(activity.config.login_provider, 8),
+      alauda: $filter('isProvider')(activity.config.login_provider, 32),
+      gitcafe: $filter('isProvider')(activity.config.login_provider, 16),
+    };
+
+    activity.config.max_enrollment = parseInt(activity.config.max_enrollment, 10) || 0;
+
+    $scope.open = {
+      event_start_time: false,
+      event_end_time: false,
+      registration_start_time: false,
+      registration_end_time: false,
+      judge_start_time: false,
+      judge_end_time: false
+    };
+
     $scope.modules = activity;
-    //$scope.minDate = new Date();
+
     $scope.delBanner = function(index) {
       $scope.modules.banners.splice(index, 1);
     }
-
 
     $scope.showAddBannerDialog = function() {
       $scope.modules.banners.push('http://image5.tuku.cn/pic/wallpaper/fengjing/shanshuilantian/014.jpg');
@@ -121,22 +141,7 @@ angular.module('oh.controllers', [])
         content: '保存成功'
       });
     }
-    $scope.open = {
-      date1: false
-    }
 
-    $scope.openDatetime = function() {
-      $scope.open.date1 = true;
-    }
-
-    $scope.provider = {
-      windows: $filter('isProvider')($scope.modules.config.login_provider, 1),
-      github: $filter('isProvider')($scope.modules.config.login_provider, 2),
-      qq: $filter('isProvider')($scope.modules.config.login_provider, 4),
-      weibo: $filter('isProvider')($scope.modules.config.login_provider, 8),
-      alauda: $filter('isProvider')($scope.modules.config.login_provider, 32),
-      gitcafe: $filter('isProvider')($scope.modules.config.login_provider, 16),
-    };
     $scope.providerChange = function(checked, value) {
       if (checked) {
         $scope.modules.config.login_provider = ((+$scope.modules.config.login_provider) || 0) | value;
@@ -176,4 +181,8 @@ angular.module('oh.controllers', [])
 
   }).controller('serversController', function($rootScope, $scope, activityService, api) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.SERVERS');
+
+  }).controller('createController', function($rootScope, $scope, activityService, api) {
+    
+    console.log('createController');
   });
