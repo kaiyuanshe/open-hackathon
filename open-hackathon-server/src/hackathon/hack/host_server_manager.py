@@ -26,6 +26,7 @@ __author__ = 'ZGQ'
 
 import sys
 import requests
+import time
 from uuid import uuid1
 from time import strftime, sleep
 import thread
@@ -90,9 +91,11 @@ class DockerHostManager(Component):
         # it's more reasonable to launch VM when the existed ones are almost used up.
         # The new-created VM must run 'cloudvm service by default(either cloud-init or python remote ssh)
         # todo the VM public/private IP will change after reboot, need sync the IP in db with azure in this case
-        for docker_host in vms:
-            if self.hosted_docker.ping(docker_host) & self.cloud_service_available.isAvailable(docker_host.public_ip):
-                return docker_host
+        for i in range(30):
+            for docker_host in vms:
+                if self.hosted_docker.ping(docker_host) & self.cloud_service_available.isAvailable(docker_host.public_ip):
+                    return docker_host
+            time.sleep(10)
         if not self.util.is_local():
             self.create_docker_host_vm(hackathon.id)
         return None
