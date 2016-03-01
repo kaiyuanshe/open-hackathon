@@ -196,8 +196,10 @@ class UserManager(Component):
         ret = user.dic()
 
         # to fit old return value's fields
-        ret["email"] = ret.pop("emails")
-        ret["user_profile"] = ret.pop("profile")
+        if "emails" in ret:
+            ret["email"] = ret.pop("emails")
+        if "profile" in ret:
+            ret["user_profile"] = ret.pop("profile")
 
         return ret
 
