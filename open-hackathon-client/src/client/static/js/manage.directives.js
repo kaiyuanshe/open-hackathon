@@ -162,4 +162,20 @@ angular.module('oh.directives', [])
         }
       }
     }
+  }).directive('speech', function(speech) {
+    return {
+      restrict: 'A',
+      link: function(scope, elem, attrs) {
+        var type = attrs.speechType || 'tip';
+        if (attrs.type == 'checkbox') {
+          elem.bind('change', function(e) {
+            if (e.target.checked) {
+              speech.on();
+            } else {
+              speech.off();
+            }
+          })
+        }
+      }
+    }
   });

@@ -35,13 +35,15 @@ from flask import request, g
 import uuid
 
 from hackathon.hackathon_response import internal_server_error, not_found, ok
-from hackathon.database import UserToken, User, UserEmail, AdminHackathonRel, Hackathon, UserHackathonAsset
+from hackathon.database import User, UserEmail, AdminHackathonRel, Hackathon, UserHackathonAsset
 from hackathon.constants import ReservedUser, HTTP_HEADER
 from hackathon import Component, RequiredFeature
+from hackathon.hmongo.models import UserToken
 
 __all__ = ["UserManager"]
 
 users_operation_time = {}
+
 
 class UserManager(Component):
     """Component for user management"""
@@ -102,7 +104,7 @@ class UserManager(Component):
     def check_user_online_status(self):
         """Check whether the user is offline. If the answer is yes, update its status in DB."""
         overtime_user_ids = [user_id for user_id in users_operation_time
-                             if (self.util.get_now() - users_operation_time[user_id]).seconds > 1800] # 1800s-half hour
+                             if (self.util.get_now() - users_operation_time[user_id]).seconds > 1800]  # 1800s-half hour
 
         User.query.filter(User.id.in_(overtime_user_ids)).update({User.online: 0}, synchronize_session=False)
         self.db.commit()
@@ -235,10 +237,10 @@ class UserManager(Component):
                                                   User.login_times.desc())
         return [self.user_display_info(u) for u in users]
 
-
     def update_user_avatar_url(self, user, url):
         self.db.update_object(user, avatar_url=url)
         return True
+
     # ----------------------------private methods-------------------------------------
 
     def __validate_token(self, token):
@@ -253,8 +255,9 @@ class UserManager(Component):
         if "authenticated" in g and g.authenticated:
             return g.user
         else:
-            t = self.db.find_first_object_by(UserToken, token=token)
-            if t is not None and t.expire_date >= self.util.get_now():
+            # todo eliminate the warning related to 'objects'
+            t = UserToken.objects(token=token).first()
+            if t and t.expire_date >= self.util.get_now():
                 g.authenticated = True
                 g.user = t.user
                 return t.user
@@ -381,4 +384,3 @@ class UserManager(Component):
                                        description="Token for Oxford API")
             self.db.add_object(asset)
             self.db.commit()
-

@@ -221,4 +221,31 @@ angular.module('oh.api', [])
       open(modal);
     }
     return this;
+  }).factory('speech', function() {
+
+    var path = '/static/sound/';
+
+    function audio(name) {
+      var a = document.createElement('audio');
+      a.setAttribute('src', path + name);
+      a.addEventListener('load', function() {
+        a.play()
+      }, !0);
+      a.pause();
+      a.play();
+    }
+
+    this.alert = function() {
+      audio('voice_alert.mp3');
+    }
+    this.off = function() {
+      audio('voice_off.mp3');
+    }
+    this.on = function() {
+      audio('voice_on.mp3');
+    }
+    this.tip = function() {
+      audio('smallbox.mp3');
+    }
+    return this;
   });

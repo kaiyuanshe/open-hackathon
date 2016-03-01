@@ -34,10 +34,12 @@ from werkzeug.exceptions import PreconditionFailed, InternalServerError, BadRequ
 from flask import g, request
 import lxml
 from lxml.html.clean import Cleaner
+from mongoengine.context_managers import no_dereference
 
-from hackathon.database import Hackathon, User, AdminHackathonRel, DockerHostServer, HackathonLike, \
-    HackathonStat, HackathonConfig, HackathonTag, UserHackathonRel, HackathonOrganizer, Award, UserHackathonAsset,\
+from hackathon.database import User, AdminHackathonRel, DockerHostServer, HackathonLike, \
+    HackathonStat, HackathonConfig, HackathonTag, UserHackathonRel, HackathonOrganizer, Award, UserHackathonAsset, \
     UserTeamRel, HackathonNotice
+from hackathon.hmongo.models import Hackathon
 from hackathon.hackathon_response import internal_server_error, ok, not_found, forbidden
 from hackathon.constants import HACKATHON_BASIC_INFO, ADMIN_ROLE_TYPE, HACK_STATUS, RGStatus, HTTP_HEADER, \
     FILE_TYPE, HACK_TYPE, HACKATHON_STAT, DockerHostServerStatus, HACK_NOTICE_CATEGORY, HACK_NOTICE_EVENT
@@ -159,7 +161,7 @@ class HackathonManager(Component):
         return self.util.paginate(pagination, func)
 
     def get_online_hackathons(self):
-        return self.db.find_all_objects(Hackathon, Hackathon.status == HACK_STATUS.ONLINE)
+        return Hackathon.objects(status=HACK_STATUS.ONLINE)
 
     def get_user_hackathon_list_with_detail(self, user_id):
         user = self.user_manager.get_user_by_id(user_id)
@@ -219,13 +221,14 @@ class HackathonManager(Component):
         if HTTP_HEADER.HACKATHON_NAME in request.headers:
             try:
                 hackathon_name = request.headers[HTTP_HEADER.HACKATHON_NAME]
-                hackathon = self.get_hackathon_by_name(hackathon_name)
-                if hackathon is None:
-                    self.log.debug("cannot find hackathon by name %s" % hackathon_name)
-                    return False
-                else:
-                    g.hackathon = hackathon
-                    return True
+                with no_dereference(Hackathon) as Hack:
+                    hackathon = Hack.objects(name=hackathon_name).first()
+                    if hackathon:
+                        g.hackathon = hackathon
+                        return True
+                    else:
+                        self.log.debug("cannot find hackathon by name %s" % hackathon_name)
+                        return False
             except Exception as ex:
                 self.log.error(ex)
                 self.log.debug("hackathon_name invalid")
@@ -276,9 +279,10 @@ class HackathonManager(Component):
 
             if update_items:
                 if 'status' in update_items and int(update_items['status']) == HACK_STATUS.ONLINE:
-                    self.create_hackathon_notice(hackathon.id, HACK_NOTICE_EVENT.HACK_ONLINE, HACK_NOTICE_CATEGORY.HACKATHON) #hackathon online
+                    self.create_hackathon_notice(hackathon.id, HACK_NOTICE_EVENT.HACK_ONLINE,
+                                                 HACK_NOTICE_CATEGORY.HACKATHON)  # hackathon online
                 else:
-                    pass #other hackathon properties changes
+                    pass  # other hackathon properties changes
 
             # basic xss prevention
             if 'description' in update_items and update_items['description']:
@@ -326,11 +330,10 @@ class HackathonManager(Component):
             Hackathon.name,
             Hackathon.display_name,
             Hackathon.short_description,
-            ). \
+        ). \
             join(HackathonLike, HackathonLike.hackathon_id == Hackathon.id). \
             filter(HackathonLike.user_id == user_id).all()
         return [a._asdict() for a in hackathons]
-
 
     def like_hackathon(self, user, hackathon):
         like = self.db.find_first_object_by(HackathonLike, user_id=user.id, hackathon_id=hackathon.id)
@@ -541,7 +544,7 @@ class HackathonManager(Component):
             a new notice not belongs to any hackathon is created for the propose of HACK_NOTICE_EVENT.xx. The notice's front-end icon 
             and description is determined by HACK_NOTICE_CATEGORY.yy, while its content and link url is ''
         """
-        hackathon_notice = HackathonNotice(hackathon_id=hackathon_id, 
+        hackathon_notice = HackathonNotice(hackathon_id=hackathon_id,
                                            content='',
                                            link='',
                                            event=notice_event,
@@ -550,40 +553,41 @@ class HackathonManager(Component):
                                            update_time=self.util.get_now())
 
         hackathon = self.get_hackathon_by_id(hackathon_id)
-        #notice creation logic for different notice_events
+        # notice creation logic for different notice_events
         if hackathon:
             if notice_event == HACK_NOTICE_EVENT.HACK_CREATE:
-                hackathon_notice.content = u"Hachathon: %s 创建成功" %(hackathon.name)
+                hackathon_notice.content = u"Hachathon: %s 创建成功" % (hackathon.name)
             elif notice_event == HACK_NOTICE_EVENT.HACK_EDIT and hackathon:
-                hackathon_notice.content = u"Hachathon: %s 信息变更" %(hackathon.name)
+                hackathon_notice.content = u"Hachathon: %s 信息变更" % (hackathon.name)
             elif notice_event == HACK_NOTICE_EVENT.HACK_ONLINE and hackathon:
-                hackathon_notice.content = u"Hachathon: %s 正式上线" %(hackathon.name)
+                hackathon_notice.content = u"Hachathon: %s 正式上线" % (hackathon.name)
             elif notice_event == HACK_NOTICE_EVENT.HACK_OFFLINE and hackathon:
-                hackathon_notice.content = u"Hachathon: %s 下线" %(hackathon.name)
+                hackathon_notice.content = u"Hachathon: %s 下线" % (hackathon.name)
             else:
                 pass
 
         if notice_event == HACK_NOTICE_EVENT.EXPR_JOIN and body.get('user_id'):
             user_id = int(body.get('user_id'))
             user = self.user_manager.get_user_by_id(user_id)
-            hackathon_notice.content = u"用户 %s 开始编程" %(user.nickname)
+            hackathon_notice.content = u"用户 %s 开始编程" % (user.nickname)
         else:
             pass
 
-        #use assigned value if content or link is assigned in body
+        # use assigned value if content or link is assigned in body
         hackathon_notice.content = body.get('content', hackathon_notice.content)
         hackathon_notice.link = body.get('link', hackathon_notice.link)
 
         self.db.add_object(hackathon_notice)
 
-        self.log.debug("a new notice is created: hackathon_id: %d, event: %d, category: %d" %(hackathon_id, notice_event, notice_category))
+        self.log.debug("a new notice is created: hackathon_id: %d, event: %d, category: %d" % (
+            hackathon_id, notice_event, notice_category))
         return hackathon_notice.dic()
 
     def update_hackathon_notice(self, body):
         hackathon_notice = self.db.get_object(HackathonNotice, body.get('id'))
         if not hackathon_notice:
             return not_found("hackathon_notice not found")
-        
+
         hackathon_notice.content = body.get("content", hackathon_notice.content)
         hackathon_notice.link = body.get("link", hackathon_notice.link)
         hackathon_notice.update_time = self.util.get_now()
@@ -625,11 +629,11 @@ class HackathonManager(Component):
         hackathon_name = body.get("hackathon_name")
         notice_category = body.get("category")
         notice_event = body.get("event")
-        order_by = body.get("order_by", "time") 
+        order_by = body.get("order_by", "time")
         page = int(body.get("page", 1))
         per_page = int(body.get("per_page", 1000))
 
-        #filter by hackathon_name, category or event
+        # filter by hackathon_name, category or event
         if hackathon_name:
             hackathon = self.get_hackathon_by_name(hackathon_name)
             if hackathon:
@@ -643,7 +647,7 @@ class HackathonManager(Component):
             notice_event_tuple = tuple([int(event) for event in notice_event.split(',')])
             query = query.filter(HackathonNotice.event.in_(notice_event_tuple))
 
-        #order by time, category or event
+        # order by time, category or event
         if order_by == 'time':
             query = query.order_by(HackathonNotice.update_time.desc())
         elif order_by == 'category':
@@ -659,8 +663,7 @@ class HackathonManager(Component):
             detail = hackathon_notice.dic()
             return detail
 
-        return self.util.paginate(pagination, func)    
-
+        return self.util.paginate(pagination, func)
 
     def schedule_pre_allocate_expr_job(self):
         """Add an interval schedule job to check all hackathons"""

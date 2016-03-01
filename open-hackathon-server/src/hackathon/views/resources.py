@@ -37,7 +37,6 @@ from hackathon.decorators import hackathon_name_required, token_required, admin_
 from hackathon.health import report_health
 from hackathon.hackathon_response import bad_request, not_found, ok
 from hackathon_resource import HackathonResource
-from hackathon.constants import RGStatus
 
 hackathon_manager = RequiredFeature("hackathon_manager")
 user_manager = RequiredFeature("user_manager")
@@ -67,6 +66,7 @@ class CurrentTimeResource(HackathonResource):
         return {
             "currenttime": long(time.time() * 1000)
         }
+
 
 """Resources for templates library"""
 
@@ -166,15 +166,36 @@ class UserLoginResource(HackathonResource):
 
 
 class CurrentUserResource(HackathonResource):
-    @token_required
+    # @token_required
     def get(self):
         return user_manager.user_display_info(g.user)
+        # from hackathon.hmongo.models import User, Email, Post
+        # import uuid
+        # post = Post(name="post1", content="content1")
+        # post.save()
+        #
+        # email1 = Email(email="w@a.com")
+        # email2 = Email(email="ww@b.com")
+        #
+        # user = User(name="Junbo Wang",
+        #             nickname="Junbo",
+        #             dictf={"da": "va", "db": "vb"},
+        #             emailf="juniwang@microsoft.com",
+        #             embedf=[email1, email2],
+        #             referf=post,
+        #             urlf="http://www.microsoft.com",
+        #             uuidf=uuid.uuid1()
+        #             )
+        #
+        # user = user.save()
+        # return user.dic()
 
 
 class UserListResource(HackathonResource):
     @admin_privilege_required
     def get(self):
         return user_manager.get_user_fezzy_search(g.hackathon, self.context())
+
 
 class UserProfileResource(HackathonResource):
     def get(self):
@@ -199,7 +220,6 @@ class UserProfileResource(HackathonResource):
 
         return profile
 
-
     @token_required
     def post(self):
         args = request.get_json()
@@ -212,11 +232,13 @@ class UserProfileResource(HackathonResource):
         args["user_id"] = g.user.id
         return user_profile_manager.update_user_profile(args)
 
+
 class UserPictureResource(HackathonResource):
     @token_required
     def put(self):
         args = request.get_json()
         return user_manager.update_user_avatar_url(g.user, args["url"])
+
 
 class UserTemplateListResource(HackathonResource):
     @token_required
@@ -521,6 +543,7 @@ class AdminAzureResource(HackathonResource):
         ctx = self.context()
         return azure_cert_manager.delete_certificate(ctx.certificate_id, g.hackathon)
 
+
 class AdminRegisterListResource(HackathonResource):
     @admin_privilege_required
     def get(self):
@@ -728,7 +751,8 @@ class AdminHackathonNoticeResource(HackathonResource):
     @admin_privilege_required
     def post(self):
         ctx = self.context()
-        return hackathon_manager.create_hackathon_notice(g.hackathon.id, int(ctx.get('event', 0)), int(ctx.get('category', 0)), ctx)
+        return hackathon_manager.create_hackathon_notice(g.hackathon.id, int(ctx.get('event', 0)),
+                                                         int(ctx.get('category', 0)), ctx)
 
     @admin_privilege_required
     def put(self):

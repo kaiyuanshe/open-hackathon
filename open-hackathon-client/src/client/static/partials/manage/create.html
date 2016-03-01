@@ -1,137 +1,193 @@
-  <button class="btn btn-default">样式 default</button>
-  <button class="btn btn-primary">样式 primary</button>
-  <button class="btn btn-success">样式 success</button>
-  <button class="btn btn-info">样式 info</button>
-  <button class="btn btn-warning">样式 warning</button>
-  <button class="btn btn-danger">样式 danger</button>
-  <div class="">
-    <label class="checkbox">
-      <input type="checkbox">
-      <span>Checkbox 2</span>
-    </label>
+<div class="container">
+  <div class="row">
+    <div class="box">
+      <ul class="wizard">
+        <li class="complete"><span class="step">1</span>
+          <ANY translate="CREATE_ACTIVITY_WIZARD.STEP1">STEP1</ANY>
+        </li>
+        <li class="active"><span class="step">2</span>
+          <ANY translate="CREATE_ACTIVITY_WIZARD.STEP2">STEP2</ANY>
+        </li>
+        <li class="active complete"><span class="step">3</span>
+          <ANY translate="CREATE_ACTIVITY_WIZARD.STEP3">STEP3</ANY>
+        </li>
+        <li><span class="step">4</span>
+          <ANY translate="CREATE_ACTIVITY_WIZARD.STEP4">STEP4</ANY>
+        </li>
+      </ul>
+      <div class="step-content">
+        <div id="step1">
+          <div class="col-lg-7 col-md-8 col-xs-10 center">
+            <ng-form name="activitForm" class="form-horizontal" novalidate>
+              <fieldset class="detail-wrapper">
+                <div class="form-group">
+                  <label class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.NAME">NAME</label>
+                  <div class="col-xs-10 required">
+                    <input type="text" class="form-control" name="name" placeholder="{{'ACTIVITY_FIELDS.NAME' | translate}}" ng-model="modules.name" ng-trim="true" 
+                    ng-minleng="5" 
+                    ng-maxlength="20"
+                    maxlength="20" 
+                    pattern="^(?!_)(?!.*?_$)[a-z0-9_-]+$"
+                    required>
+                    <div class="messages" ng-messages="activitForm.name.$error" ng-if="activitForm.name.$touched && activitForm.name.$invalid">
+                      <span ng-message="minlength"><i class="fa fa-close" uib-tooltip="" tooltip-placement="right auto" ></i></span>
+                      <span ng-message="maxlength"><i class="fa fa-close" uib-tooltip="" tooltip-placement="right auto" ></i></span>
+                      <span ng-message="required"><i class="fa fa-close" uib-tooltip="" tooltip-placement="right auto"></i></span>
+                    </div>
+                    <div class="messages" ng-if="activitForm.name.$touched && activitForm.name.$valid">
+                      <i class="fa fa-check"></i>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group" ng-class="{'has-error': activitForm.display_name.$touched && activitForm.display_name.$invalid,'has-success':activitForm.display_name.$valid}">
+                  <label for="inputPassword" class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.DISPLAY_NAME">DISPLAY_NAME</label>
+                  <div class="col-xs-10 required">
+                    <input type="text" class="form-control" name="display_name" placeholder="{{'ACTIVITY_FIELDS.DISPLAY_NAME' | translate}}" ng-model="modules.display_name" ng-trim="true" ng-maxlength="10" required>
+                    <div class="messages" ng-messages="activitForm.display_name.$error" ng-if="activitForm.display_name.$touched && activitForm.display_name.$invalid">
+                      <span ng-message="maxlength"><i class="fa fa-close" uib-tooltip="" tooltip-placement="right auto" ></i></span>
+                      <span ng-message="required"><i class="fa fa-close" uib-tooltip="" tooltip-placement="right auto"></i></span>
+                    </div>
+                    <div class="messages" ng-if="activitForm.display_name.$touched && activitForm.display_name.$valid">
+                      <i class="fa fa-check"></i>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group" ng-class="{'has-error': activitForm.tags.$touched && activitForm.tags.$invalid,'has-success':activitForm.tags.$touched && activitForm.tags.$valid}">
+                  <label for="inputPassword" class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.TAGS">TAGS</label>
+                  <div class="col-xs-10 control-addon">
+                    <tags-input ng-model="tag" name="tags" placeholder="{{ 'ACTIVITY_FIELDS.TAGS' | translate}}" min-length="2">
+                      <i class="control-icon fa fa-tag"></i>
+                    </tags-input>
+                    <div class="messages" ng-if="activitForm.tags.$touched && activitForm.tags.$valid">
+                      <i class="fa fa-check"></i>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group" ng-class="{'has-success':activitForm.location.$touched && activitForm.location.$valid}">
+                  <label for="inputPassword" class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.LOCATION">LOCATION</label>
+                  <div class="col-xs-10 control-addon">
+                    <input type="text" class="form-control" name="location" placeholder="{{'PLACEHOLDERS.LOCATION' | translate}}" ng-model="modules.config.location">
+                    <i class="control-icon fa fa-map-marker"></i>
+                    <div class="messages" ng-if="activitForm.location.$touched && activitForm.location.$valid">
+                      <i class="fa fa-check"></i>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="inputPassword" class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.EVENT_TIME">EVENT_TIME</label>
+                  <div class="col-xs-5 control-addon required" ng-class="{'has-error': activitForm.event_start_time.$touched && activitForm.event_start_time.$invalid,'has-success':activitForm.event_start_time.$touched && activitForm.event_start_time.$valid}">
+                    <input type="text" class="form-control" name="event_start_time" placeholder="{{'PLACEHOLDERS.START_TIME' | translate}}" ng-model="modules.event_start_time" ng-max="modules.event_end_time" max-date="modules.event_end_time" ng-focus="open.event_start_time = true" ng-click="open.event_start_time = true" is-open="open.event_start_time" datetime-local="yyyy/MM/dd HH:mm" datetime-picker="yyyy/MM/dd HH:mm" timepicker-options="{'show-meridian':true}" required>
+                    <i class="control-icon fa fa-calendar"></i>
+                    <div class="messages" ng-messages="activitForm.event_start_time.$error" ng-if="activitForm.event_start_time.$touched && activitForm.event_start_time.$invalid">
+                      <span ng-message="datetime"><i class="fa fa-close" uib-tooltip="{{'VALIDATE.EVENT_START_TIME_REQUIRED' | translate}}" tooltip-placement="right auto" ></i></span>
+                      <span ng-message="max"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.EVENT_START_TIME_MAX' | translate}}" tooltip-placement="right auto" ></i></span>
+                      <span ng-message="required"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.EVENT_START_TIME_REQUIRED' | translate}}" tooltip-placement="right auto"></i></span>
+                    </div>
+                    <div class="messages" ng-if="activitForm.event_start_time.$touched && activitForm.event_start_time.$valid">
+                      <i class="fa fa-check"></i>
+                    </div>
+                  </div>
+                  <div class="col-xs-5 control-addon" ng-class="{'has-error': activitForm.event_end_time.$touched && activitForm.event_end_time.$invalid,'has-success':activitForm.event_end_time.$touched && activitForm.event_end_time.$valid}">
+                    <input type="text" class="form-control" name="event_end_time" placeholder="{{'PLACEHOLDERS.END_TIME' | translate}}" ng-model="modules.event_end_time" ng-min="modules.event_start_time" min-date="modules.event_start_time" ng-focus="open.event_end_time = true" ng-click="open.event_end_time = true" is-open="open.event_end_time" datetime-local="yyyy/MM/dd HH:mm" datetime-picker="yyyy/MM/dd HH:mm" timepicker-options="{'show-meridian':true}" required>
+                    <i class="control-icon fa fa-calendar"></i>
+                    <div class="messages" ng-messages="activitForm.event_end_time.$error" ng-if="activitForm.event_end_time.$touched && activitForm.event_end_time.$invalid">
+                      <span ng-message="datetime"><i class="fa fa-close" uib-tooltip="{{'VALIDATE.EVENT_START_TIME_REQUIRED' | translate}}" tooltip-placement="right auto" ></i></span>
+                      <span ng-message="min"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.EVENT_END_TIME_MIN' | translate}}" tooltip-placement="right auto" ></i></span>
+                      <span ng-message="required"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.EVENT_END_TIME_REQUIRED' | translate}}" tooltip-placement="right auto"></i></span>
+                    </div>
+                    <div class="messages" ng-if="activitForm.event_end_time.$touched && activitForm.event_end_time.$valid">
+                      <i class="fa fa-check"></i>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="inputPassword" class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.REGISTRATION_TIME">REGISTRATION_TIME</label>
+                  <div class="col-xs-5 control-addon required" ng-class="{'has-error': activitForm.registration_start_time.$touched && activitForm.registration_start_time.$invalid,'has-success':activitForm.registration_start_time.$touched && activitForm.registration_start_time.$valid}">
+                    <input type="text" class="form-control" name="registration_start_time" placeholder="{{'PLACEHOLDERS.START_TIME' | translate}}" ng-model="modules.registration_start_time" ng-max="modules.registration_end_time" max-date="modules.registration_end_time" ng-focus="open.registration_start_time = true" ng-click="open.registration_start_time = true" is-open="open.registration_start_time" datetime-local="yyyy/MM/dd HH:mm" datetime-picker="yyyy/MM/dd HH:mm" timepicker-options="{'show-meridian':true}" required>
+                    <i class="control-icon fa fa-calendar"></i>
+                    <div class="messages" ng-messages="activitForm.registration_start_time.$error" ng-if="activitForm.registration_start_time.$touched && activitForm.registration_start_time.$invalid">
+                      <span ng-message="datetime"><i class="fa fa-close" uib-tooltip="{{'VALIDATE.EVENT_START_TIME_REQUIRED' | translate}}" tooltip-placement="right auto" ></i></span>
+                      <span ng-message="max"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.REGISTRATION_START_TIME_MAX' | translate}}" tooltip-placement="right auto" ></i></span>
+                      <span ng-message="required"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.REGISTRATION_START_TIME_REQUIRED' | translate}}" tooltip-placement="right auto"></i></span>
+                    </div>
+                    <div class="messages" ng-if="activitForm.registration_start_time.$touched && activitForm.registration_start_time.$valid">
+                      <i class="fa fa-check"></i>
+                    </div>
+                  </div>
+                  <div class="col-xs-5 control-addon" ng-class="{'has-error': activitForm.registration_end_time.$touched && activitForm.registration_end_time.$invalid,'has-success':activitForm.registration_end_time.$touched && activitForm.registration_end_time.$valid}">
+                    <input type="text" class="form-control" name="registration_end_time" placeholder="{{'PLACEHOLDERS.END_TIME' | translate}}" ng-model="modules.registration_end_time" ng-min="modules.registration_start_time" min-date="modules.registration_start_time" ng-focus="open.registration_end_time = true" ng-click="open.registration_end_time = true" is-open="open.registration_end_time" datetime-local="yyyy/MM/dd HH:mm" datetime-picker="yyyy/MM/dd HH:mm" timepicker-options="{'show-meridian':true}" required>
+                    <i class="control-icon fa fa-calendar"></i>
+                    <div class="messages" ng-messages="activitForm.registration_end_time.$error" ng-if="activitForm.registration_end_time.$touched && activitForm.registration_end_time.$invalid">
+                      <span ng-message="datetime"><i class="fa fa-close" uib-tooltip="{{'VALIDATE.EVENT_START_TIME_REQUIRED' | translate}}" tooltip-placement="right auto" ></i></span>
+                      <span ng-message="min"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.REGISTRATION_END_TIME_MIN' | translate}}" tooltip-placement="right auto" ></i></span>
+                      <span ng-message="required"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.REGISTRATION_END_TIME_REQUIRED' | translate}}" tooltip-placement="right auto"></i></span>
+                    </div>
+                    <div class="messages" ng-if="activitForm.registration_end_time.$touched && activitForm.registration_end_time.$valid">
+                      <i class="fa fa-check"></i>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="inputPassword" class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.JUDGE_TIME">JUDGE_TIME</label>
+                  <div class="col-xs-5 control-addon required" ng-class="{'has-error': activitForm.judge_start_time.$touched && activitForm.judge_start_time.$invalid,'has-success':activitForm.judge_start_time.$touched && activitForm.judge_start_time.$valid}">
+                    <input type="text" class="form-control" name="judge_start_time" placeholder="{{'PLACEHOLDERS.START_TIME' | translate}}" ng-model="modules.judge_start_time" ng-max="modules.judge_end_time" max-date="modules.judge_end_time" ng-focus="open.judge_start_time = true" ng-click="open.judge_start_time = true" is-open="open.judge_start_time" datetime-local="yyyy/MM/dd HH:mm" datetime-picker="yyyy/MM/dd HH:mm" timepicker-options="{'show-meridian':true}" required>
+                    <i class="control-icon fa fa-calendar"></i>
+                    <div class="messages" ng-messages="activitForm.judge_start_time.$error" ng-if="activitForm.judge_start_time.$touched && activitForm.judge_start_time.$invalid">
+                      <span ng-message="datetime"><i class="fa fa-close" uib-tooltip="{{'VALIDATE.EVENT_START_TIME_REQUIRED' | translate}}" tooltip-placement="right auto" ></i></span>
+                      <span ng-message="max"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.JUDGE_START_TIME_MAX' | translate}}" tooltip-placement="right auto" ></i></span>
+                      <span ng-message="required"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.JUDGE_START_TIME_REQUIRED' | translate}}" tooltip-placement="right auto"></i></span>
+                    </div>
+                    <div class="messages" ng-if="activitForm.judge_start_time.$touched && activitForm.judge_start_time.$valid">
+                      <i class="fa fa-check"></i>
+                    </div>
+                  </div>
+                  <div class="col-xs-5 control-addon" ng-class="{'has-error': activitForm.judge_end_time.$touched && activitForm.judge_end_time.$invalid,'has-success':activitForm.judge_end_time.$touched && activitForm.judge_end_time.$valid}">
+                    <input type="text" class="form-control" name="judge_end_time" placeholder="{{'PLACEHOLDERS.END_TIME' | translate}}" ng-model="modules.judge_end_time" ng-min="modules.judge_start_time" min-date="modules.judge_start_time" ng-focus="open.judge_end_time = true" ng-click="open.judge_end_time = true" is-open="open.judge_end_time" datetime-local="yyyy/MM/dd HH:mm" datetime-picker="yyyy/MM/dd HH:mm" timepicker-options="{'show-meridian':true}" required>
+                    <i class="control-icon fa fa-calendar"></i>
+                    <div class="messages" ng-messages="activitForm.judge_end_time.$error" ng-if="activitForm.judge_end_time.$touched && activitForm.judge_end_time.$invalid">
+                      <span ng-message="datetime"><i class="fa fa-close" uib-tooltip="{{'VALIDATE.EVENT_START_TIME_REQUIRED' | translate}}" tooltip-placement="right auto" ></i></span>
+                      <span ng-message="min"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.JUDGE_END_TIME_MIN' | translate}}" tooltip-placement="right auto" ></i></span>
+                      <span ng-message="required"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.JUDGE_END_TIME_REQUIRED' | translate}}" tooltip-placement="right auto"></i></span>
+                    </div>
+                    <div class="messages" ng-if="activitForm.judge_end_time.$touched && activitForm.judge_end_time.$valid">
+                      <i class="fa fa-check"></i>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group" ng-class="{'has-error': activitForm.ribbon.$touched && activitForm.ribbon.$invalid,'has-success':activitForm.ribbon.$touched && activitForm.ribbon.$valid}">
+                  <label for="inputPassword" class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.RIBBON">RIBBON</label>
+                  <div class="col-xs-10">
+                    <input type="text" name="ribbon" class="form-control" placeholder="" ng-model="modules.ribbon">
+                  </div>
+                </div>
+                <div class="form-group" ng-class="{'has-error': activitForm.max_enrollment.$touched && activitForm.max_enrollment.$invalid,'has-success': activitForm.max_enrollment.$touched && activitForm.max_enrollment.$valid}">
+                  <label for="inputPassword" class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.MAX_ENROLLMENT">MAX_ENROLLMENT</label>
+                  <div class="col-xs-10 control-addon">
+                    <input type="number" class="form-control" name="max_enrollment" placeholder="{{'PLACEHOLDERS.MAX_ENROLLMENT' | translate}}" min="0" ng-model="modules.config.max_enrollment" string-to-number ng-min="0" pattern="[0-9]+">
+                    <i class="control-icon fa fa-user-plus"></i>
+                    <div class="messages" ng-messages="activitForm.max_enrollment.$error" ng-if="activitForm.max_enrollment.$touched">
+                      <span ng-message="min"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.MAX_ENROLLMENT_MIN' | translate}}"  tooltip-placement="right auto"></i></span>
+                      <span ng-message="pattern"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.MAX_ENROLLMENT_PATTERN' | translate}}" tooltip-placement="right auto"></i></span>
+                    </div>
+                    <div class="messages" ng-if="activitForm.max_enrollment.$touched && activitForm.max_enrollment.$valid">
+                      <i class="fa fa-check"></i>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="inputPassword" class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.SHORT_DESCRIPTION">SHORT_DESCRIPTION</label>
+                  <div class="col-xs-10">
+                    <textarea class="form-control" ng-model="modules.short_description"></textarea>
+                  </div>
+                </div>
+              </fieldset>
+            </ng-form>
+          </div>
+        </div>
+        <div id="step2"></div>
+        <div id="step3"></div>
+        <div id="step5"></div>
+      </div>
+    </div>
   </div>
-  <div>
-    <label class="checkbox checkbox-primary">
-      <input type="checkbox">
-      <span>Checkbox primary</span>
-    </label>
-  </div>
-  <div>
-    <label class="checkbox checkbox-success">
-      <input type="checkbox">
-      <span>Checkbox success</span>
-    </label>
-  </div>
-  <div>
-    <label class="checkbox checkbox-info">
-      <input type="checkbox">
-      <span>Checkbox info</span>
-    </label>
-  </div>
-  <div>
-    <label class="checkbox checkbox-warning">
-      <input type="checkbox">
-      <span>Checkbox warning</span>
-    </label>
-  </div>
-  <div>
-    <label class="checkbox checkbox-danger">
-      <input type="checkbox">
-      <span>Checkbox danger</span>
-    </label>
-  </div>
-  <div>
-    <label class="checkbox checkbox-primary checkbox-lg">
-      <input type="checkbox">
-      <span>Checkbox primary</span>
-    </label>
-  </div>
-  <div>
-    <label class="checkbox checkbox-success checkbox-lg">
-      <input type="checkbox" disabled="disabled" checked="checked">
-      <span>Checkbox primary</span>
-    </label>
-  </div>
-  <div>
-    <label class="radiobox">
-      <input type="radio" checked="checked">
-      <span>Radiobox 1</span>
-    </label>
-  </div>
-  <div>
-    <label class="radiobox radiobox-primary">
-      <input type="radio" checked="checked">
-      <span>Radiobox 1</span>
-    </label>
-  </div>
-  <div>
-    <label class="radiobox radiobox-success">
-      <input type="radio" checked="checked">
-      <span>Radiobox 1</span>
-    </label>
-  </div>
-  <div>
-    <label class="radiobox radiobox-info">
-      <input type="radio" checked="checked">
-      <span>Radiobox 1</span>
-    </label>
-  </div>
-  <div>
-    <label class="radiobox radiobox-warning">
-      <input type="radio" checked="checked">
-      <span>Radiobox 1</span>
-    </label>
-  </div>
-  <div>
-    <label class="radiobox radiobox-danger">
-      <input type="radio">
-      <span>Radiobox 1</span>
-    </label>
-  </div>
-  <div>
-    <label class="radiobox radiobox-info radiobox-lg">
-      <input type="radio" checked="checked">
-      <span>Radiobox 1</span>
-    </label>
-  </div>
-  <div>
-    <label class="radiobox radiobox-success radiobox-lg">
-      <input type="radio" checked="checked" disabled="disabled">
-      <span>Radiobox 1</span>
-    </label>
-  </div>
-  <div>
-    <label class="switchbox switchbox-inline">
-      <input type="checkbox">
-      <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
-    </label>
-    <label class="switchbox switchbox-primary switchbox-inline">
-      <input type="checkbox">
-      <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
-    </label>
-    <label class="switchbox switchbox-success">
-      <input type="checkbox">
-      <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
-    </label>
-    <label class="switchbox switchbox-info">
-      <input type="checkbox">
-      <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
-    </label>
-    <label class="switchbox switchbox-warning">
-      <input type="checkbox">
-      <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
-    </label>
-    <label class="switchbox switchbox-danger">
-      <input type="checkbox">
-      <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
-    </label>
-    <label class="switchbox switchbox-primary  switchbox-lg ">
-      <input type="checkbox">
-      <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
-    </label>
-    <label class="switchbox switchbox-primary  switchbox-lg ">
-      <input type="checkbox" disabled="disabled" checked="checked">
-      <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
-    </label>
-  </div>
-</section>
+</div>
