@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 """
 Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
- 
+
 The MIT License (MIT)
- 
+
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -31,6 +31,7 @@ from datetime import datetime
 from uuid import UUID
 
 from hackathon.util import get_now
+from pagination import Pagination
 
 
 def make_serializable(item):
@@ -49,6 +50,14 @@ def make_serializable(item):
         return item
 
 
+class HQuerySet(QuerySet):
+    """add some handy helpers on the default query set from mongoengine
+    """
+
+    def paginate(self, page, per_page):
+        return Pagination(self, page, per_page)
+
+
 class HDocumentBase(DynamicDocument):
     """
     DB model base class, providing basic functions
@@ -59,8 +68,8 @@ class HDocumentBase(DynamicDocument):
 
     meta = {
         'allow_inheritance': True,
-        'abstract': True
-    }
+        'abstract': True,
+        'queryset_class': HQuerySet}
 
     def __init__(self, **kwargs):
         super(HDocumentBase, self).__init__(**kwargs)
@@ -101,7 +110,7 @@ class User(HDocumentBase):
     emails = EmbeddedDocumentListField(UserEmail)
     is_super = BooleanField(default=False)
     profile = EmbeddedDocumentField(UserProfile)
-    provider = StringField(max_length=20)
+    provider = StringField(max_length=20, unique_with="openid")
     openid = StringField(max_length=100)
     avatar_url = URLField()
     access_token = StringField(max_length=100)
@@ -127,6 +136,11 @@ class UserToken(DynamicDocument):
 
     def __init__(self, **kwargs):
         super(UserToken, self).__init__(**kwargs)
+
+    # TODO: should inherit this from HDocumentBase? then should we delete the default
+    # fields in the HDocumentBase?
+    def dic(self):
+        return make_serializable(self.to_mongo().to_dict())
 
 
 class Template(HDocumentBase):
