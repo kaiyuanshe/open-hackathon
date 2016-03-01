@@ -50,6 +50,19 @@ def make_serializable(item):
         return item
 
 
+def to_dic(obj):
+    ret = make_serializable(obj.to_mongo().to_dict())
+
+    # normalize
+    if "_id" in ret:
+        ret["id"] = ret.pop("_id")
+
+    if "_cls" in ret:
+        ret.pop("_cls")
+
+    return ret
+
+
 class HQuerySet(QuerySet):
     """add some handy helpers on the default query set from mongoengine
     """
@@ -75,7 +88,7 @@ class HDocumentBase(DynamicDocument):
         super(HDocumentBase, self).__init__(**kwargs)
 
     def dic(self):
-        return make_serializable(self.to_mongo().to_dict())
+        return to_dic(self)
 
     def __repr__(self):
         return '%s: %s' % (self.__class__.__name__, self.to_json())
@@ -140,7 +153,7 @@ class UserToken(DynamicDocument):
     # TODO: should inherit this from HDocumentBase? then should we delete the default
     # fields in the HDocumentBase?
     def dic(self):
-        return make_serializable(self.to_mongo().to_dict())
+        return to_dic(self)
 
 
 class Template(HDocumentBase):
