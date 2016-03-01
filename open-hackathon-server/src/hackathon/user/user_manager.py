@@ -79,7 +79,8 @@ class UserManager(Component):
             return internal_server_error(e.message)
 
     def login(self, provider, context):
-        if provider == "db":
+        # TODO: remove back-compatibilty for old `mysql login`
+        if provider == "db" or provider == "mysql":
             return self.__db_login(context)
         else:
             return self.__oauth_login(provider, context)
