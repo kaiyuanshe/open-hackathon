@@ -114,6 +114,7 @@ class UserProfile(DynamicEmbeddedDocument):
     skype = StringField()
     wechat = StringField()
     weibo = StringField()
+    avatar_url = URLField()  # high priority than avatar_url in User
 
 
 class User(HDocumentBase):
@@ -125,7 +126,7 @@ class User(HDocumentBase):
     profile = EmbeddedDocumentField(UserProfile)
     provider = StringField(max_length=20, unique_with="openid")
     openid = StringField(max_length=100)
-    avatar_url = URLField()
+    avatar_url = URLField()  # if avatar_url in UserProfile setted, this is not used
     access_token = StringField(max_length=100)
     online = BooleanField(default=False)
     last_login_time = DateTimeField()
