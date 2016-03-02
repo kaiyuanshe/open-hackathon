@@ -28,10 +28,12 @@
     var isProfile = false;
 
     function pageload() {
-        oh.api.user.profile.get({}, function (data) {
+        oh.api.user.get({}, function (data) {
             if (!data.error) {
-                setFormData(data);
-                isProfile = true;
+                setFormData(data.profile || {});
+                if(data.profile) {
+                  isProfile = true;
+                }
             } else {
                 console.log(data.error);
             }

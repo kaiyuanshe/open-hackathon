@@ -178,6 +178,28 @@ class UserManager(Component):
         # return serializable items as well as total count
         return self.util.paginate(pagination, get_user_details)
 
+    def cleaned_user_dic(self, user):
+        """trim the harmful and security info from the user object
+
+        this function return the cleaned info that can return to low-security client
+        such as web browser
+
+        :type user: User
+        :param user: User instance to be cleaned
+
+        :rtype: dict
+        :return: cleaned user dict
+        """
+        ret = user.dic()
+
+        # pop high-security-risk data
+        if "password" in ret:
+            ret.pop("password")
+        if "access_token" in ret:
+            ret.pop("access_token")
+
+        return ret
+
     def user_display_info(self, user):
         """Return user detail information
 
@@ -193,13 +215,7 @@ class UserManager(Component):
         if user is None:
             return None
 
-        ret = user.dic()
-
-        # pop high-security-risk data
-        if "password" in ret:
-            ret.pop("password")
-        if "access_token" in ret:
-            ret.pop("access_token")
+        ret = self.cleaned_user_dic(user)
 
         # set avatar_url to display
         if "profile" in ret and "avatar_url" in ret["profile"]:
