@@ -25,7 +25,7 @@
 # -----------------------------------------------------------------------------------
 
 try:
-    from hackathon.hmongo import db
+    from hackathon.hmongo.models import User
 except ImportError:
     pass
 
@@ -41,15 +41,12 @@ def setup_db():
     # reserved user is deleted, may not need in mongodb implementation
 
     # default super admin
-    admin = {
-        "name": "admin",
-        "nickname": "admin",
-        "password": "e8104164dfc4a479e42a9f6c0aefd2be",
-        "is_super": True,
-        "profile": {}}
+    admin = User(
+        name="admin",
+        nickname="admin",
+        password="e8104164dfc4a479e42a9f6c0aefd2be",
+        is_super=True)
 
-    db.user.update_one({"name": "admin"}, {"$set": admin}, upsert=True)
-    db.client.close()
-
+    User.objects(name="admin").update_one(__raw__={"$set": admin.to_mongo().to_dict()}, upsert=True)
 
 setup_db()
