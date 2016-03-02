@@ -203,10 +203,12 @@ class UserProfileResource(HackathonResource):
         parse.add_argument('user_id', type=int, location='args', required=False)
         args = parse.parse_args()
         query_uid = args["user_id"] or 0
-        if query_uid == g.user.id or query_uid == 0:
+        if hasattr(g, "user") and (query_uid == g.user.id or query_uid == 0):
             user = user_manager.get_user_by_id(g.user.id)
-        else:
+        elif query_uid != 0:
             user = user_manager.get_user_by_id(query_uid)
+        else:
+            return bad_request("must login or provide a user id")
 
         info = user_profile_manager.get_user_profile(user.id)
         profile = {}
