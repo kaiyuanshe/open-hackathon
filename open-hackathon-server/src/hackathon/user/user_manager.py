@@ -252,9 +252,9 @@ class UserManager(Component):
         username = context.get("username")
         enc_pwd = context.get("password")
 
-        user = User.objects(nane=username, password=enc_pwd).first()
+        user = User.objects(name=username, password=enc_pwd).first()
         if user is None:
-            self.log.warn("invalid user/pwd login: user=%s, encoded pwd=%s" % (user, enc_pwd))
+            self.log.warn("invalid user/pwd login: username=%s, encoded pwd=%s" % (username, enc_pwd))
             return None
 
         user.online = True

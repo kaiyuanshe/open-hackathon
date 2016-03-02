@@ -124,13 +124,21 @@ class User(HDocumentBase):
     emails = EmbeddedDocumentListField(UserEmail)
     is_super = BooleanField(default=False)
     profile = EmbeddedDocumentField(UserProfile)
-    provider = StringField(max_length=20, unique_with="openid")
+    provider = StringField(max_length=20)
     openid = StringField(max_length=100)
     avatar_url = URLField()  # if avatar_url in UserProfile setted, this is not used
     access_token = StringField(max_length=100)
     online = BooleanField(default=False)
     last_login_time = DateTimeField()
     login_times = IntField(default=1)  # a new user usually added upon whose first login, by default 1 thus
+
+    meta = {
+        "indexes": [
+            {
+                # default unqiue is not sparse, so we have to set it by ourselves
+                "fields": ["provider", "openid"],
+                "unqiue": True,
+                "sparse": True}]}
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
