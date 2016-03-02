@@ -6,7 +6,7 @@
         "type": "object",
         "properties": {
           "id": {
-            "pattern": "^[0-9]+$",
+            "pattern": "^[0-9a-zA-Z]+$",
             "description": "identifier of User"
           }
         }

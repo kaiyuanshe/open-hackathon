@@ -30,15 +30,14 @@ sys.path.append("..")
 
 from datetime import timedelta
 
-from sqlalchemy.exc import IntegrityError
 from flask import request, g
+from mongoengine import Q, NotUniqueError
 import uuid
 
 from hackathon.hackathon_response import internal_server_error, not_found, ok
-from hackathon.database import User, UserEmail, AdminHackathonRel, Hackathon, UserHackathonAsset
-from hackathon.constants import ReservedUser, HTTP_HEADER
+from hackathon.constants import HTTP_HEADER
 from hackathon import Component, RequiredFeature
-from hackathon.hmongo.models import UserToken
+from hackathon.hmongo.models import UserToken, User, UserEmail
 
 __all__ = ["UserManager"]
 
@@ -72,16 +71,17 @@ class UserManager(Component):
         try:
             user = self.get_user_by_id(user_id)
             if user:
-                user.online = 0
-                self.db.commit()
+                user.online = False
+                user.save()
             return ok()
         except Exception as e:
             self.log.error(e)
             return internal_server_error(e.message)
 
     def login(self, provider, context):
-        if provider == "mysql":
-            return self.__mysql_login(context)
+        # TODO: remove back-compatibilty for old `mysql login`
+        if provider == "db" or provider == "mysql":
+            return self.__db_login(context)
         else:
             return self.__oauth_login(provider, context)
 
@@ -106,8 +106,7 @@ class UserManager(Component):
         overtime_user_ids = [user_id for user_id in users_operation_time
                              if (self.util.get_now() - users_operation_time[user_id]).seconds > 1800]  # 1800s-half hour
 
-        User.query.filter(User.id.in_(overtime_user_ids)).update({User.online: 0}, synchronize_session=False)
-        self.db.commit()
+        User.objects(id__in=overtime_user_ids).update(online=False)
         for user_id in overtime_user_ids:
             users_operation_time.pop(user_id, "")
 
@@ -120,13 +119,12 @@ class UserManager(Component):
         :rtype: User
         :return: instance of User or None if user not found
         """
-        return self.db.find_first_object_by(User, id=user_id)
+        return User.objects.get(id=user_id)
 
     def load_user(self, user_id):
         '''get user for flask_login user_loader'''
         user = self.get_user_by_id(user_id)
         dic = user.dic() if user else not_found()
-        dic["is_super"] = self.is_super_admin(user)
         return dic
 
     def get_user_by_email(self, email):
@@ -141,11 +139,7 @@ class UserManager(Component):
         if email is None:
             return None
 
-        user_email = self.db.find_first_object_by(UserEmail, email=email)
-        if user_email is None:
-            return None
-
-        return user_email.user
+        return User.objects(emails__email=email).first()
 
     def get_user_fezzy_search(self, hackathon, args):
         """fezzy search user by name,kickname and email
@@ -161,21 +155,23 @@ class UserManager(Component):
         page = int(args.get("page", 1))
         per_page = int(args.get("per_page", 20))
 
-        query = User.query
-        query = query.outerjoin(UserEmail).filter(User.name.like("%" + keyword + "%") |
-                                                  User.nickname.like("%" + keyword + "%") |
-                                                  UserEmail.email.like("%" + keyword + "%"))
-
-        # perform db query with pagination
-        pagination = self.db.paginate(query, page, per_page)
+        pagination = User.objects(
+            Q(name__icontains=keyword) |
+            Q(nickname__icontains=keyword) |
+            Q(emails__email__icontains=keyword)).paginate(page, per_page)
 
         def get_user_details(user):
             user_info = self.user_display_info(user)
-            admin_hackathon_rel = self.db.find_first_object_by(AdminHackathonRel, hackathon_id=hackathon.id,
-                                                               user_id=user.id)
-            user_info[
-                "role_type"] = admin_hackathon_rel.role_type if admin_hackathon_rel else 3  # admin:1 judge:2 user:3
-            user_info["remarks"] = admin_hackathon_rel.remarks if admin_hackathon_rel else ""
+
+            # admin_hackathon_rel = self.db.find_first_object_by(AdminHackathonRel, hackathon_id=hackathon.id,
+            #                                                    user_id=user.id)
+            # user_info[
+            #    "role_type"] = admin_hackathon_rel.role_type if admin_hackathon_rel else 3  # admin:1 judge:2 user:3
+            # user_info["remarks"] = admin_hackathon_rel.remarks if admin_hackathon_rel else ""
+            #
+            # TODO: hackathon hasn't been refactored, simply set to NULL info here
+            user_info["role_type"] = 3
+            user_info["remarks"] = ""
 
             return user_info
 
@@ -197,48 +193,25 @@ class UserManager(Component):
         if user is None:
             return None
 
-        ret = {
-            "id": user.id,
-            "name": user.name,
-            "nickname": user.nickname,
-            "email": [e.dic() for e in user.emails.all()],
-            "provider": user.provider,
-            "avatar_url": user.avatar_url,
-            "online": user.online,
-            "create_time": str(user.create_time),
-            "last_login_time": str(user.last_login_time),
-            "is_super": self.is_super_admin(user)
-        }
-        if user.profile:
-            ret["user_profile"] = user.profile.dic()
+        ret = user.dic()
+
+        # pop high-security-risk data
+        if "password" in ret:
+            ret.pop("password")
+        if "access_token" in ret:
+            ret.pop("access_token")
 
         return ret
 
-    def is_super_admin(self, user):
-        """Check whether an user is super admin or not
-
-        super admin is also known as system administrator who have the highest privileges
-
-        :type user: User
-        :param user: User instance to be returned which shouldn't be None
-
-        :rtype bool
-        :return True if user is super admin otherwise False
-        """
-        if user.id == ReservedUser.DefaultSuperAdmin:
-            return True
-
-        return -1 in self.admin_manager.get_entitled_hackathon_ids(user.id)
-
     def get_talents(self):
         # todo real talents list
-        users = self.db.find_all_objects_order_by(User,
-                                                  10,
-                                                  User.login_times.desc())
+        users = User.objects.order_by("-login_times")[:10]
+
         return [self.user_display_info(u) for u in users]
 
     def update_user_avatar_url(self, user, url):
-        self.db.update_object(user, avatar_url=url)
+        user.avatar_url = url
+        user.save()
         return True
 
     # ----------------------------private methods-------------------------------------
@@ -272,52 +245,50 @@ class UserManager(Component):
                                user=admin,
                                expire_date=token_expire_date,
                                issue_date=token_issue_date)
-        self.db.add_object(user_token)
+        user_token.save()
         return user_token
 
-    def __mysql_login(self, context):
+    def __db_login(self, context):
         username = context.get("username")
         enc_pwd = context.get("password")
 
-        user = self.db.find_first_object_by(User, name=username, password=enc_pwd)
+        user = User.objects(name=username, password=enc_pwd).first()
         if user is None:
-            self.log.warn("invalid user/pwd login: user=%s, encoded pwd=%s" % (user, enc_pwd))
+            self.log.warn("invalid user/pwd login: username=%s, encoded pwd=%s" % (username, enc_pwd))
             return None
 
-        user.online = 1
-        self.db.commit()
+        user.online = True
+        user.save()
 
         token = self.__generate_api_token(user)
         return {
             "token": token.dic(),
-            "user": user.dic()
-        }
+            "user": user.dic()}
 
     def __create_or_update_email(self, user, email_info):
         email = email_info['email']
         primary_email = email_info['primary']
         verified = email_info['verified']
-        existed = self.db.find_first_object_by(UserEmail, email=email)
-        if existed is None:
-            user_email = UserEmail(name=user.name,
-                                   email=email,
-                                   primary_email=primary_email,
-                                   verified=verified,
-                                   user=user)
-            self.db.add_object(user_email)
-        else:
-            existed.primary_email = primary_email
-            existed.verified = verified
-            existed.name = user.name
-            self.db.commit()
+
+        new_mail = UserEmail(
+            email=email,
+            primary_email=primary_email,
+            verified=verified)
+
+        existed = False
+        for i, e in enumerate(user.emails):
+            if e.email == email:
+                user.emails[i] = new_mail
+                existed = True
+                break
+
+        if not existed:
+            user.emails.append(new_mail)
+
+        user.save()
 
     def __get_existing_user(self, openid, provider):
-        # emails = [e["email"] for e in email_list]
-        # if len(emails):
-        #     ues = self.db.find_first_object(UserEmail, UserEmail.email.in_(emails))
-        #     if ues is not None:
-        #         return ues.user
-        return self.db.find_first_object_by(User, openid=openid, provider=provider)
+        return User.objects(openid=openid, provider=provider).first()
 
     def __oauth_login(self, provider, context):
         # update db
@@ -326,15 +297,15 @@ class UserManager(Component):
 
         user = self.__get_existing_user(openid, provider)
         if user is not None:
-            self.db.update_object(user,
-                                  provider=provider,
-                                  name=context.get("name", user.name),
-                                  nickname=context.get("nickname", user.nickname),
-                                  access_token=context.get("access_token", user.access_token),
-                                  avatar_url=context.get("avatar_url", user.avatar_url),
-                                  last_login_time=self.util.get_now(),
-                                  login_times=user.login_times + 1,
-                                  online=1)
+            user.update(
+                provider=provider,
+                name=context.get("name", user.name),
+                nickname=context.get("nickname", user.nickname),
+                access_token=context.get("access_token", user.access_token),
+                avatar_url=context.get("avatar_url", user.avatar_url),
+                last_login_time=self.util.get_now(),
+                login_times=user.login_times + 1,
+                online=True)
             map(lambda x: self.__create_or_update_email(user, x), email_list)
         else:
             user = User(openid=openid,
@@ -344,15 +315,12 @@ class UserManager(Component):
                         access_token=context.access_token,
                         avatar_url=context.get("avatar_url", ""),
                         login_times=1,
-                        online=1)
+                        online=True)
 
             try:
-                self.db.add_object(user)
-            except IntegrityError as e:
-                if "1062" in e.message:
-                    return self.__oauth_login(provider, context)
-                else:
-                    raise
+                user.save()
+            except NotUniqueError:
+                return self.__oauth_login(provider, context)
 
             map(lambda x: self.__create_or_update_email(user, x), email_list)
 
@@ -364,23 +332,23 @@ class UserManager(Component):
         token = self.__generate_api_token(user)
         return {
             "token": token.dic(),
-            "user": user.dic()
-        }
+            "user": user.dic()}
 
     def __oxford(self, user, oxford_api):
         if not oxford_api:
             return
 
-        hackathon = self.db.find_first_object_by(Hackathon, name="oxford")
-        if hackathon:
-            exist = self.db.find_first_object_by(UserHackathonAsset, asset_value=oxford_api)
-            if exist:
-                return
-
-            asset = UserHackathonAsset(user_id=user.id,
-                                       hackathon_id=hackathon.id,
-                                       asset_name="Oxford Token",
-                                       asset_value=oxford_api,
-                                       description="Token for Oxford API")
-            self.db.add_object(asset)
-            self.db.commit()
+        # TODO: not finish
+        # hackathon = Hackathon.objects(name="oxford").first()
+        # if hackathon:
+        #     exist = self.db.find_first_object_by(UserHackathonAsset, asset_value=oxford_api)
+        #     if exist:
+        #         return
+        #
+        #     asset = UserHackathonAsset(user_id=user.id,
+        #                                hackathon_id=hackathon.id,
+        #                                asset_name="Oxford Token",
+        #                                asset_value=oxford_api,
+        #                                description="Token for Oxford API")
+        #     self.db.add_object(asset)
+        #     self.db.commit()

@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 """
 Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
- 
+
 The MIT License (MIT)
- 
+
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -31,6 +31,7 @@ from datetime import datetime
 from uuid import UUID
 
 from hackathon.util import get_now
+from pagination import Pagination
 
 
 def make_serializable(item):
@@ -49,6 +50,27 @@ def make_serializable(item):
         return item
 
 
+def to_dic(obj):
+    ret = make_serializable(obj.to_mongo().to_dict())
+
+    # normalize
+    if "_id" in ret:
+        ret["id"] = ret.pop("_id")
+
+    if "_cls" in ret:
+        ret.pop("_cls")
+
+    return ret
+
+
+class HQuerySet(QuerySet):
+    """add some handy helpers on the default query set from mongoengine
+    """
+
+    def paginate(self, page, per_page):
+        return Pagination(self, page, per_page)
+
+
 class HDocumentBase(DynamicDocument):
     """
     DB model base class, providing basic functions
@@ -59,14 +81,14 @@ class HDocumentBase(DynamicDocument):
 
     meta = {
         'allow_inheritance': True,
-        'abstract': True
-    }
+        'abstract': True,
+        'queryset_class': HQuerySet}
 
     def __init__(self, **kwargs):
         super(HDocumentBase, self).__init__(**kwargs)
 
     def dic(self):
-        return make_serializable(self.to_mongo().to_dict())
+        return to_dic(self)
 
     def __repr__(self):
         return '%s: %s' % (self.__class__.__name__, self.to_json())
@@ -92,6 +114,7 @@ class UserProfile(DynamicEmbeddedDocument):
     skype = StringField()
     wechat = StringField()
     weibo = StringField()
+    avatar_url = URLField()  # high priority than avatar_url in User
 
 
 class User(HDocumentBase):
@@ -103,17 +126,25 @@ class User(HDocumentBase):
     profile = EmbeddedDocumentField(UserProfile)
     provider = StringField(max_length=20)
     openid = StringField(max_length=100)
-    avatar_url = URLField()
+    avatar_url = URLField()  # if avatar_url in UserProfile setted, this is not used
     access_token = StringField(max_length=100)
     online = BooleanField(default=False)
     last_login_time = DateTimeField()
     login_times = IntField(default=1)  # a new user usually added upon whose first login, by default 1 thus
 
+    meta = {
+        "indexes": [
+            {
+                # default unqiue is not sparse, so we have to set it by ourselves
+                "fields": ["provider", "openid"],
+                "unqiue": True,
+                "sparse": True}]}
+
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
 
 
-class UserToken(DynamicDocument):
+class UserToken(HDocumentBase):
     token = UUIDField(required=True)
     user = ReferenceField(User)
     issue_date = DateTimeField(default=get_now())
@@ -121,9 +152,13 @@ class UserToken(DynamicDocument):
 
     meta = {
         'indexes': [
-            '#token'
-        ]
-    }
+            {
+                # See mongodb and mongo engine documentation for details
+                # by default, mongoengine will add a `_cls` field with the index as a compund index
+                # but mongodb only support Single Key Index on Hashed Token so far
+                # set the `cls` option to False can disable this beahviour on mongoengine
+                "fields": ["#token"],
+                "cls": False}]}
 
     def __init__(self, **kwargs):
         super(UserToken, self).__init__(**kwargs)
