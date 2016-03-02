@@ -49,7 +49,7 @@ class UserProfileManager(Component):
             user = User.objects.get(id=u_id)
             user.profile = UserProfile(**args)
             user.save()
-            return user.dic()["profile"]
+            return user.dic()
         except Exception as e:
             self.log.debug(e)
             return internal_server_error("failed to create user profile")
@@ -61,7 +61,7 @@ class UserProfileManager(Component):
             user = User.objects.get(id=u_id)
             user.profile = UserProfile(**args)
             user.save()
-            return user.dic()["profile"]
+            return user.dic()
         except Exception as e:
             self.log.debug(e)
             return internal_server_error("failed to update user profile")
