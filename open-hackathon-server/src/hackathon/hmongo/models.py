@@ -135,7 +135,7 @@ class User(HDocumentBase):
         super(User, self).__init__(**kwargs)
 
 
-class UserToken(DynamicDocument):
+class UserToken(HDocumentBase):
     token = UUIDField(required=True)
     user = ReferenceField(User)
     issue_date = DateTimeField(default=get_now())
@@ -143,17 +143,16 @@ class UserToken(DynamicDocument):
 
     meta = {
         'indexes': [
-            '#token'
-        ]
-    }
+            {
+                # See mongodb and mongo engine documentation for details
+                # by default, mongoengine will add a `_cls` field with the index as a compund index
+                # but mongodb only support Single Key Index on Hashed Token so far
+                # set the `cls` option to False can disable this beahviour on mongoengine
+                "fields": ["#token"],
+                "cls": False}]}
 
     def __init__(self, **kwargs):
         super(UserToken, self).__init__(**kwargs)
-
-    # TODO: should inherit this from HDocumentBase? then should we delete the default
-    # fields in the HDocumentBase?
-    def dic(self):
-        return to_dic(self)
 
 
 class Template(HDocumentBase):
