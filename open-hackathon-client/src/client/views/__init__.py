@@ -44,7 +44,7 @@ from flask import Response, render_template, request, g, redirect, make_response
 from client import app, Context
 from client.constants import LOGIN_PROVIDER
 from client.user.login_manager import login_manager_helper
-from client.functions import get_config, safe_get_config, get_now, is_local
+from client.functions import get_config, safe_get_config, get_now
 from client.log import log
 
 session_lifetime_minutes = 60
@@ -132,7 +132,7 @@ def __get_api(url, headers=None, **kwargs):
         req = requests.get(get_config("hackathon-api.endpoint") + url, headers=default_headers, **kwargs)
         resp = req.content
         return json.loads(resp)
-    except Exception as e:
+    except Exception:
         abort(500, 'API Service is not yet open')
 
 

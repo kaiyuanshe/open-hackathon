@@ -213,7 +213,7 @@ class UserProfileResource(HackathonResource):
         if info is not None:
             profile = to_dic(info)
 
-        profile["avatar_url"] = user.avatar_url
+        profile["avatar_url"] = profile["avatar_url"] or user.avatar_url
         profile["provider"] = user.provider
         profile["name"] = user.name
         profile["nickname"] = user.nickname

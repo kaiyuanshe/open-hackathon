@@ -201,6 +201,10 @@ class UserManager(Component):
         if "access_token" in ret:
             ret.pop("access_token")
 
+        # set avatar_url to display
+        if "profile" in ret and "avatar_url" in ret["profile"]:
+            ret["avatar_url"] = ret["profile"]["avatar_url"]
+
         return ret
 
     def get_talents(self):
