@@ -72,7 +72,7 @@ class UserManager(Component):
             user = self.get_user_by_id(user_id)
             if user:
                 user.online = False
-                self.db.commit()
+                user.save()
             return ok()
         except Exception as e:
             self.log.error(e)
