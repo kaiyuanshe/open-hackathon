@@ -34,13 +34,13 @@ class User():
             setattr(self, key, value)
 
     def get_avatar_url(self):
+        ret = None
         if hasattr(self, "profile"):
             ret = self.profile.get("avatar_url", None)
 
         if not ret and hasattr(self, "avatar_url"):
             ret = self.avatar_url
 
-        print "get_avatar_url: " + ret
         return ret
 
     def get_user_id(self):
