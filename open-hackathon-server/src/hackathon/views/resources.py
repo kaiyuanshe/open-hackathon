@@ -27,7 +27,6 @@ import sys
 
 sys.path.append("..")
 import time
-import json
 
 from flask import g, request
 from flask_restful import reqparse
@@ -35,8 +34,9 @@ from flask_restful import reqparse
 from hackathon import RequiredFeature, Component
 from hackathon.decorators import hackathon_name_required, token_required, admin_privilege_required
 from hackathon.health import report_health
-from hackathon.hackathon_response import bad_request, not_found, ok
+from hackathon.hackathon_response import bad_request, not_found
 from hackathon_resource import HackathonResource
+from hackathon.hmongo.models import to_dic
 
 hackathon_manager = RequiredFeature("hackathon_manager")
 user_manager = RequiredFeature("user_manager")
@@ -211,7 +211,7 @@ class UserProfileResource(HackathonResource):
         info = user_profile_manager.get_user_profile(user.id)
         profile = {}
         if info is not None:
-            profile = info.dic()
+            profile = to_dic(info)
 
         profile["avatar_url"] = user.avatar_url
         profile["provider"] = user.provider
