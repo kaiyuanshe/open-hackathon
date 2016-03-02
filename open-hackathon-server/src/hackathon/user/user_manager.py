@@ -37,7 +37,7 @@ import uuid
 from hackathon.hackathon_response import internal_server_error, not_found, ok
 from hackathon.constants import HTTP_HEADER
 from hackathon import Component, RequiredFeature
-from hackathon.hmongo.models import UserToken, User, UserEmail
+from hackathon.hmongo.models import UserToken, User, UserEmail, UserProfile
 
 __all__ = ["UserManager"]
 
@@ -214,6 +214,8 @@ class UserManager(Component):
         return [self.user_display_info(u) for u in users]
 
     def update_user_avatar_url(self, user, url):
+        if not user.profile:
+            user.profile = UserProfile()
         user.profile.avatar_url = url
         user.save()
         return True
