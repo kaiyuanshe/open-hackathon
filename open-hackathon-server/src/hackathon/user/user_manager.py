@@ -270,20 +270,20 @@ class UserManager(Component):
         primary_email = email_info['primary']
         verified = email_info['verified']
 
-        # TODO: is there a better way to do this?
+        new_mail = UserEmail(
+            email=email,
+            primary_email=primary_email,
+            verified=verified)
+
         existed = False
-        for e in user.emails:
+        for i, e in enumerate(user.emails):
             if e.email == email:
-                e.primary_email = primary_email
-                e.verified = verified
+                user.emails[i] = new_mail
                 existed = True
                 break
 
         if not existed:
-            user.emails.append(UserEmail(
-                email=email,
-                primary_email=primary_email,
-                verified=verified))
+            user.emails.append(new_mail)
 
         user.save()
 
