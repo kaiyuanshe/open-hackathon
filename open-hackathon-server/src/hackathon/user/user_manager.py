@@ -195,11 +195,11 @@ class UserManager(Component):
 
         ret = user.dic()
 
-        # to fit old return value's fields
-        if "emails" in ret:
-            ret["email"] = ret.pop("emails")
-        if "profile" in ret:
-            ret["user_profile"] = ret.pop("profile")
+        # pop high-security-risk data
+        if "password" in ret:
+            ret.pop("password")
+        if "access_token" in ret:
+            ret.pop("access_token")
 
         return ret
 

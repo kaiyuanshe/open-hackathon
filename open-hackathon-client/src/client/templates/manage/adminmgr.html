@@ -144,7 +144,7 @@
 <script id="hackathon_admin_list_template" type="text/x-jquery-tmpl">
     <tr>
         <td>${user_info.nickname}</td>
-        <td>${$item.getEmails(user_info.email)}</td>
+        <td>${$item.getEmails(user_info.emails)}</td>
         <td>
             <a href="javascript:void(0);" id="searchlist_roletype" data-type="select" data-name="role_type"
             data-value="${role_type}" class="editable" data-source='{"1":"管理员", "2":"裁判"}' data-placement="top">

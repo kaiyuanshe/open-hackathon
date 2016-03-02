@@ -132,7 +132,7 @@
                                 {% elif user.is_admin %}
                                     <a class="btn btn-primary btn-lg"
                                        href="{{ url_for('edithackathon',hackathon_name=hackathon_name) }}">管理</a>
-                                {% elif user.get("user_profile") == None %}
+                                {% elif user.get("profile") == None %}
                                     <a class="btn btn-primary btn-lg"
                                        href="{{ url_for('user_profile',return_url=request.path) }}">我要报名</a>
                                 {% elif registration == None %}
