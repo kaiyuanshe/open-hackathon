@@ -210,7 +210,7 @@ class UserManager(Component):
         return [self.user_display_info(u) for u in users]
 
     def update_user_avatar_url(self, user, url):
-        user.avatar_url = url
+        user.profile.avatar_url = url
         user.save()
         return True
 
