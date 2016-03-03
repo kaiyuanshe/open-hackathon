@@ -25,17 +25,17 @@ THE SOFTWARE.
 __author__ = 'ZGQ'
 
 import sys
-from os.path import isfile
 import requests
+import time
 from uuid import uuid1
 from time import strftime, sleep
+import thread
 
 sys.path.append("..")
 
 from azure.storage.blob import BlobService
 from azure.servicemanagement import (ConfigurationSet, ConfigurationSetInputEndpoint, OSVirtualHardDisk,
                                      LinuxConfigurationSet, ServiceManagementService)
-import json
 
 from hackathon import Component, RequiredFeature, Context
 from hackathon.database.models import DockerHostServer, HackathonAzureKey, Hackathon, HackathonConfig, AzureKey
