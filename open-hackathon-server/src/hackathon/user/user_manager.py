@@ -37,7 +37,7 @@ import uuid
 from hackathon.hackathon_response import internal_server_error, not_found, ok
 from hackathon.constants import HTTP_HEADER
 from hackathon import Component, RequiredFeature
-from hackathon.hmongo.models import UserToken, User, UserEmail
+from hackathon.hmongo.models import UserToken, User, UserEmail, UserProfile
 
 __all__ = ["UserManager"]
 
@@ -178,6 +178,28 @@ class UserManager(Component):
         # return serializable items as well as total count
         return self.util.paginate(pagination, get_user_details)
 
+    def cleaned_user_dic(self, user):
+        """trim the harmful and security info from the user object
+
+        this function return the cleaned info that can return to low-security client
+        such as web browser
+
+        :type user: User
+        :param user: User instance to be cleaned
+
+        :rtype: dict
+        :return: cleaned user dict
+        """
+        ret = user.dic()
+
+        # pop high-security-risk data
+        if "password" in ret:
+            ret.pop("password")
+        if "access_token" in ret:
+            ret.pop("access_token")
+
+        return ret
+
     def user_display_info(self, user):
         """Return user detail information
 
@@ -193,13 +215,11 @@ class UserManager(Component):
         if user is None:
             return None
 
-        ret = user.dic()
+        ret = self.cleaned_user_dic(user)
 
-        # pop high-security-risk data
-        if "password" in ret:
-            ret.pop("password")
-        if "access_token" in ret:
-            ret.pop("access_token")
+        # set avatar_url to display
+        if "profile" in ret and "avatar_url" in ret["profile"]:
+            ret["avatar_url"] = ret["profile"]["avatar_url"]
 
         return ret
 
@@ -210,7 +230,9 @@ class UserManager(Component):
         return [self.user_display_info(u) for u in users]
 
     def update_user_avatar_url(self, user, url):
-        user.avatar_url = url
+        if not user.profile:
+            user.profile = UserProfile()
+        user.profile.avatar_url = url
         user.save()
         return True
 

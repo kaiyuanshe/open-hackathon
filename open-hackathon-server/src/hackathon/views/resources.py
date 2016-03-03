@@ -27,7 +27,6 @@ import sys
 
 sys.path.append("..")
 import time
-import json
 
 from flask import g, request
 from flask_restful import reqparse
@@ -35,7 +34,7 @@ from flask_restful import reqparse
 from hackathon import RequiredFeature, Component
 from hackathon.decorators import hackathon_name_required, token_required, admin_privilege_required
 from hackathon.health import report_health
-from hackathon.hackathon_response import bad_request, not_found, ok
+from hackathon.hackathon_response import bad_request, not_found
 from hackathon_resource import HackathonResource
 
 hackathon_manager = RequiredFeature("hackathon_manager")
@@ -165,30 +164,22 @@ class UserLoginResource(HackathonResource):
         return user_manager.logout(g.user.id)
 
 
-class CurrentUserResource(HackathonResource):
-    # @token_required
+class UserResource(HackathonResource):
     def get(self):
-        return user_manager.user_display_info(g.user)
-        # from hackathon.hmongo.models import User, Email, Post
-        # import uuid
-        # post = Post(name="post1", content="content1")
-        # post.save()
-        #
-        # email1 = Email(email="w@a.com")
-        # email2 = Email(email="ww@b.com")
-        #
-        # user = User(name="Junbo Wang",
-        #             nickname="Junbo",
-        #             dictf={"da": "va", "db": "vb"},
-        #             emailf="juniwang@microsoft.com",
-        #             embedf=[email1, email2],
-        #             referf=post,
-        #             urlf="http://www.microsoft.com",
-        #             uuidf=uuid.uuid1()
-        #             )
-        #
-        # user = user.save()
-        # return user.dic()
+        parse = reqparse.RequestParser()
+        parse.add_argument("user_id", type=int, location="args", required=False)
+        args = parse.parse_args()
+
+        uid = args["user_id"] or None
+
+        if uid:
+            user = user_manager.get_user_by_id(uid)
+        elif hasattr(g, "user"):
+            user = user_manager.get_user_by_id(g.user.id)
+        else:
+            return bad_request("must login or provide a user id")
+
+        return user_manager.cleaned_user_dic(user)
 
 
 class UserListResource(HackathonResource):
@@ -198,28 +189,6 @@ class UserListResource(HackathonResource):
 
 
 class UserProfileResource(HackathonResource):
-    def get(self):
-        parse = reqparse.RequestParser()
-        parse.add_argument('user_id', type=int, location='args', required=False)
-        args = parse.parse_args()
-        query_uid = args["user_id"] or 0
-        if query_uid == g.user.id or query_uid == 0:
-            user = user_manager.get_user_by_id(g.user.id)
-        else:
-            user = user_manager.get_user_by_id(query_uid)
-
-        info = user_profile_manager.get_user_profile(user.id)
-        profile = {}
-        if info is not None:
-            profile = info.dic()
-
-        profile["avatar_url"] = user.avatar_url
-        profile["provider"] = user.provider
-        profile["name"] = user.name
-        profile["nickname"] = user.nickname
-
-        return profile
-
     @token_required
     def post(self):
         args = request.get_json()
