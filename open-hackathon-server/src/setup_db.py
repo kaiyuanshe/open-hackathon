@@ -25,7 +25,7 @@
 # -----------------------------------------------------------------------------------
 
 try:
-    from hackathon.hmongo.models import User
+    from hackathon.hmongo.models import User, Hackathon
 except ImportError:
     pass
 
@@ -41,6 +41,7 @@ def setup_db():
     # reserved user is deleted, may not need in mongodb implementation
 
     # default super admin
+
     admin = User(
         name="admin",
         nickname="admin",
@@ -48,5 +49,50 @@ def setup_db():
         is_super=True)
 
     User.objects(name="admin").update_one(__raw__={"$set": admin.to_mongo().to_dict()}, upsert=True)
+
+    from hackathon.util import get_now
+    hackathon1 = Hackathon(
+        name="hackathon1",
+        display_name="display1",
+        ribbon="ribbon1",
+        short_description = "short_description1",
+        description="description1",
+        location="location1",
+        banners=["https://octodex.github.com/hanukkat", "https://octodex.github.com/welcometocat", "https://octodex.github.com/filmtocat"],
+        status=1,
+        creator_id=User.objects(name="admin").first(),
+        type=1,
+        tags=["tag1", "tag2", "tag3"],
+        event_start_time = get_now(),
+        event_end_time = get_now(),
+        registration_start_time = get_now(),
+        registration_end_time = get_now(),
+        judge_start_time = get_now(),
+        judge_end_time = get_now(),
+    )
+
+    hackathon2 = Hackathon(
+        name="hackathon2",
+        display_name="display2",
+        ribbon="ribbon2",
+        short_description = "short_description2",
+        description="description2",
+        location="location2",
+        banners=["https://octodex.github.com/privateinvestocat", "https://octodex.github.com/gracehoppertocat", "https://octodex.github.com/gobbleotron"],
+        status=1,
+        creator_id=User.objects(name="admin").first(),
+        type=1,
+        tags=["tag1", "tag2", "tag3"],
+        event_start_time = get_now(),
+        event_end_time = get_now(),
+        registration_start_time = get_now(),
+        registration_end_time = get_now(),
+        judge_start_time = get_now(),
+        judge_end_time = get_now(),
+    )
+
+    hackathon1.save(force_insert=True)
+    hackathon2.save(force_insert=True)
+    
 
 setup_db()

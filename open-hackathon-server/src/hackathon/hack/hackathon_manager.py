@@ -185,7 +185,7 @@ class HackathonManager(Component):
         return map(lambda h: self.__get_hackathon_detail(h, user), hackathon_list)
 
     def get_entitled_hackathon_simple_list(self, user):
-        return self.admin_manager.get_entitled_hackathons_simple(user.id)
+        return self.admin_manager.get_entitled_hackathons_simple(user)
 
     def get_basic_property(self, hackathon, key, default=None):
         """Get basic property of hackathon from HackathonConfig"""
