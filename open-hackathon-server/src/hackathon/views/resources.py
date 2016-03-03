@@ -147,20 +147,20 @@ class GuacamoleResource(HackathonResource):
 
 
 class UserLoginResource(HackathonResource):
-    '''User login/logout processing'''
+    """User login/logout processing"""
 
     def get(self):
-        '''Get user by id'''
+        """Get user by id"""
         return user_manager.load_user(self.context().id)
 
     def post(self):
-        '''user login'''
+        """user login"""
         context = self.context()
         return user_manager.login(context.provider, context)
 
     @token_required
     def delete(self):
-        '''User logout'''
+        """User logout"""
         return user_manager.logout(g.user.id)
 
 
@@ -174,7 +174,7 @@ class UserResource(HackathonResource):
 
         if uid:
             user = user_manager.get_user_by_id(uid)
-        elif hasattr(g, "user"):
+        elif user_manager.validate_login():
             user = user_manager.get_user_by_id(g.user.id)
         else:
             return bad_request("must login or provide a user id")

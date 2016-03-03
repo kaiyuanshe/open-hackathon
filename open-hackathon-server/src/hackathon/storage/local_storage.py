@@ -79,7 +79,8 @@ class LocalStorage(Storage):
     def report_health(self):
         """The status of local storage should be always True"""
         return {
-            HEALTH.STATUS: HEALTH_STATUS.OK
+            HEALTH.STATUS: HEALTH_STATUS.OK,
+            "type": "LocalStorage"
         }
 
     def __init__(self):

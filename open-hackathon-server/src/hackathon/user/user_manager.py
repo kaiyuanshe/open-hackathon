@@ -29,10 +29,10 @@ import sys
 sys.path.append("..")
 
 from datetime import timedelta
+import uuid
 
 from flask import request, g
 from mongoengine import Q, NotUniqueError
-import uuid
 
 from hackathon.hackathon_response import internal_server_error, not_found, ok
 from hackathon.constants import HTTP_HEADER
@@ -79,8 +79,7 @@ class UserManager(Component):
             return internal_server_error(e.message)
 
     def login(self, provider, context):
-        # TODO: remove back-compatibilty for old `mysql login`
-        if provider == "db" or provider == "mysql":
+        if provider == "db":
             return self.__db_login(context)
         else:
             return self.__oauth_login(provider, context)
@@ -280,6 +279,7 @@ class UserManager(Component):
             return None
 
         user.online = True
+        user.login_times = (user.login_times or 0) + 1
         user.save()
 
         token = self.__generate_api_token(user)
@@ -360,17 +360,17 @@ class UserManager(Component):
         if not oxford_api:
             return
 
-        # TODO: not finish
-        # hackathon = Hackathon.objects(name="oxford").first()
-        # if hackathon:
-        #     exist = self.db.find_first_object_by(UserHackathonAsset, asset_value=oxford_api)
-        #     if exist:
-        #         return
-        #
-        #     asset = UserHackathonAsset(user_id=user.id,
-        #                                hackathon_id=hackathon.id,
-        #                                asset_name="Oxford Token",
-        #                                asset_value=oxford_api,
-        #                                description="Token for Oxford API")
-        #     self.db.add_object(asset)
-        #     self.db.commit()
+            # TODO: not finish
+            # hackathon = Hackathon.objects(name="oxford").first()
+            # if hackathon:
+            #     exist = self.db.find_first_object_by(UserHackathonAsset, asset_value=oxford_api)
+            #     if exist:
+            #         return
+            #
+            #     asset = UserHackathonAsset(user_id=user.id,
+            #                                hackathon_id=hackathon.id,
+            #                                asset_name="Oxford Token",
+            #                                asset_value=oxford_api,
+            #                                description="Token for Oxford API")
+            #     self.db.add_object(asset)
+            #     self.db.commit()

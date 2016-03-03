@@ -420,7 +420,7 @@ def create_join_team(hackathon_name, tid):
 @app.route("/admin", methods=['GET', 'POST'])
 def superadmin():
     if request.method == 'POST':
-        return __login(LOGIN_PROVIDER.MYSQL)
+        return __login(LOGIN_PROVIDER.DB)
 
     return render("/superadmin.html")
 
