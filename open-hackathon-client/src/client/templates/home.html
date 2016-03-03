@@ -102,7 +102,7 @@
                                         <div class="oh-header">
                                             <a href="{{ url_for('hackathon', hackathon_name=item.name) }}"
                                                target="_blank">
-                                                <img src="{{ item.banners.split(';')[0] or url_for('static',filename='pic/homepage.jpg') }}"
+                                                <img src="{{ item.banners[0] or url_for('static',filename='pic/homepage.jpg') }}"
                                                      class="hackathon-thumb" alt="{{ item.display_name }}">
                                             </a>
                                             {% if item.ribbon != "" %}
@@ -125,7 +125,7 @@
                                                 </a>
                                             </h3>
                                             <ul class="oh-tags">
-                                                {% for name in item.tag.split(',') %}
+                                                {% for name in item.tags %}
                                                     <li>
                                                         <a href="#">{{ name }}</a>
                                                         {% if loop.index < (item.tag | length) %},{% endif %}
@@ -200,7 +200,7 @@
                                         <div class="oh-header">
                                             <a href="{{ url_for('hackathon', hackathon_name=item.name) }}"
                                                target="_blank">
-                                                <img src="{{ item.banners.split(';')[0] or url_for('static',filename='pic/homepage.jpg') }}"
+                                                <img src="{{ item.banners[0] or url_for('static',filename='pic/homepage.jpg') }}"
                                                      class="hackathon-thumb" alt="{{ item.display_name }}">
                                             </a>
                                             {% if item.ribbon != "" %}
@@ -223,7 +223,7 @@
                                                 </a>
                                             </h3>
                                             <ul class="oh-tags">
-                                                {% for name in item.tag.split(',') %}
+                                                {% for name in item.tags %}
                                                     <li>
                                                         <a href="#">{{ name }}</a>
                                                         {% if loop.index < (item.tag | length) %},{% endif %}
@@ -298,7 +298,7 @@
                                         <div class="oh-header">
                                             <a href="{{ url_for('hackathon', hackathon_name=item.name) }}"
                                                target="_blank">
-                                                <img src="{{ item.banners.split(';')[0] or url_for('static',filename='pic/homepage.jpg') }}"
+                                                <img src="{{ item.banners[0] or url_for('static',filename='pic/homepage.jpg') }}"
                                                      class="hackathon-thumb" alt="{{ item.display_name }}">
                                             </a>
                                             {% if item.ribbon != "" %}
@@ -321,7 +321,7 @@
                                                 </a>
                                             </h3>
                                             <ul class="oh-tags">
-                                                {% for name in item.tag.split(',') %}
+                                                {% for name in item.tags %}
                                                     <li>
                                                         <a href="#">{{ name }}</a>
                                                         {% if loop.index < (item.tag | length) %},{% endif %}
