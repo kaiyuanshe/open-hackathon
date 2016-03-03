@@ -188,7 +188,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
         hackathon = kwargs["hackathon"]
         experiment = kwargs["experiment"]
         container_name = unit.get_name()
-        host_server = self.docker_host_manager.get_available_docker_host(1, hackathon)
+        host_server = self.docker_host_manager.get_available_docker_host(1, hackathon, self.load_azure_key_id(experiment.id))
         if not host_server:
             return None
 
