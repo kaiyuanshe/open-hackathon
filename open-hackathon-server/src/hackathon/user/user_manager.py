@@ -193,7 +193,15 @@ class UserManager(Component):
         if user is None:
             return None
 
-        ret = user.dic()
+        # ret = user.dic()
+        if isinstance(user, User): #User object
+            ret = user.dic()
+        else: #DBRef
+            ret = User.objects(id=user.id).first()
+            if ret:
+                return ret.dic()
+            else:
+                return {}
 
         # pop high-security-risk data
         if "password" in ret:

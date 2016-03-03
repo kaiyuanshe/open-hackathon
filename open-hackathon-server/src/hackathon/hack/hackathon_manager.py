@@ -719,30 +719,31 @@ class HackathonManager(Component):
         """Return hackathon info as well as its details including configs, stat, organizers, like if user logon"""
         detail = hackathon.dic()
 
-        detail["config"] = self.__get_hackathon_configs(hackathon)
-        detail["stat"] = self.get_hackathon_stat(hackathon)
-        detail["tag"] = self.get_hackathon_tags(hackathon)
-        detail["organizer"] = self.__get_hackathon_organizers(hackathon)
+        # detail["config"] = self.__get_hackathon_configs(hackathon)
+        # detail["stat"] = self.get_hackathon_stat(hackathon)
+        # detail["tag"] = self.get_hackathon_tags(hackathon)
+        # detail["organizer"] = self.__get_hackathon_organizers(hackathon)
+        detail["stat"] = {"register": 5}
 
         if user:
             detail["user"] = self.user_manager.user_display_info(user)
-            detail["user"]["is_admin"] = self.admin_manager.is_hackathon_admin(hackathon.id, user.id)
+            # detail["user"]["is_admin"] = self.admin_manager.is_hackathon_admin(hackathon.id, user.id)
 
-            asset = self.db.find_all_objects_by(UserHackathonAsset, user_id=user.id, hackathon_id=hackathon.id)
-            if asset:
-                detail["asset"] = [o.dic() for o in asset]
+            # asset = self.db.find_all_objects_by(UserHackathonAsset, user_id=user.id, hackathon_id=hackathon.id)
+            # if asset:
+            #     detail["asset"] = [o.dic() for o in asset]
 
-            like = self.db.find_first_object_by(HackathonLike, user_id=user.id, hackathon_id=hackathon.id)
-            if like:
-                detail["like"] = like.dic()
-
-            register = self.register_manager.get_registration_by_user_and_hackathon(user.id, hackathon.id)
-            if register:
-                detail["registration"] = register.dic()
-
-            team_rel = self.db.find_first_object_by(UserTeamRel, user_id=user.id, hackathon_id=hackathon.id)
-            if team_rel:
-                detail["team"] = team_rel.team.dic()
+            # like = self.db.find_first_object_by(HackathonLike, user_id=user.id, hackathon_id=hackathon.id)
+            # if like:
+            #     detail["like"] = like.dic()
+            #
+            # register = self.register_manager.get_registration_by_user_and_hackathon(user.id, hackathon.id)
+            # if register:
+            #     detail["registration"] = register.dic()
+            #
+            # team_rel = self.db.find_first_object_by(UserTeamRel, user_id=user.id, hackathon_id=hackathon.id)
+            # if team_rel:
+            #     detail["team"] = team_rel.team.dic()
 
         return detail
 

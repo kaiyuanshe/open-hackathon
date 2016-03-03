@@ -108,7 +108,9 @@ class AdminManager(Component):
 
         # return [h._asdict() for h in admin_user_hackathon_simple]
 
-        admin_user_hackathon_simple = Hackathon.objects(creator_id=user).no_dereference().order_by('-event_start_time')
+        admin_user_hackathon_simple = Hackathon.objects(creator_id=user)\
+            .only('name','display_name','ribbon','short_description','banners','status','creator_id','type','event_start_time','event_end_time').no_dereference().order_by('-event_start_time')
+        
         all_hackathon = [h.dic() for h in admin_user_hackathon_simple]
         return all_hackathon
 

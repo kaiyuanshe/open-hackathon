@@ -164,25 +164,25 @@ class RegisterManager(Component):
             "asset":[]
         }
 
-        asset = self.db.find_all_objects_by(UserHackathonAsset, user_id=user.id, hackathon_id=hackathon.id)
-        if asset:
-            detail["asset"] = [o.dic() for o in asset]
+        # asset = self.db.find_all_objects_by(UserHackathonAsset, user_id=user.id, hackathon_id=hackathon.id)
+        # if asset:
+        #     detail["asset"] = [o.dic() for o in asset]
 
-        rel = self.get_registration_by_user_and_hackathon(user.id, hackathon.id)
-        if rel is None:
-            return detail
+        # rel = self.get_registration_by_user_and_hackathon(user.id, hackathon.id)
+        # if rel is None:
+        #     return detail
 
-        detail["registration"] = rel.dic()
-        # experiment if any
-        try:
-            experiment = self.db.find_first_object(Experiment,
-                                                   Experiment.user_id == user.id,
-                                                   Experiment.hackathon_id == hackathon.id,
-                                                   Experiment.status.in_([EStatus.STARTING, EStatus.RUNNING]))
-            if experiment is not None:
-                detail["experiment"] = experiment.dic()
-        except Exception as e:
-            self.log.error(e)
+        # detail["registration"] = rel.dic()
+        # # experiment if any
+        # try:
+        #     experiment = self.db.find_first_object(Experiment,
+        #                                            Experiment.user_id == user.id,
+        #                                            Experiment.hackathon_id == hackathon.id,
+        #                                            Experiment.status.in_([EStatus.STARTING, EStatus.RUNNING]))
+        #     if experiment is not None:
+        #         detail["experiment"] = experiment.dic()
+        # except Exception as e:
+        #     self.log.error(e)
 
         return detail
 

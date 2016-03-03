@@ -57,12 +57,17 @@ def setup_db():
         ribbon="ribbon1",
         short_description = "short_description1",
         description="description1",
-        location="location1",
-        banners=["https://octodex.github.com/hanukkat", "https://octodex.github.com/welcometocat", "https://octodex.github.com/filmtocat"],
+        banners=["https://octodex.github.com/images/hanukkat.png", "https://octodex.github.com/images/welcometocat.png", "https://octodex.github.com/images/filmtocat.png"],
         status=1,
         creator_id=User.objects(name="admin").first(),
         type=1,
         tags=["tag1", "tag2", "tag3"],
+        config={
+            "location": "loaction1",
+            "max_enrollment": "10",
+            "auto_approve": 1,
+            "login_provider": "github"
+        },
         event_start_time = get_now(),
         event_end_time = get_now(),
         registration_start_time = get_now(),
@@ -77,12 +82,17 @@ def setup_db():
         ribbon="ribbon2",
         short_description = "short_description2",
         description="description2",
-        location="location2",
-        banners=["https://octodex.github.com/privateinvestocat", "https://octodex.github.com/gracehoppertocat", "https://octodex.github.com/gobbleotron"],
+        banners=["https://octodex.github.com/images/privateinvestocat.jpg", "https://octodex.github.com/images/gracehoppertocat.jpg", "https://octodex.github.com/images/gobbleotron.gif"],
         status=1,
         creator_id=User.objects(name="admin").first(),
         type=1,
         tags=["tag1", "tag2", "tag3"],
+        config={
+            "location": "loaction2",
+            "max_enrollment": "10",
+            "auto_approve": 1,
+            "login_provider": "github"
+        },
         event_start_time = get_now(),
         event_end_time = get_now(),
         registration_start_time = get_now(),
@@ -91,8 +101,8 @@ def setup_db():
         judge_end_time = get_now(),
     )
 
-    hackathon1.save(force_insert=True)
-    hackathon2.save(force_insert=True)
+    Hackathon.objects(name="hackathon1").update_one(__raw__={"$set": hackathon1.to_mongo().to_dict()}, upsert=True)
+    Hackathon.objects(name="hackathon2").update_one(__raw__={"$set": hackathon2.to_mongo().to_dict()}, upsert=True)
     
 
 setup_db()

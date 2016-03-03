@@ -6,7 +6,7 @@
     <div class="item" ng-repeat="activity in activities">
       <a ui-sref="manage.edit({name:activity.name})" class="btn btn-sm btn-success"><i class="fa fa-cog"></i> <ANY translate="MANAGE">MANAGE</ANY></a>
       <header>
-        <a href="/site/{{activity.name}}" target="_blank"><img src="{{activity.banners | split:',' | defBanner}}" static-image max-width="298" max-height="168"></a>
+        <a href="/site/{{activity.name}}" target="_blank"><img src="{{activity.banners | defBanner}}" static-image max-width="298" max-height="168"></a>
         <span>{{activity.display_name}}</span>
       </header>
       <div class="item-body">
