@@ -70,17 +70,11 @@ class DockerHostManager(Component):
 
     def get_available_docker_host(self, ctx):
         """
-        Get available docker host from DB    req_count, hackathon_id, azure_key_id
+        Get available docker host from DB
         If there is no qualified host, then create one
 
-        :param req_count: the number of containers needed
-        :type req_count: integer
-
-        :param hackathon: a record in DB table:hackathon
-        :type hackathon: Hackathon object
-
-        :return: a docker host if there is a qualified one, otherwise None
-        :rtype: DockerHostServer object
+        :param ctx: contex, containing req_count, hackathon_id, azure_key_id
+        :type req_count: Context
         """
         req_count = ctx.req_count
         hackathon_id = ctx.hackathon_id
