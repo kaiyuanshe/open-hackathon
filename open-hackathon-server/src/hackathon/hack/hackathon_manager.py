@@ -117,6 +117,7 @@ class HackathonManager(Component):
         cache_key = "hackathon_stat_%s" % hackathon.id
         return self.cache.get_cache(key=cache_key, createfunc=internal_get_stat)
 
+    # TODO: remove hard code and implement pagination
     def get_hackathon_list(self, args):
         # get values from request's QueryString
         page = int(args.get("page", 1))
@@ -643,6 +644,7 @@ class HackathonManager(Component):
         self.db.delete_all_objects_by(HackathonNotice, id=notice_id)
         return ok()
 
+    # TODO: remove hard code and implements pagination
     def get_hackathon_notice_list(self, body):
         """
         list hackathon notices, notices are paginated, can be filtered by hackathon_name, event and category, 
@@ -791,6 +793,7 @@ class HackathonManager(Component):
 
         return ok(can_online)
 
+    # TODO: some information is omitted and needed to be added
     def __get_hackathon_detail(self, hackathon, user=None):
         """Return hackathon info as well as its details including configs, stat, organizers, like if user logon"""
         detail = hackathon.dic()
