@@ -39,7 +39,7 @@ from mongoengine.context_managers import no_dereference
 from hackathon.database import User, AdminHackathonRel, DockerHostServer, HackathonLike, \
     HackathonStat, HackathonConfig, HackathonTag, UserHackathonRel, HackathonOrganizer, Award, UserHackathonAsset, \
     UserTeamRel, HackathonNotice
-from hackathon.hmongo.models import Hackathon
+from hackathon.hmongo.models import Hackathon, HackathonNotice
 from hackathon.hackathon_response import internal_server_error, ok, not_found, forbidden
 from hackathon.constants import HACKATHON_BASIC_INFO, ADMIN_ROLE_TYPE, HACK_STATUS, RGStatus, HTTP_HEADER, \
     FILE_TYPE, HACK_TYPE, HACKATHON_STAT, DockerHostServerStatus, HACK_NOTICE_CATEGORY, HACK_NOTICE_EVENT
@@ -668,8 +668,6 @@ class HackathonManager(Component):
             search first 1000 notices ordered by event, filtered by event == 1 and hackathon_name == 'hackathon'
         """
 
-        query = HackathonNotice.query
-
         hackathon_name = body.get("hackathon_name")
         notice_category = body.get("category")
         notice_event = body.get("event")
@@ -677,37 +675,71 @@ class HackathonManager(Component):
         page = int(body.get("page", 1))
         per_page = int(body.get("per_page", 1000))
 
-        # filter by hackathon_name, category or event
+
+        # query = HackathonNotice.objects
+
+        # # filter by hackathon_name, category or event
+        # if hackathon_name:
+        #     hackathon = self.get_hackathon_by_name(hackathon_name)
+        #     if hackathon:
+        #         query = query.filter(HackathonNotice.hackathon_id == hackathon.id)
+        #     else:
+        #         return not_found("hackathon_name not found")
+        # if notice_category:
+        #     notice_category_tuple = tuple([int(category) for category in notice_category.split(',')])
+        #     query = query.filter(HackathonNotice.category.in_(notice_category_tuple))
+        # if notice_event:
+        #     notice_event_tuple = tuple([int(event) for event in notice_event.split(',')])
+        #     query = query.filter(HackathonNotice.event.in_(notice_event_tuple))
+
+        # # order by time, category or event
+        # if order_by == 'time':
+        #     query = query.order_by(HackathonNotice.update_time.desc())
+        # elif order_by == 'category':
+        #     query = query.order_by(HackathonNotice.category)
+        # elif order_by == 'event':
+        #     query = query.order_by(HackathonNotice.event)
+        # else:
+        #     query = query.order_by(HackathonNotice.update_time.desc())
+
+        # pagination = self.db.paginate(query, page, per_page)
+
+        # def func(hackathon_notice):
+        #     detail = hackathon_notice.dic()
+        #     return detail
+
+        # return self.util.paginate(pagination, func)
+
+        query = HackathonNotice.objects()
         if hackathon_name:
-            hackathon = self.get_hackathon_by_name(hackathon_name)
+            hackathon = Hackathon.objects(name=hackathon_name).only('name').first()
             if hackathon:
-                query = query.filter(HackathonNotice.hackathon_id == hackathon.id)
+                query = query.filter(hackathon=hackathon)
             else:
-                return not_found("hackathon_name not found")
+                return not_found('hackathon_name not found')
+
         if notice_category:
             notice_category_tuple = tuple([int(category) for category in notice_category.split(',')])
-            query = query.filter(HackathonNotice.category.in_(notice_category_tuple))
+            query = query.filter(category__in=notice_category_tuple)
         if notice_event:
             notice_event_tuple = tuple([int(event) for event in notice_event.split(',')])
-            query = query.filter(HackathonNotice.event.in_(notice_event_tuple))
+            query = query.filter(event__in=notice_event_tuple)
 
         # order by time, category or event
         if order_by == 'time':
-            query = query.order_by(HackathonNotice.update_time.desc())
+            query = query.order_by('-update_time')
         elif order_by == 'category':
-            query = query.order_by(HackathonNotice.category)
+            query = query.order_by('-category')
         elif order_by == 'event':
-            query = query.order_by(HackathonNotice.event)
+            query = query.order_by('-event')
         else:
-            query = query.order_by(HackathonNotice.update_time.desc())
+            query = query.order_by('-update_time')
 
-        pagination = self.db.paginate(query, page, per_page)
+        query_list = [q.dic() for q in query]
+        query_dict = {'items': query_list}
 
-        def func(hackathon_notice):
-            detail = hackathon_notice.dic()
-            return detail
+        return query_dict
 
-        return self.util.paginate(pagination, func)
 
     def schedule_pre_allocate_expr_job(self):
         """Add an interval schedule job to check all hackathons"""
