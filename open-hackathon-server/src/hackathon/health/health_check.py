@@ -164,7 +164,8 @@ class AzureHealthCheck(HealthCheck):
         azure = Service(azure_key.id)
         if azure.ping():
             return {
-                STATUS: HEALTH_STATUS.OK
+                STATUS: HEALTH_STATUS.OK,
+                "type": "Azure Storage"
             }
         else:
             return {

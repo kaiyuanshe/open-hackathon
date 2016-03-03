@@ -64,7 +64,7 @@ class LoginManagerHelper():
         logout_user()
 
     def login(self, provider):
-        if provider == LOGIN_PROVIDER.MYSQL:
+        if provider == LOGIN_PROVIDER.DB:
             return self.__mysql_login()
         else:
             return self.__oauth_login(provider)
@@ -80,7 +80,7 @@ class LoginManagerHelper():
     def __mysql_login(self):
 
         data = {
-            "provider": LOGIN_PROVIDER.MYSQL,
+            "provider": LOGIN_PROVIDER.DB,
             "openid": request.form['username'],
             "username": request.form['username'],
             "password": encode(request.form['password'])

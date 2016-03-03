@@ -32,7 +32,7 @@ class ROLE:
 
 
 class LOGIN_PROVIDER:
-    MYSQL = "mysql"
+    DB = "db"
     GITHUB = "github"
     QQ = "qq"
     GITCAFE = "gitcafe"

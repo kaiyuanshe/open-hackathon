@@ -29,15 +29,15 @@ import sys
 sys.path.append("..")
 
 from datetime import timedelta
+import uuid
 
 from flask import request, g
 from mongoengine import Q, NotUniqueError
-import uuid
 
 from hackathon.hackathon_response import internal_server_error, not_found, ok
 from hackathon.constants import HTTP_HEADER
 from hackathon import Component, RequiredFeature
-from hackathon.hmongo.models import UserToken, User, UserEmail
+from hackathon.hmongo.models import UserToken, User, UserEmail, UserProfile
 
 __all__ = ["UserManager"]
 
@@ -79,8 +79,7 @@ class UserManager(Component):
             return internal_server_error(e.message)
 
     def login(self, provider, context):
-        # TODO: remove back-compatibilty for old `mysql login`
-        if provider == "db" or provider == "mysql":
+        if provider == "db":
             return self.__db_login(context)
         else:
             return self.__oauth_login(provider, context)
@@ -178,6 +177,28 @@ class UserManager(Component):
         # return serializable items as well as total count
         return self.util.paginate(pagination, get_user_details)
 
+    def cleaned_user_dic(self, user):
+        """trim the harmful and security info from the user object
+
+        this function return the cleaned info that can return to low-security client
+        such as web browser
+
+        :type user: User
+        :param user: User instance to be cleaned
+
+        :rtype: dict
+        :return: cleaned user dict
+        """
+        ret = user.dic()
+
+        # pop high-security-risk data
+        if "password" in ret:
+            ret.pop("password")
+        if "access_token" in ret:
+            ret.pop("access_token")
+
+        return ret
+
     def user_display_info(self, user):
         """Return user detail information
 
@@ -193,21 +214,11 @@ class UserManager(Component):
         if user is None:
             return None
 
-        # ret = user.dic()
-        if isinstance(user, User): #User object
-            ret = user.dic()
-        else: #DBRef
-            ret = User.objects(id=user.id).first()
-            if ret:
-                return ret.dic()
-            else:
-                return {}
+        ret = self.cleaned_user_dic(user)
 
-        # pop high-security-risk data
-        if "password" in ret:
-            ret.pop("password")
-        if "access_token" in ret:
-            ret.pop("access_token")
+        # set avatar_url to display
+        if "profile" in ret and "avatar_url" in ret["profile"]:
+            ret["avatar_url"] = ret["profile"]["avatar_url"]
 
         return ret
 
@@ -218,7 +229,9 @@ class UserManager(Component):
         return [self.user_display_info(u) for u in users]
 
     def update_user_avatar_url(self, user, url):
-        user.avatar_url = url
+        if not user.profile:
+            user.profile = UserProfile()
+        user.profile.avatar_url = url
         user.save()
         return True
 
@@ -266,6 +279,7 @@ class UserManager(Component):
             return None
 
         user.online = True
+        user.login_times = (user.login_times or 0) + 1
         user.save()
 
         token = self.__generate_api_token(user)
@@ -346,17 +360,17 @@ class UserManager(Component):
         if not oxford_api:
             return
 
-        # TODO: not finish
-        # hackathon = Hackathon.objects(name="oxford").first()
-        # if hackathon:
-        #     exist = self.db.find_first_object_by(UserHackathonAsset, asset_value=oxford_api)
-        #     if exist:
-        #         return
-        #
-        #     asset = UserHackathonAsset(user_id=user.id,
-        #                                hackathon_id=hackathon.id,
-        #                                asset_name="Oxford Token",
-        #                                asset_value=oxford_api,
-        #                                description="Token for Oxford API")
-        #     self.db.add_object(asset)
-        #     self.db.commit()
+            # TODO: not finish
+            # hackathon = Hackathon.objects(name="oxford").first()
+            # if hackathon:
+            #     exist = self.db.find_first_object_by(UserHackathonAsset, asset_value=oxford_api)
+            #     if exist:
+            #         return
+            #
+            #     asset = UserHackathonAsset(user_id=user.id,
+            #                                hackathon_id=hackathon.id,
+            #                                asset_name="Oxford Token",
+            #                                asset_value=oxford_api,
+            #                                description="Token for Oxford API")
+            #     self.db.add_object(asset)
+            #     self.db.commit()
