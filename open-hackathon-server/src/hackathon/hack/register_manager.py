@@ -33,7 +33,7 @@ from flask import g
 from hackathon import Component, RequiredFeature
 from hackathon.database import UserHackathonRel, Experiment,HackathonConfig, UserHackathonAsset
 from hackathon.hackathon_response import bad_request, precondition_failed, internal_server_error, not_found, ok, login_provider_error
-from hackathon.constants import EStatus, RGStatus, HACKATHON_BASIC_INFO, HACKATHON_STAT, LOGIN_PROVIDER
+from hackathon.constants import EStatus, HACK_USER_STATUS, HACKATHON_BASIC_INFO, HACKATHON_STAT, LOGIN_PROVIDER
 
 __all__ = ["RegisterManager"]
 
@@ -95,7 +95,7 @@ class RegisterManager(Component):
                                        friendly_message="报名人数已满")
 
         try:
-            args["status"] = RGStatus.AUTO_PASSED if hackathon.is_auto_approve() else RGStatus.UNAUDIT
+            args["status"] = HACK_USER_STATUS.AUTO_PASSED if hackathon.is_auto_approve() else HACK_USER_STATUS.UNAUDIT
             args['create_time'] = self.util.get_now()
             user_hackathon_rel = self.db.add_object_kwargs(UserHackathonRel, **args).dic()
 
@@ -121,7 +121,7 @@ class RegisterManager(Component):
             register.status = context.status
             self.db.commit()
 
-            if register.status == RGStatus.AUDIT_PASSED:
+            if register.status == HACK_USER_STATUS.AUDIT_PASSED:
                 self.team_manager.create_default_team(register.hackathon, register.user)
 
             hackathon = self.hackathon_manager.get_hackathon_by_id(register.hackathon_id)
@@ -189,7 +189,7 @@ class RegisterManager(Component):
     def __update_register_stat(self, hackathon):
         count = self.db.count(UserHackathonRel,
                               UserHackathonRel.hackathon_id == hackathon.id,
-                              UserHackathonRel.status.in_([RGStatus.AUDIT_PASSED, RGStatus.AUTO_PASSED]),
+                              UserHackathonRel.status.in_([HACK_USER_STATUS.AUDIT_PASSED, HACK_USER_STATUS.AUTO_PASSED]),
                               UserHackathonRel.deleted == 0)
         self.hackathon_manager.update_hackathon_stat(hackathon, HACKATHON_STAT.REGISTER, count)
 
@@ -223,7 +223,7 @@ class RegisterManager(Component):
             # count of audited users
             current_num = self.db.count(UserHackathonRel,
                                         UserHackathonRel.hackathon_id == hackathon.id,
-                                        UserHackathonRel.status.in_([RGStatus.AUDIT_PASSED, RGStatus.AUTO_PASSED]))
+                                        UserHackathonRel.status.in_([HACK_USER_STATUS.AUDIT_PASSED, HACK_USER_STATUS.AUTO_PASSED]))
             return current_num >= max
 
     def __is_user_hackathon_login_provider(self, user, hackathon):

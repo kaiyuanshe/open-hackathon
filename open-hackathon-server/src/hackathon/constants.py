@@ -265,7 +265,7 @@ class AVMStatus:
     STOPPED_DEALLOCATED = 'StoppedDeallocated'
 
 
-class RGStatus:
+class HACK_USER_STATUS:
     """
     For status in DB model Register for registration audit status
     """
@@ -275,12 +275,14 @@ class RGStatus:
     AUTO_PASSED = 3
 
 
-class ADMIN_ROLE_TYPE:
+class HACK_USER_TYPE:
     """
     admin role types
     """
+    VISITOR = 0
     ADMIN = 1
     JUDGE = 2
+    COMPETITOR = 3
 
 
 class ORGANIZATION_TYPE:

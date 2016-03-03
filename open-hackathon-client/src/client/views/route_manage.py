@@ -39,7 +39,6 @@ def create_event():
     return render("/create_event.html", islocal=is_local())
 
 @app.route("/manage")
-@app.route("/manage/")
 @login_required
 def myhackathon():
     return render("/base/manage.html")

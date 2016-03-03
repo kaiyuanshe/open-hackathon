@@ -217,12 +217,13 @@ class Hackathon(HDocumentBase):
     display_name = StringField(required=True)
     ribbon = StringField()  # a short sentence of advertisement
     short_description = StringField()
+    location = StringField()
     description = StringField()
     banners = ListField()
     status = IntField(default=0)  # 0-new 1-online 2-offline
-    creator_id = ReferenceField(User)
+    creator = ReferenceField(User)
     config = DictField()
-    type = IntField()  # enum.HACK_TYPE
+    type = IntField(default=1)  # enum.HACK_TYPE
     organizers = EmbeddedDocumentListField(Organization)
     partners = EmbeddedDocumentListField(Organization)
     tags = ListField()
@@ -243,14 +244,12 @@ class Hackathon(HDocumentBase):
 
 
 class UserHackathon(HDocumentBase):
-    # IMPORTANT: status of registration updated!!!
     user = ReferenceField(User)
     hackathon = ReferenceField(Hackathon)
-    description = StringField()
-    # 0-visitor 1-admin 2-judge 10-not approved user 11-approved user 12-refused user 13-auto approved user
-    status = IntField()
-    like = BooleanField()
-    assets = DictField()  # assets for user
+    role = IntField()  # 0-visitor 1-admin 2-judge 3-competitor
+    status = IntField()  # 0-not approved user 1-approved user 2-refused user 3-auto approved user
+    like = BooleanField(default=True)
+    assets = DictField(default={})  # assets for user
     remark = StringField()
 
     def __init__(self, **kwargs):
@@ -323,9 +322,9 @@ class DockerHostServer(HDocumentBase):
     private_docker_api_port = IntField(min_value=1, max_value=65535, default=4243)
     container_count = IntField(required=True, min_value=0, default=0)
     container_max_count = IntField(required=True, min_value=0)
-    is_auto = BooleanField()  # 0-started manually 1-started by OHP server
+    is_auto = BooleanField(default=False)  # 0-started manually 1-started by OHP server
     state = IntField(default=0)  # 0-VM starting, 1-docker init, 2-docker API ready, 3-unavailable
-    disabled = BooleanField()  # T-disabled by manager, F-available
+    disabled = BooleanField(default=False)  # T-disabled by manager, F-available
     hackathon = ReferenceField(Hackathon)
 
     def __init__(self, **kwargs):

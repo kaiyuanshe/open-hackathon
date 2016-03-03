@@ -88,6 +88,9 @@ class Context(object):
         else:
             return default_value
 
+    def to_dict(self):
+        return dict(self.__dict__)
+
     @staticmethod
     def from_object(arg):
         """Convert JSON-like object to Context recursively

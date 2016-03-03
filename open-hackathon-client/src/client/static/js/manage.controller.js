@@ -183,6 +183,13 @@ angular.module('oh.controllers', [])
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.SERVERS');
 
   }).controller('createController', function($rootScope, $scope, activityService, api) {
-    
-    console.log('createController');
+    formdata = $scope.modules
+    $scope.create_event = function(){
+      api.admin.hackathon.post({body: formdata}).then(function(data){
+        $scope.$emit('showTip', {
+          level: 'tip-success',
+          content: 'Event ' + formdata.name + ' created'
+      });
+      })
+    }
   });

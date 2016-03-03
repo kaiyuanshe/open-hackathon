@@ -31,7 +31,7 @@ from flask import g
 from sqlalchemy import func
 from hackathon import Component, RequiredFeature
 from hackathon.database import AdminHackathonRel, User, Hackathon
-from hackathon.constants import ADMIN_ROLE_TYPE
+from hackathon.constants import HACK_USER_TYPE
 from hackathon.hackathon_response import precondition_failed, ok, not_found, internal_server_error, bad_request
 
 __all__ = ["AdminManager"]
@@ -148,7 +148,7 @@ class AdminManager(Component):
             if ahl is None:
                 ahl = AdminHackathonRel(
                     user_id=user.id,
-                    role_type=args.get("role_type", ADMIN_ROLE_TYPE.ADMIN),
+                    role_type=args.get("role_type", HACK_USER_TYPE.ADMIN),
                     hackathon_id=g.hackathon.id,
                     remarks=args.get("remarks"),
                     create_time=self.util.get_now()
