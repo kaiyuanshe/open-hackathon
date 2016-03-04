@@ -177,6 +177,11 @@ class Template(HDocumentBase):
     def __init__(self, **kwargs):
         super(Template, self).__init__(**kwargs)
 
+    def dic(self):
+        ret = super(Template, self).dic()
+        ret["creator_id"] = ret.pop("creator")
+        return ret
+
 
 class Organization(DynamicEmbeddedDocument):
     id = UUIDField(required=True)

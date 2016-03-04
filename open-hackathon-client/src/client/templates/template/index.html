@@ -10,6 +10,13 @@
     body:after {
     content: initial;
     }
+
+    td.remove-column {
+      text-align: center;
+    }
+    td.remove-column>a:hover{
+      color: #f32333;
+    }
 </style>
 {% endblock %}
 
@@ -76,6 +83,7 @@
                         <th>状态</th>
                         <th>创建时间</th>
                         <th>模板文件</th>
+                        <th></th>
                     </tr>
                     </thead>
                     <tbody id="alltemplatelist">
@@ -98,6 +106,7 @@
         <td>${$item.getStatus(status)}</td>
         <td>${moment(create_time).format('YYYY/MM/DD HH:mm')}</td>
         <td><a href="${url}" download="${url}">下载</a></td>
+        <td class="remove-column"><a data-template-id="${id}"><i class="fa fa-trash-o"></i></a></td>
     </tr>
     {% endraw %}
 </script>

@@ -144,7 +144,7 @@ class TemplateLibrary(Component):
             if template is None:
                 return ok("already removed")
             # user can only delete the template which created by himself except super admin
-            if g.user.id != template.creator.id and not g.use.is_super:
+            if g.user.id != template.creator.id and not g.user.is_super:
                 return forbidden()
             if Experiment.objects(template=template).count() > 0:
                 return forbidden("template already in use")

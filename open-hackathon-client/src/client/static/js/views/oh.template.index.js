@@ -68,7 +68,6 @@
         $('#template_list_filter').find('[data-type="query"]').removeAttr('disabled')
     }
 
-
     function init() {
         var templateform = $('#template_list_filter');
         templateform.bootstrapValidator().on('success.form.bv', function (e) {
@@ -102,11 +101,36 @@
                 }
             }
         });
+
+        $('#alltemplatelist').on('click', '[data-template-id]', function() {
+            var $a = $(this);
+            var id = $a.attr('data-template-id');
+            var templateName = $($a.parent().parent().find('td')[1]).text();
+
+            if(! id)
+              return;
+
+            $a.hide();
+
+            oh.comm.confirm('删除模板', '确认删除模板' + templateName + '吗?', function() {
+              oh.api.template.delete({
+                query: {id: id}
+              }, function(data) {
+                if(data.error) {
+                  oh.comm.alert('删除模板失败', data.error.friendly_message);
+                } else {
+                  getTemplateList();
+                }
+
+                $a.show();
+              });
+            });
+        });
     }
 
     $(function () {
         init();
         getTemplateList();
-    })
+    });
 
 })(window.jQuery, window.oh);
