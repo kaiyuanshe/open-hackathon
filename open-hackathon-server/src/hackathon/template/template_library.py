@@ -31,12 +31,12 @@ from os.path import isfile
 import json
 import requests
 
-from sqlalchemy import and_
 from flask import g, request
+from mongoengine import Q
 
 from hackathon import Component, RequiredFeature, Context
-from hackathon.database import Template, Experiment, HackathonTemplateRel
-from hackathon.hackathon_response import not_found, ok, internal_server_error, forbidden
+from hackathon.hmongo.models import Template, Experiment
+from hackathon.hackathon_response import ok, internal_server_error, forbidden
 from hackathon.constants import FILE_TYPE, TEMPLATE_STATUS
 from template_constants import TEMPLATE
 from template_content import TemplateContent
@@ -56,10 +56,7 @@ class TemplateLibrary(Component):
         :type template_id: int
         :param template_id: unique id of Template
         """
-        template = self.db.get_object(Template, template_id)
-        if template:
-            return template.dic()
-        return not_found("template cannot be found by id %s" % template_id)
+        return Template.objects(id=template_id).first()
 
     def get_template_info_by_name(self, template_name):
         """Query template basic info from DB by its id
@@ -67,13 +64,12 @@ class TemplateLibrary(Component):
         :type template_name: str|unicode
         :param template_name: unique name of Template
         """
-        return self.db.find_first_object_by(Template, name=template_name)
+        return Template.objects(name=template_name).first()
 
     def search_template(self, args):
         """Search template by status, name or description"""
         criterion = self.__generate_search_criterion(args)
-        templates = self.db.find_all_objects(Template, criterion)
-        return [t.dic() for t in templates]
+        return [t.dic() for t in Template.objects(criterion)]
 
     def load_template(self, template):
         """load template into memory either from a local cache path or an remote uri
@@ -133,24 +129,24 @@ class TemplateLibrary(Component):
         :return:
         """
         template_content = self.__load_template_content(args)
-        template = self.__get_template_by_name(template_content.name)
+        template = self.get_template_info_by_name(template_content.name)
         if template is not None:
             # user can only modify the template which created by himself except super admin
-            if g.user.id != template.creator_id and not self.user_manager.is_super_admin(g.user):
+            if g.user.id != template.creator.id and not g.user.is_super:
                 raise Forbidden()
 
         return self.__create_or_update_template(template_content)
 
     def delete_template(self, template_id):
-        self.log.debug("delete template [%d]" % template_id)
+        self.log.debug("delete template [%s]" % template_id)
         try:
-            template = self.db.get_object(Template, template_id)
+            template = self.get_template_info_by_id(template_id)
             if template is None:
                 return ok("already removed")
             # user can only delete the template which created by himself except super admin
-            if g.user.id != template.creator_id and not self.user_manager.is_super_admin(g.user):
+            if g.user.id != template.creator.id and not g.use.is_super:
                 return forbidden()
-            if len(self.db.find_all_objects_by(Experiment, template_id=template_id)) > 0:
+            if Experiment.objects(template=template).count() > 0:
                 return forbidden("template already in use")
 
             # remove template cache and storage
@@ -158,8 +154,8 @@ class TemplateLibrary(Component):
             self.storage.delete(template.url)
 
             # remove record in DB
-            self.db.delete_all_objects_by(HackathonTemplateRel, template_id=template.id)
-            self.db.delete_object(template)
+            # the Hackathon used this template will imply the mongoengine's PULL reverse_delete_rule
+            template.delete()
 
             return ok("delete template success")
         except Exception as ex:
@@ -167,10 +163,7 @@ class TemplateLibrary(Component):
             return internal_server_error("delete template failed")
 
     def template_verified(self, template_id):
-        template = self.db.find_first_object_by(Template, id=template_id)
-        if template:
-            template.status = TEMPLATE_STATUS.CHECK_PASS
-            self.db.commit()
+        Template.objects.update_one(id=template_id, status=TEMPLATE_STATUS.CHECK_PASS)
 
     def __init__(self):
         pass
@@ -202,8 +195,8 @@ class TemplateLibrary(Component):
             context = Context(
                 file_name=file_name,
                 file_type=FILE_TYPE.TEMPLATE,
-                content=template_content.to_dict()
-            )
+                content=template_content.to_dict())
+
             self.log.debug("saving template as file [%s]" % file_name)
             context = self.storage.save(context)
             return context
@@ -225,30 +218,27 @@ class TemplateLibrary(Component):
         :return: if raised exception return InternalServerError else return nothing
 
         """
-        template = self.db.find_first_object_by(Template, name=template_content.name)
+        template = self.get_template_info_by_name(template_content.name)
         try:
             provider = self.__get_provider_from_template_dic(template_content)
             if template is None:
-                self.log.debug("insert template info to db: %s" % template_content.name)
-                template = self.db.add_object_kwargs(Template,
-                                                     name=template_content.name,
-                                                     url=context.url,
-                                                     local_path=context.get("physical_path"),
-                                                     provider=provider,
-                                                     creator_id=g.user.id,
-                                                     status=TEMPLATE_STATUS.UNCHECKED,
-                                                     create_time=self.util.get_now(),
-                                                     update_time=self.util.get_now(),
-                                                     description=template_content.description,
-                                                     virtual_environment_count=len(template_content.units))
+                template = Template.objects.create(
+                    name=template_content.name,
+                    url=context.url,
+                    local_path=context.get("physical_path"),
+                    provider=provider,
+                    creator=g.user,
+                    status=TEMPLATE_STATUS.UNCHECKED,
+                    description=template_content.description,
+                    virtual_environment_count=len(template_content.units))
             else:
-                self.db.update_object(template,
-                                      url=context.url,
-                                      local_path=context.get("physical_path"),
-                                      update_time=self.util.get_now(),
-                                      description=template_content.description,
-                                      virtual_environment_count=len(template_content.units),
-                                      provider=provider)
+                template.update(
+                    url=context.url,
+                    local_path=context.get("physical_path"),
+                    update_time=self.util.get_now(),
+                    provider=provider,
+                    description=template_content.description,
+                    virtual_environment_count=len(template_content.units))
                 self.cache.invalidate(self.__get_template_cache_key(template.id))
 
             return template.dic()
@@ -265,28 +255,27 @@ class TemplateLibrary(Component):
         providers = [int(u.provider) for u in template_content.units]
         return providers[0]
 
-    def __get_template_by_name(self, name):
-        return self.db.find_first_object_by(Template, name=name)
-
     def __generate_search_criterion(self, args):
         """generate DB query criterion according to Querystring of request.
 
-        The output will be SQLAlchemy understandable expressions.
+        The output will be MongoEngine understandable expressions.
         """
         criterion = Template.status != -1
         if 'status' in args and int(args["status"]) >= 0:
-            criterion = Template.status == args['status']
+            criterion = Q(status=args["status"])
+        else:
+            criterion = Q(status__ne=-1)
 
-        if 'name' in args and len(args['name']) > 0:
-            criterion = and_(criterion, Template.name.like('%' + args['name'] + '%'))
+        if 'name' in args and len(args["name"]) > 0:
+            criterion &= Q(name__icontains=args["name"])
 
-        if 'description' in args and len(args['description']) > 0:
-            criterion = and_(criterion, Template.description.like('%' + args['description'] + '%'))
+        if 'description' in args and len(args["description"]) > 0:
+            criterion &= Q(description__icontains=args["description"])
 
         return criterion
 
     def __get_template_cache_key(self, template_id):
-        return "__template__%d__" % template_id
+        return "__template__%s__" % str(template_id)
 
     def __load_template_content(self, args):
         """ Convert dict of template content into TemplateContent object
@@ -309,6 +298,9 @@ class TemplateLibrary(Component):
         :return: if validate passed return nothing else raised a BadRequest exception
 
         """
+        if not args:
+            raise BadRequest(description="template name invalid")
+
         if TEMPLATE.TEMPLATE_NAME not in args:
             raise BadRequest(description="template name invalid")
 

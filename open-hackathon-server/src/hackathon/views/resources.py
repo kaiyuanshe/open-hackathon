@@ -73,7 +73,10 @@ class CurrentTimeResource(HackathonResource):
 class TemplateResource(HackathonResource):
     def get(self):
         context = self.context()
-        return template_library.get_template_info_by_id(context.id)
+        template = template_library.get_template_info_by_id(context.id)
+        if template:
+            return template.dic()
+        return not_found("template cannot be found by id %s" % context.id)
 
     # create template
     @token_required
@@ -91,7 +94,7 @@ class TemplateResource(HackathonResource):
     @token_required
     def delete(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('id', type=int, location='args', required=True)
+        parse.add_argument('id', type=str, location='args', required=True)
         args = parse.parse_args()
         return template_library.delete_template(args['id'])
 
