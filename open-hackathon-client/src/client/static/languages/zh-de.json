@@ -59,8 +59,13 @@
     "RIBBON": "广告语",
     "MAX_ENROLLMENT": "报名人数",
     "SHORT_DESCRIPTION": "简介",
+    "DESCRIPTION": "活动详情",
     "ADD_BANNER": "添加图片",
     "ADD_BANNER_TIP": "推荐尺寸<span class=\"text-red\">752*420</span>px 图片"
+  },
+  "AZURE_FIELDS": {
+    "SUBSCRIPTION_ID": "订阅序号",
+    "MANAGEMENT_HOST": "服务URL"
   },
   "CREATE_ACTIVITY_WIZARD": {
     "STEP1": "填写基本信息",
@@ -69,20 +74,21 @@
     "STEP4": "完成"
   },
   "PLACEHOLDERS": {
-    "EVENT_NAME":"请使用英文小字母、数字和'_'（下划线）'-'(中划线)",
+    "EVENT_NAME": "请使用英文小字母、数字和'_'（下划线）'-'(中划线)",
     "LOCATION": "线上/线下地址",
     "START_TIME": "开始时间",
     "END_TIME": "结束时间",
-    "MAX_ENROLLMENT": "限制人数，0表不限制"
+    "MAX_ENROLLMENT": "限制人数，0表不限制",
+    "SUBSCRIPTION_ID":"SUBSCRIPTION ID"
   },
   "VALIDATE": {
     "datetime": "请填写正确的日期时间",
 
 
-    "EVENT_NAME_REQUIRED":"黑客松名称是必需的，不能为空",
-    "EVENT_NAME_MINLENGTH":"黑客松名称必须5到20个字符",
-    "EVENT_NAME_MAXLENGTH":"黑客松名称必须5到20个字符",
-    "EVENT_NAME_PATTERN":"黑客松名称只能由英文字母的，数字和下划线",
+    "EVENT_NAME_REQUIRED": "黑客松名称是必需的，不能为空",
+    "EVENT_NAME_MINLENGTH": "黑客松名称必须5到20个字符",
+    "EVENT_NAME_MAXLENGTH": "黑客松名称必须5到20个字符",
+    "EVENT_NAME_PATTERN": "黑客松名称只能由英文字母的，数字和下划线",
     "EVENT_START_TIME_REQUIRED": "请填写活动开始时间",
     "EVENT_START_TIME_MAX": "开始时间不能大于结束时间",
     "EVENT_END_TIME_REQUIRED": "请填写活动结束时间",

@@ -183,6 +183,23 @@ angular.module('oh.controllers', [])
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.SERVERS');
 
   }).controller('createController', function($rootScope, $scope, activityService, api) {
-    
+    $scope.wizard = 3;
+    $scope.ssss = '0';
+    $scope.oneAtATime = true;
+    $scope.activitSubmit = function() {
+      $scope.wizard = 2;
+      console.log($scope.modules);
+    };
+
+    $scope.clondFormSubmit = function() {
+
+    };
+    $scope.notUseCloud = function() {
+      $scope.wizard = 4;
+    }
+
+    $scope.expression = function($event) {
+      $event.stopPropagation();
+    }
     console.log('createController');
   });

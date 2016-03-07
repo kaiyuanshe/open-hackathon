@@ -1,3 +1,7 @@
+a:focus {
+  outline: none;
+}
+
 .text-default {
   color: #6d6e70;
 }
@@ -1026,4 +1030,125 @@ label.switchbox input[type=checkbox][disabled]:checked ~ .switchbox-handle i {
 .input-lg {
   border-radius: 2px;
   font-size: 15px;
+}
+
+.pagination-sm > li:first-child > a,
+.pagination-sm > li:first-child > span,
+.pagination-sm > li:last-child > a,
+.pagination-sm > li:last-child > span,
+.pagination > li:first-child > a,
+.pagination > li:first-child > span,
+.pagination > li:last-child > a,
+.pagination > li:last-child > span {
+  border-radius: 0;
+}
+
+.pagination-primary > .active > a,
+.pagination-primary > .active > span,
+.pagination-primary > .active > a:hover,
+.pagination-primary > .active > span:hover,
+.pagination-primary > .active > a:focus,
+.pagination-primary > .active > span:focus {
+  background-color: #019e48;
+  border-color: #019e48;
+}
+
+.pagination-primary > li > a,
+.pagination-primary > li > span {
+  color: #019e48;
+}
+
+.pagination-primary > li > a:hover,
+.pagination-primary > li > span:hover,
+.pagination-primary > li > a:focus,
+.pagination-primary > li > span:focus {
+  color: #016b31;
+}
+
+.pagination-success > .active > a,
+.pagination-success > .active > span,
+.pagination-success > .active > a:hover,
+.pagination-success > .active > span:hover,
+.pagination-success > .active > a:focus,
+.pagination-success > .active > span:focus {
+  background-color: #7dba43;
+  border-color: #7dba43;
+}
+
+.pagination-success > li > a,
+.pagination-success > li > span {
+  color: #7dba43;
+}
+
+.pagination-success > li > a:hover,
+.pagination-success > li > span:hover,
+.pagination-success > li > a:focus,
+.pagination-success > li > span:focus {
+  color: #649535;
+}
+
+.pagination-info > .active > a,
+.pagination-info > .active > span,
+.pagination-info > .active > a:hover,
+.pagination-info > .active > span:hover,
+.pagination-info > .active > a:focus,
+.pagination-info > .active > span:focus {
+  background-color: #00a4ee;
+  border-color: #00a4ee;
+}
+
+.pagination-info > li > a,
+.pagination-info > li > span {
+  color: #00a4ee;
+}
+
+.pagination-info > li > a:hover,
+.pagination-info > li > span:hover,
+.pagination-info > li > a:focus,
+.pagination-info > li > span:focus {
+  color: #0081bb;
+}
+
+.pagination-warning > .active > a,
+.pagination-warning > .active > span,
+.pagination-warning > .active > a:hover,
+.pagination-warning > .active > span:hover,
+.pagination-warning > .active > a:focus,
+.pagination-warning > .active > span:focus {
+  background-color: #ffb800;
+  border-color: #ffb800;
+}
+
+.pagination-warning > li > a,
+.pagination-warning > li > span {
+  color: #ffb800;
+}
+
+.pagination-warning > li > a:hover,
+.pagination-warning > li > span:hover,
+.pagination-warning > li > a:focus,
+.pagination-warning > li > span:focus {
+  color: #cc9300;
+}
+
+.pagination-danger > .active > a,
+.pagination-danger > .active > span,
+.pagination-danger > .active > a:hover,
+.pagination-danger > .active > span:hover,
+.pagination-danger > .active > a:focus,
+.pagination-danger > .active > span:focus {
+  background-color: #cf3c0e;
+  border-color: #cf3c0e;
+}
+
+.pagination-danger > li > a,
+.pagination-danger > li > span {
+  color: #cf3c0e;
+}
+
+.pagination-danger > li > a:hover,
+.pagination-danger > li > span:hover,
+.pagination-danger > li > a:focus,
+.pagination-danger > li > span:focus {
+  color: #cf3c0e;
 }
