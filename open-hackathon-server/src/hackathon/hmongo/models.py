@@ -250,7 +250,7 @@ class UserHackathon(HDocumentBase):
     role = IntField()  # 0-visitor 1-admin 2-judge 3-competitor
     status = IntField()  # 0-not approved user 1-approved user 2-refused user 3-auto approved user
     like = BooleanField(default=True)
-    assets = DictField(default={})  # assets for user
+    assets = ListField(DictField(default={}))  # assets for user
     remark = StringField()
 
     def __init__(self, **kwargs):

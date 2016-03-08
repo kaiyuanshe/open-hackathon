@@ -137,7 +137,7 @@ class HackathonRegistrationListResource(HackathonResource):
         parse = reqparse.RequestParser()
         parse.add_argument('num', type=int, location='args', default=5)
         args = parse.parse_args()
-        return register_manager.get_hackathon_registration_list(args['num'])
+        return register_manager.get_hackathon_registration_list(g.hackathon.id, args['num'])
 
 
 """Resources for user(participant) to join hackathon"""
@@ -519,7 +519,7 @@ class AdminAzureResource(HackathonResource):
 class AdminRegisterListResource(HackathonResource):
     @admin_privilege_required
     def get(self):
-        return register_manager.get_hackathon_registration_list()
+        return register_manager.get_hackathon_registration_list(g.hackathon.id)
 
 
 class AdminRegisterResource(HackathonResource):
