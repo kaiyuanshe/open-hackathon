@@ -31,6 +31,7 @@ from datetime import datetime
 from uuid import UUID
 
 from hackathon.util import get_now
+from hackathon.constants import TEMPLATE_STATUS
 from pagination import Pagination
 
 
@@ -168,10 +169,10 @@ class Template(HDocumentBase):
     name = StringField(required=True, unique=True)
     url = URLField(required=True)
     provider = IntField()
-    status = IntField()  # constants.TEMPLATE_STATUS
+    status = IntField(default=TEMPLATE_STATUS.UNCHECKED)  # constants.TEMPLATE_STATUS
     description = StringField()
     virtual_environment_count = IntField(min_value=1, required=True)
-    creator_id = ReferenceField(User)
+    creator = ReferenceField(User)
 
     def __init__(self, **kwargs):
         super(Template, self).__init__(**kwargs)
@@ -228,7 +229,7 @@ class Hackathon(HDocumentBase):
     partners = EmbeddedDocumentListField(Organization)
     tags = ListField()
     awards = EmbeddedDocumentListField(Award)
-    templates = ListField(ReferenceField(Template))  # templates for hackathon
+    templates = ListField(ReferenceField(Template, reverse_delete_rule=PULL))  # templates for hackathon
     azure_keys = ListField(AzureKey)
 
     event_start_time = DateTimeField()
