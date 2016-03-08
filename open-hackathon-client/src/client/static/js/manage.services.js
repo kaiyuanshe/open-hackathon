@@ -51,7 +51,8 @@ angular.module('oh.api', [])
         }
         return getCmd;
       } else {
-        return getCmd[obj] = function(options, callback) {
+
+        getCmd[obj] = function(options, callback) {
           var deferred = $q.defer();
           var _params = {
             query: {},
@@ -85,12 +86,13 @@ angular.module('oh.api', [])
             });
           return deferred.promise;
         }
+        getCmd[obj]._path_ = name;
+        return getCmd[obj];
       }
     }
 
     return API($window.CONFIG.apiconfig.api, $window.CONFIG.apiconfig.proxy + '/api');
-  })
-  .factory('activityService', function($rootScope, $q, api) {
+  }).factory('activityService', function($rootScope, $q, api) {
     var activity_list = [],
       isLoad = false,
       currentActivity = {};

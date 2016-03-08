@@ -38,6 +38,11 @@ a:focus {
   border-radius: 2px;
 }
 
+.btn-long {
+  padding-left: 30px;
+  padding-right: 30px;
+}
+
 .btn:active,
 .btn.active {
   outline: 0;
@@ -1151,4 +1156,82 @@ label.switchbox input[type=checkbox][disabled]:checked ~ .switchbox-handle i {
 .pagination-danger > li > a:focus,
 .pagination-danger > li > span:focus {
   color: #cf3c0e;
+}
+
+.label {
+  border-radius: 2px;
+  font-weight: normal;
+  padding: 5px 15px;
+}
+
+.label-primary {
+  background-color: #019e48;
+}
+
+.label-success {
+  background-color: #7dba43;
+}
+
+.label-info {
+  background-color: #00a4ee;
+}
+
+.label-warning {
+  background-color: #ffb800;
+}
+
+.label-danger {
+  background-color: #cf3c0e;
+}
+
+.icon {
+  display: table-cell;
+  border-radius: 50%;
+  vertical-align: middle;
+  text-align: center;
+  background-color: #CA0505;
+  width: 25px;
+  height: 25px;
+  color: #fff;
+  font-size: 14px;
+}
+
+.icon-lg {
+  width: 100px;
+  height: 100px;
+  font-size: 70px;
+}
+
+.icon-md {
+  width: 50px;
+  height: 50px;
+  font-size: 35px;
+}
+
+.icon-primary {
+  background-color: #019e48;
+}
+
+.icon-success {
+  background-color: #7dba43;
+}
+
+.icon-info {
+  background-color: #00a4ee;
+}
+
+.icon-warning {
+  background-color: #ffb800;
+}
+
+.icon-danger {
+  background-color: #cf3c0e;
+}
+
+input[type=radio]:checked+.info-box {
+  border-color: #7dba43;
+}
+input[type=radio]:checked+.info-box footer{
+  background:  #7dba43;
+  color:#fff;
 }

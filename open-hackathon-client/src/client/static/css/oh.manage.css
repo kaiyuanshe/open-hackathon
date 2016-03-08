@@ -667,7 +667,7 @@ tags-input .tags .tag-item .remove-button {
   text-align: right;
 }
 
-.form-horizontal header {
+.form-horizontal>header {
   display: block;
   padding: 50px 0 42px;
   color: #929497;
@@ -760,6 +760,7 @@ tags-input .tags .tag-item .remove-button {
   color: #00a4ee;
   text-decoration: none;
 }
+
 .inner-list .panel-title a:hover label,
 .inner-list .panel-open .panel-title a label,
 .inner-list .panel-open .panel-title a:hover label {
@@ -781,4 +782,97 @@ tags-input .tags .tag-item .remove-button {
   padding: 4px 0px 5px 3px;
   float: none;
   vertical-align: middle;
+}
+
+.clond-templates {
+  margin: 0 -5px;
+}
+
+.clond-templates .item {
+  border: 1px solid #d0d2d3;
+  border-radius: 2px;
+  margin-bottom: 20px;
+}
+
+.clond-templates .btn-group-justified>.btn {
+  border-radius: 0;
+  border-color: #d0d2d3;
+  border-bottom: none;
+  border-right: none;
+}
+
+.clond-templates .btn-group-justified>.btn:first-child:not(:last-child):not(.dropdown-toggle) {
+  border-left: none;
+}
+
+.btn-group-justified .checkbox {
+  padding: 0;
+  min-height: 0;
+}
+
+.clond-templates> .btn:last-child:not(:first-child),
+.btn-group > .dropdown-toggle:not(:first-child) {
+  border-bottom-left-radius: 0;
+  border-top-left-radius: 0;
+}
+
+.clond-templates header {
+  padding: 10px 0 5px;
+  margin: 0 15px;
+  border-bottom: 1px solid #d0d2d3;
+  font-size: 16px;
+  font-weight: 700;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.clond-templates .item-body {
+  padding: 15px;
+  max-height: 155px;
+  overflow: hidden;
+}
+.clond-templates .item-body p{
+  font-size:14px;
+  margin-top: 15px;
+  overflow: hidden;
+  max-height: 40px;
+}
+.clond-templates [class*="col-"] {
+  padding: 0 5px;
+}
+
+.clond-templates .author {
+  margin-right: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.clond-templates .author .picture {
+  width: 32px;
+  height: 32px;
+}
+
+.clond-templates .author .picture img {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.float-left {
+  float: left;
+}
+
+.float-right {
+  float: right;
+}
+
+.line {
+  line-height: 30px;
+}
+.line  .label {
+  margin-top:3px; 
+}
+.inline-block{
+  display: inline-block;
 }

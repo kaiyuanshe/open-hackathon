@@ -65,7 +65,8 @@ angular.module('oh.controllers', [])
       $scope.loading = false;
     });
 
-  }).controller('manageController', function($scope, $state, session, NAV) {
+  })
+  .controller('manageController', function($scope, $state, session, NAV) {
     $scope.page = {
       name: ''
     };
@@ -91,7 +92,8 @@ angular.module('oh.controllers', [])
       }, {});
     }
 
-  }).controller('editController', function($rootScope, $scope, $filter, dialog, session, activityService, api, activity, speech) {
+  })
+  .controller('editController', function($rootScope, $scope, $filter, dialog, session, activityService, api, activity, speech) {
 
     $scope.$emit('pageName', 'SETTINGS.EDIT_ACTIVITY');
 
@@ -154,48 +156,229 @@ angular.module('oh.controllers', [])
       });
     }
 
-  }).controller('usersController', function($rootScope, $scope, activityService, api) {
+  })
+  .controller('usersController', function($rootScope, $scope, activityService, api) {
     $scope.$emit('pageName', 'SETTINGS.USERS');
 
-
-  }).controller('adminController', function($rootScope, $scope, activityService, api) {
+  })
+  .controller('adminController', function($rootScope, $scope, activityService, api) {
     $scope.$emit('pageName', 'SETTINGS.ADMINISTRATORS');
 
-  }).controller('organizersController', function($rootScope, $scope, activityService, api) {
+  })
+  .controller('organizersController', function($rootScope, $scope, activityService, api) {
     $scope.$emit('pageName', 'SETTINGS.ORGANIZERS');
 
-  }).controller('prizesController', function($rootScope, $scope, activityService, api) {
+  })
+  .controller('prizesController', function($rootScope, $scope, activityService, api) {
     $scope.$emit('pageName', 'SETTINGS.PRIZES');
 
-  }).controller('awardsController', function($rootScope, $scope, activityService, api) {
+  })
+  .controller('awardsController', function($rootScope, $scope, activityService, api) {
     $scope.$emit('pageName', 'SETTINGS.AWARDS');
 
-  }).controller('veController', function($rootScope, $scope, activityService, api) {
+  })
+  .controller('veController', function($rootScope, $scope, activityService, api) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.VIRTUAL_ENVIRONMENT');
 
-  }).controller('monitorController', function($rootScope, $scope, activityService, api) {
+  })
+  .controller('monitorController', function($rootScope, $scope, activityService, api) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.ENVIRONMENTAL_MONITOR');
 
-  }).controller('cloudController', function($rootScope, $scope, activityService, api) {
+  })
+  .controller('cloudController', function($rootScope, $scope, activityService, api) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.CLOUD_RESOURCES');
 
-  }).controller('serversController', function($rootScope, $scope, activityService, api) {
+  })
+  .controller('serversController', function($rootScope, $scope, activityService, api) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.SERVERS');
 
-  }).controller('createController', function($rootScope, $scope, activityService, api) {
-    $scope.wizard = 3;
-    $scope.ssss = '0';
+  })
+  .controller('createController', function($rootScope, $scope, $timeout, $uibModal, activityService, api) {
+    var request;
+    $scope.wizard = 2;
     $scope.oneAtATime = true;
-    $scope.activitSubmit = function() {
-      $scope.wizard = 2;
-      console.log($scope.modules);
+    $scope.isShowAdvancedSettings = true;
+    $scope.activityFormDisabled = false;
+    $scope.activity = {
+      status: -1
+    }
+
+    $scope.configs = {
+      location: '',
+      max_enrollment: 0,
+      auto_approve: -1,
+      alauda_enabled: false,
+      recycle_enabled: false,
+      recycle_minutes: 0,
+      pre_allocate_enabled: false,
+      pre_allocate_number: 1,
+      freedom_team: false,
+      login_provider: 63
+    };
+
+    function getConfigs() {
+      var configs = [];
+      angular.forEach($scope.configs, function(value, key) {
+        configs.push({
+          key: key,
+          value: value
+        });
+      })
+      return configs;
+    }
+
+    $scope.$watch('activity.name', function(newValue, oldValue, scope) {
+      if (request && newValue) {
+        $timeout.cancel(request);
+      }
+      $timeout(function() {
+        api.admin.hackathon.checkname.get({
+          query: {
+            name: newValue
+          }
+        }, function(data) {
+          $scope.activityForm.name.$setValidity('rometname', !data);
+        });
+      }, 400);
+    });
+
+    $scope.activitySubmit = function() {
+      $scope.activityForm.disabled = true;
+      api.admin.hackathon.post({
+        body: $scope.activity
+      }, function(data) {
+        if (data.error) {
+          if (data.error.code == 412) {
+            $scope.activityForm.name.$setValidity('rometname', false);
+          } else {
+            $scope.$emit('showTip', {
+              level: 'tip-danger',
+              content: data.error.friendly_message
+            });
+          }
+          $scope.activityForm.disabled = false;
+        } else {
+
+          api.admin.hackathon.config.post({
+            header: {
+              hackathon_name: $scope.activity.name
+            },
+            body: getConfigs()
+          }).then(function(data) {
+            if (data.error) {
+              $scope.$emit('showTip', {
+                level: 'tip-danger',
+                content: data.error.friendly_message
+              });
+              $scope.activityForm.disabled = false;
+            } else {
+              var tags = [];
+              angular.forEach($scope.tags, function(obj, index) {
+                tags.push(obj.text);
+              })
+              api.admin.hackathon.tags.post({
+                header: {
+                  hackathon_name: $scope.activity.name
+                },
+                body: tags
+              }).then(function(data) {
+                if (data.error) {
+                  $scope.$emit('showTip', {
+                    level: 'tip-danger',
+                    content: data.error.friendly_message
+                  });
+                } else {
+                  $scope.wizard = 2;
+                }
+                $scope.activityForm.disabled = false;
+              });
+            }
+          });
+        }
+      });
     };
 
     $scope.clondFormSubmit = function() {
+      $scope.configs.auto_approve = $scope.clondservices;
+
+      var modalInstance = $uibModal.open({
+        animation: true,
+        templateUrl: 'manage/template/dialogs/confirm.html',
+        controller: function($scope, $uibModalInstance) {
+          $scope.title = "sfasdfas";
+          $scope.body = '<p><label><label class="icon icon-md icon-success"><i class="fa fa-check"></i></label> </label>一旦确定服务商就不能在修改！是否确定？</p>'
+          $scope.ok = function() {
+            $uibModalInstance.close();
+          };
+
+          $scope.cancel = function() {
+            $uibModalInstance.dismiss('cancel');
+          };
+        },
+        size: 'sm modal-success'
+      });
+
+      modalInstance.result.then(function() {
+        $scope.isAzureForm = $scope.clondservices == 1;
+        if(!$scope.isAzureForm){
+          api.template.list.get({}).then(function(data) {
+            console.log(data);
+          });
+
+          api.admin.hackathon.config.put({
+            header: {
+              hackathon_name: $scope.activity.name
+            },
+            body: getConfigs()
+          }).then(function(data) {
+            if (data.error) {
+              $scope.$emit('showTip', {
+                level: 'tip-danger',
+                content: data.error.friendly_message
+              });
+            } else {
+
+            }
+          });
+        }
+      });
 
     };
+
     $scope.notUseCloud = function() {
-      $scope.wizard = 4;
+      $scope.configs.auto_approve = 0;
+      api.admin.hackathon.config.put({
+        header: {
+          hackathon_name: $scope.activity.name
+        },
+        body: getConfigs()
+      }).then(function(data) {
+        if (data.error) {
+          $scope.$emit('showTip', {
+            level: 'tip-danger',
+            content: data.error.friendly_message
+          });
+        } else {
+          api.admin.hackathon.put({
+            header: {
+              hackathon_name: $scope.activity.name
+            },
+            body: {
+              status: 0
+            }
+          }).then(function(data) {
+            if (data.error) {
+              $scope.$emit('showTip', {
+                level: 'tip-danger',
+                content: data.error.friendly_message
+              });
+            } else {
+              $scope.isShowAdvancedSettings = false;
+              $scope.wizard = 4;
+            }
+          })
+        }
+      });
     }
 
     $scope.expression = function($event) {
