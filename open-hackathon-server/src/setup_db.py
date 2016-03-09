@@ -25,7 +25,7 @@
 # -----------------------------------------------------------------------------------
 
 try:
-    from hackathon.hmongo.models import User, Hackathon
+    from hackathon.hmongo.models import User
 except ImportError:
     pass
 
@@ -48,69 +48,7 @@ def setup_db():
         password="e8104164dfc4a479e42a9f6c0aefd2be",
         is_super=True)
 
-    user = User(
-        name="user",
-        nickname="user",
-        password="e8104164dfc4a479e42a9f6c0aefd2be")
-
     User.objects(name="admin").update_one(__raw__={"$set": admin.to_mongo().to_dict()}, upsert=True)
-    User.objects(name="user").update_one(__raw__={"$set": user.to_mongo().to_dict()}, upsert=True)
 
-
-    from hackathon.util import get_now
-    import datetime
-    hackathon1 = Hackathon(
-        name="hackathon1",
-        display_name="display1",
-        ribbon="ribbon1",
-        short_description = "short_description1",
-        description="description1",
-        banners=["https://octodex.github.com/images/hanukkat.png", "https://octodex.github.com/images/welcometocat.png", "https://octodex.github.com/images/filmtocat.png"],
-        status=1,
-        creator_id=User.objects(name="admin").first(),
-        type=1,
-        tags=["tag1", "tag2", "tag3"],
-        config={
-            "location": "loaction1",
-            "max_enrollment": "10",
-            "auto_approve": 1,
-            "login_provider": 3
-        },
-        event_start_time = get_now(),
-        event_end_time = get_now() + datetime.timedelta(hours = 8),
-        registration_start_time = get_now(),
-        registration_end_time = get_now() + datetime.timedelta(hours = 8),
-        judge_start_time = get_now(),
-        judge_end_time = get_now() + datetime.timedelta(hours = 8),
-    )
-
-    hackathon2 = Hackathon(
-        name="hackathon2",
-        display_name="display2",
-        ribbon="ribbon2",
-        short_description = "short_description2",
-        description="description2",
-        banners=["https://octodex.github.com/images/privateinvestocat.jpg", "https://octodex.github.com/images/gracehoppertocat.jpg", "https://octodex.github.com/images/gobbleotron.gif"],
-        status=1,
-        creator_id=User.objects(name="user").first(),
-        type=1,
-        tags=["tag1", "tag2", "tag3"],
-        config={
-            "location": "loaction2",
-            "max_enrollment": "10",
-            "auto_approve": 1,
-            "login_provider": 2
-        },
-        event_start_time = get_now(),
-        event_end_time = get_now() + datetime.timedelta(hours = 8),
-        registration_start_time = get_now(),
-        registration_end_time = get_now() + datetime.timedelta(hours = 8),
-        judge_start_time = get_now(),
-        judge_end_time = get_now() + datetime.timedelta(hours = 8),
-    )
-
-    Hackathon.objects(name="hackathon1").update_one(__raw__={"$set": hackathon1.to_mongo().to_dict()}, upsert=True)
-    Hackathon.objects(name="hackathon2").update_one(__raw__={"$set": hackathon2.to_mongo().to_dict()}, upsert=True)
-    
 
 setup_db()

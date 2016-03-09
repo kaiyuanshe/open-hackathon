@@ -601,7 +601,6 @@ class HackathonManager(Component):
         self.db.delete_all_objects_by(HackathonNotice, id=notice_id)
         return ok()
 
-    # TODO: remove hard code and implements pagination
     def get_hackathon_notice_list(self, body):
         """
         list hackathon notices, notices are paginated, can be filtered by hackathon_name, event and category, 
@@ -633,71 +632,44 @@ class HackathonManager(Component):
         order_by = body.get("order_by", "time")
         page = int(body.get("page", 1))
         per_page = int(body.get("per_page", 1000))
+        
+        hackathon_filter = Q()
+        category_filter = Q()
+        event_filter = Q()
+        order_by_condition = '-update_time'
 
-
-        # query = HackathonNotice.objects
-
-        # # filter by hackathon_name, category or event
-        # if hackathon_name:
-        #     hackathon = self.get_hackathon_by_name(hackathon_name)
-        #     if hackathon:
-        #         query = query.filter(HackathonNotice.hackathon_id == hackathon.id)
-        #     else:
-        #         return not_found("hackathon_name not found")
-        # if notice_category:
-        #     notice_category_tuple = tuple([int(category) for category in notice_category.split(',')])
-        #     query = query.filter(HackathonNotice.category.in_(notice_category_tuple))
-        # if notice_event:
-        #     notice_event_tuple = tuple([int(event) for event in notice_event.split(',')])
-        #     query = query.filter(HackathonNotice.event.in_(notice_event_tuple))
-
-        # # order by time, category or event
-        # if order_by == 'time':
-        #     query = query.order_by(HackathonNotice.update_time.desc())
-        # elif order_by == 'category':
-        #     query = query.order_by(HackathonNotice.category)
-        # elif order_by == 'event':
-        #     query = query.order_by(HackathonNotice.event)
-        # else:
-        #     query = query.order_by(HackathonNotice.update_time.desc())
-
-        # pagination = self.db.paginate(query, page, per_page)
-
-        # def func(hackathon_notice):
-        #     detail = hackathon_notice.dic()
-        #     return detail
-
-        # return self.util.paginate(pagination, func)
-
-        query = HackathonNotice.objects()
         if hackathon_name:
             hackathon = Hackathon.objects(name=hackathon_name).only('name').first()
             if hackathon:
-                query = query.filter(hackathon=hackathon)
+                hackathon_filter = Q(hackathon=hackathon)
             else:
                 return not_found('hackathon_name not found')
 
         if notice_category:
             notice_category_tuple = tuple([int(category) for category in notice_category.split(',')])
-            query = query.filter(category__in=notice_category_tuple)
+            category_filter = Q(category__in=notice_category_tuple)
         if notice_event:
             notice_event_tuple = tuple([int(event) for event in notice_event.split(',')])
-            query = query.filter(event__in=notice_event_tuple)
+            event_filter = Q(event__in=notice_event_tuple)
 
-        # order by time, category or event
-        if order_by == 'time':
-            query = query.order_by('-update_time')
-        elif order_by == 'category':
-            query = query.order_by('-category')
+        if order_by == 'category':
+            order_by_condition = '+category'
         elif order_by == 'event':
-            query = query.order_by('-event')
+            order_by_condition = '+event'
         else:
-            query = query.order_by('-update_time')
+            order_by_condition = '-update_time'
 
-        query_list = [q.dic() for q in query]
-        query_dict = {'items': query_list}
+        pagination = HackathonNotice.objects(
+            hackathon_filter & category_filter & event_filter
+        ).order_by(
+            order_by_condition
+        ).paginate(page, per_page)
 
-        return query_dict
+        def func(hackathon_notice):
+            return hackathon_notice.dic()
+
+        # return serializable items as well as total count
+        return self.util.paginate(pagination, func)
 
 
     def schedule_pre_allocate_expr_job(self):
