@@ -29,6 +29,7 @@ import sys
 sys.path.append("..")
 import imghdr
 from datetime import timedelta
+from bson import ObjectId
 
 from werkzeug.exceptions import PreconditionFailed, InternalServerError, BadRequest
 from flask import g, request
@@ -37,12 +38,9 @@ from lxml.html.clean import Cleaner
 from mongoengine import Q
 from mongoengine.context_managers import no_dereference
 
-# from hackathon.database import User, AdminHackathonRel, DockerHostServer, HackathonLike, \
-#     HackathonStat, HackathonConfig, HackathonTag, UserHackathonRel, HackathonOrganizer, Award, UserHackathonAsset, \
-#     UserTeamRel, HackathonNotice
-from hackathon.hmongo.models import Hackathon, HackathonNotice
+from hackathon.hmongo.models import Hackathon, UserHackathon, DockerHostServer, User, HackathonNotice
 from hackathon.hackathon_response import internal_server_error, ok, not_found, forbidden
-from hackathon.constants import HACKATHON_BASIC_INFO, ADMIN_ROLE_TYPE, HACK_STATUS, RGStatus, HTTP_HEADER, \
+from hackathon.constants import HACKATHON_BASIC_INFO, HACK_USER_TYPE, HACK_STATUS, HACK_USER_STATUS, HTTP_HEADER, \
     FILE_TYPE, HACK_TYPE, HACKATHON_STAT, DockerHostServerStatus, HACK_NOTICE_CATEGORY, HACK_NOTICE_EVENT
 from hackathon import RequiredFeature, Component, Context
 
@@ -94,14 +92,14 @@ class HackathonManager(Component):
         if not name:
             return None
 
-        return self.db.find_first_object_by(Hackathon, name=name)
+        return Hackathon.objects(name=name).first()
 
     def get_hackathon_by_id(self, hackathon_id):
         """Query hackathon by id
 
         :return hackathon instance or None
         """
-        return self.db.find_first_object_by(Hackathon, id=hackathon_id)
+        return Hackathon.objects(id=ObjectId(hackathon_id))
 
     def get_hackathon_detail(self, hackathon):
         user = None
@@ -249,12 +247,12 @@ class HackathonManager(Component):
 
         :rtype: dict
         """
-        hackathon = self.get_hackathon_by_name(context.name)
-        if hackathon is not None:
+        hackathon = Hackathon.objects(name=context.name).first()
+        if hackathon:
             raise PreconditionFailed("hackathon name already exists")
 
         self.log.debug("add a new hackathon:" + context.name)
-        new_hack = self.__create_hackathon(context)
+        new_hack = self.__create_hackathon(g.user, context)
 
         # init data is for local only
         if self.util.is_local():
@@ -753,8 +751,8 @@ class HackathonManager(Component):
 
         return detail
 
-    def __create_hackathon(self, context):
-        """Insert hackathon and admin_hackathon_rel to database
+    def __create_hackathon(self, creator, context):
+        """Insert hackathon and creator(admin of course) to database
 
         We enforce that default config are used during the creation
 
@@ -771,16 +769,19 @@ class HackathonManager(Component):
             ribbon=context.get("ribbon"),
             description=context.get("description"),
             short_description=context.get("short_description"),
-            banners=context.get("banners"),
+            location=context.get("location"),
+            banners=context.get("banners", []),
             status=HACK_STATUS.INIT,
-            creator_id=g.user.id,
+            creator=creator,
+            type=context.get("type", HACK_TYPE.HACKATHON),
+            config=context.get("config", Context()).to_dict(),
+            tags=context.get("tags", []),
             event_start_time=context.get("event_start_time"),
             event_end_time=context.get("event_end_time"),
             registration_start_time=context.get("registration_start_time"),
             registration_end_time=context.get("registration_end_time"),
             judge_start_time=context.get("judge_start_time"),
-            judge_end_time=context.get("judge_end_time"),
-            type=context.get("type", HACK_TYPE.HACKATHON)
+            judge_end_time=context.get("judge_end_time")
         )
 
         # basic xss prevention
@@ -788,17 +789,16 @@ class HackathonManager(Component):
             new_hack.description = self.cleaner.clean_html(new_hack.description)
 
         # insert into table hackathon
-        self.db.add_object(new_hack)
+        new_hack.save()
 
         # add the current login user as admin and creator
         try:
-            ahl = AdminHackathonRel(user_id=g.user.id,
-                                    role_type=ADMIN_ROLE_TYPE.ADMIN,
-                                    hackathon_id=new_hack.id,
-                                    status=HACK_STATUS.INIT,
-                                    remarks='creator',
-                                    create_time=self.util.get_now())
-            self.db.add_object(ahl)
+            admin = UserHackathon(user=creator,
+                                  hackathon=new_hack,
+                                  role_type=HACK_USER_TYPE.ADMIN,
+                                  status=HACK_USER_STATUS.AUTO_PASSED,
+                                  remarks='creator')
+            admin.save()
         except Exception as ex:
             # TODO: send out a email to remind administrator to deal with this problems
             self.log.error(ex)
@@ -866,8 +866,8 @@ class HackathonManager(Component):
             result[item.type] = item.count
 
         reg_list = hackathon.registers.filter(UserHackathonRel.deleted != 1,
-                                              UserHackathonRel.status.in_([RGStatus.AUTO_PASSED,
-                                                                           RGStatus.AUDIT_PASSED])).all()
+                                              UserHackathonRel.status.in_([HACK_USER_STATUS.AUTO_PASSED,
+                                                                           HACK_USER_STATUS.AUDIT_PASSED])).all()
 
         reg_count = len(reg_list)
         if reg_count > 0:
@@ -889,20 +889,21 @@ class HackathonManager(Component):
         """
         try:
             # test docker host server
-            docker_host = DockerHostServer(vm_name="localhost", public_dns="localhost",
-                                           public_ip="127.0.0.1", public_docker_api_port=4243,
-                                           private_ip="127.0.0.1", private_docker_api_port=4243,
-                                           container_count=0, container_max_count=100,
-                                           disabled=0, state=DockerHostServerStatus.DOCKER_READY,
-                                           hackathon=hackathon)
-            if self.db.find_first_object_by(DockerHostServer, vm_name=docker_host.vm_name,
-                                            hackathon_id=hackathon.id) is None:
-                self.db.add_object(docker_host)
+            host = DockerHostServer(vm_name="localhost",
+                                    public_dns="localhost",
+                                    public_ip="127.0.0.1",
+                                    public_docker_api_port=4243,
+                                    private_ip="127.0.0.1",
+                                    private_docker_api_port=4243,
+                                    container_count=0,
+                                    container_max_count=100,
+                                    disabled=False,
+                                    state=DockerHostServerStatus.DOCKER_READY,
+                                    hackathon=hackathon)
+            host.save()
         except Exception as e:
             self.log.error(e)
             self.log.warn("fail to create test data")
-
-        return
 
     def __validate_upload_files(self):
         # check file size

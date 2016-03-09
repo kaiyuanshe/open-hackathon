@@ -23,7 +23,7 @@
                 <div class="form-group">
                   <label class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.NAME">NAME</label>
                   <div class="col-xs-10 required">
-                    <input type="text" class="form-control" name="name" placeholder="{{'ACTIVITY_FIELDS.NAME' | translate}}" ng-model="modules.name" ng-trim="true" 
+                    <input type="text" class="form-control" name="name" placeholder="{{'ACTIVITY_FIELDS.NAME' | translate}}" ng-model="modules.name" ng-trim="true"
                     ng-minleng="5" 
                     ng-maxlength="20"
                     maxlength="20" 
@@ -42,7 +42,7 @@
                 <div class="form-group" ng-class="{'has-error': activitForm.display_name.$touched && activitForm.display_name.$invalid,'has-success':activitForm.display_name.$valid}">
                   <label for="inputPassword" class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.DISPLAY_NAME">DISPLAY_NAME</label>
                   <div class="col-xs-10 required">
-                    <input type="text" class="form-control" name="display_name" placeholder="{{'ACTIVITY_FIELDS.DISPLAY_NAME' | translate}}" ng-model="modules.display_name" ng-trim="true" ng-maxlength="10" required>
+                    <input type="text" class="form-control" name="display_name" placeholder="{{'ACTIVITY_FIELDS.DISPLAY_NAME' | translate}}" ng-model="modules.display_name" ng-trim="true" ng-maxlength="100" required>
                     <div class="messages" ng-messages="activitForm.display_name.$error" ng-if="activitForm.display_name.$touched && activitForm.display_name.$invalid">
                       <span ng-message="maxlength"><i class="fa fa-close" uib-tooltip="" tooltip-placement="right auto" ></i></span>
                       <span ng-message="required"><i class="fa fa-close" uib-tooltip="" tooltip-placement="right auto"></i></span>
@@ -55,7 +55,7 @@
                 <div class="form-group" ng-class="{'has-error': activitForm.tags.$touched && activitForm.tags.$invalid,'has-success':activitForm.tags.$touched && activitForm.tags.$valid}">
                   <label for="inputPassword" class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.TAGS">TAGS</label>
                   <div class="col-xs-10 control-addon">
-                    <tags-input ng-model="tag" name="tags" placeholder="{{ 'ACTIVITY_FIELDS.TAGS' | translate}}" min-length="2">
+                    <tags-input ng-model="tags" name="tags" placeholder="{{ 'ACTIVITY_FIELDS.TAGS' | translate}}" min-length="2">
                       <i class="control-icon fa fa-tag"></i>
                     </tags-input>
                     <div class="messages" ng-if="activitForm.tags.$touched && activitForm.tags.$valid">
@@ -66,7 +66,7 @@
                 <div class="form-group" ng-class="{'has-success':activitForm.location.$touched && activitForm.location.$valid}">
                   <label for="inputPassword" class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.LOCATION">LOCATION</label>
                   <div class="col-xs-10 control-addon">
-                    <input type="text" class="form-control" name="location" placeholder="{{'PLACEHOLDERS.LOCATION' | translate}}" ng-model="modules.config.location">
+                    <input type="text" class="form-control" name="location" placeholder="{{'PLACEHOLDERS.LOCATION' | translate}}" ng-model="modules.location">
                     <i class="control-icon fa fa-map-marker"></i>
                     <div class="messages" ng-if="activitForm.location.$touched && activitForm.location.$valid">
                       <i class="fa fa-check"></i>
@@ -178,6 +178,17 @@
                   <label for="inputPassword" class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.SHORT_DESCRIPTION">SHORT_DESCRIPTION</label>
                   <div class="col-xs-10">
                     <textarea class="form-control" ng-model="modules.short_description"></textarea>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.DESCRIPTION">DESCRIPTION</label>
+                  <div class="col-xs-10">
+                    <textarea class="form-control" ng-model="modules.description"></textarea>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <div class="col-xs-10">
+                    <button type="button" class="btn btn-success" ng-click="create_event()">Next</button>
                   </div>
                 </div>
               </fieldset>

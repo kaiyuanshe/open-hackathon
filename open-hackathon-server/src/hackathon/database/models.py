@@ -848,7 +848,7 @@ class AdminHackathonRel(DBBase):
     user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
     user = relationship('User', backref=backref('admin_hackathon_rels', lazy='dynamic'))
 
-    role_type = Column(Integer)  # enum.ADMIN_ROLE_TYPE
+    role_type = Column(Integer)  # enum.HACK_USER_TYPE
     hackathon_id = Column(Integer)
     status = Column(Integer, default=0)  # reserved, not in use currently
     remarks = Column(String(255))
