@@ -34,6 +34,7 @@ from werkzeug.exceptions import PreconditionFailed, InternalServerError, BadRequ
 from flask import g, request
 import lxml
 from lxml.html.clean import Cleaner
+from mongoengine import Q
 from mongoengine.context_managers import no_dereference
 
 from hackathon.database import User, AdminHackathonRel, DockerHostServer, HackathonLike, \
@@ -117,7 +118,7 @@ class HackathonManager(Component):
         cache_key = "hackathon_stat_%s" % hackathon.id
         return self.cache.get_cache(key=cache_key, createfunc=internal_get_stat)
 
-    # TODO: remove hard code and implement pagination
+    # TODO: implement HackathonStat related features: order_by == 'registered_users_num':
     def get_hackathon_list(self, args):
         # get values from request's QueryString
         page = int(args.get("page", 1))
@@ -127,82 +128,38 @@ class HackathonManager(Component):
         name = args.get("name")
 
         # build query by search conditions and order_by
-        # query = Hackathon.query
-        # if status:
-        #     query = query.filter(Hackathon.status == status)
-        # if name:
-        #     query = query.filter(Hackathon.name.like("%" + name + "%"))
+        status_filter = Q()
+        name_filter = Q()
+        order_by_condition = '-id'
 
-        # if order_by == "create_time":
-        #     query = query.order_by(Hackathon.create_time.desc())
-        # elif order_by == "event_start_time":
-        #     # all started and coming hackathon-activities would be shown based on event_start_time.
-        #     query = query.order_by(Hackathon.event_start_time.desc())
-
-        #     # just coming hackathon-activities would be shown based on event_start_time.
-        #     # query = query.order_by(Hackathon.event_start_time.asc()).filter(Hackathon.event_start_time > self.util.get_now())
-        # elif order_by == "registered_users_num":
-        #     # hackathons with zero registered users would not be shown.
-        #     query = query.join(HackathonStat).order_by(HackathonStat.count.desc())
-        # else:
-        #     query = query.order_by(Hackathon.id.desc())
-
-        # # perform db query with pagination
-        # pagination = self.db.paginate(query, page, per_page)
-
-        # # check whether it's anonymous user or not
-        # user = None
-        # if self.user_manager.validate_login():
-        #     user = g.user
-
-        # def func(hackathon):
-        #     return self.__get_hackathon_detail(hackathon, user)
-
-        # # return serializable items as well as total count
-        # return self.util.paginate(pagination, func)
-
-        query = Hackathon.objects()
         if status:
-            query = query.filter(status=status)
+            status_filter = Q(status=status)
         if name:
-            query = query.filter(name__contains=name)
+            name_filter = Q(name__contains=name)
 
-        if order_by == "create_time":
-            query = query.order_by('-create_time')
-        elif order_by == "event_start_time":
-            # all started and coming hackathon-activities would be shown based on event_start_time.
-            query = query.order_by('-event_start_time')
-
-            # just coming hackathon-activities would be shown based on event_start_time.
-            # query = query.order_by(Hackathon.event_start_time.asc()).filter(Hackathon.event_start_time > self.util.get_now())
-        elif order_by == "registered_users_num":
+        if order_by == 'create_time':
+            order_by_condition = '-create_time'
+        elif order_by == 'event_start_time':
+            order_by_condition = '-event_start_time'
+        elif order_by == 'registered_users_num':
             # hackathons with zero registered users would not be shown.
-            pass #TODO 
-            # query = query.join(HackathonStat).order_by(HackathonStat.count.desc())
+            # TODO
+            pass
         else:
-            query = query.order_by('-id')
-
-        # TO CHANGE, no pagination
-        for q in query:
-            q['stat'] = {'like': 1}
-        query_list = [q.dic() for q in query]
-        query_dict = {'items': query_list}
-
-        return query_dict
+            order_by_condition = '-id'
 
         # perform db query with pagination
-        # pagination = self.db.paginate(query, page, per_page)
+        pagination = Hackathon.objects(status_filter & name_filter).order_by(order_by_condition).paginate(page, per_page)
 
-        # # check whether it's anonymous user or not
-        # user = None
-        # if self.user_manager.validate_login():
-        #     user = g.user
+        user = None
+        if self.user_manager.validate_login():
+            user = g.user
 
-        # def func(hackathon):
-        #     return self.__get_hackathon_detail(hackathon, user)
+        def func(hackathon):
+            return self.__get_hackathon_detail(hackathon, user)
 
-        # # return serializable items as well as total count
-        # return self.util.paginate(pagination, func)
+        # return serializable items as well as total count
+        return self.util.paginate(pagination, func)
 
 
     def get_online_hackathons(self):
