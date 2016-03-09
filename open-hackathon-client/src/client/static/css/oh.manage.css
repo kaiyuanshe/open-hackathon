@@ -793,7 +793,9 @@ tags-input .tags .tag-item .remove-button {
   border-radius: 2px;
   margin-bottom: 20px;
 }
-
+.clond-templates .item.active{
+  border-color:#7dba43;
+}
 .clond-templates .btn-group-justified>.btn {
   border-radius: 0;
   border-color: #d0d2d3;
@@ -832,12 +834,14 @@ tags-input .tags .tag-item .remove-button {
   max-height: 155px;
   overflow: hidden;
 }
-.clond-templates .item-body p{
-  font-size:14px;
+
+.clond-templates .item-body p {
+  font-size: 14px;
   margin-top: 15px;
   overflow: hidden;
   max-height: 40px;
 }
+
 .clond-templates [class*="col-"] {
   padding: 0 5px;
 }
@@ -870,9 +874,19 @@ tags-input .tags .tag-item .remove-button {
 .line {
   line-height: 30px;
 }
-.line  .label {
-  margin-top:3px; 
+
+.line .label {
+  margin-top: 3px;
 }
-.inline-block{
+
+.inline-block {
   display: inline-block;
+}
+
+.dialog-centent label.icon+.dialog-message {
+  display: table-cell;
+  padding-left: 20px;
+  font-weight: normal;
+  vertical-align: middle;
+  text-align: left;
 }

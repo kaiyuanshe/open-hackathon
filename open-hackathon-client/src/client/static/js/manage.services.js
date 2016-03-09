@@ -182,15 +182,18 @@ angular.module('oh.api', [])
       var modalInstance = $uibModal.open({
         animation: true,
         templateUrl: modal.url,
-        size: modal.size + ' ' + modal.class,
+        size: modal.size + ' modal-' + modal.status,
         resolve: modal.resolve,
         controller: modal.controller
       });
       return modalInstance;
     }
 
-    this.alert = function(modal, callback) {
-      modal.url = '/static/partials/dialogs/alert.html?v=' + VERSION;
+    function base(modal) {
+      if (modal.icon) {
+        modal.body = '<p class="dialog-centent"><label class="icon icon-md icon-' + modal.status + '"><i class="fa ' + modal.icon + '"></i></label><label class="dialog-message">' + modal.body + '</label></p>'
+      }
+      modal.ok = modal.ok || function() {return ''};
       modal.controller = function($scope, $uibModalInstance) {
         $scope.title = modal.title;
         $scope.body = modal.body;
@@ -204,19 +207,14 @@ angular.module('oh.api', [])
       return open(modal).result;
     }
 
+    this.alert = function(modal) {
+      modal.url = 'manage/template/dialogs/alert.html';
+      return base(modal);
+    }
+
     this.confirm = function(modal) {
-      modal.url = '/static/partials/dialogs/confirm.html?v=' + VERSION;
-      modal.controller = function($scope, $uibModalInstance) {
-        $scope.title = modal.title;
-        $scope.body = modal.body;
-        $scope.ok = function() {
-          $uibModalInstance.close(modal.ok());
-        };
-        $scope.cancel = function() {
-          $uibModalInstance.dismiss('cancel');
-        };
-      }
-      return open(modal).result;
+      modal.url = 'manage/template/dialogs/confirm.html';
+      return base(modal);
     }
 
     this.customize = function(modal) {

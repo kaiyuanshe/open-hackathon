@@ -190,7 +190,6 @@
                     <div class="form-group">
                       <div class="col-xs-offset-2 col-xs-10">
                         <button type="submit" class="btn btn-primary btn-long" ng-disabled="activityForm.$invalid || activityFormDisabled"><i class="fa fa-arrow-circle-o-right"></i> 下一步</button>
-                        {{activity}}
                       </div>
                     </div>
                   </footer>
@@ -217,7 +216,7 @@
                       </div>
                       <div class="col-xs-6">
                         <label for="alauda">
-                          <input id="alauda" class="hide"  type="radio" name="clond" value="2" ng-model="clondservices" required>
+                          <input id="alauda" class="hide" type="radio" name="clond" value="2" ng-model="clondservices" required>
                           <div class="info-box">
                             <div class="content text-centet">
                               <img src="/static/pic/alauda-logo-white.png">
@@ -239,7 +238,7 @@
                     </div>
                   </footer>
                 </form>
-                <form name="azureForm" class="form-horizontal" ng-show="isAzureForm" novalidate>
+                <form name="azureForm" class="form-horizontal" ng-show="isAzureForm" ng-submit="azureFormSubmit()" novalidate>
                   <header class="text-grey">
                     <i class="fa fa-plus"></i> 创建新Azure证书
                   </header>
@@ -272,7 +271,7 @@
                   <footer>
                     <div class="form-group">
                       <div class="col-xs-offset-2 col-xs-12">
-                        <button type="submit" class="btn btn-primary btn-long" ng-disabled="azureForm.$invalid"><i class="fa fa-arrow-circle-o-right"></i> 下一步</button>
+                        <button type="submit" class="btn btn-primary btn-long" ng-disabled="azureForm.$invalid || azureFormDisabled"><i class="fa fa-arrow-circle-o-right"></i> 下一步</button>
                       </div>
                     </div>
                   </footer>
@@ -280,7 +279,7 @@
               </div>
             </div>
             <div id="step3" ng-show="wizard == 3" class="clearfix" style="margin: -32px 0;">
-              <ng-form name="templateForm" class="form-horizontal" novalidate>
+              <form name="templateForm" class="form-horizontal" ng-submit="templateSubmit()" novalidate>
                 <div class="inner-layout">
                   <div class="inner-left inner-cell">
                     <div class="header">
@@ -288,15 +287,15 @@
                         <div class="col-md-12 col-lg-7">
                           <div class="row">
                             <div class="input-group search">
-                              <input type="text" class="form-control" placeholder="Search for...">
+                              <input type="text" class="form-control" ng-model="search.name" placeholder="Search for...">
                               <span class="input-group-btn">
-                            <select class="form-control dropdown-list" name="status" ng-model="ssss">
-                              <option value="0" selected="selected">全部</option>
-                              <option value="1">审核通过</option>
-                              <option value="2">未审核</option>
-                              <option value="3">审核失败</option>
+                            <select class="form-control dropdown-list" name="status" ng-model="search.status">
+                              <option value="-1" selected="selected"  translate="TEMPLATE_STATUS.ALL">ALL</option>
+                              <option value="1" translate="TEMPLATE_STATUS.PASS">PASS</option>
+                              <option value="0" translate="TEMPLATE_STATUS.UNAPPROVED">UNAPPROVED</option>
+                              <option value="2" translate="TEMPLATE_STATUS.FAIL">FAIL</option>
                             </select>
-                            <button class="btn btn-info" type="button">搜索</button>
+                            <button class="btn btn-info" type="button" ng-click="searchTemplates()">搜索</button>
                           </span>
                             </div>
                           </div>
@@ -311,10 +310,10 @@
                     </div>
                     <div class="clearfix">
                       <div class="clond-templates">
-                        <div class="col-lg-4 col-md-6 col-sm-12">
-                          <div class="item">
+                        <div class="col-lg-4 col-md-6 col-sm-12" ng-repeat="image in image_templates">
+                          <div class="item" ng-class="{active:isChecked(templates, image.id)}">
                             <header>
-                              openter-ubuntu-sshd
+                              {{image.name}}
                             </header>
                             <div class="item-body text-default">
                               <div class="line">
@@ -325,148 +324,20 @@
                                 </div>
                               </div>
                               <div class="line">
-                                <span class="label label-success float-right">审核通过</span>
-                                <time><i class="text-success fa fa-calendar"></i> 2015/11/05 16:27</time>
+                                <span class="label float-right" ng-class="{'label-warning':image.status==0,'label-success':image.status==1, 'label-danger':image.status==2}">{{ image.status | imageStatus }}</span>
+                                <time><i class="text-success fa fa-calendar"></i> {{image.create_time | date:'yyyy/MM/dd HH:mm' }}</time>
                               </div>
-                              <p>Simple Ubunt SSHD image with client keep alive enabled</p>
+                              <p>{{image.description}}</p>
                             </div>
                             <footer>
                               <div class="btn-group btn-group-justified">
                                 <div class="btn">
                                   <label class="checkbox checkbox-success">
-                                    <input type="checkbox" checked="checked">
+                                    <input type="checkbox" value="{{image.id}}" ng-checked="isChecked(templates, image.id)" check-value="{{image.id}}" check-change="testchange($event,image.id)">
                                     <span>绑定</span>
                                   </label>
                                 </div>
-                                <a class="btn btn-primary" href="#">下线</a>
-                              </div>
-                            </footer>
-                          </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6 col-sm-12">
-                          <div class="item">
-                            <header>
-                              openter-ubuntu-sshd
-                            </header>
-                            <div class="item-body text-default">
-                              <div class="line">
-                                <div class="float-right">使用次数（600）</div>
-                                <div class="author">
-                                  <span class="picture"><img src="/static/pic/monkey-32-32px.png"></span>
-                                  <span>创建者</span>
-                                </div>
-                              </div>
-                              <div class="line">
-                                <span class="label label-success float-right">审核通过</span>
-                                <time><i class="text-success fa fa-calendar"></i> 2015/11/05 16:27</time>
-                              </div>
-                              <p>Simple Ubunt SSHD image with client keep alive enabled</p>
-                            </div>
-                            <footer>
-                              <div class="btn-group btn-group-justified">
-                                <div class="btn">
-                                  <label class="checkbox checkbox-success">
-                                    <input type="checkbox" checked="checked">
-                                    <span>绑定</span>
-                                  </label>
-                                </div>
-                                <a class="btn btn-primary" href="#">下线</a>
-                              </div>
-                            </footer>
-                          </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6 col-sm-12">
-                          <div class="item">
-                            <header>
-                              openter-ubuntu-sshd
-                            </header>
-                            <div class="item-body text-default">
-                              <div class="line">
-                                <div class="float-right">使用次数（600）</div>
-                                <div class="author">
-                                  <span class="picture"><img src="/static/pic/monkey-32-32px.png"></span>
-                                  <span>创建者</span>
-                                </div>
-                              </div>
-                              <div class="line">
-                                <span class="label label-success float-right">审核通过</span>
-                                <time><i class="text-success fa fa-calendar"></i> 2015/11/05 16:27</time>
-                              </div>
-                              <p>Simple Ubunt SSHD image with client keep alive enabled</p>
-                            </div>
-                            <footer>
-                              <div class="btn-group btn-group-justified">
-                                <div class="btn">
-                                  <label class="checkbox checkbox-success">
-                                    <input type="checkbox" checked="checked">
-                                    <span>绑定</span>
-                                  </label>
-                                </div>
-                                <a class="btn btn-primary" href="#">下线</a>
-                              </div>
-                            </footer>
-                          </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6 col-sm-12">
-                          <div class="item">
-                            <header>
-                              openter-ubuntu-sshd
-                            </header>
-                            <div class="item-body text-default">
-                              <div class="line">
-                                <div class="float-right">使用次数（600）</div>
-                                <div class="author">
-                                  <span class="picture"><img src="/static/pic/monkey-32-32px.png"></span>
-                                  <span>创建者</span>
-                                </div>
-                              </div>
-                              <div class="line">
-                                <span class="label label-success float-right">审核通过</span>
-                                <time><i class="text-success fa fa-calendar"></i> 2015/11/05 16:27</time>
-                              </div>
-                              <p>Simple Ubunt SSHD image with client keep alive enabled</p>
-                            </div>
-                            <footer>
-                              <div class="btn-group btn-group-justified">
-                                <div class="btn">
-                                  <label class="checkbox checkbox-success">
-                                    <input type="checkbox" checked="checked">
-                                    <span>绑定</span>
-                                  </label>
-                                </div>
-                                <a class="btn btn-primary" href="#">下线</a>
-                              </div>
-                            </footer>
-                          </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6 col-sm-12">
-                          <div class="item">
-                            <header>
-                              openter-ubuntu-sshd
-                            </header>
-                            <div class="item-body text-default">
-                              <div class="line">
-                                <div class="float-right">使用次数（600）</div>
-                                <div class="author">
-                                  <span class="picture"><img src="/static/pic/monkey-32-32px.png"></span>
-                                  <span>创建者</span>
-                                </div>
-                              </div>
-                              <div class="line">
-                                <span class="label label-success float-right">审核通过</span>
-                                <time><i class="text-success fa fa-calendar"></i> 2015/11/05 16:27</time>
-                              </div>
-                              <p>Simple Ubunt SSHD image with client keep alive enabled</p>
-                            </div>
-                            <footer>
-                              <div class="btn-group btn-group-justified">
-                                <div class="btn">
-                                  <label class="checkbox checkbox-success">
-                                    <input type="checkbox" checked="checked">
-                                    <span>绑定</span>
-                                  </label>
-                                </div>
-                                <a class="btn btn-primary" href="#">下线</a>
+                                <a class="btn btn-primary" href="{{image.url}}" download="{{image.url}}">下线</a>
                               </div>
                             </footer>
                           </div>
@@ -474,12 +345,12 @@
                       </div>
                     </div>
                     <div class="clearfix">
-                      <uib-pagination total-items="175" ng-model="bigCurrentPage" max-size="5" class="pagination pagination-success" boundary-link-numbers="true" rotate="false"></uib-pagination>
+                      <!--  <uib-pagination total-items="175" ng-model="bigCurrentPage" max-size="5" class="pagination pagination-success" boundary-link-numbers="true" rotate="false"></uib-pagination> -->
                     </div>
                     <footer class="clearfix">
                       <div class="form-group">
                         <div class="col-xs-12">
-                          <button type="submit" class="btn btn-primary btn-long" ng-click="next()"><i class="fa fa-arrow-circle-o-right"></i> 下一步</button>
+                          <button type="submit" class="btn btn-primary btn-long"><i class="fa fa-arrow-circle-o-right"></i> 下一步</button>
                         </div>
                       </div>
                     </footer>
@@ -491,82 +362,33 @@
                       </header>
                       <div class="content">
                         <uib-accordion close-others="oneAtATime">
-                          <uib-accordion-group>
+                          <uib-accordion-group ng-repeat="temp in templates">
                             <uib-accordion-heading>
-                              I can have markup, too!
+                              {{temp.template.name}}
                               <label class="checkbox checkbox-success right" ng-click="expression($event)">
                                 <input type="checkbox" checked="checked">
                                 <span>绑定</span>
                               </label>
                             </uib-accordion-heading>
-                            <p>创建者:ifendoe</p>
-                            <p>使用次数(600)</p>
-                            <p>
-                              <time>2015/11/05 16:27 </time> <span class="right">审核失败</span></p>
-                            <p>This is just some content to illustrate fancy headings.</p>
-                          </uib-accordion-group>
-                          <uib-accordion-group>
-                            <uib-accordion-heading>
-                              I can have markup, too!
-                              <label class="checkbox checkbox-success right" ng-click="expression($event)">
-                                <input type="checkbox" checked="checked">
-                                <span>绑定</span>
-                              </label>
-                            </uib-accordion-heading>
-                            <p>创建者:ifendoe</p>
-                            <p>使用次数(600)</p>
-                            <p>
-                              <time>2015/11/05 16:27 </time> <span class="right">审核失败</span></p>
-                            <p>This is just some content to illustrate fancy headings.</p>
-                          </uib-accordion-group>
-                          <uib-accordion-group>
-                            <uib-accordion-heading>
-                              I can have markup, too!
-                              <label class="checkbox checkbox-success right" ng-click="expression($event)">
-                                <input type="checkbox" checked="checked">
-                                <span>绑定</span>
-                              </label>
-                            </uib-accordion-heading>
-                            <p>创建者:ifendoe</p>
-                            <p>使用次数(600)</p>
-                            <p>
-                              <time>2015/11/05 16:27 </time> <span class="right">审核失败</span></p>
-                            <p>This is just some content to illustrate fancy headings.</p>
-                          </uib-accordion-group>
-                          <uib-accordion-group>
-                            <uib-accordion-heading>
-                              I can have markup, too!
-                              <label class="checkbox checkbox-success right" ng-click="expression($event)">
-                                <input type="checkbox" checked="checked">
-                                <span>绑定</span>
-                              </label>
-                            </uib-accordion-heading>
-                            <p>创建者:ifendoe</p>
-                            <p>使用次数(600)</p>
-                            <p>
-                              <time>2015/11/05 16:27 </time> <span class="right">审核失败</span></p>
-                            <p>This is just some content to illustrate fancy headings.</p>
-                          </uib-accordion-group>
-                          <uib-accordion-group>
-                            <uib-accordion-heading>
-                              I can have markup, too!
-                              <label class="checkbox checkbox-success right" ng-click="expression($event)">
-                                <input type="checkbox" checked="checked">
-                                <span>绑定</span>
-                              </label>
-                            </uib-accordion-heading>
-                            <p>创建者:ifendoe</p>
-                            <p>使用次数(600)</p>
-                            <p>
-                              <time>2015/11/05 16:27 </time> <span class="right">审核失败</span></p>
-                            <p>This is just some content to illustrate fancy headings.</p>
+                            <div class="line">
+                              <div class="float-right">使用次数（600）</div>
+                              <div class="author">
+                                <span class="picture"><img src="/static/pic/monkey-32-32px.png"></span>
+                                <span>创建者</span>
+                              </div>
+                            </div>
+                            <div class="line">
+                              <span class="label float-right" ng-class="{'label-warning':temp.template.status==0,'label-success':temp.template.status==1, 'label-danger':temp.template.status==2}">{{ temp.template.status | imageStatus }}</span>
+                              <time><i class="text-success fa fa-calendar"></i> {{temp.create_time | date:'yyyy/MM/dd HH:mm' }}</time>
+                            </div>
+                            <p>{{temp.template.description}}</p>
                           </uib-accordion-group>
                         </uib-accordion>
                       </div>
                     </div>
                   </div>
                 </div>
-              </ng-form>
+              </form>
             </div>
           </div>
           <div id="step4" ng-show="wizard == 4" class="clearfix">
@@ -577,21 +399,21 @@
                 </label>
                 <h3 class="text-gery">已成功保存活动</h3>
                 <div class="form-group">
-                  <button type="button" class="btn btn-success btn-long ">立即上线</button>
+                  <button type="button" class="btn btn-success btn-long " ng-disabled="onlineDisabled" ng-click="online()">立即上线</button>
                 </div>
                 <p class="text-gery">完善更多信息</p>
                 <div class="inline-block text-left">
                   <p>
-                    <span class="text-gery">基础设置：</span>
-                    <a href="#"><i class="fa fa-user"></i> 报名用户 </a>
-                    <a href="#"><i class="fa fa-sitemap"></i> 主办方 </a>
-                    <a href="#"><i class="fa fa-trophy"></i> 奖项设置 </a>
+                    <span class="text-gery" translate="SETTINGS.MAIN">SETTINGS.MAIN</span>
+                    <a ui-sref="manage.users({name:activity.name})"><i class="fa fa-user"></i> <ANY translate="SETTINGS.USERS">USERS</ANY> </a>
+                    <a ui-sref="manage.organizers({name:activity.name})"><i class="fa fa-sitemap"></i> <ANY translate="SETTINGS.ORGANIZERS">ORGANIZERS</ANY> </a>
+                    <a ui-sref="manage.prizes({name:activity.name})"><i class="fa fa-trophy"></i> <ANY translate="SETTINGS.PRIZES">PRIZES</ANY> </a>
                   </p>
                   <p ng-show="isShowAdvancedSettings">
-                    <span class="text-gery">高级设置：</span>
-                    <a href="#"><i class="fa fa-th-large"></i> 虚拟环境 </a>
-                    <a href="#"><i class="fa fa-desktop"></i> 环境监控 </a>
-                    <a href="#"><i class="fa fa-server"></i> 服务器 </a>
+                    <span class="text-gery" translate="ADVANCED_SETTINGS.MAIN">ADVANCED_SETTINGS.MAIN:</span>
+                    <a ui-sref="manage.ve({name:activity.name})"><i class="fa fa-th-large"></i> <ANY translate="ADVANCED_SETTINGS.VIRTUAL_ENVIRONMENT">VIRTUAL_ENVIRONMENT</ANY>  </a>
+                    <a ui-sref="manage.monitor({name:activity.ame})"><i class="fa fa-desktop"></i> <ANY translate="ADVANCED_SETTINGS.ENVIRONMENTAL_MONITOR">ENVIRONMENTAL_MONITOR</ANY>  </a>
+                    <a ui-sref="manage.servers({name:activity.name})"><i class="fa fa-server"></i> <ANY translate="ADVANCED_SETTINGS.SERVERS">SERVERS</ANY>  </a>
                   </p>
                   <br/>
                   <br/>

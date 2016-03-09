@@ -193,19 +193,20 @@ angular.module('oh.controllers', [])
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.SERVERS');
 
   })
-  .controller('createController', function($rootScope, $scope, $timeout, $uibModal, activityService, api) {
+  .controller('createController', function($scope, $timeout, $filter, $state, dialog, api) {
     var request;
-    $scope.wizard = 2;
-    $scope.oneAtATime = true;
+    $scope.wizard = 1;
     $scope.isShowAdvancedSettings = true;
+
     $scope.activityFormDisabled = false;
+
     $scope.activity = {
-      status: -1
+      status: -1,
     }
 
     $scope.configs = {
       location: '',
-      max_enrollment: 0,
+      max_enrollment: '',
       auto_approve: -1,
       alauda_enabled: false,
       recycle_enabled: false,
@@ -216,16 +217,6 @@ angular.module('oh.controllers', [])
       login_provider: 63
     };
 
-    function getConfigs() {
-      var configs = [];
-      angular.forEach($scope.configs, function(value, key) {
-        configs.push({
-          key: key,
-          value: value
-        });
-      })
-      return configs;
-    }
 
     $scope.$watch('activity.name', function(newValue, oldValue, scope) {
       if (request && newValue) {
@@ -241,6 +232,42 @@ angular.module('oh.controllers', [])
         });
       }, 400);
     });
+
+
+    $scope.$watch('wizard', function(newValue, oldValue, scope) {
+      if (newValue == 3) {
+        api.template.list.get({}).then(function(data) {
+          $scope.image_templates = data;
+        });
+        api.admin.hackathon.template.list.get({
+          header: {
+            hackathon_name: $scope.activity.name
+          }
+        }, function(data) {
+          $scope.templates = data;
+        })
+      } else if (newValue == 4) {
+        updataActivityStatus(0).then(function(data) {
+          if (data.error) {
+            $scope.$emit('showTip', {
+              level: 'tip-danger',
+              content: data.error.friendly_message
+            });
+          }
+        })
+      }
+    });
+
+    function getConfigs() {
+      var configs = [];
+      angular.forEach($scope.configs, function(value, key) {
+        configs.push({
+          key: key,
+          value: value
+        });
+      })
+      return configs;
+    }
 
     $scope.activitySubmit = function() {
       $scope.activityForm.disabled = true;
@@ -258,7 +285,6 @@ angular.module('oh.controllers', [])
           }
           $scope.activityForm.disabled = false;
         } else {
-
           api.admin.hackathon.config.post({
             header: {
               hackathon_name: $scope.activity.name
@@ -289,6 +315,7 @@ angular.module('oh.controllers', [])
                   });
                 } else {
                   $scope.wizard = 2;
+
                 }
                 $scope.activityForm.disabled = false;
               });
@@ -298,60 +325,17 @@ angular.module('oh.controllers', [])
       });
     };
 
-    $scope.clondFormSubmit = function() {
-      $scope.configs.auto_approve = $scope.clondservices;
 
-      var modalInstance = $uibModal.open({
-        animation: true,
-        templateUrl: 'manage/template/dialogs/confirm.html',
-        controller: function($scope, $uibModalInstance) {
-          $scope.title = "sfasdfas";
-          $scope.body = '<p><label><label class="icon icon-md icon-success"><i class="fa fa-check"></i></label> </label>一旦确定服务商就不能在修改！是否确定？</p>'
-          $scope.ok = function() {
-            $uibModalInstance.close();
-          };
-
-          $scope.cancel = function() {
-            $uibModalInstance.dismiss('cancel');
-          };
-        },
-        size: 'sm modal-success'
-      });
-
-      modalInstance.result.then(function() {
-        $scope.isAzureForm = $scope.clondservices == 1;
-        if(!$scope.isAzureForm){
-          api.template.list.get({}).then(function(data) {
-            console.log(data);
-          });
-
-          api.admin.hackathon.config.put({
-            header: {
-              hackathon_name: $scope.activity.name
-            },
-            body: getConfigs()
-          }).then(function(data) {
-            if (data.error) {
-              $scope.$emit('showTip', {
-                level: 'tip-danger',
-                content: data.error.friendly_message
-              });
-            } else {
-
-            }
-          });
-        }
-      });
-
-    };
-
+    /*------------------------------------------------------*/
     $scope.notUseCloud = function() {
-      $scope.configs.auto_approve = 0;
       api.admin.hackathon.config.put({
         header: {
           hackathon_name: $scope.activity.name
         },
-        body: getConfigs()
+        body: [{
+          key: 'auto_approve',
+          value: 0
+        }]
       }).then(function(data) {
         if (data.error) {
           $scope.$emit('showTip', {
@@ -381,8 +365,196 @@ angular.module('oh.controllers', [])
       });
     }
 
+    $scope.clondFormSubmit = function() {
+      dialog.confirm({
+        title: 'sfasdfas',
+        body: '一旦确定服务商就不能在修改！是否确定？',
+        icon: 'fa-exclamation',
+        size: 'sm',
+        status: 'warning'
+      }).then(function() {
+        $scope.isAzureForm = $scope.clondservices == 1;
+        if (!$scope.isAzureForm) {
+          api.admin.hackathon.config.put({
+            header: {
+              hackathon_name: $scope.activity.name
+            },
+            body: [{
+              key: 'auto_approve',
+              value: $scope.clondservices
+            }]
+          }).then(function(data) {
+            if (data.error) {
+              $scope.$emit('showTip', {
+                level: 'tip-danger',
+                content: data.error.friendly_message
+              });
+            } else {
+              $scope.wizard = 3;
+            }
+          });
+        }
+      })
+    };
+
+    /*------------------------------------------------------*/
+    $scope.azureFormDisabled = false;
+    $scope.azure = {
+      management_host: 'management.core.chinacloudapi.cn',
+    };
+
+    $scope.azureFormSubmit = function() {
+      $scope.azureFormDisabled = true;
+      api.admin.azure.post({
+        body: $scope.azure,
+        header: {
+          hackathon_name: $scope.activity.name
+        }
+      }).then(function(data) {
+        if (data.error) {
+          $scope.$emit('showTip', {
+            level: 'tip-danger',
+            content: data.error.friendly_message
+          });
+          $scope.azureFormDisabled = false;
+        } else {
+          $scope.wizard = 3;
+        }
+      });
+    };
+    /*------------------------------------------------------*/
+
+    $scope.oneAtATime = true;
+    $scope.templates = [];
+    $scope.search = {
+      status: '-1'
+    }
+    $scope.searchTemplates = function() {
+      api.template.list.get({
+        query: $scope.search
+      }).then(function(data) {
+        $scope.image_templates = data;
+      });
+    }
+
+    $scope.testchange = function($event, id) {
+      var result
+      if ($event.target.checked) {
+        result = api.admin.hackathon.template.post({
+          body: {
+            template_id: id
+          },
+          header: {
+            hackathon_name: $scope.activity.name
+          }
+        });
+      } else {
+        var obj = $filter('filter')($scope.templates, {
+          template: {
+            id: id
+          }
+        }, true) || [];
+        if (obj.length > 0) {
+          result = api.admin.hackathon.template.delete({
+            query: {
+              template_id: obj[0].id
+            },
+            header: {
+              hackathon_name: $scope.activity.name
+            }
+          });
+        } else {
+          return;
+        }
+      }
+      result.then(function(data) {
+        if (data.error) {
+          $scope.$emit('showTip', {
+            level: 'tip-danger',
+            content: data.error.friendly_message
+          });
+        } else {
+          api.admin.hackathon.template.list.get({
+            header: {
+              hackathon_name: $scope.activity.name
+            }
+          }, function(data) {
+            $scope.templates = data;
+          })
+        }
+
+      })
+    }
+
     $scope.expression = function($event) {
       $event.stopPropagation();
     }
-    console.log('createController');
+
+    $scope.isChecked = function(list, id) {
+      var obj = $filter('filter')(list, {
+        template: {
+          id: id
+        }
+      }, true);
+      return obj.length > 0 ? true : false;
+    }
+    $scope.templateSubmit = function() {
+      if ($scope.templates.length > 0) {
+        $scope.wizard = 4;
+      } else {
+        $scope.$emit('showTip', {
+          level: 'tip-danger',
+          content: '请绑定模板'
+        });
+      }
+    }
+
+    /*------------------------------------------------------*/
+
+    function updataActivityStatus(status) {
+      return api.admin.hackathon.put({
+        body: {
+          name: $scope.activity.name,
+          status: status
+        },
+        header: {
+          hackathon_name: $scope.activity.name
+        }
+      })
+    }
+
+
+    $scope.onlineDisabled = false;
+    $scope.online = function() {
+      $scope.onlineDisabled = true;
+      api.admin.hackathon.canonline.get({
+        header: {
+          hackathon_name: $scope.activity.name
+        }
+      }).then(function(data) {
+        console.log(data);
+        if (data.message) {
+          updataActivityStatus(0).then(function(data) {
+            if (data.error) {
+              $scope.$emit('showTip', {
+                level: 'tip-danger',
+                content: data.error.friendly_message
+              });
+              $scope.onlineDisabled = false;
+            } else {
+              $state.go('manage.edit', {
+                name: $scope.activity.name
+              });
+            }
+          });
+        } else {
+          $scope.onlineDisabled = false;
+          $scope.$emit('showTip', {
+            level: 'tip-danger',
+            content: '证书授权失败，请检验SUBSCRIPTION ID是否正确。'
+          });
+        }
+      })
+
+    }
   });

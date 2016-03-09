@@ -1203,9 +1203,9 @@ label.switchbox input[type=checkbox][disabled]:checked ~ .switchbox-handle i {
 }
 
 .icon-md {
-  width: 50px;
-  height: 50px;
-  font-size: 35px;
+  width: 66px;
+  height: 66px;
+  font-size: 45px;
 }
 
 .icon-primary {

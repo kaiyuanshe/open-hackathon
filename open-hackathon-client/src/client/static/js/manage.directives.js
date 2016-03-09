@@ -183,6 +183,19 @@ angular.module('oh.directives', [])
         }
       }
     }
+  }).directive('checkValue', function() {
+    return {
+      restrict: 'A',
+      scope: {
+        checkChange: '&'
+      },
+
+      link: function(scope, elem, attrs) {
+        elem.bind('change', function(e) {
+          scope.checkChange({'$event': e}); 
+        })
+      }
+    }
   });
 
 
@@ -193,7 +206,7 @@ angular.module("oh.templates", []).run(["$templateCache", function($templateCach
   <button type="button" class="close" ng-click="cancel()"><span aria-hidden="true">&times;</span></button>\
   {{title}} </h3>\
   </div>\
-  <div class="modal-body" ng-bind-html="body">\
+  <div class="modal-body text-center" ng-bind-html="body">\
   </div>\
   <div class="modal-footer">\
     <button class="btn btn-success btn-sm" type="button" ng-click="ok()" translate="OK">OK</button>\
@@ -204,7 +217,7 @@ angular.module("oh.templates", []).run(["$templateCache", function($templateCach
   <button type="button" class="close" ng-click="cancel()"><span aria-hidden="true">&times;</span></button>\
   {{title}} </h3>\
   </div>\
-  <div class="modal-body" ng-bind-html="body">\
+  <div class="modal-body text-center" ng-bind-html="body">\
   </div>\
   <div class="modal-footer">\
   <button class="btn btn-success btn-sm" type="button" ng-click="ok()" translate="OK">OK</button>\
