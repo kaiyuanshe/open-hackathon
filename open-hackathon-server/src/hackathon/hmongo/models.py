@@ -252,6 +252,7 @@ class UserHackathon(HDocumentBase):
     like = BooleanField(default=True)
     assets = ListField(DictField(default={}))  # assets for user
     remark = StringField()
+    deleted = BooleanField(default=False)
 
     def __init__(self, **kwargs):
         super(UserHackathon, self).__init__(**kwargs)

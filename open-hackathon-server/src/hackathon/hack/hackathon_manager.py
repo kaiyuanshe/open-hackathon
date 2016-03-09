@@ -101,7 +101,7 @@ class HackathonManager(Component):
 
         :return hackathon instance or None
         """
-        return Hackathon.objects(id=ObjectId(hackathon_id))
+        return Hackathon.objects(id=ObjectId(hackathon_id)).first()
 
     def get_hackathon_detail(self, hackathon):
         user = None
@@ -190,9 +190,9 @@ class HackathonManager(Component):
 
     def get_basic_property(self, hackathon, key, default=None):
         """Get basic property of hackathon from HackathonConfig"""
-        config = self.db.find_first_object_by(HackathonConfig, key=key, hackathon_id=hackathon.id)
-        if config:
-            return config.value
+        if hackathon.config:
+            return hackathon.config.get(key, default)
+
         return default
 
     def get_all_properties(self, hackathon):
@@ -515,7 +515,7 @@ class HackathonManager(Component):
 
     def create_hackathon_notice(self, hackathon_id, notice_event, notice_category, body={}):
         """
-        create hackathon notice with hackathon_id, notice_event, notice_category. 
+        create hackathon notice with hackathon_id, notice_event, notice_category.
         notice 'content' and 'link' can be included in body (optional)
 
         :type hackathon_id: int
@@ -526,11 +526,11 @@ class HackathonManager(Component):
                              more specfic than notice_category, new events can be added without disturbing front-end code
 
         :type notice_category: Class HACK_NOTICE_CATEGORY
-        :param notice_category: category that the notice belongs to, used for notice filtering and notice properties display 
-                                at front-end (e.g. icons/descriptions, see oh.manage.notice.js & oh.site.hackathon.js), 
-                                more general than notice_event, if you want to add a new category in HACK_NOTICE_CATEGORY, 
+        :param notice_category: category that the notice belongs to, used for notice filtering and notice properties display
+                                at front-end (e.g. icons/descriptions, see oh.manage.notice.js & oh.site.hackathon.js),
+                                more general than notice_event, if you want to add a new category in HACK_NOTICE_CATEGORY,
                                 remember to update front-end js code as well.
-                                
+
         :type body: dict/Context, default value: {}
         :param body: other necessary information, e.g.: 'content'(notice's content), 'link'(notice's link), other keys for specfic uses
 
@@ -538,11 +538,11 @@ class HackathonManager(Component):
 
         ::Example:
         :create_hackathon_notice(2, HACK_NOTICE_EVENT.xx, HACK_NOTICE_CATEGORY.yy, {'content': 'zz'})
-            a new notice for a hackathon with id 2 is created for the propose of HACK_NOTICE_EVENT.xx. The notice's front-end icon 
+            a new notice for a hackathon with id 2 is created for the propose of HACK_NOTICE_EVENT.xx. The notice's front-end icon
             and description is determined by HACK_NOTICE_CATEGORY.yy, while its content is 'zz' and its link url is ''
-        
+
         :create_hackathon_notice(-1, HACK_NOTICE_EVENT.xx, HACK_NOTICE_CATEGORY.yy)
-            a new notice not belongs to any hackathon is created for the propose of HACK_NOTICE_EVENT.xx. The notice's front-end icon 
+            a new notice not belongs to any hackathon is created for the propose of HACK_NOTICE_EVENT.xx. The notice's front-end icon
             and description is determined by HACK_NOTICE_CATEGORY.yy, while its content and link url is ''
         """
         hackathon_notice = HackathonNotice(hackathon_id=hackathon_id,
@@ -602,7 +602,7 @@ class HackathonManager(Component):
 
     def get_hackathon_notice_list(self, body):
         """
-        list hackathon notices, notices are paginated, can be filtered by hackathon_name, event and category, 
+        list hackathon notices, notices are paginated, can be filtered by hackathon_name, event and category,
         can be ordered by update_time, event and category.
 
         :type body: Context

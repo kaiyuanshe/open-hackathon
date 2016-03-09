@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 """
 Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
- 
+
 The MIT License (MIT)
- 
+
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -30,12 +30,12 @@ sys.path.append("..")
 from flask import g
 from sqlalchemy import func
 from hackathon import Component, RequiredFeature
-from hackathon.database import AdminHackathonRel, User, Hackathon
+from hackathon.database import AdminHackathonRel, Hackathon
+from hackathon.hmongo.models import UserHackathon, User
 from hackathon.constants import HACK_USER_TYPE
 from hackathon.hackathon_response import precondition_failed, ok, not_found, internal_server_error, bad_request
 
 __all__ = ["AdminManager"]
-
 
 
 class AdminManager(Component):
@@ -67,12 +67,10 @@ class AdminManager(Component):
         :rtype: list
         :return list of hackathon id
         """
-        # get AdminUserHackathonRels from query withn filter by email
-        admin_user_hackathon_rels = self.db.find_all_objects_by(AdminHackathonRel,
-                                                                user_id=user_id)
+        hacks = UserHackathon.objects(user=user_id, role=HACK_USER_TYPE.ADMIN)
 
         # get hackathon_ids_from AdminUserHackathonRels details
-        hackathon_ids = [x.hackathon_id for x in admin_user_hackathon_rels]
+        hackathon_ids = [x.hackathon.id for x in hacks]
 
         return list(set(hackathon_ids))
 
@@ -96,8 +94,8 @@ class AdminManager(Component):
             Hackathon.status,
             Hackathon.creator_id,
             Hackathon.type,
-            (func.unix_timestamp(Hackathon.event_start_time)*1000).label('event_start_time'),
-            (func.unix_timestamp(Hackathon.event_end_time)*1000).label('event_end_time')
+            (func.unix_timestamp(Hackathon.event_start_time) * 1000).label('event_start_time'),
+            (func.unix_timestamp(Hackathon.event_end_time) * 1000).label('event_end_time')
         ).join(AdminHackathonRel, AdminHackathonRel.hackathon_id == Hackathon.id or AdminHackathonRel.hackathon_id == -1)\
             .filter(AdminHackathonRel.user_id == user_id)\
             .order_by(Hackathon.event_start_time.desc())\
@@ -214,8 +212,13 @@ class AdminManager(Component):
         :rtype: bool
         :return True if specific user has admin privilidge on specific hackathon otherwise False
         """
-        hack_ids = self.get_entitled_hackathon_ids(user_id)
-        return -1 in hack_ids or hackathon_id in hack_ids
+        if User.objects(id=user_id, is_super=True).count():
+            return True
+
+        return UserHackathon.objects(
+            user=user_id,
+            hackathon=hackathon_id,
+            role=HACK_USER_TYPE.ADMIN).count() > 0
 
     def __generate_update_items(self, args):
         """Generate columns of AdminHackathonRel to be updated"""

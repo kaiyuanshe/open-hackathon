@@ -32,7 +32,7 @@ from flask import g
 from hackathon import Component, RequiredFeature
 from hackathon.hmongo.models import UserHackathon, Experiment
 from hackathon.hackathon_response import bad_request, precondition_failed, internal_server_error, not_found, ok, login_provider_error
-from hackathon.constants import EStatus, HACK_USER_STATUS, HACKATHON_BASIC_INFO, HACKATHON_STAT, LOGIN_PROVIDER
+from hackathon.constants import EStatus, HACK_USER_STATUS, HACKATHON_BASIC_INFO, LOGIN_PROVIDER
 
 __all__ = ["RegisterManager"]
 
@@ -50,14 +50,14 @@ class RegisterManager(Component):
         :rtype: list
         :return all registered usrs if num is None else return the specific number of users order by create_time desc
         """
-        registers = UserHackathon.objects(hackathon__id=hackathon_id).order_by('-create_time')[:num]
+        registers = UserHackathon.objects(hackathon=hackathon_id).order_by('-create_time')[:num]
         return map(lambda x: self.__get_registration_with_profile(x), registers)
 
     def get_registration_by_id(self, registration_id):
         return UserHackathon.objects(id=registration_id).first()
 
     def get_registration_by_user_and_hackathon(self, user_id, hackathon_id):
-        return UserHackathon.objects(user__id=user_id, hackathon__id=hackathon_id)
+        return UserHackathon.objects(user=user_id, hackathon=hackathon_id).first()
 
     def create_registration(self, hackathon, user, args):
         """Register hackathon for user
@@ -75,7 +75,7 @@ class RegisterManager(Component):
                 provides=",".join(check_login_provider["provides"]))
 
         if self.is_user_registered(user.id, hackathon):
-            self.log.debug("user %d already registered on hackathon %d" % (user_id, hackathon.id))
+            self.log.debug("user %s already registered on hackathon %s" % (user_id, hackathon.id))
             return self.get_registration_detail(user, hackathon)
 
         if self.admin_manager.is_hackathon_admin(hackathon.id, user.id):
@@ -92,13 +92,21 @@ class RegisterManager(Component):
                                        friendly_message="报名人数已满")
 
         try:
-            args["status"] = HACK_USER_STATUS.AUTO_PASSED if hackathon.is_auto_approve() else HACK_USER_STATUS.UNAUDIT
-            args["create_time"] = self.util.get_now()
-            user_hackathon = UserHackathon.objects.create(**args).dic()
+            status = HACK_USER_STATUS.AUTO_PASSED if hackathon.is_auto_approve() else HACK_USER_STATUS.UNAUDIT
+            args.pop("user_id")
+            args.pop("hackathon_id")
+
+            user_hackathon = UserHackathon.objects.create(
+                user=user,
+                hackathon=hackathon,
+                status=status,
+                **args).dic()
 
             # create a team as soon as user registration approved(auto or manually)
             if hackathon.is_auto_approve():
-                self.team_manager.create_default_team(hackathon, user)
+                pass
+                # TODO: fix this after team_manager refactored
+                # self.team_manager.create_default_team(hackathon, user)
 
             self.__update_register_stat(hackathon)
             return user_hackathon
@@ -121,8 +129,9 @@ class RegisterManager(Component):
             if register.status == HACK_USER_STATUS.AUDIT_PASSED:
                 self.team_manager.create_default_team(register.hackathon, register.user)
 
-            hackathon = self.hackathon_manager.get_hackathon_by_id(register.hackathon_id)
-            self.__update_register_stat(hackathon)
+            # TODO: fix after hackathon_manager refactored
+            # hackathon = self.hackathon_manager.get_hackathon_by_id(register.hackathon_id)
+            # self.__update_register_stat(hackathon)
 
             return register.dic()
         except Exception as e:
@@ -157,8 +166,7 @@ class RegisterManager(Component):
     def get_registration_detail(self, user, hackathon, registration=None):
         detail = {
             "hackathon": hackathon.dic(),
-            "user": self.user_manager.user_display_info(user),
-            "asset": []}
+            "user": self.user_manager.user_display_info(user)}
 
         if not registration:
             registration = registration or self.get_registration_by_user_and_hackathon(user.id, hackathon.id)
@@ -171,8 +179,8 @@ class RegisterManager(Component):
         # experiment if any
         try:
             exp = Experiment.objects(
-                user__id=user.id,
-                hackathon__id=hackathon.id,
+                user=user.id,
+                hackathon=hackathon.id,
                 status__in=[EStatus.STARTING, EStatus.RUNNING]).first()
 
             if exp:
@@ -183,18 +191,18 @@ class RegisterManager(Component):
         return detail
 
     def __update_register_stat(self, hackathon):
-        count = UserHackathon.objects(
-            hackathon__id=hackathon.id,
+        UserHackathon.objects(
+            hackathon=hackathon.id,
             status__in=[HACK_USER_STATUS.AUDIT_PASSED, HACK_USER_STATUS.AUTO_PASSED],
             # TODO
             deleted=0).count()
 
-        self.hackathon_manager.update_hackathon_stat(hackathon, HACKATHON_STAT.REGISTER, count)
+        # TODO: fix this after hachathon_manager fixed
+        # self.hackathon_manager.update_hackathon_stat(hackathon, HACKATHON_STAT.REGISTER, count)
 
     def is_user_registered(self, user_id, hackathon):
         """Check whether use registered certain hackathon"""
         register = self.get_registration_by_user_and_hackathon(user_id, hackathon.id)
-        # TODO
         return register is not None and register.deleted == 0
 
     def __get_registration_with_profile(self, registration):
@@ -216,14 +224,14 @@ class RegisterManager(Component):
         :return False if not all seats occupied or hackathon has no limit at all otherwise True
         """
         # TODO
-        maximum = hackathon.get_basic_property(HACKATHON_BASIC_INFO.MAX_ENROLLMENT, 0)
+        maximum = self.hackathon_manager.get_basic_property(hackathon, HACKATHON_BASIC_INFO.MAX_ENROLLMENT, 0)
 
         if maximum == 0:  # means no limit
             return False
         else:
             # count of audited users
             current_num = UserHackathon.objects(
-                hackathon__id=hackathon.id,
+                hackathon=hackathon.id,
                 status__in=[HACK_USER_STATUS.AUDIT_PASSED, HACK_USER_STATUS.AUTO_PASSED]).count()
 
             return current_num >= max

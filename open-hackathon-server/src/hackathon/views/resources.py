@@ -230,8 +230,8 @@ class UserRegistrationResource(HackathonResource):
     def post(self):
         args = {
             "user_id": g.user.id,
-            "hackathon_id": g.hackathon.id
-        }
+            "hackathon_id": g.hackathon.id}
+
         return register_manager.create_registration(g.hackathon, g.user, args)
 
 
@@ -525,7 +525,7 @@ class AdminRegisterListResource(HackathonResource):
 class AdminRegisterResource(HackathonResource):
     def get(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('id', type=int, location='args', required=True)  # register_id
+        parse.add_argument("id", type=str, location="args", required=True)  # register_id
         args = parse.parse_args()
         rel = register_manager.get_registration_by_id(args["id"])
         return rel.dic() if rel is not None else not_found("not found")
@@ -542,7 +542,7 @@ class AdminRegisterResource(HackathonResource):
     @admin_privilege_required
     def delete(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('id', type=int, location='args', required=True)
+        parse.add_argument('id', type=str, location='args', required=True)
         args = parse.parse_args()
         return register_manager.delete_registration(args)
 
