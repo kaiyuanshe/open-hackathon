@@ -37,9 +37,9 @@ from lxml.html.clean import Cleaner
 from mongoengine import Q
 from mongoengine.context_managers import no_dereference
 
-from hackathon.database import User, AdminHackathonRel, DockerHostServer, HackathonLike, \
-    HackathonStat, HackathonConfig, HackathonTag, UserHackathonRel, HackathonOrganizer, Award, UserHackathonAsset, \
-    UserTeamRel, HackathonNotice
+# from hackathon.database import User, AdminHackathonRel, DockerHostServer, HackathonLike, \
+#     HackathonStat, HackathonConfig, HackathonTag, UserHackathonRel, HackathonOrganizer, Award, UserHackathonAsset, \
+#     UserTeamRel, HackathonNotice
 from hackathon.hmongo.models import Hackathon, HackathonNotice
 from hackathon.hackathon_response import internal_server_error, ok, not_found, forbidden
 from hackathon.constants import HACKATHON_BASIC_INFO, ADMIN_ROLE_TYPE, HACK_STATUS, RGStatus, HTTP_HEADER, \
@@ -722,7 +722,7 @@ class HackathonManager(Component):
 
         return ok(can_online)
 
-    # TODO: replace hard code and review some items's query API
+    # TODO: we need to review those commented items one by one to decide the API output
     def __get_hackathon_detail(self, hackathon, user=None):
         """Return hackathon info as well as its details including configs, stat, organizers, like if user logon"""
         detail = hackathon.dic()
@@ -734,7 +734,7 @@ class HackathonManager(Component):
             detail["user"] = self.user_manager.user_display_info(user)
             detail["user"]["is_admin"] = user.is_super or hackathon.creator.id == user.id
 
-            # TODO: the API of these queries needs further review
+            # TODO: we need to review those items one by one to decide the API output
             # asset = self.db.find_all_objects_by(UserHackathonAsset, user_id=user.id, hackathon_id=hackathon.id)
             # if asset:
             #     detail["asset"] = [o.dic() for o in asset]

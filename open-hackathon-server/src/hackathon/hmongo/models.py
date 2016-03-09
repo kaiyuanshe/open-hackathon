@@ -221,7 +221,7 @@ class Hackathon(HDocumentBase):
     banners = ListField()
     status = IntField(default=0)  # 0-new 1-online 2-offline
     creator_id = ReferenceField(User)
-    config = DictField() # location, max_enrollment, auto_approve, login_provider
+    config = DictField() # max_enrollment, auto_approve, login_provider
     type = IntField()  # enum.HACK_TYPE
     organizers = EmbeddedDocumentListField(Organization)
     partners = EmbeddedDocumentListField(Organization)

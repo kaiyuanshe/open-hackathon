@@ -157,7 +157,7 @@ class RegisterManager(Component):
             self.log.error(ex)
             return internal_server_error("failed in delete register: %s" % args["id"])
 
-    # TODO: some information is omitted and needed to be added
+    # TODO: registration related functions are to be refactored
     def get_registration_detail(self, user, hackathon):
         detail = {
             "hackathon": hackathon.dic(),
