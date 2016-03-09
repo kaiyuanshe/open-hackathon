@@ -41,6 +41,7 @@ def setup_db():
     # reserved user is deleted, may not need in mongodb implementation
 
     # default super admin
+
     admin = User(
         name="admin",
         nickname="admin",
@@ -48,5 +49,6 @@ def setup_db():
         is_super=True)
 
     User.objects(name="admin").update_one(__raw__={"$set": admin.to_mongo().to_dict()}, upsert=True)
+
 
 setup_db()
