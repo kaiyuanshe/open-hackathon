@@ -99,7 +99,7 @@ class HackathonManager(Component):
 
         :return hackathon instance or None
         """
-        return Hackathon.objects(id=ObjectId(hackathon_id))
+        return Hackathon.objects(id=ObjectId(hackathon_id)).first()
 
     def get_hackathon_detail(self, hackathon):
         user = None
@@ -509,7 +509,10 @@ class HackathonManager(Component):
         return [a.dic() for a in awards]
 
     def get_hackathon_notice(self, notice_id):
-        hackathon_notice = self.db.get_object(HackathonNotice, notice_id)
+        hackathon_notice = HackathonNotice.objects(id=notice_id).first()
+        if not hackathon_notice:
+            return not_found("hackathon_notice not found")
+
         return hackathon_notice.dic()
 
     def create_hackathon_notice(self, hackathon_id, notice_event, notice_category, body={}):
@@ -544,15 +547,15 @@ class HackathonManager(Component):
             a new notice not belongs to any hackathon is created for the propose of HACK_NOTICE_EVENT.xx. The notice's front-end icon 
             and description is determined by HACK_NOTICE_CATEGORY.yy, while its content and link url is ''
         """
-        hackathon_notice = HackathonNotice(hackathon_id=hackathon_id,
-                                           content='',
+        hackathon_notice = HackathonNotice(content='',
                                            link='',
                                            event=notice_event,
-                                           category=notice_category,
-                                           create_time=self.util.get_now(),
-                                           update_time=self.util.get_now())
+                                           category=notice_category)
 
         hackathon = self.get_hackathon_by_id(hackathon_id)
+        if hackathon:
+            hackathon_notice.hackathon = hackathon
+
         # notice creation logic for different notice_events
         if hackathon:
             if notice_event == HACK_NOTICE_EVENT.HACK_CREATE:
@@ -577,14 +580,14 @@ class HackathonManager(Component):
         hackathon_notice.content = body.get('content', hackathon_notice.content)
         hackathon_notice.link = body.get('link', hackathon_notice.link)
 
-        self.db.add_object(hackathon_notice)
+        hackathon_notice.save()
 
         self.log.debug("a new notice is created: hackathon_id: %d, event: %d, category: %d" % (
             hackathon_id, notice_event, notice_category))
         return hackathon_notice.dic()
 
     def update_hackathon_notice(self, body):
-        hackathon_notice = self.db.get_object(HackathonNotice, body.get('id'))
+        hackathon_notice = HackathonNotice.objects(id=body.get('id')).first()
         if not hackathon_notice:
             return not_found("hackathon_notice not found")
 
@@ -592,12 +595,17 @@ class HackathonManager(Component):
         hackathon_notice.link = body.get("link", hackathon_notice.link)
         hackathon_notice.update_time = self.util.get_now()
 
-        self.db.commit()
+        hackathon_notice.save()
         return hackathon_notice.dic()
 
     def delete_hackathon_notice(self, notice_id):
-        self.db.delete_all_objects_by(HackathonNotice, id=notice_id)
+        hackathon_notice = HackathonNotice.objects(id=notice_id).first()
+        if not hackathon_notice:
+            return not_found('Hackathon notice not found')
+        
+        hackathon_notice.delete()
         return ok()
+            
 
     def get_hackathon_notice_list(self, body):
         """
