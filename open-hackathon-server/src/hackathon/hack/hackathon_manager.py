@@ -722,21 +722,19 @@ class HackathonManager(Component):
 
         return ok(can_online)
 
-    # TODO: some information is omitted and needed to be added
+    # TODO: replace hard code and review some items's query API
     def __get_hackathon_detail(self, hackathon, user=None):
         """Return hackathon info as well as its details including configs, stat, organizers, like if user logon"""
         detail = hackathon.dic()
 
-        # detail["config"] = self.__get_hackathon_configs(hackathon)
-        # detail["stat"] = self.get_hackathon_stat(hackathon)
-        # detail["tag"] = self.get_hackathon_tags(hackathon)
-        # detail["organizer"] = self.__get_hackathon_organizers(hackathon)
+        # TODO: replace hard code
         detail["stat"] = {"register": 5}
 
         if user:
             detail["user"] = self.user_manager.user_display_info(user)
-            # detail["user"]["is_admin"] = self.admin_manager.is_hackathon_admin(hackathon.id, user.id)
+            detail["user"]["is_admin"] = user.is_super or hackathon.creator.id == user.id
 
+            # TODO: the API of these queries needs further review
             # asset = self.db.find_all_objects_by(UserHackathonAsset, user_id=user.id, hackathon_id=hackathon.id)
             # if asset:
             #     detail["asset"] = [o.dic() for o in asset]
