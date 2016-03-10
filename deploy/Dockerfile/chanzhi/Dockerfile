@@ -75,8 +75,20 @@ RUN cp -r /opt/chanzhieps/system /var/www
 
 RUN chmod o=rwx -R /var/www/system/tmp
 RUN chmod o=rwx -R /var/www/html/data
+RUN chown -R www-data:www-data /var/www
 
 EXPOSE 80
+
+#
+# Config Chanzhi
+#
+
+RUN sed -i "s/'dbHost', '127.0.0.1'/'dbHost', '127.0.0.1'/g" /var/www/system/module/install/view/step2.html.php
+RUN sed -i "s/'dbPort', '3306'/'dbPort', '3306', 'readonly'/g" /var/www/system/module/install/view/step2.html.php
+RUN sed -i "s/'dbUser', ''/'dbUser', 'root', 'readonly'/g" /var/www/system/module/install/view/step2.html.php
+RUN sed -i "s/'dbPassword', ''/'dbPassword', 'roottest', 'readonly'/g" /var/www/system/module/install/view/step2.html.php
+RUN sed -i "s/'dbName', ''/'dbName', 'chanzhi'/g" /var/www/system/module/install/view/step2.html.php
+RUN rm /var/www/html/index.html
 
 #
 # Build run.sh
