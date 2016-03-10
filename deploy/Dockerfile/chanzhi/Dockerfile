@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # -----------------------------------------------------------------------------------
-# Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
+# Copyright (c) Microsoft Asia-Pacific R&D Group. All rights reserved.
 #
 # The MIT License (MIT)
 #
@@ -26,7 +26,7 @@
 
 FROM ubuntu:14.04
 
-MAINTAINER Microsoft Open Technologies (Shanghai) Co. Ltd.
+MAINTAINER Microsoft Asia-Pacific R&D Group
 
 #
 # Config SSH
@@ -35,7 +35,7 @@ RUN apt-get update
 RUN apt-get install -y openssh-server sudo
 
 RUN sed -i 's/UsePAM yes/UsePAM no/g' /etc/ssh/sshd_config
-RUN sed -i '$a\ClientAliveInterval 1200' /etc/ssh/sshd_config
+RUN sed -i '$a\ClientAliveInterval 120' /etc/ssh/sshd_config
 RUN sed -i 's/PermitRootLogin without-password/PermitRootLogin yes/' /etc/ssh/sshd_config
 
 RUN useradd admin
@@ -100,4 +100,4 @@ RUN echo '(mysqld &)' >> /run.sh
 RUN echo '/usr/sbin/apache2ctl start' >> /run.sh
 RUN echo '/usr/sbin/sshd -D' >> /run.sh
 
-CMD ["bin/sh", "/run.sh"]
+CMD ["/bin/sh", "/run.sh"]
