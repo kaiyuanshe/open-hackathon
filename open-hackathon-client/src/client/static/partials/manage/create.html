@@ -1,137 +1,430 @@
-  <button class="btn btn-default">样式 default</button>
-  <button class="btn btn-primary">样式 primary</button>
-  <button class="btn btn-success">样式 success</button>
-  <button class="btn btn-info">样式 info</button>
-  <button class="btn btn-warning">样式 warning</button>
-  <button class="btn btn-danger">样式 danger</button>
-  <div class="">
-    <label class="checkbox">
-      <input type="checkbox">
-      <span>Checkbox 2</span>
-    </label>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-lg-9 col-md-10 col-xs-11 center">
+      <div class="row">
+        <div class="box">
+          <ul class="wizard">
+            <li ng-class="{active: wizard == 1, complete: wizard >1}"><span class="step">1</span>
+              <ANY translate="CREATE_ACTIVITY_WIZARD.STEP1">STEP1</ANY>
+            </li>
+            <li ng-class="{active: wizard == 2, complete: wizard >2}"><span class="step">2</span>
+              <ANY translate="CREATE_ACTIVITY_WIZARD.STEP2">STEP2</ANY>
+            </li>
+            <li ng-class="{active: wizard == 3, complete: wizard >3}"><span class="step">3</span>
+              <ANY translate="CREATE_ACTIVITY_WIZARD.STEP3">STEP3</ANY>
+            </li>
+            <li ng-class="{active: wizard == 4}"><span class="step">4</span>
+              <ANY translate="CREATE_ACTIVITY_WIZARD.STEP4">STEP4</ANY>
+            </li>
+          </ul>
+          <div class="step-content">
+            <div id="step1" ng-show="wizard == 1">
+              <div class="col-lg-8 col-md-10 col-xs-11 center">
+                <form name="activityForm" class="form-horizontal" ng-submit="activitySubmit()" novalidate>
+                  <fieldset class="detail-wrapper">
+                    <div class="form-group" ng-class="{'has-error': activityForm.name.$touched && activityForm.name.$invalid,'has-success':activityForm.name.$valid}">
+                      <label class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.NAME">NAME</label>
+                      <div class="col-xs-10 required">
+                        <input type="text" class="form-control" name="name" placeholder="{{'ACTIVITY_FIELDS.NAME' | translate}}" ng-model="activity.name" ng-trim="true" ng-minleng="5" ng-maxlength="20" maxlength="20" pattern="^(?!_)(?!.*?_$)[a-z0-9_-]+$" required>
+                        <div class="messages" ng-messages="activityForm.name.$error" ng-if="activityForm.name.$touched && activityForm.name.$invalid">
+                          <span ng-message="pattern"><i class="fa fa-close" uib-tooltip="pattern" tooltip-placement="right auto" ></i></span>
+                          <span ng-message="minlength"><i class="fa fa-close" uib-tooltip="minlength" tooltip-placement="right auto" ></i></span>
+                          <span ng-message="maxlength"><i class="fa fa-close" uib-tooltip="maxlength" tooltip-placement="right auto" ></i></span>
+                          <span ng-message="required"><i class="fa fa-close" uib-tooltip="required" tooltip-placement="right auto"></i></span>
+                          <span ng-message="rometname"><i class="fa fa-close" uib-tooltip="remote-validate" tooltip-placement="right auto" ></i></span>
+                        </div>
+                        <div class="messages" ng-if="activityForm.name.$touched && activityForm.name.$valid">
+                          <i class="fa fa-check"></i>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group" ng-class="{'has-error': activityForm.display_name.$touched && activityForm.display_name.$invalid,'has-success':activityForm.display_name.$valid}">
+                      <label for="inputPassword" class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.DISPLAY_NAME">DISPLAY_NAME</label>
+                      <div class="col-xs-10 required">
+                        <input type="text" class="form-control" name="display_name" placeholder="{{'ACTIVITY_FIELDS.DISPLAY_NAME' | translate}}" ng-model="activity.display_name" ng-trim="true" ng-maxlength="10" required>
+                        <div class="messages" ng-messages="activityForm.display_name.$error" ng-if="activityForm.display_name.$touched && activityForm.display_name.$invalid">
+                          <span ng-message="maxlength"><i class="fa fa-close" uib-tooltip="" tooltip-placement="right auto" ></i></span>
+                          <span ng-message="required"><i class="fa fa-close" uib-tooltip="" tooltip-placement="right auto"></i></span>
+                        </div>
+                        <div class="messages" ng-if="activityForm.display_name.$touched && activityForm.display_name.$valid">
+                          <i class="fa fa-check"></i>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group" ng-class="{'has-error': activityForm.tags.$touched && activityForm.tags.$invalid,'has-success':activityForm.tags.$touched && activityForm.tags.$valid}">
+                      <label for="inputPassword" class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.TAGS">TAGS</label>
+                      <div class="col-xs-10 control-addon">
+                        <tags-input ng-model="tags" name="tags" placeholder="{{ 'ACTIVITY_FIELDS.TAGS' | translate}}" min-length="2">
+                          <i class="control-icon fa fa-tag"></i>
+                        </tags-input>
+                        <div class="messages" ng-if="activityForm.tags.$touched && activityForm.tags.$valid">
+                          <i class="fa fa-check"></i>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group" ng-class="{'has-success':activityForm.location.$touched && activityForm.location.$valid}">
+                      <label for="inputPassword" class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.LOCATION">LOCATION</label>
+                      <div class="col-xs-10 control-addon">
+                        <input type="text" class="form-control" name="location" placeholder="{{'PLACEHOLDERS.LOCATION' | translate}}" ng-model="configs.location">
+                        <i class="control-icon fa fa-map-marker"></i>
+                        <div class="messages" ng-if="activityForm.location.$touched && activityForm.location.$valid">
+                          <i class="fa fa-check"></i>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label for="inputPassword" class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.EVENT_TIME">EVENT_TIME</label>
+                      <div class="col-xs-5 control-addon required" ng-class="{'has-error': activityForm.event_start_time.$touched && activityForm.event_start_time.$invalid,'has-success':activityForm.event_start_time.$touched && activityForm.event_start_time.$valid}">
+                        <input type="text" class="form-control" name="event_start_time" placeholder="{{'PLACEHOLDERS.START_TIME' | translate}}" ng-model="activity.event_start_time" ng-max="activity.event_end_time" max-date="activity.event_end_time" ng-focus="open.event_start_time = true" ng-click="open.event_start_time = true" is-open="open.event_start_time" datetime-local="yyyy/MM/dd HH:mm" datetime-picker="yyyy/MM/dd HH:mm" timepicker-options="{'show-meridian':true}" required>
+                        <i class="control-icon fa fa-calendar"></i>
+                        <div class="messages" ng-messages="activityForm.event_start_time.$error" ng-if="activityForm.event_start_time.$touched && activityForm.event_start_time.$invalid">
+                          <span ng-message="datetime"><i class="fa fa-close" uib-tooltip="{{'VALIDATE.EVENT_START_TIME_REQUIRED' | translate}}" tooltip-placement="right auto" ></i></span>
+                          <span ng-message="max"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.EVENT_START_TIME_MAX' | translate}}" tooltip-placement="right auto" ></i></span>
+                          <span ng-message="required"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.EVENT_START_TIME_REQUIRED' | translate}}" tooltip-placement="right auto"></i></span>
+                        </div>
+                        <div class="messages" ng-if="activityForm.event_start_time.$touched && activityForm.event_start_time.$valid">
+                          <i class="fa fa-check"></i>
+                        </div>
+                      </div>
+                      <div class="col-xs-5 control-addon" ng-class="{'has-error': activityForm.event_end_time.$touched && activityForm.event_end_time.$invalid,'has-success':activityForm.event_end_time.$touched && activityForm.event_end_time.$valid}">
+                        <input type="text" class="form-control" name="event_end_time" placeholder="{{'PLACEHOLDERS.END_TIME' | translate}}" ng-model="activity.event_end_time" ng-min="activity.event_start_time" min-date="activity.event_start_time" ng-focus="open.event_end_time = true" ng-click="open.event_end_time = true" is-open="open.event_end_time" datetime-local="yyyy/MM/dd HH:mm" datetime-picker="yyyy/MM/dd HH:mm" timepicker-options="{'show-meridian':true}" required>
+                        <i class="control-icon fa fa-calendar"></i>
+                        <div class="messages" ng-messages="activityForm.event_end_time.$error" ng-if="activityForm.event_end_time.$touched && activityForm.event_end_time.$invalid">
+                          <span ng-message="datetime"><i class="fa fa-close" uib-tooltip="{{'VALIDATE.EVENT_START_TIME_REQUIRED' | translate}}" tooltip-placement="right auto" ></i></span>
+                          <span ng-message="min"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.EVENT_END_TIME_MIN' | translate}}" tooltip-placement="right auto" ></i></span>
+                          <span ng-message="required"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.EVENT_END_TIME_REQUIRED' | translate}}" tooltip-placement="right auto"></i></span>
+                        </div>
+                        <div class="messages" ng-if="activityForm.event_end_time.$touched && activityForm.event_end_time.$valid">
+                          <i class="fa fa-check"></i>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label for="inputPassword" class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.REGISTRATION_TIME">REGISTRATION_TIME</label>
+                      <div class="col-xs-5 control-addon required" ng-class="{'has-error': activityForm.registration_start_time.$touched && activityForm.registration_start_time.$invalid,'has-success':activityForm.registration_start_time.$touched && activityForm.registration_start_time.$valid}">
+                        <input type="text" class="form-control" name="registration_start_time" placeholder="{{'PLACEHOLDERS.START_TIME' | translate}}" ng-model="activity.registration_start_time" ng-max="activity.registration_end_time" max-date="activity.registration_end_time" ng-focus="open.registration_start_time = true" ng-click="open.registration_start_time = true" is-open="open.registration_start_time" datetime-local="yyyy/MM/dd HH:mm" datetime-picker="yyyy/MM/dd HH:mm" timepicker-options="{'show-meridian':true}" required>
+                        <i class="control-icon fa fa-calendar"></i>
+                        <div class="messages" ng-messages="activityForm.registration_start_time.$error" ng-if="activityForm.registration_start_time.$touched && activityForm.registration_start_time.$invalid">
+                          <span ng-message="datetime"><i class="fa fa-close" uib-tooltip="{{'VALIDATE.EVENT_START_TIME_REQUIRED' | translate}}" tooltip-placement="right auto" ></i></span>
+                          <span ng-message="max"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.REGISTRATION_START_TIME_MAX' | translate}}" tooltip-placement="right auto" ></i></span>
+                          <span ng-message="required"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.REGISTRATION_START_TIME_REQUIRED' | translate}}" tooltip-placement="right auto"></i></span>
+                        </div>
+                        <div class="messages" ng-if="activityForm.registration_start_time.$touched && activityForm.registration_start_time.$valid">
+                          <i class="fa fa-check"></i>
+                        </div>
+                      </div>
+                      <div class="col-xs-5 control-addon" ng-class="{'has-error': activityForm.registration_end_time.$touched && activityForm.registration_end_time.$invalid,'has-success':activityForm.registration_end_time.$touched && activityForm.registration_end_time.$valid}">
+                        <input type="text" class="form-control" name="registration_end_time" placeholder="{{'PLACEHOLDERS.END_TIME' | translate}}" ng-model="activity.registration_end_time" ng-min="activity.registration_start_time" min-date="activity.registration_start_time" ng-focus="open.registration_end_time = true" ng-click="open.registration_end_time = true" is-open="open.registration_end_time" datetime-local="yyyy/MM/dd HH:mm" datetime-picker="yyyy/MM/dd HH:mm" timepicker-options="{'show-meridian':true}" required>
+                        <i class="control-icon fa fa-calendar"></i>
+                        <div class="messages" ng-messages="activityForm.registration_end_time.$error" ng-if="activityForm.registration_end_time.$touched && activityForm.registration_end_time.$invalid">
+                          <span ng-message="datetime"><i class="fa fa-close" uib-tooltip="{{'VALIDATE.EVENT_START_TIME_REQUIRED' | translate}}" tooltip-placement="right auto" ></i></span>
+                          <span ng-message="min"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.REGISTRATION_END_TIME_MIN' | translate}}" tooltip-placement="right auto" ></i></span>
+                          <span ng-message="required"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.REGISTRATION_END_TIME_REQUIRED' | translate}}" tooltip-placement="right auto"></i></span>
+                        </div>
+                        <div class="messages" ng-if="activityForm.registration_end_time.$touched && activityForm.registration_end_time.$valid">
+                          <i class="fa fa-check"></i>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label for="inputPassword" class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.JUDGE_TIME">JUDGE_TIME</label>
+                      <div class="col-xs-5 control-addon required" ng-class="{'has-error': activityForm.judge_start_time.$touched && activityForm.judge_start_time.$invalid,'has-success':activityForm.judge_start_time.$touched && activityForm.judge_start_time.$valid}">
+                        <input type="text" class="form-control" name="judge_start_time" placeholder="{{'PLACEHOLDERS.START_TIME' | translate}}" ng-model="activity.judge_start_time" ng-max="activity.judge_end_time" max-date="activity.judge_end_time" ng-focus="open.judge_start_time = true" ng-click="open.judge_start_time = true" is-open="open.judge_start_time" datetime-local="yyyy/MM/dd HH:mm" datetime-picker="yyyy/MM/dd HH:mm" timepicker-options="{'show-meridian':true}" required>
+                        <i class="control-icon fa fa-calendar"></i>
+                        <div class="messages" ng-messages="activityForm.judge_start_time.$error" ng-if="activityForm.judge_start_time.$touched && activityForm.judge_start_time.$invalid">
+                          <span ng-message="datetime"><i class="fa fa-close" uib-tooltip="{{'VALIDATE.EVENT_START_TIME_REQUIRED' | translate}}" tooltip-placement="right auto" ></i></span>
+                          <span ng-message="max"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.JUDGE_START_TIME_MAX' | translate}}" tooltip-placement="right auto" ></i></span>
+                          <span ng-message="required"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.JUDGE_START_TIME_REQUIRED' | translate}}" tooltip-placement="right auto"></i></span>
+                        </div>
+                        <div class="messages" ng-if="activityForm.judge_start_time.$touched && activityForm.judge_start_time.$valid">
+                          <i class="fa fa-check"></i>
+                        </div>
+                      </div>
+                      <div class="col-xs-5 control-addon" ng-class="{'has-error': activityForm.judge_end_time.$touched && activityForm.judge_end_time.$invalid,'has-success':activityForm.judge_end_time.$touched && activityForm.judge_end_time.$valid}">
+                        <input type="text" class="form-control" name="judge_end_time" placeholder="{{'PLACEHOLDERS.END_TIME' | translate}}" ng-model="activity.judge_end_time" ng-min="activity.judge_start_time" min-date="activity.judge_start_time" ng-focus="open.judge_end_time = true" ng-click="open.judge_end_time = true" is-open="open.judge_end_time" datetime-local="yyyy/MM/dd HH:mm" datetime-picker="yyyy/MM/dd HH:mm" timepicker-options="{'show-meridian':true}" required>
+                        <i class="control-icon fa fa-calendar"></i>
+                        <div class="messages" ng-messages="activityForm.judge_end_time.$error" ng-if="activityForm.judge_end_time.$touched && activityForm.judge_end_time.$invalid">
+                          <span ng-message="datetime"><i class="fa fa-close" uib-tooltip="{{'VALIDATE.EVENT_START_TIME_REQUIRED' | translate}}" tooltip-placement="right auto" ></i></span>
+                          <span ng-message="min"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.JUDGE_END_TIME_MIN' | translate}}" tooltip-placement="right auto" ></i></span>
+                          <span ng-message="required"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.JUDGE_END_TIME_REQUIRED' | translate}}" tooltip-placement="right auto"></i></span>
+                        </div>
+                        <div class="messages" ng-if="activityForm.judge_end_time.$touched && activityForm.judge_end_time.$valid">
+                          <i class="fa fa-check"></i>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group" ng-class="{'has-error': activityForm.ribbon.$touched && activityForm.ribbon.$invalid,'has-success':activityForm.ribbon.$touched && activityForm.ribbon.$valid}">
+                      <label for="inputPassword" class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.RIBBON">RIBBON</label>
+                      <div class="col-xs-10">
+                        <input type="text" name="ribbon" class="form-control" placeholder="" ng-model="activity.ribbon">
+                      </div>
+                    </div>
+                    <div class="form-group" ng-class="{'has-error': activityForm.max_enrollment.$touched && activityForm.max_enrollment.$invalid,'has-success': activityForm.max_enrollment.$touched && activityForm.max_enrollment.$valid}">
+                      <label for="inputPassword" class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.MAX_ENROLLMENT">MAX_ENROLLMENT</label>
+                      <div class="col-xs-10 control-addon">
+                        <input type="number" class="form-control" name="max_enrollment" placeholder="{{'PLACEHOLDERS.MAX_ENROLLMENT' | translate}}" min="0" ng-model="configs.max_enrollment" string-to-number ng-min="0" pattern="[0-9]+">
+                        <i class="control-icon fa fa-user-plus"></i>
+                        <div class="messages" ng-messages="activityForm.max_enrollment.$error" ng-if="activityForm.max_enrollment.$touched">
+                          <span ng-message="min"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.MAX_ENROLLMENT_MIN' | translate}}"  tooltip-placement="right auto"></i></span>
+                          <span ng-message="pattern"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.MAX_ENROLLMENT_PATTERN' | translate}}" tooltip-placement="right auto"></i></span>
+                        </div>
+                        <div class="messages" ng-if="activityForm.max_enrollment.$touched && activityForm.max_enrollment.$valid">
+                          <i class="fa fa-check"></i>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label for="inputPassword" class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.SHORT_DESCRIPTION">SHORT_DESCRIPTION</label>
+                      <div class="col-xs-10">
+                        <textarea class="form-control" ng-model="activity.short_description" rows="4"></textarea>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label for="inputPassword" class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.DESCRIPTION">DESCRIPTION</label>
+                      <div class="col-xs-10">
+                        <textarea name="description" ckeditor ng-model="activity.description" height="300"></textarea>
+                      </div>
+                    </div>
+                  </fieldset>
+                  <footer>
+                    <div class="form-group">
+                      <div class="col-xs-offset-2 col-xs-10">
+                        <button type="submit" class="btn btn-primary btn-long" ng-disabled="activityForm.$invalid || activityFormDisabled"><i class="fa fa-arrow-circle-o-right"></i> 下一步</button>
+                      </div>
+                    </div>
+                  </footer>
+                </form>
+              </div>
+            </div>
+            <div id="step2" ng-show="wizard == 2">
+              <div class="col-lg-8 col-md-10 col-xs-11 center">
+                <form name="clondForm" class="form-horizontal" ng-show="!isAzureForm" ng-submit="clondFormSubmit()" novalidate>
+                  <fieldset class="detail-wrapper">
+                    <div class="form-group">
+                      <div class="col-xs-6">
+                        <label for="azure">
+                          <input id="azure" class="hide" type="radio" name="clond" value="1" ng-model="clondservices" required>
+                          <div class="info-box">
+                            <div class="content text-centet">
+                              <img src="/static/pic/azure-logo.png">
+                            </div>
+                            <footer class="text-center">
+                              使用
+                            </footer>
+                          </div>
+                        </label>
+                      </div>
+                      <div class="col-xs-6">
+                        <label for="alauda">
+                          <input id="alauda" class="hide" type="radio" name="clond" value="2" ng-model="clondservices" required>
+                          <div class="info-box">
+                            <div class="content text-centet">
+                              <img src="/static/pic/alauda-logo-white.png">
+                            </div>
+                            <footer class="text-center">
+                              使用
+                            </footer>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+                  </fieldset>
+                  <footer>
+                    <div class="form-group">
+                      <div class="col-xs-12">
+                        <button type="submit" class="btn btn-primary btn-long" ng-disabled="clondForm.$invalid"><i class="fa fa-arrow-circle-o-right"></i> 下一步</button>
+                        <a href="#" ng-click="notUseCloud()"> skip 不使用云资源</a>
+                      </div>
+                    </div>
+                  </footer>
+                </form>
+                <form name="azureForm" class="form-horizontal" ng-show="isAzureForm" ng-submit="azureFormSubmit()" novalidate>
+                  <header class="text-grey">
+                    <i class="fa fa-plus"></i> 创建新Azure证书
+                  </header>
+                  <fieldset class="detail-wrapper">
+                    <div class="form-group" ng-class="{'has-error': azureForm.subscription_id.$touched && activityForm.name.$invalid,'has-success':activityForm.name.$valid}">
+                      <label class="col-xs-2 control-label" translate="AZURE_FIELDS.SUBSCRIPTION_ID">SUBSCRIPTION_ID</label>
+                      <div class="col-xs-10 required">
+                        <input type="text" class="form-control" name="subscription_id" placeholder="{{'PLACEHOLDERS.SUBSCRIPTION_ID' | translate}}" ng-model="azure.subscription_id" ng-trim="true" ng-minleng="5" pattern="[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}" required>
+                        <div class="messages" ng-messages="activityForm.name.$error" ng-if="activityForm.name.$touched && activityForm.name.$invalid">
+                          <span ng-message="pattern"><i class="fa fa-close" uib-tooltip="pattern" tooltip-placement="right auto" ></i></span>
+                          <span ng-message="required"><i class="fa fa-close" uib-tooltip="required" tooltip-placement="right auto"></i></span>
+                        </div>
+                        <div class="messages" ng-if="activityForm.name.$touched && activityForm.name.$valid">
+                          <i class="fa fa-check"></i>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group" ng-class="{'has-error': azureForm.management_host.$touched && azureForm.management_host.$invalid,'has-success':azureForm.management_host.$valid}">
+                      <label class="col-xs-2 control-label" translate="AZURE_FIELDS.MANAGEMENT_HOST">MANAGEMENT_HOST</label>
+                      <div class="col-xs-10 required">
+                        <select class="form-control" name="management_host" ng-model="azure.management_host">
+                          <option value="management.core.chinacloudapi.cn">
+                            management.core.chinacloudapi.cn
+                          </option>
+                          <option value="management.core.windows.net">management.core.windows.net</option>
+                        </select>
+                      </div>
+                    </div>
+                  </fieldset>
+                  <footer>
+                    <div class="form-group">
+                      <div class="col-xs-offset-2 col-xs-12">
+                        <button type="submit" class="btn btn-primary btn-long" ng-disabled="azureForm.$invalid || azureFormDisabled"><i class="fa fa-arrow-circle-o-right"></i> 下一步</button>
+                      </div>
+                    </div>
+                  </footer>
+                </form>
+              </div>
+            </div>
+            <div id="step3" ng-show="wizard == 3" class="clearfix" style="margin: -32px 0;">
+              <form name="templateForm" class="form-horizontal" ng-submit="templateSubmit()" novalidate>
+                <div class="inner-layout">
+                  <div class="inner-left inner-cell">
+                    <div class="header">
+                      <div class="clearfix">
+                        <div class="col-md-12 col-lg-7">
+                          <div class="row">
+                            <div class="input-group search">
+                              <input type="text" class="form-control" ng-model="search.name" placeholder="Search for...">
+                              <span class="input-group-btn">
+                            <select class="form-control dropdown-list" name="status" ng-model="search.status">
+                              <option value="-1" selected="selected"  translate="TEMPLATE_STATUS.ALL">ALL</option>
+                              <option value="1" translate="TEMPLATE_STATUS.PASS">PASS</option>
+                              <option value="0" translate="TEMPLATE_STATUS.UNAPPROVED">UNAPPROVED</option>
+                              <option value="2" translate="TEMPLATE_STATUS.FAIL">FAIL</option>
+                            </select>
+                            <button class="btn btn-info" type="button" ng-click="searchTemplates()">搜索</button>
+                          </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-12 col-lg-5">
+                          <div class="row  text-right">
+                            <a href="#" class="btn btn-primary">创建模板</a>
+                            <a href="#" class="btn btn-primary">从文件创建模板</a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="clearfix">
+                      <div class="clond-templates">
+                        <div class="col-lg-4 col-md-6 col-sm-12" ng-repeat="image in image_templates">
+                          <div class="item" ng-class="{active:isChecked(templates, image.id)}">
+                            <header>
+                              {{image.name}}
+                            </header>
+                            <div class="item-body text-default">
+                              <div class="line">
+                                <div class="float-right">使用次数（600）</div>
+                                <div class="author">
+                                  <span class="picture"><img src="/static/pic/monkey-32-32px.png"></span>
+                                  <span>创建者</span>
+                                </div>
+                              </div>
+                              <div class="line">
+                                <span class="label float-right" ng-class="{'label-warning':image.status==0,'label-success':image.status==1, 'label-danger':image.status==2}">{{ image.status | imageStatus }}</span>
+                                <time><i class="text-success fa fa-calendar"></i> {{image.create_time | date:'yyyy/MM/dd HH:mm' }}</time>
+                              </div>
+                              <p>{{image.description}}</p>
+                            </div>
+                            <footer>
+                              <div class="btn-group btn-group-justified">
+                                <div class="btn">
+                                  <label class="checkbox checkbox-success">
+                                    <input type="checkbox" value="{{image.id}}" ng-checked="isChecked(templates, image.id)" check-value="{{image.id}}" check-change="testchange($event,image.id)">
+                                    <span>绑定</span>
+                                  </label>
+                                </div>
+                                <a class="btn btn-primary" href="{{image.url}}" download="{{image.url}}">下线</a>
+                              </div>
+                            </footer>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="clearfix">
+                      <!--  <uib-pagination total-items="175" ng-model="bigCurrentPage" max-size="5" class="pagination pagination-success" boundary-link-numbers="true" rotate="false"></uib-pagination> -->
+                    </div>
+                    <footer class="clearfix">
+                      <div class="form-group">
+                        <div class="col-xs-12">
+                          <button type="submit" class="btn btn-primary btn-long"><i class="fa fa-arrow-circle-o-right"></i> 下一步</button>
+                        </div>
+                      </div>
+                    </footer>
+                  </div>
+                  <div class="inner-right inner-cell">
+                    <div class="inner-list">
+                      <header>
+                        已绑定模板
+                      </header>
+                      <div class="content">
+                        <uib-accordion close-others="oneAtATime">
+                          <uib-accordion-group ng-repeat="temp in templates">
+                            <uib-accordion-heading>
+                              {{temp.template.name}}
+                              <label class="checkbox checkbox-success right" ng-click="expression($event)">
+                                <input type="checkbox" checked="checked">
+                                <span>绑定</span>
+                              </label>
+                            </uib-accordion-heading>
+                            <div class="line">
+                              <div class="float-right">使用次数（600）</div>
+                              <div class="author">
+                                <span class="picture"><img src="/static/pic/monkey-32-32px.png"></span>
+                                <span>创建者</span>
+                              </div>
+                            </div>
+                            <div class="line">
+                              <span class="label float-right" ng-class="{'label-warning':temp.template.status==0,'label-success':temp.template.status==1, 'label-danger':temp.template.status==2}">{{ temp.template.status | imageStatus }}</span>
+                              <time><i class="text-success fa fa-calendar"></i> {{temp.create_time | date:'yyyy/MM/dd HH:mm' }}</time>
+                            </div>
+                            <p>{{temp.template.description}}</p>
+                          </uib-accordion-group>
+                        </uib-accordion>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+          <div id="step4" ng-show="wizard == 4" class="clearfix">
+            <div class="col-lg-8 col-md-10 col-xs-11 center">
+              <div class=" text-center">
+                <label>
+                  <sapn class="icon icon-lg icon-success"><i class="fa fa-check"></i></sapn>
+                </label>
+                <h3 class="text-gery">已成功保存活动</h3>
+                <div class="form-group">
+                  <button type="button" class="btn btn-success btn-long " ng-disabled="onlineDisabled" ng-click="online()">立即上线</button>
+                </div>
+                <p class="text-gery">完善更多信息</p>
+                <div class="inline-block text-left">
+                  <p>
+                    <span class="text-gery" translate="SETTINGS.MAIN">SETTINGS.MAIN</span>
+                    <a ui-sref="manage.users({name:activity.name})"><i class="fa fa-user"></i> <ANY translate="SETTINGS.USERS">USERS</ANY> </a>
+                    <a ui-sref="manage.organizers({name:activity.name})"><i class="fa fa-sitemap"></i> <ANY translate="SETTINGS.ORGANIZERS">ORGANIZERS</ANY> </a>
+                    <a ui-sref="manage.prizes({name:activity.name})"><i class="fa fa-trophy"></i> <ANY translate="SETTINGS.PRIZES">PRIZES</ANY> </a>
+                  </p>
+                  <p ng-show="isShowAdvancedSettings">
+                    <span class="text-gery" translate="ADVANCED_SETTINGS.MAIN">ADVANCED_SETTINGS.MAIN:</span>
+                    <a ui-sref="manage.ve({name:activity.name})"><i class="fa fa-th-large"></i> <ANY translate="ADVANCED_SETTINGS.VIRTUAL_ENVIRONMENT">VIRTUAL_ENVIRONMENT</ANY>  </a>
+                    <a ui-sref="manage.monitor({name:activity.ame})"><i class="fa fa-desktop"></i> <ANY translate="ADVANCED_SETTINGS.ENVIRONMENTAL_MONITOR">ENVIRONMENTAL_MONITOR</ANY>  </a>
+                    <a ui-sref="manage.servers({name:activity.name})"><i class="fa fa-server"></i> <ANY translate="ADVANCED_SETTINGS.SERVERS">SERVERS</ANY>  </a>
+                  </p>
+                  <br/>
+                  <br/>
+                  <br/>
+                  <br/>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-  <div>
-    <label class="checkbox checkbox-primary">
-      <input type="checkbox">
-      <span>Checkbox primary</span>
-    </label>
-  </div>
-  <div>
-    <label class="checkbox checkbox-success">
-      <input type="checkbox">
-      <span>Checkbox success</span>
-    </label>
-  </div>
-  <div>
-    <label class="checkbox checkbox-info">
-      <input type="checkbox">
-      <span>Checkbox info</span>
-    </label>
-  </div>
-  <div>
-    <label class="checkbox checkbox-warning">
-      <input type="checkbox">
-      <span>Checkbox warning</span>
-    </label>
-  </div>
-  <div>
-    <label class="checkbox checkbox-danger">
-      <input type="checkbox">
-      <span>Checkbox danger</span>
-    </label>
-  </div>
-  <div>
-    <label class="checkbox checkbox-primary checkbox-lg">
-      <input type="checkbox">
-      <span>Checkbox primary</span>
-    </label>
-  </div>
-  <div>
-    <label class="checkbox checkbox-success checkbox-lg">
-      <input type="checkbox" disabled="disabled" checked="checked">
-      <span>Checkbox primary</span>
-    </label>
-  </div>
-  <div>
-    <label class="radiobox">
-      <input type="radio" checked="checked">
-      <span>Radiobox 1</span>
-    </label>
-  </div>
-  <div>
-    <label class="radiobox radiobox-primary">
-      <input type="radio" checked="checked">
-      <span>Radiobox 1</span>
-    </label>
-  </div>
-  <div>
-    <label class="radiobox radiobox-success">
-      <input type="radio" checked="checked">
-      <span>Radiobox 1</span>
-    </label>
-  </div>
-  <div>
-    <label class="radiobox radiobox-info">
-      <input type="radio" checked="checked">
-      <span>Radiobox 1</span>
-    </label>
-  </div>
-  <div>
-    <label class="radiobox radiobox-warning">
-      <input type="radio" checked="checked">
-      <span>Radiobox 1</span>
-    </label>
-  </div>
-  <div>
-    <label class="radiobox radiobox-danger">
-      <input type="radio">
-      <span>Radiobox 1</span>
-    </label>
-  </div>
-  <div>
-    <label class="radiobox radiobox-info radiobox-lg">
-      <input type="radio" checked="checked">
-      <span>Radiobox 1</span>
-    </label>
-  </div>
-  <div>
-    <label class="radiobox radiobox-success radiobox-lg">
-      <input type="radio" checked="checked" disabled="disabled">
-      <span>Radiobox 1</span>
-    </label>
-  </div>
-  <div>
-    <label class="switchbox switchbox-inline">
-      <input type="checkbox">
-      <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
-    </label>
-    <label class="switchbox switchbox-primary switchbox-inline">
-      <input type="checkbox">
-      <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
-    </label>
-    <label class="switchbox switchbox-success">
-      <input type="checkbox">
-      <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
-    </label>
-    <label class="switchbox switchbox-info">
-      <input type="checkbox">
-      <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
-    </label>
-    <label class="switchbox switchbox-warning">
-      <input type="checkbox">
-      <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
-    </label>
-    <label class="switchbox switchbox-danger">
-      <input type="checkbox">
-      <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
-    </label>
-    <label class="switchbox switchbox-primary  switchbox-lg ">
-      <input type="checkbox">
-      <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
-    </label>
-    <label class="switchbox switchbox-primary  switchbox-lg ">
-      <input type="checkbox" disabled="disabled" checked="checked">
-      <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
-    </label>
-  </div>
-</section>
+</div>

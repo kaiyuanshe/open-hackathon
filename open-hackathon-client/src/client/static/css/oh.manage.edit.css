@@ -1,5 +1,6 @@
 .manage-edit .detail-wrapper {
   width: 700px;
+  word-break: break-word;
   margin: 0 auto;
 }
 

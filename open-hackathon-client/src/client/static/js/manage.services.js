@@ -51,7 +51,8 @@ angular.module('oh.api', [])
         }
         return getCmd;
       } else {
-        return getCmd[obj] = function(options, callback) {
+
+        getCmd[obj] = function(options, callback) {
           var deferred = $q.defer();
           var _params = {
             query: {},
@@ -85,12 +86,13 @@ angular.module('oh.api', [])
             });
           return deferred.promise;
         }
+        getCmd[obj]._path_ = name;
+        return getCmd[obj];
       }
     }
 
     return API($window.CONFIG.apiconfig.api, $window.CONFIG.apiconfig.proxy + '/api');
-  })
-  .factory('activityService', function($rootScope, $q, api) {
+  }).factory('activityService', function($rootScope, $q, api) {
     var activity_list = [],
       isLoad = false,
       currentActivity = {};
@@ -180,15 +182,18 @@ angular.module('oh.api', [])
       var modalInstance = $uibModal.open({
         animation: true,
         templateUrl: modal.url,
-        size: modal.size + ' ' + modal.class,
+        size: modal.size + ' modal-' + modal.status,
         resolve: modal.resolve,
         controller: modal.controller
       });
       return modalInstance;
     }
 
-    this.alert = function(modal, callback) {
-      modal.url = '/static/partials/dialogs/alert.html?v=' + VERSION;
+    function base(modal) {
+      if (modal.icon) {
+        modal.body = '<p class="dialog-centent"><label class="icon icon-md icon-' + modal.status + '"><i class="fa ' + modal.icon + '"></i></label><label class="dialog-message">' + modal.body + '</label></p>'
+      }
+      modal.ok = modal.ok || function() {return ''};
       modal.controller = function($scope, $uibModalInstance) {
         $scope.title = modal.title;
         $scope.body = modal.body;
@@ -202,23 +207,45 @@ angular.module('oh.api', [])
       return open(modal).result;
     }
 
+    this.alert = function(modal) {
+      modal.url = 'manage/template/dialogs/alert.html';
+      return base(modal);
+    }
+
     this.confirm = function(modal) {
-      modal.url = '/static/partials/dialogs/confirm.html?v=' + VERSION;
-      modal.controller = function($scope, $uibModalInstance) {
-        $scope.title = modal.title;
-        $scope.body = modal.body;
-        $scope.ok = function() {
-          $uibModalInstance.close(modal.ok());
-        };
-        $scope.cancel = function() {
-          $uibModalInstance.dismiss('cancel');
-        };
-      }
-      return open(modal).result;
+      modal.url = 'manage/template/dialogs/confirm.html';
+      return base(modal);
     }
 
     this.customize = function(modal) {
       open(modal);
+    }
+    return this;
+  }).factory('speech', function() {
+
+    var path = '/static/sound/';
+
+    function audio(name) {
+      var a = document.createElement('audio');
+      a.setAttribute('src', path + name);
+      a.addEventListener('load', function() {
+        a.play()
+      }, !0);
+      a.pause();
+      a.play();
+    }
+
+    this.alert = function() {
+      audio('voice_alert.mp3');
+    }
+    this.off = function() {
+      audio('voice_off.mp3');
+    }
+    this.on = function() {
+      audio('voice_on.mp3');
+    }
+    this.tip = function() {
+      audio('smallbox.mp3');
     }
     return this;
   });
