@@ -52,4 +52,18 @@ angular.module('oh.filters', [])
       providers = parseInt(providers, 10) || 0;
       return value == (providers & value);
     }
+  }).filter('inArray', function() {
+    return function(array, value) {
+      array = array || [];
+      return array.indexOf(value) !== -1;
+    }
+  }).filter('imageStatus',function($translate){
+    return function(status){
+       switch(status){
+        case 0:return $translate.instant('TEMPLATE_STATUS.UNAPPROVED');
+        case 1:return $translate.instant('TEMPLATE_STATUS.PASS');
+        case 2:return $translate.instant('TEMPLATE_STATUS.FAIL');
+       }
+       return '';
+    }
   });
