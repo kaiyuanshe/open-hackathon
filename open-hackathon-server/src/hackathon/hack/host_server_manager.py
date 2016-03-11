@@ -26,10 +26,8 @@ __author__ = 'ZGQ'
 
 import sys
 import requests
-import time
 from uuid import uuid1
 from time import strftime, sleep
-import thread
 
 sys.path.append("..")
 
@@ -85,6 +83,10 @@ class DockerHostManager(Component):
                                        DockerHostServer.hackathon_id == hackathon_id,
                                        DockerHostServer.state == DockerHostServerStatus.DOCKER_READY,
                                        DockerHostServer.disabled == DockerHostServerDisable.ABLE)
+        if self.util.is_local():
+            if len(vms) is not 0:
+                return vms[0]
+            return None
         # todo connect to azure to launch new VM if no existed VM meet the requirement
         # since it takes some time to launch VM,
         # it's more reasonable to launch VM when the existed ones are almost used up.
@@ -104,7 +106,6 @@ class DockerHostManager(Component):
                     return docker_host
         if not self.util.is_local():
             self.create_docker_host_vm(hackathon_id)
-        self.scheduler.add_once("docker_host_manager", "get_available_docker_host", context=ctx, seconds=10)
         return
         # raise Exception("No available VM.")
 
