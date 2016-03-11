@@ -548,7 +548,6 @@ class HackathonManager(Component):
             and description is determined by HACK_NOTICE_CATEGORY.yy, while its content and link url is ''
         """
         hackathon_notice = HackathonNotice(content='',
-                                           link='',
                                            event=notice_event,
                                            category=notice_category)
 
@@ -570,7 +569,7 @@ class HackathonManager(Component):
                 pass
 
         if notice_event == HACK_NOTICE_EVENT.EXPR_JOIN and body.get('user_id'):
-            user_id = int(body.get('user_id'))
+            user_id = body.get('user_id')
             user = self.user_manager.get_user_by_id(user_id)
             hackathon_notice.content = u"用户 %s 开始编程" % (user.nickname)
         else:
@@ -578,12 +577,14 @@ class HackathonManager(Component):
 
         # use assigned value if content or link is assigned in body
         hackathon_notice.content = body.get('content', hackathon_notice.content)
-        hackathon_notice.link = body.get('link', hackathon_notice.link)
+        link = body.get('link')
+        if link:
+            hackathon_notice.link = link # it must be valid url str
 
         hackathon_notice.save()
 
-        self.log.debug("a new notice is created: hackathon_id: %d, event: %d, category: %d" % (
-            hackathon_id, notice_event, notice_category))
+        self.log.debug("a new notice is created: hackathon: %s, event: %d, category: %d" % (
+            hackathon.name, notice_event, notice_category))
         return hackathon_notice.dic()
 
     def update_hackathon_notice(self, body):
@@ -593,7 +594,6 @@ class HackathonManager(Component):
 
         hackathon_notice.content = body.get("content", hackathon_notice.content)
         hackathon_notice.link = body.get("link", hackathon_notice.link)
-        hackathon_notice.update_time = self.util.get_now()
 
         hackathon_notice.save()
         return hackathon_notice.dic()
