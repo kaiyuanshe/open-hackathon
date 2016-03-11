@@ -84,7 +84,7 @@ class DockerHostManager(Component):
                                        DockerHostServer.state == DockerHostServerStatus.DOCKER_READY,
                                        DockerHostServer.disabled == DockerHostServerDisable.ABLE)
         if self.util.is_local():
-            if len(vms) is not 0:
+            if len(vms) > 0:
                 return vms[0]
             return None
         # todo connect to azure to launch new VM if no existed VM meet the requirement
