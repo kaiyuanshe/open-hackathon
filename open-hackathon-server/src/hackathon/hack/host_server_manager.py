@@ -25,7 +25,6 @@ THE SOFTWARE.
 __author__ = 'ZGQ'
 
 import sys
-from os.path import isfile
 import requests
 from uuid import uuid1
 from time import strftime, sleep
@@ -35,7 +34,6 @@ sys.path.append("..")
 from azure.storage.blob import BlobService
 from azure.servicemanagement import (ConfigurationSet, ConfigurationSetInputEndpoint, OSVirtualHardDisk,
                                      LinuxConfigurationSet, ServiceManagementService)
-import json
 
 from hackathon import Component, RequiredFeature, Context
 from hackathon.database.models import DockerHostServer, HackathonAzureKey, Hackathon, HackathonConfig, AzureKey
@@ -43,6 +41,9 @@ from hackathon.constants import (AzureApiExceptionMessage, DockerPingResult, AVM
                                  DockerHostServerStatus, DockerHostServerDisable, AzureVMStartMethod,
                                  ServiceDeploymentSlot, AzureVMSize, AzureVMEndpointName, TCPProtocol,
                                  AzureVMEndpointDefaultPort, AzureVMEnpointConfigType, AzureOperationStatus)
+from hackathon.azureformation.service import (
+    Service,
+)
 from hackathon.hackathon_response import ok, not_found, precondition_failed
 
 
@@ -65,38 +66,49 @@ class DockerHostManager(Component):
         host_servers = self.db.find_all_objects(DockerHostServer, DockerHostServer.hackathon_id == hackathon_id)
         return [host_server.dic() for host_server in host_servers]
 
-    def get_available_docker_host(self, req_count, hackathon):
+    def get_available_docker_host(self, ctx):
         """
         Get available docker host from DB
         If there is no qualified host, then create one
 
-        :param req_count: the number of containers needed
-        :type req_count: integer
-
-        :param hackathon: a record in DB table:hackathon
-        :type hackathon: Hackathon object
-
-        :return: a docker host if there is a qualified one, otherwise None
-        :rtype: DockerHostServer object
+        :param ctx: contex, containing req_count, hackathon_id, azure_key_id
+        :type req_count: Context
         """
+        req_count = ctx.req_count
+        hackathon_id = ctx.hackathon_id
+        azure_key_id = ctx.azure_key_id
         vms = self.db.find_all_objects(DockerHostServer,
                                        DockerHostServer.container_count + req_count <=
                                        DockerHostServer.container_max_count,
-                                       DockerHostServer.hackathon_id == hackathon.id,
+                                       DockerHostServer.hackathon_id == hackathon_id,
                                        DockerHostServer.state == DockerHostServerStatus.DOCKER_READY,
                                        DockerHostServer.disabled == DockerHostServerDisable.ABLE)
+        if self.util.is_local():
+            if len(vms) > 0:
+                return vms[0]
+            return None
         # todo connect to azure to launch new VM if no existed VM meet the requirement
         # since it takes some time to launch VM,
         # it's more reasonable to launch VM when the existed ones are almost used up.
         # The new-created VM must run 'cloudvm service by default(either cloud-init or python remote ssh)
         # todo the VM public/private IP will change after reboot, need sync the IP in db with azure in this case
+        service = Service(azure_key_id=azure_key_id)
         for docker_host in vms:
             if self.hosted_docker.ping(docker_host):
-                return docker_host
+                service_name = docker_host.public_dns.split(".")[0]
+                deployments = service.get_hosted_service_properties(service_name, detail=True).deployments
+                available = True
+                for deployment in deployments:
+                    if deployment.locked:
+                        available = False
+                        break;
+                if available:
+                    return docker_host
         if not self.util.is_local():
-            self.create_docker_host_vm(hackathon.id)
-        return None
+            self.create_docker_host_vm(hackathon_id)
+        return
         # raise Exception("No available VM.")
+
 
     def get_host_server_by_id(self, id_):
         """
