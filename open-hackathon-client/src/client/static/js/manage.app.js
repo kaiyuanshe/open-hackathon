@@ -39,6 +39,7 @@ angular.module('manageView', [
     'oh.filters',
     'oh.controllers',
     'oh.directives',
+    'oh.templates',
     'oh.api'
   ])
   .config(function($locationProvider, $translateProvider, $stateProvider, $urlRouterProvider, VERSION) {
