@@ -184,7 +184,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
         :param ctx: consists the following keys
         :return:
         """
-        self.scheduler.add_once("azure_formation", "schedule_setup", context=ctx, seconds=0)
+        self.scheduler.add_once("docker_host_manager", "get_available_docker_host", context=ctx, seconds=0)
 
     def start(self, unit, **kwargs):
         """
@@ -201,20 +201,21 @@ class HostedDockerFormation(DockerFormationBase, Component):
             image=unit.get_image_with_tag(),
             ports=unit.get_ports(),
             remote=unit.get_remote(),
-            container_config=unit.get_container_config(),
             virtual_environment=kwargs["virtual_environment"],
-            host_server=None
+            host_server=None,
+            unit=unit
         )
         self.__schedule_setup(ctx)
 
     def start_container(self, ctx):
         experiment = ctx.experiment
-        container_name = ctx.container
-        host_server = self.docker_host_manager.get_available_docker_host(ctx)
+        container_name = ctx.container_name
+        host_server = ctx.hosted_server
         virtual_environment = ctx.virtual_environment
         image = ctx.image
         remote = ctx.remote
         ports = ctx.ports
+        unit = ctx.unit
         if not host_server:
             return None
 

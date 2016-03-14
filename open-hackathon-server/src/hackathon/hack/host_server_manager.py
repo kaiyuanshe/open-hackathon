@@ -107,7 +107,7 @@ class DockerHostManager(Component):
                     self.scheduler.add_once("hosted_docker", "start_container", ctx, seconds=0)
                     return
         #self.create_docker_host_vm(hackathon_id)
-        self.scheduler.add_once("hosted_docker", "start_container", ctx, seconds=10)
+        self.scheduler.add_once("docker_host_manager", "get_available_docker_host", ctx, seconds=10)
         return
         # raise Exception("No available VM.")
 
