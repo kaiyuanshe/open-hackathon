@@ -76,7 +76,7 @@ class DockerHostManager(Component):
         """
         req_count = ctx.req_count
         hackathon_id = ctx.hackathon_id
-        azure_key_id = ctx.azure_key_id
+        azure_key_id = self.hosted_docker.load_azure_key_id(ctx.experiment.id)
         vms = self.db.find_all_objects(DockerHostServer,
                                        DockerHostServer.container_count + req_count <=
                                        DockerHostServer.container_max_count,
@@ -103,9 +103,11 @@ class DockerHostManager(Component):
                         available = False
                         break;
                 if available:
-                    return docker_host
-        if not self.util.is_local():
-            self.create_docker_host_vm(hackathon_id)
+                    ctx.hosted_server = docker_host
+                    self.scheduler.add_once("hosted_docker", "start_container", ctx, seconds=0)
+                    return
+        #self.create_docker_host_vm(hackathon_id)
+        self.scheduler.add_once("hosted_docker", "start_container", ctx, seconds=10)
         return
         # raise Exception("No available VM.")
 

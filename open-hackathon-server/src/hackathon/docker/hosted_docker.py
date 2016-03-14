@@ -177,6 +177,15 @@ class HostedDockerFormation(DockerFormationBase, Component):
 
         self.__stop_container(expr_id, docker_host)
 
+    def __schedule_setup(self, ctx):
+        """
+        This function is used to schedule the process of starting a container as following
+        get_available_docker_host -->
+        :param ctx: consists the following keys
+        :return:
+        """
+        self.scheduler.add_once("azure_formation", "schedule_setup", context=ctx, seconds=0)
+
     def start(self, unit, **kwargs):
         """
         In this function, we create a container and then start a container
@@ -184,16 +193,28 @@ class HostedDockerFormation(DockerFormationBase, Component):
         :param docker_host:
         :return:
         """
-        virtual_environment = kwargs["virtual_environment"]
-        hackathon = kwargs["hackathon"]
-        experiment = kwargs["experiment"]
-        container_name = unit.get_name()
         ctx = Context(
             req_count=1,
-            hackathon_id=hackathon.id,
-            azure_key_id=self.load_azure_key_id(experiment.id)
+            hackathon_id=kwargs["hackathon"].id,
+            experiment=kwargs["experiment"],
+            container_name=unit.get_name(),
+            image=unit.get_image_with_tag(),
+            ports=unit.get_ports(),
+            remote=unit.get_remote(),
+            container_config=unit.get_container_config(),
+            virtual_environment=kwargs["virtual_environment"],
+            host_server=None
         )
+        self.__schedule_setup(ctx)
+
+    def start_container(self, ctx):
+        experiment = ctx.experiment
+        container_name = ctx.container
         host_server = self.docker_host_manager.get_available_docker_host(ctx)
+        virtual_environment = ctx.virtual_environment
+        image = ctx.image
+        remote = ctx.remote
+        ports = ctx.ports
         if not host_server:
             return None
 
@@ -201,7 +222,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
                                     name=container_name,
                                     host_server_id=host_server.id,
                                     virtual_environment=virtual_environment,
-                                    image=unit.get_image_with_tag())
+                                    image=image)
         self.db.add_object(container)
         self.db.commit()
 
@@ -211,10 +232,10 @@ class HostedDockerFormation(DockerFormationBase, Component):
             self.__assign_ports(experiment, host_server, virtual_environment, unit.get_ports()))
 
         # guacamole config
-        guacamole = unit.get_remote()
+        guacamole = remote
         port_cfg = filter(lambda p:
                           p[DOCKER_UNIT.PORTS_PORT] == guacamole[DOCKER_UNIT.REMOTE_PORT],
-                          unit.get_ports())
+                          ports)
         if len(port_cfg) > 0:
             gc = {
                 "displayname": container_name,
@@ -238,7 +259,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
             host_server.container_count += 1
             self.db.commit()
         else:
-            container_config = unit.get_container_config()
+            container_config = ctx.container_config
             # create container
             try:
                 container_create_result = self.__create(host_server, container_config, container_name)
