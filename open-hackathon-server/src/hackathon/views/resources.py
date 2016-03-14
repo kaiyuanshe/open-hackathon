@@ -27,7 +27,6 @@ import sys
 
 sys.path.append("..")
 import time
-import json
 
 from flask import g, request
 from flask_restful import reqparse
@@ -35,9 +34,8 @@ from flask_restful import reqparse
 from hackathon import RequiredFeature, Component
 from hackathon.decorators import hackathon_name_required, token_required, admin_privilege_required
 from hackathon.health import report_health
-from hackathon.hackathon_response import bad_request, not_found, ok
+from hackathon.hackathon_response import bad_request, not_found
 from hackathon_resource import HackathonResource
-from hackathon.constants import RGStatus
 
 hackathon_manager = RequiredFeature("hackathon_manager")
 user_manager = RequiredFeature("user_manager")
@@ -68,13 +66,17 @@ class CurrentTimeResource(HackathonResource):
             "currenttime": long(time.time() * 1000)
         }
 
+
 """Resources for templates library"""
 
 
 class TemplateResource(HackathonResource):
     def get(self):
         context = self.context()
-        return template_library.get_template_info_by_id(context.id)
+        template = template_library.get_template_info_by_id(context.id)
+        if template:
+            return template.dic()
+        return not_found("template cannot be found by id %s" % context.id)
 
     # create template
     @token_required
@@ -92,7 +94,7 @@ class TemplateResource(HackathonResource):
     @token_required
     def delete(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('id', type=int, location='args', required=True)
+        parse.add_argument('id', type=str, location='args', required=True)
         args = parse.parse_args()
         return template_library.delete_template(args['id'])
 
@@ -148,27 +150,39 @@ class GuacamoleResource(HackathonResource):
 
 
 class UserLoginResource(HackathonResource):
-    '''User login/logout processing'''
+    """User login/logout processing"""
 
     def get(self):
-        '''Get user by id'''
+        """Get user by id"""
         return user_manager.load_user(self.context().id)
 
     def post(self):
-        '''user login'''
+        """user login"""
         context = self.context()
         return user_manager.login(context.provider, context)
 
     @token_required
     def delete(self):
-        '''User logout'''
+        """User logout"""
         return user_manager.logout(g.user.id)
 
 
-class CurrentUserResource(HackathonResource):
-    @token_required
+class UserResource(HackathonResource):
     def get(self):
-        return user_manager.user_display_info(g.user)
+        parse = reqparse.RequestParser()
+        parse.add_argument("user_id", type=int, location="args", required=False)
+        args = parse.parse_args()
+
+        uid = args["user_id"] or None
+
+        if uid:
+            user = user_manager.get_user_by_id(uid)
+        elif user_manager.validate_login():
+            user = user_manager.get_user_by_id(g.user.id)
+        else:
+            return bad_request("must login or provide a user id")
+
+        return user_manager.cleaned_user_dic(user)
 
 
 class UserListResource(HackathonResource):
@@ -176,30 +190,8 @@ class UserListResource(HackathonResource):
     def get(self):
         return user_manager.get_user_fezzy_search(g.hackathon, self.context())
 
+
 class UserProfileResource(HackathonResource):
-    def get(self):
-        parse = reqparse.RequestParser()
-        parse.add_argument('user_id', type=int, location='args', required=False)
-        args = parse.parse_args()
-        query_uid = args["user_id"] or 0
-        if query_uid == g.user.id or query_uid == 0:
-            user = user_manager.get_user_by_id(g.user.id)
-        else:
-            user = user_manager.get_user_by_id(query_uid)
-
-        info = user_profile_manager.get_user_profile(user.id)
-        profile = {}
-        if info is not None:
-            profile = info.dic()
-
-        profile["avatar_url"] = user.avatar_url
-        profile["provider"] = user.provider
-        profile["name"] = user.name
-        profile["nickname"] = user.nickname
-
-        return profile
-
-
     @token_required
     def post(self):
         args = request.get_json()
@@ -212,11 +204,13 @@ class UserProfileResource(HackathonResource):
         args["user_id"] = g.user.id
         return user_profile_manager.update_user_profile(args)
 
+
 class UserPictureResource(HackathonResource):
     @token_required
     def put(self):
         args = request.get_json()
         return user_manager.update_user_avatar_url(g.user, args["url"])
+
 
 class UserTemplateListResource(HackathonResource):
     @token_required
@@ -521,6 +515,7 @@ class AdminAzureResource(HackathonResource):
         ctx = self.context()
         return azure_cert_manager.delete_certificate(ctx.certificate_id, g.hackathon)
 
+
 class AdminRegisterListResource(HackathonResource):
     @admin_privilege_required
     def get(self):
@@ -728,7 +723,8 @@ class AdminHackathonNoticeResource(HackathonResource):
     @admin_privilege_required
     def post(self):
         ctx = self.context()
-        return hackathon_manager.create_hackathon_notice(g.hackathon.id, int(ctx.get('event', 0)), int(ctx.get('category', 0)), ctx)
+        return hackathon_manager.create_hackathon_notice(g.hackathon.id, int(ctx.get('event', 0)),
+                                                         int(ctx.get('category', 0)), ctx)
 
     @admin_privilege_required
     def put(self):

@@ -11,7 +11,7 @@
 
             <h1 class="title">{{ hackathon.display_name }}</h1>
             <ul class="tags">
-                {% for item  in  hackathon.tag.split(",") %}
+                {% for item  in  hackathon.tags %}
                     <li><a href="javascript:;">{{ item }}</a></li>
                 {% endfor %}
             </ul>
@@ -19,13 +19,13 @@
                 <div class="col-lg-8 col-md-7">
                     <div id="banner" class="carousel slide" data-ride="carousel">
                         <ol class="carousel-indicators">
-                            {% for src in hackathon.banners.split(';') %}
+                            {% for src in hackathon.banners %}
                                 <li data-target="#banner" data-slide-to="{{ loop.index - 1 }}" {% if loop.index == 1 %}
                                     class="active" {% endif %}></li>
                             {% endfor %}
                         </ol>
                         <div class="carousel-inner" role="listbox">
-                            {% for src in hackathon.banners.split(';') %}
+                            {% for src in hackathon.banners %}
                                 <div class="item {% if loop.index == 1 %} active {% endif %}">
                                     <img src="{{ src }}">
                                 </div>
@@ -132,7 +132,7 @@
                                 {% elif user.is_admin %}
                                     <a class="btn btn-primary btn-lg"
                                        href="{{ url_for('edithackathon',hackathon_name=hackathon_name) }}">管理</a>
-                                {% elif user.get("user_profile") == None %}
+                                {% elif user.get("profile") == None %}
                                     <a class="btn btn-primary btn-lg"
                                        href="{{ url_for('user_profile',return_url=request.path) }}">我要报名</a>
                                 {% elif registration == None %}

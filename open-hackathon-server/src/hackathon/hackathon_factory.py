@@ -25,6 +25,7 @@ THE SOFTWARE.
 
 __all__ = ["factory", "RequiredFeature"]
 
+
 #
 # Hackathon factory
 # call 'factory.provide' to fill object into factory
@@ -44,7 +45,7 @@ class HackathonFactory:
         """Set the value of allow_replace"""
         self.allow_replace = allow_replace
 
-    def provide(self, feature, provider, *args, **kwargs):
+    def provide(self, feature, provider, suspend_callable=False, *args, **kwargs):
         """Add a provider to factory
 
         :type feature: str|unicode
@@ -52,6 +53,9 @@ class HackathonFactory:
 
         :type provider: object | callable
         :param provider: the object to be added.
+
+        :type suspend_callable: boolean
+        :param suspend_callable: suspend the callable where we want to keep the original function
 
         :Example:
             from *** import UserManager
@@ -65,7 +69,7 @@ class HackathonFactory:
         """
         if not self.allow_replace:
             assert not self.providers.has_key(feature), "Duplicate feature: %r" % feature
-        if callable(provider):
+        if callable(provider) and not suspend_callable:
             def call():
                 return provider(*args, **kwargs)
         else:
@@ -82,6 +86,7 @@ class HackathonFactory:
 
 
 factory = HackathonFactory()
+
 
 #
 # Some basic assertions to test the suitability of injected features

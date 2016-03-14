@@ -33,7 +33,7 @@ from flask import g
 from hackathon import Component, RequiredFeature
 from hackathon.database import UserHackathonRel, Experiment,HackathonConfig, UserHackathonAsset
 from hackathon.hackathon_response import bad_request, precondition_failed, internal_server_error, not_found, ok, login_provider_error
-from hackathon.constants import EStatus, RGStatus, HACKATHON_BASIC_INFO, HACKATHON_STAT, LOGIN_PROVIDER
+from hackathon.constants import EStatus, HACK_USER_STATUS, HACKATHON_BASIC_INFO, HACKATHON_STAT, LOGIN_PROVIDER
 
 __all__ = ["RegisterManager"]
 
@@ -95,7 +95,7 @@ class RegisterManager(Component):
                                        friendly_message="报名人数已满")
 
         try:
-            args["status"] = RGStatus.AUTO_PASSED if hackathon.is_auto_approve() else RGStatus.UNAUDIT
+            args["status"] = HACK_USER_STATUS.AUTO_PASSED if hackathon.is_auto_approve() else HACK_USER_STATUS.UNAUDIT
             args['create_time'] = self.util.get_now()
             user_hackathon_rel = self.db.add_object_kwargs(UserHackathonRel, **args).dic()
 
@@ -121,7 +121,7 @@ class RegisterManager(Component):
             register.status = context.status
             self.db.commit()
 
-            if register.status == RGStatus.AUDIT_PASSED:
+            if register.status == HACK_USER_STATUS.AUDIT_PASSED:
                 self.team_manager.create_default_team(register.hackathon, register.user)
 
             hackathon = self.hackathon_manager.get_hackathon_by_id(register.hackathon_id)
@@ -157,6 +157,7 @@ class RegisterManager(Component):
             self.log.error(ex)
             return internal_server_error("failed in delete register: %s" % args["id"])
 
+    # TODO: registration related functions are to be refactored
     def get_registration_detail(self, user, hackathon):
         detail = {
             "hackathon": hackathon.dic(),
@@ -164,32 +165,32 @@ class RegisterManager(Component):
             "asset":[]
         }
 
-        asset = self.db.find_all_objects_by(UserHackathonAsset, user_id=user.id, hackathon_id=hackathon.id)
-        if asset:
-            detail["asset"] = [o.dic() for o in asset]
+        # asset = self.db.find_all_objects_by(UserHackathonAsset, user_id=user.id, hackathon_id=hackathon.id)
+        # if asset:
+        #     detail["asset"] = [o.dic() for o in asset]
 
-        rel = self.get_registration_by_user_and_hackathon(user.id, hackathon.id)
-        if rel is None:
-            return detail
+        # rel = self.get_registration_by_user_and_hackathon(user.id, hackathon.id)
+        # if rel is None:
+        #     return detail
 
-        detail["registration"] = rel.dic()
-        # experiment if any
-        try:
-            experiment = self.db.find_first_object(Experiment,
-                                                   Experiment.user_id == user.id,
-                                                   Experiment.hackathon_id == hackathon.id,
-                                                   Experiment.status.in_([EStatus.STARTING, EStatus.RUNNING]))
-            if experiment is not None:
-                detail["experiment"] = experiment.dic()
-        except Exception as e:
-            self.log.error(e)
+        # detail["registration"] = rel.dic()
+        # # experiment if any
+        # try:
+        #     experiment = self.db.find_first_object(Experiment,
+        #                                            Experiment.user_id == user.id,
+        #                                            Experiment.hackathon_id == hackathon.id,
+        #                                            Experiment.status.in_([EStatus.STARTING, EStatus.RUNNING]))
+        #     if experiment is not None:
+        #         detail["experiment"] = experiment.dic()
+        # except Exception as e:
+        #     self.log.error(e)
 
         return detail
 
     def __update_register_stat(self, hackathon):
         count = self.db.count(UserHackathonRel,
                               UserHackathonRel.hackathon_id == hackathon.id,
-                              UserHackathonRel.status.in_([RGStatus.AUDIT_PASSED, RGStatus.AUTO_PASSED]),
+                              UserHackathonRel.status.in_([HACK_USER_STATUS.AUDIT_PASSED, HACK_USER_STATUS.AUTO_PASSED]),
                               UserHackathonRel.deleted == 0)
         self.hackathon_manager.update_hackathon_stat(hackathon, HACKATHON_STAT.REGISTER, count)
 
@@ -223,7 +224,7 @@ class RegisterManager(Component):
             # count of audited users
             current_num = self.db.count(UserHackathonRel,
                                         UserHackathonRel.hackathon_id == hackathon.id,
-                                        UserHackathonRel.status.in_([RGStatus.AUDIT_PASSED, RGStatus.AUTO_PASSED]))
+                                        UserHackathonRel.status.in_([HACK_USER_STATUS.AUDIT_PASSED, HACK_USER_STATUS.AUTO_PASSED]))
             return current_num >= max
 
     def __is_user_hackathon_login_provider(self, user, hackathon):

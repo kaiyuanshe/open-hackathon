@@ -72,7 +72,7 @@
                 var minMarginTopVal = -noticeHeight*(totoalNoticeCount+1);
                 var maxMarginTopVal = 0;
                 firstNotice.css({"margin-top":  "-" + noticeHeight + "px"});
-                
+
                 $('#btn-notice-up').click(function(){
                     firstNotice.stop(true, true).animate({"margin-top": "-=" + noticeHeight + "px"}, 500, function() {
                         var marginVal = parseInt(firstNotice.css("margin-top").slice(0, -2));
@@ -95,14 +95,14 @@
                 setInterval(function() {
                     $('#btn-notice-up').trigger('click');
                 }, 5000);
-                
+
             } else { //no notice
                 $('.oh-notice-list').append("<li>无</li>");
                 $('#btn-notice-up').css("display", "none");
                 $('#btn-notice-down').css("display", "none");
             }
         });
-        
+
     }
 
     function bindEvent() {

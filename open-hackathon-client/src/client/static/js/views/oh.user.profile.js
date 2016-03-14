@@ -30,7 +30,7 @@
     var edit_tmpl = '<a class="right btn btn-success btn-sm" href="/user/edit"><i class="fa fa-pencil"></i> 编辑个人资料</a>';
 
     function getUserProfile(query) {
-        return oh.api.user.profile.get(query, function (data) {
+        return oh.api.user.get(query, function (data) {
             if (!data.error) {
                 bingUser(data);
                 if (user_id == 0) {
@@ -120,11 +120,13 @@
     }
 
     function bingUser(data) {
+        var profile = data.profile || {};
+
         $('.user-name').text(data.nickname);
         $('.user-picture>img').load(function (e) {
             oh.comm.imgLoad(this);
-        }).attr({src: data.avatar_url});
-        $('.career').html((data.career_type || '') + '</br>' + (data.career || ''));
+        }).attr({src: profile.avatar_url || data.avatar_url});
+        $('.career').html((profile.career_type || '') + '</br>' + (profile.career || ''));
         $('.' + data.provider).addClass('active');
     }
 

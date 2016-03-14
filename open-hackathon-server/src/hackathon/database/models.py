@@ -334,7 +334,7 @@ class HackathonNotice(DBBase):
 
     id = Column(Integer, primary_key=True)
     category = Column(Integer)  # category: Class HACK_NOTICE_CATEGORY, controls how icons/descriptions are shown at front-end
-    event = Column(Integer) # event: Class HACK_NOTICE_EVENT, records the specfic event that triggers current notice 
+    event = Column(Integer) # event: Class HACK_NOTICE_EVENT, records the specfic event that triggers current notice
     create_time = Column(TZDateTime, default=get_now())
     update_time = Column(TZDateTime, default=get_now())
     content = Column(Text)
@@ -848,7 +848,7 @@ class AdminHackathonRel(DBBase):
     user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
     user = relationship('User', backref=backref('admin_hackathon_rels', lazy='dynamic'))
 
-    role_type = Column(Integer)  # enum.ADMIN_ROLE_TYPE
+    role_type = Column(Integer)  # enum.HACK_USER_TYPE
     hackathon_id = Column(Integer)
     status = Column(Integer, default=0)  # reserved, not in use currently
     remarks = Column(String(255))

@@ -191,7 +191,6 @@ angular.module('oh.controllers', [])
   })
   .controller('serversController', function($rootScope, $scope, activityService, api) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.SERVERS');
-
   })
   .controller('createController', function($scope, $timeout, $filter, $state, dialog, api) {
     var request;
@@ -555,6 +554,5 @@ angular.module('oh.controllers', [])
           });
         }
       })
-
     }
   });

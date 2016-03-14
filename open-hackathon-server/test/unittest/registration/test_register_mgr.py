@@ -28,7 +28,7 @@ import sys
 
 sys.path.append("../src/hackathon")
 import datetime
-from hackathon.constants import RGStatus
+from hackathon.constants import HACK_USER_STATUS
 from hackathon.hack import HackathonManager
 from hackathon.hackathon_response import bad_request, precondition_failed, not_found, ok
 import unittest
@@ -120,7 +120,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
         auto_approve.return_value = True
 
         db_adapter = Mock()
-        new_register = UserHackathonRel(id=7, user_id=1, status=RGStatus.AUTO_PASSED, deleted=0)
+        new_register = UserHackathonRel(id=7, user_id=1, status=HACK_USER_STATUS.AUTO_PASSED, deleted=0)
         db_adapter.add_object_kwargs.return_value = new_register
         rm = RegisterManager(db_adapter)
 
@@ -142,7 +142,7 @@ class TestUserHackathonRelManager(unittest.TestCase):
     def test_update_register_common_loginc(self, get_method):
         args = {"id": 7, "phone": "1234567", 'create_time': '2012-12-23 09:09:09'}
 
-        register = UserHackathonRel(id=7, user_id=1, status=RGStatus.AUTO_PASSED, deleted=0)
+        register = UserHackathonRel(id=7, user_id=1, status=HACK_USER_STATUS.AUTO_PASSED, deleted=0)
         get_method.return_value = register
 
         db_adapter = Mock()

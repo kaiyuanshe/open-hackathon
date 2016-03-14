@@ -29,10 +29,14 @@ sys.path.append("..")
 
 from flask import g
 from sqlalchemy import func
+from mongoengine import Q
+
 from hackathon import Component, RequiredFeature
-from hackathon.database import AdminHackathonRel, User, Hackathon
-from hackathon.constants import ADMIN_ROLE_TYPE
+from hackathon.hmongo.models import Hackathon, User
+from hackathon.constants import HACK_USER_TYPE
 from hackathon.hackathon_response import precondition_failed, ok, not_found, internal_server_error, bad_request
+
+
 
 __all__ = ["AdminManager"]
 
@@ -76,7 +80,7 @@ class AdminManager(Component):
 
         return list(set(hackathon_ids))
 
-    def get_entitled_hackathons_simple(self, user_id):
+    def get_entitled_hackathons_simple(self, user):
         """Get hackathon id list that specific user is entitled to manage
 
         :type user_id: int
@@ -86,24 +90,15 @@ class AdminManager(Component):
         :return list of hackathon simple
         """
 
-        admin_user_hackathon_simple = self.db.session().query(
-            Hackathon.id,
-            Hackathon.name,
-            Hackathon.display_name,
-            Hackathon.ribbon,
-            Hackathon.short_description,
-            Hackathon.banners,
-            Hackathon.status,
-            Hackathon.creator_id,
-            Hackathon.type,
-            (func.unix_timestamp(Hackathon.event_start_time)*1000).label('event_start_time'),
-            (func.unix_timestamp(Hackathon.event_end_time)*1000).label('event_end_time')
-        ).join(AdminHackathonRel, AdminHackathonRel.hackathon_id == Hackathon.id or AdminHackathonRel.hackathon_id == -1)\
-            .filter(AdminHackathonRel.user_id == user_id)\
-            .order_by(Hackathon.event_start_time.desc())\
-            .all()
+        user_filter = Q()
+        if not user.is_super:
+            user_filter = Q(creator=user)
 
-        return [h._asdict() for h in admin_user_hackathon_simple]
+        admin_user_hackathon_simple = Hackathon.objects(user_filter)\
+            .only('name','display_name','ribbon','short_description','location','banners','status','creator','type','event_start_time','event_end_time').no_dereference().order_by('-event_start_time')
+        
+        all_hackathon = [h.dic() for h in admin_user_hackathon_simple]
+        return all_hackathon
 
     def get_admins_by_hackathon(self, hackathon):
         """Get all admins of a hackathon
@@ -148,7 +143,7 @@ class AdminManager(Component):
             if ahl is None:
                 ahl = AdminHackathonRel(
                     user_id=user.id,
-                    role_type=args.get("role_type", ADMIN_ROLE_TYPE.ADMIN),
+                    role_type=args.get("role_type", HACK_USER_TYPE.ADMIN),
                     hackathon_id=g.hackathon.id,
                     remarks=args.get("remarks"),
                     create_time=self.util.get_now()
