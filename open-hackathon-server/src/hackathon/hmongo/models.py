@@ -25,6 +25,7 @@ THE SOFTWARE.
 import sys
 
 sys.path.append("..")
+import time
 from mongoengine import *
 from bson import ObjectId
 from datetime import datetime
@@ -43,6 +44,7 @@ def make_serializable(item):
             item[k] = make_serializable(v)
         return item
     elif isinstance(item, datetime):
+        item = item.replace(tzinfo=None)
         epoch = datetime.utcfromtimestamp(0)
         return long((item - epoch).total_seconds() * 1000)
     elif isinstance(item, ObjectId) or isinstance(item, UUID):
@@ -211,6 +213,7 @@ class AzureKey(HDocumentBase):
 
     def __init__(self, **kwargs):
         super(AzureKey, self).__init__(**kwargs)
+
 
 
 class Hackathon(HDocumentBase):
