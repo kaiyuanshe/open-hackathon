@@ -65,7 +65,7 @@
                     <div class="form-group" ng-class="{'has-success':activityForm.location.$touched && activityForm.location.$valid}">
                       <label for="inputPassword" class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.LOCATION">LOCATION</label>
                       <div class="col-xs-10 control-addon">
-                        <input type="text" class="form-control" name="location" placeholder="{{'PLACEHOLDERS.LOCATION' | translate}}" ng-model="configs.location">
+                        <input type="text" class="form-control" name="location" placeholder="{{'PLACEHOLDERS.LOCATION' | translate}}" ng-model="activity.config.location">
                         <i class="control-icon fa fa-map-marker"></i>
                         <div class="messages" ng-if="activityForm.location.$touched && activityForm.location.$valid">
                           <i class="fa fa-check"></i>
@@ -162,7 +162,7 @@
                     <div class="form-group" ng-class="{'has-error': activityForm.max_enrollment.$touched && activityForm.max_enrollment.$invalid,'has-success': activityForm.max_enrollment.$touched && activityForm.max_enrollment.$valid}">
                       <label for="inputPassword" class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.MAX_ENROLLMENT">MAX_ENROLLMENT</label>
                       <div class="col-xs-10 control-addon">
-                        <input type="number" class="form-control" name="max_enrollment" placeholder="{{'PLACEHOLDERS.MAX_ENROLLMENT' | translate}}" min="0" ng-model="configs.max_enrollment" string-to-number ng-min="0" pattern="[0-9]+">
+                        <input type="number" class="form-control" name="max_enrollment" placeholder="{{'PLACEHOLDERS.MAX_ENROLLMENT' | translate}}" min="0" ng-model="activity.config.max_enrollment" string-to-number ng-min="0" pattern="[0-9]+">
                         <i class="control-icon fa fa-user-plus"></i>
                         <div class="messages" ng-messages="activityForm.max_enrollment.$error" ng-if="activityForm.max_enrollment.$touched">
                           <span ng-message="min"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.MAX_ENROLLMENT_MIN' | translate}}"  tooltip-placement="right auto"></i></span>

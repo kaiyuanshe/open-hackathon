@@ -78,7 +78,7 @@ angular.module('oh.directives', [])
                 setTimeout(function() {
                   tip.remove();
                 }, 500);
-              }, 3000);
+              }, 10000);
             }, 1);
           }
         });
