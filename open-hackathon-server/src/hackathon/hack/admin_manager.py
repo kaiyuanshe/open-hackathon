@@ -32,7 +32,7 @@ from sqlalchemy import func
 from mongoengine import Q
 
 from hackathon import Component, RequiredFeature
-from hackathon.hmongo.models import Hackathon, User
+from hackathon.hmongo.models import Hackathon, User, UserHackathon
 from hackathon.constants import HACK_USER_TYPE
 from hackathon.hackathon_response import precondition_failed, ok, not_found, internal_server_error, bad_request
 
@@ -60,25 +60,13 @@ class AdminManager(Component):
         :rtype: bool
         :return True if specific user has admin privilidge on specific hackathon otherwise False
         """
-        return self.is_hackathon_admin(g.hackathon.id, g.user.id)
 
-    def get_entitled_hackathon_ids(self, user_id):
-        """Get hackathon id list that specific user is entitled to manage
+        if g.user.is_super:
+            return True
 
-        :type user_id: int
-        :param user_id: id of user
+        return UserHackathon.objects(role=HACK_USER_TYPE.ADMIN, hackathon=g.hackathon, user=g.user).count() > 0
 
-        :rtype: list
-        :return list of hackathon id
-        """
-        # get AdminUserHackathonRels from query withn filter by email
-        admin_user_hackathon_rels = self.db.find_all_objects_by(AdminHackathonRel,
-                                                                user_id=user_id)
 
-        # get hackathon_ids_from AdminUserHackathonRels details
-        hackathon_ids = [x.hackathon_id for x in admin_user_hackathon_rels]
-
-        return list(set(hackathon_ids))
 
     def get_entitled_hackathons_simple(self, user):
         """Get hackathon id list that specific user is entitled to manage
@@ -197,20 +185,6 @@ class AdminManager(Component):
             self.log.error(e)
             return internal_server_error(e)
 
-    def is_hackathon_admin(self, hackathon_id, user_id):
-        """Check whether user is admin of specific hackathon
-
-        :type hackathon_id: int
-        :param hackathon_id: id of hackathon
-
-        :type user_id: int
-        :param user_id: the id of user to be checked
-
-        :rtype: bool
-        :return True if specific user has admin privilidge on specific hackathon otherwise False
-        """
-        hack_ids = self.get_entitled_hackathon_ids(user_id)
-        return -1 in hack_ids or hackathon_id in hack_ids
 
     def __generate_update_items(self, args):
         """Generate columns of AdminHackathonRel to be updated"""

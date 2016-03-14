@@ -273,6 +273,7 @@ class HACK_USER_STATUS:
     AUDIT_PASSED = 1
     AUDIT_REFUSE = 2
     AUTO_PASSED = 3
+    AUTO_PASSED = 3
 
 
 class HACK_USER_TYPE:
@@ -294,7 +295,9 @@ class ORGANIZATION_TYPE:
 
 
 class HACK_STATUS:
-    INIT = 0
+
+    INIT = -1
+    DRAFT = 0
     ONLINE = 1
     OFFLINE = 2
 
