@@ -197,16 +197,16 @@
               </div>
             </div>
             <div id="step2" ng-show="wizard == 2">
-              <div class="col-lg-8 col-md-10 col-xs-11 center">
+              <div class="col-lg-6 col-md-9 center">
                 <form name="clondForm" class="form-horizontal" ng-show="!isAzureForm" ng-submit="clondFormSubmit()" novalidate>
                   <fieldset class="detail-wrapper">
                     <div class="form-group">
-                      <div class="col-xs-6">
+                      <div class="col-md-6 text-center">
                         <label for="azure">
                           <input id="azure" class="hide" type="radio" name="clond" value="1" ng-model="clondservices" required>
                           <div class="info-box">
                             <div class="content text-centet">
-                              <img src="/static/pic/azure-logo.png">
+                              <img src="/static/pic/azure-logo.jpg">
                             </div>
                             <footer class="text-center">
                               使用
@@ -214,12 +214,12 @@
                           </div>
                         </label>
                       </div>
-                      <div class="col-xs-6">
+                      <div class="col-md-6 text-center">
                         <label for="alauda">
                           <input id="alauda" class="hide" type="radio" name="clond" value="2" ng-model="clondservices" required>
                           <div class="info-box">
                             <div class="content text-centet">
-                              <img src="/static/pic/alauda-logo-white.png">
+                              <img src="/static/pic/alauda-logo-white.jpg">
                             </div>
                             <footer class="text-center">
                               使用
@@ -303,7 +303,9 @@
                         <div class="col-md-12 col-lg-5">
                           <div class="row  text-right">
                             <a href="#" class="btn btn-primary">创建模板</a>
-                            <a href="#" class="btn btn-primary">从文件创建模板</a>
+                            <span href="#" class="btn btn-primary file-btn">从文件创建模板
+                              <input type="file" nv-file-select uploader="uploader" ng-value="file">
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -317,7 +319,7 @@
                             </header>
                             <div class="item-body text-default">
                               <div class="line">
-                                <div class="float-right">使用次数（600）</div>
+                                <div class="float-right">使用次数（{{image.virtual_environment_count}}）</div>
                                 <div class="author">
                                   <span class="picture"><img src="/static/pic/monkey-32-32px.png"></span>
                                   <span>创建者</span>
@@ -364,24 +366,24 @@
                         <uib-accordion close-others="oneAtATime">
                           <uib-accordion-group ng-repeat="temp in templates">
                             <uib-accordion-heading>
-                              {{temp.template.name}}
+                              {{temp.name}}
                               <label class="checkbox checkbox-success right" ng-click="expression($event)">
                                 <input type="checkbox" checked="checked">
                                 <span>绑定</span>
                               </label>
                             </uib-accordion-heading>
                             <div class="line">
-                              <div class="float-right">使用次数（600）</div>
+                              <div class="float-right">使用次数（{{temp.virtual_environment_count}}）</div>
                               <div class="author">
                                 <span class="picture"><img src="/static/pic/monkey-32-32px.png"></span>
                                 <span>创建者</span>
                               </div>
                             </div>
                             <div class="line">
-                              <span class="label float-right" ng-class="{'label-warning':temp.template.status==0,'label-success':temp.template.status==1, 'label-danger':temp.template.status==2}">{{ temp.template.status | imageStatus }}</span>
+                              <span class="label float-right" ng-class="{'label-warning':temp.status==0,'label-success':temp.status==1, 'label-danger':temp.status==2}">{{ temp.status | imageStatus }}</span>
                               <time><i class="text-success fa fa-calendar"></i> {{temp.create_time | date:'yyyy/MM/dd HH:mm' }}</time>
                             </div>
-                            <p>{{temp.template.description}}</p>
+                            <p>{{temp.description}}</p>
                           </uib-accordion-group>
                         </uib-accordion>
                       </div>
