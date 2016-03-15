@@ -200,11 +200,20 @@ class HackathonManager(Component):
 
     def set_basic_property(self, hackathon, properties):
         """Set basic property in table HackathonConfig"""
-        if isinstance(properties, list):
-            map(lambda p: self.__set_basic_property(hackathon, p), properties)
-        else:
-            self.__set_basic_property(hackathon, properties)
 
+        hackathon.config.update(properties)
+        hackathon.save()
+
+        self.cache.invalidate(self.__get_config_cache_key(hackathon))
+        return ok()
+
+    def delete_basic_property(self, hackathon, keys):
+        if isinstance(keys, str):
+            keys = keys.split()
+
+        map(lambda key: hackathon.config.pop(key, None), keys)
+
+        hackathon.save()
         self.cache.invalidate(self.__get_config_cache_key(hackathon))
         return ok()
 
@@ -924,18 +933,6 @@ class HackathonManager(Component):
                 continue  # jpg is not considered in imghdr
             if imghdr.what(request.files.get(file_name)) is None:
                 raise BadRequest("only images can be uploaded")
-
-    def __set_basic_property(self, hackathon, prop):
-        """Set basic property in table HackathonConfig"""
-        config = self.db.find_first_object_by(HackathonConfig, hackathon_id=hackathon.id, key=prop.key)
-        if config:
-            config.value = prop.value
-        else:
-            config = HackathonConfig(key=prop.key,
-                                     value=prop.value,
-                                     hackathon_id=hackathon.id)
-            self.db.add_object(config)
-        self.db.commit()
 
 
 '''
