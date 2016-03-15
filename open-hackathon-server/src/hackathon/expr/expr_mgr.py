@@ -298,7 +298,7 @@ class ExprManager(Component):
                 expr.status = EStatus.STARTING
                 self.db.commit()
                 map(lambda unit:
-                    self.__remote_start_container(hackathon, expr, unit),
+                    self.__remote_start_container(hackathon, expr, unit, user_id),
                     virtual_environments_units)
             except Exception as e:
                 self.log.error(e)
@@ -434,7 +434,7 @@ class ExprManager(Component):
 
         return template
 
-    def __remote_start_container(self, hackathon, expr, docker_template_unit):
+    def __remote_start_container(self, hackathon, expr, docker_template_unit, user_id):
         old_name = docker_template_unit.get_name()
         suffix = "".join(random.sample(string.ascii_letters + string.digits, 8))
         new_name = '%d-%s-%s' % (expr.id, old_name, suffix.lower())
@@ -454,7 +454,8 @@ class ExprManager(Component):
         container_ret = docker.start(docker_template_unit,
                                      hackathon=hackathon,
                                      virtual_environment=ve,
-                                     experiment=expr)
+                                     experiment=expr,
+                                     user_id=user_id)
 
         if container_ret is None:
             self.log.error("container %s fail to run" % new_name)

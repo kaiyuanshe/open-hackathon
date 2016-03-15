@@ -195,6 +195,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
         """
         ctx = Context(
             req_count=1,
+            user_id=kwargs["user_id"],
             hackathon_id=kwargs["hackathon"].id,
             experiment=kwargs["experiment"],
             container_name=unit.get_name(),
@@ -208,7 +209,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
         self.__schedule_setup(ctx)
 
     def start_container(self, ctx):
-        experiment = ctx.experiment
+        #experiment = ctx.experiment
         container_name = ctx.container_name
         host_server = ctx.hosted_server
         virtual_environment = ctx.virtual_environment
@@ -216,9 +217,17 @@ class HostedDockerFormation(DockerFormationBase, Component):
         remote = ctx.remote
         ports = ctx.ports
         unit = ctx.unit
+        user_id = ctx.user_id
+        hackathon_id = ctx.hackathon_id
         if not host_server:
             return None
 
+        experiment = self.db.find_first_object(
+            Experiment,
+            Experiment.user_id == user_id,
+            Experiment.hackathon_id == hackathon_id,
+            Experiment.status == EStatus.STARTING
+        )
         container = DockerContainer(experiment,
                                     name=container_name,
                                     host_server_id=host_server.id,
