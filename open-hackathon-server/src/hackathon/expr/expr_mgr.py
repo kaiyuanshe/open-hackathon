@@ -345,8 +345,10 @@ class ExprManager(Component):
     def __report_expr_status(self, expr):
         containers = self.__get_containers_by_exper(expr)
         for container in containers:
+            if container is None:
+                continue
             # expr status(restarting or running) is not match container running status on docker host
-            if not self.hosted_docker.check_container_status_is_normal(container):
+            if self.hosted_docker.check_container_status_is_normal(container):
                 try:
                     self.db.update_object(expr, status=EStatus.UNEXPECTED_ERROR)
                     self.db.update_object(container.virtual_environment, status=VEStatus.UNEXPECTED_ERROR)
@@ -448,14 +450,14 @@ class ExprManager(Component):
                                 remote_provider=VERemoteProvider.Guacamole,
                                 experiment=expr)
         self.db.add_object(ve)
-
+        self.db.commit()
         # start container remotely , use hosted docker or alauda docker
         docker = self.__get_docker(hackathon)
         container_ret = docker.start(docker_template_unit,
                                      hackathon=hackathon,
-                                     virtual_environment=ve,
                                      experiment=expr,
-                                     user_id=user_id)
+                                     user_id=user_id,
+                                     new_name=new_name)
 
         if container_ret is None:
             self.log.error("container %s fail to run" % new_name)

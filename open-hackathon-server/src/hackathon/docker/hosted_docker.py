@@ -39,13 +39,13 @@ from hackathon.database.models import (
     HackathonAzureKey,
     PortBinding,
     DockerHostServer,
-)
+    VirtualEnvironment)
 from hackathon.constants import (
     EStatus,
     PortBindingType,
     VEStatus,
     HEALTH,
-)
+    VE_PROVIDER, VERemoteProvider)
 from compiler.ast import (
     flatten,
 )
@@ -202,17 +202,16 @@ class HostedDockerFormation(DockerFormationBase, Component):
             image=unit.get_image_with_tag(),
             ports=unit.get_ports(),
             remote=unit.get_remote(),
-            virtual_environment=kwargs["virtual_environment"],
+            #virtual_environment=kwargs["virtual_environment"],
             host_server=None,
-            unit=unit
+            unit=unit,
+            new_name=kwargs["new_name"]
         )
         self.__schedule_setup(ctx)
 
     def start_container(self, ctx):
-        #experiment = ctx.experiment
         container_name = ctx.container_name
         host_server = ctx.hosted_server
-        virtual_environment = ctx.virtual_environment
         image = ctx.image
         remote = ctx.remote
         ports = ctx.ports
@@ -228,6 +227,16 @@ class HostedDockerFormation(DockerFormationBase, Component):
             Experiment.hackathon_id == hackathon_id,
             Experiment.status == EStatus.STARTING
         )
+
+        virtual_environment = self.db.find_first_object(
+            VirtualEnvironment,
+            VirtualEnvironment.experiment == experiment,
+            VirtualEnvironment.provider == VE_PROVIDER.DOCKER,
+            VirtualEnvironment.name == ctx.new_name,
+            VirtualEnvironment.image == image,
+            VirtualEnvironment.remote_provider == VERemoteProvider.Guacamole
+        )
+
         container = DockerContainer(experiment,
                                     name=container_name,
                                     host_server_id=host_server.id,
@@ -296,6 +305,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
 
         self.log.debug("starting container %s is ended ... " % container_name)
         virtual_environment.status = VEStatus.RUNNING
+        experiment.status = EStatus.RUNNING
         self.db.commit()
 
         self.expr_manager.check_expr_status(virtual_environment.experiment)
