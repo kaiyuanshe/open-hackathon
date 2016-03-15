@@ -81,7 +81,7 @@ def init_routes():
     api.add_resource(TeamTemplateResource, "/api/team/template")  # select or unselect template for team
 
     # APIs for admin to manage hackathon and hackathon resources, features and users
-    api.add_resource(AdminHackathonResource, "/api/admin/hackathon")  # create/update hackathonfv
+    api.add_resource(AdminHackathonResource, "/api/admin/hackathon")  # create/update hackathon
     api.add_resource(AdminHackathonCanOnLineResource, "/api/admin/hackathon/canonline")
     api.add_resource(AdminHackathonConfigResource, "/api/admin/hackathon/config")  # set hackathon config
     api.add_resource(AdminHackathonOrganizerResource, "/api/admin/hackathon/organizer")  # manage hackathon organizers
