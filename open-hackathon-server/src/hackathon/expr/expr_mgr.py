@@ -458,7 +458,8 @@ class ExprManager(Component):
 
         if container_ret is None:
             self.log.error("container %s fail to run" % new_name)
-            raise Exception("container_ret is none")
+            #todo raise Exception("container_ret is none")
+            return
 
         remote = json.loads(ve.remote_paras)
         self.__docker_completed(remote)
