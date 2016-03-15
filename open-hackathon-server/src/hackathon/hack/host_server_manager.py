@@ -36,11 +36,12 @@ from azure.servicemanagement import (ConfigurationSet, ConfigurationSetInputEndp
                                      LinuxConfigurationSet, ServiceManagementService)
 
 from hackathon import Component, RequiredFeature, Context
-from hackathon.database.models import DockerHostServer, HackathonAzureKey, Hackathon, HackathonConfig, AzureKey
+from hackathon.database.models import DockerHostServer, HackathonAzureKey, Hackathon, HackathonConfig, AzureKey, \
+    Experiment
 from hackathon.constants import (AzureApiExceptionMessage, DockerPingResult, AVMStatus, AzureVMPowerState,
                                  DockerHostServerStatus, DockerHostServerDisable, AzureVMStartMethod,
                                  ServiceDeploymentSlot, AzureVMSize, AzureVMEndpointName, TCPProtocol,
-                                 AzureVMEndpointDefaultPort, AzureVMEnpointConfigType, AzureOperationStatus)
+                                 AzureVMEndpointDefaultPort, AzureVMEnpointConfigType, AzureOperationStatus, EStatus)
 from hackathon.azureformation.service import (
     Service,
 )
@@ -76,7 +77,14 @@ class DockerHostManager(Component):
         """
         req_count = ctx.req_count
         hackathon_id = ctx.hackathon_id
-        azure_key_id = self.hosted_docker.load_azure_key_id(ctx.experiment.id)
+        user_id = ctx.user_id
+        experiment = self.db.find_first_object(
+            Experiment,
+            Experiment.user_id == user_id,
+            Experiment.hackathon_id == hackathon_id,
+            Experiment.status == EStatus.STARTING
+        )
+        azure_key_id = self.hosted_docker.load_azure_key_id(experiment.id)
         vms = self.db.find_all_objects(DockerHostServer,
                                        DockerHostServer.container_count + req_count <=
                                        DockerHostServer.container_max_count,

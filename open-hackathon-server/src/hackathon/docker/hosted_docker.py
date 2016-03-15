@@ -180,7 +180,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
     def __schedule_setup(self, ctx):
         """
         This function is used to schedule the process of starting a container as following
-        get_available_docker_host -->
+        get_available_docker_host --> start_container -->
         :param ctx: consists the following keys
         :return:
         """
@@ -197,12 +197,10 @@ class HostedDockerFormation(DockerFormationBase, Component):
             req_count=1,
             user_id=kwargs["user_id"],
             hackathon_id=kwargs["hackathon"].id,
-            experiment=kwargs["experiment"],
             container_name=unit.get_name(),
             image=unit.get_image_with_tag(),
             ports=unit.get_ports(),
             remote=unit.get_remote(),
-            #virtual_environment=kwargs["virtual_environment"],
             host_server=None,
             unit=unit,
             new_name=kwargs["new_name"]
@@ -278,7 +276,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
             host_server.container_count += 1
             self.db.commit()
         else:
-            container_config = ctx.container_config
+            container_config = unit.get_container_config()
             # create container
             try:
                 container_create_result = self.__create(host_server, container_config, container_name)
@@ -538,7 +536,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
         ep = Endpoint(Service(self.load_azure_key_id(expr_id)))
         host_server_name = host_server.vm_name
         host_server_dns = host_server.public_dns.split('.')[0]
-        public_endpoints = ep.assign_public_endpoints(host_server_dns, 'Production', host_server_name, host_ports)
+        public_endpoints = ep.assign_public_endpoints(host_server_dns, 'Production', host_server_name, host_ports) #todo async
         if not isinstance(public_endpoints, list):
             self.log.debug("failed to get public ports")
             return internal_server_error('cannot get public ports')
