@@ -430,5 +430,3 @@ class Experiment(HDocumentBase):
 
     def __init__(self, **kwargs):
         super(Experiment, self).__init__(**kwargs)
-
-print User.objects(_id=ObjectId("56e677a8b5f5e70ad5aabdf1")).first()
