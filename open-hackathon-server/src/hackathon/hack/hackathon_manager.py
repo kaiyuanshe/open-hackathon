@@ -805,7 +805,7 @@ class HackathonManager(Component):
         try:
             admin = UserHackathon(user=creator,
                                   hackathon=new_hack,
-                                  role_type=HACK_USER_TYPE.ADMIN,
+                                  role=HACK_USER_TYPE.ADMIN,
                                   status=HACK_USER_STATUS.AUTO_PASSED,
                                   remarks='creator')
             admin.save()
