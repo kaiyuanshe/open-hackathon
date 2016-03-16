@@ -35,9 +35,9 @@ from flask import request, g
 from mongoengine import Q, NotUniqueError
 
 from hackathon.hackathon_response import internal_server_error, not_found, ok
-from hackathon.constants import HTTP_HEADER
+from hackathon.constants import HTTP_HEADER, HACK_USER_TYPE
 from hackathon import Component, RequiredFeature
-from hackathon.hmongo.models import UserToken, User, UserEmail, UserProfile
+from hackathon.hmongo.models import UserToken, User, UserEmail, UserProfile, UserHackathon
 
 __all__ = ["UserManager"]
 
@@ -112,13 +112,13 @@ class UserManager(Component):
     def get_user_by_id(self, user_id):
         """Query user by unique id
 
-        :type user_id: int
-        :param user_id: id of the user to query
+        :type user_id: str
+        :param user_id: _id of the user to query
 
         :rtype: User
         :return: instance of User or None if user not found
         """
-        return User.objects.get(id=user_id)
+        return User.objects(id=user_id).first()
 
     def load_user(self, user_id):
         '''get user for flask_login user_loader'''
@@ -141,7 +141,7 @@ class UserManager(Component):
         return User.objects(emails__email=email).first()
 
     def get_user_fezzy_search(self, hackathon, args):
-        """fezzy search user by name,kickname and email
+        """fezzy search user by name, nickname and email
 
         :type **kwargs: dict
         :param **kwargs: dict should has key['condition']
@@ -162,15 +162,9 @@ class UserManager(Component):
         def get_user_details(user):
             user_info = self.user_display_info(user)
 
-            # admin_hackathon_rel = self.db.find_first_object_by(AdminHackathonRel, hackathon_id=hackathon.id,
-            #                                                    user_id=user.id)
-            # user_info[
-            #    "role_type"] = admin_hackathon_rel.role_type if admin_hackathon_rel else 3  # admin:1 judge:2 user:3
-            # user_info["remarks"] = admin_hackathon_rel.remarks if admin_hackathon_rel else ""
-            #
-            # TODO: hackathon hasn't been refactored, simply set to NULL info here
-            user_info["role_type"] = 3
-            user_info["remarks"] = ""
+            user_hackathon = UserHackathon.objects(hackathon=hackathon, user=user)
+            user_info["role"] = user_hackathon.role if user_hackathon else HACK_USER_TYPE.VISITOR
+            user_info["remark"] = user_hackathon.remark if user_hackathon else ""
 
             return user_info
 
@@ -209,7 +203,7 @@ class UserManager(Component):
         :param user: User instance to be returned which shouldn't be None
 
         :rtype dict
-        :return user detail info from table User, UserEmail, UserProfile
+        :return user detail info from collection User
         """
         if user is None:
             return None
