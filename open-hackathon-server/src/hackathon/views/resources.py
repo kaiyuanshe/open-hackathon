@@ -630,7 +630,7 @@ class HackathonAdminResource(HackathonResource):
     @admin_privilege_required
     def delete(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('id', type=int, location='args', required=True)
+        parse.add_argument('id', type=str, location='args', required=True)
         args = parse.parse_args()
         return admin_manager.delete_admin(args['id'])
 

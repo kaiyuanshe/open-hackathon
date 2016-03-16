@@ -129,8 +129,8 @@ class AdminManager(Component):
 
             if user_hackathon is None:
                 uhl = UserHackathon(
-                    user=user.id,
-                    hackathon=g.hackthon.id,
+                    user=user,
+                    hackathon=g.hackathon,
                     role=args.get("role"),
                     status=HACK_USER_STATUS.AUTO_PASSED,
                     remark=args.get("remark")
@@ -139,7 +139,7 @@ class AdminManager(Component):
             else:
                 user_hackathon.role = args.get("role")
                 user_hackathon.remark = args.get("remark")
-                user_hackathon.update()
+                user_hackathon.save()
 
             return ok()
         except Exception as e:
@@ -187,7 +187,7 @@ class AdminManager(Component):
                 user_hackathon.role = args['role']
             if 'remark' in args:
                 user_hackathon.remark = args['remark']
-            user_hackathon.update()
+            user_hackathon.save()
 
             return ok('update hackathon admin successfully')
         except Exception as e:
@@ -208,4 +208,3 @@ class AdminManager(Component):
         """
         hack_ids = self.get_entitled_hackathon_ids(user_id)
         return -1 in hack_ids or hackathon_id in hack_ids
-    
