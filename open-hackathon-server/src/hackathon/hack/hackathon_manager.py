@@ -807,7 +807,7 @@ class HackathonManager(Component):
                                   hackathon=new_hack,
                                   role=HACK_USER_TYPE.ADMIN,
                                   status=HACK_USER_STATUS.AUTO_PASSED,
-                                  remarks='creator')
+                                  remark='creator')
             admin.save()
         except Exception as ex:
             # TODO: send out a email to remind administrator to deal with this problems

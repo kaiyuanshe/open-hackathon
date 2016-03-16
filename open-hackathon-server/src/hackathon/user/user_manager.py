@@ -162,7 +162,7 @@ class UserManager(Component):
         def get_user_details(user):
             user_info = self.user_display_info(user)
 
-            user_hackathon = UserHackathon.objects(hackathon=hackathon, user=user)
+            user_hackathon = UserHackathon.objects(hackathon=hackathon, user=user).first()
             user_info["role"] = user_hackathon.role if user_hackathon else HACK_USER_TYPE.VISITOR
             user_info["remark"] = user_hackathon.remark if user_hackathon else ""
 
