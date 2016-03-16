@@ -96,10 +96,12 @@ class HackathonManager(Component):
 
     def get_hackathon_by_id(self, hackathon_id):
         """Query hackathon by id
+        :type hackathon_id: str or ObjectId are both ok
+        :param hackathon_id: _id of hackathon
 
         :return hackathon instance or None
         """
-        return Hackathon.objects(id=ObjectId(hackathon_id)).first()
+        return Hackathon.objects(id=hackathon_id).first()
 
     def get_hackathon_detail(self, hackathon):
         user = None
@@ -814,7 +816,7 @@ class HackathonManager(Component):
                                   hackathon=new_hack,
                                   role=HACK_USER_TYPE.ADMIN,
                                   status=HACK_USER_STATUS.AUTO_PASSED,
-                                  remarks='creator')
+                                  remark='creator')
             admin.save()
         except Exception as ex:
             # TODO: send out a email to remind administrator to deal with this problems
