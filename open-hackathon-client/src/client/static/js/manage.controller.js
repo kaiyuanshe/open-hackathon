@@ -192,29 +192,30 @@ angular.module('oh.controllers', [])
   .controller('serversController', function($rootScope, $scope, activityService, api) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.SERVERS');
   })
-  .controller('createController', function($scope, $timeout, $filter, $state, dialog, api) {
+  .controller('createController', function($scope, $timeout, $filter, $cookies, $state, FileUploader, dialog, api) {
     var request;
-    $scope.wizard = 1;
+    $scope.wizard = 3;
     $scope.isShowAdvancedSettings = true;
 
     $scope.activityFormDisabled = false;
 
     $scope.activity = {
+      name: 'aaa',
       status: -1,
+      tags: [],
+      config: {
+        location: '',
+        cloud_provide: 0,
+        auto_approve: true,
+        recycle_enabled: false,
+        recycle_minutes: 0,
+        pre_allocate_enabled: false,
+        pre_allocate_number: 1,
+        freedom_team: false,
+        login_provider: 63
+      }
     }
 
-    $scope.configs = {
-      location: '',
-      max_enrollment: '',
-      auto_approve: -1,
-      alauda_enabled: false,
-      recycle_enabled: false,
-      recycle_minutes: 0,
-      pre_allocate_enabled: false,
-      pre_allocate_number: 1,
-      freedom_team: false,
-      login_provider: 63
-    };
 
 
     $scope.$watch('activity.name', function(newValue, oldValue, scope) {
@@ -231,6 +232,7 @@ angular.module('oh.controllers', [])
         });
       }, 400);
     });
+
 
 
     $scope.$watch('wizard', function(newValue, oldValue, scope) {
@@ -268,7 +270,12 @@ angular.module('oh.controllers', [])
       return configs;
     }
 
+
     $scope.activitySubmit = function() {
+      angular.forEach($scope.tags, function(value, key) {
+        $scope.activity.tags.push(value.text);
+      });
+
       $scope.activityForm.disabled = true;
       api.admin.hackathon.post({
         body: $scope.activity
@@ -284,42 +291,7 @@ angular.module('oh.controllers', [])
           }
           $scope.activityForm.disabled = false;
         } else {
-          api.admin.hackathon.config.post({
-            header: {
-              hackathon_name: $scope.activity.name
-            },
-            body: getConfigs()
-          }).then(function(data) {
-            if (data.error) {
-              $scope.$emit('showTip', {
-                level: 'tip-danger',
-                content: data.error.friendly_message
-              });
-              $scope.activityForm.disabled = false;
-            } else {
-              var tags = [];
-              angular.forEach($scope.tags, function(obj, index) {
-                tags.push(obj.text);
-              })
-              api.admin.hackathon.tags.post({
-                header: {
-                  hackathon_name: $scope.activity.name
-                },
-                body: tags
-              }).then(function(data) {
-                if (data.error) {
-                  $scope.$emit('showTip', {
-                    level: 'tip-danger',
-                    content: data.error.friendly_message
-                  });
-                } else {
-                  $scope.wizard = 2;
-
-                }
-                $scope.activityForm.disabled = false;
-              });
-            }
-          });
+          $scope.wizard = 2;
         }
       });
     };
@@ -327,14 +299,13 @@ angular.module('oh.controllers', [])
 
     /*------------------------------------------------------*/
     $scope.notUseCloud = function() {
-      api.admin.hackathon.config.put({
+      api.admin.hackathon.put({
         header: {
           hackathon_name: $scope.activity.name
         },
-        body: [{
-          key: 'auto_approve',
-          value: 0
-        }]
+        body: {
+          status: 0
+        }
       }).then(function(data) {
         if (data.error) {
           $scope.$emit('showTip', {
@@ -342,31 +313,16 @@ angular.module('oh.controllers', [])
             content: data.error.friendly_message
           });
         } else {
-          api.admin.hackathon.put({
-            header: {
-              hackathon_name: $scope.activity.name
-            },
-            body: {
-              status: 0
-            }
-          }).then(function(data) {
-            if (data.error) {
-              $scope.$emit('showTip', {
-                level: 'tip-danger',
-                content: data.error.friendly_message
-              });
-            } else {
-              $scope.isShowAdvancedSettings = false;
-              $scope.wizard = 4;
-            }
-          })
+          $scope.isShowAdvancedSettings = false;
+          $scope.wizard = 4;
         }
       });
     }
 
+
     $scope.clondFormSubmit = function() {
       dialog.confirm({
-        title: 'sfasdfas',
+        title: '提示',
         body: '一旦确定服务商就不能在修改！是否确定？',
         icon: 'fa-exclamation',
         size: 'sm',
@@ -378,10 +334,9 @@ angular.module('oh.controllers', [])
             header: {
               hackathon_name: $scope.activity.name
             },
-            body: [{
-              key: 'auto_approve',
-              value: $scope.clondservices
-            }]
+            body: {
+              cloud_provide: $scope.clondservices
+            }
           }).then(function(data) {
             if (data.error) {
               $scope.$emit('showTip', {
@@ -423,6 +378,70 @@ angular.module('oh.controllers', [])
     };
     /*------------------------------------------------------*/
 
+
+
+    var uploader = $scope.uploader = new FileUploader({
+      url: api.template.file.post._path_,
+      headers: {
+        token: $cookies.get('token')
+      },
+      autoUpload: true
+    });
+
+    uploader.filters.push({
+      name: 'templateFilter',
+      fn: function(item, options) {
+        return /js|json|txt$/i.test(item.name);
+      }
+    });
+    uploader.onWhenAddingFileFailed = function(item, filter, options) {
+      $scope.$emit('showTip', {
+        level: 'tip-warning',
+        content: '模板文件必须是txt、js、json后缀名'
+      });
+    };
+    uploader.onAfterAddingFile = function(fileItem) {
+      //console.info('onAfterAddingFile', fileItem);
+    };
+    uploader.onAfterAddingAll = function(addedFileItems) {
+      //console.info('onAfterAddingAll', addedFileItems);
+    };
+    uploader.onBeforeUploadItem = function(item) {
+      //console.info('onBeforeUploadItem', item);
+    };
+    uploader.onProgressItem = function(fileItem, progress) {
+      //console.info('onProgressItem', fileItem, progress);
+    };
+    uploader.onProgressAll = function(progress) {
+      //console.info('onProgressAll', progress);
+    };
+    uploader.onSuccessItem = function(fileItem, response, status, headers) {
+      //console.info('onSuccessItem', fileItem, response, status, headers);
+    };
+    uploader.onErrorItem = function(fileItem, response, status, headers) {
+      //console.info('onErrorItem', fileItem, response, status, headers);
+    };
+    uploader.onCancelItem = function(fileItem, response, status, headers) {
+      //console.info('onCancelItem', fileItem, response, status, headers);
+    };
+    uploader.onCompleteItem = function(fileItem, data) {
+      if (data.error) {
+        $scope.$emit('showTip', {
+          level: 'tip-danger',
+          content: data.error.friendly_message
+        });
+      } else {
+        api.template.list.get({}).then(function(data) {
+          $scope.image_templates = data;
+        });
+      }
+    };
+    uploader.onCompleteAll = function() {
+      $scope.file = '';
+    };
+
+    console.info('uploader', uploader);
+
     $scope.oneAtATime = true;
     $scope.templates = [];
     $scope.search = {
@@ -448,23 +467,14 @@ angular.module('oh.controllers', [])
           }
         });
       } else {
-        var obj = $filter('filter')($scope.templates, {
-          template: {
-            id: id
+        result = api.admin.hackathon.template.delete({
+          query: {
+            template_id: id
+          },
+          header: {
+            hackathon_name: $scope.activity.name
           }
-        }, true) || [];
-        if (obj.length > 0) {
-          result = api.admin.hackathon.template.delete({
-            query: {
-              template_id: obj[0].id
-            },
-            header: {
-              hackathon_name: $scope.activity.name
-            }
-          });
-        } else {
-          return;
-        }
+        });
       }
       result.then(function(data) {
         if (data.error) {
@@ -473,13 +483,7 @@ angular.module('oh.controllers', [])
             content: data.error.friendly_message
           });
         } else {
-          api.admin.hackathon.template.list.get({
-            header: {
-              hackathon_name: $scope.activity.name
-            }
-          }, function(data) {
-            $scope.templates = data;
-          })
+          $scope.templates = data;
         }
 
       })
@@ -491,9 +495,7 @@ angular.module('oh.controllers', [])
 
     $scope.isChecked = function(list, id) {
       var obj = $filter('filter')(list, {
-        template: {
-          id: id
-        }
+        id: id
       }, true);
       return obj.length > 0 ? true : false;
     }
@@ -513,7 +515,6 @@ angular.module('oh.controllers', [])
     function updataActivityStatus(status) {
       return api.admin.hackathon.put({
         body: {
-          name: $scope.activity.name,
           status: status
         },
         header: {
