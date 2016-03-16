@@ -201,9 +201,9 @@ angular.module('oh.controllers', [])
 
     $scope.activity = {
       status: -1,
+      location: '',
       tags: [],
       config: {
-        location: '',
         cloud_provide: 0,
         auto_approve: true,
         recycle_enabled: false,

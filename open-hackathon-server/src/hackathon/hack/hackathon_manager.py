@@ -289,7 +289,7 @@ class HackathonManager(Component):
                 update_items['description'] = self.cleaner.clean_html(update_items['description'])
                 self.log.debug("hackathon description :" + update_items['description'])
 
-            self.db.update_object(hackathon, **update_items)
+            hackathon.save()
             return hackathon.dic()
         except Exception as e:
             self.log.error(e)
