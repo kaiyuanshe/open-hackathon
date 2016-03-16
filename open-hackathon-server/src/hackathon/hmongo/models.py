@@ -233,7 +233,7 @@ class Hackathon(HDocumentBase):
     tags = ListField()
     awards = EmbeddedDocumentListField(Award)
     templates = ListField(ReferenceField(Template, reverse_delete_rule=PULL))  # templates for hackathon
-    azure_keys = ListField(AzureKey)
+    azure_keys = ListField(ReferenceField(AzureKey))
 
     event_start_time = DateTimeField()
     event_end_time = DateTimeField()

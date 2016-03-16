@@ -33,6 +33,7 @@ angular.module('manageView', [
     'ui.bootstrap',
     'ui.bootstrap.datetimepicker',
     'ngTagsInput',
+    'angularFileUpload',
     'oh.manage.router',
     'oh.pages',
     'oh.providers',

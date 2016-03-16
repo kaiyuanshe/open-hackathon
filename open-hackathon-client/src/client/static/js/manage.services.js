@@ -24,13 +24,6 @@
 
 angular.module('oh.api', [])
   .factory('api', function($rootScope, $http, $window, $cookies, $q) {
-    var methods = {
-      get: 'GET',
-      post: 'POST',
-      put: 'PUT',
-      del: 'DELETE'
-    };
-
     function API(obj, name) {
       var key;
       var getCmd = {};
@@ -51,8 +44,9 @@ angular.module('oh.api', [])
         }
         return getCmd;
       } else {
-
-        getCmd[obj] = function(options, callback) {
+        var methodName = obj.toUpperCase(),method = obj.toUpperCase();
+        
+        getCmd[methodName] = function(options, callback) {
           var deferred = $q.defer();
           var _params = {
             query: {},
@@ -68,7 +62,7 @@ angular.module('oh.api', [])
           options.header.token = $cookies.get('token');
 
           var config = {
-            method: methods[obj],
+            method: method,
             url: name,
             params: options.query,
             data: options.body,
@@ -86,8 +80,8 @@ angular.module('oh.api', [])
             });
           return deferred.promise;
         }
-        getCmd[obj]._path_ = name;
-        return getCmd[obj];
+        getCmd[methodName]._path_ = name;
+        return getCmd[methodName];
       }
     }
 
