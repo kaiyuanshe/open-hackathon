@@ -99,7 +99,6 @@ angular.module('oh.controllers', [])
 
     $scope.animationsEnabled = true;
 
-    activity.banners = $filter('split')(activity.banners, ',');
     activity.event_start_time = new Date(activity.event_start_time);
     activity.event_end_time = new Date(activity.event_end_time);
     activity.registration_start_time = new Date(activity.registration_start_time);
@@ -194,7 +193,7 @@ angular.module('oh.controllers', [])
   })
   .controller('createController', function($scope, $timeout, $filter, $cookies, $state, FileUploader, dialog, api) {
     var request;
-    $scope.wizard = 3;
+    $scope.wizard = 1;
     $scope.isShowAdvancedSettings = true;
 
     $scope.activityFormDisabled = false;
@@ -534,7 +533,7 @@ angular.module('oh.controllers', [])
       }).then(function(data) {
         console.log(data);
         if (data.message) {
-          updataActivityStatus(0).then(function(data) {
+          updataActivityStatus(1).then(function(data) {
             if (data.error) {
               $scope.$emit('showTip', {
                 level: 'tip-danger',

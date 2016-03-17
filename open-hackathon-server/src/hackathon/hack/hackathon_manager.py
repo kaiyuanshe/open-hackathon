@@ -189,9 +189,9 @@ class HackathonManager(Component):
 
     def get_basic_property(self, hackathon, key, default=None):
         """Get basic property of hackathon from HackathonConfig"""
-        config = self.db.find_first_object_by(HackathonConfig, key=key, hackathon_id=hackathon.id)
+        config = hackathon.config
         if config:
-            return config.value
+            return config.get(key)
         return default
 
     def get_all_properties(self, hackathon):
@@ -286,19 +286,18 @@ class HackathonManager(Component):
             update_items = self.__parse_update_items(args, hackathon)
             self.log.debug("update hackathon items :" + str(args.keys()))
 
-            if update_items:
-                if 'status' in update_items and int(update_items['status']) == HACK_STATUS.ONLINE:
-                    self.create_hackathon_notice(hackathon.id, HACK_NOTICE_EVENT.HACK_ONLINE,
+            if 'status' in update_items and int(update_items['status']) == HACK_STATUS.ONLINE:
+                self.create_hackathon_notice(hackathon.id, HACK_NOTICE_EVENT.HACK_ONLINE,
                                                  HACK_NOTICE_CATEGORY.HACKATHON)  # hackathon online
-                else:
-                    pass  # other hackathon properties changes
 
             # basic xss prevention
             if 'description' in update_items and update_items['description']:
                 update_items['description'] = self.cleaner.clean_html(update_items['description'])
                 self.log.debug("hackathon description :" + update_items['description'])
 
+            hackathon.modify(**update_items)
             hackathon.save()
+
             return hackathon.dic()
         except Exception as e:
             self.log.error(e)
