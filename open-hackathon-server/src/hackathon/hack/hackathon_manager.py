@@ -96,10 +96,12 @@ class HackathonManager(Component):
 
     def get_hackathon_by_id(self, hackathon_id):
         """Query hackathon by id
+        :type hackathon_id: str or ObjectId are both ok
+        :param hackathon_id: _id of hackathon
 
         :return hackathon instance or None
         """
-        return Hackathon.objects(id=ObjectId(hackathon_id)).first()
+        return Hackathon.objects(id=hackathon_id).first()
 
     def get_hackathon_detail(self, hackathon):
         user = None
@@ -298,7 +300,7 @@ class HackathonManager(Component):
                 update_items['description'] = self.cleaner.clean_html(update_items['description'])
                 self.log.debug("hackathon description :" + update_items['description'])
 
-            self.db.update_object(hackathon, **update_items)
+            hackathon.save()
             return hackathon.dic()
         except Exception as e:
             self.log.error(e)
@@ -557,6 +559,7 @@ class HackathonManager(Component):
             and description is determined by HACK_NOTICE_CATEGORY.yy, while its content and link url is ''
         """
         hackathon_notice = HackathonNotice(content='',
+                                           link='',
                                            event=notice_event,
                                            category=notice_category)
 
@@ -586,11 +589,9 @@ class HackathonManager(Component):
 
         # use assigned value if content or link is assigned in body
         hackathon_notice.content = body.get('content', hackathon_notice.content)
-        link = body.get('link')
-        if link:
-            hackathon_notice.link = link # it must be valid url str
+        hackathon_notice.link = body.get('link', hackathon_notice.link)
 
-        hackathon_notice.save()
+        hackathon_notice.save(validate=False)
 
         self.log.debug("a new notice is created: hackathon: %s, event: %d, category: %d" % (
             hackathon.name, notice_event, notice_category))
@@ -604,7 +605,7 @@ class HackathonManager(Component):
         hackathon_notice.content = body.get("content", hackathon_notice.content)
         hackathon_notice.link = body.get("link", hackathon_notice.link)
 
-        hackathon_notice.save()
+        hackathon_notice.save(validate=False)
         return hackathon_notice.dic()
 
     def delete_hackathon_notice(self, notice_id):
@@ -814,7 +815,7 @@ class HackathonManager(Component):
                                   hackathon=new_hack,
                                   role=HACK_USER_TYPE.ADMIN,
                                   status=HACK_USER_STATUS.AUTO_PASSED,
-                                  remarks='creator')
+                                  remark='creator')
             admin.save()
         except Exception as ex:
             # TODO: send out a email to remind administrator to deal with this problems

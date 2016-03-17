@@ -133,7 +133,7 @@
                             <h4 name="dserie">{name}<h4>\
                         </div>\
                     </div>';
-        var url_tmpe = '<h4><a href="{url}" style="text-decoration:underline;color:#00abec;" class="col-md-offset-1">{name}</a></h4>';
+        var url_tmpe = '<h4><a href="{url}" target="_blank" style="text-decoration:underline;color:#00abec;" class="col-md-offset-1">{name}</a></h4>';
         if (data.status == 2) {
             var dockers = []
             for (var i in data.remote_servers) {
