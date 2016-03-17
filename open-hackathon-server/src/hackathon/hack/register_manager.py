@@ -54,10 +54,9 @@ class RegisterManager(Component):
         :rtype: list
         :return all registered usrs if num is None else return the specific number of users order by create_time desc
         """
-        registers = self.db.find_all_objects_order_by(UserHackathonRel,
-                                                      num,
-                                                      UserHackathonRel.create_time.desc(),
-                                                      hackathon_id=g.hackathon.id)
+        registers = UserHackathon.objects(hackathon=g.hackathon).order_by('-create_time') if not num \
+                    else UserHackathon.objects(hackathon=g.hackathon).order_by('-create_time').limit(num)
+
         return map(lambda x: self.__get_registration_with_profile(x), registers)
 
     def get_registration_by_id(self, registration_id):
