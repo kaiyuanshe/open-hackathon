@@ -25,14 +25,13 @@ THE SOFTWARE.
 import sys
 
 sys.path.append("..")
-import time
 from mongoengine import *
 from bson import ObjectId
 from datetime import datetime
 from uuid import UUID
 
 from hackathon.util import get_now
-from hackathon.constants import TEMPLATE_STATUS
+from hackathon.constants import TEMPLATE_STATUS, HACK_USER_TYPE
 from pagination import Pagination
 
 
@@ -215,7 +214,6 @@ class AzureKey(HDocumentBase):
         super(AzureKey, self).__init__(**kwargs)
 
 
-
 class Hackathon(HDocumentBase):
     name = StringField(unique=True, required=True)
     display_name = StringField(required=True)
@@ -250,7 +248,7 @@ class Hackathon(HDocumentBase):
 class UserHackathon(HDocumentBase):
     user = ReferenceField(User)
     hackathon = ReferenceField(Hackathon)
-    role = IntField()  # 0-visitor 1-admin 2-judge 3-competitor
+    role = IntField(default=HACK_USER_TYPE.COMPETITOR)  # 0-visitor 1-admin 2-judge 3-competitor
     status = IntField()  # 0-not approved user 1-approved user 2-refused user 3-auto approved user
     like = BooleanField(default=True)
     assets = ListField(DictField(default={}))  # assets for user

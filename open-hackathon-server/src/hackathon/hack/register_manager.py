@@ -147,16 +147,16 @@ class RegisterManager(Component):
         try:
             register = self.get_registration_by_id(args["id"])
             if register is not None:
-                user = register.user
                 register.delete()
                 hackathon = self.hackathon_manager.get_hackathon_by_id(register.hackathon.id)
                 self.__update_register_stat(hackathon)
 
-                team = self.team_manager.get_team_by_user_and_hackathon(user, hackathon)
-                if not team:
-                    self.log.warn("team of this registered user is not found!")
-                    return ok()
-                self.team_manager.quit_team_forcedly(team, user)
+                # TODO: remove team after team_manager is refactored
+                # team = self.team_manager.get_team_by_user_and_hackathon(user, hackathon)
+                # if not team:
+                #     self.log.warn("team of this registered user is not found!")
+                #     return ok()
+                # self.team_manager.quit_team_forcedly(team, register.user)
 
             return ok()
         except Exception as ex:
