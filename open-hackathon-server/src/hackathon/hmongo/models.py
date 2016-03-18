@@ -25,6 +25,7 @@ THE SOFTWARE.
 import sys
 
 sys.path.append("..")
+import time
 from mongoengine import *
 from bson import ObjectId
 from datetime import datetime
@@ -43,6 +44,7 @@ def make_serializable(item):
             item[k] = make_serializable(v)
         return item
     elif isinstance(item, datetime):
+        item = item.replace(tzinfo=None)
         epoch = datetime.utcfromtimestamp(0)
         return long((item - epoch).total_seconds() * 1000)
     elif isinstance(item, ObjectId) or isinstance(item, UUID):
@@ -213,6 +215,7 @@ class AzureKey(HDocumentBase):
         super(AzureKey, self).__init__(**kwargs)
 
 
+
 class Hackathon(HDocumentBase):
     name = StringField(unique=True, required=True)
     display_name = StringField(required=True)
@@ -223,14 +226,14 @@ class Hackathon(HDocumentBase):
     banners = ListField()
     status = IntField(default=0)  # 0-new 1-online 2-offline
     creator = ReferenceField(User)
-    config = DictField()
+    config = DictField()  # max_enrollment, auto_approve, login_provider
     type = IntField(default=1)  # enum.HACK_TYPE
     organizers = EmbeddedDocumentListField(Organization)
     partners = EmbeddedDocumentListField(Organization)
     tags = ListField()
     awards = EmbeddedDocumentListField(Award)
     templates = ListField(ReferenceField(Template, reverse_delete_rule=PULL))  # templates for hackathon
-    azure_keys = ListField(AzureKey)
+    azure_keys = ListField(ReferenceField(AzureKey))
 
     event_start_time = DateTimeField()
     event_end_time = DateTimeField()

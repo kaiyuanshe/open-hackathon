@@ -32,7 +32,7 @@ from flask import g
 from hackathon import Component, RequiredFeature
 from hackathon.hmongo.models import UserHackathon, Experiment
 from hackathon.hackathon_response import bad_request, precondition_failed, internal_server_error, not_found, ok, login_provider_error
-from hackathon.constants import EStatus, HACK_USER_STATUS, HACKATHON_BASIC_INFO, LOGIN_PROVIDER
+from hackathon.constants import EStatus, HACK_USER_STATUS, HACKATHON_BASIC_INFO, LOGIN_PROVIDER, HACK_USER_TYPE
 
 __all__ = ["RegisterManager"]
 
@@ -203,7 +203,7 @@ class RegisterManager(Component):
     def is_user_registered(self, user_id, hackathon):
         """Check whether use registered certain hackathon"""
         register = self.get_registration_by_user_and_hackathon(user_id, hackathon.id)
-        return register is not None and register.deleted == 0
+        return register is not None and register.role == HACK_USER_TYPE.COMPETITOR
 
     def __get_registration_with_profile(self, registration):
         """Return user display info as well as the registration detail in dict

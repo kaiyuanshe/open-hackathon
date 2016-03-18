@@ -33,12 +33,14 @@ angular.module('manageView', [
     'ui.bootstrap',
     'ui.bootstrap.datetimepicker',
     'ngTagsInput',
+    'angularFileUpload',
     'oh.manage.router',
     'oh.pages',
     'oh.providers',
     'oh.filters',
     'oh.controllers',
     'oh.directives',
+    'oh.templates',
     'oh.api'
   ])
   .config(function($locationProvider, $translateProvider, $stateProvider, $urlRouterProvider, VERSION) {

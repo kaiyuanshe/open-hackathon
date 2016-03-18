@@ -78,7 +78,7 @@ angular.module('oh.directives', [])
                 setTimeout(function() {
                   tip.remove();
                 }, 500);
-              }, 3000);
+              }, 10000);
             }, 1);
           }
         });
@@ -94,25 +94,30 @@ angular.module('oh.directives', [])
         width: '@'
       },
       link: function(scope, element, attrs, ngModel) {
+        var plugins = ['div', 'colordialog', 'liststyle', 'font', 'colorbutton', 'showblocks', 'justify'];
+        var addPlugins = attrs.addPlugins || ''
+        plugins.push(addPlugins);
         var ck = CKEDITOR.replace(element[0], {
           width: scope.width || 'auto',
-          height: scope.height || 'auto'
+          height: scope.height || 'auto',
+          extraPlugins: plugins.join()
         });
         if (!ngModel) return;
 
-        ck.on('save', function() {
-          scope.$apply(function() {
-            ngModel.$setViewValue(ck.getData());
+        if (addPlugins.search('save') > -1) {
+          ck.on('save', function() {
+            scope.$apply(function() {
+              ngModel.$setViewValue(ck.getData());
+            });
           });
-        });
-        // ck.on('pasteState', function() {
-        //   scope.$apply(function() {
-        //     ngModel.$setViewValue(ck.getData());
-        //   });
-        // });
-        ck.on('keydown', function(e) {
-          console.log(e);
-        })
+        } else {
+          ck.on('pasteState', function() {
+            scope.$apply(function() {
+              ngModel.$setViewValue(ck.getData());
+            });
+          });
+        }
+
         ck.on('instanceReady', function() {
           ck.setData(ngModel.$viewValue);
         });
@@ -178,4 +183,45 @@ angular.module('oh.directives', [])
         }
       }
     }
+  }).directive('checkValue', function() {
+    return {
+      restrict: 'A',
+      scope: {
+        checkChange: '&'
+      },
+
+      link: function(scope, elem, attrs) {
+        elem.bind('change', function(e) {
+          scope.checkChange({'$event': e}); 
+        })
+      }
+    }
   });
+
+
+angular.module("oh.templates", []).run(["$templateCache", function($templateCache) {
+
+  $templateCache.put("manage/template/dialogs/alert.html", '<div class="modal-header cursor-move" dragable>\
+  <h3 class="modal-title">\
+  <button type="button" class="close" ng-click="cancel()"><span aria-hidden="true">&times;</span></button>\
+  {{title}} </h3>\
+  </div>\
+  <div class="modal-body text-center" ng-bind-html="body">\
+  </div>\
+  <div class="modal-footer">\
+    <button class="btn btn-success btn-sm" type="button" ng-click="ok()" translate="OK">OK</button>\
+  </div>');
+
+  $templateCache.put("manage/template/dialogs/confirm.html", '<div class="modal-header cursor-move " dragable>\
+  <h3 class="modal-title">\
+  <button type="button" class="close" ng-click="cancel()"><span aria-hidden="true">&times;</span></button>\
+  {{title}} </h3>\
+  </div>\
+  <div class="modal-body text-center" ng-bind-html="body">\
+  </div>\
+  <div class="modal-footer">\
+  <button class="btn btn-success btn-sm" type="button" ng-click="ok()" translate="OK">OK</button>\
+  <button class="btn btn-default btn-sm" type="button" ng-click="cancel()" translate="CANCEL">CANCEL</button>\
+  </div>');
+
+}]);

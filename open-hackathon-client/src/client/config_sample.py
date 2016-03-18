@@ -206,6 +206,7 @@ Config = {
                 },
                 "template": {
                     "": ["get", "post", "delete", "put"],
+                    "file":["post"],
                     "list": ["get"],
                     "check": ["get"]
                 },

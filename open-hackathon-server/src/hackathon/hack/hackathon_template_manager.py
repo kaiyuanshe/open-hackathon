@@ -30,8 +30,9 @@ from compiler.ast import flatten
 
 from flask import g
 
+from hackathon.hmongo.models import Hackathon, Template
+
 from hackathon import Component, RequiredFeature, Context
-from hackathon.database import HackathonTemplateRel, Template, DockerHostServer
 from hackathon.template import TEMPLATE, DOCKER_UNIT
 from hackathon.constants import VE_PROVIDER, TEMPLATE_STATUS
 from hackathon.hackathon_response import ok, not_found, internal_server_error
@@ -47,44 +48,43 @@ class HackathonTemplateManager(Component):
     template_library = RequiredFeature("template_library")
     hosted_docker = RequiredFeature("hosted_docker")
 
-    def add_template_to_hackathon(self, template_id, team_id=-1):
-        template = self.db.find_first_object_by(Template, id=template_id)
-        if template is None:
-            return not_found("template does not exist")
-        htr = self.db.find_first_object_by(HackathonTemplateRel,
-                                           template_id=template.id,
-                                           hackathon_id=g.hackathon.id,
-                                           team_id=team_id)
-        if htr is not None:
-            return ok("already exist")
+    def add_template_to_hackathon(self, template_id):
         try:
-            self.db.add_object_kwargs(HackathonTemplateRel,
-                                      hackathon_id=g.hackathon.id,
-                                      template_id=template.id,
-                                      team_id=team_id,
-                                      update_time=self.util.get_now())
-            return ok()
+            template = Template.objects(id=template_id).first()
+
+            if template is None:
+                return not_found("template does not exist")
+
+            if not (template in g.hackathon.templates):
+                g.hackathon.templates.append(template)
+                g.hackathon.save()
+
+            return self.get_templates_with_detail_by_hackathon(g.hackathon)
+
         except Exception as ex:
             self.log.error(ex)
             return internal_server_error("add a hackathon template rel record faild")
 
-    def delete_template_from_hackathon(self, template_id, team_id=-1):
-        self.db.delete_all_objects_by(HackathonTemplateRel,
-                                      template_id=template_id,
-                                      hackathon_id=g.hackathon.id,
-                                      team_id=team_id)
+    def delete_template_from_hackathon(self, template_id):
+        template = Template.objects(id=template_id).first()
+        if template is None:
+            return not_found("template does not exist")
+
+        if template in g.hackathon.templates:
+            g.hackathon.templates.remove(template)
+            g.hackathon.save()
+
         # self.db.delete_object(htr)
-        return ok()
+        return self.get_templates_with_detail_by_hackathon(g.hackathon)
 
     def get_templates_by_hackathon_id(self, hackathon_id):
         """Get all templates used by certain hackathon"""
         return self.db.find_all_objects_by(HackathonTemplateRel, hackathon_id=hackathon_id)
 
-    def get_templates_with_detail_by_hackathon(self, hackathon_id):
+    def get_templates_with_detail_by_hackathon(self, hackathon):
         """Get all templates as well as its details used by certain hackathon"""
-        templates = self.get_templates_by_hackathon_id(hackathon_id)
-        templates_with_details = [self.__get_template_detail(t) for t in templates]
-        return templates_with_details
+
+        return [t.dic() for t in hackathon.templates]
 
     def get_user_templates(self, user, hackathon):
         template_list = self.__get_templates_by_user(user, hackathon)
