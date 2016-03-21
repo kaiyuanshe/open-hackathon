@@ -37,7 +37,7 @@ from lxml.html.clean import Cleaner
 from mongoengine import Q
 from mongoengine.context_managers import no_dereference
 
-from hackathon.hmongo.models import Hackathon, UserHackathon, DockerHostServer, User, HackathonNotice
+from hackathon.hmongo.models import Hackathon, UserHackathon, DockerHostServer, User, HackathonNotice, HackathonStat
 from hackathon.hackathon_response import internal_server_error, ok, not_found, forbidden
 from hackathon.constants import HACKATHON_BASIC_INFO, HACK_USER_TYPE, HACK_STATUS, HACK_USER_STATUS, HTTP_HEADER, \
     FILE_TYPE, HACK_TYPE, HACKATHON_STAT, DockerHostServerStatus, HACK_NOTICE_CATEGORY, HACK_NOTICE_EVENT
@@ -377,17 +377,16 @@ class HackathonManager(Component):
         :type count: int
         :param count: the new count for this stat item
         """
-        stat = self.db.find_first_object_by(HackathonStat, hackathon_id=hackathon.id, type=stat_type)
+        stat = HackathonStat.objects(hackathon=hackathon, type=stat_type).first()
         if stat:
             stat.count = count
             stat.update_time = self.util.get_now()
         else:
-            stat = HackathonStat(hackathon_id=hackathon.id, type=stat_type, count=count)
-            self.db.add_object(stat)
+            stat = HackathonStat(hackathon=hackathon, type=stat_type, count=count)
 
         if stat.count < 0:
             stat.count = 0
-        self.db.commit()
+        stat.save()
 
     def increase_hackathon_stat(self, hackathon, stat_type, increase):
         """Increase or descrease the count for certain hackathon stat

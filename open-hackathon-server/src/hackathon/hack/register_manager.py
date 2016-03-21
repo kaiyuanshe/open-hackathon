@@ -31,8 +31,10 @@ from flask import g
 
 from hackathon import Component, RequiredFeature
 from hackathon.hmongo.models import UserHackathon, Experiment
-from hackathon.hackathon_response import bad_request, precondition_failed, internal_server_error, not_found, ok, login_provider_error
-from hackathon.constants import EStatus, HACK_USER_STATUS, HACKATHON_BASIC_INFO, LOGIN_PROVIDER, HACK_USER_TYPE
+from hackathon.hackathon_response import bad_request, precondition_failed, internal_server_error, not_found, ok,\
+    login_provider_error
+from hackathon.constants import EStatus, HACK_USER_STATUS, HACKATHON_BASIC_INFO, HACKATHON_STAT, LOGIN_PROVIDER,\
+    HACK_USER_TYPE
 
 __all__ = ["RegisterManager"]
 
@@ -50,7 +52,9 @@ class RegisterManager(Component):
         :rtype: list
         :return all registered usrs if num is None else return the specific number of users order by create_time desc
         """
-        registers = UserHackathon.objects(hackathon=hackathon_id).order_by('-create_time')[:num]
+        registers = UserHackathon.objects(hackathon=hackathon_id,
+                                          role=HACK_USER_TYPE.COMPETITOR).order_by('-create_time')[:num]
+
         return map(lambda x: self.__get_registration_with_profile(x), registers)
 
     def get_registration_by_id(self, registration_id):
@@ -148,15 +152,14 @@ class RegisterManager(Component):
             register = self.get_registration_by_id(args["id"])
             if register is not None:
                 register.delete()
-                hackathon = self.hackathon_manager.get_hackathon_by_id(register.hackathon.id)
+                hackathon = register.hackathon
                 self.__update_register_stat(hackathon)
 
-                # TODO: remove team after team_manager is refactored
-                # team = self.team_manager.get_team_by_user_and_hackathon(user, hackathon)
-                # if not team:
-                #     self.log.warn("team of this registered user is not found!")
-                #     return ok()
-                # self.team_manager.quit_team_forcedly(team, register.user)
+                team = self.team_manager.get_team_by_user_and_hackathon(register.user, hackathon)
+                if not team:
+                    self.log.warn("team of this registered user is not found!")
+                    return ok()
+                self.team_manager.quit_team_forcedly(team, register.user)
 
             return ok()
         except Exception as ex:
@@ -191,14 +194,13 @@ class RegisterManager(Component):
         return detail
 
     def __update_register_stat(self, hackathon):
-        UserHackathon.objects(
+        count = UserHackathon.objects(
             hackathon=hackathon.id,
             status__in=[HACK_USER_STATUS.AUDIT_PASSED, HACK_USER_STATUS.AUTO_PASSED],
             # TODO
             deleted=0).count()
 
-        # TODO: fix this after hachathon_manager fixed
-        # self.hackathon_manager.update_hackathon_stat(hackathon, HACKATHON_STAT.REGISTER, count)
+        self.hackathon_manager.update_hackathon_stat(hackathon, HACKATHON_STAT.REGISTER, count)
 
     def is_user_registered(self, user_id, hackathon):
         """Check whether use registered certain hackathon"""
