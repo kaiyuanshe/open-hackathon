@@ -29,6 +29,7 @@ sys.path.append("..")
 import json
 
 from flask import g
+from mongoengine import Q
 
 from hackathon import Component, RequiredFeature
 from hackathon.hmongo.models import UserHackathon
@@ -54,13 +55,14 @@ class RegisterManager(Component):
         :rtype: list
         :return all registered usrs if num is None else return the specific number of users order by create_time desc
         """
-        registers = UserHackathon.objects(hackathon=g.hackathon).order_by('-create_time') if not num \
-                    else UserHackathon.objects(hackathon=g.hackathon).order_by('-create_time').limit(num)
+        registers_query = UserHackathon.objects(hackathon=g.hackathon,
+                                                role=HACK_USER_TYPE.COMPETITOR).order_by('-create_time')
+        registers = registers_query.limit(num).all() if num else registers_query.all()
 
         return map(lambda x: self.__get_registration_with_profile(x), registers)
 
     def get_registration_by_id(self, registration_id):
-        return self.db.get_object(UserHackathonRel, registration_id)
+        return UserHackathon.objects(id=registration_id).first()
 
     def get_registration_by_user_and_hackathon(self, user_id, hackathon_id):
         return UserHackathon.objects(user=user_id, hackathon=hackathon_id).first()
@@ -115,18 +117,18 @@ class RegisterManager(Component):
         try:
             registration_id = context.id
             register = self.get_registration_by_id(registration_id)
-            if register is None or register.hackathon_id != g.hackathon.id:
+            if register is None or register.hackathon.id != g.hackathon.id:
                 # we can also create a new object here.
                 return not_found("registration not found")
 
             register.update_time = self.util.get_now()
             register.status = context.status
-            self.db.commit()
+            register.save()
 
             if register.status == HACK_USER_STATUS.AUDIT_PASSED:
                 self.team_manager.create_default_team(register.hackathon, register.user)
 
-            hackathon = self.hackathon_manager.get_hackathon_by_id(register.hackathon_id)
+            hackathon = self.hackathon_manager.get_hackathon_by_id(register.hackathon.id)
             self.__update_register_stat(hackathon)
 
             return register.dic()
@@ -141,11 +143,11 @@ class RegisterManager(Component):
         if "id" not in args:
             return bad_request("id not invalid")
         try:
-            register = self.db.find_first_object_by(UserHackathonRel, id = args['id'])
+            register = UserHackathon.objects(id=args["id"]).first()
             user = register.user
             if register is not None:
-                self.db.delete_object(register)
-                hackathon = self.hackathon_manager.get_hackathon_by_id(register.hackathon_id)
+                hackathon = register.hackathon
+                register.delete()
                 self.__update_register_stat(hackathon)
 
                 team = self.team_manager.get_team_by_user_and_hackathon(user, hackathon)
@@ -190,10 +192,8 @@ class RegisterManager(Component):
         return detail
 
     def __update_register_stat(self, hackathon):
-        count = self.db.count(UserHackathonRel,
-                              UserHackathonRel.hackathon_id == hackathon.id,
-                              UserHackathonRel.status.in_([HACK_USER_STATUS.AUDIT_PASSED, HACK_USER_STATUS.AUTO_PASSED]),
-                              UserHackathonRel.deleted == 0)
+        filter_condition = [HACK_USER_STATUS.AUTO_PASSED, HACK_USER_STATUS.AUDIT_PASSED]
+        count = UserHackathon.objects(hackathon=hackathon, status__in=filter_condition).count()
         self.hackathon_manager.update_hackathon_stat(hackathon, HACKATHON_STAT.REGISTER, count)
 
     def is_user_registered(self, user_id, hackathon):
