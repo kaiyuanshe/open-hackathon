@@ -28,12 +28,13 @@ import sys
 sys.path.append("..")
 
 from flask import g
-from mongoengine import Q
 
 from hackathon import Component, RequiredFeature
 from hackathon.hmongo.models import UserHackathon, Experiment
-from hackathon.hackathon_response import bad_request, precondition_failed, internal_server_error, not_found, ok, login_provider_error
-from hackathon.constants import EStatus, HACK_USER_STATUS, HACKATHON_BASIC_INFO, LOGIN_PROVIDER, HACK_USER_TYPE
+from hackathon.hackathon_response import bad_request, precondition_failed, internal_server_error, not_found, ok,\
+    login_provider_error
+from hackathon.constants import EStatus, HACK_USER_STATUS, HACKATHON_BASIC_INFO, HACKATHON_STAT, LOGIN_PROVIDER,\
+    HACK_USER_TYPE
 
 __all__ = ["RegisterManager"]
 
@@ -154,12 +155,11 @@ class RegisterManager(Component):
                 hackathon = register.hackathon
                 self.__update_register_stat(hackathon)
 
-                # TODO: remove team after team_manager is refactored
-                # team = self.team_manager.get_team_by_user_and_hackathon(user, hackathon)
-                # if not team:
-                #     self.log.warn("team of this registered user is not found!")
-                #     return ok()
-                # self.team_manager.quit_team_forcedly(team, register.user)
+                team = self.team_manager.get_team_by_user_and_hackathon(register.user, hackathon)
+                if not team:
+                    self.log.warn("team of this registered user is not found!")
+                    return ok()
+                self.team_manager.quit_team_forcedly(team, register.user)
 
             return ok()
         except Exception as ex:
@@ -194,7 +194,7 @@ class RegisterManager(Component):
         return detail
 
     def __update_register_stat(self, hackathon):
-        UserHackathon.objects(
+        count = UserHackathon.objects(
             hackathon=hackathon.id,
             status__in=[HACK_USER_STATUS.AUDIT_PASSED, HACK_USER_STATUS.AUTO_PASSED],
             # TODO

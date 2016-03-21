@@ -539,7 +539,7 @@ class TeamManager(Component):
     def __generate_team_name(self, hackathon, user):
         """Generate a default team name by user name. It can be updated later by team leader"""
         team_name = user.name
-        if Team.objects(hackathon=hackathon, name=team_name).filter(Q(members_user=user)).first():
+        if Team.objects(hackathon=hackathon, name=team_name, members__user=user).first():
             team_name = "%s (%s)" % (user.name, user.id)
         return team_name
 
@@ -592,10 +592,9 @@ class TeamManager(Component):
         :rtype: Team
         :return instance of Team
         """
-        t = Team.objects(hackathon=hackathon_id,
-                         members__user=user_id,
-                         members__status=TeamMemberStatus.Approved).first()
-        return t
+        return Team.objects(hackathon=hackathon_id,
+                            members__user=user_id,
+                            members__status=TeamMemberStatus.Approved).first()
 
     def __get_team_by_name(self, hackathon_id, team_name):
         """ get user's team basic information stored on table 'team' based on team name
