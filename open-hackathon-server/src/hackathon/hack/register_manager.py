@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 """
 Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
- 
+
 The MIT License (MIT)
- 
+
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -26,18 +26,14 @@ THE SOFTWARE.
 import sys
 
 sys.path.append("..")
-import json
 
 from flask import g
 from mongoengine import Q
 
 from hackathon import Component, RequiredFeature
-from hackathon.hmongo.models import UserHackathon
-from hackathon.database import UserHackathonRel, Experiment, HackathonConfig, UserHackathonAsset
-from hackathon.hackathon_response import bad_request, precondition_failed, internal_server_error, not_found, ok, \
-    login_provider_error
-from hackathon.constants import EStatus, HACK_USER_STATUS, HACKATHON_BASIC_INFO, HACKATHON_STAT, LOGIN_PROVIDER, \
-    HACK_USER_TYPE
+from hackathon.hmongo.models import UserHackathon, Experiment
+from hackathon.hackathon_response import bad_request, precondition_failed, internal_server_error, not_found, ok, login_provider_error
+from hackathon.constants import EStatus, HACK_USER_STATUS, HACKATHON_BASIC_INFO, LOGIN_PROVIDER, HACK_USER_TYPE
 
 __all__ = ["RegisterManager"]
 
@@ -49,15 +45,14 @@ class RegisterManager(Component):
     admin_manager = RequiredFeature("admin_manager")
     team_manager = RequiredFeature("team_manager")
 
-    def get_hackathon_registration_list(self, num=None):
+    def get_hackathon_registration_list(self, hackathon_id, num=None):
         """Get registered users list
 
         :rtype: list
         :return all registered usrs if num is None else return the specific number of users order by create_time desc
         """
-        registers_query = UserHackathon.objects(hackathon=g.hackathon,
-                                                role=HACK_USER_TYPE.COMPETITOR).order_by('-create_time')
-        registers = registers_query.limit(num).all() if num else registers_query.all()
+        registers = UserHackathon.objects(hackathon=hackathon_id,
+                                          role=HACK_USER_TYPE.COMPETITOR).order_by('-create_time')[:num]
 
         return map(lambda x: self.__get_registration_with_profile(x), registers)
 
@@ -77,12 +72,13 @@ class RegisterManager(Component):
 
         check_login_provider = self.__is_user_hackathon_login_provider(user, hackathon)
         if check_login_provider["fail"]:
-            return login_provider_error("hackathon registration not login provider",
-                                        friendly_message="当前黑客松活动只是使用"+",".join(check_login_provider["provides"])+"账户才能报名",
-                                        provides=",".join(check_login_provider["provides"]))
+            return login_provider_error(
+                "hackathon registration not login provider",
+                friendly_message="当前黑客松活动只是使用" + ",".join(check_login_provider["provides"]) + "账户才能报名",
+                provides=",".join(check_login_provider["provides"]))
 
         if self.is_user_registered(user.id, hackathon):
-            self.log.debug("user %d already registered on hackathon %d" % (user_id, hackathon.id))
+            self.log.debug("user %s already registered on hackathon %s" % (user_id, hackathon.id))
             return self.get_registration_detail(user, hackathon)
 
         if self.admin_manager.is_hackathon_admin(hackathon.id, user.id):
@@ -99,16 +95,24 @@ class RegisterManager(Component):
                                        friendly_message="报名人数已满")
 
         try:
-            args["status"] = HACK_USER_STATUS.AUTO_PASSED if hackathon.is_auto_approve() else HACK_USER_STATUS.UNAUDIT
-            args['create_time'] = self.util.get_now()
-            user_hackathon_rel = self.db.add_object_kwargs(UserHackathonRel, **args).dic()
+            status = HACK_USER_STATUS.AUTO_PASSED if hackathon.is_auto_approve() else HACK_USER_STATUS.UNAUDIT
+            args.pop("user_id")
+            args.pop("hackathon_id")
+
+            user_hackathon = UserHackathon.objects.create(
+                user=user,
+                hackathon=hackathon,
+                status=status,
+                **args).dic()
 
             # create a team as soon as user registration approved(auto or manually)
             if hackathon.is_auto_approve():
-                self.team_manager.create_default_team(hackathon, user)
+                pass
+                # TODO: fix this after team_manager refactored
+                # self.team_manager.create_default_team(hackathon, user)
 
             self.__update_register_stat(hackathon)
-            return user_hackathon_rel
+            return user_hackathon
         except Exception as e:
             self.log.error(e)
             return internal_server_error("fail to create register")
@@ -128,13 +132,14 @@ class RegisterManager(Component):
             if register.status == HACK_USER_STATUS.AUDIT_PASSED:
                 self.team_manager.create_default_team(register.hackathon, register.user)
 
-            hackathon = self.hackathon_manager.get_hackathon_by_id(register.hackathon.id)
-            self.__update_register_stat(hackathon)
+            # TODO: fix after hackathon_manager refactored
+            # hackathon = self.hackathon_manager.get_hackathon_by_id(register.hackathon_id)
+            # self.__update_register_stat(hackathon)
 
             return register.dic()
         except Exception as e:
             self.log.error(e)
-            return internal_server_error("fail to  update register")
+            return internal_server_error("fail to update register")
 
     def delete_registration(self, args):
         """
@@ -143,57 +148,58 @@ class RegisterManager(Component):
         if "id" not in args:
             return bad_request("id not invalid")
         try:
-            register = UserHackathon.objects(id=args["id"]).first()
-            user = register.user
+            register = self.get_registration_by_id(args["id"])
             if register is not None:
-                hackathon = register.hackathon
                 register.delete()
+                hackathon = register.hackathon
                 self.__update_register_stat(hackathon)
 
-                team = self.team_manager.get_team_by_user_and_hackathon(user, hackathon)
-                if not team:
-                    self.log.warn("team of this registered user is not found!")
-                    return ok()
-                self.team_manager.quit_team_forcedly(team, user)
+                # TODO: remove team after team_manager is refactored
+                # team = self.team_manager.get_team_by_user_and_hackathon(user, hackathon)
+                # if not team:
+                #     self.log.warn("team of this registered user is not found!")
+                #     return ok()
+                # self.team_manager.quit_team_forcedly(team, register.user)
 
             return ok()
         except Exception as ex:
             self.log.error(ex)
             return internal_server_error("failed in delete register: %s" % args["id"])
 
-    # TODO: registration related functions are to be refactored
-    def get_registration_detail(self, user, hackathon):
+    def get_registration_detail(self, user, hackathon, registration=None):
         detail = {
             "hackathon": hackathon.dic(),
-            "user": self.user_manager.user_display_info(user),
-            "asset":[]
-        }
+            "user": self.user_manager.user_display_info(user)}
 
-        # asset = self.db.find_all_objects_by(UserHackathonAsset, user_id=user.id, hackathon_id=hackathon.id)
-        # if asset:
-        #     detail["asset"] = [o.dic() for o in asset]
+        if not registration:
+            registration = registration or self.get_registration_by_user_and_hackathon(user.id, hackathon.id)
 
-        # rel = self.get_registration_by_user_and_hackathon(user.id, hackathon.id)
-        # if rel is None:
-        #     return detail
+        if not registration:
+            return detail
 
-        # detail["registration"] = rel.dic()
-        # # experiment if any
-        # try:
-        #     experiment = self.db.find_first_object(Experiment,
-        #                                            Experiment.user_id == user.id,
-        #                                            Experiment.hackathon_id == hackathon.id,
-        #                                            Experiment.status.in_([EStatus.STARTING, EStatus.RUNNING]))
-        #     if experiment is not None:
-        #         detail["experiment"] = experiment.dic()
-        # except Exception as e:
-        #     self.log.error(e)
+        # "asset" is alreay in registration
+        detail["registration"] = registration.dic()
+        # experiment if any
+        try:
+            exp = Experiment.objects(
+                user=user.id,
+                hackathon=hackathon.id,
+                status__in=[EStatus.STARTING, EStatus.RUNNING]).first()
+
+            if exp:
+                detail["experiment"] = exp.dic()
+        except Exception as e:
+            self.log.error(e)
 
         return detail
 
     def __update_register_stat(self, hackathon):
-        filter_condition = [HACK_USER_STATUS.AUTO_PASSED, HACK_USER_STATUS.AUDIT_PASSED]
-        count = UserHackathon.objects(hackathon=hackathon, status__in=filter_condition).count()
+        UserHackathon.objects(
+            hackathon=hackathon.id,
+            status__in=[HACK_USER_STATUS.AUDIT_PASSED, HACK_USER_STATUS.AUTO_PASSED],
+            # TODO
+            deleted=0).count()
+
         self.hackathon_manager.update_hackathon_stat(hackathon, HACKATHON_STAT.REGISTER, count)
 
     def is_user_registered(self, user_id, hackathon):
@@ -219,51 +225,40 @@ class RegisterManager(Component):
 
         :return False if not all seats occupied or hackathon has no limit at all otherwise True
         """
-        maximum = hackathon.get_basic_property(HACKATHON_BASIC_INFO.MAX_ENROLLMENT, 0)
+        # TODO
+        maximum = self.hackathon_manager.get_basic_property(hackathon, HACKATHON_BASIC_INFO.MAX_ENROLLMENT, 0)
+
         if maximum == 0:  # means no limit
             return False
         else:
             # count of audited users
-            current_num = self.db.count(UserHackathonRel,
-                                        UserHackathonRel.hackathon_id == hackathon.id,
-                                        UserHackathonRel.status.in_([HACK_USER_STATUS.AUDIT_PASSED, HACK_USER_STATUS.AUTO_PASSED]))
+            current_num = UserHackathon.objects(
+                hackathon=hackathon.id,
+                status__in=[HACK_USER_STATUS.AUDIT_PASSED, HACK_USER_STATUS.AUTO_PASSED]).count()
+
             return current_num >= max
 
     def __is_user_hackathon_login_provider(self, user, hackathon):
-        """Check whether login prpvoder
+        """Check whether login provider
 
         :return False if not all seats occupied or hackathon has no limit at all otherwise True
         """
-        login_provider = self.db.find_first_object(HackathonConfig,
-                           HackathonConfig.hackathon_id == hackathon.id,
-                           HackathonConfig.key == 'login_provider')
-
+        login_provider = hackathon.config.get("login_provider")
         data = {"fail": False, "provides": []}
-        hackathon_login_provider = int(login_provider.value)
 
-        if hackathon_login_provider & LOGIN_PROVIDER.LIVE == LOGIN_PROVIDER.LIVE:
-            data["provides"].append("live")
+        if login_provider:
+            hackathon_login_provider = int(login_provider)
 
-        if hackathon_login_provider & LOGIN_PROVIDER.GITHUB == LOGIN_PROVIDER.GITHUB:
-            data["provides"].append("github")
+            for mask, provide in (
+                    (LOGIN_PROVIDER.LIVE, "live"),
+                    (LOGIN_PROVIDER.GITHUB, "github"),
+                    (LOGIN_PROVIDER.QQ, "qq"),
+                    (LOGIN_PROVIDER.WEIBO, "weibo"),
+                    (LOGIN_PROVIDER.GITCAFE, "gitcafe"),
+                    (LOGIN_PROVIDER.ALAUDA, "alauda")):
+                if (hackathon_login_provider & mask) > 0:
+                    data["provides"].append(provide)
 
-        if hackathon_login_provider & LOGIN_PROVIDER.QQ == LOGIN_PROVIDER.QQ:
-            data["provides"].append("qq")
+            data["fail"] = user.provide not in data["provides"]
 
-        if hackathon_login_provider & LOGIN_PROVIDER.WEIBO == LOGIN_PROVIDER.WEIBO:
-            data["provides"].append("weibo")
-
-        if hackathon_login_provider & LOGIN_PROVIDER.GITCAFE == LOGIN_PROVIDER.GITCAFE:
-            data["provides"].append("gitcafe")
-
-        if hackathon_login_provider & LOGIN_PROVIDER.ALAUDA == LOGIN_PROVIDER.ALAUDA:
-            data["provides"].append("alauda")
-
-
-        if login_provider is None:
-            data["fail"] = False
-        elif user.provider in data["provides"]:
-            data["fail"] = False
-        else:
-            data["fail"] = True
         return data
