@@ -6,7 +6,7 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "integer",
+            "type": "string",
             "description": "id of user_hackathon_rel"
           },
           "status": {

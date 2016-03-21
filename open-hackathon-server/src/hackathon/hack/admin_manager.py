@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 """
 Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
- 
+
 The MIT License (MIT)
- 
+
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -28,7 +28,6 @@ import sys
 sys.path.append("..")
 
 from flask import g
-from sqlalchemy import func
 from mongoengine import Q
 
 from hackathon import Component, RequiredFeature
@@ -37,9 +36,7 @@ from hackathon.constants import HACK_USER_TYPE, HACK_USER_STATUS
 from hackathon.hackathon_response import precondition_failed, ok, not_found, internal_server_error, bad_request
 
 
-
 __all__ = ["AdminManager"]
-
 
 
 class AdminManager(Component):
@@ -66,8 +63,6 @@ class AdminManager(Component):
 
         return UserHackathon.objects(role=HACK_USER_TYPE.ADMIN, hackathon=g.hackathon, user=g.user).count() > 0
 
-
-
     def get_entitled_hackathons_simple(self, user):
         """Get hackathon id list that specific user is entitled to manage
 
@@ -77,14 +72,23 @@ class AdminManager(Component):
         :rtype: list
         :return list of hackathon simple
         """
-
         user_filter = Q()
         if not user.is_super:
             user_filter = Q(creator=user)
 
-        admin_user_hackathon_simple = Hackathon.objects(user_filter)\
-            .only('name','display_name','ribbon','short_description','location','banners','status','creator','type','event_start_time','event_end_time').no_dereference().order_by('-event_start_time')
-        
+        admin_user_hackathon_simple = Hackathon.objects(user_filter).only(
+            'name',
+            'display_name',
+            'ribbon',
+            'short_description',
+            'location',
+            'banners',
+            'status',
+            'creator',
+            'type',
+            'event_start_time',
+            'event_end_time').no_dereference().order_by('-event_start_time')
+
         all_hackathon = [h.dic() for h in admin_user_hackathon_simple]
         return all_hackathon
 
@@ -206,5 +210,10 @@ class AdminManager(Component):
         :rtype: bool
         :return True if specific user has admin privilidge on specific hackathon otherwise False
         """
-        hack_ids = self.get_entitled_hackathon_ids(user_id)
-        return -1 in hack_ids or hackathon_id in hack_ids
+        if User.objects(id=user_id, is_super=True).count():
+            return True
+
+        return UserHackathon.objects(
+            user=user_id,
+            hackathon=hackathon_id,
+            role=HACK_USER_TYPE.ADMIN).count() > 0
