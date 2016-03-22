@@ -149,9 +149,27 @@ angular.module('oh.controllers', [])
       } else {
         $scope.modules.config.login_provider = ((+$scope.modules.config.login_provider) || 0) ^ value;
       }
-      $scope.$emit('showTip', {
-        level: 'tip-success',
-        content: '登录方式修改成功'
+
+      api.admin.hackathon.config.put({
+        header: {
+          hackathon_name: activity.name
+        },
+        body: {
+          login_provider: activity.config.login_provider
+        }
+      }).then(function(data) {
+        console.log(data);
+        if (data.error) {
+          $scope.$emit('showTip', {
+            level: 'tip-danger',
+            content: data.error.friendly_message
+          });
+        } else {
+          $scope.$emit('showTip', {
+            level: 'tip-success',
+            content: '登录方式修改成功'
+          });
+        }
       });
     }
 

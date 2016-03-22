@@ -27,7 +27,7 @@
               <div class="form-group" ng-class="{'has-error': activitForm.tags.$touched && activitForm.tags.$invalid,'has-success':activitForm.tags.$touched && activitForm.tags.$valid}">
                 <label for="inputPassword" class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.TAGS">TAGS</label>
                 <div class="col-xs-10 control-addon">
-                  <tags-input ng-model="tag" name="tags" placeholder="{{ 'ACTIVITY_FIELDS.TAGS' | translate}}" min-length="2">
+                  <tags-input ng-model="modules.tags" name="tags" placeholder="{{ 'ACTIVITY_FIELDS.TAGS' | translate}}" min-length="2">
                     <i class="control-icon fa fa-tag"></i>
                   </tags-input>
                   <div class="messages" ng-if="activitForm.tags.$touched && activitForm.tags.$valid">
