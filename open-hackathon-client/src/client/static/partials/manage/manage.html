@@ -8,7 +8,7 @@
         <span>{{currentUser.nickname}}</span>
       </div>
       <ul class="nav">
-        <li ng-repeat="navManage in currentArea track by navManage.name" class="nav-index-group">
+        <li ng-if="isShowNav(navManage.type)" ng-repeat="navManage in currentArea track by navManage.name" class="nav-index-group">
           <h3 translate="{{navManage.name}}"></h3>
           <ul class="nav">
             <li ng-repeat="navItem in navManage.navGroups" ng-class="isActive(navItem)">

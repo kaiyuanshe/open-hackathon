@@ -43,6 +43,10 @@ def create_event():
 def myhackathon():
     return render("/base/manage.html")
 
+@app.route("/manage/")
+@login_required
+def myhackathon2():
+    return render("/base/manage.html")
 
 @app.route("/manage/<path:path>")
 @login_required

@@ -25,71 +25,90 @@
 angular.module('oh.manage.router', [
   'ui.router',
   'oh.pages'
-]).config(function($stateProvider, $urlRouterProvider, VERSION) {
-  $stateProvider.state('manage', {
-      abstract: true,
-      url: '/',
-      templateUrl: '/static/partials/manage/manage.html?v=' + VERSION,
-      controller: 'manageController'
-    }).state('manage.edit', {
-      url: 'edit/:name',
-      templateUrl: '/static/partials/manage/edit.html?v=' + VERSION,
-      controller: 'editController',
-      resolve: {
-        activity: function($stateParams, api) {
-          return api.admin.hackathon.get({
-            header: {
-              hackathon_name: $stateParams.name
-            }
-          }).then(function(data) {
-            return data;
-          });
-        }
+]).config(function($locationProvider, $stateProvider, $urlRouterProvider, VERSION) {
+  $urlRouterProvider.otherwise('/main');
+  $stateProvider.state('main', {
+    url: '/main',
+    templateUrl: '/static/partials/manage/main.html?v=' + VERSION,
+    controller: function($scope, $rootScope, activityService) {
+      activityService.reload();
+
+      $rootScope.$on('getActivity', function(event, activities) {
+        $scope.activities = activityService.getAll();
+        event.stopPropagation();
+      });
+
+      $scope.online = function(activity) {
+        activity.status = 1;
       }
-    })
-    .state('manage.users', {
-      url: 'users/:name',
-      templateUrl: '/static/partials/manage/users.html?v=' + VERSION,
-      controller: 'usersController'
-    })
-    .state('manage.admin', {
-      url: 'admin/:name',
-      templateUrl: '/static/partials/manage/admin.html?v=' + VERSION,
-      controller: 'adminController'
-    })
-    .state('manage.organizers', {
-      url: 'organizers/:name',
-      templateUrl: '/static/partials/manage/organizers.html?v=' + VERSION,
-      controller: 'organizersController'
-    })
-    .state('manage.prizes', {
-      url: 'prizes/:name',
-      templateUrl: '/static/partials/manage/prizes.html?v=' + VERSION,
-      controller: 'prizesController'
-    })
-    .state('manage.awards', {
-      url: 'awards/:name',
-      templateUrl: '/static/partials/manage/awards.html?v=' + VERSION,
-      controller: 'awardsController'
-    })
-    .state('manage.ve', {
-      url: 've/:name',
-      templateUrl: '/static/partials/manage/ve.html?v=' + VERSION,
-      controller: 'veController'
-    })
-    .state('manage.monitor', {
-      url: 'monitor/:name',
-      templateUrl: '/static/partials/manage/monitor.html?v=' + VERSION,
-      controller: 'monitorController'
-    })
-    .state('manage.cloud', {
-      url: 'cloud/:name',
-      templateUrl: '/static/partials/manage/cloud.html?v=' + VERSION,
-      controller: 'cloudController'
-    })
-    .state('manage.servers', {
-      url: 'servers/:name',
-      templateUrl: '/static/partials/manage/servers.html?v=' + VERSION,
-      controller: 'serversController'
-    })
+      $scope.offline = function(activity) {
+        activity.status = 2;
+      }
+    }
+  }).state('create', {
+    url: '/create',
+    templateUrl: '/static/partials/manage/create.html?v=' + VERSION,
+    controller: 'createController'
+  }).state('404', {
+    url: '/404',
+    templateUrl: '/static/partials/manage/404.html?v=' + VERSION,
+  }).state('manage', {
+    abstract: true,
+    url: '/',
+    templateUrl: '/static/partials/manage/manage.html?v=' + VERSION,
+    controller: 'manageController'
+  }).state('manage.edit', {
+    url: 'edit/:name',
+    templateUrl: '/static/partials/manage/edit.html?v=' + VERSION,
+    controller: 'editController',
+    resolve: {
+      activity: function($stateParams, api) {
+        return api.admin.hackathon.get({
+          header: {
+            hackathon_name: $stateParams.name
+          }
+        }).then(function(data) {
+          return data;
+        });
+      }
+    }
+  }).state('manage.users', {
+    url: 'users/:name',
+    templateUrl: '/static/partials/manage/users.html?v=' + VERSION,
+    controller: 'usersController'
+  }).state('manage.admin', {
+    url: 'admin/:name',
+    templateUrl: '/static/partials/manage/admin.html?v=' + VERSION,
+    controller: 'adminController'
+  }).state('manage.organizers', {
+    url: 'organizers/:name',
+    templateUrl: '/static/partials/manage/organizers.html?v=' + VERSION,
+    controller: 'organizersController'
+  }).state('manage.prizes', {
+    url: 'prizes/:name',
+    templateUrl: '/static/partials/manage/prizes.html?v=' + VERSION,
+    controller: 'prizesController'
+  }).state('manage.awards', {
+    url: 'awards/:name',
+    templateUrl: '/static/partials/manage/awards.html?v=' + VERSION,
+    controller: 'awardsController'
+  }).state('manage.ve', {
+    url: 've/:name',
+    templateUrl: '/static/partials/manage/ve.html?v=' + VERSION,
+    controller: 'veController'
+  }).state('manage.monitor', {
+    url: 'monitor/:name',
+    templateUrl: '/static/partials/manage/monitor.html?v=' + VERSION,
+    controller: 'monitorController'
+  }).state('manage.cloud', {
+    url: 'cloud/:name',
+    templateUrl: '/static/partials/manage/cloud.html?v=' + VERSION,
+    controller: 'cloudController'
+  }).state('manage.servers', {
+    url: 'servers/:name',
+    templateUrl: '/static/partials/manage/servers.html?v=' + VERSION,
+    controller: 'serversController'
+  })
+  $locationProvider.html5Mode(true).hashPrefix('!');
+
 });

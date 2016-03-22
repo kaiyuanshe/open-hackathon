@@ -83,7 +83,7 @@
     "SUBSCRIPTION_ID": "SUBSCRIPTION ID"
   },
   "VALIDATE": {
-    "datetime": "请填写正确的日期时间",
+    "DATETIME": "请填写正确的日期时间",
 
 
     "EVENT_NAME_REQUIRED": "黑客松名称是必需的，不能为空",
