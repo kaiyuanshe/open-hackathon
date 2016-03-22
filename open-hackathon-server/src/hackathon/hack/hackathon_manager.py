@@ -29,7 +29,6 @@ import sys
 sys.path.append("..")
 import imghdr
 from datetime import timedelta
-from bson import ObjectId
 
 from werkzeug.exceptions import PreconditionFailed, InternalServerError, BadRequest
 from flask import g, request
@@ -38,7 +37,7 @@ from lxml.html.clean import Cleaner
 from mongoengine import Q
 from mongoengine.context_managers import no_dereference
 
-from hackathon.hmongo.models import Hackathon, UserHackathon, DockerHostServer, User, HackathonNotice
+from hackathon.hmongo.models import Hackathon, UserHackathon, DockerHostServer, User, HackathonNotice, HackathonStat
 from hackathon.hackathon_response import internal_server_error, ok, not_found, forbidden
 from hackathon.constants import HACKATHON_BASIC_INFO, HACK_USER_TYPE, HACK_STATUS, HACK_USER_STATUS, HTTP_HEADER, \
     FILE_TYPE, HACK_TYPE, HACKATHON_STAT, DockerHostServerStatus, HACK_NOTICE_CATEGORY, HACK_NOTICE_EVENT
@@ -96,10 +95,12 @@ class HackathonManager(Component):
 
     def get_hackathon_by_id(self, hackathon_id):
         """Query hackathon by id
+        :type hackathon_id: str or ObjectId are both ok
+        :param hackathon_id: _id of hackathon
 
         :return hackathon instance or None
         """
-        return Hackathon.objects(id=ObjectId(hackathon_id)).first()
+        return Hackathon.objects(id=hackathon_id).first()
 
     def get_hackathon_detail(self, hackathon):
         user = None
@@ -159,7 +160,6 @@ class HackathonManager(Component):
         # return serializable items as well as total count
         return self.util.paginate(pagination, func)
 
-
     def get_online_hackathons(self):
         return Hackathon.objects(status=HACK_STATUS.ONLINE)
 
@@ -189,9 +189,8 @@ class HackathonManager(Component):
 
     def get_basic_property(self, hackathon, key, default=None):
         """Get basic property of hackathon from HackathonConfig"""
-        config = hackathon.config
-        if config:
-            return config.get(key)
+        if hackathon.config:
+            return hackathon.config.get(key, default)
         return default
 
     def get_all_properties(self, hackathon):
@@ -376,17 +375,16 @@ class HackathonManager(Component):
         :type count: int
         :param count: the new count for this stat item
         """
-        stat = self.db.find_first_object_by(HackathonStat, hackathon_id=hackathon.id, type=stat_type)
+        stat = HackathonStat.objects(hackathon=hackathon, type=stat_type).first()
         if stat:
             stat.count = count
             stat.update_time = self.util.get_now()
         else:
-            stat = HackathonStat(hackathon_id=hackathon.id, type=stat_type, count=count)
-            self.db.add_object(stat)
+            stat = HackathonStat(hackathon=hackathon, type=stat_type, count=count)
 
         if stat.count < 0:
             stat.count = 0
-        self.db.commit()
+        stat.save()
 
     def increase_hackathon_stat(self, hackathon, stat_type, increase):
         """Increase or descrease the count for certain hackathon stat
@@ -525,7 +523,7 @@ class HackathonManager(Component):
 
     def create_hackathon_notice(self, hackathon_id, notice_event, notice_category, body={}):
         """
-        create hackathon notice with hackathon_id, notice_event, notice_category. 
+        create hackathon notice with hackathon_id, notice_event, notice_category.
         notice 'content' and 'link' can be included in body (optional)
 
         :type hackathon_id: int
@@ -536,11 +534,11 @@ class HackathonManager(Component):
                              more specfic than notice_category, new events can be added without disturbing front-end code
 
         :type notice_category: Class HACK_NOTICE_CATEGORY
-        :param notice_category: category that the notice belongs to, used for notice filtering and notice properties display 
-                                at front-end (e.g. icons/descriptions, see oh.manage.notice.js & oh.site.hackathon.js), 
-                                more general than notice_event, if you want to add a new category in HACK_NOTICE_CATEGORY, 
+        :param notice_category: category that the notice belongs to, used for notice filtering and notice properties display
+                                at front-end (e.g. icons/descriptions, see oh.manage.notice.js & oh.site.hackathon.js),
+                                more general than notice_event, if you want to add a new category in HACK_NOTICE_CATEGORY,
                                 remember to update front-end js code as well.
-                                
+
         :type body: dict/Context, default value: {}
         :param body: other necessary information, e.g.: 'content'(notice's content), 'link'(notice's link), other keys for specfic uses
 
@@ -548,11 +546,11 @@ class HackathonManager(Component):
 
         ::Example:
         :create_hackathon_notice(2, HACK_NOTICE_EVENT.xx, HACK_NOTICE_CATEGORY.yy, {'content': 'zz'})
-            a new notice for a hackathon with id 2 is created for the propose of HACK_NOTICE_EVENT.xx. The notice's front-end icon 
+            a new notice for a hackathon with id 2 is created for the propose of HACK_NOTICE_EVENT.xx. The notice's front-end icon
             and description is determined by HACK_NOTICE_CATEGORY.yy, while its content is 'zz' and its link url is ''
-        
+
         :create_hackathon_notice(-1, HACK_NOTICE_EVENT.xx, HACK_NOTICE_CATEGORY.yy)
-            a new notice not belongs to any hackathon is created for the propose of HACK_NOTICE_EVENT.xx. The notice's front-end icon 
+            a new notice not belongs to any hackathon is created for the propose of HACK_NOTICE_EVENT.xx. The notice's front-end icon
             and description is determined by HACK_NOTICE_CATEGORY.yy, while its content and link url is ''
         """
         hackathon_notice = HackathonNotice(content='',
@@ -609,14 +607,14 @@ class HackathonManager(Component):
         hackathon_notice = HackathonNotice.objects(id=notice_id).first()
         if not hackathon_notice:
             return not_found('Hackathon notice not found')
-        
+
         hackathon_notice.delete()
         return ok()
-            
+
 
     def get_hackathon_notice_list(self, body):
         """
-        list hackathon notices, notices are paginated, can be filtered by hackathon_name, event and category, 
+        list hackathon notices, notices are paginated, can be filtered by hackathon_name, event and category,
         can be ordered by update_time, event and category.
 
         :type body: Context
@@ -645,7 +643,7 @@ class HackathonManager(Component):
         order_by = body.get("order_by", "time")
         page = int(body.get("page", 1))
         per_page = int(body.get("per_page", 1000))
-        
+
         hackathon_filter = Q()
         category_filter = Q()
         event_filter = Q()
@@ -812,7 +810,7 @@ class HackathonManager(Component):
                                   hackathon=new_hack,
                                   role=HACK_USER_TYPE.ADMIN,
                                   status=HACK_USER_STATUS.AUTO_PASSED,
-                                  remarks='creator')
+                                  remark='creator')
             admin.save()
         except Exception as ex:
             # TODO: send out a email to remind administrator to deal with this problems

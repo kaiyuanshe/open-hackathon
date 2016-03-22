@@ -137,7 +137,7 @@ class HackathonRegistrationListResource(HackathonResource):
         parse = reqparse.RequestParser()
         parse.add_argument('num', type=int, location='args', default=5)
         args = parse.parse_args()
-        return register_manager.get_hackathon_registration_list(args['num'])
+        return register_manager.get_hackathon_registration_list(g.hackathon.id, args['num'])
 
 
 """Resources for user(participant) to join hackathon"""
@@ -230,8 +230,8 @@ class UserRegistrationResource(HackathonResource):
     def post(self):
         args = {
             "user_id": g.user.id,
-            "hackathon_id": g.hackathon.id
-        }
+            "hackathon_id": g.hackathon.id}
+
         return register_manager.create_registration(g.hackathon, g.user, args)
 
 
@@ -519,13 +519,14 @@ class AdminAzureResource(HackathonResource):
 class AdminRegisterListResource(HackathonResource):
     @admin_privilege_required
     def get(self):
-        return register_manager.get_hackathon_registration_list()
+        return register_manager.get_hackathon_registration_list(g.hackathon.id)
 
 
 class AdminRegisterResource(HackathonResource):
     def get(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('id', type=str, location='args', required=True)  # register_id
+        parse.add_argument("id", type=str, location="args", required=True)  # register_id
+
         args = parse.parse_args()
         rel = register_manager.get_registration_by_id(args["id"])
         return rel.dic() if rel is not None else not_found("not found")
@@ -630,7 +631,7 @@ class HackathonAdminResource(HackathonResource):
     @admin_privilege_required
     def delete(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('id', type=int, location='args', required=True)
+        parse.add_argument('id', type=str, location='args', required=True)
         args = parse.parse_args()
         return admin_manager.delete_admin(args['id'])
 

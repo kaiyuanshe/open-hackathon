@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 """
 Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
- 
+
 The MIT License (MIT)
- 
+
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -30,9 +30,11 @@ sys.path.append("..")
 
 from flask import g
 from sqlalchemy import and_, func
+from mongoengine import Q
 
 from hackathon import Component, RequiredFeature
-from hackathon.database import Team, UserTeamRel, User, Hackathon, TeamScore, TeamShow, Award, TeamAward
+from hackathon.hmongo.models import Team, TeamMember
+from hackathon.database import UserTeamRel, User, Hackathon, TeamScore, TeamShow, Award, TeamAward
 from hackathon.hackathon_response import not_found, bad_request, precondition_failed, ok, forbidden
 from hackathon.constants import TeamMemberStatus, Team_Show_Type
 
@@ -139,18 +141,15 @@ class TeamManager(Component):
             return precondition_failed("you must leave the current team first")
 
         team_name = self.__generate_team_name(hackathon, user)
+        team_member = TeamMember(join_time=self.util.get_now(),
+                                 status=TeamMemberStatus.Approved,
+                                 user=user)
         team = Team(name=team_name,
-                    leader_id=user.id,
+                    leader=user,
                     logo=user.avatar_url,
-                    hackathon_id=hackathon.id)
-        self.db.add_object(team)
-
-        user_team_rel = UserTeamRel(join_time=self.util.get_now(),
-                                    status=TeamMemberStatus.Approved,
-                                    hackathon_id=hackathon.id,
-                                    user_id=user.id,
-                                    team_id=team.id)
-        self.db.add_object(user_team_rel)
+                    hackathon=hackathon,
+                    members=[team_member])
+        team.save()
 
         return team.dic()
 
@@ -218,27 +217,24 @@ class TeamManager(Component):
         """
 
         # here we don't check whether the operator has the permission,
-        members = self.db.find_all_objects_by(UserTeamRel, team_id=team.id, status=TeamMemberStatus.Approved)
-        if not members or len(members) == 0:
+        if not team.members or len(team.members) == 0:
             self.log.warn("this team doesn't have any members")
             return ok()
-        member_users = [m.user for m in members]
+        member_users = [m.user for m in team.members if m.status == TeamMemberStatus.Approved]
 
         num_team_members = len(member_users)
         hackathon = team.hackathon
         if num_team_members > 1:
-            if team.leader_id == user.id:
-                self.db.delete_all_objects_by(UserTeamRel, team_id=team.id)
-                self.db.delete_object(team)
+            if team.leader == user:
+                team.delete()
                 for u in member_users:
-                    if u.id != user.id:
+                    if u != user:
                         self.create_default_team(hackathon, u)
             else:
-                self.db.delete_all_objects_by(UserTeamRel, user_id=user.id, team_id=team.id)
+                Team.objects(id=team.id).update_one(pull__members__user=user)
         else:
             # num_team_members == 1
-            self.db.delete_all_objects_by(UserTeamRel, team_id=team.id)
-            self.db.delete_object(team)
+            team.delete()
 
         return ok()
 
@@ -368,8 +364,8 @@ class TeamManager(Component):
             return self.hackathon_template_manager.delete_template_from_hackathon(template_id, team.id)
 
     def get_team_by_user_and_hackathon(self, user, hackathon):
-        utrs = self.db.find_first_object_by(UserTeamRel, user_id=user.id, hackathon_id=hackathon.id)
-        return utrs.team if utrs else None
+        team = Team.objects(hackathon=hackathon, members__user=user).first()
+        return team
 
     def score_team(self, judge, ctx):
         team = self.__get_team_by_id(ctx.team_id)
@@ -543,7 +539,7 @@ class TeamManager(Component):
     def __generate_team_name(self, hackathon, user):
         """Generate a default team name by user name. It can be updated later by team leader"""
         team_name = user.name
-        if self.db.find_first_object_by(Team, hackathon_id=hackathon.id, name=team_name):
+        if Team.objects(hackathon=hackathon, name=team_name, members__user=user).first():
             team_name = "%s (%s)" % (user.name, user.id)
         return team_name
 
@@ -588,18 +584,17 @@ class TeamManager(Component):
         return self.db.find_first_object_by(Team, id=team_id)
 
     def __get_valid_team_by_user(self, user_id, hackathon_id):
-        """Get valid User_Team_Rel by user and hackathon
+        """Get valid Team(Mongo-document) by user and hackathon
 
         "valid" means user is approved. There might be other records where status=Init
-        Since foreign keys are defined in User_Team_Rel, one can access team or user through the return result directly
+        Since foreign keys are defined in Team, one can access team or user through the return result directly
 
-        :rtype: UserTeamRel
-        :return instance of UserTeamRel
+        :rtype: Team
+        :return instance of Team
         """
-        return self.db.find_first_object_by(UserTeamRel,
-                                            hackathon_id=hackathon_id,
-                                            user_id=user_id,
-                                            status=TeamMemberStatus.Approved)
+        return Team.objects(hackathon=hackathon_id,
+                            members__user=user_id,
+                            members__status=TeamMemberStatus.Approved).first()
 
     def __get_team_by_name(self, hackathon_id, team_name):
         """ get user's team basic information stored on table 'team' based on team name

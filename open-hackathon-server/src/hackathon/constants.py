@@ -273,7 +273,6 @@ class HACK_USER_STATUS:
     AUDIT_PASSED = 1
     AUDIT_REFUSE = 2
     AUTO_PASSED = 3
-    AUTO_PASSED = 3
 
 
 class HACK_USER_TYPE:
@@ -517,7 +516,7 @@ class HACK_NOTICE_CATEGORY:
     HACKATHON = 0  # hackathon related notice
     USER = 1   # user related notice
     EXPERIMENT = 2   # experiment related notice
-    AWARD = 3 # award related notice
+    AWARD = 3  # award related notice
     TEMPLATE = 4  # template related notice
 
 
@@ -526,8 +525,8 @@ class HACK_NOTICE_EVENT:
     HACK_CREATE = 1
     HACK_EDIT = 2
     HACK_ONLINE = 3
-    HACK_OFFLINE = 4 # hackathon create/edit/online/offline
-    EXPR_JOIN = 5 # user start to program
+    HACK_OFFLINE = 4  # hackathon create/edit/online/offline
+    EXPR_JOIN = 5  # user start to program
 
 
 class EMAIL_SMTP_STATUSCODE:
