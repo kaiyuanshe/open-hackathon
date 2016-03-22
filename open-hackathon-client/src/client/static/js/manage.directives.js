@@ -78,7 +78,7 @@ angular.module('oh.directives', [])
                 setTimeout(function() {
                   tip.remove();
                 }, 500);
-              }, 10000);
+              },  newValue.showTime|| 5000);
             }, 1);
           }
         });
@@ -223,5 +223,7 @@ angular.module("oh.templates", []).run(["$templateCache", function($templateCach
   <button class="btn btn-success btn-sm" type="button" ng-click="ok()" translate="OK">OK</button>\
   <button class="btn btn-default btn-sm" type="button" ng-click="cancel()" translate="CANCEL">CANCEL</button>\
   </div>');
+
+  $templateCache.put("manage/template/dialogs/upimage.html",'<div>updimage</div>');
 
 }]);

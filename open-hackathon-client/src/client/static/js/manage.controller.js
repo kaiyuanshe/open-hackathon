@@ -25,8 +25,8 @@
 angular.module('oh.controllers', [])
   .controller('MainController', MainController = function($scope, $rootScope, $location, $window, $cookies, $state, $translate, api, activityService, NAV) {
     $scope.isloaded = true;
-    $scope.loading = false;
 
+    $scope.loading = false;
     $rootScope.$on("$stateChangeStart", function(event, toState, toParams, fromState, fromParams) {
       $scope.loading = true;
       var activity = activityService.getCurrentActivity();
@@ -40,7 +40,12 @@ angular.module('oh.controllers', [])
         if (activity.name != undefined) {
           activity.name = toParams.name;
           activityService.setCurrentActivity(activity);
-          $scope.$emit('changeCurrenActivity', activity);
+          //$scope.$emit('changeCurrenActivity', activity);
+          // if (activity.status == -1) {
+          //   $state.go('create', {
+          //     name: toParams.name
+          //   });
+          // }
         } else {
           api.admin.hackathon.get({
             header: {
@@ -51,9 +56,16 @@ angular.module('oh.controllers', [])
               $state.go('404');
             } else {
               activityService.add(data);
+              activityService.setCurrentActivity(data);
+              // if (data.status == -1) {
+              //   $state.go('create', {
+              //     name: toParams.name
+              //   });
+              // } else {
               $state.go(toState.name, {
                 name: toParams.name
               });
+              //}
             }
           });
           event.preventDefault();
@@ -66,11 +78,14 @@ angular.module('oh.controllers', [])
     });
 
   })
-  .controller('manageController', function($scope, $state, session, NAV) {
+  .controller('manageController', function($scope, $state, activityService, session, NAV) {
+    var activity = activityService.getCurrentActivity();
     $scope.page = {
       name: ''
     };
+
     $scope.currentUser = session.user;
+
     $scope.$on('pageName', function(event, pageName) {
       $scope.page.name = pageName;
       event.preventDefault();
@@ -80,15 +95,23 @@ angular.module('oh.controllers', [])
 
     $scope.currentArea = NAV.manage;
     $scope.$emit('pageName', '');
+
     $scope.isActive = function(item) {
       return {
         active: $state.includes(item.state)
       }
     }
 
+    $scope.isShowNav = function(type) {
+      if (type == 1) {
+        return true;
+      }
+      return activity.config.cloud_provide != 0
+    }
+
     $scope.navLink = function(item) {
       return $state.href(item.state, {
-        name: $scope.currentActivity.name
+        name: activity.name
       }, {});
     }
 
@@ -99,7 +122,7 @@ angular.module('oh.controllers', [])
 
     $scope.animationsEnabled = true;
 
-    activity.banners = $filter('split')(activity.banners, ',');
+    activity.banners = activity.banners;
     activity.event_start_time = new Date(activity.event_start_time);
     activity.event_end_time = new Date(activity.event_end_time);
     activity.registration_start_time = new Date(activity.registration_start_time);
@@ -144,6 +167,8 @@ angular.module('oh.controllers', [])
       });
     }
 
+
+
     $scope.providerChange = function(checked, value) {
       if (checked) {
         $scope.modules.config.login_provider = ((+$scope.modules.config.login_provider) || 0) | value;
@@ -152,6 +177,7 @@ angular.module('oh.controllers', [])
       }
       $scope.$emit('showTip', {
         level: 'tip-success',
+        showTime: Math.random() * 10000,
         content: '登录方式修改成功'
       });
     }
@@ -192,16 +218,15 @@ angular.module('oh.controllers', [])
   .controller('serversController', function($rootScope, $scope, activityService, api) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.SERVERS');
   })
-  .controller('createController', function($scope, $timeout, $filter, $cookies, $state, FileUploader, dialog, api) {
+  .controller('createController', function($scope, $timeout, $filter, $cookies, $state, $stateParams, FileUploader, dialog, api) {
     var request;
-    $scope.wizard = 3;
+    console.log($stateParams.name);
+    $scope.wizard = 1;
     $scope.isShowAdvancedSettings = true;
 
     $scope.activityFormDisabled = false;
 
     $scope.activity = {
-      name: 'aaa',
-      status: -1,
       location: '',
       tags: [],
       config: {
@@ -217,20 +242,21 @@ angular.module('oh.controllers', [])
     }
 
 
-
     $scope.$watch('activity.name', function(newValue, oldValue, scope) {
       if (request && newValue) {
         $timeout.cancel(request);
       }
-      $timeout(function() {
-        api.admin.hackathon.checkname.get({
-          query: {
-            name: newValue
-          }
-        }, function(data) {
-          $scope.activityForm.name.$setValidity('rometname', !data);
-        });
-      }, 400);
+      if (newValue) {
+        request = $timeout(function() {
+          api.admin.hackathon.checkname.get({
+            query: {
+              name: newValue
+            }
+          }, function(data) {
+            $scope.activityForm.name.$setValidity('rometname', !data);
+          });
+        }, 400);
+      }
     });
 
 
@@ -438,7 +464,7 @@ angular.module('oh.controllers', [])
       $scope.file = '';
     };
 
-    console.info('uploader', uploader);
+    //console.info('uploader', uploader);
 
     $scope.oneAtATime = true;
     $scope.templates = [];

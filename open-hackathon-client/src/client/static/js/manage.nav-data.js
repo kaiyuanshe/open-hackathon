@@ -23,10 +23,11 @@
 // -----------------------------------------------------------------------------------
 
 angular.module('oh.pages', [])
-  .constant('VERSION', '0.1.6')
+  .constant('VERSION', '0.1.7')
   .value('NAV', {
     manage: [{
       name: "SETTINGS.MAIN",
+      type: 1,
       navGroups: [{
         name: "SETTINGS.EDIT_ACTIVITY",
         state: "manage.edit",
@@ -54,6 +55,7 @@ angular.module('oh.pages', [])
       }]
     }, {
       name: "ADVANCED_SETTINGS.MAIN",
+      type: 2,
       navGroups: [{
         name: "ADVANCED_SETTINGS.VIRTUAL_ENVIRONMENT",
         state: "manage.ve",

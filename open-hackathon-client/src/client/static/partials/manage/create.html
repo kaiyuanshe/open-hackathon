@@ -25,13 +25,13 @@
                     <div class="form-group" ng-class="{'has-error': activityForm.name.$touched && activityForm.name.$invalid,'has-success':activityForm.name.$valid}">
                       <label class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.NAME">NAME</label>
                       <div class="col-xs-10 required">
-                        <input type="text" class="form-control" name="name" placeholder="{{'ACTIVITY_FIELDS.NAME' | translate}}" ng-model="activity.name" ng-trim="true" ng-minleng="5" ng-maxlength="20" maxlength="20" pattern="^(?!_)(?!.*?_$)[a-z0-9_-]+$" required>
+                        <input type="text" class="form-control" name="name" placeholder="{{'ACTIVITY_FIELDS.NAME' | translate}}" ng-model="activity.name" ng-trim="true" ng-minlength="5" ng-maxlength="20" maxlength="20" pattern="^(?!_)(?!.*?_$)[a-z0-9_-]+$" required>
                         <div class="messages" ng-messages="activityForm.name.$error" ng-if="activityForm.name.$touched && activityForm.name.$invalid">
-                          <span ng-message="pattern"><i class="fa fa-close" uib-tooltip="pattern" tooltip-placement="right auto" ></i></span>
-                          <span ng-message="minlength"><i class="fa fa-close" uib-tooltip="minlength" tooltip-placement="right auto" ></i></span>
-                          <span ng-message="maxlength"><i class="fa fa-close" uib-tooltip="maxlength" tooltip-placement="right auto" ></i></span>
-                          <span ng-message="required"><i class="fa fa-close" uib-tooltip="required" tooltip-placement="right auto"></i></span>
-                          <span ng-message="rometname"><i class="fa fa-close" uib-tooltip="remote-validate" tooltip-placement="right auto" ></i></span>
+                          <span ng-message="pattern"><i class="fa fa-close" uib-tooltip="名称必须是小写英文字母加数字或中划线" tooltip-placement="right auto" ></i></span>
+                          <span ng-message="minlength"><i class="fa fa-close" uib-tooltip="{{'VALIDATE.EVENT_NAME_MINLENGTH' | translate}}" tooltip-placement="right auto" ></i></span>
+                          <span ng-message="maxlength"><i class="fa fa-close" uib-tooltip="名称不能大于20个字符" tooltip-placement="right auto" ></i></span>
+                          <span ng-message="required"><i class="fa fa-close" uib-tooltip="{{'VALIDATE.EVENT_NAME_REQUIRED' | translate}}" tooltip-placement="right auto"></i></span>
+                          <span ng-message="rometname"><i class="fa fa-close" uib-tooltip="名称已经存在，请重新启个名称" tooltip-placement="right auto" ></i></span>
                         </div>
                         <div class="messages" ng-if="activityForm.name.$touched && activityForm.name.$valid">
                           <i class="fa fa-check"></i>
@@ -190,6 +190,7 @@
                     <div class="form-group">
                       <div class="col-xs-offset-2 col-xs-10">
                         <button type="submit" class="btn btn-primary btn-long" ng-disabled="activityForm.$invalid || activityFormDisabled"><i class="fa fa-arrow-circle-o-right"></i> 下一步</button>
+                        {{activity}}
                       </div>
                     </div>
                   </footer>
