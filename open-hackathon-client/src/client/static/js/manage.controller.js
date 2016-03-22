@@ -136,10 +136,27 @@ angular.module('oh.controllers', [])
       $scope.modules.banners.push('http://image5.tuku.cn/pic/wallpaper/fengjing/shanshuilantian/014.jpg');
     }
 
-    $scope.showTip = function() {
+    $scope.showTip = function(level, content) {
       $scope.$emit('showTip', {
-        level: 'tip-success',
-        content: '保存成功'
+        level: level,
+        content: content
+      });
+    }
+
+    $scope.updateDescription = function() {
+      api.admin.hackathon.put({
+        header: {
+          hackathon_name: activity.name
+        },
+        body: {
+          description: activity.description
+        }
+      }, function(data) {
+        if (data.error) {
+          $scope.showTip(level='tip-danger', content=data.error.friendly_message);
+        } else {
+          $scope.showTip(level='tip-success', content='保存成功');
+        }
       });
     }
 
@@ -158,17 +175,10 @@ angular.module('oh.controllers', [])
           login_provider: activity.config.login_provider
         }
       }).then(function(data) {
-        console.log(data);
         if (data.error) {
-          $scope.$emit('showTip', {
-            level: 'tip-danger',
-            content: data.error.friendly_message
-          });
+          $scope.showTip(level='tip-danger', content=data.error.friendly_message);
         } else {
-          $scope.$emit('showTip', {
-            level: 'tip-success',
-            content: '登录方式修改成功'
-          });
+          $scope.showTip(level='tip-success', content='登录方式修改成功');
         }
       });
     }

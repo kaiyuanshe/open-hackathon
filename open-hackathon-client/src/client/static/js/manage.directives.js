@@ -108,6 +108,7 @@ angular.module('oh.directives', [])
           ck.on('save', function() {
             scope.$apply(function() {
               ngModel.$setViewValue(ck.getData());
+              scope.$parent.updateDescription();
             });
           });
         } else {
