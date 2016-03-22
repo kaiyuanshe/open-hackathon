@@ -128,18 +128,54 @@ angular.module('oh.controllers', [])
 
     $scope.modules = activity;
 
-    $scope.delBanner = function(index) {
-      $scope.modules.banners.splice(index, 1);
-    }
+    // $scope.delBanner = function(index) {
+    //   $scope.modules.banners.splice(index, 1);
+    // }
 
-    $scope.showAddBannerDialog = function() {
-      $scope.modules.banners.push('http://image5.tuku.cn/pic/wallpaper/fengjing/shanshuilantian/014.jpg');
-    }
+    // $scope.showAddBannerDialog = function() {
+    //   $scope.modules.banners.push('http://image5.tuku.cn/pic/wallpaper/fengjing/shanshuilantian/014.jpg');
+    // }
 
     $scope.showTip = function(level, content) {
       $scope.$emit('showTip', {
         level: level,
         content: content
+      });
+    }
+
+    $scope.delBanner = function(index) {
+      $scope.modules.banners.splice(index, 1);
+      api.admin.hackathon.put({
+        header: {
+          hackathon_name: activity.name
+        },
+        body: {
+          banners: activity.banners
+        }
+      }, function(data) {
+        if (data.error) {
+          $scope.showTip(level='tip-danger', content=data.error.friendly_message);
+        } else {
+          $scope.showTip(level='tip-success', content='删除成功');
+        }
+      });
+    }
+
+    $scope.showAddBannerDialog = function() {
+      $scope.modules.banners.push('http://image5.tuku.cn/pic/wallpaper/fengjing/shanshuilantian/014.jpg');
+      api.admin.hackathon.put({
+        header: {
+          hackathon_name: activity.name
+        },
+        body: {
+          banners: activity.banners
+        }
+      }, function(data) {
+        if (data.error) {
+          $scope.showTip(level='tip-danger', content=data.error.friendly_message);
+        } else {
+          $scope.showTip(level='tip-success', content='添加成功');
+        }
       });
     }
 
