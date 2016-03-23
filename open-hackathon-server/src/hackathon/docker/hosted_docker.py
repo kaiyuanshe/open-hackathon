@@ -195,7 +195,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
                 map(lambda cfg: cfg.update({DOCKER_UNIT.PORTS_PUBLIC_PORT: cfg[DOCKER_UNIT.PORTS_HOST_PORT]}),
                     public_ports_cfg)
             else:
-                self.log.debug("starting to get azure ports") #todo here
+                self.log.debug("starting to get azure ports")
                 ep = Endpoint(Service(self.load_azure_key_id(experiment.id)))
                 host_server_name = host_server.vm_name
                 host_server_dns = host_server.public_dns.split('.')[0]
@@ -214,7 +214,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
     def wait_for_network_config(self, ctx):
         if ctx.count > ctx.loop:
             self.log.error('Timed out waiting for async operation to complete.')
-            self.on_setup_failed()
+            self.on_setup_failed(ctx)
             return
 
         experiment = ctx.experiment
@@ -245,7 +245,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
         if ctx.count > ctx.loop:
             self.log.error('Timed out waiting for async operation to complete.')
             self.log.error('%s [%s] not ready' % (AZURE_RESOURCE_TYPE.VIRTUAL_MACHINE, ctx.new_name))
-            self.on_setup_failed()
+            self.on_setup_failed(ctx)
             return
 
         try:
