@@ -34,11 +34,9 @@ from sqlalchemy import __version__
 
 from hackathon.constants import HEALTH_STATUS
 from hackathon import RequiredFeature, Component
-from hackathon.database.models import User, AzureKey
 from hackathon.azureformation.service import Service
 
 __all__ = [
-    "MySQLHealthCheck",
     "HostedDockerHealthCheck",
     "AlaudaDockerHealthCheck",
     "GuacamoleHealthCheck",
@@ -57,31 +55,6 @@ class HealthCheck(Component):
     @abc.abstractmethod
     def report_health(self):
         pass
-
-
-class MySQLHealthCheck(HealthCheck):
-    """Check health status of MySQL database
-
-    Make sure MySQL is working and correctly configured by a single DB query
-    """
-
-    def report_health(self):
-        """Report status of MySQL by query the count of User table
-
-        Will return OK if no exception raised else return ERROR
-        """
-        try:
-            self.db.count(User)
-            return {
-                STATUS: HEALTH_STATUS.OK,
-                VERSION: __version__
-            }
-        except Exception as e:
-            return {
-                STATUS: HEALTH_STATUS.ERROR,
-                VERSION: __version__,
-                DESCRIPTION: e.message
-            }
 
 
 class MongoDBHealthCheck(HealthCheck):
@@ -155,22 +128,24 @@ class AzureHealthCheck(HealthCheck):
     """Check the status of azure to make sure config is right and azure is available"""
 
     def report_health(self):
-        azure_key = self.db.find_first_object(AzureKey)
-        if not azure_key:
-            return {
-                STATUS: HEALTH_STATUS.WARNING,
-                DESCRIPTION: "No Azure key found"
-            }
-        azure = Service(azure_key.id)
-        if azure.ping():
-            return {
-                STATUS: HEALTH_STATUS.OK,
-                "type": "Azure Storage"
-            }
-        else:
-            return {
-                STATUS: HEALTH_STATUS.ERROR
-            }
+        # todo azure health check
+        raise NotImplementedError()
+        #     azure_key = self.db.find_first_object(AzureKey)
+        #     if not azure_key:
+        #         return {
+        #             STATUS: HEALTH_STATUS.WARNING,
+        #             DESCRIPTION: "No Azure key found"
+        #         }
+        #     azure = Service(azure_key.id)
+        #     if azure.ping():
+        #         return {
+        #             STATUS: HEALTH_STATUS.OK,
+        #             "type": "Azure Storage"
+        #         }
+        #     else:
+        #         return {
+        #             STATUS: HEALTH_STATUS.ERROR
+        #         }
 
 
 class StorageHealthCheck(HealthCheck):
