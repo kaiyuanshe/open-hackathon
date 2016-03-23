@@ -863,8 +863,10 @@ class HackathonManager(Component):
                 result[key] = dict(args)[key]
 
         result.pop('id', None)
+        result.pop('name', None)
+        result.pop('creator', None)
         result.pop('create_time', None)
-        result.pop('creator_id', None)
+        result.pop('config', None) #use update hackathon config instead
         result['update_time'] = self.util.get_now()
         return result
 
