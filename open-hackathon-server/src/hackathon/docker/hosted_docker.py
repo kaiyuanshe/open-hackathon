@@ -260,7 +260,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
             deployment_name = ep.service.get_deployment_name(cloud_service_name, deployment_slot)
             props = ep.service.get_deployment_by_name(cloud_service_name, deployment_name)
             if ep.service.get_virtual_machine_instance_status(props, ctx.hosted_server.vm_name) != AVMStatus.READY_ROLE:
-                self.log.debug('wait for virtual machine [%s] loop count [%d]' % (ctx.request_id, ctx.count))
+                self.log.debug('wait for virtual machine [%r] loop count [%d]' % (ctx.new_name, ctx.count))
                 ctx.count += 1
                 self.scheduler.add_once("hosted_docker", "wait_for_virtual_machine", ctx, seconds=10)
                 return
