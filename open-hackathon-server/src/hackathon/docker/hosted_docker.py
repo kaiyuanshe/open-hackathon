@@ -141,7 +141,6 @@ class HostedDockerFormation(DockerFormationBase, Component):
             request_id=None,
             public_endpoints=None,
             public_ports_cfg=None,
-            public_ports=None,
             experiment=kwargs["experiment"],
         )
         self.__schedule_setup(ctx)
