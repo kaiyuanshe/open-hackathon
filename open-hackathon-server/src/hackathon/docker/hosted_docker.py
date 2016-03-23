@@ -45,7 +45,7 @@ from hackathon.constants import (
     PortBindingType,
     VEStatus,
     HEALTH,
-    VE_PROVIDER, VERemoteProvider)
+    VE_PROVIDER, VERemoteProvider, AZURE_RESOURCE_TYPE, AVMStatus)
 from compiler.ast import (
     flatten,
 )
@@ -122,6 +122,314 @@ class HostedDockerFormation(DockerFormationBase, Component):
                 HEALTH.DESCRIPTION: e.message
             }
 
+    def start(self, unit, **kwargs):
+        """
+        In this function, we create a container and then start a container
+        :param unit: docker template unit
+        :param docker_host:
+        :return:
+        """
+        ctx = Context(
+            req_count=1,
+            user_id=kwargs["user_id"],
+            hackathon_id=kwargs["hackathon"].id,
+            host_server=None,
+            unit=unit,
+            new_name=kwargs["new_name"],
+            count=0,
+            loop=30,
+            request_id=None,
+            public_endpoints=None,
+            public_ports_cfg=None,
+            public_ports=None,
+            experiment=kwargs["experiment"],
+        )
+        self.__schedule_setup(ctx)
+
+    def __schedule_setup(self, ctx):
+        """
+        This function is used to schedule the process of starting a container as following
+        get_available_docker_host --> start_container --> docker_host_manager.get_available_docker_host ->
+         config_network -> wait_for_network_config -> wait_for_virtual_machine -> start_container
+        :param ctx: consists the following keys
+        :return:
+        """
+        self.docker_host_manager.get_available_docker_host(ctx)
+
+    def config_network(self, ctx):
+        try:
+            host_server = ctx.hosted_server
+            unit = ctx.unit
+            container_name = unit.get_name()
+            image = unit.get_image_with_tag()
+            experiment = ctx.experiment
+            new_name = ctx.new_name
+            virtual_environment = self.db.find_first_object_by(VirtualEnvironment,
+                                                               provider=VE_PROVIDER.DOCKER,
+                                                               name=new_name,
+                                                               image=image,
+                                                               status=VEStatus.INIT,
+                                                               remote_provider=VERemoteProvider.Guacamole,
+                                                               experiment=experiment
+                                                               )
+            container = DockerContainer(experiment,
+                                        name=container_name,
+                                        host_server_id=host_server.id,
+                                        virtual_environment=virtual_environment,
+                                        image=image)
+            self.db.add_object(container)
+            self.db.commit()
+            port_cfg = unit.get_ports()
+            # get 'host_port'
+            map(lambda p:
+                p.update(
+                    {DOCKER_UNIT.PORTS_HOST_PORT: self.get_available_host_port(host_server, p[
+                        DOCKER_UNIT.PORTS_PORT])}
+                ),
+                port_cfg)
+
+            # get 'public' cfg
+            public_ports_cfg = filter(lambda p: DOCKER_UNIT.PORTS_PUBLIC in p, port_cfg)
+            host_ports = [u[DOCKER_UNIT.PORTS_HOST_PORT] for u in public_ports_cfg]
+            if self.util.safe_get_config("environment", "prod") == "local":
+                map(lambda cfg: cfg.update({DOCKER_UNIT.PORTS_PUBLIC_PORT: cfg[DOCKER_UNIT.PORTS_HOST_PORT]}),
+                    public_ports_cfg)
+            else:
+                self.log.debug("starting to get azure ports") #todo here
+                ep = Endpoint(Service(self.load_azure_key_id(experiment.id)))
+                host_server_name = host_server.vm_name
+                host_server_dns = host_server.public_dns.split('.')[0]
+
+                public_endports, result = ep.assign_public_endpoints(host_server_dns, 'Production', host_server_name, host_ports)
+                ctx.request_id = result.request_id
+                ctx.count = 0
+                ctx.loop = 20
+                ctx.public_endpoints = public_endports
+                ctx.public_ports_cfg = public_ports_cfg
+                self.wait_for_network_config(ctx)
+        except Exception as e:
+            self.log.error("Failed to config endpoint on the cloud service: %r" % str(e))
+            self.on_setup_failed(ctx)
+
+    def wait_for_network_config(self, ctx):
+        if ctx.count > ctx.loop:
+            self.log.error('Timed out waiting for async operation to complete.')
+            self.on_setup_failed()
+            return
+
+        experiment = ctx.experiment
+        try:
+            ep = Endpoint(Service(self.load_azure_key_id(experiment.id)))
+            result = ep.service.get_operation_status(ctx.request_id)
+            if result.status == ep.service.IN_PROGRESS:
+                self.log.debug('wait for async [%s] loop count [%d]' % (ctx.request_id, ctx.count))
+                ctx.count += 1
+                self.scheduler.add_once("hosted_docker", "wait_for_network_config", ctx, seconds=10)
+                return
+            if result.status != ep.service.SUCCEEDED:
+                self.log.error(vars(result))
+                if result.error:
+                   self.log.error(result.error.code)
+                   self.log.error(vars(result.error))
+                self.log.error('Asynchronous operation did not succeed.')
+                self.on_setup_failed(ctx)
+                return
+            ctx.count = 0
+            ctx.loop = 20
+            self.wait_for_virtual_machine(ctx)
+        except Exception as e:
+            self.log.error("Failed to config endpoint on the cloud service: %r" % str(e))
+            self.on_setup_failed(ctx)
+
+    def wait_for_virtual_machine(self, ctx):
+        if ctx.count > ctx.loop:
+            self.log.error('Timed out waiting for async operation to complete.')
+            self.log.error('%s [%s] not ready' % (AZURE_RESOURCE_TYPE.VIRTUAL_MACHINE, ctx.new_name))
+            self.on_setup_failed()
+            return
+
+        try:
+            public_endpoints = ctx.public_endpoints
+            public_ports_cfg = ctx.public_ports_cfg
+            host_server = ctx.hosted_server
+            cloud_service_name = host_server.public_dns.split('.')[0]
+            experiment = ctx.experiment
+
+            ep = Endpoint(Service(self.load_azure_key_id(experiment.id)))
+            deployment_slot = 'Production'
+            deployment_name = ep.service.get_deployment_name(cloud_service_name, deployment_slot)
+            props = ep.service.get_deployment_by_name(cloud_service_name, deployment_name)
+            if ep.service.get_virtual_machine_instance_status(props, ctx.hosted_server.vm_name) != AVMStatus.READY_ROLE:
+                self.log.debug('wait for virtual machine [%s] loop count [%d]' % (ctx.request_id, ctx.count))
+                ctx.count += 1
+                self.scheduler.add_once("hosted_docker", "wait_for_virtual_machine", ctx, seconds=10)
+                return
+            if not isinstance(public_endpoints, list):
+                self.log.debug("failed to get public ports")
+                self.on_setup_failed(ctx)
+                return
+            self.log.debug("public ports : %s" % public_endpoints)
+            for i in range(len(public_ports_cfg)):
+                public_ports_cfg[i][DOCKER_UNIT.PORTS_PUBLIC_PORT] = public_endpoints[i]
+            self.start_container(ctx)
+        except Exception as e:
+            self.log.error("Failed to creat virtual machine on the cloud service: %r" % str(e))
+            self.on_setup_failed(ctx)
+
+    def start_container(self, ctx):
+        # update port binding, start container and configure guacamole
+        binding_dockers = []
+        public_ports_cfg = ctx.public_ports_cfg
+        host_server = ctx.hosted_server
+        unit = ctx.unit
+        image = unit.get_image_with_tag()
+        ports = unit.get_ports()
+        container_name = unit.get_name()
+        remote = unit.get_remote()
+        experiment = ctx.experiment
+        new_name = ctx.new_name
+        virtual_environment = self.db.find_first_object_by(VirtualEnvironment,
+                                                            provider=VE_PROVIDER.DOCKER,
+                                                            name=new_name,
+                                                            image=image,
+                                                            status=VEStatus.INIT,
+                                                            remote_provider=VERemoteProvider.Guacamole,
+                                                            experiment=experiment
+                                                            )
+        # update port binding
+        for public_cfg in public_ports_cfg:
+            binding_cloud_service = PortBinding(name=public_cfg[DOCKER_UNIT.PORTS_NAME],
+                                                port_from=public_cfg[DOCKER_UNIT.PORTS_PUBLIC_PORT],
+                                                port_to=public_cfg[DOCKER_UNIT.PORTS_HOST_PORT],
+                                                binding_type=PortBindingType.CLOUD_SERVICE,
+                                                binding_resource_id=host_server.id,
+                                                virtual_environment=virtual_environment,
+                                                experiment=experiment,
+                                                url=public_cfg[DOCKER_UNIT.PORTS_URL]
+                                                if DOCKER_UNIT.PORTS_URL in public_cfg else None)
+            binding_docker = PortBinding(name=public_cfg[DOCKER_UNIT.PORTS_NAME],
+                                         port_from=public_cfg[DOCKER_UNIT.PORTS_HOST_PORT],
+                                         port_to=public_cfg[DOCKER_UNIT.PORTS_PORT],
+                                         binding_type=PortBindingType.DOCKER,
+                                         binding_resource_id=host_server.id,
+                                         virtual_environment=virtual_environment,
+                                         experiment=experiment)
+            binding_dockers.append(binding_docker)
+            self.db.add_object(binding_cloud_service)
+            self.db.add_object(binding_docker)
+        self.db.commit()
+
+        local_ports_cfg = filter(lambda p: DOCKER_UNIT.PORTS_PUBLIC not in p, public_ports_cfg)
+        for local_cfg in local_ports_cfg:
+            port_binding = PortBinding(name=local_cfg[DOCKER_UNIT.PORTS_NAME],
+                                       port_from=local_cfg[DOCKER_UNIT.PORTS_HOST_PORT],
+                                       port_to=local_cfg[DOCKER_UNIT.PORTS_PORT],
+                                       binding_type=PortBindingType.DOCKER,
+                                       binding_resource_id=host_server.id,
+                                       virtual_environment=virtual_environment,
+                                       experiment=experiment)
+            binding_dockers.append(port_binding)
+            self.db.add_object(port_binding)
+        self.db.commit()
+
+        # guacamole config
+        guacamole = remote
+        port_cfg = filter(lambda p:
+                          p[DOCKER_UNIT.PORTS_PORT] == guacamole[DOCKER_UNIT.REMOTE_PORT],
+                          ports)
+        if len(port_cfg) > 0:
+            gc = {
+                "displayname": container_name,
+                "name": container_name,
+                "protocol": guacamole[DOCKER_UNIT.REMOTE_PROTOCOL],
+                "hostname": host_server.public_ip,
+                "port": port_cfg[0].get("public_port"),
+                "enable-sftp": True
+            }
+
+            if DOCKER_UNIT.REMOTE_USERNAME in guacamole:
+                gc["username"] = guacamole[DOCKER_UNIT.REMOTE_USERNAME]
+            if DOCKER_UNIT.REMOTE_PASSWORD in guacamole:
+                gc["password"] = guacamole[DOCKER_UNIT.REMOTE_PASSWORD]
+            # save guacamole config into DB
+            virtual_environment.remote_paras = json.dumps(gc)
+
+        exist = self.__get_container(container_name, host_server)
+
+        container = self.db.find_first_object(
+            DockerContainer,
+            DockerContainer.name == container_name,
+            DockerContainer.host_server_id == host_server.id,
+            DockerContainer.image == image
+        )
+        if exist is not None:
+            container.container_id = exist["Id"]
+            host_server.container_count += 1
+            self.db.commit()
+        else:
+            container_config = unit.get_container_config()
+            # create container
+            try:
+                container_create_result = self.__create(host_server, container_config, container_name)
+            except Exception as e:
+                self.log.error(e)
+                self.log.error("container %s fail to create" % container_name)
+                return
+            container.container_id = container_create_result["Id"]
+            # start container
+            try:
+                self.__start(host_server, container_create_result["Id"])
+                host_server.container_count += 1
+                self.db.commit()
+            except Exception as e:
+                self.log.error(e)
+                self.log.error("container %s fail to start" % container["Id"])
+                return
+            # check
+            if self.__get_container(container_name, host_server) is None:
+                self.log.error(
+                    "container %s has started, but can not find it in containers' info, maybe it exited again."
+                    % container_name)
+                return
+
+        self.log.debug("starting container %s is ended ... " % container_name)
+        virtual_environment.status = VEStatus.RUNNING
+        experiment.status = EStatus.RUNNING
+        self.db.commit()
+        self.expr_manager.check_expr_status(virtual_environment.experiment)
+
+    # callbacks will be called here
+    def on_setup_failed(self, ctx):
+        self.log.error("azure virtual environment %d setup failed" % ctx.experiment.id)
+        self.roll_back(ctx.experiment.id)
+
+    def roll_back(self, expr_id):
+        """
+        roll back when exception occurred
+        :param expr_id: experiment id
+        """
+        self.log.debug("Starting rollback experiment %d" % expr_id)
+        expr = self.db.find_first_object_by(Experiment, id=expr_id)
+        try:
+            expr.status = EStatus.ROLL_BACKING
+            self.db.commit()
+            if expr is not None:
+                # delete containers and change expr status
+                for c in expr.virtual_environments:
+                    if c.provider == VE_PROVIDER.DOCKER and c.container:
+                        self.delete(c.name, container=c.container, expr_id=expr_id)
+                        c.status = VEStatus.DELETED
+                        self.db.commit()
+            # delete ports
+            expr.status = EStatus.ROLL_BACKED
+            self.db.commit()
+            self.log.info("Experiment %d rollback succeeded" % expr_id)
+        except Exception as e:
+            expr.status = EStatus.FAILED
+            self.db.commit()
+            self.log.info("Rollback failed")
+            self.log.error(e)
+
     def get_available_host_port(self, docker_host, private_port):
         """
         We use double operation to ensure ports not conflicted, first we get ports from host machine, but in multiple
@@ -177,138 +485,6 @@ class HostedDockerFormation(DockerFormationBase, Component):
 
         self.__stop_container(expr_id, docker_host)
 
-    def __schedule_setup(self, ctx):
-        """
-        This function is used to schedule the process of starting a container as following
-        get_available_docker_host --> start_container -->
-        :param ctx: consists the following keys
-        :return:
-        """
-        self.scheduler.add_once("docker_host_manager", "get_available_docker_host", context=ctx, seconds=0)
-
-    def start(self, unit, **kwargs):
-        """
-        In this function, we create a container and then start a container
-        :param unit: docker template unit
-        :param docker_host:
-        :return:
-        """
-        ctx = Context(
-            req_count=1,
-            user_id=kwargs["user_id"],
-            hackathon_id=kwargs["hackathon"].id,
-            container_name=unit.get_name(),
-            image=unit.get_image_with_tag(),
-            ports=unit.get_ports(),
-            remote=unit.get_remote(),
-            host_server=None,
-            unit=unit,
-            new_name=kwargs["new_name"]
-        )
-        self.__schedule_setup(ctx)
-
-    def start_container(self, ctx):
-        container_name = ctx.container_name
-        host_server = ctx.hosted_server
-        image = ctx.image
-        remote = ctx.remote
-        ports = ctx.ports
-        unit = ctx.unit
-        user_id = ctx.user_id
-        hackathon_id = ctx.hackathon_id
-        if not host_server:
-            return None
-
-        experiment = self.db.find_first_object(
-            Experiment,
-            Experiment.user_id == user_id,
-            Experiment.hackathon_id == hackathon_id,
-            Experiment.status == EStatus.STARTING
-        )
-
-        virtual_environment = self.db.find_first_object(
-            VirtualEnvironment,
-            VirtualEnvironment.experiment == experiment,
-            VirtualEnvironment.provider == VE_PROVIDER.DOCKER,
-            VirtualEnvironment.name == ctx.new_name,
-            VirtualEnvironment.image == image,
-            VirtualEnvironment.remote_provider == VERemoteProvider.Guacamole
-        )
-
-        container = DockerContainer(experiment,
-                                    name=container_name,
-                                    host_server_id=host_server.id,
-                                    virtual_environment=virtual_environment,
-                                    image=image)
-        self.db.add_object(container)
-        self.db.commit()
-
-        # port binding
-        map(lambda p:
-            [p.port_from, p.port_to],
-            self.__assign_ports(experiment, host_server, virtual_environment, unit.get_ports()))
-
-        # guacamole config
-        guacamole = remote
-        port_cfg = filter(lambda p:
-                          p[DOCKER_UNIT.PORTS_PORT] == guacamole[DOCKER_UNIT.REMOTE_PORT],
-                          ports)
-        if len(port_cfg) > 0:
-            gc = {
-                "displayname": container_name,
-                "name": container_name,
-                "protocol": guacamole[DOCKER_UNIT.REMOTE_PROTOCOL],
-                "hostname": host_server.public_ip,
-                "port": port_cfg[0].get("public_port"),
-                "enable-sftp": True
-            }
-
-            if DOCKER_UNIT.REMOTE_USERNAME in guacamole:
-                gc["username"] = guacamole[DOCKER_UNIT.REMOTE_USERNAME]
-            if DOCKER_UNIT.REMOTE_PASSWORD in guacamole:
-                gc["password"] = guacamole[DOCKER_UNIT.REMOTE_PASSWORD]
-            # save guacamole config into DB
-            virtual_environment.remote_paras = json.dumps(gc)
-
-        exist = self.__get_container(container_name, host_server)
-        if exist is not None:
-            container.container_id = exist["Id"]
-            host_server.container_count += 1
-            self.db.commit()
-        else:
-            container_config = unit.get_container_config()
-            # create container
-            try:
-                container_create_result = self.__create(host_server, container_config, container_name)
-            except Exception as e:
-                self.log.error(e)
-                self.log.error("container %s fail to create" % container_name)
-                return None
-            container.container_id = container_create_result["Id"]
-            # start container
-            try:
-                self.__start(host_server, container_create_result["Id"])
-                host_server.container_count += 1
-                self.db.commit()
-            except Exception as e:
-                self.log.error(e)
-                self.log.error("container %s fail to start" % container["Id"])
-                return None
-            # check
-            if self.__get_container(container_name, host_server) is None:
-                self.log.error(
-                    "container %s has started, but can not find it in containers' info, maybe it exited again."
-                    % container_name)
-                return None
-
-        self.log.debug("starting container %s is ended ... " % container_name)
-        virtual_environment.status = VEStatus.RUNNING
-        experiment.status = EStatus.RUNNING
-        self.db.commit()
-
-        self.expr_manager.check_expr_status(virtual_environment.experiment)
-
-        return container
 
     def get_vm_url(self, docker_host):
         return 'http://%s:%d' % (docker_host.public_dns, docker_host.public_docker_api_port)
@@ -574,7 +750,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
             map(lambda cfg: cfg.update({DOCKER_UNIT.PORTS_PUBLIC_PORT: cfg[DOCKER_UNIT.PORTS_HOST_PORT]}),
                 public_ports_cfg)
         else:
-            public_ports = self.__get_available_public_ports(expr.id, host_server, host_ports)
+            public_ports = self.__get_available_public_ports(expr.id, host_server, host_ports) #todo here
             for i in range(len(public_ports_cfg)):
                 public_ports_cfg[i][DOCKER_UNIT.PORTS_PUBLIC_PORT] = public_ports[i]
 
