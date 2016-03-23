@@ -452,22 +452,13 @@ class ExprManager(Component):
         self.db.commit()
         # start container remotely , use hosted docker or alauda docker
         docker = self.__get_docker(hackathon)
-        container_ret = docker.start(docker_template_unit,
-                                     hackathon=hackathon,
-                                     experiment=expr,
-                                     user_id=user_id,
-                                     new_name=new_name)
-
-        if container_ret is None:
-            self.log.error("container %s fail to run" % new_name)
-            #todo raise Exception("container_ret is none")
-            return
-
-        remote = json.loads(ve.remote_paras)
-        self.__docker_completed(remote)
-
-        self.log.debug("starting container %s is ended ... " % new_name)
-        return ve
+        docker.start(docker_template_unit,
+                     hackathon=hackathon,
+                     experiment=expr,
+                     user_id=user_id,
+                     new_name=new_name)
+        self.log.debug("starting container %s is starting ... " % new_name)
+        return
 
     def __check_expr_status(self, user_id, hackathon, template):
         """
@@ -600,26 +591,3 @@ class ExprManager(Component):
         else:
             self.assign_expr_to_admin(expr)
             self.log.debug("assign " + str(expr.id) + " to default admin")
-
-
-    def __docker_completed(self, remote):
-        try:
-            p = pexpect.spawn("scp -P %s %s %s@%s:/usr/local/sbin/guacctl" % (remote["port"],
-                        abspath("%s/../docker/guacctl" % dirname(realpath(__file__))), remote["username"],
-                        remote["hostname"]))
-            i = p.expect([pexpect.TIMEOUT, 'yes/no', 'password: '])
-
-            if i == 1:
-                p.sendline("yes")
-                i = p.expect([pexpect.TIMEOUT, 'password:'])
-
-            if i != 0:
-                p.sendline(remote["password"])
-                p.expect(pexpect.EOF)
-
-            p.close()
-        except Exception as e:
-            self.log.info("scp file error")
-            self.log.error(e)
-
-        return True
