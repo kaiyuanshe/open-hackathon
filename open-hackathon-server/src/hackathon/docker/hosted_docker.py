@@ -706,91 +706,12 @@ class HostedDockerFormation(DockerFormationBase, Component):
         req = requests.post(url, headers=self.application_json)
         self.log.debug(req.content)
 
-    def __get_available_public_ports(self, expr_id, host_server, host_ports):
-        self.log.debug("starting to get azure ports")
-        ep = Endpoint(Service(self.load_azure_key_id(expr_id)))
-        host_server_name = host_server.vm_name
-        host_server_dns = host_server.public_dns.split('.')[0]
-        public_endpoints = ep.assign_public_endpoints(host_server_dns, 'Production', host_server_name, host_ports) #todo async
-        if not isinstance(public_endpoints, list):
-            self.log.debug("failed to get public ports")
-            return internal_server_error('cannot get public ports')
-        self.log.debug("public ports : %s" % public_endpoints)
-        return public_endpoints
-
     def load_azure_key_id(self, expr_id):
         expr = self.db.get_object(Experiment, expr_id)
         hak = self.db.find_first_object_by(HackathonAzureKey, hackathon_id=expr.hackathon_id)
         if not hak:
             raise Exception("no azure key configured")
         return hak.azure_key_id
-
-    def __assign_ports(self, expr, host_server, ve, port_cfg):
-        """
-        assign ports from host server
-        :param expr:
-        :param host_server:
-        :param ve:
-        :param port_cfg:
-        :return:
-        """
-        # get 'host_port'
-        map(lambda p:
-            p.update(
-                {DOCKER_UNIT.PORTS_HOST_PORT: self.get_available_host_port(host_server, p[
-                    DOCKER_UNIT.PORTS_PORT])}
-            ),
-            port_cfg)
-
-        # get 'public' cfg
-        public_ports_cfg = filter(lambda p: DOCKER_UNIT.PORTS_PUBLIC in p, port_cfg)
-        host_ports = [u[DOCKER_UNIT.PORTS_HOST_PORT] for u in public_ports_cfg]
-        if self.util.safe_get_config("environment", "prod") == "local":
-            map(lambda cfg: cfg.update({DOCKER_UNIT.PORTS_PUBLIC_PORT: cfg[DOCKER_UNIT.PORTS_HOST_PORT]}),
-                public_ports_cfg)
-        else:
-            public_ports = self.__get_available_public_ports(expr.id, host_server, host_ports) #todo here
-            for i in range(len(public_ports_cfg)):
-                public_ports_cfg[i][DOCKER_UNIT.PORTS_PUBLIC_PORT] = public_ports[i]
-
-        binding_dockers = []
-
-        # update port binding
-        for public_cfg in public_ports_cfg:
-            binding_cloud_service = PortBinding(name=public_cfg[DOCKER_UNIT.PORTS_NAME],
-                                                port_from=public_cfg[DOCKER_UNIT.PORTS_PUBLIC_PORT],
-                                                port_to=public_cfg[DOCKER_UNIT.PORTS_HOST_PORT],
-                                                binding_type=PortBindingType.CLOUD_SERVICE,
-                                                binding_resource_id=host_server.id,
-                                                virtual_environment=ve,
-                                                experiment=expr,
-                                                url=public_cfg[DOCKER_UNIT.PORTS_URL]
-                                                if DOCKER_UNIT.PORTS_URL in public_cfg else None)
-            binding_docker = PortBinding(name=public_cfg[DOCKER_UNIT.PORTS_NAME],
-                                         port_from=public_cfg[DOCKER_UNIT.PORTS_HOST_PORT],
-                                         port_to=public_cfg[DOCKER_UNIT.PORTS_PORT],
-                                         binding_type=PortBindingType.DOCKER,
-                                         binding_resource_id=host_server.id,
-                                         virtual_environment=ve,
-                                         experiment=expr)
-            binding_dockers.append(binding_docker)
-            self.db.add_object(binding_cloud_service)
-            self.db.add_object(binding_docker)
-        self.db.commit()
-
-        local_ports_cfg = filter(lambda p: DOCKER_UNIT.PORTS_PUBLIC not in p, port_cfg)
-        for local_cfg in local_ports_cfg:
-            port_binding = PortBinding(name=local_cfg[DOCKER_UNIT.PORTS_NAME],
-                                       port_from=local_cfg[DOCKER_UNIT.PORTS_HOST_PORT],
-                                       port_to=local_cfg[DOCKER_UNIT.PORTS_PORT],
-                                       binding_type=PortBindingType.DOCKER,
-                                       binding_resource_id=host_server.id,
-                                       virtual_environment=ve,
-                                       experiment=expr)
-            binding_dockers.append(port_binding)
-            self.db.add_object(port_binding)
-        self.db.commit()
-        return binding_dockers
 
     def __release_ports(self, expr_id, host_server):
         """
