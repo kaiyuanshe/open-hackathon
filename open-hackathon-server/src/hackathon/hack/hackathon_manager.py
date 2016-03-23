@@ -451,6 +451,9 @@ class HackathonManager(Component):
             hackathon.update(push__organizers=organizer)
         else:
             hackathon.update(push__partners=organizer)
+
+        hackathon.update_time = self.util.get_now()
+        hackathon.save()
         return ok()
 
     def update_hackathon_organizer(self, hackathon, body):
@@ -478,6 +481,8 @@ class HackathonManager(Component):
         organizer.logo = body.get("logo", organizer.logo)
         organizer.save()
 
+        hackathon.update_time = self.util.get_now()
+        hackathon.save()
         return ok()
 
     def delete_hackathon_organizer(self, hackathon, organizer_id):
@@ -486,6 +491,8 @@ class HackathonManager(Component):
         else:
             hackathon.update(pull__partners=hackathon.partners.get(id=organizer_id))
 
+        hackathon.update_time = self.util.get_now()
+        hackathon.save()
         return ok()
 
     def create_hackathon_award(self, hackathon, body):
