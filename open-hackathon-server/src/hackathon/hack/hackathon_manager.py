@@ -28,6 +28,7 @@ import sys
 
 sys.path.append("..")
 import imghdr
+import uuid
 from datetime import timedelta
 
 from werkzeug.exceptions import PreconditionFailed, InternalServerError, BadRequest
@@ -37,10 +38,12 @@ from lxml.html.clean import Cleaner
 from mongoengine import Q
 from mongoengine.context_managers import no_dereference
 
-from hackathon.hmongo.models import Hackathon, UserHackathon, DockerHostServer, User, HackathonNotice, HackathonStat
+from hackathon.hmongo.models import Hackathon, UserHackathon, DockerHostServer, User, HackathonNotice, HackathonStat, \
+    Organization
 from hackathon.hackathon_response import internal_server_error, ok, not_found, forbidden
 from hackathon.constants import HACKATHON_BASIC_INFO, HACK_USER_TYPE, HACK_STATUS, HACK_USER_STATUS, HTTP_HEADER, \
-    FILE_TYPE, HACK_TYPE, HACKATHON_STAT, DockerHostServerStatus, HACK_NOTICE_CATEGORY, HACK_NOTICE_EVENT
+    FILE_TYPE, HACK_TYPE, HACKATHON_STAT, DockerHostServerStatus, HACK_NOTICE_CATEGORY, HACK_NOTICE_EVENT, \
+    ORGANIZATION_TYPE
 from hackathon import RequiredFeature, Component, Context
 
 docker_host_manager = RequiredFeature("docker_host_manager")
@@ -439,35 +442,50 @@ class HackathonManager(Component):
         return not_found()
 
     def create_hackathon_organizer(self, hackathon, body):
-        organizer = HackathonOrganizer(hackathon_id=hackathon.id,
-                                       name=body["name"],
-                                       organization_type=body.get("organization_type"),
-                                       description=body.get("description"),
-                                       homepage=body.get("homepage"),
-                                       logo=body.get("logo"),
-                                       create_time=self.util.get_now())
-        self.db.add_object(organizer)
-        return organizer.dic()
+        organizer = Organization(id=uuid.uuid4(),
+                                 name=body["name"],
+                                 description=body["description"],
+                                 homepage=body["homepage"],
+                                 logo=body["logo"])
+        if int(body["organization_type"]) == ORGANIZATION_TYPE.ORGANIZER:
+            hackathon.update(push__organizers=organizer)
+        else:
+            hackathon.update(push__partners=organizer)
+        return ok()
 
     def update_hackathon_organizer(self, hackathon, body):
-        organizer = self.db.get_object(HackathonOrganizer, body["id"])
+        previous_organization_type = ORGANIZATION_TYPE.ORGANIZER if \
+            hackathon.organizers.filter(id=body["id"]) else ORGANIZATION_TYPE.PARTNER
+
+        organizer = hackathon.organizers.get(id=body["id"]) if \
+            previous_organization_type == ORGANIZATION_TYPE.ORGANIZER else \
+            hackathon.partners.get(id=body["id"])
+
         if not organizer:
             return not_found()
-        if organizer.hackathon_id != hackathon.id:
-            return forbidden()
+
+        if not previous_organization_type == body.get("organization_type", previous_organization_type):
+            if previous_organization_type == ORGANIZATION_TYPE.ORGANIZER:
+                hackathon.update(pull__organizers=organizer)
+                hackathon.update(push__partners=organizer)
+            else:
+                hackathon.update(pull__partners=organizer)
+                hackathon.update(push__organizers=organizer)
 
         organizer.name = body.get("name", organizer.name)
-        organizer.organization_type = body.get("organization_type", organizer.organization_type)
         organizer.description = body.get("description", organizer.description)
         organizer.homepage = body.get("homepage", organizer.homepage)
         organizer.logo = body.get("logo", organizer.logo)
-        organizer.update_time = self.util.get_now()
-        self.db.commit()
+        organizer.save()
 
-        return organizer.dic()
+        return ok()
 
     def delete_hackathon_organizer(self, hackathon, organizer_id):
-        self.db.delete_all_objects_by(HackathonOrganizer, id=organizer_id, hackathon_id=hackathon.id)
+        if hackathon.organizers.filter(id=organizer_id):
+            hackathon.update(pull__organizers=hackathon.organizers.get(id=organizer_id))
+        else:
+            hackathon.update(pull__partners=hackathon.partners.get(id=organizer_id))
+
         return ok()
 
     def create_hackathon_award(self, hackathon, body):
