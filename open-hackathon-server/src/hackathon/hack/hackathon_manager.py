@@ -638,7 +638,6 @@ class HackathonManager(Component):
         hackathon_notice.delete()
         return ok()
 
-
     def get_hackathon_notice_list(self, body):
         """
         list hackathon notices, notices are paginated, can be filtered by hackathon_name, event and category,
@@ -708,7 +707,6 @@ class HackathonManager(Component):
 
         # return serializable items as well as total count
         return self.util.paginate(pagination, func)
-
 
     def schedule_pre_allocate_expr_job(self):
         """Add an interval schedule job to check all hackathons"""
@@ -780,10 +778,10 @@ class HackathonManager(Component):
             # like = self.db.find_first_object_by(HackathonLike, user_id=user.id, hackathon_id=hackathon.id)
             # if like:
             #     detail["like"] = like.dic()
-            #
-            # register = self.register_manager.get_registration_by_user_and_hackathon(user.id, hackathon.id)
-            # if register:
-            #     detail["registration"] = register.dic()
+
+            register = self.register_manager.get_registration_by_user_and_hackathon(user.id, hackathon.id)
+            if register:
+                detail["registration"] = register.dic()
             #
             # team_rel = self.db.find_first_object_by(UserTeamRel, user_id=user.id, hackathon_id=hackathon.id)
             # if team_rel:

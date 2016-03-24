@@ -107,7 +107,7 @@
                                     {% endif %}
                                     <p>活动已结束。</p>
                                 {% elif registration != None %}
-                                    {% if registration.status == 1 or (hackathon.config.auto_approve =='1' and registration.status == 3) %}
+                                    {% if registration.status == 1 or (hackathon.config.auto_approve and registration.status == 3) %}
                                         {% if experiment == None %}
                                             <a class="btn btn-primary btn-lg"
                                                href="{{ url_for('temp_settings',hackathon_name=hackathon_name) }}">立即参加</a>
