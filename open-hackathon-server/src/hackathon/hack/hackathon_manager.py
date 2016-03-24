@@ -32,12 +32,14 @@ from datetime import timedelta
 
 from werkzeug.exceptions import PreconditionFailed, InternalServerError, BadRequest
 from flask import g, request
+import uuid
 import lxml
 from lxml.html.clean import Cleaner
 from mongoengine import Q
 from mongoengine.context_managers import no_dereference
 
-from hackathon.hmongo.models import Hackathon, UserHackathon, DockerHostServer, User, HackathonNotice, HackathonStat
+from hackathon.hmongo.models import Hackathon, UserHackathon, DockerHostServer, User, HackathonNotice, HackathonStat,\
+    Award, to_dic
 from hackathon.hackathon_response import internal_server_error, ok, not_found, forbidden
 from hackathon.constants import HACKATHON_BASIC_INFO, HACK_USER_TYPE, HACK_STATUS, HACK_USER_STATUS, HTTP_HEADER, \
     FILE_TYPE, HACK_TYPE, HACKATHON_STAT, DockerHostServerStatus, HACK_NOTICE_CATEGORY, HACK_NOTICE_EVENT
@@ -475,22 +477,30 @@ class HackathonManager(Component):
         if level > 10:
             level = 10
 
-        award = Award(hackathon_id=hackathon.id,
-                      name=body.name,
-                      level=level,
-                      quota=body.quota,
-                      award_url=body.get("award_url"),
-                      description=body.get("description"))
-        self.db.add_object(award)
-        return award.dic()
+        award = Award(
+            id=uuid.uuid1(),
+            name=body.name,
+            level=level,
+            quota=body.quota,
+            award_url=body.get("award_url"),
+            description=body.get("description"))
+
+        hackathon.awards.append(award)
+        hackathon.save()
+
+        return to_dic(award)
 
     def update_hackathon_award(self, hackathon, body):
-        award = self.db.get_object(Award, body.id)
+        award_id = body.id
+        award = None
+
+        for _award in hackathon.awards:
+            if str(_award.id) == award_id:
+                award = _award
+                break
+
         if not award:
             return not_found("award not found")
-
-        if award.hackathon.name != hackathon.name:
-            return forbidden()
 
         level = award.level
         if body.get("level"):
@@ -505,16 +515,21 @@ class HackathonManager(Component):
         award.description = body.get("description", award.description)
         award.update_time = self.util.get_now()
 
-        self.db.commit()
-        return award.dic()
+        hackathon.save()
+
+        return to_dic(award)
 
     def delete_hackathon_award(self, hackathon, award_id):
-        self.db.delete_all_objects_by(Award, hackathon_id=hackathon.id, id=award_id)
+        for i in xrange(0, len(hackathon.awards)):
+            if str(hackathon.awards[i].id) == award_id:
+                hackathon.awards.pop(i)
+                hackathon.save()
+                break
+
         return ok()
 
     def list_hackathon_awards(self, hackathon):
-        awards = hackathon.award_contents.order_by(Award.level.desc()).all()
-        return [a.dic() for a in awards]
+        return [to_dic(a) for a in sorted(hackathon.awards, lambda a, b: b.level - a.level)]
 
     def get_hackathon_notice(self, notice_id):
         hackathon_notice = HackathonNotice.objects(id=notice_id).first()
@@ -612,7 +627,6 @@ class HackathonManager(Component):
 
         hackathon_notice.delete()
         return ok()
-
 
     def get_hackathon_notice_list(self, body):
         """
