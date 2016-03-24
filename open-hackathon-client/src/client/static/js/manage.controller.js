@@ -186,6 +186,19 @@ angular.module('oh.controllers', [])
   .controller('usersController', function($rootScope, $scope, activityService, api) {
     $scope.$emit('pageName', 'SETTINGS.USERS');
 
+    var activity = activityService.getCurrentActivity();
+
+    $scope.data = {
+      registerUsers: []  // we cannot use activity.registration here, its single
+    };
+
+    $scope.refresh = function() {
+      api.admin.registration.list.get({
+
+      }, function() {
+
+      });
+    };
   })
   .controller('adminController', function($rootScope, $scope, activityService, api) {
     $scope.$emit('pageName', 'SETTINGS.ADMINISTRATORS');

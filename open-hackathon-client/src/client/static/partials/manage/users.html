@@ -1,2 +1,35 @@
-<h1>useasdasdasdfsdfdsfsfswr</h1>
-<button class="btn btn-info">info</button>
+<div class="col-lg-12">
+      <div class="box">
+          <div class="box-header">
+              <h2>
+                  <i class="fa fa-home"></i>
+                  用户管理
+              </h2>
+          </div>
+          <div class="box-content">
+              <div class="row">
+                  <div class="col-lg-6">
+                      <a href="/edit/register">添加</a>
+                  </div>
+              </div>
+              <table class="table table-bordered">
+                  <thead>
+                  <tr>
+                      <th>注册名</th>
+                      <th>邮箱</th>
+                      <th>登录方式</th>
+                      <th>联系电话</th>
+                      <th>联系地址</th>
+                      <th>报名时间</th>
+                      <th>状态</th>
+                      <th>操作</th>
+                  </tr>
+                  </thead>
+                  <tbody id="registe_list">
+                      <td ng-repeat="user in data.registerUsers">
+                      </td>
+                  </tbody>
+              </table>
+          </div>
+      </div>
+</div>
