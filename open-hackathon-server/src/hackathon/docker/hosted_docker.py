@@ -221,13 +221,14 @@ class HostedDockerFormation(DockerFormationBase, Component):
                 self.on_wait_for_network_config(ctx)
         except Exception as e:
             self.log.error("Failed to config endpoint on the cloud service: %r" % str(e))
-            self.expr_manager.roll_back(experiment.id)
+            self.scheduler.add_once(ctx.on_failed[0], ctx.on_failed[1], ctx.experiment.id, seconds=0)
 
     def on_wait_for_network_config(self, ctx):
         experiment = ctx.experiment
+        on_failed = ctx.on_failed
         if ctx.count > ctx.loop:
             self.log.error('Timed out waiting for async operation to complete.')
-            self.expr_manager.roll_back(experiment.id)
+            self.scheduler.add_once(on_failed[0], on_failed[1], ctx.experiment.id, seconds=0)
             return
         try:
             service = CloudServiceAdapter(self.load_azure_key_id(experiment.id))
@@ -238,13 +239,14 @@ class HostedDockerFormation(DockerFormationBase, Component):
             service.check_network_config(ctx)
         except Exception as e:
             self.log.error("Failed to config endpoint on the cloud service: %r" % str(e))
-            self.expr_manager.roll_back(experiment.id)
+            self.scheduler.add_once(on_failed[0], on_failed[1], ctx.experiment.id, seconds=0)
 
     def on_wait_for_virtual_machine(self, ctx):
+        on_failed = ctx.on_failed
         if ctx.count > ctx.loop:
             self.log.error('Timed out waiting for async operation to complete.')
             self.log.error('%s [%s] not ready' % (AZURE_RESOURCE_TYPE.VIRTUAL_MACHINE, ctx.new_name))
-            self.expr_manager.roll_back(ctx.experiment.id)
+            self.scheduler.add_once(on_failed[0], on_failed[1], ctx.experiment.id, seconds=0)
             return
         try:
             host_server = ctx.hosted_server
@@ -260,7 +262,7 @@ class HostedDockerFormation(DockerFormationBase, Component):
             service.check_virtual_machine(cloud_service_name, deployment_slot, ctx)
         except Exception as e:
             self.log.error("Failed to config endpoint on the cloud service: %r" % str(e))
-            self.expr_manager.roll_back(experiment.id)
+            self.scheduler.add_once(on_failed[0], on_failed[1], ctx.experiment.id, seconds=0)
 
     def start_container(self, ctx):
         # update port binding, start container and configure guacamole

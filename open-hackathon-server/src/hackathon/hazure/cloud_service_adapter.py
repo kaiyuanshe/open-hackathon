@@ -195,7 +195,7 @@ class CloudServiceAdapter(ServiceAdapter):
         on_continue = ctx.on_continue
         if ctx.count > ctx.loop:
             self.log.error('Timed out waiting for async operation to complete.')
-            self.scheduler.add_once(on_failed[0], on_failed[1], ctx, seconds=0)
+            self.scheduler.add_once(on_failed[0], on_failed[1], ctx.expriment.id, seconds=0)
             return
 
         try:
