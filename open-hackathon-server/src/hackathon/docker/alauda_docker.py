@@ -31,7 +31,7 @@ from datetime import datetime, timedelta
 
 from docker_formation_base import DockerFormationBase
 from hackathon.constants import HEALTH_STATUS, VE_PROVIDER, VEStatus, EStatus, HEALTH, OAUTH_PROVIDER
-from hackathon.database import VirtualEnvironment
+# from hackathon.database import VirtualEnvironment
 from hackathon.hackathon_exception import AlaudaException
 from hackathon.template import DOCKER_UNIT
 from hackathon import Component, Context, RequiredFeature

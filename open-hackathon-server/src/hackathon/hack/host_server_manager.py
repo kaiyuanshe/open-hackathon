@@ -36,7 +36,7 @@ from azure.servicemanagement import (ConfigurationSet, ConfigurationSetInputEndp
                                      LinuxConfigurationSet, ServiceManagementService)
 
 from hackathon import Component, RequiredFeature, Context
-from hackathon.database.models import DockerHostServer, HackathonAzureKey, Hackathon, HackathonConfig, AzureKey
+# from hackathon.database.models import DockerHostServer, HackathonAzureKey, Hackathon, HackathonConfig, AzureKey
 from hackathon.constants import (AzureApiExceptionMessage, DockerPingResult, AVMStatus, AzureVMPowerState,
                                  DockerHostServerStatus, DockerHostServerDisable, AzureVMStartMethod,
                                  ServiceDeploymentSlot, AzureVMSize, AzureVMEndpointName, TCPProtocol,

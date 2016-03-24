@@ -29,7 +29,7 @@ __all__ = ["AzureFormation"]
 import json
 
 from hackathon import Component, Context, RequiredFeature
-from hackathon.database import VirtualEnvironment, Experiment
+# from hackathon.database import VirtualEnvironment, Experiment
 from hackathon.constants import (
     ADStatus, AVMStatus, VEStatus, EStatus)
 

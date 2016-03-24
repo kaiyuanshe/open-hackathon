@@ -40,9 +40,9 @@ from hackathon.azureformation.utility import (
     run_job,
 )
 
-from hackathon.database.models import (
-    AzureKey,
-)
+# from hackathon.database.models import (
+#     AzureKey,
+# )
 from azure.servicemanagement import (
     ServiceManagementService,
     Deployment,
