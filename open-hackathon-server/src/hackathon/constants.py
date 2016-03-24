@@ -319,7 +319,7 @@ class FILE_TYPE:
     AZURE_CERT = "azure_cert"
 
 
-class TeamMemberStatus:
+class TEAM_MEMBER_STATUS:
     """Status of member of team
 
     Attributes:
@@ -327,9 +327,9 @@ class TeamMemberStatus:
         Approved: member approved by team leader or system administrator
         Denied: member denied by team leader or system administrator. Member of this status won't be saved in DB
     """
-    Init = 0
-    Approved = 1
-    Denied = 2
+    INIT = 0
+    APPROVED = 1
+    DENIED = 2
 
 
 class DockerHostServerStatus:
@@ -491,16 +491,16 @@ class AzureVMEnpointConfigType:
     NETWORK = 'NetworkConfiguration'
 
 
-class Team_Show_Type:
+class TEAM_SHOW_TYPE:
     """Type of resource to be shown. """
-    Image = 0  # image
-    Video = 1  # e.g. Youku link
-    SourceCode = 2  # e.g. github
-    PowerPoint = 3  # ppt
-    Excel = 4  # excel
-    Word = 5  # word
-    Pdf = 6  # pdf
-    Other = 99  # other
+    IMAGE = 0  # image
+    VIDEO = 1  # e.g. Youku link
+    SOURCE_CODE = 2  # e.g. github
+    POWER_POINT = 3  # ppt
+    EXCEL = 4  # excel
+    WORD = 5  # word
+    PDF = 6  # pdf
+    OTHER = 99  # other
 
 
 class LOGIN_PROVIDER:
