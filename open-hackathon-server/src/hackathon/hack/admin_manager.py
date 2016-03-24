@@ -75,20 +75,21 @@ class AdminManager(Component):
         if not user.is_super:
             user_filter = Q(user=user, role=HACK_USER_TYPE.ADMIN)
 
-        admin_user_hackathon_simple = UserHackathon.objects(user_filter).only(
-            'hackathon.name',
-            'hackathon.display_name',
-            'hackathon.ribbon',
-            'hackathon.short_description',
-            'hackathon.location',
-            'hackathon.banners',
-            'hackathon.status',
-            'hackathon.creator',
-            'hackathon.type',
-            'hackathon.event_start_time',
-            'hackathon.event_end_time').order_by('-hackathon.event_start_time')
+        hids = [uh.hackathon.id for uh in UserHackathon.objects(user_filter).no_dereference().only("hackathon")]
+        hack_list = Hackathon.objects(id__in=hids).only(
+            'name',
+            'display_name',
+            'ribbon',
+            'short_description',
+            'location',
+            'banners',
+            'status',
+            'creator',
+            'type',
+            'event_start_time',
+            'event_end_time').order_by("-event_end_time")
 
-        all_hackathon = [h.dic() for h in admin_user_hackathon_simple]
+        all_hackathon = [h.dic() for h in hack_list]
         return all_hackathon
 
     def get_admins_by_hackathon(self, hackathon):

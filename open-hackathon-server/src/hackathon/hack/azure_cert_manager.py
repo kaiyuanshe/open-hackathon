@@ -31,10 +31,10 @@ from os.path import dirname, realpath, abspath, isfile
 import commands
 
 from hackathon.hazure.cloud_service_adapter import CloudServiceAdapter
-from hackathon.hmongo.models import Hackathon, User, AzureKey
+from hackathon.hmongo.models import Hackathon, AzureKey
 
 from hackathon import RequiredFeature, Component, Context
-from hackathon.hackathon_response import not_found, ok
+from hackathon.hackathon_response import ok
 from hackathon.constants import FILE_TYPE
 
 __all__ = ["AzureCertManager"]
@@ -201,8 +201,6 @@ class AzureCertManager(Component):
 
         return ok(True)
 
-
-
     def check_sub_id(self, subscription_id):
         if self.util.is_local():
             return ok(True)
@@ -214,8 +212,8 @@ class AzureCertManager(Component):
 
         try:
             sms = CloudServiceAdapter(azure_key.subscription_id,
-                                     azure_key.get_local_pem_url(),
-                                     host=azure_key.management_host)
+                                      azure_key.get_local_pem_url(),
+                                      host=azure_key.management_host)
             sms.list_hosted_services()
         except Exception as e:
 
