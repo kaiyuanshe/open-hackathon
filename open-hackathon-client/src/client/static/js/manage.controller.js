@@ -131,6 +131,11 @@ angular.module('oh.controllers', [])
     activity.config.max_enrollment = parseInt(activity.config.max_enrollment, 10) || 0;
 
     $scope.modules = activity;
+    $scope.tags = [];
+    $scope.activityFormDisabled = false;
+    angular.forEach($scope.modules.tags, function(value, key) {
+      $scope.tags.push({text: value});
+    });
 
     $scope.provider = {
       windows: $filter('isProvider')(activity.config.login_provider, 1),
@@ -161,42 +166,24 @@ angular.module('oh.controllers', [])
 
     //update basic information
     $scope.updateBasicInformation = function() {
-      var basicInformation = {};
-      basicInformation.display_name = $scope.modules.display_name;
-      basicInformation.location = $scope.modules.location;
-      basicInformation.event_start_time = $scope.modules.event_start_time;
-      basicInformation.event_end_time = $scope.modules.event_end_time;
-      basicInformation.registration_start_time = $scope.modules.registration_start_time;
-      basicInformation.registration_end_time = $scope.modules.registration_end_time;
-      basicInformation.judge_start_time = $scope.modules.judge_start_time;
-      basicInformation.judge_end_time = $scope.modules.judge_end_time;
-      basicInformation.ribbon = $scope.modules.ribbon;
-      basicInformation.short_description = $scope.modules.short_description;
+      $scope.modules.tags = [];
+      angular.forEach($scope.tags, function(value, key) {
+        $scope.modules.tags.push(value.text);
+      });
 
+      $scope.activityFormDisabled = true;
       api.admin.hackathon.put({
         header: {
           hackathon_name: $scope.modules.name
         },
-        body: basicInformation
-      }).then(function(data) {
+        body: $scope.modules
+      }, function(data) {
         if (data.error) {
           $scope.showTip(level='tip-danger', content=data.error.friendly_message);
         } else {
-          api.admin.hackathon.config.put({
-            header: {
-              hackathon_name: $scope.modules.name
-            },
-            body: {
-              max_enrollment: $scope.modules.config.max_enrollment
-            }
-          }, function(data) {
-            if (data.error) {
-              $scope.showTip(level='tip-danger', content=data.error.friendly_message);
-            } else {
-              $scope.showTip(level='tip-success', content='更新成功');
-            }
-          });
+          $scope.showTip(level='tip-success', content='更新成功');
         }
+        $scope.activityFormDisabled = false;
       });
     };
 
