@@ -68,8 +68,8 @@ class DockerHostManager(Component):
 
     def get_available_docker_host(self, ctx):
         on_success = ctx.on_success
-        on_continue = ["docker_host_manager", "get_available_docker_host"]
-        if self.__check_available_docker_host(on_continue, ctx.on_failed, ctx):
+        ctx.on_continue = ["docker_host_manager", "get_available_docker_host"]
+        if self.__check_available_docker_host(ctx.on_continue, ctx.on_failed, ctx):
             self.scheduler.add_once(on_success[0], on_success[1], ctx, seconds=0)
 
     def __check_available_docker_host(self, on_continue, on_failed, ctx):
