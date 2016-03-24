@@ -35,7 +35,7 @@ from hackathon.constants import (
     VERemoteProvider,
 )
 
-from hackathon.database.models import (
+from hackathon.hmongo.models import (
     VirtualEnvironment,
 )
 import json

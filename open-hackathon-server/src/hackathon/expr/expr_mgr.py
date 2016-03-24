@@ -40,9 +40,8 @@ from sqlalchemy import and_
 from hackathon import Component, RequiredFeature, Context
 from hackathon.constants import EStatus, VERemoteProvider, VE_PROVIDER, PortBindingType, VEStatus, ReservedUser, \
     AVMStatus, CLOUD_ECLIPSE, HACK_NOTICE_EVENT, HACK_NOTICE_CATEGORY
-from hackathon.database import VirtualEnvironment, DockerHostServer, Experiment, User, HackathonTemplateRel, \
+from hackathon.hmongo.models import VirtualEnvironment, DockerHostServer, Experiment, User, \
     DockerContainer, AzureKey, Template
-from hackathon.azureformation.azureFormation import AzureFormation
 from hackathon.hackathon_response import internal_server_error, not_found, ok
 
 __all__ = ["ExprManager"]
@@ -339,7 +338,8 @@ class ExprManager(Component):
         # after everything is ready, set the expr state to running
         # response to caller
 
-        self.hackathon_manager.create_hackathon_notice(hackathon.id, HACK_NOTICE_EVENT.EXPR_JOIN, HACK_NOTICE_CATEGORY.EXPERIMENT, {'user_id': user_id})
+        self.hackathon_manager.create_hackathon_notice(hackathon.id, HACK_NOTICE_EVENT.EXPR_JOIN,
+                                                       HACK_NOTICE_CATEGORY.EXPERIMENT, {'user_id': user_id})
         return self.__report_expr_status(expr)
 
     def __report_expr_status(self, expr):
@@ -469,8 +469,10 @@ class ExprManager(Component):
         remote = json.loads(ve.remote_paras)
         try:
             p = pexpect.spawn("scp -P %s %s %s@%s:/usr/local/sbin/guacctl" % (remote["port"],
-                        abspath("%s/../docker/guacctl" % dirname(realpath(__file__))), remote["username"],
-                        remote["hostname"]))
+                                                                              abspath("%s/../docker/guacctl" % dirname(
+                                                                                  realpath(__file__))),
+                                                                              remote["username"],
+                                                                              remote["hostname"]))
             i = p.expect([pexpect.TIMEOUT, 'yes/no', 'password: '])
 
             if i == 1:

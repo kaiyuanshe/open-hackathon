@@ -38,15 +38,15 @@ from azure.servicemanagement import (ConfigurationSet, ConfigurationSetInputEndp
                                      LinuxConfigurationSet, ServiceManagementService)
 
 from hackathon import Component, RequiredFeature, Context
-from hackathon.database.models import DockerHostServer, HackathonAzureKey, Hackathon
+from hackathon.hmongo.models import DockerHostServer, Hackathon
 from hackathon.constants import (AzureApiExceptionMessage, DockerPingResult, AVMStatus, AzureVMPowerState,
                                  DockerHostServerStatus, DockerHostServerDisable, AzureVMStartMethod,
                                  ServiceDeploymentSlot, AzureVMSize, AzureVMEndpointName, TCPProtocol,
                                  AzureVMEndpointDefaultPort, AzureVMEnpointConfigType, AzureOperationStatus, EStatus)
 from hackathon.hackathon_response import ok, not_found, precondition_failed
 
-
 __all__ = ["DockerHostManager"]
+
 
 class DockerHostManager(Component):
     """Component to manage docker host server"""
@@ -109,7 +109,7 @@ class DockerHostManager(Component):
         try:
             service = CloudServiceAdapter(azure_key_id)
             for docker_host in vms:
-               if self.hosted_docker.ping(docker_host):
+                if self.hosted_docker.ping(docker_host):
                     service_name = docker_host.public_dns.split(".")[0]
                     if service.is_cloud_service_locked(service_name) is False:
                         ctx.hosted_server = docker_host
@@ -122,7 +122,8 @@ class DockerHostManager(Component):
             ctx.count += 1
             self.scheduler.add_once(on_continue[0], on_continue[1], ctx, seconds=10)
         except Exception as e:
-            self.log.error("Fail to get an available docker host for experiment %d, exceptions: %r" % (experiment.id, str(e)))
+            self.log.error(
+                "Fail to get an available docker host for experiment %d, exceptions: %r" % (experiment.id, str(e)))
             self.scheduler.add_once(on_faild[0], on_faild[1], ctx.experiment.id, seconds=0)
             return False
         return False
@@ -463,7 +464,6 @@ class DockerHostManager(Component):
             return False
 
         return True
-
 
     def __get_sms_object(self, hackathon_id):
         """

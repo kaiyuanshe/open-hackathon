@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 from hackathon.constants import AZURE_RESOURCE_TYPE, AVMStatus
-from hackathon.database import AzureKey
+from hackathon.hmongo.models import AzureKey
 from hackathon.hazure.utils import find_unassigned_endpoints, add_endpoint_to_network_config
 from hackathon.hazure.virtual_machine_adapter import VirtualMachineAdapter
 from hackathon.template import DOCKER_UNIT
