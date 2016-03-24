@@ -122,7 +122,7 @@ class TeamManager(Component):
         if name is not None:
             query &= Q(name=name)
 
-        teams = Team.objects(Q)[:number]
+        teams = Team.objects(query)[:number]
 
         # check whether it's anonymous user or not
         user = None
@@ -457,7 +457,7 @@ class TeamManager(Component):
             query &= Q(works__type=show_type)
         # show_list = TeamShow.query.filter(criterion).order_by(TeamShow.create_time.desc()).limit(limit)
         works = []
-        for team in Team.objects(Q):
+        for team in Team.objects(query):
             works.append(team.works)
 
         works.sort(lambda a, b: b.create_time - a.create_time)
