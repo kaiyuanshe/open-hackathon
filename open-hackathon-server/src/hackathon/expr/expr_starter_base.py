@@ -22,3 +22,49 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
+
+import sys
+
+sys.path.append("..")
+
+import abc
+
+from hackathon import Component
+
+__all__ = ["ExprStarter"]
+
+
+class ExprStarter(Component):
+    """Base for experiment starter"""
+
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
+    def start_expr(self, context):
+        """To start a new Experiment asynchronously
+
+        :type context: Context
+        :param context: the execution context.
+
+        """
+        pass
+
+    @abc.abstractmethod
+    def stop_expr(self, context):
+        """Stop experiment asynchronously
+
+        :type context: Context
+        :param context: the execution context.
+
+        """
+        pass
+
+    @abc.abstractmethod
+    def rollback(self, context):
+        """cancel/rollback a expr which is in error state
+
+        :type context: Context
+        :param context: the execution context.
+
+        """
+        pass

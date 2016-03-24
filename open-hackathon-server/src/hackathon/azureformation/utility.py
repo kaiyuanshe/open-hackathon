@@ -27,6 +27,7 @@ __author__ = 'Yifu Huang'
 import sys
 
 sys.path.append("..")
+<<<<<<< HEAD
 # from hackathon.database import (
 #     db_adapter,
 # )
@@ -41,6 +42,9 @@ sys.path.append("..")
 #     Template,
 #     Experiment,
 # )
+=======
+
+>>>>>>> junbo/master
 from hackathon.util import (
     load_template,
     call,

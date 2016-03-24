@@ -122,13 +122,20 @@ angular.module('oh.controllers', [])
 
     $scope.animationsEnabled = true;
 
-    activity.banners = activity.banners;
     activity.event_start_time = new Date(activity.event_start_time);
     activity.event_end_time = new Date(activity.event_end_time);
     activity.registration_start_time = new Date(activity.registration_start_time);
     activity.registration_end_time = new Date(activity.registration_end_time);
     activity.judge_start_time = new Date(activity.judge_start_time);
     activity.judge_end_time = new Date(activity.judge_end_time);
+    activity.config.max_enrollment = parseInt(activity.config.max_enrollment, 10) || 0;
+
+    $scope.modules = activity;
+    $scope.tags = [];
+    $scope.activityFormDisabled = false;
+    angular.forEach($scope.modules.tags, function(value, key) {
+      $scope.tags.push({text: value});
+    });
 
     $scope.provider = {
       windows: $filter('isProvider')(activity.config.login_provider, 1),
@@ -139,8 +146,6 @@ angular.module('oh.controllers', [])
       gitcafe: $filter('isProvider')(activity.config.login_provider, 16),
     };
 
-    activity.config.max_enrollment = parseInt(activity.config.max_enrollment, 10) || 0;
-
     $scope.open = {
       event_start_time: false,
       event_end_time: false,
@@ -149,25 +154,91 @@ angular.module('oh.controllers', [])
       judge_start_time: false,
       judge_end_time: false
     };
+    
 
-    $scope.modules = activity;
+    $scope.showTip = function(level, content, showTime) {
+      $scope.$emit('showTip', {
+        level: level,
+        content: content,
+        showTime: showTime || 3000
+      });
+    };
+
+    //update basic information
+    $scope.updateBasicInformation = function() {
+      $scope.modules.tags = [];
+      angular.forEach($scope.tags, function(value, key) {
+        $scope.modules.tags.push(value.text);
+      });
+
+      $scope.activityFormDisabled = true;
+      api.admin.hackathon.put({
+        header: {
+          hackathon_name: $scope.modules.name
+        },
+        body: $scope.modules
+      }, function(data) {
+        if (data.error) {
+          $scope.showTip(level='tip-danger', content=data.error.friendly_message);
+        } else {
+          $scope.showTip(level='tip-success', content='更新成功');
+        }
+        $scope.activityFormDisabled = false;
+      });
+    };
 
     $scope.delBanner = function(index) {
       $scope.modules.banners.splice(index, 1);
-    }
+      api.admin.hackathon.put({
+        header: {
+          hackathon_name: $scope.modules.name
+        },
+        body: {
+          banners: $scope.modules.banners
+        }
+      }, function(data) {
+        if (data.error) {
+          $scope.showTip(level='tip-danger', content=data.error.friendly_message);
+        } else {
+          $scope.showTip(level='tip-success', content='删除成功');
+        }
+      });
+    };
 
     $scope.showAddBannerDialog = function() {
       $scope.modules.banners.push('http://image5.tuku.cn/pic/wallpaper/fengjing/shanshuilantian/014.jpg');
-    }
-
-    $scope.showTip = function() {
-      $scope.$emit('showTip', {
-        level: 'tip-success',
-        content: '保存成功'
+      api.admin.hackathon.put({
+        header: {
+          hackathon_name: $scope.modules.name
+        },
+        body: {
+          banners: $scope.modules.banners
+        }
+      }, function(data) {
+        if (data.error) {
+          $scope.showTip(level='tip-danger', content=data.error.friendly_message);
+        } else {
+          $scope.showTip(level='tip-success', content='添加成功');
+        }
       });
-    }
+    };
 
-
+    $scope.updateDescription = function() {
+      api.admin.hackathon.put({
+        header: {
+          hackathon_name: $scope.modules.name
+        },
+        body: {
+          description: $scope.modules.description
+        }
+      }, function(data) {
+        if (data.error) {
+          $scope.showTip(level='tip-danger', content=data.error.friendly_message);
+        } else {
+          $scope.showTip(level='tip-success', content='保存成功');
+        }
+      });
+    };
 
     $scope.providerChange = function(checked, value) {
       if (checked) {
@@ -175,12 +246,22 @@ angular.module('oh.controllers', [])
       } else {
         $scope.modules.config.login_provider = ((+$scope.modules.config.login_provider) || 0) ^ value;
       }
-      $scope.$emit('showTip', {
-        level: 'tip-success',
-        showTime: Math.random() * 10000,
-        content: '登录方式修改成功'
+
+      api.admin.hackathon.config.put({
+        header: {
+          hackathon_name: $scope.modules.name
+        },
+        body: {
+          login_provider: $scope.modules.config.login_provider
+        }
+      }).then(function(data) {
+        if (data.error) {
+          $scope.showTip(level='tip-danger', content=data.error.friendly_message);
+        } else {
+          $scope.showTip(level='tip-success', content='登录方式修改成功');
+        }
       });
-    }
+    };
 
   })
   .controller('usersController', function($rootScope, $scope, activityService, api) {
@@ -558,7 +639,7 @@ angular.module('oh.controllers', [])
       }).then(function(data) {
         console.log(data);
         if (data.message) {
-          updataActivityStatus(0).then(function(data) {
+          updataActivityStatus(1).then(function(data) {
             if (data.error) {
               $scope.$emit('showTip', {
                 level: 'tip-danger',

@@ -34,7 +34,6 @@ from mongoengine import Q
 
 from hackathon import Component, RequiredFeature
 from hackathon.hmongo.models import Team, TeamMember
-# from hackathon.database import UserTeamRel, User, Hackathon, TeamScore, TeamShow, Award, TeamAward
 from hackathon.hackathon_response import not_found, bad_request, precondition_failed, ok, forbidden
 from hackathon.constants import TeamMemberStatus, Team_Show_Type
 
