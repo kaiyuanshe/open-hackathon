@@ -303,7 +303,7 @@ class ExprManager(Component):
             except Exception as e:
                 self.log.error(e)
                 self.log.error("Failed starting containers")
-                self.__roll_back(expr.id)
+                self.roll_back(expr.id)
                 return internal_server_error('Failed starting containers')
         else:
             expr.status = EStatus.STARTING
@@ -452,12 +452,39 @@ class ExprManager(Component):
         self.db.commit()
         # start container remotely , use hosted docker or alauda docker
         docker = self.__get_docker(hackathon)
-        docker.start(docker_template_unit,
-                     hackathon=hackathon,
-                     experiment=expr,
-                     user_id=user_id,
-                     new_name=new_name)
-        self.log.debug("starting container %s is starting ... " % new_name)
+        container_ret = docker.start(docker_template_unit,
+                                     hackathon=hackathon,
+                                     experiment=expr,
+                                     user_id=user_id,
+                                     new_name=new_name)
+
+        self.log.debug("starting container %s is ended ... " % new_name)
+        return ve
+
+    def on_docker_completed(self, ve):
+        """
+        This function should be invoked after container is started in alauda_docker.py and hosted_docker.py
+        :param ve: virtual environment
+        """
+        remote = json.loads(ve.remote_paras)
+        try:
+            p = pexpect.spawn("scp -P %s %s %s@%s:/usr/local/sbin/guacctl" % (remote["port"],
+                        abspath("%s/../docker/guacctl" % dirname(realpath(__file__))), remote["username"],
+                        remote["hostname"]))
+            i = p.expect([pexpect.TIMEOUT, 'yes/no', 'password: '])
+
+            if i == 1:
+                p.sendline("yes")
+                i = p.expect([pexpect.TIMEOUT, 'password:'])
+
+            if i != 0:
+                p.sendline(remote["password"])
+                p.expect(pexpect.EOF)
+
+            p.close()
+        except Exception as e:
+            self.log.info("scp file error")
+            self.log.error(e)
         return
 
     def __check_expr_status(self, user_id, hackathon, template):
@@ -490,12 +517,12 @@ class ExprManager(Component):
             self.log.debug("experiment had been assigned, check experiment and start new job ... ")
             return expr
 
-    def __roll_back(self, expr_id):
+    def roll_back(self, expr_id):
         """
         roll back when exception occurred
         :param expr_id: experiment id
         """
-        self.log.debug("Starting rollback ...")
+        self.log.debug("Starting rollback experiment %d..." % expr_id)
         expr = self.db.find_first_object_by(Experiment, id=expr_id)
         try:
             expr.status = EStatus.ROLL_BACKING

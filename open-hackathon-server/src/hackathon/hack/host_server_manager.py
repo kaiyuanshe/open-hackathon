@@ -22,6 +22,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
+from hackathon.hazure.cloud_service_adapter import CloudServiceAdapter
+
 __author__ = 'ZGQ'
 
 import sys
@@ -54,11 +56,12 @@ class DockerHostManager(Component):
     """Component to manage docker host server"""
     hosted_docker = RequiredFeature("hosted_docker")
     sche = RequiredFeature("scheduler")
+    expr_manager = RequiredFeature("expr_manager")
 
     def get_docker_hosts_list(self, hackathon_id):
         """
         Get all host servers of a hackathon
-        :param hackathon_id: the id of this hackathon
+        :param hackathon_id: the id of this hackathon, on_success callback function
         :type hackathon_id: integer
 
         :return: a list of all docker hosts
@@ -68,6 +71,11 @@ class DockerHostManager(Component):
         return [host_server.dic() for host_server in host_servers]
 
     def get_available_docker_host(self, ctx):
+        on_success = ctx.on_success
+        if self.check_available_docker_host(ctx):
+            self.scheduler.add_once(on_success[0], on_success[1], ctx, seconds=0)
+
+    def check_available_docker_host(self, ctx):
         """
         Get available docker host from DB
         If there is no qualified host, then create one
@@ -84,14 +92,13 @@ class DockerHostManager(Component):
                                        DockerHostServer.hackathon_id == hackathon_id,
                                        DockerHostServer.state == DockerHostServerStatus.DOCKER_READY,
                                        DockerHostServer.disabled == DockerHostServerDisable.ABLE)
-        self.db.commit()
         if self.util.is_local():
             if len(vms) > 0:
                 self.hosted_docker.config_network(ctx)
                 return
             self.log.error("No available local virtual machines for docker!")
-            self.hosted_docker.on_setup_failed(ctx)
-            return
+            self.expr_manager.roll_back(experiment.id)
+            return False
         # todo connect to azure to launch new VM if no existed VM meet the requirement
         # since it takes some time to launch VM,
         # it's more reasonable to launch VM when the existed ones are almost used up.
@@ -99,33 +106,28 @@ class DockerHostManager(Component):
         # todo the VM public/private IP will change after reboot, need sync the IP in db with azure in this case
         if ctx.count > ctx.loop:
             self.log.error("Timeout for getting an available docker host")
-            self.hosted_docker.on_setup_failed(ctx)
-            return
-        service = Service(azure_key_id=azure_key_id)
+            self.expr_manager.roll_back(experiment.id)
+            return False
         try:
+            service = CloudServiceAdapter(azure_key_id)
             for docker_host in vms:
                if self.hosted_docker.ping(docker_host):
                     service_name = docker_host.public_dns.split(".")[0]
-                    deployments = service.get_hosted_service_properties(service_name, detail=True).deployments
-                    available = True
-                    for deployment in deployments:
-                        if deployment.locked:
-                            available = False
-                            break;
-                    if available:
+                    if service.is_cloud_service_locked(service_name) is False:
                         ctx.hosted_server = docker_host
-                        self.hosted_docker.config_network(ctx)
-                        return
+                        return True
             if len(vms) == 0:
                 self.create_docker_host_vm(hackathon_id)
                 self.scheduler.add_once("docker_host_manager", "get_available_docker_host", ctx, seconds=60)
-                return
+                return False
             self.log.debug('async [%s] loop count [%d] for get available docker host' % (ctx.request_id, ctx.count))
             ctx.count += 1
             self.scheduler.add_once("docker_host_manager", "get_available_docker_host", ctx, seconds=10)
         except Exception as e:
             self.log.error("Fail to get an available docker host for experiment %d, exceptions: %r" % (experiment.id, str(e)))
-            self.hosted_docker.on_setup_failed(ctx)
+            self.expr_manager.roll_back(experiment.id)
+            return False
+        return False
 
     def get_host_server_by_id(self, id_):
         """

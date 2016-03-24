@@ -26,6 +26,8 @@
 
 import sys
 
+from hackathon.hazure.cloud_service_adapter import CloudServiceAdapter
+
 sys.path.append("..")
 
 from hackathon import (
@@ -142,6 +144,9 @@ class HostedDockerFormation(DockerFormationBase, Component):
             public_endpoints=None,
             public_ports_cfg=None,
             experiment=kwargs["experiment"],
+            on_success=["", ""],
+            on_continue=["", ""],
+            on_failed=["expr_manager", "roll_back"]
         )
         self.__schedule_setup(ctx)
 
@@ -153,6 +158,9 @@ class HostedDockerFormation(DockerFormationBase, Component):
         :param ctx: consists the following keys
         :return:
         """
+        on_success = ctx.on_success
+        on_success[0] = "hosted_docker"
+        on_success[1] = "config_network"
         self.docker_host_manager.get_available_docker_host(ctx)
 
     def config_network(self, ctx):
@@ -195,85 +203,64 @@ class HostedDockerFormation(DockerFormationBase, Component):
                     public_ports_cfg)
             else:
                 self.log.debug("starting to get azure ports")
-                ep = Endpoint(Service(self.load_azure_key_id(experiment.id)))
+                service = CloudServiceAdapter(self.load_azure_key_id(experiment.id))
                 host_server_name = host_server.vm_name
                 host_server_dns = host_server.public_dns.split('.')[0]
-
-                public_endports, result = ep.assign_public_endpoints(host_server_dns, 'Production', host_server_name, host_ports)
+                public_endports, result = service.assgin_public_endpoints(host_server_dns, 'Production', host_server_name, host_ports)
+                if not isinstance(public_endports, list):
+                    self.log.debug("failed to get public ports")
+                    self.expr_manager.roll_back(experiment.id)
+                self.log.debug("public ports : %s" % public_endports)
+                for i in range(len(public_ports_cfg)):
+                    public_ports_cfg[i][DOCKER_UNIT.PORTS_PUBLIC_PORT] = public_endports[i]
                 ctx.request_id = result.request_id
                 ctx.count = 0
                 ctx.loop = 20
                 ctx.public_endpoints = public_endports
                 ctx.public_ports_cfg = public_ports_cfg
-                self.wait_for_network_config(ctx)
+                self.on_wait_for_network_config(ctx)
         except Exception as e:
             self.log.error("Failed to config endpoint on the cloud service: %r" % str(e))
-            self.on_setup_failed(ctx)
+            self.expr_manager.roll_back(experiment.id)
 
-    def wait_for_network_config(self, ctx):
+    def on_wait_for_network_config(self, ctx):
+        experiment = ctx.experiment
         if ctx.count > ctx.loop:
             self.log.error('Timed out waiting for async operation to complete.')
-            self.on_setup_failed(ctx)
+            self.expr_manager.roll_back(experiment.id)
             return
-
-        experiment = ctx.experiment
         try:
-            ep = Endpoint(Service(self.load_azure_key_id(experiment.id)))
-            result = ep.service.get_operation_status(ctx.request_id)
-            if result.status == ep.service.IN_PROGRESS:
-                self.log.debug('wait for async [%s] loop count [%d]' % (ctx.request_id, ctx.count))
-                ctx.count += 1
-                self.scheduler.add_once("hosted_docker", "wait_for_network_config", ctx, seconds=10)
-                return
-            if result.status != ep.service.SUCCEEDED:
-                self.log.error(vars(result))
-                if result.error:
-                   self.log.error(result.error.code)
-                   self.log.error(vars(result.error))
-                self.log.error('Asynchronous operation did not succeed.')
-                self.on_setup_failed(ctx)
-                return
-            ctx.count = 0
-            ctx.loop = 20
-            self.wait_for_virtual_machine(ctx)
+            service = CloudServiceAdapter(self.load_azure_key_id(experiment.id))
+            ctx.on_continue[0] = "hosted_docker"
+            ctx.on_continue[1] = "on_wait_for_network_config"
+            ctx.on_success[0] = "hosted_docker"
+            ctx.on_success[1] = "on_wait_for_virtual_machine"
+            service.check_network_config(ctx)
         except Exception as e:
             self.log.error("Failed to config endpoint on the cloud service: %r" % str(e))
-            self.on_setup_failed(ctx)
+            self.expr_manager.roll_back(experiment.id)
 
-    def wait_for_virtual_machine(self, ctx):
+    def on_wait_for_virtual_machine(self, ctx):
         if ctx.count > ctx.loop:
             self.log.error('Timed out waiting for async operation to complete.')
             self.log.error('%s [%s] not ready' % (AZURE_RESOURCE_TYPE.VIRTUAL_MACHINE, ctx.new_name))
-            self.on_setup_failed(ctx)
+            self.expr_manager.roll_back(ctx.experiment.id)
             return
-
         try:
-            public_endpoints = ctx.public_endpoints
-            public_ports_cfg = ctx.public_ports_cfg
             host_server = ctx.hosted_server
             cloud_service_name = host_server.public_dns.split('.')[0]
             experiment = ctx.experiment
 
-            ep = Endpoint(Service(self.load_azure_key_id(experiment.id)))
+            service = CloudServiceAdapter(self.load_azure_key_id(experiment.id))
             deployment_slot = 'Production'
-            deployment_name = ep.service.get_deployment_name(cloud_service_name, deployment_slot)
-            props = ep.service.get_deployment_by_name(cloud_service_name, deployment_name)
-            if ep.service.get_virtual_machine_instance_status(props, ctx.hosted_server.vm_name) != AVMStatus.READY_ROLE:
-                self.log.debug('wait for virtual machine [%r] loop count [%d]' % (ctx.new_name, ctx.count))
-                ctx.count += 1
-                self.scheduler.add_once("hosted_docker", "wait_for_virtual_machine", ctx, seconds=10)
-                return
-            if not isinstance(public_endpoints, list):
-                self.log.debug("failed to get public ports")
-                self.on_setup_failed(ctx)
-                return
-            self.log.debug("public ports : %s" % public_endpoints)
-            for i in range(len(public_ports_cfg)):
-                public_ports_cfg[i][DOCKER_UNIT.PORTS_PUBLIC_PORT] = public_endpoints[i]
-            self.start_container(ctx)
+            ctx.on_continue[0] = "hosted_docker"
+            ctx.on_continue[1] = "on_wait_for_virtual_machine"
+            ctx.on_success[0] = "hosted_docker"
+            ctx.on_success[1] = "start_container"
+            service.check_virtual_machine(cloud_service_name, deployment_slot, ctx)
         except Exception as e:
-            self.log.error("Failed to creat virtual machine on the cloud service: %r" % str(e))
-            self.on_setup_failed(ctx)
+            self.log.error("Failed to config endpoint on the cloud service: %r" % str(e))
+            self.expr_manager.roll_back(experiment.id)
 
     def start_container(self, ctx):
         # update port binding, start container and configure guacamole
@@ -393,41 +380,9 @@ class HostedDockerFormation(DockerFormationBase, Component):
 
         self.log.debug("starting container %s is ended ... " % container_name)
         virtual_environment.status = VEStatus.RUNNING
-        experiment.status = EStatus.RUNNING
         self.db.commit()
+        self.expr_manager.on_docker_completed(virtual_environment)
         self.expr_manager.check_expr_status(virtual_environment.experiment)
-
-    # callbacks will be called here
-    def on_setup_failed(self, ctx):
-        self.log.error("azure virtual environment %d setup failed" % ctx.experiment.id)
-        self.roll_back(ctx.experiment.id)
-
-    def roll_back(self, expr_id):
-        """
-        roll back when exception occurred
-        :param expr_id: experiment id
-        """
-        self.log.debug("Starting rollback experiment %d" % expr_id)
-        expr = self.db.find_first_object_by(Experiment, id=expr_id)
-        try:
-            expr.status = EStatus.ROLL_BACKING
-            self.db.commit()
-            if expr is not None:
-                # delete containers and change expr status
-                for c in expr.virtual_environments:
-                    if c.provider == VE_PROVIDER.DOCKER and c.container:
-                        self.delete(c.name, container=c.container, expr_id=expr_id)
-                        c.status = VEStatus.DELETED
-                        self.db.commit()
-            # delete ports
-            expr.status = EStatus.ROLL_BACKED
-            self.db.commit()
-            self.log.info("Experiment %d rollback succeeded" % expr_id)
-        except Exception as e:
-            expr.status = EStatus.FAILED
-            self.db.commit()
-            self.log.info("Rollback failed")
-            self.log.error(e)
 
     def get_available_host_port(self, docker_host, private_port):
         """
