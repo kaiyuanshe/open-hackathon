@@ -25,6 +25,12 @@ THE SOFTWARE.
 
 from log import log
 
+
+class HTTP_CODE:
+    CREATE_NOT_FINISHED = 412101
+    AZURE_KEY_NOT_READY = 412102
+
+
 __all__ = [
     "bad_request",
     "unauthorized",
@@ -35,6 +41,7 @@ __all__ = [
     "unsupported_mediatype",
     "internal_server_error",
     "ok",
+    "HTTP_CODE",
 ]
 
 

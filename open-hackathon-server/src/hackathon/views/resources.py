@@ -497,7 +497,7 @@ class HackathonCheckNameResource(HackathonResource):
 class AdminHackathonListResource(HackathonResource):
     @token_required
     def get(self):
-        return hackathon_manager.get_entitled_hackathon_simple_list(g.user)
+        return admin_manager.get_entitled_hackathons_list(g.user)
 
 
 class AdminAzureResource(HackathonResource):
