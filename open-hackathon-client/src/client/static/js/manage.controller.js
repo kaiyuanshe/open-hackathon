@@ -221,12 +221,13 @@ angular.module('oh.controllers', [])
   .controller('createController', function($scope, $timeout, $filter, $cookies, $state, $stateParams, FileUploader, dialog, api) {
     var request;
     console.log($stateParams.name);
-    $scope.wizard = 1;
+    $scope.wizard = 2;
     $scope.isShowAdvancedSettings = true;
 
     $scope.activityFormDisabled = false;
 
     $scope.activity = {
+      name:'aaaaa',
       location: '',
       tags: [],
       config: {
@@ -325,14 +326,7 @@ angular.module('oh.controllers', [])
 
     /*------------------------------------------------------*/
     $scope.notUseCloud = function() {
-      api.admin.hackathon.put({
-        header: {
-          hackathon_name: $scope.activity.name
-        },
-        body: {
-          status: 0
-        }
-      }).then(function(data) {
+      updataActivityStatus(0).then(function(data) {
         if (data.error) {
           $scope.$emit('showTip', {
             level: 'tip-danger',
@@ -379,9 +373,14 @@ angular.module('oh.controllers', [])
 
     /*------------------------------------------------------*/
     $scope.azureFormDisabled = false;
+    $scope.azuse_download_cer = false;
     $scope.azure = {
       management_host: 'management.core.chinacloudapi.cn',
     };
+
+    $scope.azureNext = function(){
+       $scope.wizard = 3;
+    }
 
     $scope.azureFormSubmit = function() {
       $scope.azureFormDisabled = true;
@@ -390,16 +389,35 @@ angular.module('oh.controllers', [])
         header: {
           hackathon_name: $scope.activity.name
         }
-      }).then(function(data) {
-        if (data.error) {
+      }).then(function(azure_key) {
+        if (azure_key.error) {
           $scope.$emit('showTip', {
             level: 'tip-danger',
-            content: data.error.friendly_message
+            content: azure_key.error.friendly_message
           });
-          $scope.azureFormDisabled = false;
         } else {
-          $scope.wizard = 3;
+          api.admin.azure.checksubid.post({
+            body: {
+              subscription_id:$scope.azure.subscription_id
+            },
+            header: {
+              hackathon_name: $scope.activity.name
+            }
+          }).then(function(data){
+            if(!data.message){
+               $scope.$emit('showTip', {
+                level: 'tip-warning',
+                content: '证书授权失败，请检验SUBSCRIPTION ID是否正确。'
+              });
+            }
+          })
+
+          var cert_url = azure_key.cert_url;
+          window.location.href = cert_url;
+          $scope.azuse_download_cer = true;
+          $scope.azurecer = cert_url;
         }
+        $scope.azureFormDisabled = false;
       });
     };
     /*------------------------------------------------------*/
@@ -418,36 +436,14 @@ angular.module('oh.controllers', [])
         return /js|json|txt$/i.test(item.name);
       }
     });
+
     uploader.onWhenAddingFileFailed = function(item, filter, options) {
       $scope.$emit('showTip', {
         level: 'tip-warning',
         content: '模板文件必须是txt、js、json后缀名'
       });
     };
-    uploader.onAfterAddingFile = function(fileItem) {
-      //console.info('onAfterAddingFile', fileItem);
-    };
-    uploader.onAfterAddingAll = function(addedFileItems) {
-      //console.info('onAfterAddingAll', addedFileItems);
-    };
-    uploader.onBeforeUploadItem = function(item) {
-      //console.info('onBeforeUploadItem', item);
-    };
-    uploader.onProgressItem = function(fileItem, progress) {
-      //console.info('onProgressItem', fileItem, progress);
-    };
-    uploader.onProgressAll = function(progress) {
-      //console.info('onProgressAll', progress);
-    };
-    uploader.onSuccessItem = function(fileItem, response, status, headers) {
-      //console.info('onSuccessItem', fileItem, response, status, headers);
-    };
-    uploader.onErrorItem = function(fileItem, response, status, headers) {
-      //console.info('onErrorItem', fileItem, response, status, headers);
-    };
-    uploader.onCancelItem = function(fileItem, response, status, headers) {
-      //console.info('onCancelItem', fileItem, response, status, headers);
-    };
+
     uploader.onCompleteItem = function(fileItem, data) {
       if (data.error) {
         $scope.$emit('showTip', {
@@ -460,11 +456,10 @@ angular.module('oh.controllers', [])
         });
       }
     };
+
     uploader.onCompleteAll = function() {
       $scope.file = '';
     };
-
-    //console.info('uploader', uploader);
 
     $scope.oneAtATime = true;
     $scope.templates = [];
@@ -509,7 +504,6 @@ angular.module('oh.controllers', [])
         } else {
           $scope.templates = data;
         }
-
       })
     }
 
@@ -526,6 +520,7 @@ angular.module('oh.controllers', [])
     $scope.templateSubmit = function() {
       if ($scope.templates.length > 0) {
         $scope.wizard = 4;
+        updataActivityStatus(0);
       } else {
         $scope.$emit('showTip', {
           level: 'tip-danger',
@@ -551,31 +546,29 @@ angular.module('oh.controllers', [])
     $scope.onlineDisabled = false;
     $scope.online = function() {
       $scope.onlineDisabled = true;
-      api.admin.hackathon.canonline.get({
+      api.admin.hackathon.online.post({
         header: {
           hackathon_name: $scope.activity.name
         }
       }).then(function(data) {
-        console.log(data);
-        if (data.message) {
-          updataActivityStatus(0).then(function(data) {
-            if (data.error) {
-              $scope.$emit('showTip', {
-                level: 'tip-danger',
-                content: data.error.friendly_message
-              });
-              $scope.onlineDisabled = false;
-            } else {
-              $state.go('manage.edit', {
-                name: $scope.activity.name
-              });
+        $scope.onlineDisabled = false;
+          if (data.error) {
+            var message = ''
+            if(data.error.code ==412101){
+              message ='当前黑客松没有还未创建成功。'
+            } else if(data.error.code ==412102) {
+              message ='证书授权失败，请检验SUBSCRIPTION ID是否正确。'
+            }else {
+              message = data.error.friendly_message
             }
-          });
+            $scope.$emit('showTip', {
+              level: 'tip-danger',
+              content: message
+            });
         } else {
-          $scope.onlineDisabled = false;
           $scope.$emit('showTip', {
-            level: 'tip-danger',
-            content: '证书授权失败，请检验SUBSCRIPTION ID是否正确。'
+            level: 'tip-success',
+            content: '上线成功'
           });
         }
       })
