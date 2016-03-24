@@ -77,6 +77,7 @@ def ping_connection(connection, branch):
 
 
 db_session = scoped_session(sessionmaker(autocommit=False,
+                                         expire_on_commit=False,
                                          autoflush=True,
                                          bind=engine))
 Base = declarative_base()
