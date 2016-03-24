@@ -24,10 +24,10 @@
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
 
-try:
-    from hackathon.hmongo.models import User
-except ImportError:
-    pass
+# try:
+from hackathon.hmongo.models import User
+# except ImportError:
+#     pass
 
 
 def setup_db():

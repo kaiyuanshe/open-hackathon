@@ -516,6 +516,13 @@ class AdminAzureResource(HackathonResource):
         return azure_cert_manager.delete_certificate(ctx.certificate_id, g.hackathon)
 
 
+class AdminAzureCheckSubIdResource(HackathonResource):
+    @admin_privilege_required
+    def post(self):
+        ctx = self.context()
+        return azure_cert_manager.check_sub_id(ctx.subscription_id)
+
+
 class AdminRegisterListResource(HackathonResource):
     @admin_privilege_required
     def get(self):
@@ -710,10 +717,10 @@ class AdminHostserverResource(HackathonResource):
         return docker_host_manager.delete_host_server(self.context().id)
 
 
-class AdminHackathonCanOnLineResource(HackathonResource):
+class AdminHackathonOnLineResource(HackathonResource):
     @admin_privilege_required
-    def get(self):
-        return hackathon_manager.check_hackathon_online(g.hackathon)
+    def post(self):
+        return hackathon_manager.hackathon_online(g.hackathon)
 
 
 class AdminHackathonNoticeResource(HackathonResource):
