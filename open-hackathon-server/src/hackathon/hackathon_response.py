@@ -53,6 +53,14 @@ def __response_with_code(code, message, friendly_message=""):
     }
 
 
+def general_error(code,
+                  message="",
+                  friendly_message=(
+                          'An unexpected error encountered'
+                  )):
+    return __response_with_code(code, message, friendly_message)
+
+
 def bad_request(message="",
                 friendly_message=(
                         'The browser (or proxy) sent a request that this server could '
@@ -110,9 +118,9 @@ def unsupported_mediatype(message="",
 
 
 def login_provider_error(message="",
-                          friendly_message=(
-                                  'Current hackathon must be logged in to use a specific way.'
-                          ), provides=""):
+                         friendly_message=(
+                                 'Current hackathon must be logged in to use a specific way.'
+                         ), provides=""):
     return {
         "error": {
             "code": 420,
@@ -132,10 +140,9 @@ def internal_server_error(message="",
     return __response_with_code(500, message, friendly_message)
 
 
-
-
 def ok(message=""):
     return {
         "code": 200,
         "message": message
     }
+

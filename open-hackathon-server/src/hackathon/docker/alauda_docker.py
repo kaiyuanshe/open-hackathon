@@ -31,7 +31,7 @@ from datetime import datetime, timedelta
 
 from docker_formation_base import DockerFormationBase
 from hackathon.constants import HEALTH_STATUS, VE_PROVIDER, VEStatus, EStatus, HEALTH, OAUTH_PROVIDER
-from hackathon.database import VirtualEnvironment
+from hackathon.hmongo.models import VirtualEnvironment
 from hackathon.hackathon_exception import AlaudaException
 from hackathon.template import DOCKER_UNIT
 from hackathon import Component, Context, RequiredFeature
@@ -68,7 +68,8 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
         context = Context(guacamole=unit.get_remote(),
                           service_name=service_name,
                           user_id=user.id,
-                          virtual_environment_id=virtual_environment.id)
+                          virtual_environment_id=virtual_environment.id,
+                          ve_remote_paras=virtual_environment.remote_paras)
         self.__service_result_handler(service, context)
         return service
 
@@ -165,7 +166,7 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
             # save guacamole config into DB
             ve.remote_paras = json.dumps(gc)
         self.db.commit()
-
+        self.expr_manager.on_docker_completed(ve)
         # update experiment status
         self.expr_manager.check_expr_status(ve.experiment)
 

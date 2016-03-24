@@ -40,10 +40,10 @@ from mongoengine.context_managers import no_dereference
 
 from hackathon.hmongo.models import Hackathon, UserHackathon, DockerHostServer, User, HackathonNotice, HackathonStat, \
     Organization
-from hackathon.hackathon_response import internal_server_error, ok, not_found, forbidden
+from hackathon.hackathon_response import internal_server_error, ok, not_found, forbidden, general_error
 from hackathon.constants import HACKATHON_BASIC_INFO, HACK_USER_TYPE, HACK_STATUS, HACK_USER_STATUS, HTTP_HEADER, \
     FILE_TYPE, HACK_TYPE, HACKATHON_STAT, DockerHostServerStatus, HACK_NOTICE_CATEGORY, HACK_NOTICE_EVENT, \
-    ORGANIZATION_TYPE
+    ORGANIZATION_TYPE, CLOUD_PROVIDE
 from hackathon import RequiredFeature, Component, Context
 
 docker_host_manager = RequiredFeature("docker_host_manager")
@@ -194,7 +194,6 @@ class HackathonManager(Component):
         """Get basic property of hackathon from HackathonConfig"""
         if hackathon.config:
             return hackathon.config.get(key, default)
-
         return default
 
     def get_all_properties(self, hackathon):
@@ -289,20 +288,23 @@ class HackathonManager(Component):
             update_items = self.__parse_update_items(args, hackathon)
             self.log.debug("update hackathon items :" + str(args.keys()))
 
-            if update_items:
-                if 'status' in update_items and int(update_items['status']) == HACK_STATUS.ONLINE:
-                    self.create_hackathon_notice(hackathon.id, HACK_NOTICE_EVENT.HACK_ONLINE,
+            if 'config' in update_items:
+                self.set_basic_property(hackathon, update_items.get('config', {}))
+                update_items.pop('config', None)
+
+            if 'status' in update_items and int(update_items['status']) == HACK_STATUS.ONLINE:
+                self.create_hackathon_notice(hackathon.id, HACK_NOTICE_EVENT.HACK_ONLINE,
                                                  HACK_NOTICE_CATEGORY.HACKATHON)  # hackathon online
-                else:
-                    pass  # other hackathon properties changes
 
             # basic xss prevention
             if 'description' in update_items and update_items['description']:
                 update_items['description'] = self.cleaner.clean_html(update_items['description'])
                 self.log.debug("hackathon description :" + update_items['description'])
 
+            hackathon.modify(**update_items)
             hackathon.save()
-            return hackathon.dic()
+
+            return ok()
         except Exception as e:
             self.log.error(e)
             return internal_server_error("fail to update hackathon")
@@ -749,16 +751,30 @@ class HackathonManager(Component):
                 self.scheduler.remove_job(job_id)
         return True
 
-    def check_hackathon_online(self, hackathon):
-        alauda_enabled = is_alauda_enabled(hackathon)
-        can_online = True
-        if alauda_enabled == "0":
-            if self.util.is_local():
-                can_online = True
-            else:
-                can_online = docker_host_manager.check_subscription_id(hackathon.id)
 
-        return ok(can_online)
+    def hackathon_online(self, hackathon):
+        req = ok()
+
+        if hackathon.status == HACK_STATUS.DRAFT:
+            if self.util.is_local() or hackathon.config.cloud_provide == CLOUD_PROVIDE.NONE:
+                req = ok()
+            elif hackathon.config.cloud_provide == CLOUD_PROVIDE.AZURE:
+                is_success = docker_host_manager.check_subscription_id(hackathon.id)
+                if not is_success:
+                    req =general_error(code=412102) #azure sub id is invalide
+
+        elif hackathon.status == HACK_STATUS.ONLINE:
+            req = ok()
+        else:
+            req = general_error(code=412101)
+
+        if req.get('error') is None:
+            hackathon.status = HACK_STATUS.ONLINE
+            hackathon.save()
+
+        return req
+
+
 
     # TODO: we need to review those commented items one by one to decide the API output
     def __get_hackathon_detail(self, hackathon, user=None):
@@ -871,8 +887,8 @@ class HackathonManager(Component):
     def __parse_update_items(self, args, hackathon):
         """Parse properties that need to update
 
-        Only those whose value changed items will be returned. Also some static property like id, create_time should
-        NOT be updated.
+        Only those whose value changed items will be returned. Also some static property like id, name, create_time 
+        and unexisted properties should NOT be updated.
 
         :type args: dict
         :param args: arguments from http body which contains new values
@@ -885,13 +901,15 @@ class HackathonManager(Component):
         """
         result = {}
 
+        hackathon_dic = hackathon.dic()
         for key in dict(args):
-            if dict(args)[key] != hackathon.dic()[key]:
+            if hackathon_dic.has_key(key) and dict(args)[key] != hackathon_dic[key]:
                 result[key] = dict(args)[key]
 
         result.pop('id', None)
+        result.pop('name', None)
+        result.pop('creator', None)
         result.pop('create_time', None)
-        result.pop('creator_id', None)
         result['update_time'] = self.util.get_now()
         return result
 

@@ -28,11 +28,11 @@ import sys
 
 sys.path.append("..")
 
-from sqlalchemy import create_engine, exc, event, select
-from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
+# from sqlalchemy import create_engine, exc, event, select
+# from sqlalchemy.orm import scoped_session, sessionmaker
+# from sqlalchemy.ext.declarative import declarative_base
 # noinspection PyUnresolvedReferences
-from flask.ext.sqlalchemy import BaseQuery
+# from flask.ext.sqlalchemy import BaseQuery
 
 from db_adapters import SQLAlchemyAdapter
 from hackathon.util import safe_get_config
@@ -40,15 +40,16 @@ from hackathon.util import safe_get_config
 MYSQL_CONNECTION = 'mysql.connection'
 DEFAULT_CONNECTION_URL = 'mysql://root:root@localhost/hackathon'
 
-engine = create_engine(safe_get_config(MYSQL_CONNECTION, DEFAULT_CONNECTION_URL),
-                       convert_unicode=True,
-                       pool_size=50,
-                       pool_recycle=3600,
-                       max_overflow=100,
-                       echo=False)
+engine = {}
+# create_engine(safe_get_config(MYSQL_CONNECTION, DEFAULT_CONNECTION_URL),
+#                        convert_unicode=True,
+#                        pool_size=50,
+#                        pool_recycle=3600,
+#                        max_overflow=100,
+#                        echo=False)
 
 
-@event.listens_for(engine, "engine_connect")
+# @event.listens_for(engine, "engine_connect")
 def ping_connection(connection, branch):
     if branch:
         # "branch" refers to a sub-connection of a connection,
