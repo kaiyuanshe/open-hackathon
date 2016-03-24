@@ -458,7 +458,7 @@ class TeamManager(Component):
         # show_list = TeamShow.query.filter(criterion).order_by(TeamShow.create_time.desc()).limit(limit)
         works = []
         for team in Team.objects(query):
-            works.append(team.works)
+            works += team.works
 
         works.sort(lambda a, b: b.create_time - a.create_time)
         works = works[:limit]
@@ -561,7 +561,7 @@ class TeamManager(Component):
         resp["is_frozen"] = team.hackathon.judge_start_time < self.util.get_now()
 
         if user:
-            resp["is_admin"] = self.admin_manager.is_hackathon_admin(team.hackathon_id, user.id)
+            resp["is_admin"] = self.admin_manager.is_hackathon_admin(team.hackathon.id, user.id)
             resp["is_leader"] = team.leader.id == user.id
             resp["is_member"] = any([mem.user.id == user.id for mem in team.members])
         else:
