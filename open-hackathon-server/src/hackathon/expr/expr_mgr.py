@@ -452,11 +452,11 @@ class ExprManager(Component):
         self.db.commit()
         # start container remotely , use hosted docker or alauda docker
         docker = self.__get_docker(hackathon)
-        container_ret = docker.start(docker_template_unit,
-                                     hackathon=hackathon,
-                                     experiment=expr,
-                                     user_id=user_id,
-                                     new_name=new_name)
+        docker.start(docker_template_unit,
+                     hackathon=hackathon,
+                     experiment=expr,
+                     user_id=user_id,
+                     new_name=new_name)
 
         self.log.debug("starting container %s is ended ... " % new_name)
         return ve
