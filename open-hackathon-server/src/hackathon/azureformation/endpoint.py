@@ -84,18 +84,7 @@ class Endpoint(Component):
         except Exception as e:
             self.log.error(e)
             return self.ERROR_RESULT
-        if not self.service.wait_for_async(result.request_id, self.TICK, self.LOOP):
-            self.log.error('wait for async fail')
-            return self.ERROR_RESULT
-        if not self.service.wait_for_virtual_machine(cloud_service_name,
-                                                     deployment_name,
-                                                     virtual_machine_name,
-                                                     self.TICK,
-                                                     self.LOOP,
-                                                     AVMStatus.READY_ROLE):
-            self.log.error('%s [%s] not ready' % (AZURE_RESOURCE_TYPE.VIRTUAL_MACHINE, virtual_machine_name))
-            return self.ERROR_RESULT
-        return public_endpoints
+        return public_endpoints, result
 
     def release_public_endpoints(self, cloud_service_name, deployment_slot, virtual_machine_name, private_endpoints):
         """
