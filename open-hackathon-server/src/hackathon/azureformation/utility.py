@@ -27,24 +27,7 @@ __author__ = 'Yifu Huang'
 import sys
 
 sys.path.append("..")
-<<<<<<< HEAD
-# from hackathon.database import (
-#     db_adapter,
-# )
-# from hackathon.database.models import (
-#     AzureLog,
-#     AzureStorageAccount,
-#     AzureCloudService,
-#     AzureDeployment,
-#     AzureVirtualMachine,
-#     AzureEndpoint,
-#     VirtualEnvironment,
-#     Template,
-#     Experiment,
-# )
-=======
 
->>>>>>> junbo/master
 from hackathon.util import (
     load_template,
     call,
