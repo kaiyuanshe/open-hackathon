@@ -130,22 +130,22 @@ class AzureHealthCheck(HealthCheck):
     """Check the status of azure to make sure config is right and azure is available"""
 
     def report_health(self):
-        azure_keys = AzureKey.objects()
-        if not azure_keys:
+        azure_key = AzureKey.objects().first()
+        if not azure_key:
             return {
                 STATUS: HEALTH_STATUS.WARNING,
                 DESCRIPTION: "No Azure key found"
             }
-        for azure_key in azure_keys:
-            azure = Service(azure_key.id)
-            if azure.ping():
-                return {
-                    STATUS: HEALTH_STATUS.OK,
-                    "type": "Azure Storage"
-                }
-        return {
-            STATUS: HEALTH_STATUS.ERROR
-        }
+        azure = Service(azure_key.id)
+        if azure.ping():
+            return {
+                STATUS: HEALTH_STATUS.OK,
+                "type": "Azure Storage"
+            }
+        else:
+            return {
+                STATUS: HEALTH_STATUS.ERROR
+            }
 
 
 class StorageHealthCheck(HealthCheck):
