@@ -86,7 +86,7 @@
                                 </dd>
                                 <dt>限额：</dt>
                                 <dd>
-                                    {{ hackathon.config.max_enrollment == 0 and  '无限' or hackathon.config.max_enrollment ~ '人' }}
+                                    {{ not hackathon.config.max_enrollment and  '无限' or hackathon.config.max_enrollment ~ '人' }}
                                     <span class="grey-text">（<span>{{ hackathon.stat.register or 0 }}</span>人已报名）</span>
                                 </dd>
                                 <dt>主办方：</dt>
