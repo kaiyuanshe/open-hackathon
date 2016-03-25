@@ -86,6 +86,4 @@ angular.module('manageView', [
       event.stopPropagation();
     });
 
-  
-
   });

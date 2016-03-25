@@ -77,10 +77,6 @@ class HackathonTemplateManager(Component):
         # self.db.delete_object(htr)
         return self.get_templates_with_detail_by_hackathon(g.hackathon)
 
-    def get_templates_by_hackathon_id(self, hackathon_id):
-        """Get all templates used by certain hackathon"""
-        return self.db.find_all_objects_by(HackathonTemplateRel, hackathon_id=hackathon_id)
-
     def get_templates_with_detail_by_hackathon(self, hackathon):
         """Get all templates as well as its details used by certain hackathon"""
 

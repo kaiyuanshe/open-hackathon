@@ -570,3 +570,8 @@ class SMS_CHINATELECOM_STATUSCODE:
 class CHINATELECOM_ACCESS_TOKEN_STATUSCODE:
     """Status Code of requesting ChinaTelecom access_token"""
     SUCCESS = "0"
+
+class CLOUD_PROVIDE:
+    NONE = 0
+    AZURE = 1
+    ALAUDA = 2

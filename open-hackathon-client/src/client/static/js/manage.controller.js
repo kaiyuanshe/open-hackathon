@@ -122,13 +122,20 @@ angular.module('oh.controllers', [])
 
     $scope.animationsEnabled = true;
 
-    activity.banners = activity.banners;
     activity.event_start_time = new Date(activity.event_start_time);
     activity.event_end_time = new Date(activity.event_end_time);
     activity.registration_start_time = new Date(activity.registration_start_time);
     activity.registration_end_time = new Date(activity.registration_end_time);
     activity.judge_start_time = new Date(activity.judge_start_time);
     activity.judge_end_time = new Date(activity.judge_end_time);
+    activity.config.max_enrollment = parseInt(activity.config.max_enrollment, 10) || 0;
+
+    $scope.modules = activity;
+    $scope.tags = [];
+    $scope.activityFormDisabled = false;
+    angular.forEach($scope.modules.tags, function(value, key) {
+      $scope.tags.push({text: value});
+    });
 
     $scope.provider = {
       windows: $filter('isProvider')(activity.config.login_provider, 1),
@@ -139,8 +146,6 @@ angular.module('oh.controllers', [])
       gitcafe: $filter('isProvider')(activity.config.login_provider, 16),
     };
 
-    activity.config.max_enrollment = parseInt(activity.config.max_enrollment, 10) || 0;
-
     $scope.open = {
       event_start_time: false,
       event_end_time: false,
@@ -149,25 +154,91 @@ angular.module('oh.controllers', [])
       judge_start_time: false,
       judge_end_time: false
     };
+    
 
-    $scope.modules = activity;
+    $scope.showTip = function(level, content, showTime) {
+      $scope.$emit('showTip', {
+        level: level,
+        content: content,
+        showTime: showTime || 3000
+      });
+    };
+
+    //update basic information
+    $scope.updateBasicInformation = function() {
+      $scope.modules.tags = [];
+      angular.forEach($scope.tags, function(value, key) {
+        $scope.modules.tags.push(value.text);
+      });
+
+      $scope.activityFormDisabled = true;
+      api.admin.hackathon.put({
+        header: {
+          hackathon_name: $scope.modules.name
+        },
+        body: $scope.modules
+      }, function(data) {
+        if (data.error) {
+          $scope.showTip(level='tip-danger', content=data.error.friendly_message);
+        } else {
+          $scope.showTip(level='tip-success', content='更新成功');
+        }
+        $scope.activityFormDisabled = false;
+      });
+    };
 
     $scope.delBanner = function(index) {
       $scope.modules.banners.splice(index, 1);
-    }
+      api.admin.hackathon.put({
+        header: {
+          hackathon_name: $scope.modules.name
+        },
+        body: {
+          banners: $scope.modules.banners
+        }
+      }, function(data) {
+        if (data.error) {
+          $scope.showTip(level='tip-danger', content=data.error.friendly_message);
+        } else {
+          $scope.showTip(level='tip-success', content='删除成功');
+        }
+      });
+    };
 
     $scope.showAddBannerDialog = function() {
       $scope.modules.banners.push('http://image5.tuku.cn/pic/wallpaper/fengjing/shanshuilantian/014.jpg');
-    }
-
-    $scope.showTip = function() {
-      $scope.$emit('showTip', {
-        level: 'tip-success',
-        content: '保存成功'
+      api.admin.hackathon.put({
+        header: {
+          hackathon_name: $scope.modules.name
+        },
+        body: {
+          banners: $scope.modules.banners
+        }
+      }, function(data) {
+        if (data.error) {
+          $scope.showTip(level='tip-danger', content=data.error.friendly_message);
+        } else {
+          $scope.showTip(level='tip-success', content='添加成功');
+        }
       });
-    }
+    };
 
-
+    $scope.updateDescription = function() {
+      api.admin.hackathon.put({
+        header: {
+          hackathon_name: $scope.modules.name
+        },
+        body: {
+          description: $scope.modules.description
+        }
+      }, function(data) {
+        if (data.error) {
+          $scope.showTip(level='tip-danger', content=data.error.friendly_message);
+        } else {
+          $scope.showTip(level='tip-success', content='保存成功');
+        }
+      });
+    };
 
     $scope.providerChange = function(checked, value) {
       if (checked) {
@@ -175,12 +246,22 @@ angular.module('oh.controllers', [])
       } else {
         $scope.modules.config.login_provider = ((+$scope.modules.config.login_provider) || 0) ^ value;
       }
-      $scope.$emit('showTip', {
-        level: 'tip-success',
-        showTime: Math.random() * 10000,
-        content: '登录方式修改成功'
+
+      api.admin.hackathon.config.put({
+        header: {
+          hackathon_name: $scope.modules.name
+        },
+        body: {
+          login_provider: $scope.modules.config.login_provider
+        }
+      }).then(function(data) {
+        if (data.error) {
+          $scope.showTip(level='tip-danger', content=data.error.friendly_message);
+        } else {
+          $scope.showTip(level='tip-success', content='登录方式修改成功');
+        }
       });
-    }
+    };
 
   })
   .controller('usersController', function($rootScope, $scope, activityService, api) {
@@ -338,14 +419,7 @@ angular.module('oh.controllers', [])
 
     /*------------------------------------------------------*/
     $scope.notUseCloud = function() {
-      api.admin.hackathon.put({
-        header: {
-          hackathon_name: $scope.activity.name
-        },
-        body: {
-          status: 0
-        }
-      }).then(function(data) {
+      updataActivityStatus(0).then(function(data) {
         if (data.error) {
           $scope.$emit('showTip', {
             level: 'tip-danger',
@@ -392,9 +466,14 @@ angular.module('oh.controllers', [])
 
     /*------------------------------------------------------*/
     $scope.azureFormDisabled = false;
+    $scope.azuse_download_cer = false;
     $scope.azure = {
       management_host: 'management.core.chinacloudapi.cn',
     };
+
+    $scope.azureNext = function(){
+       $scope.wizard = 3;
+    }
 
     $scope.azureFormSubmit = function() {
       $scope.azureFormDisabled = true;
@@ -403,16 +482,35 @@ angular.module('oh.controllers', [])
         header: {
           hackathon_name: $scope.activity.name
         }
-      }).then(function(data) {
-        if (data.error) {
+      }).then(function(azure_key) {
+        if (azure_key.error) {
           $scope.$emit('showTip', {
             level: 'tip-danger',
-            content: data.error.friendly_message
+            content: azure_key.error.friendly_message
           });
-          $scope.azureFormDisabled = false;
         } else {
-          $scope.wizard = 3;
+          api.admin.azure.checksubid.post({
+            body: {
+              subscription_id:$scope.azure.subscription_id
+            },
+            header: {
+              hackathon_name: $scope.activity.name
+            }
+          }).then(function(data){
+            if(!data.message){
+               $scope.$emit('showTip', {
+                level: 'tip-warning',
+                content: '证书授权失败，请检验SUBSCRIPTION ID是否正确。'
+              });
+            }
+          })
+
+          var cert_url = azure_key.cert_url;
+          window.location.href = cert_url;
+          $scope.azuse_download_cer = true;
+          $scope.azurecer = cert_url;
         }
+        $scope.azureFormDisabled = false;
       });
     };
     /*------------------------------------------------------*/
@@ -431,36 +529,14 @@ angular.module('oh.controllers', [])
         return /js|json|txt$/i.test(item.name);
       }
     });
+
     uploader.onWhenAddingFileFailed = function(item, filter, options) {
       $scope.$emit('showTip', {
         level: 'tip-warning',
         content: '模板文件必须是txt、js、json后缀名'
       });
     };
-    uploader.onAfterAddingFile = function(fileItem) {
-      //console.info('onAfterAddingFile', fileItem);
-    };
-    uploader.onAfterAddingAll = function(addedFileItems) {
-      //console.info('onAfterAddingAll', addedFileItems);
-    };
-    uploader.onBeforeUploadItem = function(item) {
-      //console.info('onBeforeUploadItem', item);
-    };
-    uploader.onProgressItem = function(fileItem, progress) {
-      //console.info('onProgressItem', fileItem, progress);
-    };
-    uploader.onProgressAll = function(progress) {
-      //console.info('onProgressAll', progress);
-    };
-    uploader.onSuccessItem = function(fileItem, response, status, headers) {
-      //console.info('onSuccessItem', fileItem, response, status, headers);
-    };
-    uploader.onErrorItem = function(fileItem, response, status, headers) {
-      //console.info('onErrorItem', fileItem, response, status, headers);
-    };
-    uploader.onCancelItem = function(fileItem, response, status, headers) {
-      //console.info('onCancelItem', fileItem, response, status, headers);
-    };
+
     uploader.onCompleteItem = function(fileItem, data) {
       if (data.error) {
         $scope.$emit('showTip', {
@@ -473,11 +549,10 @@ angular.module('oh.controllers', [])
         });
       }
     };
+
     uploader.onCompleteAll = function() {
       $scope.file = '';
     };
-
-    //console.info('uploader', uploader);
 
     $scope.oneAtATime = true;
     $scope.templates = [];
@@ -522,7 +597,6 @@ angular.module('oh.controllers', [])
         } else {
           $scope.templates = data;
         }
-
       })
     }
 
@@ -539,6 +613,7 @@ angular.module('oh.controllers', [])
     $scope.templateSubmit = function() {
       if ($scope.templates.length > 0) {
         $scope.wizard = 4;
+        updataActivityStatus(0);
       } else {
         $scope.$emit('showTip', {
           level: 'tip-danger',
@@ -564,31 +639,29 @@ angular.module('oh.controllers', [])
     $scope.onlineDisabled = false;
     $scope.online = function() {
       $scope.onlineDisabled = true;
-      api.admin.hackathon.canonline.get({
+      api.admin.hackathon.online.post({
         header: {
           hackathon_name: $scope.activity.name
         }
       }).then(function(data) {
-        console.log(data);
-        if (data.message) {
-          updataActivityStatus(0).then(function(data) {
-            if (data.error) {
-              $scope.$emit('showTip', {
-                level: 'tip-danger',
-                content: data.error.friendly_message
-              });
-              $scope.onlineDisabled = false;
-            } else {
-              $state.go('manage.edit', {
-                name: $scope.activity.name
-              });
+        $scope.onlineDisabled = false;
+          if (data.error) {
+            var message = ''
+            if(data.error.code ==412101){
+              message ='当前黑客松没有还未创建成功。'
+            } else if(data.error.code ==412102) {
+              message ='证书授权失败，请检验SUBSCRIPTION ID是否正确。'
+            }else {
+              message = data.error.friendly_message
             }
-          });
+            $scope.$emit('showTip', {
+              level: 'tip-danger',
+              content: message
+            });
         } else {
-          $scope.onlineDisabled = false;
           $scope.$emit('showTip', {
-            level: 'tip-danger',
-            content: '证书授权失败，请检验SUBSCRIPTION ID是否正确。'
+            level: 'tip-success',
+            content: '上线成功'
           });
         }
       })
