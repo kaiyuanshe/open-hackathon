@@ -154,7 +154,7 @@ angular.module('oh.controllers', [])
       judge_start_time: false,
       judge_end_time: false
     };
-    
+
 
     $scope.showTip = function(level, content, showTime) {
       $scope.$emit('showTip', {
@@ -264,22 +264,60 @@ angular.module('oh.controllers', [])
     };
 
   })
-  .controller('usersController', function($rootScope, $scope, activityService, api) {
+  .controller('usersController', function($rootScope, $scope, activityService, api, util, dialog) {
     $scope.$emit('pageName', 'SETTINGS.USERS');
 
     var activity = activityService.getCurrentActivity();
 
     $scope.data = {
-      registerUsers: []  // we cannot use activity.registration here, its single
+      registerUsers: [],  // we cannot use activity.registration here, its single
+      regStatus: {}
     };
 
-    $scope.refresh = function() {
-      api.admin.registration.list.get({
-
-      }, function() {
-
+    var showTip = function(level, content, showTime) {
+      $scope.$emit('showTip', {
+        level: level,
+        content: content,
+        showTime: showTime || 3000
       });
     };
+
+    var refresh = function() {
+      api.admin.registration.list.get({
+        header: {hackathon_name: activity.name}
+      }, function(data) {
+        if(data.error) {
+          showTip('tip-danger', data.error.friendly_message);
+        } else {
+          var i;
+          $scope.data.regStatus = {};
+          for(i = 0;i < data.length;i ++) {
+            $scope.data.regStatus[data[i].id] = '' + data[i].status;
+          }
+
+          $scope.data.registerUsers = data;
+        }
+      });
+    };
+
+    $scope.updateStatus = function(reg) {
+      api.admin.registration.put({
+        header: {hackathon_name: activity.name},
+        body: {
+          id: reg.id,
+          status: parseInt($scope.data.regStatus[reg.id]),
+        }
+      }, function(data) {
+        if(data.error) {
+          showTip('tip-danger', data.error.friendly_message);
+          $scope.data.regStatus[reg.id] = '' + reg.status;
+        } else {
+          reg.status = parseInt($scope.data.regStatus[reg.id]);
+        }
+      });
+    };
+
+    refresh();
   })
   .controller('adminController', function($rootScope, $scope, activityService, api) {
     $scope.$emit('pageName', 'SETTINGS.ADMINISTRATORS');

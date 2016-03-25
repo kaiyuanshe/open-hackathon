@@ -132,7 +132,7 @@ class RegisterManager(Component):
             if register.status == HACK_USER_STATUS.AUDIT_PASSED:
                 self.team_manager.create_default_team(register.hackathon, register.user)
 
-            hackathon = self.hackathon_manager.get_hackathon_by_id(register.hackathon_id)
+            hackathon = self.hackathon_manager.get_hackathon_by_id(register.hackathon.id)
             self.__update_register_stat(hackathon)
 
             return register.dic()
