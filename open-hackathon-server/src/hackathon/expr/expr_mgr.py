@@ -347,7 +347,8 @@ class ExprManager(Component):
         ret = {
             "expr_id": str(expr.id),
             "status": expr.status,
-            "hackathon": expr.hackathon.name if expr.hackathon else "",
+            "hackathon_name": expr.hackathon.name if expr.hackathon else "",
+            "hackathon": str(expr.hackathon.id) if expr.hackathon else "",
             "create_time": str(expr.create_time),
             "last_heart_beat_time": str(expr.last_heart_beat_time),
         }
