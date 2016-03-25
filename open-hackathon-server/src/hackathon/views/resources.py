@@ -273,12 +273,12 @@ class UserHackathonLikeResource(HackathonResource):
 
 class UserExperimentResource(HackathonResource, Component):
     def get(self):
-        return expr_manager.get_expr_status(int(self.context().id))
+        return expr_manager.get_expr_status(self.context().id)
 
     @token_required
     def post(self):
         context = self.context()
-        return expr_manager.start_expr(g.user.id, context.template_name, context.get("hackathon_name"))
+        return expr_manager.start_expr(g.user, context.template_name, context.get("hackathon_name"))
 
     @token_required
     def delete(self):
@@ -584,7 +584,7 @@ class AdminExperimentResource(HackathonResource):
         if 'name' not in args:
             return bad_request('template name name invalid')
         template_name = args['name']
-        return expr_manager.start_expr(g.user.id, template_name, g.hackathon.name)
+        return expr_manager.start_expr(g.user, template_name, g.hackathon.name)
 
     @admin_privilege_required
     def delete(self):

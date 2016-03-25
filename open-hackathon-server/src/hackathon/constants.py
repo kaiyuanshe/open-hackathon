@@ -104,11 +104,6 @@ class HACKATHON_BASIC_INFO:
     FREEDOM_TEAM = "freedom_team"
 
 
-class CLOUD_ECLIPSE:
-    """CloudEclipse Constans"""
-    CLOUD_ECLIPSE = "cloud_eclipse"
-
-
 class TEMPLATE_STATUS:
     """Status for db model Template
 
@@ -165,17 +160,6 @@ class VEStatus:
     STOPPED = 3
     DELETED = 4
     UNEXPECTED_ERROR = 5
-
-
-class PortBindingType:
-    """Type of port binding
-
-    Attributes:
-        CloudService: type indicates public endpoint on cloudService
-        DOCKER: type indicates exposed port on docker host machine
-    """
-    CLOUD_SERVICE = 1
-    DOCKER = 2
 
 
 class VERemoteProvider:
@@ -294,7 +278,6 @@ class ORGANIZATION_TYPE:
 
 
 class HACK_STATUS:
-
     INIT = -1
     DRAFT = 0
     ONLINE = 1
@@ -514,8 +497,8 @@ class LOGIN_PROVIDER:
 
 class HACK_NOTICE_CATEGORY:
     HACKATHON = 0  # hackathon related notice
-    USER = 1   # user related notice
-    EXPERIMENT = 2   # experiment related notice
+    USER = 1  # user related notice
+    EXPERIMENT = 2  # experiment related notice
     AWARD = 3  # award related notice
     TEMPLATE = 4  # template related notice
 
@@ -570,6 +553,7 @@ class SMS_CHINATELECOM_STATUSCODE:
 class CHINATELECOM_ACCESS_TOKEN_STATUSCODE:
     """Status Code of requesting ChinaTelecom access_token"""
     SUCCESS = "0"
+
 
 class CLOUD_PROVIDE:
     NONE = 0
