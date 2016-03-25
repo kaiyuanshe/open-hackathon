@@ -53,8 +53,8 @@ class CloudServiceAdapter(ServiceAdapter):
         super(CloudServiceAdapter, self).__init__(
             ServiceManagementService(subscription_id, cert_url, *args, **kwargs))
 
-    def __init__(self, azure_key_id):
-        azure_key = self.db.get_object(AzureKey, azure_key_id)
+    def __init__(self, azure_key):
+        #azure_key = self.db.get_object(AzureKey, azure_key_id)
         super(CloudServiceAdapter, self).__init__(
             ServiceManagementService(azure_key.subscription_id, azure_key.get_local_pem_url(), host=azure_key.management_host))
 
@@ -114,6 +114,18 @@ class CloudServiceAdapter(ServiceAdapter):
 
         self.log.debug("service cloud %s, creation failed" % name)
         return False
+
+    def ping(self):
+        """
+        Use list storage accounts to check azure service management service health
+        :return:
+        """
+        try:
+            self.list_storage_accounts()
+        except Exception as e:
+            self.log.error(e)
+            return False
+        return True
 
     def update_cloud_service(self):
         # TODO

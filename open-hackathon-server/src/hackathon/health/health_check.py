@@ -27,7 +27,7 @@
 import sys
 
 from hackathon.hazure.cloud_service_adapter import CloudServiceAdapter
-from hackathon.hmongo.models import AzureKey
+from hackathon.hmongo.models import AzureKey, User
 
 sys.path.append("..")
 import requests
@@ -134,8 +134,8 @@ class AzureHealthCheck(HealthCheck):
                 STATUS: HEALTH_STATUS.WARNING,
                 DESCRIPTION: "No Azure key found"
             }
-        azure = CloudServiceAdapter(azure_key.id)
-        if azure.ping():
+        service = CloudServiceAdapter(azure_key)
+        if service.ping():
             return {
                 STATUS: HEALTH_STATUS.OK,
                 "type": "Azure Storage"
