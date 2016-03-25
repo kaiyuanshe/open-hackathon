@@ -6,7 +6,7 @@
         "type": "object",
         "properties": {
           "team_id": {
-            "description": "object_id of team",
+            "description": "id of team",
             "type": "string"
           }
         }
@@ -33,13 +33,9 @@
         "description": "delete award content",
         "type": "object",
         "properties": {
-          "award_id": {
-            "description": "uuid of award",
-            "pattern": "^[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}$"
-          },
-          "team_id": {
-            "description": "object_id of team",
-            "type": "string"
+          "id": {
+            "description": "unique identifier of team_award",
+            "pattern": "^[0-9]+$"
           }
         }
       }

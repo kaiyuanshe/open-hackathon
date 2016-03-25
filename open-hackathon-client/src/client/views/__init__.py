@@ -335,7 +335,6 @@ def logout():
 
 @app.route("/login")
 def login():
-    # todo redirect to the page request login
     session["return_url"] = request.args.get("return_url")
     provider = request.args.get("provides")
     prs = ["github", "qq", "gitcafe", "weibo", "live", "alauda"]

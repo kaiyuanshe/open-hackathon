@@ -41,7 +41,6 @@ from hackathon_response import *
 from hackathon_exception import *
 from log import log
 from context import Context
-from database import db_session
 
 __all__ = [
     "app",
@@ -103,11 +102,6 @@ cors = CORS(app)
 
 # initialize hackathon scheduler
 scheduler = HackathonScheduler(app)
-
-
-@app.teardown_appcontext
-def shutdown_session(exception=None):
-    db_session.remove()
 
 
 @app.errorhandler(400)
@@ -192,7 +186,6 @@ def init_components():
     factory.provide("guacamole", GuacamoleInfo)
 
     # health check items
-    factory.provide("health_check_mysql", get_class("hackathon.health.health_check.MySQLHealthCheck"))
     factory.provide("health_check_hosted_docker", get_class("hackathon.health.health_check.HostedDockerHealthCheck"))
     factory.provide("health_check_alauda_docker", get_class("hackathon.health.health_check.AlaudaDockerHealthCheck"))
     factory.provide("health_check_guacamole", get_class("hackathon.health.health_check.GuacamoleHealthCheck"))
@@ -208,9 +201,6 @@ def init_components():
 
 
 def init_db():
-    # from hackathon.database import db_session
-    # from hackathon.database.db_adapters import SQLAlchemyAdapter
-    # factory.provide("db", SQLAlchemyAdapter, db_session)
     from hmongo import db
     factory.provide("db", db, suspend_callable=True)
 

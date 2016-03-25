@@ -40,9 +40,11 @@ from hackathon.azureformation.utility import (
     run_job,
 )
 
-from hackathon.database.models import (
+
+from hackathon.hmongo.models import (
     AzureKey,
 )
+
 from azure.servicemanagement import (
     ServiceManagementService,
     Deployment,

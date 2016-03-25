@@ -190,7 +190,6 @@
                     <div class="form-group">
                       <div class="col-xs-offset-2 col-xs-10">
                         <button type="submit" class="btn btn-primary btn-long" ng-disabled="activityForm.$invalid || activityFormDisabled"><i class="fa fa-arrow-circle-o-right"></i> 下一步</button>
-                        {{activity}}
                       </div>
                     </div>
                   </footer>
@@ -244,15 +243,15 @@
                     <i class="fa fa-plus"></i> 创建新Azure证书
                   </header>
                   <fieldset class="detail-wrapper">
-                    <div class="form-group" ng-class="{'has-error': azureForm.subscription_id.$touched && activityForm.name.$invalid,'has-success':activityForm.name.$valid}">
+                    <div class="form-group" ng-class="{'has-error': azureForm.subscription_id.$touched && azureForm.subscription_id.$invalid,'has-success':azureForm.subscription_id.$valid}">
                       <label class="col-xs-2 control-label" translate="AZURE_FIELDS.SUBSCRIPTION_ID">SUBSCRIPTION_ID</label>
                       <div class="col-xs-10 required">
                         <input type="text" class="form-control" name="subscription_id" placeholder="{{'PLACEHOLDERS.SUBSCRIPTION_ID' | translate}}" ng-model="azure.subscription_id" ng-trim="true" ng-minleng="5" pattern="[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}" required>
-                        <div class="messages" ng-messages="activityForm.name.$error" ng-if="activityForm.name.$touched && activityForm.name.$invalid">
+                        <div class="messages" ng-messages="azureForm.subscription_id.$error" ng-if="azureForm.subscription_id.$touched && azureForm.subscription_id.$invalid">
                           <span ng-message="pattern"><i class="fa fa-close" uib-tooltip="pattern" tooltip-placement="right auto" ></i></span>
                           <span ng-message="required"><i class="fa fa-close" uib-tooltip="required" tooltip-placement="right auto"></i></span>
                         </div>
-                        <div class="messages" ng-if="activityForm.name.$touched && activityForm.name.$valid">
+                        <div class="messages" ng-if="aazureForm.subscription_id.$touched && azureForm.subscription_id.$valid">
                           <i class="fa fa-check"></i>
                         </div>
                       </div>
@@ -268,11 +267,18 @@
                         </select>
                       </div>
                     </div>
+                    <div class="form-group" ng-show="azuse_download_cer">
+                      <label class="col-xs-2 control-label">下载证书</label>
+                      <div class="col-xs-10">
+                        <a href="{{azurecer}}" download="{{azurecer}}">{{azurecer}}</a>
+                      </div>
+                    </div>
                   </fieldset>
                   <footer>
                     <div class="form-group">
                       <div class="col-xs-offset-2 col-xs-12">
-                        <button type="submit" class="btn btn-primary btn-long" ng-disabled="azureForm.$invalid || azureFormDisabled"><i class="fa fa-arrow-circle-o-right"></i> 下一步</button>
+                        <button type="submit" class="btn btn-success btn-long" ng-disabled="azureForm.$invalid || azureFormDisabled"><i class="fa fa-arrow-circle-o-right"></i> 提交 </button>
+                        <button type="button" class="btn btn-primary btn-long" ng-show="azuse_download_cer" ng-click="azureNext()"><i class="fa fa-arrow-circle-o-right"></i> 下一步</button>
                       </div>
                     </div>
                   </footer>
