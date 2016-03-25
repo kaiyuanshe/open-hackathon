@@ -26,17 +26,15 @@
 
 import sys
 
+from hackathon.hazure.cloud_service_adapter import CloudServiceAdapter
 from hackathon.hmongo.models import AzureKey
 
 sys.path.append("..")
 import requests
 import abc
 
-from sqlalchemy import __version__
-
 from hackathon.constants import HEALTH_STATUS
 from hackathon import RequiredFeature, Component
-from hackathon.azureformation.service import Service
 
 __all__ = [
     "HostedDockerHealthCheck",
@@ -136,7 +134,7 @@ class AzureHealthCheck(HealthCheck):
                 STATUS: HEALTH_STATUS.WARNING,
                 DESCRIPTION: "No Azure key found"
             }
-        azure = Service(azure_key.id)
+        azure = CloudServiceAdapter(azure_key.id)
         if azure.ping():
             return {
                 STATUS: HEALTH_STATUS.OK,
