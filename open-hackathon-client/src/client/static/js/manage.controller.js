@@ -271,7 +271,9 @@ angular.module('oh.controllers', [])
 
     $scope.data = {
       registerUsers: [],  // we cannot use activity.registration here, its single
-      regStatus: {}
+      regStatus: {},
+      checkAll: false,
+      checks: {},
     };
 
     var showTip = function(level, content, showTime) {
@@ -289,10 +291,14 @@ angular.module('oh.controllers', [])
         if(data.error) {
           showTip('tip-danger', data.error.friendly_message);
         } else {
-          var i;
           $scope.data.regStatus = {};
+          $scope.data.checkAll = false;
+          $scope.data.checks = {};
+
+          var i;
           for(i = 0;i < data.length;i ++) {
             $scope.data.regStatus[data[i].id] = '' + data[i].status;
+            $scope.data.checks[data[i].id] = false;
           }
 
           $scope.data.registerUsers = data;
@@ -301,7 +307,7 @@ angular.module('oh.controllers', [])
     };
 
     $scope.updateStatus = function(reg) {
-      api.admin.registration.put({
+      return api.admin.registration.put({
         header: {hackathon_name: activity.name},
         body: {
           id: reg.id,
@@ -315,6 +321,27 @@ angular.module('oh.controllers', [])
           reg.status = parseInt($scope.data.regStatus[reg.id]);
         }
       });
+    };
+
+    $scope.updateStatusBatch = function() {
+      var i, id, reg;
+      for(i = 0;i < $scope.data.registerUsers.length;i ++) {
+        reg = $scope.data.registerUsers[i];
+        id = reg.id;
+
+        if(! $scope.data.checks[id])
+          continue;
+
+        $scope.updateStatus(reg);
+      }
+
+    };
+
+    $scope.toggleCheckAll = function() {
+      var i;
+      for(i = 0;i < $scope.data.registerUsers.length;i ++) {
+        $scope.data.checks[$scope.data.registerUsers[i].id] = $scope.data.checkAll;
+      }
     };
 
     refresh();
