@@ -42,6 +42,7 @@ from hackathon.constants import EStatus, VERemoteProvider, VE_PROVIDER, PortBind
     AVMStatus, CLOUD_ECLIPSE, HACK_NOTICE_EVENT, HACK_NOTICE_CATEGORY
 from hackathon.hmongo.models import VirtualEnvironment, DockerHostServer, Experiment, User, \
     DockerContainer, AzureKey, Template
+
 from hackathon.hackathon_response import internal_server_error, not_found, ok
 
 __all__ = ["ExprManager"]
@@ -74,7 +75,6 @@ class ExprManager(Component):
         template = self.__check_template_status(hackathon, template_name)
 
         if user_id > 0:
-
             expr = self.__check_expr_status(user_id, hackathon, template)
             if expr is not None:
                 return self.__report_expr_status(expr)
@@ -266,7 +266,7 @@ class ExprManager(Component):
             else:
                 raise PreconditionFailed("Hackathon was already ended")
         else:
-            return None
+            raise NotFound("Hackathon with name %s not found" % hackathon_name)
 
     def __get_docker(self, hackathon, virtual_environment=None):
         """select which docker implementation"""
@@ -428,8 +428,8 @@ class ExprManager(Component):
             # hackathon is None means it's starting expr for template testing
             return template
 
-        hackathon_templates = self.hackathon_template_manager.get_templates_by_hackathon_id(hackathon.id)
-        template_ids = [h.template_id for h in hackathon_templates]
+        hackathon_templates = hackathon.templates
+        template_ids = [t.id for t in hackathon_templates]
         if template.id not in template_ids:
             raise PreconditionFailed("template '%s' not allowed for hackathon '%s'" % (template_name, hackathon.name))
 

@@ -35,7 +35,6 @@ from hackathon.hmongo.models import Hackathon, User, UserHackathon
 from hackathon.constants import HACK_USER_TYPE, HACK_USER_STATUS
 from hackathon.hackathon_response import precondition_failed, ok, not_found, internal_server_error, bad_request
 
-
 __all__ = ["AdminManager"]
 
 
@@ -63,7 +62,7 @@ class AdminManager(Component):
 
         return UserHackathon.objects(role=HACK_USER_TYPE.ADMIN, hackathon=g.hackathon, user=g.user).count() > 0
 
-    def get_entitled_hackathons_simple(self, user):
+    def get_entitled_hackathons_list(self, user):
         """Get hackathon id list that specific user is entitled to manage
 
         :type user_id: int
@@ -74,9 +73,10 @@ class AdminManager(Component):
         """
         user_filter = Q()
         if not user.is_super:
-            user_filter = Q(creator=user)
+            user_filter = Q(user=user, role=HACK_USER_TYPE.ADMIN)
 
-        admin_user_hackathon_simple = Hackathon.objects(user_filter).only(
+        hids = [uh.hackathon.id for uh in UserHackathon.objects(user_filter).no_dereference().only("hackathon")]
+        hack_list = Hackathon.objects(id__in=hids).only(
             'name',
             'display_name',
             'ribbon',
@@ -87,9 +87,9 @@ class AdminManager(Component):
             'creator',
             'type',
             'event_start_time',
-            'event_end_time').no_dereference().order_by('-event_start_time')
+            'event_end_time').order_by("-event_end_time")
 
-        all_hackathon = [h.dic() for h in admin_user_hackathon_simple]
+        all_hackathon = [h.dic() for h in hack_list]
         return all_hackathon
 
     def get_admins_by_hackathon(self, hackathon):

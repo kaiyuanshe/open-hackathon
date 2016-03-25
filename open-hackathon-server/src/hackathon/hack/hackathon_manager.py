@@ -40,10 +40,10 @@ from mongoengine.context_managers import no_dereference
 
 from hackathon.hmongo.models import Hackathon, UserHackathon, DockerHostServer, User, HackathonNotice, HackathonStat, \
     Organization
-from hackathon.hackathon_response import internal_server_error, ok, not_found, forbidden
+from hackathon.hackathon_response import internal_server_error, ok, not_found, forbidden, general_error, HTTP_CODE
 from hackathon.constants import HACKATHON_BASIC_INFO, HACK_USER_TYPE, HACK_STATUS, HACK_USER_STATUS, HTTP_HEADER, \
     FILE_TYPE, HACK_TYPE, HACKATHON_STAT, DockerHostServerStatus, HACK_NOTICE_CATEGORY, HACK_NOTICE_EVENT, \
-    ORGANIZATION_TYPE
+    ORGANIZATION_TYPE, CLOUD_PROVIDE
 from hackathon import RequiredFeature, Component, Context
 
 docker_host_manager = RequiredFeature("docker_host_manager")
@@ -151,7 +151,8 @@ class HackathonManager(Component):
             order_by_condition = '-id'
 
         # perform db query with pagination
-        pagination = Hackathon.objects(status_filter & name_filter).order_by(order_by_condition).paginate(page, per_page)
+        pagination = Hackathon.objects(status_filter & name_filter).order_by(order_by_condition).paginate(page,
+                                                                                                          per_page)
 
         user = None
         if self.user_manager.validate_login():
@@ -186,9 +187,6 @@ class HackathonManager(Component):
             hackathon_list = self.db.find_all_objects(Hackathon, Hackathon.id.in_(hackathon_ids))
 
         return map(lambda h: self.__get_hackathon_detail(h, user), hackathon_list)
-
-    def get_entitled_hackathon_simple_list(self, user):
-        return self.admin_manager.get_entitled_hackathons_simple(user)
 
     def get_basic_property(self, hackathon, key, default=None):
         """Get basic property of hackathon from HackathonConfig"""
@@ -294,7 +292,7 @@ class HackathonManager(Component):
 
             if 'status' in update_items and int(update_items['status']) == HACK_STATUS.ONLINE:
                 self.create_hackathon_notice(hackathon.id, HACK_NOTICE_EVENT.HACK_ONLINE,
-                                                 HACK_NOTICE_CATEGORY.HACKATHON)  # hackathon online
+                                             HACK_NOTICE_CATEGORY.HACKATHON)  # hackathon online
 
             # basic xss prevention
             if 'description' in update_items and update_items['description']:
@@ -640,7 +638,6 @@ class HackathonManager(Component):
         hackathon_notice.delete()
         return ok()
 
-
     def get_hackathon_notice_list(self, body):
         """
         list hackathon notices, notices are paginated, can be filtered by hackathon_name, event and category,
@@ -711,7 +708,6 @@ class HackathonManager(Component):
         # return serializable items as well as total count
         return self.util.paginate(pagination, func)
 
-
     def schedule_pre_allocate_expr_job(self):
         """Add an interval schedule job to check all hackathons"""
         next_run_time = self.util.get_now() + timedelta(seconds=3)
@@ -751,16 +747,27 @@ class HackathonManager(Component):
                 self.scheduler.remove_job(job_id)
         return True
 
-    def check_hackathon_online(self, hackathon):
-        alauda_enabled = is_alauda_enabled(hackathon)
-        can_online = True
-        if alauda_enabled == "0":
-            if self.util.is_local():
-                can_online = True
-            else:
-                can_online = docker_host_manager.check_subscription_id(hackathon.id)
+    def hackathon_online(self, hackathon):
+        req = ok()
 
-        return ok(can_online)
+        if hackathon.status == HACK_STATUS.DRAFT:
+            if self.util.is_local() or hackathon.config.cloud_provide == CLOUD_PROVIDE.NONE:
+                req = ok()
+            elif hackathon.config.cloud_provide == CLOUD_PROVIDE.AZURE:
+                is_success = docker_host_manager.check_subscription_id(hackathon.id)
+                if not is_success:
+                    req = general_error(code=HTTP_CODE.AZURE_KEY_NOT_READY)  # azure sub id is invalide
+
+        elif hackathon.status == HACK_STATUS.ONLINE:
+            req = ok()
+        else:
+            req = general_error(code=HTTP_CODE.CREATE_NOT_FINISHED)
+
+        if req.get('error') is None:
+            hackathon.status = HACK_STATUS.ONLINE
+            hackathon.save()
+
+        return req
 
     # TODO: we need to review those commented items one by one to decide the API output
     def __get_hackathon_detail(self, hackathon, user=None):
