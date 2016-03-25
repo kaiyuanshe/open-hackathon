@@ -201,10 +201,10 @@ class AdminManager(Component):
     def is_hackathon_admin(self, hackathon_id, user_id):
         """Check whether user is admin of specific hackathon
 
-        :type hackathon_id: int
+        :type hackathon_id: string or object_id
         :param hackathon_id: id of hackathon
 
-        :type user_id: int
+        :type user_id: string or object_id
         :param user_id: the id of user to be checked
 
         :rtype: bool

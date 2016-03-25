@@ -133,9 +133,8 @@ class RegisterManager(Component):
             if register.status == HACK_USER_STATUS.AUDIT_PASSED:
                 self.team_manager.create_default_team(register.hackathon, register.user)
 
-            # TODO: fix after hackathon_manager refactored
-            # hackathon = self.hackathon_manager.get_hackathon_by_id(register.hackathon_id)
-            # self.__update_register_stat(hackathon)
+            hackathon = self.hackathon_manager.get_hackathon_by_id(register.hackathon.id)
+            self.__update_register_stat(hackathon)
 
             return register.dic()
         except Exception as e:
