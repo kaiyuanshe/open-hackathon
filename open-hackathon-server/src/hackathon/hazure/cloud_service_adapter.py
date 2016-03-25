@@ -53,8 +53,8 @@ class CloudServiceAdapter(ServiceAdapter):
         super(CloudServiceAdapter, self).__init__(
             ServiceManagementService(subscription_id, cert_url, *args, **kwargs))
 
-    def __init__(self, azure_key):
-        #azure_key = self.db.get_object(AzureKey, azure_key_id)
+    def __init__(self, azure_key_id):
+        azure_key = AzureKey.objects.get(id=azure_key_id)
         super(CloudServiceAdapter, self).__init__(
             ServiceManagementService(azure_key.subscription_id, azure_key.get_local_pem_url(), host=azure_key.management_host))
 

@@ -134,7 +134,7 @@ class AzureHealthCheck(HealthCheck):
                 STATUS: HEALTH_STATUS.WARNING,
                 DESCRIPTION: "No Azure key found"
             }
-        service = CloudServiceAdapter(azure_key)
+        service = CloudServiceAdapter(azure_key.id)
         if service.ping():
             return {
                 STATUS: HEALTH_STATUS.OK,
