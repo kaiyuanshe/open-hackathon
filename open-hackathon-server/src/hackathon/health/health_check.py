@@ -26,6 +26,8 @@
 
 import sys
 
+from hackathon.hmongo.models import AzureKey
+
 sys.path.append("..")
 import requests
 import abc
@@ -128,24 +130,22 @@ class AzureHealthCheck(HealthCheck):
     """Check the status of azure to make sure config is right and azure is available"""
 
     def report_health(self):
-        # todo azure health check
-        raise NotImplementedError()
-        #     azure_key = self.db.find_first_object(AzureKey)
-        #     if not azure_key:
-        #         return {
-        #             STATUS: HEALTH_STATUS.WARNING,
-        #             DESCRIPTION: "No Azure key found"
-        #         }
-        #     azure = Service(azure_key.id)
-        #     if azure.ping():
-        #         return {
-        #             STATUS: HEALTH_STATUS.OK,
-        #             "type": "Azure Storage"
-        #         }
-        #     else:
-        #         return {
-        #             STATUS: HEALTH_STATUS.ERROR
-        #         }
+        azure_keys = AzureKey.objects()
+        if not azure_keys:
+            return {
+                STATUS: HEALTH_STATUS.WARNING,
+                DESCRIPTION: "No Azure key found"
+            }
+        for azure_key in azure_keys:
+            azure = Service(azure_key.id)
+            if azure.ping():
+                return {
+                    STATUS: HEALTH_STATUS.OK,
+                    "type": "Azure Storage"
+                }
+        return {
+            STATUS: HEALTH_STATUS.ERROR
+        }
 
 
 class StorageHealthCheck(HealthCheck):
