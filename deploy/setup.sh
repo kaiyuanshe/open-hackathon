@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "安装将花费一定时间，请耐心等待直到安装完成^_^, ..."
 sudo apt-get update
-sudo apt-get install -y python-setuptools python-dev git easy_install pip docker-engine
+sudo apt-get install -y python-setuptools python-dev git python-pip docker-engine
 
 cd /home && sudo rm -rf opentech
 sudo mkdir opentech && cd opentech
