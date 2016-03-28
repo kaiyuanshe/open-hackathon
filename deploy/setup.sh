@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "安装将花费一定时间，请耐心等待直到安装完成^_^, ..."
 sudo apt-get update
-sudo apt-get install -y python-setuptools python-dev git python-pip docker-engine
+sudo apt-get install -y python-setuptools python-dev git python-pip
 
 cd /home && sudo rm -rf opentech
 sudo mkdir opentech && cd opentech
@@ -41,6 +41,7 @@ sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58
 # get ubuntu version
 # for ubuntu 14
 uversion=$(lsb_release -d | grep 14)
+#this requires root access
 if [ ${uversion} > 0 ]; then
     sudo echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" > /etc/apt/sources.list.d/docker.list
 fi
