@@ -32,6 +32,8 @@ import base64
 import urllib
 import urllib2
 import abc
+from uuid import UUID
+from bson import ObjectId
 from datetime import datetime, timedelta
 from mailthon import email
 from mailthon.postman import Postman

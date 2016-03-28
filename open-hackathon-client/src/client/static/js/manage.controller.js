@@ -271,6 +271,45 @@ angular.module('oh.controllers', [])
   .controller('adminController', function($rootScope, $scope, activityService, api) {
     $scope.$emit('pageName', 'SETTINGS.ADMINISTRATORS');
 
+    var activity = activityService.getCurrentActivity();
+    $scope.admins = [];
+    $scope.filterAdminCondition = 0;
+
+    $scope.showTip = function(level, content, showTime) {
+      $scope.$emit('showTip', {
+        level: level,
+        content: content,
+        showTime: showTime || 3000
+      });
+    };
+
+    $scope.filterAdmin = function(item) {
+      if($scope.filterAdminCondition == 0)
+        return true;
+      return item.role == $scope.filterAdminCondition;
+    }
+
+    $scope.userTypeSeletor = {
+      availableOptions: [
+        {id: '1', name: 'Option A'},
+        {id: '2', name: 'Option B'},
+        {id: '3', name: 'Option C'}
+      ],
+      selectedOption: {id: '3', name: 'Option C'}
+    };
+
+    function pageLoad() {
+      api.admin.hackathon.administrator.list.get({
+        header: {hackathon_name: activity.name}
+      }, function(data){
+        if(data.error)
+          showTip('tip-danger', data.error.friendly_message);
+        else
+          $scope.admins = data;
+      })
+    }
+
+    pageLoad();
   })
   .controller('organizersController', function($rootScope, $scope, activityService, api) {
     $scope.$emit('pageName', 'SETTINGS.ORGANIZERS');
