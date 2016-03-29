@@ -39,7 +39,7 @@ from mongoengine import Q
 from mongoengine.context_managers import no_dereference
 
 from hackathon.hmongo.models import Hackathon, UserHackathon, DockerHostServer, User, HackathonNotice, HackathonStat, \
-    Organization
+    Organization, Award
 from hackathon.hackathon_response import internal_server_error, ok, not_found, forbidden, general_error, HTTP_CODE
 from hackathon.constants import HACKATHON_BASIC_INFO, HACK_USER_TYPE, HACK_STATUS, HACK_USER_STATUS, HTTP_HEADER, \
     FILE_TYPE, HACK_TYPE, HACKATHON_STAT, DockerHostServerStatus, HACK_NOTICE_CATEGORY, HACK_NOTICE_EVENT, \
@@ -496,50 +496,55 @@ class HackathonManager(Component):
         return ok()
 
     def create_hackathon_award(self, hackathon, body):
-        level = int(body.level)
+        level = int(body.get("level"))
         if level > 10:
             level = 10
 
-        award = Award(hackathon_id=hackathon.id,
-                      name=body.name,
+        award = Award(id=uuid.uuid4(),
+                      name=body.get("name"),
+                      description=body.get("description"),
                       level=level,
-                      quota=body.quota,
-                      award_url=body.get("award_url"),
-                      description=body.get("description"))
-        self.db.add_object(award)
-        return award.dic()
+                      quota=body.get("quota"),
+                      award_url=body.get("award_url"))
+        hackathon.update(push__awards=award)
+
+        hackathon.update_time = self.util.get_now()
+        hackathon.save()
+        return ok()
 
     def update_hackathon_award(self, hackathon, body):
-        award = self.db.get_object(Award, body.id)
+        award = hackathon.awards.get(id=body.get("id"))
         if not award:
             return not_found("award not found")
 
-        if award.hackathon.name != hackathon.name:
-            return forbidden()
-
         level = award.level
-        if body.get("level"):
-            level = int(body.level)
+        if "level" in body:
+            level = int(body.get("level"))
             if level > 10:
                 level = 10
 
         award.name = body.get("name", award.name)
+        award.description = body.get("description", award.description)
         award.level = body.get("level", level)
         award.quota = body.get("quota", award.quota)
         award.award_url = body.get("award_url", award.award_url)
-        award.description = body.get("description", award.description)
-        award.update_time = self.util.get_now()
+        award.save()
 
-        self.db.commit()
-        return award.dic()
+        hackathon.update_time = self.util.get_now()
+        hackathon.save()
+        return ok()
 
     def delete_hackathon_award(self, hackathon, award_id):
-        self.db.delete_all_objects_by(Award, hackathon_id=hackathon.id, id=award_id)
+        award = hackathon.awards.get(id=award_id)
+        hackathon.update(pull__awards=award)
+        hackathon.update_time = self.util.get_now()
+        hackathon.save()
         return ok()
 
     def list_hackathon_awards(self, hackathon):
-        awards = hackathon.award_contents.order_by(Award.level.desc()).all()
-        return [a.dic() for a in awards]
+        awards = hackathon.dic()["awards"]
+        awards.sort(key=lambda award:-award["level"])
+        return awards
 
     def get_hackathon_notice(self, notice_id):
         hackathon_notice = HackathonNotice.objects(id=notice_id).first()

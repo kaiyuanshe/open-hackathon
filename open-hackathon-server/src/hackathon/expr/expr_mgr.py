@@ -35,14 +35,12 @@ import pexpect
 
 from werkzeug.exceptions import PreconditionFailed, NotFound
 from os.path import dirname, realpath, abspath
-from sqlalchemy import and_
+from mongoengine import Q
 
 from hackathon import Component, RequiredFeature, Context
-from hackathon.constants import EStatus, VERemoteProvider, VE_PROVIDER, PortBindingType, VEStatus, ReservedUser, \
-    AVMStatus, CLOUD_ECLIPSE, HACK_NOTICE_EVENT, HACK_NOTICE_CATEGORY
-from hackathon.hmongo.models import VirtualEnvironment, DockerHostServer, Experiment, User, \
-    DockerContainer, AzureKey, Template
-
+from hackathon.constants import EStatus, VERemoteProvider, VE_PROVIDER, VEStatus, ReservedUser, \
+    HACK_NOTICE_EVENT, HACK_NOTICE_CATEGORY
+from hackathon.hmongo.models import VirtualEnvironment, DockerHostServer, Experiment, User, Template
 from hackathon.hackathon_response import internal_server_error, not_found, ok
 
 __all__ = ["ExprManager"]
@@ -61,7 +59,7 @@ class ExprManager(Component):
     azure_formation = RequiredFeature("azure_formation")
     azure_cert_manager = RequiredFeature("azure_cert_manager")
 
-    def start_expr(self, user_id, template_name, hackathon_name=None):
+    def start_expr(self, user, template_name, hackathon_name=None):
         """
         A user uses a template to start a experiment under a hackathon
         :param hackathon_name:
@@ -74,9 +72,9 @@ class ExprManager(Component):
         hackathon = self.__check_hackathon_event_time(hackathon_name)
         template = self.__check_template_status(hackathon, template_name)
 
-        if user_id > 0:
-            expr = self.__check_expr_status(user_id, hackathon, template)
-            if expr is not None:
+        if user:
+            expr = self.__check_expr_status(user, hackathon, template)
+            if expr:
                 return self.__report_expr_status(expr)
 
         # new expr
@@ -147,8 +145,8 @@ class ExprManager(Component):
             return ok()
 
     def get_expr_status(self, expr_id):
-        expr = self.db.find_first_object_by(Experiment, id=expr_id)
-        if expr is not None:
+        expr = Experiment.objects(id==expr_id).first()
+        if expr:
             return self.__report_expr_status(expr)
         else:
             return not_found('Experiment Not found')
@@ -217,7 +215,7 @@ class ExprManager(Component):
                         else:
                             self.log.debug(
                                 "no starting template: %s , remain num is %d ... " % (template.name, remain_num))
-                            self.start_expr(ReservedUser.DefaultUserID, template.name, rel.hackathon.name)
+                            self.start_expr(None, template.name, rel.hackathon.name)
                             break
                             # curr_num += 1
                             # self.log.debug("all template %s start complete" % template.name)
@@ -231,7 +229,7 @@ class ExprManager(Component):
                     if curr_num < pre_num:
                         remain_num = pre_num - curr_num
                         self.log.debug("no idle template: %s, remain num is %d ... " % (template.name, remain_num))
-                        self.start_expr(ReservedUser.DefaultUserID, template.name, rel.hackathon.name)
+                        self.start_expr(None, template.name, rel.hackathon.name)
                         # curr_num += 1
                         break
                         # self.log.debug("all template %s start complete" % template.name)
@@ -281,6 +279,7 @@ class ExprManager(Component):
 
     def __start_new_expr(self, hackathon, template, user_id):
         # new expr
+        expr = Experiment(user)
         expr = self.db.add_object_kwargs(Experiment,
                                          user_id=user_id,
                                          hackathon_id=hackathon.id,
@@ -343,33 +342,26 @@ class ExprManager(Component):
         return self.__report_expr_status(expr)
 
     def __report_expr_status(self, expr):
-        containers = self.__get_containers_by_exper(expr)
-        if expr.status != EStatus.STARTING:
-            for container in containers:
-                # expr status(restarting or running) is not match container running status on docker host
-                if not self.hosted_docker.check_container_status_is_normal(container):
-                    try:
-                        self.db.update_object(expr, status=EStatus.UNEXPECTED_ERROR)
-                        self.db.update_object(container.virtual_environment, status=VEStatus.UNEXPECTED_ERROR)
-                        break
-                    except Exception as ex:
-                        self.log.error(ex)
+        expr = self.__re_check_expr_status(expr)
+
         ret = {
-            "expr_id": expr.id,
+            "expr_id": str(expr.id),
             "status": expr.status,
-            "hackathon": expr.hackathon.name,
+            "hackathon_name": expr.hackathon.name if expr.hackathon else "",
+            "hackathon": str(expr.hackathon.id) if expr.hackathon else "",
             "create_time": str(expr.create_time),
             "last_heart_beat_time": str(expr.last_heart_beat_time),
         }
 
         if expr.status != EStatus.RUNNING:
             return ret
-        # return remote clients include guacamole and cloudEclipse
+
+        # return remote clients include guacamole
         remote_servers = []
-        for ve in expr.virtual_environments.all():
+        for ve in expr.virtual_environments:
             if ve.remote_provider == VERemoteProvider.Guacamole:
                 try:
-                    guacamole_config = json.loads(ve.remote_paras)
+                    guacamole_config = ve.remote_paras
                     guacamole_host = self.util.safe_get_config("guacamole.host", "localhost:8080")
                     # target url format:
                     # http://localhost:8080/guacamole/#/client/c/{name}?name={name}&oh={token}
@@ -380,35 +372,29 @@ class ExprManager(Component):
                         "guacamole_host": guacamole_host,
                         "url": url
                     })
-                    # cloud eclipse
-                    cloud_eclipse_url = self.__get_cloud_eclipse_url(expr)
-                    if cloud_eclipse_url is not None:
-                        remote_servers.append({
-                            "name": CLOUD_ECLIPSE.CLOUD_ECLIPSE,
-                            "url": cloud_eclipse_url
-                        })
 
                 except Exception as e:
                     self.log.error(e)
+                    # so that the frontend can query again?
                     ret["status"] = EStatus.STARTING
                     return ret
 
-        if expr.status == EStatus.RUNNING:
-            ret["remote_servers"] = remote_servers
+        ret["remote_servers"] = remote_servers
+
         # return public accessible web url
         public_urls = []
         if expr.template.provider == VE_PROVIDER.DOCKER:
-            for ve in expr.virtual_environments.all():
-                for p in ve.port_bindings.all():
-                    if p.binding_type == PortBindingType.CLOUD_SERVICE and p.url is not None:
-                        hs = self.db.find_first_object_by(DockerHostServer, id=p.binding_resource_id)
-                        url = p.url.format(hs.public_dns, p.port_from)
+            for ve in expr.virtual_environments:
+                container = ve.docker_container
+                for p in container.port_bindings.filter(is_public=True):
+                    if p.url:
                         public_urls.append({
                             "name": p.name,
-                            "url": url
+                            "url": p.url.format(container.host_server.public_dns, p.public_port)
                         })
         else:
-            for ve in expr.virtual_environments.all():
+            # todo windows azure public url
+            for ve in expr.virtual_environments:
                 for vm in ve.azure_virtual_machines_v.all():
                     ep = vm.azure_endpoints.filter_by(private_port=80).first()
                     url = 'http://%s:%s' % (vm.public_ip, ep.public_port)
@@ -489,34 +475,29 @@ class ExprManager(Component):
             self.log.error(e)
         return
 
-    def __check_expr_status(self, user_id, hackathon, template):
+    def __check_expr_status(self, user, hackathon, template):
         """
         check experiment status, if there are pre-allocate experiments, the experiment will be assigned directly
-        :param user_id:
+        :param user:
         :param hackathon:
         :param template:
         :return:
         """
-        exp_status = [EStatus.RUNNING, EStatus.STARTING]
-        is_admin = self.admin_Manager.is_hackathon_admin(hackathon.id, user_id)
-        check_temp = Experiment.template_id == template.id if is_admin else Experiment.id > -1
-        expr = self.db.find_first_object(Experiment,
-                                         Experiment.status.in_(exp_status),
-                                         Experiment.user_id == user_id,
-                                         Experiment.hackathon_id == hackathon.id,
-                                         check_temp)
-        if expr is not None:
+        criterion = Q(status__in=[EStatus.RUNNING, EStatus.STARTING], hackathon=hackathon)
+        is_admin = self.admin_Manager.is_hackathon_admin(hackathon.id, user.id)
+        if is_admin:
+            criterion &= Q(template=template)
+
+        expr = Experiment.objects(criterion).first()
+        if expr:
+            # user has a running/starting experiment
             return expr
 
-        expr = self.db.find_first_object_by(Experiment,
-                                            status=EStatus.RUNNING,
-                                            hackathon_id=hackathon.id,
-                                            user_id=ReservedUser.DefaultUserID,
-                                            template=template)
-        if expr is not None:
-            self.db.update_object(expr, user_id=user_id)
-            self.db.commit()
-            self.log.debug("experiment had been assigned, check experiment and start new job ... ")
+        # try to assign pre-configured expr to user
+        expr = Experiment.objects(status=EStatus.RUNNING, hackathon=hackathon, template=template, user=None).first()
+        if expr:
+            expr.user = user
+            expr.save()
             return expr
 
     def roll_back(self, expr_id):
@@ -575,23 +556,7 @@ class ExprManager(Component):
             condition = and_(condition, Experiment.user_id.in_(uids))
         return condition
 
-    def __get_cloud_eclipse_url(self, experiment):
-        team = self.team_manager.get_team_by_user_and_hackathon(experiment.user, experiment.hackathon)
-        if not team:
-            return None
-
-        source = self.team_manager.get_team_source_code(team.id)
-        if not source:
-            return None
-
-        # http://www.idehub.cn/api/ide/18?git=http://git.idehub.cn/root/test-c.git&user=root&from=hostname(frontend)
-        api = self.util.safe_get_config("%s.api" % CLOUD_ECLIPSE.CLOUD_ECLIPSE, "http://www.idehub.cn/api/ide")
-        openid = experiment.user.openid
-        url = "%s/%d?git=%s&user=%s&from=" % (api, experiment.id, source.uri, openid)
-        self.log.debug("cloud eclipse url : %s" % url)
-        return url
-
-    def __get_containers_by_exper(self, expr):
+    def __re_check_expr_status(self, expr):
         """get experiment's all containers which are based on hosted_docker
 
         :type  expr: Experiment
@@ -600,8 +565,20 @@ class ExprManager(Component):
         :return DockerContainer object List by query
 
         """
-        ves = self.db.find_all_objects_by(VirtualEnvironment, experiment_id=expr.id, provider=VE_PROVIDER.DOCKER)
-        return map(lambda x: x.container, ves)
+        if expr.status != EStatus.STARTING:
+            for ve in expr.virtual_environments:
+                if ve.provider != VE_PROVIDER.DOCKER or ve.docker_container is None:
+                    continue
+                # expr status(restarting or running) is not match container running status on docker host
+                try:
+                    if not self.hosted_docker.check_container_status_is_normal(ve.docker_container):
+                        expr.status = EStatus.UNEXPECTED_ERROR
+                        ve.status = VEStatus.UNEXPECTED_ERROR
+                        expr.save()
+                        break
+                except Exception as ex:
+                    self.log.error(ex)
+        return expr
 
     def __recycle_expr(self, expr):
         """recycle expr

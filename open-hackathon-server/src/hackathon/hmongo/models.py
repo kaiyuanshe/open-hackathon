@@ -31,26 +31,9 @@ from uuid import UUID
 from mongoengine import *
 from bson import ObjectId
 
-from hackathon.util import get_now
+from hackathon.util import get_now, make_serializable
 from hackathon.constants import TEMPLATE_STATUS, HACK_USER_TYPE
 from pagination import Pagination
-
-
-def make_serializable(item):
-    if isinstance(item, list):
-        return [make_serializable(sub) for sub in item]
-    elif isinstance(item, dict):
-        for k, v in item.items():
-            item[k] = make_serializable(v)
-        return item
-    elif isinstance(item, datetime):
-        item = item.replace(tzinfo=None)
-        epoch = datetime.utcfromtimestamp(0)
-        return long((item - epoch).total_seconds() * 1000)
-    elif isinstance(item, ObjectId) or isinstance(item, UUID):
-        return str(item)
-    else:
-        return item
 
 
 def to_dic(obj):
@@ -340,10 +323,11 @@ class PortBinding(DynamicEmbeddedDocument):
     # that means a port occupied by stopped container won't be allocated to new container. So it's possible to start the
     # container again. And the number of port should be enough since we won't have too many containers on the same VM.
     name = StringField()
-    port_from = IntField(min_value=1, max_value=65535)
-    port_to = IntField(min_value=1, max_value=65535)
-    binding_type = IntField()  # CloudService or Docker, see enum.py
-    url = URLField()  # public url schema for display
+    is_public = BooleanField()
+    public_port = IntField(min_value=1, max_value=65535)  # port that are public accessible
+    host_port = IntField(min_value=1, max_value=65535)  # port on hosted VM
+    container_port = IntField(min_value=1, max_value=65535)  # port inside docker container
+    url = StringField()  # public url pattern for display where host and port should be replaced
 
 
 class DockerContainer(DynamicEmbeddedDocument):

@@ -310,6 +310,9 @@ angular.module('oh.controllers', [])
           $scope.data.registerUsers = data;
           $scope.data.curPage = 1;
           $scope.data.nPage = parseInt(Math.round(data.length / $scope.data.perPage));
+
+          $scope.data.autoApprove = activity.config.auto_approve;
+          $scope.data.freedomTeam = activity.config.freedom_team;
         }
       });
     };

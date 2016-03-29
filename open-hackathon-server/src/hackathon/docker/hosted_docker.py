@@ -45,7 +45,6 @@ from hackathon.hmongo.models import (
 
 from hackathon.constants import (
     EStatus,
-    PortBindingType,
     VEStatus,
     HEALTH,
     VE_PROVIDER, VERemoteProvider, AZURE_RESOURCE_TYPE, AVMStatus)
@@ -477,8 +476,8 @@ class HostedDockerFormation(DockerFormationBase, Component):
         :return True: the container running status is running or restarting , else returns False
 
         """
-        docker_host = self.db.find_first_object_by(DockerHostServer, id=docker_container.host_server_id)
-        if docker_host is not None:
+        docker_host = docker_container.host_server
+        if docker_host:
             container_info = self.__get_container_info_by_container_id(docker_host, docker_container.container_id)
             if container_info is None:
                 return False
@@ -699,7 +698,6 @@ class HostedDockerFormation(DockerFormationBase, Component):
     def __get_container_info_by_container_id(self, docker_host, container_id):
         """get a container info by container_id from a docker host
 
-        :type docker_host: DockerHostServer
         :param: the docker host which you want to search container from
 
         :type container_id: str|unicode

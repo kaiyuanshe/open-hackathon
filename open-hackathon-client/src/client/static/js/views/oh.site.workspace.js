@@ -139,9 +139,9 @@
             for (var i in data.remote_servers) {
                 dockers.push({
                     purl: "",
-                    imgUrl: data.remote_servers[i].name == 'cloud_eclipse' ? '/static/pic/idehub.png' : '/static/pic/dseries.png',
+                    imgUrl: '/static/pic/dseries.png',
                     name: data.remote_servers[i].name,
-                    surl: data.remote_servers[i].name == 'cloud_eclipse' ? data.remote_servers[i].url + window.location.origin : data.remote_servers[i].guacamole_host + "/guacamole/#/client/" + get_guacamole_server_name(data.remote_servers[i].name, "c", "openhackathon") + "?oh=" + $.cookie('token') + "&name=" + data.remote_servers[i].name + "&_=" + new Date().getTime()
+                    surl: data.remote_servers[i].guacamole_host + "/guacamole/#/client/" + get_guacamole_server_name(data.remote_servers[i].name, "c", "openhackathon") + "?oh=" + $.cookie('token') + "&name=" + data.remote_servers[i].name + "&_=" + new Date().getTime()
                     })
                 $('#show').append(tmpe.format(dockers[i]));
             }

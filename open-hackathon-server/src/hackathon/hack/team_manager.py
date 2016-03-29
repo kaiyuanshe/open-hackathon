@@ -106,7 +106,7 @@ class TeamManager(Component):
     def get_hackathon_team_list(self, hackathon_id, name=None, number=None):
         """Get the team list of selected hackathon
 
-        :type hackathon_id: int
+        :type hackathon_id: string or object_id
         :param hackathon_id: hackathon id
 
         :type name: str|unicode
@@ -118,18 +118,18 @@ class TeamManager(Component):
         :rtype: list
         :return: a list of team filter by name and number on selected hackathon
         """
-        query = Q(hackathon=hackathon_id)
+        teams = Team.objects(hackathon=hackathon_id)
         if name is not None:
-            query &= Q(name=name)
-
-        teams = Team.objects(query)[:number]
+            teams = filter(lambda t: name in t.name, teams)
+        if number is not None:
+            teams = teams[0: number]
 
         # check whether it's anonymous user or not
         user = None
         if self.user_manager.validate_login():
             user = g.user
 
-        return [self.__team_detail(x, user) for x in teams]
+        return map(lambda x: self.__team_detail(x, user), teams)
 
     def create_default_team(self, hackathon, user):
         """Create a default new team for user after registration.
@@ -556,18 +556,15 @@ class TeamManager(Component):
     def __team_detail(self, team, user=None):
         resp = team.dic()
         resp["leader"] = self.user_manager.user_display_info(team.leader)
-        resp["member_count"] = len(filter(lambda mem: mem.status == TEAM_MEMBER_STATUS.APPROVED, team.members))
+        resp["member_count"] = team.members.filter(status=TEAM_MEMBER_STATUS.APPROVED).count()
         # all team action not allowed if frozen
         resp["is_frozen"] = team.hackathon.judge_start_time < self.util.get_now()
 
         if user:
             resp["is_admin"] = self.admin_manager.is_hackathon_admin(team.hackathon.id, user.id)
-            resp["is_leader"] = team.leader.id == user.id
-            resp["is_member"] = any([mem.user.id == user.id for mem in team.members])
-        else:
-            resp["is_admin"] = False
-            resp["is_leader"] = False
-            resp["is_member"] = False
+            resp["is_leader"] = team.leader == user
+            rel = Team.objects().filter(members__user=user).count()
+            resp["is_member"] = rel > 0
 
         return resp
 

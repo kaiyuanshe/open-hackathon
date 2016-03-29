@@ -36,11 +36,13 @@ from datetime import datetime, timedelta
 from mailthon import email
 from mailthon.postman import Postman
 from mailthon.middleware import TLS, Auth
+from bson import ObjectId
+from uuid import UUID
 
 from hackathon_factory import RequiredFeature
 from hackathon.log import log
 from hackathon.constants import EMAIL_SMTP_STATUSCODE, VOICEVERIFY_RONGLIAN_STATUSCODE, SMS_CHINATELECOM_TEMPLATE, \
-        SMS_CHINATELECOM_STATUSCODE, CHINATELECOM_ACCESS_TOKEN_STATUSCODE
+    SMS_CHINATELECOM_STATUSCODE, CHINATELECOM_ACCESS_TOKEN_STATUSCODE
 
 try:
     from config import Config
@@ -59,8 +61,27 @@ __all__ = [
     "DisabledVoiceVerify",
     "RonglianVoiceVerify",
     "DisabledSms",
-    "ChinaTelecomSms"
+    "ChinaTelecomSms",
+    "make_serializable",
 ]
+
+
+def make_serializable(item):
+    """make an object serializable before saving DB or respond with HTTP"""
+    if isinstance(item, list):
+        return [make_serializable(sub) for sub in item]
+    elif isinstance(item, dict):
+        for k, v in item.items():
+            item[k] = make_serializable(v)
+        return item
+    elif isinstance(item, datetime):
+        item = item.replace(tzinfo=None)
+        epoch = datetime.utcfromtimestamp(0)
+        return long((item - epoch).total_seconds() * 1000)
+    elif isinstance(item, ObjectId) or isinstance(item, UUID):
+        return str(item)
+    else:
+        return item
 
 
 def get_config(key):
@@ -204,6 +225,9 @@ class Utility(object):
         if not v:
             return False
         return v.lower() in ["yes", "true", "y", "t", "1"]
+
+    def make_serializable(self, v):
+        return make_serializable(v)
 
     def paginate(self, pagination, func=None):
         """Convert pagination results from DB to serializable dict
@@ -555,7 +579,7 @@ class ChinaTelecomSms(Sms):
 
         try:
             # timestamp should be Beijing local time
-            timestamp = (get_now() + timedelta(hours = 8)).strftime("%Y-%m-%d %H:%M:%S")
+            timestamp = (get_now() + timedelta(hours=8)).strftime("%Y-%m-%d %H:%M:%S")
             data = {"acceptor_tel": receiver,
                     "template_id": template_id,
                     "template_param": str(content),
@@ -594,7 +618,7 @@ class ChinaTelecomSms(Sms):
             if response_json["res_code"] == CHINATELECOM_ACCESS_TOKEN_STATUSCODE.SUCCESS:
                 # access_token's expiration time is 30 days.
                 self.access_token = response_json["access_token"]
-                self.access_token_expiration_time = get_now() + timedelta(days = 30)
+                self.access_token_expiration_time = get_now() + timedelta(days=30)
                 return True
             log.error("ChinaTelecom-SMS Error: request access_token fails")
             return False
