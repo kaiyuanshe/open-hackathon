@@ -794,10 +794,10 @@ class HackathonManager(Component):
             # like = self.db.find_first_object_by(HackathonLike, user_id=user.id, hackathon_id=hackathon.id)
             # if like:
             #     detail["like"] = like.dic()
-            #
-            # register = self.register_manager.get_registration_by_user_and_hackathon(user.id, hackathon.id)
-            # if register:
-            #     detail["registration"] = register.dic()
+
+            register = self.register_manager.get_registration_by_user_and_hackathon(user.id, hackathon.id)
+            if register:
+                detail["registration"] = register.dic()
             #
             # team_rel = self.db.find_first_object_by(UserTeamRel, user_id=user.id, hackathon_id=hackathon.id)
             # if team_rel:

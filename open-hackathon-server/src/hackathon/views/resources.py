@@ -362,7 +362,7 @@ class TeamMemberResource(HackathonResource):
     @token_required
     def put(self):
         ctx = self.context()
-        return team_manager.update_team_member_status(g.user, ctx.id, ctx.status)
+        return team_manager.update_team_member_status(g.user, ctx.team_id, ctx.status)
 
     @token_required
     def delete(self):
@@ -386,7 +386,10 @@ class TeamMemberListResource(HackathonResource):
         parse.add_argument('team_id', type=int, location='args', required=True)
         args = parse.parse_args()
 
-        return team_manager.get_team_members(args["team_id"])
+        ret = team_manager.get_team_members(args["team_id"])
+        if not ret:
+            return not_found()
+        return ret
 
 
 class TeamTemplateResource(HackathonResource):

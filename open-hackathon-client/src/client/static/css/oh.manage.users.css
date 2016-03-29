@@ -1,0 +1,65 @@
+select.register-status-select {
+  width: 90%;
+  height: 30px;
+  border-radius: 2px;
+  border-width: 1px;
+  border-style: solid;
+  color: #fff;
+  outline: none;
+}
+
+select.register-status-select.auto-approve {
+  background-color: #0275d8;
+  border-color: #0275d8;
+}
+
+select.register-status-select.accepted {
+  background-color: #449d44;
+  border-color: #419641;
+}
+
+select.register-status-select.rejected {
+  background-color: #d9534f;
+  border-color: #d9534f;
+}
+
+select.register-status-select.waiting {
+  background-color: #f0ad4e;
+  border-color: #f0ad4e;
+}
+
+.register-users table tbody > tr > td {
+  vertical-align: middle;
+}
+
+.register-users-container {
+  display: -webkit-box;
+	display: -webkit-flex;
+	display: -moz-flex;
+	display: -ms-flexbox;
+	display: flex;
+
+  -webkit-box-direction: normal;
+	-webkit-box-orient: horizontal;
+  -webkit-flex-direction: row;
+	-moz-flex-direction: row;
+	-ms-flex-direction: row;
+	flex-direction: row;
+}
+
+div.register-users {
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -moz-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+}
+
+div.register-users-stat {
+  -webkit-box-flex: 0;
+	-webkit-flex-grow: 0;
+	-moz-flex-grow: 0;
+	-ms-flex-positive: 0;
+	flex-grow: 0;
+  width: 300px;
+}
