@@ -21,9 +21,9 @@
         </tr>
         </thead>
         <tbody id="registe_list">
-            <tr ng-repeat="reg in data.registerUsers track by reg.id">
+            <tr ng-repeat="reg in data.registerUsers | limitTo:data.perPage:(data.curPage - 1) * data.perPage as curPageUsers track by reg.id">
               <td>
-                <input type="checkbox" ng-model="data.checks[reg.id]">
+                <input type="checkbox" ng-model="data.checks[reg.id]" ng-change="checkCheckAll()">
               </td>
               <td>{{reg.user.name}}</td>
               <td>
@@ -51,6 +51,14 @@
             </tr>
         </tbody>
     </table>
+    <uib-pagination
+        total-items="data.nPage"
+        ng-model="data.curPage"
+        items-per-page="data.perPage"
+        max-size="6"
+        class="pagination-sm"
+        force-ellipses="true">
+    </uib-pagination>
   </div>
   <div class="register-users-stat">
     <ul>

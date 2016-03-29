@@ -274,6 +274,9 @@ angular.module('oh.controllers', [])
       regStatus: {},
       checkAll: false,
       checks: {},
+      perPage: 20,
+      curPage: 1,
+      nPage: 0
     };
 
     var showTip = function(level, content, showTime) {
@@ -302,7 +305,34 @@ angular.module('oh.controllers', [])
           }
 
           $scope.data.registerUsers = data;
+          $scope.data.curPage = 1;
+          $scope.data.nPage = parseInt(Math.round(data.length / $scope.data.perPage));
         }
+      });
+    };
+
+    var _updateBatch = function(updates, status, index) {
+      if(index >= updates.length) {
+        return;
+      }
+
+      var reg = updates[index];
+
+      api.admin.registration.put({
+        header: {hackathon_name: activity.name},
+        body: {
+          id: reg.id,
+          status: status,
+        },
+      }, function(data) {
+        if(data.error) {
+          showTip('tip-danger', 'some of the registration updates failed: ' + data.error.friendly_message);
+        } else {
+          reg.status = parseInt(status);
+          $scope.data.regStatus[reg.id] = '' + reg.status;
+        }
+
+        _updateBatch(updates, status, index + 1);
       });
     };
 
@@ -323,18 +353,19 @@ angular.module('oh.controllers', [])
       });
     };
 
-    $scope.updateStatusBatch = function() {
+    $scope.updateStatusBatch = function(status) {
       var i, id, reg;
+
+      var toUpdate = [];
       for(i = 0;i < $scope.data.registerUsers.length;i ++) {
         reg = $scope.data.registerUsers[i];
         id = reg.id;
 
-        if(! $scope.data.checks[id])
-          continue;
-
-        $scope.updateStatus(reg);
+        if($scope.data.checks[id])
+          toUpdate.push(reg);
       }
 
+      _updateBatch(toUpdate, status, 0);
     };
 
     $scope.toggleCheckAll = function() {
@@ -342,6 +373,18 @@ angular.module('oh.controllers', [])
       for(i = 0;i < $scope.data.registerUsers.length;i ++) {
         $scope.data.checks[$scope.data.registerUsers[i].id] = $scope.data.checkAll;
       }
+    };
+
+    $scope.checkCheckAll = function() {
+      var i = 0, allChecked = true;
+      for(i = 0;i < $scope.data.registerUsers.length;i ++) {
+        if(! $scope.data.checks[$scope.data.registerUsers[i].id]) {
+          allChecked = false;
+          break;
+        }
+      }
+
+      $scope.data.checkAll = allChecked;
     };
 
     refresh();
