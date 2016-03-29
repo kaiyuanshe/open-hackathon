@@ -95,7 +95,18 @@ angular.module('oh.manage.router', [
   }).state('manage.ve', {
     url: 've/:name',
     templateUrl: '/static/partials/manage/ve.html?v=' + VERSION,
-    controller: 'veController'
+    controller: 'veController',
+    resolve: {
+      activity: function($stateParams, api) {
+        return api.admin.hackathon.get({
+          header: {
+            hackathon_name: $stateParams.name
+          }
+        }).then(function(data) {
+          return data;
+        });
+      }
+    }
   }).state('manage.monitor', {
     url: 'monitor/:name',
     templateUrl: '/static/partials/manage/monitor.html?v=' + VERSION,
