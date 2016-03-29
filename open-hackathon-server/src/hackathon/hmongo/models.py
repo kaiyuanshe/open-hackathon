@@ -262,7 +262,7 @@ class HackathonNotice(HDocumentBase):
         super(HackathonNotice, self).__init__(**kwargs)
 
 
-class TeamWorks(EmbeddedDocument):
+class TeamWork(EmbeddedDocument):
     id = UUIDField(required=True)
     description = StringField()
     type = IntField(required=True)
@@ -289,7 +289,7 @@ class Team(HDocumentBase):
     logo = URLField()
     leader = ReferenceField(User)
     hackathon = ReferenceField(Hackathon)
-    works = EmbeddedDocumentListField(TeamWorks)
+    works = EmbeddedDocumentListField(TeamWork)
     scores = EmbeddedDocumentListField(TeamScore)
     members = EmbeddedDocumentListField(TeamMember)
     awards = ListField()

@@ -135,7 +135,7 @@
                                             <p class="oh-desc"><a class="grey-link"
                                                                   href="{{ url_for('hackathon', hackathon_name=item.name) }}"
                                                                   target="_blank">
-                                                {{ item.short_description | limitTo(60) }}</a>
+                                                {{ item.get("short_description") | limitTo(60) }}</a>
                                             </p>
 
                                             <div class="oh-time">
@@ -233,7 +233,7 @@
                                             <p class="oh-desc"><a class="grey-link"
                                                                   href="{{ url_for('hackathon', hackathon_name=item.name) }}"
                                                                   target="_blank">
-                                                {{ item.short_description | limitTo(60) }}</a>
+                                                {{ item.get("short_description") | limitTo(60) }}</a>
                                             </p>
 
                                             <div class="oh-time">
@@ -331,7 +331,7 @@
                                             <p class="oh-desc"><a class="grey-link"
                                                                   href="{{ url_for('hackathon', hackathon_name=item.name) }}"
                                                                   target="_blank">
-                                                {{ item.short_description | limitTo(60) }}</a>
+                                                {{ item.get("short_description") | limitTo(60) }}</a>
                                             </p>
 
                                             <div class="oh-time">

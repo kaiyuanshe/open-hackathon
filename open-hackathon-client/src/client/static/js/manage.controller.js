@@ -154,7 +154,7 @@ angular.module('oh.controllers', [])
       judge_start_time: false,
       judge_end_time: false
     };
-    
+
 
     $scope.showTip = function(level, content, showTime) {
       $scope.$emit('showTip', {
@@ -264,9 +264,157 @@ angular.module('oh.controllers', [])
     };
 
   })
-  .controller('usersController', function($rootScope, $scope, activityService, api) {
+  .controller('usersController', function($rootScope, $scope, activityService, api, util, dialog) {
     $scope.$emit('pageName', 'SETTINGS.USERS');
 
+    var activity = activityService.getCurrentActivity();
+
+    $scope.data = {
+      registerUsers: [],  // we cannot use activity.registration here, its single
+      regStatus: {},
+      checkAll: false,
+      checks: {},
+      perPage: 20,
+      curPage: 1,
+      nPage: 0,
+
+      freedomTeam: activity.config.freedom_team,
+      autoApprove: activity.config.auto_approve
+    };
+
+    var showTip = function(level, content, showTime) {
+      $scope.$emit('showTip', {
+        level: level,
+        content: content,
+        showTime: showTime || 3000
+      });
+    };
+
+    var refresh = function() {
+      api.admin.registration.list.get({
+        header: {hackathon_name: activity.name}
+      }, function(data) {
+        if(data.error) {
+          showTip('tip-danger', data.error.friendly_message);
+        } else {
+          $scope.data.regStatus = {};
+          $scope.data.checkAll = false;
+          $scope.data.checks = {};
+
+          var i;
+          for(i = 0;i < data.length;i ++) {
+            $scope.data.regStatus[data[i].id] = '' + data[i].status;
+            $scope.data.checks[data[i].id] = false;
+          }
+
+          $scope.data.registerUsers = data;
+          $scope.data.curPage = 1;
+          $scope.data.nPage = parseInt(Math.round(data.length / $scope.data.perPage));
+
+          $scope.data.autoApprove = activity.config.auto_approve;
+          $scope.data.freedomTeam = activity.config.freedom_team;
+        }
+      });
+    };
+
+    var _updateBatch = function(updates, status, index) {
+      if(index >= updates.length) {
+        return;
+      }
+
+      var reg = updates[index];
+
+      api.admin.registration.put({
+        header: {hackathon_name: activity.name},
+        body: {
+          id: reg.id,
+          status: status,
+        },
+      }, function(data) {
+        if(data.error) {
+          showTip('tip-danger', 'some of the registration updates failed: ' + data.error.friendly_message);
+        } else {
+          reg.status = parseInt(status);
+          $scope.data.regStatus[reg.id] = '' + reg.status;
+        }
+
+        _updateBatch(updates, status, index + 1);
+      });
+    };
+
+    $scope.updateStatus = function(reg) {
+      return api.admin.registration.put({
+        header: {hackathon_name: activity.name},
+        body: {
+          id: reg.id,
+          status: parseInt($scope.data.regStatus[reg.id]),
+        }
+      }, function(data) {
+        if(data.error) {
+          showTip('tip-danger', data.error.friendly_message);
+          $scope.data.regStatus[reg.id] = '' + reg.status;
+        } else {
+          reg.status = parseInt($scope.data.regStatus[reg.id]);
+        }
+      });
+    };
+
+    $scope.updateStatusBatch = function(status) {
+      var i, id, reg;
+
+      var toUpdate = [];
+      for(i = 0;i < $scope.data.registerUsers.length;i ++) {
+        reg = $scope.data.registerUsers[i];
+        id = reg.id;
+
+        if($scope.data.checks[id])
+          toUpdate.push(reg);
+      }
+
+      _updateBatch(toUpdate, status, 0);
+    };
+
+    $scope.toggleCheckAll = function() {
+      var i;
+      for(i = 0;i < $scope.data.registerUsers.length;i ++) {
+        $scope.data.checks[$scope.data.registerUsers[i].id] = $scope.data.checkAll;
+      }
+    };
+
+    $scope.checkCheckAll = function() {
+      var i = 0, allChecked = true;
+      for(i = 0;i < $scope.data.registerUsers.length;i ++) {
+        if(! $scope.data.checks[$scope.data.registerUsers[i].id]) {
+          allChecked = false;
+          break;
+        }
+      }
+
+      $scope.data.checkAll = allChecked;
+    };
+
+    $scope.updateConfig = function() {
+      api.admin.hackathon.put({
+        header: {hackathon_name: activity.name},
+        body: {
+          config: {
+            auto_approve: $scope.data.autoApprove,
+            freedom_team: $scope.data.freedomTeam
+          }
+        }
+      }, function(data) {
+        if(data.error) {
+          showTip('tip-danger', data.error.friendly_message);
+          $scope.data.autoApprove = activity.config.auto_approve;
+          $scope.data.freedomTeam = activity.config.freedom_team;
+        } else {
+          activity.config.auto_approve = $scope.data.autoApprove;
+          activity.config.freedom_team = $scope.data.freedomTeam;
+        }
+      });
+    };
+
+    refresh();
   })
   .controller('adminController', function($rootScope, $scope, activityService, api) {
     $scope.$emit('pageName', 'SETTINGS.ADMINISTRATORS');
