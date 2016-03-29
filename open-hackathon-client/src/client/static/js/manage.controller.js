@@ -276,7 +276,10 @@ angular.module('oh.controllers', [])
       checks: {},
       perPage: 20,
       curPage: 1,
-      nPage: 0
+      nPage: 0,
+
+      freedomTeam: activity.config.freedom_team,
+      autoApprove: activity.config.auto_approve
     };
 
     var showTip = function(level, content, showTime) {
@@ -385,6 +388,27 @@ angular.module('oh.controllers', [])
       }
 
       $scope.data.checkAll = allChecked;
+    };
+
+    $scope.updateConfig = function() {
+      api.admin.hackathon.put({
+        header: {hackathon_name: activity.name},
+        body: {
+          config: {
+            auto_approve: $scope.data.autoApprove,
+            freedom_team: $scope.data.freedomTeam
+          }
+        }
+      }, function(data) {
+        if(data.error) {
+          showTip('tip-danger', data.error.friendly_message);
+          $scope.data.autoApprove = activity.config.auto_approve;
+          $scope.data.freedomTeam = activity.config.freedom_team;
+        } else {
+          activity.config.auto_approve = $scope.data.autoApprove;
+          activity.config.freedom_team = $scope.data.freedomTeam;
+        }
+      });
     };
 
     refresh();
