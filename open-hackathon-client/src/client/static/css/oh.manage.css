@@ -788,6 +788,7 @@ tags-input .tags .tag-item .remove-button {
 
 .clond-templates {
   margin: 0 -5px;
+  min-height: 300px;
 }
 
 .clond-templates .item {

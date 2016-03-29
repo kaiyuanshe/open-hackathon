@@ -68,7 +68,7 @@
                 if (data.length > 0) {
                     panel.append($('#my_event_item').tmpl(data, {
                         get_banner: function (banners) {
-                            return banners.split(';')[0] || ''
+                            return banners[0] || ''
                         },
                         get_status: function (status) {
                             return status_data[status];

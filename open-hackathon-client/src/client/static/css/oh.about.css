@@ -1,0 +1,150 @@
+.oh-main {
+  background-color: #f6f6f6;
+}
+
+.bg-banner {
+  background: url("/static/images/banner.png");
+  background-position: center -85px;
+  background-color: #f1f1f1;
+  background-repeat: no-repeat;
+  height: 380px;
+  overflow: hidden;
+}
+
+.bg-banner .jumbotron {
+  background: rgba(0, 0, 0, 0.5) no-repeat 50% 50%;
+  background-size: cover;
+  height: 380px;
+  color: #fff;
+  text-align: center;
+  margin-bottom: 0;
+  padding-top: 63px;
+}
+
+.bg-banner .jumbotron h1 {
+  font-size: 20px;
+  margin-bottom: 25px;
+}
+
+.bg-banner .jumbotron h1 span {
+  color: #7dba43;
+}
+
+.bg-banner .jumbotron p {
+  font-size: 16px;
+}
+
+.left_nav {
+  float: left;
+  width: 110px;
+  z-index: 2;
+  position: relative;
+}
+
+.def-nav {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.def-nav li {
+  border-right: 2px solid transparent;
+  padding: 5px 0;
+}
+
+.def-nav li.active {
+  border-color: #7dba43
+}
+
+.def-nav li a:hover,
+.def-nav li a:focus,
+.def-nav li.active a {
+  color: #7dba43;
+}
+
+.right-main {
+  position: relative;
+  margin-left: 110px;
+  min-height: 300px;
+  padding: 8px 30px;
+  color: #929497;
+}
+
+.right-main:before {
+  content: '';
+  position: absolute;
+  left: -2px;
+  top: 0;
+  bottom: 0;
+  border-left: 2px solid #ddd;
+}
+
+.right-main h2 {
+  margin-top: 0;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.text-left {
+  text-align: left!important;
+}
+
+.market {
+  position: relative;
+  cursor: pointer;
+  border: 1px solid #DDD;
+  margin-bottom: 15px;
+  background: #fff;
+  min-height: 200px;
+}
+
+.market img {
+  width: 100%;
+}
+
+.market .title {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  padding: 20px;
+  background-color: rgba(0, 0, 0, 0.5);
+  font-size: 15px;
+  line-height: 24px;
+  color: #fff;
+}
+
+.market:hover .title {
+  display: block;
+}
+
+.contact {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.contact li {
+  margin-right: 30px;
+  width: 100px;
+  text-align: center;
+  vertical-align: text-top;
+  display: inline-block;
+}
+
+.contact li .pic {
+  width: 80px;
+  height: 80px;
+  display: inline-block;
+  color: #fff;
+  font-size: 54px;
+  background-color: #A8A9AD;
+  text-align: center;
+  border-radius: 50%;
+}
+.contact li p{
+  margin-top:10px;
+  margin-bottom:0;
+}

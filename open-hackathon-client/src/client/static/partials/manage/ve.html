@@ -1,1 +1,107 @@
-ve.html
+<div class="manage-ve">
+  <form name="templateForm" class="form-horizontal" ng-submit="templateSubmit()" novalidate>
+    <div class="inner-layout">
+      <div class="inner-left inner-cell">
+        <div class="header">
+          <div class="clearfix">
+            <div class="col-md-12 col-lg-7">
+              <div class="row">
+                <div class="input-group search">
+                  <input type="text" class="form-control" ng-model="search.name" placeholder="Search for...">
+                  <span class="input-group-btn">
+                            <select class="form-control dropdown-list" name="status" ng-model="search.status">
+                              <option value="-1" selected="selected"  translate="TEMPLATE_STATUS.ALL">ALL</option>
+                              <option value="1" translate="TEMPLATE_STATUS.PASS">PASS</option>
+                              <option value="0" translate="TEMPLATE_STATUS.UNAPPROVED">UNAPPROVED</option>
+                              <option value="2" translate="TEMPLATE_STATUS.FAIL">FAIL</option>
+                            </select>
+                            <button class="btn btn-info" type="button" ng-click="searchTemplates()">搜索</button>
+                          </span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-12 col-lg-5">
+              <div class="row  text-right">
+                <a href="#" class="btn btn-primary">创建模板</a>
+                <span href="#" class="btn btn-primary file-btn">从文件创建模板
+                              <input type="file" nv-file-select uploader="uploader" ng-value="file">
+                            </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="clearfix">
+          <div class="clond-templates">
+            <div class="col-lg-4 col-md-6 col-sm-12" ng-repeat="image in image_templates">
+              <div class="item" ng-class="{active:isChecked(templates, image.id)}">
+                <header>
+                  {{image.name}}
+                </header>
+                <div class="item-body text-default">
+                  <div class="line">
+                    <div class="float-right">使用次数（{{image.virtual_environment_count}}）</div>
+                    <div class="author">
+                      <span class="picture"><img src="/static/pic/monkey-32-32px.png"></span>
+                      <span>创建者</span>
+                    </div>
+                  </div>
+                  <div class="line">
+                    <span class="label float-right" ng-class="{'label-warning':image.status==0,'label-success':image.status==1, 'label-danger':image.status==2}">{{ image.status | imageStatus }}</span>
+                    <time><i class="text-success fa fa-calendar"></i> {{image.create_time | date:'yyyy/MM/dd HH:mm' }}</time>
+                  </div>
+                  <p>{{image.description}}</p>
+                </div>
+                <footer>
+                  <div class="btn-group btn-group-justified">
+                    <div class="btn">
+                      <label class="checkbox checkbox-success">
+                        <input type="checkbox" value="{{image.id}}" ng-checked="isChecked(templates, image.id)" check-value="{{image.id}}" check-change="testchange($event,image.id)">
+                        <span>绑定</span>
+                      </label>
+                    </div>
+                    <a class="btn btn-primary" href="{{image.url}}" download="{{image.url}}">下线</a>
+                  </div>
+                </footer>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="clearfix">
+          <!--  <uib-pagination total-items="175" ng-model="bigCurrentPage" max-size="5" class="pagination pagination-success" boundary-link-numbers="true" rotate="false"></uib-pagination> -->
+        </div>
+      </div>
+      <div class="inner-right inner-cell">
+        <div class="inner-list">
+          <header>
+            已绑定模板
+          </header>
+          <div class="content">
+            <uib-accordion close-others="oneAtATime">
+              <uib-accordion-group ng-repeat="temp in templates">
+                <uib-accordion-heading>
+                  {{temp.name}}
+                  <label class="checkbox checkbox-success right" ng-click="expression($event)">
+                    <input type="checkbox" checked="checked">
+                    <span>绑定</span>
+                  </label>
+                </uib-accordion-heading>
+                <div class="line">
+                  <div class="float-right">使用次数（{{temp.virtual_environment_count}}）</div>
+                  <div class="author">
+                    <span class="picture"><img src="/static/pic/monkey-32-32px.png"></span>
+                    <span>创建者</span>
+                  </div>
+                </div>
+                <div class="line">
+                  <span class="label float-right" ng-class="{'label-warning':temp.status==0,'label-success':temp.status==1, 'label-danger':temp.status==2}">{{ temp.status | imageStatus }}</span>
+                  <time><i class="text-success fa fa-calendar"></i> {{temp.create_time | date:'yyyy/MM/dd HH:mm' }}</time>
+                </div>
+                <p>{{temp.description}}</p>
+              </uib-accordion-group>
+            </uib-accordion>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
