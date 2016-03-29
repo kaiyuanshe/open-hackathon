@@ -25,11 +25,8 @@ THE SOFTWARE.
 import sys
 
 sys.path.append("..")
-from datetime import datetime
-from uuid import UUID
 
 from mongoengine import *
-from bson import ObjectId
 
 from hackathon.util import get_now, make_serializable
 from hackathon.constants import TEMPLATE_STATUS, HACK_USER_TYPE

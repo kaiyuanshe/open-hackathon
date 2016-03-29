@@ -29,7 +29,7 @@ from werkzeug.exceptions import Forbidden
 sys.path.append("..")
 
 from flask import g
-from mongoengine import Q
+from mongoengine import Q, ValidationError
 
 from hackathon import Component, RequiredFeature
 from hackathon.hmongo.models import Team, TeamMember, TeamScore, TeamWork, to_dic
@@ -91,13 +91,16 @@ class TeamManager(Component):
         :rtype: dict
         :return: team's information and team's members list if team is found otherwise not_found()
         """
-        team = Team.objects(id=team_id).first()
+        try:
+            team = Team.objects(id=team_id).first()
+        except ValidationError:
+            return None
 
         if not team:
             return None
 
         def sub(t):
-            m = t.dic()
+            m = to_dic(t)
             m["user"] = self.user_manager.user_display_info(t.user)
             return m
 
@@ -118,18 +121,21 @@ class TeamManager(Component):
         :rtype: list
         :return: a list of team filter by name and number on selected hackathon
         """
-        teams = Team.objects(hackathon=hackathon_id)
+        query = Q(hackathon=hackathon_id)
         if name is not None:
-            teams = filter(lambda t: name in t.name, teams)
-        if number is not None:
-            teams = teams[0: number]
+            query &= Q(name__icontains=name)
+
+        try:
+            teams = Team.objects(query).order_by('name')[:number]
+        except ValidationError:
+            return []
 
         # check whether it's anonymous user or not
         user = None
         if self.user_manager.validate_login():
             user = g.user
 
-        return map(lambda x: self.__team_detail(x, user), teams)
+        return [self.__team_detail(x, user) for x in teams]
 
     def create_default_team(self, hackathon, user):
         """Create a default new team for user after registration.
@@ -174,10 +180,11 @@ class TeamManager(Component):
 
         self.__validate_team_permission(g.hackathon.id, team, g.user)
 
-        team.name = kwargs.get("name", team.name),
-        team.description = kwargs.get("description", team.description),
-        team.logo = kwargs.get("logo", team.logo),
+        team.name = kwargs.get("name", team.name)
+        team.description = kwargs.get("description", team.description)
+        team.logo = kwargs.get("logo", team.logo)
         team.update_time = self.util.get_now()
+
         team.save()
 
         return self.__team_detail(team)
@@ -230,7 +237,7 @@ class TeamManager(Component):
             if team.leader == user:
                 team.delete()
                 for u in member_users:
-                    if u != user:
+                    if u.id != user.id:
                         self.create_default_team(hackathon, u)
             else:
                 Team.objects(id=team.id).update_one(pull__members__user=user)
@@ -257,8 +264,8 @@ class TeamManager(Component):
         if not team:
             return not_found()
 
-        cur_team = self.__get_valid_team_by_user(user.id, team.hackathon_id)
-        if cur_team and cur_team.team.user_team_rels.count() > 1:
+        cur_team = self.__get_valid_team_by_user(user.id, team.hackathon.id)
+        if cur_team and cur_team.members.count() > 1:
             return precondition_failed("Team leader cannot join another team for team member count greater than 1")
 
         if not self.register_manager.is_user_registered(user.id, team.hackathon):
@@ -267,8 +274,8 @@ class TeamManager(Component):
         mem = TeamMember(
             join_time=self.util.get_now(),
             status=TEAM_MEMBER_STATUS.INIT,
-            user_id=user.id)
-        team.members.push(mem)
+            user=user)
+        team.members.append(mem)
 
         team.save()
 
@@ -588,7 +595,10 @@ class TeamManager(Component):
 
     def __get_team_by_id(self, team_id):
         """Get team by its primary key"""
-        return Team.objects(id=team_id).first()
+        try:
+            return Team.objects(id=team_id).first()
+        except ValidationError:
+            return None
 
     def __get_valid_team_by_user(self, user_id, hackathon_id):
         """Get valid Team(Mongo-document) by user and hackathon
@@ -617,7 +627,10 @@ class TeamManager(Component):
         :rtype: Team
         :return: instance of Team if team found otherwise None
         """
-        return Team.objects(hackathon=hackathon_id, name=team_name).first()
+        try:
+            return Team.objects(hackathon=hackathon_id, name=team_name).first()
+        except ValidationError:
+            return None
 
     def __validate_team_permission(self, hackathon_id, team, user):
         """Validate current login user whether has proper right on specific team.
@@ -634,16 +647,16 @@ class TeamManager(Component):
         :raise: Forbidden if user is neither team leader, hackathon admin nor super admin
         """
         self.log.debug(
-            "validate team permission on hackathon %d and team %s for user %s" % (hackathon_id, team.name, user.id))
+            "validate team permission on hackathon %s and team %s for user %s" % (hackathon_id, team.name, user.id))
 
         # check if team leader
-        if team.leader_id != user.id:
+        if team.leader.id != user.id:
             # check if hackathon admin
             if not self.admin_manager.is_hackathon_admin(hackathon_id, user.id):
                 # super permission is already checked in admin_manager.is_hackathon_admin
-                self.log.debug("Access denied for user [%s]%s trying to access team '%s' of hackathon %d " %
+                self.log.debug("Access denied for user [%s]%s trying to access team '%s' of hackathon %s " %
                                (user.id, user.name, team, hackathon_id))
-                raise Forbidden(description="You don't have permission on team '%s'" % team)
+                raise Forbidden(description="You don't have permission on team '%s'" % team.name)
 
         return
 
