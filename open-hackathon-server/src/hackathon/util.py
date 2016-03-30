@@ -38,6 +38,8 @@ from datetime import datetime, timedelta
 from mailthon import email
 from mailthon.postman import Postman
 from mailthon.middleware import TLS, Auth
+from bson import ObjectId
+from uuid import UUID
 
 from hackathon_factory import RequiredFeature
 from hackathon.log import log

@@ -30,7 +30,7 @@ angular.module('oh.manage.router', [
   $stateProvider.state('main', {
     url: '/main',
     templateUrl: '/static/partials/manage/main.html?v=' + VERSION,
-    controller: function($scope, $rootScope, activityService) {
+    controller: function($scope, $rootScope, activityService, api) {
       activityService.reload();
 
       $rootScope.$on('getActivity', function(event, activities) {
@@ -39,10 +39,60 @@ angular.module('oh.manage.router', [
       });
 
       $scope.online = function(activity) {
-        activity.status = 1;
+        if(activity.status == 1)return;
+        api.admin.hackathon.online.post({
+          header: {
+            hackathon_name: activity.name
+          }
+        }).then(function(data) {
+          if (data.error) {
+            var message = ''
+            if (data.error.code == 412101) {
+              message = '当前黑客松没有还未创建成功。'
+            } else if (data.error.code == 412102) {
+              message = '证书授权失败，请检验SUBSCRIPTION ID是否正确。'
+            } else {
+              message = data.error.friendly_message
+            }
+            $scope.$emit('showTip', {
+              level: 'tip-danger',
+              content: message
+            });
+          } else {
+            $scope.$emit('showTip', {
+              level: 'tip-success',
+              content: '上线成功'
+            });
+            activity.status = 1;
+          }
+        })
       }
       $scope.offline = function(activity) {
-        activity.status = 2;
+        if(activity.status == 2)return;
+        api.admin.hackathon.online.post({
+          header: {
+            hackathon_name: activity.name
+          }
+        }).then(function(data) {
+          if (data.error) {
+            var message = ''
+            if (data.error.code == 412101) {
+              message = '当前黑客松没有还未创建成功。'
+            } else {
+              message = data.error.friendly_message
+            }
+            $scope.$emit('showTip', {
+              level: 'tip-danger',
+              content: message
+            });
+          } else {
+            $scope.$emit('showTip', {
+              level: 'tip-success',
+              content: '成功'
+            });
+            activity.status = 2;
+          }
+        })
       }
     }
   }).state('create', {
@@ -95,7 +145,18 @@ angular.module('oh.manage.router', [
   }).state('manage.ve', {
     url: 've/:name',
     templateUrl: '/static/partials/manage/ve.html?v=' + VERSION,
-    controller: 'veController'
+    controller: 'veController',
+    resolve: {
+      activity: function($stateParams, api) {
+        return api.admin.hackathon.get({
+          header: {
+            hackathon_name: $stateParams.name
+          }
+        }).then(function(data) {
+          return data;
+        });
+      }
+    }
   }).state('manage.monitor', {
     url: 'monitor/:name',
     templateUrl: '/static/partials/manage/monitor.html?v=' + VERSION,

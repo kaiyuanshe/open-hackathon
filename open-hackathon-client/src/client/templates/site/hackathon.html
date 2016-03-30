@@ -86,7 +86,7 @@
                                 </dd>
                                 <dt>限额：</dt>
                                 <dd>
-                                    {{ hackathon.config.max_enrollment == 0 and  '无限' or hackathon.config.max_enrollment ~ '人' }}
+                                    {{ not hackathon.config.max_enrollment and  '无限' or hackathon.config.max_enrollment ~ '人' }}
                                     <span class="grey-text">（<span>{{ hackathon.stat.register or 0 }}</span>人已报名）</span>
                                 </dd>
                                 <dt>主办方：</dt>
@@ -107,7 +107,7 @@
                                     {% endif %}
                                     <p>活动已结束。</p>
                                 {% elif registration != None %}
-                                    {% if registration.status == 1 or (hackathon.config.auto_approve =='1' and registration.status == 3) %}
+                                    {% if registration.status == 1 or (hackathon.config.auto_approve and registration.status == 3) %}
                                         {% if experiment == None %}
                                             <a class="btn btn-primary btn-lg"
                                                href="{{ url_for('temp_settings',hackathon_name=hackathon_name) }}">立即参加</a>

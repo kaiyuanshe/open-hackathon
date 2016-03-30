@@ -244,7 +244,7 @@ class UserHackathon(HDocumentBase):
 
 
 class HackathonStat(HDocumentBase):
-    type = StringField()
+    type = StringField() # class HACKATHON_STAT
     count = IntField(min_value=0)
     hackathon = ReferenceField(Hackathon)
 
@@ -262,7 +262,7 @@ class HackathonNotice(HDocumentBase):
         super(HackathonNotice, self).__init__(**kwargs)
 
 
-class TeamWorks(EmbeddedDocument):
+class TeamWork(EmbeddedDocument):
     id = UUIDField(required=True)
     description = StringField()
     type = IntField(required=True)
@@ -289,10 +289,10 @@ class Team(HDocumentBase):
     logo = URLField()
     leader = ReferenceField(User)
     hackathon = ReferenceField(Hackathon)
-    works = EmbeddedDocumentListField(TeamWorks)
+    works = EmbeddedDocumentListField(TeamWork)
     scores = EmbeddedDocumentListField(TeamScore)
     members = EmbeddedDocumentListField(TeamMember)
-    awards = ListField()
+    awards = ListField() # list of uuid. UUID reference class Award-id
     assets = DictField()  # assets for team
     templates = ListField(ReferenceField(Template))  # templates for team
 

@@ -335,36 +335,42 @@ class HackathonManager(Component):
         return {"files": images}
 
     def get_userlike_all_hackathon(self, user_id):
+        user_hackathon_rels = UserHackathon.objects(user=user_id).all()
 
-        hackathons = self.db.session().query(
-            Hackathon.id,
-            Hackathon.banners,
-            Hackathon.name,
-            Hackathon.display_name,
-            Hackathon.short_description,
-        ). \
-            join(HackathonLike, HackathonLike.hackathon_id == Hackathon.id). \
-            filter(HackathonLike.user_id == user_id).all()
-        return [a._asdict() for a in hackathons]
+        def get_user_hackathon_detail(user_hackathon_rel):
+            dict = user_hackathon_rel.dic()
+            dict["hackathon_info"] = user_hackathon_rel.hackathon.dic()
+            return dict
+
+        return [get_user_hackathon_detail(rel) for rel in user_hackathon_rels]
 
     def like_hackathon(self, user, hackathon):
-        like = self.db.find_first_object_by(HackathonLike, user_id=user.id, hackathon_id=hackathon.id)
-        if not like:
-            like = HackathonLike(user_id=user.id, hackathon_id=hackathon.id)
-            self.db.add_object(like)
-            self.db.commit()
+        user_hackathon = UserHackathon.objects(hackathon=hackathon, user=user).first()
+        if not user_hackathon:
+            user_hackathon = UserHackathon(hackathon=hackathon,
+                                           user=user,
+                                           role=HACK_USER_TYPE.VISITOR,
+                                           status=HACK_USER_STATUS.UNAUDIT,
+                                           like=True,
+                                           remark="")
+            user_hackathon.save()
+        if not user_hackathon.like:
+            user_hackathon.like = True
+            user_hackathon.save()
 
-            # increase the count of users that like this hackathon
-            self.increase_hackathon_stat(hackathon, HACKATHON_STAT.LIKE, 1)
+        # increase the count of users that like this hackathon
+        self.increase_hackathon_stat(hackathon, HACKATHON_STAT.LIKE, 1)
 
         return ok()
 
     def unlike_hackathon(self, user, hackathon):
-        self.db.delete_all_objects_by(HackathonLike, user_id=user.id, hackathon_id=hackathon.id)
-        self.db.commit()
+        user_hackathon = UserHackathon.objects(user=user, hackathon=hackathon).first()
+        if user_hackathon:
+            user_hackathon.like = False
+            user_hackathon.save()
 
         # sync the like count
-        like_count = self.db.count_by(HackathonLike, hackathon_id=hackathon.id)
+        like_count = UserHackathon.objects(hackathon=hackathon, like=True).count()
         self.update_hackathon_stat(hackathon, HACKATHON_STAT.LIKE, like_count)
         return ok()
 
@@ -403,16 +409,16 @@ class HackathonManager(Component):
         :type increase: int
         :param increase: increase of the count. Can be positive or negative
         """
-        stat = self.db.find_first_object_by(HackathonStat, hackathon_id=hackathon.id, type=stat_type)
+        stat = HackathonStat.objects(hackathon=hackathon, type=stat_type).first()
         if stat:
             stat.count += increase
         else:
-            stat = HackathonStat(hackathon_id=hackathon.id, type=stat_type, count=increase)
-            self.db.add_object(stat)
+            stat = HackathonStat(hackathon=hackathon, type=stat_type, count=increase)
 
         if stat.count < 0:
             stat.count = 0
-        self.db.commit()
+        stat.update_time = self.util.get_now()
+        stat.save()
 
     def get_hackathon_tags(self, hackathon):
         tags = self.db.find_all_objects_by(HackathonTag, hackathon_id=hackathon.id)
@@ -755,7 +761,7 @@ class HackathonManager(Component):
     def hackathon_online(self, hackathon):
         req = ok()
 
-        if hackathon.status == HACK_STATUS.DRAFT:
+        if hackathon.status == HACK_STATUS.DRAFT or hackathon.status == HACK_STATUS.OFFLINE:
             if self.util.is_local() or hackathon.config.cloud_provide == CLOUD_PROVIDE.NONE:
                 req = ok()
             elif hackathon.config.cloud_provide == CLOUD_PROVIDE.AZURE:
@@ -771,6 +777,16 @@ class HackathonManager(Component):
         if req.get('error') is None:
             hackathon.status = HACK_STATUS.ONLINE
             hackathon.save()
+
+        return req
+
+    def hackathon_offline(self, hackathon):
+        req = ok()
+        if hackathon.status == HACK_STATUS.ONLINE or hackathon.status == HACK_STATUS.DRAFT:
+            hackathon.status = HACK_STATUS.OFFLINE
+            hackathon.save()
+        elif hackathon.status == HACK_STATUS.INIT:
+            req = general_error(code=HTTP_CODE.CREATE_NOT_FINISHED)
 
         return req
 
@@ -794,10 +810,10 @@ class HackathonManager(Component):
             # like = self.db.find_first_object_by(HackathonLike, user_id=user.id, hackathon_id=hackathon.id)
             # if like:
             #     detail["like"] = like.dic()
-            #
-            # register = self.register_manager.get_registration_by_user_and_hackathon(user.id, hackathon.id)
-            # if register:
-            #     detail["registration"] = register.dic()
+
+            register = self.register_manager.get_registration_by_user_and_hackathon(user.id, hackathon.id)
+            if register:
+                detail["registration"] = register.dic()
             #
             # team_rel = self.db.find_first_object_by(UserTeamRel, user_id=user.id, hackathon_id=hackathon.id)
             # if team_rel:

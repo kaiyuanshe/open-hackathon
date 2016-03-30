@@ -29,13 +29,12 @@ from werkzeug.exceptions import Forbidden
 sys.path.append("..")
 
 from flask import g
-from sqlalchemy import and_, func
 from mongoengine import Q
 
 from hackathon import Component, RequiredFeature
-from hackathon.hmongo.models import Team, TeamMember
+from hackathon.hmongo.models import Team, TeamMember, TeamScore, TeamWork, Hackathon, to_dic
 from hackathon.hackathon_response import not_found, bad_request, precondition_failed, ok, forbidden
-from hackathon.constants import TeamMemberStatus, Team_Show_Type
+from hackathon.constants import TEAM_MEMBER_STATUS, TEAM_SHOW_TYPE
 
 __all__ = ["TeamManager"]
 hack_manager = RequiredFeature("hackathon_manager")
@@ -57,6 +56,7 @@ class TeamManager(Component):
             user = g.user
 
         if team:
+            # TODO: refine: dereference member users is not necessary
             return self.__team_detail(team, user)
         else:
             return not_found()
@@ -91,14 +91,17 @@ class TeamManager(Component):
         :rtype: dict
         :return: team's information and team's members list if team is found otherwise not_found()
         """
-        rels = self.db.find_all_objects_by(UserTeamRel, team_id=team_id)
+        team = Team.objects(id=team_id).first()
+
+        if not team:
+            return None
 
         def sub(t):
             m = t.dic()
             m["user"] = self.user_manager.user_display_info(t.user)
             return m
 
-        return map(lambda t: sub(t), rels)
+        return [sub(t) for t in team.members]
 
     def get_hackathon_team_list(self, hackathon_id, name=None, number=None):
         """Get the team list of selected hackathon
@@ -126,22 +129,21 @@ class TeamManager(Component):
         if self.user_manager.validate_login():
             user = g.user
 
-        team_list = map(lambda x: self.__team_detail(x, user), teams)
-        return team_list
+        return map(lambda x: self.__team_detail(x, user), teams)
 
     def create_default_team(self, hackathon, user):
         """Create a default new team for user after registration.
 
         Use user name as team name by default. Append user id in case user name is duplicate
         """
-        user_team_rel = self.__get_valid_team_by_user(user.id, hackathon.id)
-        if user_team_rel:
+        user_team = self.__get_valid_team_by_user(user.id, hackathon.id)
+        if user_team:
             self.log.debug("fail to create team since user is already in some team.")
             return precondition_failed("you must leave the current team first")
 
         team_name = self.__generate_team_name(hackathon, user)
         team_member = TeamMember(join_time=self.util.get_now(),
-                                 status=TeamMemberStatus.Approved,
+                                 status=TEAM_MEMBER_STATUS.APPROVED,
                                  user=user)
         team = Team(name=team_name,
                     leader=user,
@@ -171,11 +173,13 @@ class TeamManager(Component):
                 return precondition_failed("team with the same name exists already")
 
         self.__validate_team_permission(g.hackathon.id, team, g.user)
-        self.db.update_object(team,
-                              name=kwargs.get("name", team.name),
-                              description=kwargs.get("description", team.description),
-                              logo=kwargs.get("logo", team.logo),
-                              update_time=self.util.get_now())
+
+        team.name = kwargs.get("name", team.name),
+        team.description = kwargs.get("description", team.description),
+        team.logo = kwargs.get("logo", team.logo),
+        team.update_time = self.util.get_now()
+        team.save()
+
         return self.__team_detail(team)
 
     def dismiss_team(self, operator, team_id):
@@ -191,12 +195,11 @@ class TeamManager(Component):
         hackathon = team.hackathon
         self.__validate_team_permission(hackathon.id, team, operator)
 
-        members = self.db.find_all_objects_by(UserTeamRel, team_id=team.id, status=TeamMemberStatus.Approved)
+        members = team.members
         member_users = [m.user for m in members]
 
-        # delete all team members first
-        self.db.delete_all_objects_by(UserTeamRel, team_id=team.id)
-        self.db.delete_object(team)
+        # TODO: transcation?
+        team.delete()
 
         for u in member_users:
             self.create_default_team(hackathon, u)
@@ -219,7 +222,7 @@ class TeamManager(Component):
         if not team.members or len(team.members) == 0:
             self.log.warn("this team doesn't have any members")
             return ok()
-        member_users = [m.user for m in team.members if m.status == TeamMemberStatus.Approved]
+        member_users = [m.user for m in team.members if m.status == TEAM_MEMBER_STATUS.APPROVED]
 
         num_team_members = len(member_users)
         hackathon = team.hackathon
@@ -247,7 +250,7 @@ class TeamManager(Component):
         :return: if user already joined team or team not exist, return bad request. Else, return a dict of joined
             details.
         """
-        if self.db.find_first_object_by(UserTeamRel, user_id=user.id, team_id=team_id):
+        if Team.objects(id=team_id, members__user=user.id).count():
             return ok("You already joined this team.")
 
         team = self.__get_team_by_id(team_id)
@@ -261,72 +264,77 @@ class TeamManager(Component):
         if not self.register_manager.is_user_registered(user.id, team.hackathon):
             return precondition_failed("user not registerd")
 
-        candidate = UserTeamRel(join_time=self.util.get_now(),
-                                update_time=self.util.get_now(),
-                                status=TeamMemberStatus.Init,
-                                hackathon_id=team.hackathon.id,
-                                user_id=user.id,
-                                team_id=team.id)
-        self.db.add_object(candidate)
-        return candidate.dic()
+        mem = TeamMember(
+            join_time=self.util.get_now(),
+            status=TEAM_MEMBER_STATUS.INIT,
+            user_id=user.id)
+        team.members.push(mem)
 
-    def update_team_member_status(self, operator, user_team_rel_id, status):
+        team.save()
+
+        return to_dic(mem)
+
+    def update_team_member_status(self, operator, team_id, status):
         """ update user's status on selected team. if current user doesn't have permission, return bad request.
         Else, update user's status
 
         :type status: int
-        :param status: the status of the team member, see TeamMemberStatus in constants.py
+        :param status: the status of the team member, see TEAM_MEMBER_STATUS in constants.py
 
         :rtype: bool
         :return: if update success, return ok. if not , return bad request.
         """
-        rel = self.db.find_first_object_by(UserTeamRel, id=user_team_rel_id)
-        if not rel:
+        team = Team.objects(id=team_id)
+        mem = filter(lambda x: x.user.id == operator.id, team.members)
+        assert len(mem) < 2
+        if not mem:
             return not_found()
+        mem = mem[0]
 
-        team = rel.team
-        self.__validate_team_permission(rel.hackathon_id, team, operator)
+        self.__validate_team_permission(team.hackathon.id, team, operator)
 
-        if rel.user_id == team.leader_id:
+        if operator.user.id == team.leader.id:
             return precondition_failed("cannot update status of team leader")
 
-        if status == TeamMemberStatus.Approved:
+        if status == TEAM_MEMBER_STATUS.APPROVED:
             # disable previous team first
-            self.db.delete_all_objects_by(UserTeamRel,
-                                          hackathon_id=rel.hackathon_id,
-                                          user_id=rel.user_id,
-                                          status=TeamMemberStatus.Approved)
-            self.db.delete_all_objects_by(Team, hackathon_id=rel.hackathon_id, leader_id=rel.user_id)
+            Team.objects(hackathon=team.hackathon.id).update(pull__members__user={
+                "user": operator.id,
+                "status": TEAM_MEMBER_STATUS.APPROVED})
 
-            rel.status = TeamMemberStatus.Approved
-            rel.update_time = self.util.get_now()
-            self.db.commit()
+            Team.objects(hackathon=team.hackathon.id, leader=operator.id).delete()
+
+            mem.status = TEAM_MEMBER_STATUS.APPROVED
+            mem.update_time = self.util.get_now()
+            team.save()
             return ok("approved")
-        if status == TeamMemberStatus.Denied:
-            user = rel.user
-            hackathon = rel.hackathon
-            self.db.delete_object(rel)
+
+        if status == TEAM_MEMBER_STATUS.DENIED:
+            user = mem.user
+            hackathon = mem.hackathon
+            team.members.remove(mem)
             self.create_default_team(hackathon, user)
             return ok("Your request has been denied, please rejoin another team.")
 
     def kick_or_leave(self, operator, team_id, user_id):
-        rel = self.db.find_first_object_by(UserTeamRel, team_id=team_id, user_id=user_id)
-        if not rel:
+        team = Team.objects(id=team_id, members__user=user_id)
+        if not team:
             return not_found()
+        mem = filter(lambda x: x.user.id == user_id, team.members)[0]
 
-        team = rel.team
-        hackathon = rel.hackathon
-        user = rel.user
-        if team.leader_id == rel.user_id:  # if the user to be leaved or kicked is team leader
+        hackathon = team.hackathon
+        user = mem.user
+        if team.leader.id == user_id:  # if the user to be leaved or kicked is team leader
             return precondition_failed("leader cannot leave team")
 
-        if operator.id == rel.user_id:  # leave team
-            self.db.delete_object(rel)
-            self.db.commit()
-            self.create_default_team(rel.hackathon, rel.user)
+        if operator.id == user_id:  # leave team
+            team.members.remove(mem)
+            team.save()
+            self.create_default_team(hackathon, user)
         else:  # kick somebody else
             self.__validate_team_permission(hackathon.id, team, operator)
-            self.db.delete_object(rel)
+            team.members.remove(mem)
+            team.save()
             self.create_default_team(hackathon, user)
 
         return ok()
@@ -343,7 +351,7 @@ class TeamManager(Component):
         if not team:
             return precondition_failed("you don't join any team so you cannot add teamplate")
 
-        if team.leader_id != g.user.id:
+        if team.leader.id != g.user.id:
             return forbidden("team leader required")
         else:
             return self.hackathon_template_manager.add_template_to_hackathon(args["template_id"], team.id)
@@ -357,7 +365,7 @@ class TeamManager(Component):
         if not team:
             return precondition_failed("you don't join any team so you cannot add teamplate")
 
-        if team.leader_id != g.user.id:
+        if team.leader.id != g.user.id:
             return forbidden("team leader required")
         else:
             return self.hackathon_template_manager.delete_template_from_hackathon(template_id, team.id)
@@ -374,15 +382,20 @@ class TeamManager(Component):
         if not self.admin_manager.is_hackathon_admin(team.hackathon_id, judge.id):
             return forbidden()
 
-        score = self.db.find_first_object_by(TeamScore, team_id=team.id, judge_id=judge.id)
+        score = filter(lambda x: x.judge.id == judge.id, team.scores)
         if score:
+            score = score[0]
             score.score = ctx.score
             score.reason = ctx.get("reason")
             score.update_time = self.util.get_now()
-            self.db.commit()
+            team.save()
         else:
-            score = TeamScore(score=ctx.score, team_id=team.id, judge_id=judge.id, reason=ctx.get("reason"))
-            self.db.add_object(score)
+            score = TeamScore(
+                score=ctx.score,
+                judge=judge,
+                reason=ctx.get("reason"))
+            team.scores.append(score)
+            team.save()
 
         return self.get_score(judge, team.id)
 
@@ -394,11 +407,10 @@ class TeamManager(Component):
         if not self.admin_manager.is_hackathon_admin(team.hackathon_id, user.id):
             return {}
 
-        scores = self.db.find_all_objects_by(TeamScore, team_id=team_id)
         resp = {
-            "all": [s.dic() for s in scores]
-        }
-        my = filter(lambda sc: sc.judge_id == user.id, scores)
+            "all": [s.dic() for s in team.scores]}
+
+        my = filter(lambda sc: sc.judge.id == user.id, team.scores)
         if len(my):
             resp["my"] = my[0].dic()
 
@@ -410,105 +422,128 @@ class TeamManager(Component):
             return not_found()
 
         self.__validate_team_permission(team.hackathon_id, team, user)
-        show = TeamShow(
+        work = TeamWork(
             note=context.get("note"),
             type=context.type,
             uri=context.uri,
             team_id=context.team_id,
-            hackathon_id=team.hackathon_id
-        )
-        self.db.add_object(show)
-        return show.dic()
+            hackathon_id=team.hackathon_id)
+
+        self.db.add_object(work)
+        return to_dic(work)
 
     def delete_team_show(self, user, show_id):
-        show = self.db.find_first_object_by(TeamShow, id=show_id)
-        if show:
-            self.__validate_team_permission(show.team.hackathon_id, show.team, user)
-            self.db.delete_object(show)
-            self.db.commit()
+        team = Team.objects(works__id=show_id).first()
+        if team:
+            self.__validate_team_permission(team.hackathon_id, team, user)
+            for i in xrange(len(team.works)):
+                if str(team.works[i].id) == show_id:
+                    team.works.pop(i)
+                    break
+            team.save()
 
         return ok()
 
     def get_team_show_list(self, team_id):
-        show_list = self.db.find_all_objects_by(TeamShow, team_id=team_id)
-        return [s.dic() for s in show_list]
+        team = self.__get_team_by_id(team_id)
+        if not team:
+            return []
+
+        return [to_dic(s) for s in team.works]
 
     def get_hackathon_show_list(self, hackathon_id, show_type=None, limit=10):
-        criterion = TeamShow.hackathon_id == hackathon_id
+        query = Q(hackathon=hackathon_id)
         if show_type:
-            criterion = and_(criterion, TeamShow.type == show_type)
+            query &= Q(works__type=show_type)
         # show_list = TeamShow.query.filter(criterion).order_by(TeamShow.create_time.desc()).limit(limit)
+        works = []
+        for team in Team.objects(query):
+            works += team.works
 
-        show_list = self.db.session().query(
-            TeamShow.id,
-            TeamShow.note,
-            TeamShow.team_id,
-            TeamShow.hackathon_id,
-            Team.name,
-            Team.description,
-            Team.logo,
-            func.group_concat(func.concat(TeamShow.uri, ":::", TeamShow.type)).label('uri')
-        ).join(Team, Team.id == TeamShow.team_id).filter(criterion).group_by(TeamShow.team_id).order_by(
-            TeamShow.create_time.desc()).all()
+        works.sort(lambda a, b: b.create_time - a.create_time)
+        works = works[:limit]
 
-        return [s._asdict() for s in show_list]
+        def fill_work(w):
+            return {
+                "name": w.team.name,
+                "description": w.team.description,
+                "logo": w.team.logo,
+                "uri": "",  # TODO: what is uri?
+                "id": w.id,
+                "note": w.note,
+                "team_id": w.team.id,
+                "hackathon_id": w.hackathon.id}
+
+        return [fill_work(w) for w in works]
 
     def get_team_source_code(self, team_id):
-        return self.db.find_first_object_by(TeamShow, team_id=team_id, type=Team_Show_Type.SourceCode)
+        team = Team.objects(id=team_id, works__type=TEAM_SHOW_TYPE.SOURCE_CODE)
+        if not team:
+            return None
+
+        return filter(lambda w: w.type == TEAM_SHOW_TYPE.SOURCE_CODE, team.works)[0]
 
     def query_team_awards(self, team_id):
         team = self.__get_team_by_id(team_id)
         if not team:
             return []
 
-        return [self.__award_with_detail(r) for r in team.team_awards.order_by(TeamAward.level.desc()).all()]
+        return [self.__award_with_detail(r) for r in sorted(team.awards, lambda a, b: b.level - a.level)]
 
     def get_granted_awards(self, hackathon):
-        awards = self.db.find_all_objects_order_by(TeamAward,
-                                                   None,
-                                                   TeamAward.level.desc(), TeamAward.create_time.asc(),
-                                                   hackathon_id=hackathon.id)
-        return [self.__award_with_detail(r) for r in awards]
+        # awards = self.db.find_all_objects_order_by(TeamAward,
+        #                                            None,
+        #                                            TeamAward.level.desc(), TeamAward.create_time.asc(),
+        #                                            hackathon_id=hackathon.id)
+        # return [self.__award_with_detail(r) for r in awards]
+        # TODO
+        pass
 
     def get_all_granted_awards(self, limit):
-        q = self.db.session().query(TeamAward). \
-            join(Award, TeamAward.award_id == Award.id). \
-            filter_by(). \
-            group_by(TeamAward.hackathon_id). \
-            order_by(TeamAward.level.desc(), TeamAward.create_time.desc()). \
-            limit(limit)
 
-        return [self.__get_hackathon_and_show_detail(s) for s in q]
+        teams = Team.objects.all()
+        teams_with_awards = [team for team in teams if not team.awards == []]
+        teams_with_awards.sort(key=lambda t:(
+            t.hackathon.id,
+            Hackathon.objects(id=t.hackathon.id, awards__id=t.awards[0]).first().awards[0].level
+            ), reverse=True) # sort by hackathon and then sort by award level.
+        teams_with_awards = teams_with_awards[0: int(limit)]
+
+        return [self.__get_hackathon_and_show_detail(team) for team in teams_with_awards]
 
     def grant_award_to_team(self, hackathon, context):
-        team = self.__get_team_by_id(context.team_id)
-        if not team:
-            return not_found("team not found")
-
-        award = self.db.find_first_object_by(Award, id=context.award_id)
-        if not award:
-            return not_found("award not found")
-
-        if team.hackathon_id != hackathon.id or award.hackathon_id != hackathon.id:
-            return precondition_failed("hackathon doesn't match")
-
-        exist = self.db.find_first_object_by(TeamAward, team_id=context.team_id, award_id=context.award_id)
-        if not exist:
-            exist = TeamAward(team_id=context.team_id,
-                              hackathon_id=hackathon.id,
-                              award_id=context.award_id,
-                              reason=context.get("reason"),
-                              level=award.level)
-            self.db.add_object(exist)
-        else:
-            exist.reason = context.get("reason", exist.reason)
-            self.db.commit()
-
-        return self.__award_with_detail(exist)
+        # team = self.__get_team_by_id(context.team_id)
+        # if not team:
+        #     return not_found("team not found")
+        #
+        # award = self.db.find_first_object_by(Award, id=context.award_id)
+        # if not award:
+        #     return not_found("award not found")
+        #
+        # if team.hackathon_id != hackathon.id or award.hackathon_id != hackathon.id:
+        #     return precondition_failed("hackathon doesn't match")
+        #
+        # exist = self.db.find_first_object_by(TeamAward, team_id=context.team_id, award_id=context.award_id)
+        # if not exist:
+        #     exist = TeamAward(team_id=context.team_id,
+        #                       hackathon_id=hackathon.id,
+        #                       award_id=context.award_id,
+        #                       reason=context.get("reason"),
+        #                       level=award.level)
+        #     self.db.add_object(exist)
+        # else:
+        #     exist.reason = context.get("reason", exist.reason)
+        #     self.db.commit()
+        #
+        # return self.__award_with_detail(exist)
+        # TODO
+        pass
 
     def cancel_team_award(self, hackathon, team_award_id):
-        self.db.delete_all_objects_by(TeamAward, hackathon_id=hackathon.id, id=team_award_id)
-        return ok()
+        # self.db.delete_all_objects_by(TeamAward, hackathon_id=hackathon.id, id=team_award_id)
+        # return ok()
+        # TODO
+        pass
 
     def __init__(self):
         pass
@@ -521,12 +556,10 @@ class TeamManager(Component):
     def __team_detail(self, team, user=None):
         resp = team.dic()
         resp["leader"] = self.user_manager.user_display_info(team.leader)
-        resp["member_count"] = team.members.filter(status=TeamMemberStatus.Approved).count()
+        resp["member_count"] = team.members.filter(status=TEAM_MEMBER_STATUS.APPROVED).count()
         # all team action not allowed if frozen
         resp["is_frozen"] = team.hackathon.judge_start_time < self.util.get_now()
-        resp["is_admin"] = False
-        resp["is_leader"] = False
-        resp["is_member"] = False
+
         if user:
             resp["is_admin"] = self.admin_manager.is_hackathon_admin(team.hackathon.id, user.id)
             resp["is_leader"] = team.leader == user
@@ -538,7 +571,7 @@ class TeamManager(Component):
     def __generate_team_name(self, hackathon, user):
         """Generate a default team name by user name. It can be updated later by team leader"""
         team_name = user.name
-        if Team.objects(hackathon=hackathon, name=team_name, members__user=user).first():
+        if Team.objects(hackathon=hackathon, name=team_name).first():
             team_name = "%s (%s)" % (user.name, user.id)
         return team_name
 
@@ -551,36 +584,11 @@ class TeamManager(Component):
         :rtype: list
         :return list of all teams as well as hackathon info
         """
-
-        q = self.db.session().query(UserTeamRel). \
-            join(Hackathon, Hackathon.id == UserTeamRel.hackathon_id). \
-            join(Team, Team.id == UserTeamRel.team_id). \
-            filter(UserTeamRel.user_id == user_id)
-
-        return q.all()
-
-    def __get_team_members(self, team):
-        """Get team members list and related user display info
-
-        :type team: Team
-        :param team: Team to get members. Cannot be None
-
-        :rtype: list
-        :return list of all members as well as user info
-        """
-        team_members = self.db.find_all_objects_by(UserTeamRel, team_id=team.id)
-
-        def get_info(sql_object):
-            r = sql_object.dic()
-            r['user'] = self.user_manager.user_display_info(sql_object.user)
-            return r
-
-        team_members = map(lambda x: get_info(x), team_members)
-        return team_members
+        return Team.objects(members__user=user_id).all()
 
     def __get_team_by_id(self, team_id):
         """Get team by its primary key"""
-        return self.db.find_first_object_by(Team, id=team_id)
+        return Team.objects(id=team_id).first()
 
     def __get_valid_team_by_user(self, user_id, hackathon_id):
         """Get valid Team(Mongo-document) by user and hackathon
@@ -591,9 +599,11 @@ class TeamManager(Component):
         :rtype: Team
         :return instance of Team
         """
-        return Team.objects(hackathon=hackathon_id,
-                            members__user=user_id,
-                            members__status=TeamMemberStatus.Approved).first()
+        return Team.objects(
+            hackathon=hackathon_id,
+            members__match={
+                "user": user_id,
+                "status": TEAM_MEMBER_STATUS.APPROVED}).first()
 
     def __get_team_by_name(self, hackathon_id, team_name):
         """ get user's team basic information stored on table 'team' based on team name
@@ -607,7 +617,7 @@ class TeamManager(Component):
         :rtype: Team
         :return: instance of Team if team found otherwise None
         """
-        return self.db.find_first_object_by(Team, hackathon_id=hackathon_id, name=team_name)
+        return Team.objects(hackathon=hackathon_id, name=team_name).first()
 
     def __validate_team_permission(self, hackathon_id, team, user):
         """Validate current login user whether has proper right on specific team.
@@ -630,19 +640,14 @@ class TeamManager(Component):
         if team.leader_id != user.id:
             # check if hackathon admin
             if not self.admin_manager.is_hackathon_admin(hackathon_id, user.id):
-                # check if super admin
-                if not self.user_manager.is_super_admin(user):
-                    self.log.debug("Access denied for user [%s]%s trying to access team '%s' of hackathon %d " %
-                                   (user.id, user.name, team, hackathon_id))
-                    raise Forbidden(description="You don't have permission on team '%s'" % team)
+                # super permission is already checked in admin_manager.is_hackathon_admin
+                self.log.debug("Access denied for user [%s]%s trying to access team '%s' of hackathon %d " %
+                               (user.id, user.name, team, hackathon_id))
+                raise Forbidden(description="You don't have permission on team '%s'" % team)
 
         return
 
-    def __get_hackathon_and_show_detail(self, Team_Award):
-        ta = Team_Award.dic()
-        team = self.get_team_by_id(ta.get("team_id"))
-        team["hackathon"] = hack_manager.get_hackathon_detail(hack_manager.get_hackathon_by_id(ta.get("hackathon_id")))
-        team["show"] = self.get_team_show_list(ta.get("team_id"))
-        team["award"] = ta
-        team["members"] = self.get_team_members(ta.get("team_id"))
-        return team
+    def __get_hackathon_and_show_detail(self, team):
+        team_dic = team.dic()
+        team_dic["hackathon"] = hack_manager.get_hackathon_detail(team.hackathon)
+        return team_dic
