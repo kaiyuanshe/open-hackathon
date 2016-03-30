@@ -688,7 +688,7 @@ class TeamAwardResource(HackathonResource):
 
     @admin_privilege_required
     def delete(self):
-        return team_manager.cancel_team_award(g.hackathon, self.context().id)
+        return team_manager.cancel_team_award(g.hackathon, self.context().team_id, self.context().award_id)
 
 
 class HackathonGrantedAwardsResource(HackathonResource):
@@ -699,7 +699,7 @@ class HackathonGrantedAwardsResource(HackathonResource):
 
 class GranteAwardsResource(HackathonResource):
     def get(self):
-        return team_manager.get_all_granted_awards(self.context().limit)
+        return team_manager.get_all_granted_awards(self.context().get("limit", 10))
 
 
 class AdminHostserverListResource(HackathonResource):

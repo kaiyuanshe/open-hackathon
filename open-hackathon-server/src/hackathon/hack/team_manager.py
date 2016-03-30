@@ -562,11 +562,11 @@ class TeamManager(Component):
         if not team:
             return []
 
-        return [self.__award_with_detail(r) for r in sorted(team.awards, lambda a, b: b.level - a.level)]
+        return [self.__award_with_detail(r, hackathon=team.hackathon) for r in sorted(team.awards, lambda a, b: b.level - a.level)]
 
     def get_granted_awards(self, hackathon):
         awards = []
-        for team in Team.object(hackathon=hackathon):
+        for team in Team.objects(hackathon=hackathon):
             awards += team.awards
 
         awards.sort(lambda a, b: (b.level - a.level) * 10 + int(a.create_time < b.create_time))
@@ -579,7 +579,7 @@ class TeamManager(Component):
         for hack in Hackathon.objects():
             for team in Team.objects(hackathon=hack):
                 t = team.dic()
-                for award in t.pop["awards"]:
+                for award in t.pop("awards"):
                     ct = copy.deepcopy(t)
                     ct["award"] = award
                     awards.append(ct)
@@ -598,6 +598,7 @@ class TeamManager(Component):
         assert len(award) < 2
         if not award:
             return not_found("award not found")
+        award = award[0]
 
         if team.hackathon.id != hackathon.id:
             return precondition_failed("hackathon doesn't match")
@@ -606,6 +607,7 @@ class TeamManager(Component):
         assert len(team_award) < 2
 
         if team_award:
+            team_award = team_award[0]
             team_award.reason = context.get("reason", team_award.reason)
         else:
             team_award = TeamAward(
@@ -634,11 +636,14 @@ class TeamManager(Component):
     def __init__(self):
         pass
 
-    def __award_with_detail(self, team_award, award=None):
+    def __award_with_detail(self, team_award, award=None, hackathon=None):
         dic = to_dic(team_award)
 
+        if not hackathon:
+            hackathon = g.hackathon
+
         if not award:
-            award = filter(lambda a: a.id == team_award.award_id, g.hackathon.awards)[0]
+            award = filter(lambda a: a.id == team_award.award_id, hackathon.awards)[0]
 
         dic["award"] = to_dic(award)
         return dic
