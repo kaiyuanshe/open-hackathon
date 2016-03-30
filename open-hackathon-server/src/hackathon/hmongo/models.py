@@ -25,11 +25,8 @@ THE SOFTWARE.
 import sys
 
 sys.path.append("..")
-from datetime import datetime
-from uuid import UUID
 
 from mongoengine import *
-from bson import ObjectId
 
 from hackathon.util import get_now, make_serializable
 from hackathon.constants import TEMPLATE_STATUS, HACK_USER_TYPE
@@ -244,7 +241,7 @@ class UserHackathon(HDocumentBase):
 
 
 class HackathonStat(HDocumentBase):
-    type = StringField() # class HACKATHON_STAT
+    type = StringField()  # class HACKATHON_STAT
     count = IntField(min_value=0)
     hackathon = ReferenceField(Hackathon)
 
@@ -267,6 +264,7 @@ class TeamWork(EmbeddedDocument):
     description = StringField()
     type = IntField(required=True)
     uri = URLField()
+    create_time = DateTimeField(default=get_now())
 
 
 class TeamScore(EmbeddedDocument):
@@ -292,7 +290,7 @@ class Team(HDocumentBase):
     works = EmbeddedDocumentListField(TeamWork)
     scores = EmbeddedDocumentListField(TeamScore)
     members = EmbeddedDocumentListField(TeamMember)
-    awards = ListField() # list of uuid. UUID reference class Award-id
+    awards = ListField()  # list of uuid. UUID reference class Award-id
     assets = DictField()  # assets for team
     templates = ListField(ReferenceField(Template))  # templates for team
 
