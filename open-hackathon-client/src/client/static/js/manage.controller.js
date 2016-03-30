@@ -21,43 +21,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 // -----------------------------------------------------------------------------------
-
-angular.module('oh.controllers', [])
-  .controller('MainController', MainController = function($scope, $rootScope, $location, $window, $cookies, $state, $translate, api, activityService, NAV) {
-    $scope.isloaded = true;
-
-    $scope.loading = false;
-    $rootScope.$on("$stateChangeStart", function(event, toState, toParams, fromState, fromParams) {
-      $scope.loading = true;
-      var activity = activityService.getCurrentActivity();
-      $scope.currentActivity = {
-        name: toParams.name
-      };
-      if (toParams.name === undefined || activity.name == toParams.name) {
-
-      } else {
-        activity = activityService.getByName(toParams.name)
-        if (activity.name != undefined) {
-          activity.name = toParams.name;
-          activityService.setCurrentActivity(activity);
-          //$scope.$emit('changeCurrenActivity', activity);
-          // if (activity.status == -1) {
-          //   $state.go('create', {
-          //     name: toParams.name
-          //   });
-          // }
-        } else {
-          api.admin.hackathon.get({
-            header: {
-              hackathon_name: toParams.name
-            }
-          }).then(function(data) {
-            if (data.error) {
-              $state.go('404');
-            } else {
-              activityService.add(data);
-              activityService.setCurrentActivity(data);
-              // if (data.status == -1) {
+/*
+          // if (data.status == -1) {
               //   $state.go('create', {
               //     name: toParams.name
               //   });
@@ -65,11 +30,77 @@ angular.module('oh.controllers', [])
               $state.go(toState.name, {
                 name: toParams.name
               });
-              //}
+              //}*/
+angular.module('oh.controllers', [])
+  .controller('MainController', MainController = function($scope, $rootScope, $state, $q, api, activityService) {
+    $scope.isloaded = true;
+
+    $scope.loading = false;
+
+    function asyncActivity(toParams) {
+      var deferred = $q.defer();
+      deferred.notify('About to greet ' + name + '.');
+      var activity = activityService.getCurrentActivity();
+      $scope.currentActivity = {
+        name: toParams.name
+      };
+      if (toParams.name === undefined || activity.name == toParams.name) {
+        deferred.resolve(activity)
+      } else {
+        activity = activityService.getByName(toParams.name)
+        if (activity.name != undefined) {
+          activity.name = toParams.name;
+          activityService.setCurrentActivity(activity);
+          deferred.resolve(activity)
+        } else {
+          api.admin.hackathon.get({
+            header: {
+              hackathon_name: toParams.name
+            }
+          }).then(function(data) {
+            if (data.error) {
+              deferred.reject(data.error)
+            } else {
+              activityService.add(data);
+              activityService.setCurrentActivity(data);
+              deferred.resolve(data)
             }
           });
-          event.preventDefault();
         }
+      }
+
+      return deferred.promise;
+    }
+
+    $rootScope.$on("$stateChangeStart", function(event, toState, toParams, fromState, fromParams) {
+      $scope.loading = true;
+      if (toState.name == 'create' || toState.name == 'main') {
+        return;
+      } else {
+        asyncActivity(toParams).then(function(activity) {
+            console.log(activity)
+            if (activity.status == -1) {
+              $state.go('create', {
+                name: toParams.name
+              });
+            } else if (activity.config.cloud_provide == 0) {
+              switch (toState.name) {
+                case 'manage.ve':
+                case 'manage.monitor':
+                case 'manage.cloud':
+                case 'manage.servers':
+                  $state.go('404');
+                  return
+              }
+            } else {
+              $rootScope.$broadcast('chargeActitity')
+            }
+          },
+          function(error) {
+            $state.go('404');
+            event.preventDefault();
+          }
+        )
       }
     });
 
@@ -79,7 +110,11 @@ angular.module('oh.controllers', [])
 
   })
   .controller('manageController', function($scope, $state, activityService, session, NAV) {
-    var activity = activityService.getCurrentActivity();
+    var activity = $scope.activity = activityService.getCurrentActivity();
+    $scope.$on('chargeActitity', function(event) {
+      activity = $scope.activity = activityService.getCurrentActivity();
+      event.preventDefault();
+    })
     $scope.page = {
       name: ''
     };
@@ -106,7 +141,11 @@ angular.module('oh.controllers', [])
       if (type == 1) {
         return true;
       }
-      return activity.config.cloud_provide != 0
+      if (activity.config) {
+        return activity.config.cloud_provide != 0
+      } else {
+        return false;
+      }
     }
 
     $scope.navLink = function(item) {
@@ -134,7 +173,9 @@ angular.module('oh.controllers', [])
     $scope.tags = [];
     $scope.activityFormDisabled = false;
     angular.forEach($scope.modules.tags, function(value, key) {
-      $scope.tags.push({text: value});
+      $scope.tags.push({
+        text: value
+      });
     });
 
     $scope.provider = {
@@ -179,9 +220,9 @@ angular.module('oh.controllers', [])
         body: $scope.modules
       }, function(data) {
         if (data.error) {
-          $scope.showTip(level='tip-danger', content=data.error.friendly_message);
+          $scope.showTip(level = 'tip-danger', content = data.error.friendly_message);
         } else {
-          $scope.showTip(level='tip-success', content='更新成功');
+          $scope.showTip(level = 'tip-success', content = '更新成功');
         }
         $scope.activityFormDisabled = false;
       });
@@ -198,9 +239,9 @@ angular.module('oh.controllers', [])
         }
       }, function(data) {
         if (data.error) {
-          $scope.showTip(level='tip-danger', content=data.error.friendly_message);
+          $scope.showTip(level = 'tip-danger', content = data.error.friendly_message);
         } else {
-          $scope.showTip(level='tip-success', content='删除成功');
+          $scope.showTip(level = 'tip-success', content = '删除成功');
         }
       });
     };
@@ -216,9 +257,9 @@ angular.module('oh.controllers', [])
         }
       }, function(data) {
         if (data.error) {
-          $scope.showTip(level='tip-danger', content=data.error.friendly_message);
+          $scope.showTip(level = 'tip-danger', content = data.error.friendly_message);
         } else {
-          $scope.showTip(level='tip-success', content='添加成功');
+          $scope.showTip(level = 'tip-success', content = '添加成功');
         }
       });
     };
@@ -233,9 +274,9 @@ angular.module('oh.controllers', [])
         }
       }, function(data) {
         if (data.error) {
-          $scope.showTip(level='tip-danger', content=data.error.friendly_message);
+          $scope.showTip(level = 'tip-danger', content = data.error.friendly_message);
         } else {
-          $scope.showTip(level='tip-success', content='保存成功');
+          $scope.showTip(level = 'tip-success', content = '保存成功');
         }
       });
     };
@@ -256,9 +297,9 @@ angular.module('oh.controllers', [])
         }
       }).then(function(data) {
         if (data.error) {
-          $scope.showTip(level='tip-danger', content=data.error.friendly_message);
+          $scope.showTip(level = 'tip-danger', content = data.error.friendly_message);
         } else {
-          $scope.showTip(level='tip-success', content='登录方式修改成功');
+          $scope.showTip(level = 'tip-success', content = '登录方式修改成功');
         }
       });
     };
@@ -432,12 +473,147 @@ angular.module('oh.controllers', [])
     $scope.$emit('pageName', 'SETTINGS.AWARDS');
 
   })
-  .controller('veController', function($rootScope, $scope, activityService, api) {
+  .controller('veController', function($rootScope, $scope, $stateParams, $filter, activityService, $cookies, FileUploader, activity, api) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.VIRTUAL_ENVIRONMENT');
 
+    api.template.list.get({}).then(function(data) {
+      $scope.image_templates = data;
+    });
+
+    api.admin.hackathon.template.list.get({
+      header: {
+        hackathon_name: activity.name
+      }
+    }, function(data) {
+      $scope.templates = data;
+    })
+
+    var uploader = $scope.uploader = new FileUploader({
+      url: api.template.file.post._path_,
+      headers: {
+        token: $cookies.get('token')
+      },
+      autoUpload: true
+    });
+
+    uploader.filters.push({
+      name: 'templateFilter',
+      fn: function(item, options) {
+        return /js|json|txt$/i.test(item.name);
+      }
+    });
+
+    uploader.onWhenAddingFileFailed = function(item, filter, options) {
+      $scope.$emit('showTip', {
+        level: 'tip-warning',
+        content: '模板文件必须是txt、js、json后缀名'
+      });
+    };
+
+    uploader.onCompleteItem = function(fileItem, data) {
+      if (data.error) {
+        $scope.$emit('showTip', {
+          level: 'tip-danger',
+          content: data.error.friendly_message
+        });
+      } else {
+        api.template.list.get({}).then(function(data) {
+          $scope.image_templates = data;
+        });
+      }
+    };
+
+    uploader.onCompleteAll = function() {
+      $scope.file = '';
+    };
+
+    $scope.oneAtATime = true;
+    $scope.templates = [];
+    $scope.search = {
+      status: '-1'
+    }
+    $scope.searchTemplates = function() {
+      api.template.list.get({
+        query: $scope.search
+      }).then(function(data) {
+        $scope.image_templates = data;
+      });
+    }
+
+    $scope.testchange = function($event, id) {
+      var result
+      if ($event.target.checked) {
+        result = api.admin.hackathon.template.post({
+          body: {
+            template_id: id
+          },
+          header: {
+            hackathon_name: activity.name
+          }
+        });
+      } else {
+        result = api.admin.hackathon.template.delete({
+          query: {
+            template_id: id
+          },
+          header: {
+            hackathon_name: activity.name
+          }
+        });
+      }
+      result.then(function(data) {
+        if (data.error) {
+          $scope.$emit('showTip', {
+            level: 'tip-danger',
+            content: data.error.friendly_message
+          });
+        } else {
+          $scope.templates = data;
+        }
+      })
+    }
+
+    $scope.expression = function($event) {
+      $event.stopPropagation();
+    }
+
+    $scope.isChecked = function(list, id) {
+      var obj = $filter('filter')(list, {
+        id: id
+      }, true);
+      return obj.length > 0 ? true : false;
+    }
+    $scope.templateSubmit = function() {
+      if ($scope.templates.length > 0) {
+        $scope.wizard = 4;
+        updataActivityStatus(0);
+      } else {
+        $scope.$emit('showTip', {
+          level: 'tip-danger',
+          content: '请绑定模板'
+        });
+      }
+    }
+
   })
-  .controller('monitorController', function($rootScope, $scope, activityService, api) {
+  .controller('monitorController', function($rootScope, $scope, stateParams, activityService, api) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.ENVIRONMENTAL_MONITOR');
+    var currentHackathon = $stateParams.name;
+    api.admin.experiment.list.get({
+      query: data,
+      header: {
+        hackathon_name: currentHackathon
+      }
+    }).then(function(data) {
+      if (data.error) {
+        $scope.$emit('showTip', {
+          level: 'tip-danger',
+          content: data.error.friendly_message
+        });
+      } else {
+        $scope.experiment = data;
+      }
+    })
 
   })
   .controller('cloudController', function($rootScope, $scope, activityService, api) {
@@ -450,12 +626,13 @@ angular.module('oh.controllers', [])
   .controller('createController', function($scope, $timeout, $filter, $cookies, $state, $stateParams, FileUploader, dialog, api) {
     var request;
     console.log($stateParams.name);
-    $scope.wizard = 1;
+    $scope.wizard = 3;
     $scope.isShowAdvancedSettings = true;
 
     $scope.activityFormDisabled = false;
 
     $scope.activity = {
+      name: 'aaaaa',
       location: '',
       tags: [],
       config: {
@@ -577,25 +754,22 @@ angular.module('oh.controllers', [])
         status: 'warning'
       }).then(function() {
         $scope.isAzureForm = $scope.clondservices == 1;
-        if (!$scope.isAzureForm) {
-          api.admin.hackathon.config.put({
-            header: {
-              hackathon_name: $scope.activity.name
-            },
-            body: {
-              cloud_provide: $scope.clondservices
-            }
-          }).then(function(data) {
-            if (data.error) {
-              $scope.$emit('showTip', {
-                level: 'tip-danger',
-                content: data.error.friendly_message
-              });
-            } else {
-              $scope.wizard = 3;
-            }
-          });
-        }
+
+        api.admin.hackathon.config.put({
+          header: {
+            hackathon_name: $scope.activity.name
+          },
+          body: {
+            cloud_provide: parseInt($scope.clondservices)
+          }
+        }).then(function(data) {
+          if (data.error) {
+            $scope.$emit('showTip', {
+              level: 'tip-danger',
+              content: data.error.friendly_message
+            });
+          }
+        });
       })
     };
 
@@ -606,8 +780,8 @@ angular.module('oh.controllers', [])
       management_host: 'management.core.chinacloudapi.cn',
     };
 
-    $scope.azureNext = function(){
-       $scope.wizard = 3;
+    $scope.azureNext = function() {
+      $scope.wizard = 3;
     }
 
     $scope.azureFormSubmit = function() {
@@ -626,14 +800,14 @@ angular.module('oh.controllers', [])
         } else {
           api.admin.azure.checksubid.post({
             body: {
-              subscription_id:$scope.azure.subscription_id
+              subscription_id: $scope.azure.subscription_id
             },
             header: {
               hackathon_name: $scope.activity.name
             }
-          }).then(function(data){
-            if(!data.message){
-               $scope.$emit('showTip', {
+          }).then(function(data) {
+            if (!data.message) {
+              $scope.$emit('showTip', {
                 level: 'tip-warning',
                 content: '证书授权失败，请检验SUBSCRIPTION ID是否正确。'
               });
@@ -780,19 +954,19 @@ angular.module('oh.controllers', [])
         }
       }).then(function(data) {
         $scope.onlineDisabled = false;
-          if (data.error) {
-            var message = ''
-            if(data.error.code ==412101){
-              message ='当前黑客松没有还未创建成功。'
-            } else if(data.error.code ==412102) {
-              message ='证书授权失败，请检验SUBSCRIPTION ID是否正确。'
-            }else {
-              message = data.error.friendly_message
-            }
-            $scope.$emit('showTip', {
-              level: 'tip-danger',
-              content: message
-            });
+        if (data.error) {
+          var message = ''
+          if (data.error.code == 412101) {
+            message = '当前黑客松没有还未创建成功。'
+          } else if (data.error.code == 412102) {
+            message = '证书授权失败，请检验SUBSCRIPTION ID是否正确。'
+          } else {
+            message = data.error.friendly_message
+          }
+          $scope.$emit('showTip', {
+            level: 'tip-danger',
+            content: message
+          });
         } else {
           $scope.$emit('showTip', {
             level: 'tip-success',

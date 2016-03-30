@@ -251,13 +251,9 @@ class UserHackathonListResource(HackathonResource):
 class UserHackathonLikeResource(HackathonResource):
     def get(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('user_id', type=int, location='args', required=False)
+        parse.add_argument('user_id', type=str, location='args', required=False)
         args = parse.parse_args()
-        query_uid = args["user_id"] or 0
-        if query_uid == g.user.id or query_uid == 0:
-            user_id = g.user.id
-        else:
-            user_id = query_uid
+        user_id = g.user.id if args["user_id"] else args["user_id"]
         return hackathon_manager.get_userlike_all_hackathon(user_id)
 
     @hackathon_name_required
@@ -731,6 +727,10 @@ class AdminHackathonOnLineResource(HackathonResource):
     def post(self):
         return hackathon_manager.hackathon_online(g.hackathon)
 
+class AdminHackathonOffLineResource(HackathonResource):
+    @admin_privilege_required
+    def post(self):
+        return hackathon_manager.hackathon_offline(g.hackathon)
 
 class AdminHackathonNoticeResource(HackathonResource):
     @admin_privilege_required

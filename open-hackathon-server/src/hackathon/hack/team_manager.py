@@ -29,7 +29,6 @@ from werkzeug.exceptions import Forbidden
 sys.path.append("..")
 
 import uuid
-import copy
 import time
 from flask import g
 from mongoengine import Q, ValidationError
@@ -562,32 +561,30 @@ class TeamManager(Component):
         if not team:
             return []
 
-        return [self.__award_with_detail(r, hackathon=team.hackathon) for r in sorted(team.awards, lambda a, b: b.level - a.level)]
+        awards = [self.__award_with_detail(r, hackathon=team.hackathon) for r in team.awards]
+        awards.sort(lambda a, b: b.level - a.level)
+        return awards
 
     def get_granted_awards(self, hackathon):
         awards = []
         for team in Team.objects(hackathon=hackathon):
             awards += team.awards
 
+        awards = [self.__award_with_detail(r) for r in awards]
         awards.sort(lambda a, b: (b.level - a.level) * 10 + int(a.create_time < b.create_time))
 
-        return [self.__award_with_detail(r) for r in awards]
+        return awards
 
     def get_all_granted_awards(self, limit):
-        awards = []
+        teams = Team.objects.all()
+        teams_with_awards = [team for team in teams if not team.awards == []]
+        teams_with_awards.sort(key=lambda t: (
+            t.hackathon.id,
+            Hackathon.objects(id=t.hackathon.id, awards__id=t.awards[0]).first().awards[0].level),
+            reverse=True)  # sort by hackathon and then sort by award level.
+        teams_with_awards = teams_with_awards[0: int(limit)]
 
-        for hack in Hackathon.objects():
-            for team in Team.objects(hackathon=hack):
-                t = team.dic()
-                for award in t.pop("awards"):
-                    ct = copy.deepcopy(t)
-                    ct["award"] = award
-                    awards.append(ct)
-
-        awards.sort(
-            lambda a, b: (b["award"]["level"] - a["award"]["level"]) * 10 + int(a["create_time"] < b["create_time"]))
-
-        return awards[:limit]
+        return [self.__get_hackathon_and_show_detail(team) for team in teams_with_awards]
 
     def grant_award_to_team(self, hackathon, context):
         team = self.__get_team_by_id(context.team_id)
@@ -747,3 +744,8 @@ class TeamManager(Component):
                 raise Forbidden(description="You don't have permission on team '%s'" % team.name)
 
         return
+
+    def __get_hackathon_and_show_detail(self, team):
+        team_dic = team.dic()
+        team_dic["hackathon"] = hack_manager.get_hackathon_detail(team.hackathon)
+        return team_dic

@@ -156,6 +156,7 @@ Config = {
                         "checkname": ["get"],
                         "list": ["get"],
                         "online": ["post"],
+                        "offline":["post"],
                         "tags": ["get", "post", "put", "delete"],
                         "config": ["post", "put", "delete"],
                         "administrator": {
