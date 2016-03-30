@@ -349,8 +349,14 @@ class TeamShowResource(HackathonResource):
 class HackathonTeamShowResource(HackathonResource):
     @hackathon_name_required
     def get(self):
-        show_type = request.args.get("type")
-        limit = request.args.get("limit", 6)
+        parse = reqparse.RequestParser()
+        parse.add_argument("limit", type=int, location='args')
+        parse.add_argument("type", type=str, location='args')
+        args = parse.parse_args()
+
+        show_type = args.get("type")
+        limit = args.get("limit", 6)
+
         return team_manager.get_hackathon_show_list(g.hackathon.id, show_type, limit)
 
 
@@ -403,9 +409,9 @@ class TeamTemplateResource(HackathonResource):
     @hackathon_name_required
     def delete(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('template_id', type=int, location='args', required=True)
+        parse.add_argument('template_id', type=str, location='args', required=True)
         args = parse.parse_args()
-        return team_manager.delete_template_from(args['template_id'])
+        return team_manager.delete_template_from_team(args['template_id'])
 
 
 class TalentResource(HackathonResource):

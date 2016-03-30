@@ -264,6 +264,7 @@ class TeamWork(EmbeddedDocument):
     description = StringField()
     type = IntField(required=True)
     uri = URLField()
+    create_time = DateTimeField(default=get_now())
 
 
 class TeamScore(EmbeddedDocument):
@@ -280,6 +281,13 @@ class TeamMember(EmbeddedDocument):
     user = ReferenceField(User)
 
 
+class TeamAward(EmbeddedDocument):
+    award_id = UUIDField(required=True)
+    reason = StringField()
+    create_time = DateTimeField(default=get_now())
+    level = IntField(default=5)
+
+
 class Team(HDocumentBase):
     name = StringField(required=True)
     description = StringField()
@@ -289,7 +297,7 @@ class Team(HDocumentBase):
     works = EmbeddedDocumentListField(TeamWork)
     scores = EmbeddedDocumentListField(TeamScore)
     members = EmbeddedDocumentListField(TeamMember)
-    awards = ListField()
+    awards = EmbeddedDocumentListField(TeamAward)
     assets = DictField()  # assets for team
     templates = ListField(ReferenceField(Template))  # templates for team
 
