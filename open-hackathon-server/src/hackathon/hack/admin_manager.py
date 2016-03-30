@@ -86,6 +86,7 @@ class AdminManager(Component):
             'status',
             'creator',
             'type',
+            'config',
             'event_start_time',
             'event_end_time').order_by("-event_end_time")
 

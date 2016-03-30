@@ -755,7 +755,7 @@ class HackathonManager(Component):
     def hackathon_online(self, hackathon):
         req = ok()
 
-        if hackathon.status == HACK_STATUS.DRAFT:
+        if hackathon.status == HACK_STATUS.DRAFT or hackathon.status == HACK_STATUS.OFFLINE:
             if self.util.is_local() or hackathon.config.cloud_provide == CLOUD_PROVIDE.NONE:
                 req = ok()
             elif hackathon.config.cloud_provide == CLOUD_PROVIDE.AZURE:
@@ -771,6 +771,16 @@ class HackathonManager(Component):
         if req.get('error') is None:
             hackathon.status = HACK_STATUS.ONLINE
             hackathon.save()
+
+        return req
+
+    def hackathon_offline(self, hackathon):
+        req = ok()
+        if hackathon.status == HACK_STATUS.ONLINE or hackathon.status == HACK_STATUS.DRAFT:
+            hackathon.status = HACK_STATUS.OFFLINE
+            hackathon.save()
+        elif hackathon.status == HACK_STATUS.INIT:
+            req = general_error(code=HTTP_CODE.CREATE_NOT_FINISHED)
 
         return req
 
