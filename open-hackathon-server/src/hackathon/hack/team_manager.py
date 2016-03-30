@@ -32,7 +32,7 @@ from flask import g
 from mongoengine import Q
 
 from hackathon import Component, RequiredFeature
-from hackathon.hmongo.models import Team, TeamMember, TeamScore, TeamWork, to_dic
+from hackathon.hmongo.models import Team, TeamMember, TeamScore, TeamWork, Hackathon, to_dic
 from hackathon.hackathon_response import not_found, bad_request, precondition_failed, ok, forbidden
 from hackathon.constants import TEAM_MEMBER_STATUS, TEAM_SHOW_TYPE
 
@@ -500,16 +500,16 @@ class TeamManager(Component):
         pass
 
     def get_all_granted_awards(self, limit):
-        # q = self.db.session().query(TeamAward). \
-        #     join(Award, TeamAward.award_id == Award.id). \
-        #     filter_by(). \
-        #     group_by(TeamAward.hackathon_id). \
-        #     order_by(TeamAward.level.desc(), TeamAward.create_time.desc()). \
-        #     limit(limit)
-        #
-        # return [self.__get_hackathon_and_show_detail(s) for s in q]
-        # TODO
-        pass
+
+        teams = Team.objects.all()
+        teams_with_awards = [team for team in teams if not team.awards == []]
+        teams_with_awards.sort(key=lambda t:(
+            t.hackathon.id,
+            Hackathon.objects(id=t.hackathon.id, awards__id=t.awards[0]).first().awards[0].level
+            ), reverse=True) # sort by hackathon and then sort by award level.
+        teams_with_awards = teams_with_awards[0: int(limit)]
+
+        return [self.__get_hackathon_and_show_detail(team) for team in teams_with_awards]
 
     def grant_award_to_team(self, hackathon, context):
         # team = self.__get_team_by_id(context.team_id)
@@ -647,11 +647,7 @@ class TeamManager(Component):
 
         return
 
-    def __get_hackathon_and_show_detail(self, Team_Award):
-        ta = Team_Award.dic()
-        team = self.get_team_by_id(ta.get("team_id"))
-        team["hackathon"] = hack_manager.get_hackathon_detail(hack_manager.get_hackathon_by_id(ta.get("hackathon_id")))
-        team["show"] = self.get_team_show_list(ta.get("team_id"))
-        team["award"] = ta
-        team["members"] = self.get_team_members(ta.get("team_id"))
-        return team
+    def __get_hackathon_and_show_detail(self, team):
+        team_dic = team.dic()
+        team_dic["hackathon"] = hack_manager.get_hackathon_detail(team.hackathon)
+        return team_dic
