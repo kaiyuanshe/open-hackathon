@@ -251,7 +251,6 @@ class TeamManager(Component):
         """Join a team will create a record on user_team_rel table which status will be 0.
 
         :type user: User
-        :param user: the user to join a team
 
         :rtype: dict
         :return: if user already joined team or team not exist, return bad request. Else, return a dict of joined
@@ -281,7 +280,7 @@ class TeamManager(Component):
 
         return to_dic(mem)
 
-    def update_team_member_status(self, operator, team_id, status):
+    def update_team_member_status(self, operator, team_id, user_id, status):
         """ update user's status on selected team. if current user doesn't have permission, return bad request.
         Else, update user's status
 
@@ -291,25 +290,47 @@ class TeamManager(Component):
         :rtype: bool
         :return: if update success, return ok. if not , return bad request.
         """
-        team = Team.objects(id=team_id)
-        mem = filter(lambda x: x.user.id == operator.id, team.members)
+        team = self.__get_team_by_id(team_id)
+        if not team:
+            return not_found()
+
+        mem = filter(lambda x: str(x.user.id) == user_id, team.members)
         assert len(mem) < 2
         if not mem:
             return not_found()
         mem = mem[0]
 
+        # #NOTE1# we have to re-check this here
+        # because of this situation:
+        #   A is in a single-person team TeamA, and request join TeamB
+        #   after that, C join TeamA and now TeamA has two members,
+        #   this is not allowed when status == TEAM_MEMBER_STATUS.APPROVED
+        cur_team = self.__get_valid_team_by_user(mem.user.id, team.hackathon.id)
+        if cur_team and cur_team.members.count() > 1:
+            return precondition_failed("Team leader cannot join another team for team member count greater than 1")
+
         self.__validate_team_permission(team.hackathon.id, team, operator)
 
-        if operator.user.id == team.leader.id:
+        if mem.user.id == team.leader.id:
             return precondition_failed("cannot update status of team leader")
 
         if status == TEAM_MEMBER_STATUS.APPROVED:
             # disable previous team first
-            Team.objects(hackathon=team.hackathon.id).update(pull__members__user={
-                "user": operator.id,
-                "status": TEAM_MEMBER_STATUS.APPROVED})
+            # NOTE:
+            #   Do we also have to delete status that is not TEAM_MEMBER_STATUS.APPROVED?
+            #   i.e., if A request join both TeamB and TeamC, TeamC approve join first, then TeamB approved,
+            #   this will cause A leave TeamB and join TeamC.
+            #   is this the desired behaviour?
+            Team.objects(hackathon=team.hackathon.id).update(__raw__={
+                "$pull": {
+                    "members": {
+                        "user": user_id,
+                        "status": TEAM_MEMBER_STATUS.APPROVED}}})
 
-            Team.objects(hackathon=team.hackathon.id, leader=operator.id).delete()
+            # because only team leader with single team can make join request
+            # so we don't have to make default team for other members in this team
+            # we make the check in #NOTE1# so this is always true
+            Team.objects(hackathon=team.hackathon.id, leader=mem.user.id).delete()
 
             mem.status = TEAM_MEMBER_STATUS.APPROVED
             mem.update_time = self.util.get_now()
@@ -318,8 +339,9 @@ class TeamManager(Component):
 
         if status == TEAM_MEMBER_STATUS.DENIED:
             user = mem.user
-            hackathon = mem.hackathon
+            hackathon = team.hackathon
             team.members.remove(mem)
+            team.save()
             self.create_default_team(hackathon, user)
             return ok("Your request has been denied, please rejoin another team.")
 

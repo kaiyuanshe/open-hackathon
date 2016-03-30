@@ -362,7 +362,7 @@ class TeamMemberResource(HackathonResource):
     @token_required
     def put(self):
         ctx = self.context()
-        return team_manager.update_team_member_status(g.user, ctx.team_id, ctx.status)
+        return team_manager.update_team_member_status(g.user, ctx.team_id, ctx.user_id, ctx.status)
 
     @token_required
     def delete(self):

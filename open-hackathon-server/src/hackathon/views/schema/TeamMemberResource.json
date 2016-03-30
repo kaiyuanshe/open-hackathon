@@ -7,7 +7,8 @@
         "properties": {
           "team_id": {
             "description": "unique identifier of team",
-            "type": "string"
+            "type": "string",
+            "pattern": "^[0-9a-zA-Z]+$"
           }
         }
       }
@@ -24,9 +25,15 @@
               2
             ]
           },
-          "id": {
-            "description": "unique identifier of user_team_rel",
-            "type": "integer"
+          "team_id": {
+            "description": "unique identifier of team",
+            "type": "string",
+            "pattern": "^[0-9a-zA-Z]+$"
+          },
+          "user_id": {
+            "description": "unique identifier of user",
+            "type": "string",
+            "pattern": "^[0-9a-zA-Z]+$"
           }
         }
       }
@@ -38,11 +45,11 @@
         "properties": {
           "user_id": {
             "description": "unique identifier of user",
-            "pattern": "^[0-9]+$"
+            "pattern": "^[0-9a-zA-Z]+$"
           },
           "team_id": {
             "description": "unique identifier of team",
-            "pattern": "^[0-9]+$"
+            "pattern": "^[0-9a-zA-Z]+$"
           }
         }
       }
