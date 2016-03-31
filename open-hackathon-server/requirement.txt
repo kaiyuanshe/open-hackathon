@@ -2,9 +2,6 @@ werkzeug==0.9.6
 flask==0.10.1
 flask-restful==0.2.12
 flask-cors==1.9.0
-sqlalchemy==1.0.8
-flask-sqlalchemy==2.0
-mysql-python==1.2.5
 azure==1.0.2
 requests
 apscheduler==3.0.3
