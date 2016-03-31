@@ -12,5 +12,5 @@ fi
 
 # for linux mint
 if [ $(lsb_release -d | grep -q "Mint") ]; then
-    sudo echo "deb https://apt.dockerproject.org/repo ubuntu-wily main" > /etc/apt/sources.list.d/docker.list
+    sudo echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" > /etc/apt/sources.list.d/docker.list
 fi

@@ -13,7 +13,7 @@ if grep -q "Unable to lacate" <<< $result; then
     exit
 fi
 echo "install autoconf libtool tomcat7"
-result=$(sudo apt-get install -y autoconf libtool tomcat7)
+result=$(sudo apt-get install -y autoconf automake libtool tomcat7)
 if grep -q "Unable to lacate" <<< $result; then
     echo "Could not install dependancy software, pls install docker manually"
     exit
@@ -111,10 +111,10 @@ fi
 sudo apt-cache policy docker-engine
 sudo apt-get update
 # for ubuntu 15
-sudo apt-get install linux-image-extra-$(uname -r)
+sudo apt-get install -y linux-image-extra-$(uname -r)
 # for ubuntu 12 & 14
-sudo apt-get install apparmor
-sudo apt-get install docker-engine
+sudo apt-get install -y apparmor
+sudo apt-get install -y docker-engine
 sudo service docker start
 sudo docker run hello-world
 
