@@ -1,22 +1,59 @@
 #!/bin/bash
-echo "安装将花费一定时间，请耐心等待直到安装完成^_^, ..."
-sudo apt-get update
-sudo apt-get install -y python-setuptools python-dev git python-pip autoconf libtool tomcat7
 
+get_dependency_software() {
+result=$(sudo apt-get update)
+if grep -q "Could not resolve" <<< $result; then
+    echo "Could not update apt-get, please solve it"
+    exit
+fi
+result=$(sudo apt-get install -y git python-setuptools python-dev python-pip)
+if grep -q "Unable to lacate" <<< $result; then
+    echo "Could not install dependancy software, pls install docker manually"
+    exit
+fi
+result=$(sudo apt-get install -y autoconf libtool tomcat7)
+if grep -q "Unable to lacate" <<< $result; then
+    echo "Could not install dependancy software, pls install docker manually"
+    exit
+fi
+}
+
+set_envirement() {
 cd /home && sudo rm -rf opentech
 sudo mkdir opentech && cd opentech
-sudo git clone https://github.com/msopentechcn/open-hackathon.git
+result=$(sudo git clone https://github.com/msopentechcn/open-hackathon.git)
+if grep -q "unable to access" <<< $result; then
+    echo "Could not git clone open-hackathon source code, pls check your network"
+    exit
+fi
 cd /home/opentech/open-hackathon
 sudo pip install -r open-hackathon-server/requirement.txt
 sudo pip install -r open-hackathon-client/requirement.txt
 sudo cp open-hackathon-server/src/hackathon/config_sample.py open-hackathon-server/src/hackathon/config.py
 sudo cp open-hackathon-server/src/hackathon/config_sample.py open-hackathon-server/src/hackathon/config.py
+}
 
-# install and Configure guacamole
-sudo apt-get install -y libcairo2-dev libjpeg62-turbo-dev
-sudo apt-get install -y libjpeg62-dev libpng12-dev libossp-uuid-dev
-sudo apt-get install -y libfreerdp-dev libpango1.0-dev libssh2-1-dev libtelnet-dev
+get_dependency_for_guacamole() {
+result=$(sudo apt-get install -y libcairo2-dev libjpeg62-turbo-dev)
+if grep -q "Unable to lacate" <<< $result; then
+    echo "Could not install dependancy software for guacamole, pls install docker manually"
+    exit
+fi
+result=$(sudo apt-get install -y libjpeg62-dev libpng12-dev libossp-uuid-dev)
+if grep -q "Unable to lacate" <<< $result; then
+    echo "Could not install dependancy software for guacamole, pls install docker manually"
+    exit
+fi
+result=$(sudo apt-get install -y libfreerdp-dev libpango1.0-dev libssh2-1-dev libtelnet-dev)
+if grep -q "Unable to lacate" <<< $result; then
+    echo "Could not install dependancy software for guacamole, pls install docker manually"
+    exit
+fi
 sudo apt-get install -y libvncserver-dev libpulse-dev libwebp-dev libssl-dev libvorbis-dev
+}
+
+install_and_config_guacamole() {
+# install and Configure guacamole
 cd /home/opentech && sudo wget http://sourceforge.net/projects/guacamole/files/current/source/guacamole-server-0.9.9.tar.gz/download
 sudo mv download guacamole-server-0.9.9.tar.gz && sudo tar -xzf guacamole-server-0.9.9.tar.gz && cd guacamole-server-0.9.9/
 sudo autoreconf -fi
@@ -33,28 +70,47 @@ cd /home/opentech/open-hackathon/deploy/guacamole
 sudo cp guacamole-sample.properties /etc/guacamole/guacamole.properties
 sudo cp *.jar /etc/guacamole
 sudo ln -s /etc/guacamole/guacamole.properties /usr/share/tomcat7/.guacamole/guacamole.properties
+}
 
 
 # install docker
-sudo apt-get update
-sudo apt-get install apt-transport-https ca-certificates
+install_and_config_docker() {
+result=$(sudo apt-get update)
+if grep -q "Could not resolve" <<< $result; then
+    echo "Could not update apt-get, please solve it"
+    exit
+fi
+result=$(sudo apt-get install apt-transport-https ca-certificates)
+if grep -q "Unable to lacate" <<< $result; then
+    echo "Could not install dependancy software for docker, pls install docker manually"
+    exit
+fi
 sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
-# get ubuntu version
-# for ubuntu 14
-uversion=$(lsb_release -d | grep 14)
+#get ubuntu version
+#for ubuntu 14
 #this requires root access
-if [ ${uversion} > 0 ]; then
+if [ $(lsb_release -d | grep -q "14") ]; then
     sudo echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" > /etc/apt/sources.list.d/docker.list
 fi
 
 # for ubuntu 15
-uversion=$(lsb_release -d | grep 15)
-if [ ${uversion} > 0 ]; then
+if [ $(lsb_release -d | grep -q "15") ]; then
     sudo echo "deb https://apt.dockerproject.org/repo ubuntu-wily main" > /etc/apt/sources.list.d/docker.list
 fi
 
-sudo apt-get update
-sudo apt-get purge lxc-docker
+# for linux mint
+if [ $(lsb_release -d | grep -q "Mint") ]; then
+    sudo echo "deb https://apt.dockerproject.org/repo ubuntu-wily main" > /etc/apt/sources.list.d/docker.list
+fi
+result=$(sudo apt-get update)
+if grep -q "Could not resolve" <<< $result; then
+    echo "Could not update apt-get, please solve it"
+    exit
+fi
+result=$(sudo apt-get purge lxc-docker)
+if grep -q "Unable to lacate" <<< $result; then
+    echo "Could not install docker, pls install docker manually"
+fi
 sudo apt-cache policy docker-engine
 sudo apt-get update
 # for ubuntu 15
@@ -71,6 +127,21 @@ sudo groupadd docker
 sudo gpasswd -a ${USER} docker
 
 sudo docker pull rastasheep/ubuntu-sshd
+}
+
+
+
+
+echo "It may take a long time to install and configure open-hackathon, please wait a moment^_^, ..."
+echo "安装将花费一定时间，请耐心等待直到安装完成^_^, ..."
+
+
+get_dependency_software
+set_envirement
+get_dependency_for_guacamole
+install_and_config_guacamole
+install_and_config_docker
+
 # Logging && Hosts
 sudo mkdir /var/log/open-hackathon
 sudo chmod -R 644 /var/log/open-hackathon
