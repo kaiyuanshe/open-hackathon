@@ -134,7 +134,7 @@
                                        href="/manage/edit/{{hackathon_name}}">管理</a>
                                 {% elif user.get("profile") == None %}
                                     <a class="btn btn-primary btn-lg"
-                                       href="{{ url_for('user_profile',return_url=request.path) }}">我要报名</a>
+                                       href="{{ url_for('user_profile_edit',return_url=request.path) }}">我要报名</a>
                                 {% elif registration == None %}
                                     <a class="btn btn-primary btn-lg" data-type="register">我要报名</a>
                                 {% endif %}

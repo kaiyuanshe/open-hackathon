@@ -96,7 +96,7 @@ class RegisterManager(Component):
                                        friendly_message="报名人数已满")
 
         try:
-            is_auto_approve = hackathon.config.get(HACKATHON_BASIC_INFO.AUTO_APPROVE, True)
+            is_auto_approve = hackathon.config.get(HACKATHON_CONFIG.AUTO_APPROVE, True)
             status = HACK_USER_STATUS.AUTO_PASSED if is_auto_approve else HACK_USER_STATUS.UNAUDIT
             args.pop("user_id")
             args.pop("hackathon_id")

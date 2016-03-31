@@ -26,10 +26,8 @@ THE SOFTWARE.
 import sys
 
 sys.path.append("..")
-from expr_starter import DockerExprStarter
+from docker_expr_starter import DockerExprStarter
 from hackathon import RequiredFeature
-from hackathon.constants import VEStatus, EStatus
-from hackathon_response import internal_server_error
 
 
 class AlaudaDockerStarter(DockerExprStarter):

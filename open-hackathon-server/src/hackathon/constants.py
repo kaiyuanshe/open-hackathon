@@ -99,8 +99,8 @@ class HACKATHON_CONFIG:
     PRE_ALLOCATE_ENABLED = "pre_allocate_enabled"
     PRE_ALLOCATE_NUMBER = "pre_allocate_number"
     PRE_ALLOCATE_INTERVAL_SECONDS = "pre_allocate_interval_second"
-    ALAUDA_ENABLED = "alauda_enabled"
     FREEDOM_TEAM = "freedom_team"
+    CLOUD_PROVIDER = "cloud_provider"
 
 
 class TEMPLATE_STATUS:

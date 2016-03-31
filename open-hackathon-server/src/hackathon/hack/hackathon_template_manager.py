@@ -138,12 +138,11 @@ class HackathonTemplateManager(Component):
             return []
 
         # get templates of the team
-        htrs = self.db.find_all_objects_by(HackathonTemplateRel, hackathon_id=hackathon.id, team_id=team.id)
-        if len(htrs) == 0:
+        templates = team.templates
+        if len(templates) == 0:
             # get template for the hackathon
-            htrs = self.db.find_all_objects_by(HackathonTemplateRel, hackathon_id=hackathon.id, team_id=-1)
+            templates = hackathon.templates
 
-        templates = map(lambda x: x.template, htrs)
         data = []
         for template in templates:
             content = self.template_library.load_template(template)

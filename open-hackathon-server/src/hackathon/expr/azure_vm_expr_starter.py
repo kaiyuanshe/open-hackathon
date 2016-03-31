@@ -30,7 +30,7 @@ from expr_starter import ExprStarter
 from hackathon import RequiredFeature
 from hackathon.hmongo.models import VirtualEnvironment
 from hackathon.constants import VE_PROVIDER, VERemoteProvider, VEStatus
-from hackathon_response import internal_server_error
+from hackathon.hackathon_response import internal_server_error
 
 
 class AzureVMExprStarter(ExprStarter):

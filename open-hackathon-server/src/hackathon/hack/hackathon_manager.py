@@ -230,14 +230,13 @@ class HackathonManager(Component):
         if HTTP_HEADER.HACKATHON_NAME in request.headers:
             try:
                 hackathon_name = request.headers[HTTP_HEADER.HACKATHON_NAME]
-                with no_dereference(Hackathon) as Hack:
-                    hackathon = Hack.objects(name=hackathon_name).first()
-                    if hackathon:
-                        g.hackathon = hackathon
-                        return True
-                    else:
-                        self.log.debug("cannot find hackathon by name %s" % hackathon_name)
-                        return False
+                hackathon = Hackathon.objects(name=hackathon_name).first()
+                if hackathon:
+                    g.hackathon = hackathon
+                    return True
+                else:
+                    self.log.debug("cannot find hackathon by name %s" % hackathon_name)
+                    return False
             except Exception as ex:
                 self.log.error(ex)
                 self.log.debug("hackathon_name invalid")
@@ -928,7 +927,7 @@ class HackathonManager(Component):
         return result
 
     def __get_hackathon_stat(self, hackathon):
-        stats = self.db.find_all_objects_by(HackathonStat, hackathon_id=hackathon.id)
+        stats = HackathonStat.objects(hackathon=hackathon).all()
         result = {
             "hackathon_id": hackathon.id,
             "online": 0,
@@ -937,16 +936,17 @@ class HackathonManager(Component):
         for item in stats:
             result[item.type] = item.count
 
-        reg_list = hackathon.registers.filter(UserHackathonRel.deleted != 1,
-                                              UserHackathonRel.status.in_([HACK_USER_STATUS.AUTO_PASSED,
-                                                                           HACK_USER_STATUS.AUDIT_PASSED])).all()
-
+        reg_list = UserHackathon.objects(hackathon=hackathon,
+                                         role=HACK_USER_TYPE.COMPETITOR,
+                                         deleted=False,
+                                         status__in=[HACK_USER_STATUS.AUTO_PASSED, HACK_USER_STATUS.AUDIT_PASSED]
+                                         ).only("user").no_dereference().all()
+        reg_list = [uh.user.id for uh in reg_list]
         reg_count = len(reg_list)
         if reg_count > 0:
-            user_id_list = [r.user_id for r in reg_list]
-            user_id_online = self.db.count(User, (User.id.in_(user_id_list) & (User.online == 1)))
-            result["online"] = user_id_online
-            result["offline"] = reg_count - user_id_online
+            online_count = User.objects(id__in=reg_list, online=True).count()
+            result["online"] = online_count
+            result["offline"] = reg_count - online_count
 
         return result
 

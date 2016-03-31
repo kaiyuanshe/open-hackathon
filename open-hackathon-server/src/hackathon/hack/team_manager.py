@@ -34,7 +34,7 @@ from flask import g
 from mongoengine import Q, ValidationError
 
 from hackathon import Component, RequiredFeature
-from hackathon.hmongo.models import Team, TeamMember, TeamScore, TeamWork, TeamAward, Hackathon, to_dic
+from hackathon.hmongo.models import Team, TeamMember, TeamScore, TeamWork, Hackathon, to_dic
 from hackathon.hackathon_response import not_found, bad_request, precondition_failed, ok, forbidden
 from hackathon.constants import TEAM_MEMBER_STATUS, TEAM_SHOW_TYPE
 
@@ -581,7 +581,7 @@ class TeamManager(Component):
         teams_with_awards.sort(key=lambda t: (
             t.hackathon.id,
             Hackathon.objects(id=t.hackathon.id, awards__id=t.awards[0]).first().awards[0].level),
-            reverse=True)  # sort by hackathon and then sort by award level.
+                               reverse=True)  # sort by hackathon and then sort by award level.
         teams_with_awards = teams_with_awards[0: int(limit)]
 
         return [self.__get_hackathon_and_show_detail(team) for team in teams_with_awards]

@@ -28,33 +28,24 @@ import sys
 
 sys.path.append("..")
 from datetime import timedelta
-import json
-import random
-import string
-import pexpect
 
 from werkzeug.exceptions import PreconditionFailed, NotFound
-from os.path import dirname, realpath, abspath
 from mongoengine import Q
 
 from hackathon import Component, RequiredFeature, Context
 from hackathon.constants import EStatus, VERemoteProvider, VE_PROVIDER, VEStatus, ReservedUser, \
-    HACK_NOTICE_EVENT, HACK_NOTICE_CATEGORY, CLOUD_PROVIDER
-from hackathon.hmongo.models import VirtualEnvironment, DockerHostServer, Experiment, User, Template
-from hackathon.hackathon_response import internal_server_error, not_found, ok
+    HACK_NOTICE_EVENT, HACK_NOTICE_CATEGORY, CLOUD_PROVIDER, HACKATHON_CONFIG
+from hackathon.hmongo.models import Experiment, User
+from hackathon.hackathon_response import not_found, ok
 
 __all__ = ["ExprManager"]
 
 
 class ExprManager(Component):
-    register_manager = RequiredFeature("register_manager")
     user_manager = RequiredFeature("user_manager")
     hackathon_manager = RequiredFeature("hackathon_manager")
     admin_Manager = RequiredFeature("admin_manager")
-    hackathon_template_manager = RequiredFeature("hackathon_template_manager")
-    hosted_docker = RequiredFeature("hosted_docker")
-    alauda_docker = RequiredFeature("alauda_docker")
-    team_manager = RequiredFeature("team_manager")
+    template_library = RequiredFeature("template_library")
 
     def start_expr(self, user, template_name, hackathon_name=None):
         """
@@ -216,7 +207,7 @@ class ExprManager(Component):
         """
         hackathon = self.hackathon_manager.get_hackathon_by_name(hackathon_name)
         if hackathon:
-            if not hackathon.config.cloud_provider:
+            if HACKATHON_CONFIG.CLOUD_PROVIDER not in hackathon.config:
                 raise PreconditionFailed("No cloud resource is configured for this hackathon.")
             if self.util.get_now() < hackathon.event_end_time:
                 return hackathon
@@ -225,17 +216,6 @@ class ExprManager(Component):
         else:
             raise NotFound("Hackathon with name %s not found" % hackathon_name)
 
-    def __get_docker(self, hackathon, virtual_environment=None):
-        """select which docker implementation"""
-        if virtual_environment:
-            if virtual_environment.provider == VE_PROVIDER.ALAUDA:
-                return self.alauda_docker
-            return self.hosted_docker
-        elif hackathon.is_alauda_enabled():
-            return self.alauda_docker
-        else:
-            return self.hosted_docker
-
     def get_starter(self, hackathon, template):
         # load expr starter
         starter = None
@@ -243,9 +223,9 @@ class ExprManager(Component):
             return starter
 
         if template.provider == VE_PROVIDER.DOCKER:
-            if hackathon.config.cloud_provider == CLOUD_PROVIDER.AZURE:
+            if hackathon.config[HACKATHON_CONFIG.CLOUD_PROVIDER] == CLOUD_PROVIDER.AZURE:
                 starter = RequiredFeature("azure_docker")
-            elif hackathon.config.cloud_provider == CLOUD_PROVIDER.ALAUDA:
+            elif hackathon.config[HACKATHON_CONFIG.CLOUD_PROVIDER] == CLOUD_PROVIDER.ALAUDA:
                 starter = RequiredFeature("alauda_docker")
         elif template.provider == VE_PROVIDER.AZURE:
             starter = RequiredFeature("azure_vm")
@@ -258,7 +238,7 @@ class ExprManager(Component):
         if not starter:
             raise PreconditionFailed("either template not supported or hackathon resource not configured")
 
-        context = starter.start(Context(
+        context = starter.start_expr(Context(
             template=template,
             user=user,
             hackathon=hackathon
@@ -275,8 +255,6 @@ class ExprManager(Component):
                                                        {'user_id': user.id if user else ""})
 
     def __report_expr_status(self, expr):
-        expr = self.__re_check_expr_status(expr)
-
         ret = {
             "expr_id": str(expr.id),
             "status": expr.status,
@@ -354,32 +332,6 @@ class ExprManager(Component):
 
         return template
 
-    def __remote_start_container(self, hackathon, expr, docker_template_unit, user_id):
-        old_name = docker_template_unit.get_name()
-        suffix = "".join(random.sample(string.ascii_letters + string.digits, 8))
-        new_name = '%d-%s-%s' % (expr.id, old_name, suffix.lower())
-        docker_template_unit.set_name(new_name)
-        self.log.debug("starting to start container: %s" % new_name)
-        # db entity
-        ve = VirtualEnvironment(provider=VE_PROVIDER.DOCKER,
-                                name=new_name,
-                                image=docker_template_unit.get_image_with_tag(),
-                                status=VEStatus.INIT,
-                                remote_provider=VERemoteProvider.Guacamole,
-                                experiment=expr)
-        self.db.add_object(ve)
-        self.db.commit()
-        # start container remotely , use hosted docker or alauda docker
-        docker = self.__get_docker(hackathon)
-        docker.start(docker_template_unit,
-                     hackathon=hackathon,
-                     experiment=expr,
-                     user_id=user_id,
-                     new_name=new_name)
-
-        self.log.debug("starting container %s is ended ... " % new_name)
-        return ve
-
     def __check_expr_status(self, user, hackathon, template):
         """
         check experiment status, if there are pre-allocate experiments, the experiment will be assigned directly
@@ -425,17 +377,8 @@ class ExprManager(Component):
 
     def __get_expr_with_detail(self, experiment):
         info = experiment.dic()
-        info['user_info'] = self.user_manager.user_display_info(experiment.user)
-        virtual_environments = self.db.find_all_objects_by(VirtualEnvironment, experiment_id=experiment.id)
-
-        def get_virtual_environment_detail(virtual_environment):
-            dict = virtual_environment.dic()
-            containers_detail = self.hosted_docker.get_containers_detail_by_ve(virtual_environment)
-            if not containers_detail == {}:
-                dict["hosted_docker"] = containers_detail
-            return dict
-
-        info['virtual_environments'] = [get_virtual_environment_detail(ve) for ve in virtual_environments]
+        # replace OjbectId with user info
+        info['user'] = self.user_manager.user_display_info(experiment.user)
         return info
 
     def __get_filter_condition(self, hackathon_id, **kwargs):
@@ -449,30 +392,6 @@ class ExprManager(Component):
             uids = map(lambda x: x.id, users)
             condition = and_(condition, Experiment.user_id.in_(uids))
         return condition
-
-    def __re_check_expr_status(self, expr):
-        """get experiment's all containers which are based on hosted_docker
-
-        :type  expr: Experiment
-        :param expr: which to get containers from
-
-        :return DockerContainer object List by query
-
-        """
-        if expr.status != EStatus.STARTING:
-            for ve in expr.virtual_environments:
-                if ve.provider != VE_PROVIDER.DOCKER or ve.docker_container is None:
-                    continue
-                # expr status(restarting or running) is not match container running status on docker host
-                try:
-                    if not self.hosted_docker.is_container_running(ve.docker_container):
-                        expr.status = EStatus.UNEXPECTED_ERROR
-                        ve.status = VEStatus.UNEXPECTED_ERROR
-                        expr.save()
-                        break
-                except Exception as ex:
-                    self.log.error(ex)
-        return expr
 
     def __recycle_expr(self, expr):
         """recycle expr

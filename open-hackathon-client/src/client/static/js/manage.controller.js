@@ -626,13 +626,12 @@ angular.module('oh.controllers', [])
   .controller('createController', function($scope, $timeout, $filter, $cookies, $state, $stateParams, FileUploader, dialog, api) {
     var request;
     console.log($stateParams.name);
-    $scope.wizard = 3;
+    $scope.wizard = 1;
     $scope.isShowAdvancedSettings = true;
 
     $scope.activityFormDisabled = false;
 
     $scope.activity = {
-      name: 'aaaaa',
       location: '',
       tags: [],
       config: {

@@ -28,7 +28,7 @@ sys.path.append("..")
 from compiler.ast import flatten
 from threading import Lock
 
-from expr_starter import DockerExprStarter
+from docker_expr_starter import DockerExprStarter
 from hackathon import RequiredFeature, Context
 from hackathon.hmongo.models import Hackathon, Experiment, DockerContainer, PortBinding, DockerHostServer, AzureKey
 from hackathon.constants import DHS_QUERY_STATE, EStatus, AVMStatus, VERemoteProvider, VEStatus, VE_PROVIDER
@@ -70,8 +70,10 @@ class AzureHostedDockerStarter(DockerExprStarter):
             self.__assign_ports(context, host_resp.docker_host_server)
         elif host_resp.state == DHS_QUERY_STATE.ONGOING and context.trial < 20:
             # tried up to 20 times
+            self.log.debug("host servers are all busy, %d times tried, will retry in 3 seconds" % context.trial)
             self.scheduler.add_once(FEATURE, "get_docker_host_server", context, seconds=3)
         else:
+            self.log.debug("no available host server")
             self._on_virtual_environment_failed(context)
 
     def query_network_config_status(self, context):
@@ -121,16 +123,8 @@ class AzureHostedDockerStarter(DockerExprStarter):
             self.log.error(e)
             self.scheduler.add_once(FEATURE, "query_vm_status", context, seconds=TRIAL_INTERVAL_SECONDS)
 
-    def _internal_start_virtual_environment(self, context, docker_template_unit):
-        # context contains complex object, we need create another serializable one with only simple fields
-        ctx = Context(experiment_id=context.experiment.id,
-                      hackathon_id=context.hackathon.id,
-                      template_name=context.template.name,
-                      virtual_environment_name=context.virtual_environment.name,
-                      unit=docker_template_unit)
-        if context.get("user", None):
-            ctx.user_id = context.user.id
-        self.get_docker_host_server(ctx)
+    def _internal_start_virtual_environment(self, context):
+        self.get_docker_host_server(context)
 
     def _get_docker_proxy(self):
         return self.docker
@@ -327,6 +321,7 @@ class AzureHostedDockerStarter(DockerExprStarter):
         self._on_virtual_environment_stopped(context)
 
     def __assign_ports(self, context, host_server):
+        self.log.debug("try to assign port on server %r" % host_server)
         unit = context.unit
         experiment = Experiment.objects(id=context.experiment_id).no_dereference().first()
         virtual_environment = experiment.virtual_environments.get(name=context.virtual_environment_name)
