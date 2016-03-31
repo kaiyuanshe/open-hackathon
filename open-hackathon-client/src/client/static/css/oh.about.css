@@ -7,18 +7,18 @@
   background-position: center -85px;
   background-color: #f1f1f1;
   background-repeat: no-repeat;
-  height: 380px;
+  height: 340px;
   overflow: hidden;
 }
 
 .bg-banner .jumbotron {
   background: rgba(0, 0, 0, 0.5) no-repeat 50% 50%;
   background-size: cover;
-  height: 380px;
+  height: 340px;
   color: #fff;
   text-align: center;
   margin-bottom: 0;
-  padding-top: 63px;
+  padding-top: 69px;
 }
 
 .bg-banner .jumbotron h1 {
@@ -62,25 +62,16 @@
   color: #7dba43;
 }
 
-.right-main {
+.about-main {
   position: relative;
-  margin-left: 110px;
   min-height: 300px;
-  padding: 8px 30px;
-  color: #929497;
+  padding: 8px 0px;
+  color: #505050;
 }
 
-.right-main:before {
-  content: '';
-  position: absolute;
-  left: -2px;
-  top: 0;
-  bottom: 0;
-  border-left: 2px solid #ddd;
-}
-
-.right-main h2 {
+.about-main h2 {
   margin-top: 0;
+  color:#7dba43;
   font-weight: bold;
   margin-bottom: 20px;
 }
@@ -98,6 +89,11 @@
   min-height: 200px;
 }
 
+.market .warp{
+  height:200px;
+  display:table-cell;
+  vertical-align:middle;
+}
 .market img {
   width: 100%;
 }
@@ -126,6 +122,28 @@
   margin: 0;
 }
 
+.jumbotron .contact li{
+   width: 80px;
+   height: 80px;
+   display: inline-block;
+   color: #fff;
+   line-height:80px;
+   background-color: #019D49;
+   text-align: center;
+   border-radius: 50%;
+   margin:0 20px;
+   position:relative;
+}
+.jumbotron .contact li:before{
+  position:absolute;
+  right: -25px;
+  font-size: 20px;
+  font-family: FontAwesome;
+  content: '\f105';
+}
+.jumbotron .contact li:last-child:before{
+  display:none;
+}
 .contact li {
   margin-right: 30px;
   width: 100px;
@@ -135,16 +153,46 @@
 }
 
 .contact li .pic {
-  width: 80px;
-  height: 80px;
+  width: 50px;
+  height: 50px;
   display: inline-block;
   color: #fff;
-  font-size: 54px;
+  font-size: 30px;
+  line-height: 50px;
   background-color: #A8A9AD;
   text-align: center;
   border-radius: 50%;
 }
+.contact li.weixin .pic{
+
+  background-color: #3AB54A;
+}
+.contact li.weibo .pic{
+
+  background-color: #F05A27;
+}
+.contact li.email .pic{
+
+  background-color: #27AAE2;
+}
 .contact li p{
   margin-top:10px;
   margin-bottom:0;
+}
+.d-ul{
+  margin: 0;
+    padding: 0;
+    list-style: none;
+    margin-bottom: 30px;
+}
+.d-ul li {
+    position: relative;
+    padding-left: 15px;
+}
+.d-ul li:before {
+    position: absolute;
+    color: #7dba43;
+    content: '●';
+    left: 0px;
+    font-size: 12px;
 }
