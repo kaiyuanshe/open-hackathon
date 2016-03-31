@@ -1,6 +1,7 @@
 #!/bin/bash
 
 get_dependency_software() {
+echo "updating apt-get......"
 result=$(sudo apt-get update)
 if grep -q "Could not resolve" <<< $result; then
     echo "Could not update apt-get, please solve it"
@@ -12,7 +13,7 @@ if grep -q "Unable to lacate" <<< $result; then
     echo "Could not install dependancy software, pls install docker manually"
     exit
 fi
-echo "install autoconf libtool tomcat7"
+echo "installing autoconf libtool tomcat7"
 result=$(sudo apt-get install -y autoconf automake libtool tomcat7)
 if grep -q "Unable to lacate" <<< $result; then
     echo "Could not install dependancy software, pls install docker manually"
@@ -30,8 +31,9 @@ if grep -q "unable to access" <<< $result; then
     exit
 fi
 cd /home/opentech/open-hackathon
-echo "installing required python library"
-sudo pip install -r open-hackathon-server/requirement.txt
+echo "pip is installing required python library"
+result=$(sudo pip install -r open-hackathon-server/requirement.txt)
+
 sudo pip install -r open-hackathon-client/requirement.txt
 sudo cp open-hackathon-server/src/hackathon/config_sample.py open-hackathon-server/src/hackathon/config.py
 sudo cp open-hackathon-server/src/hackathon/config_sample.py open-hackathon-server/src/hackathon/config.py
