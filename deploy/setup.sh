@@ -142,7 +142,8 @@ deploy() {
 
     # Installing uWSGI
     pip install uwsgi
-
+    cp /home/opentech/open-hackathon/open-hackathon-server/src/open-hackathon-server.conf /etc/init/
+    cp /home/opentech/open-hackathon/open-hackathon-client/src/open-hackathon-client.conf /etc/init/
 }
 
 echo "It may take a long time to install and configure open-hackathon, please wait a moment^_^, ..."
