@@ -67,7 +67,7 @@ class DockerHostManager(Component):
         return [host_server.dic() for host_server in host_servers]
 
     def get_available_docker_host(self, hackathon):
-        vms = DockerHostServer.objects.filter(__raw__={'$where': 'this.container_count+200 < this.container_max_count'}) \
+        vms = DockerHostServer.objects.filter(__raw__={'$where': 'this.container_count+1 < this.container_max_count'}) \
             .filter(hackathon=hackathon, state=DockerHostServerStatus.DOCKER_READY, disabled=False).all()
 
         if self.util.is_local():

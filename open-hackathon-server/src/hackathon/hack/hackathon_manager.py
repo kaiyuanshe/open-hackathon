@@ -255,8 +255,7 @@ class HackathonManager(Component):
 
         :rtype: dict
         """
-        hackathon = Hackathon.objects(name=context.name).first()
-        if hackathon:
+        if Hackathon.objects(name=context.name).count() > 0:
             raise PreconditionFailed("hackathon name already exists")
 
         self.log.debug("add a new hackathon:" + context.name)
@@ -929,7 +928,7 @@ class HackathonManager(Component):
     def __get_hackathon_stat(self, hackathon):
         stats = HackathonStat.objects(hackathon=hackathon).all()
         result = {
-            "hackathon_id": hackathon.id,
+            "hackathon_id": str(hackathon.id),
             "online": 0,
             "offline": 0
         }

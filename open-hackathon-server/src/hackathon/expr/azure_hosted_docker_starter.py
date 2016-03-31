@@ -31,7 +31,7 @@ from threading import Lock
 from docker_expr_starter import DockerExprStarter
 from hackathon import RequiredFeature, Context
 from hackathon.hmongo.models import Hackathon, Experiment, DockerContainer, PortBinding, DockerHostServer, AzureKey
-from hackathon.constants import DHS_QUERY_STATE, EStatus, AVMStatus, VERemoteProvider, VEStatus, VE_PROVIDER
+from hackathon.constants import DHS_QUERY_STATE, EStatus, AVMStatus, VERemoteProvider, VEStatus
 from hackathon.hazure import VirtualMachineAdapter
 from hackathon.template import DOCKER_UNIT
 from hackathon.hazure.utils import find_unassigned_endpoints, add_endpoint_to_network_config, \
@@ -138,7 +138,7 @@ class AzureHostedDockerStarter(DockerExprStarter):
             context.trial += 1
             self._enable_guacd_file_transfer(context)
         except Exception as e:
-            self.log.info("enable guacamole file transfer failed count:" % context.trial)
+            self.log.info("enable guacamole file transfer failed count: %d" % context.trial)
             self.log.error(e)
             if context.trial < 20:
                 self.scheduler.add_once(FEATURE, "enable_guacd_file_transfer", context, seconds=30)
@@ -149,13 +149,10 @@ class AzureHostedDockerStarter(DockerExprStarter):
         # assign host port
         try:
             port_cfg = unit.get_ports()
-            port_cfg = map(lambda p:
-                           p.update(
-                               {DOCKER_UNIT.PORTS_HOST_PORT: self.__get_available_host_port(host_server, p[
-                                   DOCKER_UNIT.PORTS_PORT])}
-                           ),
-                           port_cfg)
-            context.port_cfg = port_cfg
+            for cfg in port_cfg:
+                cfg[DOCKER_UNIT.PORTS_HOST_PORT] = self.__get_available_host_port(host_server,
+                                                                                  cfg[DOCKER_UNIT.PORTS_PORT])
+            context.port_config = port_cfg
             self.__assign_public_ports(context, host_server)
         except Exception as e:
             self.log.error(e)
@@ -163,13 +160,12 @@ class AzureHostedDockerStarter(DockerExprStarter):
 
     def __assign_public_ports(self, context, host_server):
         """assign ports on azure cloud service that map a public port to a port inside certain VM"""
-        port_cfg = context.port_cfg
+        port_cfg = context.port_config
         context.host_server_id = host_server.id
 
         if self.util.is_local():
-            context.port_cfg = map(
-                lambda cfg: cfg.update({DOCKER_UNIT.PORTS_PUBLIC_PORT: cfg[DOCKER_UNIT.PORTS_HOST_PORT]}),
-                port_cfg)
+            for cfg in port_cfg:
+                cfg[DOCKER_UNIT.PORTS_PUBLIC_PORT] = cfg[DOCKER_UNIT.PORTS_HOST_PORT]
             self.__update_virtual_environment_cfg(context)
         else:
             # configure ports on azure cloud service
@@ -225,10 +221,11 @@ class AzureHostedDockerStarter(DockerExprStarter):
     def __update_virtual_environment_cfg(self, context):
         experiment = Experiment.objects(id=context.experiment_id).no_dereference().first()
         virtual_environment = experiment.virtual_environments.get(name=context.virtual_environment_name)
-        host_server = DockerHostServer.objects(id=context.host_server_id)
+        host_server = DockerHostServer.objects(id=context.host_server_id).first()
 
         # azure_key
-        experiment.azure_key = AzureKey.objects(id=context.azure_key_id).first()
+        if not self.util.is_local():
+            experiment.azure_key = AzureKey.objects(id=context.azure_key_id).first()
 
         # update port binding
         for cfg in context.port_config:
@@ -237,8 +234,9 @@ class AzureHostedDockerStarter(DockerExprStarter):
                                        is_public=bool(cfg[DOCKER_UNIT.PORTS_PUBLIC]),
                                        public_port=public_port,
                                        host_port=cfg[DOCKER_UNIT.PORTS_HOST_PORT],
-                                       container_port=cfg[DOCKER_UNIT.PORTS_PORT],
-                                       url=cfg[DOCKER_UNIT.PORTS_URL])
+                                       container_port=cfg[DOCKER_UNIT.PORTS_PORT])
+            if DOCKER_UNIT.PORTS_URL in cfg:
+                port_binding.url = cfg[DOCKER_UNIT.PORTS_URL]
             virtual_environment.docker_container.port_bindings.append(port_binding)
 
         # guacamole config
@@ -280,8 +278,8 @@ class AzureHostedDockerStarter(DockerExprStarter):
             host_server.container_count += 1
             host_server.save()
         else:
+            context.unit.set_ports(context.port_config)
             container_config = context.unit.get_container_config()
-            container_config.set_ports(context.port_config)
 
             try:
                 # create docker container

@@ -48,8 +48,7 @@ class DockerExprStarter(ExprStarter):
     def _internal_start_expr(self, context):
         for unit in context.template_content.units:
             try:
-                context.unit = unit
-                self._internal_start_virtual_environment(context)
+                self.__start_virtual_environment(context, unit)
             except Exception as e:
                 self.log.error(e)
                 self._on_virtual_environment_failed(context)
@@ -89,8 +88,7 @@ class DockerExprStarter(ExprStarter):
                                 name=new_name,
                                 image=docker_template_unit.get_image_with_tag(),
                                 status=VEStatus.INIT,
-                                remote_provider=VERemoteProvider.Guacamole,
-                                experiment=context.experiment)
+                                remote_provider=VERemoteProvider.Guacamole)
         # create a new context for current ve only
         context = context.copy()
         experiment = Experiment.objects(id=context.experiment_id).no_dereference().only("virtual_environments").first()
@@ -107,10 +105,9 @@ class DockerExprStarter(ExprStarter):
         This function should be invoked after container is started in alauda_docker.py and hosted_docker.py
         :param ve: virtual environment
         """
-        expr = Experiment.objects(id=context.experiment_id).no_dereference() \
-            .only("virtual_environments").first()
+        expr = Experiment.objects(id=context.experiment_id).no_dereference().first()
         virtual_env = expr.virtual_environments.get(name=context.virtual_environment_name)
-        remote = virtual_env.remote_para
+        remote = virtual_env.remote_paras
 
         p = pexpect.spawn("scp -P %s %s %s@%s:/usr/local/sbin/guacctl" %
                           (remote["port"],

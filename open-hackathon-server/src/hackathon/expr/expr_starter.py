@@ -102,7 +102,7 @@ class ExprStarter(Component):
         expr = Experiment.objects(id=context.experiment_id).no_dereference() \
             .only("status", "virtual_environments").first()
         if all(ve.status == VEStatus.RUNNING for ve in expr.virtual_environments):
-            expr.status = VEStatus.RUNNING
+            expr.status = EStatus.RUNNING
             expr.save()
             self._on_expr_started(context)
 
