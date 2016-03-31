@@ -156,7 +156,6 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
                 "enable-sftp": True
             }
 
-
             if DOCKER_UNIT.REMOTE_USERNAME in guacamole:
                 gc["username"] = guacamole[DOCKER_UNIT.REMOTE_USERNAME]
 

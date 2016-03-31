@@ -83,8 +83,7 @@ class HostedDockerHealthCheck(HealthCheck):
     """
 
     def __init__(self):
-        self.hosted_docker = RequiredFeature("hosted_docker")
-        self.alauda_docker = RequiredFeature("alauda_docker")
+        self.hosted_docker = RequiredFeature("hosted_docker_proxy")
 
     def report_health(self):
         return self.hosted_docker.report_health()
@@ -97,7 +96,7 @@ class AlaudaDockerHealthCheck(HealthCheck):
     """
 
     def __init__(self):
-        self.alauda_docker = RequiredFeature("alauda_docker")
+        self.alauda_docker = RequiredFeature("alauda_docker_proxy")
 
     def report_health(self):
         return self.alauda_docker.report_health()

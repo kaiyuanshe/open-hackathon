@@ -147,7 +147,6 @@ def init_components():
         AzureCertManager, RegisterManager, HackathonTemplateManager, Cryptor
     from hackathon.template import TemplateLibrary
     from hackathon.remote.guacamole import GuacamoleInfo
-    from hackathon.expr.expr_mgr import ExprManager
     from hackathon.cache.cache_mgr import CacheManagerExt
     from hackathon.hazure.azure_formation import AzureFormation
 
@@ -180,10 +179,12 @@ def init_components():
     factory.provide("docker_host_manager", DockerHostManager)
     factory.provide("hackathon_template_manager", HackathonTemplateManager)
     factory.provide("template_library", TemplateLibrary)
-    factory.provide("expr_manager", ExprManager)
     factory.provide("admin_manager", AdminManager)
     factory.provide("team_manager", TeamManager)
     factory.provide("guacamole", GuacamoleInfo)
+
+    # experiment starter
+    init_expr_components()
 
     # health check items
     factory.provide("health_check_hosted_docker", get_class("hackathon.health.health_check.HostedDockerHealthCheck"))
@@ -193,8 +194,8 @@ def init_components():
     factory.provide("health_check_mongodb", get_class("hackathon.health.health_check.MongoDBHealthCheck"))
 
     # docker
-    factory.provide("hosted_docker", get_class("hackathon.docker.hosted_docker.HostedDockerFormation"))
-    factory.provide("alauda_docker", get_class("hackathon.docker.alauda_docker.AlaudaDockerFormation"))
+    factory.provide("hosted_docker_proxy", get_class("hackathon.docker.hosted_docker.HostedDockerFormation"))
+    factory.provide("alauda_docker_proxy", get_class("hackathon.docker.alauda_docker.AlaudaDockerFormation"))
 
     # storage
     init_hackathon_storage()
@@ -203,6 +204,14 @@ def init_components():
 def init_db():
     from hmongo import db
     factory.provide("db", db, suspend_callable=True)
+
+
+def init_expr_components():
+    from expr import ExprManager, AzureVMExprStarter, AzureHostedDockerStarter, AlaudaDockerStarter
+    factory.provide("expr_manager", ExprManager)
+    factory.provide("alauda_docker", AlaudaDockerStarter)
+    factory.provide("azure_docker", AzureHostedDockerStarter)
+    factory.provide("azure_vm", AzureVMExprStarter)
 
 
 def init_voice_verify():

@@ -285,13 +285,12 @@ class UserExperimentResource(HackathonResource, Component):
         # id is experiment id
         parser = reqparse.RequestParser()
         parser.add_argument('id', type=int, location='args', required=True)
-        parser.add_argument('force', type=int, location='args', default=0)
         args = parser.parse_args()
-        return expr_manager.stop_expr(args["id"], args['force'])
+        return expr_manager.stop_expr(args["id"])
 
     @token_required
     def put(self):
-        return expr_manager.heart_beat(int(self.context().id))
+        return expr_manager.heart_beat(self.context().id)
 
 
 class TeamResource(HackathonResource):
@@ -696,7 +695,7 @@ class GranteAwardsResource(HackathonResource):
 class AdminHostserverListResource(HackathonResource):
     @admin_privilege_required
     def get(self):
-        return docker_host_manager.get_docker_hosts_list(g.hackathon.id)
+        return docker_host_manager.get_docker_hosts_list(g.hackathon)
 
 
 class AdminHostserverResource(HackathonResource):
@@ -706,7 +705,7 @@ class AdminHostserverResource(HackathonResource):
 
     @admin_privilege_required
     def post(self):
-        return docker_host_manager.create_host_server(g.hackathon.id, self.context())
+        return docker_host_manager.add_existed_host_server(g.hackathon.id, self.context())
 
     @admin_privilege_required
     def put(self):

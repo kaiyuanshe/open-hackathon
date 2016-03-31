@@ -25,11 +25,8 @@ THE SOFTWARE.
 import sys
 
 sys.path.append("..")
-from datetime import datetime
-from uuid import UUID
 
 from mongoengine import *
-from bson import ObjectId
 
 from hackathon.util import get_now, make_serializable
 from hackathon.constants import TEMPLATE_STATUS, HACK_USER_TYPE
@@ -294,6 +291,7 @@ class Team(HDocumentBase):
     members = EmbeddedDocumentListField(TeamMember)
     awards = ListField()
     assets = DictField()  # assets for team
+    azure_keys = ListField(ReferenceField(AzureKey))
     templates = ListField(ReferenceField(Template))  # templates for team
 
     def __init__(self, **kwargs):
@@ -335,7 +333,7 @@ class DockerContainer(DynamicEmbeddedDocument):
     image = StringField()
     container_id = StringField()
     host_server = ReferenceField(DockerHostServer)
-    port_bindings = EmbeddedDocumentListField(PortBinding)
+    port_bindings = EmbeddedDocumentListField(PortBinding, default=[])
 
 
 class AzureStorageAccount(DynamicEmbeddedDocument):
@@ -392,7 +390,6 @@ class VirtualEnvironment(DynamicEmbeddedDocument):
     """
     Virtual environment is abstraction of smallest environment unit in template
     """
-    id = UUIDField()
     provider = IntField()  # VE_PROVIDER in enum.py
     name = StringField(required=True, unique=True)
     status = IntField(required=True)  # VEStatus in enum.py
@@ -409,8 +406,9 @@ class Experiment(HDocumentBase):
     last_heart_beat_time = DateTimeField()
     template = ReferenceField(Template)
     user = ReferenceField(User)
+    azure_key = ReferenceField(AzureKey)
     hackathon = ReferenceField(Hackathon)
-    virtual_environments = EmbeddedDocumentListField(VirtualEnvironment)
+    virtual_environments = EmbeddedDocumentListField(VirtualEnvironment, default=[])
 
     def __init__(self, **kwargs):
         super(Experiment, self).__init__(**kwargs)

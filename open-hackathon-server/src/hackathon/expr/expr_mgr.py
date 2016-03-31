@@ -39,7 +39,7 @@ from mongoengine import Q
 
 from hackathon import Component, RequiredFeature, Context
 from hackathon.constants import EStatus, VERemoteProvider, VE_PROVIDER, VEStatus, ReservedUser, \
-    HACK_NOTICE_EVENT, HACK_NOTICE_CATEGORY
+    HACK_NOTICE_EVENT, HACK_NOTICE_CATEGORY, CLOUD_PROVIDER
 from hackathon.hmongo.models import VirtualEnvironment, DockerHostServer, Experiment, User, Template
 from hackathon.hackathon_response import internal_server_error, not_found, ok
 
@@ -51,13 +51,10 @@ class ExprManager(Component):
     user_manager = RequiredFeature("user_manager")
     hackathon_manager = RequiredFeature("hackathon_manager")
     admin_Manager = RequiredFeature("admin_manager")
-    template_library = RequiredFeature("template_library")
     hackathon_template_manager = RequiredFeature("hackathon_template_manager")
     hosted_docker = RequiredFeature("hosted_docker")
     alauda_docker = RequiredFeature("alauda_docker")
     team_manager = RequiredFeature("team_manager")
-    azure_formation = RequiredFeature("azure_formation")
-    azure_cert_manager = RequiredFeature("azure_cert_manager")
 
     def start_expr(self, user, template_name, hackathon_name=None):
         """
@@ -69,8 +66,8 @@ class ExprManager(Component):
         """
 
         self.log.debug("try to start experiment for hackathon %s using template %s" % (hackathon_name, template_name))
-        hackathon = self.__check_hackathon_event_time(hackathon_name)
-        template = self.__check_template_status(hackathon, template_name)
+        hackathon = self.__verify_hackathon(hackathon_name)
+        template = self.__verify_template(hackathon, template_name)
 
         if user:
             expr = self.__check_expr_status(user, hackathon, template)
@@ -78,74 +75,36 @@ class ExprManager(Component):
                 return self.__report_expr_status(expr)
 
         # new expr
-        return self.__start_new_expr(hackathon, template, user_id)
+        return self.__start_new_expr(hackathon, template, user)
 
     def heart_beat(self, expr_id):
-        expr = self.db.find_first_object_by(Experiment, id=expr_id, status=EStatus.RUNNING)
+        expr = Experiment.objects(id=expr_id, status=EStatus.RUNNING).first()
         if expr is None:
             return not_found('Experiment is not running')
 
         expr.last_heart_beat_time = self.util.get_now()
-        self.db.commit()
+        expr.save()
         return ok()
 
-    def stop_expr(self, expr_id, force=0):
+    def stop_expr(self, expr_id):
         """
         :param expr_id: experiment id
         :param force: 0: only stop container and release ports, 1: force stop and delete container and release ports.
         :return:
         """
         self.log.debug("begin to stop %d" % expr_id)
-        expr = self.db.find_first_object_by(Experiment, id=expr_id, status=EStatus.RUNNING)
+        expr = Experiment.objects(id=expr_id, status=EStatus.RUNNING)
         if expr is not None:
-            # Docker
-            if expr.template.provider == VE_PROVIDER.DOCKER:
-                # stop containers
-                for c in expr.virtual_environments.all():
-                    try:
-                        self.log.debug("begin to stop %s" % c.name)
-                        docker = self.__get_docker(expr.hackathon, c)
-                        if force:
-                            docker.delete(c.name, virtual_environment=c, container=c.container, expr_id=expr_id)
-                            c.status = VEStatus.DELETED
-                        else:
-                            docker.stop(c.name, virtual_environment=c, container=c.container, expr_id=expr_id)
-                            c.status = VEStatus.STOPPED
-                    except Exception as e:
-                        self.log.error(e)
-                        self.__roll_back(expr_id)
-                        return internal_server_error('Failed stop/delete container')
-                if force:
-                    expr.status = EStatus.DELETED
-                else:
-                    expr.status = EStatus.STOPPED
-                self.db.commit()
-            else:
-                try:
-                    # todo support delete azure vm
-                    # hosted_docker = RequiredFeature("hosted_docker")
-                    # af = AzureFormation(hosted_docker.load_azure_key_id(expr_id))
-                    # af.stop(expr_id, AVMStatus.STOPPED_DEALLOCATED)
-                    template = self.db.get_object(Template, expr.template_id)
-                    template_content = self.template_library.load_template(template)
-                    azure_keys = self.azure_cert_manager.get_certificates_by_expr(expr_id)
-                    # TODO: which key to use
-                    azure_key = azure_keys[0]
-
-                    # TODO: elimate virtual_environments arg and expr_id arg
-                    self.azure_formation.stop_vm(
-                        expr_id, azure_key, template_content.units, expr.virtual_environments.all(), expr_id)
-                except Exception as e:
-                    self.log.error(e)
-                    return internal_server_error('Failed stopping azure')
-
+            starter = self.get_starter(expr.hackathon, expr.template)
+            if starter:
+                starter.stop_expr(Context(experiment=expr))
             self.log.debug("experiment %d ended success" % expr_id)
             return ok('OK')
         else:
             return ok()
 
     def get_expr_status(self, expr_id):
-        expr = Experiment.objects(id==expr_id).first()
+        expr = Experiment.objects(id == expr_id).first()
         if expr:
             return self.__report_expr_status(expr)
         else:
@@ -245,20 +204,20 @@ class ExprManager(Component):
 
         :return:
         """
-        try:
-            self.db.update_object(expr, user_id=ReservedUser.DefaultUserID)
-        except Exception as e:
-            self.log.error(e)
+        expr.user = None
+        expr.save()
 
     # --------------------------------------------- helper function ---------------------------------------------#
 
-    def __check_hackathon_event_time(self, hackathon_name):
+    def __verify_hackathon(self, hackathon_name):
         """validate the event_start_time and event_end_time of a hackathon
 
         Will return None if hackathon not found or current time is not between its start time and end time
         """
         hackathon = self.hackathon_manager.get_hackathon_by_name(hackathon_name)
         if hackathon:
+            if not hackathon.config.cloud_provider:
+                raise PreconditionFailed("No cloud resource is configured for this hackathon.")
             if self.util.get_now() < hackathon.event_end_time:
                 return hackathon
             else:
@@ -277,69 +236,43 @@ class ExprManager(Component):
         else:
             return self.hosted_docker
 
-    def __start_new_expr(self, hackathon, template, user_id):
-        # new expr
-        expr = Experiment(user)
-        expr = self.db.add_object_kwargs(Experiment,
-                                         user_id=user_id,
-                                         hackathon_id=hackathon.id,
-                                         status=EStatus.INIT,
-                                         template_id=template.id,
-                                         create_time=self.util.get_now())
-        self.db.commit()
+    def get_starter(self, hackathon, template):
+        # load expr starter
+        starter = None
+        if not hackathon or not template:
+            return starter
 
         if template.provider == VE_PROVIDER.DOCKER:
-            try:
-                template_content = self.template_library.load_template(template)
-                virtual_environments_units = template_content.units
+            if hackathon.config.cloud_provider == CLOUD_PROVIDER.AZURE:
+                starter = RequiredFeature("azure_docker")
+            elif hackathon.config.cloud_provider == CLOUD_PROVIDER.ALAUDA:
+                starter = RequiredFeature("alauda_docker")
+        elif template.provider == VE_PROVIDER.AZURE:
+            starter = RequiredFeature("azure_vm")
 
-                expr.status = EStatus.STARTING
-                self.db.commit()
-                map(lambda unit:
-                    self.__remote_start_container(hackathon, expr, unit, user_id),
-                    virtual_environments_units)
-            except Exception as e:
-                self.log.error(e)
-                self.log.error("Failed starting containers")
-                self.roll_back(expr.id)
-                return internal_server_error('Failed starting containers')
-        else:
-            expr.status = EStatus.STARTING
-            self.db.commit()
-            try:
-                # af = AzureFormation(self.hosted_docker.load_azure_key_id(expr.id))
-                # af.create(expr.id)
-                template_content = self.template_library.load_template(template)
-                azure_keys = self.azure_cert_manager.get_certificates_by_expr(expr.id)
-                # TODO: which key to use?
-                azure_key = azure_keys[0]
+        return starter
 
-                # create virtual environments for units
-                expr_id = expr.id
-                ves = []
-                for unit in template_content.units:
-                    ve = VirtualEnvironment(
-                        provider=VE_PROVIDER.AZURE,
-                        # TODO: when to set name?
-                        name=self.azure_formation.get_virtual_machine_name(unit.get_virtual_machine_name(), expr_id),
-                        image=unit.get_image_name(),
-                        status=VEStatus.INIT,
-                        remote_provider=VERemoteProvider.Guacamole,
-                        experiment=expr)
-                    self.db.add_object(ve)
-                    ves.append(ve)
+    def __start_new_expr(self, hackathon, template, user):
+        starter = self.get_starter(hackathon, template)
 
-                # TODO: elimate virtual_environments arg
-                self.azure_formation.start_vm(expr_id, azure_key, template_content.units, ves)
-            except Exception as e:
-                self.log.error(e)
-                return internal_server_error('Failed starting azure vm')
-        # after everything is ready, set the expr state to running
-        # response to caller
+        if not starter:
+            raise PreconditionFailed("either template not supported or hackathon resource not configured")
 
-        self.hackathon_manager.create_hackathon_notice(hackathon.id, HACK_NOTICE_EVENT.EXPR_JOIN,
-                                                       HACK_NOTICE_CATEGORY.EXPERIMENT, {'user_id': user_id})
-        return self.__report_expr_status(expr)
+        context = starter.start(Context(
+            template=template,
+            user=user,
+            hackathon=hackathon
+        ))
+
+        return self.__report_expr_status(context.experiment)
+
+    def on_expr_started(self, experiment):
+        hackathon = experiment.hackathon
+        user = experiment.user
+        self.hackathon_manager.create_hackathon_notice(hackathon.id,
+                                                       HACK_NOTICE_EVENT.EXPR_JOIN,
+                                                       HACK_NOTICE_CATEGORY.EXPERIMENT,
+                                                       {'user_id': user.id if user else ""})
 
     def __report_expr_status(self, expr):
         expr = self.__re_check_expr_status(expr)
@@ -405,7 +338,7 @@ class ExprManager(Component):
         ret["public_urls"] = public_urls
         return ret
 
-    def __check_template_status(self, hackathon, template_name):
+    def __verify_template(self, hackathon, template_name):
         template = self.template_library.get_template_info_by_name(template_name)
         if not template:
             raise NotFound("template cannot be found by name '%s'" % template_name)
@@ -447,34 +380,6 @@ class ExprManager(Component):
         self.log.debug("starting container %s is ended ... " % new_name)
         return ve
 
-    def on_docker_completed(self, ve):
-        """
-        This function should be invoked after container is started in alauda_docker.py and hosted_docker.py
-        :param ve: virtual environment
-        """
-        remote = json.loads(ve.remote_paras)
-        try:
-            p = pexpect.spawn("scp -P %s %s %s@%s:/usr/local/sbin/guacctl" % (remote["port"],
-                                                                              abspath("%s/../docker/guacctl" % dirname(
-                                                                                  realpath(__file__))),
-                                                                              remote["username"],
-                                                                              remote["hostname"]))
-            i = p.expect([pexpect.TIMEOUT, 'yes/no', 'password: '])
-
-            if i == 1:
-                p.sendline("yes")
-                i = p.expect([pexpect.TIMEOUT, 'password:'])
-
-            if i != 0:
-                p.sendline(remote["password"])
-                p.expect(pexpect.EOF)
-
-            p.close()
-        except Exception as e:
-            self.log.info("scp file error")
-            self.log.error(e)
-        return
-
     def __check_expr_status(self, user, hackathon, template):
         """
         check experiment status, if there are pre-allocate experiments, the experiment will be assigned directly
@@ -506,28 +411,17 @@ class ExprManager(Component):
         :param expr_id: experiment id
         """
         self.log.debug("Starting rollback experiment %d..." % expr_id)
-        expr = self.db.find_first_object_by(Experiment, id=expr_id)
-        try:
-            expr.status = EStatus.ROLL_BACKING
-            self.db.commit()
-            if expr is not None:
-                # delete containers and change expr status
-                for c in expr.virtual_environments:
-                    if c.provider == VE_PROVIDER.DOCKER and c.container:
-                        docker = self.__get_docker(expr.hackathon, c)
-                        docker.delete(c.name, container=c.container, expr_id=expr_id)
-                        c.status = VEStatus.DELETED
-                        self.db.commit()
-            # delete ports
-            expr.status = EStatus.ROLL_BACKED
+        expr = Experiment.objects(id=expr_id)
+        if not expr:
+            self.log.warn("rollback failed due to experiment not found")
+            return
 
-            self.db.commit()
-            self.log.info("Rollback succeeded")
-        except Exception as e:
-            expr.status = EStatus.FAILED
-            self.db.commit()
-            self.log.info("Rollback failed")
-            self.log.error(e)
+        starter = self.get_starter(expr.hackathon, expr.template)
+        if not starter:
+            self.log.warn("rollback failed due to no starter found")
+            return
+
+        return starter.rollback(Context(experiment=expr))
 
     def __get_expr_with_detail(self, experiment):
         info = experiment.dic()
@@ -571,7 +465,7 @@ class ExprManager(Component):
                     continue
                 # expr status(restarting or running) is not match container running status on docker host
                 try:
-                    if not self.hosted_docker.check_container_status_is_normal(ve.docker_container):
+                    if not self.hosted_docker.is_container_running(ve.docker_container):
                         expr.status = EStatus.UNEXPECTED_ERROR
                         ve.status = VEStatus.UNEXPECTED_ERROR
                         expr.save()

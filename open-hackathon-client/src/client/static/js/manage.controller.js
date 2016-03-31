@@ -106,7 +106,7 @@ angular.module('oh.controllers', [])
       if (type == 1) {
         return true;
       }
-      return activity.config.cloud_provide != 0
+      return activity.config.cloud_provider != 0
     }
 
     $scope.navLink = function(item) {
@@ -311,7 +311,7 @@ angular.module('oh.controllers', [])
       location: '',
       tags: [],
       config: {
-        cloud_provide: 0,
+        cloud_provider: 0,
         auto_approve: true,
         recycle_enabled: false,
         recycle_minutes: 0,
@@ -435,7 +435,7 @@ angular.module('oh.controllers', [])
               hackathon_name: $scope.activity.name
             },
             body: {
-              cloud_provide: $scope.clondservices
+              cloud_provider: $scope.clondservices
             }
           }).then(function(data) {
             if (data.error) {

@@ -32,10 +32,13 @@ import base64
 import urllib
 import urllib2
 import abc
+from uuid import UUID
 from datetime import datetime, timedelta
+
 from mailthon import email
 from mailthon.postman import Postman
 from mailthon.middleware import TLS, Auth
+from bson import ObjectId
 
 from hackathon_factory import RequiredFeature
 from hackathon.log import log

@@ -33,7 +33,7 @@ from hackathon import Component, RequiredFeature
 from hackathon.hmongo.models import UserHackathon, Experiment
 from hackathon.hackathon_response import bad_request, precondition_failed, internal_server_error, not_found, ok,\
     login_provider_error
-from hackathon.constants import EStatus, HACK_USER_STATUS, HACKATHON_BASIC_INFO, HACKATHON_STAT, LOGIN_PROVIDER,\
+from hackathon.constants import EStatus, HACK_USER_STATUS, HACKATHON_CONFIG, HACKATHON_STAT, LOGIN_PROVIDER,\
     HACK_USER_TYPE
 
 __all__ = ["RegisterManager"]
@@ -225,7 +225,7 @@ class RegisterManager(Component):
         :return False if not all seats occupied or hackathon has no limit at all otherwise True
         """
         # TODO
-        maximum = self.hackathon_manager.get_basic_property(hackathon, HACKATHON_BASIC_INFO.MAX_ENROLLMENT, 0)
+        maximum = self.hackathon_manager.get_basic_property(hackathon, HACKATHON_CONFIG.MAX_ENROLLMENT, 0)
 
         if maximum == 0:  # means no limit
             return False
