@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "安装将花费一定时间，请耐心等待直到安装完成^_^, ..."
 sudo apt-get update
-sudo apt-get install -y python-setuptools python-dev git python-pip
+sudo apt-get install -y python-setuptools python-dev git python-pip autoconf libtool tomcat7
 
 cd /home && sudo rm -rf opentech
 sudo mkdir opentech && cd opentech
@@ -13,9 +13,10 @@ sudo cp open-hackathon-server/src/hackathon/config_sample.py open-hackathon-serv
 sudo cp open-hackathon-server/src/hackathon/config_sample.py open-hackathon-server/src/hackathon/config.py
 
 # install and Configure guacamole
-sudo apt-get install -y libcairo2-dev libjpeg62-turbo-dev libjpeg62-dev libpng12-dev libossp-uuid-dev
+sudo apt-get install -y libcairo2-dev libjpeg62-turbo-dev
+sudo apt-get install -y libjpeg62-dev libpng12-dev libossp-uuid-dev
 sudo apt-get install -y libfreerdp-dev libpango1.0-dev libssh2-1-dev libtelnet-dev
-sudo apt-get install -y libvncserver-dev libwebp-dev libssl-dev libvorbis-dev
+sudo apt-get install -y libvncserver-dev libpulse-dev libwebp-dev libssl-dev libvorbis-dev
 cd /home/opentech && sudo wget http://sourceforge.net/projects/guacamole/files/current/source/guacamole-server-0.9.9.tar.gz/download
 sudo mv download guacamole-server-0.9.9.tar.gz && sudo tar -xzf guacamole-server-0.9.9.tar.gz && cd guacamole-server-0.9.9/
 sudo autoreconf -fi
@@ -29,8 +30,8 @@ sudo mv download /var/lib/tomcat7/webapps/guacamole.war
 sudo mkdir /usr/share/tomcat7/.guacamole
 sudo mkdir /etc/guacamole
 cd /home/opentech/open-hackathon/deploy/guacamole
-cp guacamole-sample.properties /etc/guacamole/guacamole.properties
-cp *.jar /etc/guacamole
+sudo cp guacamole-sample.properties /etc/guacamole/guacamole.properties
+sudo cp *.jar /etc/guacamole
 sudo ln -s /etc/guacamole/guacamole.properties /usr/share/tomcat7/.guacamole/guacamole.properties
 
 
