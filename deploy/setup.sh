@@ -34,7 +34,7 @@ cd /home/opentech/open-hackathon
 echo "pip is installing required python library"
 result=$(sudo pip install -r open-hackathon-server/requirement.txt)
 
-sudo pip install -r open-hackathon-client/requirement.txt
+result=$(sudo pip install -r open-hackathon-client/requirement.txt)
 sudo cp open-hackathon-server/src/hackathon/config_sample.py open-hackathon-server/src/hackathon/config.py
 sudo cp open-hackathon-server/src/hackathon/config_sample.py open-hackathon-server/src/hackathon/config.py
 }
@@ -69,11 +69,13 @@ fi
 install_and_config_guacamole() {
 # install and Configure guacamole
 cd /home/opentech && sudo wget http://sourceforge.net/projects/guacamole/files/current/source/guacamole-server-0.9.9.tar.gz/download
+sudo rm -rf guacamole-server-0.9.9
 sudo mv download guacamole-server-0.9.9.tar.gz && sudo tar -xzf guacamole-server-0.9.9.tar.gz && cd guacamole-server-0.9.9/
 sudo autoreconf -fi
 sudo ./configure --with-init-dir=/etc/init.d
 sudo make
 sudo make install
+ldconfig
 # configure guacamole client
 sudo wget http://sourceforge.net/projects/guacamole/files/current/binary/guacamole-0.9.9.war/download
 sudo mv download /var/lib/tomcat7/webapps/guacamole.war
@@ -99,7 +101,6 @@ if grep -q "Unable to lacate" <<< $result; then
     echo "Could not install dependancy software for docker, pls install docker manually"
     exit
 fi
-sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
 
 result=$(sudo apt-get update)
 if grep -q "Could not resolve" <<< $result; then
