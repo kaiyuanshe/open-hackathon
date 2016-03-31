@@ -1,2 +1,77 @@
-<h1>useasdasdasdfsdfdsfsfswr</h1>
-<button class="btn btn-info">info</button>
+<div class="register-users-container">
+  <div class="register-users">
+    <div style="margin-left: 15px; margin-bottom: 3px;">
+        <button class="btn btn-sm btn-success" ng-click="updateStatusBatch(1)">通过</button>
+        <button class="btn btn-sm btn-danger" ng-click="updateStatusBatch(2)">拒绝</button>
+
+      <div class="btn-group">
+          <button type="button" class="btn btn-sm btn-primary" uib-btn-checkbox ng-model="data.freedomTeam" ng-change="updateConfig()">允许组队</button>
+          <button type="button" class="btn btn-sm btn-primary" uib-btn-checkbox ng-model="data.autoApprove" ng-change="updateConfig()">自动审核</button>
+      </div>
+    </div>
+
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>
+              <input type="checkbox" ng-model="data.checkAll" ng-change="toggleCheckAll()">
+            </th>
+            <th>注册名</th>
+            <th>邮箱</th>
+            <th>登录方式</th>
+            <th>联系电话</th>
+            <th>联系地址</th>
+            <th>报名时间</th>
+            <th>状态</th>
+        </tr>
+        </thead>
+        <tbody id="registe_list">
+            <tr ng-repeat="reg in data.registerUsers | limitTo:data.perPage:(data.curPage - 1) * data.perPage as curPageUsers track by reg.id">
+                <td>
+                    <input type="checkbox" ng-model="data.checks[reg.id]" ng-change="checkCheckAll()">
+                </td>
+                <td>{{reg.user.name}}</td>
+                <td>
+                    <span ng-repeat="email in reg.user.emails | orderBy: '-primary_email'">
+                      <a ng-href="mailto: {{email.email}}">
+                        {{email.email}}
+                      </a>
+                      {{ $last ? '' : ',' }}
+                    </span>
+                </td>
+                <td>{{reg.user.provider || ''}}</td>
+                <td>{{reg.user.profile && (reg.user.profile.phone || '')}}</td>
+                <td>{{reg.user.profile && (reg.user.profile.address || '')}}</td>
+                <td>{{reg.create_time | date:'yyyy-MM-dd HH:mm'}}</td>
+                <td style="text-align: center;">
+                    <select ng-model="data.regStatus[reg.id]" class="register-status-select"
+                        ng-class="{'waiting': reg.status == 0, 'accepted': reg.status == 1 , 'rejected': reg.status == 2, 'auto-approve': reg.status == 3}"
+                        ng-change="updateStatus(reg)">
+                        <option value="0">未审核</option>
+                        <option value="1">通过</option>
+                        <option value="2">拒绝</option>
+                        <option value="3">自动通过</option>
+                  </select>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <uib-pagination
+        total-items="data.nPage"
+        ng-model="data.curPage"
+        items-per-page="data.perPage"
+        max-size="6"
+        class="pagination-sm"
+        force-ellipses="true">
+    </uib-pagination>
+  </div>
+  <div class="register-users-stat">
+    <ul>
+        <li>全部用户（{{ data.registerUsers.length }}）</li>
+        <li>通过（{{ (data.registerUsers|filter:{status: 1}).length }}）</li>
+        <li>自动通过（{{ (data.registerUsers|filter:{status: 3}).length }}）</li>
+        <li>未审核（{{ (data.registerUsers|filter:{status: 0}).length }}）</li>
+        <li>拒绝（{{ (data.registerUsers|filter:{status: 2}).length }}）</li>
+    </ul>
+  </div>
+</div>

@@ -2,6 +2,8 @@
 @import "oh.button.css";
 @import "oh.manage.main.css";
 @import "oh.manage.edit.css";
+@import "oh.manage.users.css";
+
 html,
 body {
   position: relative;
@@ -786,6 +788,7 @@ tags-input .tags .tag-item .remove-button {
 
 .clond-templates {
   margin: 0 -5px;
+  min-height: 300px;
 }
 
 .clond-templates .item {

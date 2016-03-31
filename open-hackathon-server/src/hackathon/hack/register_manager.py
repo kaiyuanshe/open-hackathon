@@ -96,7 +96,8 @@ class RegisterManager(Component):
                                        friendly_message="报名人数已满")
 
         try:
-            status = HACK_USER_STATUS.AUTO_PASSED if hackathon.is_auto_approve() else HACK_USER_STATUS.UNAUDIT
+            is_auto_approve = hackathon.config.get(HACKATHON_BASIC_INFO.AUTO_APPROVE, True)
+            status = HACK_USER_STATUS.AUTO_PASSED if is_auto_approve else HACK_USER_STATUS.UNAUDIT
             args.pop("user_id")
             args.pop("hackathon_id")
 
@@ -107,10 +108,8 @@ class RegisterManager(Component):
                 **args).dic()
 
             # create a team as soon as user registration approved(auto or manually)
-            if hackathon.is_auto_approve():
-                pass
-                # TODO: fix this after team_manager refactored
-                # self.team_manager.create_default_team(hackathon, user)
+            if is_auto_approve:
+                self.team_manager.create_default_team(hackathon, user)
 
             self.__update_register_stat(hackathon)
             return user_hackathon
@@ -258,6 +257,6 @@ class RegisterManager(Component):
                 if (hackathon_login_provider & mask) > 0:
                     data["provides"].append(provide)
 
-            data["fail"] = user.provide not in data["provides"]
+            data["fail"] = user.provider not in data["provides"]
 
         return data
