@@ -22,44 +22,47 @@
  * THE SOFTWARE.
  */
 
-(function($, oh) {
-  'use strict';
+(function ($, oh) {
+    'use strict';
 
-  var isProfile = false;
+    var isProfile = false;
 
-  function pageload() {
+    function pageload() {
+        $('body').scrollspy({
+            target: '#lift',
+            offset: 150
+        })
+    }
 
-  }
+    function getFormData() {
+        var form = $('#form');
+        var data = {};
+        form.find('input,select,textarea').each(function (i, elm) {
+            var input = $(elm);
+            var val = input.val().trim();
+            if (val.length)
+                data[input.attr('name')] = input.val();
+        });
+        return data;
+    }
 
-  function getFormData() {
-    var form = $('#form');
-    var data = {};
-    form.find('input,select,textarea').each(function(i, elm) {
-      var input = $(elm);
-      var val = input.val().trim();
-      if (val.length)
-        data[input.attr('name')] = input.val();
-    });
-    return data;
-  }
-
-  function profileFormValidator() {
-    var pform = $('#profileForm').bootstrapValidator()
-      .on('success.form.bv', function(e, ok) {
-        e.preventDefault();
-        var data = getFormData()
+    function profileFormValidator() {
+        var pform = $('#profileForm').bootstrapValidator()
+            .on('success.form.bv', function (e, ok) {
+                e.preventDefault();
+                var data = getFormData()
 
 
-      });
-  }
+            });
+    }
 
 
-  function init() {
-    pageload();
-    profileFormValidator();
-  }
+    function init() {
+        pageload();
+        profileFormValidator();
+    }
 
-  $(function() {
-    init();
-  })
+    $(function () {
+        init();
+    })
 })(window.jQuery, window.oh);
