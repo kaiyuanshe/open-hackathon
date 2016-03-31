@@ -24,7 +24,7 @@ set_envirement() {
 cd /home && sudo rm -rf opentech
 sudo mkdir opentech && cd opentech
 echo "git cloning open-hackathon source code"
-result=$(sudo git clone https://github.com/msopentechcn/open-hackathon.git)
+result=$(sudo git clone https://github.com/YaningX/open-hackathon.git)
 if grep -q "unable to access" <<< $result; then
     echo "Could not git clone open-hackathon source code, pls check your network"
     exit
