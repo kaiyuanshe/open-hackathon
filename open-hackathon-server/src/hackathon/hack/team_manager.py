@@ -580,8 +580,8 @@ class TeamManager(Component):
         teams_with_awards = [team for team in teams if not team.awards == []]
         teams_with_awards.sort(key=lambda t: (
             t.hackathon.id,
-            Hackathon.objects(id=t.hackathon.id, awards__id=t.awards[0]).first().awards[0].level),
-                               reverse=True)  # sort by hackathon and then sort by award level.
+            Hackathon.objects(id=t.hackathon.id, awards__id=t.awards[0]).first().awards.get(id=t.awards[0]).level
+        ), reverse=True)  # sort by hackathon and then sort by award level.
         teams_with_awards = teams_with_awards[0: int(limit)]
 
         return [self.__get_hackathon_and_show_detail(team) for team in teams_with_awards]
