@@ -11,7 +11,7 @@
                 <div class="clearfix">
                     <div class="profile-left">
                         <div class="picture">
-                            <img src="{{ current_user.avatar_url }}" data-role="picture" onerror="javascript:this.src='/static/pic/monkey-204-204px.png'">
+                            <img src="{{ current_user.get_avatar_url() }}" data-role="picture" onerror="javascript:this.src='/static/pic/monkey-204-204px.png'">
                         </div>
                         <a href="#" data-toggle="modal" data-target="#pictureModal" class="update-picture"><i
                                 class="fa fa-cloud-upload"></i> 更新头像</a>

@@ -33,16 +33,14 @@ from flask_restful import Api
 from flask_cors import CORS
 from datetime import timedelta
 
-from util import safe_get_config, get_class, Utility, Email, DisabledVoiceVerify, RonglianVoiceVerify, DisabledSms,\
-                ChinaTelecomSms
+from util import safe_get_config, get_class, Utility, Email, DisabledVoiceVerify, RonglianVoiceVerify, DisabledSms, \
+    ChinaTelecomSms
 from hackathon_factory import factory, RequiredFeature
 from hackathon_scheduler import HackathonScheduler
 from hackathon_response import *
 from hackathon_exception import *
 from log import log
 from context import Context
-from database import db_session
-
 
 __all__ = [
     "app",
@@ -106,11 +104,6 @@ cors = CORS(app)
 scheduler = HackathonScheduler(app)
 
 
-@app.teardown_appcontext
-def shutdown_session(exception=None):
-    db_session.remove()
-
-
 @app.errorhandler(400)
 def bad_request_handler(error):
     log.error(error)
@@ -149,21 +142,18 @@ class Component(object):
 
 def init_components():
     """Init hackathon factory"""
-    from hackathon.database import db_session
-    from hackathon.database.db_adapters import SQLAlchemyAdapter
     from hackathon.user import UserManager, UserProfileManager
     from hackathon.hack import HackathonManager, AdminManager, TeamManager, DockerHostManager, \
         AzureCertManager, RegisterManager, HackathonTemplateManager, Cryptor
     from hackathon.template import TemplateLibrary
     from hackathon.remote.guacamole import GuacamoleInfo
-    from hackathon.expr.expr_mgr import ExprManager
     from hackathon.cache.cache_mgr import CacheManagerExt
     from hackathon.hazure.azure_formation import AzureFormation
 
     # dependencies MUST be provided in advance
     factory.provide("util", Utility)
     factory.provide("log", log)
-    factory.provide("db", SQLAlchemyAdapter, db_session)
+    init_db()
 
     # hazure
     factory.provide("azure_formation", AzureFormation)
@@ -189,24 +179,39 @@ def init_components():
     factory.provide("docker_host_manager", DockerHostManager)
     factory.provide("hackathon_template_manager", HackathonTemplateManager)
     factory.provide("template_library", TemplateLibrary)
-    factory.provide("expr_manager", ExprManager)
     factory.provide("admin_manager", AdminManager)
     factory.provide("team_manager", TeamManager)
     factory.provide("guacamole", GuacamoleInfo)
 
+    # experiment starter
+    init_expr_components()
+
     # health check items
-    factory.provide("health_check_mysql", get_class("hackathon.health.health_check.MySQLHealthCheck"))
     factory.provide("health_check_hosted_docker", get_class("hackathon.health.health_check.HostedDockerHealthCheck"))
     factory.provide("health_check_alauda_docker", get_class("hackathon.health.health_check.AlaudaDockerHealthCheck"))
     factory.provide("health_check_guacamole", get_class("hackathon.health.health_check.GuacamoleHealthCheck"))
     factory.provide("health_check_azure", get_class("hackathon.health.health_check.AzureHealthCheck"))
+    factory.provide("health_check_mongodb", get_class("hackathon.health.health_check.MongoDBHealthCheck"))
 
     # docker
-    factory.provide("hosted_docker", get_class("hackathon.docker.hosted_docker.HostedDockerFormation"))
-    factory.provide("alauda_docker", get_class("hackathon.docker.alauda_docker.AlaudaDockerFormation"))
+    factory.provide("hosted_docker_proxy", get_class("hackathon.docker.hosted_docker.HostedDockerFormation"))
+    factory.provide("alauda_docker_proxy", get_class("hackathon.docker.alauda_docker.AlaudaDockerFormation"))
 
     # storage
     init_hackathon_storage()
+
+
+def init_db():
+    from hmongo import db
+    factory.provide("db", db, suspend_callable=True)
+
+
+def init_expr_components():
+    from expr import ExprManager, AzureVMExprStarter, AzureHostedDockerStarter, AlaudaDockerStarter
+    factory.provide("expr_manager", ExprManager)
+    factory.provide("alauda_docker", AlaudaDockerStarter)
+    factory.provide("azure_docker", AzureHostedDockerStarter)
+    factory.provide("azure_vm", AzureVMExprStarter)
 
 
 def init_voice_verify():

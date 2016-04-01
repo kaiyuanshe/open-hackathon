@@ -161,6 +161,9 @@ class DockerTemplateUnit(TemplateUnit):
         else:
             return image + ':latest'
 
+    def set_ports(self, port_cfg):
+        self.dic[DOCKER_UNIT.PORTS] = port_cfg
+
     def get_ports(self):
         return self.dic[DOCKER_UNIT.PORTS]
 

@@ -31,11 +31,9 @@ QQ_OAUTH_STATE = "openhackathon"  # todo state should not be constant. Actually 
 
 HACKATHON_SERVER_ENDPOINT = "http://localhost:15000"
 
-MYSQL_HOST = "localhost"
-MYSQL_USER = "hackathon"
-MYSQL_PWD = "hackathon"
-MYSQL_DB = "hackathon"
-MYSQL_PORT = 3306
+MONGODB_HOST = "localhost"
+MONGODB_PORT = 27017
+MONGODB_DB = "hackathon"
 
 Config = {
     "environment": "local",
@@ -43,8 +41,10 @@ Config = {
     "app": {
         "secret_key": "secret_key"
     },
-    "mysql": {
-        "connection": 'mysql://%s:%s@%s:%s/%s' % (MYSQL_USER, MYSQL_PWD, MYSQL_HOST, MYSQL_PORT, MYSQL_DB)
+    "mongodb": {
+        "database": MONGODB_DB,
+        "host": MONGODB_HOST,
+        "port": MONGODB_PORT
     },
     "login": {
         "token_expiration_minutes": 60 * 24
@@ -56,8 +56,13 @@ Config = {
         "host": "http://localhost:8080"
     },
     "scheduler": {
-        "job_store": "mysql",
-        "job_store_url": 'mysql://%s:%s@%s:%s/%s' % (MYSQL_USER, MYSQL_PWD, MYSQL_HOST, MYSQL_PORT, MYSQL_DB)
+        # "job_store": "mysql",
+        # "job_store_url": 'mysql://%s:%s@%s:%s/%s' % (MYSQL_USER, MYSQL_PWD, MYSQL_HOST, MYSQL_PORT, MYSQL_DB)
+        "job_store": "mongodb",
+        "database": MONGODB_DB,
+        "collection": "jobs",
+        "host": MONGODB_HOST,
+        "port": MONGODB_PORT
     },
     "storage": {
         "type": "local",
@@ -78,9 +83,6 @@ Config = {
             "endpoint": "http://api.int.alauda.io",
             "region_name": "BEIJING1"
         }
-    },
-    "cloud_eclipse": {
-        "api": "http://www.idehub.cn/api/ide"
     },
     "email": {
         "host": "",

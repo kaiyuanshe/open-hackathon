@@ -889,24 +889,3 @@
 .hackathon-description {
     color: #aaa;
 }
-
-.tooltip .tooltip-inner {
-    border: 1px solid #d2d2d2;
-    background: #fff;
-    color: #21b1de;
-}
-
-.tooltip.top .tooltip-arrow {
-    border-top-color: #d2d2d2;
-}
-
-.tooltip.top .tooltip-arrow:before {
-    position: absolute;
-    content: '';
-    bottom: 1px;
-    margin-left: -5px;
-    border-style: solid;
-    border-width: 5px 5px 0;
-    border-color: transparent;
-    border-top-color: #fff;
-}

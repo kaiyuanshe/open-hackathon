@@ -24,7 +24,7 @@
         "type": "object",
         "properties": {
           "id": {
-            "pattern": "^[0-9]+$"
+            "type": "string"
           }
         }
       }
@@ -35,8 +35,7 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "string",
-            "pattern": "^[0-9]+$"
+            "type": "string"
           }
         }
       }

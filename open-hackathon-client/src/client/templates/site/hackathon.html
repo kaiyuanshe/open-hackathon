@@ -11,7 +11,7 @@
 
             <h1 class="title">{{ hackathon.display_name }}</h1>
             <ul class="tags">
-                {% for item  in  hackathon.tag.split(",") %}
+                {% for item  in  hackathon.tags %}
                     <li><a href="javascript:;">{{ item }}</a></li>
                 {% endfor %}
             </ul>
@@ -19,13 +19,13 @@
                 <div class="col-lg-8 col-md-7">
                     <div id="banner" class="carousel slide" data-ride="carousel">
                         <ol class="carousel-indicators">
-                            {% for src in hackathon.banners.split(';') %}
+                            {% for src in hackathon.banners %}
                                 <li data-target="#banner" data-slide-to="{{ loop.index - 1 }}" {% if loop.index == 1 %}
                                     class="active" {% endif %}></li>
                             {% endfor %}
                         </ol>
                         <div class="carousel-inner" role="listbox">
-                            {% for src in hackathon.banners.split(';') %}
+                            {% for src in hackathon.banners %}
                                 <div class="item {% if loop.index == 1 %} active {% endif %}">
                                     <img src="{{ src }}">
                                 </div>
@@ -82,11 +82,11 @@
                                 </dd>
                                 <dt>地址：</dt>
                                 <dd>
-                                    {{ hackathon.config.location == '' and '在线编程' or hackathon.config.location }}
+                                    {{ hackathon.location == '' and '在线编程' or hackathon.location }}
                                 </dd>
                                 <dt>限额：</dt>
                                 <dd>
-                                    {{ hackathon.config.max_enrollment == '0' and  '无限' or hackathon.config.max_enrollment +'人' }}
+                                    {{ not hackathon.config.max_enrollment and  '无限' or hackathon.config.max_enrollment ~ '人' }}
                                     <span class="grey-text">（<span>{{ hackathon.stat.register or 0 }}</span>人已报名）</span>
                                 </dd>
                                 <dt>主办方：</dt>
@@ -107,7 +107,7 @@
                                     {% endif %}
                                     <p>活动已结束。</p>
                                 {% elif registration != None %}
-                                    {% if registration.status == 1 or (hackathon.config.auto_approve =='1' and registration.status == 3) %}
+                                    {% if registration.status == 1 or (hackathon.config.auto_approve and registration.status == 3) %}
                                         {% if experiment == None %}
                                             <a class="btn btn-primary btn-lg"
                                                href="{{ url_for('temp_settings',hackathon_name=hackathon_name) }}">立即参加</a>
@@ -131,10 +131,10 @@
                                        href="{{ url_for('login', return_url=request.path, provides=get_provides(hackathon.config.login_provider)) }}">我要报名</a>
                                 {% elif user.is_admin %}
                                     <a class="btn btn-primary btn-lg"
-                                       href="{{ url_for('edithackathon',hackathon_name=hackathon_name) }}">管理</a>
-                                {% elif user.get("user_profile") == None %}
+                                       href="/manage/edit/{{hackathon_name}}">管理</a>
+                                {% elif user.get("profile") == None %}
                                     <a class="btn btn-primary btn-lg"
-                                       href="{{ url_for('user_profile',return_url=request.path) }}">我要报名</a>
+                                       href="{{ url_for('user_profile_edit',return_url=request.path) }}">我要报名</a>
                                 {% elif registration == None %}
                                     <a class="btn btn-primary btn-lg" data-type="register">我要报名</a>
                                 {% endif %}
@@ -186,11 +186,11 @@
                             {% endfor %}
                         </div>
                     </div>
-                    {% if hackathon.config.location %}
+                    {% if hackathon.location %}
                         <div class="oh-box">
                             <h3 class="title">活动地点</h3>
 
-                            <div id="map" class="baidu-map" title="{{ hackathon.config.location }}"></div>
+                            <div id="map" class="baidu-map" title="{{ hackathon.location }}"></div>
                         </div>
                     {% endif %}
                     <div class="oh-box" style="display:none">
@@ -392,7 +392,7 @@
             height: 30       // 信息窗口高度题
         }
         function initializeMap() {
-            var address = "{{ hackathon.config.location }}";
+            var address = "{{ hackathon.location }}";
 
             var map = new BMap.Map("map");
             var myGeo = new BMap.Geocoder();
@@ -408,7 +408,7 @@
             });
         }
         $(function () {
-            var ismap = {{ hackathon.config.location == '' and 'false' or 'true' }};
+            var ismap = {{ hackathon.location == '' and 'false' or 'true' }};
             if (ismap) {
                 window.setTimeout("setupScriptDelay('api.map.baidu.com/api?v=2.0&ak=KIpwmISmRtIMMssrIQ4NF9ji&callback=initializeMap', true)", 300);
             }

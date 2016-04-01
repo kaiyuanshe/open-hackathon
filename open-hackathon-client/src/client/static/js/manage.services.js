@@ -1,18 +1,18 @@
 // -----------------------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-//  
+//
 // The MIT License (MIT)
-//  
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-//  
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-//  
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,13 +24,6 @@
 
 angular.module('oh.api', [])
   .factory('api', function($rootScope, $http, $window, $cookies, $q) {
-    var methods = {
-      get: 'GET',
-      post: 'POST',
-      put: 'PUT',
-      del: 'DELETE'
-    };
-
     function API(obj, name) {
       var key;
       var getCmd = {};
@@ -51,8 +44,9 @@ angular.module('oh.api', [])
         }
         return getCmd;
       } else {
+        var methodName = obj.toUpperCase(),method = obj.toUpperCase();
 
-        getCmd[obj] = function(options, callback) {
+        getCmd[methodName] = function(options, callback) {
           var deferred = $q.defer();
           var _params = {
             query: {},
@@ -68,7 +62,7 @@ angular.module('oh.api', [])
           options.header.token = $cookies.get('token');
 
           var config = {
-            method: methods[obj],
+            method: method,
             url: name,
             params: options.query,
             data: options.body,
@@ -86,8 +80,8 @@ angular.module('oh.api', [])
             });
           return deferred.promise;
         }
-        getCmd[obj]._path_ = name;
-        return getCmd[obj];
+        getCmd[methodName]._path_ = name;
+        return getCmd[methodName];
       }
     }
 
@@ -158,7 +152,7 @@ angular.module('oh.api', [])
     }
   }).factory('authService', function(api, session) {
 
-    var user = api.user.profile.get().then(function(data) {
+    var user = api.user.get().then(function(data) {
       session.create(data)
       return data;
     })
@@ -248,4 +242,22 @@ angular.module('oh.api', [])
       audio('smallbox.mp3');
     }
     return this;
+  }).factory('util', function($rootScope) {
+    var util = $rootScope.util = {
+      getUserPrimaryEmail: function(user) {
+        if(! user.emails)
+          return ;
+
+        var email;
+        for(email in user.emails) {
+          if(email.primary_email)
+            return email.email;
+        }
+
+        // default use first email as primary email
+        return user.emails[0].email;
+      }
+    };
+
+    return util;
   });

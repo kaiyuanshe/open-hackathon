@@ -31,7 +31,7 @@ from datetime import datetime, timedelta
 
 from docker_formation_base import DockerFormationBase
 from hackathon.constants import HEALTH_STATUS, VE_PROVIDER, VEStatus, EStatus, HEALTH, OAUTH_PROVIDER
-from hackathon.database import VirtualEnvironment
+from hackathon.hmongo.models import VirtualEnvironment
 from hackathon.hackathon_exception import AlaudaException
 from hackathon.template import DOCKER_UNIT
 from hackathon import Component, Context, RequiredFeature
@@ -155,7 +155,6 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
                 "port": alauda_port.get(ALAUDA.SERVICE_PORT),
                 "enable-sftp": True
             }
-
 
             if DOCKER_UNIT.REMOTE_USERNAME in guacamole:
                 gc["username"] = guacamole[DOCKER_UNIT.REMOTE_USERNAME]

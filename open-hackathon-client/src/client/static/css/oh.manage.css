@@ -2,6 +2,8 @@
 @import "oh.button.css";
 @import "oh.manage.main.css";
 @import "oh.manage.edit.css";
+@import "oh.manage.users.css";
+
 html,
 body {
   position: relative;
@@ -786,6 +788,7 @@ tags-input .tags .tag-item .remove-button {
 
 .clond-templates {
   margin: 0 -5px;
+  min-height: 300px;
 }
 
 .clond-templates .item {
@@ -793,9 +796,11 @@ tags-input .tags .tag-item .remove-button {
   border-radius: 2px;
   margin-bottom: 20px;
 }
-.clond-templates .item.active{
-  border-color:#7dba43;
+
+.clond-templates .item.active {
+  border-color: #7dba43;
 }
+
 .clond-templates .btn-group-justified>.btn {
   border-radius: 0;
   border-color: #d0d2d3;
@@ -889,4 +894,24 @@ tags-input .tags .tag-item .remove-button {
   font-weight: normal;
   vertical-align: middle;
   text-align: left;
+}
+
+.file-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.file-btn>input[type="file"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  -ms-filter: 'alpha(opacity=0)';
+  direction: ltr;
+  cursor: pointer;
 }

@@ -2,9 +2,6 @@ werkzeug==0.9.6
 flask==0.10.1
 flask-restful==0.2.12
 flask-cors==1.9.0
-sqlalchemy==1.0.8
-flask-sqlalchemy==2.0
-mysql-python==1.2.5
 azure==1.0.2
 requests
 apscheduler==3.0.3
@@ -15,3 +12,5 @@ validictory==1.0.0
 beaker==1.7.0
 pexpect==4.0.1
 mailthon==0.1.1
+pymongo==3.2.1
+mongoengine==0.10.6

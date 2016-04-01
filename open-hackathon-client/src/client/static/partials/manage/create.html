@@ -25,13 +25,13 @@
                     <div class="form-group" ng-class="{'has-error': activityForm.name.$touched && activityForm.name.$invalid,'has-success':activityForm.name.$valid}">
                       <label class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.NAME">NAME</label>
                       <div class="col-xs-10 required">
-                        <input type="text" class="form-control" name="name" placeholder="{{'ACTIVITY_FIELDS.NAME' | translate}}" ng-model="activity.name" ng-trim="true" ng-minleng="5" ng-maxlength="20" maxlength="20" pattern="^(?!_)(?!.*?_$)[a-z0-9_-]+$" required>
+                        <input type="text" class="form-control" name="name" placeholder="{{'ACTIVITY_FIELDS.NAME' | translate}}" ng-model="activity.name" ng-trim="true" ng-minlength="5" ng-maxlength="20" maxlength="20" pattern="^(?!_)(?!.*?_$)[a-z0-9_-]+$" required>
                         <div class="messages" ng-messages="activityForm.name.$error" ng-if="activityForm.name.$touched && activityForm.name.$invalid">
-                          <span ng-message="pattern"><i class="fa fa-close" uib-tooltip="pattern" tooltip-placement="right auto" ></i></span>
-                          <span ng-message="minlength"><i class="fa fa-close" uib-tooltip="minlength" tooltip-placement="right auto" ></i></span>
-                          <span ng-message="maxlength"><i class="fa fa-close" uib-tooltip="maxlength" tooltip-placement="right auto" ></i></span>
-                          <span ng-message="required"><i class="fa fa-close" uib-tooltip="required" tooltip-placement="right auto"></i></span>
-                          <span ng-message="rometname"><i class="fa fa-close" uib-tooltip="remote-validate" tooltip-placement="right auto" ></i></span>
+                          <span ng-message="pattern"><i class="fa fa-close" uib-tooltip="名称必须是小写英文字母加数字或中划线" tooltip-placement="right auto" ></i></span>
+                          <span ng-message="minlength"><i class="fa fa-close" uib-tooltip="{{'VALIDATE.EVENT_NAME_MINLENGTH' | translate}}" tooltip-placement="right auto" ></i></span>
+                          <span ng-message="maxlength"><i class="fa fa-close" uib-tooltip="名称不能大于20个字符" tooltip-placement="right auto" ></i></span>
+                          <span ng-message="required"><i class="fa fa-close" uib-tooltip="{{'VALIDATE.EVENT_NAME_REQUIRED' | translate}}" tooltip-placement="right auto"></i></span>
+                          <span ng-message="rometname"><i class="fa fa-close" uib-tooltip="名称已经存在，请重新启个名称" tooltip-placement="right auto" ></i></span>
                         </div>
                         <div class="messages" ng-if="activityForm.name.$touched && activityForm.name.$valid">
                           <i class="fa fa-check"></i>
@@ -65,7 +65,7 @@
                     <div class="form-group" ng-class="{'has-success':activityForm.location.$touched && activityForm.location.$valid}">
                       <label for="inputPassword" class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.LOCATION">LOCATION</label>
                       <div class="col-xs-10 control-addon">
-                        <input type="text" class="form-control" name="location" placeholder="{{'PLACEHOLDERS.LOCATION' | translate}}" ng-model="configs.location">
+                        <input type="text" class="form-control" name="location" placeholder="{{'PLACEHOLDERS.LOCATION' | translate}}" ng-model="activity.location">
                         <i class="control-icon fa fa-map-marker"></i>
                         <div class="messages" ng-if="activityForm.location.$touched && activityForm.location.$valid">
                           <i class="fa fa-check"></i>
@@ -162,7 +162,7 @@
                     <div class="form-group" ng-class="{'has-error': activityForm.max_enrollment.$touched && activityForm.max_enrollment.$invalid,'has-success': activityForm.max_enrollment.$touched && activityForm.max_enrollment.$valid}">
                       <label for="inputPassword" class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.MAX_ENROLLMENT">MAX_ENROLLMENT</label>
                       <div class="col-xs-10 control-addon">
-                        <input type="number" class="form-control" name="max_enrollment" placeholder="{{'PLACEHOLDERS.MAX_ENROLLMENT' | translate}}" min="0" ng-model="configs.max_enrollment" string-to-number ng-min="0" pattern="[0-9]+">
+                        <input type="number" class="form-control" name="max_enrollment" placeholder="{{'PLACEHOLDERS.MAX_ENROLLMENT' | translate}}" min="0" ng-model="activity.config.max_enrollment" string-to-number ng-min="0" pattern="[0-9]+">
                         <i class="control-icon fa fa-user-plus"></i>
                         <div class="messages" ng-messages="activityForm.max_enrollment.$error" ng-if="activityForm.max_enrollment.$touched">
                           <span ng-message="min"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.MAX_ENROLLMENT_MIN' | translate}}"  tooltip-placement="right auto"></i></span>
@@ -197,16 +197,16 @@
               </div>
             </div>
             <div id="step2" ng-show="wizard == 2">
-              <div class="col-lg-8 col-md-10 col-xs-11 center">
+              <div class="col-lg-6 col-md-9 center">
                 <form name="clondForm" class="form-horizontal" ng-show="!isAzureForm" ng-submit="clondFormSubmit()" novalidate>
                   <fieldset class="detail-wrapper">
                     <div class="form-group">
-                      <div class="col-xs-6">
+                      <div class="col-md-6 text-center">
                         <label for="azure">
                           <input id="azure" class="hide" type="radio" name="clond" value="1" ng-model="clondservices" required>
                           <div class="info-box">
                             <div class="content text-centet">
-                              <img src="/static/pic/azure-logo.png">
+                              <img src="/static/pic/azure-logo.jpg">
                             </div>
                             <footer class="text-center">
                               使用
@@ -214,12 +214,12 @@
                           </div>
                         </label>
                       </div>
-                      <div class="col-xs-6">
+                      <div class="col-md-6 text-center">
                         <label for="alauda">
                           <input id="alauda" class="hide" type="radio" name="clond" value="2" ng-model="clondservices" required>
                           <div class="info-box">
                             <div class="content text-centet">
-                              <img src="/static/pic/alauda-logo-white.png">
+                              <img src="/static/pic/alauda-logo-white.jpg">
                             </div>
                             <footer class="text-center">
                               使用
@@ -243,15 +243,15 @@
                     <i class="fa fa-plus"></i> 创建新Azure证书
                   </header>
                   <fieldset class="detail-wrapper">
-                    <div class="form-group" ng-class="{'has-error': azureForm.subscription_id.$touched && activityForm.name.$invalid,'has-success':activityForm.name.$valid}">
+                    <div class="form-group" ng-class="{'has-error': azureForm.subscription_id.$touched && azureForm.subscription_id.$invalid,'has-success':azureForm.subscription_id.$valid}">
                       <label class="col-xs-2 control-label" translate="AZURE_FIELDS.SUBSCRIPTION_ID">SUBSCRIPTION_ID</label>
                       <div class="col-xs-10 required">
                         <input type="text" class="form-control" name="subscription_id" placeholder="{{'PLACEHOLDERS.SUBSCRIPTION_ID' | translate}}" ng-model="azure.subscription_id" ng-trim="true" ng-minleng="5" pattern="[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}" required>
-                        <div class="messages" ng-messages="activityForm.name.$error" ng-if="activityForm.name.$touched && activityForm.name.$invalid">
+                        <div class="messages" ng-messages="azureForm.subscription_id.$error" ng-if="azureForm.subscription_id.$touched && azureForm.subscription_id.$invalid">
                           <span ng-message="pattern"><i class="fa fa-close" uib-tooltip="pattern" tooltip-placement="right auto" ></i></span>
                           <span ng-message="required"><i class="fa fa-close" uib-tooltip="required" tooltip-placement="right auto"></i></span>
                         </div>
-                        <div class="messages" ng-if="activityForm.name.$touched && activityForm.name.$valid">
+                        <div class="messages" ng-if="aazureForm.subscription_id.$touched && azureForm.subscription_id.$valid">
                           <i class="fa fa-check"></i>
                         </div>
                       </div>
@@ -267,11 +267,18 @@
                         </select>
                       </div>
                     </div>
+                    <div class="form-group" ng-show="azuse_download_cer">
+                      <label class="col-xs-2 control-label">下载证书</label>
+                      <div class="col-xs-10">
+                        <a href="{{azurecer}}" download="{{azurecer}}">{{azurecer}}</a>
+                      </div>
+                    </div>
                   </fieldset>
                   <footer>
                     <div class="form-group">
                       <div class="col-xs-offset-2 col-xs-12">
-                        <button type="submit" class="btn btn-primary btn-long" ng-disabled="azureForm.$invalid || azureFormDisabled"><i class="fa fa-arrow-circle-o-right"></i> 下一步</button>
+                        <button type="submit" class="btn btn-success btn-long" ng-disabled="azureForm.$invalid || azureFormDisabled"><i class="fa fa-arrow-circle-o-right"></i> 提交 </button>
+                        <button type="button" class="btn btn-primary btn-long" ng-show="azuse_download_cer" ng-click="azureNext()"><i class="fa fa-arrow-circle-o-right"></i> 下一步</button>
                       </div>
                     </div>
                   </footer>
@@ -303,7 +310,9 @@
                         <div class="col-md-12 col-lg-5">
                           <div class="row  text-right">
                             <a href="#" class="btn btn-primary">创建模板</a>
-                            <a href="#" class="btn btn-primary">从文件创建模板</a>
+                            <span href="#" class="btn btn-primary file-btn">从文件创建模板
+                              <input type="file" nv-file-select uploader="uploader" ng-value="file">
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -317,7 +326,7 @@
                             </header>
                             <div class="item-body text-default">
                               <div class="line">
-                                <div class="float-right">使用次数（600）</div>
+                                <div class="float-right">使用次数（{{image.virtual_environment_count}}）</div>
                                 <div class="author">
                                   <span class="picture"><img src="/static/pic/monkey-32-32px.png"></span>
                                   <span>创建者</span>
@@ -364,24 +373,24 @@
                         <uib-accordion close-others="oneAtATime">
                           <uib-accordion-group ng-repeat="temp in templates">
                             <uib-accordion-heading>
-                              {{temp.template.name}}
+                              {{temp.name}}
                               <label class="checkbox checkbox-success right" ng-click="expression($event)">
                                 <input type="checkbox" checked="checked">
                                 <span>绑定</span>
                               </label>
                             </uib-accordion-heading>
                             <div class="line">
-                              <div class="float-right">使用次数（600）</div>
+                              <div class="float-right">使用次数（{{temp.virtual_environment_count}}）</div>
                               <div class="author">
                                 <span class="picture"><img src="/static/pic/monkey-32-32px.png"></span>
                                 <span>创建者</span>
                               </div>
                             </div>
                             <div class="line">
-                              <span class="label float-right" ng-class="{'label-warning':temp.template.status==0,'label-success':temp.template.status==1, 'label-danger':temp.template.status==2}">{{ temp.template.status | imageStatus }}</span>
+                              <span class="label float-right" ng-class="{'label-warning':temp.status==0,'label-success':temp.status==1, 'label-danger':temp.status==2}">{{ temp.status | imageStatus }}</span>
                               <time><i class="text-success fa fa-calendar"></i> {{temp.create_time | date:'yyyy/MM/dd HH:mm' }}</time>
                             </div>
-                            <p>{{temp.template.description}}</p>
+                            <p>{{temp.description}}</p>
                           </uib-accordion-group>
                         </uib-accordion>
                       </div>

@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 """
 Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
- 
+
 The MIT License (MIT)
- 
+
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -59,7 +59,7 @@ def init_routes():
 
     # APIs for user(participant) to join hackathon
     api.add_resource(GuacamoleResource, "/api/user/guacamoleconfig")  # get remote paras for guacamole
-    api.add_resource(CurrentUserResource, "/api/user")  # get current login user
+    api.add_resource(UserResource, "/api/user")  # get current login user
     api.add_resource(UserLoginResource, "/api/user/login")  # user login/logout
     api.add_resource(UserProfileResource, "/api/user/profile")  # update user profile
     api.add_resource(UserPictureResource, "/api/user/picture")  # update user picture
@@ -82,13 +82,15 @@ def init_routes():
 
     # APIs for admin to manage hackathon and hackathon resources, features and users
     api.add_resource(AdminHackathonResource, "/api/admin/hackathon")  # create/update hackathon
-    api.add_resource(AdminHackathonCanOnLineResource, "/api/admin/hackathon/canonline")
+    api.add_resource(AdminHackathonOnLineResource, "/api/admin/hackathon/online")
+    api.add_resource(AdminHackathonOffLineResource, "/api/admin/hackathon/offline")
     api.add_resource(AdminHackathonConfigResource, "/api/admin/hackathon/config")  # set hackathon config
     api.add_resource(AdminHackathonOrganizerResource, "/api/admin/hackathon/organizer")  # manage hackathon organizers
     api.add_resource(AdminHackathonTags, "/api/admin/hackathon/tags")  # get or set hackathon tags
     api.add_resource(HackathonCheckNameResource, "/api/admin/hackathon/checkname")  # check hackathon name exists
     api.add_resource(AdminHackathonListResource, "/api/admin/hackathon/list")  # get entitled hackathon list
     api.add_resource(AdminAzureResource, '/api/admin/azure')  # manage azure subscription and certs
+    api.add_resource(AdminAzureCheckSubIdResource, '/api/admin/azure/checksubid')
     api.add_resource(AdminRegisterListResource, "/api/admin/registration/list")  # get registered users
     api.add_resource(AdminRegisterResource, "/api/admin/registration")  # create, delete or query registration
     api.add_resource(AdminHackathonTemplateListResource,

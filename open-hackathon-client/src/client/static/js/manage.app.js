@@ -33,6 +33,7 @@ angular.module('manageView', [
     'ui.bootstrap',
     'ui.bootstrap.datetimepicker',
     'ngTagsInput',
+    'angularFileUpload',
     'oh.manage.router',
     'oh.pages',
     'oh.providers',
@@ -42,46 +43,13 @@ angular.module('manageView', [
     'oh.templates',
     'oh.api'
   ])
-  .config(function($locationProvider, $translateProvider, $stateProvider, $urlRouterProvider, VERSION) {
+  .config(function($translateProvider) {
     $translateProvider.useStaticFilesLoader({
         prefix: '/static/languages/',
         suffix: '.json'
       }).preferredLanguage('zh-de')
       .useSanitizeValueStrategy()
       .useLocalStorage();
-
-    $urlRouterProvider.otherwise('/main');
-
-    $stateProvider.state('main', {
-      url: '/main',
-      templateUrl: '/static/partials/manage/main.html?v=' + VERSION,
-      controller: function($scope, $rootScope, activityService) {
-        activityService.reload();
-
-        $rootScope.$on('getActivity', function(event, activities) {
-          $scope.activities = activityService.getAll();
-          event.stopPropagation();
-        });
-
-        $scope.online = function(activity) {
-          activity.status = 1;
-        }
-        $scope.offline = function(activity) {
-          activity.status = 2;
-        }
-      }
-    });
-    $stateProvider.state('create', {
-      url: '/create',
-      templateUrl: '/static/partials/manage/create.html?v=' + VERSION,
-      controller:'createController'
-    });
-    $stateProvider.state('404', {
-      url: '/404',
-      templateUrl: '/static/partials/manage/404.html?v=' + VERSION,
-    });
-
-    $locationProvider.html5Mode(true).hashPrefix('!');
 
   }).run(function($rootScope, $state, authService, api, activityService, uiDatetimePickerConfig) {
     uiDatetimePickerConfig.buttonBar = {
@@ -117,4 +85,5 @@ angular.module('manageView', [
       event.preventDefault();
       event.stopPropagation();
     });
+
   });

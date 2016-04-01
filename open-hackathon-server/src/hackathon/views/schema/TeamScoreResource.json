@@ -6,7 +6,7 @@
         "properties": {
           "team_id": {
             "description": "unique identifier of team",
-            "pattern": "^[0-9]+$"
+            "pattern": "^[0-9a-zA-Z]+$"
           }
         }
       }
@@ -17,7 +17,7 @@
         "type": "object",
         "properties": {
           "team_id": {
-            "type": "integer"
+            "pattern": "^[0-9a-zA-Z]+$"
           },
           "score": {
             "type": "integer",
@@ -33,7 +33,7 @@
         "type": "object",
         "properties": {
           "team_id": {
-            "type": "integer"
+            "pattern": "^[0-9a-zA-Z]+$"
           },
           "score": {
             "type": "integer",
