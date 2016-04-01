@@ -26,45 +26,12 @@ THE SOFTWARE.
 import sys
 
 sys.path.append("..")
-
-import abc
-
-from hackathon import Component
-
-__all__ = ["ExprStarter"]
+from docker_expr_starter import DockerExprStarter
+from hackathon import RequiredFeature
 
 
-class ExprStarter(Component):
-    """Base for experiment starter"""
+class AlaudaDockerStarter(DockerExprStarter):
+    docker = RequiredFeature("alauda_docker_proxy")
 
-    __metaclass__ = abc.ABCMeta
-
-    @abc.abstractmethod
-    def start_expr(self, context):
-        """To start a new Experiment asynchronously
-
-        :type context: Context
-        :param context: the execution context.
-
-        """
-        pass
-
-    @abc.abstractmethod
-    def stop_expr(self, context):
-        """Stop experiment asynchronously
-
-        :type context: Context
-        :param context: the execution context.
-
-        """
-        pass
-
-    @abc.abstractmethod
-    def rollback(self, context):
-        """cancel/rollback a expr which is in error state
-
-        :type context: Context
-        :param context: the execution context.
-
-        """
-        pass
+    def _get_docker_proxy(self):
+        return self.docker

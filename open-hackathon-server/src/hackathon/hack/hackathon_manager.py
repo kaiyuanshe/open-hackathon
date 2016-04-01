@@ -40,10 +40,10 @@ from mongoengine.context_managers import no_dereference
 
 from hackathon.hmongo.models import Hackathon, UserHackathon, DockerHostServer, User, HackathonNotice, HackathonStat, \
     Organization, Award
-from hackathon.hackathon_response import internal_server_error, ok, not_found, forbidden, general_error, HTTP_CODE
-from hackathon.constants import HACKATHON_BASIC_INFO, HACK_USER_TYPE, HACK_STATUS, HACK_USER_STATUS, HTTP_HEADER, \
+from hackathon.hackathon_response import internal_server_error, ok, not_found, general_error, HTTP_CODE
+from hackathon.constants import HACKATHON_CONFIG, HACK_USER_TYPE, HACK_STATUS, HACK_USER_STATUS, HTTP_HEADER, \
     FILE_TYPE, HACK_TYPE, HACKATHON_STAT, DockerHostServerStatus, HACK_NOTICE_CATEGORY, HACK_NOTICE_EVENT, \
-    ORGANIZATION_TYPE, CLOUD_PROVIDE
+    ORGANIZATION_TYPE, CLOUD_PROVIDER
 from hackathon import RequiredFeature, Component, Context
 
 docker_host_manager = RequiredFeature("docker_host_manager")
@@ -79,7 +79,7 @@ class HackathonManager(Component):
         return hackathon is not None
 
     def is_recycle_enabled(self, hackathon):
-        key = HACKATHON_BASIC_INFO.RECYCLE_ENABLED
+        key = HACKATHON_CONFIG.RECYCLE_ENABLED
         return self.util.str2bool(self.get_basic_property(hackathon, key, False))
 
     def get_hackathon_by_name(self, name):
@@ -222,7 +222,7 @@ class HackathonManager(Component):
         return ok()
 
     def get_recycle_minutes(self, hackathon):
-        key = HACKATHON_BASIC_INFO.RECYCLE_MINUTES
+        key = HACKATHON_CONFIG.RECYCLE_MINUTES
         minutes = self.get_basic_property(hackathon, key, 60)
         return int(minutes)
 
@@ -230,14 +230,13 @@ class HackathonManager(Component):
         if HTTP_HEADER.HACKATHON_NAME in request.headers:
             try:
                 hackathon_name = request.headers[HTTP_HEADER.HACKATHON_NAME]
-                with no_dereference(Hackathon) as Hack:
-                    hackathon = Hack.objects(name=hackathon_name).first()
-                    if hackathon:
-                        g.hackathon = hackathon
-                        return True
-                    else:
-                        self.log.debug("cannot find hackathon by name %s" % hackathon_name)
-                        return False
+                hackathon = Hackathon.objects(name=hackathon_name).first()
+                if hackathon:
+                    g.hackathon = hackathon
+                    return True
+                else:
+                    self.log.debug("cannot find hackathon by name %s" % hackathon_name)
+                    return False
             except Exception as ex:
                 self.log.error(ex)
                 self.log.debug("hackathon_name invalid")
@@ -256,8 +255,7 @@ class HackathonManager(Component):
 
         :rtype: dict
         """
-        hackathon = Hackathon.objects(name=context.name).first()
-        if hackathon:
+        if Hackathon.objects(name=context.name).count() > 0:
             raise PreconditionFailed("hackathon name already exists")
 
         self.log.debug("add a new hackathon:" + context.name)
@@ -549,7 +547,7 @@ class HackathonManager(Component):
 
     def list_hackathon_awards(self, hackathon):
         awards = hackathon.dic()["awards"]
-        awards.sort(key=lambda award:-award["level"])
+        awards.sort(key=lambda award: -award["level"])
         return awards
 
     def get_hackathon_notice(self, notice_id):
@@ -762,9 +760,9 @@ class HackathonManager(Component):
         req = ok()
 
         if hackathon.status == HACK_STATUS.DRAFT or hackathon.status == HACK_STATUS.OFFLINE:
-            if self.util.is_local() or hackathon.config.cloud_provide == CLOUD_PROVIDE.NONE:
+            if self.util.is_local() or hackathon.config.cloud_provide == CLOUD_PROVIDER.NONE:
                 req = ok()
-            elif hackathon.config.cloud_provide == CLOUD_PROVIDE.AZURE:
+            elif hackathon.config.cloud_provider == CLOUD_PROVIDER.AZURE:
                 is_success = docker_host_manager.check_subscription_id(hackathon.id)
                 if not is_success:
                     req = general_error(code=HTTP_CODE.AZURE_KEY_NOT_READY)  # azure sub id is invalide
@@ -814,10 +812,10 @@ class HackathonManager(Component):
             register = self.register_manager.get_registration_by_user_and_hackathon(user.id, hackathon.id)
             if register:
                 detail["registration"] = register.dic()
-            #
-            # team_rel = self.db.find_first_object_by(UserTeamRel, user_id=user.id, hackathon_id=hackathon.id)
-            # if team_rel:
-            #     detail["team"] = team_rel.team.dic()
+                #
+                # team_rel = self.db.find_first_object_by(UserTeamRel, user_id=user.id, hackathon_id=hackathon.id)
+                # if team_rel:
+                #     detail["team"] = team_rel.team.dic()
 
         return detail
 
@@ -877,7 +875,7 @@ class HackathonManager(Component):
         return new_hack
 
     def __get_pre_allocate_interval(self, hackathon):
-        interval = self.get_basic_property(hackathon, HACKATHON_BASIC_INFO.PRE_ALLOCATE_INTERVAL_SECONDS)
+        interval = self.get_basic_property(hackathon, HACKATHON_CONFIG.PRE_ALLOCATE_INTERVAL_SECONDS)
         if interval:
             return int(interval)
         else:
@@ -928,25 +926,26 @@ class HackathonManager(Component):
         return result
 
     def __get_hackathon_stat(self, hackathon):
-        stats = self.db.find_all_objects_by(HackathonStat, hackathon_id=hackathon.id)
+        stats = HackathonStat.objects(hackathon=hackathon).all()
         result = {
-            "hackathon_id": hackathon.id,
+            "hackathon_id": str(hackathon.id),
             "online": 0,
             "offline": 0
         }
         for item in stats:
             result[item.type] = item.count
 
-        reg_list = hackathon.registers.filter(UserHackathonRel.deleted != 1,
-                                              UserHackathonRel.status.in_([HACK_USER_STATUS.AUTO_PASSED,
-                                                                           HACK_USER_STATUS.AUDIT_PASSED])).all()
-
+        reg_list = UserHackathon.objects(hackathon=hackathon,
+                                         role=HACK_USER_TYPE.COMPETITOR,
+                                         deleted=False,
+                                         status__in=[HACK_USER_STATUS.AUTO_PASSED, HACK_USER_STATUS.AUDIT_PASSED]
+                                         ).only("user").no_dereference().all()
+        reg_list = [uh.user.id for uh in reg_list]
         reg_count = len(reg_list)
         if reg_count > 0:
-            user_id_list = [r.user_id for r in reg_list]
-            user_id_online = self.db.count(User, (User.id.in_(user_id_list) & (User.online == 1)))
-            result["online"] = user_id_online
-            result["offline"] = reg_count - user_id_online
+            online_count = User.objects(id__in=reg_list, online=True).count()
+            result["online"] = online_count
+            result["offline"] = reg_count - online_count
 
         return result
 
@@ -998,7 +997,7 @@ hackathon is entity of Hackathon that defines in database/models.py.
 
 def is_auto_approve(hackathon):
     hack_manager = RequiredFeature("hackathon_manager")
-    value = hack_manager.get_basic_property(hackathon, HACKATHON_BASIC_INFO.AUTO_APPROVE, "1")
+    value = hack_manager.get_basic_property(hackathon, HACKATHON_CONFIG.AUTO_APPROVE, "1")
     return util.str2bool(value)
 
 
@@ -1010,20 +1009,14 @@ def is_pre_allocate_enabled(hackathon):
         return False
 
     hack_manager = RequiredFeature("hackathon_manager")
-    value = hack_manager.get_basic_property(hackathon, HACKATHON_BASIC_INFO.PRE_ALLOCATE_ENABLED, "1")
+    value = hack_manager.get_basic_property(hackathon, HACKATHON_CONFIG.PRE_ALLOCATE_ENABLED, "1")
     return util.str2bool(value)
 
 
 def get_pre_allocate_number(hackathon):
     hack_manager = RequiredFeature("hackathon_manager")
-    value = hack_manager.get_basic_property(hackathon, HACKATHON_BASIC_INFO.PRE_ALLOCATE_NUMBER, 1)
+    value = hack_manager.get_basic_property(hackathon, HACKATHON_CONFIG.PRE_ALLOCATE_NUMBER, 1)
     return int(value)
-
-
-def is_alauda_enabled(hackathon):
-    hack_manager = RequiredFeature("hackathon_manager")
-    value = hack_manager.get_basic_property(hackathon, HACKATHON_BASIC_INFO.ALAUDA_ENABLED, "0")
-    return util.str2bool(value)
 
 
 def get_basic_property(hackathon, property_name, default_value=None):
@@ -1034,5 +1027,4 @@ def get_basic_property(hackathon, property_name, default_value=None):
 Hackathon.is_auto_approve = is_auto_approve
 Hackathon.is_pre_allocate_enabled = is_pre_allocate_enabled
 Hackathon.get_pre_allocate_number = get_pre_allocate_number
-Hackathon.is_alauda_enabled = is_alauda_enabled
 Hackathon.get_basic_property = get_basic_property

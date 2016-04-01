@@ -142,7 +142,7 @@ angular.module('oh.controllers', [])
         return true;
       }
       if (activity.config) {
-        return activity.config.cloud_provide != 0
+        return activity.config.cloud_provider != 0
       } else {
         return false;
       }
@@ -671,17 +671,16 @@ angular.module('oh.controllers', [])
   .controller('createController', function($scope, $timeout, $filter, $cookies, $state, $stateParams, FileUploader, dialog, api) {
     var request;
     console.log($stateParams.name);
-    $scope.wizard = 3;
+    $scope.wizard = 1;
     $scope.isShowAdvancedSettings = true;
 
     $scope.activityFormDisabled = false;
 
     $scope.activity = {
-      name: 'aaaaa',
       location: '',
       tags: [],
       config: {
-        cloud_provide: 0,
+        cloud_provider: 0,
         auto_approve: true,
         recycle_enabled: false,
         recycle_minutes: 0,
@@ -799,13 +798,12 @@ angular.module('oh.controllers', [])
         status: 'warning'
       }).then(function() {
         $scope.isAzureForm = $scope.clondservices == 1;
-
         api.admin.hackathon.config.put({
           header: {
             hackathon_name: $scope.activity.name
           },
           body: {
-            cloud_provide: parseInt($scope.clondservices)
+            cloud_provider: parseInt($scope.clondservices)
           }
         }).then(function(data) {
           if (data.error) {

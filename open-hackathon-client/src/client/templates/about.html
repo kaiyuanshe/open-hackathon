@@ -1,200 +1,92 @@
 {% extends "base/base.html" %} {% block style %}
-<link href="/static/css/oh.about.css" rel="stylesheet"> {% endblock %} {% block content %}
-<div class="bg-banner">
-  <div class="jumbotron ">
-    <div class="container">
-      <div><img src="/static/pic/monkey-104-104px.jpg"></div>
-      <h1>“为开放而生，与开源同行” —— <span>开放黑客松</span></h1>
-      <p>在过去的365天中，我们与394个黑客，9个合作伙伴，
-        <br/> 一起并肩跑过了6场黑客马拉松。
-      </p>
-    </div>
-  </div>
-</div>
-<div class="oh-main">
-  <div class="container">
-    <div class="row">
-      <nav class="left_nav">
-        <ul class="def-nav" role="tablist">
-          <li class="active"><a href="#contactus" role="tab" data-toggle="tab">联系我们</a></li>
-          <li><a href="#feedback" role="tab" data-toggle="tab">意见反馈</a></li>
-          <li><a href="#partners" role="tab" data-toggle="tab">合作伙伴</a></li>
-        </ul>
-      </nav>
-      <article class="right-main">
-        <h2 id="contactus">联系我们</h2>
-        <ul class="contact">
-          <li>
-            <a href="#">
-              <span class="pic"><i class="fa fa-weixin"></i></span>
-              <p>微信</p>
-            </a>
-          </li>
-          <li>
-            <a href="#">
-              <span class="pic"><i class="fa fa-weibo"></i></span>
-              <p>新浪微博</p>
-            </a>
-          </li>
-          <li>
-            <a href="#">
-              <span class="pic"><i class="fa fa-envelope-o"></i></span>
-              <p>邮箱<br/> xxx@micorsoft.com</p>
-            </a>
-          </li>
-          <li>
-            <a href="#">
-              <span class="pic"><i class="fa fa-github-alt"></i></span>
-              <p>github</p>
-            </a>
-          </li>
-        </ul>
-        <hr>
-        <h2 id="feedback">意见反馈</h2>
-        <form class="form-horizontal" id="form" novalidate>
-          <div class="form-group">
-            <label for="inputEmail3" class="col-xs-1 control-label text-left">姓名</label>
-            <div class="col-xs-5">
-              <input type="text" class="form-control" name="name" id="" placeholder="姓名"
-               required
-               data-bv-trigger="blur"
-               data-bv-notempty-message="姓名必须填写"
-              >
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="inputPassword3" class="col-xs-1 control-label text-left">邮箱</label>
-            <div class="col-xs-5">
-              <input type="email" class="form-control" name="email" id="" placeholder="邮箱"
-               required
-               data-bv-trigger="blur"
-               data-bv-notempty-message="请填写您的邮箱地址。"
-              >
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="inputPassword3" class="col-xs-1 control-label text-left">意见</label>
-            <div class="col-xs-5">
-              <textarea class="form-control" name="notes" placeholder="意见"
-               required
-               data-bv-trigger="blur"
-               data-bv-notempty-message="请填写意见信息。"
-              ></textarea>
-            </div>
-          </div>
-          <div class="form-group">
-            <div class="col-sm-offset-1 col-xs-5">
-              <button type="submit" class="btn btn-success">提交</button>
-            </div>
-          </div>
-        </form>
-        <hr>
-        <h2 id="partners">合作伙伴</h2>
-        <div class="clearfix">
-          <div class="col-xs-3">
-            <div class="market">
-              <img src="/static/pic/jstorm.jpg">
-              <div class="body">
-                <div class="title">
-                  <div class="teble-cell midder">
-                    <h3 class="text-center">jstorm</h3>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-xs-3">
-            <div class="market">
-              <img src="/static/pic/jstorm.jpg">
-              <div class="body">
-                <div class="title">
-                  <div class="teble-cell midder">
-                    <h3 class="text-center">极客学院</h3>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-xs-3">
-            <div class="market">
-              <img src="/static/pic/jstorm.jpg">
-              <div class="body">
-                <div class="title">
-                  <div class="teble-cell midder">
-                    <h3 class="text-center">优麒麟</h3>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-xs-3">
-            <div class="market">
-              <img src="/static/pic/jstorm.jpg">
-              <div class="body">
-                <div class="title">
-                  <div class="teble-cell midder">
-                    <h3 class="text-center">GitCafe</h3>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-xs-3">
-            <div class="market">
-              <img src="/static/pic/alauda-logo-white.jpg">
-              <div class="body">
-                <div class="title">
-                  <div class="teble-cell midder">
-                    <h3 class="text-center">灵雀云</h3>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-xs-3">
-            <div class="market">
-              <img src="/static/pic/jstorm.jpg">
-              <div class="body">
-                <div class="title">
-                  <div class="teble-cell midder">
-                    <h3 class="text-center">聚合数据</h3>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-xs-3">
-            <div class="market">
-              <img src="/static/pic/microsoft.jpg">
-              <div class="body">
-                <div class="title">
-                  <div class="teble-cell midder">
-                    <h3 class="text-center">Microsoft</h3>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-xs-3">
-            <div class="market">
-              <img src="/static/pic/jstorm.jpg">
-              <div class="body">
-                <div class="title">
-                  <div class="teble-cell midder">
-                    <h3 class="text-center">WICRESOFT</h3>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </article>
-    </div>
-  </div>
-</div>
-{% endblock %}
+    <link href="/static/css/oh.about.css" rel="stylesheet"> {% endblock %} {% block content %}
+    <div class="bg-banner">
+        <div class="jumbotron ">
+            <div class="container">
 
-{% block script %}
-  <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
- <script type="text/javascript" src="/static/js/views/oh.about.js"></script>
+                <h1><span>开放黑客松</span>是互联网+时代下促进创新、创业的新平台</h1>
+                <p>开放黑客松平台致力于为各类孵化创新中心度身定制“海选 -&gt; 招募 -&gt; 竞赛 -&gt; 评选 -&gt; 奖励 -&gt; 产品 -&gt; 展示 -&gt; 持续云开发 -&gt;
+                    孵化” 一条龙式全方面位服务。
+                </p>
+                <ul class="contact">
+                    <li>
+                        海选
+                    </li>
+                    <li>
+                        招募
+                    </li>
+                    <li>
+                        竞赛
+                    </li>
+                    <li>
+                        评选
+                    </li>
+                    <li>
+                        奖励
+                    </li>
+                    <li>
+                        产品
+                    </li>
+                    <li>
+                        展示
+                    </li>
+                    <li>
+                        持续云开发
+                    </li>
+                    <li>
+                        孵化
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="oh-main">
+        <div class="container">
+            <div class="row">
+
+                <article class="about-main">
+                    <h2 id="about">关于我们</h2>
+                    <ul class="d-ul">
+                        <li>开放黑客松平台为两类人群而设计：孵化创新中心的主办方和创业团队。</li>
+                        <li>
+                            对于孵化创新中心来说，基于该平台主办方可轻松组织创业大赛，招募，竞赛，评选，奖励以及后续孵化新的项目和团队，以漏斗式的结构推进创新团队的孵化过程。基于微软Azure云的和黑客松平台支持大规模同时在线，不仅可持续举办系列大赛，也支持同时举办多个主题的竞赛，还合适联手多个合作伙伴共同举办。主办方可以节省大量的活动组织，现在维持，硬件设置，准备，支持和交通，食宿等众多花费和资源。
+                        </li>
+                        <li>
+                            对于创业团队来说，第一个海选阶段跨越了地域和时间的限制，在全国各地均可在此平台上在线参加；第二个阶段对于创新比赛优胜的团队，黑客松平台的云上展示厅为各个团队提供了在线的项目体验云环境；第三个阶段对于后续持续孵化的项目团队，可持续在此黑客松平台上通过SaaS服务，快速开发，测试，部署自己的解决方案，省去硬件采购的投入和软件的安装，同时更灵活弹性的顺应团队业务增长，让创业团队全力地发挥创意，开发和部署自己的创业项目。
+                        </li>
+                    </ul>
+                    <hr>
+                    <h2 id="contactus">联系我们</h2>
+                    <ul class="d-ul">
+                        <li>您可以通过点击微信，微博，邮箱联系我们反馈任何使用过程中遇到的问题及意见。<a href="https://github.com/msopentechcn/open-hackathon/issues" >BUG提交</a></li>
+                    </ul>
+                    <ul class="contact">
+                        <li class="weixin">
+                            <a href="#">
+                                <span class="pic"><i class="fa fa-weixin"></i></span>
+                                <p>微信公众号
+                                    <br/>kaiyuanshe</p>
+                            </a>
+                        </li>
+                        <li class="weibo">
+                            <a href="http://weibo.com/kaiyuanshe">
+                                <span class="pic"><i class="fa fa-weibo"></i></span>
+                                <p>新浪微博
+                                    <br/>kaiyuanshe </p>
+                            </a>
+                        </li>
+                        <li class="email">
+                            <a href="mailto:hackathon@kaiyuanshe.cn">
+                                <span class="pic"><i class="fa fa-envelope-o"></i></span>
+                                <p>邮箱
+                                    <br/> hackathon@kaiyuanshe.cn</p>
+                            </a>
+                        </li>
+                    </ul>
+                </article>
+            </div>
+        </div>
+    </div>
+{% endblock %} {% block script %}
+
 {% endblock %}

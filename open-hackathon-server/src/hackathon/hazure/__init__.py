@@ -26,3 +26,5 @@ THE SOFTWARE.
 __author__ = "rapidhere"
 
 from blob_service_adapter import BlobServiceAdapter
+from cloud_service_adapter import CloudServiceAdapter
+from virtual_machine_adapter import VirtualMachineAdapter

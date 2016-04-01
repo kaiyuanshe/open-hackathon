@@ -77,7 +77,7 @@ class HACKATHON_STAT:
     REGISTER = "register"
 
 
-class HACKATHON_BASIC_INFO:
+class HACKATHON_CONFIG:
     """Basic settings of hackathon that saved into column 'basic_info' of table 'hackathon'
 
     Attributes:
@@ -92,7 +92,6 @@ class HACKATHON_BASIC_INFO:
         ALAUDA_ENABLED: bool,default false, whether to use alauda service, no azure resource needed if true
         FREEDOM_TEAM: bool,default true,Whether to allow freedom of the team
     """
-    LOCATION = "location"
     MAX_ENROLLMENT = "max_enrollment"
     AUTO_APPROVE = "auto_approve"
     RECYCLE_ENABLED = "recycle_enabled"
@@ -100,8 +99,8 @@ class HACKATHON_BASIC_INFO:
     PRE_ALLOCATE_ENABLED = "pre_allocate_enabled"
     PRE_ALLOCATE_NUMBER = "pre_allocate_number"
     PRE_ALLOCATE_INTERVAL_SECONDS = "pre_allocate_interval_second"
-    ALAUDA_ENABLED = "alauda_enabled"
     FREEDOM_TEAM = "freedom_team"
+    CLOUD_PROVIDER = "cloud_provider"
 
 
 class TEMPLATE_STATUS:
@@ -145,7 +144,6 @@ class EStatus:
     STARTING = 1
     RUNNING = 2
     STOPPED = 3
-    DELETED = 4
     FAILED = 5
     ROLL_BACKING = 6
     ROLL_BACKED = 7
@@ -158,7 +156,6 @@ class VEStatus:
     RUNNING = 1
     FAILED = 2
     STOPPED = 3
-    DELETED = 4
     UNEXPECTED_ERROR = 5
 
 
@@ -332,16 +329,11 @@ class DockerHostServerStatus:
     UNAVAILABLE = 3
 
 
-class DockerHostServerDisable:
-    """
-    whether the docker host server VM is disabled by manager or not
-
-    Attributes:
-        ABLE: VM is not disabled by manager
-        DISABLE: VM is disabled by manager
-    """
-    ABLE = 0
-    DISABLE = 1
+class DHS_QUERY_STATE:
+    """state to indicate the progress when query available docker host server"""
+    SUCCESS = 0
+    ONGOING = 1
+    FAILED = 2
 
 
 class AzureVMStartMethod:
@@ -555,7 +547,7 @@ class CHINATELECOM_ACCESS_TOKEN_STATUSCODE:
     SUCCESS = "0"
 
 
-class CLOUD_PROVIDE:
+class CLOUD_PROVIDER:
     NONE = 0
     AZURE = 1
     ALAUDA = 2

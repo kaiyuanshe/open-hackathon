@@ -49,7 +49,8 @@ def get_network_config(network_config, assigned_endpoints):
     # avoid duplicate endpoint under same cloud service
     endpoints = map(lambda i: i[AZURE_UNIT.NETWORK_CONFIG_INPUT_ENDPOINTS_LOCAL_PORT], input_endpoints)
     unassigned_endpoints = map(str, find_unassigned_endpoints(endpoints, assigned_endpoints))
-    map(lambda (i, u): i.update({AZURE_UNIT.NETWORK_CONFIG_INPUT_ENDPOINTS_PORT: u}), zip(input_endpoints, unassigned_endpoints))
+    map(lambda (i, u): i.update({AZURE_UNIT.NETWORK_CONFIG_INPUT_ENDPOINTS_PORT: u}),
+        zip(input_endpoints, unassigned_endpoints))
 
     for input_endpoint in input_endpoints:
         network_config.input_endpoints.input_endpoints.append(
@@ -127,4 +128,26 @@ def add_endpoint_to_network_config(network_config, public_endpoints, private_end
                                           endpoint[0],
                                           endpoint[1])
         )
+    return new_network_config
+
+
+def delete_endpoint_from_network_config(network_config, private_endpoints):
+    """
+    Return a new network config
+    :param network_config:
+    :param private_endpoints: a list of int or str
+    :return:
+    """
+    private_endpoints = map(str, private_endpoints)
+    new_network_config = ConfigurationSet()
+    new_network_config.configuration_set_type = network_config.configuration_set_type
+    if network_config.input_endpoints is not None:
+        for input_endpoint in network_config.input_endpoints.input_endpoints:
+            if input_endpoint.local_port not in private_endpoints:
+                new_network_config.input_endpoints.input_endpoints.append(
+                    ConfigurationSetInputEndpoint(input_endpoint.name,
+                                                  input_endpoint.protocol,
+                                                  input_endpoint.port,
+                                                  input_endpoint.local_port)
+                )
     return new_network_config

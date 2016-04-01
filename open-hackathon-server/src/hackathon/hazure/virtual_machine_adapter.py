@@ -42,12 +42,10 @@ class VirtualMachineAdapter(ServiceAdapter):
     so we won't split a signle deployment adapter, instead, we do it in this adapter
     """
     NETWORK_CONFIGURATION = 'NetworkConfiguration'
+
     def __init__(self, subscription_id, cert_url, *args, **kwargs):
         super(VirtualMachineAdapter, self).__init__(
             ServiceManagementService(subscription_id, cert_url, *args, **kwargs))
-
-    def __init__(self, service):
-        super(VirtualMachineAdapter, self).__init__(service)
 
     def deployment_exists(self, cloud_service_name, deployment_slot):
         """check if the specified cloud service is under specified deployment slot(production or staging)
