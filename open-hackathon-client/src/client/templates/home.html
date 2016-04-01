@@ -3,6 +3,12 @@
     <link href="/static/css/oh.home.css" rel="stylesheet">
 {% endblock %}
 {% block content %}
+    {% if sc %}
+    <div id="sc_logo">
+        <div style="width:100%; height:200px; background:url('/static/pic/yantai_gov.png'); background-size:cover"></div>
+    </div>
+    {% endif %}
+
     <div id="carousel-example-generic" class="carousel slide carousel-fade" data-ride="carousel">
         <ol class="carousel-indicators">
             <li data-target="#carousel-example-generic" data-slide-to="0" class="active"></li>

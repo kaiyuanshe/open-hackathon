@@ -436,7 +436,8 @@ class AzureHostedDockerStarter(DockerExprStarter):
             azure_key = AzureKey.objects(id=context.azure_key_id).first()
 
         if not azure_key:
-            azure_key = Experiment.objects(id=context.experiment_id).first().only("azure_key")
+            expr = Experiment.objects(id=context.experiment_id).only("azure_key").first()
+            azure_key = expr.azure_key
 
         if not azure_key:
             hackathon = Hackathon.objects(id=context.hackathon_id).first()
@@ -451,7 +452,7 @@ class AzureHostedDockerStarter(DockerExprStarter):
         # todo provide a single and unified way to get adapter for hackathon
         azure_key = self.__load_azure_key_id(context)
         return VirtualMachineAdapter(azure_key.subscription_id,
-                                     azure_key.get_local_pem_url,
+                                     azure_key.get_local_pem_url(),
                                      host=azure_key.management_host)
 
     def __get_available_host_port(self, docker_host, private_port):

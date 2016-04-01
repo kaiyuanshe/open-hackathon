@@ -176,8 +176,10 @@ class HackathonManager(Component):
         return map(lambda h: self.__get_hackathon_detail(h, user), user_hack_list)
 
     def get_recyclable_hackathon_list(self):
-        all_hackathon = self.db.find_all_objects(Hackathon)
-        return filter(lambda h: self.is_recycle_enabled(h), all_hackathon)
+        # todo fix auto recycle
+        # all_hackathon = self.db.find_all_objects(Hackathon)
+        # return filter(lambda h: self.is_recycle_enabled(h), all_hackathon)
+        return []
 
     def get_entitled_hackathon_list_with_detail(self, user):
         hackathon_ids = self.admin_manager.get_entitled_hackathon_ids(user.id)
@@ -732,7 +734,9 @@ class HackathonManager(Component):
         Add an interval job for hackathon if it's pre-allocate is enabled.
         Otherwise try to remove the schedule job
         """
-        hackathon_list = self.db.find_all_objects(Hackathon)
+        # todo fix pre-allocate
+        # hackathon_list = self.db.find_all_objects(Hackathon)
+        hackathon_list = []
         for hack in hackathon_list:
             job_id = "pre_allocate_expr_" + str(hack.id)
             is_job_exists = self.scheduler.has_job(job_id)
