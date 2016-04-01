@@ -461,10 +461,13 @@ angular.module('oh.controllers', [])
     $scope.$emit('pageName', 'SETTINGS.ADMINISTRATORS');
 
     var activity = activityService.getCurrentActivity();
-    $scope.admins = [];
+    $scope.data = {
+      admins: [],
+      adminsType: []
+    }
     $scope.filterAdminCondition = 0;
 
-    $scope.showTip = function(level, content, showTime) {
+    function showTip(level, content, showTime) {
       $scope.$emit('showTip', {
         level: level,
         content: content,
@@ -478,14 +481,12 @@ angular.module('oh.controllers', [])
       return item.role == $scope.filterAdminCondition;
     }
 
-    $scope.userTypeSeletor = {
-      availableOptions: [
-        {id: '1', name: 'Option A'},
-        {id: '2', name: 'Option B'},
-        {id: '3', name: 'Option C'}
-      ],
-      selectedOption: {id: '3', name: 'Option C'}
-    };
+    /*$scope.userTypeSeletor = {
+      options: [
+        $translate.instant('HACK_USER_TYPE.ADMIN'),
+        $translate.instant('HACK_USER_TYPE.JUDGE')
+      ]
+    };*/
 
     function pageLoad() {
       api.admin.hackathon.administrator.list.get({
@@ -493,8 +494,13 @@ angular.module('oh.controllers', [])
       }, function(data){
         if(data.error)
           showTip('tip-danger', data.error.friendly_message);
-        else
-          $scope.admins = data;
+        else{
+          $scope.data.admins = data;
+          $scope.data.adminsType = [];
+          for(var index in data) {
+            $scope.data.adminsType.push(data[index].role);
+          }
+        }
       })
     }
 
