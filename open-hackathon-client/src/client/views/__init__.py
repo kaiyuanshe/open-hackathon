@@ -308,7 +308,27 @@ def index():
     soon_hackathon = empty_items if "error" in soon_hackathon else soon_hackathon
 
     return render('/home.html', newest_hackathons=newest_hackathons, hot_hackathons=hot_hackathons,
-                  soon_hackathon=soon_hackathon)
+                  soon_hackathon=soon_hackathon, sc=False)
+
+
+@app.route('/shuangchuang')
+def shuangchuang():
+    empty_items = {
+        "items": []
+    }
+    newest_hackathons = __get_api(API_HACKATHON_LIST, {"token": session.get("token")},
+                                  params={"page": 1, "per_page": 3, "order_by": "create_time", "status": 1})
+    hot_hackathons = __get_api(API_HACKATHON_LIST, {"token": session.get("token")},
+                               params={"page": 1, "per_page": 3, "order_by": "registered_users_num", "status": 1})
+    soon_hackathon = __get_api(API_HACKATHON_LIST, {"token": session.get("token")},
+                               params={"page": 1, "per_page": 3, "order_by": "event_start_time", "status": 1})
+
+    newest_hackathons = empty_items if "error" in newest_hackathons else newest_hackathons
+    hot_hackathons = empty_items if "error" in hot_hackathons else hot_hackathons
+    soon_hackathon = empty_items if "error" in soon_hackathon else soon_hackathon
+
+    return render('/home.html', newest_hackathons=newest_hackathons, hot_hackathons=hot_hackathons,
+                  soon_hackathon=soon_hackathon, sc=True)
 
 
 @app.route('/help')
@@ -432,7 +452,6 @@ def landing():
 @app.route("/events")
 def events():
     return render("/events.html")
-
 
 
 from route_manage import *
