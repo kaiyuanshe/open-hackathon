@@ -24,17 +24,17 @@
           <td>{{admin.user_info.name}}</td>
           <td>{{admin.user_info.emails | join}}</td>
           <td>
-            <select ng-model="data.adminsType[$index] | hackUserType" ng-change="">
-              <option>{{'HACK_USER_TYPE.ADMIN' | translate}}</option>
-              <option>{{'HACK_USER_TYPE.JUDGE' | translate}}</option>
+            <select ng-model="data.adminsType[admin.id]" ng-change="updateAdmin(admin)">
+              <option value="1">{{'HACK_USER_TYPE.ADMIN' | translate}}</option>
+              <option value="2">{{'HACK_USER_TYPE.JUDGE' | translate}}</option>
             </select>
           </td>
           <td>{{admin.status | hackUserStatus}}</td>
           <td>{{admin.user_info.provider}}</td>
           <td>{{admin.user_info.last_login_time | date:'yyyy-MM-dd HH:mm:ss'}}</td>
           <td>{{admin.user_info.create_time | date:'yyyy-MM-dd HH:mm:ss'}}</td>
-          <input>{{admin.remark}}
-            <input type="text">
+          <td>
+            <input ng-model="data.adminsRemark[admin.id]" ng-blur="updateAdmin(admin)">
           </td>
         </tr>
       </tbody>

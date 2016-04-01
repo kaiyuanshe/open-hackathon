@@ -463,7 +463,8 @@ angular.module('oh.controllers', [])
     var activity = activityService.getCurrentActivity();
     $scope.data = {
       admins: [],
-      adminsType: []
+      adminsType: [],
+      adminsRemark: []
     }
     $scope.filterAdminCondition = 0;
 
@@ -479,6 +480,26 @@ angular.module('oh.controllers', [])
       if($scope.filterAdminCondition == 0)
         return true;
       return item.role == $scope.filterAdminCondition;
+    }
+
+    $scope.updateAdmin = function(admin) {
+      api.admin.hackathon.administrator.put({
+        header: {hackathon_name: activity.name},
+        body: {
+          id: admin.id,
+          role: parseInt($scope.data.adminsType[admin.id]),
+          remark: $scope.data.adminsRemark[admin.id]
+        }
+      }, function(data) {
+        if(data.error)
+          showTip('tip-danger', data.error.friendly_message);
+        else{
+          // update $scope.data.admin
+          admin.role = parseInt($scope.data.adminsType[admin.id]);
+          admin.remark = $scope.data.adminsRemark[admin.id];
+          showTip('tip-success', '修改管理员成功');
+        }
+      });
     }
 
     /*$scope.userTypeSeletor = {
@@ -498,7 +519,8 @@ angular.module('oh.controllers', [])
           $scope.data.admins = data;
           $scope.data.adminsType = [];
           for(var index in data) {
-            $scope.data.adminsType.push(data[index].role);
+            $scope.data.adminsType[data[index].id] = data[index].role.toString();
+            $scope.data.adminsRemark[data[index].id] = data[index].remark;
           }
         }
       })
