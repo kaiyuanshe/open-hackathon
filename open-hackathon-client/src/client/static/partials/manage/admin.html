@@ -3,11 +3,11 @@
     <table class="table table-striped">
       <thead>
         <tr>
-          <button><a><i class="fa fa-trash"></i><span>{{'DELETE' | translate}}</span></a></button>
-          <button><a><i class="fa fa-plus"></i><span>{{'CREATE' | translate}}</span></a></button>
+          <button ng-click="deleteAdmins()"><a><i class="fa fa-trash"></i><span>{{'DELETE' | translate}}</span></a></button>
+          <button ng-click="showSearchBar()"><a><i class="fa fa-plus"></i><span>{{'CREATE' | translate}}</span></a></button>
         </tr>
         <tr>
-          <th><input type="checkbox" id="AdminCheckbox"/></th>
+          <th><input type="checkbox" ng-click="toggleAllAdmins()" ng-checked="isAllAdminsSelected()"></th>
           <th>{{'ADMIN_WEBPAGE_FIELDS.NAME' | translate}}</th>
           <th>{{'ADMIN_WEBPAGE_FIELDS.EMAILS' | translate}}</th>
           <th>{{'ADMIN_WEBPAGE_FIELDS.ROLE' | translate}}</th>
@@ -20,7 +20,7 @@
       </thead>
       <tbody>
         <tr ng-repeat="admin in data.admins | filter:filterAdmin">
-          <td><input type="checkbox" name="adminItemCheckbox"/></td>
+          <td><input type="checkbox" ng-checked="isAdminSelected(admin)" ng-click="selectAdmin(admin)"></td>
           <td>{{admin.user_info.name}}</td>
           <td>{{admin.user_info.emails | join}}</td>
           <td>

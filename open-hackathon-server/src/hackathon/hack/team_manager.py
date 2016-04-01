@@ -655,8 +655,8 @@ class TeamManager(Component):
         if user:
             resp["is_admin"] = self.admin_manager.is_hackathon_admin(team.hackathon.id, user.id)
             resp["is_leader"] = team.leader == user
-            rel = Team.objects().filter(members__user=user).count()
-            resp["is_member"] = rel > 0
+            rel = team.members.filter(user=user)
+            resp["is_member"] = True if not rel==[] else False
 
         return resp
 
