@@ -436,7 +436,7 @@ class AzureHostedDockerStarter(DockerExprStarter):
             azure_key = AzureKey.objects(id=context.azure_key_id).first()
 
         if not azure_key:
-            azure_key = Experiment.objects(id=context.experiment_id).first().only("azure_key")
+            azure_key = Experiment.objects(id=context.experiment_id).only("azure_key").first()
 
         if not azure_key:
             hackathon = Hackathon.objects(id=context.hackathon_id).first()

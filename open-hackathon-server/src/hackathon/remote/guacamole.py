@@ -27,39 +27,27 @@
 import sys
 
 sys.path.append("..")
-from flask import (
-    request,
-)
-from hackathon.constants import (
-    VEStatus,
-    VERemoteProvider,
-)
+from flask import request, g
 
-from hackathon.hmongo.models import (
-    VirtualEnvironment,
-)
-
-import json
+from hackathon.constants import VEStatus, VERemoteProvider
+from hackathon.hmongo.models import Experiment
 from hackathon.hackathon_response import forbidden, not_found
 from hackathon import Component
-from flask import g
 
 
 class GuacamoleInfo(Component):
     def getConnectInfo(self):
         connection_name = request.args.get("name")
-        guacamole_config = self.db.find_first_object_by(VirtualEnvironment,
-                                                        name=connection_name,
-                                                        status=VEStatus.RUNNING,
-                                                        remote_provider=VERemoteProvider.Guacamole)
-        if guacamole_config is None:
+        expr = Experiment.objects(virtual_environments__name=connection_name).no_dereference().first()
+        if not expr:
             return not_found("not_found")
 
-        if guacamole_config.experiment.user_id != g.user.id:
+        if expr.user.id != g.user.id:
             return forbidden("forbidden")
 
-        self.log.debug("get guacamole config by id: %s, paras: %s" % (connection_name, guacamole_config.remote_paras))
-        return json.loads(guacamole_config.remote_paras)
+        ve = expr.virtual_environments.get(name=connection_name)
+        self.log.debug("get guacamole config by id: %s, paras: %r" % (connection_name, ve.remote_paras))
+        return ve.remote_paras
         # return {
         # "displayname": "ubuntu", "hostname": "139.217.133.53",
         # "name": "174-ubuntu", "password": "acowoman",
