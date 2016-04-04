@@ -70,6 +70,11 @@ angular.module('oh.api', [])
           };
           $http(config)
             .success(function(data, status, headers, config) {
+              if(data.error){
+                if(data.error.code===401){
+                  location.href = '/login';
+                }
+              }
               callback(data);
             }).error(function(data, status, headers, config) {
               console.log(data);
