@@ -310,7 +310,7 @@ angular.module('oh.controllers', [])
     var activity = activityService.getCurrentActivity();
 
     $scope.data = {
-      registerUsers: [],  // we cannot use activity.registration here, its single
+      registerUsers: [], // we cannot use activity.registration here, its single
       regStatus: {},
       checkAll: false,
       checks: {},
@@ -332,9 +332,11 @@ angular.module('oh.controllers', [])
 
     var refresh = function() {
       api.admin.registration.list.get({
-        header: {hackathon_name: activity.name}
+        header: {
+          hackathon_name: activity.name
+        }
       }, function(data) {
-        if(data.error) {
+        if (data.error) {
           showTip('tip-danger', data.error.friendly_message);
         } else {
           $scope.data.regStatus = {};
@@ -342,7 +344,7 @@ angular.module('oh.controllers', [])
           $scope.data.checks = {};
 
           var i;
-          for(i = 0;i < data.length;i ++) {
+          for (i = 0; i < data.length; i++) {
             $scope.data.regStatus[data[i].id] = '' + data[i].status;
             $scope.data.checks[data[i].id] = false;
           }
@@ -363,20 +365,22 @@ angular.module('oh.controllers', [])
     });
 
     var _updateBatch = function(updates, status, index) {
-      if(index >= updates.length) {
+      if (index >= updates.length) {
         return;
       }
 
       var reg = updates[index];
 
       api.admin.registration.put({
-        header: {hackathon_name: activity.name},
+        header: {
+          hackathon_name: activity.name
+        },
         body: {
           id: reg.id,
           status: status,
         },
       }, function(data) {
-        if(data.error) {
+        if (data.error) {
           showTip('tip-danger', 'some of the registration updates failed: ' + data.error.friendly_message);
         } else {
           reg.status = parseInt(status);
@@ -389,13 +393,15 @@ angular.module('oh.controllers', [])
 
     $scope.updateStatus = function(reg) {
       return api.admin.registration.put({
-        header: {hackathon_name: activity.name},
+        header: {
+          hackathon_name: activity.name
+        },
         body: {
           id: reg.id,
           status: parseInt($scope.data.regStatus[reg.id]),
         }
       }, function(data) {
-        if(data.error) {
+        if (data.error) {
           showTip('tip-danger', data.error.friendly_message);
           $scope.data.regStatus[reg.id] = '' + reg.status;
         } else {
@@ -408,11 +414,11 @@ angular.module('oh.controllers', [])
       var i, id, reg;
 
       var toUpdate = [];
-      for(i = 0;i < $scope.data.registerUsers.length;i ++) {
+      for (i = 0; i < $scope.data.registerUsers.length; i++) {
         reg = $scope.data.registerUsers[i];
         id = reg.id;
 
-        if($scope.data.checks[id])
+        if ($scope.data.checks[id])
           toUpdate.push(reg);
       }
 
@@ -421,15 +427,16 @@ angular.module('oh.controllers', [])
 
     $scope.toggleCheckAll = function() {
       var i;
-      for(i = 0;i < $scope.data.registerUsers.length;i ++) {
+      for (i = 0; i < $scope.data.registerUsers.length; i++) {
         $scope.data.checks[$scope.data.registerUsers[i].id] = $scope.data.checkAll;
       }
     };
 
     $scope.checkCheckAll = function() {
-      var i = 0, allChecked = true;
-      for(i = 0;i < $scope.data.registerUsers.length;i ++) {
-        if(! $scope.data.checks[$scope.data.registerUsers[i].id]) {
+      var i = 0,
+        allChecked = true;
+      for (i = 0; i < $scope.data.registerUsers.length; i++) {
+        if (!$scope.data.checks[$scope.data.registerUsers[i].id]) {
           allChecked = false;
           break;
         }
@@ -440,7 +447,9 @@ angular.module('oh.controllers', [])
 
     $scope.updateConfig = function() {
       api.admin.hackathon.put({
-        header: {hackathon_name: activity.name},
+        header: {
+          hackathon_name: activity.name
+        },
         body: {
           config: {
             auto_approve: $scope.data.autoApprove,
@@ -448,7 +457,7 @@ angular.module('oh.controllers', [])
           }
         }
       }, function(data) {
-        if(data.error) {
+        if (data.error) {
           showTip('tip-danger', data.error.friendly_message);
           $scope.data.autoApprove = activity.config.auto_approve;
           $scope.data.freedomTeam = activity.config.freedom_team;
@@ -888,7 +897,6 @@ angular.module('oh.controllers', [])
   })
   .controller('monitorController', function($rootScope, $scope, stateParams, activityService, api) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.ENVIRONMENTAL_MONITOR');
-    var currentHackathon = $stateParams.name;
     api.admin.experiment.list.get({
       query: data,
       header: {
@@ -909,6 +917,116 @@ angular.module('oh.controllers', [])
   .controller('cloudController', function($rootScope, $scope, activityService, api) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.CLOUD_RESOURCES');
 
+  })
+  .controller('azurecertController', function($rootScope, $scope, $stateParams, activityService, api, dialog) {
+    $scope.$emit('pageName', 'ADVANCED_SETTINGS.AZURECERT');
+    var isDeleteCerDisabled = false;
+    $scope.azureFormDisabled = false;
+    $scope.azure = {
+      management_host: 'management.core.chinacloudapi.cn',
+    };
+
+
+    function getAzureCer() {
+      api.admin.azure.get({
+        header: {
+          hackathon_name: $stateParams.name
+        }
+      }).then(function(data) {
+        $scope.azurecerts = data;
+        console.log(data);
+      });
+    }
+
+    $scope.checksubid = function(ecert) {
+      api.admin.azure.checksubid.post({
+        body: {
+          subscription_id: ecert.subscription_id
+        },
+        header: {
+          hackathon_name: $stateParams.name
+        }
+      }).then(function(data) {
+        if (!data.message) {
+          $scope.$emit('showTip', {
+            level: 'tip-warning',
+            content: '证书授权失败，请检验SUBSCRIPTION ID是否正确。'
+          });
+        } else {
+          $scope.$emit('showTip', {
+            level: 'tip-success',
+            content: '检验成功。'
+          });
+          ecert.verified = true;
+        }
+      })
+    };
+
+
+    $scope.azureFormSubmit = function() {
+      $scope.azureFormDisabled = true;
+      api.admin.azure.post({
+        body: $scope.azure,
+        header: {
+          hackathon_name: $stateParams.name
+        }
+      }).then(function(azure_key) {
+        if (azure_key.error) {
+          $scope.$emit('showTip', {
+            level: 'tip-danger',
+            content: azure_key.error.friendly_message
+          });
+        } else {
+          $scope.$emit('showTip', {
+            level: 'tip-success',
+            content: '创建SUBSCRIPTION ID成功'
+          });
+          $scope.azure.subscription_id = '';
+          $scope.azure.management_host = 'management.core.chinacloudapi.cn';
+        }
+        $scope.azureFormDisabled = false;
+      });
+    };
+
+
+    $scope.deleteCert = function(id) {
+      if (!isDeleteCerDisabled) {
+        isDeleteCerDisabled = !isDeleteCerDisabled;
+        dialog.confirm({
+          title: '提示',
+          body: '确定删除此Azure证书？',
+          icon: 'fa-exclamation',
+          size: 'sm',
+          status: 'warning'
+        }).then(function() {
+          api.admin.azure.delete({
+            header: {
+              hackathon_name: $stateParams.name
+            },
+            query: {
+              certificate_id: id
+            }
+          }).then(function(data) {
+            if (data.error) {
+              $scope.$emit('showTip', {
+                level: 'tip-danger',
+                content: data.error.friendly_message
+              });
+            } else {
+              $scope.$emit('showTip', {
+                level: 'tip-success',
+                content: '删除成功'
+              });
+              getAzureCer();
+            }
+            isDeleteCerDisabled = !isDeleteCerDisabled;
+          });
+        })
+      }
+    }
+
+
+    getAzureCer();
   })
   .controller('serversController', function($rootScope, $scope, activityService, api) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.SERVERS');
