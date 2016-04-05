@@ -318,8 +318,8 @@ angular.module('oh.controllers', [])
       curPage: 1,
       nPage: 0,
 
-      freedomTeam: activity.config.freedom_team,
-      autoApprove: activity.config.auto_approve
+      freedomTeam: false,
+      autoApprove: false
     };
 
     var showTip = function(level, content, showTime) {
@@ -356,6 +356,11 @@ angular.module('oh.controllers', [])
         }
       });
     };
+
+    $scope.$on('chargeActitity', function() {
+      activity = activityService.getCurrentActivity();
+      refresh();
+    });
 
     var _updateBatch = function(updates, status, index) {
       if(index >= updates.length) {
@@ -453,8 +458,6 @@ angular.module('oh.controllers', [])
         }
       });
     };
-
-    refresh();
   })
   .controller('adminController', function($rootScope, $scope, activityService, api, dialog) {
     $scope.$emit('pageName', 'SETTINGS.ADMINISTRATORS');
@@ -614,11 +617,15 @@ angular.module('oh.controllers', [])
           return ;
         }
 
-        console.log(data);
         activity.awards = data;
         $scope.data.awards = data;
       });
     };
+
+    $scope.$on('chargeActitity', function() {
+      activity = activityService.getCurrentActivity();
+      refreshAward();
+    });
 
     var deleteAward = function(id) {
       return api.admin.hackathon.award.delete({
@@ -703,8 +710,7 @@ angular.module('oh.controllers', [])
         description: '',
       };
       openAddAwardWizard();
-    }
-
+    };
   })
   .controller('veController', function($rootScope, $scope, $stateParams, $filter, activityService, $cookies, FileUploader, activity, api) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.VIRTUAL_ENVIRONMENT');
