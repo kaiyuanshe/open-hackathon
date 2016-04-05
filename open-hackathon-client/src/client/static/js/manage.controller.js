@@ -583,9 +583,60 @@ angular.module('oh.controllers', [])
 
     pageLoad();
   })
-  .controller('organizersController', function($rootScope, $scope, activityService, api) {
+  .controller('organizersController', function($rootScope, $scope, $cookies, activityService, api) {
     $scope.$emit('pageName', 'SETTINGS.ORGANIZERS');
 
+    // very quick and rough implementation, please feel free to update
+    $scope.data = $scope.activity = activityService.getCurrentActivity();
+    $scope.$on('chargeActitity', function(event) {
+      $scope.data = $scope.activity = activityService.getCurrentActivity();
+      event.preventDefault();
+    })
+
+    $scope.orgFormSubmit = function(){
+      api.admin.hackathon.organizer.post({
+        body: $scope.org,
+        header: {
+          hackathon_name: $scope.activity.name,
+          token: $cookies.get('token')
+        }
+      }).then(function(data){
+        if(data.error){
+          $scope.$emit('showTip', {
+            level: 'tip-danger',
+            content: data.error.friendly_message
+          });
+        }else{
+          $scope.showTip(level = 'tip-success', content = '修改成功');
+        }
+      })
+    }
+
+    $scope.delete_organizer = function(organizer_id){
+      api.admin.hackathon.organizer.delete({
+          query: {
+            id: organizer_id
+          },
+          header: {
+            hackathon_name: $scope.activity.name,
+            token: $cookies.get('token')
+          }
+        }).then(function(data){
+          if(data.error){
+            $scope.$emit('showTip', {
+              level: 'tip-danger',
+              content: data.error.friendly_message
+            });
+          }else{
+            $scope.data.organizers = $scope.data.organizers.filter(function(organizer){
+              return organizer.id != organizer_id
+            })
+            $scope.data.partners = $scope.data.partners.filter(function(partner){
+              return partner.id != organizer_id
+            })
+          }
+        })
+    }
   })
   .controller('awardsController', function($rootScope, $scope, activityService, api) {
     $scope.$emit('pageName', 'SETTINGS.AWARDS');
