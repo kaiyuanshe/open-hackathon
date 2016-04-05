@@ -726,10 +726,12 @@ class AdminHackathonOnLineResource(HackathonResource):
     def post(self):
         return hackathon_manager.hackathon_online(g.hackathon)
 
+
 class AdminHackathonOffLineResource(HackathonResource):
     @admin_privilege_required
     def post(self):
         return hackathon_manager.hackathon_offline(g.hackathon)
+
 
 class AdminHackathonNoticeResource(HackathonResource):
     @admin_privilege_required

@@ -216,6 +216,11 @@ angular.module('oh.api', [])
       return base(modal);
     }
 
+    this.add_admin = function(modal) {
+      modal.url = 'manage/template/dialogs/add_admin.html';
+      return base(modal);
+    }
+
     this.customize = function(modal) {
       open(modal);
     }

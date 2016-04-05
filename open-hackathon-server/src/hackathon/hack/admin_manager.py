@@ -102,7 +102,8 @@ class AdminManager(Component):
         :rtype: list
         :return list of administrators including the detail information
         """
-        user_hackathon_rels = UserHackathon.objects(hackathon=hackathon).all()
+        user_hackathon_rels = UserHackathon.objects(hackathon=hackathon,
+                                                    role__in=[HACK_USER_TYPE.ADMIN, HACK_USER_TYPE.JUDGE]).all()
 
         def get_admin_details(rel):
             dic = rel.dic()
