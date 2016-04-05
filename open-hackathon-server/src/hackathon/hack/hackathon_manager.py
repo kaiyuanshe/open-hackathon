@@ -36,10 +36,9 @@ from flask import g, request
 import lxml
 from lxml.html.clean import Cleaner
 from mongoengine import Q
-from mongoengine.context_managers import no_dereference
 
 from hackathon.hmongo.models import Hackathon, UserHackathon, DockerHostServer, User, HackathonNotice, HackathonStat, \
-    Organization, Award
+    Organization, Award, Team
 from hackathon.hackathon_response import internal_server_error, ok, not_found, general_error, HTTP_CODE
 from hackathon.constants import HACKATHON_CONFIG, HACK_USER_TYPE, HACK_STATUS, HACK_USER_STATUS, HTTP_HEADER, \
     FILE_TYPE, HACK_TYPE, HACKATHON_STAT, DockerHostServerStatus, HACK_NOTICE_CATEGORY, HACK_NOTICE_EVENT, \
@@ -545,6 +544,11 @@ class HackathonManager(Component):
         hackathon.update(pull__awards=award)
         hackathon.update_time = self.util.get_now()
         hackathon.save()
+
+        # delete granted award in teams
+        award_uuid = uuid.UUID(award_id)
+        Team.objects(hackathon=hackathon, awards=award_uuid).update(pull__awards=award_uuid)
+
         return ok()
 
     def list_hackathon_awards(self, hackathon):
@@ -903,7 +907,7 @@ class HackathonManager(Component):
     def __parse_update_items(self, args, hackathon):
         """Parse properties that need to update
 
-        Only those whose value changed items will be returned. Also some static property like id, name, create_time 
+        Only those whose value changed items will be returned. Also some static property like id, name, create_time
         and unexisted properties should NOT be updated.
 
         :type args: dict

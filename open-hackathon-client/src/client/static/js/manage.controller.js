@@ -156,7 +156,6 @@ angular.module('oh.controllers', [])
 
   })
   .controller('editController', function($rootScope, $scope, $filter, dialog, session, activityService, api, activity, speech) {
-
     $scope.$emit('pageName', 'SETTINGS.EDIT_ACTIVITY');
 
     $scope.animationsEnabled = true;
@@ -319,8 +318,8 @@ angular.module('oh.controllers', [])
       curPage: 1,
       nPage: 0,
 
-      freedomTeam: activity.config.freedom_team,
-      autoApprove: activity.config.auto_approve
+      freedomTeam: false,
+      autoApprove: false
     };
 
     var showTip = function(level, content, showTime) {
@@ -357,6 +356,11 @@ angular.module('oh.controllers', [])
         }
       });
     };
+
+    $scope.$on('chargeActitity', function() {
+      activity = activityService.getCurrentActivity();
+      refresh();
+    });
 
     var _updateBatch = function(updates, status, index) {
       if(index >= updates.length) {
@@ -454,8 +458,6 @@ angular.module('oh.controllers', [])
         }
       });
     };
-
-    refresh();
   })
   .controller('adminController', function($rootScope, $scope, activityService, api, dialog) {
     $scope.$emit('pageName', 'SETTINGS.ADMINISTRATORS');
@@ -585,13 +587,130 @@ angular.module('oh.controllers', [])
     $scope.$emit('pageName', 'SETTINGS.ORGANIZERS');
 
   })
-  .controller('prizesController', function($rootScope, $scope, activityService, api) {
-    $scope.$emit('pageName', 'SETTINGS.PRIZES');
-
-  })
   .controller('awardsController', function($rootScope, $scope, activityService, api) {
     $scope.$emit('pageName', 'SETTINGS.AWARDS');
 
+  })
+  .controller('prizesController', function($rootScope, $scope, $uibModal, activityService, api, dialog) {
+    $scope.$emit('pageName', 'SETTINGS.PRIZES');
+
+    var activity = activityService.getCurrentActivity();
+    $scope.data = {
+      awards: activity.awards,
+    };
+
+    var formData = {};
+
+    var showTip = function(level, msg) {
+      $scope.$emit('showTip', {
+        level: level,
+        content: msg
+      });
+    };
+
+    var refreshAward = function() {
+      return api.admin.hackathon.award.list.get({
+        header: {hackathon_name: activity.name}
+      }, function(data) {
+        if(data.error) {
+          showTip('tip-danger', data.error.friendly_message);
+          return ;
+        }
+
+        activity.awards = data;
+        $scope.data.awards = data;
+      });
+    };
+
+    $scope.$on('chargeActitity', function() {
+      activity = activityService.getCurrentActivity();
+      refreshAward();
+    });
+
+    var deleteAward = function(id) {
+      return api.admin.hackathon.award.delete({
+        query: {id: id},
+        header: {
+          hackathon_name: activity.name
+        }
+      });
+    };
+
+    var createAward = function() {
+      var award = formData;
+      var fn;
+
+      if(award.id)
+        fn = api.admin.hackathon.award.put;
+      else
+        fn = api.admin.hackathon.award.post;
+
+      return fn({
+        body: award,
+        header: {
+          hackathon_name: activity.name
+        }
+      }, function(data) {
+        if(data.error)
+          showTip('tip-danger', data.error.friendly_message);
+        else {
+          showTip('tip-success', '创建/修改成功');
+          refreshAward();
+        }
+      });
+    };
+
+    var openAddAwardWizard = function() {
+      $uibModal.open({
+        templateUrl: 'awardModel.html',
+        controller: function($scope, $uibModalInstance) {
+          $scope.data = formData;
+
+          $scope.cancel = function() {
+            $uibModalInstance.dismiss('cancel');
+          };
+
+          $scope.addAward = function() {
+            $uibModalInstance.close();
+          };
+        },  // end controller
+      })
+
+      // handel create
+      .result.then(createAward);
+    };
+
+    $scope.delete = function(id) {
+      dialog.confirm({
+        title: '提示',
+        body: '确认删除此奖项?'
+      }).then(function() {
+        return deleteAward(id);
+      }).then(function(data) {
+        if(data.error)
+          showTip('tip-danger', data.error.friendly_message);
+        else {
+          showTip('tip-success', '删除成功');
+          return refreshAward();
+        }
+      });
+    };
+
+    $scope.edit = function(idx) {
+      formData = activity.awards[idx];
+      openAddAwardWizard();
+    };
+
+    $scope.add = function() {
+      formData = {
+        name: '',
+        award_url: '',
+        level: 5,
+        quota: 1,
+        description: '',
+      };
+      openAddAwardWizard();
+    };
   })
   .controller('veController', function($rootScope, $scope, $stateParams, $filter, activityService, $cookies, FileUploader, activity, api) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.VIRTUAL_ENVIRONMENT');
@@ -745,7 +864,6 @@ angular.module('oh.controllers', [])
   })
   .controller('createController', function($scope, $timeout, $filter, $cookies, $state, $stateParams, FileUploader, dialog, api) {
     var request;
-    console.log($stateParams.name);
     $scope.wizard = 1;
     $scope.isShowAdvancedSettings = true;
 
