@@ -28,21 +28,21 @@ import sys
 
 sys.path.append("..")
 import imghdr
+import uuid
 from datetime import timedelta
 
 from werkzeug.exceptions import PreconditionFailed, InternalServerError, BadRequest
 from flask import g, request
-import uuid
 import lxml
 from lxml.html.clean import Cleaner
 from mongoengine import Q
-from mongoengine.context_managers import no_dereference
 
-from hackathon.hmongo.models import Hackathon, UserHackathon, DockerHostServer, User, HackathonNotice, HackathonStat,\
-    Award, to_dic
-from hackathon.hackathon_response import internal_server_error, ok, not_found, forbidden
-from hackathon.constants import HACKATHON_BASIC_INFO, HACK_USER_TYPE, HACK_STATUS, HACK_USER_STATUS, HTTP_HEADER, \
-    FILE_TYPE, HACK_TYPE, HACKATHON_STAT, DockerHostServerStatus, HACK_NOTICE_CATEGORY, HACK_NOTICE_EVENT
+from hackathon.hmongo.models import Hackathon, UserHackathon, DockerHostServer, User, HackathonNotice, HackathonStat, \
+    Organization, Award
+from hackathon.hackathon_response import internal_server_error, ok, not_found, general_error, HTTP_CODE
+from hackathon.constants import HACKATHON_CONFIG, HACK_USER_TYPE, HACK_STATUS, HACK_USER_STATUS, HTTP_HEADER, \
+    FILE_TYPE, HACK_TYPE, HACKATHON_STAT, DockerHostServerStatus, HACK_NOTICE_CATEGORY, HACK_NOTICE_EVENT, \
+    ORGANIZATION_TYPE, CLOUD_PROVIDER
 from hackathon import RequiredFeature, Component, Context
 
 docker_host_manager = RequiredFeature("docker_host_manager")
@@ -78,7 +78,7 @@ class HackathonManager(Component):
         return hackathon is not None
 
     def is_recycle_enabled(self, hackathon):
-        key = HACKATHON_BASIC_INFO.RECYCLE_ENABLED
+        key = HACKATHON_CONFIG.RECYCLE_ENABLED
         return self.util.str2bool(self.get_basic_property(hackathon, key, False))
 
     def get_hackathon_by_name(self, name):
@@ -150,7 +150,8 @@ class HackathonManager(Component):
             order_by_condition = '-id'
 
         # perform db query with pagination
-        pagination = Hackathon.objects(status_filter & name_filter).order_by(order_by_condition).paginate(page, per_page)
+        pagination = Hackathon.objects(status_filter & name_filter).order_by(order_by_condition).paginate(page,
+                                                                                                          per_page)
 
         user = None
         if self.user_manager.validate_login():
@@ -174,8 +175,10 @@ class HackathonManager(Component):
         return map(lambda h: self.__get_hackathon_detail(h, user), user_hack_list)
 
     def get_recyclable_hackathon_list(self):
-        all_hackathon = self.db.find_all_objects(Hackathon)
-        return filter(lambda h: self.is_recycle_enabled(h), all_hackathon)
+        # todo fix auto recycle
+        # all_hackathon = self.db.find_all_objects(Hackathon)
+        # return filter(lambda h: self.is_recycle_enabled(h), all_hackathon)
+        return []
 
     def get_entitled_hackathon_list_with_detail(self, user):
         hackathon_ids = self.admin_manager.get_entitled_hackathon_ids(user.id)
@@ -186,14 +189,10 @@ class HackathonManager(Component):
 
         return map(lambda h: self.__get_hackathon_detail(h, user), hackathon_list)
 
-    def get_entitled_hackathon_simple_list(self, user):
-        return self.admin_manager.get_entitled_hackathons_simple(user)
-
     def get_basic_property(self, hackathon, key, default=None):
         """Get basic property of hackathon from HackathonConfig"""
         if hackathon.config:
             return hackathon.config.get(key, default)
-
         return default
 
     def get_all_properties(self, hackathon):
@@ -224,7 +223,7 @@ class HackathonManager(Component):
         return ok()
 
     def get_recycle_minutes(self, hackathon):
-        key = HACKATHON_BASIC_INFO.RECYCLE_MINUTES
+        key = HACKATHON_CONFIG.RECYCLE_MINUTES
         minutes = self.get_basic_property(hackathon, key, 60)
         return int(minutes)
 
@@ -232,14 +231,13 @@ class HackathonManager(Component):
         if HTTP_HEADER.HACKATHON_NAME in request.headers:
             try:
                 hackathon_name = request.headers[HTTP_HEADER.HACKATHON_NAME]
-                with no_dereference(Hackathon) as Hack:
-                    hackathon = Hack.objects(name=hackathon_name).first()
-                    if hackathon:
-                        g.hackathon = hackathon
-                        return True
-                    else:
-                        self.log.debug("cannot find hackathon by name %s" % hackathon_name)
-                        return False
+                hackathon = Hackathon.objects(name=hackathon_name).first()
+                if hackathon:
+                    g.hackathon = hackathon
+                    return True
+                else:
+                    self.log.debug("cannot find hackathon by name %s" % hackathon_name)
+                    return False
             except Exception as ex:
                 self.log.error(ex)
                 self.log.debug("hackathon_name invalid")
@@ -258,8 +256,7 @@ class HackathonManager(Component):
 
         :rtype: dict
         """
-        hackathon = Hackathon.objects(name=context.name).first()
-        if hackathon:
+        if Hackathon.objects(name=context.name).count() > 0:
             raise PreconditionFailed("hackathon name already exists")
 
         self.log.debug("add a new hackathon:" + context.name)
@@ -288,20 +285,23 @@ class HackathonManager(Component):
             update_items = self.__parse_update_items(args, hackathon)
             self.log.debug("update hackathon items :" + str(args.keys()))
 
-            if update_items:
-                if 'status' in update_items and int(update_items['status']) == HACK_STATUS.ONLINE:
-                    self.create_hackathon_notice(hackathon.id, HACK_NOTICE_EVENT.HACK_ONLINE,
-                                                 HACK_NOTICE_CATEGORY.HACKATHON)  # hackathon online
-                else:
-                    pass  # other hackathon properties changes
+            if 'config' in update_items:
+                self.set_basic_property(hackathon, update_items.get('config', {}))
+                update_items.pop('config', None)
+
+            if 'status' in update_items and int(update_items['status']) == HACK_STATUS.ONLINE:
+                self.create_hackathon_notice(hackathon.id, HACK_NOTICE_EVENT.HACK_ONLINE,
+                                             HACK_NOTICE_CATEGORY.HACKATHON)  # hackathon online
 
             # basic xss prevention
             if 'description' in update_items and update_items['description']:
                 update_items['description'] = self.cleaner.clean_html(update_items['description'])
                 self.log.debug("hackathon description :" + update_items['description'])
 
+            hackathon.modify(**update_items)
             hackathon.save()
-            return hackathon.dic()
+
+            return ok()
         except Exception as e:
             self.log.error(e)
             return internal_server_error("fail to update hackathon")
@@ -334,36 +334,42 @@ class HackathonManager(Component):
         return {"files": images}
 
     def get_userlike_all_hackathon(self, user_id):
+        user_hackathon_rels = UserHackathon.objects(user=user_id).all()
 
-        hackathons = self.db.session().query(
-            Hackathon.id,
-            Hackathon.banners,
-            Hackathon.name,
-            Hackathon.display_name,
-            Hackathon.short_description,
-        ). \
-            join(HackathonLike, HackathonLike.hackathon_id == Hackathon.id). \
-            filter(HackathonLike.user_id == user_id).all()
-        return [a._asdict() for a in hackathons]
+        def get_user_hackathon_detail(user_hackathon_rel):
+            dict = user_hackathon_rel.dic()
+            dict["hackathon_info"] = user_hackathon_rel.hackathon.dic()
+            return dict
+
+        return [get_user_hackathon_detail(rel) for rel in user_hackathon_rels]
 
     def like_hackathon(self, user, hackathon):
-        like = self.db.find_first_object_by(HackathonLike, user_id=user.id, hackathon_id=hackathon.id)
-        if not like:
-            like = HackathonLike(user_id=user.id, hackathon_id=hackathon.id)
-            self.db.add_object(like)
-            self.db.commit()
+        user_hackathon = UserHackathon.objects(hackathon=hackathon, user=user).first()
+        if not user_hackathon:
+            user_hackathon = UserHackathon(hackathon=hackathon,
+                                           user=user,
+                                           role=HACK_USER_TYPE.VISITOR,
+                                           status=HACK_USER_STATUS.UNAUDIT,
+                                           like=True,
+                                           remark="")
+            user_hackathon.save()
+        if not user_hackathon.like:
+            user_hackathon.like = True
+            user_hackathon.save()
 
-            # increase the count of users that like this hackathon
-            self.increase_hackathon_stat(hackathon, HACKATHON_STAT.LIKE, 1)
+        # increase the count of users that like this hackathon
+        self.increase_hackathon_stat(hackathon, HACKATHON_STAT.LIKE, 1)
 
         return ok()
 
     def unlike_hackathon(self, user, hackathon):
-        self.db.delete_all_objects_by(HackathonLike, user_id=user.id, hackathon_id=hackathon.id)
-        self.db.commit()
+        user_hackathon = UserHackathon.objects(user=user, hackathon=hackathon).first()
+        if user_hackathon:
+            user_hackathon.like = False
+            user_hackathon.save()
 
         # sync the like count
-        like_count = self.db.count_by(HackathonLike, hackathon_id=hackathon.id)
+        like_count = UserHackathon.objects(hackathon=hackathon, like=True).count()
         self.update_hackathon_stat(hackathon, HACKATHON_STAT.LIKE, like_count)
         return ok()
 
@@ -402,16 +408,16 @@ class HackathonManager(Component):
         :type increase: int
         :param increase: increase of the count. Can be positive or negative
         """
-        stat = self.db.find_first_object_by(HackathonStat, hackathon_id=hackathon.id, type=stat_type)
+        stat = HackathonStat.objects(hackathon=hackathon, type=stat_type).first()
         if stat:
             stat.count += increase
         else:
-            stat = HackathonStat(hackathon_id=hackathon.id, type=stat_type, count=increase)
-            self.db.add_object(stat)
+            stat = HackathonStat(hackathon=hackathon, type=stat_type, count=increase)
 
         if stat.count < 0:
             stat.count = 0
-        self.db.commit()
+        stat.update_time = self.util.get_now()
+        stat.save()
 
     def get_hackathon_tags(self, hackathon):
         tags = self.db.find_all_objects_by(HackathonTag, hackathon_id=hackathon.id)
@@ -441,95 +447,109 @@ class HackathonManager(Component):
         return not_found()
 
     def create_hackathon_organizer(self, hackathon, body):
-        organizer = HackathonOrganizer(hackathon_id=hackathon.id,
-                                       name=body["name"],
-                                       organization_type=body.get("organization_type"),
-                                       description=body.get("description"),
-                                       homepage=body.get("homepage"),
-                                       logo=body.get("logo"),
-                                       create_time=self.util.get_now())
-        self.db.add_object(organizer)
-        return organizer.dic()
+        organizer = Organization(id=uuid.uuid4(),
+                                 name=body["name"],
+                                 description=body["description"],
+                                 homepage=body["homepage"],
+                                 logo=body["logo"])
+        if int(body["organization_type"]) == ORGANIZATION_TYPE.ORGANIZER:
+            hackathon.update(push__organizers=organizer)
+        else:
+            hackathon.update(push__partners=organizer)
+
+        hackathon.update_time = self.util.get_now()
+        hackathon.save()
+        return ok()
 
     def update_hackathon_organizer(self, hackathon, body):
-        organizer = self.db.get_object(HackathonOrganizer, body["id"])
+        previous_organization_type = ORGANIZATION_TYPE.ORGANIZER if \
+            hackathon.organizers.filter(id=body["id"]) else ORGANIZATION_TYPE.PARTNER
+
+        organizer = hackathon.organizers.get(id=body["id"]) if \
+            previous_organization_type == ORGANIZATION_TYPE.ORGANIZER else \
+            hackathon.partners.get(id=body["id"])
+
         if not organizer:
             return not_found()
-        if organizer.hackathon_id != hackathon.id:
-            return forbidden()
+
+        if not previous_organization_type == body.get("organization_type", previous_organization_type):
+            if previous_organization_type == ORGANIZATION_TYPE.ORGANIZER:
+                hackathon.update(pull__organizers=organizer)
+                hackathon.update(push__partners=organizer)
+            else:
+                hackathon.update(pull__partners=organizer)
+                hackathon.update(push__organizers=organizer)
 
         organizer.name = body.get("name", organizer.name)
-        organizer.organization_type = body.get("organization_type", organizer.organization_type)
         organizer.description = body.get("description", organizer.description)
         organizer.homepage = body.get("homepage", organizer.homepage)
         organizer.logo = body.get("logo", organizer.logo)
-        organizer.update_time = self.util.get_now()
-        self.db.commit()
+        organizer.save()
 
-        return organizer.dic()
+        hackathon.update_time = self.util.get_now()
+        hackathon.save()
+        return ok()
 
     def delete_hackathon_organizer(self, hackathon, organizer_id):
-        self.db.delete_all_objects_by(HackathonOrganizer, id=organizer_id, hackathon_id=hackathon.id)
+        if hackathon.organizers.filter(id=organizer_id):
+            hackathon.update(pull__organizers=hackathon.organizers.get(id=organizer_id))
+        else:
+            hackathon.update(pull__partners=hackathon.partners.get(id=organizer_id))
+
+        hackathon.update_time = self.util.get_now()
+        hackathon.save()
         return ok()
 
     def create_hackathon_award(self, hackathon, body):
-        level = int(body.level)
+        level = int(body.get("level"))
         if level > 10:
             level = 10
 
-        award = Award(
-            id=uuid.uuid1(),
-            name=body.name,
-            level=level,
-            quota=body.quota,
-            award_url=body.get("award_url"),
-            description=body.get("description"))
+        award = Award(id=uuid.uuid4(),
+                      name=body.get("name"),
+                      description=body.get("description"),
+                      level=level,
+                      quota=body.get("quota"),
+                      award_url=body.get("award_url"))
+        hackathon.update(push__awards=award)
 
-        hackathon.awards.append(award)
+        hackathon.update_time = self.util.get_now()
         hackathon.save()
-
-        return to_dic(award)
+        return ok()
 
     def update_hackathon_award(self, hackathon, body):
-        award_id = body.id
-        award = None
-
-        for _award in hackathon.awards:
-            if str(_award.id) == award_id:
-                award = _award
-                break
-
+        award = hackathon.awards.get(id=body.get("id"))
         if not award:
             return not_found("award not found")
 
         level = award.level
-        if body.get("level"):
-            level = int(body.level)
+        if "level" in body:
+            level = int(body.get("level"))
             if level > 10:
                 level = 10
 
         award.name = body.get("name", award.name)
+        award.description = body.get("description", award.description)
         award.level = body.get("level", level)
         award.quota = body.get("quota", award.quota)
         award.award_url = body.get("award_url", award.award_url)
-        award.description = body.get("description", award.description)
-        award.update_time = self.util.get_now()
+        award.save()
 
+        hackathon.update_time = self.util.get_now()
         hackathon.save()
-
-        return to_dic(award)
+        return ok()
 
     def delete_hackathon_award(self, hackathon, award_id):
-        for i in xrange(0, len(hackathon.awards)):
-            if str(hackathon.awards[i].id) == award_id:
-                hackathon.awards.pop(i)
-                hackathon.save()
-                break
-
+        award = hackathon.awards.get(id=award_id)
+        hackathon.update(pull__awards=award)
+        hackathon.update_time = self.util.get_now()
+        hackathon.save()
         return ok()
 
     def list_hackathon_awards(self, hackathon):
-        return [to_dic(a) for a in sorted(hackathon.awards, lambda a, b: b.level - a.level)]
+        awards = hackathon.dic()["awards"]
+        awards.sort(key=lambda award: -award["level"])
+        return awards
 
     def get_hackathon_notice(self, notice_id):
         hackathon_notice = HackathonNotice.objects(id=notice_id).first()
@@ -698,7 +718,6 @@ class HackathonManager(Component):
         # return serializable items as well as total count
         return self.util.paginate(pagination, func)
 
-
     def schedule_pre_allocate_expr_job(self):
         """Add an interval schedule job to check all hackathons"""
         next_run_time = self.util.get_now() + timedelta(seconds=3)
@@ -714,7 +733,9 @@ class HackathonManager(Component):
         Add an interval job for hackathon if it's pre-allocate is enabled.
         Otherwise try to remove the schedule job
         """
-        hackathon_list = self.db.find_all_objects(Hackathon)
+        # todo fix pre-allocate
+        # hackathon_list = self.db.find_all_objects(Hackathon)
+        hackathon_list = []
         for hack in hackathon_list:
             job_id = "pre_allocate_expr_" + str(hack.id)
             is_job_exists = self.scheduler.has_job(job_id)
@@ -738,16 +759,37 @@ class HackathonManager(Component):
                 self.scheduler.remove_job(job_id)
         return True
 
-    def check_hackathon_online(self, hackathon):
-        alauda_enabled = is_alauda_enabled(hackathon)
-        can_online = True
-        if alauda_enabled == "0":
-            if self.util.is_local():
-                can_online = True
-            else:
-                can_online = docker_host_manager.check_subscription_id(hackathon.id)
+    def hackathon_online(self, hackathon):
+        req = ok()
 
-        return ok(can_online)
+        if hackathon.status == HACK_STATUS.DRAFT or hackathon.status == HACK_STATUS.OFFLINE:
+            if self.util.is_local() or hackathon.config.cloud_provide == CLOUD_PROVIDER.NONE:
+                req = ok()
+            elif hackathon.config.cloud_provider == CLOUD_PROVIDER.AZURE:
+                is_success = docker_host_manager.check_subscription_id(hackathon.id)
+                if not is_success:
+                    req = general_error(code=HTTP_CODE.AZURE_KEY_NOT_READY)  # azure sub id is invalide
+
+        elif hackathon.status == HACK_STATUS.ONLINE:
+            req = ok()
+        else:
+            req = general_error(code=HTTP_CODE.CREATE_NOT_FINISHED)
+
+        if req.get('error') is None:
+            hackathon.status = HACK_STATUS.ONLINE
+            hackathon.save()
+
+        return req
+
+    def hackathon_offline(self, hackathon):
+        req = ok()
+        if hackathon.status == HACK_STATUS.ONLINE or hackathon.status == HACK_STATUS.DRAFT:
+            hackathon.status = HACK_STATUS.OFFLINE
+            hackathon.save()
+        elif hackathon.status == HACK_STATUS.INIT:
+            req = general_error(code=HTTP_CODE.CREATE_NOT_FINISHED)
+
+        return req
 
     # TODO: we need to review those commented items one by one to decide the API output
     def __get_hackathon_detail(self, hackathon, user=None):
@@ -769,14 +811,14 @@ class HackathonManager(Component):
             # like = self.db.find_first_object_by(HackathonLike, user_id=user.id, hackathon_id=hackathon.id)
             # if like:
             #     detail["like"] = like.dic()
-            #
-            # register = self.register_manager.get_registration_by_user_and_hackathon(user.id, hackathon.id)
-            # if register:
-            #     detail["registration"] = register.dic()
-            #
-            # team_rel = self.db.find_first_object_by(UserTeamRel, user_id=user.id, hackathon_id=hackathon.id)
-            # if team_rel:
-            #     detail["team"] = team_rel.team.dic()
+
+            register = self.register_manager.get_registration_by_user_and_hackathon(user.id, hackathon.id)
+            if register:
+                detail["registration"] = register.dic()
+                #
+                # team_rel = self.db.find_first_object_by(UserTeamRel, user_id=user.id, hackathon_id=hackathon.id)
+                # if team_rel:
+                #     detail["team"] = team_rel.team.dic()
 
         return detail
 
@@ -836,7 +878,7 @@ class HackathonManager(Component):
         return new_hack
 
     def __get_pre_allocate_interval(self, hackathon):
-        interval = self.get_basic_property(hackathon, HACKATHON_BASIC_INFO.PRE_ALLOCATE_INTERVAL_SECONDS)
+        interval = self.get_basic_property(hackathon, HACKATHON_CONFIG.PRE_ALLOCATE_INTERVAL_SECONDS)
         if interval:
             return int(interval)
         else:
@@ -860,8 +902,8 @@ class HackathonManager(Component):
     def __parse_update_items(self, args, hackathon):
         """Parse properties that need to update
 
-        Only those whose value changed items will be returned. Also some static property like id, create_time should
-        NOT be updated.
+        Only those whose value changed items will be returned. Also some static property like id, name, create_time
+        and unexisted properties should NOT be updated.
 
         :type args: dict
         :param args: arguments from http body which contains new values
@@ -874,36 +916,39 @@ class HackathonManager(Component):
         """
         result = {}
 
+        hackathon_dic = hackathon.dic()
         for key in dict(args):
-            if dict(args)[key] != hackathon.dic()[key]:
+            if hackathon_dic.has_key(key) and dict(args)[key] != hackathon_dic[key]:
                 result[key] = dict(args)[key]
 
         result.pop('id', None)
+        result.pop('name', None)
+        result.pop('creator', None)
         result.pop('create_time', None)
-        result.pop('creator_id', None)
         result['update_time'] = self.util.get_now()
         return result
 
     def __get_hackathon_stat(self, hackathon):
-        stats = self.db.find_all_objects_by(HackathonStat, hackathon_id=hackathon.id)
+        stats = HackathonStat.objects(hackathon=hackathon).all()
         result = {
-            "hackathon_id": hackathon.id,
+            "hackathon_id": str(hackathon.id),
             "online": 0,
             "offline": 0
         }
         for item in stats:
             result[item.type] = item.count
 
-        reg_list = hackathon.registers.filter(UserHackathonRel.deleted != 1,
-                                              UserHackathonRel.status.in_([HACK_USER_STATUS.AUTO_PASSED,
-                                                                           HACK_USER_STATUS.AUDIT_PASSED])).all()
-
+        reg_list = UserHackathon.objects(hackathon=hackathon,
+                                         role=HACK_USER_TYPE.COMPETITOR,
+                                         deleted=False,
+                                         status__in=[HACK_USER_STATUS.AUTO_PASSED, HACK_USER_STATUS.AUDIT_PASSED]
+                                         ).only("user").no_dereference().all()
+        reg_list = [uh.user.id for uh in reg_list]
         reg_count = len(reg_list)
         if reg_count > 0:
-            user_id_list = [r.user_id for r in reg_list]
-            user_id_online = self.db.count(User, (User.id.in_(user_id_list) & (User.online == 1)))
-            result["online"] = user_id_online
-            result["offline"] = reg_count - user_id_online
+            online_count = User.objects(id__in=reg_list, online=True).count()
+            result["online"] = online_count
+            result["offline"] = reg_count - online_count
 
         return result
 
@@ -955,7 +1000,7 @@ hackathon is entity of Hackathon that defines in database/models.py.
 
 def is_auto_approve(hackathon):
     hack_manager = RequiredFeature("hackathon_manager")
-    value = hack_manager.get_basic_property(hackathon, HACKATHON_BASIC_INFO.AUTO_APPROVE, "1")
+    value = hack_manager.get_basic_property(hackathon, HACKATHON_CONFIG.AUTO_APPROVE, "1")
     return util.str2bool(value)
 
 
@@ -967,20 +1012,14 @@ def is_pre_allocate_enabled(hackathon):
         return False
 
     hack_manager = RequiredFeature("hackathon_manager")
-    value = hack_manager.get_basic_property(hackathon, HACKATHON_BASIC_INFO.PRE_ALLOCATE_ENABLED, "1")
+    value = hack_manager.get_basic_property(hackathon, HACKATHON_CONFIG.PRE_ALLOCATE_ENABLED, "1")
     return util.str2bool(value)
 
 
 def get_pre_allocate_number(hackathon):
     hack_manager = RequiredFeature("hackathon_manager")
-    value = hack_manager.get_basic_property(hackathon, HACKATHON_BASIC_INFO.PRE_ALLOCATE_NUMBER, 1)
+    value = hack_manager.get_basic_property(hackathon, HACKATHON_CONFIG.PRE_ALLOCATE_NUMBER, 1)
     return int(value)
-
-
-def is_alauda_enabled(hackathon):
-    hack_manager = RequiredFeature("hackathon_manager")
-    value = hack_manager.get_basic_property(hackathon, HACKATHON_BASIC_INFO.ALAUDA_ENABLED, "0")
-    return util.str2bool(value)
 
 
 def get_basic_property(hackathon, property_name, default_value=None):
@@ -991,5 +1030,4 @@ def get_basic_property(hackathon, property_name, default_value=None):
 Hackathon.is_auto_approve = is_auto_approve
 Hackathon.is_pre_allocate_enabled = is_pre_allocate_enabled
 Hackathon.get_pre_allocate_number = get_pre_allocate_number
-Hackathon.is_alauda_enabled = is_alauda_enabled
 Hackathon.get_basic_property = get_basic_property

@@ -39,6 +39,9 @@ class CloudServiceAdapter(ServiceAdapter):
     wrap up some interface to work with Azure Cloud Service
     """
 
+    NOT_FOUND = 'Not found (Not Found)'
+    NETWORK_CONFIGURATION = 'NetworkConfiguration'
+
     def __init__(self, subscription_id, cert_url, *args, **kwargs):
         super(CloudServiceAdapter, self).__init__(
             ServiceManagementService(subscription_id, cert_url, *args, **kwargs))
@@ -100,6 +103,18 @@ class CloudServiceAdapter(ServiceAdapter):
         self.log.debug("service cloud %s, creation failed" % name)
         return False
 
+    def ping(self):
+        """
+        Use list storage accounts to check azure service management service health
+        :return:
+        """
+        try:
+            self.list_storage_accounts()
+        except Exception as e:
+            self.log.error(e)
+            return False
+        return True
+
     def update_cloud_service(self):
         # TODO
         raise NotImplementedError
@@ -126,3 +141,10 @@ class CloudServiceAdapter(ServiceAdapter):
             self.log.debug("service cloud %s, delete done" % service_name)
         else:
             self.log.debug("service cloud %s, delete failed" % service_name)
+
+    def is_cloud_service_locked(self, service_name):
+        deployments = self.service.get_hosted_service_properties(service_name, embed_detail=True).deployments
+        for deployment in deployments:
+            if deployment.locked:
+                return True
+        return False

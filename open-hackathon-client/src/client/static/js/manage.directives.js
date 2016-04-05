@@ -108,6 +108,7 @@ angular.module('oh.directives', [])
           ck.on('save', function() {
             scope.$apply(function() {
               ngModel.$setViewValue(ck.getData());
+              scope.$parent.updateDescription();
             });
           });
         } else {
@@ -226,4 +227,21 @@ angular.module("oh.templates", []).run(["$templateCache", function($templateCach
 
   $templateCache.put("manage/template/dialogs/upimage.html",'<div>updimage</div>');
 
+  $templateCache.put("manage/template/dialogs/add_admin.html", '<div class="modal-header cursor-move" dragable>\
+  <h3 class="modal-title">\
+    <button type="button" class="close" ng-click="cancel()"><span aria-hidden="true">&times;</span></button>\
+    {{title}}\
+  </h3>\
+  <form>\
+    <input style="color:black" type="text" placeholder="{{\'ADMIN_WEBPAGE_FIELDS.ADMIN_SEARCH_HINT\' | translate}}">\
+    <input style="color:red" type="submit" value="{{\'ADMIN_WEBPAGE_FIELDS.SEARCH\' | translate}}"/>\
+  </form>\
+  <table class="table table-striped">\
+    <thead><tr>\
+      <th>{{\'ADMIN_WEBPAGE_FIELDS.NAME\' | translate}}</th>\
+      <th>{{\'ADMIN_WEBPAGE_FIELDS.NICKNAME\' | translate}}</th>\
+      <th>{{\'ADMIN_WEBPAGE_FIELDS.EMAILS\' | translate}}</th>\
+    </tr></thead>\
+  </table>\
+  </div>');
 }]);

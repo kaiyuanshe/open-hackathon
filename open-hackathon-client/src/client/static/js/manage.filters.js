@@ -38,8 +38,15 @@ angular.module('oh.filters', [])
       }
       return [];
     }
-  })
-  .filter('defBanner', function() {
+  }).filter('join', function() {
+    return function(list, filler) {
+      filler = filler || ',';
+      if (list) {
+        return list.join(filler);
+      }
+      return '';
+    }
+  }).filter('defBanner', function() {
     return function(array) {
       return array.length > 0 ? array[0] : '/static/pic/homepage.jpg';
     }
@@ -65,5 +72,25 @@ angular.module('oh.filters', [])
         case 2:return $translate.instant('TEMPLATE_STATUS.FAIL');
        }
        return '';
+    }
+  }).filter('hackUserStatus', function($translate){
+    return function(status) {
+      switch(status) {
+        case 0: return $translate.instant('HACK_USER_STATUS.NOAUDIT');
+        case 1: return $translate.instant('HACK_USER_STATUS.AUDIT_PASSED');
+        case 2: return $translate.instant('HACK_USER_STATUS.AUDIT_REFUSE');
+        case 3: return $translate.instant('HACK_USER_STATUS.AUTO_PASSED');
+        default: return '';
+      }
+    }
+  }).filter('hackUserType', function($translate){
+    return function(type) {
+      switch(type) {
+        case 0: return $translate.instant('HACK_USER_TYPE.VISITOR');
+        case 1: return $translate.instant('HACK_USER_TYPE.ADMIN');
+        case 2: return $translate.instant('HACK_USER_TYPE.JUDGE');
+        case 3: return $translate.instant('HACK_USER_TYPE.COMPETITOR');
+        default: return '';
+      }
     }
   });

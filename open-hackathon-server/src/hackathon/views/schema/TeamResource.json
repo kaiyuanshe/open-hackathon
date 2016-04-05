@@ -7,7 +7,7 @@
         "properties": {
           "id": {
             "description": "unique identifier of team",
-            "type": "integer"
+            "type": "string"
           }
         }
       }
@@ -19,7 +19,7 @@
         "properties": {
           "id": {
             "description": "unique identifier of team",
-            "pattern": "^[0-9]+$"
+            "type": "string"
           }
         }
       }

@@ -33,7 +33,7 @@ from hackathon import Component, RequiredFeature
 from hackathon.hmongo.models import UserHackathon, Experiment
 from hackathon.hackathon_response import bad_request, precondition_failed, internal_server_error, not_found, ok,\
     login_provider_error
-from hackathon.constants import EStatus, HACK_USER_STATUS, HACKATHON_BASIC_INFO, HACKATHON_STAT, LOGIN_PROVIDER,\
+from hackathon.constants import EStatus, HACK_USER_STATUS, HACKATHON_CONFIG, HACKATHON_STAT, LOGIN_PROVIDER,\
     HACK_USER_TYPE
 
 __all__ = ["RegisterManager"]
@@ -96,7 +96,8 @@ class RegisterManager(Component):
                                        friendly_message="报名人数已满")
 
         try:
-            status = HACK_USER_STATUS.AUTO_PASSED if hackathon.is_auto_approve() else HACK_USER_STATUS.UNAUDIT
+            is_auto_approve = hackathon.config.get(HACKATHON_CONFIG.AUTO_APPROVE, True)
+            status = HACK_USER_STATUS.AUTO_PASSED if is_auto_approve else HACK_USER_STATUS.UNAUDIT
             args.pop("user_id")
             args.pop("hackathon_id")
 
@@ -107,10 +108,8 @@ class RegisterManager(Component):
                 **args).dic()
 
             # create a team as soon as user registration approved(auto or manually)
-            if hackathon.is_auto_approve():
-                pass
-                # TODO: fix this after team_manager refactored
-                # self.team_manager.create_default_team(hackathon, user)
+            if is_auto_approve:
+                self.team_manager.create_default_team(hackathon, user)
 
             self.__update_register_stat(hackathon)
             return user_hackathon
@@ -133,9 +132,8 @@ class RegisterManager(Component):
             if register.status == HACK_USER_STATUS.AUDIT_PASSED:
                 self.team_manager.create_default_team(register.hackathon, register.user)
 
-            # TODO: fix after hackathon_manager refactored
-            # hackathon = self.hackathon_manager.get_hackathon_by_id(register.hackathon_id)
-            # self.__update_register_stat(hackathon)
+            hackathon = self.hackathon_manager.get_hackathon_by_id(register.hackathon.id)
+            self.__update_register_stat(hackathon)
 
             return register.dic()
         except Exception as e:
@@ -226,7 +224,7 @@ class RegisterManager(Component):
         :return False if not all seats occupied or hackathon has no limit at all otherwise True
         """
         # TODO
-        maximum = self.hackathon_manager.get_basic_property(hackathon, HACKATHON_BASIC_INFO.MAX_ENROLLMENT, 0)
+        maximum = self.hackathon_manager.get_basic_property(hackathon, HACKATHON_CONFIG.MAX_ENROLLMENT, 0)
 
         if maximum == 0:  # means no limit
             return False
@@ -259,6 +257,6 @@ class RegisterManager(Component):
                 if (hackathon_login_provider & mask) > 0:
                     data["provides"].append(provide)
 
-            data["fail"] = user.provide not in data["provides"]
+            data["fail"] = user.provider not in data["provides"]
 
         return data

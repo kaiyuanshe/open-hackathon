@@ -45,7 +45,7 @@ angular.module('oh.api', [])
         return getCmd;
       } else {
         var methodName = obj.toUpperCase(),method = obj.toUpperCase();
-        
+
         getCmd[methodName] = function(options, callback) {
           var deferred = $q.defer();
           var _params = {
@@ -70,6 +70,11 @@ angular.module('oh.api', [])
           };
           $http(config)
             .success(function(data, status, headers, config) {
+              if(data.error){
+                if(data.error.code===401){
+                  location.href = '/login';
+                }
+              }
               callback(data);
             }).error(function(data, status, headers, config) {
               console.log(data);
@@ -211,6 +216,11 @@ angular.module('oh.api', [])
       return base(modal);
     }
 
+    this.add_admin = function(modal) {
+      modal.url = 'manage/template/dialogs/add_admin.html';
+      return base(modal);
+    }
+
     this.customize = function(modal) {
       open(modal);
     }
@@ -242,4 +252,22 @@ angular.module('oh.api', [])
       audio('smallbox.mp3');
     }
     return this;
+  }).factory('util', function($rootScope) {
+    var util = $rootScope.util = {
+      getUserPrimaryEmail: function(user) {
+        if(! user.emails)
+          return ;
+
+        var email;
+        for(email in user.emails) {
+          if(email.primary_email)
+            return email.email;
+        }
+
+        // default use first email as primary email
+        return user.emails[0].email;
+      }
+    };
+
+    return util;
   });

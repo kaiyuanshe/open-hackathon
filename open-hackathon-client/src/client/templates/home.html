@@ -3,6 +3,12 @@
     <link href="/static/css/oh.home.css" rel="stylesheet">
 {% endblock %}
 {% block content %}
+    {% if sc %}
+    <div id="sc_logo">
+        <div style="width:100%; height:200px; background:url('/static/pic/yantai_gov.png'); background-size:cover"></div>
+    </div>
+    {% endif %}
+
     <div id="carousel-example-generic" class="carousel slide carousel-fade" data-ride="carousel">
         <ol class="carousel-indicators">
             <li data-target="#carousel-example-generic" data-slide-to="0" class="active"></li>
@@ -135,7 +141,7 @@
                                             <p class="oh-desc"><a class="grey-link"
                                                                   href="{{ url_for('hackathon', hackathon_name=item.name) }}"
                                                                   target="_blank">
-                                                {{ item.short_description | limitTo(60) }}</a>
+                                                {{ item.get("short_description") | limitTo(60) }}</a>
                                             </p>
 
                                             <div class="oh-time">
@@ -143,9 +149,9 @@
                                                         class="fa fa-calendar"></span> {{ item.event_start_time | date("%y/%m/%d
                                             %a %H:%M") }}
                                                 </div>
-                                                <div><span
-                                                        class="fa fa-map-marker"></span> {{ item.location == '' and '在线'
-                                            or item.location | limitTo(2) }}
+                                                <div>
+                                                    <span class="fa fa-map-marker"></span>
+                                                    {{ item.location or "线上" | limitTo(2) }}
                                                 </div>
                                             </div>
                                             <div class="oh-progressbar"><span
@@ -233,7 +239,7 @@
                                             <p class="oh-desc"><a class="grey-link"
                                                                   href="{{ url_for('hackathon', hackathon_name=item.name) }}"
                                                                   target="_blank">
-                                                {{ item.short_description | limitTo(60) }}</a>
+                                                {{ item.get("short_description") | limitTo(60) }}</a>
                                             </p>
 
                                             <div class="oh-time">
@@ -241,9 +247,9 @@
                                                         class="fa fa-calendar"></span> {{ item.event_start_time | date("%y/%m/%d
                                             %a %H:%M") }}
                                                 </div>
-                                                <div><span
-                                                        class="fa fa-map-marker"></span> {{ item.location == '' and '在线'
-                                            or item.location | limitTo(2) }}
+                                                <div>
+                                                    <span class="fa fa-map-marker"></span>
+                                                    {{ item.location or "线上" | limitTo(2) }}
                                                 </div>
                                             </div>
                                             <div class="oh-progressbar"><span
@@ -331,7 +337,7 @@
                                             <p class="oh-desc"><a class="grey-link"
                                                                   href="{{ url_for('hackathon', hackathon_name=item.name) }}"
                                                                   target="_blank">
-                                                {{ item.short_description | limitTo(60) }}</a>
+                                                {{ item.get("short_description") | limitTo(60) }}</a>
                                             </p>
 
                                             <div class="oh-time">
@@ -339,9 +345,9 @@
                                                         class="fa fa-calendar"></span> {{ item.event_start_time | date("%y/%m/%d
                                             %a %H:%M") }}
                                                 </div>
-                                                <div><span
-                                                        class="fa fa-map-marker"></span> {{ item.location == '' and '在线'
-                                            or item.location | limitTo(2) }}
+                                                <div>
+                                                    <span class="fa fa-map-marker"></span>
+                                                    {{ item.location or "线上" | limitTo(2) }}
                                                 </div>
                                             </div>
                                             <div class="oh-progressbar"><span
@@ -662,7 +668,7 @@
     <script id="notice_list_template" type="text/x-jquery-tmpl">
      {% raw %}
         <li>
-        {{if link==''}}
+        {{if !link || link==''}}
             ${content}<span>${moment(update_time).format('YYYY-MM-DD')}</span>
         {{else}}
             <a href="${link}">
@@ -728,15 +734,15 @@
         </div>
         <div class="col-xs-7 oh-show">
             <div class="oh-thumbnail">
-                {{if show.length>0 }}
+                {{if works.length>0 }}
                 <div id="hackathon-${hackathon.id}" class="carousel slide" data-ride="carousel" data-wrap="true">
                     <ol class="carousel-indicators">
-                        {{each show}}
+                        {{each works}}
                             <li data-target="#hackathon-${$data.hackathon.id}" data-slide-to="${$index}"></li>
                         {{/each}}
                     </ol>
                     <div class="carousel-inner" role="listbox">
-                        {{each show}}
+                        {{each works}}
                             <div class="item">
                                 {{if type == 0}}
                                     <img src="${uri}" alt="${note}">

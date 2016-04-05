@@ -1,1 +1,52 @@
-<h1>admin</h1>
+<div class="row">
+  <div class="col-lg-8">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <button ng-click="deleteAdmins()"><a><i class="fa fa-trash"></i><span>{{'DELETE' | translate}}</span></a></button>
+          <button ng-click="showSearchBar()"><a><i class="fa fa-plus"></i><span>{{'CREATE' | translate}}</span></a></button>
+        </tr>
+        <tr>
+          <th><input type="checkbox" ng-click="toggleAllAdmins()" ng-checked="isAllAdminsSelected()"></th>
+          <th>{{'ADMIN_WEBPAGE_FIELDS.NAME' | translate}}</th>
+          <th>{{'ADMIN_WEBPAGE_FIELDS.EMAILS' | translate}}</th>
+          <th>{{'ADMIN_WEBPAGE_FIELDS.ROLE' | translate}}</th>
+          <th>{{'ADMIN_WEBPAGE_FIELDS.STATUS' | translate}}</th>
+          <th>{{'ADMIN_WEBPAGE_FIELDS.PROVIDER' | translate}}</th>
+          <th>{{'ADMIN_WEBPAGE_FIELDS.LASTLOGINTIME' | translate}}</th>
+          <th>{{'ADMIN_WEBPAGE_FIELDS.CREATETIME' | translate}}</th>
+          <th>{{'ADMIN_WEBPAGE_FIELDS.REMARK' | translate}}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="admin in data.admins | filter:filterAdmin">
+          <td><input type="checkbox" ng-checked="isAdminSelected(admin)" ng-click="selectAdmin(admin)"></td>
+          <td>{{admin.user_info.name}}</td>
+          <td>{{admin.user_info.emails | join}}</td>
+          <td>
+            <select ng-model="data.adminsType[admin.id]" ng-change="updateAdmin(admin)">
+              <option value="1">{{'HACK_USER_TYPE.ADMIN' | translate}}</option>
+              <option value="2">{{'HACK_USER_TYPE.JUDGE' | translate}}</option>
+            </select>
+          </td>
+          <td>{{admin.status | hackUserStatus}}</td>
+          <td>{{admin.user_info.provider}}</td>
+          <td>{{admin.user_info.last_login_time | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+          <td>{{admin.user_info.create_time | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+          <td>
+            <input ng-model="data.adminsRemark[admin.id]" ng-blur="updateAdmin(admin)">
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col-lg-4">
+    <table class="table table-striped table-bordered">
+      <tbody>
+        <tr><td ng-click="filterAdminCondition=0">{{'ALL_USERS' | translate}}({{data.admins.length}})</td></tr>
+        <tr><td ng-click="filterAdminCondition=1">{{'HACK_USER_TYPE.ADMIN' | translate}}({{(data.admins | filter:{role:1}).length}})</td></tr>
+        <tr><td ng-click="filterAdminCondition=2">{{'HACK_USER_TYPE.JUDGE' | translate}}({{(data.admins | filter:{role:2}).length}})</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>

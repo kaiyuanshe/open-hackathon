@@ -77,7 +77,7 @@ class HACKATHON_STAT:
     REGISTER = "register"
 
 
-class HACKATHON_BASIC_INFO:
+class HACKATHON_CONFIG:
     """Basic settings of hackathon that saved into column 'basic_info' of table 'hackathon'
 
     Attributes:
@@ -92,7 +92,6 @@ class HACKATHON_BASIC_INFO:
         ALAUDA_ENABLED: bool,default false, whether to use alauda service, no azure resource needed if true
         FREEDOM_TEAM: bool,default true,Whether to allow freedom of the team
     """
-    LOCATION = "location"
     MAX_ENROLLMENT = "max_enrollment"
     AUTO_APPROVE = "auto_approve"
     RECYCLE_ENABLED = "recycle_enabled"
@@ -100,13 +99,8 @@ class HACKATHON_BASIC_INFO:
     PRE_ALLOCATE_ENABLED = "pre_allocate_enabled"
     PRE_ALLOCATE_NUMBER = "pre_allocate_number"
     PRE_ALLOCATE_INTERVAL_SECONDS = "pre_allocate_interval_second"
-    ALAUDA_ENABLED = "alauda_enabled"
     FREEDOM_TEAM = "freedom_team"
-
-
-class CLOUD_ECLIPSE:
-    """CloudEclipse Constans"""
-    CLOUD_ECLIPSE = "cloud_eclipse"
+    CLOUD_PROVIDER = "cloud_provider"
 
 
 class TEMPLATE_STATUS:
@@ -150,7 +144,6 @@ class EStatus:
     STARTING = 1
     RUNNING = 2
     STOPPED = 3
-    DELETED = 4
     FAILED = 5
     ROLL_BACKING = 6
     ROLL_BACKED = 7
@@ -163,19 +156,7 @@ class VEStatus:
     RUNNING = 1
     FAILED = 2
     STOPPED = 3
-    DELETED = 4
     UNEXPECTED_ERROR = 5
-
-
-class PortBindingType:
-    """Type of port binding
-
-    Attributes:
-        CloudService: type indicates public endpoint on cloudService
-        DOCKER: type indicates exposed port on docker host machine
-    """
-    CLOUD_SERVICE = 1
-    DOCKER = 2
 
 
 class VERemoteProvider:
@@ -294,7 +275,6 @@ class ORGANIZATION_TYPE:
 
 
 class HACK_STATUS:
-
     INIT = -1
     DRAFT = 0
     ONLINE = 1
@@ -319,7 +299,7 @@ class FILE_TYPE:
     AZURE_CERT = "azure_cert"
 
 
-class TeamMemberStatus:
+class TEAM_MEMBER_STATUS:
     """Status of member of team
 
     Attributes:
@@ -327,9 +307,9 @@ class TeamMemberStatus:
         Approved: member approved by team leader or system administrator
         Denied: member denied by team leader or system administrator. Member of this status won't be saved in DB
     """
-    Init = 0
-    Approved = 1
-    Denied = 2
+    INIT = 0
+    APPROVED = 1
+    DENIED = 2
 
 
 class DockerHostServerStatus:
@@ -349,16 +329,11 @@ class DockerHostServerStatus:
     UNAVAILABLE = 3
 
 
-class DockerHostServerDisable:
-    """
-    whether the docker host server VM is disabled by manager or not
-
-    Attributes:
-        ABLE: VM is not disabled by manager
-        DISABLE: VM is disabled by manager
-    """
-    ABLE = 0
-    DISABLE = 1
+class DHS_QUERY_STATE:
+    """state to indicate the progress when query available docker host server"""
+    SUCCESS = 0
+    ONGOING = 1
+    FAILED = 2
 
 
 class AzureVMStartMethod:
@@ -491,16 +466,16 @@ class AzureVMEnpointConfigType:
     NETWORK = 'NetworkConfiguration'
 
 
-class Team_Show_Type:
+class TEAM_SHOW_TYPE:
     """Type of resource to be shown. """
-    Image = 0  # image
-    Video = 1  # e.g. Youku link
-    SourceCode = 2  # e.g. github
-    PowerPoint = 3  # ppt
-    Excel = 4  # excel
-    Word = 5  # word
-    Pdf = 6  # pdf
-    Other = 99  # other
+    IMAGE = 0  # image
+    VIDEO = 1  # e.g. Youku link
+    SOURCE_CODE = 2  # e.g. github
+    POWER_POINT = 3  # ppt
+    EXCEL = 4  # excel
+    WORD = 5  # word
+    PDF = 6  # pdf
+    OTHER = 99  # other
 
 
 class LOGIN_PROVIDER:
@@ -514,8 +489,8 @@ class LOGIN_PROVIDER:
 
 class HACK_NOTICE_CATEGORY:
     HACKATHON = 0  # hackathon related notice
-    USER = 1   # user related notice
-    EXPERIMENT = 2   # experiment related notice
+    USER = 1  # user related notice
+    EXPERIMENT = 2  # experiment related notice
     AWARD = 3  # award related notice
     TEMPLATE = 4  # template related notice
 
@@ -570,3 +545,9 @@ class SMS_CHINATELECOM_STATUSCODE:
 class CHINATELECOM_ACCESS_TOKEN_STATUSCODE:
     """Status Code of requesting ChinaTelecom access_token"""
     SUCCESS = "0"
+
+
+class CLOUD_PROVIDER:
+    NONE = 0
+    AZURE = 1
+    ALAUDA = 2

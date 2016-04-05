@@ -28,12 +28,7 @@
         "properties": {
           "id": {
             "description": "unique identifier of award",
-            "pattern": "^[0-9]+$"
-          },
-          "level": {
-            "description": "level of award, 0-10",
-            "pattern": "^[0-9]+$",
-            "required": false
+            "pattern": "^[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}$"
           }
         }
       }
@@ -45,7 +40,7 @@
         "properties": {
           "id": {
             "description": "unique identifier of award",
-            "pattern": "^[0-9a-zA-Z\-]+$"
+            "pattern": "^[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}$"
           }
         }
       }

@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 """
 Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
- 
+
 The MIT License (MIT)
- 
+
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -30,12 +30,11 @@ from compiler.ast import flatten
 
 from flask import g
 
-from hackathon.hmongo.models import Hackathon, Template
+from hackathon.hmongo.models import Template
 
 from hackathon import Component, RequiredFeature, Context
-from hackathon.template import TEMPLATE, DOCKER_UNIT
 from hackathon.constants import VE_PROVIDER, TEMPLATE_STATUS
-from hackathon.hackathon_response import ok, not_found, internal_server_error
+from hackathon.hackathon_response import not_found, internal_server_error
 
 __all__ = ["HackathonTemplateManager"]
 
@@ -76,10 +75,6 @@ class HackathonTemplateManager(Component):
 
         # self.db.delete_object(htr)
         return self.get_templates_with_detail_by_hackathon(g.hackathon)
-
-    def get_templates_by_hackathon_id(self, hackathon_id):
-        """Get all templates used by certain hackathon"""
-        return self.db.find_all_objects_by(HackathonTemplateRel, hackathon_id=hackathon_id)
 
     def get_templates_with_detail_by_hackathon(self, hackathon):
         """Get all templates as well as its details used by certain hackathon"""
@@ -143,12 +138,11 @@ class HackathonTemplateManager(Component):
             return []
 
         # get templates of the team
-        htrs = self.db.find_all_objects_by(HackathonTemplateRel, hackathon_id=hackathon.id, team_id=team.id)
-        if len(htrs) == 0:
+        templates = team.templates
+        if len(templates) == 0:
             # get template for the hackathon
-            htrs = self.db.find_all_objects_by(HackathonTemplateRel, hackathon_id=hackathon.id, team_id=-1)
+            templates = hackathon.templates
 
-        templates = map(lambda x: x.template, htrs)
         data = []
         for template in templates:
             content = self.template_library.load_template(template)

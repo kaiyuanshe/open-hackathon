@@ -25,31 +25,12 @@ THE SOFTWARE.
 import sys
 
 sys.path.append("..")
-from mongoengine import *
-from bson import ObjectId
-from datetime import datetime
-from uuid import UUID
 
-from hackathon.util import get_now
+from mongoengine import *
+
+from hackathon.util import get_now, make_serializable
 from hackathon.constants import TEMPLATE_STATUS, HACK_USER_TYPE
 from pagination import Pagination
-
-
-def make_serializable(item):
-    if isinstance(item, list):
-        return [make_serializable(sub) for sub in item]
-    elif isinstance(item, dict):
-        for k, v in item.items():
-            item[k] = make_serializable(v)
-        return item
-    elif isinstance(item, datetime):
-        item = item.replace(tzinfo=None)
-        epoch = datetime.utcfromtimestamp(0)
-        return long((item - epoch).total_seconds() * 1000)
-    elif isinstance(item, ObjectId) or isinstance(item, UUID):
-        return str(item)
-    else:
-        return item
 
 
 def to_dic(obj):
@@ -260,7 +241,7 @@ class UserHackathon(HDocumentBase):
 
 
 class HackathonStat(HDocumentBase):
-    type = StringField()
+    type = StringField()  # class HACKATHON_STAT
     count = IntField(min_value=0)
     hackathon = ReferenceField(Hackathon)
 
@@ -278,11 +259,12 @@ class HackathonNotice(HDocumentBase):
         super(HackathonNotice, self).__init__(**kwargs)
 
 
-class TeamWorks(EmbeddedDocument):
+class TeamWork(EmbeddedDocument):
     id = UUIDField(required=True)
     description = StringField()
     type = IntField(required=True)
     uri = URLField()
+    create_time = DateTimeField(default=get_now())
 
 
 class TeamScore(EmbeddedDocument):
@@ -305,11 +287,12 @@ class Team(HDocumentBase):
     logo = URLField()
     leader = ReferenceField(User)
     hackathon = ReferenceField(Hackathon)
-    works = EmbeddedDocumentListField(TeamWorks)
+    works = EmbeddedDocumentListField(TeamWork)
     scores = EmbeddedDocumentListField(TeamScore)
     members = EmbeddedDocumentListField(TeamMember)
-    awards = ListField()
+    awards = ListField()  # list of uuid. UUID reference class Award-id
     assets = DictField()  # assets for team
+    azure_keys = ListField(ReferenceField(AzureKey))
     templates = ListField(ReferenceField(Template))  # templates for team
 
     def __init__(self, **kwargs):
@@ -339,10 +322,11 @@ class PortBinding(DynamicEmbeddedDocument):
     # that means a port occupied by stopped container won't be allocated to new container. So it's possible to start the
     # container again. And the number of port should be enough since we won't have too many containers on the same VM.
     name = StringField()
-    port_from = IntField(min_value=1, max_value=65535)
-    port_to = IntField(min_value=1, max_value=65535)
-    binding_type = IntField()  # CloudService or Docker, see enum.py
-    url = URLField()  # public url schema for display
+    is_public = BooleanField()
+    public_port = IntField(min_value=1, max_value=65535)  # port that are public accessible
+    host_port = IntField(min_value=1, max_value=65535)  # port on hosted VM
+    container_port = IntField(min_value=1, max_value=65535)  # port inside docker container
+    url = StringField()  # public url pattern for display where host and port should be replaced
 
 
 class DockerContainer(DynamicEmbeddedDocument):
@@ -350,7 +334,7 @@ class DockerContainer(DynamicEmbeddedDocument):
     image = StringField()
     container_id = StringField()
     host_server = ReferenceField(DockerHostServer)
-    port_bindings = EmbeddedDocumentListField(PortBinding)
+    port_bindings = EmbeddedDocumentListField(PortBinding, default=[])
 
 
 class AzureStorageAccount(DynamicEmbeddedDocument):
@@ -407,7 +391,6 @@ class VirtualEnvironment(DynamicEmbeddedDocument):
     """
     Virtual environment is abstraction of smallest environment unit in template
     """
-    id = UUIDField()
     provider = IntField()  # VE_PROVIDER in enum.py
     name = StringField(required=True, unique=True)
     status = IntField(required=True)  # VEStatus in enum.py
@@ -424,8 +407,9 @@ class Experiment(HDocumentBase):
     last_heart_beat_time = DateTimeField()
     template = ReferenceField(Template)
     user = ReferenceField(User)
+    azure_key = ReferenceField(AzureKey)
     hackathon = ReferenceField(Hackathon)
-    virtual_environments = EmbeddedDocumentListField(VirtualEnvironment)
+    virtual_environments = EmbeddedDocumentListField(VirtualEnvironment, default=[])
 
     def __init__(self, **kwargs):
         super(Experiment, self).__init__(**kwargs)
