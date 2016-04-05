@@ -8,7 +8,7 @@
         "properties": {
           "id": {
             "description": "the id of the host_server",
-            "pattern": "^[0-9]+$"
+            "type": "string"
           }
         }
       }
@@ -47,10 +47,6 @@
           "container_max_count": {
             "description": "the max container count of vm/host_server",
             "pattern": "^[0-9]+$"
-          },
-          "disabled": {
-            "description": "the max container count of vm/host_server",
-            "pattern": "^[0-9]+$"
           }
         }
       }
@@ -64,7 +60,7 @@
         "properties": {
           "id": {
             "description": "id of the host_server",
-            "pattern": "^[0-9]+$"
+            "type": "string"
           },
           "vm_name": {
             "description": "the name of vm/host_server",
@@ -103,7 +99,7 @@
           },
           "disabled": {
             "description": "the max container count of vm/host_server",
-            "pattern": "^[0-9]+$",
+            "type": "boolean",
             "required": false
           }
         }
@@ -118,7 +114,7 @@
         "properties": {
           "id": {
             "description": "the id of the host_server",
-            "pattern": "^[0-9]+$"
+            "type": "string"
           }
         }
       }
