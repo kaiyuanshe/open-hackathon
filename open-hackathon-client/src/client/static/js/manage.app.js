@@ -33,15 +33,17 @@ angular.module('manageView', [
     'ui.bootstrap',
     'ui.bootstrap.datetimepicker',
     'ngTagsInput',
+    'angularFileUpload',
     'oh.manage.router',
     'oh.pages',
     'oh.providers',
     'oh.filters',
     'oh.controllers',
     'oh.directives',
+    'oh.templates',
     'oh.api'
   ])
-  .config(function($locationProvider, $translateProvider, $stateProvider, $urlRouterProvider, VERSION) {
+  .config(function($translateProvider) {
     $translateProvider.useStaticFilesLoader({
         prefix: '/static/languages/',
         suffix: '.json'
@@ -49,43 +51,39 @@ angular.module('manageView', [
       .useSanitizeValueStrategy()
       .useLocalStorage();
 
-    $urlRouterProvider.otherwise('/main');
-
-    $stateProvider.state('main', {
-      url: '/main',
-      templateUrl: '/static/partials/manage/main.html?v=' + VERSION,
-      controller: function($scope, $rootScope, activityService) {
-        activityService.reload();
-
-        $rootScope.$on('getActivity', function(event, activities) {
-          $scope.activities = activityService.getAll();
-          event.stopPropagation();
-        });
-
-        $scope.online = function(activity) {
-          activity.status = 1;
-        }
-        $scope.offline = function(activity) {
-          activity.status = 2;
-        }
+  }).run(function($rootScope, $state, authService, api, activityService, uiDatetimePickerConfig) {
+    uiDatetimePickerConfig.buttonBar = {
+      show: true,
+      now: {
+        show: true,
+        text: '现在'
+      },
+      today: {
+        show: true,
+        text: '今天'
+      },
+      clear: {
+        show: true,
+        text: '取消'
+      },
+      date: {
+        show: true,
+        text: '日期'
+      },
+      time: {
+        show: true,
+        text: '时间'
+      },
+      close: {
+        show: true,
+        text: '关闭'
       }
-    });
-    $stateProvider.state('create', {
-      url: '/create',
-      templateUrl: '/static/partials/manage/create.html?v=' + VERSION,
-    });
-    $stateProvider.state('404', {
-      url: '/404',
-      templateUrl: '/static/partials/manage/404.html?v=' + VERSION,
-    });
-
-    $locationProvider.html5Mode(true).hashPrefix('!');
-
-  }).run(function($rootScope, $state, authService, api, activityService) {
+    };
     authService.getUser();
     $rootScope.$on('showTip', function(event, obj) {
       $rootScope.tip = obj;
       event.preventDefault();
       event.stopPropagation();
     });
+
   });

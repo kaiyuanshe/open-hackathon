@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 """
 Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
- 
+
 The MIT License (MIT)
- 
+
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -28,14 +28,14 @@ import sys
 sys.path.append("..")
 
 from flask import g
-from sqlalchemy import func
+from mongoengine import Q
+
 from hackathon import Component, RequiredFeature
-from hackathon.database import AdminHackathonRel, User, Hackathon
-from hackathon.constants import ADMIN_ROLE_TYPE
+from hackathon.hmongo.models import Hackathon, User, UserHackathon
+from hackathon.constants import HACK_USER_TYPE, HACK_USER_STATUS
 from hackathon.hackathon_response import precondition_failed, ok, not_found, internal_server_error, bad_request
 
 __all__ = ["AdminManager"]
-
 
 
 class AdminManager(Component):
@@ -56,27 +56,13 @@ class AdminManager(Component):
         :rtype: bool
         :return True if specific user has admin privilidge on specific hackathon otherwise False
         """
-        return self.is_hackathon_admin(g.hackathon.id, g.user.id)
 
-    def get_entitled_hackathon_ids(self, user_id):
-        """Get hackathon id list that specific user is entitled to manage
+        if g.user.is_super:
+            return True
 
-        :type user_id: int
-        :param user_id: id of user
+        return UserHackathon.objects(role=HACK_USER_TYPE.ADMIN, hackathon=g.hackathon, user=g.user).count() > 0
 
-        :rtype: list
-        :return list of hackathon id
-        """
-        # get AdminUserHackathonRels from query withn filter by email
-        admin_user_hackathon_rels = self.db.find_all_objects_by(AdminHackathonRel,
-                                                                user_id=user_id)
-
-        # get hackathon_ids_from AdminUserHackathonRels details
-        hackathon_ids = [x.hackathon_id for x in admin_user_hackathon_rels]
-
-        return list(set(hackathon_ids))
-
-    def get_entitled_hackathons_simple(self, user_id):
+    def get_entitled_hackathons_list(self, user):
         """Get hackathon id list that specific user is entitled to manage
 
         :type user_id: int
@@ -85,25 +71,27 @@ class AdminManager(Component):
         :rtype: list
         :return list of hackathon simple
         """
+        user_filter = Q()
+        if not user.is_super:
+            user_filter = Q(user=user, role=HACK_USER_TYPE.ADMIN)
 
-        admin_user_hackathon_simple = self.db.session().query(
-            Hackathon.id,
-            Hackathon.name,
-            Hackathon.display_name,
-            Hackathon.ribbon,
-            Hackathon.short_description,
-            Hackathon.banners,
-            Hackathon.status,
-            Hackathon.creator_id,
-            Hackathon.type,
-            (func.unix_timestamp(Hackathon.event_start_time)*1000).label('event_start_time'),
-            (func.unix_timestamp(Hackathon.event_end_time)*1000).label('event_end_time')
-        ).join(AdminHackathonRel, AdminHackathonRel.hackathon_id == Hackathon.id or AdminHackathonRel.hackathon_id == -1)\
-            .filter(AdminHackathonRel.user_id == user_id)\
-            .order_by(Hackathon.event_start_time.desc())\
-            .all()
+        hids = [uh.hackathon.id for uh in UserHackathon.objects(user_filter).no_dereference().only("hackathon")]
+        hack_list = Hackathon.objects(id__in=hids).only(
+            'name',
+            'display_name',
+            'ribbon',
+            'short_description',
+            'location',
+            'banners',
+            'status',
+            'creator',
+            'type',
+            'config',
+            'event_start_time',
+            'event_end_time').order_by("-event_end_time")
 
-        return [h._asdict() for h in admin_user_hackathon_simple]
+        all_hackathon = [h.dic() for h in hack_list]
+        return all_hackathon
 
     def get_admins_by_hackathon(self, hackathon):
         """Get all admins of a hackathon
@@ -114,14 +102,15 @@ class AdminManager(Component):
         :rtype: list
         :return list of administrators including the detail information
         """
-        rels = self.db.find_all_objects_by(AdminHackathonRel, hackathon_id=hackathon.id)
+        user_hackathon_rels = UserHackathon.objects(hackathon=hackathon,
+                                                    role__in=[HACK_USER_TYPE.ADMIN, HACK_USER_TYPE.JUDGE]).all()
 
-        def get_admin_details(ahl):
-            dic = ahl.dic()
-            dic["user_info"] = self.user_manager.user_display_info(ahl.user)
+        def get_admin_details(rel):
+            dic = rel.dic()
+            dic["user_info"] = self.user_manager.user_display_info(rel.user)
             return dic
 
-        return map(lambda ahl: get_admin_details(ahl), rels)
+        return map(lambda rel: get_admin_details(rel), user_hackathon_rels)
 
     def add_admin(self, args):
         """Add a new administrator on a hackathon
@@ -142,24 +131,28 @@ class AdminManager(Component):
                                        friendly_message="该用户已报名参赛，不能再被选为裁判或管理员。请先取消其报名")
 
         try:
-            ahl = self.db.find_first_object(AdminHackathonRel,
-                                            AdminHackathonRel.user_id == user.id,
-                                            AdminHackathonRel.hackathon_id == g.hackathon.id)
-            if ahl is None:
-                ahl = AdminHackathonRel(
-                    user_id=user.id,
-                    role_type=args.get("role_type", ADMIN_ROLE_TYPE.ADMIN),
-                    hackathon_id=g.hackathon.id,
-                    remarks=args.get("remarks"),
-                    create_time=self.util.get_now()
+            user_hackathon = UserHackathon.objects(user=user.id, hackathon=g.hackathon.id).first()
+
+            if user_hackathon is None:
+                uhl = UserHackathon(
+                    user=user,
+                    hackathon=g.hackathon,
+                    role=args.get("role"),
+                    status=HACK_USER_STATUS.AUTO_PASSED,
+                    remark=args.get("remark")
                 )
-                self.db.add_object(ahl)
+                uhl.save()
+            else:
+                user_hackathon.role = args.get("role")
+                user_hackathon.remark = args.get("remark")
+                user_hackathon.save()
+
             return ok()
         except Exception as e:
             self.log.error(e)
             return internal_server_error("create admin failed")
 
-    def delete_admin(self, ahl_id):
+    def delete_admin(self, user_hackathon_id):
         """Delete admin on a hackathon
 
         creator of the hackathon cannot be deleted.
@@ -167,15 +160,15 @@ class AdminManager(Component):
         :returns ok() if succeeds or it's deleted before.
                  precondition_failed if try to delete the creator
         """
-        ahl = self.db.find_first_object(AdminHackathonRel, AdminHackathonRel.id == ahl_id)
-        if not ahl:
+        user_hackathon = UserHackathon.objects(id=user_hackathon_id).first()
+        if not user_hackathon:
             return ok()
 
-        hackathon = self.hackathon_manager.get_hackathon_by_id(ahl.hackathon_id)
-        if hackathon and hackathon.creator_id == ahl.user_id:
+        hackathon = user_hackathon.hackathon
+        if hackathon and hackathon.creator == user_hackathon.user:
             return precondition_failed("hackathon creator can not be deleted")
 
-        self.db.delete_all_objects(AdminHackathonRel, AdminHackathonRel.id == ahl_id)
+        user_hackathon.delete()
         return ok()
 
     def update_admin(self, args):
@@ -186,17 +179,22 @@ class AdminManager(Component):
                  not_found() if specific AdminHackathonRel not found
                  internal_server_error() if DB exception raised
         """
-        id = args.get("id", None)
-        if not id:
-            return bad_request("invalid id")
+        user_hackathon_id = args.get("id", None)
+        if not user_hackathon_id:
+            return bad_request("invalid user_hackathon_id")
 
-        ahl = self.db.find_first_object(AdminHackathonRel, AdminHackathonRel.id == id)
-        if not ahl:
+        user_hackathon = UserHackathon.objects(id=user_hackathon_id).first()
+        if not user_hackathon:
             return not_found("admin does not exist")
 
-        update_items = self.__generate_update_items(args)
         try:
-            self.db.update_object(ahl, **update_items)
+            user_hackathon.update_time = self.util.get_now()
+            if 'role' in args:
+                user_hackathon.role = args['role']
+            if 'remark' in args:
+                user_hackathon.remark = args['remark']
+            user_hackathon.save()
+
             return ok('update hackathon admin successfully')
         except Exception as e:
             self.log.error(e)
@@ -205,25 +203,19 @@ class AdminManager(Component):
     def is_hackathon_admin(self, hackathon_id, user_id):
         """Check whether user is admin of specific hackathon
 
-        :type hackathon_id: int
+        :type hackathon_id: string or object_id
         :param hackathon_id: id of hackathon
 
-        :type user_id: int
+        :type user_id: string or object_id
         :param user_id: the id of user to be checked
 
         :rtype: bool
         :return True if specific user has admin privilidge on specific hackathon otherwise False
         """
-        hack_ids = self.get_entitled_hackathon_ids(user_id)
-        return -1 in hack_ids or hackathon_id in hack_ids
+        if User.objects(id=user_id, is_super=True).count():
+            return True
 
-    def __generate_update_items(self, args):
-        """Generate columns of AdminHackathonRel to be updated"""
-        update_items = {
-            'update_time': self.util.get_now()
-        }
-        if 'role_type' in args:
-            update_items['role_type'] = args['role_type']
-        if 'remarks' in args:
-            update_items['remarks'] = args['remarks']
-        return update_items
+        return UserHackathon.objects(
+            user=user_id,
+            hackathon=hackathon_id,
+            role=HACK_USER_TYPE.ADMIN).count() > 0

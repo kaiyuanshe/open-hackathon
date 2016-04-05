@@ -44,7 +44,7 @@ from flask import Response, render_template, request, g, redirect, make_response
 from client import app, Context
 from client.constants import LOGIN_PROVIDER
 from client.user.login_manager import login_manager_helper
-from client.functions import get_config, safe_get_config, get_now, is_local
+from client.functions import get_config, safe_get_config, get_now
 from client.log import log
 
 session_lifetime_minutes = 60
@@ -132,7 +132,7 @@ def __get_api(url, headers=None, **kwargs):
         req = requests.get(get_config("hackathon-api.endpoint") + url, headers=default_headers, **kwargs)
         resp = req.content
         return json.loads(resp)
-    except Exception as e:
+    except Exception:
         abort(500, 'API Service is not yet open')
 
 
@@ -308,7 +308,27 @@ def index():
     soon_hackathon = empty_items if "error" in soon_hackathon else soon_hackathon
 
     return render('/home.html', newest_hackathons=newest_hackathons, hot_hackathons=hot_hackathons,
-                  soon_hackathon=soon_hackathon)
+                  soon_hackathon=soon_hackathon, sc=False)
+
+
+@app.route('/shuangchuang')
+def shuangchuang():
+    empty_items = {
+        "items": []
+    }
+    newest_hackathons = __get_api(API_HACKATHON_LIST, {"token": session.get("token")},
+                                  params={"page": 1, "per_page": 3, "order_by": "create_time", "status": 1})
+    hot_hackathons = __get_api(API_HACKATHON_LIST, {"token": session.get("token")},
+                               params={"page": 1, "per_page": 3, "order_by": "registered_users_num", "status": 1})
+    soon_hackathon = __get_api(API_HACKATHON_LIST, {"token": session.get("token")},
+                               params={"page": 1, "per_page": 3, "order_by": "event_start_time", "status": 1})
+
+    newest_hackathons = empty_items if "error" in newest_hackathons else newest_hackathons
+    hot_hackathons = empty_items if "error" in hot_hackathons else hot_hackathons
+    soon_hackathon = empty_items if "error" in soon_hackathon else soon_hackathon
+
+    return render('/home.html', newest_hackathons=newest_hackathons, hot_hackathons=hot_hackathons,
+                  soon_hackathon=soon_hackathon, sc=True)
 
 
 @app.route('/help')
@@ -335,7 +355,6 @@ def logout():
 
 @app.route("/login")
 def login():
-    # todo redirect to the page request login
     session["return_url"] = request.args.get("return_url")
     provider = request.args.get("provides")
     prs = ["github", "qq", "gitcafe", "weibo", "live", "alauda"]
@@ -420,7 +439,7 @@ def create_join_team(hackathon_name, tid):
 @app.route("/admin", methods=['GET', 'POST'])
 def superadmin():
     if request.method == 'POST':
-        return __login(LOGIN_PROVIDER.MYSQL)
+        return __login(LOGIN_PROVIDER.DB)
 
     return render("/superadmin.html")
 

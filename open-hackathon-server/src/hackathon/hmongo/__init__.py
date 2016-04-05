@@ -25,7 +25,7 @@ THE SOFTWARE.
 import sys
 
 sys.path.append("..")
-from pymongo import MongoClient
+from mongoengine import connect
 
 from hackathon.util import safe_get_config
 
@@ -37,10 +37,13 @@ mongodb_port = safe_get_config("mongodb.port", 27017)
 ohp_db = safe_get_config("mongodb.database", "hackathon")
 
 # mongodb client
-client = MongoClient(host=mongodb_host, port=mongodb_port)
+client = connect(ohp_db, host=mongodb_host, port=mongodb_port)
 
-# mongodb collection for OHP
+# mongodb collection for OHP, authentication disabled for now.
 db = client[ohp_db]
+
+
+# db.authenticate('user', 'password', mechanism='SCRAM-SHA-1')
 
 
 def drop_db():

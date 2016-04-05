@@ -1,18 +1,18 @@
 // -----------------------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
-//  
+//
 // The MIT License (MIT)
-//  
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-//  
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-//  
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,13 +24,6 @@
 
 angular.module('oh.api', [])
   .factory('api', function($rootScope, $http, $window, $cookies, $q) {
-    var methods = {
-      get: 'GET',
-      post: 'POST',
-      put: 'PUT',
-      del: 'DELETE'
-    };
-
     function API(obj, name) {
       var key;
       var getCmd = {};
@@ -51,7 +44,9 @@ angular.module('oh.api', [])
         }
         return getCmd;
       } else {
-        return getCmd[obj] = function(options, callback) {
+        var methodName = obj.toUpperCase(),method = obj.toUpperCase();
+
+        getCmd[methodName] = function(options, callback) {
           var deferred = $q.defer();
           var _params = {
             query: {},
@@ -67,7 +62,7 @@ angular.module('oh.api', [])
           options.header.token = $cookies.get('token');
 
           var config = {
-            method: methods[obj],
+            method: method,
             url: name,
             params: options.query,
             data: options.body,
@@ -75,6 +70,11 @@ angular.module('oh.api', [])
           };
           $http(config)
             .success(function(data, status, headers, config) {
+              if(data.error){
+                if(data.error.code===401){
+                  location.href = '/login';
+                }
+              }
               callback(data);
             }).error(function(data, status, headers, config) {
               console.log(data);
@@ -85,12 +85,13 @@ angular.module('oh.api', [])
             });
           return deferred.promise;
         }
+        getCmd[methodName]._path_ = name;
+        return getCmd[methodName];
       }
     }
 
     return API($window.CONFIG.apiconfig.api, $window.CONFIG.apiconfig.proxy + '/api');
-  })
-  .factory('activityService', function($rootScope, $q, api) {
+  }).factory('activityService', function($rootScope, $q, api) {
     var activity_list = [],
       isLoad = false,
       currentActivity = {};
@@ -156,7 +157,7 @@ angular.module('oh.api', [])
     }
   }).factory('authService', function(api, session) {
 
-    var user = api.user.profile.get().then(function(data) {
+    var user = api.user.get().then(function(data) {
       session.create(data)
       return data;
     })
@@ -180,15 +181,18 @@ angular.module('oh.api', [])
       var modalInstance = $uibModal.open({
         animation: true,
         templateUrl: modal.url,
-        size: modal.size + ' ' + modal.class,
+        size: modal.size + ' modal-' + modal.status,
         resolve: modal.resolve,
         controller: modal.controller
       });
       return modalInstance;
     }
 
-    this.alert = function(modal, callback) {
-      modal.url = '/static/partials/dialogs/alert.html?v=' + VERSION;
+    function base(modal) {
+      if (modal.icon) {
+        modal.body = '<p class="dialog-centent"><label class="icon icon-md icon-' + modal.status + '"><i class="fa ' + modal.icon + '"></i></label><label class="dialog-message">' + modal.body + '</label></p>'
+      }
+      modal.ok = modal.ok || function() {return ''};
       modal.controller = function($scope, $uibModalInstance) {
         $scope.title = modal.title;
         $scope.body = modal.body;
@@ -202,23 +206,68 @@ angular.module('oh.api', [])
       return open(modal).result;
     }
 
+    this.alert = function(modal) {
+      modal.url = 'manage/template/dialogs/alert.html';
+      return base(modal);
+    }
+
     this.confirm = function(modal) {
-      modal.url = '/static/partials/dialogs/confirm.html?v=' + VERSION;
-      modal.controller = function($scope, $uibModalInstance) {
-        $scope.title = modal.title;
-        $scope.body = modal.body;
-        $scope.ok = function() {
-          $uibModalInstance.close(modal.ok());
-        };
-        $scope.cancel = function() {
-          $uibModalInstance.dismiss('cancel');
-        };
-      }
-      return open(modal).result;
+      modal.url = 'manage/template/dialogs/confirm.html';
+      return base(modal);
+    }
+
+    this.add_admin = function(modal) {
+      modal.url = 'manage/template/dialogs/add_admin.html';
+      return base(modal);
     }
 
     this.customize = function(modal) {
       open(modal);
     }
     return this;
+  }).factory('speech', function() {
+
+    var path = '/static/sound/';
+
+    function audio(name) {
+      var a = document.createElement('audio');
+      a.setAttribute('src', path + name);
+      a.addEventListener('load', function() {
+        a.play()
+      }, !0);
+      a.pause();
+      a.play();
+    }
+
+    this.alert = function() {
+      audio('voice_alert.mp3');
+    }
+    this.off = function() {
+      audio('voice_off.mp3');
+    }
+    this.on = function() {
+      audio('voice_on.mp3');
+    }
+    this.tip = function() {
+      audio('smallbox.mp3');
+    }
+    return this;
+  }).factory('util', function($rootScope) {
+    var util = $rootScope.util = {
+      getUserPrimaryEmail: function(user) {
+        if(! user.emails)
+          return ;
+
+        var email;
+        for(email in user.emails) {
+          if(email.primary_email)
+            return email.email;
+        }
+
+        // default use first email as primary email
+        return user.emails[0].email;
+      }
+    };
+
+    return util;
   });

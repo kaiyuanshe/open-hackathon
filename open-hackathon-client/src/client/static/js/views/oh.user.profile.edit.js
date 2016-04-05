@@ -28,10 +28,12 @@
     var isProfile = false;
 
     function pageload() {
-        oh.api.user.profile.get({}, function (data) {
+        oh.api.user.get({}, function (data) {
             if (!data.error) {
-                setFormData(data);
-                isProfile = true;
+                setFormData(data.profile || {});
+                if(data.profile) {
+                  isProfile = true;
+                }
             } else {
                 console.log(data.error);
             }
@@ -45,12 +47,14 @@
         })
     }
 
-    function getFormDate() {
+    function getFormData() {
         var pform = $('#profileForm');
         var data = {};
         pform.find('input,select,textarea').each(function (i, elm) {
             var input = $(elm);
-            data[input.attr('name')] = input.val();
+            var val = input.val().trim();
+            if(val.length)
+              data[input.attr('name')] = input.val();
         });
         return data;
     }
@@ -59,7 +63,7 @@
         var pform = $('#profileForm').bootstrapValidator()
             .on('success.form.bv', function (e, ok) {
                 e.preventDefault();
-                var data = getFormDate()
+                var data = getFormData()
                 if (isProfile) {
                     oh.api.user.profile.put({body: data}).then(callback);
                 } else {
@@ -93,7 +97,7 @@
                 var picture = $('#picture').val();
                 updatePicture(picture).then(function (data) {
                     if (data.error) {
-                        oh.comm.alert('´íÎó', data.error.friendly_message);
+                        oh.comm.alert('ï¿½ï¿½ï¿½ï¿½', data.error.friendly_message);
                     } else {
                         $('img[data-role="picture"]').attr({src: picture});
                         $.ajax({

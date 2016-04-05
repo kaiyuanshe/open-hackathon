@@ -24,18 +24,16 @@
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
 
-try:
-    from hackathon.hmongo import db
-    from hackathon.util import get_now
-    from hackathon.constants import ADMIN_ROLE_TYPE, ReservedUser
-except ImportError:
-    pass
+# try:
+from hackathon.hmongo.models import User
+# except ImportError:
+#     pass
 
 
 def setup_db():
     """Initialize db tables
 
-    make sure database and user correctly created in mysql
+    make sure database and user correctly created in db
     in case upgrade the table structure, the origin table need be dropped firstly
     """
     # init REQUIRED db data.
@@ -43,18 +41,14 @@ def setup_db():
     # reserved user is deleted, may not need in mongodb implementation
 
     # default super admin
-    admin = db.users.find_one({"name": "admin"})
-    if not admin:
-        admin = {
-            "name": "admin",
-            "nickname": "admin",
-            "password": "e8104164dfc4a479e42a9f6c0aefd2be",
-            "is_super": True,
-            "profile": {}
-        }
-        db.users.insert_one(admin)
 
-    db.client.close()
+    admin = User(
+        name="admin",
+        nickname="admin",
+        password="e8104164dfc4a479e42a9f6c0aefd2be",
+        is_super=True)
+
+    User.objects(name="admin").update_one(__raw__={"$set": admin.to_mongo().to_dict()}, upsert=True)
 
 
 setup_db()

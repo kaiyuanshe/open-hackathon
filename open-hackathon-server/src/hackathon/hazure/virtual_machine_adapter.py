@@ -41,6 +41,7 @@ class VirtualMachineAdapter(ServiceAdapter):
     NOTE: the deployment must be done on a cloud service in Azure, and used in a virtual machine,
     so we won't split a signle deployment adapter, instead, we do it in this adapter
     """
+    NETWORK_CONFIGURATION = 'NetworkConfiguration'
 
     def __init__(self, subscription_id, cert_url, *args, **kwargs):
         super(VirtualMachineAdapter, self).__init__(
@@ -229,3 +230,18 @@ class VirtualMachineAdapter(ServiceAdapter):
             self.log.debug("deployment %s, delete done" % deployment_name)
         else:
             self.log.debug("deployment %s, delete failed" % deployment_name)
+
+    def get_virtual_machine_network_config(self, cloud_service_name, deployment_name, virtual_machine_name):
+        try:
+            virtual_machine = self.get_virtual_machine(cloud_service_name, deployment_name, virtual_machine_name)
+        except Exception as e:
+            self.log.error(e)
+            return None
+        if virtual_machine is not None:
+            for configuration_set in virtual_machine.configuration_sets.configuration_sets:
+                if configuration_set.configuration_set_type == self.NETWORK_CONFIGURATION:
+                    return configuration_set
+        return None
+
+    def get_virtual_machine(self, cloud_service_name, deployment_name, role_name):
+        return self.service.get_role(cloud_service_name, deployment_name, role_name)

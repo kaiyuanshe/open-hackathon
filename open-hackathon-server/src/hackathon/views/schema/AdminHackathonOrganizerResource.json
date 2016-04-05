@@ -7,7 +7,7 @@
         "properties": {
           "id": {
             "type": "string",
-            "pattern": "^[0-9]+$"
+            "pattern": "^[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}$"
           }
         }
       }
@@ -32,7 +32,8 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "int"
+            "type": "string",
+            "pattern": "^[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}$"
           }
         }
       }
@@ -44,7 +45,7 @@
         "properties": {
           "id": {
             "type": "string",
-            "pattern": "^[0-9]+$"
+            "pattern": "^[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}$"
           }
         }
       }

@@ -84,9 +84,6 @@ Config = {
             "region_name": "BEIJING1"
         }
     },
-    "cloud_eclipse": {
-        "api": "http://www.idehub.cn/api/ide"
-    },
     "email": {
         "host": "",
         "port": 587,

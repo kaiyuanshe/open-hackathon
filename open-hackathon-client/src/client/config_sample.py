@@ -14,7 +14,7 @@
 #
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-#  
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -64,9 +64,6 @@ Config = {
     "environment": "local",
     "app": {
         "secret_key": "secret_key"
-    },
-    "mysql": {
-        "connection": 'mysql://%s:%s@%s/%s' % ('hackathon', 'hackathon', 'localhost', 'hackathon')
     },
     "login": {
         "github": {
@@ -155,7 +152,8 @@ Config = {
                         "": ["get", "post", "put"],
                         "checkname": ["get"],
                         "list": ["get"],
-                        "canonline": ["get"],
+                        "online": ["post"],
+                        "offline":["post"],
                         "tags": ["get", "post", "put", "delete"],
                         "config": ["post", "put", "delete"],
                         "administrator": {
@@ -184,6 +182,7 @@ Config = {
                     },
                     "azure": {
                         "": ["get", "post", "delete", "put"],
+                        "checksubid":["post"]
                     },
                     "experiment": {
                         "list": ["get"],
@@ -206,6 +205,7 @@ Config = {
                 },
                 "template": {
                     "": ["get", "post", "delete", "put"],
+                    "file":["post"],
                     "list": ["get"],
                     "check": ["get"]
                 },
@@ -221,7 +221,7 @@ Config = {
                         "list": ["get"]
                     },
                     "profile": {
-                        "": ["get", "post", "put"]
+                        "": ["post", "put"]
                     },
                     "picture": {
                         "": ["put"]
@@ -268,7 +268,7 @@ Config = {
                 "talent": {
                     "list": ["get"]
                 },
-                "grantedawards":["get"]
+                "grantedawards": ["get"]
             }
         }
     }
