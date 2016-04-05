@@ -584,12 +584,12 @@ angular.module('oh.controllers', [])
     $scope.$emit('pageName', 'SETTINGS.ORGANIZERS');
 
   })
-  .controller('prizesController', function($rootScope, $scope, activityService, api) {
-    $scope.$emit('pageName', 'SETTINGS.PRIZES');
+  .controller('awardsController', function($rootScope, $scope, activityService, api) {
+    $scope.$emit('pageName', 'SETTINGS.AWARDS');
 
   })
-  .controller('awardsController', function($rootScope, $scope, $uibModal, activityService, api, dialog) {
-    $scope.$emit('pageName', 'SETTINGS.AWARDS');
+  .controller('prizesController', function($rootScope, $scope, $uibModal, activityService, api, dialog) {
+    $scope.$emit('pageName', 'SETTINGS.PRIZES');
 
     var activity = activityService.getCurrentActivity();
     $scope.data = {
