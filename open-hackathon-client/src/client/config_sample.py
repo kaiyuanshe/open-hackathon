@@ -155,7 +155,7 @@ Config = {
                         "online": ["post"],
                         "offline":["post"],
                         "tags": ["get", "post", "put", "delete"],
-                        "config": ["post", "put", "delete"],
+                        "config": ["get", "post", "put", "delete"],
                         "administrator": {
                             "": ["put", "post", "delete"],
                             "list": ["get"]

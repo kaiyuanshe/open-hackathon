@@ -451,7 +451,7 @@ class AdminHackathonConfigResource(HackathonResource):
 
     @admin_privilege_required
     def delete(self):
-        return hackathon_manager.delete_basic_property(g.hackathon, self.context().keys)
+        return hackathon_manager.delete_basic_property(g.hackathon, self.context().to_dict().values())
 
 
 class AdminHackathonOrganizerResource(HackathonResource):

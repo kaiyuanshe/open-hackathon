@@ -197,8 +197,8 @@ class HackathonManager(Component):
         return default
 
     def get_all_properties(self, hackathon):
-        configs = self.db.find_all_objects_by(HackathonConfig, hackathon_id=hackathon.id)
-        return [c.dic() for c in configs]
+        config = hackathon.config
+        return config if config else {}
 
     def set_basic_property(self, hackathon, properties):
         """Set basic property in table HackathonConfig"""
@@ -217,10 +217,6 @@ class HackathonManager(Component):
 
         hackathon.save()
         self.cache.invalidate(self.__get_config_cache_key(hackathon))
-        return ok()
-
-    def delete_property(self, hackathon, key):
-        self.db.delete_all_objects_by(HackathonConfig, hackathon_id=hackathon.id, key=key)
         return ok()
 
     def get_recycle_minutes(self, hackathon):
