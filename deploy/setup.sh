@@ -82,10 +82,10 @@ install_and_config_guacamole() {
     cd /home/opentech &&  wget http://sourceforge.net/projects/guacamole/files/current/source/guacamole-server-0.9.9.tar.gz/download
     rm -rf guacamole-server-0.9.9
     mv download guacamole-server-0.9.9.tar.gz &&  tar -xzf guacamole-server-0.9.9.tar.gz && cd guacamole-server-0.9.9/
-    autoreconf -fi
-    ./configure --with-init-dir=/etc/init.d
-    make
-    make install
+    $(autoreconf -fi)
+    $(./configure --with-init-dir=/etc/init.d)
+    $(make)
+    $(make install)
     ldconfig
     # configure guacamole client
     wget http://sourceforge.net/projects/guacamole/files/current/binary/guacamole-0.9.9.war/download
@@ -97,7 +97,11 @@ install_and_config_guacamole() {
     cp guacamole-sample.properties /etc/guacamole/guacamole.properties
     cp *.jar /etc/guacamole
     ln -s /etc/guacamole/guacamole.properties /usr/share/tomcat7/.guacamole/guacamole.properties
-    service guacd restart
+    result=$(sudo service guacd restart)
+    if ! (grep -q "SUCCESS" <<< $result); then
+        echo "Fail to install guacamole, please run this script once again!"
+        exit
+    fi
 }
 
 
@@ -123,15 +127,30 @@ install_and_config_docker() {
     if grep -q "Unable to lacate" <<< $result; then
         echo "Could not install docker, pls install docker manually"
     fi
-    apt-cache policy docker-engine
-    apt-get update
+    $(apt-cache policy docker-engine)
     # for ubuntu 15
-    apt-get install -y linux-image-extra-$(uname -r)
+    result=$(apt-get install -y linux-image-extra-$(uname -r))
+    if grep -q "Unable to lacate" <<< $result; then
+        echo "Could not install linux-image-extra-$(uname -r)"
+        exit
+    fi
     # for ubuntu 12 & 14
-    apt-get install -y apparmor
-    apt-get install -y docker-engine
+    result=$(apt-get install -y apparmor)
+    if grep -q "Unable to lacate" <<< $result; then
+        echo "Could not install apparmor"
+        exit
+    fi
+    result=$(apt-get install -y docker-engine)
+    if grep -q "Unable to lacate" <<< $result; then
+        echo "Could not install apparmor"
+        exit
+    fi
     service docker start
-    docker run hello-world
+    
+    result=$(docker run hello-world)
+    if grep -q "Hello from Docker" <<< $result; then
+        echo "Install docker failed, please run this script again"
+    fi
 
     usermod -aG docker ubuntu
 
@@ -152,7 +171,7 @@ deploy() {
     fi
 
     # Installing uWSGI
-    pip install uwsgi
+    $(pip install uwsgi)
     cp /home/opentech/open-hackathon/open-hackathon-server/src/open-hackathon-server.conf /etc/init/
     cp /home/opentech/open-hackathon/open-hackathon-client/src/open-hackathon-client.conf /etc/init/
 }
