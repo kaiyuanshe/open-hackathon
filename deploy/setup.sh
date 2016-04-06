@@ -90,6 +90,7 @@ install_mongodb() {
    echo "mongodb-enterprise-shell hold" | sudo dpkg --set-selections
    echo "mongodb-enterprise-mongos hold" | sudo dpkg --set-selections
    echo "mongodb-enterprise-tools hold" | sudo dpkg --set-selections
+   service mongod start
    cd /home/opentech/ && python open-hackathon-server/src/setup_db.py
 }
 
@@ -203,12 +204,6 @@ install_and_config_docker() {
         exit
     fi
     service docker start
-    
-    result=$(sudo docker run hello-world)
-    if grep -q "Hello from Docker" <<< $result; then
-        echo "Install docker failed, please run this script again"
-        exit
-    fi
 
     echo "docker installed successfully"
 
@@ -218,6 +213,11 @@ install_and_config_docker() {
     gpasswd -a ${USER} docker
 
     docker pull rastasheep/ubuntu-sshd
+    result=$(sudo docker run hello-world)
+    if grep -q "Hello from Docker" <<< $result; then
+        echo "Install docker failed, please run this script again"
+        exit
+    fi
 }
 
 
