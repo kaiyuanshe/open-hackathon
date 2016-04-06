@@ -3,8 +3,12 @@
     <table class="table table-striped">
       <thead>
         <tr>
-          <button ng-click="deleteAdmins()"><a><i class="fa fa-trash"></i><span>{{'DELETE' | translate}}</span></a></button>
-          <button ng-click="showSearchBar()"><a><i class="fa fa-plus"></i><span>{{'CREATE' | translate}}</span></a></button>
+          <button class="btn-danger" ng-click="deleteAdmins()">
+            <a><i class="fa fa-trash"></i><span>{{'DELETE' | translate}}</span></a>
+          </button>
+          <button class="btn-success" ng-click="showSearchBar()">
+            <a><i class="fa fa-plus"></i><span>{{'CREATE' | translate}}</span></a>
+          </button>
         </tr>
         <tr>
           <th><input type="checkbox" ng-click="toggleAllAdmins()" ng-checked="isAllAdminsSelected()"></th>

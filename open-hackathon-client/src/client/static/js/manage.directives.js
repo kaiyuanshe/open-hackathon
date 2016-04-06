@@ -227,26 +227,28 @@ angular.module("oh.templates", []).run(["$templateCache", function($templateCach
 
   $templateCache.put("manage/template/dialogs/upimage.html",'<div>updimage</div>');
 
+  // SearchBar for Webpage "Manage-Admin"
   $templateCache.put("manage/template/dialogs/add_admin.html", '<div class="modal-header cursor-move">\
   <h3 class="modal-title">\
     <button type="button" class="close" ng-click="cancel()"><span aria-hidden="true">&times;</span></button>\
     {{title}}\
   </h3>\
   <form>\
-    <input style="color:black" type="text" placeholder="{{\'ADMIN_WEBPAGE_FIELDS.ADMIN_SEARCH_HINT\' | translate}}" \
-    ng-model="data.searchKeyword">\
-    <input style="color:red" type="submit" value="{{\'ADMIN_WEBPAGE_FIELDS.SEARCH\' | translate}}" ng-click="searchAdmin()">\
+    <input style="color:black" type="text" placeholder="{{\'ADMIN_WEBPAGE_FIELDS.ADMIN_SEARCH_HINT\' | translate}}"\
+      ng-model="data.searchKeyword">\
+    <input style="color:red" type="submit" value="{{\'ADMIN_WEBPAGE_FIELDS.SEARCH\' | translate}}"\
+      ng-click="searchAdmin()">\
   </form>\
   <table class="table">\
     <thead>\
-      <tr>\
+      <tr style="color:black">\
         <th>{{\'ADMIN_WEBPAGE_FIELDS.NAME\' | translate}}</th>\
         <th>{{\'ADMIN_WEBPAGE_FIELDS.NICKNAME\' | translate}}</th>\
         <th>{{\'ADMIN_WEBPAGE_FIELDS.EMAILS\' | translate}}</th>\
       </tr>\
     </thead>\
     <tbody>\
-      <tr ng-repeat="user in data.searchResult" ng-style="user.id == data.selectedUserId && data.selectedUserCSS" \
+      <tr ng-repeat="user in data.searchResult" ng-style="user.id == data.selectedUserId && data.selectedUserCSS"\
         ng-click="selectSearchedUser(user)">\
         <td>{{user.name}}</td>\
         <td>{{user.nickname}}</td>\
