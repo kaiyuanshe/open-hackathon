@@ -451,36 +451,17 @@ class AdminHackathonConfigResource(HackathonResource):
 
 
 class AdminHackathonOrganizerResource(HackathonResource):
-    def get(self):
-        return hackathon_manager.qet_organizer_by_id(self.context().id)
-
     @admin_privilege_required
     def post(self):
-        return hackathon_manager.create_hackathon_organizer(g.hackathon, request.get_json())
+        return hackathon_manager.create_hackathon_organizer(g.hackathon, self.context())
 
     @admin_privilege_required
     def put(self):
-        return hackathon_manager.update_hackathon_organizer(g.hackathon, request.get_json())
+        return hackathon_manager.update_hackathon_organizer(g.hackathon, self.context())
 
     @admin_privilege_required
     def delete(self):
         return hackathon_manager.delete_hackathon_organizer(g.hackathon, self.context().id)
-
-
-class AdminHackathonTags(HackathonResource):
-    @hackathon_name_required
-    def get(self):
-        return hackathon_manager.get_hackathon_tags(g.hackathon)
-
-    @admin_privilege_required
-    def post(self):
-        tags = request.get_data().split(",")
-        return hackathon_manager.set_hackathon_tags(g.hackathon, tags)
-
-    @admin_privilege_required
-    def put(self):
-        tags = request.get_data().split(",")
-        return hackathon_manager.set_hackathon_tags(g.hackathon, tags)
 
 
 class HackathonTagNamesResource(HackathonResource):
