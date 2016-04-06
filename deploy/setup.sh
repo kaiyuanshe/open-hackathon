@@ -271,7 +271,7 @@ main() {
     set_envirement
     get_dependency_for_guacamole
     install_and_config_guacamole
-    install_and_config_docker
+    #install_and_config_docker
     deploy
 }
 
