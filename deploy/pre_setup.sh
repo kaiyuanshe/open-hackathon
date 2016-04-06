@@ -2,7 +2,6 @@
 pre_setup() {
     #for ubuntu 14
     #this requires root access
-    export username=$(whoami)
     if ! $(id | grep -q "root"); then
         echo "switch to root user to run shell script pre_setup.sh"
     fi
@@ -21,8 +20,6 @@ pre_setup() {
     fi
 
     apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
-    echo "switch to $username"
-    su $username
 }
 
 pre_setup

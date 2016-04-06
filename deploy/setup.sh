@@ -13,8 +13,8 @@ get_dependency_software() {
         echo "Could not install dependancy software, pls install docker manually"
         exit
     fi
-    echo "installing autoconf libtool tomcat7"
-    result=$( apt-get install -y autoconf automake libtool tomcat7)
+    echo "installing autoconf libtool tomcat7 mongodb"
+    result=$( apt-get install -y autoconf automake libtool tomcat7 mongodb)
     if grep -q "Unable to lacate" <<< $result; then
         echo "Could not install dependancy software, pls install docker manually"
         exit
