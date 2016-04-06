@@ -473,6 +473,7 @@ angular.module('oh.controllers', [])
       selectedUserRole: 1,
       selectedUserRemark: ""
     }
+    // 0-no condition, 1-admin, 2-judge
     $scope.filterAdminCondition = 0;
 
     function showTip(level, content, showTime) {
@@ -539,12 +540,12 @@ angular.module('oh.controllers', [])
     $scope.deleteAdmins = function() {
       deleteAdminList($scope.data.selectedAdmins, 0);
 
+      // delete admins one by one
       function deleteAdminList(list, index) {
         if(index == list.length){
           pageLoad();
           return;
         }
-
         api.admin.hackathon.administrator.delete({
           header: {hackathon_name: activity.name},
           query: {id: list[index]}
@@ -572,21 +573,16 @@ angular.module('oh.controllers', [])
       }, function(data) {
         if(data.error)
           showTip('tip-danger', data.error.friendly_message);
-        else{
-          console.log(data.items);
+        else
           $scope.data.searchResult = data.items;
-        }
       });
     }
 
     $scope.selectSearchedUser = function(user) {
       $scope.data.selectedUserId = user.id;
-      console.log(user.id);
     }
 
     $scope.createAdmin = function() {
-      console.log($scope.data.selectedUserRemark);
-      console.log($scope.data.selectedUserRole);
       if($scope.data.selectedUserId == "") {
         showTip('tip-danger', "请选择需要设置成管理员的用户！");
       } else {
@@ -632,6 +628,7 @@ angular.module('oh.controllers', [])
       })
     }
 
+    // init the page and load admins-list
     pageLoad();
   })
   .controller('organizersController', function($rootScope, $scope, activityService, api) {
