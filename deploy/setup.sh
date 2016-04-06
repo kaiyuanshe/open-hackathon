@@ -1,31 +1,4 @@
 #!/bin/bash
-pre_setup() {
-    #for ubuntu 14
-    #this requires root access
-    export username=$(whoami)
-    if ! $(id | grep -q "root"); then
-        echo "switch to root user to update /etc/apt/sources.list.d/docker.list"
-        echo "Please input the root password"
-        su
-    fi
-    if $(lsb_release -d | grep -q "14"); then
-        echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" > /etc/apt/sources.list.d/docker.list
-    fi
-
-    # for ubuntu 15
-    if $(lsb_release -d | grep -q "15"); then
-        echo "deb https://apt.dockerproject.org/repo ubuntu-wily main" > /etc/apt/sources.list.d/docker.list
-    fi
-
-    # for linux mint
-    if $(lsb_release -d | grep -q "Mint"); then
-        echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" > /etc/apt/sources.list.d/docker.list
-    fi
-
-    apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
-    echo "switch to $username"
-    su $username
-}
 
 get_dependency_software() {
     echo "updating apt-get......"
@@ -187,7 +160,6 @@ deploy() {
 echo "It may take a long time to install and configure open-hackathon, please wait a moment^_^, ..."
 echo "安装将花费一定时间，请耐心等待直到安装完成^_^, ..."
 
-pre_setup
 get_dependency_software
 set_envirement
 get_dependency_for_guacamole
