@@ -1,4 +1,31 @@
 #!/bin/bash
+pre_setup() {
+    #for ubuntu 14
+    #this requires root access
+    export username=$(whoami)
+    if ! $(id | grep -q "root"); then
+        echo "switch to root user to update /etc/apt/sources.list.d/docker.list"
+        echo "Please input the root password"
+        su
+    fi
+    if $(lsb_release -d | grep -q "14"); then
+        echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" > /etc/apt/sources.list.d/docker.list
+    fi
+
+    # for ubuntu 15
+    if $(lsb_release -d | grep -q "15"); then
+        echo "deb https://apt.dockerproject.org/repo ubuntu-wily main" > /etc/apt/sources.list.d/docker.list
+    fi
+
+    # for linux mint
+    if $(lsb_release -d | grep -q "Mint"); then
+        echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" > /etc/apt/sources.list.d/docker.list
+    fi
+
+    apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+    echo "switch to $username"
+    su $username
+}
 
 get_dependency_software() {
     echo "updating apt-get......"
@@ -24,6 +51,7 @@ get_dependency_software() {
 set_envirement() {
     cd /home &&  rm -rf opentech
     mkdir opentech && cd opentech
+    rm -r open-hackathon
     echo "git cloning open-hackathon source code"
     result=$( git clone https://github.com/YaningX/open-hackathon.git)
     if grep -q "unable to access" <<< $result; then
@@ -40,6 +68,11 @@ set_envirement() {
 }
 
 get_dependency_for_guacamole() {
+    result=$(sudo service guacd restart)
+    if grep -q "SUCCESS" <<< $result; then
+        echo "guacamole is installed!"
+        return
+    fi
     echo "installing libcairo2-dev"
     result=$( apt-get install -y libcairo2-dev)
     if grep -q "Unable to lacate" <<< $result; then
@@ -67,6 +100,11 @@ get_dependency_for_guacamole() {
 }
 
 install_and_config_guacamole() {
+    result=$(sudo service guacd restart)
+    if grep -q "SUCCESS" <<< $result; then
+        echo "guacamole is installed!"
+        return
+    fi
     # install and Configure guacamole
     cd /home/opentech &&  wget http://sourceforge.net/projects/guacamole/files/current/source/guacamole-server-0.9.9.tar.gz/download
     rm -rf guacamole-server-0.9.9
@@ -149,7 +187,7 @@ deploy() {
 echo "It may take a long time to install and configure open-hackathon, please wait a moment^_^, ..."
 echo "安装将花费一定时间，请耐心等待直到安装完成^_^, ..."
 
-
+pre_setup
 get_dependency_software
 set_envirement
 get_dependency_for_guacamole
