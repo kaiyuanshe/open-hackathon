@@ -1,4 +1,22 @@
 #!/bin/bash
+pre_setup() {
+    #for ubuntu 14
+    if $(lsb_release -d | grep -q "14"); then
+        echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" | tee /etc/apt/sources.list.d/docker.list
+    fi
+
+    # for ubuntu 15
+    if $(lsb_release -d | grep -q "15"); then
+        echo "deb https://apt.dockerproject.org/repo ubuntu-wily main" | tee /etc/apt/sources.list.d/docker.list
+    fi
+
+    # for linux mint
+    if $(lsb_release -d | grep -q "Mint"); then
+        echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" | tee /etc/apt/sources.list.d/docker.list
+    fi
+
+    apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+}
 
 get_dependency_software() {
     echo "updating apt-get......"
@@ -13,8 +31,8 @@ get_dependency_software() {
         echo "Could not install dependancy software, pls install docker manually"
         exit
     fi
-    echo "installing autoconf libtool tomcat7 mongodb"
-    result=$(sudo apt-get install -y autoconf automake libtool tomcat7 mongodb)
+    echo "installing autoconf libtool tomcat7 "
+    result=$(sudo apt-get install -y autoconf automake libtool tomcat7 )
     if grep -q "Unable to lacate" <<< $result; then
         echo "Could not install dependancy software, pls install docker manually"
         exit
@@ -39,6 +57,33 @@ set_envirement() {
     result=$(sudo pip install -r open-hackathon-client/requirement.txt)
     cp open-hackathon-server/src/hackathon/config_sample.py open-hackathon-server/src/hackathon/config.py
     cp open-hackathon-server/src/hackathon/config_sample.py open-hackathon-server/src/hackathon/config.py
+}
+
+install_mongodb() {
+   result=$(sudo service mongod status)
+   if grep "mongod start/running" <<< $result; then
+       echo "mongodb is installed"
+       return
+   fi
+   sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
+   if $(lsb_release -d | grep -q "14"); then
+        echo "deb http://repo.mongodb.com/apt/ubuntu trusty/mongodb-enterprise/3.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-enterprise.list
+   fi
+   if $(lsb_release -d | grep -q "Mint"); then
+        echo "deb http://repo.mongodb.com/apt/ubuntu trusty/mongodb-enterprise/3.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-enterprise.list
+   fi
+   if $(lsb_release -d | grep -q "Mint"); then
+        echo "deb http://repo.mongodb.com/apt/ubuntu precise/mongodb-enterprise/3.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-enterprise.list
+   fi
+   echo "deb http://repo.mongodb.com/apt/ubuntu "$(lsb_release -sc)"/mongodb-enterprise/2.6 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-enterprise-2.6.list
+   sudo apt-get update
+   sudo apt-get install -y mongodb-enterprise
+   sudo apt-get install -y mongodb-enterprise=3.0.11 mongodb-enterprise-server=3.0.11 mongodb-enterprise-shell=3.0.11 mongodb-enterprise-mongos=3.0.11 mongodb-enterprise-tools=3.0.11
+   echo "mongodb-enterprise hold" | sudo dpkg --set-selections
+   echo "mongodb-enterprise-server hold" | sudo dpkg --set-selections
+   echo "mongodb-enterprise-shell hold" | sudo dpkg --set-selections
+   echo "mongodb-enterprise-mongos hold" | sudo dpkg --set-selections
+   echo "mongodb-enterprise-tools hold" | sudo dpkg --set-selections
 }
 
 get_dependency_for_guacamole() {
@@ -187,7 +232,9 @@ deploy() {
 echo "It may take a long time to install and configure open-hackathon, please wait a moment^_^, ..."
 echo "安装将花费一定时间，请耐心等待直到安装完成^_^, ..."
 
+pre_setup
 get_dependency_software
+install_mongodb
 set_envirement
 get_dependency_for_guacamole
 install_and_config_guacamole
