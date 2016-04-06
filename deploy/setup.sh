@@ -134,7 +134,7 @@ install_and_config_docker() {
     fi
     result=$(sudo apt-cache policy docker-engine)
     # for ubuntu 15
-    result=$(apt-get install -y linux-image-extra-$(uname -r))
+    result=$(sudo apt-get install -y linux-image-extra-$(uname -r))
     if grep -q "Unable to lacate" <<< $result; then
         echo "Could not install linux-image-extra-$(uname -r)"
         exit
