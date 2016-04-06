@@ -722,6 +722,7 @@ angular.module('oh.controllers', [])
           };
 
           $scope.addAward = function() {
+            createAward()
             $uibModalInstance.close();
           };
         },  // end controller
@@ -910,8 +911,116 @@ angular.module('oh.controllers', [])
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.CLOUD_RESOURCES');
 
   })
-  .controller('serversController', function($rootScope, $scope, activityService, api) {
+  .controller('serversController', function($rootScope, $scope, $uibModal, $cookies, activityService, api, dialog) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.SERVERS');
+    var activity = activityService.getCurrentActivity();
+    var refresh = function(){
+      api.admin.hostserver.list.get({
+          header: {
+            hackathon_name: activity.name,
+            token: $cookies.get('token')
+          }
+        }).then(function(data){
+          if(data.error){
+            $scope.$emit('showTip', { level: 'tip-danger', content: data.error.friendly_message});
+          }else{
+            $scope.data = data
+          }
+        })
+    }
+
+    var afterAdd = function(new_server){
+      $scope.$emit('showTip', { level: 'tip-success', content: "添加成功"});
+      $scope.data.push(new_server)
+    }
+
+    var afterUpdate = function(new_server){
+      $scope.$emit('showTip', { level: 'tip-success', content: "更新成功"});
+      $scope.data = $scope.data.map(function(server){
+        if(server.id==new_server.id){
+          return new_server
+        }else{
+          return server
+        }
+      })
+    }
+
+    $scope.$on('chargeActitity', function() {
+      activity = activityService.getCurrentActivity();
+      refresh();
+    });
+
+    var openModel = function(data){
+      $uibModal.open({
+        templateUrl: 'serverModel.html',
+        controller: function($scope, $uibModalInstance, $cookies, api) {
+          $scope.data = data;
+
+          $scope.cancel = function() {
+            $uibModalInstance.dismiss('cancel');
+          };
+
+          $scope.add_server = function() {
+            var fn, af;
+            if(data.id){
+              fn = api.admin.hostserver.put
+              af = afterUpdate
+            }else{
+              fn = api.admin.hostserver.post
+              af = afterAdd
+            }
+            fn({
+              body: $scope.data,
+              header: {
+                hackathon_name: activity.name,
+                token: $cookies.get('token')
+              }
+            }).then(function(data){
+              if(data.error){
+                $scope.$emit('showTip', { level: 'tip-danger', content: data.error.friendly_message});
+              }else{
+                af(data)
+              }
+              $uibModalInstance.close();
+            })
+          };
+        },  // end controller
+      })
+    }
+
+    $scope.add = function(){
+      openModel({})
+    }
+
+    $scope.edit = function(server){
+      openModel(server)
+    }
+
+    $scope.delete = function(server_id){
+      api.admin.hostserver.delete({
+        query: {
+          id: server_id
+        },
+        header: {
+          hackathon_name: activity.name,
+          token: $cookies.get('token')
+        }
+      }).then(function(data){
+        if(data.error){
+          $scope.$emit('showTip', { level: 'tip-danger', content: data.error.friendly_message});
+        }else{
+          $scope.$emit('showTip', { level: 'tip-success', content: "删除成功"});
+          $scope.data = $scope.data.filter(function(server){
+            return server.id != server_id
+          })
+        }
+      })
+    }
+
+    $scope.getState = function(state){
+      desc= {0:"创建中", 1:"创建中", 2:"可用", 3:"不可用"}
+      return desc[state] || ""
+    }
   })
   .controller('createController', function($scope, $timeout, $filter, $cookies, $state, $stateParams, FileUploader, dialog, api) {
     var request;
