@@ -1,1 +1,88 @@
-<h1>organizers</h1>
+<div class="register-users">
+<div style="margin-left: 15px; margin-bottom: 3px;">
+  <div class="btn-group" style="width:500px">
+      <form name="add_org" ng-submit="orgFormSubmit()">
+          <header class="text-grey">
+            <i class="fa fa-plus"></i> 创建新Org
+          </header>
+          <fieldset class="detail-wrapper">
+            <div class="form-group">
+              <label class="col-xs-2 control-label">名称</label>
+              <div class="col-xs-10 required">
+                <input type="text" class="form-control" name="orgname" ng-model="org.name" ng-trim="true" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="col-xs-2 control-label">类型</label>
+              <div class="col-xs-10 required">
+                <select class="form-control" name="orgtype" ng-model="org.organization_type">
+                    <option value="1">主办方</option>
+                    <option value="2">合作伙伴</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="col-xs-2 control-label">LOGO</label>
+              <div class="col-xs-10 required">
+                <input type="text" class="form-control" name="orglogo" ng-model="org.logo" ng-trim="true" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="col-xs-2 control-label">描述</label>
+              <div class="col-xs-10 required">
+                <input type="text" class="form-control" name="orgdesc" ng-model="org.description" ng-trim="true" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="col-xs-2 control-label">主页</label>
+              <div class="col-xs-10 required">
+                <input type="text" class="form-control" name="orghomepage" ng-model="org.homepage" ng-trim="true" required>
+              </div>
+            </div>
+          </fieldset>
+          <footer>
+            <div class="form-group">
+              <div class="col-xs-offset-2 col-xs-12">
+                <button type="submit" class="btn btn-success btn-long"><i class="fa fa-arrow-circle-o-right"></i> 提交 </button>
+              </div>
+            </div>
+          </footer>
+      </form>
+  </div>
+</div>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>LOGO</th>
+            <th>描述</th>
+            <th>主页</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody id="organizer_list">
+        <tr ng-repeat="org in data.organizers">
+            <td>{{org.name}}</td>
+            <td>
+                主办方
+            </td>
+            <td><img style="width:160px" src="{{org.logo}}"></td>
+            <td>{{reg.description}}</td>
+            <td><a href="{{org.homepage}}">{{org.homepage}}</a></td>
+            <td><button type="button" class="btn btn-danger" ng-click="delete_organizer(org.id)">Delete</button></td>
+        </tr>
+        <tr ng-repeat="org in data.partners">
+            <td>{{org.name}}</td>
+            <td>
+                合作伙伴
+            </td>
+            <td><img style="width:160px" src="{{org.logo}}"></td>
+            <td>{{org.description}}</td>
+            <td><a href="{{org.homepage}}">{{org.homepage}}</a></td>
+            <td><button type="button" class="btn btn-danger" ng-click="delete_organizer(org.id)">Delete</button></td>
+        </tr>
+    </tbody>
+</table>
+</div>

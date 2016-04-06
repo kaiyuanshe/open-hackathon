@@ -65,9 +65,6 @@ Config = {
     "app": {
         "secret_key": "secret_key"
     },
-    "mysql": {
-        "connection": 'mysql://%s:%s@%s/%s' % ('hackathon', 'hackathon', 'localhost', 'hackathon')
-    },
     "login": {
         "github": {
             "client_id": GITHUB_CLIENT_ID,

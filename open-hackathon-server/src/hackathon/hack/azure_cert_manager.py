@@ -202,10 +202,14 @@ class AzureCertManager(Component):
         return ok(True)
 
     def check_sub_id(self, subscription_id):
-        if self.util.is_local():
-            return ok(True)
 
         azure_key = AzureKey.objects(subscription_id=subscription_id).first()
+
+        if self.util.is_local():
+            if azure_key is not None:
+                azure_key.verified = True
+                azure_key.save()
+            return ok(True)
 
         if azure_key is None:
             return ok(False)
@@ -215,6 +219,8 @@ class AzureCertManager(Component):
                                       azure_key.get_local_pem_url(),
                                       host=azure_key.management_host)
             sms.list_hosted_services()
+            azure_key.verified = True
+            azure_key.save()
         except Exception as e:
 
             return ok(False)

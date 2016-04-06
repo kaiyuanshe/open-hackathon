@@ -710,7 +710,7 @@ class AdminHostserverResource(HackathonResource):
 
     @admin_privilege_required
     def post(self):
-        return docker_host_manager.add_existed_host_server(g.hackathon.id, self.context())
+        return docker_host_manager.add_host_server(g.hackathon, self.context())
 
     @admin_privilege_required
     def put(self):
@@ -726,10 +726,12 @@ class AdminHackathonOnLineResource(HackathonResource):
     def post(self):
         return hackathon_manager.hackathon_online(g.hackathon)
 
+
 class AdminHackathonOffLineResource(HackathonResource):
     @admin_privilege_required
     def post(self):
         return hackathon_manager.hackathon_offline(g.hackathon)
+
 
 class AdminHackathonNoticeResource(HackathonResource):
     @admin_privilege_required

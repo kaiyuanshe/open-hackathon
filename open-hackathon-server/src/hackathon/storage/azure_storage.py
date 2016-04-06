@@ -107,7 +107,8 @@ class AzureStorage(Storage):
             if self.azure_blob_service.create_container_in_storage('images', 'container'):
                 return {
                     HEALTH.STATUS: HEALTH_STATUS.OK,
-                    HEALTH.DESCRIPTION: "You can use Azure resources now."
+                    HEALTH.DESCRIPTION: "You can use Azure resources now.",
+                    "type": "AzureStorage"
                 }
             else:
                 return {

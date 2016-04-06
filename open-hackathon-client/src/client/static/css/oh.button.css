@@ -1231,7 +1231,42 @@ label.switchbox input[type=checkbox][disabled]:checked ~ .switchbox-handle i {
 input[type=radio]:checked+.info-box {
   border-color: #7dba43;
 }
-input[type=radio]:checked+.info-box footer{
-  background:  #7dba43;
-  color:#fff;
+
+input[type=radio]:checked+.info-box footer {
+  background: #7dba43;
+  color: #fff;
+}
+
+.table thead {
+  background-color: #e8e8e9;
+  text-align: center;
+}
+
+.table th {
+  font-weight: normal;
+}
+
+.table-primary thead {
+  background-color: #019e48;
+  color: #fff;
+}
+
+.table-success thead {
+  background-color: #7dba43;
+  color: #fff;
+}
+
+.table-info thead {
+  background-color: #00a4ee;
+  color: #fff;
+}
+
+.table-warning thead {
+  background-color: #ffb800;
+  color: #fff;
+}
+
+.table-danger thead {
+  background-color: #cf3c0e;
+  color: #fff;
 }
