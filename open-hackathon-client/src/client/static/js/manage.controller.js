@@ -660,6 +660,10 @@ angular.module('oh.controllers', [])
         if(data.error){
           $scope.$emit('showTip', { level: 'tip-danger', content: data.error.friendly_message});
         }else{
+           $scope.$emit('showTip', {
+            level: 'tip-success',
+            content: '添加成功'
+          });
           $scope.data = data
         }
       })

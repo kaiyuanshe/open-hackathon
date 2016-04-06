@@ -53,7 +53,8 @@
             if (!data.error) {
                 $('#like_events').append($('#like_event_item').tmpl(data, {
                     get_banner: function (banners) {
-                        return banners.split(';')[0] || ''
+                        banners = banners || [];
+                        return banners[0] || ''
                     }
                 }));
             }
@@ -88,10 +89,11 @@
                 if (data.length > 0) {
                     panel.append($('#my_register_event_item').tmpl(data, {
                         get_banner: function (banners) {
-                            return banners.split(';')[0] || '';
+                            banners = banners || [];
+                            return banners[0] || '';
                         },
                         get_location: function (location) {
-                            return location.length > 0 ? location.substring(0, 2) : '在线';
+                            return location ? location.substring(0, 5) + (location.length > 5 ? '...' : '') : '在线';
                         }
                     }));
                 } else {
@@ -102,7 +104,7 @@
     }
 
     function pageload() {
-        user_id = +location.pathname.replace(/\/user\/p_/ig, '') || 0;
+        user_id = location.pathname.replace(/\/user\/p_/ig, '') || 0;
         var query = user_id == 0 ? {} : {query: {user_id: user_id}};
         getUserProfile(query);
         getMyRegisterEvents(query);
