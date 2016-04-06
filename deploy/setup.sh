@@ -61,7 +61,7 @@ set_envirement() {
 
 install_mongodb() {
    result=$(sudo service mongod status)
-   if grep "mongod start/running" <<< $result; then
+   if ! $(grep "unrecognized service" <<< $result); then
        echo "mongodb is installed"
        return
    fi
@@ -76,14 +76,21 @@ install_mongodb() {
         echo "deb http://repo.mongodb.com/apt/ubuntu precise/mongodb-enterprise/3.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-enterprise.list
    fi
    echo "deb http://repo.mongodb.com/apt/ubuntu "$(lsb_release -sc)"/mongodb-enterprise/2.6 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-enterprise-2.6.list
-   sudo apt-get update
-   sudo apt-get install -y mongodb-enterprise
-   sudo apt-get install -y mongodb-enterprise=3.0.11 mongodb-enterprise-server=3.0.11 mongodb-enterprise-shell=3.0.11 mongodb-enterprise-mongos=3.0.11 mongodb-enterprise-tools=3.0.11
+   result=$(sudo apt-get update)
+   echo "installing mongodb-enterprise"
+   result=$(sudo apt-get install -y mongodb-enterprise)
+   echo "installing mongodb-enterprise=3.0.11 mongodb-enterprise-server=3.0.11 mongodb-enterprise-shell=3.0.11 mongodb-enterprise-mongos=3.0.11 mongodb-enterprise-tools=3.0.11"
+   result=$(sudo apt-get install -y mongodb-enterprise=3.0.11 mongodb-enterprise-server=3.0.11 mongodb-enterprise-shell=3.0.11 mongodb-enterprise-mongos=3.0.11 mongodb-enterprise-tools=3.0.11)
+   if grep -q "Unable to lacate" <<< $result; then
+       echo "Could not install mongodb, pls run this script again or install mongodb manually"
+       exit
+   fi
    echo "mongodb-enterprise hold" | sudo dpkg --set-selections
    echo "mongodb-enterprise-server hold" | sudo dpkg --set-selections
    echo "mongodb-enterprise-shell hold" | sudo dpkg --set-selections
    echo "mongodb-enterprise-mongos hold" | sudo dpkg --set-selections
    echo "mongodb-enterprise-tools hold" | sudo dpkg --set-selections
+   cd /home/opentech/ && python open-hackathon-server/src/setup_db.py
 }
 
 get_dependency_for_guacamole() {
@@ -154,8 +161,8 @@ install_and_config_guacamole() {
 }
 
 
-# install docker
 install_and_config_docker() {
+    # install docker
     result=$(sudo apt-get update)
     if grep -q "Could not resolve" <<< $result; then
         echo "Could not update apt-get, please solve it"
@@ -197,7 +204,7 @@ install_and_config_docker() {
     fi
     service docker start
     
-    result=$(docker run hello-world)
+    result=$(sudo docker run hello-world)
     if grep -q "Hello from Docker" <<< $result; then
         echo "Install docker failed, please run this script again"
         exit
@@ -229,17 +236,25 @@ deploy() {
     cp /home/opentech/open-hackathon/open-hackathon-client/src/open-hackathon-client.conf /etc/init/
 }
 
-echo "It may take a long time to install and configure open-hackathon, please wait a moment^_^, ..."
-echo "安装将花费一定时间，请耐心等待直到安装完成^_^, ..."
 
-pre_setup
-get_dependency_software
-install_mongodb
-set_envirement
-get_dependency_for_guacamole
-install_and_config_guacamole
-install_and_config_docker
-deploy
+
+
+
+main() {
+    echo "It may take a long time to install and configure open-hackathon, please wait a moment^_^, ..."
+    echo "安装将花费一定时间，请耐心等待直到安装完成^_^, ..."
+
+    pre_setup
+    get_dependency_software
+    install_mongodb
+    set_envirement
+    get_dependency_for_guacamole
+    install_and_config_guacamole
+    install_and_config_docker
+    deploy
+}
+
+main
 
 
 
