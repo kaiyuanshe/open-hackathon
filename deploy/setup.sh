@@ -215,9 +215,10 @@ install_and_config_docker() {
     docker pull rastasheep/ubuntu-sshd
     result=$(sudo docker run hello-world)
     if ! (grep -q "Hello from Docker" <<< $result); then
-        echo "Install docker failed, please run this script again"
+        echo "Install docker failed, please run this script again or install docker manually."
         exit
     fi
+    echo "Docker is installed successfully."
 }
 
 
