@@ -237,7 +237,7 @@ class DockerHostManager(Component):
                                        container_count=0,
                                        container_max_count=args.container_max_count,
                                        is_auto=False,
-                                       disabled=False,
+                                       disabled=args.get("disabled", False),
                                        hackathon=hackathon)
 
         if self.docker.ping(host_server):
@@ -313,6 +313,7 @@ class DockerHostManager(Component):
             self.log.warn('delete docker_host fail, not find hostserver_id:' + args.id)
             return not_found("", "host_server not found")
 
+        vm.vm_name = args.get("vm_name", vm.vm_name)
         vm.public_dns = args.get("public_dns", vm.public_dns)
         vm.public_ip = args.get("public_ip", vm.public_ip)
         vm.private_ip = args.get("private_ip", vm.private_ip)
