@@ -156,13 +156,15 @@ install_and_config_guacamole() {
         echo "guacamole is installed!"
         return
     fi
-    echo "install guacamole"
+    echo "installing guacamole"
     # install and Configure guacamole
-    cd /home/opentech &&  wget http://sourceforge.net/projects/guacamole/files/current/source/guacamole-server-0.9.9.tar.gz/download
+    cd /home/opentech && rm -f download && rm -rf guacamole-server-0.9.9
+    wget http://sourceforge.net/projects/guacamole/files/current/source/guacamole-server-0.9.9.tar.gz/download
     rm -rf guacamole-server-0.9.9
     mv download guacamole-server-0.9.9.tar.gz &&  tar -xzf guacamole-server-0.9.9.tar.gz && cd guacamole-server-0.9.9/
     result=$(autoreconf -fi)
     result=$(./configure --with-init-dir=/etc/init.d)
+    result=$(make clean)
     result=$(make)
     result=$(make install)
     ldconfig
