@@ -465,7 +465,13 @@ angular.module('oh.controllers', [])
       admins: [],
       adminsType: [],
       adminsRemark: [],
-      selectedAdmins: []
+      selectedAdmins: [],
+      searchKeyword: "", // search users to create admins
+      searchResult: [],
+      selectedUserId: "", // user selected to create an admin
+      selectedUserCSS: {color: 'red'}, // todo remove this line when CSS done
+      selectedUserRole: 1,
+      selectedUserRemark: ""
     }
     $scope.filterAdminCondition = 0;
 
@@ -531,26 +537,23 @@ angular.module('oh.controllers', [])
     }
 
     $scope.deleteAdmins = function() {
-      // todo
-      console.log($scope.data.selectedAdmins);
-      // todo
-      function deleteAnAdmin(admin) {
+      deleteAdminList($scope.data.selectedAdmins, 0);
+
+      function deleteAdminList(list, index) {
+        if(index == list.length){
+          pageLoad();
+          return;
+        }
+
         api.admin.hackathon.administrator.delete({
           header: {hackathon_name: activity.name},
-          query: {id: admin.id}
+          query: {id: list[index]}
         }, function(data) {
           if(data.error)
             showTip('tip-danger', data.error.friendly_message);
-          else{
-            delete $scope.data.adminsType[admin.id];
-            delete $scope.data.adminsRemark[admin.id];
-            var index_admin = $scope.data.admins.indexOf(admin)
-            $scope.data.admins.splice(index_admin, 1)
-            var index_selected_admin = $scope.data.selectedAdmins.indexOf(admin.id)
-            $scope.data.selectedAdmins.splice(index_selected_admin, 1)
-
-            showTip('tip-success', '成功删除管理员: ' + admin.name);
-          }
+          else
+            showTip('tip-success', '成功删除管理员!');
+          deleteAdminList(list, index + 1);
         });
       }
     }
@@ -559,7 +562,50 @@ angular.module('oh.controllers', [])
       dialog.add_admin({
         title: '增加管理员',
         size: 'sm'
+      }, $scope);
+    }
+
+    $scope.searchAdmin = function() {
+      api.admin.user.list.get({
+        header: {hackathon_name: activity.name},
+        query: {keyword: $scope.data.searchKeyword}
+      }, function(data) {
+        if(data.error)
+          showTip('tip-danger', data.error.friendly_message);
+        else{
+          console.log(data.items);
+          $scope.data.searchResult = data.items;
+        }
       });
+    }
+
+    $scope.selectSearchedUser = function(user) {
+      $scope.data.selectedUserId = user.id;
+      console.log(user.id);
+    }
+
+    $scope.createAdmin = function() {
+      console.log($scope.data.selectedUserRemark);
+      console.log($scope.data.selectedUserRole);
+      if($scope.data.selectedUserId == "") {
+        showTip('tip-danger', "请选择需要设置成管理员的用户！");
+      } else {
+        api.admin.hackathon.administrator.post({
+          header: {hackathon_name: activity.name},
+          body: {
+            id: $scope.data.selectedUserId,
+            role: $scope.data.selectedUserRole,
+            remark: $scope.data.selectedUserRemark
+          }
+        }, function(data) {
+          if(data.error)
+            showTip('tip-danger', data.error.friendly_message);
+          else{
+            showTip('tip-success', '创建管理员成功');
+            pageLoad();
+          }
+        });
+      }
     }
 
     function pageLoad() {
@@ -571,6 +617,13 @@ angular.module('oh.controllers', [])
         else{
           $scope.data.admins = data;
           $scope.data.adminsType = [];
+          $scope.data.adminsRemark = [];
+          $scope.data.selectedAdmins = [];
+          $scope.data.searchKeyword = "";
+          $scope.data.searchResult = [];
+          $scope.data.selectedUserId = "";
+          $scope.data.selectedUserRole = 1;
+          $scope.data.selectedUserRemark = "";
           for(var index in data) {
             $scope.data.adminsType[data[index].id] = data[index].role.toString();
             $scope.data.adminsRemark[data[index].id] = data[index].remark;

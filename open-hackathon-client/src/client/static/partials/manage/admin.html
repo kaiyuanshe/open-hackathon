@@ -22,7 +22,7 @@
         <tr ng-repeat="admin in data.admins | filter:filterAdmin">
           <td><input type="checkbox" ng-checked="isAdminSelected(admin)" ng-click="selectAdmin(admin)"></td>
           <td>{{admin.user_info.name}}</td>
-          <td>{{admin.user_info.emails | join}}</td>
+          <td>{{admin.user_info.emails | joinEmails}}</td>
           <td>
             <select ng-model="data.adminsType[admin.id]" ng-change="updateAdmin(admin)">
               <option value="1">{{'HACK_USER_TYPE.ADMIN' | translate}}</option>
@@ -44,8 +44,12 @@
     <table class="table table-striped table-bordered">
       <tbody>
         <tr><td ng-click="filterAdminCondition=0">{{'ALL_USERS' | translate}}({{data.admins.length}})</td></tr>
-        <tr><td ng-click="filterAdminCondition=1">{{'HACK_USER_TYPE.ADMIN' | translate}}({{(data.admins | filter:{role:1}).length}})</td></tr>
-        <tr><td ng-click="filterAdminCondition=2">{{'HACK_USER_TYPE.JUDGE' | translate}}({{(data.admins | filter:{role:2}).length}})</td></tr>
+        <tr><td ng-click="filterAdminCondition=1">
+          {{'HACK_USER_TYPE.ADMIN' | translate}}({{(data.admins | filter:{role:1}).length}})</td>
+        </tr>
+        <tr><td ng-click="filterAdminCondition=2">
+          {{'HACK_USER_TYPE.JUDGE' | translate}}({{(data.admins | filter:{role:2}).length}})</td>
+        </tr>
       </tbody>
     </table>
   </div>

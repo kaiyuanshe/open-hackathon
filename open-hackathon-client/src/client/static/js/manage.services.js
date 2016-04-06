@@ -211,9 +211,24 @@ angular.module('oh.api', [])
       return base(modal);
     }
 
-    this.add_admin = function(modal) {
+    this.add_admin = function(modal, admin_$scope) {
       modal.url = 'manage/template/dialogs/add_admin.html';
-      return base(modal);
+      modal.controller = function($scope, $uibModalInstance) {
+        $scope.title = modal.title;
+        $scope.body = modal.body;
+        $scope.ok = function() {
+          $uibModalInstance.close(modal.ok());
+        };
+        $scope.cancel = function() {
+          $uibModalInstance.dismiss('cancel');
+        };
+
+        $scope.data = admin_$scope.data;
+        $scope.searchAdmin = admin_$scope.searchAdmin;
+        $scope.selectSearchedUser = admin_$scope.selectSearchedUser;
+        $scope.createAdmin = admin_$scope.createAdmin;
+      }
+      return open(modal).result;
     }
 
     this.customize = function(modal) {

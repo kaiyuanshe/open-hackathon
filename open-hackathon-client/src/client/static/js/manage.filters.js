@@ -38,14 +38,6 @@ angular.module('oh.filters', [])
       }
       return [];
     }
-  }).filter('join', function() {
-    return function(list, filler) {
-      filler = filler || ',';
-      if (list) {
-        return list.join(filler);
-      }
-      return '';
-    }
   }).filter('defBanner', function() {
     return function(array) {
       return array.length > 0 ? array[0] : '/static/pic/homepage.jpg';
@@ -72,6 +64,18 @@ angular.module('oh.filters', [])
         case 2:return $translate.instant('TEMPLATE_STATUS.FAIL');
        }
        return '';
+    }
+  }).filter('joinEmails', function() {
+    return function(list, filler) {
+      filler = filler || ',';
+      emailList = []
+      if (list) {
+        for(var index in list)
+          if("email" in list[index])
+            emailList.push(list[index].email);
+        return emailList.join(filler);
+      }
+      return '';
     }
   }).filter('hackUserStatus', function($translate){
     return function(status) {
