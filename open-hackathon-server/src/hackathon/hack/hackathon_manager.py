@@ -167,12 +167,14 @@ class HackathonManager(Component):
         return Hackathon.objects(status=HACK_STATUS.ONLINE)
 
     def get_user_hackathon_list_with_detail(self, user_id):
-        user = self.user_manager.get_user_by_id(user_id)
-        user_hack_list = self.db.session().query(Hackathon) \
-            .join(UserHackathonRel, UserHackathonRel.hackathon_id == Hackathon.id) \
-            .filter(UserHackathonRel.deleted != 1, UserHackathonRel.user_id == user_id).all()
+        user_hackathon_rels = UserHackathon.objects(user=user_id, role=HACK_USER_TYPE.COMPETITOR).all()
 
-        return map(lambda h: self.__get_hackathon_detail(h, user), user_hack_list)
+        def get_user_hackathon_detail(user_hackathon_rel):
+            dict = user_hackathon_rel.dic()
+            dict["hackathon_info"] = user_hackathon_rel.hackathon.dic()
+            return dict
+
+        return [get_user_hackathon_detail(rel) for rel in user_hackathon_rels]
 
     def get_recyclable_hackathon_list(self):
         # todo fix auto recycle

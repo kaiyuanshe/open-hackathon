@@ -170,7 +170,7 @@ class UserLoginResource(HackathonResource):
 class UserResource(HackathonResource):
     def get(self):
         parse = reqparse.RequestParser()
-        parse.add_argument("user_id", type=int, location="args", required=False)
+        parse.add_argument("user_id", type=str, location="args", required=False)
         args = parse.parse_args()
 
         uid = args["user_id"] or None
@@ -238,13 +238,9 @@ class UserRegistrationResource(HackathonResource):
 class UserHackathonListResource(HackathonResource):
     def get(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('user_id', type=int, location='args', required=False)
+        parse.add_argument('user_id', type=str, location='args', required=False)
         args = parse.parse_args()
-        query_uid = args["user_id"] or 0
-        if query_uid == g.user.id or query_uid == 0:
-            user_id = g.user.id
-        else:
-            user_id = query_uid
+        user_id = args["user_id"] or g.user.id
         return hackathon_manager.get_user_hackathon_list_with_detail(user_id)
 
 
@@ -253,7 +249,7 @@ class UserHackathonLikeResource(HackathonResource):
         parse = reqparse.RequestParser()
         parse.add_argument('user_id', type=str, location='args', required=False)
         args = parse.parse_args()
-        user_id = g.user.id if args["user_id"] else args["user_id"]
+        user_id = args["user_id"] or g.user.id
         return hackathon_manager.get_userlike_all_hackathon(user_id)
 
     @hackathon_name_required
