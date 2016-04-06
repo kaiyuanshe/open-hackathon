@@ -22,7 +22,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 BLOCK
-pre_setup() {
+pre_setup_docker() {
     #for ubuntu 14
     if $(lsb_release -d | grep -q "14"); then
         echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" | tee /etc/apt/sources.list.d/docker.list
@@ -267,12 +267,12 @@ main() {
     echo "It may take a long time to install and configure open-hackathon, please wait a moment^_^, ..."
     echo "安装将花费一定时间，请耐心等待直到安装完成^_^, ..."
 
-    pre_setup
     get_dependency_software
     install_mongodb
     set_envirement
     get_dependency_for_guacamole
     install_and_config_guacamole
+    #pre_setup_docker
     #install_and_config_docker
     deploy
 }
