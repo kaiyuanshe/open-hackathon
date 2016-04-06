@@ -691,8 +691,7 @@
     position: relative;
     text-align: left;
     color: #969696;
-    max-height: 95px;
-    min-height: 95px;
+    border: 0;
 }
 
 .oh-users .oh-signature {

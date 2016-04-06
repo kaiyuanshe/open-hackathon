@@ -616,7 +616,10 @@ angular.module('oh.controllers', [])
             content: data.error.friendly_message
           });
         }else{
-          $scope.showTip(level = 'tip-success', content = '修改成功');
+           $scope.$emit('showTip', {
+            level: 'tip-success',
+            content: '添加成功'
+          });
         }
       })
     }
