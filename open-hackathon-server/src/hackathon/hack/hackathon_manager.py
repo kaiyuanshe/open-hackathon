@@ -419,82 +419,41 @@ class HackathonManager(Component):
         stat.update_time = self.util.get_now()
         stat.save()
 
-    def get_hackathon_tags(self, hackathon):
-        tags = self.db.find_all_objects_by(HackathonTag, hackathon_id=hackathon.id)
-        return ",".join([t.tag for t in tags])
-
-    def set_hackathon_tags(self, hackathon, tags):
-        """Set hackathon tags
-
-        :type tags: list
-        :param tags: a list of str, every str is a tag
-        """
-        self.db.delete_all_objects_by(HackathonTag, hackathon_id=hackathon.id)
-        for tag in tags:
-            t = tag.strip('"').strip("'")
-            self.db.add_object(HackathonTag(tag=t, hackathon_id=hackathon.id))
-        self.db.commit()
-        return ok()
-
     def get_distinct_tags(self):
         """Return all distinct hackathon tags for auto-complete usage"""
         return self.db.session().query(HackathonTag.tag).distinct().all()
 
-    def qet_organizer_by_id(self, organizer_id):
-        organizer = self.db.get_object(HackathonOrganizer, organizer_id)
-        if organizer:
-            return organizer.dic()
-        return not_found()
-
     def create_hackathon_organizer(self, hackathon, body):
         organizer = Organization(id=uuid.uuid4(),
-                                 name=body["name"],
-                                 description=body["description"],
-                                 homepage=body["homepage"],
-                                 logo=body["logo"])
-        if int(body["organization_type"]) == ORGANIZATION_TYPE.ORGANIZER:
-            hackathon.update(push__organizers=organizer)
-        else:
-            hackathon.update(push__partners=organizer)
+                                 name=body.name,
+                                 description=body.get("description", ""),
+                                 organization_type=body.organization_type,
+                                 homepage=body.get("homepage", ""),
+                                 logo=body.get("logo", ""))
 
+        hackathon.organizers.append(organizer)
         hackathon.update_time = self.util.get_now()
         hackathon.save()
-        return ok()
+        return hackathon.dic()
 
     def update_hackathon_organizer(self, hackathon, body):
-        previous_organization_type = ORGANIZATION_TYPE.ORGANIZER if \
-            hackathon.organizers.filter(id=body["id"]) else ORGANIZATION_TYPE.PARTNER
-
-        organizer = hackathon.organizers.get(id=body["id"]) if \
-            previous_organization_type == ORGANIZATION_TYPE.ORGANIZER else \
-            hackathon.partners.get(id=body["id"])
-
+        organizer = hackathon.organizers.get(id=body.id)
         if not organizer:
             return not_found()
-
-        if not previous_organization_type == body.get("organization_type", previous_organization_type):
-            if previous_organization_type == ORGANIZATION_TYPE.ORGANIZER:
-                hackathon.update(pull__organizers=organizer)
-                hackathon.update(push__partners=organizer)
-            else:
-                hackathon.update(pull__partners=organizer)
-                hackathon.update(push__organizers=organizer)
 
         organizer.name = body.get("name", organizer.name)
         organizer.description = body.get("description", organizer.description)
         organizer.homepage = body.get("homepage", organizer.homepage)
         organizer.logo = body.get("logo", organizer.logo)
-        organizer.save()
+        organizer.organization_type = body.get("organization_type", organizer.organization_type)
 
         hackathon.update_time = self.util.get_now()
         hackathon.save()
-        return ok()
+        return hackathon.dic()
 
     def delete_hackathon_organizer(self, hackathon, organizer_id):
         if hackathon.organizers.filter(id=organizer_id):
             hackathon.update(pull__organizers=hackathon.organizers.get(id=organizer_id))
-        else:
-            hackathon.update(pull__partners=hackathon.partners.get(id=organizer_id))
 
         hackathon.update_time = self.util.get_now()
         hackathon.save()
