@@ -93,7 +93,7 @@
                             return banners[0] || '';
                         },
                         get_location: function (location) {
-                            return location ? location.substring(0, 2) : '在线';
+                            return location ? location.substring(0, 5) + (location.length > 5 ? '...' : '') : '在线';
                         }
                     }));
                 } else {
