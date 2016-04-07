@@ -266,13 +266,13 @@ function install_and_config_docker() {
 
 function deploy() {
     # Logging && Hosts
-    mkdir /var/log/open-hackathon
+    result=$(mkdir /var/log/open-hackathon)
     chmod -R 644 /var/log/open-hackathon
 
     # Installing uWSGI
     result=$(pip install uwsgi)
     cp $OHP_HOME/open-hackathon-server/src/open-hackathon-server.conf /etc/init/
-    cp $OHP_HOME/open-hackathon/open-hackathon-client/src/open-hackathon-client.conf /etc/init/
+    cp $OHP_HOME/open-hackathon-client/src/open-hackathon-client.conf /etc/init/
 }
 
 
