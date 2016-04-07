@@ -366,7 +366,12 @@ footer .oh-copyright hr {
   background-color: #21b1de;
   border-color: #21b1de;
 }
-
+.red-text{
+  color: #cf3c0e;
+}
+.green-text{
+  color:#7dba43;
+}
 .blue-text {
   color: #21b1de;
 }
@@ -1824,14 +1829,13 @@ ul.messages li {
 }
 
 .oh-box {
-  border: 1px solid #D2D2D2;
-  margin-bottom: 40px;
+  margin-bottom: 10px;
 }
 
 .oh-body {
-  padding: 20px 20px 28px;
+  border: 1px solid #edf0ef;
 }
-
+.oh-body
 h1.title {
   margin: 20px 0;
   font-size: 20px;
@@ -1845,10 +1849,9 @@ h2.title {
 }
 
 h3.title {
-  font-size: 16px;
+  font-size: 18px;
   margin: 0;
-  padding: 20px 0 14px 20px;
-  border-bottom: 1px solid #ddd;
+  padding: 8px 0;
 }
 
 h4.title {}

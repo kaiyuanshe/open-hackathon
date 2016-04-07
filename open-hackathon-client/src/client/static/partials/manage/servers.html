@@ -1,1 +1,151 @@
-servers.html
+<div class="col-lg-12" loading>
+    <script type="text/ng-template" id="serverModel.html">
+        <div class="modal-header">
+            <h3 class="modal-title">添加/编辑服务器</h3>
+        </div>
+        <div class="modal-body">
+            <form class="form-horizontal" id="serverForm">
+                <div class="form-group has-feedback">
+                    <label class="col-md-3 control-label">服务器名称</label>
+
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" name="vm_name" id="vm_name" placeholder=""
+                               ng-model="data.vm_name"
+                               required
+                               data-bv-trigger="blur"
+                               data-bv-notempty-message="服务器名称，不能为空">
+                    </div>
+                </div>
+                <div class="form-group has-feedback">
+                    <label class="col-md-3 control-label">公网域名</label>
+
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" name="public_dns" id="public_dns"
+                               placeholder="xxx.chinacloudapp.cn"
+                               ng-model="data.public_dns"
+                               data-bv-trigger="blur"
+                               data-bv-message="请填写正确的公网域名"
+                               data-bv-notempty-message="请填写公网域名">
+                    </div>
+                </div>
+                <div class="form-group has-feedback">
+                    <label class="col-md-3 control-label">公网IP</label>
+
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" name="public_ip" id="public_ip"
+                               ng-model="data.public_ip"
+                               placeholder="xxx.xxx.xxx.xxx"
+                               data-bv-trigger="blur"
+                               data-bv-message="请填写正确的公网IP"
+                               data-bv-notempty-message="请填写公网IP">
+                    </div>
+                </div>
+                <div class="form-group has-feedback">
+                    <label class="col-md-3 control-label">公网docker端口</label>
+
+                    <div class="col-md-6">
+                        <input type="number" class="form-control" name="public_docker_api_port"
+                               id="public_docker_api_port" ng-model="data.public_docker_api_port"
+                               placeholder="4243" max="65535" min="1">
+                    </div>
+                </div>
+                <div class="form-group has-feedback">
+                    <label class="col-md-3 control-label">内网IP</label>
+
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" name="private_ip" id="private_ip"
+                               ng-model="data.private_ip"
+                               placeholder="xxx.xxx.xxx.xxx"
+                               data-bv-trigger="blur"
+                               data-bv-message="请填写正确的内网IP"
+                               data-bv-notempty-message="请填写内网IP">
+                    </div>
+                </div>
+                <div class="form-group has-feedback">
+                    <label class="col-md-3 control-label">公网docker端口</label>
+
+                    <div class="col-md-6">
+                        <input type="number" class="form-control" name="private_docker_api_port"
+                               id="private_docker_api_port" ng-model="data.private_docker_api_port"
+                               placeholder="4243" max="65535" min="1">
+                    </div>
+                </div>
+                <div class="form-group has-feedback">
+                    <label class="col-md-3 control-label">最大容器数</label>
+
+                    <div class="col-md-6">
+                        <input type="number" class="form-control" name="container_max_count"
+                               id="container_max_count" ng-model="data.container_max_count"
+                               placeholder="20" max="1000" min="1">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-3 control-label">禁用 </label>
+
+                    <div class="col-md-6">
+                        <label class="switchbox switchbox-success switchbox-inline">
+                          <input type="checkbox" ng-model="data.disabled" speech checked="checked">
+                          <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
+                        </label>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" ng-click="cancel()">取消</button>
+            <button type="button" class="btn btn-primary" ng-click="add_server()">提交</button>
+        </div>
+    </script>
+
+    <div class="box">
+        <div class="box-header">
+            <button type="button" class="btn btn-primary" ng-click="add()">添加</button>
+        </div>
+
+        <div class="box-content">
+            <div id="serverTable">
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>VM名称</th>
+                        <th>DNS</th>
+                        <th>外部Ip</th>
+                        <th>外部docker端口</th>
+                        <th>内部IP</th>
+                        <th>内部docker端口</th>
+                        <th>当前容器数</th>
+                        <th>最大容器数</th>
+                        <th>创建方式</th>
+                        <th>状态</th>
+                        <th>是否禁用</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="server in data">
+                        <td>{{server.vm_name}}</td>
+                        <td>{{server.public_dns}}</td>
+                        <td>{{server.public_ip}}</td>
+                        <td>{{server.public_docker_api_port}}</td>
+                        <td>{{server.private_ip}}</td>
+                        <td>{{server.private_docker_api_port}}</td>
+                        <td>{{server.container_count}}</td>
+                        <td>{{server.container_max_count}}</td>
+                        <td>{{server.is_auto ? "自动" : "手动" }}</td>
+                        <td>{{getState(server.state)}}</td>
+                        <td>{{server.disabled}}</td>
+                        <td class="col-action">
+                            <a class="btn btn-info btn-sm" ng-click="edit(server)">
+                                <i class="fa fa-edit"></i>
+                            </a>
+                            <a class="btn btn-danger btn-sm" ng-click="delete(server.id)">
+                                <i class="fa fa-trash-o"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

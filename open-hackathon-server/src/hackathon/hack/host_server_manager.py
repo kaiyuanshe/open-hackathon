@@ -40,10 +40,10 @@ from azure.servicemanagement import (ConfigurationSet, ConfigurationSetInputEndp
 from hackathon import Component, RequiredFeature, Context
 from hackathon.hmongo.models import DockerHostServer, Hackathon
 from hackathon.constants import (AzureApiExceptionMessage, DockerPingResult, AVMStatus, AzureVMPowerState,
-                                 DockerHostServerStatus, DHS_QUERY_STATE, AzureVMStartMethod,
+                                 DockerHostServerStatus, DHS_QUERY_STATE,
                                  ServiceDeploymentSlot, AzureVMSize, AzureVMEndpointName, TCPProtocol,
                                  AzureVMEndpointDefaultPort, AzureVMEnpointConfigType, AzureOperationStatus, EStatus)
-from hackathon.hackathon_response import ok, not_found, precondition_failed
+from hackathon.hackathon_response import ok, not_found
 
 __all__ = ["DockerHostManager"]
 
@@ -51,7 +51,6 @@ __all__ = ["DockerHostManager"]
 class DockerHostManager(Component):
     """Component to manage docker host server"""
     docker = RequiredFeature("hosted_docker_proxy")
-    sche = RequiredFeature("scheduler")
     expr_manager = RequiredFeature("expr_manager")
 
     def get_docker_hosts_list(self, hackathon):
@@ -220,13 +219,10 @@ class DockerHostManager(Component):
         self.sche.add_once('docker_host_manager', 'check_vm_status', context=context, minutes=5)
         return True
 
-    def add_existed_host_server(self, hackathon_id, args):
+    def add_host_server(self, hackathon, args):
         """
         create a docker host DB object for a hackathon and insert record into the database.
         param-"args" contain all necessary infos to new a docker_host
-
-        :param hackathon_id: the id of hackathon in DB
-        :type hackathon_id: Integer
 
         :return: return True if succeed, otherwise return False
         :rtype: bool
@@ -240,19 +236,17 @@ class DockerHostManager(Component):
                                        private_docker_api_port=args.private_docker_api_port,
                                        container_count=0,
                                        container_max_count=args.container_max_count,
-                                       is_auto=AzureVMStartMethod.MANUAL,
-                                       disabled=args.disabled,
-                                       create_time=self.util.get_now(),
-                                       update_time=self.util.get_now(),
-                                       hackathon_id=hackathon_id)
+                                       is_auto=False,
+                                       disabled=args.get("disabled", False),
+                                       hackathon=hackathon)
 
-        if self.hosted_docker.ping(host_server, 5):
+        if self.docker.ping(host_server):
             host_server.state = DockerHostServerStatus.DOCKER_READY
         else:
             host_server.state = DockerHostServerStatus.UNAVAILABLE
 
-        self.db.add_object(host_server)
-        return ok()
+        host_server.save()
+        return host_server.dic()
 
     def get_and_check_host_server(self, host_server_id):
         """
@@ -269,18 +263,40 @@ class DockerHostManager(Component):
         host_server = DockerHostServer.objects(id=host_server_id).first()
         if host_server is None:
             self.log.warn('get docker_host fail, not find host server by id:' + host_server_id)
-            return None
+            return not_found("docker host server not found")
 
-        try:
-            docker = RequiredFeature("hosted_docker_proxy")
-            containers = docker.list_containers(host_server)
-            if len(containers) != host_server.container_count:
-                host_server.update_one(set_container_count=len(containers))
-        except Exception as e:
-            self.log.error("Failed in sync container count")
-            self.log.error(e)
+        ping = self.docker.ping(host_server)
+        if not ping:
+            host_server.state = DockerHostServerStatus.UNAVAILABLE
+            host_server.save()
+        else:
+            try:
+                containers = self.docker.list_containers(host_server)
+                if len(containers) != host_server.container_count:
+                    host_server.container_count = len(containers)
+                    host_server.save()
+            except Exception as e:
+                self.log.error("Failed in sync container count")
+                self.log.error(e)
 
-        return host_server.dic()
+        return self.__check_docker_host_server(host_server).dic()
+
+    def __check_docker_host_server(self, host_server):
+        ping = self.docker.ping(host_server)
+        if not ping:
+            host_server.state = DockerHostServerStatus.UNAVAILABLE
+            host_server.save()
+        else:
+            try:
+                containers = self.docker.list_containers(host_server)
+                if len(containers) != host_server.container_count:
+                    host_server.container_count = len(containers)
+                    host_server.save()
+            except Exception as e:
+                self.log.error("Failed in sync container count")
+                self.log.error(e)
+
+        return host_server
 
     def update_host_server(self, args):
         """
@@ -292,40 +308,30 @@ class DockerHostManager(Component):
         :return: ok() if succeed.
                  not_found(...) if fail to update the docker_host's information
         """
-        vm = self.db.find_first_object_by(DockerHostServer, id=args.id)
+        vm = DockerHostServer.objects(id=args.id).first()
         if vm is None:
             self.log.warn('delete docker_host fail, not find hostserver_id:' + args.id)
             return not_found("", "host_server not found")
 
+        vm.vm_name = args.get("vm_name", vm.vm_name)
         vm.public_dns = args.get("public_dns", vm.public_dns)
         vm.public_ip = args.get("public_ip", vm.public_ip)
         vm.private_ip = args.get("private_ip", vm.private_ip)
-        vm.public_docker_api_port = args.get("public_docker_api_port", vm.public_docker_api_port)
-        vm.private_docker_api_port = args.get("private_docker_api_port", vm.private_docker_api_port),
-        if self.hosted_docker.ping(vm, 5):
-            args['state'] = DockerHostServerStatus.DOCKER_READY
+        vm.container_max_count = int(args.get("container_max_count", vm.container_max_count))
+        vm.public_docker_api_port = int(args.get("public_docker_api_port", vm.public_docker_api_port))
+        vm.private_docker_api_port = int(args.get("private_docker_api_port", vm.private_docker_api_port))
+        vm.disabled = args.get("disabled", vm.disabled)
+        if self.docker.ping(vm):
+            vm.state = DockerHostServerStatus.DOCKER_READY
         else:
-            args['state'] = DockerHostServerStatus.UNAVAILABLE
+            vm.state = DockerHostServerStatus.UNAVAILABLE
 
-        self.db.update_object(vm, vm_name=args.get("vm_name", vm.vm_name),
-                              public_dns=args.get("public_dns", vm.public_dns),
-                              public_ip=args.get("public_ip", vm.public_ip),
-                              public_docker_api_port=args.get("public_docker_api_port", vm.public_docker_api_port),
-                              private_ip=args.get("private_ip", vm.private_ip),
-                              private_docker_api_port=args.get("private_docker_api_port",
-                                                               vm.private_docker_api_port),
-                              container_max_count=args.get("container_max_count", vm.container_max_count),
-                              state=args.get("state", vm.state),
-                              disabled=args.get("disabled", vm.disabled),
-                              update_time=self.util.get_now())
-        return ok()
+        vm.save()
+        return self.__check_docker_host_server(vm).dic()
 
     def delete_host_server(self, host_server_id):
         """
         delete a docker host_server for a hackathon.
-
-        :param hackathon_id: the id of a hackathon in DB
-        :type hackathon_id: Integer
 
         :param host_server_id: the id of host_server in DB
         :type host_server_id: Integer
@@ -333,13 +339,7 @@ class DockerHostManager(Component):
         :return: ok() if succeeds or this host_server doesn't exist
                  precondition_failed() if there are still some containers running
         """
-        vm = self.db.find_first_object_by(DockerHostServer, id=host_server_id)
-        if vm is None:
-            self.log.warn('delete docker_host fail, not find hostserver_id:' + host_server_id)
-            return ok()
-        if not vm.container_count == 0:
-            return precondition_failed("", "fail to delete: there are some containers running in this server")
-        self.db.delete_object(vm)
+        DockerHostServer.objects(id=host_server_id).delete()
         return ok()
 
     def check_vm_status(self, context):
@@ -411,8 +411,8 @@ class DockerHostManager(Component):
         db_object = self.db.add_object_kwargs(DockerHostServer, vm_name=context.host_name, public_dns=public_dns,
                                               public_ip=public_ip, public_docker_api_port=public_docker_api_port,
                                               private_ip=private_ip, private_docker_api_port=private_docker_api_port,
-                                              container_count=0, is_auto=AzureVMStartMethod.AUTO, state=state,
-                                              disable=DockerHostServerDisable.ABLE,
+                                              container_count=0, is_auto=True, state=state,
+                                              disable=False,
                                               container_max_count=self.util.safe_get_config(
                                                   'dockerhostserver.vm.container_max_count', 50),
                                               hackathon_id=context.hackathon_id)

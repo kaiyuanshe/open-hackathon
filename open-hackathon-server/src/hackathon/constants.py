@@ -336,18 +336,6 @@ class DHS_QUERY_STATE:
     FAILED = 2
 
 
-class AzureVMStartMethod:
-    """
-    the way how Azure VM is started
-
-    Attributes:
-        AUTO: VM is started by OHP server
-        MANUAL: VM is started manually
-    """
-    AUTO = 1
-    MANUAL = 2
-
-
 class AzureApiExceptionMessage:
     """
     The message returned by azure api when exception occurs
