@@ -74,9 +74,9 @@ function set_envirement() {
         mkdir $HOME
     fi
     cd $HOME
-    if [! -d "$HOME/open-hackathon" ]; then
+    if [ ! -d "$HOME/open-hackathon" ]; then
         echo "git cloning open-hackathon source code"
-        result=$(sudo git clone https://github.com/msopentechcn/open-hackathon.git)
+        result=$(git clone https://github.com/msopentechcn/open-hackathon.git)
         if grep -q "unable to access" <<< $result; then
             echo "Could not git clone open-hackathon source code, pls check your network"
             exit
@@ -114,8 +114,8 @@ function install_mongodb() {
    result=$(apt-get update)
    echo "installing mongodb-org"
    result=$(apt-get install -y mongodb-org)
-   echo "installing mongodb-org=3.2.4 mongodb-org-server=3.2.4 mongodb-org-shell=3.2.4 mongodb-org-mongos=3.2.4 mongodb-org-tools=3.2.4"
-   result=$(apt-get install -y mongodb-org=3.2.4 mongodb-org-server=3.2.4 mongodb-org-shell=3.2.4 mongodb-org-mongos=3.2.4 mongodb-org-tools=3.2.4)
+   echo "installing mongodb-org=$MONGO_VERSION mongodb-org-server=$MONGO_VERSION mongodb-org-shell=$MONGO_VERSION mongodb-org-mongos=$MONGO_VERSION mongodb-org-tools=$MONGO_VERSION"
+   result=$(apt-get install -y mongodb-org=$MONGO_VERSION mongodb-org-server=$MONGO_VERSION mongodb-org-shell=$MONGO_VERSION mongodb-org-mongos=$MONGO_VERSION mongodb-org-tools=$MONGO_VERSION)
    if grep -q "Unable to lacate" <<< $result; then
        echo "Could not install mongodb, pls run this script again or install mongodb manually"
        exit
@@ -171,11 +171,11 @@ function install_and_config_guacamole() {
     echo "installing guacamole"
     # install and Configure guacamole
     cd /home/opentech
-    if [ ! -d "guacamole-server-0.9.9" ]; then
-        wget http://sourceforge.net/projects/guacamole/files/current/source/guacamole-server-0.9.9.tar.gz/download
-        mv download guacamole-server-0.9.9.tar.gz &&  tar -xzf guacamole-server-0.9.9.tar.gz
+    if [ ! -d "guacamole-server-$GUACAMOLE_VERSION" ]; then
+        wget http://sourceforge.net/projects/guacamole/files/current/source/guacamole-server-$GUACAMOLE_VERSION.tar.gz/download
+        mv download guacamole-server-$GUACAMOLE_VERSION.tar.gz &&  tar -xzf guacamole-server-$GUACAMOLE_VERSION.tar.gz
     fi
-    cd guacamole-server-0.9.9
+    cd guacamole-server-$GUACAMOLE_VERSION
     result=$(autoreconf -fi)
     result=$(./configure --with-init-dir=/etc/init.d)
     result=$(make clean)
@@ -184,7 +184,7 @@ function install_and_config_guacamole() {
     ldconfig
     # configure guacamole client
     if [ ! -f /var/lib/tomcat7/webapps/guacamole.war ] ; then
-        wget http://sourceforge.net/projects/guacamole/files/current/binary/guacamole-0.9.9.war/download
+        wget http://sourceforge.net/projects/guacamole/files/current/binary/guacamole-$GUACAMOLE_VERSION.war/download
         mv download /var/lib/tomcat7/webapps/guacamole.war
     fi
     # configure guacamole authentication provider
@@ -271,8 +271,8 @@ function deploy() {
 
     # Installing uWSGI
     result=$(pip install uwsgi)
-    cp /home/opentech/open-hackathon/open-hackathon-server/src/open-hackathon-server.conf /etc/init/
-    cp /home/opentech/open-hackathon/open-hackathon-client/src/open-hackathon-client.conf /etc/init/
+    cp $OHP_HOME/open-hackathon-server/src/open-hackathon-server.conf /etc/init/
+    cp $OHP_HOME/open-hackathon/open-hackathon-client/src/open-hackathon-client.conf /etc/init/
 }
 
 
@@ -284,6 +284,7 @@ function main() {
     fi
     export HOME=/home/opentech
     export OHP_HOME=$HOME/open-hackathon
+    export MONGO_VERSION=3.2.4
     export GUACAMOLE_VERSION=0.9.9
     echo "It may take a long time to install and configure open-hackathon, please wait a moment^_^, ..."
     echo "安装将花费一定时间，请耐心等待直到安装完成^_^, ..."
