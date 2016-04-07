@@ -39,7 +39,7 @@ angular.module('oh.manage.router', [
       });
 
       $scope.online = function(activity) {
-        if(activity.status == 1)return;
+        if (activity.status == 1) return;
         api.admin.hackathon.online.post({
           header: {
             hackathon_name: activity.name
@@ -68,7 +68,7 @@ angular.module('oh.manage.router', [
         })
       }
       $scope.offline = function(activity) {
-        if(activity.status == 2)return;
+        if (activity.status == 2) return;
         api.admin.hackathon.online.post({
           header: {
             hackathon_name: activity.name
@@ -165,6 +165,10 @@ angular.module('oh.manage.router', [
     url: 'cloud/:name',
     templateUrl: '/static/partials/manage/cloud.html?v=' + VERSION,
     controller: 'cloudController'
+  }).state('manage.azurecert', {
+    url: 'azure/:name',
+    templateUrl: '/static/partials/manage/azurecert.html?v=' + VERSION,
+    controller: 'azurecertController'
   }).state('manage.servers', {
     url: 'servers/:name',
     templateUrl: '/static/partials/manage/servers.html?v=' + VERSION,

@@ -188,6 +188,7 @@ def strip_tags(html):
 def limit_to(text, limit=100):
     if text is None:
         text = ""
+    text = unicode(text)
     return text[0:limit]
 
 

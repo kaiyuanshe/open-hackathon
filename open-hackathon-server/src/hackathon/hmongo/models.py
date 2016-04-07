@@ -166,6 +166,7 @@ class Organization(DynamicEmbeddedDocument):
     description = StringField()
     homepage = URLField()
     logo = URLField()
+    organization_type = IntField()
 
 
 class Award(EmbeddedDocument):
@@ -208,7 +209,6 @@ class Hackathon(HDocumentBase):
     config = DictField()  # max_enrollment, auto_approve, login_provider
     type = IntField(default=1)  # enum.HACK_TYPE
     organizers = EmbeddedDocumentListField(Organization)
-    partners = EmbeddedDocumentListField(Organization)
     tags = ListField()
     awards = EmbeddedDocumentListField(Award)
     templates = ListField(ReferenceField(Template, reverse_delete_rule=PULL))  # templates for hackathon

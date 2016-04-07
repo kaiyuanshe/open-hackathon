@@ -227,21 +227,44 @@ angular.module("oh.templates", []).run(["$templateCache", function($templateCach
 
   $templateCache.put("manage/template/dialogs/upimage.html",'<div>updimage</div>');
 
-  $templateCache.put("manage/template/dialogs/add_admin.html", '<div class="modal-header cursor-move" dragable>\
+  // SearchBar for Webpage "Manage-Admin"
+  $templateCache.put("manage/template/dialogs/add_admin.html", '<div class="modal-header cursor-move">\
   <h3 class="modal-title">\
     <button type="button" class="close" ng-click="cancel()"><span aria-hidden="true">&times;</span></button>\
     {{title}}\
   </h3>\
   <form>\
-    <input style="color:black" type="text" placeholder="{{\'ADMIN_WEBPAGE_FIELDS.ADMIN_SEARCH_HINT\' | translate}}">\
-    <input style="color:red" type="submit" value="{{\'ADMIN_WEBPAGE_FIELDS.SEARCH\' | translate}}"/>\
+    <input style="color:black" type="text" placeholder="{{\'ADMIN_WEBPAGE_FIELDS.ADMIN_SEARCH_HINT\' | translate}}"\
+      ng-model="data.searchKeyword">\
+    <input style="color:red" type="submit" value="{{\'ADMIN_WEBPAGE_FIELDS.SEARCH\' | translate}}"\
+      ng-click="searchAdmin()">\
   </form>\
-  <table class="table table-striped">\
-    <thead><tr>\
-      <th>{{\'ADMIN_WEBPAGE_FIELDS.NAME\' | translate}}</th>\
-      <th>{{\'ADMIN_WEBPAGE_FIELDS.NICKNAME\' | translate}}</th>\
-      <th>{{\'ADMIN_WEBPAGE_FIELDS.EMAILS\' | translate}}</th>\
-    </tr></thead>\
+  <table class="table">\
+    <thead>\
+      <tr style="color:black">\
+        <th>{{\'ADMIN_WEBPAGE_FIELDS.NAME\' | translate}}</th>\
+        <th>{{\'ADMIN_WEBPAGE_FIELDS.NICKNAME\' | translate}}</th>\
+        <th>{{\'ADMIN_WEBPAGE_FIELDS.EMAILS\' | translate}}</th>\
+      </tr>\
+    </thead>\
+    <tbody>\
+      <tr ng-repeat="user in data.searchResult" ng-style="user.id == data.selectedUserId && data.selectedUserCSS"\
+        ng-click="selectSearchedUser(user)">\
+        <td>{{user.name}}</td>\
+        <td>{{user.nickname}}</td>\
+        <td>{{user.emails | joinEmails}}</td>\
+      </tr>\
+    </tbody>\
   </table>\
+  <form>\
+    <input type="radio" ng-model="data.selectedUserRole" value=1 checked/>\
+    <label>{{\'HACK_USER_TYPE.ADMIN\' | translate}}</label><br/>\
+    <input type="radio" ng-model="data.selectedUserRole" value=2 />\
+    <label>{{\'HACK_USER_TYPE.JUDGE\' | translate}}</label><br/>\
+    <label>{{\'ADMIN_WEBPAGE_FIELDS.REMARK\' | translate}}</label>\
+    <input type="text" style="color:black" ng-model="data.selectedUserRemark"><br/>\
+  </form>\
+  <input type="submit" style="color:red" value="{{\'OK\' | translate}}" ng-click="createAdmin();cancel()">\
+  <input type="button" style="color:red" value="{{\'CANCEL\' | translate}}" ng-click="cancel()">\
   </div>');
 }]);
