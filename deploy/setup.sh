@@ -96,7 +96,7 @@ function set_envirement() {
 
 function install_mongodb() {
    result=$(sudo service mongod status)
-   if ! $(grep -q "unrecognized service" <<< $result); then
+   if $(grep -q "mongod" <<< $result); then
        echo "mongodb is installed"
        return
    fi
