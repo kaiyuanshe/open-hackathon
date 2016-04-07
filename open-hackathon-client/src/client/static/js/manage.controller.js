@@ -991,6 +991,11 @@ angular.module('oh.controllers', [])
     }
 
     $scope.searchExperiment = function() {
+      if($scope.searchKeyword == "") {
+        pageLoad();
+        return
+      }
+
       api.admin.experiment.list.get({
         header: {
           hackathon_name: activity.name
