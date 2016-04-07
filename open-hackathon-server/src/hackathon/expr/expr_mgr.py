@@ -112,10 +112,7 @@ class ExprManager(Component):
 
     def get_expr_list_by_hackathon_id(self, hackathon_id, user_name, status):
         # get a list of all experiments' detail
-        if status:
-            experiments = Experiment.objects(status=status).all()
-        else:
-            experiments = Experiment.objects().all()
+        experiments = Experiment.objects(status=status).all() if status else Experiment.objects().all()
 
         if user_name and not user_name == "":
             experiments = [experiment for experiment in experiments if experiment.user.name == user_name]

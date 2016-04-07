@@ -605,9 +605,7 @@ class AdminExperimentListResource(HackathonResource):
         parse.add_argument('user_name', type=str, location='args', required=False)
         parse.add_argument('status', type=int, location='args', required=False)
         args = parse.parse_args()
-        return expr_manager.get_expr_list_by_hackathon_id(g.hackathon.id,
-                                                          user_name=args['user_name'],
-                                                          status=args['status'])
+        return expr_manager.get_expr_list_by_hackathon_id(g.hackathon.id, args['user_name'], args['status'])
 
 
 class AdminHackathonFileResource(HackathonResource):
