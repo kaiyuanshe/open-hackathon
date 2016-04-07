@@ -65,30 +65,14 @@ class AdminManager(Component):
     def get_entitled_hackathons_list(self, user):
         """Get hackathon id list that specific user is entitled to manage
 
-        :type user_id: int
-        :param user_id: id of user
-
         :rtype: list
         :return list of hackathon simple
         """
-        user_filter = Q()
-        if not user.is_super:
-            user_filter = Q(user=user, role=HACK_USER_TYPE.ADMIN)
 
-        hids = [uh.hackathon.id for uh in UserHackathon.objects(user_filter).no_dereference().only("hackathon")]
-        hack_list = Hackathon.objects(id__in=hids).only(
-            'name',
-            'display_name',
-            'ribbon',
-            'short_description',
-            'location',
-            'banners',
-            'status',
-            'creator',
-            'type',
-            'config',
-            'event_start_time',
-            'event_end_time').order_by("-event_end_time")
+        if not user.is_super:
+            hack_list = UserHackathon.objects(user=user, role=HACK_USER_TYPE.ADMIN).distinct("hackathon")
+        else:
+            hack_list = Hackathon.objects().all()
 
         all_hackathon = [h.dic() for h in hack_list]
         return all_hackathon
