@@ -74,6 +74,7 @@ class AdminManager(Component):
         else:
             hack_list = Hackathon.objects().all()
 
+        hack_list.sort(key=lambda s: s.create_time, reverse=True)
         all_hackathon = [h.dic() for h in hack_list]
         return all_hackathon
 
