@@ -144,6 +144,7 @@
     "LASTLOGINTIME": "最后登录时间",
     "CREATETIME": "创建时间",
     "REMARK": "备注",
+    "CREATE_ADMIN": "增加管理员",
     "ADMIN_SEARCH_HINT": "用户名/昵称/邮箱",
     "SEARCH": "搜索"
   }

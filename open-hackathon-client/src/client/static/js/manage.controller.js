@@ -468,7 +468,7 @@ angular.module('oh.controllers', [])
       });
     };
   })
-  .controller('adminController', function($rootScope, $scope, activityService, api, dialog) {
+  .controller('adminController', function($rootScope, $scope, $uibModal, activityService, api, dialog) {
     $scope.$emit('pageName', 'SETTINGS.ADMINISTRATORS');
 
     var activity = activityService.getCurrentActivity();
@@ -571,13 +571,24 @@ angular.module('oh.controllers', [])
     }
 
     $scope.showSearchBar = function() {
-      dialog.add_admin({
-        title: '增加管理员',
-        size: 'sm'
-      }, $scope);
+      var data = $scope.data;
+
+      $uibModal.open({
+        templateUrl: 'addAdminModel.html',
+        controller: function($scope, $uibModalInstance) {
+          $scope.data = data;
+          $scope.cancel = function() {
+            $uibModalInstance.dismiss('cancel');
+          };
+
+          $scope.searchAdmin = searchAdmin;
+          $scope.selectSearchedUser = selectSearchedUser;
+          $scope.createAdmin = createAdmin;
+        },
+      });
     }
 
-    $scope.searchAdmin = function() {
+    function searchAdmin() {
       api.admin.user.list.get({
         header: {hackathon_name: activity.name},
         query: {keyword: $scope.data.searchKeyword}
@@ -589,11 +600,11 @@ angular.module('oh.controllers', [])
       });
     }
 
-    $scope.selectSearchedUser = function(user) {
+    function selectSearchedUser(user) {
       $scope.data.selectedUserId = user.id;
     }
 
-    $scope.createAdmin = function() {
+    function createAdmin() {
       if($scope.data.selectedUserId == "") {
         showTip('tip-danger', "请选择需要设置成管理员的用户！");
       } else {
