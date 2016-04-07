@@ -22,6 +22,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 BLOCK
+
+
+# This script should be run as "sudo bash setup.sh"
+# Better to deploy open-hackathon on ubuntu 14
+
+
 function pre_setup_docker() {
     #for ubuntu 14
     if $(lsb_release -d | grep -q "14"); then
@@ -43,19 +49,19 @@ function pre_setup_docker() {
 
 function get_dependency_software() {
     echo "updating apt-get......"
-    result=$(sudo apt-get update)
+    result=$(apt-get update)
     if grep -q "Could not resolve" <<< $result; then
         echo "Could not update apt-get, please solve it"
         exit
     fi
     echo "installing git python-setuptools python-dev python-pip"
-    result=$(sudo apt-get install -y git python-setuptools python-dev python-pip)
+    result=$(apt-get install -y git python-setuptools python-dev python-pip)
     if grep -q "Unable to lacate" <<< $result; then
         echo "Could not install dependancy software, pls install docker manually"
         exit
     fi
     echo "installing autoconf libtool tomcat7 "
-    result=$(sudo apt-get install -y autoconf automake libtool tomcat7 )
+    result=$(apt-get install -y autoconf automake libtool tomcat7 )
     if grep -q "Unable to lacate" <<< $result; then
         echo "Could not install dependancy software, pls install docker manually"
         exit
@@ -64,20 +70,26 @@ function get_dependency_software() {
 
 function set_envirement() {
     echo "git clone source code from Github, and solve python dependency"
-    cd /home &&  rm -rf opentech
-    mkdir opentech && cd opentech
-    rm -r open-hackathon
-    echo "git cloning open-hackathon source code"
-    result=$(sudo git clone https://github.com/YaningX/open-hackathon.git)
-    if grep -q "unable to access" <<< $result; then
-        echo "Could not git clone open-hackathon source code, pls check your network"
-        exit
+    if [ ! -d $HOME ]; then
+        mkdir $HOME
     fi
-    cd /home/opentech/open-hackathon
-    echo "pip is installing required python library"
-    result=$(sudo pip install -r open-hackathon-server/requirement.txt)
+    cd $HOME
+    if [! -d "$HOME/open-hackathon" ]; then
+        echo "git cloning open-hackathon source code"
+        result=$(sudo git clone https://github.com/msopentechcn/open-hackathon.git)
+        if grep -q "unable to access" <<< $result; then
+            echo "Could not git clone open-hackathon source code, pls check your network"
+            exit
+        fi
+    fi
 
-    result=$(sudo pip install -r open-hackathon-client/requirement.txt)
+    cd $OHP_HOME
+    git reset --hard
+    git pull
+    echo "pip is installing required python library"
+    result=$(pip install -r open-hackathon-server/requirement.txt)
+
+    result=$(pip install -r open-hackathon-client/requirement.txt)
     cp open-hackathon-server/src/hackathon/config_sample.py open-hackathon-server/src/hackathon/config.py
     cp open-hackathon-server/src/hackathon/config_sample.py open-hackathon-server/src/hackathon/config.py
 }
@@ -88,62 +100,62 @@ function install_mongodb() {
        echo "mongodb is installed"
        return
    fi
-   sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
+   apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
+
+   if $(lsb_release -d | grep -q "12"); then
+        echo "deb http://repo.mongodb.org/apt/ubuntu precise/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
+   fi
    if $(lsb_release -d | grep -q "14"); then
-        echo "deb http://repo.mongodb.com/apt/ubuntu trusty/mongodb-enterprise/3.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-enterprise.list
+        echo "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
    fi
    if $(lsb_release -d | grep -q "Mint"); then
-        echo "deb http://repo.mongodb.com/apt/ubuntu trusty/mongodb-enterprise/3.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-enterprise.list
+        echo "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
    fi
-   if $(lsb_release -d | grep -q "Mint"); then
-        echo "deb http://repo.mongodb.com/apt/ubuntu precise/mongodb-enterprise/3.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-enterprise.list
-   fi
-   echo "deb http://repo.mongodb.com/apt/ubuntu "$(lsb_release -sc)"/mongodb-enterprise/2.6 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-enterprise-2.6.list
-   result=$(sudo apt-get update)
-   echo "installing mongodb-enterprise"
-   result=$(sudo apt-get install -y mongodb-enterprise)
-   echo "installing mongodb-enterprise=3.0.11 mongodb-enterprise-server=3.0.11 mongodb-enterprise-shell=3.0.11 mongodb-enterprise-mongos=3.0.11 mongodb-enterprise-tools=3.0.11"
-   result=$(sudo apt-get install -y mongodb-enterprise=3.0.11 mongodb-enterprise-server=3.0.11 mongodb-enterprise-shell=3.0.11 mongodb-enterprise-mongos=3.0.11 mongodb-enterprise-tools=3.0.11)
+   result=$(apt-get update)
+   echo "installing mongodb-org"
+   result=$(apt-get install -y mongodb-org)
+   echo "installing mongodb-org=3.2.4 mongodb-org-server=3.2.4 mongodb-org-shell=3.2.4 mongodb-org-mongos=3.2.4 mongodb-org-tools=3.2.4"
+   result=$(apt-get install -y mongodb-org=3.2.4 mongodb-org-server=3.2.4 mongodb-org-shell=3.2.4 mongodb-org-mongos=3.2.4 mongodb-org-tools=3.2.4)
    if grep -q "Unable to lacate" <<< $result; then
        echo "Could not install mongodb, pls run this script again or install mongodb manually"
        exit
    fi
-   echo "mongodb-enterprise hold" | sudo dpkg --set-selections
-   echo "mongodb-enterprise-server hold" | sudo dpkg --set-selections
-   echo "mongodb-enterprise-shell hold" | sudo dpkg --set-selections
-   echo "mongodb-enterprise-mongos hold" | sudo dpkg --set-selections
-   echo "mongodb-enterprise-tools hold" | sudo dpkg --set-selections
+   echo "mongodb-org hold" | sudo dpkg --set-selections
+   echo "mongodb-org-server hold" | sudo dpkg --set-selections
+   echo "mongodb-org-shell hold" | sudo dpkg --set-selections
+   echo "mongodb-org-mongos hold" | sudo dpkg --set-selections
+   echo "mongodb-org-tools hold" | sudo dpkg --set-selections
    service mongod start
    cd /home/opentech/ && python open-hackathon-server/src/setup_db.py
 }
 
 function get_dependency_for_guacamole() {
     echo "solve dependency software for guacamole"
-    result=$(sudo service guacd restart)
+    result=$(service guacd restart)
     if grep -q "SUCCESS" <<< $result; then
         echo "guacamole is installed!"
         return
     fi
     echo "installing libcairo2-dev"
-    result=$(sudo apt-get install -y libcairo2-dev)
+    result=$(apt-get install -y libcairo2-dev)
     if grep -q "Unable to lacate" <<< $result; then
         echo "Could not install dependancy software for guacamole, pls install guacamole manually"
         exit
     fi
     echo "installing libjpeg62-dev libpng12-dev libossp-uuid-dev"
-    result=$(sudo apt-get install -y libjpeg62-dev libpng12-dev libossp-uuid-dev)
+    result=$(apt-get install -y libjpeg62-dev libpng12-dev libossp-uuid-dev)
     if grep -q "Unable to lacate" <<< $result; then
         echo "Could not install dependancy software for guacamole, pls install guacamole manually"
         exit
     fi
     echo "installing libfreerdp-dev libpango1.0-dev libssh2-1-dev libtelnet-dev"
-    result=$(sudo apt-get install -y libfreerdp-dev libpango1.0-dev libssh2-1-dev libtelnet-dev)
+    result=$(apt-get install -y libfreerdp-dev libpango1.0-dev libssh2-1-dev libtelnet-dev)
     if grep -q "Unable to lacate" <<< $result; then
         echo "Could not install dependancy software for guacamole, pls install guacamole manually"
         exit
     fi
     echo "installing libvncserver-dev libpulse-dev libwebp-dev libssl-dev libvorbis-dev"
-    result=$(sudo apt-get install -y libvncserver-dev libpulse-dev libwebp-dev libssl-dev libvorbis-dev)
+    result=$(apt-get install -y libvncserver-dev libpulse-dev libwebp-dev libssl-dev libvorbis-dev)
     if grep -q "Unable to lacate" <<< $result; then
         echo "Could not install dependancy software for guacamole, pls install guacamole manually"
         exit
@@ -151,17 +163,19 @@ function get_dependency_for_guacamole() {
 }
 
 function install_and_config_guacamole() {
-    result=$(sudo service guacd restart)
+    result=$(service guacd restart)
     if grep -q "SUCCESS" <<< $result; then
         echo "guacamole is installed!"
         return
     fi
     echo "installing guacamole"
     # install and Configure guacamole
-    cd /home/opentech && rm -f download && rm -rf guacamole-server-0.9.9
-    wget http://sourceforge.net/projects/guacamole/files/current/source/guacamole-server-0.9.9.tar.gz/download
-    rm -rf guacamole-server-0.9.9
-    mv download guacamole-server-0.9.9.tar.gz &&  tar -xzf guacamole-server-0.9.9.tar.gz && cd guacamole-server-0.9.9/
+    cd /home/opentech
+    if [ ! -d "guacamole-server-0.9.9" ]; then
+        wget http://sourceforge.net/projects/guacamole/files/current/source/guacamole-server-0.9.9.tar.gz/download
+        mv download guacamole-server-0.9.9.tar.gz &&  tar -xzf guacamole-server-0.9.9.tar.gz
+    fi
+    cd guacamole-server-0.9.9
     result=$(autoreconf -fi)
     result=$(./configure --with-init-dir=/etc/init.d)
     result=$(make clean)
@@ -169,8 +183,10 @@ function install_and_config_guacamole() {
     result=$(make install)
     ldconfig
     # configure guacamole client
-    wget http://sourceforge.net/projects/guacamole/files/current/binary/guacamole-0.9.9.war/download
-    mv download /var/lib/tomcat7/webapps/guacamole.war
+    if [ ! -f /var/lib/tomcat7/webapps/guacamole.war ] ; then
+        wget http://sourceforge.net/projects/guacamole/files/current/binary/guacamole-0.9.9.war/download
+        mv download /var/lib/tomcat7/webapps/guacamole.war
+    fi
     # configure guacamole authentication provider
     mkdir /usr/share/tomcat7/.guacamole
     mkdir /etc/guacamole
@@ -183,6 +199,7 @@ function install_and_config_guacamole() {
         echo "Fail to install guacamole, please run this script once again!"
         exit
     fi
+    result=$(service tomcat7 restart)
     echo "guacamole installed successfully"
 }
 
@@ -252,10 +269,6 @@ function deploy() {
     mkdir /var/log/open-hackathon
     chmod -R 644 /var/log/open-hackathon
 
-    if ! $(grep -qs "open-hackathon-dev.chinacloudapp.cn" /etc/hosts); then
-        echo "127.0.0.1 open-hackathon-dev.chinacloudapp.cn" >> /etc/hosts
-    fi
-
     # Installing uWSGI
     result=$(pip install uwsgi)
     cp /home/opentech/open-hackathon/open-hackathon-server/src/open-hackathon-server.conf /etc/init/
@@ -269,6 +282,9 @@ function main() {
         echo "like sudo bash setup.sh"
         exit 1
     fi
+    export HOME=/home/opentech
+    export OHP_HOME=$HOME/open-hackathon
+    export GUACAMOLE_VERSION=0.9.9
     echo "It may take a long time to install and configure open-hackathon, please wait a moment^_^, ..."
     echo "安装将花费一定时间，请耐心等待直到安装完成^_^, ..."
     get_dependency_software
@@ -279,6 +295,7 @@ function main() {
     #pre_setup_docker
     #install_and_config_docker
     deploy
+    chown -R $(logname) $HOME
 }
 
 main
