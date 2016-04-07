@@ -571,7 +571,7 @@ class TeamManager(Component):
             awards += team.awards
 
         awards = [self.__award_with_detail(r) for r in awards]
-        awards.sort(lambda a, b: (b.level - a.level) * 10 + int(a.create_time < b.create_time))
+        awards.sort(lambda a, b: b["level"] - a["level"])
 
         return awards
 
@@ -642,6 +642,10 @@ class TeamManager(Component):
         resp["member_count"] = team.members.filter(status=TEAM_MEMBER_STATUS.APPROVED).count()
         # all team action not allowed if frozen
         resp["is_frozen"] = team.hackathon.judge_start_time < self.util.get_now()
+
+        for i in xrange(0, len(team.members)):
+            mem = team.members[i]
+            resp["members"][i]["user"] = self.user_manager.user_display_info(mem.user)
 
         if user:
             resp["is_admin"] = self.admin_manager.is_hackathon_admin(team.hackathon.id, user.id)
