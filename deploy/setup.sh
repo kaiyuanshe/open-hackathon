@@ -264,9 +264,13 @@ deploy() {
 
 
 main() {
+    if [ $(id -u) != "0" ]; then
+        echo "Installation and configuration require sudo, pls enter your password"
+        sudo bash -c "$(declare -f main); main"
+        exit 1
+    fi
     echo "It may take a long time to install and configure open-hackathon, please wait a moment^_^, ..."
     echo "安装将花费一定时间，请耐心等待直到安装完成^_^, ..."
-
     get_dependency_software
     install_mongodb
     set_envirement
