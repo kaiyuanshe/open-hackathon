@@ -641,7 +641,8 @@ class TeamManager(Component):
         resp["leader"] = self.user_manager.user_display_info(team.leader)
         resp["member_count"] = team.members.filter(status=TEAM_MEMBER_STATUS.APPROVED).count()
         # all team action not allowed if frozen
-        resp["is_frozen"] = team.hackathon.judge_start_time < self.util.get_now()
+        resp["is_frozen"] = team.hackathon.judge_start_time > self.util.get_now() or \
+                            team.hackathon.judge_end_time < self.util.get_now()
 
         if user:
             resp["is_admin"] = self.admin_manager.is_hackathon_admin(team.hackathon.id, user.id)

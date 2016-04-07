@@ -468,7 +468,7 @@ angular.module('oh.controllers', [])
       });
     };
   })
-  .controller('adminController', function($rootScope, $scope, activityService, api, dialog) {
+  .controller('adminController', function($rootScope, $scope, $uibModal, activityService, api, dialog) {
     $scope.$emit('pageName', 'SETTINGS.ADMINISTRATORS');
 
     var activity = activityService.getCurrentActivity();
@@ -476,8 +476,15 @@ angular.module('oh.controllers', [])
       admins: [],
       adminsType: [],
       adminsRemark: [],
-      selectedAdmins: []
+      selectedAdmins: [],
+      searchKeyword: "", // search users to create admins
+      searchResult: [],
+      selectedUserId: "", // user selected to create an admin
+      selectedUserCSS: {color: 'red'}, // todo remove this line when CSS done
+      selectedUserRole: 1,
+      selectedUserRemark: ""
     }
+    // 0-no condition, 1-admin, 2-judge
     $scope.filterAdminCondition = 0;
 
     function showTip(level, content, showTime) {
@@ -542,35 +549,81 @@ angular.module('oh.controllers', [])
     }
 
     $scope.deleteAdmins = function() {
-      // todo
-      console.log($scope.data.selectedAdmins);
-      // todo
-      function deleteAnAdmin(admin) {
+      deleteAdminList($scope.data.selectedAdmins, 0);
+
+      // delete admins one by one
+      function deleteAdminList(list, index) {
+        if(index == list.length){
+          pageLoad();
+          return;
+        }
         api.admin.hackathon.administrator.delete({
           header: {hackathon_name: activity.name},
-          query: {id: admin.id}
+          query: {id: list[index]}
         }, function(data) {
           if(data.error)
             showTip('tip-danger', data.error.friendly_message);
-          else{
-            delete $scope.data.adminsType[admin.id];
-            delete $scope.data.adminsRemark[admin.id];
-            var index_admin = $scope.data.admins.indexOf(admin)
-            $scope.data.admins.splice(index_admin, 1)
-            var index_selected_admin = $scope.data.selectedAdmins.indexOf(admin.id)
-            $scope.data.selectedAdmins.splice(index_selected_admin, 1)
-
-            showTip('tip-success', '成功删除管理员: ' + admin.name);
-          }
+          else
+            showTip('tip-success', '成功删除管理员!');
+          deleteAdminList(list, index + 1);
         });
       }
     }
 
     $scope.showSearchBar = function() {
-      dialog.add_admin({
-        title: '增加管理员',
-        size: 'sm'
+      var data = $scope.data;
+
+      $uibModal.open({
+        templateUrl: 'addAdminModel.html',
+        controller: function($scope, $uibModalInstance) {
+          $scope.data = data;
+          $scope.cancel = function() {
+            $uibModalInstance.dismiss('cancel');
+          };
+
+          $scope.searchAdmin = searchAdmin;
+          $scope.selectSearchedUser = selectSearchedUser;
+          $scope.createAdmin = createAdmin;
+        },
       });
+    }
+
+    function searchAdmin() {
+      api.admin.user.list.get({
+        header: {hackathon_name: activity.name},
+        query: {keyword: $scope.data.searchKeyword}
+      }, function(data) {
+        if(data.error)
+          showTip('tip-danger', data.error.friendly_message);
+        else
+          $scope.data.searchResult = data.items;
+      });
+    }
+
+    function selectSearchedUser(user) {
+      $scope.data.selectedUserId = user.id;
+    }
+
+    function createAdmin() {
+      if($scope.data.selectedUserId == "") {
+        showTip('tip-danger', "请选择需要设置成管理员的用户！");
+      } else {
+        api.admin.hackathon.administrator.post({
+          header: {hackathon_name: activity.name},
+          body: {
+            id: $scope.data.selectedUserId,
+            role: $scope.data.selectedUserRole,
+            remark: $scope.data.selectedUserRemark
+          }
+        }, function(data) {
+          if(data.error)
+            showTip('tip-danger', data.error.friendly_message);
+          else{
+            showTip('tip-success', '创建管理员成功');
+            pageLoad();
+          }
+        });
+      }
     }
 
     function pageLoad() {
@@ -582,6 +635,13 @@ angular.module('oh.controllers', [])
         else{
           $scope.data.admins = data;
           $scope.data.adminsType = [];
+          $scope.data.adminsRemark = [];
+          $scope.data.selectedAdmins = [];
+          $scope.data.searchKeyword = "";
+          $scope.data.searchResult = [];
+          $scope.data.selectedUserId = "";
+          $scope.data.selectedUserRole = 1;
+          $scope.data.selectedUserRemark = "";
           for(var index in data) {
             $scope.data.adminsType[data[index].id] = data[index].role.toString();
             $scope.data.adminsRemark[data[index].id] = data[index].remark;
@@ -590,6 +650,7 @@ angular.module('oh.controllers', [])
       })
     }
 
+    // init the page and load admins-list
     pageLoad();
   })
   .controller('organizersController', function($rootScope, $scope, $stateParams, $uibModal, $cookies, activityService, api) {
@@ -610,6 +671,10 @@ angular.module('oh.controllers', [])
         if(data.error){
           $scope.$emit('showTip', { level: 'tip-danger', content: data.error.friendly_message});
         }else{
+           $scope.$emit('showTip', {
+            level: 'tip-success',
+            content: '添加成功'
+          });
           $scope.data = data
         }
       })
@@ -932,24 +997,81 @@ angular.module('oh.controllers', [])
     }
 
   })
-  .controller('monitorController', function($rootScope, $scope, stateParams, activityService, api) {
+  .controller('monitorController', function($rootScope, $scope, $stateParams, activityService, api) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.ENVIRONMENTAL_MONITOR');
-    api.admin.experiment.list.get({
-      query: data,
-      header: {
-        hackathon_name: currentHackathon
-      }
-    }).then(function(data) {
-      if (data.error) {
-        $scope.$emit('showTip', {
-          level: 'tip-danger',
-          content: data.error.friendly_message
-        });
-      } else {
-        $scope.experiment = data;
-      }
-    })
 
+    var activity = activityService.getCurrentActivity();
+    $scope.data = {
+      "experiments": []
+    }
+    // filterCondition -1:all, 2:running, 3:stopped, 5:fail
+    $scope.filterExperimentCondition = -1;
+    $scope.searchKeyword = "";
+
+    $scope.filterExperiments = function(item) {
+      if($scope.filterExperimentCondition == -1)
+        return true;
+      return item.status== $scope.filterExperimentCondition;
+    }
+
+    function showTip(level, content, showTime) {
+      $scope.$emit('showTip', {
+        level: level,
+        content: content,
+        showTime: showTime || 3000
+      });
+    };
+
+    $scope.updateExperiment = function(experiment) {
+      showTip('tip-danger', "暂时不支持更新操作");
+    }
+
+    $scope.deleteExperiment = function(experiment) {
+      showTip('tip-danger', "暂时不支持删除操作");
+    }
+
+    $scope.searchExperiment = function() {
+      if($scope.searchKeyword == "") {
+        pageLoad();
+        return
+      }
+
+      api.admin.experiment.list.get({
+        header: {
+          hackathon_name: activity.name
+        },
+        query: {
+          user_name: $scope.searchKeyword
+        }
+      }).then(function(data) {
+        if (data.error) {
+          showTip('tip-danger', data.error.friendly_message);
+        } else {
+          if(data.length == 0)
+            showTip('tip-danger', "未找到满足要求的结果");
+          $scope.data.experiments = data;
+          $scope.filterExperimentCondition = -1;
+        }
+      })
+    }
+
+    function pageLoad() {
+      api.admin.experiment.list.get({
+        header: {
+          hackathon_name: activity.name
+        }
+      }).then(function(data) {
+        if (data.error) {
+          showTip('tip-danger', data.error.friendly_message);
+        } else {
+          $scope.data.experiments = data;
+          $scope.filterExperimentCondition = -1;
+          $scope.searchKeyword = ""
+        }
+      })
+    }
+
+    pageLoad();
   })
   .controller('cloudController', function($rootScope, $scope, activityService, api) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.CLOUD_RESOURCES');
