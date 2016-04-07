@@ -91,7 +91,7 @@ class UserProfile(DynamicEmbeddedDocument):
     gender = IntField()  # 0:women 1:man
     notes = StringField()  # a short activity or mood
     phone = StringField(max_length=20)
-    qq = StringField(regex="\d+")
+    qq = StringField()
     real_name = StringField(max_length=80)
     self_introduction = StringField()
     skype = StringField()
@@ -175,7 +175,7 @@ class Award(EmbeddedDocument):
     description = StringField(required=True)
     level = IntField(min_value=0, max_value=10)  # 0-10
     quota = IntField(min_value=1, default=1, required=True)
-    award_url = URLField()
+    award_url = StringField()
 
 
 class AzureKey(HDocumentBase):
@@ -232,7 +232,7 @@ class UserHackathon(HDocumentBase):
     role = IntField(default=HACK_USER_TYPE.COMPETITOR)  # 0-visitor 1-admin 2-judge 3-competitor
     status = IntField()  # 0-not approved user 1-approved user 2-refused user 3-auto approved user
     like = BooleanField(default=True)
-    assets = ListField(DictField(default={}))  # assets for user
+    assets = DictField(default={}) # assets for user
     remark = StringField()
     deleted = BooleanField(default=False)
 
@@ -263,7 +263,7 @@ class TeamWork(EmbeddedDocument):
     id = UUIDField(required=True)
     description = StringField()
     type = IntField(required=True)
-    uri = URLField()
+    uri = StringField()
     create_time = DateTimeField(default=get_now())
 
 
@@ -284,7 +284,7 @@ class TeamMember(EmbeddedDocument):
 class Team(HDocumentBase):
     name = StringField(required=True)
     description = StringField()
-    logo = URLField()
+    logo = StringField()
     leader = ReferenceField(User)
     hackathon = ReferenceField(Hackathon)
     works = EmbeddedDocumentListField(TeamWork)
@@ -323,9 +323,9 @@ class PortBinding(DynamicEmbeddedDocument):
     # container again. And the number of port should be enough since we won't have too many containers on the same VM.
     name = StringField()
     is_public = BooleanField()
-    public_port = IntField(min_value=1, max_value=65535)  # port that are public accessible
-    host_port = IntField(min_value=1, max_value=65535)  # port on hosted VM
-    container_port = IntField(min_value=1, max_value=65535)  # port inside docker container
+    public_port = IntField()  # port that are public accessible
+    host_port = IntField()  # port on hosted VM
+    container_port = IntField()  # port inside docker container
     url = StringField()  # public url pattern for display where host and port should be replaced
 
 
