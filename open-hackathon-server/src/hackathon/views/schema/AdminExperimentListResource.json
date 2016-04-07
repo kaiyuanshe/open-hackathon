@@ -1,0 +1,24 @@
+{
+  "AdminExperimentListResource": {
+    "get": {
+      "input": {
+        "description": "get the list of experiments",
+        "type": "object",
+        "properties": {
+          "user_name": {
+            "description": "user_name of experiments",
+            "type": "string",
+            "required": false
+          },
+          "status": {
+            "description": "status of experiments",
+            "type": "integer",
+            "enum": [0, 1, 2, 3, 5, 6, 7, 8],
+            "required": false
+          }
+        }
+      }
+    },
+    }
+  }
+}
