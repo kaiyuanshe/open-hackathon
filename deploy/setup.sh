@@ -74,7 +74,7 @@ function set_envirement() {
         mkdir $HOME
     fi
     cd $HOME
-    if [ ! -d "$HOME/open-hackathon" ]; then
+    if [ ! -d "$OHP_HOME" ]; then
         echo "git cloning open-hackathon source code"
         result=$(git clone https://github.com/msopentechcn/open-hackathon.git)
         if grep -q "unable to access" <<< $result; then
@@ -126,7 +126,7 @@ function install_mongodb() {
    echo "mongodb-org-mongos hold" | sudo dpkg --set-selections
    echo "mongodb-org-tools hold" | sudo dpkg --set-selections
    service mongod start
-   cd /home/opentech/ && python open-hackathon-server/src/setup_db.py
+   cd $OHP_HOME && python open-hackathon-server/src/setup_db.py
 }
 
 function get_dependency_for_guacamole() {
@@ -170,7 +170,7 @@ function install_and_config_guacamole() {
     fi
     echo "installing guacamole"
     # install and Configure guacamole
-    cd /home/opentech
+    cd $OHP_HOME
     if [ ! -d "guacamole-server-$GUACAMOLE_VERSION" ]; then
         wget http://sourceforge.net/projects/guacamole/files/current/source/guacamole-server-$GUACAMOLE_VERSION.tar.gz/download
         mv download guacamole-server-$GUACAMOLE_VERSION.tar.gz &&  tar -xzf guacamole-server-$GUACAMOLE_VERSION.tar.gz
@@ -206,41 +206,41 @@ function install_and_config_guacamole() {
 
 function install_and_config_docker() {
     # install docker
-    result=$(sudo apt-get update)
+    result=$(apt-get update)
     if grep -q "Could not resolve" <<< $result; then
         echo "Could not update apt-get, please solve it"
         exit
     fi
-    result=$(sudo apt-get install apt-transport-https ca-certificates)
+    result=$(apt-get install apt-transport-https ca-certificates)
     if grep -q "Unable to lacate" <<< $result; then
         echo "Could not install dependancy software for docker, pls install docker manually"
         exit
     fi
 
-    result=$(sudo apt-get update)
+    result=$(apt-get update)
     if grep -q "Could not resolve" <<< $result; then
         echo "Could not update apt-get, please solve it"
         exit
     fi
-    result=$(sudo apt-get purge lxc-docker)
+    result=$(apt-get purge lxc-docker)
     if grep -q "Unable to lacate" <<< $result; then
         echo "Could not install docker, pls install docker manually"
         exit
     fi
-    result=$(sudo apt-cache policy docker-engine)
+    result=$(apt-cache policy docker-engine)
     # for ubuntu 15
-    result=$(sudo apt-get install -y linux-image-extra-$(uname -r))
+    result=$(apt-get install -y linux-image-extra-$(uname -r))
     if grep -q "Unable to lacate" <<< $result; then
         echo "Could not install linux-image-extra-$(uname -r)"
         exit
     fi
     # for ubuntu 12 & 14
-    result=$(sudo apt-get install -y apparmor)
+    result=$(apt-get install -y apparmor)
     if grep -q "Unable to lacate" <<< $result; then
         echo "Could not install apparmor"
         exit
     fi
-    result=$(sudo apt-get install -y docker-engine)
+    result=$(apt-get install -y docker-engine)
     if grep -q "Unable to lacate" <<< $result; then
         echo "Could not install apparmor"
         exit
@@ -255,7 +255,7 @@ function install_and_config_docker() {
     gpasswd -a ${USER} docker
 
     docker pull rastasheep/ubuntu-sshd
-    result=$(sudo docker run hello-world)
+    result=$(docker run hello-world)
     if ! (grep -q "Hello from Docker" <<< $result); then
         echo "Install docker failed, please run this script again or install docker manually."
         exit
