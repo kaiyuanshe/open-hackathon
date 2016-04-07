@@ -97,4 +97,30 @@ angular.module('oh.filters', [])
         default: return '';
       }
     }
+  }).filter('joinVMs', function() {
+    return function(list, filler) {
+      filler = filler || ',';
+      vmList = []
+      if (list) {
+        for(var index in list)
+          if("name" in list[index])
+            vmList.push(list[index].name);
+        return vmList.join(filler);
+      }
+      return '';
+    }
+  }).filter('exprStatus', function($translate){
+    return function(type) {
+      switch(type) {
+        case 0: return $translate.instant('EXPERIMENT_STATUS.INIT');
+        case 1: return $translate.instant('EXPERIMENT_STATUS.STARTING');
+        case 2: return $translate.instant('EXPERIMENT_STATUS.RUNNING');
+        case 3: return $translate.instant('EXPERIMENT_STATUS.STOPPED');
+        case 5: return $translate.instant('EXPERIMENT_STATUS.FAILED');
+        case 6: return $translate.instant('EXPERIMENT_STATUS.ROLL_BACKING');
+        case 7: return $translate.instant('EXPERIMENT_STATUS.ROLL_BACKED');
+        case 8: return $translate.instant('EXPERIMENT_STATUS.UNEXPCTED_ERROR');
+        default: return '';
+      }
+    }
   });
