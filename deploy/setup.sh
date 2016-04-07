@@ -265,8 +265,8 @@ function deploy() {
 
 function main() {
     if [ $(id -u) != "0" ]; then
-        echo "Installation and configuration require sudo, pls enter your password"
-        sudo bash -c "$(declare -f main); main"
+        echo "Please run this script with sudo"
+        echo "like sudo bash setup.sh"
         exit 1
     fi
     echo "It may take a long time to install and configure open-hackathon, please wait a moment^_^, ..."
