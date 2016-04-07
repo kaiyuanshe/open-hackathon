@@ -22,7 +22,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 BLOCK
-pre_setup_docker() {
+function pre_setup_docker() {
     #for ubuntu 14
     if $(lsb_release -d | grep -q "14"); then
         echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" | tee /etc/apt/sources.list.d/docker.list
@@ -41,7 +41,7 @@ pre_setup_docker() {
     apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
 }
 
-get_dependency_software() {
+function get_dependency_software() {
     echo "updating apt-get......"
     result=$(sudo apt-get update)
     if grep -q "Could not resolve" <<< $result; then
@@ -62,7 +62,7 @@ get_dependency_software() {
     fi
 }
 
-set_envirement() {
+function set_envirement() {
     echo "git clone source code from Github, and solve python dependency"
     cd /home &&  rm -rf opentech
     mkdir opentech && cd opentech
@@ -82,7 +82,7 @@ set_envirement() {
     cp open-hackathon-server/src/hackathon/config_sample.py open-hackathon-server/src/hackathon/config.py
 }
 
-install_mongodb() {
+function install_mongodb() {
    result=$(sudo service mongod status)
    if ! $(grep "unrecognized service" <<< $result); then
        echo "mongodb is installed"
@@ -117,7 +117,7 @@ install_mongodb() {
    cd /home/opentech/ && python open-hackathon-server/src/setup_db.py
 }
 
-get_dependency_for_guacamole() {
+function get_dependency_for_guacamole() {
     echo "solve dependency software for guacamole"
     result=$(sudo service guacd restart)
     if grep -q "SUCCESS" <<< $result; then
@@ -150,7 +150,7 @@ get_dependency_for_guacamole() {
     fi
 }
 
-install_and_config_guacamole() {
+function install_and_config_guacamole() {
     result=$(sudo service guacd restart)
     if grep -q "SUCCESS" <<< $result; then
         echo "guacamole is installed!"
@@ -187,7 +187,7 @@ install_and_config_guacamole() {
 }
 
 
-install_and_config_docker() {
+function install_and_config_docker() {
     # install docker
     result=$(sudo apt-get update)
     if grep -q "Could not resolve" <<< $result; then
@@ -247,7 +247,7 @@ install_and_config_docker() {
 }
 
 
-deploy() {
+function deploy() {
     # Logging && Hosts
     mkdir /var/log/open-hackathon
     chmod -R 644 /var/log/open-hackathon
@@ -263,7 +263,7 @@ deploy() {
 }
 
 
-main() {
+function main() {
     if [ $(id -u) != "0" ]; then
         echo "Installation and configuration require sudo, pls enter your password"
         sudo bash -c "$(declare -f main); main"
