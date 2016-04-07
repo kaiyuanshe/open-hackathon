@@ -71,10 +71,10 @@ class AdminManager(Component):
 
         if not user.is_super:
             hack_list = UserHackathon.objects(user=user, role=HACK_USER_TYPE.ADMIN).distinct("hackathon")
+            hack_list.sort(key=lambda s: s.create_time, reverse=True)
         else:
-            hack_list = Hackathon.objects().all()
+            hack_list = Hackathon.objects().all().order_by("-create_time")
 
-        hack_list.sort(key=lambda s: s.create_time, reverse=True)
         all_hackathon = [h.dic() for h in hack_list]
         return all_hackathon
 
