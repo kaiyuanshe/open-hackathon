@@ -110,10 +110,12 @@ class ExprManager(Component):
             self.db.commit()
             self.template_library.template_verified(experiment.template.id)
 
-    def get_expr_list_by_hackathon_id(self, hackathon_id, **kwargs):
+    def get_expr_list_by_hackathon_id(self, hackathon_id, user_name, status):
         # get a list of all experiments' detail
-        condition = self.__get_filter_condition(hackathon_id, **kwargs)
-        experiments = self.db.find_all_objects(Experiment, condition)
+        experiments = Experiment.objects(status=status).all() if status else Experiment.objects().all()
+
+        if user_name and not user_name == "":
+            experiments = [experiment for experiment in experiments if experiment.user.name == user_name]
         return [self.__get_expr_with_detail(experiment) for experiment in experiments]
 
     def scheduler_recycle_expr(self):
@@ -380,18 +382,6 @@ class ExprManager(Component):
         # replace OjbectId with user info
         info['user'] = self.user_manager.user_display_info(experiment.user)
         return info
-
-    def __get_filter_condition(self, hackathon_id, **kwargs):
-        condition = Experiment.hackathon_id == hackathon_id
-        # check status: -1 means query all status
-        if kwargs['status'] != -1:
-            condition = and_(condition, Experiment.status == kwargs['status'])
-        # check user name
-        if len(kwargs['user_name']) > 0:
-            users = self.db.find_all_objects(User, User.nickname.like('%' + kwargs['user_name'] + '%'))
-            uids = map(lambda x: x.id, users)
-            condition = and_(condition, Experiment.user_id.in_(uids))
-        return condition
 
     def __recycle_expr(self, expr):
         """recycle expr

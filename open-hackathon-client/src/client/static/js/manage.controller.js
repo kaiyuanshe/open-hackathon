@@ -997,24 +997,81 @@ angular.module('oh.controllers', [])
     }
 
   })
-  .controller('monitorController', function($rootScope, $scope, stateParams, activityService, api) {
+  .controller('monitorController', function($rootScope, $scope, $stateParams, activityService, api) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.ENVIRONMENTAL_MONITOR');
-    api.admin.experiment.list.get({
-      query: data,
-      header: {
-        hackathon_name: currentHackathon
-      }
-    }).then(function(data) {
-      if (data.error) {
-        $scope.$emit('showTip', {
-          level: 'tip-danger',
-          content: data.error.friendly_message
-        });
-      } else {
-        $scope.experiment = data;
-      }
-    })
 
+    var activity = activityService.getCurrentActivity();
+    $scope.data = {
+      "experiments": []
+    }
+    // filterCondition -1:all, 2:running, 3:stopped, 5:fail
+    $scope.filterExperimentCondition = -1;
+    $scope.searchKeyword = "";
+
+    $scope.filterExperiments = function(item) {
+      if($scope.filterExperimentCondition == -1)
+        return true;
+      return item.status== $scope.filterExperimentCondition;
+    }
+
+    function showTip(level, content, showTime) {
+      $scope.$emit('showTip', {
+        level: level,
+        content: content,
+        showTime: showTime || 3000
+      });
+    };
+
+    $scope.updateExperiment = function(experiment) {
+      showTip('tip-danger', "暂时不支持更新操作");
+    }
+
+    $scope.deleteExperiment = function(experiment) {
+      showTip('tip-danger', "暂时不支持删除操作");
+    }
+
+    $scope.searchExperiment = function() {
+      if($scope.searchKeyword == "") {
+        pageLoad();
+        return
+      }
+
+      api.admin.experiment.list.get({
+        header: {
+          hackathon_name: activity.name
+        },
+        query: {
+          user_name: $scope.searchKeyword
+        }
+      }).then(function(data) {
+        if (data.error) {
+          showTip('tip-danger', data.error.friendly_message);
+        } else {
+          if(data.length == 0)
+            showTip('tip-danger', "未找到满足要求的结果");
+          $scope.data.experiments = data;
+          $scope.filterExperimentCondition = -1;
+        }
+      })
+    }
+
+    function pageLoad() {
+      api.admin.experiment.list.get({
+        header: {
+          hackathon_name: activity.name
+        }
+      }).then(function(data) {
+        if (data.error) {
+          showTip('tip-danger', data.error.friendly_message);
+        } else {
+          $scope.data.experiments = data;
+          $scope.filterExperimentCondition = -1;
+          $scope.searchKeyword = ""
+        }
+      })
+    }
+
+    pageLoad();
   })
   .controller('cloudController', function($rootScope, $scope, activityService, api) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.CLOUD_RESOURCES');

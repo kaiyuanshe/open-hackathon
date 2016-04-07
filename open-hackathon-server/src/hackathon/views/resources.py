@@ -578,13 +578,9 @@ class AdminExperimentResource(HackathonResource):
 class AdminExperimentListResource(HackathonResource):
     @admin_privilege_required
     def get(self):
-        parse = reqparse.RequestParser()
-        parse.add_argument('user_name', type=str, location='args')
-        parse.add_argument('status', type=int, location='args')
-        args = parse.parse_args()
         return expr_manager.get_expr_list_by_hackathon_id(g.hackathon.id,
-                                                          user_name=args['user_name'],
-                                                          status=args['status'])
+            self.context().user_name if "user_name" in self.context() else None,
+            self.context().status if "status" in self.context() else None)
 
 
 class AdminHackathonFileResource(HackathonResource):
