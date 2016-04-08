@@ -911,14 +911,11 @@ angular.module('oh.controllers', [])
           };
 
           $scope.addAward = function() {
-            createAward()
+            createAward();
             $uibModalInstance.close();
           };
         },  // end controller
-      })
-
-      // handel create
-      .result.then(createAward);
+      });
     };
 
     $scope.delete = function(id) {
