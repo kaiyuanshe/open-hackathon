@@ -5,415 +5,43 @@
 {% endblock %}
 
 {% block content %}
-    <div class="team-banner">
-        <div class="container">
-            <div class="air oh-team-edit">
-                {% if team.is_admin == False and team.is_leader == False %}
-                    {% if team.is_member and not team.is_frozen %}
-                        <a href="javascript:void(0);" class="btn oh-white-text bg-color-pinkDark btn-lg"
-                           data-role="leave">
-                            <i class="fa fa-unlink"></i> 离队</a>
-                    {% elif team.is_admin == False and not team.is_frozen %}
-                        <a href="javascript:void(0);"
-                           class="btn oh-white-text bg-color-pinkDark btn-lg" data-role="join"><i
-                                class="fa fa-link"></i> 加入</a>
-                    {% endif %}
-                {% elif team.is_leader and not team.is_frozen %}
-                    <a href="javascript:void(0)" class="btn oh-white-text bg-color-pinkDark btn-lg" data-role="disband">
-                        <i class="fa fa-bomb"></i> 解散</a>
-                    <a href="javascript:void(0);"
-                       class="btn oh-white-text bg-color-pinkDark btn-lg" data-role="edit">
-                        <i class="fa fa-edit"></i> 编辑</a>
-                    <a href="javascript:void(0);"
-                       class="btn oh-white-text bg-color-pinkDark btn-lg hide" data-role="save">
-                        <i class="fa fa-save"></i> 保存</a>
-                {% elif team.is_admin %}
-                    <a href="/manage/{{ hackathon_name }}/team/{{ team.id }}"
-                       class="btn oh-white-text bg-color-pinkDark btn-lg" target="manage">
-                        <i class="fa fa-gears"></i> 管理</a>
-                {% endif %}
-            </div>
-            <div class="air air-top-left oh-nav">
-                <a href="{{ url_for('hackathon', hackathon_name=hackathon_name) }}">{{ hackathon_name }}</a> &gt; <span
-                    data-role="team_name">{{ team.name }}</span>
-            </div>
-            <div class="oh-team-header">
-                <div class="oh-team-logo">
-                    <div class="oh-logo-warp">
-                        <img id="team_logo" src="{{ team.logo == None and '/static/pic/team-logo.png' or team.logo }}"
-                             onerror="javascript:this.src='/static/pic/team-logo.png'">
-                        {% if team.is_leader %}
-                            <a href="javascript:;" class="edit" data-role="logo-edit">更新Logo</a>
-                        {% endif %}
-                    </div>
-                </div>
-                <h1 class="title" id="team_name"> {{ team.name }}  </h1>
-
-                <div class="description" id="team_description">{{ team.description }}</div>
-            </div>
-        </div>
-    </div>
-    <div class="" data-tid="{{ team.id }}" data-role="{{ role }}" data-lid="{{ team.leader.id }}"
+    <div class="oh-main team" data-tid="{{ team.id }}" data-role="{{ role }}" data-lid="{{ team.leader.id }}"
          data-uid="{{ current_user.id }}">
-        <div id="team_info " class="container">
-            <div class="row">
-                <div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 team-pic">
 
-
-                </div>
-
-            </div>
+        <div class="container ">
+            <ul class="breadcrumbs">
+                <li>当前黑客松： <a
+                        href="{{ url_for('hackathon', hackathon_name=hackathon_name) }}">{{ hackathon_name }}</a>
+                </li>
+                <li> {{ team.name }}</li>
+            </ul>
         </div>
-        <div id="team_member">
-            <div class="container team-box">
-                <div class="oh-header clearfix">
-                    <h2>团队成员 <span>（0）</span></h2>
+
+        <div class="container ">
+            <div class="team-left">
+                <div class="warp">
                 </div>
-                <div class="oh-users" id="talent_list">
-                </div>
-            </div>
-        </div>
-    </div>
-    <div id="team_works">
-        <div class="container team-box">
-            <div class="oh-header clearfix">
-                <h2 class="">团队作品 <span>(0)</span></h2>
-            </div>
-            <div class="works" id="works">
-                <div class="works_video" id="works_video">
-                    <div class="addshow">
-                        <span>视频展示</span>
-                        {% if team.is_leader and not team.is_frozen %}
-                            <a href="javascript:" data-role="addVideo"><i class="fa fa-plus"></i></a>
-                        {% endif %}
+                <div class="warp">
+                    <div class="team-desc">
+                        <h5 class="title">团队简介</h5>
+                        <p>{{ team.description }}</p>
                     </div>
+                </div>
+                <div class="warp">
+                    <div class="oh-users" id="talent_list">
+                    </div>
+                </div>
+            </div>
 
+            <div class="team-right">
+                <div class="warp">
                 </div>
-            </div>
-            <div class="works_img" id="works_img">
-                <div class="addshow">
-                    <span>图片展示</span>
-                    {% if team.is_leader and not team.is_frozen %}
-                        <a href="javascript:" data-role="addImg"><i class="fa fa-plus"></i></a>
-                    {% endif %}
-                </div>
-            </div>
-            <div class="works_doc" id="works_doc">
-                <div class="addshow">
-                    <span>文档说明</span>
-                    {% if team.is_leader and not team.is_frozen %}
-                        <a href="javascript:" data-role="addDoc"><i class="fa fa-plus"></i></a>
-                    {% endif %}
-                </div>
-            </div>
-            <div>
-                <div class="addshow">
-                    <span>源代码地址</span>
-                    {% if team.is_leader and not team.is_frozen %}
-                        <a href="javascript:" data-role="addCode"><i class="fa fa-plus"></i></a>
-                    {% endif %}
-                </div>
-                <ul class="works_code" id="works_code"></ul>
-            </div>
-            <div>
-                <div class="addshow">
-                    <span>其他展示</span>
-                    {% if team.is_leader and not team.is_frozen %}
-                        <a href="javascript:" data-role="addOther"><i class="fa fa-plus"></i></a>
-                    {% endif %}
-                </div>
-                <ul class="works_other" id="works_other"></ul>
             </div>
         </div>
     </div>
-
-    {% if team.is_admin %}
-        <div id="referee">
-            <div class="container team-box">
-                <div class="oh-header clearfix">
-                    <h2>裁判评分</h2>
-                </div>
-                <form id="score_form" method="post" novalidate class="hide">
-                    <fieldset>
-                        <div class="form-group rating">
-                            <div class="oh-inline-block">
-                                <input type="radio" name="trophies-rating" value="10" id="trophies-10">
-                                <label for="trophies-10"><i class="fa fa-trophy"></i></label>
-                                <input type="radio" name="trophies-rating" value="9" id="trophies-9">
-                                <label for="trophies-9"><i class="fa fa-trophy"></i></label>
-                                <input type="radio" name="trophies-rating" value="8" id="trophies-8">
-                                <label for="trophies-8"><i class="fa fa-trophy"></i></label>
-                                <input type="radio" name="trophies-rating" value="7" id="trophies-7">
-                                <label for="trophies-7"><i class="fa fa-trophy"></i></label>
-                                <input type="radio" name="trophies-rating" value="6" id="trophies-6">
-                                <label for="trophies-6"><i class="fa fa-trophy"></i></label>
-                                <input type="radio" name="trophies-rating" value="5" id="trophies-5">
-                                <label for="trophies-5"><i class="fa fa-trophy"></i></label>
-                                <input type="radio" name="trophies-rating" value="4" id="trophies-4">
-                                <label for="trophies-4"><i class="fa fa-trophy"></i></label>
-                                <input type="radio" name="trophies-rating" value="3" id="trophies-3">
-                                <label for="trophies-3"><i class="fa fa-trophy"></i></label>
-                                <input type="radio" name="trophies-rating" value="2" id="trophies-2">
-                                <label for="trophies-2"><i class="fa fa-trophy"></i></label>
-                                <input type="radio" name="trophies-rating" value="1" id="trophies-1">
-                                <label for="trophies-1"><i class="fa fa-trophy"></i></label>
-                                评分：
-                            </div>
-                        </div>
-                        <div class="form-group">
-                        <textarea class="form-control" id="comment" name="comment" rows="4" maxlength="200"
-                                  data-bv-stringlength="true"
-                                  placeholder="写下您的感想呗！"></textarea>
-                        </div>
-                    </fieldset>
-                    <fieldset class="text-right">
-                        <button type="submit" class="btn btn-primary">提交</button>
-                    </fieldset>
-                </form>
-                <ul id="score_list" class="list-unstyled"></ul>
-            </div>
-        </div>
-    {% endif %}
 {% endblock %}
 
 {% block script %}
-    {% if team.is_leader %}
-        <div class="modal fade" id="teamLogoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-            <div class="modal-dialog" role="document">
-                <form id="editLogoForm" class="form-horizontal" novalidate>
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                                    aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title" id="myModalLabel">修改团队Logo</h4>
-                        </div>
-                        <div class="modal-body">
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label required">图片路径</label>
-
-                                <div class="col-sm-9">
-                                    <input type="url" class="form-control" id="logo" name="logo" placeholder="图片路径"
-                                           required
-                                           data-bv-trigger="blur"
-                                           data-bv-message="请填写正确的图片访问路径"
-                                           data-bv-notempty-message="请填图片路径">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="submit" class="btn btn-primary">确定</button>
-                            <button type="button" class="btn btn-warning" data-dismiss="modal">取消</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-        <div class="modal fade" id="works_videoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-            <div class="modal-dialog" role="document">
-                <form id="addWorkVideoForm" class="form-horizontal" novalidate>
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                                    aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title" id="myModalLabel">发布视频</h4>
-                        </div>
-                        <div class="modal-body">
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label required">描述</label>
-
-                                <div class="col-sm-9">
-                                    <input type="text" class="form-control" name="note" maxlength="80"
-                                           placeholder="描述信息">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label required">视频地址</label>
-
-                                <div class="col-sm-9">
-                                    <textarea type="text" class="form-control" name="work_video"
-                                              placeholder="<embed src='http://player.youku.com/......"
-                                              data-bv-trigger="blur"
-                                              data-bv-notempty-message="请填嵌入视频代码"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="submit" class="btn btn-primary">确定</button>
-                            <button type="button" class="btn btn-warning" data-dismiss="modal">取消</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-        <div class="modal fade" id="works_imgModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-            <div class="modal-dialog" role="document">
-                <form id="addWorkImgForm" class="form-horizontal" novalidate>
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                                    aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title" id="myModalLabel2">发布图片</h4>
-                        </div>
-                        <div class="modal-body">
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label required">描述</label>
-
-                                <div class="col-sm-9">
-                                    <input type="text" class="form-control" name="note" maxlength="80"
-                                           placeholder="描述信息">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label required">图片路径</label>
-
-                                <div class="col-sm-9">
-                                    <input type="url" class="form-control" name="work_img"
-                                           placeholder="http://"
-                                           required
-                                           data-bv-trigger="blur"
-                                           data-bv-message="请填写正确的图片访问路径"
-                                           data-bv-notempty-message="请填图片路径">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="submit" class="btn btn-primary">确定</button>
-                            <button type="button" class="btn btn-warning" data-dismiss="modal">取消</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-        <div class="modal fade" id="works_docModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-            <div class="modal-dialog" role="document">
-                <form id="addWorkDocForm" class="form-horizontal" novalidate>
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                                    aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title" id="myDocLabel">发布文档</h4>
-                        </div>
-                        <div class="modal-body">
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label required">类型</label>
-
-                                <div class="col-sm-9">
-                                    <select class="form-control" name="type">
-                                        <option value="3">PowerPoint</option>
-                                        <option value="5">Word</option>
-                                        <option value="4">Excel</option>
-                                        <option value="6">PDF</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label required">描述</label>
-
-                                <div class="col-sm-9">
-                                    <input type="text" class="form-control" name="note" maxlength="80"
-                                           placeholder="描述信息">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label required">文档路径</label>
-
-                                <div class="col-sm-9">
-                                    <input type="url" class="form-control" name="work_doc"
-                                           placeholder="http://"
-                                           required
-                                           data-bv-trigger="blur"
-                                           data-bv-message="请填写正确的文档访问路径"
-                                           data-bv-notempty-message="请填文档路径">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="submit" class="btn btn-primary">确定</button>
-                            <button type="button" class="btn btn-warning" data-dismiss="modal">取消</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-        <div class="modal fade" id="works_otherModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-            <div class="modal-dialog" role="document">
-                <form id="addWorkOtherForm" class="form-horizontal" novalidate>
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                                    aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title" id="myModalLabel">发布其他作品</h4>
-                        </div>
-                        <div class="modal-body">
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label required">描述</label>
-
-                                <div class="col-sm-9">
-                                    <input type="text" class="form-control" name="note" maxlength="80"
-                                           placeholder="描述信息">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label required">作品路径</label>
-
-                                <div class="col-sm-9">
-                                    <input type="url" class="form-control" name="work_other"
-                                           placeholder="http://"
-                                           required
-                                           data-bv-trigger="blur"
-                                           data-bv-message="请填写正确的访问路径"
-                                           data-bv-notempty-message="请填路径">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="submit" class="btn btn-primary">确定</button>
-                            <button type="button" class="btn btn-warning" data-dismiss="modal">取消</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-        <div class="modal fade" id="works_codeModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-            <div class="modal-dialog" role="document">
-                <form id="addWorkCodeForm" class="form-horizontal" novalidate>
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                                    aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title" id="myModalLabel">发布其他作品</h4>
-                        </div>
-                        <div class="modal-body">
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label required">描述</label>
-
-                                <div class="col-sm-9">
-                                    <input type="text" class="form-control" name="note" maxlength="80"
-                                           placeholder="描述信息">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label required">项目地址</label>
-
-                                <div class="col-sm-9">
-                                    <input type="url" class="form-control" name="work_code"
-                                           placeholder="https://github.com/......"
-                                           data-bv-trigger="blur"
-                                           data-bv-message="请填写正确的项目地址"
-                                           data-bv-notempty-message="请填项目地址">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="submit" class="btn btn-primary">确定</button>
-                            <button type="button" class="btn btn-warning" data-dismiss="modal">取消</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    {% endif %}
-
     {% if team.is_leader and not team.is_frozen %}
         <script id="team_item" type="text/x-jquery-tmpl">
             {% raw %}
@@ -445,6 +73,7 @@
                 </div>
             </div>
             {% endraw %}
+
         </script>
     {% else %}
         <script id="team_item" type="text/x-jquery-tmpl">
@@ -467,169 +96,9 @@
                 </div>
             </div>
             {% endraw %}
+
         </script>
     {% endif %}
-    <script id="show_item" type="text/x-jquery-tmpl">
-    {% if team.is_leader and not team.is_frozen %}
-        {% raw %}
-            {{if type == 0 }}
-                <div class="row work_item show_item">
-                     <div class="col-md-3 col-md-push-9">
-                          <div class="delete"><a href="javascript:;" data-role="delete-show" title="删除"><i class="fa fa-trash-o"></i></a></div>
-                          ${note}
-                     </div>
-                     <div class="col-md-9 col-md-pull-3">
-
-                         <img src="${uri} " alt="${note}" class="oh-thumbnail">
-                     </div>
-                </div>
-            {{else type == 1}}
-                <div class="row work_item show_item">
-                    <div class="col-md-3 col-md-push-9">
-                         <div class="delete"><a href="javascript:;" data-role="delete-show" title="删除"><i class="fa fa-trash-o"></i></a></div>
-                          ${note}
-                    </div>
-                    <div class="col-md-9 col-md-pull-3 iframe">
-                        {{html uri}}
-                    </div>
-                </div>
-            {{else type==2}}
-                <li class="work_item"><span>${note}:</span><a href="${uri}" target="_blank">${uri}</a> <div class="delete"><a href="javascript:;" data-role="delete-show"><i class="fa fa-trash-o"></i></a></div></li>
-            {{else type==3}}
-                <div class="row work_item show_item">
-                    <div class="col-md-3 col-md-push-9">
-                        <div class="delete"><a href="javascript:;" data-role="delete-show" title="删除"><i class="fa fa-trash-o"></i></a></div>
-                        ${note}
-                    </div>
-                    <div class="col-md-9 col-md-pull-3 iframe">
-                        <iframe src="${uri}" seamless="seamless" frameborder="0" scrolling="yes"></iframe>
-                    </div>
-                </div>
-            {{else type==4}}
-                <div class="row work_item show_item">
-                    <div class="col-md-3 col-md-push-9">
-                        <div class="delete"><a href="javascript:;" data-role="delete-show" title="删除"><i class="fa fa-trash-o"></i></a></div>
-                        ${note}
-                    </div>
-                    <div class="col-md-9 col-md-pull-3 iframe">
-                        <iframe src="${uri}" seamless="seamless" frameborder="0" scrolling="yes"></iframe>
-                    </div>
-                </div>
-            {{else type==5}}
-                <div class="row work_item show_item">
-                    <div class="col-md-3 col-md-push-9">
-                        <div class="delete"><a href="javascript:;" data-role="delete-show" title="删除"><i class="fa fa-trash-o"></i></a></div>
-                        ${note}
-                    </div>
-                    <div class="col-md-9 col-md-pull-3 iframe">
-                        <iframe src="${uri}" seamless="seamless" frameborder="0" scrolling="yes"></iframe>
-                    </div>
-                </div>
-            {{else type == 6}}
-                <div class="row work_item show_item">
-                    <div class="col-md-3 col-md-push-9">
-                        <div class="delete"><a href="javascript:;" data-role="delete-show" title="删除"><i class="fa fa-trash-o"></i></a></div>
-                        ${note}
-                    </div>
-                    <div class="col-md-9 col-md-pull-3 pdf">
-                        <object data="${uri}" type="application/pdf" width="100%" height="100%">
-                            <p>Your browser doesn't support PDF viewing. Please install PDF viewer plugin!</p>
-                        </object>
-                    </div>
-                </div>
-            {{else}}
-                <li class="work_item"><a href="${uri}" target="_blank">${note}</a> <div class="delete"><a href="javascript:;" data-role="delete-show"><i class="fa fa-trash-o"></i></a></div></li>
-            {{/if}}
-        {% endraw %}
-    {% else %}
-        {% raw %}
-            {{if type == 0 }}
-                <div class="row show_item">
-                     <div class="col-md-3 col-md-push-9">
-                          ${note}
-                     </div>
-                     <div class="col-md-9 col-md-pull-3">
-                         <img src="${uri}" alt="${note}">
-                     </div>
-                </div>
-            {{else type == 1}}
-                <div class="row show_item">
-                    <div class="col-md-3 col-md-push-9">
-                          ${note}
-                     </div>
-                     <div class="col-md-9 col-md-pull-3 iframe">
-                         {{html uri}}
-                     </div>
-                </div>
-            {{else type == 2}}
-                <li><span>${note}:</span><a href="${uri}" target="_blank">${uri}</a></li>
-            {{else type==3}}
-                <div class="row show_item">
-                    <div class="col-md-3 col-md-push-9">
-                          ${note}
-                     </div>
-                     <div class="col-md-9 col-md-pull-3 iframe">
-                         <iframe src="${uri}" seamless="seamless" frameborder="0" scrolling="yes"></iframe>
-                     </div>
-                </div>
-            {{else type==4}}
-                <div class="row show_item">
-                    <div class="col-md-3 col-md-push-9">
-                          ${note}
-                     </div>
-                     <div class="col-md-9 col-md-pull-3 iframe">
-                         <iframe src="${uri}" seamless="seamless" frameborder="0" scrolling="yes"></iframe>
-                     </div>
-                </div>
-            {{else type==5}}
-                <div class="row show_item">
-                    <div class="col-md-3 col-md-push-9">
-                          ${note}
-                     </div>
-                     <div class="col-md-9 col-md-pull-3 iframe">
-                         <iframe src="${uri}" seamless="seamless" frameborder="0" scrolling="yes"></iframe>
-                     </div>
-                </div>
-            {{else type == 6}}
-                <div class="row show_item">
-                    <div class="col-md-3 col-md-push-9">
-                          ${note}
-                     </div>
-                     <div class="col-md-9 col-md-pull-3 pdf">
-                         <object data="${uri}" type="application/pdf" width="100%" height="100%">
-                             <p>Your browser doesn't support PDF viewing. Please install PDF viewer plugin!</p>
-                         </object>
-                     </div>
-                </div>
-            {{else}}
-                <li><a href="${uri}" target="_blank">${note}</a></li>
-            {{/if}}
-        {% endraw %}
-    {% endif %}
-    </script>
-    <script id="score_item" type="text/x-jquery-tmpl">
-        {% raw %}
-            <li>
-                <div class=" rating">
-                    <div class="oh-inline-block">
-                        <label for="10" {{if score==10 }}class="active"{{/if}} ><i class="fa fa-trophy"></i></label>
-                        <label for="9" {{if score==9 }}class="active"{{/if}}><i class="fa fa-trophy"></i></label>
-                        <label for="8" {{if score==8 }}class="active"{{/if}}><i class="fa fa-trophy"></i></label>
-                        <label for="7" {{if score==7 }}class="active"{{/if}}><i class="fa fa-trophy"></i></label>
-                        <label for="6" {{if score==6 }}class="active"{{/if}}><i class="fa fa-trophy"></i></label>
-                        <label for="5" {{if score==5 }}class="active"{{/if}}><i class="fa fa-trophy"></i></label>
-                        <label for="4" {{if score==4 }}class="active"{{/if}}><i class="fa fa-trophy"></i></label>
-                        <label for="3" {{if score==3 }}class="active"{{/if}}><i class="fa fa-trophy"></i></label>
-                        <label for="2" {{if score==2 }}class="active"{{/if}}><i class="fa fa-trophy"></i></label>
-                        <label for="1" {{if score==1 }}class="active"{{/if}}><i class="fa fa-trophy"></i></label>
-                        评分：
-                    </div>
-                </div>
-                ${score}分
-                <span>点评：</span> ${reason}
-            </li>
-        {% endraw %}
-    </script>
     <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
     <script type="text/javascript" src="/static/js/views/oh.site.team.js"></script>
 {% endblock %}

@@ -87,7 +87,7 @@
             var parent = $(img).parents('[data-parent]');
             var FitWidth = parent.width();
             var FitHeight = parent.height();
-            var image = {width: img.width, height: img.height}
+            var image = {width: img.naturalWidth, height: img.naturalHeight}
             var height = (image.height * FitWidth) / image.width;
             var width = (image.width * FitHeight) / image.height;
             if (height > FitHeight) {
