@@ -19,6 +19,7 @@
   padding: 20px 10px;
   float: left;
   position: relative;
+  margin-bottom: 20px;
 
   box-shadow: 0 0 1px 1px #dfdfdf;
 }
@@ -94,8 +95,7 @@
 }
 
 .team-award-item .team-awards-container {
-  margin-top: 10px;
-  min-height: 100px;
+  height: 140px;
 
   display: -webkit-box;
 	display: -webkit-flex;
@@ -112,6 +112,7 @@
 }
 
 .team-award-item div.new-award-button-container {
+  padding-top: 10px;
   -webkit-box-flex: 0;
 	-webkit-flex-grow: 0;
 	-moz-flex-grow: 0;
@@ -121,6 +122,8 @@
 }
 
 .team-award-item .team-awards {
+  padding-top: 10px;
+  overflow: auto;
   display: inline-block;
   word-break: break-all;
   word-wrap: break-word;
@@ -141,12 +144,15 @@
 }
 
 span.award-item {
-    font-size: 14px;
-    border-radius: 1px;
-    border: 1px solid #019e48;
-    display: inline-block;
-    float: left;
-    line-height: 1.5;
+  position: relative;
+  font-size: 14px;
+  border-radius: 1px;
+  border: 1px solid #019e48;
+  display: inline-block;
+  float: left;
+  line-height: 1.5;
+  margin-right: 10px;
+  margin-bottom: 12px;
 }
 
 span.award-item>i {
@@ -165,5 +171,85 @@ span.award-item>p {
   text-align: center;
   min-width: 60px;
   margin: 0;
+  padding: 0 5px;;
+}
+
+
+span.cancel-award-cross {
+  display: inline-block;
+  color: #3f3f3f;
+  position: absolute;
+  font-size: 14px;
+  top: -7px;
+  right: -7px;
+  background-color: #afafaf;
+  border-radius: 50%;
+  width: 14px;
+  height: 14px;
+  font-weight: normal;
+  text-align: center;
+  cursor: pointer;
+}
+
+span.new-award-button {
   padding: 0;
+  line-height: 1.5;
+  text-align: center;
+  width: 24px;
+  font-size: 14px;
+  background-color: #efefef;
+  color: #019e48;
+}
+
+.search-bar-container {
+  width: 100%;
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
+.search-bar {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flexbox;
+  display: flex;
+
+  -webkit-box-direction: normal;
+  -webkit-box-orient: horizontal;
+  -webkit-flex-direction: row;
+  -moz-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+
+  background-color: #0782c1;
+  padding: 8px 10px;
+  border-radius: 3px;
+}
+
+.search-bar input {
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -moz-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+  height: 26px;
+  border-style: none;
+  border-radius: 3px;
+  padding: 0 10px;
+}
+
+.search-bar button {
+  -webkit-box-flex: 0;
+	-webkit-flex-grow: 0;
+	-moz-flex-grow: 0;
+	-ms-flex-positive: 0;
+	flex-grow: 0;
+  height: 26px;
+  border-style: none;
+  background-color: inherit;
+  color: #efefef;
+  width: 80px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: bold;
 }

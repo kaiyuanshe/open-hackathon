@@ -63,18 +63,3 @@ div.register-users-stat {
 	flex-grow: 0;
   width: 300px;
 }
-
-span.cancel-award-cross {
-  display: inline-block;
-  color: #3f3f3f;
-  position: relative;
-  top: -10px;
-  left: 10px;
-  background-color: #afafaf;
-  border-radius: 50%;
-  width: 1em;
-  height: 1em;
-  font-weight: normal;
-  text-align: center;
-  cursor: pointer;
-}

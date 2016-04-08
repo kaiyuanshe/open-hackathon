@@ -316,7 +316,6 @@ angular.module('oh.controllers', [])
       checks: {},
       perPage: 20,
       curPage: 1,
-      nPage: 0,
 
       freedomTeam: false,
       autoApprove: false
@@ -351,7 +350,6 @@ angular.module('oh.controllers', [])
 
           $scope.data.registerUsers = data;
           $scope.data.curPage = 1;
-          $scope.data.nPage = parseInt(Math.round(data.length / $scope.data.perPage));
 
           $scope.data.autoApprove = activity.config.auto_approve;
           $scope.data.freedomTeam = activity.config.freedom_team;
@@ -746,6 +744,10 @@ angular.module('oh.controllers', [])
       awards: [],
       teams: [],
       awardsMap: [],
+      searchText: '',
+
+      perPage: 6,
+      curPage: 1,
     };
 
     $scope.$on('chargeActitity', function() {
