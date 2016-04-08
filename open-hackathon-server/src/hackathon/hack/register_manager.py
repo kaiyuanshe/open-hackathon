@@ -196,7 +196,7 @@ class RegisterManager(Component):
             hackathon=hackathon.id,
             status__in=[HACK_USER_STATUS.AUDIT_PASSED, HACK_USER_STATUS.AUTO_PASSED],
             # TODO
-            deleted=0).count()
+            deleted=False).count()
 
         self.hackathon_manager.update_hackathon_stat(hackathon, HACKATHON_STAT.REGISTER, count)
 

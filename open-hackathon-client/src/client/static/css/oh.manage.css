@@ -3,6 +3,7 @@
 @import "oh.manage.main.css";
 @import "oh.manage.edit.css";
 @import "oh.manage.users.css";
+@import "oh.manage.awards.css";
 
 html,
 body {
