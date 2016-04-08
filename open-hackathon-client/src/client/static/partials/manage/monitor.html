@@ -1,7 +1,60 @@
-<div class="manage-monitor">
-	<tabe class="table">
-		<thead>
-			<tr></tr>
-		</thead>
-	</tabe>
+<div class="row">
+  <div class="col-lg-9">
+    <div>
+      <form>
+        <input type="text" placeholder="{{'EXPERIMENT_WEBPAGE_FIELDS.SEARCH_EXPERIMENT_HINT' | translate}}"
+               ng-model="searchKeyword">
+        <input type="submit" value="{{'EXPERIMENT_WEBPAGE_FIELDS.SEARCH' | translate}}" ng-click="searchExperiment()">
+      </form>
+    </div>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>{{'EXPERIMENT_WEBPAGE_FIELDS.USERNAME' | translate}}</th>
+          <th>{{'EXPERIMENT_WEBPAGE_FIELDS.EXPERIMENT_ID' | translate}}</th>
+          <th>{{'EXPERIMENT_WEBPAGE_FIELDS.EXPERIMENT_STATUS' | translate}}</th>
+          <th>{{'EXPERIMENT_WEBPAGE_FIELDS.LAST_HEARTBEAT_TIME' | translate}}</th>
+          <th>{{'EXPERIMENT_WEBPAGE_FIELDS.CREATE_TIME' | translate}}</th>
+          <th>{{'EXPERIMENT_WEBPAGE_FIELDS.VM_LOCATED' | translate}}</th>
+          <th>{{'EXPERIMENT_WEBPAGE_FIELDS.OPERATION' | translate}}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="experiment in data.experiments | filter:filterExperiments">
+          <td>{{experiment.user.name}}</td>
+          <td>{{experiment.id}}</td>
+          <td>{{experiment.status | exprStatus}}</td>
+          <td>{{experiment.last_heart_beat_time | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+          <td>{{experiment.create_time | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+          <td>{{experiment.virtual_environments | joinVMs}}</td>
+          <td>
+            <a class="btn btn-info btn-sm" ng-click="updateExperiment(experiment)">
+              <i class="fa fa-edit"></i>
+            </a>
+            <a class="btn btn-danger btn-sm" ng-click="deleteExperiment(experiment)">
+              <i class="fa fa-trash-o"></i>
+            </a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col-lg-3">
+    <table class="table table-striped table-bordered">
+      <tbody>
+        <tr><td ng-click="filterExperimentCondition=-1">
+          {{'EXPERIMENT_WEBPAGE_FIELDS.ALL_STATUS' | translate}}({{data.experiments.length}})</td>
+        </tr>
+        <tr><td ng-click="filterExperimentCondition=2">
+          {{'EXPERIMENT_STATUS.RUNNING' | translate}}({{(data.experiments | filter:{status:2}).length}})</td>
+        </tr>
+        <tr><td ng-click="filterExperimentCondition=3">
+          {{'EXPERIMENT_STATUS.STOPPED' | translate}}({{(data.experiments | filter:{status:3}).length}})</td>
+        </tr>
+        <tr><td ng-click="filterExperimentCondition=5">
+          {{'EXPERIMENT_STATUS.FAILED' | translate}}({{(data.experiments | filter:{status:5}).length}})</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
