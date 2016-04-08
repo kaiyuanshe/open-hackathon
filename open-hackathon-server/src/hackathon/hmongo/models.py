@@ -78,7 +78,7 @@ class HDocumentBase(DynamicDocument):
 
 
 class UserEmail(EmbeddedDocument):
-    email = EmailField()
+    email = StringField()
     primary_email = BooleanField()
     verified = BooleanField()
 
