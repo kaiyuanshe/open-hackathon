@@ -345,7 +345,7 @@ angular.module('oh.controllers', [])
       });
     };
 
-    var refresh = function() {
+    function refresh() {
       api.admin.registration.list.get({
         header: {
           hackathon_name: activity.name
@@ -481,6 +481,8 @@ angular.module('oh.controllers', [])
         }
       });
     };
+
+    refresh();
   })
   .controller('adminController', function($rootScope, $scope, $uibModal, activityService, api, dialog) {
     $scope.$emit('pageName', 'SETTINGS.ADMINISTRATORS');
@@ -760,7 +762,7 @@ angular.module('oh.controllers', [])
         })
     }
 
-    refresh()
+    refresh();
   })
   .controller('awardsController', function($rootScope, $scope, $q, activityService, api) {
     $scope.$emit('pageName', 'SETTINGS.AWARDS');
@@ -1295,7 +1297,7 @@ angular.module('oh.controllers', [])
   .controller('serversController', function($rootScope, $scope, $stateParams, $uibModal, $cookies, activityService, api, dialog) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.SERVERS');
 
-    var refresh = function(){
+    function refresh() {
       api.admin.hostserver.list.get({
           header: {
             hackathon_name: $stateParams.name,
