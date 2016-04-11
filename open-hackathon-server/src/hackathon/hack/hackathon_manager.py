@@ -760,8 +760,15 @@ class HackathonManager(Component):
         """Return hackathon info as well as its details including configs, stat, organizers, like if user logon"""
         detail = hackathon.dic()
 
-        # TODO: replace hard code
-        detail["stat"] = {"register": 5}
+        detail["stat"] = {
+            "register": 0,
+            "like": 0}
+
+        for stat in HackathonStat.objects(hackathon=hackathon):
+            if stat.type == HACKATHON_STAT.REGISTER:
+                detail["stat"]["register"] = stat.count
+            elif stat.type == HACKATHON_STAT.LIKE:
+                detail["stat"]["like"] = stat.count
 
         if user:
             detail["user"] = self.user_manager.user_display_info(user)
@@ -779,10 +786,9 @@ class HackathonManager(Component):
             register = self.register_manager.get_registration_by_user_and_hackathon(user.id, hackathon.id)
             if register:
                 detail["registration"] = register.dic()
-                #
-                # team_rel = self.db.find_first_object_by(UserTeamRel, user_id=user.id, hackathon_id=hackathon.id)
-                # if team_rel:
-                #     detail["team"] = team_rel.team.dic()
+                team = Team.objects(hackathon=hackathon, members__user=user).first()
+                if team:
+                    detail["team"] = team.dic()
 
         return detail
 
