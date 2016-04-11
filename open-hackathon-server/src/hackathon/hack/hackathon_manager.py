@@ -344,7 +344,7 @@ class HackathonManager(Component):
         user_hackathon = UserHackathon.objects(hackathon=hackathon, user=user).first()
         if user_hackathon and user_hackathon.like:
             return ok()
-            
+
         if not user_hackathon:
             user_hackathon = UserHackathon(hackathon=hackathon,
                                            user=user,
@@ -800,12 +800,6 @@ class HackathonManager(Component):
         register_num_query_filter = Q(type=HACKATHON_STAT.REGISTER)
         like_num_query_filter = Q(type=HACKATHON_STAT.LIKE)
 
-        if user:
-            user_filter = Q(user=user)
-            hackathon_like = UserHackathon.objects(hackathon_filter & user_filter).only('like').first()
-            if hackathon_like and hackathon_like.like:
-                detail['like'] = hackathon_like.like
-
         detail['stat'] = {'register': 0}
         hackathon_register_num = HackathonStat.objects(hackathon_filter & register_num_query_filter).only('count').first()
         hackathon_like_num = HackathonStat.objects(hackathon_filter & like_num_query_filter).only('count').first()
@@ -817,8 +811,13 @@ class HackathonManager(Component):
         # detail["stat"] = {"register": 5}
 
         if user:
+            user_filter = Q(user=user)
+            hackathon_like = UserHackathon.objects(hackathon_filter & user_filter).only('like').first()
+            if hackathon_like and hackathon_like.like:
+                detail['like'] = hackathon_like.like
+
             detail["user"] = self.user_manager.user_display_info(user)
-            detail["user"]["is_admin"] = user.is_super or hackathon.creator.id == user.id
+            detail["user"]["is_admin"] = self.admin_manager.is_hackathon_admin(hackathon.id, user.id)
 
             # TODO: we need to review those items one by one to decide the API output
             # asset = self.db.find_all_objects_by(UserHackathonAsset, user_id=user.id, hackathon_id=hackathon.id)

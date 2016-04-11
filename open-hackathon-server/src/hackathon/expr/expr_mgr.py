@@ -341,7 +341,7 @@ class ExprManager(Component):
         :return:
         """
         criterion = Q(status__in=[EStatus.RUNNING, EStatus.STARTING], hackathon=hackathon)
-        is_admin = self.admin_Manager.is_hackathon_admin(hackathon.id, user.id)
+        is_admin = self.admin_manager.is_hackathon_admin(hackathon.id, user.id)
         if is_admin:
             criterion &= Q(template=template)
 

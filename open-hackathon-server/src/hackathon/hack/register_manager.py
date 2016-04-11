@@ -61,7 +61,7 @@ class RegisterManager(Component):
         return UserHackathon.objects(id=registration_id).first()
 
     def get_registration_by_user_and_hackathon(self, user_id, hackathon_id):
-        return UserHackathon.objects(user=user_id, hackathon=hackathon_id).first()
+        return UserHackathon.objects(user=user_id, hackathon=hackathon_id, role=HACK_USER_TYPE.COMPETITOR).first()
 
     def create_registration(self, hackathon, user, args):
         """Register hackathon for user
@@ -101,18 +101,24 @@ class RegisterManager(Component):
             args.pop("user_id")
             args.pop("hackathon_id")
 
-            user_hackathon = UserHackathon.objects.create(
-                user=user,
-                hackathon=hackathon,
-                status=status,
-                **args).dic()
+            user_hackathon = UserHackathon.objects(user=user, hackathon=hackathon).first()
+            if not user_hackathon:
+                user_hackathon = UserHackathon.objects.create(
+                    user=user,
+                    hackathon=hackathon,
+                    status=status,
+                    **args)
+            else: #visitor -> competitor
+                user_hackathon.role = HACK_USER_TYPE.COMPETITOR
+                user_hackathon.status = status
+                user_hackathon.save()
 
             # create a team as soon as user registration approved(auto or manually)
             if is_auto_approve:
                 self.team_manager.create_default_team(hackathon, user)
 
             self.__update_register_stat(hackathon)
-            return user_hackathon
+            return user_hackathon.dic()
         except Exception as e:
             self.log.error(e)
             return internal_server_error("fail to create register")
@@ -195,6 +201,7 @@ class RegisterManager(Component):
         count = UserHackathon.objects(
             hackathon=hackathon.id,
             status__in=[HACK_USER_STATUS.AUDIT_PASSED, HACK_USER_STATUS.AUTO_PASSED],
+            role=HACK_USER_TYPE.COMPETITOR,
             # TODO
             deleted=False).count()
 
@@ -232,7 +239,8 @@ class RegisterManager(Component):
             # count of audited users
             current_num = UserHackathon.objects(
                 hackathon=hackathon.id,
-                status__in=[HACK_USER_STATUS.AUDIT_PASSED, HACK_USER_STATUS.AUTO_PASSED]).count()
+                status__in=[HACK_USER_STATUS.AUDIT_PASSED, HACK_USER_STATUS.AUTO_PASSED],
+                role=HACK_USER_TYPE.COMPETITOR).count()
 
             return current_num >= maximum
 
