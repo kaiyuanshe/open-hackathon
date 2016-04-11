@@ -175,6 +175,7 @@ class HackathonManager(Component):
         return map(lambda h: self.__get_hackathon_detail(h, user), user_hack_list)
 
     def get_recyclable_hackathon_list(self):
+        # todo filter hackathons in a db-level
         hackathons = Hackathon.objects().all()
         return filter(lambda h: self.is_recycle_enabled(h), hackathons)
 
