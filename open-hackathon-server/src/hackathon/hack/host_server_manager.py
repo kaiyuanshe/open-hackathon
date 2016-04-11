@@ -126,7 +126,7 @@ class DockerHostManager(Component):
         """
         self.log.debug('Begin to check host server and prepare resource.')
         min_avavilabe_container = 5
-        for hackathon in self.db.find_all_objects(Hackathon):
+        for hackathon in Hackathon.objects():
             if self.__exist_request_host_server_by_hackathon_id(min_avavilabe_container, hackathon.id):
                 continue
             if not self.start_new_docker_host_vm(hackathon):

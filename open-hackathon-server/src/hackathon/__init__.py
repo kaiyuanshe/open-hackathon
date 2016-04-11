@@ -292,7 +292,7 @@ def __init_schedule_jobs():
     sche = RequiredFeature("scheduler")
     if not util.is_local():
         hackathon_manager = RequiredFeature("hackathon_manager")
-        # host_server_manager = RequiredFeature("docker_host_manager")
+        host_server_manager = RequiredFeature("docker_host_manager")
 
         # schedule job to check recycle operation
         next_run_time = util.get_now() + timedelta(seconds=10)
@@ -305,10 +305,10 @@ def __init_schedule_jobs():
         # schedule job to pre-allocate environment
         hackathon_manager.schedule_pre_allocate_expr_job()
 
-        # # schedule job to pull docker images automatically
-        # if not safe_get_config("docker.alauda.enabled", False):
-        #     docker = RequiredFeature("hosted_docker")
-        #     docker.ensure_images()
+        # schedule job to pull docker images automatically
+        if not safe_get_config("docker.alauda.enabled", False):
+             docker = RequiredFeature("hosted_docker_proxy")
+             docker.ensure_images()
 
         # schedule job to pre-create a docker host server VM
         # host_server_manager.schedule_pre_allocate_host_server_job()

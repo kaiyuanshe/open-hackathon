@@ -699,9 +699,7 @@ class HackathonManager(Component):
         Add an interval job for hackathon if it's pre-allocate is enabled.
         Otherwise try to remove the schedule job
         """
-        # todo fix pre-allocate
-        # hackathon_list = self.db.find_all_objects(Hackathon)
-        hackathon_list = []
+        hackathon_list = Hackathon.objects()
         for hack in hackathon_list:
             job_id = "pre_allocate_expr_" + str(hack.id)
             is_job_exists = self.scheduler.has_job(job_id)
