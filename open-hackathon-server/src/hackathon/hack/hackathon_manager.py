@@ -79,7 +79,7 @@ class HackathonManager(Component):
 
     def is_recycle_enabled(self, hackathon):
         key = HACKATHON_CONFIG.RECYCLE_ENABLED
-        return self.util.str2bool(self.get_basic_property(hackathon, key, False))
+        return self.get_basic_property(hackathon, key, False)
 
     def get_hackathon_by_name(self, name):
         """Get hackathon accoring the unique name

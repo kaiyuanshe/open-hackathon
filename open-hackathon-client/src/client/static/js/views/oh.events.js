@@ -158,10 +158,7 @@
             } else {
                 var list = $('#event_list_template').tmpl(data.items, {
                     getEventImg: function (banners) {
-                        return banners.split(';')[0] || '/static/pic/homepage.jpg';
-                    },
-                    getTags: function (tabs) {
-                        return tabs.split(',');
+                        return banners[0] || '/static/pic/homepage.jpg';
                     },
                     getLocation: function (location) {
                         return location ? location.substring(0, 2) : '在线';
