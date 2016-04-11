@@ -342,6 +342,9 @@ class HackathonManager(Component):
 
     def like_hackathon(self, user, hackathon):
         user_hackathon = UserHackathon.objects(hackathon=hackathon, user=user).first()
+        if user_hackathon and user_hackathon.like:
+            return ok()
+            
         if not user_hackathon:
             user_hackathon = UserHackathon(hackathon=hackathon,
                                            user=user,

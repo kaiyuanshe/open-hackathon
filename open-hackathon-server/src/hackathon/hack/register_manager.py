@@ -196,7 +196,7 @@ class RegisterManager(Component):
             hackathon=hackathon.id,
             status__in=[HACK_USER_STATUS.AUDIT_PASSED, HACK_USER_STATUS.AUTO_PASSED],
             # TODO
-            deleted=0).count()
+            deleted=False).count()
 
         self.hackathon_manager.update_hackathon_stat(hackathon, HACKATHON_STAT.REGISTER, count)
 
@@ -234,7 +234,7 @@ class RegisterManager(Component):
                 hackathon=hackathon.id,
                 status__in=[HACK_USER_STATUS.AUDIT_PASSED, HACK_USER_STATUS.AUTO_PASSED]).count()
 
-            return current_num >= max
+            return current_num >= maximum
 
     def __is_user_hackathon_login_provider(self, user, hackathon):
         """Check whether login provider
