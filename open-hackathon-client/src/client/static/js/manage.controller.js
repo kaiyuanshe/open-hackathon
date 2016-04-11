@@ -1400,7 +1400,7 @@ angular.module('oh.controllers', [])
       return desc[state] || ""
     }
 
-    refresh()
+    refresh();
   })
   .controller('createController', function($scope, $timeout, $filter, $cookies, $state, $stateParams, FileUploader, dialog, api) {
     var request;
