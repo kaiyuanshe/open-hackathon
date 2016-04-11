@@ -793,8 +793,25 @@ class HackathonManager(Component):
         """Return hackathon info as well as its details including configs, stat, organizers, like if user logon"""
         detail = hackathon.dic()
 
+        hackathon_filter = Q(hackathon=hackathon)
+        register_num_query_filter = Q(type=HACKATHON_STAT.REGISTER)
+        like_num_query_filter = Q(type=HACKATHON_STAT.LIKE)
+
+        if user:
+            user_filter = Q(user=user)
+            hackathon_like = UserHackathon.objects(hackathon_filter & user_filter).only('like').first()
+            if hackathon_like and hackathon_like.like:
+                detail['like'] = hackathon_like.like
+
+        detail['stat'] = {'register': 0}
+        hackathon_register_num = HackathonStat.objects(hackathon_filter & register_num_query_filter).only('count').first()
+        hackathon_like_num = HackathonStat.objects(hackathon_filter & like_num_query_filter).only('count').first()
+        if hackathon_register_num:
+            detail['stat']['register'] = hackathon_register_num.count
+        if hackathon_like_num:
+            detail['stat']['like'] = hackathon_like_num.count
         # TODO: replace hard code
-        detail["stat"] = {"register": 5}
+        # detail["stat"] = {"register": 5}
 
         if user:
             detail["user"] = self.user_manager.user_display_info(user)
