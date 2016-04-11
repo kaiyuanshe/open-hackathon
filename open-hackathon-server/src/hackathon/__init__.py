@@ -311,7 +311,7 @@ def __init_schedule_jobs():
              docker.ensure_images()
 
         # schedule job to pre-create a docker host server VM
-        # host_server_manager.schedule_pre_allocate_host_server_job()
+        host_server_manager.schedule_pre_allocate_host_server_job()
 
     # init the overtime-sessions detection to update users' online status
     sche.add_interval(feature="user_manager",

@@ -727,9 +727,9 @@ class HackathonManager(Component):
         req = ok()
 
         if hackathon.status == HACK_STATUS.DRAFT or hackathon.status == HACK_STATUS.OFFLINE:
-            if self.util.is_local() or hackathon.config.cloud_provide == CLOUD_PROVIDER.NONE:
+            if self.util.is_local() or hackathon.config['cloud_provider']== CLOUD_PROVIDER.NONE:
                 req = ok()
-            elif hackathon.config.cloud_provider == CLOUD_PROVIDER.AZURE:
+            elif hackathon.config['cloud_provider'] == CLOUD_PROVIDER.AZURE:
                 is_success = docker_host_manager.check_subscription_id(hackathon.id)
                 if not is_success:
                     req = general_error(code=HTTP_CODE.AZURE_KEY_NOT_READY)  # azure sub id is invalide
