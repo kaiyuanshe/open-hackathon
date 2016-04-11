@@ -689,6 +689,10 @@ class DockerHostManager(Component):
         :return: True if there exists one host server at least, otherwise False
         :rtype: bool
         """
+        vms = DockerHostServer.objects(DockerHostServer.container_count + request_count <=
+                                       DockerHostServer.container_max_count,
+                                       DockerHostServer.hackathon_id == hackathon_id,
+                                       DockerHostServer.state == DockerHostServerStatus.DOCKER_READY,)
         vms = self.db.find_all_objects(DockerHostServer,
                                        DockerHostServer.container_count + request_count <=
                                        DockerHostServer.container_max_count,

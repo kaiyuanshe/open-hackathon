@@ -38,7 +38,7 @@ from datetime import timedelta
 
 from hackathon import RequiredFeature, Component, Context
 from hackathon.hmongo.models import DockerContainer, DockerHostServer
-from hackathon.constants import HEALTH, HEALTH_STATUS
+from hackathon.constants import HEALTH, HEALTH_STATUS, HACKATHON_CONFIG, CLOUD_PROVIDER
 
 
 class HostedDockerFormation(Component):
@@ -221,7 +221,7 @@ class HostedDockerFormation(Component):
 
     def __ensure_images_for_hackathon(self, hackathon):
         # only ensure those alauda is disabled
-        if hackathon.is_alauda_enabled():
+        if hackathon.config[HACKATHON_CONFIG.CLOUD_PROVIDER] == CLOUD_PROVIDER.ALAUDA:
             self.log.debug("schedule job of hackathon '%s(%d)' removed for alauda enabled" %
                            (hackathon.name, hackathon.id))
             self.scheduler.remove_job(self.__get_schedule_job_id(hackathon))
@@ -238,7 +238,7 @@ class HostedDockerFormation(Component):
                 self.log.debug("job %s existed" % job_id)
             else:
                 self.log.debug(
-                    "adding schedule job to ensure images for hackathon [%d]%s" % (hackathon.id, hackathon.name))
+                    "adding schedule job to ensure images for hackathon %s" % hackathon.name)
                 next_run_time = self.util.get_now() + timedelta(seconds=3)
                 context = Context(hackathon_id=hackathon.id)
                 self.scheduler.add_interval(feature="hackathon_template_manager",
