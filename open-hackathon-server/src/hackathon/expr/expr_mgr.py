@@ -247,10 +247,6 @@ class ExprManager(Component):
     def on_expr_started(self, experiment):
         hackathon = experiment.hackathon
         user = experiment.user
-        self.hackathon_manager.create_hackathon_notice(hackathon.id,
-                                                       HACK_NOTICE_EVENT.EXPR_JOIN,
-                                                       HACK_NOTICE_CATEGORY.EXPERIMENT,
-                                                       {'user_id': user.id if user else ""})
 
     def __report_expr_status(self, expr):
         ret = {

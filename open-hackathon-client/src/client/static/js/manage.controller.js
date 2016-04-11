@@ -851,6 +851,20 @@ angular.module('oh.controllers', [])
 
     $scope.data = {
       notices: activity.notices,
+      noticeDescription: {
+        0: '黑客松信息',
+        1: '用户信息',
+        2: '实验信息',
+        3: '获奖信息',
+        4: '模板信息'
+      },
+      noticeIcon: {
+        0: 'glyphicon glyphicon-bullhorn', //'黑客松信息'
+        1: 'glyphicon glyphicon-user', //'用户信息'
+        2: 'glyphicon glyphicon-th-list', //'实验信息'
+        3: 'glyphicon glyphicon-gift', //'获奖信息'
+        4: 'glyphicon glyphicon-edit' //'模板信息'
+      }
     };
 
     var formData = {};
@@ -873,6 +887,7 @@ angular.module('oh.controllers', [])
           showTip('tip-danger', data.error.friendly_message);
           return ;
         }
+
         activity.notices = data.items;
         $scope.data.notices = data.items;
       });
@@ -930,7 +945,7 @@ angular.module('oh.controllers', [])
             createNotice();
             $uibModalInstance.close();
           };
-        },  // end controller
+        }, 
       });
     };
 
@@ -959,7 +974,7 @@ angular.module('oh.controllers', [])
       formData = {
         content: '',
         link: '',
-        type: '',
+        category: 0,
       };
       openAddNoticeWizard();
     };

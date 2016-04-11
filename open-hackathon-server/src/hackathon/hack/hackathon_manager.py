@@ -262,8 +262,6 @@ class HackathonManager(Component):
         if self.util.is_local():
             self.__create_default_data_for_local(new_hack)
 
-        self.create_hackathon_notice(new_hack.id, HACK_NOTICE_EVENT.HACK_CREATE, HACK_NOTICE_CATEGORY.HACKATHON)
-
         return new_hack.dic()
 
     def update_hackathon(self, args):
@@ -599,6 +597,7 @@ class HackathonManager(Component):
 
         hackathon_notice.content = body.get("content", hackathon_notice.content)
         hackathon_notice.link = body.get("link", hackathon_notice.link)
+        hackathon_notice.category = body.get("category", hackathon_notice.category)
 
         hackathon_notice.save(validate=False)
         return hackathon_notice.dic()
