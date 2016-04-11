@@ -703,19 +703,22 @@ class HackathonManager(Component):
         for hack in hackathon_list:
             job_id = "pre_allocate_expr_" + str(hack.id)
             is_job_exists = self.scheduler.has_job(job_id)
-            if hack.is_pre_allocate_enabled():
-                if is_job_exists:
+            hack.config['pre_allocate_enabled'] = True #todo delete here
+            hack.config['pre_allocate_number'] = 3 #todo
+            hack.save()
+            if hack.config['pre_allocate_enabled']:
+                if not is_job_exists:# todo
                     self.log.debug("pre_allocate job already exists for hackathon %s" % str(hack.id))
                     continue
 
                 self.log.debug("add pre_allocate job for hackathon %s" % str(hack.id))
-                next_run_time = self.util.get_now() + timedelta(seconds=hack.id * 10)
-                pre_allocate_interval = self.__get_pre_allocate_interval(hack)
+               # next_run_time = self.util.get_now() + timedelta(seconds=hack.id * 10)
+                pre_allocate_interval = 5 #todo self.__get_pre_allocate_interval(hack)
                 self.scheduler.add_interval(feature="expr_manager",
                                             method="pre_allocate_expr",
                                             id=job_id,
                                             context=Context(hackathon_id=hack.id),
-                                            next_run_time=next_run_time,
+                                            #next_run_time=next_run_time,
                                             seconds=pre_allocate_interval
                                             )
             elif is_job_exists:
@@ -852,7 +855,7 @@ class HackathonManager(Component):
         if interval:
             return int(interval)
         else:
-            return 300 + hackathon.id * 10
+            return 300 #+ hackathon.id * 10
 
     def __get_hackathon_configs(self, hackathon):
 
@@ -973,31 +976,10 @@ def is_auto_approve(hackathon):
     value = hack_manager.get_basic_property(hackathon, HACKATHON_CONFIG.AUTO_APPROVE, "1")
     return util.str2bool(value)
 
-
-def is_pre_allocate_enabled(hackathon):
-    if hackathon.status != HACK_STATUS.ONLINE:
-        return False
-
-    if hackathon.event_end_time < util.get_now():
-        return False
-
-    hack_manager = RequiredFeature("hackathon_manager")
-    value = hack_manager.get_basic_property(hackathon, HACKATHON_CONFIG.PRE_ALLOCATE_ENABLED, "1")
-    return util.str2bool(value)
-
-
-def get_pre_allocate_number(hackathon):
-    hack_manager = RequiredFeature("hackathon_manager")
-    value = hack_manager.get_basic_property(hackathon, HACKATHON_CONFIG.PRE_ALLOCATE_NUMBER, 1)
-    return int(value)
-
-
 def get_basic_property(hackathon, property_name, default_value=None):
     hack_manager = RequiredFeature("hackathon_manager")
     return hack_manager.get_basic_property(hackathon, property_name, default_value)
 
 
 Hackathon.is_auto_approve = is_auto_approve
-Hackathon.is_pre_allocate_enabled = is_pre_allocate_enabled
-Hackathon.get_pre_allocate_number = get_pre_allocate_number
 Hackathon.get_basic_property = get_basic_property

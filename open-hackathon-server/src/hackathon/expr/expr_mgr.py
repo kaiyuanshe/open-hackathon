@@ -35,7 +35,7 @@ from mongoengine import Q
 from hackathon import Component, RequiredFeature, Context
 from hackathon.constants import EStatus, VERemoteProvider, VE_PROVIDER, VEStatus, ReservedUser, \
     HACK_NOTICE_EVENT, HACK_NOTICE_CATEGORY, CLOUD_PROVIDER, HACKATHON_CONFIG
-from hackathon.hmongo.models import Experiment, User
+from hackathon.hmongo.models import Experiment, User, Hackathon, UserHackathon
 from hackathon.hackathon_response import not_found, ok
 
 __all__ = ["ExprManager"]
@@ -143,20 +143,19 @@ class ExprManager(Component):
     def pre_allocate_expr(self, context):
         hackathon_id = context.hackathon_id
         self.log.debug("executing pre_allocate_expr for hackathon %s " % hackathon_id)
-        htrs = self.db.find_all_objects_by(HackathonTemplateRel, hackathon_id=hackathon_id)
-        for rel in htrs:
+        hackathon = Hackathon.objects(id=hackathon_id).first()
+        hackthon_templates = hackathon.templates
+        #htrs = self.db.find_all_objects_by(HackathonTemplateRel, hackathon_id=hackathon_id)
+        for template in hackthon_templates:
             try:
-                template = rel.template
-                pre_num = rel.hackathon.get_pre_allocate_number()
-                curr_num = self.db.count(Experiment,
-                                         Experiment.user_id == ReservedUser.DefaultUserID,
-                                         Experiment.hackathon_id == hackathon_id,
-                                         Experiment.template_id == template.id,
-                                         (Experiment.status == EStatus.STARTING) | (
-                                             Experiment.status == EStatus.RUNNING))
+                template = template
+                pre_num = hackathon.config["pre_allocate_number"]
+                query = Q(status=EStatus.STARTING) | Q(status=EStatus.RUNNING)
+                curr_num = Experiment.objects(hackathon=hackathon, template=template).filter(query).count()
                 if template.provider == VE_PROVIDER.AZURE:
                     if curr_num < pre_num:
                         remain_num = pre_num - curr_num
+                        start_num = Experiment.objects()
                         start_num = self.db.count_by(Experiment,
                                                      user_id=ReservedUser.DefaultUserID,
                                                      template=template,
