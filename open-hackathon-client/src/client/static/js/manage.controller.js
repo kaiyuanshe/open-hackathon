@@ -78,7 +78,7 @@ angular.module('oh.controllers', [])
         return;
       } else {
         asyncActivity(toParams).then(function(activity) {
-            console.log(activity)
+            // console.log(activity)
             if (activity.status == -1) {
               $state.go('create', {
                 name: toParams.name
@@ -156,7 +156,6 @@ angular.module('oh.controllers', [])
 
   })
   .controller('editController', function($rootScope, $scope, $filter, dialog, session, activityService, api, activity, speech) {
-
     $scope.$emit('pageName', 'SETTINGS.EDIT_ACTIVITY');
 
     $scope.animationsEnabled = true;
@@ -311,16 +310,15 @@ angular.module('oh.controllers', [])
     var activity = activityService.getCurrentActivity();
 
     $scope.data = {
-      registerUsers: [],  // we cannot use activity.registration here, its single
+      registerUsers: [], // we cannot use activity.registration here, its single
       regStatus: {},
       checkAll: false,
       checks: {},
       perPage: 20,
       curPage: 1,
-      nPage: 0,
 
-      freedomTeam: activity.config.freedom_team,
-      autoApprove: activity.config.auto_approve
+      freedomTeam: false,
+      autoApprove: false
     };
 
     var showTip = function(level, content, showTime) {
@@ -333,9 +331,11 @@ angular.module('oh.controllers', [])
 
     var refresh = function() {
       api.admin.registration.list.get({
-        header: {hackathon_name: activity.name}
+        header: {
+          hackathon_name: activity.name
+        }
       }, function(data) {
-        if(data.error) {
+        if (data.error) {
           showTip('tip-danger', data.error.friendly_message);
         } else {
           $scope.data.regStatus = {};
@@ -343,14 +343,13 @@ angular.module('oh.controllers', [])
           $scope.data.checks = {};
 
           var i;
-          for(i = 0;i < data.length;i ++) {
+          for (i = 0; i < data.length; i++) {
             $scope.data.regStatus[data[i].id] = '' + data[i].status;
             $scope.data.checks[data[i].id] = false;
           }
 
           $scope.data.registerUsers = data;
           $scope.data.curPage = 1;
-          $scope.data.nPage = parseInt(Math.round(data.length / $scope.data.perPage));
 
           $scope.data.autoApprove = activity.config.auto_approve;
           $scope.data.freedomTeam = activity.config.freedom_team;
@@ -358,21 +357,28 @@ angular.module('oh.controllers', [])
       });
     };
 
+    $scope.$on('chargeActitity', function() {
+      activity = activityService.getCurrentActivity();
+      refresh();
+    });
+
     var _updateBatch = function(updates, status, index) {
-      if(index >= updates.length) {
+      if (index >= updates.length) {
         return;
       }
 
       var reg = updates[index];
 
       api.admin.registration.put({
-        header: {hackathon_name: activity.name},
+        header: {
+          hackathon_name: activity.name
+        },
         body: {
           id: reg.id,
           status: status,
         },
       }, function(data) {
-        if(data.error) {
+        if (data.error) {
           showTip('tip-danger', 'some of the registration updates failed: ' + data.error.friendly_message);
         } else {
           reg.status = parseInt(status);
@@ -385,13 +391,15 @@ angular.module('oh.controllers', [])
 
     $scope.updateStatus = function(reg) {
       return api.admin.registration.put({
-        header: {hackathon_name: activity.name},
+        header: {
+          hackathon_name: activity.name
+        },
         body: {
           id: reg.id,
           status: parseInt($scope.data.regStatus[reg.id]),
         }
       }, function(data) {
-        if(data.error) {
+        if (data.error) {
           showTip('tip-danger', data.error.friendly_message);
           $scope.data.regStatus[reg.id] = '' + reg.status;
         } else {
@@ -404,11 +412,11 @@ angular.module('oh.controllers', [])
       var i, id, reg;
 
       var toUpdate = [];
-      for(i = 0;i < $scope.data.registerUsers.length;i ++) {
+      for (i = 0; i < $scope.data.registerUsers.length; i++) {
         reg = $scope.data.registerUsers[i];
         id = reg.id;
 
-        if($scope.data.checks[id])
+        if ($scope.data.checks[id])
           toUpdate.push(reg);
       }
 
@@ -417,15 +425,16 @@ angular.module('oh.controllers', [])
 
     $scope.toggleCheckAll = function() {
       var i;
-      for(i = 0;i < $scope.data.registerUsers.length;i ++) {
+      for (i = 0; i < $scope.data.registerUsers.length; i++) {
         $scope.data.checks[$scope.data.registerUsers[i].id] = $scope.data.checkAll;
       }
     };
 
     $scope.checkCheckAll = function() {
-      var i = 0, allChecked = true;
-      for(i = 0;i < $scope.data.registerUsers.length;i ++) {
-        if(! $scope.data.checks[$scope.data.registerUsers[i].id]) {
+      var i = 0,
+        allChecked = true;
+      for (i = 0; i < $scope.data.registerUsers.length; i++) {
+        if (!$scope.data.checks[$scope.data.registerUsers[i].id]) {
           allChecked = false;
           break;
         }
@@ -436,7 +445,9 @@ angular.module('oh.controllers', [])
 
     $scope.updateConfig = function() {
       api.admin.hackathon.put({
-        header: {hackathon_name: activity.name},
+        header: {
+          hackathon_name: activity.name
+        },
         body: {
           config: {
             auto_approve: $scope.data.autoApprove,
@@ -444,7 +455,7 @@ angular.module('oh.controllers', [])
           }
         }
       }, function(data) {
-        if(data.error) {
+        if (data.error) {
           showTip('tip-danger', data.error.friendly_message);
           $scope.data.autoApprove = activity.config.auto_approve;
           $scope.data.freedomTeam = activity.config.freedom_team;
@@ -454,10 +465,8 @@ angular.module('oh.controllers', [])
         }
       });
     };
-
-    refresh();
   })
-  .controller('adminController', function($rootScope, $scope, activityService, api, dialog) {
+  .controller('adminController', function($rootScope, $scope, $uibModal, activityService, api, dialog) {
     $scope.$emit('pageName', 'SETTINGS.ADMINISTRATORS');
 
     var activity = activityService.getCurrentActivity();
@@ -465,8 +474,15 @@ angular.module('oh.controllers', [])
       admins: [],
       adminsType: [],
       adminsRemark: [],
-      selectedAdmins: []
+      selectedAdmins: [],
+      searchKeyword: "", // search users to create admins
+      searchResult: [],
+      selectedUserId: "", // user selected to create an admin
+      selectedUserCSS: {color: 'red'}, // todo remove this line when CSS done
+      selectedUserRole: 1,
+      selectedUserRemark: ""
     }
+    // 0-no condition, 1-admin, 2-judge
     $scope.filterAdminCondition = 0;
 
     function showTip(level, content, showTime) {
@@ -531,35 +547,81 @@ angular.module('oh.controllers', [])
     }
 
     $scope.deleteAdmins = function() {
-      // todo
-      console.log($scope.data.selectedAdmins);
-      // todo
-      function deleteAnAdmin(admin) {
+      deleteAdminList($scope.data.selectedAdmins, 0);
+
+      // delete admins one by one
+      function deleteAdminList(list, index) {
+        if(index == list.length){
+          pageLoad();
+          return;
+        }
         api.admin.hackathon.administrator.delete({
           header: {hackathon_name: activity.name},
-          query: {id: admin.id}
+          query: {id: list[index]}
         }, function(data) {
           if(data.error)
             showTip('tip-danger', data.error.friendly_message);
-          else{
-            delete $scope.data.adminsType[admin.id];
-            delete $scope.data.adminsRemark[admin.id];
-            var index_admin = $scope.data.admins.indexOf(admin)
-            $scope.data.admins.splice(index_admin, 1)
-            var index_selected_admin = $scope.data.selectedAdmins.indexOf(admin.id)
-            $scope.data.selectedAdmins.splice(index_selected_admin, 1)
-
-            showTip('tip-success', '成功删除管理员: ' + admin.name);
-          }
+          else
+            showTip('tip-success', '成功删除管理员!');
+          deleteAdminList(list, index + 1);
         });
       }
     }
 
     $scope.showSearchBar = function() {
-      dialog.add_admin({
-        title: '增加管理员',
-        size: 'sm'
+      var data = $scope.data;
+
+      $uibModal.open({
+        templateUrl: 'addAdminModel.html',
+        controller: function($scope, $uibModalInstance) {
+          $scope.data = data;
+          $scope.cancel = function() {
+            $uibModalInstance.dismiss('cancel');
+          };
+
+          $scope.searchAdmin = searchAdmin;
+          $scope.selectSearchedUser = selectSearchedUser;
+          $scope.createAdmin = createAdmin;
+        },
       });
+    }
+
+    function searchAdmin() {
+      api.admin.user.list.get({
+        header: {hackathon_name: activity.name},
+        query: {keyword: $scope.data.searchKeyword}
+      }, function(data) {
+        if(data.error)
+          showTip('tip-danger', data.error.friendly_message);
+        else
+          $scope.data.searchResult = data.items;
+      });
+    }
+
+    function selectSearchedUser(user) {
+      $scope.data.selectedUserId = user.id;
+    }
+
+    function createAdmin() {
+      if($scope.data.selectedUserId == "") {
+        showTip('tip-danger', "请选择需要设置成管理员的用户！");
+      } else {
+        api.admin.hackathon.administrator.post({
+          header: {hackathon_name: activity.name},
+          body: {
+            id: $scope.data.selectedUserId,
+            role: $scope.data.selectedUserRole,
+            remark: $scope.data.selectedUserRemark
+          }
+        }, function(data) {
+          if(data.error)
+            showTip('tip-danger', data.error.friendly_message);
+          else{
+            showTip('tip-success', '创建管理员成功');
+            pageLoad();
+          }
+        });
+      }
     }
 
     function pageLoad() {
@@ -571,6 +633,13 @@ angular.module('oh.controllers', [])
         else{
           $scope.data.admins = data;
           $scope.data.adminsType = [];
+          $scope.data.adminsRemark = [];
+          $scope.data.selectedAdmins = [];
+          $scope.data.searchKeyword = "";
+          $scope.data.searchResult = [];
+          $scope.data.selectedUserId = "";
+          $scope.data.selectedUserRole = 1;
+          $scope.data.selectedUserRemark = "";
           for(var index in data) {
             $scope.data.adminsType[data[index].id] = data[index].role.toString();
             $scope.data.adminsRemark[data[index].id] = data[index].remark;
@@ -579,19 +648,320 @@ angular.module('oh.controllers', [])
       })
     }
 
+    // init the page and load admins-list
     pageLoad();
   })
-  .controller('organizersController', function($rootScope, $scope, activityService, api) {
+  .controller('organizersController', function($rootScope, $scope, $stateParams, $uibModal, $cookies, activityService, api) {
     $scope.$emit('pageName', 'SETTINGS.ORGANIZERS');
 
-  })
-  .controller('prizesController', function($rootScope, $scope, activityService, api) {
-    $scope.$emit('pageName', 'SETTINGS.PRIZES');
+    // very quick and rough implementation, please feel free to update
+    var refresh = function(data){
+      if(data){
+        $scope.data = data
+        return
+      }
 
+      api.admin.hackathon.get({
+        header: {
+          hackathon_name: $stateParams.name
+        }
+      }).then(function(data){
+        if(data.error){
+          $scope.$emit('showTip', { level: 'tip-danger', content: data.error.friendly_message});
+        }else{
+           $scope.$emit('showTip', {
+            level: 'tip-success',
+            content: '添加成功'
+          });
+          $scope.data = data
+        }
+      })
+    }
+
+    var openModel = function(org){
+      $uibModal.open({
+        templateUrl: 'orgModel.html',
+        controller: function($scope, $stateParams, $uibModalInstance, $cookies, api) {
+          $scope.org = org;
+
+          $scope.cancel = function() {
+            $uibModalInstance.dismiss('cancel');
+          };
+
+          $scope.add_organizer = function() {
+            var fn;
+            if(org.id){
+              fn = api.admin.hackathon.organizer.put
+            }else{
+              fn = api.admin.hackathon.organizer.post
+            }
+            fn({
+              body: $scope.org,
+              header: {
+                hackathon_name: $stateParams.name,
+                token: $cookies.get('token')
+              }
+            }).then(function(data){
+              if(data.error){
+                $scope.$emit('showTip', { level: 'tip-danger', content: data.error.friendly_message});
+              }else{
+                $scope.$emit('showTip', { level: 'tip-success', content: "操作成功"});
+                refresh(data)
+              }
+              $uibModalInstance.close();
+            })
+          };
+        },  // end controller
+      })
+    }
+
+    $scope.edit = function(org){
+      openModel(org)
+    }
+
+    $scope.add = function(){
+      openModel({})
+    }
+
+    $scope.delete_organizer = function(organizer_id){
+      api.admin.hackathon.organizer.delete({
+          query: {
+            id: organizer_id
+          },
+          header: {
+            hackathon_name: $stateParams.name,
+            token: $cookies.get('token')
+          }
+        }).then(function(data){
+          if(data.error){
+            $scope.$emit('showTip', {level: 'tip-danger', content: data.error.friendly_message });
+          }else{
+            $scope.$emit('showTip', {level: 'tip-success', content: "删除成功" });
+            $scope.data.organizers = $scope.data.organizers.filter(function(organizer){
+              return organizer.id != organizer_id
+            })
+          }
+        })
+    }
+
+    refresh()
   })
-  .controller('awardsController', function($rootScope, $scope, activityService, api) {
+  .controller('awardsController', function($rootScope, $scope, $q, activityService, api) {
     $scope.$emit('pageName', 'SETTINGS.AWARDS');
 
+    var activity = activityService.getCurrentActivity();
+    var data = $scope.data = {
+      grantedAwards: [],
+      awards: [],
+      teams: [],
+      awardsMap: [],
+      searchText: '',
+
+      perPage: 6,
+      curPage: 1,
+    };
+
+    $scope.$on('chargeActitity', function() {
+      activity = activityService.getCurrentActivity();
+      refresh();
+    });
+
+    $scope.grantAward = function(awardId, teamId) {
+      grantAward(awardId, teamId);
+    };
+
+    $scope.cancelAward = function(awardId, teamId) {
+      cancelAward(awardId, teamId);
+    }
+
+    function cancelAward(awardId, teamId) {
+      return api.admin.team.award.delete({
+        header: {hackathon_name: activity.name},
+        query: {
+          award_id: awardId,
+          team_id: teamId
+        }
+      }).then(function(data) {
+        if(data.error) {
+          showTip('tip-danger', error.friendly_message);
+          return ;
+        }
+
+        showTip('tip-success', '删除成功');
+
+        return refresh();
+      });
+    }
+
+    function grantAward(awardId, teamId) {
+      return api.admin.team.award.post({
+        header: {hackathon_name: activity.name},
+        body: {
+          award_id: awardId,
+          team_id: teamId
+        }
+      }).then(function(data) {
+        if(data.error) {
+          showTip('tip-danger', error.friendly_message);
+          return ;
+        }
+
+        showTip('tip-success', '颁奖成功');
+
+        return refresh();
+      });
+    }
+
+    function refresh() {
+      return $q.all([
+        api.hackathon.grantedawards.get({header: {hackathon_name: activity.name}}),
+        api.admin.hackathon.award.list.get({header: {hackathon_name: activity.name}}),
+        api.hackathon.team.list.get({header: {hackathon_name: activity.name}}),
+      ]).then(function(res) {
+        if(res[0].error || res[1].error || res[2].error) {
+          throw res[0].error || res[1].error || res[2].error;
+        }
+
+        data.grantedAwards = res[0];
+        data.awards = res[1];
+        data.teams = res[2];
+
+        var i;
+        for(i = 0;i < data.awards.length;i ++) {
+          data.awardsMap[data.awards[i].id] = data.awards[i];
+        }
+
+        return data;
+      }).catch(function(error) {
+        showTip('tip-danger', error.friendly_message);
+      });
+    }
+
+    function showTip(level, msg) {
+      $scope.$emit('showTip', {
+        level: level,
+        content: msg
+      });
+    };
+  })
+  .controller('prizesController', function($rootScope, $scope, $uibModal, activityService, api, dialog) {
+    $scope.$emit('pageName', 'SETTINGS.PRIZES');
+
+    var activity = activityService.getCurrentActivity();
+    $scope.data = {
+      awards: activity.awards,
+    };
+
+    var formData = {};
+
+    var showTip = function(level, msg) {
+      $scope.$emit('showTip', {
+        level: level,
+        content: msg
+      });
+    };
+
+    var refreshAward = function() {
+      return api.admin.hackathon.award.list.get({
+        header: {hackathon_name: activity.name}
+      }, function(data) {
+        if(data.error) {
+          showTip('tip-danger', data.error.friendly_message);
+          return ;
+        }
+
+        activity.awards = data;
+        $scope.data.awards = data;
+      });
+    };
+
+    $scope.$on('chargeActitity', function() {
+      activity = activityService.getCurrentActivity();
+      refreshAward();
+    });
+
+    var deleteAward = function(id) {
+      return api.admin.hackathon.award.delete({
+        query: {id: id},
+        header: {
+          hackathon_name: activity.name
+        }
+      });
+    };
+
+    var createAward = function() {
+      var award = formData;
+      var fn;
+
+      if(award.id)
+        fn = api.admin.hackathon.award.put;
+      else
+        fn = api.admin.hackathon.award.post;
+
+      return fn({
+        body: award,
+        header: {
+          hackathon_name: activity.name
+        }
+      }, function(data) {
+        if(data.error)
+          showTip('tip-danger', data.error.friendly_message);
+        else {
+          showTip('tip-success', '创建/修改成功');
+          refreshAward();
+        }
+      });
+    };
+
+    var openAddAwardWizard = function() {
+      $uibModal.open({
+        templateUrl: 'awardModel.html',
+        controller: function($scope, $uibModalInstance) {
+          $scope.data = formData;
+
+          $scope.cancel = function() {
+            $uibModalInstance.dismiss('cancel');
+          };
+
+          $scope.addAward = function() {
+            createAward();
+            $uibModalInstance.close();
+          };
+        },  // end controller
+      });
+    };
+
+    $scope.delete = function(id) {
+      dialog.confirm({
+        title: '提示',
+        body: '确认删除此奖项?'
+      }).then(function() {
+        return deleteAward(id);
+      }).then(function(data) {
+        if(data.error)
+          showTip('tip-danger', data.error.friendly_message);
+        else {
+          showTip('tip-success', '删除成功');
+          return refreshAward();
+        }
+      });
+    };
+
+    $scope.edit = function(idx) {
+      formData = activity.awards[idx];
+      openAddAwardWizard();
+    };
+
+    $scope.add = function() {
+      formData = {
+        name: '',
+        award_url: '',
+        level: 5,
+        quota: 1,
+        description: '',
+      };
+      openAddAwardWizard();
+    };
   })
   .controller('veController', function($rootScope, $scope, $stateParams, $filter, activityService, $cookies, FileUploader, activity, api) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.VIRTUAL_ENVIRONMENT');
@@ -716,36 +1086,306 @@ angular.module('oh.controllers', [])
     }
 
   })
-  .controller('monitorController', function($rootScope, $scope, stateParams, activityService, api) {
+  .controller('monitorController', function($rootScope, $scope, $stateParams, activityService, api) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.ENVIRONMENTAL_MONITOR');
-    var currentHackathon = $stateParams.name;
-    api.admin.experiment.list.get({
-      query: data,
-      header: {
-        hackathon_name: currentHackathon
-      }
-    }).then(function(data) {
-      if (data.error) {
-        $scope.$emit('showTip', {
-          level: 'tip-danger',
-          content: data.error.friendly_message
-        });
-      } else {
-        $scope.experiment = data;
-      }
-    })
 
+    var activity = activityService.getCurrentActivity();
+    $scope.data = {
+      "experiments": []
+    }
+    // filterCondition -1:all, 2:running, 3:stopped, 5:fail
+    $scope.filterExperimentCondition = -1;
+    $scope.searchKeyword = "";
+
+    $scope.filterExperiments = function(item) {
+      if($scope.filterExperimentCondition == -1)
+        return true;
+      return item.status== $scope.filterExperimentCondition;
+    }
+
+    function showTip(level, content, showTime) {
+      $scope.$emit('showTip', {
+        level: level,
+        content: content,
+        showTime: showTime || 3000
+      });
+    };
+
+    $scope.updateExperiment = function(experiment) {
+      showTip('tip-danger', "暂时不支持更新操作");
+    }
+
+    $scope.deleteExperiment = function(experiment) {
+      showTip('tip-danger', "暂时不支持删除操作");
+    }
+
+    $scope.searchExperiment = function() {
+      if($scope.searchKeyword == "") {
+        pageLoad();
+        return
+      }
+
+      api.admin.experiment.list.get({
+        header: {
+          hackathon_name: activity.name
+        },
+        query: {
+          user_name: $scope.searchKeyword
+        }
+      }).then(function(data) {
+        if (data.error) {
+          showTip('tip-danger', data.error.friendly_message);
+        } else {
+          if(data.length == 0)
+            showTip('tip-danger', "未找到满足要求的结果");
+          $scope.data.experiments = data;
+          $scope.filterExperimentCondition = -1;
+        }
+      })
+    }
+
+    function pageLoad() {
+      api.admin.experiment.list.get({
+        header: {
+          hackathon_name: activity.name
+        }
+      }).then(function(data) {
+        if (data.error) {
+          showTip('tip-danger', data.error.friendly_message);
+        } else {
+          $scope.data.experiments = data;
+          $scope.filterExperimentCondition = -1;
+          $scope.searchKeyword = ""
+        }
+      })
+    }
+
+    pageLoad();
   })
   .controller('cloudController', function($rootScope, $scope, activityService, api) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.CLOUD_RESOURCES');
 
   })
-  .controller('serversController', function($rootScope, $scope, activityService, api) {
+  .controller('azurecertController', function($rootScope, $scope, $stateParams, activityService, api, dialog) {
+    $scope.$emit('pageName', 'ADVANCED_SETTINGS.AZURECERT');
+    var isDeleteCerDisabled = false;
+    $scope.azureFormDisabled = false;
+    $scope.azure = {
+      management_host: 'management.core.chinacloudapi.cn',
+    };
+
+
+    function getAzureCer() {
+      api.admin.azure.get({
+        header: {
+          hackathon_name: $stateParams.name
+        }
+      }).then(function(data) {
+        $scope.azurecerts = data;
+        // console.log(data);
+      });
+    }
+
+    $scope.checksubid = function(ecert) {
+      api.admin.azure.checksubid.post({
+        body: {
+          subscription_id: ecert.subscription_id
+        },
+        header: {
+          hackathon_name: $stateParams.name
+        }
+      }).then(function(data) {
+        if (!data.message) {
+          $scope.$emit('showTip', {
+            level: 'tip-warning',
+            content: '证书授权失败，请检验SUBSCRIPTION ID是否正确。'
+          });
+        } else {
+          $scope.$emit('showTip', {
+            level: 'tip-success',
+            content: '检验成功。'
+          });
+          ecert.verified = true;
+        }
+      })
+    };
+
+
+    $scope.azureFormSubmit = function() {
+      $scope.azureFormDisabled = true;
+      api.admin.azure.post({
+        body: $scope.azure,
+        header: {
+          hackathon_name: $stateParams.name
+        }
+      }).then(function(azure_key) {
+        if (azure_key.error) {
+          $scope.$emit('showTip', {
+            level: 'tip-danger',
+            content: azure_key.error.friendly_message
+          });
+        } else {
+          $scope.$emit('showTip', {
+            level: 'tip-success',
+            content: '创建SUBSCRIPTION ID成功'
+          });
+          $scope.azure.subscription_id = '';
+          $scope.azure.management_host = 'management.core.chinacloudapi.cn';
+        }
+        $scope.azureFormDisabled = false;
+      });
+    };
+
+
+    $scope.deleteCert = function(id) {
+      if (!isDeleteCerDisabled) {
+        isDeleteCerDisabled = !isDeleteCerDisabled;
+        dialog.confirm({
+          title: '提示',
+          body: '确定删除此Azure证书？',
+          icon: 'fa-exclamation',
+          size: 'sm',
+          status: 'warning'
+        }).then(function() {
+          api.admin.azure.delete({
+            header: {
+              hackathon_name: $stateParams.name
+            },
+            query: {
+              certificate_id: id
+            }
+          }).then(function(data) {
+            if (data.error) {
+              $scope.$emit('showTip', {
+                level: 'tip-danger',
+                content: data.error.friendly_message
+              });
+            } else {
+              $scope.$emit('showTip', {
+                level: 'tip-success',
+                content: '删除成功'
+              });
+              getAzureCer();
+            }
+            isDeleteCerDisabled = !isDeleteCerDisabled;
+          });
+        })
+      }
+    }
+
+
+    getAzureCer();
+  })
+  .controller('serversController', function($rootScope, $scope, $stateParams, $uibModal, $cookies, activityService, api, dialog) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.SERVERS');
+
+    var refresh = function(){
+      api.admin.hostserver.list.get({
+          header: {
+            hackathon_name: $stateParams.name,
+            token: $cookies.get('token')
+          }
+        }).then(function(data){
+          if(data.error){
+            $scope.$emit('showTip', { level: 'tip-danger', content: data.error.friendly_message});
+          }else{
+            $scope.data = data
+          }
+        })
+    }
+
+    var afterAdd = function(new_server){
+      $scope.$emit('showTip', { level: 'tip-success', content: "添加成功"});
+      $scope.data.push(new_server)
+    }
+
+    var afterUpdate = function(new_server){
+      $scope.$emit('showTip', { level: 'tip-success', content: "更新成功"});
+      $scope.data = $scope.data.map(function(server){
+        if(server.id==new_server.id){
+          return new_server
+        }else{
+          return server
+        }
+      })
+    }
+
+    var openModel = function(data){
+      $uibModal.open({
+        templateUrl: 'serverModel.html',
+        controller: function($scope, $stateParams, $uibModalInstance, $cookies, api) {
+          $scope.data = data;
+
+          $scope.cancel = function() {
+            $uibModalInstance.dismiss('cancel');
+          };
+
+          $scope.add_server = function() {
+            var fn, af;
+            if(data.id){
+              fn = api.admin.hostserver.put
+              af = afterUpdate
+            }else{
+              fn = api.admin.hostserver.post
+              af = afterAdd
+            }
+            fn({
+              body: $scope.data,
+              header: {
+                hackathon_name: $stateParams.name,
+                token: $cookies.get('token')
+              }
+            }).then(function(data){
+              if(data.error){
+                $scope.$emit('showTip', { level: 'tip-danger', content: data.error.friendly_message});
+              }else{
+                af(data)
+              }
+              $uibModalInstance.close();
+            })
+          };
+        },  // end controller
+      })
+    }
+
+    $scope.add = function(){
+      openModel({})
+    }
+
+    $scope.edit = function(server){
+      openModel(server)
+    }
+
+    $scope.delete = function(server_id){
+      api.admin.hostserver.delete({
+        query: {
+          id: server_id
+        },
+        header: {
+          hackathon_name: $stateParams.name,
+          token: $cookies.get('token')
+        }
+      }).then(function(data){
+        if(data.error){
+          $scope.$emit('showTip', { level: 'tip-danger', content: data.error.friendly_message});
+        }else{
+          $scope.$emit('showTip', { level: 'tip-success', content: "删除成功"});
+          $scope.data = $scope.data.filter(function(server){
+            return server.id != server_id
+          })
+        }
+      })
+    }
+
+    $scope.getState = function(state){
+      desc= {0:"创建中", 1:"创建中", 2:"可用", 3:"不可用"}
+      return desc[state] || ""
+    }
+
+    refresh()
   })
   .controller('createController', function($scope, $timeout, $filter, $cookies, $state, $stateParams, FileUploader, dialog, api) {
     var request;
-    console.log($stateParams.name);
     $scope.wizard = 1;
     $scope.isShowAdvancedSettings = true;
 

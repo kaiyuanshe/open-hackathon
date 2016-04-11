@@ -23,6 +23,7 @@
     "VIRTUAL_ENVIRONMENT": "虚拟环境",
     "ENVIRONMENTAL_MONITOR": "环境监控",
     "CLOUD_RESOURCES": "云资源",
+    "AZURECERT": "Azure订阅",
     "SERVERS": "服务器"
   },
   "ACTIVITY_STATUS": {
@@ -36,6 +37,7 @@
     "REJECT": "拒绝",
     "AUTO_PASS": "自动通过"
   },
+
   "ALL_USERS": "全部用户",
   "CREATE": "增加",
   "UPDATE": "更新",
@@ -49,6 +51,10 @@
     "BANNER": "海报图",
     "DETAILS": "活动详情",
     "PROVIDERS": "登陆方式"
+  },
+  "AZURECERT_TABS": {
+    "AZURECERT_LIST": "Azure证书列表",
+    "CREATE_AZURECERT": "创建Azure证书"
   },
   "ACTIVITY_FIELDS": {
     "NAME": "名称",
@@ -128,6 +134,16 @@
     "AUDIT_REFUSE": "自动通过",
     "AUTO_PASSED": "未审核"
   },
+  "EXPERIMENT_STATUS": {
+    "INIT": "初始化",
+    "STARTING": "正在启动",
+    "RUNNING": "正在运行",
+    "STOPPED": "停止运行",
+    "FAILED": "启动失败",
+    "ROLL_BACKING": "正在回滚",
+    "ROLL_BACKED": "已回滚",
+    "UNEXPCTED_ERROR": "未知错误"
+  },
   "ADMIN_WEBPAGE_FIELDS": {
     "NAME": "名称",
     "NICKNAME": "昵称",
@@ -138,7 +154,20 @@
     "LASTLOGINTIME": "最后登录时间",
     "CREATETIME": "创建时间",
     "REMARK": "备注",
+    "CREATE_ADMIN": "增加管理员",
     "ADMIN_SEARCH_HINT": "用户名/昵称/邮箱",
     "SEARCH": "搜索"
+  },
+  "EXPERIMENT_WEBPAGE_FIELDS": {
+    "USERNAME": "用户名",
+    "EXPERIMENT_ID": "环境ID",
+    "EXPERIMENT_STATUS": "环境状态",
+    "LAST_HEARTBEAT_TIME": "最后心跳时间",
+    "CREATE_TIME": "创建时间",
+    "VM_LOCATED": "所属VM",
+    "OPERATION": "操作",
+    "ALL_STATUS": "全部状态",
+    "SEARCH": "搜索",
+    "SEARCH_EXPERIMENT_HINT": "输入完整的用户名"
   }
 }

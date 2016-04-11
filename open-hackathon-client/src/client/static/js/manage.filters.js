@@ -38,14 +38,6 @@ angular.module('oh.filters', [])
       }
       return [];
     }
-  }).filter('join', function() {
-    return function(list, filler) {
-      filler = filler || ',';
-      if (list) {
-        return list.join(filler);
-      }
-      return '';
-    }
   }).filter('defBanner', function() {
     return function(array) {
       return array.length > 0 ? array[0] : '/static/pic/homepage.jpg';
@@ -73,6 +65,18 @@ angular.module('oh.filters', [])
        }
        return '';
     }
+  }).filter('joinEmails', function() {
+    return function(list, filler) {
+      filler = filler || ',';
+      emailList = []
+      if (list) {
+        for(var index in list)
+          if("email" in list[index])
+            emailList.push(list[index].email);
+        return emailList.join(filler);
+      }
+      return '';
+    }
   }).filter('hackUserStatus', function($translate){
     return function(status) {
       switch(status) {
@@ -90,6 +94,32 @@ angular.module('oh.filters', [])
         case 1: return $translate.instant('HACK_USER_TYPE.ADMIN');
         case 2: return $translate.instant('HACK_USER_TYPE.JUDGE');
         case 3: return $translate.instant('HACK_USER_TYPE.COMPETITOR');
+        default: return '';
+      }
+    }
+  }).filter('joinVMs', function() {
+    return function(list, filler) {
+      filler = filler || ',';
+      vmList = []
+      if (list) {
+        for(var index in list)
+          if("name" in list[index])
+            vmList.push(list[index].name);
+        return vmList.join(filler);
+      }
+      return '';
+    }
+  }).filter('exprStatus', function($translate){
+    return function(type) {
+      switch(type) {
+        case 0: return $translate.instant('EXPERIMENT_STATUS.INIT');
+        case 1: return $translate.instant('EXPERIMENT_STATUS.STARTING');
+        case 2: return $translate.instant('EXPERIMENT_STATUS.RUNNING');
+        case 3: return $translate.instant('EXPERIMENT_STATUS.STOPPED');
+        case 5: return $translate.instant('EXPERIMENT_STATUS.FAILED');
+        case 6: return $translate.instant('EXPERIMENT_STATUS.ROLL_BACKING');
+        case 7: return $translate.instant('EXPERIMENT_STATUS.ROLL_BACKED');
+        case 8: return $translate.instant('EXPERIMENT_STATUS.UNEXPCTED_ERROR');
         default: return '';
       }
     }

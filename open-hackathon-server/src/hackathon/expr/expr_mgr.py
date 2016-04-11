@@ -80,16 +80,15 @@ class ExprManager(Component):
     def stop_expr(self, expr_id):
         """
         :param expr_id: experiment id
-        :param force: 0: only stop container and release ports, 1: force stop and delete container and release ports.
         :return:
         """
-        self.log.debug("begin to stop %d" % expr_id)
-        expr = Experiment.objects(id=expr_id, status=EStatus.RUNNING)
+        self.log.debug("begin to stop %s" % str(expr_id))
+        expr = Experiment.objects(id=expr_id, status=EStatus.RUNNING).first()
         if expr is not None:
             starter = self.get_starter(expr.hackathon, expr.template)
             if starter:
-                starter.stop_expr(Context(experiment=expr))
-            self.log.debug("experiment %d ended success" % expr_id)
+                starter.stop_expr(Context(experiment_id=expr.id, experiment=expr))
+            self.log.debug("experiment %s ended success" % expr_id)
             return ok('OK')
         else:
             return ok()
@@ -110,14 +109,16 @@ class ExprManager(Component):
             self.db.commit()
             self.template_library.template_verified(experiment.template.id)
 
-    def get_expr_list_by_hackathon_id(self, hackathon_id, **kwargs):
+    def get_expr_list_by_hackathon_id(self, hackathon_id, user_name, status):
         # get a list of all experiments' detail
-        condition = self.__get_filter_condition(hackathon_id, **kwargs)
-        experiments = self.db.find_all_objects(Experiment, condition)
+        experiments = Experiment.objects(status=status).all() if status else Experiment.objects().all()
+
+        if user_name and not user_name == "":
+            experiments = [experiment for experiment in experiments if experiment.user.name == user_name]
         return [self.__get_expr_with_detail(experiment) for experiment in experiments]
 
     def scheduler_recycle_expr(self):
-        """recycle experiment acrroding to hackathon basic info on recycle configuration
+        """recycle experiment according to hackathon basic info on recycle configuration
 
         According to the hackathon's basic info on 'recycle_enabled', find out time out experiments
         Then call function to recycle them
@@ -128,13 +129,10 @@ class ExprManager(Component):
         for hackathon in self.hackathon_manager.get_recyclable_hackathon_list():
             # check recycle enabled
             mins = self.hackathon_manager.get_recycle_minutes(hackathon)
-            expr_time_cond = Experiment.create_time < self.util.get_now() - timedelta(minutes=mins)
-            status_cond = Experiment.status == EStatus.RUNNING
             # filter out the experiments that need to be recycled
-            exprs = self.db.find_all_objects(Experiment,
-                                             status_cond,
-                                             expr_time_cond,
-                                             Experiment.hackathon_id == hackathon.id)
+            exprs = Experiment.objects(create_time__lt=self.util.get_now() - timedelta(minutes=mins),
+                                       status=EStatus.RUNNING,
+                                       hackathon=hackathon)
             for expr in exprs:
                 self.__recycle_expr(expr)
 
@@ -362,7 +360,7 @@ class ExprManager(Component):
         roll back when exception occurred
         :param expr_id: experiment id
         """
-        self.log.debug("Starting rollback experiment %d..." % expr_id)
+        self.log.debug("Starting rollback experiment %s..." % expr_id)
         expr = Experiment.objects(id=expr_id)
         if not expr:
             self.log.warn("rollback failed due to experiment not found")
@@ -381,18 +379,6 @@ class ExprManager(Component):
         info['user'] = self.user_manager.user_display_info(experiment.user)
         return info
 
-    def __get_filter_condition(self, hackathon_id, **kwargs):
-        condition = Experiment.hackathon_id == hackathon_id
-        # check status: -1 means query all status
-        if kwargs['status'] != -1:
-            condition = and_(condition, Experiment.status == kwargs['status'])
-        # check user name
-        if len(kwargs['user_name']) > 0:
-            users = self.db.find_all_objects(User, User.nickname.like('%' + kwargs['user_name'] + '%'))
-            uids = map(lambda x: x.id, users)
-            condition = and_(condition, Experiment.user_id.in_(uids))
-        return condition
-
     def __recycle_expr(self, expr):
         """recycle expr
 
@@ -403,7 +389,7 @@ class ExprManager(Component):
 
         :return:
         """
-        providers = map(lambda x: x.provider, expr.virtual_environments.all())
+        providers = map(lambda x: x.provider, expr.virtual_environments)
         if VE_PROVIDER.DOCKER in providers:
             self.stop_expr(expr.id)
             self.log.debug("it's stopping " + str(expr.id) + " inactive experiment now")

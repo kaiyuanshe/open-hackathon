@@ -31,7 +31,6 @@
         "properties": {
           "certificate_id": {
             "type": "string",
-            "pattern":"^[0-9]+$",
             "description": "id of certificate in table HackathonAzureKey"
           }
         }

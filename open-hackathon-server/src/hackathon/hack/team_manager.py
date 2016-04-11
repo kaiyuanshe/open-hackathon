@@ -571,7 +571,7 @@ class TeamManager(Component):
             awards += team.awards
 
         awards = [self.__award_with_detail(r) for r in awards]
-        awards.sort(lambda a, b: (b.level - a.level) * 10 + int(a.create_time < b.create_time))
+        awards.sort(lambda a, b: b["level"] - a["level"])
 
         return awards
 
@@ -600,22 +600,14 @@ class TeamManager(Component):
         if team.hackathon.id != hackathon.id:
             return precondition_failed("hackathon doesn't match")
 
-        team_award = filter(lambda a: str(a.award_id) == context.award_id, team.awards)
+        team_award = filter(lambda a: str(a) == context.award_id, team.awards)
         assert len(team_award) < 2
 
-        if team_award:
-            team_award = team_award[0]
-            team_award.reason = context.get("reason", team_award.reason)
-        else:
-            team_award = TeamAward(
-                award_id=uuid.UUID(context.award_id),
-                reason=context.get("reason"),
-                level=award.level)
-            team.awards.append(team_award)
+        if not team_award:
+            team.awards.append(uuid.UUID(context.award_id))
+            team.save()
 
-        team.save()
-
-        return self.__award_with_detail(team_award, award)
+        return self.__award_with_detail(context.award_id)
 
     def cancel_team_award(self, hackathon, team_id, award_id):
         team = self.__get_team_by_id(team_id)
@@ -623,7 +615,7 @@ class TeamManager(Component):
             return not_found()
 
         for award in team.awards:
-            if str(award.award_id) == award_id:
+            if str(award) == award_id:
                 team.awards.remove(award)
                 team.save()
                 break
@@ -633,30 +625,34 @@ class TeamManager(Component):
     def __init__(self):
         pass
 
-    def __award_with_detail(self, team_award, award=None, hackathon=None):
-        dic = to_dic(team_award)
-
+    def __award_with_detail(self, team_award, hackathon=None):
         if not hackathon:
             hackathon = g.hackathon
 
-        if not award:
-            award = filter(lambda a: a.id == team_award.award_id, hackathon.awards)[0]
+        try:
+            award = filter(lambda a: str(a.id) == str(team_award), hackathon.awards)[0]
+        except IndexError:
+            return None
 
-        dic["award"] = to_dic(award)
-        return dic
+        return to_dic(award)
 
     def __team_detail(self, team, user=None):
         resp = team.dic()
         resp["leader"] = self.user_manager.user_display_info(team.leader)
         resp["member_count"] = team.members.filter(status=TEAM_MEMBER_STATUS.APPROVED).count()
         # all team action not allowed if frozen
-        resp["is_frozen"] = team.hackathon.judge_start_time < self.util.get_now()
+        resp["is_frozen"] = team.hackathon.judge_start_time > self.util.get_now() or \
+                            team.hackathon.judge_end_time < self.util.get_now()
+
+        for i in xrange(0, len(team.members)):
+            mem = team.members[i]
+            resp["members"][i]["user"] = self.user_manager.user_display_info(mem.user)
 
         if user:
             resp["is_admin"] = self.admin_manager.is_hackathon_admin(team.hackathon.id, user.id)
             resp["is_leader"] = team.leader == user
             rel = team.members.filter(user=user)
-            resp["is_member"] = True if not rel==[] else False
+            resp["is_member"] = True if not rel == [] else False
 
         return resp
 

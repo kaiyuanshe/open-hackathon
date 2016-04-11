@@ -75,12 +75,13 @@
     <script id="like_event_item" type="text/x-jquery-tmpl">
     {% raw %}
     <div class="event-item" data-parent>
-        <a href="/site/${name}">
-            <img src="${$item.get_banner(banners)}" onload="oh.comm.imgLoad(this)" onerror="javascript:this.src='/static/pic/homepage.jpg'">
+        <a href="/site/${hackathon_info.name}">
+            <img src="${$item.get_banner(hackathon_info.banners)}" onload="oh.comm.imgLoad(this)" onerror="javascript:this.src='/static/pic/homepage.jpg'">
         </a>
-        <p>${display_name}</p>
+        <p>${hackathon_info.display_name}</p>
     </div>
     {% endraw %}
+
 
     </script>
     <script id="my_event_item" type="text/x-jquery-tmpl">
@@ -110,34 +111,36 @@
     </div>
     {% endraw %}
 
+
     </script>
     <script id="my_register_event_item" type="text/x-jquery-tmpl">
     {% raw %}
     <div class="cbox">
         <div class="cbox-header" data-parent>
-            <a href="/site/${name}">
-                <img src="${$item.get_banner(banners)}" onload="oh.comm.imgLoad(this)" onerror="javascript:this.src='/static/pic/homepage.jpg'">
+            <a href="/site/${hackathon_info.name}">
+                <img src="${$item.get_banner(hackathon_info.banners)}" onload="oh.comm.imgLoad(this)" onerror="javascript:this.src='/static/pic/homepage.jpg'">
             </a>
         </div>
         <div class="cbox-warp">
-            <div class="title"><a href="/site/${name}">${display_name}</a></div>
+            <div class="title"><a href="/site/${hackathon_info.name}">${hackathon_info.display_name}</a></div>
             <div class="clearfix cbox-time">
                 <div class="left">
                     <span class="fa fa-calendar"></span>
-                    ${moment(event_start_time).format('YY/MM/DD')}
+                    ${moment(hackathon_info.event_start_time).format('YY/MM/DD')}
                 </div>
-                <div class="right"><span class="fa fa-map-marker"></span> ${$item.get_location(config.location)}
+                <div class="right"><span class="fa fa-map-marker"></span> ${$item.get_location(hackathon_info.location)}
                 </div>
             </div>
         </div>
         <div class="cbox-warp">
-        ${tag}&nbsp;
+        ${hackathon_info.tags.join()}
         </div>
         <div class="cbox-footer">
-            <i class="fa fa-heart"> <span>${stat.like || 0}</span> </i>
+            <i class="fa fa-heart"> N/A</i>
         </div>
     </div>
     {% endraw %}
+
 
     </script>
     <script type="text/javascript" src="/static/js/jquery/moment.min.js"></script>

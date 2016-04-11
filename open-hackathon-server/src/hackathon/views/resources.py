@@ -170,7 +170,7 @@ class UserLoginResource(HackathonResource):
 class UserResource(HackathonResource):
     def get(self):
         parse = reqparse.RequestParser()
-        parse.add_argument("user_id", type=int, location="args", required=False)
+        parse.add_argument("user_id", type=str, location="args", required=False)
         args = parse.parse_args()
 
         uid = args["user_id"] or None
@@ -238,13 +238,9 @@ class UserRegistrationResource(HackathonResource):
 class UserHackathonListResource(HackathonResource):
     def get(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('user_id', type=int, location='args', required=False)
+        parse.add_argument('user_id', type=str, location='args', required=False)
         args = parse.parse_args()
-        query_uid = args["user_id"] or 0
-        if query_uid == g.user.id or query_uid == 0:
-            user_id = g.user.id
-        else:
-            user_id = query_uid
+        user_id = args["user_id"] or g.user.id
         return hackathon_manager.get_user_hackathon_list_with_detail(user_id)
 
 
@@ -253,7 +249,7 @@ class UserHackathonLikeResource(HackathonResource):
         parse = reqparse.RequestParser()
         parse.add_argument('user_id', type=str, location='args', required=False)
         args = parse.parse_args()
-        user_id = g.user.id if args["user_id"] else args["user_id"]
+        user_id = args["user_id"] or g.user.id
         return hackathon_manager.get_userlike_all_hackathon(user_id)
 
     @hackathon_name_required
@@ -455,36 +451,17 @@ class AdminHackathonConfigResource(HackathonResource):
 
 
 class AdminHackathonOrganizerResource(HackathonResource):
-    def get(self):
-        return hackathon_manager.qet_organizer_by_id(self.context().id)
-
     @admin_privilege_required
     def post(self):
-        return hackathon_manager.create_hackathon_organizer(g.hackathon, request.get_json())
+        return hackathon_manager.create_hackathon_organizer(g.hackathon, self.context())
 
     @admin_privilege_required
     def put(self):
-        return hackathon_manager.update_hackathon_organizer(g.hackathon, request.get_json())
+        return hackathon_manager.update_hackathon_organizer(g.hackathon, self.context())
 
     @admin_privilege_required
     def delete(self):
         return hackathon_manager.delete_hackathon_organizer(g.hackathon, self.context().id)
-
-
-class AdminHackathonTags(HackathonResource):
-    @hackathon_name_required
-    def get(self):
-        return hackathon_manager.get_hackathon_tags(g.hackathon)
-
-    @admin_privilege_required
-    def post(self):
-        tags = request.get_data().split(",")
-        return hackathon_manager.set_hackathon_tags(g.hackathon, tags)
-
-    @admin_privilege_required
-    def put(self):
-        tags = request.get_data().split(",")
-        return hackathon_manager.set_hackathon_tags(g.hackathon, tags)
 
 
 class HackathonTagNamesResource(HackathonResource):
@@ -601,13 +578,9 @@ class AdminExperimentResource(HackathonResource):
 class AdminExperimentListResource(HackathonResource):
     @admin_privilege_required
     def get(self):
-        parse = reqparse.RequestParser()
-        parse.add_argument('user_name', type=str, location='args')
-        parse.add_argument('status', type=int, location='args')
-        args = parse.parse_args()
         return expr_manager.get_expr_list_by_hackathon_id(g.hackathon.id,
-                                                          user_name=args['user_name'],
-                                                          status=args['status'])
+            self.context().user_name if "user_name" in self.context() else None,
+            self.context().status if "status" in self.context() else None)
 
 
 class AdminHackathonFileResource(HackathonResource):
@@ -710,7 +683,7 @@ class AdminHostserverResource(HackathonResource):
 
     @admin_privilege_required
     def post(self):
-        return docker_host_manager.add_existed_host_server(g.hackathon.id, self.context())
+        return docker_host_manager.add_host_server(g.hackathon, self.context())
 
     @admin_privilege_required
     def put(self):
@@ -726,10 +699,12 @@ class AdminHackathonOnLineResource(HackathonResource):
     def post(self):
         return hackathon_manager.hackathon_online(g.hackathon)
 
+
 class AdminHackathonOffLineResource(HackathonResource):
     @admin_privilege_required
     def post(self):
         return hackathon_manager.hackathon_offline(g.hackathon)
+
 
 class AdminHackathonNoticeResource(HackathonResource):
     @admin_privilege_required

@@ -23,7 +23,7 @@
 // -----------------------------------------------------------------------------------
 
 angular.module('oh.pages', [])
-  .constant('VERSION', '0.1.7')
+  .constant('VERSION', '0.2.0')
   .value('NAV', {
     manage: [{
       name: "SETTINGS.MAIN",
@@ -68,6 +68,10 @@ angular.module('oh.pages', [])
         name: "ADVANCED_SETTINGS.CLOUD_RESOURCES",
         state: "manage.cloud",
         icon: 'fa-upload'
+      }, {
+        name: "ADVANCED_SETTINGS.AZURECERT",
+        state: "manage.azurecert",
+        icon: 'fa-cloud-upload'
       }, {
         name: "ADVANCED_SETTINGS.SERVERS",
         state: "manage.servers",
