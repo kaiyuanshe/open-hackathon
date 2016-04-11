@@ -177,10 +177,8 @@ class HackathonManager(Component):
         return [get_user_hackathon_detail(rel) for rel in user_hackathon_rels]
 
     def get_recyclable_hackathon_list(self):
-        # todo fix auto recycle
-        # all_hackathon = self.db.find_all_objects(Hackathon)
-        # return filter(lambda h: self.is_recycle_enabled(h), all_hackathon)
-        return []
+        hackathons = Hackathon.objects().all()
+        return filter(lambda h: self.is_recycle_enabled(h), hackathons)
 
     def get_entitled_hackathon_list_with_detail(self, user):
         hackathon_ids = self.admin_manager.get_entitled_hackathon_ids(user.id)
