@@ -155,7 +155,7 @@ angular.module('oh.controllers', [])
     }
 
   })
-  .controller('editController', function($rootScope, $scope, $filter, dialog, session, activityService, api, activity, speech) {
+  .controller('editController', function($rootScope, $scope, $filter, $uibModal, dialog, session, activityService, api, activity, speech) {
     $scope.$emit('pageName', 'SETTINGS.EDIT_ACTIVITY');
 
     $scope.animationsEnabled = true;
@@ -169,6 +169,7 @@ angular.module('oh.controllers', [])
     activity.config.max_enrollment = parseInt(activity.config.max_enrollment, 10) || 0;
 
     $scope.modules = activity;
+    $scope.data = {newBannerUrl: ""};
     $scope.tags = [];
     $scope.activityFormDisabled = false;
     angular.forEach($scope.modules.tags, function(value, key) {
@@ -194,7 +195,6 @@ angular.module('oh.controllers', [])
       judge_start_time: false,
       judge_end_time: false
     };
-
 
     $scope.showTip = function(level, content, showTime) {
       $scope.$emit('showTip', {
@@ -245,8 +245,10 @@ angular.module('oh.controllers', [])
       });
     };
 
-    $scope.showAddBannerDialog = function() {
-      $scope.modules.banners.push('http://image5.tuku.cn/pic/wallpaper/fengjing/shanshuilantian/014.jpg');
+    function addBanner() {
+      $scope.modules.banners.push($scope.data.newBannerUrl);
+      $scope.data.newBannerUrl = "";
+
       api.admin.hackathon.put({
         header: {
           hackathon_name: $scope.modules.name
@@ -260,6 +262,20 @@ angular.module('oh.controllers', [])
         } else {
           $scope.showTip(level = 'tip-success', content = '添加成功');
         }
+      });
+    };
+
+    $scope.showAddBannerDialog = function() {
+      var data = $scope.data;
+      $uibModal.open({
+        templateUrl: 'addBannersModel.html',
+        controller: function($scope, $uibModalInstance) {
+          $scope.data = data;
+          $scope.addBanner = addBanner;
+          $scope.cancel = function() {
+            $uibModalInstance.dismiss('cancel');
+          };
+        },
       });
     };
 
