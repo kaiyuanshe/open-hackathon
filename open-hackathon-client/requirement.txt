@@ -3,9 +3,8 @@ flask==0.10.1
 flask-debugtoolbar==0.10.0
 sqlalchemy==1.0.8
 flask-sqlalchemy==2.0
-mysql-python==1.2.5
 flask-login==0.2.11
-requests
+requests==2.8.1
 mock==1.0.1
-pytz
+pytz==2014.7
 markdown==2.6.2

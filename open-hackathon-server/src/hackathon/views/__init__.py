@@ -86,7 +86,6 @@ def init_routes():
     api.add_resource(AdminHackathonOffLineResource, "/api/admin/hackathon/offline")
     api.add_resource(AdminHackathonConfigResource, "/api/admin/hackathon/config")  # set hackathon config
     api.add_resource(AdminHackathonOrganizerResource, "/api/admin/hackathon/organizer")  # manage hackathon organizers
-    api.add_resource(AdminHackathonTags, "/api/admin/hackathon/tags")  # get or set hackathon tags
     api.add_resource(HackathonCheckNameResource, "/api/admin/hackathon/checkname")  # check hackathon name exists
     api.add_resource(AdminHackathonListResource, "/api/admin/hackathon/list")  # get entitled hackathon list
     api.add_resource(AdminAzureResource, '/api/admin/azure')  # manage azure subscription and certs

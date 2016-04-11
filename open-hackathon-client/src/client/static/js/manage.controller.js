@@ -78,7 +78,7 @@ angular.module('oh.controllers', [])
         return;
       } else {
         asyncActivity(toParams).then(function(activity) {
-            console.log(activity)
+            // console.log(activity)
             if (activity.status == -1) {
               $state.go('create', {
                 name: toParams.name
@@ -316,7 +316,6 @@ angular.module('oh.controllers', [])
       checks: {},
       perPage: 20,
       curPage: 1,
-      nPage: 0,
 
       freedomTeam: false,
       autoApprove: false
@@ -351,7 +350,6 @@ angular.module('oh.controllers', [])
 
           $scope.data.registerUsers = data;
           $scope.data.curPage = 1;
-          $scope.data.nPage = parseInt(Math.round(data.length / $scope.data.perPage));
 
           $scope.data.autoApprove = activity.config.auto_approve;
           $scope.data.freedomTeam = activity.config.freedom_team;
@@ -653,33 +651,76 @@ angular.module('oh.controllers', [])
     // init the page and load admins-list
     pageLoad();
   })
-  .controller('organizersController', function($rootScope, $scope, $cookies, activityService, api) {
+  .controller('organizersController', function($rootScope, $scope, $stateParams, $uibModal, $cookies, activityService, api) {
     $scope.$emit('pageName', 'SETTINGS.ORGANIZERS');
 
     // very quick and rough implementation, please feel free to update
-    $scope.data = $scope.activity = activityService.getCurrentActivity();
-    $scope.$on('chargeActitity', function(event) {
-      $scope.data = $scope.activity = activityService.getCurrentActivity();
-      event.preventDefault();
-    })
+    var refresh = function(data){
+      if(data){
+        $scope.data = data
+        return
+      }
 
-    $scope.orgFormSubmit = function(){
-      api.admin.hackathon.organizer.post({
-        body: $scope.org,
+      api.admin.hackathon.get({
         header: {
-          hackathon_name: $scope.activity.name,
-          token: $cookies.get('token')
+          hackathon_name: $stateParams.name
         }
       }).then(function(data){
         if(data.error){
-          $scope.$emit('showTip', {
-            level: 'tip-danger',
-            content: data.error.friendly_message
-          });
+          $scope.$emit('showTip', { level: 'tip-danger', content: data.error.friendly_message});
         }else{
-          $scope.showTip(level = 'tip-success', content = '修改成功');
+           $scope.$emit('showTip', {
+            level: 'tip-success',
+            content: '添加成功'
+          });
+          $scope.data = data
         }
       })
+    }
+
+    var openModel = function(org){
+      $uibModal.open({
+        templateUrl: 'orgModel.html',
+        controller: function($scope, $stateParams, $uibModalInstance, $cookies, api) {
+          $scope.org = org;
+
+          $scope.cancel = function() {
+            $uibModalInstance.dismiss('cancel');
+          };
+
+          $scope.add_organizer = function() {
+            var fn;
+            if(org.id){
+              fn = api.admin.hackathon.organizer.put
+            }else{
+              fn = api.admin.hackathon.organizer.post
+            }
+            fn({
+              body: $scope.org,
+              header: {
+                hackathon_name: $stateParams.name,
+                token: $cookies.get('token')
+              }
+            }).then(function(data){
+              if(data.error){
+                $scope.$emit('showTip', { level: 'tip-danger', content: data.error.friendly_message});
+              }else{
+                $scope.$emit('showTip', { level: 'tip-success', content: "操作成功"});
+                refresh(data)
+              }
+              $uibModalInstance.close();
+            })
+          };
+        },  // end controller
+      })
+    }
+
+    $scope.edit = function(org){
+      openModel(org)
+    }
+
+    $scope.add = function(){
+      openModel({})
     }
 
     $scope.delete_organizer = function(organizer_id){
@@ -688,29 +729,120 @@ angular.module('oh.controllers', [])
             id: organizer_id
           },
           header: {
-            hackathon_name: $scope.activity.name,
+            hackathon_name: $stateParams.name,
             token: $cookies.get('token')
           }
         }).then(function(data){
           if(data.error){
-            $scope.$emit('showTip', {
-              level: 'tip-danger',
-              content: data.error.friendly_message
-            });
+            $scope.$emit('showTip', {level: 'tip-danger', content: data.error.friendly_message });
           }else{
+            $scope.$emit('showTip', {level: 'tip-success', content: "删除成功" });
             $scope.data.organizers = $scope.data.organizers.filter(function(organizer){
               return organizer.id != organizer_id
-            })
-            $scope.data.partners = $scope.data.partners.filter(function(partner){
-              return partner.id != organizer_id
             })
           }
         })
     }
+
+    refresh()
   })
-  .controller('awardsController', function($rootScope, $scope, activityService, api) {
+  .controller('awardsController', function($rootScope, $scope, $q, activityService, api) {
     $scope.$emit('pageName', 'SETTINGS.AWARDS');
 
+    var activity = activityService.getCurrentActivity();
+    var data = $scope.data = {
+      grantedAwards: [],
+      awards: [],
+      teams: [],
+      awardsMap: [],
+      searchText: '',
+
+      perPage: 6,
+      curPage: 1,
+    };
+
+    $scope.$on('chargeActitity', function() {
+      activity = activityService.getCurrentActivity();
+      refresh();
+    });
+
+    $scope.grantAward = function(awardId, teamId) {
+      grantAward(awardId, teamId);
+    };
+
+    $scope.cancelAward = function(awardId, teamId) {
+      cancelAward(awardId, teamId);
+    }
+
+    function cancelAward(awardId, teamId) {
+      return api.admin.team.award.delete({
+        header: {hackathon_name: activity.name},
+        query: {
+          award_id: awardId,
+          team_id: teamId
+        }
+      }).then(function(data) {
+        if(data.error) {
+          showTip('tip-danger', error.friendly_message);
+          return ;
+        }
+
+        showTip('tip-success', '删除成功');
+
+        return refresh();
+      });
+    }
+
+    function grantAward(awardId, teamId) {
+      return api.admin.team.award.post({
+        header: {hackathon_name: activity.name},
+        body: {
+          award_id: awardId,
+          team_id: teamId
+        }
+      }).then(function(data) {
+        if(data.error) {
+          showTip('tip-danger', error.friendly_message);
+          return ;
+        }
+
+        showTip('tip-success', '颁奖成功');
+
+        return refresh();
+      });
+    }
+
+    function refresh() {
+      return $q.all([
+        api.hackathon.grantedawards.get({header: {hackathon_name: activity.name}}),
+        api.admin.hackathon.award.list.get({header: {hackathon_name: activity.name}}),
+        api.hackathon.team.list.get({header: {hackathon_name: activity.name}}),
+      ]).then(function(res) {
+        if(res[0].error || res[1].error || res[2].error) {
+          throw res[0].error || res[1].error || res[2].error;
+        }
+
+        data.grantedAwards = res[0];
+        data.awards = res[1];
+        data.teams = res[2];
+
+        var i;
+        for(i = 0;i < data.awards.length;i ++) {
+          data.awardsMap[data.awards[i].id] = data.awards[i];
+        }
+
+        return data;
+      }).catch(function(error) {
+        showTip('tip-danger', error.friendly_message);
+      });
+    }
+
+    function showTip(level, msg) {
+      $scope.$emit('showTip', {
+        level: level,
+        content: msg
+      });
+    };
   })
   .controller('prizesController', function($rootScope, $scope, $uibModal, activityService, api, dialog) {
     $scope.$emit('pageName', 'SETTINGS.PRIZES');
@@ -792,14 +924,11 @@ angular.module('oh.controllers', [])
           };
 
           $scope.addAward = function() {
-            createAward()
+            createAward();
             $uibModalInstance.close();
           };
         },  // end controller
-      })
-
-      // handel create
-      .result.then(createAward);
+      });
     };
 
     $scope.delete = function(id) {
@@ -1053,7 +1182,7 @@ angular.module('oh.controllers', [])
         }
       }).then(function(data) {
         $scope.azurecerts = data;
-        console.log(data);
+        // console.log(data);
       });
     }
 
@@ -1147,13 +1276,13 @@ angular.module('oh.controllers', [])
 
     getAzureCer();
   })
-  .controller('serversController', function($rootScope, $scope, $uibModal, $cookies, activityService, api, dialog) {
+  .controller('serversController', function($rootScope, $scope, $stateParams, $uibModal, $cookies, activityService, api, dialog) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.SERVERS');
-    var activity = activityService.getCurrentActivity();
+
     var refresh = function(){
       api.admin.hostserver.list.get({
           header: {
-            hackathon_name: activity.name,
+            hackathon_name: $stateParams.name,
             token: $cookies.get('token')
           }
         }).then(function(data){
@@ -1181,15 +1310,10 @@ angular.module('oh.controllers', [])
       })
     }
 
-    $scope.$on('chargeActitity', function() {
-      activity = activityService.getCurrentActivity();
-      refresh();
-    });
-
     var openModel = function(data){
       $uibModal.open({
         templateUrl: 'serverModel.html',
-        controller: function($scope, $uibModalInstance, $cookies, api) {
+        controller: function($scope, $stateParams, $uibModalInstance, $cookies, api) {
           $scope.data = data;
 
           $scope.cancel = function() {
@@ -1208,7 +1332,7 @@ angular.module('oh.controllers', [])
             fn({
               body: $scope.data,
               header: {
-                hackathon_name: activity.name,
+                hackathon_name: $stateParams.name,
                 token: $cookies.get('token')
               }
             }).then(function(data){
@@ -1238,7 +1362,7 @@ angular.module('oh.controllers', [])
           id: server_id
         },
         header: {
-          hackathon_name: activity.name,
+          hackathon_name: $stateParams.name,
           token: $cookies.get('token')
         }
       }).then(function(data){
@@ -1257,6 +1381,8 @@ angular.module('oh.controllers', [])
       desc= {0:"创建中", 1:"创建中", 2:"可用", 3:"不可用"}
       return desc[state] || ""
     }
+
+    refresh()
   })
   .controller('createController', function($scope, $timeout, $filter, $cookies, $state, $stateParams, FileUploader, dialog, api) {
     var request;
