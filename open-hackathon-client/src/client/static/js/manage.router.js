@@ -142,6 +142,10 @@ angular.module('oh.manage.router', [
     url: 'awards/:name',
     templateUrl: '/static/partials/manage/awards.html?v=' + VERSION,
     controller: 'awardsController'
+  }).state('manage.notices', {
+    url: 'notices/:name',
+    templateUrl: '/static/partials/manage/notices.html?v=' + VERSION,
+    controller: 'noticesController'
   }).state('manage.ve', {
     url: 've/:name',
     templateUrl: '/static/partials/manage/ve.html?v=' + VERSION,
