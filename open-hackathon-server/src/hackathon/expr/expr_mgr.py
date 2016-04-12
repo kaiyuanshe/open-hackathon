@@ -35,7 +35,7 @@ from mongoengine import Q
 from hackathon import Component, RequiredFeature, Context
 from hackathon.constants import EStatus, VERemoteProvider, VE_PROVIDER, VEStatus, ReservedUser, \
     HACK_NOTICE_EVENT, HACK_NOTICE_CATEGORY, CLOUD_PROVIDER, HACKATHON_CONFIG
-from hackathon.hmongo.models import Experiment, User
+from hackathon.hmongo.models import Experiment, Hackathon
 from hackathon.hackathon_response import not_found, ok
 
 __all__ = ["ExprManager"]
@@ -111,11 +111,14 @@ class ExprManager(Component):
 
     def get_expr_list_by_hackathon_id(self, hackathon_id, user_name, status):
         # get a list of all experiments' detail
-        experiments = Experiment.objects(status=status).all() if status else Experiment.objects().all()
+        query = Q()
+        if status:
+            query &= Q(status=status)
 
-        if user_name and not user_name == "":
-            experiments = [experiment for experiment in experiments if experiment.user.name == user_name]
-        return [self.__get_expr_with_detail(experiment) for experiment in experiments]
+        if user_name:
+            query &= Q(user__name=user_name)
+
+        return [self.__get_expr_with_detail(experiment) for experiment in Experiment.objects(Q)]
 
     def scheduler_recycle_expr(self):
         """recycle experiment according to hackathon basic info on recycle configuration
@@ -137,47 +140,48 @@ class ExprManager(Component):
                 self.__recycle_expr(expr)
 
     def pre_allocate_expr(self, context):
+        # TODO: too complex, not check
         hackathon_id = context.hackathon_id
         self.log.debug("executing pre_allocate_expr for hackathon %s " % hackathon_id)
-        htrs = self.db.find_all_objects_by(HackathonTemplateRel, hackathon_id=hackathon_id)
-        for rel in htrs:
+        hackathon = Hackathon.objects.get(id=hackathon_id)
+        htrs = hackathon.templates
+        for template in htrs:
             try:
-                template = rel.template
-                pre_num = rel.hackathon.get_pre_allocate_number()
-                curr_num = self.db.count(Experiment,
-                                         Experiment.user_id == ReservedUser.DefaultUserID,
-                                         Experiment.hackathon_id == hackathon_id,
-                                         Experiment.template_id == template.id,
-                                         (Experiment.status == EStatus.STARTING) | (
-                                             Experiment.status == EStatus.RUNNING))
+                pre_num = hackathon.get_pre_allocate_number()
+                curr_num = Experiment.objects(
+                    user=ReservedUser.DefaultUserID,
+                    hackathon=hackathon_id,
+                    template=template,
+                    status__in=[EStatus.STARTING, EStatus.RUNNING]).count()
+
                 if template.provider == VE_PROVIDER.AZURE:
                     if curr_num < pre_num:
                         remain_num = pre_num - curr_num
-                        start_num = self.db.count_by(Experiment,
-                                                     user_id=ReservedUser.DefaultUserID,
-                                                     template=template,
-                                                     status=EStatus.STARTING)
+                        start_num = Experiment.objects(
+                            user=ReservedUser.DefaultUserID,
+                            template=template,
+                            status=EStatus.STARTING).count()
                         if start_num > 0:
                             self.log.debug("there is an azure env starting, will check later ... ")
                             return
                         else:
                             self.log.debug(
                                 "no starting template: %s , remain num is %d ... " % (template.name, remain_num))
-                            self.start_expr(None, template.name, rel.hackathon.name)
+                            self.start_expr(None, template.name, hackathon.name)
                             break
                             # curr_num += 1
                             # self.log.debug("all template %s start complete" % template.name)
                 elif template.provider == VE_PROVIDER.DOCKER:
-                    if rel.hackathon.is_alauda_enabled():
+                    if hackathon.is_alauda_enabled():
                         # don't create pre-env if alauda used
                         continue
 
                     self.log.debug(
-                        "template name is %s, hackathon name is %s" % (template.name, rel.hackathon.name))
+                        "template name is %s, hackathon name is %s" % (template.name, hackathon.name))
                     if curr_num < pre_num:
                         remain_num = pre_num - curr_num
                         self.log.debug("no idle template: %s, remain num is %d ... " % (template.name, remain_num))
-                        self.start_expr(None, template.name, rel.hackathon.name)
+                        self.start_expr(None, template.name, hackathon.name)
                         # curr_num += 1
                         break
                         # self.log.debug("all template %s start complete" % template.name)
@@ -239,8 +243,7 @@ class ExprManager(Component):
         context = starter.start_expr(Context(
             template=template,
             user=user,
-            hackathon=hackathon
-        ))
+            hackathon=hackathon))
 
         return self.__report_expr_status(context.experiment)
 
@@ -259,8 +262,7 @@ class ExprManager(Component):
             "hackathon_name": expr.hackathon.name if expr.hackathon else "",
             "hackathon": str(expr.hackathon.id) if expr.hackathon else "",
             "create_time": str(expr.create_time),
-            "last_heart_beat_time": str(expr.last_heart_beat_time),
-        }
+            "last_heart_beat_time": str(expr.last_heart_beat_time)}
 
         if expr.status != EStatus.RUNNING:
             return ret
@@ -279,8 +281,7 @@ class ExprManager(Component):
                     remote_servers.append({
                         "name": guacamole_config["name"],
                         "guacamole_host": guacamole_host,
-                        "url": url
-                    })
+                        "url": url})
 
                 except Exception as e:
                     self.log.error(e)
@@ -299,18 +300,16 @@ class ExprManager(Component):
                     if p.url:
                         public_urls.append({
                             "name": p.name,
-                            "url": p.url.format(container.host_server.public_dns, p.public_port)
-                        })
+                            "url": p.url.format(container.host_server.public_dns, p.public_port)})
         else:
-            # todo windows azure public url
             for ve in expr.virtual_environments:
-                for vm in ve.azure_virtual_machines_v.all():
-                    ep = vm.azure_endpoints.filter_by(private_port=80).first()
-                    url = 'http://%s:%s' % (vm.public_ip, ep.public_port)
-                    public_urls.append({
-                        "name": ep.name,
-                        "url": url
-                    })
+                vm = ve.azure_resource
+                ep = vm.end_points.find(private_port=80).first()
+                url = 'http://%s:%s' % (vm.public_ip, ep.public_port)
+                public_urls.append({
+                    "name": ep.name,
+                    "url": url})
+
         ret["public_urls"] = public_urls
         return ret
 
