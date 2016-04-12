@@ -29,6 +29,7 @@
 # NOTE: all following key/secrets for test purpose.
 HOSTNAME = "http://localhost"  # host name of the UI site
 # HOSTNAME = "http://open-hackathon-dev.chinacloudapp.cn"  # host name of the UI site
+# HOSTNAME = "http://hacking.kaiyuanshe.cn"
 
 QQ_OAUTH_STATE = "openhackathon"  # todo state should be constant. Actually it should be unguessable to prevent CSFA
 HACKATHON_API_ENDPOINT = "http://localhost:15000"
@@ -87,9 +88,9 @@ Config = {
         },
         "wechat": {
             "client_id": WECHAT_APP_ID,
-            "access_token_url": "https://api.wechat.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%%s&grant_type=authorization_code" % (
+            "access_token_url": "https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%%s&grant_type=authorization_code" % (
                 WECHAT_APP_ID, WECHAT_SECRET),
-            "user_info_url": "https://api.wechat.qq.com/sns/userinfo?access_token=%s&openid=%s"
+            "user_info_url": "https://api.weixin.qq.com/sns/userinfo?access_token=%s&openid=%s"
         },
         "gitcafe": {
             "client_id": GITCAFE_CLIENT_ID,
@@ -139,7 +140,7 @@ Config = {
                 QQ_CLIENT_ID, HOSTNAME, QQ_OAUTH_STATE)
         },
         "wechat": {
-            "authorize_url": "https://open.wechat.qq.com/connect/qrconnect?appid=%s&redirect_uri=%s/wechat&response_type=code&scope=snsapi_loginE&state=%s#wechat_redirect" % (
+            "authorize_url": "https://open.weixin.qq.com/connect/qrconnect?appid=%s&redirect_uri=%s/wechat&response_type=code&scope=snsapi_login&state=%s#wechat_redirect" % (
                 WECHAT_APP_ID, HOSTNAME, WECHAT_OAUTH_STATE)
         },
         "gitcafe": {
