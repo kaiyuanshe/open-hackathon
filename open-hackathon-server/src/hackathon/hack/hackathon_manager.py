@@ -79,7 +79,7 @@ class HackathonManager(Component):
 
     def is_recycle_enabled(self, hackathon):
         key = HACKATHON_CONFIG.RECYCLE_ENABLED
-        return self.util.str2bool(self.get_basic_property(hackathon, key, False))
+        return self.get_basic_property(hackathon, key, False)
 
     def get_hackathon_by_name(self, name):
         """Get hackathon accoring the unique name
@@ -177,10 +177,9 @@ class HackathonManager(Component):
         return [get_user_hackathon_detail(rel) for rel in user_hackathon_rels]
 
     def get_recyclable_hackathon_list(self):
-        # todo fix auto recycle
-        # all_hackathon = self.db.find_all_objects(Hackathon)
-        # return filter(lambda h: self.is_recycle_enabled(h), all_hackathon)
-        return []
+        # todo filter hackathons in a db-level
+        hackathons = Hackathon.objects().all()
+        return filter(lambda h: self.is_recycle_enabled(h), hackathons)
 
     def get_entitled_hackathon_list_with_detail(self, user):
         hackathon_ids = self.admin_manager.get_entitled_hackathon_ids(user.id)
@@ -762,8 +761,15 @@ class HackathonManager(Component):
         """Return hackathon info as well as its details including configs, stat, organizers, like if user logon"""
         detail = hackathon.dic()
 
-        # TODO: replace hard code
-        detail["stat"] = {"register": 5}
+        detail["stat"] = {
+            "register": 0,
+            "like": 0}
+
+        for stat in HackathonStat.objects(hackathon=hackathon):
+            if stat.type == HACKATHON_STAT.REGISTER:
+                detail["stat"]["register"] = stat.count
+            elif stat.type == HACKATHON_STAT.LIKE:
+                detail["stat"]["like"] = stat.count
 
         if user:
             detail["user"] = self.user_manager.user_display_info(user)
@@ -781,10 +787,9 @@ class HackathonManager(Component):
             register = self.register_manager.get_registration_by_user_and_hackathon(user.id, hackathon.id)
             if register:
                 detail["registration"] = register.dic()
-                #
-                # team_rel = self.db.find_first_object_by(UserTeamRel, user_id=user.id, hackathon_id=hackathon.id)
-                # if team_rel:
-                #     detail["team"] = team_rel.team.dic()
+                team = Team.objects(hackathon=hackathon, members__user=user).first()
+                if team:
+                    detail["team"] = team.dic()
 
         return detail
 

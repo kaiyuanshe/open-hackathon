@@ -70,7 +70,10 @@
     "SHORT_DESCRIPTION": "简介",
     "DESCRIPTION": "活动详情",
     "ADD_BANNER": "添加图片",
-    "ADD_BANNER_TIP": "推荐尺寸<span class=\"text-red\">752*420</span>px 图片"
+    "ADD_BANNER_TIP": "推荐尺寸<span class=\"text-red\">752*420</span>px 图片",
+    "ADD_BANNERS": "增加海报图",
+    "PIC_ADDRESS": "图片地址",
+    "PIC_ADDRESS_HINT": "请输入有效的图片URL地址"
   },
   "AZURE_FIELDS": {
     "SUBSCRIPTION_ID": "订阅序号",
