@@ -375,6 +375,13 @@ class AzureDeployment(DynamicEmbeddedDocument):
     deletable = BooleanField()  # F-cannot delete T-can be deleted
 
 
+class AzureEndPoint(DynamicEmbeddedDocument):
+    name = StringField(max_length=50)
+    protocol = StringField(max_length=50)
+    public_port = IntegerField()
+    private_port = IntegerField()
+
+
 class AzureVirtualMachine(DynamicEmbeddedDocument):
     name = StringField(required=True)
     label = StringField()
@@ -387,6 +394,7 @@ class AzureVirtualMachine(DynamicEmbeddedDocument):
     create_time = DateTimeField()
     update_time = DateTimeField()
     deletable = BooleanField()  # F-cannot delete T-can be deleted
+    end_points = EmbeddedDocumentListField(AzureEndPoint, default=[])
 
 
 class VirtualEnvironment(DynamicEmbeddedDocument):

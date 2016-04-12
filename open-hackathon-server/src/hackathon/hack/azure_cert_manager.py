@@ -31,7 +31,7 @@ from os.path import dirname, realpath, abspath, isfile
 import commands
 
 from hackathon.hazure.cloud_service_adapter import CloudServiceAdapter
-from hackathon.hmongo.models import Hackathon, AzureKey
+from hackathon.hmongo.models import AzureKey
 
 from hackathon import RequiredFeature, Component, Context
 from hackathon.hackathon_response import ok
@@ -165,8 +165,6 @@ class AzureCertManager(Component):
 
         return hackathon_azure_keys
 
-        return certificates
-
     def delete_certificate(self, certificate_id, hackathon):
         """Delete certificate by azureKey.id and hackathon
 
@@ -221,8 +219,7 @@ class AzureCertManager(Component):
             sms.list_hosted_services()
             azure_key.verified = True
             azure_key.save()
-        except Exception as e:
-
+        except Exception:
             return ok(False)
 
         return ok(True)

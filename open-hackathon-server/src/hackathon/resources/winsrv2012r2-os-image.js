@@ -1,6 +1,6 @@
 {
-    "name": "azure-windows-os-image",
-    "description" : "use azure os image to create a windows vm",
+    "name": "winsrv2012r2-os-image",
+    "description" : "OS image: Windows Server 2012 R2 Datacenter",
     "virtual_environments": [
         {
             "provider": "1",
@@ -25,7 +25,7 @@
             "role_name" : "rapid-test",
             "image" : {
                 "type" : "os",
-                "name" : "0c5c79005aae478e8883bf950a861ce0__Windows-Server-2012-Essentials-20131018-enus"
+                "name" : "0c5c79005aae478e8883bf950a861ce0__Windows-Server-2012-Essentials-20141204-zhcn"
             },
             "system_config" : {
                 "os_family" : "Windows",

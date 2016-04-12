@@ -26,10 +26,8 @@ THE SOFTWARE.
 __author__ = "rapidhere"
 __all__ = ["AzureFormation"]
 
-import json
-
 from hackathon import Component, Context, RequiredFeature
-from hackathon.hmongo.models import VirtualEnvironment, Experiment
+from hackathon.hmongo.models import Experiment
 from hackathon.constants import (
     ADStatus, AVMStatus, VEStatus, EStatus)
 
@@ -60,7 +58,7 @@ class AzureFormation(Component):
     def __init__(self):
         pass
 
-    def start_vm(self, resource_id, azure_key, template_units, virtual_environments):
+    def start_vm(self, resource_id, azure_key, template_units, experiment_id):
         """setup the resources needed by the template unit and start the virtual machine
 
         this will create the missed VirtualMachine, CloudService and Storages
@@ -69,7 +67,7 @@ class AzureFormation(Component):
         :param resouce_id: a integer that can indentify the creation of azure resource, is reusable to checkout created virtual machine name
         :param template_units: the azure template units, contains the data need by azure formation
         :param azure_key: the azure_key object, use to access azure
-        :param virtual_environments: the virtual envrionments associated with this setup NOTE: this is a workaround
+        :param expr_id: the experiment_id associated with this setup NOTE: this is a workaround
         """
         # the setup of each unit must be SERLIALLY EXECUTED
         # to avoid the creation of same resource in same time
@@ -90,11 +88,8 @@ class AzureFormation(Component):
             #       but so far we have no way to rollback the network settings of it
             remote_created=[])
 
-        assert len(template_units) == len(virtual_environments)
-
         for i in xrange(0, len(template_units)):
             unit = template_units[i]
-            ve = virtual_environments[i]
 
             name = self.get_virtual_machine_name(unit.get_virtual_machine_name(), resource_id)
 
@@ -124,8 +119,8 @@ class AzureFormation(Component):
                 remote=unit.get_remote(),
                 endpoint_name=unit.get_remote_port_name(),
 
-                # NOTE: ONLY callback purpose functions can depend on virutal_environment_id
-                virtual_environment_id=ve.id,
+                # NOTE: ONLY callback purpose functions can depend on experiment_id
+                experiment_id=experiment_id,
 
                 # TODO: this part of info should move to super context
                 subscription_id=azure_key.subscription_id,
@@ -135,28 +130,24 @@ class AzureFormation(Component):
         # execute from first job context
         self.__schedule_setup(ctx)
 
-    def stop_vm(self, resource_id, azure_key, template_units, virtual_environments, expr_id):
+    def stop_vm(self, resource_id, azure_key, template_units, expr_id):
         """stop the virtual machine, and deallocate the resouces of the virtual machine
 
-        NOTE: virtual_environments and expr_id are just a workaround to update db status, it will be elimated in future
+        NOTE: expr_id are just a workaround to update db status, it will be elimated in future
         """
-        assert len(template_units) == len(virtual_environments)
-
         job_ctxs = []
         ctx = Context(job_ctxs=job_ctxs, current_job_index=0, resource_id=resource_id)
 
         for i in xrange(0, len(template_units)):
             unit = template_units[i]
-            ve = virtual_environments[i]
 
             job_ctxs.append(Context(
                 cloud_service_name=unit.get_cloud_service_name(),
                 deployment_slot=unit.get_deployment_slot(),
                 virtual_machine_name=self.get_virtual_machine_name(unit.get_virtual_machine_name(), resource_id),
 
-                # NOTE: ONLY callback purpose functions can depend on virutal_environment_id and expr id
-                virtual_environment_id=ve.id,
-                expr_id=expr_id,
+                # NOTE: ONLY callback purpose functions can depend expr id
+                experiment_id=expr_id,
 
                 subscription_id=azure_key.subscription_id,
                 pem_url=azure_key.get_local_pem_url(),
@@ -169,7 +160,7 @@ class AzureFormation(Component):
 
         resource_id is used by azure_formation.setup
         """
-        return "%s-%d" % (virtual_machine_base_name, int(resource_id))
+        return "%s-%s" % (virtual_machine_base_name, str(resource_id))
 
     # private functions
     def __schedule_setup(self, sctx):
@@ -525,12 +516,12 @@ class AzureFormation(Component):
         try:
             self.log.debug("azure virtual environment %d vm setup failed" % sctx.current_job_index)
             ctx = sctx.job_ctxs[sctx.current_job_index]
-            ve = self.db.find_first_object_by(VirtualEnvironment, id=ctx.virtual_environment_id)
+            expr = Experiment.objects(id=ctx.experiment_id).first()
+            ve = expr.virtual_environments[sctx.current_job_index]
 
-            if ve:
-                ve.status = VEStatus.FAILED
-                ve.experiment.status = EStatus.FAILED
-                self.db.commit()
+            ve.status = VEStatus.FAILED
+            ve.experiment.status = EStatus.FAILED
+            expr.save()
         finally:
             self.log.debug(
                 "azure virtual environment %d vm fail callback done, roll back start"
@@ -578,31 +569,29 @@ class AzureFormation(Component):
         ctx = sctx.job_ctxs[sctx.current_job_index]
 
         # update the status of virtual environment
-        ve = self.db.find_first_object_by(VirtualEnvironment, id=ctx.virtual_environment_id)
-
+        expr = Experiment.objects(id=ctx.experiment_id).first()
+        ve = expr.virtual_environments[sctx.current_job_index]
         adapter = VirtualMachineAdapter(ctx.subscription_id, ctx.pem_url, host=ctx.management_host)
-        if ve:
-            ve.status = VEStatus.RUNNING
 
-            public_ip, port = adapter.get_virtual_machine_public_endpoint(
-                ctx.cloud_service_name,
-                ctx.deployment_name,
+        ve.status = VEStatus.RUNNING
+
+        public_ip, port = adapter.get_virtual_machine_public_endpoint(
+            ctx.cloud_service_name,
+            ctx.deployment_name,
+            ctx.virtual_machine_name,
+            ctx.endpoint_name)
+
+        if not public_ip:
+            self.log.warn("unable to find public ip for vm %s, set guacamole failed" % ctx.virtual_machine_name)
+        else:
+            ve.remote_paras = get_remote_parameters(
+                ctx.raw_system_config,
+                ctx.remote,
                 ctx.virtual_machine_name,
-                ctx.endpoint_name)
+                public_ip, port)
 
-            if not public_ip:
-                self.log.warn("unable to find public ip for vm %s, set guacamole failed" % ctx.virtual_machine_name)
-            else:
-                remote_para = get_remote_parameters(
-                    ctx.raw_system_config,
-                    ctx.remote,
-                    ctx.virtual_machine_name,
-                    public_ip, port)
-
-                ve.remote_paras = json.dumps(remote_para)
-
-            self.db.commit()
-            self.expr_manager.check_expr_status(ve.experiment)
+        expr.save()
+        self.expr_manager.check_expr_status(expr)
 
         self.log.debug("azure virtual environment %d vm success callback done, step to next" % sctx.current_job_index)
         # step to config next unit
@@ -682,20 +671,19 @@ class AzureFormation(Component):
         ctx = sctx.job_ctxs[sctx.current_job_index]
 
         # update the status of virtual environment
-        ve = self.db.find_first_object_by(VirtualEnvironment, id=ctx.virtual_environment_id)
+        expr = Experiment.objects(id=ctx.experiment_id).first()
+        ve = expr.virtual_environments[sctx.current_job_index]
 
-        if ve:
-            ve.status = VEStatus.STOPPED
-            self.expr_manager.check_expr_status(ve.experiment)
+        ve.status = VEStatus.STOPPED
+        self.expr_manager.check_expr_status(ve.experiment)
 
         # all stopped
         # TODO: alter this as a hook, and trigger this hook in __schedule_stop, where the last job index should be checked
         if sctx.current_job_index == len(sctx.job_ctxs) - 1:
             self.log.debug("resource id: %d all unit stop succeeded!" % sctx.resource_id)
-            expr = self.db.find_first_object_by(Experiment, id=ctx.expr_id)
             expr.status = EStatus.STOPPED
 
-        self.db.commit()
+        expr.save()
 
         self.log.debug("azure virtual environment %d vm success callback done, step to next" % sctx.current_job_index)
         # step to config next unit
