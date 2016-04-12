@@ -45,19 +45,19 @@ class LoginBase():
         pass
 
 
-class WeixinLogin(LoginBase):
-    """Sign in with Weixin OAuth 2.0 [https://wohugb.gitbooks.io/wechat/content/qrconnent/README.html]
+class WechatLogin(LoginBase):
+    """Sign in with Wechat OAuth 2.0 [https://wohugb.gitbooks.io/wechat/content/qrconnent/README.html]
 
     :Example:
-        from client.user.login import WeixinLogin
+        from client.user.login import WechatLogin
 
-        WeixinLogin()
+        WechatLogin()
 
     .. notes::
     """
 
     def login(self, args):
-        """ Weixin Login
+        """ Wechat Login
 
         :type args: dict
         :param args:
@@ -65,7 +65,7 @@ class WeixinLogin(LoginBase):
         :rtype: dict
         :return: token and instance of user
         """
-        log.info("login from Weixin")
+        log.info("login from Wechat")
 
         code = args.get('code')
         if not code:
@@ -75,7 +75,7 @@ class WeixinLogin(LoginBase):
 
         return {
             "openid": openid,
-            "provider": LOGIN_PROVIDER.WEIXIN,
+            "provider": LOGIN_PROVIDER.WECHAT,
             "name": user_detail["nickname"],
             "nickname": user_detail["nickname"],
             "access_token": access_token,
@@ -83,7 +83,7 @@ class WeixinLogin(LoginBase):
             "avatar_url": user_detail["headimgurl"]}
 
     def _access_wxapi_or_raise(self, *args, **kwargs):
-        """access remote with under weixin'api's interface
+        """access remote with under wechat'api's interface
 
         just a simple wrapper on `get_remote`
         raise error on response error
@@ -98,7 +98,7 @@ class WeixinLogin(LoginBase):
     def get_access_token(self, code):
         """get access token from wx-api
 
-        this is the second step to login with weixin after the
+        this is the second step to login with wechat after the
         client get the code
 
         :type code: str
@@ -107,7 +107,7 @@ class WeixinLogin(LoginBase):
         :rtype: tuple
         :return: then access token and user open id in a tuple
         """
-        url = get_config("login.weixin.access_token_url") % code
+        url = get_config("login.wechat.access_token_url") % code
         r = self._access_wxapi_or_raise(url)
 
         return (r["access_token"], r["openid"])
@@ -115,7 +115,7 @@ class WeixinLogin(LoginBase):
     def get_user_info(self, access_token, openid):
         """get user info from wx-api
 
-        this is the final step to login with weixin
+        this is the final step to login with wechat
 
         :type access_token: str
         :param access_token: the access token get from wx
@@ -124,9 +124,9 @@ class WeixinLogin(LoginBase):
         :param openid: the openid get from wx to specified user
 
         :rtype: dict
-        :return: then user info accessed from weixin
+        :return: then user info accessed from wechat
         """
-        url = get_config("login.weixin.user_info_url") % (access_token, openid)
+        url = get_config("login.wechat.user_info_url") % (access_token, openid)
         return self._access_wxapi_or_raise(url)
 
 
@@ -776,5 +776,5 @@ login_providers = {
     LOGIN_PROVIDER.GITCAFE: GitcafeLogin(),
     LOGIN_PROVIDER.ALAUDA: AlaudaLogin(),
     LOGIN_PROVIDER.LIVE: LiveLogin(),
-    LOGIN_PROVIDER.WEIXIN: WeixinLogin()
+    LOGIN_PROVIDER.WECHAT: WechatLogin()
 }

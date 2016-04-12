@@ -102,7 +102,7 @@
 .btn-qq,
 .btn-weibo,
 .btn-gitcafe,
-.btn-weixin,
+.btn-wechat,
 .btn-alauda{
     color: white;
     position: relative;
@@ -120,7 +120,7 @@
 .btn-qq:before,
 .btn-weibo:before,
 .btn-gitcafe:before,
-.btn-weixin:before,
+.btn-wechat:before,
 .btn-alauda:before {
     position: absolute;
     display: block;
@@ -145,7 +145,7 @@
 .btn-qq:hover,
 .btn-weibo:hover,
 .btn-alauda:hover,
-.btn-weixin:hover,
+.btn-wechat:hover,
 .btn-gitcafe:hover {
     color: white;
 }
@@ -235,20 +235,20 @@
     background: #0087ba
 }
 
-.btn-weixin {
+.btn-wechat {
   background: #44b549;
 }
 
-.btn-weixin::before {
+.btn-wechat::before {
   content: "\f1d7";
   background: #2f9833;
 }
 
-.btn-weixin:hover {
+.btn-wechat:hover {
   background: #2f9833;
 }
 
-.btn-weixin:hover::before {
+.btn-wechat:hover::before {
   content: "\f1d7";
   background: #1f8823;
 }

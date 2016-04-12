@@ -46,9 +46,9 @@ QQ_CLIENT_ID = "101200890"
 QQ_CLIENT_SECRET = "88ad67bd4521c4cc47136854781cb9b5"
 QQ_META_CONTENT = "274307566465013314076545663016134754100636"
 
-WEIXIN_APP_ID = "wxe75b8aef71c2059f"
-WEIXIN_SECRET = "4532b90750f4c7bc70fcfbc42d881622"
-WEIXIN_OAUTH_STATE = "openhackathon"  # NOTE: may be should be same as QQ_OAUTH_STATE?
+WECHAT_APP_ID = "wxe75b8aef71c2059f"
+WECHAT_SECRET = "4532b90750f4c7bc70fcfbc42d881622"
+WECHAT_OAUTH_STATE = "openhackathon"  # NOTE: may be should be same as QQ_OAUTH_STATE?
 
 # gitcafe domain:  gcas.dgz.sh/gcs.dgz.sh for Staging, api.gitcafe.com/gitcafe.com for Production
 GITCAFE_CLIENT_ID = "1c33ecdf4dd0826325f60a92e91834522b1cdf47a7f90bdaa79f0526fdc48727"
@@ -85,11 +85,11 @@ Config = {
             "openid_url": 'https://graph.qq.com/oauth2.0/me?access_token=',
             "user_info_url": 'https://graph.qq.com/user/get_user_info?access_token=%s&oauth_consumer_key=%s&openid=%s'
         },
-        "weixin": {
-            "client_id": WEIXIN_APP_ID,
-            "access_token_url": "https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%%s&grant_type=authorization_code" % (
-                WEIXIN_APP_ID, WEIXIN_SECRET),
-            "user_info_url": "https://api.weixin.qq.com/sns/userinfo?access_token=%s&openid=%s"
+        "wechat": {
+            "client_id": WECHAT_APP_ID,
+            "access_token_url": "https://api.wechat.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%%s&grant_type=authorization_code" % (
+                WECHAT_APP_ID, WECHAT_SECRET),
+            "user_info_url": "https://api.wechat.qq.com/sns/userinfo?access_token=%s&openid=%s"
         },
         "gitcafe": {
             "client_id": GITCAFE_CLIENT_ID,
@@ -118,7 +118,7 @@ Config = {
             "redirect_uri": '%s/alauda' % HOSTNAME,
             "access_token_url": 'http://console.int.alauda.io/oauth/token'
         },
-        "provider_enabled": ["github", "weixin"],
+        "provider_enabled": ["github", "wechat"],
         "session_minutes": 60,
         "token_expiration_minutes": 60 * 24
     },
@@ -138,9 +138,9 @@ Config = {
             "authorize_url": "https://graph.qq.com/oauth2.0/authorize?client_id=%s&redirect_uri=%s/qq&scope=get_user_info&state=%s&response_type=code" % (
                 QQ_CLIENT_ID, HOSTNAME, QQ_OAUTH_STATE)
         },
-        "weixin": {
-            "authorize_url": "https://open.weixin.qq.com/connect/qrconnect?appid=%s&redirect_uri=%s/weixin&response_type=code&scope=snsapi_loginE&state=%s#wechat_redirect" % (
-                WEIXIN_APP_ID, HOSTNAME, WEIXIN_OAUTH_STATE)
+        "wechat": {
+            "authorize_url": "https://open.wechat.qq.com/connect/qrconnect?appid=%s&redirect_uri=%s/wechat&response_type=code&scope=snsapi_loginE&state=%s#wechat_redirect" % (
+                WECHAT_APP_ID, HOSTNAME, WECHAT_OAUTH_STATE)
         },
         "gitcafe": {
             "authorize_url": "https://gcs.dgz.sh/oauth/authorize?response_type=code&client_id=%s&redirect_uri=%s/gitcafe&scope=public" % (

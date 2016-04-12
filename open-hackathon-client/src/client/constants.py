@@ -39,7 +39,7 @@ class LOGIN_PROVIDER:
     WEIBO = "weibo"
     LIVE = "live"
     ALAUDA = "alauda"
-    WEIXIN = "weixin"
+    WECHAT = "wechat"
 
 
 class HTTP_HEADER:
