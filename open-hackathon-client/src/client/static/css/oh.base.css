@@ -146,7 +146,7 @@ a {
 
 a:hover,
 a:focus {
-  color: #21b1de;
+  color: #7dba41;
   text-decoration: none;
 }
 
@@ -1950,4 +1950,7 @@ h4.title {}
 
 .full-shared .share-btn .jiathis_button_wechat > span:before {
   content: "\f1d7";
+}
+.v-hidden{
+    visibility: hidden;
 }

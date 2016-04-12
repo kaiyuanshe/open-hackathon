@@ -78,7 +78,7 @@ class HDocumentBase(DynamicDocument):
 
 
 class UserEmail(EmbeddedDocument):
-    email = EmailField()
+    email = StringField()
     primary_email = BooleanField()
     verified = BooleanField()
 
@@ -286,6 +286,8 @@ class Team(HDocumentBase):
     description = StringField()
     logo = StringField()
     leader = ReferenceField(User)
+    cover = StringField()
+    dev_plan = StringField()
     hackathon = ReferenceField(Hackathon)
     works = EmbeddedDocumentListField(TeamWork)
     scores = EmbeddedDocumentListField(TeamScore)

@@ -437,9 +437,9 @@ def create_join_team(hackathon_name, tid):
     if team.get('error') is not None:
         return redirect('404')
     else:
-        role = team.is_admin and 4 or 0
-        role += team.is_leader and 2 or 0
-        role += team.is_member and 1 or 0
+        role = team.get('is_admin') and 4 or 0
+        role += team.get('is_leader') and 2 or 0
+        role += team.get('is_member') and 1 or 0
         return render("/site/team.html", hackathon_name=hackathon_name, team=team, role=role)
 
 
