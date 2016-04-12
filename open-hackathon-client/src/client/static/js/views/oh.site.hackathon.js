@@ -79,6 +79,7 @@
                 $('#works span').text('（' + data.length + '）');
                 $('#team_show').append($('#show_list_temp').tmpl(data, {
                     getImage: function (uri) {
+                        uri = uri || '';
                         var uris = uri.split(',');
                         var image_url = '/static/pic/wutu.jpg';
                         $.each(uris, function (i, o) {
@@ -102,20 +103,19 @@
                         });
                         return src
                     },
-                    getlinks: function (uri, team_id) {
-                        var uris = uri.split(',');
+                    getlinks: function (works, team_id) {
+
                         var links = '';
-                        $.each(uris, function (i, o) {
-                            var u_t = o.split(':::');
-                            var type = +u_t[1];
+                        $.each(works, function (i, work) {
+                            var type = work.type;
                             if (type == 0 && links.search('#works_img') == -1) {
-                                links += '<a href="' + getTeamlink(team_id, '#works_img') + '">图片</a>';
+                                links += '<a href="' + getTeamlink(team_id, '#works_img') + '" target="_blank">图片</a>';
                             } else if (type == 1 && links.search('#works_video') == -1) {
-                                links += '<a href="' + getTeamlink(team_id, '#works_video') + '">视频</a>';
+                                links += '<a href="' + getTeamlink(team_id, '#works_video') + '" target="_blank">视频</a>';
                             } else if (type == 2 && links.search('#works_code') == -1) {
-                                links += '<a href="' + getTeamlink(team_id, '#works_code') + '">源代码</a>';
+                                links += '<a href="' + getTeamlink(team_id, '#works_code') + '" target="_blank">源代码</a>';
                             } else if (type >= 3 && type <= 6 && links.search('#works_doc') == -1) {
-                                links += '<a href="' + getTeamlink(team_id, '#works_doc') + '">文档</a>';
+                                links += '<a href="' + getTeamlink(team_id, '#works_doc') + '" target="_blank">文档</a>';
                             }
                         });
                         return links;
