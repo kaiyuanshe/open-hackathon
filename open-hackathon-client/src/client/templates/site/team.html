@@ -2,6 +2,7 @@
 
 {% block style %}
     <link href="/static/css/oh.site.team.css" rel="stylesheet">
+    <link href="/static/css/magnific-popup.css" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
@@ -19,86 +20,288 @@
 
         <div class="container ">
             <div class="team-left">
-                <div class="warp">
-                </div>
-                <div class="warp">
-                    <div class="team-desc">
-                        <h5 class="title">团队简介</h5>
-                        <p>{{ team.description }}</p>
+                <div class="warp clearfix">
+
+                    <div class="team-logo" data-parent="">
+                        <img class="v-hidden" src="{{ team.logo == None and '/static/pic/team-logo.png' or team.logo }}"
+                             data-loadsrc="{{ team.logo == None and '/static/pic/team-logo.png' or team.logo }}"
+                             onerror="javascript:this.src='/static/pic/team-logo.png'">
                     </div>
+                    <div class="career">{{ team.name }}</div>
+                    <div> {{ team.description }} 团队简介</div>
                 </div>
+
                 <div class="warp">
-                    <div class="oh-users" id="talent_list">
-                    </div>
+                    <ul class="oh-users" id="talent_list">
+                    </ul>
                 </div>
             </div>
 
             <div class="team-right">
                 <div class="warp">
+                    <div class="team-header">
+                        <div class="inline">
+                            <div class="group">
+                                <label class="">项目名称</label>
+                                <div>
+                                    人脸识别
+                                </div>
+                            </div>
+                        </div>
+                        <div class="inline">
+                            <div class="group">
+                                <label class="">项目简介</label>
+                                <div class="left">
+                                    <button class="btn btn-success btn-sm">上传</button>
+                                </div>
+                                <div>
+
+                                </div>
+                            </div>
+                            <div class="group">
+                                <label class="">项目说明书</label>
+                                <div>
+
+
+                                </div>
+                              <button class="btn btn-success" data-role="addworks" type="button">show</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="warp">
+                    <div id="videos" class="show_item">
+                        <h2>视频展示</h2>
+                        <div class="w-videos">
+                            <div class="nothing hide">
+                                <img src="/static/images/monkey-2.png">
+                                <p>视频未上传</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="docs" class="show_item">
+                        <h2>文档说明</h2>
+                        <div class="w-doc">
+                            <div class="nothing hide">
+                                <img src="/static/images/monkey-3.png">
+                                <p>文档未上传</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="images" class="show_item">
+                        <h2>图片展示</h2>
+                        <div class="popup-gallery" id="work_images">
+                             <div class="nothing hide">
+                                <img src="/static/images/monkey-4.png">
+                                <p>图片未上传</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="code" class="show_item hide">
+                        <h2>源代码地址</h2>
+                        <div class="w-code">
+
+                        </div>
+                    </div>
+                    <div id="other" class="show_item hide">
+                        <h2>其他展示</h2>
+                        <div class="w-other">
+
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    {% if team.is_leader %}
+        <div class="modal fade" id="works_Modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <form id="addWorksForm" class="form-horizontal" novalidate>
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                    aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel">作品发布</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label required">类型</label>
+                                <div class="col-sm-9">
+                                    <select class="form-control" id="worktype">
+                                        <option value="1">发布视频</option>
+                                        <option value="0">发布图片</option>
+                                        <option value="3">发布PowerPoint文档</option>
+                                        <option value="4">发布Excel文档</option>
+                                        <option value="5">发布Word文档</option>
+                                        <option value="6">发布PDF文档</option>
+                                        <option value="2">源代码路径</option>
+                                        <option value="99">发布其他作品</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">描述</label>
+
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" name="note" maxlength="80"
+                                           placeholder="描述信息">
+                                </div>
+                            </div>
+                            <div data-gtype="image">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label required">图片路径</label>
+                                    <div class="col-sm-9">
+                                        <input type="url" class="form-control" data-name="uri" name="work_image"
+                                               placeholder="http://"
+                                               required
+                                               data-bv-trigger="blur"
+                                               data-bv-message="请填写正确的图片访问路径"
+                                               data-bv-notempty-message="请填图片路径">
+                                    </div>
+                                </div>
+                            </div>
+                            <div data-gtype="video" class="active">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label required">视频地址</label>
+
+                                    <div class="col-sm-9">
+                                <textarea type="text" class="form-control" data-name="uri" name="work_video"
+                                          placeholder="<embed src='http://player.youku.com/......"
+                                          data-bv-trigger="blur"
+                                          required
+                                          data-bv-notempty-message="请填嵌入视频代码"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div data-gtype="doc">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label required">文档路径</label>
+
+                                    <div class="col-sm-9">
+                                        <input type="url" class="form-control" data-name="uri" name="work_doc"
+                                               placeholder="http://"
+                                               required
+                                               data-bv-trigger="blur"
+                                               data-bv-message="请填写正确的文档访问路径"
+                                               data-bv-notempty-message="请填文档路径">
+                                    </div>
+                                </div>
+                            </div>
+                            <div data-gtype="code">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label required">项目地址</label>
+
+                                    <div class="col-sm-9">
+                                        <input type="url" class="form-control" data-name="uri" name="work_code"
+                                               placeholder="https://github.com/......"
+                                               data-bv-trigger="blur"
+                                               data-bv-message="请填写正确的项目地址"
+                                               data-bv-notempty-message="请填项目地址">
+                                    </div>
+                                </div>
+                            </div>
+                            <div data-gtype="other">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label required">作品路径</label>
+                                    <div class="col-sm-9">
+                                        <input type="url" class="form-control" data-name="uri" name="work_other"
+                                               placeholder="http://"
+                                               required
+                                               data-bv-trigger="blur"
+                                               data-bv-message="请填写正确的访问路径"
+                                               data-bv-notempty-message="请填路径">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">确定</button>
+                            <button type="button" class="btn btn-warning" data-dismiss="modal">取消</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    {% endif %}
 {% endblock %}
 
 {% block script %}
     {% if team.is_leader and not team.is_frozen %}
         <script id="team_item" type="text/x-jquery-tmpl">
             {% raw %}
-            <div class="col-lg-2 col-md-4 col-xs-6" data-user >
-                <div class="oh-item">
-                    <div class="oh-header">
-                        <div class="action" >
-                            <img src="${$item.getUserLogo(user.avatar_url)}" onerror="javascript:this.src='/static/pic/anon_user.png'">
-                            {{if $item.isNotLeader(user.id) }}
-                                <div class=" btn-group btn-group-justified" role="group" aria-label="Justified button group">
-                                    <div class="btn-group" role="group">
-                                        <button type="button" class="btn btn-sm btn-danger" data-id=${id} data-role="denied">踢出</button>
-                                    </div>
-                                    {{if status == 0}}
-                                    <div class="btn-group" role="group">
-                                        <button type="button" class="btn btn-sm btn-info" data-id=${id} data-role="approved">同意</button>
-                                    </div>
-                                    {{/if}}
-                                </div>
-                            {{/if}}
-                        </div>
-                    </div>
-                    <div class="oh-body">
-                        <p class="text-center">
-                            <a href="javascript:;">${user.nickname}</a><br/>
-                            <span>${$item.getTitle(user.id, status)}</span>
-                        </p>
-                    </div>
+            <li  data-user>
+                <span>${$item.getTitle(user.id, status)}</span>
+                <div class="oh-header" data-parent>
+                    <a href="/user/p_${user.id}">
+                     <img src="${$item.getUserLogo(user.avatar_url)}" onload="oh.comm.imgLoad(this)"  onerror="javascript:this.src='/static/pic/monkey-104-104px.jpg'">
+                    </a>
                 </div>
-            </div>
+                <a href="/user/p_${user.id}">${user.nickname}</a>
+                {{if $item.isNotLeader(user.id) }}
+                <div class="action">
+                    <button type="button" class="btn btn-sm btn-danger" data-id=${user.id} data-role="denied">踢出</button>
+                    {{if status == 0}}
+                    <button type="button" class="btn btn-sm btn-info" data-id=${user.id} data-role="approved">同意</button>
+                    {{/if}}
+                </div>
+                {{/if}}
+            </li>
             {% endraw %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         </script>
     {% else %}
         <script id="team_item" type="text/x-jquery-tmpl">
             {% raw %}
-            <div class="col-lg-2 col-md-4 col-xs-6" data-user >
-                <div class="oh-item">
-                    <div class="oh-header" data-parent>
-                        <div>
-                            <a href="/user/p_${id}">
-                             <img src="${$item.getUserLogo(user.avatar_url)}" onload="oh.comm.imgLoad(this)"  onerror="javascript:this.src='/static/pic/monkey-104-104px.jpg'">
-                            </a>
-                        </div>
-                    </div>
-                    <div class="oh-body">
-                        <p class="text-center">
-                             <a href="/user/p_${id}">${user.nickname}</a><br/>
-                            <span>${$item.getTitle(user.id, status)}</span>
-                        </p>
-                    </div>
+            <li  data-user>
+                <span>${$item.getTitle(user.id, status)}</span>
+                <div class="oh-header" data-parent>
+                    <a href="/user/p_${user.id}">
+                     <img src="${$item.getUserLogo(user.avatar_url)}" onload="oh.comm.imgLoad(this)"  onerror="javascript:this.src='/static/pic/monkey-104-104px.jpg'">
+                    </a>
                 </div>
-            </div>
+                <a href="/user/p_${user.id}">${user.nickname}</a>
+            </li>
             {% endraw %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         </script>
     {% endif %}
+
+    <script type="text/javascript" src="/static/js/jquery/jquery.magnific-popup.min.js"></script>
     <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
     <script type="text/javascript" src="/static/js/views/oh.site.team.js"></script>
 {% endblock %}
