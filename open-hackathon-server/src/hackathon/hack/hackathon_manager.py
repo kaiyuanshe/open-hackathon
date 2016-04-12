@@ -769,25 +769,20 @@ class HackathonManager(Component):
                 detail["stat"]["like"] = stat.count
 
         if user:
-            hackathon_like = UserHackathon.objects(hackathon=hackathon,user=user).only('like').first()
-            if hackathon_like and hackathon_like.like:
-                detail['like'] = hackathon_like.like
+            user_hackathon = UserHackathon.objects(hackathon=hackathon,user=user).first()
+            if user_hackathon and user_hackathon.like:
+                detail['like'] = user_hackathon.like
 
             detail["user"] = self.user_manager.user_display_info(user)
-            detail["user"]["is_admin"] = self.admin_manager.is_hackathon_admin(hackathon.id, user.id)
+            detail["user"]["is_admin"] = user.is_super or (user_hackathon and user_hackathon.role == HACK_USER_TYPE.ADMIN)
 
             # TODO: we need to review those items one by one to decide the API output
             # asset = self.db.find_all_objects_by(UserHackathonAsset, user_id=user.id, hackathon_id=hackathon.id)
             # if asset:
             #     detail["asset"] = [o.dic() for o in asset]
 
-            # like = self.db.find_first_object_by(HackathonLike, user_id=user.id, hackathon_id=hackathon.id)
-            # if like:
-            #     detail["like"] = like.dic()
-
-            register = self.register_manager.get_registration_by_user_and_hackathon(user.id, hackathon.id)
-            if register:
-                detail["registration"] = register.dic()
+            if user_hackathon and user_hackathon.role == HACK_USER_TYPE.COMPETITOR:
+                detail["registration"] = user_hackathon.dic()
                 team = Team.objects(hackathon=hackathon, members__user=user).first()
                 if team:
                     detail["team"] = team.dic()
