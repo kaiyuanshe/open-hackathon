@@ -145,9 +145,9 @@ class HackathonManager(Component):
             order_by_condition = '-event_start_time'
         elif order_by == 'registered_users_num': #人气热点
             # hackathons with zero registered users would not be shown.
-            hackathon_stat = HackathonStat.objects(type=HACKATHON_STAT.REGISTER, count__gt=0).order_by('-count')
-            hackathon_list = [stat.hackathon.id for stat in hackathon_stat]
-            condition_filter = Q(id__in=hackathon_list)
+            hot_hackathon_stat = HackathonStat.objects(type=HACKATHON_STAT.REGISTER, count__gt=0).order_by('-count')
+            hot_hackathon_list = [stat.hackathon.id for stat in hot_hackathon_stat]
+            condition_filter = Q(id__in=hot_hackathon_list)
         else:
             order_by_condition = '-id'
 
@@ -155,15 +155,24 @@ class HackathonManager(Component):
         pagination = Hackathon.objects(status_filter & name_filter & condition_filter).order_by(order_by_condition).paginate(page,
                                                                                                           per_page)
 
+        hackathon_list = pagination.items
+        hackathon_stat = HackathonStat.objects(hackathon__in=hackathon_list)
+
         user = None
+        user_hackathon = []
+        team = []
         if self.user_manager.validate_login():
             user = g.user
+            user_hackathon = UserHackathon.objects(user=user, hackathon__in=hackathon_list)
+            team = Team.objects(members__user=user, hackathon__in=hackathon_list)
+            
 
         def func(hackathon):
-            return self.__get_hackathon_detail(hackathon, user)
+            return self.__fill_hackathon_detail(hackathon, user, hackathon_stat, user_hackathon, team)
 
         # return serializable items as well as total count
         return self.util.paginate(pagination, func)
+
 
     def get_online_hackathons(self):
         return Hackathon.objects(status=HACK_STATUS.ONLINE)
@@ -782,6 +791,42 @@ class HackathonManager(Component):
                     detail["team"] = team.dic()
 
         return detail
+
+    def __fill_hackathon_detail(self, hackathon, user, hackathon_stat, user_hackathon, team):
+        """Return hackathon info as well as its details including configs, stat, organizers, like if user logon"""
+        detail = hackathon.dic()
+
+        detail["stat"] = {
+            "register": 0,
+            "like": 0}
+
+        for stat in hackathon_stat:
+            if stat.type == HACKATHON_STAT.REGISTER and stat.hackathon.id == hackathon.id:
+                detail["stat"]["register"] = stat.count
+            elif stat.type == HACKATHON_STAT.LIKE and stat.hackathon.id == hackathon.id:
+                detail["stat"]["like"] = stat.count
+
+        if user:
+            detail['user'] = self.user_manager.user_display_info(user)
+            detail['user']['admin'] = user.is_super
+            if user_hackathon:
+                for uh in user_hackathon:
+                    if uh.hackathon.id == hackathon.id:
+                        detail['user']['admin'] = detail['user']['admin'] or (uh.role == HACK_USER_TYPE.ADMIN)
+                        
+                        if uh.like:
+                            detail['like'] = uh.like
+                        
+                        if uh.role == HACK_USER_TYPE.COMPETITOR:
+                            detail['registration'] = uh.dic()
+                            for t in team:
+                                if t.hackathon.id == hackathon.id:
+                                    detail['team'] = team.dic()
+                                    break
+                        break
+
+        return detail
+
 
     def __create_hackathon(self, creator, context):
         """Insert hackathon and creator(admin of course) to database
