@@ -102,11 +102,11 @@ class ExprManager(Component):
 
     def check_expr_status(self, experiment):
         # update experiment status
-        virtual_environment_list = experiment.virtual_environments.all()
+        virtual_environment_list = experiment.virtual_environments
         if all(x.status == VEStatus.RUNNING for x in virtual_environment_list) \
                 and len(virtual_environment_list) == experiment.template.virtual_environment_count:
             experiment.status = EStatus.RUNNING
-            self.db.commit()
+            experiment.save()
             self.template_library.template_verified(experiment.template.id)
 
     def get_expr_list_by_hackathon_id(self, hackathon_id, user_name, status):

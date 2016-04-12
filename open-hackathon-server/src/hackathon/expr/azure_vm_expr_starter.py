@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 """
 Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
- 
+
 The MIT License (MIT)
- 
+
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -28,7 +28,7 @@ sys.path.append("..")
 
 from expr_starter import ExprStarter
 from hackathon import RequiredFeature
-from hackathon.hmongo.models import VirtualEnvironment
+from hackathon.hmongo.models import Hackathon, VirtualEnvironment, Experiment
 from hackathon.constants import VE_PROVIDER, VERemoteProvider, VEStatus
 from hackathon.hackathon_response import internal_server_error
 
@@ -40,13 +40,15 @@ class AzureVMExprStarter(ExprStarter):
     def _internal_start_expr(self, context):
         try:
             # TODO: context.hackathon may be None when tesing a template before any hackathon bind it
-            azure_keys = context.hackathon.azure_keys
+            hackathon = Hackathon.objects.get(id=context.hackathon_id)
+            experiment = Experiment.objects.get(id=context.experiment_id)
+            azure_keys = hackathon.azure_keys
             # TODO: which key to use?
             azure_key = azure_keys[0]
 
             # create virtual environments for units
-            expr_id = context.experiment.id
-            ves = []
+            expr_id = context.experiment_id
+
             for unit in context.template_content.units:
                 ve = VirtualEnvironment(
                     provider=VE_PROVIDER.AZURE,
@@ -55,13 +57,14 @@ class AzureVMExprStarter(ExprStarter):
                                                                        expr_id),
                     image=unit.get_image_name(),
                     status=VEStatus.INIT,
-                    remote_provider=VERemoteProvider.Guacamole,
-                    experiment=context.experiment)
-                self.db.add_object(ve)
-                ves.append(ve)
+                    remote_provider=VERemoteProvider.Guacamole)
 
+                experiment.virtual_environments.append(ve)
+
+            experiment.save()
             # TODO: elimate virtual_environments arg
-            self.azure_formation.start_vm(expr_id, azure_key, context.template_content.units, ves)
+            self.azure_formation.start_vm(
+                expr_id, azure_key, context.template_content.units, expr_id)
         except Exception as e:
             self.log.error(e)
             return internal_server_error('Failed starting azure vm')
