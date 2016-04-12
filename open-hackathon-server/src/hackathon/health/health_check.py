@@ -26,19 +26,17 @@
 
 import sys
 
+from hackathon.hazure.cloud_service_adapter import CloudServiceAdapter
+from hackathon.hmongo.models import AzureKey, User
+
 sys.path.append("..")
 import requests
 import abc
 
-from sqlalchemy import __version__
-
 from hackathon.constants import HEALTH_STATUS
 from hackathon import RequiredFeature, Component
-from hackathon.database.models import User, AzureKey
-from hackathon.azureformation.service import Service
 
 __all__ = [
-    "MySQLHealthCheck",
     "HostedDockerHealthCheck",
     "AlaudaDockerHealthCheck",
     "GuacamoleHealthCheck",
@@ -59,27 +57,21 @@ class HealthCheck(Component):
         pass
 
 
-class MySQLHealthCheck(HealthCheck):
-    """Check health status of MySQL database
-
-    Make sure MySQL is working and correctly configured by a single DB query
-    """
+class MongoDBHealthCheck(HealthCheck):
+    """Check the health status of MongoDB."""
 
     def report_health(self):
-        """Report status of MySQL by query the count of User table
+        """ Report the status by querying mongodb server info
 
-        Will return OK if no exception raised else return ERROR
-        """
+        Will return OK if server info returned
+       """
         try:
-            self.db.count(User)
-            return {
-                STATUS: HEALTH_STATUS.OK,
-                VERSION: __version__
-            }
+            server_info = self.db.client.server_info()
+            server_info[STATUS] = HEALTH_STATUS.OK
+            return server_info
         except Exception as e:
             return {
                 STATUS: HEALTH_STATUS.ERROR,
-                VERSION: __version__,
                 DESCRIPTION: e.message
             }
 
@@ -91,8 +83,7 @@ class HostedDockerHealthCheck(HealthCheck):
     """
 
     def __init__(self):
-        self.hosted_docker = RequiredFeature("hosted_docker")
-        self.alauda_docker = RequiredFeature("alauda_docker")
+        self.hosted_docker = RequiredFeature("hosted_docker_proxy")
 
     def report_health(self):
         return self.hosted_docker.report_health()
@@ -105,7 +96,7 @@ class AlaudaDockerHealthCheck(HealthCheck):
     """
 
     def __init__(self):
-        self.alauda_docker = RequiredFeature("alauda_docker")
+        self.alauda_docker = RequiredFeature("alauda_docker_proxy")
 
     def report_health(self):
         return self.alauda_docker.report_health()
@@ -136,16 +127,17 @@ class AzureHealthCheck(HealthCheck):
     """Check the status of azure to make sure config is right and azure is available"""
 
     def report_health(self):
-        azure_key = self.db.find_first_object(AzureKey)
+        azure_key = AzureKey.objects().first()
         if not azure_key:
             return {
                 STATUS: HEALTH_STATUS.WARNING,
                 DESCRIPTION: "No Azure key found"
             }
-        azure = Service(azure_key.id)
-        if azure.ping():
+        service = CloudServiceAdapter(azure_key.id)
+        if service.ping():
             return {
-                STATUS: HEALTH_STATUS.OK
+                STATUS: HEALTH_STATUS.OK,
+                "type": "Azure Storage"
             }
         else:
             return {

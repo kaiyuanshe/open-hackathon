@@ -3,6 +3,12 @@
     <link href="/static/css/oh.home.css" rel="stylesheet">
 {% endblock %}
 {% block content %}
+    {% if sc %}
+    <div id="sc_logo">
+        <div style="width:100%; height:200px; background:url('/static/pic/yantai_gov.png'); background-size:cover"></div>
+    </div>
+    {% endif %}
+
     <div id="carousel-example-generic" class="carousel slide carousel-fade" data-ride="carousel">
         <ol class="carousel-indicators">
             <li data-target="#carousel-example-generic" data-slide-to="0" class="active"></li>
@@ -48,9 +54,7 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="oh-notice-title"><img src="/static/pic/notice1-icon.png"> 最新公告：</div>
-                <ul class="oh-notice-list">
-                    <li><a href="http://www.huodongxing.com/event/reg_submit?id=9308149000700">牛津计划·Docker黑客松马拉松中场充电站！
-                        <span>2015-11-22 13:30</span></a></li>
+                <ul class="oh-notice-list col-md-10">
                 </ul>
             </div>
             {#
@@ -76,11 +80,10 @@
         </div>
         #}
         </div>
-        <!--<div class="btn-group btn-group-xs" role="group">-->
-        <!--<button type="button" class="btn btn-default"><span class="glyphicon glyphicon-menu-down"></span>-->
-        <!--</button>-->
-        <!--<button type="button" class="btn btn-default"><span class="glyphicon glyphicon-menu-up"></span></button>-->
-        <!--</div>-->
+        <div class="btn-group btn-group-xs" role="group">
+            <button type="button" class="btn btn-default" id="btn-notice-down"><span class="glyphicon glyphicon-menu-down"></span></button>
+            <button type="button" class="btn btn-default" id="btn-notice-up"><span class="glyphicon glyphicon-menu-up"></span></button>
+        </div>
     </div>
 
 
@@ -105,7 +108,7 @@
                                         <div class="oh-header">
                                             <a href="{{ url_for('hackathon', hackathon_name=item.name) }}"
                                                target="_blank">
-                                                <img src="{{ item.banners.split(';')[0] or url_for('static',filename='pic/homepage.jpg') }}"
+                                                <img src="{{ item.banners[0] or url_for('static',filename='pic/homepage.jpg') }}"
                                                      class="hackathon-thumb" alt="{{ item.display_name }}">
                                             </a>
                                             {% if item.ribbon != "" %}
@@ -128,7 +131,7 @@
                                                 </a>
                                             </h3>
                                             <ul class="oh-tags">
-                                                {% for name in item.tag.split(',') %}
+                                                {% for name in item.tags %}
                                                     <li>
                                                         <a href="#">{{ name }}</a>
                                                         {% if loop.index < (item.tag | length) %},{% endif %}
@@ -138,7 +141,7 @@
                                             <p class="oh-desc"><a class="grey-link"
                                                                   href="{{ url_for('hackathon', hackathon_name=item.name) }}"
                                                                   target="_blank">
-                                                {{ item.short_description | limitTo(60) }}</a>
+                                                {{ item.get("short_description") | limitTo(60) }}</a>
                                             </p>
 
                                             <div class="oh-time">
@@ -146,9 +149,9 @@
                                                         class="fa fa-calendar"></span> {{ item.event_start_time | date("%y/%m/%d
                                             %a %H:%M") }}
                                                 </div>
-                                                <div><span
-                                                        class="fa fa-map-marker"></span> {{ item.config.location == '' and '在线'
-                                            or item.config.location | limitTo(2) }}
+                                                <div>
+                                                    <span class="fa fa-map-marker"></span>
+                                                    {{ item.location or "线上" | limitTo(2) }}
                                                 </div>
                                             </div>
                                             <div class="oh-progressbar"><span
@@ -203,7 +206,7 @@
                                         <div class="oh-header">
                                             <a href="{{ url_for('hackathon', hackathon_name=item.name) }}"
                                                target="_blank">
-                                                <img src="{{ item.banners.split(';')[0] or url_for('static',filename='pic/homepage.jpg') }}"
+                                                <img src="{{ item.banners[0] or url_for('static',filename='pic/homepage.jpg') }}"
                                                      class="hackathon-thumb" alt="{{ item.display_name }}">
                                             </a>
                                             {% if item.ribbon != "" %}
@@ -226,7 +229,7 @@
                                                 </a>
                                             </h3>
                                             <ul class="oh-tags">
-                                                {% for name in item.tag.split(',') %}
+                                                {% for name in item.tags %}
                                                     <li>
                                                         <a href="#">{{ name }}</a>
                                                         {% if loop.index < (item.tag | length) %},{% endif %}
@@ -236,7 +239,7 @@
                                             <p class="oh-desc"><a class="grey-link"
                                                                   href="{{ url_for('hackathon', hackathon_name=item.name) }}"
                                                                   target="_blank">
-                                                {{ item.short_description | limitTo(60) }}</a>
+                                                {{ item.get("short_description") | limitTo(60) }}</a>
                                             </p>
 
                                             <div class="oh-time">
@@ -244,9 +247,9 @@
                                                         class="fa fa-calendar"></span> {{ item.event_start_time | date("%y/%m/%d
                                             %a %H:%M") }}
                                                 </div>
-                                                <div><span
-                                                        class="fa fa-map-marker"></span> {{ item.config.location == '' and '在线'
-                                            or item.config.location | limitTo(2) }}
+                                                <div>
+                                                    <span class="fa fa-map-marker"></span>
+                                                    {{ item.location or "线上" | limitTo(2) }}
                                                 </div>
                                             </div>
                                             <div class="oh-progressbar"><span
@@ -301,7 +304,7 @@
                                         <div class="oh-header">
                                             <a href="{{ url_for('hackathon', hackathon_name=item.name) }}"
                                                target="_blank">
-                                                <img src="{{ item.banners.split(';')[0] or url_for('static',filename='pic/homepage.jpg') }}"
+                                                <img src="{{ item.banners[0] or url_for('static',filename='pic/homepage.jpg') }}"
                                                      class="hackathon-thumb" alt="{{ item.display_name }}">
                                             </a>
                                             {% if item.ribbon != "" %}
@@ -324,7 +327,7 @@
                                                 </a>
                                             </h3>
                                             <ul class="oh-tags">
-                                                {% for name in item.tag.split(',') %}
+                                                {% for name in item.tags %}
                                                     <li>
                                                         <a href="#">{{ name }}</a>
                                                         {% if loop.index < (item.tag | length) %},{% endif %}
@@ -334,7 +337,7 @@
                                             <p class="oh-desc"><a class="grey-link"
                                                                   href="{{ url_for('hackathon', hackathon_name=item.name) }}"
                                                                   target="_blank">
-                                                {{ item.short_description | limitTo(60) }}</a>
+                                                {{ item.get("short_description") | limitTo(60) }}</a>
                                             </p>
 
                                             <div class="oh-time">
@@ -342,9 +345,9 @@
                                                         class="fa fa-calendar"></span> {{ item.event_start_time | date("%y/%m/%d
                                             %a %H:%M") }}
                                                 </div>
-                                                <div><span
-                                                        class="fa fa-map-marker"></span> {{ item.config.location == '' and '在线'
-                                            or item.config.location | limitTo(2) }}
+                                                <div>
+                                                    <span class="fa fa-map-marker"></span>
+                                                    {{ item.location or "线上" | limitTo(2) }}
                                                 </div>
                                             </div>
                                             <div class="oh-progressbar"><span
@@ -488,7 +491,7 @@
                         <div class="oh-item">
 
                             <a href="javascirp:;"><img
-                                    src="http://www.kaiyuanshe.cn/templates/hli/css/member-logos/gitcafe-small.png"
+                                    src="/static/pic/gitcafe-small.png"
                                     alt="gitcafe"></a>
 
                             <div class="oh-body">
@@ -511,7 +514,7 @@
                     <div class="col-md-3 col-xs-6">
                         <div class="oh-item">
                             <a href="javascirp:;"><img
-                                    src="http://www.kaiyuanshe.cn/templates/hli/css/member-logos/UbuntuKylinnew.png"
+                                    src="/static/pic/UbuntuKylinnew.png"
                                     alt="ukylin"></a>
 
                             <div class="oh-body">
@@ -534,7 +537,7 @@
                     <div class="col-md-3 col-xs-6">
                         <div class="oh-item">
                             <a href="javascirp:;"><img
-                                    src="http://www.kaiyuanshe.cn/templates/hli/css/member-logos/alauda-small.png"
+                                    src="/static/pic/alauda-small.png"
                                     alt="alauda"></a>
 
                             <div class="oh-body">
@@ -579,7 +582,7 @@
                     <div class="col-md-3 col-xs-6">
                         <div class="oh-item">
                             <a href="javascirp:;"><img
-                                    src="http://www.kaiyuanshe.cn/templates/hli/css/member-logos/jstorm-small.png"
+                                    src="/static/pic/jstorm-small.png"
                                     alt="jstorm"></a>
 
                             <div class="oh-body">
@@ -602,7 +605,7 @@
                     <div class="col-md-3 col-xs-6">
                         <div class="oh-item">
                             <a href="javascirp:;"><img
-                                    src="http://www.kaiyuanshe.cn/templates/hli/css/member-logos/wicresoft-small.png"
+                                    src="/static/pic/wicresoft-small.png"
                                     alt="wicresoft"></a>
 
                             <div class="oh-body">
@@ -662,17 +665,32 @@
 {% endblock %}
 
 {% block script %}
+    <script id="notice_list_template" type="text/x-jquery-tmpl">
+     {% raw %}
+        <li>
+        {{if !link || link==''}}
+            ${content}<span>${moment(update_time).format('YYYY-MM-DD')}</span>
+        {{else}}
+            <a href="${link}">
+                ${content}<span>${moment(update_time).format('YYYY-MM-DD')}</span>
+            </a>
+        {{/if}}
+        </li>
+    {% endraw %}
+
+    </script>
     <script id="talent_list_template" type="text/x-jquery-tmpl">
           <div class="col-lg-2 col-md-4 col-xs-6">
                 <div class="oh-item">
                     <div class="oh-header">
-                        <a href="javascript:;"><img src="${avatar_url}" onerror="javascript:this.src='/static/pic/anon_user.png'"></a>
+                        <a href="/user/p_${id}"><img src="${avatar_url}" onerror="javascript:this.src='/static/pic/anon_user.png'"></a>
                     </div>
                     <div class="oh-body">
                         <p class="text-center"><a href="javascript:;">${nickname}</a></p>
                     </div>
                 </div>
           </div>
+
     </script>
     <script id="award_title_template" type="text/x-jquery-tmpl">
      {% raw %}
@@ -690,6 +708,7 @@
             </a>
         </li>
     {% endraw %}
+
     </script>
     <script id="award_list_template" type="text/x-jquery-tmpl">
     {% raw %}
@@ -707,7 +726,7 @@
             <ul class="oh-list">
                 {{each members}}
                     <li>
-                        <a href="javascript:;"><img src="${user.avatar_url}"></a>
+                        <a href="/user/p_${id}"><img src="${user.avatar_url}"></a>
                         <p><a class="grey-link" href="javasript:;">${user.nicknam}</a></p>
                     </li>
                 {{/each}}
@@ -715,29 +734,32 @@
         </div>
         <div class="col-xs-7 oh-show">
             <div class="oh-thumbnail">
-                {{if show.length>0 }}
+                {{if works.length>0 }}
                 <div id="hackathon-${hackathon.id}" class="carousel slide" data-ride="carousel" data-wrap="true">
                     <ol class="carousel-indicators">
-                        {{each show}}
-                            {{if type != 2 }}
+                        {{each works}}
                             <li data-target="#hackathon-${$data.hackathon.id}" data-slide-to="${$index}"></li>
-                            {{/if}}
                         {{/each}}
                     </ol>
                     <div class="carousel-inner" role="listbox">
-                        {{each show}}
-                        {{if type != 2 }}
+                        {{each works}}
                             <div class="item">
-                               {{if type == 0 }}
-                                 <img src="${uri}" alt="${note}">
-                               {{/if}}
-                               {{if type == 1 }}
-                                   <div>
-                                        {{html uri }}
-                                   </div>
-                               {{/if}}
+                                {{if type == 0}}
+                                    <img src="${uri}" alt="${note}">
+                                {{else type == 1}}
+                                     {{html uri}}
+                                {{else type == 2}}
+                                     ${note}:<a href="${uri}" target="_blank">${uri}</a>
+                                {{else type >= 3 && type<=5}}
+                                     <iframe src="https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(uri)}" seamless="seamless" frameborder="0" scrolling="yes"></iframe>
+                                {{else type == 6}}
+                                     <object data="${uri}" type="application/pdf" width="100%" height="100%">
+                                         <p>Your browser doesn't support PDF viewing. Please install PDF viewer plugin!</p>
+                                     </object>
+                                {{else}}
+                                    <li><a href="${uri}" target="_blank">${note}</a></li>
+                                {{/if}}
                             </div>
-                        {{/if}}
                         {{/each}}
                     </div>
                 </div>
@@ -747,6 +769,8 @@
     </div>
 </div>
   {% endraw %}
+
     </script>
+    <script type="text/javascript" src="/static/js/jquery/moment.min.js"></script>
     <script type="text/javascript" src="/static/js/views/oh.home.js"></script>
 {% endblock %}

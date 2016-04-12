@@ -27,20 +27,7 @@ __author__ = 'Yifu Huang'
 import sys
 
 sys.path.append("..")
-from hackathon.database import (
-    db_adapter,
-)
-from hackathon.database.models import (
-    AzureLog,
-    AzureStorageAccount,
-    AzureCloudService,
-    AzureDeployment,
-    AzureVirtualMachine,
-    AzureEndpoint,
-    VirtualEnvironment,
-    Template,
-    Experiment,
-)
+
 from hackathon.util import (
     load_template,
     call,
@@ -313,63 +300,12 @@ def update_virtual_environment_remote_paras(virtual_machine, remote_paras):
     db_adapter.commit()
 
 
-# --------------------------------------------- network config ---------------------------------------------#
-def add_endpoint_to_network_config(network_config, public_endpoints, private_endpoints):
-    """
-    Return a new network config
-    :param network_config:
-    :param public_endpoints: a list of int or str
-    :param private_endpoints: a list of int or str
-    :return:
-    """
-    endpoints = zip(map(str, public_endpoints), map(str, private_endpoints))
-    new_network_config = ConfigurationSet()
-    new_network_config.configuration_set_type = network_config.configuration_set_type
-    if network_config.input_endpoints is not None:
-        for input_endpoint in network_config.input_endpoints.input_endpoints:
-            new_network_config.input_endpoints.input_endpoints.append(
-                ConfigurationSetInputEndpoint(input_endpoint.name,
-                                              input_endpoint.protocol,
-                                              input_endpoint.port,
-                                              input_endpoint.local_port)
-            )
-    for endpoint in endpoints:
-        new_network_config.input_endpoints.input_endpoints.append(
-            ConfigurationSetInputEndpoint(ENDPOINT_PREFIX + endpoint[0],
-                                          ENDPOINT_PROTOCOL,
-                                          endpoint[0],
-                                          endpoint[1])
-        )
-    return new_network_config
-
-
-def delete_endpoint_from_network_config(network_config, private_endpoints):
-    """
-    Return a new network config
-    :param network_config:
-    :param private_endpoints: a list of int or str
-    :return:
-    """
-    private_endpoints = map(str, private_endpoints)
-    new_network_config = ConfigurationSet()
-    new_network_config.configuration_set_type = network_config.configuration_set_type
-    if network_config.input_endpoints is not None:
-        for input_endpoint in network_config.input_endpoints.input_endpoints:
-            if input_endpoint.local_port not in private_endpoints:
-                new_network_config.input_endpoints.input_endpoints.append(
-                    ConfigurationSetInputEndpoint(input_endpoint.name,
-                                                  input_endpoint.protocol,
-                                                  input_endpoint.port,
-                                                  input_endpoint.local_port)
-                )
-    return new_network_config
-
-
 # --------------------------------------------- template ---------------------------------------------#
 def load_template_from_experiment(experiment_id):
     e = db_adapter.get_object(Experiment, experiment_id)
     t = db_adapter.get_object(Template, e.template_id)
     return load_template(t.url)
+
 
 # --------------------------------------------- scheduler ---------------------------------------------#
 def run_job(mdl_cls_func, cls_args, func_args, second=DEFAULT_TICK):

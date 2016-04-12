@@ -47,16 +47,14 @@
                 showNoTeam();
             } else if (data.length > 0) {
                 $('#team span').text('（' + data.length + '）');
-                var btn = $('<button>')
-                    .addClass('btn btn-default btn-sm btn-block')
-                    .text('更多')
-                    .bind('click', function (e) {
-                        teamsbind(data.splice(0, 8))
-                        if (data.length == 0) {
-                            btn.detach();
-                        }
-                    }).trigger('click');
-                $('#team_list').after(btn);
+                teamsbind(data);
+                // var btn = $('<button>')
+                //     .addClass('btn btn-default btn-sm btn-block')
+                //     .text('更多')
+                //     .bind('click', function (e) {
+                //         teamsbind(data.splice(0, 8))
+                //     }).trigger('click');
+                // $('#team_list').after(btn);
             } else {
                 showNoTeam();
             }
@@ -68,8 +66,8 @@
 
         getShowList().then(function (data) {
             if (data.error) {
-
-            } else {
+                noShow();
+            } else if (data.length > 0) {
                 $('#works span').text('（' + data.length + '）');
                 $('#team_show').append($('#show_list_temp').tmpl(data, {
                     getImage: function (uri) {
@@ -118,8 +116,74 @@
                         return getTeamlink(team_id, '');
                     }
                 }));
+            }else{
+                noShow();
             }
         });
+        
+        //get hackathon notice
+        oh.api.hackathon.notice.list.get({
+            query: {
+                hackathon_name: hackathon_name,
+                order_by: 'time'
+            }
+        }, function(data) {
+            if(data.error) {
+                oh.comm.alert(data.error.message);
+            } else {
+                data = data.items;
+                $('#new > span').text('（' + data.length + '）');
+
+                var noticeIconByCategory = {
+                    0: 'glyphicon glyphicon-bullhorn', //'黑客松信息'
+                    1: 'glyphicon glyphicon-user', //'用户信息'
+                    2: 'glyphicon glyphicon-th-list', //'实验信息'
+                    3: 'glyphicon glyphicon-gift', //'获奖信息'
+                    4: 'glyphicon glyphicon-edit' //'模板信息'
+                };
+
+                $('#oh-latest-news').append($('#notice_list_temp').tmpl(data, {
+                    getNoticeIcon: function(category) {
+                        return noticeIconByCategory[category];
+                    }, 
+                    getNoticeTime: function(update_time) {
+                        var current_time = new Date().getTime();
+                        var time_distance = current_time - update_time;
+                        var timing = {year: 0, month: 0, week: 0, day: 0, hour: 0, minute: 0};
+
+                        if (time_distance > 0) {
+                            timing.year = Math.floor(time_distance / 86400000 / 365)
+                            time_distance -= timing.year * 86400000 * 365;
+                            timing.month = Math.floor(time_distance / 86400000 / 30)
+                            time_distance -= timing.month * 86400000 * 30;
+                            timing.week = Math.floor(time_distance / 86400000 / 7)
+                            time_distance -= timing.week * 86400000 * 7;
+                            timing.day = Math.floor(time_distance / 86400000)
+                            time_distance -= timing.day * 86400000;
+                            timing.hour = Math.floor(time_distance / 3600000)
+                            time_distance -= timing.hour * 3600000;
+                            timing.minute = Math.floor(time_distance / 60000)
+                            time_distance -= timing.minute * 60000;
+                        } 
+
+                        var show_text;
+                        if (timing.year > 0)        show_text = timing.year + '年前';
+                        else if (timing.month > 0)  show_text = timing.month + '个月前';
+                        else if (timing.week > 0)   show_text = timing.week + '周前';
+                        else if (timing.day > 0)    show_text = timing.day + '天前';
+                        else if (timing.hour > 0)   show_text = timing.hour + '小时前';
+                        else if (timing.minute > 5) show_text = timing.minute + '分钟前'; 
+                        else                        show_text = '刚刚'; //less than 5min, show '刚刚'
+
+                        return show_text;
+                    }
+                }));
+            }
+        });
+    }
+
+    function noShow() {
+        $('#works').append('<div class="col-md-12 text-center no-team"><img  src="/static/pic/no-show.png"><div>')
     }
 
     function showNoTeam() {

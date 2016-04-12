@@ -57,7 +57,7 @@ def scheduler_listener(event):
 def scheduler_executor(feature, method, context):
     """task for all apscheduler jobs
 
-    While the context of apscheduler job will be serialized and saved into MySQL, it's hard that add a instance method
+    While the context of apscheduler job will be serialized and saved into MySQL, it's hard that add an instance method
     as an apscheduler job because the context is usually very complicate and not easy to be serialized. For example, see
     we want to add an new job to execute 'user_mgr.get_user_info' in 5 minutes, then the whole 'user_mgr' which involves
     many other classes will be serialized and saved which probably fail for many of them including 'user_mgr' itself are
@@ -88,9 +88,9 @@ def scheduler_executor(feature, method, context):
         mtd(context)
 
 
-class HackathonScheduler():
+class HackathonScheduler(object):
     """An helper class for apscheduler"""
-    jobstore = None
+    jobstore = "ohp"
 
     def get_scheduler(self):
         """Return the apscheduler instance in case you have to call it directly
@@ -145,6 +145,7 @@ class HackathonScheduler():
                                        id=id,
                                        max_instances=1,
                                        replace_existing=replace_existing,
+                                       jobstore=self.jobstore,
                                        args=[feature, method, context])
 
     def add_interval(self, feature, method, context=None, id=None, replace_existing=True, next_run_time=undefined,
@@ -188,6 +189,7 @@ class HackathonScheduler():
                                        max_instances=1,
                                        replace_existing=replace_existing,
                                        next_run_time=next_run_time,
+                                       jobstore=self.jobstore,
                                        args=[feature, method, context],
                                        **interval)
 
@@ -227,10 +229,20 @@ class HackathonScheduler():
             self.__apscheduler = BackgroundScheduler(timezone=utc)
 
             # add MySQL job store
-            if safe_get_config("scheduler.job_store", "memory") == "mysql":
+            job_store_type = safe_get_config("scheduler.job_store", "memory")
+            if job_store_type == "mysql":
                 log.debug("add aps_cheduler job store based on mysql")
-                self.jobstore = 'sqlalchemy'
-                self.__apscheduler.add_jobstore(self.jobstore, url=get_config("scheduler.job_store_url"))
+                self.__apscheduler.add_jobstore('sqlalchemy',
+                                                alias=self.jobstore,
+                                                url=get_config("scheduler.job_store_url"))
+            elif job_store_type == "mongodb":
+                log.debug("add aps_cheduler job store based on mongodb")
+                self.__apscheduler.add_jobstore('mongodb',
+                                                alias=self.jobstore,
+                                                database=safe_get_config("scheduler.database", "apscheduler"),
+                                                collection=safe_get_config("scheduler.collection", "jobs"),
+                                                host=safe_get_config("scheduler.host", "localhost"),
+                                                port=safe_get_config("scheduler.port", 27017))
 
             # add event listener
             self.__apscheduler.add_listener(scheduler_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)

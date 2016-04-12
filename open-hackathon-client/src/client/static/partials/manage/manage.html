@@ -1,0 +1,36 @@
+<div class="main-body-grid">
+  <div class="grid-left">
+    <div class="side-navigation">
+      <div class="person">
+        <div class="person-pic">
+          <img src="{{currentUser.avatar_url}}" title="{{currentUser.nickname}}" alt="{{currentUser.nickname}}" onerror="javascript:this.src='/static/pic/monkey-104-104px.jpg'">
+        </div>
+        <span>{{currentUser.nickname}}</span>
+      </div>
+      <ul class="nav">
+        <li ng-if="isShowNav(navManage.type)" ng-repeat="navManage in currentArea track by navManage.name" class="nav-index-group">
+          <h3 translate="{{navManage.name}}"></h3>
+          <ul class="nav">
+            <li ng-repeat="navItem in navManage.navGroups" ng-class="isActive(navItem)">
+              <a href="{{navLink(navItem)}}" title="{{navItem.name | translate}}"><i class="fa {{navItem.icon}}"></i><span translate="{{navItem.name}}"></span></a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="grid-right">
+    <nav class="top-navigation">
+      <a class="btn btn-default" ui-sref="main()">
+        <i class="fa fa-wrench"></i>
+        <ANY translate="MY_MANAGEMENT">MY_MANAGEMENT</ANY>
+      </a> 
+      &gt;
+      <ANY translate="CURRENT_ACTIVITIES">CURRENT_ACTIVITIES</ANY>
+      <a href="javascript:;">{{currentActivity.name}}</a> 
+      &gt;
+      <ANY translate="{{page.name}}">page.name</ANY>
+    </nav>
+    <div ui-view class="right-main"></div>
+  </div>
+</div>

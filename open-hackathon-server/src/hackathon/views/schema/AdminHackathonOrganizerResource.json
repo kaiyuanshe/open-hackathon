@@ -1,17 +1,5 @@
 {
   "AdminHackathonOrganizerResource": {
-    "get": {
-      "input": {
-        "title": "query hackathon organizer by PK id",
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "pattern": "^[0-9]+$"
-          }
-        }
-      }
-    },
     "post": {
       "input": {
         "title": "request to add a new hackathon organizer",
@@ -32,7 +20,7 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "int"
+            "type": "string"
           }
         }
       }
@@ -43,8 +31,7 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "string",
-            "pattern": "^[0-9]+$"
+            "type": "string"
           }
         }
       }

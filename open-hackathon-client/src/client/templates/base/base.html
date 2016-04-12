@@ -28,29 +28,26 @@
     {% block head %} {% endblock %}
 </head>
 
-<body data-spy="scroll" data-target="#oh_lift" style="position: relative">
-<header class="navbar navbar-inverse">
-    <div class="container">
-        <div class="navbar-header">
-            <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#navbar">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="{{ url_for('index') }}">
-                <img src="/static/pic/icon64.png">
-            </a>
+<body data-spy="scroll" data-target="#oh_lift"  style="position: relative">
+<div id="wrapper">
+    <header class="navbar navbar-inverse header">
+        <div class="container">
+            <div class="navbar-header">
+                <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#navbar">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="brand navbar-brand" href="/">
+                  <img class="logo" src="/static/images/logo.jpg">
+                </a>
+            </div>
+            {% include "partials/header_menu.html" %}
         </div>
-        {% include "partials/header_menu.html" %}
-    </div>
-</header>
-{% block content %} {% endblock %}
-{% if request.endpoint != 'index' or current_user.is_authenticated() %}
-<div class="oh-grey-bg">
-    <div class="container oh-flow-chart">
-    </div>
+    </header>
 </div>
-{% endif %}
+{% block content %} {% endblock %}
+
 {% if request.endpoint == 'index' %}
 <div class="oh-share-bar">
     <div class="oh-wrap">
@@ -76,8 +73,7 @@
 
             <dl>
                 <dt>联系我们</dt>
-                <dd><a target="_blank" href="javascript:;">关于我们</a></dd>
-                <dd><a target="_blank" href="javascript:;">联系我们</a></dd>
+                <dd><a href="/about">关于我们</a></dd>
             </dl>
             <dl>
                 <dt>活动服务</dt>
@@ -107,7 +103,7 @@
         </div>
         <div class="row text-center oh-copyright">
             <hr>
-            © 2015 Microsoft Open Technology Center
+            © 2015 Microsoft Open Technology Center | 京ICP备<a target="_blank" href="http://www.miibeian.gov.cn/">14047895号</a>
         </div>
     </div>
 </footer>

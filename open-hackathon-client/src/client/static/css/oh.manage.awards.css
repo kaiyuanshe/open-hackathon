@@ -1,0 +1,255 @@
+.award-stat-item span {
+  display: inline-block;
+  margin-right: 1em;
+  color: #df1f1f;
+  font-weight: bold;
+}
+
+.award-stat-item img {
+  display: inline-block;
+  max-width: 32px;
+  margin-right: 1em;
+}
+
+.team-award-item {
+  display: inline-block;
+  width: 30%;
+  min-width: 200px;
+  margin-right: 3%;
+  padding: 20px 10px;
+  float: left;
+  position: relative;
+  margin-bottom: 20px;
+
+  box-shadow: 0 0 1px 1px #dfdfdf;
+}
+
+.team-award-item img {
+  display: inline-block;
+  width: 80px;
+  height: 80px;
+}
+
+.team-award-item .team-data {
+  display: inline-block;
+  position: absolute;
+  left: 100px;
+  right: 10px;
+}
+
+.team-award-item .team-data>p, .team-award-item .team-data>h2, .team-award-item .team-data>span>p {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  word-break: break-all;
+  word-wrap: break-word;
+  overflow: hidden;
+}
+
+.team-award-item .team-data h2 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 15px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.team-award-item .team-data p {
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.team-award-item .team-data span["uib-dropdown"] {
+  display: inline-block;
+  width: 100%;
+  margin: 0;
+}
+
+.team-award-item .team-data>span>p {
+  cursor: pointer;
+}
+
+.team-award-item .team-data>span>ul {
+  padding: 5px 10px;
+  margin-top: -5px;
+}
+
+.team-award-item .team-data>span>ul>li>img {
+  margin: 0;
+  width: 20px;
+  height: 20px;
+  margin-right: 3px;
+  vertical-align: text-bottom;
+}
+
+.team-award-item .team-data>span>ul>li>p {
+  margin: 0;
+  width: 100px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  word-break: break-all;
+  word-wrap: break-word;
+  overflow: hidden;
+  display: inline-block;
+}
+
+.team-award-item .team-awards-container {
+  height: 140px;
+
+  display: -webkit-box;
+	display: -webkit-flex;
+	display: -moz-flex;
+	display: -ms-flexbox;
+	display: flex;
+
+  -webkit-box-direction: normal;
+	-webkit-box-orient: horizontal;
+  -webkit-flex-direction: row;
+	-moz-flex-direction: row;
+	-ms-flex-direction: row;
+	flex-direction: row;
+}
+
+.team-award-item div.new-award-button-container {
+  padding-top: 10px;
+  -webkit-box-flex: 0;
+	-webkit-flex-grow: 0;
+	-moz-flex-grow: 0;
+	-ms-flex-positive: 0;
+	flex-grow: 0;
+  margin-right: 5px;
+}
+
+.team-award-item .team-awards {
+  padding-top: 10px;
+  overflow: auto;
+  display: inline-block;
+  word-break: break-all;
+  word-wrap: break-word;
+
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -moz-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+}
+
+.new-award-menu {
+  width: 300px;
+  height: 80px;
+  padding: 20px 10px;
+  overflow: auto;
+  clear: both;
+}
+
+span.award-item {
+  position: relative;
+  font-size: 14px;
+  border-radius: 1px;
+  border: 1px solid #019e48;
+  display: inline-block;
+  float: left;
+  line-height: 1.5;
+  margin-right: 10px;
+  margin-bottom: 12px;
+}
+
+span.award-item>i {
+  display: inline-block;
+  width: 24px;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  background-color: #019e48;
+  color: #fff;
+  font-weight: bolder;
+}
+
+span.award-item>p {
+  display: inline-block;
+  text-align: center;
+  min-width: 60px;
+  margin: 0;
+  padding: 0 5px;;
+}
+
+
+span.cancel-award-cross {
+  display: inline-block;
+  color: #3f3f3f;
+  position: absolute;
+  font-size: 14px;
+  top: -7px;
+  right: -7px;
+  background-color: #afafaf;
+  border-radius: 50%;
+  width: 14px;
+  height: 14px;
+  font-weight: normal;
+  text-align: center;
+  cursor: pointer;
+}
+
+span.new-award-button {
+  padding: 0;
+  line-height: 1.5;
+  text-align: center;
+  width: 24px;
+  font-size: 14px;
+  background-color: #efefef;
+  color: #019e48;
+}
+
+.search-bar-container {
+  width: 100%;
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
+.search-bar {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flexbox;
+  display: flex;
+
+  -webkit-box-direction: normal;
+  -webkit-box-orient: horizontal;
+  -webkit-flex-direction: row;
+  -moz-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+
+  background-color: #0782c1;
+  padding: 8px 10px;
+  border-radius: 3px;
+}
+
+.search-bar input {
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -moz-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+  height: 26px;
+  border-style: none;
+  border-radius: 3px;
+  padding: 0 10px;
+}
+
+.search-bar button {
+  -webkit-box-flex: 0;
+	-webkit-flex-grow: 0;
+	-moz-flex-grow: 0;
+	-ms-flex-positive: 0;
+	flex-grow: 0;
+  height: 26px;
+  border-style: none;
+  background-color: inherit;
+  color: #efefef;
+  width: 80px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: bold;
+}

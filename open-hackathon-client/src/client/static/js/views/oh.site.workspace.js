@@ -133,15 +133,15 @@
                             <h4 name="dserie">{name}<h4>\
                         </div>\
                     </div>';
-        var url_tmpe = '<h4><a href="{url}" style="text-decoration:underline;color:#00abec;" class="col-md-offset-1">{name}</a></h4>';
+        var url_tmpe = '<h4><a href="{url}" target="_blank" style="text-decoration:underline;color:#00abec;" class="col-md-offset-1">{name}</a></h4>';
         if (data.status == 2) {
             var dockers = []
             for (var i in data.remote_servers) {
                 dockers.push({
                     purl: "",
-                    imgUrl: data.remote_servers[i].name == 'cloud_eclipse' ? '/static/pic/idehub.png' : '/static/pic/dseries.png',
+                    imgUrl: '/static/pic/dseries.png',
                     name: data.remote_servers[i].name,
-                    surl: data.remote_servers[i].name == 'cloud_eclipse' ? data.remote_servers[i].url + window.location.origin : data.remote_servers[i].guacamole_host + "/guacamole/#/client/" + get_guacamole_server_name(data.remote_servers[i].name, "c", "openhackathon") + "?oh=" + $.cookie('token') + "&name=" + data.remote_servers[i].name
+                    surl: data.remote_servers[i].guacamole_host + "/guacamole/#/client/" + get_guacamole_server_name(data.remote_servers[i].name, "c", "openhackathon") + "?oh=" + $.cookie('token') + "&name=" + data.remote_servers[i].name + "&_=" + new Date().getTime()
                     })
                 $('#show').append(tmpe.format(dockers[i]));
             }

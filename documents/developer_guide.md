@@ -12,7 +12,7 @@ On this page:
   * [Clone SourceCode](#clone-sourcecode)
   * [Install Python Packages](#install-python-packages)
   * [Install and Configure guacamole](#install-and-configure-guacamole)
-  * [Install and Configure MySQL](#install-and-configure-mysql)
+  * [Install and Configure Database](#install-and-configure-database)
   * [Install Docker](#install-docker)
   * [Logging && Hosts](#logging--hosts)
   * [Run](#run)
@@ -101,44 +101,21 @@ By default you don't need to change `/etc/guacamole/guacamole.properties` on you
 [Click](http://guac-dev.org/doc/gug/custom-authentication.html) for more about custom authentication.
 
 
-### Install and Configure MySQL
+### Install and Configure Database
 
-1.install MySQL on ubuntu by:
+1. install MongoDB following [MongoDB installation guide](https://docs.mongodb.org/v3.0/tutorial/install-mongodb-on-ubuntu/) for ubuntu.
+Navigate to [MongoDB installation](https://docs.mongodb.org/v3.0/installation/) if are running open hackathon on other OS.
 
-```
-sudo apt-get update
-sudo apt-get install mysql-server libmysqlclient-dev
-```
-  
-Follow [MySQL installation guide](https://dev.mysql.com/doc/refman/5.7/en/installing.html) for other OS. 
+2. Make sure mongodb correctly installed.  You can run `sudo service mongod status` to see the running service. Or issue command `mongo` to try mongodb command line.
 
-2.set MySQL charset to utf8. Make sure the MySQL is using `utf-8` charset. Edit `/etc/mysql/my.conf` make changes like this:
-```
-[client]
-default-character-set=utf8
-
-[mysqld]
-default-storage-engine=INNODB
-character-set-server=utf8
-collation-server=utf8_general_ci
-```
-Then restart the `mysqld` service by `service mysqld restart`
-
-3.create database and user
-Refer to [MySQL Documentation](https://dev.mysql.com/doc/refman/5.6/en/create-user.html) about how to create user and grant privileges to that user. Following are some quick instructions. Logon mysql console with root user(`mysql -u root -p`) and then:
-```mysql
-create database hackathon;
-create User 'hackathon'@'localhost' IDENTIFIED by 'hackathon';
-GRANT ALL on hackathon.* TO 'hackathon'@'localhost';
-```
-
-4.Create tables.
-Update MySQL connection parameters in `open-hackathon-client/src/client/config_sample.py` and `open-hackathon-server/src/hackathon/config_sample.py`. And then setup DB tables by:
+3. Init required data by:
+Update DB connection parameters in `open-hackathon-server/src/hackathon/config_sample.py` if required(For example you run mongodb on a port other than the default
+`27017`). And then setup DB by:
 ```
 sudo python open-hackathon-server/src/setup_db.py
 ```
 
-You can run `sudo python open-hackathon-server/src/reset_db.py` to re-create all tables. But remember, the existing data will be erased while reset the database. 
+You can run `sudo python open-hackathon-server/src/reset_db.py` to re-create all tables. But remember, the existing data will be erased while reset the database.
 
 
 ### Install Docker

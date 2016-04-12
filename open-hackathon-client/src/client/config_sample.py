@@ -69,9 +69,6 @@ Config = {
     "app": {
         "secret_key": "secret_key"
     },
-    "mysql": {
-        "connection": 'mysql://%s:%s@%s/%s' % ('hackathon', 'hackathon', 'localhost', 'hackathon')
-    },
     "login": {
         "github": {
             "client_id": GITHUB_CLIENT_ID,
@@ -169,7 +166,8 @@ Config = {
                         "": ["get", "post", "put"],
                         "checkname": ["get"],
                         "list": ["get"],
-                        "canonline": ["get"],
+                        "online": ["post"],
+                        "offline":["post"],
                         "tags": ["get", "post", "put", "delete"],
                         "config": ["post", "put", "delete"],
                         "administrator": {
@@ -187,6 +185,9 @@ Config = {
                         "award": {
                             "": ["get", "post", "put", "delete"],
                             "list": ["get"]
+                        },
+                        "notice": {
+                            "": ["get", "post", "put", "delete"]
                         }
                     },
                     "registration": {
@@ -195,6 +196,7 @@ Config = {
                     },
                     "azure": {
                         "": ["get", "post", "delete", "put"],
+                        "checksubid":["post"]
                     },
                     "experiment": {
                         "list": ["get"],
@@ -217,6 +219,7 @@ Config = {
                 },
                 "template": {
                     "": ["get", "post", "delete", "put"],
+                    "file":["post"],
                     "list": ["get"],
                     "check": ["get"]
                 },
@@ -232,13 +235,16 @@ Config = {
                         "list": ["get"]
                     },
                     "profile": {
-                        "": ["get", "post", "put"]
+                        "": ["post", "put"]
+                    },
+                    "picture": {
+                        "": ["put"]
                     },
                     "team": {
                         "member": ["get"]
                     },
                     "hackathon": {
-                        "like": ["post", "delete"]
+                        "like": ["get", "post", "delete"]
                     }
                 },
                 "bulletin": {
@@ -258,7 +264,10 @@ Config = {
                     "show": {
                         "list": ["get"]
                     },
-                    "grantedawards": ["get"]
+                    "grantedawards": ["get"],
+                    "notice": {
+                        "list": ["get"]
+                    }
                 },
                 "team": {
                     "": ["get", "post", "put", "delete"],

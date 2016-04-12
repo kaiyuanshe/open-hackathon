@@ -422,7 +422,7 @@
                     <div class="oh-header">
                         <div class="action" >
                             <img src="${$item.getUserLogo(user.avatar_url)}" onerror="javascript:this.src='/static/pic/anon_user.png'">
-                            {{if $item.isNotLeader(user_id) }}
+                            {{if $item.isNotLeader(user.id) }}
                                 <div class=" btn-group btn-group-justified" role="group" aria-label="Justified button group">
                                     <div class="btn-group" role="group">
                                         <button type="button" class="btn btn-sm btn-danger" data-id=${id} data-role="denied">踢出</button>
@@ -439,7 +439,7 @@
                     <div class="oh-body">
                         <p class="text-center">
                             <a href="javascript:;">${user.nickname}</a><br/>
-                            <span>${$item.getTitle(user_id,status)}</span>
+                            <span>${$item.getTitle(user.id, status)}</span>
                         </p>
                     </div>
                 </div>
@@ -451,25 +451,22 @@
             {% raw %}
             <div class="col-lg-2 col-md-4 col-xs-6" data-user >
                 <div class="oh-item">
-                    <div class="oh-header">
+                    <div class="oh-header" data-parent>
                         <div>
-                            <img src="${$item.getUserLogo(user.avatar_url)}" onerror="javascript:this.src='/static/pic/anon_user.png'">
+                            <a href="/user/p_${id}">
+                             <img src="${$item.getUserLogo(user.avatar_url)}" onload="oh.comm.imgLoad(this)"  onerror="javascript:this.src='/static/pic/monkey-104-104px.jpg'">
+                            </a>
                         </div>
                     </div>
                     <div class="oh-body">
                         <p class="text-center">
-                            <a href="javascript:;">${user.nickname}</a><br/>
-                            <span>${$item.getTitle(user_id,status)}</span>
+                             <a href="/user/p_${id}">${user.nickname}</a><br/>
+                            <span>${$item.getTitle(user.id, status)}</span>
                         </p>
                     </div>
                 </div>
             </div>
             {% endraw %}
-
-
-
-
-
         </script>
     {% endif %}
     <script id="show_item" type="text/x-jquery-tmpl">
@@ -632,9 +629,6 @@
                 <span>点评：</span> ${reason}
             </li>
         {% endraw %}
-
-
-
     </script>
     <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
     <script type="text/javascript" src="/static/js/views/oh.site.team.js"></script>

@@ -1,0 +1,57 @@
+.manage-edit .detail-wrapper {
+  width: 700px;
+  word-break: break-word;
+  margin: 0 auto;
+}
+
+.manage-edit .description-wrapper {
+  padding: 0;
+}
+
+.manage-edit .banners {
+  margin-top: 35px;
+  padding: 0 40px;
+  margin-left: -26px;
+  margin-bottom: 9px;
+}
+
+.manage-edit .banners .item {
+  margin-bottom: 26px;
+  margin-left: 26px;
+  float: left;
+  border: 1px dashed #7DBA43;
+  position: relative;
+  overflow: hidden;
+  width: 300px;
+  height: 170px;
+}
+
+.manage-edit .banners .item .btn {
+  position: absolute;
+  z-index: 2;
+  right: 16px;
+  top: 16px;
+  border-radius: 0;
+  padding: 2px 10px;
+}
+
+.manage-edit .banners .item.create {
+  text-align: center;
+  cursor: pointer;
+  background-color: #d1d4d4;
+}
+
+.manage-edit .banners .item.create:hover {
+  background-color: #7dba43;
+}
+
+.manage-edit .banners .item.create h3 {
+  color: #fff;
+  font-size: 30px;
+  margin-top: 48px;
+  margin-bottom: 48px;
+}
+
+.manage-edit .provider-wrapper {
+  padding: 80px 0 120px 0px;
+}

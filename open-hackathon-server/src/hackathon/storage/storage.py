@@ -43,7 +43,7 @@ class Storage(Component):
         """Save a file to storage
 
         Will load frile from context.content, and save to some place accoring to file_type and file_name.
-        After save, return a updated context which includes the url and the physical_path(if any) to caller. You MUST
+        After save, return an updated context which includes the url and the physical_path(if any) to caller. You MUST
         keep url in some place and you MAY save physical_path as well for simplicity in some cases.
 
         the url will be used in 'delete' method as a unique identifier so make sure url is unique in your implementation

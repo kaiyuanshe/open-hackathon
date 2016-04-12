@@ -88,6 +88,13 @@ class Context(object):
         else:
             return default_value
 
+    def to_dict(self):
+        return dict(self.__dict__)
+
+    def copy(self):
+        """Create another context with the same properties"""
+        return Context.from_object(dict(self.__dict__))
+
     @staticmethod
     def from_object(arg):
         """Convert JSON-like object to Context recursively
