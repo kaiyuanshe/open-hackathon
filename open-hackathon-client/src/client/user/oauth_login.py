@@ -400,17 +400,11 @@ class WeiboLogin(LoginBase):
         user_info = self.get_user_info(access_token["access_token"], access_token["uid"])
 
         # Get email need to apply high-level interface
+        # so we just leave email list empty here
         # email = self.get_email(access_token["access_token"], access_token["uid"])
+        email_list = []
 
         name = user_info["name"]
-        email_list = [
-            {
-                'name': name,
-                'email': '',
-                'verified': 1,
-                'primary': 1
-            }
-        ]
 
         required_info = {
             "openid": str(user_info["id"]),
