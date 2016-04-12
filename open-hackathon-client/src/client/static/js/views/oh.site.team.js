@@ -31,6 +31,15 @@
     var uid = 0;
     var team_date = {};
 
+    var templates = {
+        video: '<div class="sub-item">{{html uri}}</div>',
+        img: '<a href="${uri}" title="${description}" data-parent><img src="${uri}" onload="oh.comm.imgLoad(this)" alt="${description}"></a>',
+        doc: '<div class="sub-item"><iframe src="${uri}" seamless="seamless" frameborder="0" scrolling="yes"></iframe></div>',
+        pdf: '<div class="sub-item"><object data="${uri}" type="application/pdf" width="100%" height="100%"><p>您的浏览器不支持PDF查看。请安装PDF阅读器插件!</p></object></div>',
+        code: '<div class="sub-item"><span>${description}：</span><a href="${uri}" target="_blank">${uri}</a></div>',
+        other: '<div class="sub-item"><span>${description}：</span><a href="${uri}" target="_blank">${uri}</a></div>'
+    };
+
     function office_app(team_show) {
         if (team_show.type == 3 || team_show.type == 4 || team_show.type == 5) {
             team_show.uri = "https://view.officeapps.live.com/op/embed.aspx?src=" + encodeURIComponent(team_show.uri)
@@ -39,7 +48,7 @@
     }
 
     function splitShow(data) {
-        var _data = {video: [], img: [], code: [], doc: [], other: []};
+        var _data = {video: [], img: [], code: [], doc: [], pdf: [], other: []};
         $.each(data, function (i, o) {
             switch (o.type) {
                 case 0:
@@ -52,7 +61,7 @@
                     _data.code.push(o);
                     break;
                 case 6:
-                    _data.doc.push(o)
+                    _data.pdf.push(o)
                     break;
                 case 3:
                 case 4:
@@ -89,7 +98,62 @@
         });
     }
 
+
+    function bindShow(data) {
+        if (data.video.length > 0) {
+            $.tmpl(templates.video, data.video).appendTo('#videos .w-videos');
+        } else {
+            $('#videos .nothing').removeClass('hide');
+        }
+        if (data.img.length > 0) {
+            $.tmpl(templates.img, data.img).appendTo('#work_images');
+        } else {
+            $('#images .nothing').removeClass('hide');
+        }
+        if (data.doc.length == 0 || data.pdf.length == 0) {
+            $('#docs .nothing').removeClass('hide');
+        } else {
+            $.tmpl(templates.pdf, data.pdf).appendTo('#docs .w-doc');
+            $.tmpl(templates.doc, data.doc).appendTo('#docs .w-doc');
+        }
+
+        if (data.code.length > 0) {
+            $('#code').removeClass('hide');
+            $.tmpl(templates.code, data.code).appendTo('#code .w-code');
+        }
+
+        if (data.other.length > 0) {
+            $('#other').removeClass('hide');
+            $.tmpl(templates.other, data.other).appendTo('#code .w-code');
+        }
+    }
+
     function pageload() {
+        $('[data-loadsrc]').each(function (i, img) {
+            var $img = $(img).load(function (e) {
+                oh.comm.imgLoad(this);
+            })
+            $img.attr({src: $img.attr('data-loadsrc')});
+        });
+
+        $('.popup-gallery').magnificPopup({
+            delegate: 'a',
+            type: 'image',
+            tLoading: '加载图片 #%curr%...',
+            mainClass: 'mfp-img-mobile',
+            gallery: {
+                enabled: true,
+                navigateByImgClick: true,
+                preload: [0, 1]
+            },
+            image: {
+                tError: '<a href="%url%">图片 #%curr%</a> 无法加载。',
+                titleSrc: function (item) {
+                    return item.el.attr('title');
+                }
+            }
+        });
+
         tid = $('[data-tid]').data('tid');
         lid = $('[data-lid]').data('lid');
         uid = $('[data-uid]').data('uid');
@@ -100,18 +164,11 @@
             if (!data.error) {
                 $("#show_count").val("（" + data.length + "）")
                 var split_data = splitShow(data);
-                var temp = $('#show_item');
-                $('#works_video').append(temp.tmpl(split_data.video));
-                $('#works_img').append(temp.tmpl(split_data.img));
-                $('#works_doc').append(temp.tmpl(split_data.doc));
-                $('#works_code').append(temp.tmpl(split_data.code));
-                $('#works_other').append(temp.tmpl(split_data.other));
-
-                $('#team_works h2 span').text('(' + data.length + ')');
+                bindShow(split_data);
             } else {
-
             }
         });
+
 
         if (uid !== '') {
             getScore().then(function (data) {
@@ -159,110 +216,58 @@
                 })
             });
 
-        var videoForm = $('#addWorkVideoForm').bootstrapValidator()
+        var worksForm = $('#addWorksForm').bootstrapValidator()
             .on('success.form.bv', function (e) {
                 e.preventDefault();
                 var data = {
                     team_id: tid,
-                    type: 1,
-                    note: videoForm.find('[name="note"]').val(),
-                    uri: videoForm.find('[name="work_video"]').val()
+                    type: +worksForm.find('#worktype').val(),
+                    note: worksForm.find('[name="note"]').val(),
+                    uri: worksForm.find('[data-gtype].active [data-name="uri"]').val()
                 };
-                $('#works_videoModal').modal('hide');
                 addShow(data).then(function (data) {
                     if (data.error) {
                         oh.comm.alert('错误', data.error.friendly_message);
                     } else {
-                        $('#works_video').append($('#show_item').tmpl([data]));
-                        $('#team_works h2 span').text('(' + $('#team_works .work_item').length + ')');
+                        // $('#works_video').append($('#show_item').tmpl([data]));
                     }
                 });
+                works_Modal.modal('hide');
+                worksForm.data().bootstrapValidator.resetForm();
             });
 
-        var imgForm = $('#addWorkImgForm').bootstrapValidator()
-            .on('success.form.bv', function (e) {
-                e.preventDefault();
-                var data = {
-                    team_id: tid,
-                    type: 0,
-                    note: imgForm.find('[name="note"]').val(),
-                    uri: imgForm.find('[name="work_img"]').val()
-                };
-                $('#works_imgModal').modal('hide');
-                addShow(data).then(function (data) {
-                    if (data.error) {
-                        oh.comm.alert('错误', data.error.friendly_message);
-                    } else {
-                        $('#works_img').append($('#show_item').tmpl([data]));
-                        $('#team_works h2 span').text('(' + $('#team_works .work_item').length + ')');
-                    }
-                });
-            });
 
-        var codeForm = $('#addWorkCodeForm').bootstrapValidator()
-            .on('success.form.bv', function (e) {
-                e.preventDefault();
-                var data = {
-                    team_id: tid,
-                    type: 2,
-                    note: codeForm.find('[name="note"]').val(),
-                    uri: codeForm.find('[name="work_code"]').val()
-                };
-                $('#works_codeModal').modal('hide');
-                addShow(data).then(function (data) {
-                    if (data.error) {
-                        oh.comm.alert('错误', data.error.friendly_message);
-                    } else {
-                        $('#works_code').append($('#show_item').tmpl([data]));
-                        $('#team_works h2 span').text('(' + $('#team_works .work_item').length + ')');
-                    }
-                });
-            });
+        var worktype = $('#worktype').change(function (e) {
+            var type = parseInt(worktype.val());
+            var gtypename = 'video';
+            switch (type) {
+                case 0:
+                    gtypename = 'image';
+                    break;
+                case 1:
+                    break;
+                case 2:
+                    gtypename = 'code';
+                    break
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                    gtypename = 'doc';
+                    break
+                case 99:
+                    gtypename = 'other';
+                    break;
+            }
+            worksForm.find('[data-gtype]').removeClass('active');
+            worksForm.find('[data-gtype="' + gtypename + '"]').addClass('active');
+            worksForm.data().bootstrapValidator.resetForm();
+        });
 
-        var docForm = $('#addWorkDocForm').bootstrapValidator()
-            .on('success.form.bv', function (e) {
-                e.preventDefault();
-                var data = {
-                    team_id: tid,
-                    type: +docForm.find('[name="type"]').val(),
-                    note: docForm.find('[name="note"]').val(),
-                    uri: docForm.find('[name="work_doc"]').val()
-                };
-                $('#works_docModal').modal('hide');
-                addShow(data).then(function (data) {
-                    if (data.error) {
-                        oh.comm.alert('错误', data.error.friendly_message);
-                    } else {
-                        $('#works_doc').append($('#show_item').tmpl([office_app(data)]));
-                        $('#team_works h2 span').text('(' + $('#team_works .work_item').length + ')');
-                    }
-                });
-            });
-
-        var otherForm = $('#addWorkOtherForm').bootstrapValidator()
-            .on('success.form.bv', function (e) {
-                e.preventDefault();
-                var data = {
-                    team_id: tid,
-                    type: 99,
-                    note: otherForm.find('[name="note"]').val(),
-                    uri: otherForm.find('[name="work_other"]').val()
-                };
-                $('#works_otherModal').modal('hide');
-                addShow(data).then(function (data) {
-                    if (data.error) {
-                        oh.comm.alert('错误', data.error.friendly_message);
-                    } else {
-                        $('#works_other').append($('#show_item').tmpl([data]));
-                        $('#team_works h2 span').text('(' + $('#team_works .work_item').length + ')');
-                    }
-                });
-            });
-
-        $('#teamLogoModal,#works_videoModal,#works_imgModal,#works_codeModal,#works_docModal,#works_otherModal')
+        var works_Modal = $('#works_Modal')
             .on('hide.bs.modal', function (e) {
-                editLogo_form.get(0).reset();
-                editLogo_form.data().bootstrapValidator.resetForm();
+                $('#addWorksForm').get(0).reset();
+                worksForm.data().bootstrapValidator.resetForm();
             });
 
         $('#team_works').on('click', 'a[data-role="delete-show"]', function (e) {
@@ -350,21 +355,10 @@
             });
         });
 
-        $('[data-role="addVideo"]').click(function (e) {
-            $('#works_videoModal').modal('show');
+        $('[data-role="addworks"]').click(function (e) {
+            $('#works_Modal').modal('show');
         });
-        $('[data-role="addImg"]').click(function (e) {
-            $('#works_imgModal').modal('show');
-        });
-        $('[data-role="addDoc"]').click(function (e) {
-            $('#works_docModal').modal('show');
-        });
-        $('[data-role="addCode"]').click(function (e) {
-            $('#works_codeModal').modal('show');
-        });
-        $('[data-role="addOther"]').click(function (e) {
-            $('#works_otherModal').modal('show');
-        });
+
 
         $('[data-role="join"]').click(function (e) {
             joinTeam().then(function (data) {

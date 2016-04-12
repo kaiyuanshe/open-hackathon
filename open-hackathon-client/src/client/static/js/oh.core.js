@@ -100,6 +100,7 @@
                 img.style.marginLeft = -(width - FitWidth ) / 2 + 'px';
                 img.height = FitHeight
             }
+            $(img).removeClass('v-hidden');
         }
     };
 
