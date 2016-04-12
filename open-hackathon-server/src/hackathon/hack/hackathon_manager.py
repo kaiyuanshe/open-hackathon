@@ -131,6 +131,7 @@ class HackathonManager(Component):
         # build query by search conditions and order_by
         status_filter = Q()
         name_filter = Q()
+        condition_filter = Q()
         order_by_condition = '-id'
 
         if status:
@@ -138,19 +139,22 @@ class HackathonManager(Component):
         if name:
             name_filter = Q(name__contains=name)
 
-        if order_by == 'create_time':
+        if order_by == 'create_time': #最新发布
             order_by_condition = '-create_time'
-        elif order_by == 'event_start_time':
-            order_by_condition = '-event_start_time'
-        elif order_by == 'registered_users_num':
+        elif order_by == 'event_start_time': #即将开始
+            current_time = self.util.get_now()
+            condition_filter = Q(event_start_time__gte=current_time)
+            order_by_condition = '+event_start_time'
+        elif order_by == 'registered_users_num': #人气热点
             # hackathons with zero registered users would not be shown.
-            # TODO
-            pass
+            hackathon_stat = HackathonStat.objects(type=HACKATHON_STAT.REGISTER, count__gt=0).order_by('-count')
+            hackathon_list = [stat.hackathon.id for stat in hackathon_stat]
+            condition_filter = Q(id__in=hackathon_list)
         else:
             order_by_condition = '-id'
 
         # perform db query with pagination
-        pagination = Hackathon.objects(status_filter & name_filter).order_by(order_by_condition).paginate(page,
+        pagination = Hackathon.objects(status_filter & name_filter & condition_filter).order_by(order_by_condition).paginate(page,
                                                                                                           per_page)
 
         user = None
