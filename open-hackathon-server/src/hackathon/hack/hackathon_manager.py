@@ -142,9 +142,7 @@ class HackathonManager(Component):
         if order_by == 'create_time': #最新发布
             order_by_condition = '-create_time'
         elif order_by == 'event_start_time': #即将开始
-            current_time = self.util.get_now()
-            condition_filter = Q(event_start_time__gte=current_time)
-            order_by_condition = '+event_start_time'
+            order_by_condition = '-event_start_time'
         elif order_by == 'registered_users_num': #人气热点
             # hackathons with zero registered users would not be shown.
             hackathon_stat = HackathonStat.objects(type=HACKATHON_STAT.REGISTER, count__gt=0).order_by('-count')
@@ -183,15 +181,6 @@ class HackathonManager(Component):
     def get_recyclable_hackathon_list(self):
         hackathons = Hackathon.objects().all()
         return filter(lambda h: self.is_recycle_enabled(h), hackathons)
-
-    def get_entitled_hackathon_list_with_detail(self, user):
-        hackathon_ids = self.admin_manager.get_entitled_hackathon_ids(user.id)
-        if -1 in hackathon_ids:
-            hackathon_list = self.db.find_all_objects(Hackathon)
-        else:
-            hackathon_list = self.db.find_all_objects(Hackathon, Hackathon.id.in_(hackathon_ids))
-
-        return map(lambda h: self.__get_hackathon_detail(h, user), hackathon_list)
 
     def get_basic_property(self, hackathon, key, default=None):
         """Get basic property of hackathon from HackathonConfig"""
@@ -602,6 +591,7 @@ class HackathonManager(Component):
         hackathon_notice.content = body.get("content", hackathon_notice.content)
         hackathon_notice.link = body.get("link", hackathon_notice.link)
         hackathon_notice.category = body.get("category", hackathon_notice.category)
+        hackathon_notice.update_time = self.util.get_now()
 
         hackathon_notice.save(validate=False)
         return hackathon_notice.dic()
