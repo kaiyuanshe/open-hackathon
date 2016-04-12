@@ -27,6 +27,12 @@
                     </p>
                     {% endif %}
 
+                    {% if "wechat" in providers %}
+                    <p>
+                        <a class="btn btn-wechat" data-login="wechat"><span>微信 登陆</span></a>
+                    </p>
+                    {% endif %}
+
                     {% if "github" in providers %}
                     <p>
                         <a class="btn btn-github" data-login="github"><span>github 登录</span></a>

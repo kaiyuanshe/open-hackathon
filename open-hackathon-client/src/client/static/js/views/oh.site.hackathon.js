@@ -42,6 +42,14 @@
     }
 
     function pageLoad() {
+        $('[data-loadsrc]').each(function (i, img) {
+
+            var $img = $(img).load(function (e) {
+                oh.comm.imgLoad(this);
+            })
+            $img.attr({src: $img.attr('data-loadsrc')});
+        });
+
         getTeamList().then(function (data) {
             if (data.error) {
                 showNoTeam();
@@ -116,19 +124,19 @@
                         return getTeamlink(team_id, '');
                     }
                 }));
-            }else{
+            } else {
                 noShow();
             }
         });
-        
+
         //get hackathon notice
         oh.api.hackathon.notice.list.get({
             query: {
                 hackathon_name: hackathon_name,
                 order_by: 'time'
             }
-        }, function(data) {
-            if(data.error) {
+        }, function (data) {
+            if (data.error) {
                 oh.comm.alert(data.error.message);
             } else {
                 data = data.items;
@@ -143,10 +151,10 @@
                 };
 
                 $('#oh-latest-news').append($('#notice_list_temp').tmpl(data, {
-                    getNoticeIcon: function(category) {
+                    getNoticeIcon: function (category) {
                         return noticeIconByCategory[category];
-                    }, 
-                    getNoticeTime: function(update_time) {
+                    },
+                    getNoticeTime: function (update_time) {
                         var current_time = new Date().getTime();
                         var time_distance = current_time - update_time;
                         var timing = {year: 0, month: 0, week: 0, day: 0, hour: 0, minute: 0};
@@ -164,7 +172,7 @@
                             time_distance -= timing.hour * 3600000;
                             timing.minute = Math.floor(time_distance / 60000)
                             time_distance -= timing.minute * 60000;
-                        } 
+                        }
 
                         var show_text;
                         if (timing.year > 0)        show_text = timing.year + '年前';
@@ -172,7 +180,7 @@
                         else if (timing.week > 0)   show_text = timing.week + '周前';
                         else if (timing.day > 0)    show_text = timing.day + '天前';
                         else if (timing.hour > 0)   show_text = timing.hour + '小时前';
-                        else if (timing.minute > 5) show_text = timing.minute + '分钟前'; 
+                        else if (timing.minute > 5) show_text = timing.minute + '分钟前';
                         else                        show_text = '刚刚'; //less than 5min, show '刚刚'
 
                         return show_text;

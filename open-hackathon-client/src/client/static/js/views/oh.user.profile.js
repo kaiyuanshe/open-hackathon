@@ -104,7 +104,11 @@
     }
 
     function pageload() {
-        user_id = location.pathname.replace(/\/user\/p_/ig, '') || 0;
+        if (location.pathname.search(/\user\/profile/ig) > -1) {
+            user_id = 0;
+        } else {
+            user_id = location.pathname.replace(/\/user\/p_/ig, '') || 0;
+        }
         var query = user_id == 0 ? {} : {query: {user_id: user_id}};
         getUserProfile(query);
         getMyRegisterEvents(query);

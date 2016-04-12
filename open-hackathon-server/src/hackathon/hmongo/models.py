@@ -78,7 +78,7 @@ class HDocumentBase(DynamicDocument):
 
 
 class UserEmail(EmbeddedDocument):
-    email = EmailField()
+    email = StringField()
     primary_email = BooleanField()
     verified = BooleanField()
 
@@ -110,7 +110,7 @@ class User(HDocumentBase):
     provider = StringField(max_length=20)
     openid = StringField(max_length=100)
     avatar_url = URLField()  # if avatar_url in UserProfile setted, this is not used
-    access_token = StringField(max_length=100)
+    access_token = StringField(max_length=256)
     online = BooleanField(default=False)
     last_login_time = DateTimeField()
     login_times = IntField(default=1)  # a new user usually added upon whose first login, by default 1 thus
@@ -232,7 +232,7 @@ class UserHackathon(HDocumentBase):
     role = IntField(default=HACK_USER_TYPE.COMPETITOR)  # 0-visitor 1-admin 2-judge 3-competitor
     status = IntField()  # 0-not approved user 1-approved user 2-refused user 3-auto approved user
     like = BooleanField(default=True)
-    assets = DictField(default={}) # assets for user
+    assets = DictField(default={})  # assets for user
     remark = StringField()
     deleted = BooleanField(default=False)
 
@@ -286,6 +286,8 @@ class Team(HDocumentBase):
     description = StringField()
     logo = StringField()
     leader = ReferenceField(User)
+    cover = StringField()
+    dev_plan = StringField()
     hackathon = ReferenceField(Hackathon)
     works = EmbeddedDocumentListField(TeamWork)
     scores = EmbeddedDocumentListField(TeamScore)
