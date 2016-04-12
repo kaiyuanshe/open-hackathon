@@ -46,8 +46,8 @@ QQ_CLIENT_ID = "101200890"
 QQ_CLIENT_SECRET = "88ad67bd4521c4cc47136854781cb9b5"
 QQ_META_CONTENT = "274307566465013314076545663016134754100636"
 
-WEIXIN_APP_ID = "TODO"
-WEIXIN_SECRET = "TODO"
+WEIXIN_APP_ID = "wxe75b8aef71c2059f"
+WEIXIN_SECRET = "4532b90750f4c7bc70fcfbc42d881622"
 WEIXIN_OAUTH_STATE = "openhackathon"  # NOTE: may be should be same as QQ_OAUTH_STATE?
 
 # gitcafe domain:  gcas.dgz.sh/gcs.dgz.sh for Staging, api.gitcafe.com/gitcafe.com for Production
@@ -167,7 +167,7 @@ Config = {
                         "checkname": ["get"],
                         "list": ["get"],
                         "online": ["post"],
-                        "offline":["post"],
+                        "offline": ["post"],
                         "tags": ["get", "post", "put", "delete"],
                         "config": ["post", "put", "delete"],
                         "administrator": {
@@ -196,7 +196,7 @@ Config = {
                     },
                     "azure": {
                         "": ["get", "post", "delete", "put"],
-                        "checksubid":["post"]
+                        "checksubid": ["post"]
                     },
                     "experiment": {
                         "list": ["get"],
@@ -219,7 +219,7 @@ Config = {
                 },
                 "template": {
                     "": ["get", "post", "delete", "put"],
-                    "file":["post"],
+                    "file": ["post"],
                     "list": ["get"],
                     "check": ["get"]
                 },
