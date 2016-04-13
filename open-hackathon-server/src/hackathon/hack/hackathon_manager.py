@@ -700,7 +700,7 @@ class HackathonManager(Component):
                     continue
 
                 self.log.debug("add pre_allocate job for hackathon %s" % str(hack.name))
-                next_run_time = self.util.get_now() + timedelta(seconds=20)
+                next_run_time = self.util.get_now() + timedelta(seconds=(20 * random.random()))
                 pre_allocate_interval = self.__get_pre_allocate_interval(hack)
                 self.scheduler.add_interval(feature="expr_manager",
                                             method="pre_allocate_expr",
@@ -718,9 +718,9 @@ class HackathonManager(Component):
         req = ok()
 
         if hackathon.status == HACK_STATUS.DRAFT or hackathon.status == HACK_STATUS.OFFLINE:
-            if self.util.is_local() or hackathon.config['cloud_provider']== CLOUD_PROVIDER.NONE:
+            if self.util.is_local() or hackathon.config.get('cloud_provider')== CLOUD_PROVIDER.NONE:
                 req = ok()
-            elif hackathon.config['cloud_provider'] == CLOUD_PROVIDER.AZURE:
+            elif hackathon.config.get('cloud_provider') == CLOUD_PROVIDER.AZURE:
                 is_success = docker_host_manager.check_subscription_id(hackathon.id)
                 if not is_success:
                     req = general_error(code=HTTP_CODE.AZURE_KEY_NOT_READY)  # azure sub id is invalide

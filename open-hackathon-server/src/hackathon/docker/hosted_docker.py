@@ -221,7 +221,7 @@ class HostedDockerFormation(Component):
 
     def __ensure_images_for_hackathon(self, hackathon):
         # only ensure those alauda is disabled
-        if hackathon.config[HACKATHON_CONFIG.CLOUD_PROVIDER] == CLOUD_PROVIDER.ALAUDA:
+        if hackathon.config.get(HACKATHON_CONFIG.CLOUD_PROVIDER) == CLOUD_PROVIDER.ALAUDA:
             self.log.debug("schedule job of hackathon '%s(%d)' removed for alauda enabled" %
                            (hackathon.name, hackathon.id))
             self.scheduler.remove_job(self.__get_schedule_job_id(hackathon))

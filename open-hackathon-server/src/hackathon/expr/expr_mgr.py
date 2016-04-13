@@ -144,7 +144,7 @@ class ExprManager(Component):
         for template in hackthon_templates:
             try:
                 template = template
-                pre_num = hackathon.config["pre_allocate_number"]
+                pre_num = hackathon.config.get("pre_allocate_number")
                 query = Q(status=EStatus.STARTING) | Q(status=EStatus.RUNNING)
                 curr_num = Experiment.objects(user=None, hackathon=hackathon, template=template).filter(query).count()
                 if template.provider == VE_PROVIDER.AZURE:
@@ -160,7 +160,7 @@ class ExprManager(Component):
                             self.start_expr(None, template.name, hackathon.name)
                             break
                 elif template.provider == VE_PROVIDER.DOCKER:
-                    if  hackathon.config['cloud_provider'] == CLOUD_PROVIDER.ALAUDA:
+                    if hackathon.config.get('cloud_provider') == CLOUD_PROVIDER.ALAUDA:
                         # don't create pre-env if alauda used
                         continue
 
