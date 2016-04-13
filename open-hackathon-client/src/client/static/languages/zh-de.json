@@ -147,6 +147,10 @@
     "ROLL_BACKED": "已回滚",
     "UNEXPCTED_ERROR": "未知错误"
   },
+  "ORGANIZATION_TYPE": {
+    "ORGANIZER": "主办方",
+    "PARTNER": "合作伙伴"
+  },
   "ADMIN_WEBPAGE_FIELDS": {
     "NAME": "名称",
     "NICKNAME": "昵称",
