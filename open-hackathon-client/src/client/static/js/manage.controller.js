@@ -320,10 +320,8 @@ angular.module('oh.controllers', [])
     };
 
   })
-  .controller('usersController', function($rootScope, $scope, activityService, api, util, dialog) {
+  .controller('usersController', function($rootScope, $scope, activity, api, util, dialog) {
     $scope.$emit('pageName', 'SETTINGS.USERS');
-
-    var activity = activityService.getCurrentActivity();
 
     $scope.data = {
       registerUsers: [], // we cannot use activity.registration here, its single
@@ -479,10 +477,9 @@ angular.module('oh.controllers', [])
 
     refresh();
   })
-  .controller('adminController', function($rootScope, $scope, $uibModal, activityService, api, dialog) {
+  .controller('adminController', function($rootScope, $scope, $stateParams, $uibModal, api, dialog) {
     $scope.$emit('pageName', 'SETTINGS.ADMINISTRATORS');
 
-    var activity = activityService.getCurrentActivity();
     $scope.data = {
       admins: [],
       adminsType: [],
@@ -514,7 +511,7 @@ angular.module('oh.controllers', [])
 
     $scope.updateAdmin = function(admin) {
       api.admin.hackathon.administrator.put({
-        header: {hackathon_name: activity.name},
+        header: {hackathon_name: $stateParams.name},
         body: {
           id: admin.id,
           role: parseInt($scope.data.adminsType[admin.id]),
@@ -569,7 +566,7 @@ angular.module('oh.controllers', [])
           return;
         }
         api.admin.hackathon.administrator.delete({
-          header: {hackathon_name: activity.name},
+          header: {hackathon_name: $stateParams.name},
           query: {id: list[index]}
         }, function(data) {
           if(data.error)
@@ -601,7 +598,7 @@ angular.module('oh.controllers', [])
 
     function searchAdmin() {
       api.admin.user.list.get({
-        header: {hackathon_name: activity.name},
+        header: {hackathon_name: $stateParams.name},
         query: {keyword: $scope.data.searchKeyword}
       }, function(data) {
         if(data.error)
@@ -620,7 +617,7 @@ angular.module('oh.controllers', [])
         showTip('tip-danger', "请选择需要设置成管理员的用户！");
       } else {
         api.admin.hackathon.administrator.post({
-          header: {hackathon_name: activity.name},
+          header: {hackathon_name: $stateParams.name},
           body: {
             id: $scope.data.selectedUserId,
             role: $scope.data.selectedUserRole,
@@ -639,7 +636,7 @@ angular.module('oh.controllers', [])
 
     function pageLoad() {
       api.admin.hackathon.administrator.list.get({
-        header: {hackathon_name: activity.name}
+        header: {hackathon_name: $stateParams.name}
       }, function(data){
         if(data.error)
           showTip('tip-danger', data.error.friendly_message);
@@ -664,7 +661,7 @@ angular.module('oh.controllers', [])
     // init the page and load admins-list
     pageLoad();
   })
-  .controller('organizersController', function($rootScope, $scope, $stateParams, $uibModal, $cookies, activityService, api) {
+  .controller('organizersController', function($rootScope, $scope, $stateParams, $uibModal, $cookies, api) {
     $scope.$emit('pageName', 'SETTINGS.ORGANIZERS');
 
     // very quick and rough implementation, please feel free to update
@@ -758,10 +755,9 @@ angular.module('oh.controllers', [])
 
     refresh();
   })
-  .controller('awardsController', function($rootScope, $scope, $q, activityService, api) {
+  .controller('awardsController', function($rootScope, $scope, $stateParams, $q, api) {
     $scope.$emit('pageName', 'SETTINGS.AWARDS');
 
-    var activity = activityService.getCurrentActivity();
     var data = $scope.data = {
       grantedAwards: [],
       awards: [],
@@ -783,7 +779,7 @@ angular.module('oh.controllers', [])
 
     function cancelAward(awardId, teamId) {
       return api.admin.team.award.delete({
-        header: {hackathon_name: activity.name},
+        header: {hackathon_name: $stateParams.name},
         query: {
           award_id: awardId,
           team_id: teamId
@@ -802,7 +798,7 @@ angular.module('oh.controllers', [])
 
     function grantAward(awardId, teamId) {
       return api.admin.team.award.post({
-        header: {hackathon_name: activity.name},
+        header: {hackathon_name: $stateParams.name},
         body: {
           award_id: awardId,
           team_id: teamId
@@ -821,9 +817,9 @@ angular.module('oh.controllers', [])
 
     function refresh() {
       return $q.all([
-        api.hackathon.grantedawards.get({header: {hackathon_name: activity.name}}),
-        api.admin.hackathon.award.list.get({header: {hackathon_name: activity.name}}),
-        api.hackathon.team.list.get({header: {hackathon_name: activity.name}}),
+        api.hackathon.grantedawards.get({header: {hackathon_name: $stateParams.name}}),
+        api.admin.hackathon.award.list.get({header: {hackathon_name: $stateParams.name}}),
+        api.hackathon.team.list.get({header: {hackathon_name: $stateParams.name}}),
       ]).then(function(res) {
         if(res[0].error || res[1].error || res[2].error) {
           throw res[0].error || res[1].error || res[2].error;
@@ -853,10 +849,8 @@ angular.module('oh.controllers', [])
 
     refresh();
   })
-  .controller('noticesController', function($rootScope, $scope, $uibModal, activityService, api, dialog) {
+  .controller('noticesController', function($rootScope, $scope, $uibModal, activity, api, dialog) {
     $scope.$emit('pageName', 'SETTINGS.NOTICES');
-
-    var activity = activityService.getCurrentActivity();
 
     $scope.data = {
       notices: activity.notices,
@@ -901,11 +895,6 @@ angular.module('oh.controllers', [])
         $scope.data.notices = data.items;
       });
     };
-
-    $scope.$on('chargeActitity', function() {
-      activity = activityService.getCurrentActivity();
-      getHackathonNotices();
-    });
 
     var deleteNotice = function(id) {
       return api.admin.hackathon.notice.delete({
@@ -987,11 +976,12 @@ angular.module('oh.controllers', [])
       };
       openAddNoticeWizard();
     };
+
+    getHackathonNotices();
   })
-  .controller('prizesController', function($rootScope, $scope, $uibModal, activityService, api, dialog) {
+  .controller('prizesController', function($rootScope, $scope, $uibModal, activity, api, dialog) {
     $scope.$emit('pageName', 'SETTINGS.PRIZES');
 
-    var activity = activityService.getCurrentActivity();
     $scope.data = {
       awards: activity.awards,
     };
@@ -1104,7 +1094,7 @@ angular.module('oh.controllers', [])
 
     refreshAward();
   })
-  .controller('veController', function($rootScope, $scope, $stateParams, $filter, activityService, $cookies, FileUploader, activity, api) {
+  .controller('veController', function($rootScope, $scope, $filter, $cookies, FileUploader, activity, api) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.VIRTUAL_ENVIRONMENT');
 
     api.template.list.get({}).then(function(data) {
@@ -1217,7 +1207,7 @@ angular.module('oh.controllers', [])
     $scope.templateSubmit = function() {
       if ($scope.templates.length > 0) {
         $scope.wizard = 4;
-        updataActivityStatus(0);
+        updateActivityStatus(0);
       } else {
         $scope.$emit('showTip', {
           level: 'tip-danger',
@@ -1227,12 +1217,14 @@ angular.module('oh.controllers', [])
     }
 
   })
-  .controller('monitorController', function($rootScope, $scope, $stateParams, activityService, api) {
+  .controller('monitorController', function($rootScope, $scope, $stateParams, api) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.ENVIRONMENTAL_MONITOR');
 
-    var activity = activityService.getCurrentActivity();
     $scope.data = {
-      "experiments": []
+      "experiments": [],
+      "totalExprLength": 0,
+      "curPage": 1,
+      "perPage": 10
     }
     // filterCondition -1:all, 2:running, 3:stopped, 5:fail
     $scope.filterExperimentCondition = -1;
@@ -1261,6 +1253,7 @@ angular.module('oh.controllers', [])
     }
 
     $scope.searchExperiment = function() {
+      $scope.data.curPage = 1;
       if($scope.searchKeyword == "") {
         pageLoad();
         return
@@ -1268,33 +1261,45 @@ angular.module('oh.controllers', [])
 
       api.admin.experiment.list.get({
         header: {
-          hackathon_name: activity.name
+          hackathon_name: $stateParams.name
         },
         query: {
-          user_name: $scope.searchKeyword
+          user_name: $scope.searchKeyword,
+          page: $scope.data.curPage,
+          per_page: $scope.data.perPage
         }
       }).then(function(data) {
         if (data.error) {
           showTip('tip-danger', data.error.friendly_message);
         } else {
-          if(data.length == 0)
+          if(data.items.length == 0)
             showTip('tip-danger', "未找到满足要求的结果");
-          $scope.data.experiments = data;
+          $scope.data.experiments = data.items;
+          $scope.data.totalExprLength = data.total;
           $scope.filterExperimentCondition = -1;
         }
       })
     }
 
+    $scope.changePage = function() {
+      pageLoad();
+    }
+
     function pageLoad() {
       api.admin.experiment.list.get({
         header: {
-          hackathon_name: activity.name
+          hackathon_name: $stateParams.name
+        },
+        query: {
+          page: $scope.data.curPage,
+          per_page: $scope.data.perPage
         }
       }).then(function(data) {
         if (data.error) {
           showTip('tip-danger', data.error.friendly_message);
         } else {
-          $scope.data.experiments = data;
+          $scope.data.experiments = data.items;
+          $scope.data.totalExprLength = data.total;
           $scope.filterExperimentCondition = -1;
           $scope.searchKeyword = ""
         }
@@ -1307,14 +1312,13 @@ angular.module('oh.controllers', [])
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.CLOUD_RESOURCES');
 
   })
-  .controller('azurecertController', function($rootScope, $scope, $stateParams, activityService, api, dialog) {
+  .controller('azurecertController', function($rootScope, $scope, $stateParams, api, dialog) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.AZURECERT');
     var isDeleteCerDisabled = false;
     $scope.azureFormDisabled = false;
     $scope.azure = {
       management_host: 'management.core.chinacloudapi.cn',
     };
-
 
     function getAzureCer() {
       api.admin.azure.get({
@@ -1351,7 +1355,6 @@ angular.module('oh.controllers', [])
       })
     };
 
-
     $scope.azureFormSubmit = function() {
       $scope.azureFormDisabled = true;
       api.admin.azure.post({
@@ -1376,7 +1379,6 @@ angular.module('oh.controllers', [])
         $scope.azureFormDisabled = false;
       });
     };
-
 
     $scope.deleteCert = function(id) {
       if (!isDeleteCerDisabled) {
@@ -1414,10 +1416,9 @@ angular.module('oh.controllers', [])
       }
     }
 
-
     getAzureCer();
   })
-  .controller('serversController', function($rootScope, $scope, $stateParams, $uibModal, $cookies, activityService, api, dialog) {
+  .controller('serversController', function($rootScope, $scope, $stateParams, $uibModal, $cookies, api, dialog) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.SERVERS');
 
     var refresh = function(){
@@ -1582,7 +1583,7 @@ angular.module('oh.controllers', [])
           $scope.templates = data;
         })
       } else if (newValue == 4) {
-        updataActivityStatus(0).then(function(data) {
+        updateActivityStatus(0).then(function(data) {
           if (data.error) {
             $scope.$emit('showTip', {
               level: 'tip-danger',
@@ -1633,7 +1634,7 @@ angular.module('oh.controllers', [])
 
     /*------------------------------------------------------*/
     $scope.notUseCloud = function() {
-      updataActivityStatus(0).then(function(data) {
+      updateActivityStatus(0).then(function(data) {
         if (data.error) {
           $scope.$emit('showTip', {
             level: 'tip-danger',
@@ -1823,7 +1824,7 @@ angular.module('oh.controllers', [])
     $scope.templateSubmit = function() {
       if ($scope.templates.length > 0) {
         $scope.wizard = 4;
-        updataActivityStatus(0);
+        updateActivityStatus(0);
       } else {
         $scope.$emit('showTip', {
           level: 'tip-danger',
@@ -1834,7 +1835,7 @@ angular.module('oh.controllers', [])
 
     /*------------------------------------------------------*/
 
-    function updataActivityStatus(status) {
+    function updateActivityStatus(status) {
       return api.admin.hackathon.put({
         body: {
           status: status

@@ -109,13 +109,24 @@ class ExprManager(Component):
             self.db.commit()
             self.template_library.template_verified(experiment.template.id)
 
-    def get_expr_list_by_hackathon_id(self, hackathon_id, user_name, status):
+    def get_expr_list_by_hackathon_id(self, hackathon_id, context):
         # get a list of all experiments' detail
-        experiments = Experiment.objects(status=status).all() if status else Experiment.objects().all()
+        user_name = context.user_name if "user_name" in context else None
+        status = context.status if "status" in context else None
+        page = int(context.page) if "page" in context else 1
+        per_page = int(context.per_page) if "per_page" in context else 10
+        users = User.objects(name=user_name).all() if user_name else []
 
-        if user_name and not user_name == "":
-            experiments = [experiment for experiment in experiments if experiment.user.name == user_name]
-        return [self.__get_expr_with_detail(experiment) for experiment in experiments]
+        if user_name and status:
+            experiments_pagi =  Experiment.objects(status=status, user__in=users).paginate(page, per_page)
+        elif user_name and not status:
+            experiments_pagi =  Experiment.objects(user__in=users).paginate(page, per_page)
+        elif not user_name and status:
+            experiments_pagi =  Experiment.objects(status=status).paginate(page, per_page)
+        else:
+            experiments_pagi = Experiment.objects().paginate(page, per_page)
+
+        return self.util.paginate(experiments_pagi, self.__get_expr_with_detail)
 
     def scheduler_recycle_expr(self):
         """recycle experiment according to hackathon basic info on recycle configuration
