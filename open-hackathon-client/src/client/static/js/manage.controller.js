@@ -1207,7 +1207,7 @@ angular.module('oh.controllers', [])
     $scope.templateSubmit = function() {
       if ($scope.templates.length > 0) {
         $scope.wizard = 4;
-        updataActivityStatus(0);
+        updateActivityStatus(0);
       } else {
         $scope.$emit('showTip', {
           level: 'tip-danger',
@@ -1583,7 +1583,7 @@ angular.module('oh.controllers', [])
           $scope.templates = data;
         })
       } else if (newValue == 4) {
-        updataActivityStatus(0).then(function(data) {
+        updateActivityStatus(0).then(function(data) {
           if (data.error) {
             $scope.$emit('showTip', {
               level: 'tip-danger',
@@ -1634,7 +1634,7 @@ angular.module('oh.controllers', [])
 
     /*------------------------------------------------------*/
     $scope.notUseCloud = function() {
-      updataActivityStatus(0).then(function(data) {
+      updateActivityStatus(0).then(function(data) {
         if (data.error) {
           $scope.$emit('showTip', {
             level: 'tip-danger',
@@ -1824,7 +1824,7 @@ angular.module('oh.controllers', [])
     $scope.templateSubmit = function() {
       if ($scope.templates.length > 0) {
         $scope.wizard = 4;
-        updataActivityStatus(0);
+        updateActivityStatus(0);
       } else {
         $scope.$emit('showTip', {
           level: 'tip-danger',
@@ -1835,7 +1835,7 @@ angular.module('oh.controllers', [])
 
     /*------------------------------------------------------*/
 
-    function updataActivityStatus(status) {
+    function updateActivityStatus(status) {
       return api.admin.hackathon.put({
         body: {
           status: status
