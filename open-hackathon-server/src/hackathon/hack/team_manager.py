@@ -529,7 +529,7 @@ class TeamManager(Component):
             query &= Q(works__type=int(show_type))
 
         works = []
-        for team in Team.objects(query).order_by('update_time', '-age')[:limit]:
+        for team in Team.objects(query).filter(works__1__exists=True).order_by('update_time', '-age')[:limit]:
             teamDic = team.dic()
             teamDic['leader'] = {
                 'id': str(team.leader.id),

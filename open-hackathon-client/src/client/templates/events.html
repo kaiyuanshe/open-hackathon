@@ -41,7 +41,7 @@
                     </a>
                 </h3>
                 <ul class="oh-tags">
-                    {{each $item.getTags(tag)}}
+                    {{each tags}}
                          <li>
                             <a href="#">${$value}</a> {{if $index != this.length}},{{/if}}
                          </li>

@@ -35,7 +35,7 @@ from mongoengine import Q
 from hackathon import Component, RequiredFeature, Context
 from hackathon.constants import EStatus, VERemoteProvider, VE_PROVIDER, VEStatus, ReservedUser, \
     HACK_NOTICE_EVENT, HACK_NOTICE_CATEGORY, CLOUD_PROVIDER, HACKATHON_CONFIG
-from hackathon.hmongo.models import Experiment, User
+from hackathon.hmongo.models import Experiment, User, Hackathon, UserHackathon
 from hackathon.hackathon_response import not_found, ok
 
 __all__ = ["ExprManager"]
@@ -80,16 +80,15 @@ class ExprManager(Component):
     def stop_expr(self, expr_id):
         """
         :param expr_id: experiment id
-        :param force: 0: only stop container and release ports, 1: force stop and delete container and release ports.
         :return:
         """
-        self.log.debug("begin to stop %d" % expr_id)
-        expr = Experiment.objects(id=expr_id, status=EStatus.RUNNING)
+        self.log.debug("begin to stop %s" % str(expr_id))
+        expr = Experiment.objects(id=expr_id, status=EStatus.RUNNING).first()
         if expr is not None:
             starter = self.get_starter(expr.hackathon, expr.template)
             if starter:
-                starter.stop_expr(Context(experiment=expr))
-            self.log.debug("experiment %d ended success" % expr_id)
+                starter.stop_expr(Context(experiment_id=expr.id, experiment=expr))
+            self.log.debug("experiment %s ended success" % expr_id)
             return ok('OK')
         else:
             return ok()
@@ -119,7 +118,7 @@ class ExprManager(Component):
         return [self.__get_expr_with_detail(experiment) for experiment in experiments]
 
     def scheduler_recycle_expr(self):
-        """recycle experiment acrroding to hackathon basic info on recycle configuration
+        """recycle experiment according to hackathon basic info on recycle configuration
 
         According to the hackathon's basic info on 'recycle_enabled', find out time out experiments
         Then call function to recycle them
@@ -130,61 +129,52 @@ class ExprManager(Component):
         for hackathon in self.hackathon_manager.get_recyclable_hackathon_list():
             # check recycle enabled
             mins = self.hackathon_manager.get_recycle_minutes(hackathon)
-            expr_time_cond = Experiment.create_time < self.util.get_now() - timedelta(minutes=mins)
-            status_cond = Experiment.status == EStatus.RUNNING
             # filter out the experiments that need to be recycled
-            exprs = self.db.find_all_objects(Experiment,
-                                             status_cond,
-                                             expr_time_cond,
-                                             Experiment.hackathon_id == hackathon.id)
+            exprs = Experiment.objects(create_time__lt=self.util.get_now() - timedelta(minutes=mins),
+                                       status=EStatus.RUNNING,
+                                       hackathon=hackathon)
             for expr in exprs:
                 self.__recycle_expr(expr)
 
     def pre_allocate_expr(self, context):
         hackathon_id = context.hackathon_id
         self.log.debug("executing pre_allocate_expr for hackathon %s " % hackathon_id)
-        htrs = self.db.find_all_objects_by(HackathonTemplateRel, hackathon_id=hackathon_id)
-        for rel in htrs:
+        hackathon = Hackathon.objects(id=hackathon_id).first()
+        hackthon_templates = hackathon.templates
+        for template in hackthon_templates:
             try:
-                template = rel.template
-                pre_num = rel.hackathon.get_pre_allocate_number()
-                curr_num = self.db.count(Experiment,
-                                         Experiment.user_id == ReservedUser.DefaultUserID,
-                                         Experiment.hackathon_id == hackathon_id,
-                                         Experiment.template_id == template.id,
-                                         (Experiment.status == EStatus.STARTING) | (
-                                             Experiment.status == EStatus.RUNNING))
+                template = template
+                pre_num = hackathon.config.get("pre_allocate_number")
+                query = Q(status=EStatus.STARTING) | Q(status=EStatus.RUNNING)
+                curr_num = Experiment.objects(user=None, hackathon=hackathon, template=template).filter(query).count()
                 if template.provider == VE_PROVIDER.AZURE:
                     if curr_num < pre_num:
                         remain_num = pre_num - curr_num
-                        start_num = self.db.count_by(Experiment,
-                                                     user_id=ReservedUser.DefaultUserID,
-                                                     template=template,
-                                                     status=EStatus.STARTING)
+                        start_num = Experiment.objects(user=None, template=template, status=EStatus.STARTING).count()
                         if start_num > 0:
                             self.log.debug("there is an azure env starting, will check later ... ")
                             return
                         else:
                             self.log.debug(
                                 "no starting template: %s , remain num is %d ... " % (template.name, remain_num))
-                            self.start_expr(None, template.name, rel.hackathon.name)
+                            self.start_expr(None, template.name, hackathon.name)
                             break
-                            # curr_num += 1
-                            # self.log.debug("all template %s start complete" % template.name)
                 elif template.provider == VE_PROVIDER.DOCKER:
-                    if rel.hackathon.is_alauda_enabled():
+                    if hackathon.config.get('cloud_provider') == CLOUD_PROVIDER.ALAUDA:
                         # don't create pre-env if alauda used
                         continue
 
                     self.log.debug(
-                        "template name is %s, hackathon name is %s" % (template.name, rel.hackathon.name))
+                        "template name is %s, hackathon name is %s" % (template.name, hackathon.name))
                     if curr_num < pre_num:
                         remain_num = pre_num - curr_num
+                        start_num = Experiment.objects(user=None, template=template, status=EStatus.STARTING).count()
+                        if start_num > 0:
+                            self.log.debug("there is an docker container starting, will check later ... ")
+                            return
                         self.log.debug("no idle template: %s, remain num is %d ... " % (template.name, remain_num))
-                        self.start_expr(None, template.name, rel.hackathon.name)
-                        # curr_num += 1
+                        self.start_expr(None, template.name, hackathon.name)
                         break
-                        # self.log.debug("all template %s start complete" % template.name)
             except Exception as e:
                 self.log.error(e)
                 self.log.error("check default experiment failed")
@@ -251,10 +241,6 @@ class ExprManager(Component):
     def on_expr_started(self, experiment):
         hackathon = experiment.hackathon
         user = experiment.user
-        self.hackathon_manager.create_hackathon_notice(hackathon.id,
-                                                       HACK_NOTICE_EVENT.EXPR_JOIN,
-                                                       HACK_NOTICE_CATEGORY.EXPERIMENT,
-                                                       {'user_id': user.id if user else ""})
 
     def __report_expr_status(self, expr):
         ret = {
@@ -343,7 +329,7 @@ class ExprManager(Component):
         :return:
         """
         criterion = Q(status__in=[EStatus.RUNNING, EStatus.STARTING], hackathon=hackathon)
-        is_admin = self.admin_Manager.is_hackathon_admin(hackathon.id, user.id)
+        is_admin = self.admin_manager.is_hackathon_admin(hackathon.id, user.id)
         if is_admin:
             criterion &= Q(template=template)
 
@@ -364,7 +350,7 @@ class ExprManager(Component):
         roll back when exception occurred
         :param expr_id: experiment id
         """
-        self.log.debug("Starting rollback experiment %d..." % expr_id)
+        self.log.debug("Starting rollback experiment %s..." % expr_id)
         expr = Experiment.objects(id=expr_id)
         if not expr:
             self.log.warn("rollback failed due to experiment not found")
@@ -393,7 +379,7 @@ class ExprManager(Component):
 
         :return:
         """
-        providers = map(lambda x: x.provider, expr.virtual_environments.all())
+        providers = map(lambda x: x.provider, expr.virtual_environments)
         if VE_PROVIDER.DOCKER in providers:
             self.stop_expr(expr.id)
             self.log.debug("it's stopping " + str(expr.id) + " inactive experiment now")

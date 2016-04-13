@@ -73,7 +73,7 @@ class AzureHostedDockerStarter(DockerExprStarter):
             self.log.debug("host servers are all busy, %d times tried, will retry in 3 seconds" % context.trial)
             self.scheduler.add_once(FEATURE, "get_docker_host_server", context, seconds=3)
         else:
-            self.log.debug("no available host server")
+            self.log.error("no available host server")
             self._on_virtual_environment_failed(context)
 
     def query_network_config_status(self, context):
@@ -344,7 +344,7 @@ class AzureHostedDockerStarter(DockerExprStarter):
                     # release port
                     self._release_port(virtual_environment.docker_container, context)
                 except Exception as e:
-                    self.log(e)
+                    self.log.error(e)
                     self._on_virtual_environment_unexpected_error(context)
         elif virtual_environment.status == VEStatus.STOPPED:
             self._on_virtual_environment_stopped(context)
@@ -359,6 +359,7 @@ class AzureHostedDockerStarter(DockerExprStarter):
 
         host_server = docker_container.host_server
         if self.util.is_local():
+            context.container_name = docker_container.name
             self.__stop_docker_container(context, host_server)
             return
 

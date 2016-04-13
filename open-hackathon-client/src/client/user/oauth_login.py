@@ -45,6 +45,91 @@ class LoginBase():
         pass
 
 
+class WechatLogin(LoginBase):
+    """Sign in with Wechat OAuth 2.0 [https://wohugb.gitbooks.io/wechat/content/qrconnent/README.html]
+
+    :Example:
+        from client.user.login import WechatLogin
+
+        WechatLogin()
+
+    .. notes::
+    """
+
+    def login(self, args):
+        """ Wechat Login
+
+        :type args: dict
+        :param args:
+
+        :rtype: dict
+        :return: token and instance of user
+        """
+        log.info("login from Wechat")
+
+        code = args.get('code')
+        if not code:
+            return None
+        access_token, openid = self.get_access_token(code)
+        user_detail = self.get_user_info(access_token, openid)
+
+        return {
+            "openid": openid,
+            "provider": LOGIN_PROVIDER.WECHAT,
+            "name": user_detail["nickname"],
+            "nickname": user_detail["nickname"],
+            "access_token": access_token,
+            "email_list": [],
+            "avatar_url": user_detail["headimgurl"]}
+
+    def _access_wxapi_or_raise(self, *args, **kwargs):
+        """access remote with under wechat'api's interface
+
+        just a simple wrapper on `get_remote`
+        raise error on response error
+        """
+        r = json.loads(get_remote(*args, **kwargs))
+
+        if "errcode" in r:
+            raise Exception("errcode: " + str(r["errcode"]) + ", errmsg: " + r["errmsg"])
+
+        return r
+
+    def get_access_token(self, code):
+        """get access token from wx-api
+
+        this is the second step to login with wechat after the
+        client get the code
+
+        :type code: str
+        :param code: code get from wx
+
+        :rtype: tuple
+        :return: then access token and user open id in a tuple
+        """
+        url = get_config("login.wechat.access_token_url") % code
+        r = self._access_wxapi_or_raise(url)
+
+        return (r["access_token"], r["openid"])
+
+    def get_user_info(self, access_token, openid):
+        """get user info from wx-api
+
+        this is the final step to login with wechat
+
+        :type access_token: str
+        :param access_token: the access token get from wx
+
+        :type openid: str
+        :param openid: the openid get from wx to specified user
+
+        :rtype: dict
+        :return: then user info accessed from wechat
+        """
+        url = get_config("login.wechat.user_info_url") % (access_token, openid)
+        return self._access_wxapi_or_raise(url)
+
+
 class QQLogin(LoginBase):
     """Sign in with QQ
 
@@ -400,17 +485,11 @@ class WeiboLogin(LoginBase):
         user_info = self.get_user_info(access_token["access_token"], access_token["uid"])
 
         # Get email need to apply high-level interface
+        # so we just leave email list empty here
         # email = self.get_email(access_token["access_token"], access_token["uid"])
+        email_list = []
 
         name = user_info["name"]
-        email_list = [
-            {
-                'name': name,
-                'email': '',
-                'verified': 1,
-                'primary': 1
-            }
-        ]
 
         required_info = {
             "openid": str(user_info["id"]),
@@ -690,5 +769,6 @@ login_providers = {
     LOGIN_PROVIDER.QQ: QQLogin(),
     LOGIN_PROVIDER.GITCAFE: GitcafeLogin(),
     LOGIN_PROVIDER.ALAUDA: AlaudaLogin(),
-    LOGIN_PROVIDER.LIVE: LiveLogin()
+    LOGIN_PROVIDER.LIVE: LiveLogin(),
+    LOGIN_PROVIDER.WECHAT: WechatLogin()
 }
