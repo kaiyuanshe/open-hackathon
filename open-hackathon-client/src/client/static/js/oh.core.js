@@ -230,6 +230,51 @@
         $('[data-toggle="bindtemp"]').each(function (i, o) {
             bindData($(o));
         });
+
+        var getUserUnreadNotice = function() {
+            oh.api.hackathon.notice.list.get({
+                query: {
+                    filter_by_user: 1
+                }
+            }, function(data){
+                if(!data.error) {
+                    data = data.items;
+                    message_num = data.length;
+                    $('[data-mq').each(function() {
+                        $(this).text(message_num);
+                    });
+
+                    if(message_num > 0) {
+                        $('.m-count').addClass('active');
+                        $('.m-messages').remove();
+                        for(var i = 0; i < message_num; ++i) {
+                            $('.m-nothing').after('<li class="m-messages" data-id="' + data[i].id + '"><div><a target="_blank" href="' + data[i].link + '">' + data[i].content + '</a></div></li>');
+                        }
+                        $('.m-nothing').css('display', 'none');
+                        $('.m-messages').css('display', 'block');
+                    }
+                    else {
+                        $('.m-count').removeClass('active');
+                        $('.m-nothing').css('display', 'block');
+                        $('.m-messages').css('display', 'none');
+                    }
+                } 
+            });
+        };
+        
+
+        $('body').on('click', '.m-messages', function() {
+            var id = $(this).data('id');
+            oh.api.user.notice.read.put({
+                body: {
+                    id: id
+                }
+            }, function(data) {
+                getUserUnreadNotice();
+            })
+        });
+
+        getUserUnreadNotice();
     }
 
     $(function () {

@@ -246,6 +246,9 @@ Config = {
                     },
                     "hackathon": {
                         "like": ["get", "post", "delete"]
+                    },
+                    "notice": {
+                        "read": ["put"]
                     }
                 },
                 "bulletin": {

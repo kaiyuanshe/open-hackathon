@@ -661,10 +661,11 @@ footer .oh-copyright hr {
   padding: 5px 20px;
   background-color:#2b2c39;
 }
-.header .messages  .dropdown-menu  .m-nothing{
+.header .messages  .dropdown-menu  .m-nothing, .header .messages  .dropdown-menu  .m-messages, .header .messages  .dropdown-menu  .m-messages a{
   min-height:40px;
   color:#fff;
   padding:20px;
+  text-align: left;
 }
 .header .messages .dropdown-menu li{
   border-bottom: 1px solid #2b2c39;
