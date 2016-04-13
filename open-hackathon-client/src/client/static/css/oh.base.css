@@ -474,11 +474,11 @@ footer .oh-copyright hr {
   background: rgba(210, 69, 62, 0.7);
 }
 
-.oh-share-bar .jiathis_style_32x32 .jiathis_button_weixin .jtico {
-  background: url('/static/pic/weixin-icon.png') no-repeat center;
+.oh-share-bar .jiathis_style_32x32 .jiathis_button_wechat .jtico {
+  background: url('/static/pic/wechat-icon.png') no-repeat center;
 }
 
-.oh-share-bar .jiathis_style_32x32 .jiathis_button_weixin:hover .jtico {
+.oh-share-bar .jiathis_style_32x32 .jiathis_button_wechat:hover .jtico {
   background: rgba(48, 170, 99, 0.7);
 }
 
@@ -582,7 +582,7 @@ footer .oh-copyright hr {
 .header .navbar-nav > .active > a:hover,
 .header .navbar-nav > .active > a:focus {
   color: #7dba41;
-  background-color: transparent;
+  background-color: #2b2c39;
 }
 
 .header .navbar-nav > li > a {
@@ -592,19 +592,20 @@ footer .oh-copyright hr {
 
 .header .dropdown-menu {
   padding: 0;
-  background-color: #222222;
+  background-color: #151516;
   border: none;
   border-radius: 0;
+  z-index: 100;
 }
 
 .header .dropdown-menu:before {
   position: absolute;
-  content: '';
+  /* content: ''; */
   top: -9px;
   right: 30px;
   border: 0 solid transparent;
   border-width: 0 8px 9px;
-  border-bottom-color: #222222;
+  border-bottom-color: #151516;
 }
 
 .header .dropdown-menu .divider {
@@ -634,10 +635,47 @@ footer .oh-copyright hr {
 .header.navbar-inverse .navbar-nav>.open>a,
 .header.navbar-inverse .navbar-nav>.open>a:hover,
 .header.navbar-inverse .navbar-nav>.open>a:focus {
-  background-color: #222222;
+  background-color: #2b2c39;
 }
-
-
+.header .messages .m-count{
+  position:absolute;
+  top: 15px;
+  right: 5px;
+  background-color:#f25122;
+  height:19px;
+  width:19px;
+  text-align:center;
+  border-radius:50%;
+  font-size:12px;
+  display: none;
+}
+.header .messages .m-count.active{
+  display:block;
+}
+.header .messages  .dropdown-menu {
+  width:195px;
+}
+.header .messages  .dropdown-menu .d-header{
+  color:#fff;
+  font-size:12px;
+  padding: 5px 20px;
+  background-color:#2b2c39;
+}
+.header .messages  .dropdown-menu  .m-nothing{
+  min-height:40px;
+  color:#fff;
+  padding:20px;
+}
+.header .messages .dropdown-menu li{
+  border-bottom: 1px solid #2b2c39;
+}
+.header .messages .dropdown-menu .d-footer{
+  color:#fff;
+  font-size:12px;
+  padding: 5px 20px;
+  text-align:right;
+  background-color:#2b2c39;
+}
 /*----------------------------------*/
 
 .bootstrap-duallistbox-container label,
@@ -1948,7 +1986,7 @@ h4.title {}
   content: "\f1d8";
 }
 
-.full-shared .share-btn .jiathis_button_weixin > span:before {
+.full-shared .share-btn .jiathis_button_wechat > span:before {
   content: "\f1d7";
 }
 .v-hidden{

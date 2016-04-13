@@ -120,6 +120,13 @@
     width: 100%;
     height: 486px!important;
 }
+.show_item .w-doc .sub-item{
+    margin:26px 0;
+}
+.show_item .w-doc iframe{
+    width: 100%;
+    height: 470px;
+}
 .show_item h2{
     color:#888;
     margin-top:0;

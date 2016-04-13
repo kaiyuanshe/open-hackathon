@@ -123,4 +123,12 @@ angular.module('oh.filters', [])
         default: return '';
       }
     }
+  }).filter('organizationType', function($translate){
+    return function(type) {
+      switch(parseInt(type)) {
+        case 1: return $translate.instant('ORGANIZATION_TYPE.ORGANIZER');
+        case 2: return $translate.instant('ORGANIZATION_TYPE.PARTNER');
+        default: return '';
+      }
+    }
   });

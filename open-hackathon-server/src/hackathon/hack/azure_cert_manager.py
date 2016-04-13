@@ -31,7 +31,7 @@ from os.path import dirname, realpath, abspath, isfile
 import commands
 
 from hackathon.hazure.cloud_service_adapter import CloudServiceAdapter
-from hackathon.hmongo.models import Hackathon, AzureKey
+from hackathon.hmongo.models import Hackathon, AzureKey, Experiment
 
 from hackathon import RequiredFeature, Component, Context
 from hackathon.hackathon_response import ok
@@ -105,6 +105,7 @@ class AzureCertManager(Component):
 
         if not (azure_key in hackathon.azure_keys):
             hackathon.azure_keys.append(azure_key)
+            hackathon.save()
         else:
             self.log.debug('hackathon azure key exists')
 
@@ -140,8 +141,10 @@ class AzureCertManager(Component):
     def get_certificates_by_expr(self, expr_id):
         """Get certificates by experiment id
         """
-        expr = self.db.get_object(Experiment, expr_id)
-        hak = self.db.find_all_objects_by(HackathonAzureKey, hackathon_id=expr.hackathon_id)
+        #expr = self.db.get_object(Experiment, expr_id)
+        expr = Experiment.objects(id=expr_id)
+        #hak = self.db.find_all_objects_by(HackathonAzureKey, hackathon_id=expr.hackathon_id)
+        hak = Hackathon.objects(id=expr.hackathon_id).first().azure_keys[0]
         if not hak:
             raise Exception("no azure key configured")
 

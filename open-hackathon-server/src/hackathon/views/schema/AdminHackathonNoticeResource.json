@@ -6,8 +6,7 @@
         "type": "object",
         "properties": {
           "id": {
-            "description": "hackathon notice id",
-            "pattern": "^[0-9]+$"
+            "type": "string"
           }
         }
       }
@@ -30,8 +29,7 @@
         "type": "object",
         "properties": {
           "id": {
-            "description": "hackathon notice id",
-            "pattern": "^[0-9]+$"
+            "type": "string"
           }
         }
       }
@@ -42,8 +40,7 @@
         "type": "object",
         "properties": {
           "id": {
-            "description": "hackathon notice id",
-            "pattern": "^[0-9]+$"
+            "type": "string"
           }
         }
       }

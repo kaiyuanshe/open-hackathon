@@ -52,6 +52,10 @@ angular.module('oh.pages', [])
         name: "SETTINGS.AWARDS",
         state: "manage.awards",
         icon: 'fa-diamond'
+      }, {
+        name: "SETTINGS.NOTICES",
+        state: "manage.notices",
+        icon: 'fa-bullhorn'
       }]
     }, {
       name: "ADVANCED_SETTINGS.MAIN",

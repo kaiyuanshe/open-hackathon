@@ -16,7 +16,8 @@
     "ADMINISTRATORS": "管理员",
     "ORGANIZERS": "主办方",
     "PRIZES": "奖项设置",
-    "AWARDS": "评奖"
+    "AWARDS": "评奖",
+    "NOTICES": "公告"
   },
   "ADVANCED_SETTINGS": {
     "MAIN": "高级设置",
@@ -70,7 +71,10 @@
     "SHORT_DESCRIPTION": "简介",
     "DESCRIPTION": "活动详情",
     "ADD_BANNER": "添加图片",
-    "ADD_BANNER_TIP": "推荐尺寸<span class=\"text-red\">752*420</span>px 图片"
+    "ADD_BANNER_TIP": "推荐尺寸<span class=\"text-red\">752*420</span>px 图片",
+    "ADD_BANNERS": "增加海报图",
+    "PIC_ADDRESS": "图片地址",
+    "PIC_ADDRESS_HINT": "请输入有效的图片URL地址"
   },
   "AZURE_FIELDS": {
     "SUBSCRIPTION_ID": "订阅序号",
@@ -143,6 +147,10 @@
     "ROLL_BACKING": "正在回滚",
     "ROLL_BACKED": "已回滚",
     "UNEXPCTED_ERROR": "未知错误"
+  },
+  "ORGANIZATION_TYPE": {
+    "ORGANIZER": "主办方",
+    "PARTNER": "合作伙伴"
   },
   "ADMIN_WEBPAGE_FIELDS": {
     "NAME": "名称",
