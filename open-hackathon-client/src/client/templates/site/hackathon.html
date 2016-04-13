@@ -127,8 +127,9 @@
                                 <div>
                                     <h3 class="title">奖品</h3>
                                     {% for award in hackathon.awards %}
-                                        <div class="award award-{{loop.index}}" data-parent>
-                                            <img data-loadsrc="{{ award.award_url }}" src="{{ award.award_url }}" alt="{{ award.name }}" >
+                                        <div class="award award-{{ loop.index }}" data-parent>
+                                            <img data-loadsrc="{{ award.award_url }}" src="{{ award.award_url }}"
+                                                 alt="{{ award.name }}">
                                             <div class="award-body">
                                                 <h3>{{ award.name }}</h3>
                                                 <p>{{ award.description }}</p>
@@ -154,7 +155,7 @@
                         </div>
                         <div role="tabpanel" class="tab-pane" id="works">
 
-                            <div class="ob-body clearfix" id="team_show">
+                            <div class="ob-body row" id="team_show">
                             </div>
                         </div>
                     </div>
@@ -309,6 +310,9 @@
     </dd>
   </dl>
   {% endraw %}
+
+
+
     </script>
     <script id="team_list_temp" type="text/x-jquery-tmpl">
   {% raw %}
@@ -332,28 +336,30 @@
   </div>
   {% endraw %}
 
-
     </script>
     <script id="show_list_temp" type="text/x-jquery-tmpl">
   {% raw %}
   <div class="col-md-6">
-    <div class="media">
-      <div class="media-left">
-        <a href="${$item.link(team_id)}">
-          <img class="media-object" src="${logo}" onerror="javascript:this.src='/static/pic/team-logo.png'">
-        </a>
-      </div>
-      <div class="media-body">
-        <h4 class="media-heading">${name}</h4>
-        <a href="${$item.link(team_id)}" class="oh-thumb">
-          <img src="${$item.getImage(uri)}" class="oh-thumbnail" alt="${$item.getAlt(uri,note)}">
-        </a>
-        <p> 查看更多作品：{{html $item.getlinks(uri,team_id)}}</p>
+    <div class="item">
+        <div class="header" data-parent>
+            <a href="${$item.link(id)}">
+                <img src="${cover}" class="oh-thumbnail" alt="${project_name}" onload="oh.comm.imgLoad(this)" >
+            </a>
+        </div>
+        <div class="body">
+            <h4>项目名称：${project_name}</h4>
+            <p>团队名：<a href="${$item.link(id)}">${name}</a></p>
+            <div class="desc">
+                ${description}
+            </div>
+         </div>
+        <div class="footer">
+            <p> 更多展示：{{html $item.getlinks(works,id)}}</p>
+        </div>
       </div>
     </div>
   </div>
   {% endraw %}
-
 
     </script>
     <script id="register_list_temp" type="text/x-jquery-tmpl">
@@ -368,6 +374,9 @@
     <div class="date">${create_time}</div>
   </li>
   {% endraw %}
+
+
+
 
 
     </script>

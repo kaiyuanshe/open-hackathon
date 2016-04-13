@@ -137,7 +137,24 @@ class TeamManager(Component):
         if self.user_manager.validate_login():
             user = g.user
 
-        return [self.__team_detail(x, user) for x in teams]
+        def get_tema(team):
+            teamDic = team.dic()
+            teamDic['leader'] = {
+                'id': str(team.leader.id),
+                'name': team.leader.name,
+                'nickname': team.leader.nickname,
+                'avatar_url': team.leader.avatar_url
+            }
+            teamDic['cover'] = teamDic.get('cover', '')
+            teamDic['project_name'] = teamDic.get('project_name', '')
+            teamDic['dev_plan'] = teamDic.get('dev_plan', '')
+            [teamDic.pop(key, None) for key in
+             ['assets', 'awards', 'azure_keys', 'scores', 'templates', 'members', 'works']]
+            teamDic["member_count"] = team.members.filter(status=TEAM_MEMBER_STATUS.APPROVED).count()
+
+            return teamDic
+
+        return [get_tema(x) for x in teams]
 
     def create_default_team(self, hackathon, user):
         """Create a default new team for user after registration.
@@ -512,38 +529,36 @@ class TeamManager(Component):
             query &= Q(works__type=int(show_type))
 
         works = []
-        for team in Team.objects(query):
-            cur_works = []
-            uris = []
+        for team in Team.objects(query).order_by('update_time', '-age')[:limit]:
+            teamDic = team.dic()
+            teamDic['leader'] = {
+                'id': str(team.leader.id),
+                'name': team.leader.name,
+                'nickname': team.leader.nickname,
+                'avatar_url': team.leader.avatar_url
+            }
+            teamDic['cover'] = teamDic.get('cover', '')
+            teamDic['project_name'] = teamDic.get('project_name', '')
+            teamDic['dev_plan'] = teamDic.get('dev_plan', '')
+            [teamDic.pop(key, None) for key in ['assets', 'awards', 'azure_keys', 'scores', 'templates', 'members']]
+            #
+            # teamDic['works'] = []
+            #
+            # for work in team.works:
+            #     teamDic['works'].append(to_dic(work))
 
-            for work in team.works:
-                cur_works.append({
-                    "name": team.name,
-                    "description": team.description,
-                    "logo": team.logo,
-                    "id": work.id,
-                    "note": work.description,
-                    "team_id": team.id,
-                    "hackathon_id": hackathon_id,
-                    "create_time": time.mktime(work.create_time.timetuple())})
-                uris.append((work.uri, work.type))
+            works.append(teamDic)
 
-            uri = ",".join([uri + ':::' + str(type) for uri, type in uris])
-            for work in cur_works:
-                work["uri"] = uri
+        # works.sort(lambda a, b: int(b["create_time"] - a["create_time"]))
 
-            works += cur_works
+        # def proc_work(w):
+        #     w.pop("create_time")
+        #     w["id"] = str(w["id"])
+        #     w["team_id"] = str(w["team_id"])
+        #     w["hackathon_id"] = str(w["hackathon_id"])
+        #     return w
 
-        works.sort(lambda a, b: int(b["create_time"] - a["create_time"]))
-
-        def proc_work(w):
-            w.pop("create_time")
-            w["id"] = str(w["id"])
-            w["team_id"] = str(w["team_id"])
-            w["hackathon_id"] = str(w["hackathon_id"])
-            return w
-
-        return [proc_work(x) for x in works[:limit]]
+        return works
 
     def get_team_source_code(self, team_id):
         try:

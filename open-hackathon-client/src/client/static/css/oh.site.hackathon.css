@@ -349,20 +349,54 @@ h1.title {
     width: 100%;
 }
 
-#team_show .media {
-    min-height: 266px;
+#team_show .item {
+    position: relative;
+    background-color: #fff;
+    border: 1px solid #d2d2d2;
     margin-bottom: 20px;
+    height: 326px;
 }
 
-#team_show .media p {
-    margin-top: 10px;
-    color: #969696;
+#team_show .item .header {
+    height:178px;
+    border-bottom:1px solid #d0d3d2;
 }
 
-#team_show .media p a {
-    margin-right: 5px;
+#team_show .item .body {
+   padding:5px 20px;
+   height: 115px;
+   overflow:hidden;
 }
-
+#team_show .item .body p{
+    margin-bottom:5px;
+}
+#team_show .item .body .desc{
+    border-top:1px solid #d0d3d2;
+    font-size:12px;
+    padding: 5px 0;
+    color: #818182;
+}
+#team_show .item .body h4{
+    margin: 5px 0;
+    font-size: 15px;
+    min-height: 25px;
+}
+#team_show .item .footer{
+     padding:5px 20px;
+     background-color:#f1f1f2;
+     border-top: 1px solid #d0d3d2;
+}
+#team_show .item .footer p{
+    margin:0;
+}
+#team_show .item .footer a{
+    margin-left:15px;
+    color:#019e48;
+}
+#team_show .item .footer a:hover,
+#team_show .item .footer a:focus{
+    color:#7dba41;
+}
 .activity-info {
     padding-right: 28px;
 }
