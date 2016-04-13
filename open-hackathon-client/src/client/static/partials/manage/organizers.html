@@ -20,9 +20,9 @@
                     <label class="col-md-3 control-label">类型</label>
 
                     <div class="col-md-6">
-                        <select class="form-control" name="orgtype" ng-model="org.organization_type">
-                            <option value="1">主办方</option>
-                            <option value="2">合作伙伴</option>
+                        <select class="form-control" ng-model="org.organization_type">
+                            <option value="1">{{'ORGANIZATION_TYPE.ORGANIZER' | translate}}</option>
+                            <option value="2">{{'ORGANIZATION_TYPE.PARTNER' | translate}}</option>
                         </select>
                     </div>
                 </div>
@@ -84,9 +84,7 @@
                     <tbody>
                     <tr ng-repeat="org in data.organizers">
                         <td>{{org.name}}</td>
-                        <td>
-                            主办方
-                        </td>
+                        <td>{{org.organization_type | organizationType}}</td>
                         <td><img style="width:160px" src="{{org.logo}}"></td>
                         <td>{{org.description}}</td>
                         <td><a href="{{org.homepage}}">{{org.homepage}}</a></td>

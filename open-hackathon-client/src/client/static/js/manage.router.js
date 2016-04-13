@@ -125,7 +125,18 @@ angular.module('oh.manage.router', [
   }).state('manage.users', {
     url: 'users/:name',
     templateUrl: '/static/partials/manage/users.html?v=' + VERSION,
-    controller: 'usersController'
+    controller: 'usersController',
+    resolve: {
+      activity: function($stateParams, api) {
+        return api.admin.hackathon.get({
+          header: {
+            hackathon_name: $stateParams.name
+          }
+        }).then(function(data) {
+          return data;
+        });
+      }
+    }
   }).state('manage.admin', {
     url: 'admin/:name',
     templateUrl: '/static/partials/manage/admin.html?v=' + VERSION,
@@ -137,7 +148,18 @@ angular.module('oh.manage.router', [
   }).state('manage.prizes', {
     url: 'prizes/:name',
     templateUrl: '/static/partials/manage/prizes.html?v=' + VERSION,
-    controller: 'prizesController'
+    controller: 'prizesController',
+    resolve: {
+      activity: function($stateParams, api) {
+        return api.admin.hackathon.get({
+          header: {
+            hackathon_name: $stateParams.name
+          }
+        }).then(function(data) {
+          return data;
+        });
+      }
+    }
   }).state('manage.awards', {
     url: 'awards/:name',
     templateUrl: '/static/partials/manage/awards.html?v=' + VERSION,
@@ -145,7 +167,18 @@ angular.module('oh.manage.router', [
   }).state('manage.notices', {
     url: 'notices/:name',
     templateUrl: '/static/partials/manage/notices.html?v=' + VERSION,
-    controller: 'noticesController'
+    controller: 'noticesController',
+    resolve: {
+      activity: function($stateParams, api) {
+        return api.admin.hackathon.get({
+          header: {
+            hackathon_name: $stateParams.name
+          }
+        }).then(function(data) {
+          return data;
+        });
+      }
+    }
   }).state('manage.ve', {
     url: 've/:name',
     templateUrl: '/static/partials/manage/ve.html?v=' + VERSION,

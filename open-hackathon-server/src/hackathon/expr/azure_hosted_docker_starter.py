@@ -73,7 +73,7 @@ class AzureHostedDockerStarter(DockerExprStarter):
             self.log.debug("host servers are all busy, %d times tried, will retry in 3 seconds" % context.trial)
             self.scheduler.add_once(FEATURE, "get_docker_host_server", context, seconds=3)
         else:
-            self.log.debug("no available host server")
+            self.log.error("no available host server")
             self._on_virtual_environment_failed(context)
 
     def query_network_config_status(self, context):

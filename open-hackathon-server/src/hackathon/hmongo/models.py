@@ -290,6 +290,7 @@ class Team(HDocumentBase):
     leader = ReferenceField(User)
     cover = StringField()
     project_name = StringField()
+    project_description = StringField()
     dev_plan = StringField()
     hackathon = ReferenceField(Hackathon)
     works = EmbeddedDocumentListField(TeamWork)

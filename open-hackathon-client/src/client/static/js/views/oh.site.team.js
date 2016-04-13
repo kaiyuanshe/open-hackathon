@@ -33,7 +33,7 @@
 
     var templates = {
         video: '<div class="sub-item">{{html uri}}</div>',
-        img: '<a href="${uri}" title="${description}" data-parent><img src="${uri}" onload="oh.comm.imgLoad(this)" alt="${description}"></a>',
+        img: ' <div  class="sub-item"><a href="${uri}" title="${description}" data-parent><img src="${uri}" onload="oh.comm.imgLoad(this)" alt="${description}"></a></div>',
         doc: '<div class="sub-item"><iframe src="${uri}" seamless="seamless" frameborder="0" scrolling="yes"></iframe></div>',
         pdf: '<div class="sub-item"><object data="${uri}" type="application/pdf" width="100%" height="470px"><p>您的浏览器不支持PDF查看。请安装PDF阅读器插件!</p></object></div>',
         code: '<div class="sub-item"><span>${description}：</span><a href="${uri}" target="_blank">${uri}</a></div>',
@@ -129,6 +129,7 @@
     }
 
     function pageload() {
+  
         $('[data-loadsrc]').each(function (i, img) {
             var $img = $(img).load(function (e) {
                 oh.comm.imgLoad(this);
@@ -137,7 +138,7 @@
         });
 
         $('.popup-gallery').magnificPopup({
-            delegate: 'a',
+            delegate: 'a[data-parent]',
             type: 'image',
             tLoading: '加载图片 #%curr%...',
             mainClass: 'mfp-img-mobile',
@@ -269,18 +270,6 @@
                 $('#addWorksForm').get(0).reset();
                 worksForm.data().bootstrapValidator.resetForm();
             });
-
-        $('#team_works').on('click', 'a[data-role="delete-show"]', function (e) {
-            var item = $(this).parents('.work_item');
-            deleteShow({team_id: tid, id: item.data('tmplItem').data.id}).then(function (data) {
-                if (data.error) {
-                    oh.comm.alert('错误', data.error.friendly_message);
-                } else {
-                    item.detach();
-                    $('#team_works h2 span').text('(' + $('#team_works .work_item').length + ')');
-                }
-            });
-        });
     }
 
     function getMemberList() {
@@ -300,14 +289,15 @@
 
     function updateMemberStatus(rel_id, status) {
         var data = {
-            id: rel_id,
+            user_id: rel_id,
+            team_id: tid,
             status: status
         };
         return oh.api.team.member.put({body: data, header: {hackathon_name: hackathon_name}});
     }
 
     function deniedMember(rel_id) {
-        return updateMemberStatus(rel_id, 2);
+        return leaveTeam(rel_id);
     }
 
     function approvedMember(rel_id) {
@@ -363,10 +353,14 @@
         $('[data-role="join"]').click(function (e) {
             joinTeam().then(function (data) {
                 if (data.error) {
-                    oh.comm.alert('错误', data.error.friendly_message);
+                    if (data.error.code == 412) {
+                        oh.comm.alert('错误', '请报名后才能加入该团队！');
+                    } else {
+                        oh.comm.alert('错误', data.error.friendly_message);
+                    }
                 } else {
                     showMember();
-                    $('.oh-team-edit').empty().append('<a href="javascript:void(0);" class="btn oh-white-text bg-color-pinkDark btn-lg" data-role="leave"><i class="fa fa-unlink"></i> 离队</a>');
+                    $('.oh-team-edit').empty().append('<a href="javascript:void(0);" class="btn btn-danger btn-sm" data-role="leave" ><i class="fa fa-unlink"></i> 离队</a>');
                 }
             });
         });
@@ -374,11 +368,44 @@
         var edit_btn = $('[data-role="edit"]').click(function (e) {
             edit_btn.addClass('hide');
             seva_btn.removeClass('hide');
-            var input_name = $('<input>').attr({type: 'text', value: $('#team_name').text()});
-            var input_des = $('<textarea>').attr({row: '4'}).val($('#team_description').text());
+            var input_name = $('<input>').attr({
+                type: 'text',
+                placeholder: '团队名称',
+                value: $.trim($('#team_name').text())
+            });
+            var input_des = $('<textarea>').attr({
+                row: '4',
+                placeholder: '团队简介'
+            }).val($.trim($('#team_description').text()));
             $('#team_name').addClass('edit').empty().append(input_name);
             $('#team_description').addClass('edit').empty().append(input_des);
+
+            $('#show_works .sub-item').each(function (i, item) {
+                $(item).append($('<a>').attr({
+                    title: '删除',
+                    class: 'edit',
+                    'data-role': 'work-del',
+                    href: 'javascrpit:;'
+                }).html('<i class="fa fa-times"></i>'))
+            })
         });
+        if (edit_btn.length > 0) {
+            $('#show_works').on('click', 'a[data-role="work-del"]', function (e) {
+                var item = $(this).parent();
+                var id = item.data('tmplItem').data.id
+                deleteShow({team_id: tid, id: id}).then(function (data) {
+                    if (data.error) {
+                        oh.comm.alert('错误', data.error.friendly_message);
+                    } else {
+                        var sublist = item.parent();
+                        item.detach();
+                        if (sublist.find('.sub-item').length == 0) {
+                            sublist.find('.nothing').removeClass('hide');
+                        }
+                    }
+                });
+            });
+        }
 
         var seva_btn = $('[data-role="save"]').click(function (e) {
             seva_btn.addClass('hide');
@@ -389,7 +416,7 @@
             $('[data-role="team_name"]').text(team_date.name);
             $('#team_name').empty().text(team_date.name);
             $('#team_description').empty().text(team_date.description);
-
+            $('#show_works a.edit').detach();
             updateTeam(team_date).then(function (data) {
                 if (data.error) {
                     oh.comm.alert('错误', data.error.friendly_message);
@@ -421,8 +448,8 @@
                 if (data.error) {
                     oh.comm.alert('错误', data.error.friendly_message);
                 } else {
-                    btn.parents('.btn-group').detach();
-                    userItem.find('.oh-body span').text('成员')
+                    btn.detach();
+                    userItem.find('span').text('成员')
                 }
             });
         });
