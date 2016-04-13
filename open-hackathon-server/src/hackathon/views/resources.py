@@ -285,6 +285,12 @@ class UserExperimentResource(HackathonResource, Component):
         return expr_manager.heart_beat(self.context().id)
 
 
+class UserNoticeReadResource(HackathonResource):
+    @token_required
+    def put(self):
+        return hackathon_manager.check_notice_and_set_read_if_necessary(self.context().id)
+
+
 class TeamResource(HackathonResource):
     @hackathon_name_required
     def get(self):

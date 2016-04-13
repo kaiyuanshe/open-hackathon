@@ -492,6 +492,7 @@ class TeamManager(Component):
 
             team.works.append(work)
             team.save()
+
         except ValidationError as e:
             if "uri" in e.message:
                 return bad_request("`uri` field must be in uri format")
