@@ -144,7 +144,7 @@
         }, function (data) {
             if (data.error) {
                 oh.comm.alert(data.error.message);
-            } else if(data.length > 0) {
+            } else if(data.items.length > 0) {
                 data = data.items;
                 $('#new > span').text('（' + data.length + '）');
 
