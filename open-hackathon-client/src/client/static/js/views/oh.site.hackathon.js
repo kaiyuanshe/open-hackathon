@@ -28,6 +28,12 @@
     var hackathon_name = oh.comm.getCurrentHackathon();
 
     function teamsbind(data) {
+        for(var index in data) {
+            if(!data[index]["logo"]){
+                data[index]["logo"] = null;
+            }
+        }
+
         var list = $('#team_list').append($('#team_list_temp').tmpl(data, {
             get_logo: function (logo) {
                 return logo ? logo : '/static/pic/team-logo.png';
@@ -138,7 +144,7 @@
         }, function (data) {
             if (data.error) {
                 oh.comm.alert(data.error.message);
-            } else {
+            } else if(data.length > 0) {
                 data = data.items;
                 $('#new > span').text('（' + data.length + '）');
 
@@ -186,8 +192,15 @@
                         return show_text;
                     }
                 }));
+            } else {
+                noNotice();
             }
         });
+    }
+
+    function noNotice() {
+        $('#news').append('<div class="col-md-12 text-center no-team">' +
+            '亲，暂时没有动态消息的哦～<br/><img src="/static/pic/no-notice.jpg"><div>')
     }
 
     function noShow() {
