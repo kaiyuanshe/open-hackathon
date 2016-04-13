@@ -79,7 +79,7 @@ class HackathonManager(Component):
 
     def is_recycle_enabled(self, hackathon):
         key = HACKATHON_CONFIG.RECYCLE_ENABLED
-        return self.util.str2bool(self.get_basic_property(hackathon, key, False))
+        return self.get_basic_property(hackathon, key, False)
 
     def get_hackathon_by_name(self, name):
         """Get hackathon accoring the unique name
@@ -131,6 +131,7 @@ class HackathonManager(Component):
         # build query by search conditions and order_by
         status_filter = Q()
         name_filter = Q()
+        condition_filter = Q()
         order_by_condition = '-id'
 
         if status:
@@ -138,19 +139,20 @@ class HackathonManager(Component):
         if name:
             name_filter = Q(name__contains=name)
 
-        if order_by == 'create_time':
+        if order_by == 'create_time': #最新发布
             order_by_condition = '-create_time'
-        elif order_by == 'event_start_time':
+        elif order_by == 'event_start_time': #即将开始
             order_by_condition = '-event_start_time'
-        elif order_by == 'registered_users_num':
+        elif order_by == 'registered_users_num': #人气热点
             # hackathons with zero registered users would not be shown.
-            # TODO
-            pass
+            hackathon_stat = HackathonStat.objects(type=HACKATHON_STAT.REGISTER, count__gt=0).order_by('-count')
+            hackathon_list = [stat.hackathon.id for stat in hackathon_stat]
+            condition_filter = Q(id__in=hackathon_list)
         else:
             order_by_condition = '-id'
 
         # perform db query with pagination
-        pagination = Hackathon.objects(status_filter & name_filter).order_by(order_by_condition).paginate(page,
+        pagination = Hackathon.objects(status_filter & name_filter & condition_filter).order_by(order_by_condition).paginate(page,
                                                                                                           per_page)
 
         user = None
@@ -177,19 +179,9 @@ class HackathonManager(Component):
         return [get_user_hackathon_detail(rel) for rel in user_hackathon_rels]
 
     def get_recyclable_hackathon_list(self):
-        # todo fix auto recycle
-        # all_hackathon = self.db.find_all_objects(Hackathon)
-        # return filter(lambda h: self.is_recycle_enabled(h), all_hackathon)
-        return []
-
-    def get_entitled_hackathon_list_with_detail(self, user):
-        hackathon_ids = self.admin_manager.get_entitled_hackathon_ids(user.id)
-        if -1 in hackathon_ids:
-            hackathon_list = self.db.find_all_objects(Hackathon)
-        else:
-            hackathon_list = self.db.find_all_objects(Hackathon, Hackathon.id.in_(hackathon_ids))
-
-        return map(lambda h: self.__get_hackathon_detail(h, user), hackathon_list)
+        # todo filter hackathons in a db-level
+        hackathons = Hackathon.objects().all()
+        return filter(lambda h: self.is_recycle_enabled(h), hackathons)
 
     def get_basic_property(self, hackathon, key, default=None):
         """Get basic property of hackathon from HackathonConfig"""
@@ -198,8 +190,8 @@ class HackathonManager(Component):
         return default
 
     def get_all_properties(self, hackathon):
-        configs = self.db.find_all_objects_by(HackathonConfig, hackathon_id=hackathon.id)
-        return [c.dic() for c in configs]
+        config = hackathon.config
+        return config if config else {}
 
     def set_basic_property(self, hackathon, properties):
         """Set basic property in table HackathonConfig"""
@@ -218,10 +210,6 @@ class HackathonManager(Component):
 
         hackathon.save()
         self.cache.invalidate(self.__get_config_cache_key(hackathon))
-        return ok()
-
-    def delete_property(self, hackathon, key):
-        self.db.delete_all_objects_by(HackathonConfig, hackathon_id=hackathon.id, key=key)
         return ok()
 
     def get_recycle_minutes(self, hackathon):
@@ -267,8 +255,6 @@ class HackathonManager(Component):
         # init data is for local only
         if self.util.is_local():
             self.__create_default_data_for_local(new_hack)
-
-        self.create_hackathon_notice(new_hack.id, HACK_NOTICE_EVENT.HACK_CREATE, HACK_NOTICE_CATEGORY.HACKATHON)
 
         return new_hack.dic()
 
@@ -347,6 +333,9 @@ class HackathonManager(Component):
 
     def like_hackathon(self, user, hackathon):
         user_hackathon = UserHackathon.objects(hackathon=hackathon, user=user).first()
+        if user_hackathon and user_hackathon.like:
+            return ok()
+
         if not user_hackathon:
             user_hackathon = UserHackathon(hackathon=hackathon,
                                            user=user,
@@ -602,6 +591,8 @@ class HackathonManager(Component):
 
         hackathon_notice.content = body.get("content", hackathon_notice.content)
         hackathon_notice.link = body.get("link", hackathon_notice.link)
+        hackathon_notice.category = body.get("category", hackathon_notice.category)
+        hackathon_notice.update_time = self.util.get_now()
 
         hackathon_notice.save(validate=False)
         return hackathon_notice.dic()
@@ -773,21 +764,20 @@ class HackathonManager(Component):
                 detail["stat"]["like"] = stat.count
 
         if user:
+            user_hackathon = UserHackathon.objects(hackathon=hackathon,user=user).first()
+            if user_hackathon and user_hackathon.like:
+                detail['like'] = user_hackathon.like
+
             detail["user"] = self.user_manager.user_display_info(user)
-            detail["user"]["is_admin"] = user.is_super or hackathon.creator.id == user.id
+            detail["user"]["is_admin"] = user.is_super or (user_hackathon and user_hackathon.role == HACK_USER_TYPE.ADMIN)
 
             # TODO: we need to review those items one by one to decide the API output
             # asset = self.db.find_all_objects_by(UserHackathonAsset, user_id=user.id, hackathon_id=hackathon.id)
             # if asset:
             #     detail["asset"] = [o.dic() for o in asset]
 
-            # like = self.db.find_first_object_by(HackathonLike, user_id=user.id, hackathon_id=hackathon.id)
-            # if like:
-            #     detail["like"] = like.dic()
-
-            register = self.register_manager.get_registration_by_user_and_hackathon(user.id, hackathon.id)
-            if register:
-                detail["registration"] = register.dic()
+            if user_hackathon and user_hackathon.role == HACK_USER_TYPE.COMPETITOR:
+                detail["registration"] = user_hackathon.dic()
                 team = Team.objects(hackathon=hackathon, members__user=user).first()
                 if team:
                     detail["team"] = team.dic()

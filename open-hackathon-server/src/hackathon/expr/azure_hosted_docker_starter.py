@@ -344,7 +344,7 @@ class AzureHostedDockerStarter(DockerExprStarter):
                     # release port
                     self._release_port(virtual_environment.docker_container, context)
                 except Exception as e:
-                    self.log(e)
+                    self.log.error(e)
                     self._on_virtual_environment_unexpected_error(context)
         elif virtual_environment.status == VEStatus.STOPPED:
             self._on_virtual_environment_stopped(context)
@@ -359,6 +359,7 @@ class AzureHostedDockerStarter(DockerExprStarter):
 
         host_server = docker_container.host_server
         if self.util.is_local():
+            context.container_name = docker_container.name
             self.__stop_docker_container(context, host_server)
             return
 

@@ -80,16 +80,15 @@ class ExprManager(Component):
     def stop_expr(self, expr_id):
         """
         :param expr_id: experiment id
-        :param force: 0: only stop container and release ports, 1: force stop and delete container and release ports.
         :return:
         """
-        self.log.debug("begin to stop %d" % expr_id)
-        expr = Experiment.objects(id=expr_id, status=EStatus.RUNNING)
+        self.log.debug("begin to stop %s" % str(expr_id))
+        expr = Experiment.objects(id=expr_id, status=EStatus.RUNNING).first()
         if expr is not None:
             starter = self.get_starter(expr.hackathon, expr.template)
             if starter:
-                starter.stop_expr(Context(experiment=expr))
-            self.log.debug("experiment %d ended success" % expr_id)
+                starter.stop_expr(Context(experiment_id=expr.id, experiment=expr))
+            self.log.debug("experiment %s ended success" % expr_id)
             return ok('OK')
         else:
             return ok()
@@ -119,7 +118,7 @@ class ExprManager(Component):
         return [self.__get_expr_with_detail(experiment) for experiment in experiments]
 
     def scheduler_recycle_expr(self):
-        """recycle experiment acrroding to hackathon basic info on recycle configuration
+        """recycle experiment according to hackathon basic info on recycle configuration
 
         According to the hackathon's basic info on 'recycle_enabled', find out time out experiments
         Then call function to recycle them
@@ -130,13 +129,10 @@ class ExprManager(Component):
         for hackathon in self.hackathon_manager.get_recyclable_hackathon_list():
             # check recycle enabled
             mins = self.hackathon_manager.get_recycle_minutes(hackathon)
-            expr_time_cond = Experiment.create_time < self.util.get_now() - timedelta(minutes=mins)
-            status_cond = Experiment.status == EStatus.RUNNING
             # filter out the experiments that need to be recycled
-            exprs = self.db.find_all_objects(Experiment,
-                                             status_cond,
-                                             expr_time_cond,
-                                             Experiment.hackathon_id == hackathon.id)
+            exprs = Experiment.objects(create_time__lt=self.util.get_now() - timedelta(minutes=mins),
+                                       status=EStatus.RUNNING,
+                                       hackathon=hackathon)
             for expr in exprs:
                 self.__recycle_expr(expr)
 
@@ -253,10 +249,6 @@ class ExprManager(Component):
     def on_expr_started(self, experiment):
         hackathon = experiment.hackathon
         user = experiment.user
-        self.hackathon_manager.create_hackathon_notice(hackathon.id,
-                                                       HACK_NOTICE_EVENT.EXPR_JOIN,
-                                                       HACK_NOTICE_CATEGORY.EXPERIMENT,
-                                                       {'user_id': user.id if user else ""})
 
     def __report_expr_status(self, expr):
         ret = {
@@ -345,7 +337,7 @@ class ExprManager(Component):
         :return:
         """
         criterion = Q(status__in=[EStatus.RUNNING, EStatus.STARTING], hackathon=hackathon)
-        is_admin = self.admin_Manager.is_hackathon_admin(hackathon.id, user.id)
+        is_admin = self.admin_manager.is_hackathon_admin(hackathon.id, user.id)
         if is_admin:
             criterion &= Q(template=template)
 
@@ -366,7 +358,7 @@ class ExprManager(Component):
         roll back when exception occurred
         :param expr_id: experiment id
         """
-        self.log.debug("Starting rollback experiment %d..." % expr_id)
+        self.log.debug("Starting rollback experiment %s..." % expr_id)
         expr = Experiment.objects(id=expr_id)
         if not expr:
             self.log.warn("rollback failed due to experiment not found")
@@ -395,7 +387,7 @@ class ExprManager(Component):
 
         :return:
         """
-        providers = map(lambda x: x.provider, expr.virtual_environments.all())
+        providers = map(lambda x: x.provider, expr.virtual_environments)
         if VE_PROVIDER.DOCKER in providers:
             self.stop_expr(expr.id)
             self.log.debug("it's stopping " + str(expr.id) + " inactive experiment now")

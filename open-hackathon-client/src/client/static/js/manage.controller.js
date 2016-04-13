@@ -155,7 +155,7 @@ angular.module('oh.controllers', [])
     }
 
   })
-  .controller('editController', function($rootScope, $scope, $filter, dialog, session, activityService, api, activity, speech) {
+  .controller('editController', function($rootScope, $scope, $filter, $uibModal, dialog, session, activityService, api, activity, speech) {
     $scope.$emit('pageName', 'SETTINGS.EDIT_ACTIVITY');
 
     $scope.animationsEnabled = true;
@@ -169,6 +169,7 @@ angular.module('oh.controllers', [])
     activity.config.max_enrollment = parseInt(activity.config.max_enrollment, 10) || 0;
 
     $scope.modules = activity;
+    $scope.data = {newBannerUrl: ""};
     $scope.tags = [];
     $scope.activityFormDisabled = false;
     angular.forEach($scope.modules.tags, function(value, key) {
@@ -194,7 +195,6 @@ angular.module('oh.controllers', [])
       judge_start_time: false,
       judge_end_time: false
     };
-
 
     $scope.showTip = function(level, content, showTime) {
       $scope.$emit('showTip', {
@@ -245,8 +245,10 @@ angular.module('oh.controllers', [])
       });
     };
 
-    $scope.showAddBannerDialog = function() {
-      $scope.modules.banners.push('http://image5.tuku.cn/pic/wallpaper/fengjing/shanshuilantian/014.jpg');
+    function addBanner() {
+      $scope.modules.banners.push($scope.data.newBannerUrl);
+      $scope.data.newBannerUrl = "";
+
       api.admin.hackathon.put({
         header: {
           hackathon_name: $scope.modules.name
@@ -260,6 +262,20 @@ angular.module('oh.controllers', [])
         } else {
           $scope.showTip(level = 'tip-success', content = '添加成功');
         }
+      });
+    };
+
+    $scope.showAddBannerDialog = function() {
+      var data = $scope.data;
+      $uibModal.open({
+        templateUrl: 'addBannersModel.html',
+        controller: function($scope, $uibModalInstance) {
+          $scope.data = data;
+          $scope.addBanner = addBanner;
+          $scope.cancel = function() {
+            $uibModalInstance.dismiss('cancel');
+          };
+        },
       });
     };
 
@@ -329,7 +345,7 @@ angular.module('oh.controllers', [])
       });
     };
 
-    var refresh = function() {
+    function refresh() {
       api.admin.registration.list.get({
         header: {
           hackathon_name: activity.name
@@ -465,6 +481,8 @@ angular.module('oh.controllers', [])
         }
       });
     };
+
+    refresh();
   })
   .controller('adminController', function($rootScope, $scope, $uibModal, activityService, api, dialog) {
     $scope.$emit('pageName', 'SETTINGS.ADMINISTRATORS');
@@ -744,7 +762,7 @@ angular.module('oh.controllers', [])
         })
     }
 
-    refresh()
+    refresh();
   })
   .controller('awardsController', function($rootScope, $scope, $q, activityService, api) {
     $scope.$emit('pageName', 'SETTINGS.AWARDS');
@@ -842,6 +860,141 @@ angular.module('oh.controllers', [])
         level: level,
         content: msg
       });
+    };
+  })
+  .controller('noticesController', function($rootScope, $scope, $uibModal, activityService, api, dialog) {
+    $scope.$emit('pageName', 'SETTINGS.NOTICES');
+
+    var activity = activityService.getCurrentActivity();
+
+    $scope.data = {
+      notices: activity.notices,
+      noticeDescription: {
+        0: '黑客松信息',
+        1: '用户信息',
+        2: '实验信息',
+        3: '获奖信息',
+        4: '模板信息'
+      },
+      noticeIcon: {
+        0: 'glyphicon glyphicon-bullhorn', //'黑客松信息'
+        1: 'glyphicon glyphicon-user', //'用户信息'
+        2: 'glyphicon glyphicon-th-list', //'实验信息'
+        3: 'glyphicon glyphicon-gift', //'获奖信息'
+        4: 'glyphicon glyphicon-edit' //'模板信息'
+      }
+    };
+
+    var formData = {};
+
+    var showTip = function(level, msg) {
+      $scope.$emit('showTip', {
+        level: level,
+        content: msg
+      });
+    };
+
+    var getHackathonNotices = function() {
+      return api.hackathon.notice.list.get({
+        query: {
+          hackathon_name: activity.name,
+          order_by: 'time'
+        }
+      }, function(data) {
+        if(data.error) {
+          showTip('tip-danger', data.error.friendly_message);
+          return ;
+        }
+
+        activity.notices = data.items;
+        $scope.data.notices = data.items;
+      });
+    };
+
+    $scope.$on('chargeActitity', function() {
+      activity = activityService.getCurrentActivity();
+      getHackathonNotices();
+    });
+
+    var deleteNotice = function(id) {
+      return api.admin.hackathon.notice.delete({
+        query: {id: id},
+        header: {
+          hackathon_name: activity.name
+        }
+      });
+    };
+
+    var createNotice = function() {
+      var award = formData;
+      var fn;
+
+      if(award.id)
+        fn = api.admin.hackathon.notice.put;
+      else
+        fn = api.admin.hackathon.notice.post;
+
+      return fn({
+        body: award,
+        header: {
+          hackathon_name: activity.name
+        }
+      }, function(data) {
+        if(data.error)
+          showTip('tip-danger', data.error.friendly_message);
+        else {
+          showTip('tip-success', '创建/修改成功');
+          getHackathonNotices();
+        }
+      });
+    };
+
+    var openAddNoticeWizard = function() {
+      $uibModal.open({
+        templateUrl: 'noticeModel.html',
+        controller: function($scope, $uibModalInstance) {
+          $scope.data = formData;
+
+          $scope.cancel = function() {
+            $uibModalInstance.dismiss('cancel');
+          };
+
+          $scope.addNotice = function() {
+            createNotice();
+            $uibModalInstance.close();
+          };
+        }, 
+      });
+    };
+
+    $scope.delete = function(id) {
+      dialog.confirm({
+        title: '提示',
+        body: '确认删除该条公告?'
+      }).then(function() {
+        return deleteNotice(id);
+      }).then(function(data) {
+        if(data.error)
+          showTip('tip-danger', data.error.friendly_message);
+        else {
+          showTip('tip-success', '删除成功');
+          return getHackathonNotices();
+        }
+      });
+    };
+
+    $scope.edit = function(idx) {
+      formData = activity.notices[idx];
+      openAddNoticeWizard();
+    };
+
+    $scope.add = function() {
+      formData = {
+        content: '',
+        link: '',
+        category: 0,
+      };
+      openAddNoticeWizard();
     };
   })
   .controller('prizesController', function($rootScope, $scope, $uibModal, activityService, api, dialog) {
@@ -1279,7 +1432,7 @@ angular.module('oh.controllers', [])
   .controller('serversController', function($rootScope, $scope, $stateParams, $uibModal, $cookies, activityService, api, dialog) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.SERVERS');
 
-    var refresh = function(){
+    function refresh() {
       api.admin.hostserver.list.get({
           header: {
             hackathon_name: $stateParams.name,
@@ -1382,7 +1535,7 @@ angular.module('oh.controllers', [])
       return desc[state] || ""
     }
 
-    refresh()
+    refresh();
   })
   .controller('createController', function($scope, $timeout, $filter, $cookies, $state, $stateParams, FileUploader, dialog, api) {
     var request;
@@ -1402,7 +1555,9 @@ angular.module('oh.controllers', [])
         pre_allocate_enabled: false,
         pre_allocate_number: 1,
         freedom_team: false,
-        login_provider: 63
+        login_provider: 63,
+        dev_plan_required:false,
+        real_name_auth_21v:false
       }
     }
 

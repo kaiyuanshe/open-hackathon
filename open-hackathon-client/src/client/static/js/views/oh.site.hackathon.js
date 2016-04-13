@@ -42,6 +42,14 @@
     }
 
     function pageLoad() {
+        $('[data-loadsrc]').each(function (i, img) {
+
+            var $img = $(img).load(function (e) {
+                oh.comm.imgLoad(this);
+            })
+            $img.attr({src: $img.attr('data-loadsrc')});
+        });
+
         getTeamList().then(function (data) {
             if (data.error) {
                 showNoTeam();
@@ -71,6 +79,7 @@
                 $('#works span').text('（' + data.length + '）');
                 $('#team_show').append($('#show_list_temp').tmpl(data, {
                     getImage: function (uri) {
+                        uri = uri || '';
                         var uris = uri.split(',');
                         var image_url = '/static/pic/wutu.jpg';
                         $.each(uris, function (i, o) {
@@ -94,20 +103,19 @@
                         });
                         return src
                     },
-                    getlinks: function (uri, team_id) {
-                        var uris = uri.split(',');
+                    getlinks: function (works, team_id) {
+
                         var links = '';
-                        $.each(uris, function (i, o) {
-                            var u_t = o.split(':::');
-                            var type = +u_t[1];
+                        $.each(works, function (i, work) {
+                            var type = work.type;
                             if (type == 0 && links.search('#works_img') == -1) {
-                                links += '<a href="' + getTeamlink(team_id, '#works_img') + '">图片</a>';
+                                links += '<a href="' + getTeamlink(team_id, '#works_img') + '" target="_blank">图片</a>';
                             } else if (type == 1 && links.search('#works_video') == -1) {
-                                links += '<a href="' + getTeamlink(team_id, '#works_video') + '">视频</a>';
+                                links += '<a href="' + getTeamlink(team_id, '#works_video') + '" target="_blank">视频</a>';
                             } else if (type == 2 && links.search('#works_code') == -1) {
-                                links += '<a href="' + getTeamlink(team_id, '#works_code') + '">源代码</a>';
+                                links += '<a href="' + getTeamlink(team_id, '#works_code') + '" target="_blank">源代码</a>';
                             } else if (type >= 3 && type <= 6 && links.search('#works_doc') == -1) {
-                                links += '<a href="' + getTeamlink(team_id, '#works_doc') + '">文档</a>';
+                                links += '<a href="' + getTeamlink(team_id, '#works_doc') + '" target="_blank">文档</a>';
                             }
                         });
                         return links;
@@ -116,19 +124,19 @@
                         return getTeamlink(team_id, '');
                     }
                 }));
-            }else{
+            } else {
                 noShow();
             }
         });
-        
+
         //get hackathon notice
         oh.api.hackathon.notice.list.get({
             query: {
                 hackathon_name: hackathon_name,
                 order_by: 'time'
             }
-        }, function(data) {
-            if(data.error) {
+        }, function (data) {
+            if (data.error) {
                 oh.comm.alert(data.error.message);
             } else {
                 data = data.items;
@@ -143,10 +151,10 @@
                 };
 
                 $('#oh-latest-news').append($('#notice_list_temp').tmpl(data, {
-                    getNoticeIcon: function(category) {
+                    getNoticeIcon: function (category) {
                         return noticeIconByCategory[category];
-                    }, 
-                    getNoticeTime: function(update_time) {
+                    },
+                    getNoticeTime: function (update_time) {
                         var current_time = new Date().getTime();
                         var time_distance = current_time - update_time;
                         var timing = {year: 0, month: 0, week: 0, day: 0, hour: 0, minute: 0};
@@ -164,7 +172,7 @@
                             time_distance -= timing.hour * 3600000;
                             timing.minute = Math.floor(time_distance / 60000)
                             time_distance -= timing.minute * 60000;
-                        } 
+                        }
 
                         var show_text;
                         if (timing.year > 0)        show_text = timing.year + '年前';
@@ -172,7 +180,7 @@
                         else if (timing.week > 0)   show_text = timing.week + '周前';
                         else if (timing.day > 0)    show_text = timing.day + '天前';
                         else if (timing.hour > 0)   show_text = timing.hour + '小时前';
-                        else if (timing.minute > 5) show_text = timing.minute + '分钟前'; 
+                        else if (timing.minute > 5) show_text = timing.minute + '分钟前';
                         else                        show_text = '刚刚'; //less than 5min, show '刚刚'
 
                         return show_text;
