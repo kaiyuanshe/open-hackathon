@@ -30,7 +30,7 @@ import inspect
 from apscheduler.jobstores.base import JobLookupError
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.util import undefined
-from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
+from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR, EVENT_JOB_ADDED
 
 from hackathon.hackathon_factory import RequiredFeature
 from hackathon.util import safe_get_config, get_config, get_now
@@ -49,6 +49,8 @@ def scheduler_listener(event):
     if event.code == EVENT_JOB_ERROR:
         log.debug('The job crashed :(')
         log.warn("The schedule job crashed because of %s" % repr(event.exception))
+    elif event.code == EVENT_JOB_ADDED:
+        log.debug("job added %s" % event.job_id)
     else:
         log.debug('The job executed :)')
         log.debug("The schedule job %s executed and return value is '%s'" % (event.job_id, event.retval))
@@ -225,7 +227,7 @@ class HackathonScheduler(object):
 
         # NOT instantiate while in flask DEBUG mode or in the main thread
         # It's to avoid APScheduler being instantiated twice
-        if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
+        if os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
             self.__apscheduler = BackgroundScheduler(timezone=utc)
 
             # add MySQL job store
@@ -245,6 +247,6 @@ class HackathonScheduler(object):
                                                 port=safe_get_config("scheduler.port", 27017))
 
             # add event listener
-            self.__apscheduler.add_listener(scheduler_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
+            self.__apscheduler.add_listener(scheduler_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR|EVENT_JOB_ADDED)
             log.info("APScheduler loaded")
             self.__apscheduler.start()

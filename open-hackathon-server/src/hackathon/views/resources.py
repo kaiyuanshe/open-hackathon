@@ -292,6 +292,12 @@ class MyTeamResource(HackathonResource):
         return team_manager.get_my_current_team(g.hackathon, g.user)
 
 
+class UserNoticeReadResource(HackathonResource):
+    @token_required
+    def put(self):
+        return hackathon_manager.check_notice_and_set_read_if_necessary(self.context().id)
+
+
 class TeamResource(HackathonResource):
     @hackathon_name_required
     def get(self):
@@ -582,10 +588,7 @@ class AdminExperimentResource(HackathonResource):
 class AdminExperimentListResource(HackathonResource):
     @admin_privilege_required
     def get(self):
-        return expr_manager.get_expr_list_by_hackathon_id(
-            g.hackathon.id,
-            self.context().user_name if "user_name" in self.context() else None,
-            self.context().status if "status" in self.context() else None)
+        return expr_manager.get_expr_list_by_hackathon_id(g.hackathon.id, self.context())
 
 
 class AdminHackathonFileResource(HackathonResource):

@@ -497,6 +497,7 @@ class TeamManager(Component):
 
             team.works.append(work)
             team.save()
+
         except ValidationError as e:
             if "uri" in e.message:
                 return bad_request("`uri` field must be in uri format")
@@ -534,7 +535,7 @@ class TeamManager(Component):
             query &= Q(works__type=int(show_type))
 
         works = []
-        for team in Team.objects(query).order_by('update_time', '-age')[:limit]:
+        for team in Team.objects(query).filter(works__1__exists=True).order_by('update_time', '-age')[:limit]:
             teamDic = team.dic()
             teamDic['leader'] = {
                 'id': str(team.leader.id),

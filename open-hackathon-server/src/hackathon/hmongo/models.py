@@ -254,6 +254,8 @@ class HackathonNotice(HDocumentBase):
     link = URLField()
     creator = ReferenceField(User)
     hackathon = ReferenceField(Hackathon)
+    receiver = ReferenceField(User)
+    is_read = BooleanField(default=False)
 
     def __init__(self, **kwargs):
         super(HackathonNotice, self).__init__(**kwargs)
@@ -288,6 +290,7 @@ class Team(HDocumentBase):
     leader = ReferenceField(User)
     cover = StringField()
     project_name = StringField()
+    project_description = StringField()
     dev_plan = StringField()
     hackathon = ReferenceField(Hackathon)
     works = EmbeddedDocumentListField(TeamWork)
