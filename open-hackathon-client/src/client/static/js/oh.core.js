@@ -262,7 +262,6 @@
             });
         };
         
-
         $('body').on('click', '.m-messages', function() {
             var id = $(this).data('id');
             oh.api.user.notice.read.put({
@@ -271,7 +270,7 @@
                 }
             }, function(data) {
                 getUserUnreadNotice();
-            })
+            });
         });
 
         getUserUnreadNotice();
