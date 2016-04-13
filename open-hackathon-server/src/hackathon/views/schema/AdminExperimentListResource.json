@@ -15,6 +15,16 @@
             "type": "integer",
             "enum": [0, 1, 2, 3, 5, 6, 7, 8],
             "required": false
+          },
+          "page": {
+            "description": "the current page number",
+            "type": "integer",
+            "required": true
+          },
+          "per_page": {
+            "description": "number shown in each page"
+            "type": "integer",
+            "required": false
           }
         }
       }
