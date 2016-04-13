@@ -254,6 +254,8 @@ class HackathonNotice(HDocumentBase):
     link = URLField()
     creator = ReferenceField(User)
     hackathon = ReferenceField(Hackathon)
+    receiver = ReferenceField(User)
+    is_read = BooleanField(default=False)
 
     def __init__(self, **kwargs):
         super(HackathonNotice, self).__init__(**kwargs)

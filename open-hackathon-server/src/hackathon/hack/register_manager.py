@@ -34,7 +34,7 @@ from hackathon.hmongo.models import UserHackathon, Experiment
 from hackathon.hackathon_response import bad_request, precondition_failed, internal_server_error, not_found, ok,\
     login_provider_error
 from hackathon.constants import EStatus, HACK_USER_STATUS, HACKATHON_CONFIG, HACKATHON_STAT, LOGIN_PROVIDER,\
-    HACK_USER_TYPE
+    HACK_USER_TYPE, HACK_NOTICE_CATEGORY, HACK_NOTICE_EVENT
 
 __all__ = ["RegisterManager"]
 
@@ -116,6 +116,7 @@ class RegisterManager(Component):
             # create a team as soon as user registration approved(auto or manually)
             if is_auto_approve:
                 self.team_manager.create_default_team(hackathon, user)
+                self.hackathon_manager.create_hackathon_notice(register.hackathon, HACK_NOTICE_EVENT.HACK_PLAN, HACK_NOTICE_CATEGORY.HACKATHON, {'receiver': user})
 
             self.__update_register_stat(hackathon)
             return user_hackathon.dic()
@@ -137,6 +138,7 @@ class RegisterManager(Component):
 
             if register.status == HACK_USER_STATUS.AUDIT_PASSED:
                 self.team_manager.create_default_team(register.hackathon, register.user)
+                self.hackathon_manager.create_hackathon_notice(register.hackathon, HACK_NOTICE_EVENT.HACK_PLAN, HACK_NOTICE_CATEGORY.HACKATHON, {'receiver': register.user})
 
             hackathon = self.hackathon_manager.get_hackathon_by_id(register.hackathon.id)
             self.__update_register_stat(hackathon)

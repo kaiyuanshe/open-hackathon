@@ -567,12 +567,20 @@ class HackathonManager(Component):
         if hackathon:
             if notice_event == HACK_NOTICE_EVENT.HACK_CREATE:
                 hackathon_notice.content = u"Hachathon: %s 创建成功" % (hackathon.name)
-            elif notice_event == HACK_NOTICE_EVENT.HACK_EDIT and hackathon:
+            elif notice_event == HACK_NOTICE_EVENT.HACK_EDIT:
                 hackathon_notice.content = u"Hachathon: %s 信息变更" % (hackathon.name)
-            elif notice_event == HACK_NOTICE_EVENT.HACK_ONLINE and hackathon:
+            elif notice_event == HACK_NOTICE_EVENT.HACK_ONLINE:
                 hackathon_notice.content = u"Hachathon: %s 正式上线" % (hackathon.name)
-            elif notice_event == HACK_NOTICE_EVENT.HACK_OFFLINE and hackathon:
+            elif notice_event == HACK_NOTICE_EVENT.HACK_OFFLINE:
                 hackathon_notice.content = u"Hachathon: %s 下线" % (hackathon.name)
+            elif notice_event == HACK_NOTICE_EVENT.HACK_PLAN and body.get('receiver'):
+                old_hackathon_notice = HackathonNotice.objects(receiver=body.user, event=HACK_NOTICE_EVENT.HACK_PLAN).first()
+                if old_hackathon_notice: # duplicate
+                    return old_hackathon_notice.dic()
+
+                hackathon_notice.content = u"请尽快填写计划书!"
+                hackathon_notice.receiver = body.receiver
+                hackathon_notice.link = "http://baidu.com"
             else:
                 pass
 
