@@ -145,48 +145,51 @@ class ExprManager(Component):
         self.log.debug("executing pre_allocate_expr for hackathon %s " % hackathon_id)
         hackathon = Hackathon.objects(id=hackathon_id).first()
         hackthon_templates = hackathon.templates
-        #htrs = self.db.find_all_objects_by(HackathonTemplateRel, hackathon_id=hackathon_id)
+        pre_allocated = True
         for template in hackthon_templates:
             try:
                 template = template
                 pre_num = hackathon.config["pre_allocate_number"]
                 query = Q(status=EStatus.STARTING) | Q(status=EStatus.RUNNING)
-                curr_num = Experiment.objects(hackathon=hackathon, template=template).filter(query).count()
+                curr_num = Experiment.objects(user=None, hackathon=hackathon, template=template).filter(query).count()
                 if template.provider == VE_PROVIDER.AZURE:
                     if curr_num < pre_num:
+                        pre_allocated = False
                         remain_num = pre_num - curr_num
-                        start_num = Experiment.objects()
-                        start_num = self.db.count_by(Experiment,
-                                                     user_id=ReservedUser.DefaultUserID,
-                                                     template=template,
-                                                     status=EStatus.STARTING)
+                        start_num = Experiment.objects(user=None, template=template, status=EStatus.STARTING).count()
                         if start_num > 0:
                             self.log.debug("there is an azure env starting, will check later ... ")
                             return
                         else:
                             self.log.debug(
                                 "no starting template: %s , remain num is %d ... " % (template.name, remain_num))
-                            self.start_expr(None, template.name, rel.hackathon.name)
+                            self.start_expr(None, template.name, hackathon.name)
                             break
-                            # curr_num += 1
-                            # self.log.debug("all template %s start complete" % template.name)
                 elif template.provider == VE_PROVIDER.DOCKER:
-                    if rel.hackathon.is_alauda_enabled():
+                    if  hackathon.config['cloud_provider'] == CLOUD_PROVIDER.ALAUDA:
                         # don't create pre-env if alauda used
                         continue
 
                     self.log.debug(
-                        "template name is %s, hackathon name is %s" % (template.name, rel.hackathon.name))
+                        "template name is %s, hackathon name is %s" % (template.name, hackathon.name))
                     if curr_num < pre_num:
+                        pre_allocated = False
                         remain_num = pre_num - curr_num
+                        start_num = Experiment.objects(user=None, template=template, status=EStatus.STARTING).count()
+                        if start_num > 0:
+                            self.log.debug("there is an docker container starting, will check later ... ")
+                            return
                         self.log.debug("no idle template: %s, remain num is %d ... " % (template.name, remain_num))
-                        self.start_expr(None, template.name, rel.hackathon.name)
-                        # curr_num += 1
+                        self.start_expr(None, template.name, hackathon.name)
                         break
-                        # self.log.debug("all template %s start complete" % template.name)
             except Exception as e:
                 self.log.error(e)
                 self.log.error("check default experiment failed")
+        if pre_allocated:
+            job_id = "pre_allocate_expr_" + str(hackathon_id)
+            is_job_exists = self.scheduler.has_job(job_id)
+            if is_job_exists:
+                self.scheduler.remove_job(job_id)
 
     def assign_expr_to_admin(self, expr):
         """assign expr to admin to trun expr into pre_allocate_expr

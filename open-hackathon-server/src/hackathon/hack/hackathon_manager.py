@@ -691,7 +691,7 @@ class HackathonManager(Component):
                                     method="check_hackathon_for_pre_allocate_expr",
                                     id="check_hackathon_for_pre_allocate_expr",
                                     next_run_time=next_run_time,
-                                    minutes=10)
+                                    minutes=20)
 
     def check_hackathon_for_pre_allocate_expr(self):
         """Check all hackathon for pre-allocate
@@ -700,25 +700,24 @@ class HackathonManager(Component):
         Otherwise try to remove the schedule job
         """
         hackathon_list = Hackathon.objects()
+        index = 0
         for hack in hackathon_list:
             job_id = "pre_allocate_expr_" + str(hack.id)
             is_job_exists = self.scheduler.has_job(job_id)
-            hack.config['pre_allocate_enabled'] = True #todo delete here
-            hack.config['pre_allocate_number'] = 3 #todo
             hack.save()
             if hack.config['pre_allocate_enabled']:
-                if not is_job_exists:# todo
-                    self.log.debug("pre_allocate job already exists for hackathon %s" % str(hack.id))
+                if is_job_exists:
+                    self.log.debug("pre_allocate job already exists for hackathon %s" % str(hack.name))
                     continue
 
-                self.log.debug("add pre_allocate job for hackathon %s" % str(hack.id))
-               # next_run_time = self.util.get_now() + timedelta(seconds=hack.id * 10)
-                pre_allocate_interval = 5 #todo self.__get_pre_allocate_interval(hack)
+                self.log.debug("add pre_allocate job for hackathon %s" % str(hack.name))
+                next_run_time = self.util.get_now() + timedelta(seconds=20)
+                pre_allocate_interval = self.__get_pre_allocate_interval(hack, index)
                 self.scheduler.add_interval(feature="expr_manager",
                                             method="pre_allocate_expr",
                                             id=job_id,
                                             context=Context(hackathon_id=hack.id),
-                                            #next_run_time=next_run_time,
+                                            next_run_time=next_run_time,
                                             seconds=pre_allocate_interval
                                             )
             elif is_job_exists:
@@ -850,12 +849,12 @@ class HackathonManager(Component):
 
         return new_hack
 
-    def __get_pre_allocate_interval(self, hackathon):
+    def __get_pre_allocate_interval(self, hackathon, index):
         interval = self.get_basic_property(hackathon, HACKATHON_CONFIG.PRE_ALLOCATE_INTERVAL_SECONDS)
         if interval:
             return int(interval)
         else:
-            return 300 #+ hackathon.id * 10
+            return 300 + index * 50
 
     def __get_hackathon_configs(self, hackathon):
 
