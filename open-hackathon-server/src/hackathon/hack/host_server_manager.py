@@ -462,7 +462,7 @@ class DockerHostManager(Component):
         """
         hackathon_azure_keys = Hackathon.objects(id=hackathon_id).first().azure_keys
 
-        if hackathon_azure_keys is None:
+        if len(hackathon_azure_keys) == 0:
             self.log.error('Found no azure key with Hackathon:%d' % hackathon_id)
             return None
 
@@ -693,5 +693,6 @@ class DockerHostManager(Component):
                                        DockerHostServer.container_count + request_count <=
                                        DockerHostServer.container_max_count,
                                        DockerHostServer.hackathon_id == hackathon_id,
-                                       DockerHostServer.state == DockerHostServerStatus.DOCKER_READY)
+                                       DockerHostServer.state == DockerHostServerStatus.DOCKER_READY,
+                                       DockerHostServer.disabled == DockerHostServerDisable.ABLE)
         return len(vms) > 0

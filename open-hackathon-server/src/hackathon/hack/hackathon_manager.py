@@ -23,7 +23,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
-
+import random
 import sys
 
 sys.path.append("..")
@@ -691,7 +691,6 @@ class HackathonManager(Component):
         Otherwise try to remove the schedule job
         """
         hackathon_list = Hackathon.objects()
-        index = 0
         for hack in hackathon_list:
             job_id = "pre_allocate_expr_" + str(hack.id)
             is_job_exists = self.scheduler.has_job(job_id)
@@ -703,7 +702,7 @@ class HackathonManager(Component):
 
                 self.log.debug("add pre_allocate job for hackathon %s" % str(hack.name))
                 next_run_time = self.util.get_now() + timedelta(seconds=20)
-                pre_allocate_interval = self.__get_pre_allocate_interval(hack, index)
+                pre_allocate_interval = self.__get_pre_allocate_interval(hack)
                 self.scheduler.add_interval(feature="expr_manager",
                                             method="pre_allocate_expr",
                                             id=job_id,
@@ -821,9 +820,6 @@ class HackathonManager(Component):
         if new_hack.description:  # case None type
             new_hack.description = self.cleaner.clean_html(new_hack.description)
 
-        # insert into table hackathon
-        new_hack.save()
-
         # add the current login user as admin and creator
         try:
             admin = UserHackathon(user=creator,
@@ -839,12 +835,12 @@ class HackathonManager(Component):
 
         return new_hack
 
-    def __get_pre_allocate_interval(self, hackathon, index):
+    def __get_pre_allocate_interval(self, hackathon):
         interval = self.get_basic_property(hackathon, HACKATHON_CONFIG.PRE_ALLOCATE_INTERVAL_SECONDS)
         if interval:
             return int(interval)
         else:
-            return 300 + index * 20
+            return 300 + random.random() * 50
 
     def __get_hackathon_configs(self, hackathon):
 

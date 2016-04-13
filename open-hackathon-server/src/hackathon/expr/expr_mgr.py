@@ -141,7 +141,6 @@ class ExprManager(Component):
         self.log.debug("executing pre_allocate_expr for hackathon %s " % hackathon_id)
         hackathon = Hackathon.objects(id=hackathon_id).first()
         hackthon_templates = hackathon.templates
-        pre_allocated = True
         for template in hackthon_templates:
             try:
                 template = template
@@ -150,7 +149,6 @@ class ExprManager(Component):
                 curr_num = Experiment.objects(user=None, hackathon=hackathon, template=template).filter(query).count()
                 if template.provider == VE_PROVIDER.AZURE:
                     if curr_num < pre_num:
-                        pre_allocated = False
                         remain_num = pre_num - curr_num
                         start_num = Experiment.objects(user=None, template=template, status=EStatus.STARTING).count()
                         if start_num > 0:
@@ -169,7 +167,6 @@ class ExprManager(Component):
                     self.log.debug(
                         "template name is %s, hackathon name is %s" % (template.name, hackathon.name))
                     if curr_num < pre_num:
-                        pre_allocated = False
                         remain_num = pre_num - curr_num
                         start_num = Experiment.objects(user=None, template=template, status=EStatus.STARTING).count()
                         if start_num > 0:
@@ -181,11 +178,6 @@ class ExprManager(Component):
             except Exception as e:
                 self.log.error(e)
                 self.log.error("check default experiment failed")
-        if pre_allocated:
-            job_id = "pre_allocate_expr_" + str(hackathon_id)
-            is_job_exists = self.scheduler.has_job(job_id)
-            if is_job_exists:
-                self.scheduler.remove_job(job_id)
 
     def assign_expr_to_admin(self, expr):
         """assign expr to admin to trun expr into pre_allocate_expr
