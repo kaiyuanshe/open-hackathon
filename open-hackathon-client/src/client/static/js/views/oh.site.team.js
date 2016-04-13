@@ -35,7 +35,7 @@
         video: '<div class="sub-item">{{html uri}}</div>',
         img: '<a href="${uri}" title="${description}" data-parent><img src="${uri}" onload="oh.comm.imgLoad(this)" alt="${description}"></a>',
         doc: '<div class="sub-item"><iframe src="${uri}" seamless="seamless" frameborder="0" scrolling="yes"></iframe></div>',
-        pdf: '<div class="sub-item"><object data="${uri}" type="application/pdf" width="100%" height="100%"><p>您的浏览器不支持PDF查看。请安装PDF阅读器插件!</p></object></div>',
+        pdf: '<div class="sub-item"><object data="${uri}" type="application/pdf" width="100%" height="470px"><p>您的浏览器不支持PDF查看。请安装PDF阅读器插件!</p></object></div>',
         code: '<div class="sub-item"><span>${description}：</span><a href="${uri}" target="_blank">${uri}</a></div>',
         other: '<div class="sub-item"><span>${description}：</span><a href="${uri}" target="_blank">${uri}</a></div>'
     };
@@ -110,7 +110,7 @@
         } else {
             $('#images .nothing').removeClass('hide');
         }
-        if (data.doc.length == 0 || data.pdf.length == 0) {
+        if (data.doc.length == 0 && data.pdf.length == 0) {
             $('#docs .nothing').removeClass('hide');
         } else {
             $.tmpl(templates.pdf, data.pdf).appendTo('#docs .w-doc');

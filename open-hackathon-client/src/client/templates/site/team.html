@@ -64,14 +64,23 @@
 
 
                                 </div>
-                              <button class="btn btn-success" data-role="addworks" type="button">show</button>
+                                <button class="btn btn-success" data-role="addworks" type="button">show</button>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="warp">
                     <div id="videos" class="show_item">
-                        <h2>视频展示</h2>
+                        <h2>项目展示图</h2>
+                        <div class="cover">
+                            <div class="nothing">
+                                <img src="/static/images/monkey-1.png">
+                                <p>封面未上传</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="videos" class="show_item">
+                        <h2 id="works_video">视频展示</h2>
                         <div class="w-videos">
                             <div class="nothing hide">
                                 <img src="/static/images/monkey-2.png">
@@ -80,7 +89,7 @@
                         </div>
                     </div>
                     <div id="docs" class="show_item">
-                        <h2>文档说明</h2>
+                        <h2 id="works_doc">文档说明</h2>
                         <div class="w-doc">
                             <div class="nothing hide">
                                 <img src="/static/images/monkey-3.png">
@@ -89,16 +98,16 @@
                         </div>
                     </div>
                     <div id="images" class="show_item">
-                        <h2>图片展示</h2>
+                        <h2 id="works_img">图片展示</h2>
                         <div class="popup-gallery" id="work_images">
-                             <div class="nothing hide">
+                            <div class="nothing hide">
                                 <img src="/static/images/monkey-4.png">
                                 <p>图片未上传</p>
                             </div>
                         </div>
                     </div>
                     <div id="code" class="show_item hide">
-                        <h2>源代码地址</h2>
+                        <h2 id="works_code">源代码地址</h2>
                         <div class="w-code">
 
                         </div>
@@ -266,6 +275,7 @@
 
 
 
+
         </script>
     {% else %}
         <script id="team_item" type="text/x-jquery-tmpl">
@@ -280,24 +290,6 @@
                 <a href="/user/p_${user.id}">${user.nickname}</a>
             </li>
             {% endraw %}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         </script>
     {% endif %}
 

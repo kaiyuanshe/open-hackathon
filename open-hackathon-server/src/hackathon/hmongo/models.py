@@ -287,6 +287,7 @@ class Team(HDocumentBase):
     logo = StringField()
     leader = ReferenceField(User)
     cover = StringField()
+    project_name = StringField()
     dev_plan = StringField()
     hackathon = ReferenceField(Hackathon)
     works = EmbeddedDocumentListField(TeamWork)
