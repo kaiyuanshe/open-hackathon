@@ -35,7 +35,7 @@ from mongoengine import Q
 from hackathon import Component, RequiredFeature, Context
 from hackathon.constants import EStatus, VERemoteProvider, VE_PROVIDER, VEStatus, ReservedUser, \
     HACK_NOTICE_EVENT, HACK_NOTICE_CATEGORY, CLOUD_PROVIDER, HACKATHON_CONFIG
-from hackathon.hmongo.models import Experiment, User
+from hackathon.hmongo.models import Experiment, User, Hackathon, UserHackathon
 from hackathon.hackathon_response import not_found, ok
 
 __all__ = ["ExprManager"]
@@ -150,48 +150,42 @@ class ExprManager(Component):
     def pre_allocate_expr(self, context):
         hackathon_id = context.hackathon_id
         self.log.debug("executing pre_allocate_expr for hackathon %s " % hackathon_id)
-        htrs = self.db.find_all_objects_by(HackathonTemplateRel, hackathon_id=hackathon_id)
-        for rel in htrs:
+        hackathon = Hackathon.objects(id=hackathon_id).first()
+        hackthon_templates = hackathon.templates
+        for template in hackthon_templates:
             try:
-                template = rel.template
-                pre_num = rel.hackathon.get_pre_allocate_number()
-                curr_num = self.db.count(Experiment,
-                                         Experiment.user_id == ReservedUser.DefaultUserID,
-                                         Experiment.hackathon_id == hackathon_id,
-                                         Experiment.template_id == template.id,
-                                         (Experiment.status == EStatus.STARTING) | (
-                                             Experiment.status == EStatus.RUNNING))
+                template = template
+                pre_num = hackathon.config.get("pre_allocate_number")
+                query = Q(status=EStatus.STARTING) | Q(status=EStatus.RUNNING)
+                curr_num = Experiment.objects(user=None, hackathon=hackathon, template=template).filter(query).count()
                 if template.provider == VE_PROVIDER.AZURE:
                     if curr_num < pre_num:
                         remain_num = pre_num - curr_num
-                        start_num = self.db.count_by(Experiment,
-                                                     user_id=ReservedUser.DefaultUserID,
-                                                     template=template,
-                                                     status=EStatus.STARTING)
+                        start_num = Experiment.objects(user=None, template=template, status=EStatus.STARTING).count()
                         if start_num > 0:
                             self.log.debug("there is an azure env starting, will check later ... ")
                             return
                         else:
                             self.log.debug(
                                 "no starting template: %s , remain num is %d ... " % (template.name, remain_num))
-                            self.start_expr(None, template.name, rel.hackathon.name)
+                            self.start_expr(None, template.name, hackathon.name)
                             break
-                            # curr_num += 1
-                            # self.log.debug("all template %s start complete" % template.name)
                 elif template.provider == VE_PROVIDER.DOCKER:
-                    if rel.hackathon.is_alauda_enabled():
+                    if hackathon.config.get('cloud_provider') == CLOUD_PROVIDER.ALAUDA:
                         # don't create pre-env if alauda used
                         continue
 
                     self.log.debug(
-                        "template name is %s, hackathon name is %s" % (template.name, rel.hackathon.name))
+                        "template name is %s, hackathon name is %s" % (template.name, hackathon.name))
                     if curr_num < pre_num:
                         remain_num = pre_num - curr_num
+                        start_num = Experiment.objects(user=None, template=template, status=EStatus.STARTING).count()
+                        if start_num > 0:
+                            self.log.debug("there is an docker container starting, will check later ... ")
+                            return
                         self.log.debug("no idle template: %s, remain num is %d ... " % (template.name, remain_num))
-                        self.start_expr(None, template.name, rel.hackathon.name)
-                        # curr_num += 1
+                        self.start_expr(None, template.name, hackathon.name)
                         break
-                        # self.log.debug("all template %s start complete" % template.name)
             except Exception as e:
                 self.log.error(e)
                 self.log.error("check default experiment failed")

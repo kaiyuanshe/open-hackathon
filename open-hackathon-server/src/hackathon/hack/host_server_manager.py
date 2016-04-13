@@ -38,7 +38,7 @@ from azure.servicemanagement import (ConfigurationSet, ConfigurationSetInputEndp
                                      LinuxConfigurationSet, ServiceManagementService)
 
 from hackathon import Component, RequiredFeature, Context
-from hackathon.hmongo.models import DockerHostServer, Hackathon
+from hackathon.hmongo.models import DockerHostServer, Hackathon, AzureKey
 from hackathon.constants import (AzureApiExceptionMessage, DockerPingResult, AVMStatus, AzureVMPowerState,
                                  DockerHostServerStatus, DHS_QUERY_STATE,
                                  ServiceDeploymentSlot, AzureVMSize, AzureVMEndpointName, TCPProtocol,
@@ -126,7 +126,7 @@ class DockerHostManager(Component):
         """
         self.log.debug('Begin to check host server and prepare resource.')
         min_avavilabe_container = 5
-        for hackathon in self.db.find_all_objects(Hackathon):
+        for hackathon in Hackathon.objects():
             if self.__exist_request_host_server_by_hackathon_id(min_avavilabe_container, hackathon.id):
                 continue
             if not self.start_new_docker_host_vm(hackathon):
@@ -460,15 +460,16 @@ class DockerHostManager(Component):
         :return: ServiceManagementService object
         :rtype: class 'azure.servicemanagement.servicemanagementservice.ServiceManagementService'
         """
-        hackathon_azure_key = self.db.find_first_object_by(HackathonAzureKey, hackathon_id=hackathon_id)
+        hackathon_azure_keys = Hackathon.objects(id=hackathon_id).first().azure_keys
 
-        if hackathon_azure_key is None:
+        if len(hackathon_azure_keys) == 0:
             self.log.error('Found no azure key with Hackathon:%d' % hackathon_id)
             return None
 
-        sms = ServiceManagementService(hackathon_azure_key.azure_key.subscription_id,
-                                       hackathon_azure_key.azure_key.get_local_pem_url(),
-                                       host=hackathon_azure_key.azure_key.management_host)
+        hackathon_azure_key = hackathon_azure_keys[0]
+        sms = ServiceManagementService(hackathon_azure_key.subscription_id,
+                                       hackathon_azure_key.get_local_pem_url(),
+                                       host=hackathon_azure_key.management_host)
         return sms
 
     def __get_available_storage_account_and_container(self, hackathon_id):
