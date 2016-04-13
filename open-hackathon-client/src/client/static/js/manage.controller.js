@@ -93,7 +93,7 @@ angular.module('oh.controllers', [])
                   return
               }
             } else {
-              $rootScope.$broadcast('chargeActitity')
+              $rootScope.$broadcast('changeActivity')
             }
           },
           function(error) {
@@ -111,7 +111,7 @@ angular.module('oh.controllers', [])
   })
   .controller('manageController', function($scope, $state, activityService, session, NAV) {
     var activity = $scope.activity = activityService.getCurrentActivity();
-    $scope.$on('chargeActitity', function(event) {
+    $scope.$on('changeActivity', function(event) {
       activity = $scope.activity = activityService.getCurrentActivity();
       event.preventDefault();
     })
@@ -345,7 +345,7 @@ angular.module('oh.controllers', [])
       });
     };
 
-    function refresh() {
+    var refresh = function() {
       api.admin.registration.list.get({
         header: {
           hackathon_name: activity.name
@@ -372,11 +372,6 @@ angular.module('oh.controllers', [])
         }
       });
     };
-
-    $scope.$on('chargeActitity', function() {
-      activity = activityService.getCurrentActivity();
-      refresh();
-    });
 
     var _updateBatch = function(updates, status, index) {
       if (index >= updates.length) {
@@ -687,10 +682,6 @@ angular.module('oh.controllers', [])
         if(data.error){
           $scope.$emit('showTip', { level: 'tip-danger', content: data.error.friendly_message});
         }else{
-           $scope.$emit('showTip', {
-            level: 'tip-success',
-            content: '添加成功'
-          });
           $scope.data = data
         }
       })
@@ -701,12 +692,14 @@ angular.module('oh.controllers', [])
         templateUrl: 'orgModel.html',
         controller: function($scope, $stateParams, $uibModalInstance, $cookies, api) {
           $scope.org = org;
+          $scope.org.organization_type = $scope.org.organization_type.toString();
 
           $scope.cancel = function() {
             $uibModalInstance.dismiss('cancel');
           };
 
           $scope.add_organizer = function() {
+            org.organization_type = parseInt(org.organization_type);
             var fn;
             if(org.id){
               fn = api.admin.hackathon.organizer.put
@@ -738,7 +731,8 @@ angular.module('oh.controllers', [])
     }
 
     $scope.add = function(){
-      openModel({})
+      var newOrg = {organization_type: "1"}
+      openModel(newOrg)
     }
 
     $scope.delete_organizer = function(organizer_id){
@@ -778,11 +772,6 @@ angular.module('oh.controllers', [])
       perPage: 6,
       curPage: 1,
     };
-
-    $scope.$on('chargeActitity', function() {
-      activity = activityService.getCurrentActivity();
-      refresh();
-    });
 
     $scope.grantAward = function(awardId, teamId) {
       grantAward(awardId, teamId);
@@ -861,6 +850,8 @@ angular.module('oh.controllers', [])
         content: msg
       });
     };
+
+    refresh();
   })
   .controller('noticesController', function($rootScope, $scope, $uibModal, activityService, api, dialog) {
     $scope.$emit('pageName', 'SETTINGS.NOTICES');
@@ -1028,11 +1019,6 @@ angular.module('oh.controllers', [])
       });
     };
 
-    $scope.$on('chargeActitity', function() {
-      activity = activityService.getCurrentActivity();
-      refreshAward();
-    });
-
     var deleteAward = function(id) {
       return api.admin.hackathon.award.delete({
         query: {id: id},
@@ -1115,6 +1101,8 @@ angular.module('oh.controllers', [])
       };
       openAddAwardWizard();
     };
+
+    refreshAward();
   })
   .controller('veController', function($rootScope, $scope, $stateParams, $filter, activityService, $cookies, FileUploader, activity, api) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.VIRTUAL_ENVIRONMENT');
@@ -1432,7 +1420,7 @@ angular.module('oh.controllers', [])
   .controller('serversController', function($rootScope, $scope, $stateParams, $uibModal, $cookies, activityService, api, dialog) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.SERVERS');
 
-    function refresh() {
+    var refresh = function(){
       api.admin.hostserver.list.get({
           header: {
             hackathon_name: $stateParams.name,
