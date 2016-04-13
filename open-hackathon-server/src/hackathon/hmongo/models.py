@@ -378,8 +378,8 @@ class AzureDeployment(DynamicEmbeddedDocument):
 class AzureEndPoint(DynamicEmbeddedDocument):
     name = StringField(max_length=50)
     protocol = StringField(max_length=50)
-    public_port = IntegerField()
-    private_port = IntegerField()
+    public_port = IntField()
+    private_port = IntField()
 
 
 class AzureVirtualMachine(DynamicEmbeddedDocument):

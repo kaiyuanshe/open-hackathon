@@ -44,7 +44,7 @@ __all__ = ["ExprManager"]
 class ExprManager(Component):
     user_manager = RequiredFeature("user_manager")
     hackathon_manager = RequiredFeature("hackathon_manager")
-    admin_Manager = RequiredFeature("admin_manager")
+    admin_manager = RequiredFeature("admin_manager")
     template_library = RequiredFeature("template_library")
 
     def start_expr(self, user, template_name, hackathon_name=None):
