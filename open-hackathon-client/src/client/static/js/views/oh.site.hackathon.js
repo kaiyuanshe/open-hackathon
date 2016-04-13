@@ -29,7 +29,7 @@
 
     function teamsbind(data) {
         for(var index in data) {
-            if(!data[index]["logo"]){
+            if(!data[index]["logo"]) {
                 data[index]["logo"] = null;
             }
         }
