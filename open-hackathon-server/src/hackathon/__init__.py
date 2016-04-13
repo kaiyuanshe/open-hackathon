@@ -313,8 +313,6 @@ def __init_schedule_jobs():
         # schedule job to pre-create a docker host server VM
         #host_server_manager.schedule_pre_allocate_host_server_job()
     # init the overtime-sessions detection to update users' online status
-    hackathon_manager = RequiredFeature("hackathon_manager")
-    hackathon_manager.schedule_pre_allocate_expr_job()
     sche.add_interval(feature="user_manager",
                       method="check_user_online_status",
                       id="check_user_online_status",
