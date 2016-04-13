@@ -285,6 +285,13 @@ class UserExperimentResource(HackathonResource, Component):
         return expr_manager.heart_beat(self.context().id)
 
 
+class MyTeamResource(HackathonResource):
+    @token_required
+    @hackathon_name_required
+    def get(self):
+        return team_manager.get_my_current_team(g.hackathon, g.user)
+
+
 class UserNoticeReadResource(HackathonResource):
     @token_required
     def put(self):
@@ -294,10 +301,7 @@ class UserNoticeReadResource(HackathonResource):
 class TeamResource(HackathonResource):
     @hackathon_name_required
     def get(self):
-        parse = reqparse.RequestParser()
-        parse.add_argument('id', type=str, location='args', required=True)
-        args = parse.parse_args()
-        return team_manager.get_team_by_id(args["id"])
+        return team_manager.get_team_by_id(self.context().id)
 
     # @token_required
     # @hackathon_name_required

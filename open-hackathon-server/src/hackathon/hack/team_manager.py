@@ -63,6 +63,11 @@ class TeamManager(Component):
         else:
             return not_found()
 
+    def get_my_current_team(self, hackathon, user):
+        team = self.__get_valid_team_by_user(user.id, hackathon.id)
+        return self.__team_detail(team, user) if team else not_found("user has no team",
+                                                                     friendly_message="组队异常，请联系管理员!")
+
     def get_team_by_name(self, hackathon_id, team_name):
         """ get user's team basic information stored on table 'team' based on team name
 

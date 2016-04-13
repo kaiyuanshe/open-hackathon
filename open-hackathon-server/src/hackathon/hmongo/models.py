@@ -354,9 +354,6 @@ class AzureStorageAccount(DynamicEmbeddedDocument):
     update_time = DateTimeField()
     deletable = BooleanField()  # F-cannot delete T-can be deleted
 
-    def __init__(self, **kwargs):
-        super(AzureStorageAccount, self).__init__(**kwargs)
-
 
 class AzureCloudService(DynamicEmbeddedDocument):
     name = StringField()
@@ -379,11 +376,18 @@ class AzureDeployment(DynamicEmbeddedDocument):
     deletable = BooleanField()  # F-cannot delete T-can be deleted
 
 
+class AzureEndPoint(DynamicEmbeddedDocument):
+    name = StringField()
+    protocol = StringField()
+    public_port = IntField()
+    private_port = IntField()
+    url = StringField()
+
+
 class AzureVirtualMachine(DynamicEmbeddedDocument):
     name = StringField(required=True)
     label = StringField()
     # AVMStatus in enum.py
-    status = StringField()
     dns = StringField()
     public_ip = StringField()
     private_ip = StringField()
@@ -391,6 +395,7 @@ class AzureVirtualMachine(DynamicEmbeddedDocument):
     create_time = DateTimeField()
     update_time = DateTimeField()
     deletable = BooleanField()  # F-cannot delete T-can be deleted
+    end_points = EmbeddedDocumentListField(AzureEndPoint, default=[])
 
 
 class VirtualEnvironment(DynamicEmbeddedDocument):
