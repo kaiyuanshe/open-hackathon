@@ -13,16 +13,16 @@
             },
             "container" : "vhds",
             "cloud_service" : {
-                "service_name" : "rapid-test",
-                "label" : "cloud-service-label",
+                "service_name" : "ohp-win2012",
+                "label" : "ohp-win2012",
                 "location" : "China East"
             },
             "deployment" :{
-                "deployment_name" : "rapid-test-deployment",
+                "deployment_name" : "ohp-win2012",
                 "deployment_slot" : "production"
             },
-            "label" : "rapid-test",
-            "role_name" : "rapid-test",
+            "label" : "ohp-win2012",
+            "role_name" : "ohp-win2012",
             "image" : {
                 "type" : "os",
                 "name" : "0c5c79005aae478e8883bf950a861ce0__Windows-Server-2012-Essentials-20141204-zhcn"
@@ -39,10 +39,11 @@
                     {
                         "name" : "http",
                         "protocol" : "tcp",
-                        "local_port" : "80"
+                        "local_port" : "80",
+                        "url": "http://{0}:{1}"
                     },
                     {
-                        "name" : "Deploy",
+                        "name" : "remote",
                         "protocol" : "tcp",
                         "local_port" : "3389"
                     }
@@ -51,7 +52,7 @@
             "remote": {
                 "provider": "guacamole",
                 "protocol": "rdp",
-                "input_endpoint_name" : "Deploy"
+                "input_endpoint_name" : "remote"
             },
             "role_size" : "Small"
         }

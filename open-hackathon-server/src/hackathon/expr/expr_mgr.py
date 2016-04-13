@@ -107,7 +107,10 @@ class ExprManager(Component):
                 and len(virtual_environment_list) == experiment.template.virtual_environment_count:
             experiment.status = EStatus.RUNNING
             experiment.save()
-            self.template_library.template_verified(experiment.template.id)
+            try:
+                self.template_library.template_verified(experiment.template.id)
+            except:
+                pass
 
     def get_expr_list_by_hackathon_id(self, hackathon_id, user_name, status):
         # get a list of all experiments' detail
@@ -300,11 +303,15 @@ class ExprManager(Component):
         else:
             for ve in expr.virtual_environments:
                 vm = ve.azure_resource
-                ep = vm.end_points.find(private_port=80).first()
-                url = 'http://%s:%s' % (vm.public_ip, ep.public_port)
-                public_urls.append({
-                    "name": ep.name,
-                    "url": url})
+                if not vm or not vm.end_points:
+                    continue
+
+                for endpoint in vm.end_points:
+                    if endpoint.url:
+                        public_urls.append({
+                            "name": endpoint.name,
+                            "url": endpoint.url.format(vm.dns, endpoint.public_port)
+                        })
 
         ret["public_urls"] = public_urls
         return ret

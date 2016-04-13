@@ -71,6 +71,7 @@ def init_routes():
 
     # team APIs
     api.add_resource(TeamResource, "/api/team")  # create, update, dismiss and query team
+    api.add_resource(MyTeamResource, "/api/team/my")  # get team of current login user
     api.add_resource(HackathonTeamListResource, "/api/hackathon/team/list",
                      "/api/admin/team/list")  # list teams of hackathon
     api.add_resource(TeamMemberResource, "/api/team/member")  # join or leave team, approve member

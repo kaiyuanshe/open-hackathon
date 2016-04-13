@@ -139,11 +139,11 @@ class HackathonManager(Component):
         if name:
             name_filter = Q(name__contains=name)
 
-        if order_by == 'create_time': #最新发布
+        if order_by == 'create_time':  # 最新发布
             order_by_condition = '-create_time'
-        elif order_by == 'event_start_time': #即将开始
+        elif order_by == 'event_start_time':  # 即将开始
             order_by_condition = '-event_start_time'
-        elif order_by == 'registered_users_num': #人气热点
+        elif order_by == 'registered_users_num':  # 人气热点
             # hackathons with zero registered users would not be shown.
             hackathon_stat = HackathonStat.objects(type=HACKATHON_STAT.REGISTER, count__gt=0).order_by('-count')
             hackathon_list = [stat.hackathon.id for stat in hackathon_stat]
@@ -152,8 +152,9 @@ class HackathonManager(Component):
             order_by_condition = '-id'
 
         # perform db query with pagination
-        pagination = Hackathon.objects(status_filter & name_filter & condition_filter).order_by(order_by_condition).paginate(page,
-                                                                                                          per_page)
+        pagination = Hackathon.objects(status_filter & name_filter & condition_filter).order_by(
+            order_by_condition).paginate(page,
+                                         per_page)
 
         user = None
         if self.user_manager.validate_login():
@@ -557,13 +558,15 @@ class HackathonManager(Component):
         # notice creation logic for different notice_events
         if hackathon:
             if notice_event == HACK_NOTICE_EVENT.HACK_CREATE:
-                hackathon_notice.content = u"Hachathon: %s 创建成功" % (hackathon.name)
-            elif notice_event == HACK_NOTICE_EVENT.HACK_EDIT and hackathon:
-                hackathon_notice.content = u"Hachathon: %s 信息变更" % (hackathon.name)
+                hackathon_notice.content = u"%s即将火爆来袭，敬请期待！" % (hackathon.display_name)
+            # elif notice_event == HACK_NOTICE_EVENT.HACK_EDIT and hackathon:
+            #     hackathon_notice.content = u"%s更新啦，快去看看！" % (hackathon.display_name)
             elif notice_event == HACK_NOTICE_EVENT.HACK_ONLINE and hackathon:
-                hackathon_notice.content = u"Hachathon: %s 正式上线" % (hackathon.name)
+                hackathon_notice.content = u"%s开始啦，点击报名！" % (hackathon.display_name)
+                hackathon_notice.link = "/site/%s" % hackathon.name
             elif notice_event == HACK_NOTICE_EVENT.HACK_OFFLINE and hackathon:
-                hackathon_notice.content = u"Hachathon: %s 下线" % (hackathon.name)
+                hackathon_notice.content = u"%s圆满结束，点击查看详情！" % (hackathon.display_name)
+                hackathon_notice.link = "/site/%s" % hackathon.name
             else:
                 pass
 
@@ -764,12 +767,13 @@ class HackathonManager(Component):
                 detail["stat"]["like"] = stat.count
 
         if user:
-            user_hackathon = UserHackathon.objects(hackathon=hackathon,user=user).first()
+            user_hackathon = UserHackathon.objects(hackathon=hackathon, user=user).first()
             if user_hackathon and user_hackathon.like:
                 detail['like'] = user_hackathon.like
 
             detail["user"] = self.user_manager.user_display_info(user)
-            detail["user"]["is_admin"] = user.is_super or (user_hackathon and user_hackathon.role == HACK_USER_TYPE.ADMIN)
+            detail["user"]["is_admin"] = user.is_super or (
+                user_hackathon and user_hackathon.role == HACK_USER_TYPE.ADMIN)
 
             # TODO: we need to review those items one by one to decide the API output
             # asset = self.db.find_all_objects_by(UserHackathonAsset, user_id=user.id, hackathon_id=hackathon.id)
