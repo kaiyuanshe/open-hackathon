@@ -73,6 +73,7 @@ def __oauth_api_key():
         LOGIN_PROVIDER.WEIBO: get_config('login.weibo.client_id'),
         LOGIN_PROVIDER.QQ: get_config('login.qq.client_id'),
         LOGIN_PROVIDER.LIVE: get_config('login.live.client_id'),
+        LOGIN_PROVIDER.WECHAT: get_config("login.wechat.client_id"),
         LOGIN_PROVIDER.GITCAFE: get_config('login.gitcafe.client_id'),
         LOGIN_PROVIDER.GITHUB: get_config('login.github.client_id')
     }
@@ -267,6 +268,11 @@ def weibo_login():
     return __login(LOGIN_PROVIDER.WEIBO)
 
 
+@app.route('/wechat')
+def wechat_login():
+    return __login(LOGIN_PROVIDER.WECHAT)
+
+
 @app.route('/qq')
 def qq_login():
     return __login(LOGIN_PROVIDER.QQ)
@@ -431,9 +437,9 @@ def create_join_team(hackathon_name, tid):
     if team.get('error') is not None:
         return redirect('404')
     else:
-        role = team.is_admin and 4 or 0
-        role += team.is_leader and 2 or 0
-        role += team.is_member and 1 or 0
+        role = team.get('is_admin') and 4 or 0
+        role += team.get('is_leader') and 2 or 0
+        role += team.get('is_member') and 1 or 0
         return render("/site/team.html", hackathon_name=hackathon_name, team=team, role=role)
 
 

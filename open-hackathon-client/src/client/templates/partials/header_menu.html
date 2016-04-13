@@ -20,7 +20,8 @@
                 <a href="#" data-toggle="tooltip" data-placement="top" title="coming soon">黑客松社区</a>
             </li>
             <li>
-                <a href="https://github.com/msopentechcn/open-hackathon/wiki/%E5%BC%80%E6%94%BE%E9%BB%91%E5%AE%A2%E6%9D%BE%E5%B9%B3%E5%8F%B0%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97" target="_blank">新手帮助</a>
+                <a href="https://github.com/msopentechcn/open-hackathon/wiki/%E5%BC%80%E6%94%BE%E9%BB%91%E5%AE%A2%E6%9D%BE%E5%B9%B3%E5%8F%B0%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97"
+                   target="_blank">新手帮助</a>
             </li>
         </ul>
     {% endif %}
@@ -43,7 +44,8 @@
                 <a class="dropdown-toggle" data-toggle="dropdown" href="javascirpt:;">
                     <img class="avatar" data-role="picture"
                          src="{{ current_user.get_avatar_url() == none and  '/static/pic/monkey-32-32px.png' or current_user.get_avatar_url() }}"
-                         alt="{{ current_user.nickname }}" onerror="javascript:this.src='/static/pic/monkey-32-32px.png'">
+                         alt="{{ current_user.nickname }}"
+                         onerror="javascript:this.src='/static/pic/monkey-32-32px.png'">
                     我的黑客松
                     <span class="oh-caret"></span>
                 </a>
@@ -58,9 +60,33 @@
                     <li class="divider"></li>
                     <li><a href="{{ url_for('user_profile') }}"><i class="fa fa-info-circle"></i> 个人信息</a></li>
                     <li><a href="{{ url_for('myhackathon') }}"><i class="fa fa-trophy"></i> 我的活动</a></li>
-                    <li><a target="_blank" href="https://github.com/msopentechcn/open-hackathon/wiki/%E5%BC%80%E6%94%BE%E9%BB%91%E5%AE%A2%E6%9D%BE%E5%B9%B3%E5%8F%B0%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97"><i class="fa fa-question-circle"></i> 新手帮助</a></li>
+                    <li><a target="_blank"
+                           href="https://github.com/msopentechcn/open-hackathon/wiki/%E5%BC%80%E6%94%BE%E9%BB%91%E5%AE%A2%E6%9D%BE%E5%B9%B3%E5%8F%B0%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97"><i
+                            class="fa fa-question-circle"></i> 新手帮助</a></li>
                     <li><a href="{{ url_for('myhackathon') }}"><i class="fa fa-wrench"></i> 我的管理</a></li>
-                    <li><a href="{{ url_for('logout',return_url=request.path) }}"><i class="fa fa-sign-out"></i> 登出</a></li>
+                    <li><a href="{{ url_for('logout',return_url=request.path) }}"><i class="fa fa-sign-out"></i> 登出</a>
+                    </li>
+                </ul>
+            </li>
+            <li class="dropdown messages">
+                <a class="dropdown-toggle" data-toggle="dropdown" href="javascirpt:;">
+                    <span class="fa fa-envelope"></span>
+                    <span class="m-count" data-mq>0</span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li class="d-header">
+                        消息（<span data-mq>0</span>）
+                    </li>
+                    <li role="separator" class="divider"></li>
+                    <li>
+                        <div class="m-nothing">
+                            暂无任何消息！
+                        </div>
+                    </li>
+                    <li class="divider"></li>
+                    <li class="d-footer">
+                        查看更多
+                    </li>
                 </ul>
             </li>
         {% else %}
