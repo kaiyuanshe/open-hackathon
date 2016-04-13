@@ -844,7 +844,7 @@ class HackathonManager(Component):
         if interval:
             return int(interval)
         else:
-            return 300 + index * 50
+            return 300 + index * 20
 
     def __get_hackathon_configs(self, hackathon):
 

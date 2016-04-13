@@ -52,7 +52,6 @@ __all__ = [
 
 # initialize flask and flask restful
 app = Flask(__name__)
-# app.debug = True
 app.config['SECRET_KEY'] = safe_get_config("app.secret_key", "secret_key")
 
 
