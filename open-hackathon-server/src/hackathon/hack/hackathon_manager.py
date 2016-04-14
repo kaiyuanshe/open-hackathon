@@ -931,8 +931,6 @@ class HackathonManager(Component):
             new_hack.description = self.cleaner.clean_html(new_hack.description)
         new_hack.save()
 
-        new_hack.save()
-
         # add the current login user as admin and creator
         try:
             admin = UserHackathon(user=creator,
