@@ -79,18 +79,19 @@ class TemplateLibrary(Component):
         """
 
         def internal_load_template():
-            local_path = template.local_path
-            if local_path is not None and isfile(local_path):
-                with open(local_path) as template_file:
-                    return TemplateContent.from_dict(json.load(template_file))
-            else:
-                try:
-                    req = requests.get(template.url)
-                    return TemplateContent.from_dict(json.loads(req.content))
-                except Exception as e:
-                    self.log.warn("Fail to load template from remote file %s" % template.url)
-                    self.log.error(e)
-                    return None
+            # todo local cache not valid, disabled temprary
+            # local_path = template.local_path
+            # if local_path is not None and isfile(local_path):
+            #     with open(local_path) as template_file:
+            #         return TemplateContent.from_dict(json.load(template_file))
+            # else:
+            try:
+                req = requests.get(template.url)
+                return TemplateContent.from_dict(json.loads(req.content))
+            except Exception as e:
+                self.log.warn("Fail to load template from remote file %s" % template.url)
+                self.log.error(e)
+                return None
 
         cache_key = self.__get_template_cache_key(template.id)
         return self.cache.get_cache(key=cache_key, createfunc=internal_load_template)

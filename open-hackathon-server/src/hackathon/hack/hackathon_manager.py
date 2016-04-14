@@ -692,7 +692,7 @@ class HackathonManager(Component):
                 if filter_by_user == 'unread':
                     is_read_filter = Q(is_read=False)
             else:
-                return BadRequest("Please login first.")
+                raise BadRequest("Please login first.")
 
         if notice_category:
             notice_category_tuple = tuple([int(category) for category in notice_category.split(',')])
