@@ -46,6 +46,7 @@ def setup_db():
         name="admin",
         nickname="admin",
         password="e8104164dfc4a479e42a9f6c0aefd2be",
+        avatar_url="/static/pic/monkey-32-32px.png",
         is_super=True)
 
     User.objects(name="admin").update_one(__raw__={"$set": admin.to_mongo().to_dict()}, upsert=True)
