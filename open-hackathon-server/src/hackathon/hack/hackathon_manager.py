@@ -751,6 +751,17 @@ class HackathonManager(Component):
                                     next_run_time=next_run_time,
                                     minutes=20)
 
+    def __is_pre_allocate_enabled(self, hackathon):
+        if hackathon.event_end_time < self.util.get_now():
+            return False
+        if hackathon.event_start_time > self.util.get_now():
+            return False
+        if hackathon.status != HACK_STATUS.ONLINE:
+            return False
+        if hackathon.config.get(HACKATHON_CONFIG.CLOUD_PROVIDER, CLOUD_PROVIDER.NONE) == CLOUD_PROVIDER.NONE:
+            return False
+        return hackathon.config.get(HACKATHON_CONFIG.PRE_ALLOCATE_ENABLED, False)
+
     def check_hackathon_for_pre_allocate_expr(self):
         """Check all hackathon for pre-allocate
 
@@ -759,10 +770,9 @@ class HackathonManager(Component):
         """
         hackathon_list = Hackathon.objects()
         for hack in hackathon_list:
-            hack_ended = hack.event_end_time < self.util.get_now()
             job_id = "pre_allocate_expr_" + str(hack.id)
             is_job_exists = self.scheduler.has_job(job_id)
-            if hack.config.get('pre_allocate_enabled', False) and not hack_ended:
+            if self.__is_pre_allocate_enabled(hack):
                 if is_job_exists:
                     self.log.debug("pre_allocate job already exists for hackathon %s" % str(hack.name))
                     continue
