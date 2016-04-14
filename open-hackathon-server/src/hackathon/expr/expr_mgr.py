@@ -112,9 +112,8 @@ class ExprManager(Component):
             except:
                 pass
 
-    def get_expr_list_by_hackathon_id(self, hackathon_id, context):
+    def get_expr_list_by_hackathon_id(self, hackathon, context):
         # get a list of all experiments' detail
-        hackathon = Hackathon.objects(id=hackathon_id).first()
         user_name = context.user_name if "user_name" in context else None
         status = context.status if "status" in context else None
         page = int(context.page) if "page" in context else 1
