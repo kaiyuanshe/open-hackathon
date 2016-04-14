@@ -42,6 +42,7 @@
     border: 1px solid #e6e7e8;
     margin-left: 295px;
     font-size: 14px;
+    position: relative;
 }
 .team-left .warp{
     padding:12px;
@@ -98,6 +99,7 @@
     margin: 0 auto;
     overflow: hidden;
     border-radius: 50%;
+    position: relative;
 }
 .team-logo {
     max-width: 104px;
@@ -106,6 +108,24 @@
 }
 .career{text-align: center;font-size: 18px;margin: 10px 0;}
 .team-header{
+}
+.team-header .inline{
+    overflow:hidden;
+    font-size: 15px;
+    margin-bottom: 15px;
+}
+.team-header .inline label{
+    font-weight:normal;
+    float:left;
+    width: 83px;
+    color: #888;
+    font-size: 15px;
+}
+.team-header .inline label+.n-right{
+
+margin-left: 80px;
+
+padding-right: 160px;
 }
 .team-header .h4{
     margin: 0;
@@ -136,12 +156,18 @@
     font-size:0;
     margin-left: -15px;
 }
+.popup-gallery .nothing{left: 15px;position: relative;}
+.popup-gallery .sub-item{
+    position:relative;
+    width:187px;
+    height:187px;
+    margin-left: 15px;
+   margin-bottom: 15px;
+}
 .popup-gallery a{
    overflow:hidden;
    width: 187px;
    height: 187px;
-   margin-left: 15px;
-   margin-bottom: 15px;
    display:inline-block;
    border: 1px solid #ddd;
 }
@@ -623,21 +649,6 @@ fieldset {
     display: inline-block;
 }
 
-.oh-logo-warp .edit {
-    position: absolute;
-    display: none;
-    padding-top: 40px;
-    top: 10px;
-    left: 10px;
-    right: 10px;
-    bottom: 10px;
-    color: #FFF;
-    background-color: rgba(0, 0, 0, .25);
-}
-
-.oh-logo-warp:hover .edit {
-    display: block;
-}
 
 .team-pic {
     text-align: right;
@@ -681,36 +692,13 @@ fieldset {
     z-index: 6;
 }
 
-#team_name.edit,
-#team_description.edit {
-    position: relative;
-    font-size: 18px;
-    padding: 5px 0;
-    border: 1px dashed #f0f0f0;
-    margin-bottom: 2px;
-}
 
-#team_description.edit {
-    font-size: 15px;
-}
 
 .work_item span {
     margin-right: 20px
 }
 
-.edit input,
-.edit textarea {
-    width: 100%;
-    border: none;
-    resize: none;
-    background-color: transparent;
-    text-align: center;
-}
 
-.edit input:focus,
-.edit textarea:focus {
-    outline: none
-}
 
 .join {
     background: #e9ebec;
@@ -749,10 +737,7 @@ h1.title {
     float: right;
 }
 
-.oh-team-edit {
-    right: 0;
-    margin-top: 40px;
-}
+
 
 .oh-team-edit a:hover {
     color: #fff;
@@ -982,3 +967,79 @@ h2:first-child {
     list-style: none;
 }
 */
+.sub-item {
+    position:relative;
+
+}
+.sub-item a.edit{
+    position:absolute;
+    right: -15px;
+    top: -15px;
+    width:30px;
+    height:30px;
+    background-color:#888;
+    border: 2px solid #fff;
+    border-radius:50%;
+    text-align:center;
+    line-height: 26px;
+    color:#fff;
+    font-size: 18px;
+    z-index: 2;
+}
+.sub-item a.edit:hover,
+.sub-item a.edit:focus{
+    background-color:#d9534f;
+}
+.edit input,
+.edit textarea {
+    width: 100%;
+    border: none;
+    resize: none;
+    background-color: transparent;
+    text-align: center;
+    font-size: 14px;
+}
+
+.edit input:focus,
+.edit textarea:focus {
+    outline: none
+}
+#team_name.edit,
+#team_description.edit {
+    position: relative;
+    font-size: 18px;
+    padding: 5px 0;
+    border: 1px dashed #7dba41;
+    margin-bottom: 2px;
+}
+
+#team_description.edit {
+    font-size: 15px;
+}
+.w-other .sub-item a.edit,
+.w-code .sub-item a.edit{
+    right:auto;
+    top :-5px;
+    margin-left:30px;
+}
+.oh-team-edit{
+    position:absolute;
+    right:0;
+    top: 0;
+}
+
+.team-logo .edit {
+    position: absolute;
+    display: none;
+    padding-top: 42px;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    color: #fff;
+    background-color: rgba(0, 0, 0, .5);
+}
+
+.team-logo:hover .edit {
+    display: block;
+}

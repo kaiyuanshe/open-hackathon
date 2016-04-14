@@ -31,8 +31,8 @@ class ASYNC_OP_RESULT:
     SUCCEEDED = "Succeeded"
     IN_PROGRESS = "InProgress"
 
-ASYNC_OP_QUERY_INTERVAL = 5  # in seconds
-ASYNC_OP_QUERY_INTERVAL_LONG = 10  # for heavy works like wait of vm ready
+ASYNC_OP_QUERY_INTERVAL = 10  # in seconds
+ASYNC_OP_QUERY_INTERVAL_LONG = 30  # for heavy works like wait of vm ready
 
 
 class REMOTE_CREATED_RECORD:

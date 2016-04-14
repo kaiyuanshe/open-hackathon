@@ -159,6 +159,18 @@ class VirtualMachineAdapter(ServiceAdapter):
                                 endpoints.append(input_endpoint.port)
         return map(int, endpoints)
 
+    def get_virtual_machine_role(self, cloud_service_name, deployment_name, virtual_machine_name):
+        """get the role instance of vm
+
+        return None if not found
+        """
+        deployment = self.get_deployment_by_name(cloud_service_name, deployment_name)
+        for role in deployment.role_instance_list:
+            if role.role_name == virtual_machine_name:
+                return role
+
+        return None
+
     def get_virtual_machine_public_ip(self, cloud_service_name, deployment_name, virtual_machine_name):
         """get the public ip of the virtual machine
 

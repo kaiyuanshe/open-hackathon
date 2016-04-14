@@ -139,28 +139,36 @@ class HackathonManager(Component):
         if name:
             name_filter = Q(name__contains=name)
 
-        if order_by == 'create_time': #最新发布
+        if order_by == 'create_time':  # 最新发布
             order_by_condition = '-create_time'
-        elif order_by == 'event_start_time': #即将开始
+        elif order_by == 'event_start_time':  # 即将开始
             order_by_condition = '-event_start_time'
-        elif order_by == 'registered_users_num': #人气热点
+        elif order_by == 'registered_users_num':  # 人气热点
             # hackathons with zero registered users would not be shown.
-            hackathon_stat = HackathonStat.objects(type=HACKATHON_STAT.REGISTER, count__gt=0).order_by('-count')
-            hackathon_list = [stat.hackathon.id for stat in hackathon_stat]
-            condition_filter = Q(id__in=hackathon_list)
+            hot_hackathon_stat = HackathonStat.objects(type=HACKATHON_STAT.REGISTER, count__gt=0).order_by('-count')
+            hot_hackathon_list = [stat.hackathon.id for stat in hot_hackathon_stat]
+            condition_filter = Q(id__in=hot_hackathon_list)
         else:
             order_by_condition = '-id'
 
         # perform db query with pagination
-        pagination = Hackathon.objects(status_filter & name_filter & condition_filter).order_by(order_by_condition).paginate(page,
-                                                                                                          per_page)
+        pagination = Hackathon.objects(status_filter & name_filter & condition_filter).order_by(
+            order_by_condition).paginate(page,
+                                         per_page)
+
+        hackathon_list = pagination.items
+        hackathon_stat = HackathonStat.objects(hackathon__in=hackathon_list)
 
         user = None
+        user_hackathon = []
+        team = []
         if self.user_manager.validate_login():
             user = g.user
+            user_hackathon = UserHackathon.objects(user=user, hackathon__in=hackathon_list)
+            team = Team.objects(members__user=user, hackathon__in=hackathon_list)
 
         def func(hackathon):
-            return self.__get_hackathon_detail(hackathon, user)
+            return self.__fill_hackathon_detail(hackathon, user, hackathon_stat, user_hackathon, team)
 
         # return serializable items as well as total count
         return self.util.paginate(pagination, func)
@@ -557,13 +565,37 @@ class HackathonManager(Component):
         # notice creation logic for different notice_events
         if hackathon:
             if notice_event == HACK_NOTICE_EVENT.HACK_CREATE:
-                hackathon_notice.content = u"Hachathon: %s 创建成功" % (hackathon.name)
-            elif notice_event == HACK_NOTICE_EVENT.HACK_EDIT and hackathon:
-                hackathon_notice.content = u"Hachathon: %s 信息变更" % (hackathon.name)
+                hackathon_notice.content = u"%s即将火爆来袭，敬请期待！" % (hackathon.display_name)
+            # elif notice_event == HACK_NOTICE_EVENT.HACK_EDIT and hackathon:
+            #     hackathon_notice.content = u"%s更新啦，快去看看！" % (hackathon.display_name)
             elif notice_event == HACK_NOTICE_EVENT.HACK_ONLINE and hackathon:
-                hackathon_notice.content = u"Hachathon: %s 正式上线" % (hackathon.name)
+                hackathon_notice.content = u"%s开始啦，点击报名！" % (hackathon.display_name)
+                hackathon_notice.link = "/site/%s" % hackathon.name
             elif notice_event == HACK_NOTICE_EVENT.HACK_OFFLINE and hackathon:
-                hackathon_notice.content = u"Hachathon: %s 下线" % (hackathon.name)
+                hackathon_notice.content = u"%s圆满结束，点击查看详情！" % (hackathon.display_name)
+                hackathon_notice.link = "/site/%s" % hackathon.name
+            elif notice_event == HACK_NOTICE_EVENT.HACK_PLAN and body.get('receiver', None):
+                user = body.get('receiver')
+                old_hackathon_notice = HackathonNotice.objects(receiver=user, event=HACK_NOTICE_EVENT.HACK_PLAN,
+                                                               hackathon=hackathon).first()
+                if old_hackathon_notice:  # duplicate
+                    return old_hackathon_notice.dic()
+
+                hackathon_notice.content = u"您有未完成的任务，请提交开发说明书"
+                hackathon_notice.receiver = user
+                hackathon_notice.link = u"/site/%s/team" % (hackathon.name)
+
+            elif notice_event == HACK_NOTICE_EVENT.HACK_REGISTER_AZURE:
+                user = body.get('receiver')
+                old_hackathon_notice = HackathonNotice.objects(receiver=user,
+                                                               event=HACK_NOTICE_EVENT.HACK_REGISTER_AZURE,
+                                                               hackathon=hackathon).first()
+                if old_hackathon_notice:  # duplicate
+                    return old_hackathon_notice.dic()
+
+                hackathon_notice.content = u"请完成实名认证"
+                hackathon_notice.receiver = user
+                hackathon_notice.link = u"https://www.azure.cn/pricing/1rmb-trial-full/?form-type=waitinglist"
             else:
                 pass
 
@@ -614,6 +646,7 @@ class HackathonManager(Component):
         :param body: valid key/values(all key/values are optional)
             body = {
                 hackathon_name: string,                  // filter by hackathon_name, default unfiltered
+                filter_by_user: int,                     // filter by user, default filter notice that has specfic receivers
                 category: 'int[,int...]',                // filter by category, default unfiltered
                 event: 'int[,int...]',                   // filter by event, default unfiltered
                 order_by: 'time' | 'event' | 'category', // order by update_time, event, category, default by time
@@ -631,6 +664,7 @@ class HackathonManager(Component):
         """
 
         hackathon_name = body.get("hackathon_name")
+        filter_by_user = int(body.get("filter_by_user", 0))
         notice_category = body.get("category")
         notice_event = body.get("event")
         order_by = body.get("order_by", "time")
@@ -640,6 +674,8 @@ class HackathonManager(Component):
         hackathon_filter = Q()
         category_filter = Q()
         event_filter = Q()
+        user_filter = Q(receiver=None)
+        is_read_filter = Q()
         order_by_condition = '-update_time'
 
         if hackathon_name:
@@ -648,6 +684,15 @@ class HackathonManager(Component):
                 hackathon_filter = Q(hackathon=hackathon)
             else:
                 return not_found('hackathon_name not found')
+
+        if filter_by_user:
+            user = None
+            if self.user_manager.validate_login():
+                user = g.user
+                user_filter = Q(receiver=user)
+                is_read_filter = Q(is_read=False)
+            else:
+                pass
 
         if notice_category:
             notice_category_tuple = tuple([int(category) for category in notice_category.split(',')])
@@ -664,7 +709,7 @@ class HackathonManager(Component):
             order_by_condition = '-update_time'
 
         pagination = HackathonNotice.objects(
-            hackathon_filter & category_filter & event_filter
+            hackathon_filter & category_filter & event_filter & user_filter & is_read_filter
         ).order_by(
             order_by_condition
         ).paginate(page, per_page)
@@ -674,6 +719,24 @@ class HackathonManager(Component):
 
         # return serializable items as well as total count
         return self.util.paginate(pagination, func)
+
+    def check_notice_and_set_read_if_necessary(self, id):
+        hackathon_notice = HackathonNotice.objects(id=id).first()
+        if hackathon_notice:
+            if hackathon_notice.event == HACK_NOTICE_EVENT.HACK_PLAN:  # set is_read only if dev_plan is complete
+                user = hackathon_notice.receiver
+                hackathon = hackathon_notice.hackathon
+                team = Team.objects(members__user=user, hackathon=hackathon).first()
+                if not team or (team and team.dev_plan):
+                    hackathon_notice.is_read = True
+                    self.create_hackathon_notice(hackathon.id, HACK_NOTICE_EVENT.HACK_REGISTER_AZURE,
+                                                 HACK_NOTICE_CATEGORY.HACKATHON, {'receiver': user})
+                else:
+                    hackathon_notice.is_read = False
+            else:  # set is_read
+                hackathon_notice.is_read = True
+
+            hackathon_notice.save(validate=False)
 
     def schedule_pre_allocate_expr_job(self):
         """Add an interval schedule job to check all hackathons"""
@@ -718,7 +781,7 @@ class HackathonManager(Component):
         req = ok()
 
         if hackathon.status == HACK_STATUS.DRAFT or hackathon.status == HACK_STATUS.OFFLINE:
-            if self.util.is_local() or hackathon.config.get('cloud_provider')== CLOUD_PROVIDER.NONE:
+            if self.util.is_local() or hackathon.config.get('cloud_provider') == CLOUD_PROVIDER.NONE:
                 req = ok()
             elif hackathon.config.get('cloud_provider') == CLOUD_PROVIDER.AZURE:
                 is_success = docker_host_manager.check_subscription_id(hackathon.id)
@@ -762,12 +825,13 @@ class HackathonManager(Component):
                 detail["stat"]["like"] = stat.count
 
         if user:
-            user_hackathon = UserHackathon.objects(hackathon=hackathon,user=user).first()
+            user_hackathon = UserHackathon.objects(hackathon=hackathon, user=user).first()
             if user_hackathon and user_hackathon.like:
                 detail['like'] = user_hackathon.like
 
             detail["user"] = self.user_manager.user_display_info(user)
-            detail["user"]["is_admin"] = user.is_super or (user_hackathon and user_hackathon.role == HACK_USER_TYPE.ADMIN)
+            detail["user"]["is_admin"] = user.is_super or (
+                user_hackathon and user_hackathon.role == HACK_USER_TYPE.ADMIN)
 
             # TODO: we need to review those items one by one to decide the API output
             # asset = self.db.find_all_objects_by(UserHackathonAsset, user_id=user.id, hackathon_id=hackathon.id)
@@ -779,6 +843,41 @@ class HackathonManager(Component):
                 team = Team.objects(hackathon=hackathon, members__user=user).first()
                 if team:
                     detail["team"] = team.dic()
+
+        return detail
+
+    def __fill_hackathon_detail(self, hackathon, user, hackathon_stat, user_hackathon, team):
+        """Return hackathon info as well as its details including configs, stat, organizers, like if user logon"""
+        detail = hackathon.dic()
+
+        detail["stat"] = {
+            "register": 0,
+            "like": 0}
+
+        for stat in hackathon_stat:
+            if stat.type == HACKATHON_STAT.REGISTER and stat.hackathon.id == hackathon.id:
+                detail["stat"]["register"] = stat.count
+            elif stat.type == HACKATHON_STAT.LIKE and stat.hackathon.id == hackathon.id:
+                detail["stat"]["like"] = stat.count
+
+        if user:
+            detail['user'] = self.user_manager.user_display_info(user)
+            detail['user']['admin'] = user.is_super
+            if user_hackathon:
+                for uh in user_hackathon:
+                    if uh.hackathon.id == hackathon.id:
+                        detail['user']['admin'] = detail['user']['admin'] or (uh.role == HACK_USER_TYPE.ADMIN)
+
+                        if uh.like:
+                            detail['like'] = uh.like
+
+                        if uh.role == HACK_USER_TYPE.COMPETITOR:
+                            detail['registration'] = uh.dic()
+                            for t in team:
+                                if t.hackathon.id == hackathon.id:
+                                    detail['team'] = t.dic()
+                                    break
+                        break
 
         return detail
 
@@ -959,6 +1058,7 @@ def is_auto_approve(hackathon):
     hack_manager = RequiredFeature("hackathon_manager")
     value = hack_manager.get_basic_property(hackathon, HACKATHON_CONFIG.AUTO_APPROVE, "1")
     return util.str2bool(value)
+
 
 def get_basic_property(hackathon, property_name, default_value=None):
     hack_manager = RequiredFeature("hackathon_manager")

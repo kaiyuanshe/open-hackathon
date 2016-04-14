@@ -141,9 +141,9 @@ class AzureCertManager(Component):
     def get_certificates_by_expr(self, expr_id):
         """Get certificates by experiment id
         """
-        #expr = self.db.get_object(Experiment, expr_id)
+        # expr = self.db.get_object(Experiment, expr_id)
         expr = Experiment.objects(id=expr_id)
-        #hak = self.db.find_all_objects_by(HackathonAzureKey, hackathon_id=expr.hackathon_id)
+        # hak = self.db.find_all_objects_by(HackathonAzureKey, hackathon_id=expr.hackathon_id)
         hak = Hackathon.objects(id=expr.hackathon_id).first().azure_keys[0]
         if not hak:
             raise Exception("no azure key configured")
@@ -167,8 +167,6 @@ class AzureCertManager(Component):
             return []
 
         return hackathon_azure_keys
-
-        return certificates
 
     def delete_certificate(self, certificate_id, hackathon):
         """Delete certificate by azureKey.id and hackathon
@@ -224,8 +222,7 @@ class AzureCertManager(Component):
             sms.list_hosted_services()
             azure_key.verified = True
             azure_key.save()
-        except Exception as e:
-
+        except Exception:
             return ok(False)
 
         return ok(True)

@@ -44,7 +44,7 @@ __all__ = ["ExprManager"]
 class ExprManager(Component):
     user_manager = RequiredFeature("user_manager")
     hackathon_manager = RequiredFeature("hackathon_manager")
-    admin_Manager = RequiredFeature("admin_manager")
+    admin_manager = RequiredFeature("admin_manager")
     template_library = RequiredFeature("template_library")
 
     def start_expr(self, user, template_name, hackathon_name=None):
@@ -102,20 +102,34 @@ class ExprManager(Component):
 
     def check_expr_status(self, experiment):
         # update experiment status
-        virtual_environment_list = experiment.virtual_environments.all()
+        virtual_environment_list = experiment.virtual_environments
         if all(x.status == VEStatus.RUNNING for x in virtual_environment_list) \
                 and len(virtual_environment_list) == experiment.template.virtual_environment_count:
             experiment.status = EStatus.RUNNING
-            self.db.commit()
-            self.template_library.template_verified(experiment.template.id)
+            experiment.save()
+            try:
+                self.template_library.template_verified(experiment.template.id)
+            except:
+                pass
 
-    def get_expr_list_by_hackathon_id(self, hackathon_id, user_name, status):
+    def get_expr_list_by_hackathon_id(self, hackathon_id, context):
         # get a list of all experiments' detail
-        experiments = Experiment.objects(status=status).all() if status else Experiment.objects().all()
+        user_name = context.user_name if "user_name" in context else None
+        status = context.status if "status" in context else None
+        page = int(context.page) if "page" in context else 1
+        per_page = int(context.per_page) if "per_page" in context else 10
+        users = User.objects(name=user_name).all() if user_name else []
 
-        if user_name and not user_name == "":
-            experiments = [experiment for experiment in experiments if experiment.user.name == user_name]
-        return [self.__get_expr_with_detail(experiment) for experiment in experiments]
+        if user_name and status:
+            experiments_pagi = Experiment.objects(status=status, user__in=users).paginate(page, per_page)
+        elif user_name and not status:
+            experiments_pagi = Experiment.objects(user__in=users).paginate(page, per_page)
+        elif not user_name and status:
+            experiments_pagi = Experiment.objects(status=status).paginate(page, per_page)
+        else:
+            experiments_pagi = Experiment.objects().paginate(page, per_page)
+
+        return self.util.paginate(experiments_pagi, self.__get_expr_with_detail)
 
     def scheduler_recycle_expr(self):
         """recycle experiment according to hackathon basic info on recycle configuration
@@ -137,6 +151,7 @@ class ExprManager(Component):
                 self.__recycle_expr(expr)
 
     def pre_allocate_expr(self, context):
+        # TODO: too complex, not check
         hackathon_id = context.hackathon_id
         self.log.debug("executing pre_allocate_expr for hackathon %s " % hackathon_id)
         hackathon = Hackathon.objects(id=hackathon_id).first()
@@ -233,8 +248,7 @@ class ExprManager(Component):
         context = starter.start_expr(Context(
             template=template,
             user=user,
-            hackathon=hackathon
-        ))
+            hackathon=hackathon))
 
         return self.__report_expr_status(context.experiment)
 
@@ -249,8 +263,7 @@ class ExprManager(Component):
             "hackathon_name": expr.hackathon.name if expr.hackathon else "",
             "hackathon": str(expr.hackathon.id) if expr.hackathon else "",
             "create_time": str(expr.create_time),
-            "last_heart_beat_time": str(expr.last_heart_beat_time),
-        }
+            "last_heart_beat_time": str(expr.last_heart_beat_time)}
 
         if expr.status != EStatus.RUNNING:
             return ret
@@ -269,8 +282,7 @@ class ExprManager(Component):
                     remote_servers.append({
                         "name": guacamole_config["name"],
                         "guacamole_host": guacamole_host,
-                        "url": url
-                    })
+                        "url": url})
 
                 except Exception as e:
                     self.log.error(e)
@@ -289,18 +301,20 @@ class ExprManager(Component):
                     if p.url:
                         public_urls.append({
                             "name": p.name,
-                            "url": p.url.format(container.host_server.public_dns, p.public_port)
-                        })
+                            "url": p.url.format(container.host_server.public_dns, p.public_port)})
         else:
-            # todo windows azure public url
             for ve in expr.virtual_environments:
-                for vm in ve.azure_virtual_machines_v.all():
-                    ep = vm.azure_endpoints.filter_by(private_port=80).first()
-                    url = 'http://%s:%s' % (vm.public_ip, ep.public_port)
-                    public_urls.append({
-                        "name": ep.name,
-                        "url": url
-                    })
+                vm = ve.azure_resource
+                if not vm or not vm.end_points:
+                    continue
+
+                for endpoint in vm.end_points:
+                    if endpoint.url:
+                        public_urls.append({
+                            "name": endpoint.name,
+                            "url": endpoint.url.format(vm.dns, endpoint.public_port)
+                        })
+
         ret["public_urls"] = public_urls
         return ret
 

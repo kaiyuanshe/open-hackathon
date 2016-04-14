@@ -56,6 +56,7 @@ API_HACAKTHON_REGISTRATION = "/api/user/registration"
 API_TEAM_MEMBER_LIST = "/api/team/member/list"
 API_TEAM_USER = "/api/user/team/list"
 API_TEAM = "/api/team"
+API_MY_TEAM = "/api/team/my"
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -430,10 +431,21 @@ def temp_settings(hackathon_name):
         return redirect(url_for('hackathon', hackathon_name=hackathon_name))
 
 
+@app.route("/site/<hackathon_name>/team")
+def my_team(hackathon_name):
+    headers = {"hackathon_name": hackathon_name, "token": session.get("token")}
+    team = Context.from_object(__get_api(API_MY_TEAM, headers))
+    return render_team_page(hackathon_name, team)
+
+
 @app.route("/site/<hackathon_name>/team/<tid>")
 def create_join_team(hackathon_name, tid):
     headers = {"hackathon_name": hackathon_name, "token": session.get("token")}
     team = Context.from_object(__get_api(API_TEAM, headers, params={"id": tid}))
+    return render_team_page(hackathon_name, team)
+
+
+def render_team_page(hackathon_name, team):
     if team.get('error') is not None:
         return redirect('404')
     else:

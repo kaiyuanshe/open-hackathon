@@ -68,9 +68,11 @@ def init_routes():
     api.add_resource(UserRegistrationResource, "/api/user/registration")  # register hackathon
     api.add_resource(UserHackathonListResource, "/api/user/registration/list")  # participated hackathon list of user
     api.add_resource(UserExperimentResource, "/api/user/experiment")  # start or stop experiment
+    api.add_resource(UserNoticeReadResource, "/api/user/notice/read")  # read the notice
 
     # team APIs
     api.add_resource(TeamResource, "/api/team")  # create, update, dismiss and query team
+    api.add_resource(MyTeamResource, "/api/team/my")  # get team of current login user
     api.add_resource(HackathonTeamListResource, "/api/hackathon/team/list",
                      "/api/admin/team/list")  # list teams of hackathon
     api.add_resource(TeamMemberResource, "/api/team/member")  # join or leave team, approve member

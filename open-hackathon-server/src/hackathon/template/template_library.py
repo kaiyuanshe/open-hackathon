@@ -163,7 +163,7 @@ class TemplateLibrary(Component):
             return internal_server_error("delete template failed")
 
     def template_verified(self, template_id):
-        Template.objects.update_one(id=template_id, status=TEMPLATE_STATUS.CHECK_PASS)
+        Template.objects(id=template_id).update_one(status=TEMPLATE_STATUS.CHECK_PASS)
 
     def __init__(self):
         pass

@@ -1,11 +1,11 @@
 {
-    "name": "test-template-1",
-    "description" : "a template consists of a list of virtual environments, and a virtual environment is a virtual machine with its storage account, container, cloud service and deployment",
+    "name": "windows-server-2016-container-tp4",
+    "description" : "Windows Server 2016 Core with Containers Tech Preview 4",
     "virtual_environments": [
         {
             "provider": "1",
             "storage_account" : {
-                "service_name" : "rapidtest",
+                "service_name" : "opentech0storage",
                 "description" : "storage-description",
                 "label" : "storage-label",
                 "location" : "China East",
@@ -13,19 +13,19 @@
             },
             "container" : "vhds",
             "cloud_service" : {
-                "service_name" : "rapid-test",
-                "label" : "cloud-service-label",
+                "service_name" : "ohp-win2016",
+                "label" : "ohp-win2016",
                 "location" : "China East"
             },
             "deployment" :{
-                "deployment_name" : "rapid-test-deployment",
+                "deployment_name" : "ohp-win2016",
                 "deployment_slot" : "production"
             },
-            "label" : "rapid-test",
-            "role_name" : "rapid-test",
+            "label" : "ohp-win2016",
+            "role_name" : "ohp-win2016",
             "image" : {
                 "type" : "os",
-                "name" : "0c5c79005aae478e8883bf950a861ce0__Windows-Server-2012-Essentials-20131018-enus"
+                "name" : "55bc2b193643443bb879a78bda516fc8__WindowsServerCore_en-us_TP4_Container_Azure-20151118"
             },
             "system_config" : {
                 "os_family" : "Windows",
@@ -39,10 +39,11 @@
                     {
                         "name" : "http",
                         "protocol" : "tcp",
-                        "local_port" : "80"
+                        "local_port" : "80",
+                        "url": "http://{0}:{1}"
                     },
                     {
-                        "name" : "Deploy",
+                        "name" : "remote",
                         "protocol" : "tcp",
                         "local_port" : "3389"
                     }
@@ -51,7 +52,7 @@
             "remote": {
                 "provider": "guacamole",
                 "protocol": "rdp",
-                "input_endpoint_name" : "Deploy"
+                "input_endpoint_name" : "remote"
             },
             "role_size" : "Small"
         }
