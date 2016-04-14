@@ -159,7 +159,7 @@ class ExprManager(Component):
         for template in hackthon_templates:
             try:
                 template = template
-                pre_num = hackathon.config.get("pre_allocate_number")
+                pre_num = int(hackathon.config.get("pre_allocate_number", 1))
                 query = Q(status=EStatus.STARTING) | Q(status=EStatus.RUNNING)
                 curr_num = Experiment.objects(user=None, hackathon=hackathon, template=template).filter(query).count()
                 if template.provider == VE_PROVIDER.AZURE:

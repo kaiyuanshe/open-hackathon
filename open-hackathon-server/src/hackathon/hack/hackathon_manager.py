@@ -759,9 +759,10 @@ class HackathonManager(Component):
         """
         hackathon_list = Hackathon.objects()
         for hack in hackathon_list:
+            hack_ended = hack.event_end_time < self.util.get_now()
             job_id = "pre_allocate_expr_" + str(hack.id)
             is_job_exists = self.scheduler.has_job(job_id)
-            if hack.config.get('pre_allocate_enabled'):
+            if hack.config.get('pre_allocate_enabled', False) and not hack_ended:
                 if is_job_exists:
                     self.log.debug("pre_allocate job already exists for hackathon %s" % str(hack.name))
                     continue
