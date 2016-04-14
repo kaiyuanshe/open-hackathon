@@ -735,7 +735,7 @@ class HackathonManager(Component):
                 if team:
                     if not team.dev_plan:  # the dev_plan isn't submitted
                         hackathon_notice.is_read = False
-                    elif hackathon.config.get(HACKATHON_CONFIG.REAL_NAME_AUTH, False):
+                    elif hackathon.config.get(HACKATHON_CONFIG.REAL_NAME_AUTH_21V, False):
                         self.create_hackathon_notice(hackathon.id, HACK_NOTICE_EVENT.HACK_REGISTER_AZURE,
                                                      HACK_NOTICE_CATEGORY.HACKATHON, {'receiver': user})
 

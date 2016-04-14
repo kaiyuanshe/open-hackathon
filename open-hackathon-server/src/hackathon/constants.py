@@ -101,8 +101,8 @@ class HACKATHON_CONFIG:
     PRE_ALLOCATE_INTERVAL_SECONDS = "pre_allocate_interval_second"
     FREEDOM_TEAM = "freedom_team"
     CLOUD_PROVIDER = "cloud_provider"
-    DEV_PLAN = "dev_plan"
-    REAL_NAME_AUTH = "real_name_auth"
+    DEV_PLAN_REQUIRED = "dev_plan_required"
+    REAL_NAME_AUTH_21V = "real_name_auth_21v"
 
 
 class TEMPLATE_STATUS:
