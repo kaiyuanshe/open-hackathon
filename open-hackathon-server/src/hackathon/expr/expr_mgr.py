@@ -256,7 +256,6 @@ class ExprManager(Component):
         hackathon = experiment.hackathon
         user = experiment.user
 
-
     def __report_expr_status(self, expr):
         ret = {
             "expr_id": str(expr.id),
