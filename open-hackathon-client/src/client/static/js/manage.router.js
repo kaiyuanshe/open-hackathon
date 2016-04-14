@@ -69,7 +69,7 @@ angular.module('oh.manage.router', [
       }
       $scope.offline = function(activity) {
         if (activity.status == 2) return;
-        api.admin.hackathon.online.post({
+        api.admin.hackathon.offline.post({
           header: {
             hackathon_name: activity.name
           }
