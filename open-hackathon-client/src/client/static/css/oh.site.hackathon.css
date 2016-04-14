@@ -219,6 +219,7 @@ h1.title {
     height: 50px;
     width: 50px;
     float: left;
+    overflow: hidden;
 }
 
 .teams .item .footer {
@@ -330,7 +331,6 @@ h1.title {
 }
 
 .media-object {
-    width: 50px;
 }
 
 .no-team {
@@ -344,9 +344,7 @@ h1.title {
 }
 
 .oh-thumb img.oh-thumbnail {
-    height: auto;
-    max-height: 450px;
-    width: 100%;
+
 }
 
 #team_show .item {
@@ -359,7 +357,9 @@ h1.title {
 
 #team_show .item .header {
     height:178px;
+    width: 384px;
     border-bottom:1px solid #d0d3d2;
+    overflow: hidden;
 }
 
 #team_show .item .body {
