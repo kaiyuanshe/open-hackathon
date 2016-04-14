@@ -96,7 +96,7 @@ angular.module('oh.manage.router', [
       }
     }
   }).state('create', {
-    url: '/create',
+    url: '/create?name',
     templateUrl: '/static/partials/manage/create.html?v=' + VERSION,
     controller: 'createController'
   }).state('404', {
