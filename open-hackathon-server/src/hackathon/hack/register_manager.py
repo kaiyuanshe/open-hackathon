@@ -126,7 +126,7 @@ class RegisterManager(Component):
 
     def __ask_for_dev_plan(self, hackathon, user):
         # push notice if dev plan required
-        if hackathon.config.get(HACKATHON_CONFIG.DEV_PLAN, False):
+        if hackathon.config.get(HACKATHON_CONFIG.DEV_PLAN_REQUIRED, False):
             self.hackathon_manager.create_hackathon_notice(hackathon.id, HACK_NOTICE_EVENT.HACK_PLAN,
                                                            HACK_NOTICE_CATEGORY.HACKATHON, {'receiver': user})
 
