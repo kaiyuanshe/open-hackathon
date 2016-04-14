@@ -255,7 +255,7 @@ class UserManager(Component):
 
     def __generate_api_token(self, admin):
         token_issue_date = self.util.get_now()
-        valid_period = timedelta(minutes=self.util.safe_get_config("login.token_expiration_minutes", 1440))
+        valid_period = timedelta(minutes=self.util.safe_get_config("login.token_expiration_seconds", 3600))
         token_expire_date = token_issue_date + valid_period
         user_token = UserToken(token=str(uuid.uuid1()),
                                user=admin,
