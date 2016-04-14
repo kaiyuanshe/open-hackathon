@@ -538,7 +538,7 @@ class AzureFormation(Component):
             ve = expr.virtual_environments[sctx.current_job_index]
 
             ve.status = VEStatus.FAILED
-            ve.experiment.status = EStatus.FAILED
+            expr.status = EStatus.FAILED
             expr.save()
         finally:
             self.log.debug(
@@ -724,7 +724,7 @@ class AzureFormation(Component):
         ve = expr.virtual_environments[sctx.current_job_index]
 
         ve.status = VEStatus.STOPPED
-        self.expr_manager.check_expr_status(ve.experiment)
+        self.expr_manager.check_expr_status(expr)
 
         # all stopped
         # TODO: alter this as a hook, and trigger this hook in __schedule_stop, where the last job index should be checked
