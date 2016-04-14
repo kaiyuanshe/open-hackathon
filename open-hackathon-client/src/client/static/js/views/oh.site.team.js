@@ -33,11 +33,11 @@
 
     var templates = {
         video: '<div class="sub-item">{{html uri}}</div>',
-        img: ' <div  class="sub-item"><a href="${uri}" title="${description}" data-parent><img src="${uri}" onload="oh.comm.imgLoad(this)" alt="${description}"></a></div>',
-        doc: '<div class="sub-item"><iframe src="${uri}" seamless="seamless" frameborder="0" scrolling="yes"></iframe></div>',
-        pdf: '<div class="sub-item"><object data="${uri}" type="application/pdf" width="100%" height="470px"><p>您的浏览器不支持PDF查看。请安装PDF阅读器插件!</p></object></div>',
-        code: '<div class="sub-item"><span>${description}：</span><a href="${uri}" target="_blank">${uri}</a></div>',
-        other: '<div class="sub-item"><span>${description}：</span><a href="${uri}" target="_blank">${uri}</a></div>'
+        img: ' <div  class="sub-item"><a href="${uri}" title="${description}" data-parent><img src="${uri}" onload="oh.comm.imgLoad(this)" alt="${description}"></a>{{if $item.isEdit()}}<a title="删除" class="edit" data-role="work-del" href="javascrpit:;"><i class="fa fa-times"></i></a>{{/if}}</div>',
+        doc: '<div class="sub-item"><iframe src="${uri}" seamless="seamless" frameborder="0" scrolling="yes"></iframe>{{if $item.isEdit()}}<a title="删除" class="edit" data-role="work-del" href="javascrpit:;"><i class="fa fa-times"></i></a>{{/if}}</div>',
+        pdf: '<div class="sub-item"><object data="${uri}" type="application/pdf" width="100%" height="470px"><p>您的浏览器不支持PDF查看。请安装PDF阅读器插件!</p></object>{{if $item.isEdit()}}<a title="删除" class="edit" data-role="work-del" href="javascrpit:;"><i class="fa fa-times"></i></a>{{/if}}</div>',
+        code: '<div class="sub-item"><span>${description}：</span><a href="${uri}" target="_blank">${uri}</a>{{if $item.isEdit()}}<a title="删除" class="edit" data-role="work-del" href="javascrpit:;"><i class="fa fa-times"></i></a>{{/if}}</div>',
+        other: '<div class="sub-item"><span>${description}：</span><a href="${uri}" target="_blank">${uri}</a>{{if $item.isEdit()}}<a title="删除" class="edit" data-role="work-del" href="javascrpit:;"><i class="fa fa-times"></i></a>{{/if}}</div>'
     };
 
     function office_app(team_show) {
@@ -98,38 +98,83 @@
         });
     }
 
+    function isEdit() {
+        return value;
+    }
 
-    function bindShow(data) {
+    function bindShow(data, isedit) {
         if (data.video.length > 0) {
-            $.tmpl(templates.video, data.video).appendTo('#videos .w-videos');
+            $('#videos .nothing').addClass('hide');
+            $.tmpl(templates.video, data.video, {
+                isEdit: function () {
+                    return isedit;
+                }
+            }).appendTo('#videos .w-videos');
         } else {
-            $('#videos .nothing').removeClass('hide');
+            if ($('#videos .w-videos>.sub-item').length == 0) {
+                $('#videos .nothing').removeClass('hide');
+            }
+            ;
         }
         if (data.img.length > 0) {
-            $.tmpl(templates.img, data.img).appendTo('#work_images');
+            $('#images .nothing').addClass('hide');
+            $.tmpl(templates.img, data.img, {
+                isEdit: function () {
+                    return isedit;
+                }
+            }).appendTo('#work_images');
         } else {
-            $('#images .nothing').removeClass('hide');
+            if ($('#work_images>.sub-item').length == 0) {
+                $('#images .nothing').removeClass('hide');
+            }
         }
         if (data.doc.length == 0 && data.pdf.length == 0) {
-            $('#docs .nothing').removeClass('hide');
+            if ($('#docs .w-doc>.sub-item').length == 0) {
+                $('#docs .nothing').removeClass('hide');
+            }
         } else {
-            $.tmpl(templates.pdf, data.pdf).appendTo('#docs .w-doc');
-            $.tmpl(templates.doc, data.doc).appendTo('#docs .w-doc');
+            $('#docs .nothing').addClass('hide');
+            $.tmpl(templates.pdf, data.pdf, {
+                isEdit: function () {
+                    return isedit;
+                }
+            }).appendTo('#docs .w-doc');
+            $.tmpl(templates.doc, data.doc, {
+                isEdit: function () {
+                    return isedit;
+                }
+            }).appendTo('#docs .w-doc');
         }
 
         if (data.code.length > 0) {
             $('#code').removeClass('hide');
-            $.tmpl(templates.code, data.code).appendTo('#code .w-code');
+            $.tmpl(templates.code, data.code, {
+                isEdit: function () {
+                    return isedit;
+                }
+            }).appendTo('#code .w-code');
+        } else {
+            if ($('#code .w-code>.sub-item').length == 0) {
+                $('#code').addClass('hide');
+            }
         }
 
         if (data.other.length > 0) {
             $('#other').removeClass('hide');
-            $.tmpl(templates.other, data.other).appendTo('#code .w-code');
+            $.tmpl(templates.other, data.other, {
+                isEdit: function () {
+                    return isedit;
+                }
+            }).appendTo('#other .w-other');
+        } else {
+            if ($('#other .w-other>.sub-item').length == 0) {
+                $('#other').addClass('hide');
+            }
         }
     }
 
     function pageload() {
-  
+
         $('[data-loadsrc]').each(function (i, img) {
             var $img = $(img).load(function (e) {
                 oh.comm.imgLoad(this);
@@ -165,7 +210,7 @@
             if (!data.error) {
                 $("#show_count").val("（" + data.length + "）")
                 var split_data = splitShow(data);
-                bindShow(split_data);
+                bindShow(split_data, false);
             } else {
             }
         });
@@ -195,6 +240,51 @@
                     }
                 });
             });
+
+        var projectCove_form = $('#projectCoverForm').bootstrapValidator()
+            .on('success.form.bv', function (e) {
+                e.preventDefault();
+                var url = projectCove_form.find('[name="cover"]').val();
+                // $('#team_logo').attr({src: logo});
+                $('#projectCoverModal').modal('hide');
+                updateTeam({id: tid, cover: url}).then(function (data) {
+                    if (data.error) {
+                        oh.comm.alert('错误', data.error.friendly_message);
+                    } else {
+                        var c = $('#cover');
+                        var par = c.find('[data-parent]');
+                        var nothing = c.find('.nothing');
+                        if (par.length == 0) {
+                            par = $('<div data-parent>').append(
+                                $('<img>').load(function (e) {
+                                    oh.comm.imgLoad(this);
+                                })
+                            ).appendTo(c);
+                        }
+                        par.find('img').attr({src: url});
+                        nothing.addClass('hide');
+                    }
+                });
+            });
+
+        var projectPlan_Form = $('#projectPlanForm').bootstrapValidator()
+            .on('success.form.bv', function (e) {
+                e.preventDefault();
+                var url = projectPlan_Form.find('[name="plan"]').val();
+                $('#projectPlanModal').modal('hide');
+                updateTeam({id: tid, dev_plan: url}).then(function (data) {
+                    if (data.error) {
+                        oh.comm.alert('错误', data.error.friendly_message);
+                    } else {
+                        var p = $('#plan');
+                        p.attr({src: 'https://view.officeapps.live.com/op/embed.aspx?src=' + encodeURIComponent(url)}).removeClass('hide');
+                    }
+                });
+            });
+        var src = $('#plan').data('src');
+        if (src) {
+            $('#plan').attr({src: 'https://view.officeapps.live.com/op/embed.aspx?src=' + encodeURIComponent(src)}).removeClass('hide');
+        }
 
         $('#score_form').bootstrapValidator()
             .on('success.form.bv', function (e) {
@@ -230,11 +320,14 @@
                     if (data.error) {
                         oh.comm.alert('错误', data.error.friendly_message);
                     } else {
-                        // $('#works_video').append($('#show_item').tmpl([data]));
+                        // var split_data = splitShow([data]);
+                        bindShow(splitShow([data]), true);
                     }
+
                 });
                 works_Modal.modal('hide');
                 worksForm.data().bootstrapValidator.resetForm();
+                $('#worktype').trigger('change');
             });
 
 
@@ -345,7 +438,7 @@
             });
         });
 
-        $('[data-role="addworks"]').click(function (e) {
+        var addWork = $('[data-role="addworks"]').click(function (e) {
             $('#works_Modal').modal('show');
         });
 
@@ -368,6 +461,7 @@
         var edit_btn = $('[data-role="edit"]').click(function (e) {
             edit_btn.addClass('hide');
             seva_btn.removeClass('hide');
+            addWork.removeClass('hide');
             var input_name = $('<input>').attr({
                 type: 'text',
                 placeholder: '团队名称',
@@ -377,9 +471,24 @@
                 row: '4',
                 placeholder: '团队简介'
             }).val($.trim($('#team_description').text()));
+
+            var pro_name = $('<input>').attr({
+                type: 'text',
+                placeholder: '项目名称',
+                value: $.trim($('#pro_name').text())
+            });
+
+            var pro_desc = $('<textarea>').attr({
+                row: '4',
+                placeholder: '项目简介'
+            }).val($.trim($('#pro_desc').text()));
+
+            $('#pro_name').addClass('edit').empty().append(pro_name);
+            $('#pro_desc').addClass('edit').empty().append(pro_desc);
             $('#team_name').addClass('edit').empty().append(input_name);
             $('#team_description').addClass('edit').empty().append(input_des);
-
+            $('#cover').addClass('edit').prepend($('<a>').attr({'data-role': 'cover'}).text('编辑展示图'));
+            $('#plan').before($('<a>').attr({'data-role': 'plan', 'class': 'btn btn-sm btn-info'}).text('添加项目说明书'));
             $('#show_works .sub-item').each(function (i, item) {
                 $(item).append($('<a>').attr({
                     title: '删除',
@@ -407,14 +516,33 @@
             });
         }
 
+        $('.team-header').on('click', 'a[data-role]', function (e) {
+            var role = $(this).data('role');
+            switch (role) {
+                case 'cover':
+                    $('#projectCoverModal').modal('show');
+                    return;
+                case 'plan':
+                    $('#projectPlanModal').modal('show');
+                    return;
+            }
+        });
+
         var seva_btn = $('[data-role="save"]').click(function (e) {
             seva_btn.addClass('hide');
             edit_btn.removeClass('hide');
+            addWork.addClass('hide');
             $('.team-pic').removeClass('edit').find('inner-edit').detach();
             team_date.name = $('#team_name').removeClass('edit').find('input').val();
             team_date.description = $('#team_description').removeClass('edit').find('textarea').val();
+            team_date.project_name = $('#pro_name').removeClass('edit').find('input').val();
+            team_date.project_description = $('#pro_desc').removeClass('edit').find('textarea').val();
             $('[data-role="team_name"]').text(team_date.name);
             $('#team_name').empty().text(team_date.name);
+            $('#pro_name').empty().text(team_date.project_name);
+            $('#pro_desc').empty().text(team_date.project_description);
+            $('#cover').removeClass('edit').find('a').detach();
+            $('a[data-role="plan"]').detach();
             $('#team_description').empty().text(team_date.description);
             $('#show_works a.edit').detach();
             updateTeam(team_date).then(function (data) {

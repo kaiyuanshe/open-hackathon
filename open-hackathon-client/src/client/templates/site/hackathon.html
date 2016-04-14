@@ -319,9 +319,9 @@
   <div class="col-xs-3">
     <div class="item">
        <div class="clearfix">
-          <div class="logo">
+          <div class="logo" data-parent>
             <a href="${$item.get_link(id)}" target="_blank" class="oh-thumb">
-              <img class="media-object oh-thumbnail" src="${$item.get_logo(logo)}" onerror="javascript:this.src='/static/pic/team-logo.png'" alt="${name}">
+              <img class="media-object" src="${$item.get_logo(logo)}" onload="oh.comm.imgLoad(this)" onerror="javascript:this.src='/static/pic/team-logo.png'" alt="${name}">
             </a>
           </div>
           <div class="team-body">
@@ -339,7 +339,7 @@
     </script>
     <script id="show_list_temp" type="text/x-jquery-tmpl">
   {% raw %}
-  <div class="col-md-6">
+  <div class="col-xs-6">
     <div class="item">
         <div class="header" data-parent>
             <a href="${$item.link(id)}">
