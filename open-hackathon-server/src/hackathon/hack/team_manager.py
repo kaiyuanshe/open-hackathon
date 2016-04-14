@@ -204,9 +204,12 @@ class TeamManager(Component):
 
         self.__validate_team_permission(g.hackathon.id, team, g.user)
 
-        team.name = kwargs.get("name", team.name)
-        team.description = kwargs.get("description", team.description)
-        team.logo = kwargs.get("logo", team.logo)
+        # hackathon.modify(**update_items)
+        # team.name = kwargs.get("name", team.name)
+        # team.description = kwargs.get("description", team.description)
+        # team.logo = kwargs.get("logo", team.logo)
+
+        team.modify(**kwargs)
         team.update_time = self.util.get_now()
 
         team.save()
