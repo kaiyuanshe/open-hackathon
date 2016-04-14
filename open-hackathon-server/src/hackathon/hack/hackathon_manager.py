@@ -917,6 +917,7 @@ class HackathonManager(Component):
         # basic xss prevention
         if new_hack.description:  # case None type
             new_hack.description = self.cleaner.clean_html(new_hack.description)
+        new_hack.save()
 
         # add the current login user as admin and creator
         try:

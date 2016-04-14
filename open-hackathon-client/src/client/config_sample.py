@@ -155,7 +155,6 @@ Config = {
                 ALAUDA_CLIENT_ID, HOSTNAME)
         },
         "hackathon": {
-            "name": "open-xml-sdk",
             "endpoint": HACKATHON_API_ENDPOINT
         },
         "apiconfig": {
@@ -249,9 +248,6 @@ Config = {
                     "notice": {
                         "read": ["put"]
                     }
-                },
-                "bulletin": {
-                    "": ["get", "post"]
                 },
                 "hackathon": {
                     "": ["get"],
