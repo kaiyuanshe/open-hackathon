@@ -103,7 +103,8 @@ class UserManager(Component):
     def check_user_online_status(self):
         """Check whether the user is offline. If the answer is yes, update its status in DB."""
         overtime_user_ids = [user_id for user_id in users_operation_time
-                             if (self.util.get_now() - users_operation_time[user_id]).seconds > 1800]  # 1800s-half hour
+                             if (self.util.get_now() - users_operation_time[user_id]).seconds > 3600]
+                             # 3600s- expire as token expire
 
         User.objects(id__in=overtime_user_ids).update(online=False)
         for user_id in overtime_user_ids:
