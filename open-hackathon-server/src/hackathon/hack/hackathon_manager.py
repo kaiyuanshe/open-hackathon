@@ -685,8 +685,9 @@ class HackathonManager(Component):
                 return not_found('hackathon_name not found')
 
         if filter_by_user:  # only return notices that are sent to the login user
-            user = g.user
-            if user:
+            user = None
+            if self.user_manager.validate_login():
+                user = g.user
                 user_filter = Q(receiver=user)
                 if filter_by_user == 'unread':
                     is_read_filter = Q(is_read=False)

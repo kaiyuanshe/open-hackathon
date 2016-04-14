@@ -109,7 +109,7 @@ class User(HDocumentBase):
     profile = EmbeddedDocumentField(UserProfile)
     provider = StringField(max_length=20)
     openid = StringField(max_length=100)
-    avatar_url = URLField()  # if avatar_url in UserProfile setted, this is not used
+    avatar_url = StringField()  # if avatar_url in UserProfile setted, this is not used
     access_token = StringField(max_length=256)
     online = BooleanField(default=False)
     last_login_time = DateTimeField()
@@ -251,7 +251,7 @@ class HackathonNotice(HDocumentBase):
     event = IntField()  # event: Class HACK_NOTICE_EVENT, records the specfic event that triggers current notice
     content = StringField()
     related_id = DynamicField()
-    link = URLField()
+    link = StringField()
     creator = ReferenceField(User)
     hackathon = ReferenceField(Hackathon)
     receiver = ReferenceField(User)
