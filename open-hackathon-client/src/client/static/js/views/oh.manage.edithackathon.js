@@ -62,7 +62,25 @@
         });
     }
 
+    //setup ckeditor
+    function ckeditorSetup() {
+        var editorElement = CKEDITOR.document.getById( 'markdownEdit' );
+        CKEDITOR.replace(editorElement, {
+            language: 'zh-cn',
+            width:  'auto',
+            height: '220'
+        });
+    }
+
+    //update before uploading, otherwise changes won't be saved
+    function ckeditorUpdateTextarea() {
+        for (instance in CKEDITOR.instances ) {
+            CKEDITOR.instances[instance].updateElement();
+        }
+    }
+
     function pageload() {
+        ckeditorSetup();
         gethackathon();
         $('.bootstrap-tagsinput input:text').removeAttr('style');
 
@@ -74,11 +92,6 @@
                 banner_form.data().bootstrapValidator.resetForm();
                 bannerModal.modal('hide');
             });
-
-        $('#markdownEdit').markdown({
-            hiddenButtons: 'cmdCode',
-            language: 'zh'
-        });
 
         var bannerModal = $('#bannerModal').on('hide.bs.modal', function (e) {
             banner_form.get(0).reset();
@@ -117,7 +130,11 @@
         $('#display_name').val(data.display_name);
         $('#short_description').val(data.short_description);
         $('#ribbon').val(data.ribbon);
-        $('#markdownEdit').val(data.description);
+        //ckeditor may be either ready or not ready here.
+        CKEDITOR.instances["markdownEdit"].on('instanceReady', function() {
+            CKEDITOR.instances["markdownEdit"].setData(data.description);
+        }); //if ckeditor is not ready, wait 'instanceReady' signal and setFormData, else not effective
+        CKEDITOR.instances["markdownEdit"].setData(data.description); //if ckeditor is ready, setFormData, else not effective
         setDaterange($('#event_time'), startTimeAndEndTimeTostring(data.event_start_time, data.event_end_time));
         setDaterange($('#register_time'), startTimeAndEndTimeTostring(data.registration_start_time, data.registration_end_time));
         setDaterange($('#judge_time'), startTimeAndEndTimeTostring(data.judge_start_time, data.judge_end_time));
@@ -127,7 +144,16 @@
         $('#auto_approve').attr({checked: Number(data.config.auto_approve) == 1});
         $('#alauda_enabled').attr({checked: Number(data.config.alauda_enabled) == 1});
         $('#freedom_team').attr({checked: Number(data.config.freedom_team) == 1});
+        setLoginPprovider(Number(data.config.login_provider || 0))
         initFilesData(data.banners);
+    }
+
+    function setLoginPprovider(value) {
+        $('[data-role="login_provider"]').each(function (i, ele) {
+            var box = $(ele);
+            var v = Number(box.val());
+            box.attr({checked: (value & v) == v});
+        });
     }
 
     function initFilesData(banners) {
@@ -176,7 +202,17 @@
         data.push({key: 'pre_allocate_enabled', value: false});
         data.push({key: 'pre_allocate_number', value: 1});
         data.push({key: 'freedom_team', value: $('#freedom_team').is(':checked')});
+        data.push({key: 'login_provider', value: getLoginProviderValue()});
         return data;
+    }
+
+    function getLoginProviderValue() {
+        var value = 0;
+        $('[data-role="login_provider"]:checked').each(function (i, ele) {
+            var box = $(ele);
+            value += Number(box.val());
+        });
+        return value;
     }
 
     function getTags() {
@@ -201,11 +237,13 @@
             .on('success.form.bv', function (e) {
                 e.preventDefault();
 
+                ckeditorUpdateTextarea();
+
                 var hack_data = getHackthonData();
                 var config_data = getConfig();
                 var tags_data = getTags();
 
-                update_hackathon({body: hack_data,header: {hackathon_name: hackathonName}}).then(function (data) {
+                update_hackathon({body: hack_data, header: {hackathon_name: hackathonName}}).then(function (data) {
                     if (data.error) {
                         oh.comm.alert('错误', data.error.friendly_message);
                     } else {
@@ -231,10 +269,6 @@
                     }
                 });
             });
-
-        $('#markdownEdit').markdown({
-            language: 'zh'
-        })
 
         $('#hackathon_switch').change(function (e) {
             var status = $(this).val();

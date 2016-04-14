@@ -28,10 +28,10 @@
                         <td width="5px" height="60px"></td>
                         <td width="100px" height="60px">
                             <select class="form-control" name="status" id="status">
-                                <option value="-1" selected="selected"> 全部</option>
+                                <option value="-1"> 全部</option>
                                 <option value="0"> 初始化中</option>
                                 <option value="1"> 准备中</option>
-                                <option value="2"> 运行中</option>
+                                <option value="2" selected="selected"> 运行中</option>
                                 <option value="3"> 已停止</option>
                                 <option value="4"> 已删除</option>
                                 <option value="5"> 已失败</option>
@@ -57,6 +57,7 @@
                         <th>状态</th>
                         <th>最后心跳时间</th>
                         <th>创建时间</th>
+                        <th>所在VM名称</th>
                         <th>操作</th>
                     </tr>
                     </thead>
@@ -100,6 +101,7 @@
         <td>${$item.getStatus(status)}</td>
         <td>${moment(last_heart_beat_time).format('YYYY-MM-DD HH:mm')}</td>
         <td>${moment(create_time).format('YYYY-MM-DD HH:mm')}</td>
+        <td>${$item.getAllHostservers(virtual_environments)}</td>
         <td>
             <a href="#" data-target="#confirm_reset_modal" data-toggle="modal" data-name="reset" data-value="reset" class="editable" data-placement="top">重置</a>
         </td>

@@ -2,169 +2,299 @@
 
 {% block style %}
     <link href="/static/css/oh.site.team.css" rel="stylesheet">
+    <link href="/static/css/magnific-popup.css" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
-    <div class="oh-main">
-        <div class="container">
-            <h1 class="title">Fendoe {{ name }}</h1>
+    <div class="oh-main team" data-tid="{{ team.id }}" data-role="{{ role }}" data-lid="{{ team.leader.id }}"
+         data-uid="{{ current_user.id }}">
 
-            <div class="row">
-                <div class="col-lg-3 col-md-4">
-                    <div class="oh-box">
-                        <img src="/static/pic/team-logo.png">
+        <div class="container ">
+            <ul class="breadcrumbs">
+                <li>当前黑客松： <a
+                        href="{{ url_for('hackathon', hackathon_name=hackathon_name) }}">{{ hackathon_name }}</a>
+                </li>
+                <li> {{ team.name }}</li>
+            </ul>
+        </div>
+
+        <div class="container ">
+            <div class="team-left">
+                <div class="warp clearfix">
+
+                    <div class="team-logo" data-parent="">
+                        <img id="team_logo" class="v-hidden"
+                             src="{{ team.logo == None and '/static/pic/team-logo.png' or team.logo }}"
+                             data-loadsrc="{{ team.logo == None and '/static/pic/team-logo.png' or team.logo }}"
+                             onerror="javascript:this.src='/static/pic/team-logo.png'">
+                        {% if team.is_leader %}
+                            <a href="javascript:;" class="edit" data-role="logo-edit">修改团队Logo</a>
+                        {% endif %}
                     </div>
+                    <div class="career" id="team_name">{{ team.name }}</div>
+                    <div id="team_description"> {{ team.description }}</div>
                 </div>
-                <div class="col-lg-9 col-md-8">
-                    <h2 id="description" class="title">团队介绍</h2>
 
-                    <div class="oh-body">
-                        {{ description }}
-                    </div>
+                <div class="warp">
+                    <ul class="oh-users" id="talent_list">
+                    </ul>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-lg-12">
-                    <h2 id="description" class="">团队成员</h2>
 
-                    <div class="oh-body ">
-                        <div class=" oh-users " id="talent_list">
-
-                            <div class="col-lg-2 col-md-4 col-xs-6">
-                                <div class="oh-item">
-                                    <div class="oh-header"><a href="javascript:;"><img
-                                            src="https://avatars.githubusercontent.com/u/5856568?v=3"
-                                            onerror="javascript:this.src='/static/pic/anon_user.png'"></a></div>
-                                    <div class="oh-body"><p class="text-center"><a href="javascript:;">Boli Guan</a></p>
+            <div class="team-right">
+                <div class="warp">
+                    <div class="oh-team-edit">
+                        {% if team.is_admin == False and team.is_leader == False %}
+                            {% if team.is_member and not team.is_frozen %}
+                                <a href="javascript:void(0);" class="btn btn-danger btn-sm"
+                                   data-role="leave">
+                                    <i class="fa fa-unlink"></i> 离队</a>
+                            {% elif team.is_admin == False and not team.is_frozen %}
+                                <a href="javascript:void(0);"
+                                   class="btn btn-info  btn-sm" data-role="join"><i
+                                        class="fa fa-link"></i> 加入</a>
+                            {% endif %}
+                        {% elif team.is_leader and not team.is_frozen %}
+                            <a href="javascript:void(0);"
+                               class="btn btn-primary btn-sm" data-role="edit">
+                                <i class="fa fa-edit"></i> 编辑</a>
+                            <a href="javascript:void(0);"
+                               class="btn btn-success btn-sm hide" data-role="save">
+                                <i class="fa fa-save"></i> 保存</a>
+                            <a href="javascript:void(0);"
+                               class="btn btn-success btn-sm hide" data-role="addworks">
+                                <i class="fa fa-save"></i> </a>
+                        {% elif team.is_admin %}
+                            <a href="/manage/{{ hackathon_name }}/team/{{ team.id }}"
+                               class="btn btn-info" target="manage">
+                                <i class="fa fa-gears"></i> 管理</a>
+                        {% endif %}
+                    </div>
+                    <div class="team-header">
+                        <div class="inline">
+                            <div class="group">
+                                <label class="">项目名称</label>
+                                <div class="n-right" id="pro_name">
+                                    {{ team.project_name }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="inline">
+                            <div class="group">
+                                <label class="">项目展示图</label>
+                                <div class="n-right" id="pro_name">
+                                    <img src="{{ team.cover }}">
+                                    <div class="nothing">
+                                        <img src="/static/images/monkey-1.png">
+                                        <p>封面未上传</p>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-lg-2 col-md-4 col-xs-6">
-                                <div class="oh-item">
-                                    <div class="oh-header"><a href="javascript:;"><img
-                                            src="http://tp3.sinaimg.cn/1885895770/180/39996705961/1"
-                                            onerror="javascript:this.src='/static/pic/anon_user.png'"></a></div>
-                                    <div class="oh-body"><p class="text-center"><a href="javascript:;">Fendoe</a></p>
-                                    </div>
+                        </div>
+                        <div class="inline">
+                            <div class="group">
+                                <label class="">项目简介</label>
+                                <div class="n-right" id="pro_name">
+                                    {{ team.project_description }}
                                 </div>
                             </div>
-                            <div class="col-lg-2 col-md-4 col-xs-6">
-                                <div class="oh-item">
-                                    <div class="oh-header"><a href="javascript:;"><img
-                                            src="http://qzapp.qlogo.cn/qzapp/101200890/7A988694CD75E4A16710FADD2D1761FF/30"
-                                            onerror="javascript:this.src='/static/pic/anon_user.png'"></a></div>
-                                    <div class="oh-body"><p class="text-center"><a href="javascript:;">Fendoe/dy</a></p>
+                        </div>
+                        <div class="inline">
+                            <div class="group">
+                                <label class="">项目说明书</label>
+                                <div class="n-right">
+                                    <div>
+                                        <a  href="https://opentech0storage.blob.core.chinacloudapi.cn/ohp/Azure%E4%BA%91%E4%B8%8A%E5%BC%80%E6%94%BE%E9%BB%91%E5%AE%A2%E6%9D%BE%E8%AE%A1%E5%88%92%E4%B9%A6%E6%8F%90%E4%BA%A4%E6%A8%A1%E6%9D%BF.pptx">下载项目说明书模板</a></a>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-2 col-md-4 col-xs-6">
-                                <div class="oh-item">
-                                    <div class="oh-header"><a href="javascript:;"><img src="/static/pic/anon_user.png"
-                                                                                       onerror="javascript:this.src='/static/pic/anon_user.png'"></a>
-                                    </div>
-                                    <div class="oh-body"><p class="text-center"><a href="javascript:;">管伯理</a></p></div>
-                                </div>
-                            </div>
-                            <div class="col-lg-2 col-md-4 col-xs-6">
-                                <div class="oh-item">
-                                    <div class="oh-header"><a href="javascript:;"><img src="/static/pic/anon_user.png"
-                                                                                       onerror="javascript:this.src='/static/pic/anon_user.png'"></a>
-                                    </div>
-                                    <div class="oh-body"><p class="text-center"><a href="javascript:;"></a></p></div>
-                                </div>
-                            </div>
-                            <div class="col-lg-2 col-md-4 col-xs-6">
-                                <div class="oh-item">
-                                    <div class="oh-header"><a href="javascript:;"><img src="/static/pic/anon_user.png"
-                                                                                       onerror="javascript:this.src='/static/pic/anon_user.png'"></a>
-                                    </div>
-                                    <div class="oh-body"><p class="text-center"><a href="javascript:;">admin</a></p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-2 col-md-4 col-xs-6">
-                                <div class="oh-item">
-                                    <div class="oh-header"><a href="javascript:;"><img
-                                            src="https://avatars.githubusercontent.com/u/5856568?v=3"
-                                            onerror="javascript:this.src='/static/pic/anon_user.png'"></a></div>
-                                    <div class="oh-body"><p class="text-center"><a href="javascript:;">Boli Guan</a></p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-2 col-md-4 col-xs-6">
-                                <div class="oh-item">
-                                    <div class="oh-header"><a href="javascript:;"><img
-                                            src="http://tp3.sinaimg.cn/1885895770/180/39996705961/1"
-                                            onerror="javascript:this.src='/static/pic/anon_user.png'"></a></div>
-                                    <div class="oh-body"><p class="text-center"><a href="javascript:;">Fendoe</a></p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-2 col-md-4 col-xs-6">
-                                <div class="oh-item">
-                                    <div class="oh-header"><a href="javascript:;"><img
-                                            src="http://qzapp.qlogo.cn/qzapp/101200890/7A988694CD75E4A16710FADD2D1761FF/30"
-                                            onerror="javascript:this.src='/static/pic/anon_user.png'"></a></div>
-                                    <div class="oh-body"><p class="text-center"><a href="javascript:;">Fendoe/dy</a></p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-2 col-md-4 col-xs-6">
-                                <div class="oh-item">
-                                    <div class="oh-header"><a href="javascript:;"><img src="/static/pic/anon_user.png"
-                                                                                       onerror="javascript:this.src='/static/pic/anon_user.png'"></a>
-                                    </div>
-                                    <div class="oh-body"><p class="text-center"><a href="javascript:;">管伯理</a></p></div>
-                                </div>
-                            </div>
-                            <div class="col-lg-2 col-md-4 col-xs-6">
-                                <div class="oh-item">
-                                    <div class="oh-header"><a href="javascript:;"><img src="/static/pic/anon_user.png"
-                                                                                       onerror="javascript:this.src='/static/pic/anon_user.png'"></a>
-                                    </div>
-                                    <div class="oh-body"><p class="text-center"><a href="javascript:;"></a></p></div>
-                                </div>
-                            </div>
-                            <div class="col-lg-2 col-md-4 col-xs-6">
-                                <div class="oh-item">
-                                    <div class="oh-header"><a href="javascript:;"><img src="/static/pic/anon_user.png"
-                                                                                       onerror="javascript:this.src='/static/pic/anon_user.png'"></a>
-                                    </div>
-                                    <div class="oh-body"><p class="text-center"><a href="javascript:;">admin</a></p>
-                                    </div>
+                                    {% if team.get('dev_plan')  %}
+                                    {% else %}
+                                        <iframe src="https://view.officeapps.live.com/op/embed.aspx?src={{ team.get('dev_plan') }}" seamless="seamless" frameborder="0" scrolling="yes"></iframe>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-lg-12">
-                    <h2 id="description" class="">团队作品</h2>
-
-                    <div class="oh-body">
-
+                <div class="warp" id="show_works">
+                    <div id="videos" class="show_item">
+                        <h2 id="works_video">视频展示</h2>
+                        <div class="w-videos">
+                            <div class="nothing hide">
+                                <img src="/static/images/monkey-2.png">
+                                <p>视频未上传</p>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-lg-12">
-                    <h2 id="description" class="">裁判评分</h2>
+                    <div id="docs" class="show_item">
+                        <h2 id="works_doc">文档说明</h2>
+                        <div class="w-doc">
+                            <div class="nothing hide">
+                                <img src="/static/images/monkey-3.png">
+                                <p>文档未上传</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="images" class="show_item">
+                        <h2 id="works_img">图片展示</h2>
+                        <div class="popup-gallery" id="work_images">
+                            <div class="nothing hide">
+                                <img src="/static/images/monkey-4.png">
+                                <p>图片未上传</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="code" class="show_item hide">
+                        <h2 id="works_code">源代码地址</h2>
+                        <div class="w-code">
 
-                    <div class="oh-body">
+                        </div>
+                    </div>
+                    <div id="other" class="show_item hide">
+                        <h2>其他展示</h2>
+                        <div class="w-other">
 
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    {% if team.is_leader %}
+        <div class="modal fade" id="works_Modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <form id="addWorksForm" class="form-horizontal" novalidate>
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                    aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel">作品发布</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label required">类型</label>
+                                <div class="col-sm-9">
+                                    <select class="form-control" id="worktype">
+                                        <option value="1">发布视频</option>
+                                        <option value="0">发布图片</option>
+                                        <option value="3">发布PowerPoint文档</option>
+                                        <option value="4">发布Excel文档</option>
+                                        <option value="5">发布Word文档</option>
+                                        <option value="6">发布PDF文档</option>
+                                        <option value="2">源代码路径</option>
+                                        <option value="99">发布其他作品</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">描述</label>
+
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" name="note" maxlength="80"
+                                           placeholder="描述信息">
+                                </div>
+                            </div>
+                            <div data-gtype="image">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label required">图片路径</label>
+                                    <div class="col-sm-9">
+                                        <input type="url" class="form-control" data-name="uri" name="work_image"
+                                               placeholder="http://"
+                                               required
+                                               data-bv-trigger="blur"
+                                               data-bv-message="请填写正确的图片访问路径"
+                                               data-bv-notempty-message="请填图片路径">
+                                    </div>
+                                </div>
+                            </div>
+                            <div data-gtype="video" class="active">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label required">视频地址</label>
+
+                                    <div class="col-sm-9">
+                                <textarea type="text" class="form-control" data-name="uri" name="work_video"
+                                          placeholder="<embed src='http://player.youku.com/......"
+                                          data-bv-trigger="blur"
+                                          required
+                                          data-bv-notempty-message="请填嵌入视频代码"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div data-gtype="doc">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label required">文档路径</label>
+
+                                    <div class="col-sm-9">
+                                        <input type="url" class="form-control" data-name="uri" name="work_doc"
+                                               placeholder="http://"
+                                               required
+                                               data-bv-trigger="blur"
+                                               data-bv-message="请填写正确的文档访问路径"
+                                               data-bv-notempty-message="请填文档路径">
+                                    </div>
+                                </div>
+                            </div>
+                            <div data-gtype="code">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label required">项目地址</label>
+
+                                    <div class="col-sm-9">
+                                        <input type="url" class="form-control" data-name="uri" name="work_code"
+                                               placeholder="https://github.com/......"
+                                               data-bv-trigger="blur"
+                                               data-bv-message="请填写正确的项目地址"
+                                               data-bv-notempty-message="请填项目地址">
+                                    </div>
+                                </div>
+                            </div>
+                            <div data-gtype="other">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label required">作品路径</label>
+                                    <div class="col-sm-9">
+                                        <input type="url" class="form-control" data-name="uri" name="work_other"
+                                               placeholder="http://"
+                                               required
+                                               data-bv-trigger="blur"
+                                               data-bv-message="请填写正确的访问路径"
+                                               data-bv-notempty-message="请填路径">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">确定</button>
+                            <button type="button" class="btn btn-warning" data-dismiss="modal">取消</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    {% endif %}
 {% endblock %}
 
 {% block script %}
-    <script id="team_item" type="text/x-jquery-tmpl">
-    {% raw %}
+    {% if team.is_leader and not team.is_frozen %}
+        <script id="team_item" type="text/x-jquery-tmpl">
+            {% raw %}
+            <li  data-user>
+                <span>${$item.getTitle(user.id, status)}</span>
+                <div class="oh-header" data-parent>
+                    <a href="/user/p_${user.id}">
+                     <img src="${$item.getUserLogo(user.avatar_url)}" onload="oh.comm.imgLoad(this)"  onerror="javascript:this.src='/static/pic/monkey-104-104px.jpg'">
+                    </a>
+                </div>
+                <a href="/user/p_${user.id}">${user.nickname}</a>
+                {{if $item.isNotLeader(user.id) }}
+                <div class="action">
+                    <button type="button" class="btn btn-sm btn-danger" data-id=${user.id} data-role="denied">踢出</button>
+                    {{if status == 0}}
+                    <button type="button" class="btn btn-sm btn-info" data-id=${user.id} data-role="approved">同意</button>
+                    {{/if}}
+                </div>
+                {{/if}}
+            </li>
+            {% endraw %}
 
-    {% endraw %}
 
 
 
@@ -180,7 +310,63 @@
 
 
 
-    </script>
+
+
+
+
+
+
+
+
+
+        </script>
+        <div class="modal fade" id="teamLogoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <form id="editLogoForm" class="form-horizontal" novalidate>
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                    aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel">修改团队Logo</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label required">图片路径</label>
+
+                                <div class="col-sm-9">
+                                    <input type="url" class="form-control" id="logo" name="logo" placeholder="图片路径"
+                                           required
+                                           data-bv-trigger="blur"
+                                           data-bv-message="请填写正确的图片访问路径"
+                                           data-bv-notempty-message="请填图片路径">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">确定</button>
+                            <button type="button" class="btn btn-warning" data-dismiss="modal">取消</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    {% else %}
+        <script id="team_item" type="text/x-jquery-tmpl">
+            {% raw %}
+            <li  data-user>
+                <span>${$item.getTitle(user.id, status)}</span>
+                <div class="oh-header" data-parent>
+                    <a href="/user/p_${user.id}">
+                     <img src="${$item.getUserLogo(user.avatar_url)}" onload="oh.comm.imgLoad(this)"  onerror="javascript:this.src='/static/pic/monkey-104-104px.jpg'">
+                    </a>
+                </div>
+                <a href="/user/p_${user.id}">${user.nickname}</a>
+            </li>
+            {% endraw %}
+
+        </script>
+    {% endif %}
+    <script type="text/javascript" src="/static/js/jquery/jquery.magnific-popup.min.js"></script>
     <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
     <script type="text/javascript" src="/static/js/views/oh.site.team.js"></script>
 {% endblock %}

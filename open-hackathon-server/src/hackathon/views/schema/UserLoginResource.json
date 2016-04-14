@@ -1,0 +1,32 @@
+{
+  "UserLoginResource": {
+    "get": {
+      "input": {
+        "title": "search for the user by id",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "identifier of User"
+          }
+        }
+      }
+    },
+    "post": {
+      "input": {
+        "title": "user login",
+        "type": "object",
+        "properties": {
+          "openid": {
+            "type": "string",
+            "description": "unique identifier of user in certain oauth provider"
+          },
+          "provider": {
+            "type": "string",
+            "description": "login provider"
+          }
+        }
+      }
+    }
+  }
+}

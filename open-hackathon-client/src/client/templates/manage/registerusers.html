@@ -25,6 +25,7 @@
                     <tr>
                         <th>注册名</th>
                         <th>邮箱</th>
+                        <th>登录方式</th>
                         <th>联系电话</th>
                         <th>联系地址</th>
                         <th>报名时间</th>
@@ -56,7 +57,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default wb-btn" data-dismiss="modal">取消</button>
-                    <button type="button" class="btn btn-primary wb-btn" data-type="delete">确定</button>
+                    <button type="button" class="btn btn-primary wb-btn" data-type="ok">确定</button>
                 </div>
             </div>
         </div>
@@ -67,26 +68,29 @@
 
     </script>
     <script id="register_list_template" type="text/x-jquery-tmpl">
+    {% raw %}
     <tr>
         <td>
             ${user.name}
         </td>
-        <td>{% raw %}{{each user.email}}${email} ,{{/each}}{% endraw %}</td>
-        <td>${user.user_profile.phone}</td>
-        <td>${user.user_profile.address}</td>
+        <td>{{each user.email}}${email} ,{{/each}}</td>
+        <td>${user.provider}</td>
+        <td>{{if user.user_profile}} ${user.user_profile.phone} {{/if}}</td>
+        <td>{{if user.user_profile}} ${user.user_profile.address} {{/if}}</td>
         <td>${moment(create_time).format('YYYY-MM-DD HH:mm')}</td>
         <td>
             <a href="javascript:void(0);" data-type="select" data-name="status" data-value="${status}" class="editable" data-source='{"0":"未审核","1":"通过","2":"拒绝","3":"自动通过"}' data-placement="top"></a>
         </td>
-
+    {% endraw %}
         <td class="col-action">
-        {% if current_user.is_super() %}
+        {% if current_user.is_super %}
             <a class="btn btn-danger btn-sm" href="#" data-target="#confirm_modal" data-toggle="modal">
                 <i class="fa fa-trash-o "></i>
             </a>
         {% endif %}
         </td>
     </tr>
+
     </script>
     <script type="text/javascript" src="/static/js/bootstrap/bootstrap-editable.js"></script>
     <script type="text/javascript" src="/static/js/views/oh.manage.register.js"></script>

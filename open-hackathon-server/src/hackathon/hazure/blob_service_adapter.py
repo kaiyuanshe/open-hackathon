@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 """
 Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
- 
+
 The MIT License (MIT)
- 
+
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -26,14 +26,14 @@ import sys
 
 sys.path.append("..")
 
-from azure.storage import BlobService
+from azure.storage.blob import BlobService
 
-from hackathon import Component
+from service_adapter import ServiceAdapter
 
 __all__ = ["BlobServiceAdapter"]
 
 
-class BlobServiceAdapter(Component):
+class BlobServiceAdapter(ServiceAdapter):
     """The :class:`BlobServiceAdapter` class is a thin wrapper over azure.storage.BlobService.
 
     All the attributes of the wrapper stream are proxied by the adapter so
@@ -42,12 +42,10 @@ class BlobServiceAdapter(Component):
     """
 
     def __init__(self):
-        self.blob_service = BlobService(account_name=self.util.get_config("storage.azure.account_name"),
-                                        account_key=self.util.get_config("storage.azure.account_key"),
-                                        host_base=self.util.get_config("storage.azure.blob_service_host_base"))
-
-    def __getattr__(self, name):
-        return getattr(self.blob_service, name)
+        super(BlobServiceAdapter, self).__init__(
+            BlobService(account_name=self.util.get_config("storage.azure.account_name"),
+                        account_key=self.util.get_config("storage.azure.account_key"),
+                        host_base=self.util.get_config("storage.azure.blob_service_host_base")))
 
     def create_container_in_storage(self, container_name, access="container"):
         """create a container if doesn't exist
@@ -60,9 +58,9 @@ class BlobServiceAdapter(Component):
         :return:
         """
         try:
-            names = [x.name for x in self.blob_service.list_containers()]
+            names = [x.name for x in self.service.list_containers()]
             if container_name not in names:
-                return self.blob_service.create_container(container_name, x_ms_blob_public_access=access)
+                return self.service.create_container(container_name, x_ms_blob_public_access=access)
             else:
                 self.log.debug("container already exists in storage")
                 return True
@@ -87,8 +85,8 @@ class BlobServiceAdapter(Component):
         """
         try:
             if self.create_container_in_storage(container_name, 'container'):
-                self.blob_service.put_block_blob_from_file(container_name, blob_name, stream)
-                return self.blob_service.make_blob_url(container_name, blob_name)
+                self.service.put_block_blob_from_file(container_name, blob_name, stream)
+                return self.service.make_blob_url(container_name, blob_name)
             else:
                 return None
         except Exception as e:
@@ -112,8 +110,8 @@ class BlobServiceAdapter(Component):
         """
         try:
             if self.create_container_in_storage(container_name, 'container'):
-                self.blob_service.put_block_blob_from_bytes(container_name, blob_name, blob)
-                return self.blob_service.make_blob_url(container_name, blob_name)
+                self.service.put_block_blob_from_bytes(container_name, blob_name, blob)
+                return self.service.make_blob_url(container_name, blob_name)
             else:
                 return None
         except Exception as e:
@@ -136,8 +134,8 @@ class BlobServiceAdapter(Component):
         """
         try:
             if self.create_container_in_storage(container_name, 'container'):
-                self.blob_service.put_block_blob_from_text(container_name, blob_name, text)
-                return self.blob_service.make_blob_url(container_name, blob_name)
+                self.service.put_block_blob_from_text(container_name, blob_name, text)
+                return self.service.make_blob_url(container_name, blob_name)
             else:
                 return None
         except Exception as e:
@@ -160,8 +158,8 @@ class BlobServiceAdapter(Component):
         """
         try:
             if self.create_container_in_storage(container_name, 'container'):
-                self.blob_service.put_block_blob_from_path(container_name, blob_name, path)
-                return self.blob_service.make_blob_url(container_name, blob_name)
+                self.service.put_block_blob_from_path(container_name, blob_name, path)
+                return self.service.make_blob_url(container_name, blob_name)
             else:
                 return None
         except Exception as e:
@@ -171,7 +169,7 @@ class BlobServiceAdapter(Component):
     def delete_file_from_azure(self, container_name, blob_name):
         try:
             if self.create_container_in_storage(container_name, 'container'):
-                self.blob_service.delete_blob(container_name, blob_name)
+                self.service.delete_blob(container_name, blob_name)
         except Exception as e:
             self.log.error(e)
             return None

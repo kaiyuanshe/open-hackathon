@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 """
 Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
- 
+
 The MIT License (MIT)
- 
+
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -30,12 +30,11 @@ import inspect
 from apscheduler.jobstores.base import JobLookupError
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.util import undefined
-from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
+from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR, EVENT_JOB_ADDED
 
 from hackathon.hackathon_factory import RequiredFeature
 from hackathon.util import safe_get_config, get_config, get_now
 from hackathon.log import log
-
 
 __all__ = ["HackathonScheduler"]
 
@@ -48,17 +47,19 @@ def scheduler_listener(event):
     :param event: the event executed and related to the apscheduler job
     """
     if event.code == EVENT_JOB_ERROR:
-        print('The job crashed :(')
+        log.debug('The job crashed :(')
         log.warn("The schedule job crashed because of %s" % repr(event.exception))
+    elif event.code == EVENT_JOB_ADDED:
+        log.debug("job added %s" % event.job_id)
     else:
-        print('The job executed :)')
+        log.debug('The job executed :)')
         log.debug("The schedule job %s executed and return value is '%s'" % (event.job_id, event.retval))
 
 
 def scheduler_executor(feature, method, context):
     """task for all apscheduler jobs
 
-    While the context of apscheduler job will be serialized and saved into MySQL, it's hard that add a instance method
+    While the context of apscheduler job will be serialized and saved into MySQL, it's hard that add an instance method
     as an apscheduler job because the context is usually very complicate and not easy to be serialized. For example, see
     we want to add an new job to execute 'user_mgr.get_user_info' in 5 minutes, then the whole 'user_mgr' which involves
     many other classes will be serialized and saved which probably fail for many of them including 'user_mgr' itself are
@@ -89,9 +90,9 @@ def scheduler_executor(feature, method, context):
         mtd(context)
 
 
-class HackathonScheduler():
+class HackathonScheduler(object):
     """An helper class for apscheduler"""
-    jobstore = None
+    jobstore = "ohp"
 
     def get_scheduler(self):
         """Return the apscheduler instance in case you have to call it directly
@@ -146,6 +147,7 @@ class HackathonScheduler():
                                        id=id,
                                        max_instances=1,
                                        replace_existing=replace_existing,
+                                       jobstore=self.jobstore,
                                        args=[feature, method, context])
 
     def add_interval(self, feature, method, context=None, id=None, replace_existing=True, next_run_time=undefined,
@@ -189,6 +191,7 @@ class HackathonScheduler():
                                        max_instances=1,
                                        replace_existing=replace_existing,
                                        next_run_time=next_run_time,
+                                       jobstore=self.jobstore,
                                        args=[feature, method, context],
                                        **interval)
 
@@ -206,6 +209,13 @@ class HackathonScheduler():
             except Exception as e:
                 log.error(e)
 
+    def has_job(self, job_id):
+        """Check the existence of specific job """
+        if self.__apscheduler:
+            job = self.__apscheduler.get_job(job_id, jobstore=self.jobstore)
+            return job is not None
+        return False
+
     def __init__(self, app):
         """Initialize APScheduler
 
@@ -217,16 +227,26 @@ class HackathonScheduler():
 
         # NOT instantiate while in flask DEBUG mode or in the main thread
         # It's to avoid APScheduler being instantiated twice
-        if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
+        if os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
             self.__apscheduler = BackgroundScheduler(timezone=utc)
 
             # add MySQL job store
-            if safe_get_config("scheduler.job_store", "memory") == "mysql":
-                self.jobstore = 'sqlalchemy'
-                self.__apscheduler.add_jobstore(self.jobstore, url=get_config("scheduler.job_store_url"))
+            job_store_type = safe_get_config("scheduler.job_store", "memory")
+            if job_store_type == "mysql":
+                log.debug("add aps_cheduler job store based on mysql")
+                self.__apscheduler.add_jobstore('sqlalchemy',
+                                                alias=self.jobstore,
+                                                url=get_config("scheduler.job_store_url"))
+            elif job_store_type == "mongodb":
+                log.debug("add aps_cheduler job store based on mongodb")
+                self.__apscheduler.add_jobstore('mongodb',
+                                                alias=self.jobstore,
+                                                database=safe_get_config("scheduler.database", "apscheduler"),
+                                                collection=safe_get_config("scheduler.collection", "jobs"),
+                                                host=safe_get_config("scheduler.host", "localhost"),
+                                                port=safe_get_config("scheduler.port", 27017))
 
             # add event listener
-            self.__apscheduler.add_listener(scheduler_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
+            self.__apscheduler.add_listener(scheduler_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR|EVENT_JOB_ADDED)
             log.info("APScheduler loaded")
             self.__apscheduler.start()
-

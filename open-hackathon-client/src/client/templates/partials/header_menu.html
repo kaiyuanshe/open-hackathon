@@ -13,37 +13,39 @@
             <li {% if request.endpoint  == 'index' %}class="active"{% endif %}>
                 <a href="{{ url_for('index') }}">首页</a>
             </li>
-            <li>
-                <a href="#">预览活动</a>
+            <li class="soon">
+                <a href="#" data-toggle="tooltip" data-placement="top" title="coming soon">预览活动</a>
+            </li>
+            <li class="soon">
+                <a href="#" data-toggle="tooltip" data-placement="top" title="coming soon">黑客松社区</a>
             </li>
             <li>
-                <a href="#">黑客松社区</a>
-            </li>
-            <li>
-                <a href="#">新手帮助</a>
+                <a href="https://github.com/msopentechcn/open-hackathon/wiki/%E5%BC%80%E6%94%BE%E9%BB%91%E5%AE%A2%E6%9D%BE%E5%B9%B3%E5%8F%B0%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97"
+                   target="_blank">新手帮助</a>
             </li>
         </ul>
     {% endif %}
     <ul class="nav navbar-nav navbar-right">
-        <li><a href=""><span class="glyphicon glyphicon-search"></span></a></li>
+        {#        <li><a href=""><span class="glyphicon glyphicon-search"></span></a></li>#}
         <!-- start: User Dropdown -->
         {% if current_user.nickname %}
-            <li><a href="{{ url_for('create_hackathon') }}">发布活动</a></li>
-            <li class="dropdown oh-h-mgs">
-                <a class="dropdown-toggle" data-toggle="dropdown" href="javascirpt:;">
-                    <i class="fa fa-envelope"></i>
-                    消息<span></span>
-                    <span class="oh-caret"></span>
-                </a>
-                <ul class="dropdown-menu">
-                    <li>暂无消息</li>
-                </ul>
-            </li>
+            <li><a href="{{ url_for('create_event') }}">发布活动</a></li>
+            <!--<li class="dropdown oh-h-mgs">-->
+            <!--<a class="dropdown-toggle" data-toggle="dropdown" href="javascirpt:;">-->
+            <!--<i class="fa fa-envelope"></i>-->
+            <!--消息<span></span>-->
+            <!--<span class="oh-caret"></span>-->
+            <!--</a>-->
+            <!--<ul class="dropdown-menu">-->
+            <!--<li>暂无消息</li>-->
+            <!--</ul>-->
+            <!--</li>-->
             <li class="dropdown">
                 <a class="dropdown-toggle" data-toggle="dropdown" href="javascirpt:;">
-                    <img class="avatar"
-                         src="{{ current_user.avatar_url == none and  '/static/pic/anon_user.png' or current_user.avatar_url }}"
-                         alt="{{ current_user.nickname }}" onerror="javascript:this.src='/static/pic/anon_user.png'">
+                    <img class="avatar" data-role="picture"
+                         src="{{ current_user.get_avatar_url() == none and  '/static/pic/monkey-32-32px.png' or current_user.get_avatar_url() }}"
+                         alt="{{ current_user.nickname }}"
+                         onerror="javascript:this.src='/static/pic/monkey-32-32px.png'">
                     我的黑客松
                     <span class="oh-caret"></span>
                 </a>
@@ -56,23 +58,45 @@
                         </a>
                     </li>
                     <li class="divider"></li>
-                    <li><a href="{{ url_for('user_profile') }}"><i class="fa fa-star"></i>个人信息</a></li>
-                    <li><a href="{{ url_for('myhackathon') }}"><i class="fa fa-envelope"></i> 我的活动</a></li>
-                    <li><a href="{{ url_for('team_list') }}"><i class="fa fa-envelope"></i> 我的团队</a></li>
-                    <li><a href="{{ url_for('myhackathon') }}"><i class="fa fa-envelope"></i> 我的管理</a></li>
-                    <li><a href="{{ url_for('logout') }}"><i class="fa fa-off"></i> 登出</a></li>
+                    <li><a href="{{ url_for('user_profile') }}"><i class="fa fa-info-circle"></i> 个人信息</a></li>
+                    <li><a href="{{ url_for('myhackathon') }}"><i class="fa fa-trophy"></i> 我的活动</a></li>
+                    <li><a target="_blank"
+                           href="https://github.com/msopentechcn/open-hackathon/wiki/%E5%BC%80%E6%94%BE%E9%BB%91%E5%AE%A2%E6%9D%BE%E5%B9%B3%E5%8F%B0%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97"><i
+                            class="fa fa-question-circle"></i> 新手帮助</a></li>
+                    <li><a href="{{ url_for('myhackathon') }}"><i class="fa fa-wrench"></i> 我的管理</a></li>
+                    <li><a href="{{ url_for('logout',return_url=request.path) }}"><i class="fa fa-sign-out"></i> 登出</a>
+                    </li>
+                </ul>
+            </li>
+            <li class="dropdown messages">
+                <a class="dropdown-toggle" data-toggle="dropdown" href="javascirpt:;">
+                    <span class="fa fa-lg fa-envelope"></span>
+                    <span class="m-count" data-mq>0</span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li class="d-header">
+                        消息（<span data-mq>0</span>）
+                    </li>
+                    <li role="separator" class="divider"></li>
+                    <li class="m-nothing">
+                        <div>暂无任何消息！</div>
+                    </li>
+                    <li class="divider"></li>
+                    <li class="d-footer">
+                        查看更多
+                    </li>
                 </ul>
             </li>
         {% else %}
-            <li><a href="{{ url_for('login',return_url='/manage/create') }}">发布活动</a></li>
-            <li><a href="{{ url_for('login',return_url=request.path) }}">登陆</a></li>
+            <li><a href="{{ url_for('login',return_url='/manage/create_event') }}">发布活动</a></li>
+            <li><a href="{{ url_for('login',return_url=request.path) }}">登录</a></li>
         {% endif %}
         <!-- end: User Dropdown -->
     </ul>
     {% if workspace %}
         <ul class="nav navbar-nav navbar-right">
             <li>
-                <a id="timer">距离{{ hackathon.name }}结束还有：
+                <a id="timer">距离{{ hackathon.display_name }}结束还有：
                     <span id="end_timer" data-endtiem="{{ hackathon.event_end_time }}"></span>
                 </a>
             </li>

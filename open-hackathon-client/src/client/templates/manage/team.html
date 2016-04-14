@@ -1,0 +1,80 @@
+{% extends "manage/main.html" %}
+
+{% block style %}
+    <style>
+        .a_img {
+            width: 120px;
+        }
+
+        .a_img img {
+            max-width: 100px;
+            max-height: 100px;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="col-lg-12" loading>
+        <div class="box" style="display:none">
+            <div class="box-header">
+                <h2><i class="fa fa-edit"></i>评奖</h2>
+            </div>
+            <div class="box-content">
+                <div id="awardtable">
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th>团队Logo</th>
+                            <th>团队名称</th>
+                            <th>组长名称</th>
+                            <th>成员人数</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody id="awardlist">
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock body %}
+
+{% block script %}
+    <div class="modal fade bs-example-modal-sm" id="confirm_modal" tabindex="-1" role="dialog"
+         aria-labelledby="mySmallModalLabel" aria-hidden="true" data-api="oh.api.admin.registration.delete">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">提示</h4>
+                </div>
+                <div class="modal-body">
+                    <p>确定删除此地址记录？</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default wb-btn" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary wb-btn" data-type="ok">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{ super() }}
+    <script id="hackathon_award" type="text/x-jquery-tmpl">
+    <tr>
+        <td class="a_img"><img src="${logo}"></td>
+        <td>${name}</td>
+        <td>${leader.name}</td>
+        <td>${member_count}</td>
+        <td class="col-action">
+            <a class="btn btn-success" href="/manage/${$item.hackathon_name}/team/${id}">
+                <i class="fa fa-search-plus "></i>
+            </a>
+        </td>
+    </tr>
+    </script>
+    <script type="text/javascript" src="/static/js/views/oh.manage.team.js"></script>
+{% endblock %}

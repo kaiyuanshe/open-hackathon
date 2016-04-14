@@ -1,0 +1,49 @@
+{
+  "HackathonAwardResource": {
+    "post": {
+      "input": {
+        "description": "update team information",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "name of award",
+            "type": "string",
+            "maxLength": 40
+          },
+          "level": {
+            "description": "level of award, 0-10",
+            "pattern": "^[0-9]+$"
+          },
+          "quota": {
+            "description": "quota of award",
+            "pattern": "^[0-9]+$"
+          }
+        }
+      }
+    },
+    "put": {
+      "input": {
+        "description": "update award information",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "unique identifier of award",
+            "pattern": "^[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}$"
+          }
+        }
+      }
+    },
+    "delete": {
+      "input": {
+        "description": "delete award content",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "unique identifier of award",
+            "pattern": "^[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}$"
+          }
+        }
+      }
+    }
+  }
+}

@@ -6,7 +6,7 @@
         "properties": {
           "team_id": {
             "description": "unique identifier of team",
-            "pattern": "^[0-9]+$"
+            "pattern": "^[0-9a-zA-Z]+$"
           }
         }
       }
@@ -17,25 +17,25 @@
         "type": "object",
         "properties": {
           "team_id": {
-            "type": "integer"
+            "pattern": "^[0-9a-zA-Z]+$"
           },
           "type": {
             "type": "integer"
           },
           "uri": {
             "type": "string",
-            "maxLength": 200
+            "maxLength": 300
           }
         }
       }
     },
-    "put": {
+    "delete": {
       "input": {
-        "description": "score specific team by admin/judge",
         "type": "object",
         "properties": {
           "id": {
-            "pattern": "^[0-9]+$"
+            "description": "unique identifier for work",
+            "pattern": "^[0-9a-zA-Z\\-]+$"
           }
         }
       }

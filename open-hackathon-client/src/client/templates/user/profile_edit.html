@@ -1,0 +1,210 @@
+{% extends "base/base.html" %}
+{% block style %}
+    <link href="/static/css/oh.user.profile.css" rel="stylesheet">
+{% endblock %}
+{% block content %}
+    <div class="oh-main">
+        <div class="container profile-edit">
+            <div class="warp">
+                <h2 class="line-title">个人信息</h2>
+
+                <div class="clearfix">
+                    <div class="profile-left">
+                        <div class="picture">
+                            <img src="{{ current_user.get_avatar_url() }}" data-role="picture" onerror="javascript:this.src='/static/pic/monkey-204-204px.png'">
+                        </div>
+                        <a href="#" data-toggle="modal" data-target="#pictureModal" class="update-picture"><i
+                                class="fa fa-cloud-upload"></i> 更新头像</a>
+                        <ul class="profile-provider">
+                            <li class="windows {% if current_user.provider == 'live' %} active {% endif %}"> Microsoft
+                                Account 登录
+                            </li>
+                            <li class="github {% if current_user.provider == 'github' %} active {% endif %}"> Gihub 登录
+                            </li>
+                            <li class="qq {% if current_user.provider == 'qq' %} active {% endif %}"> QQ 登录</li>
+                            <li class="weibo {% if current_user.provider == 'weibo' %} active {% endif %}"> Weibo 登录
+                            </li>
+                            <li class="alauda {% if current_user.provider == 'alauda' %} active {% endif %}"> 灵雀云 登录
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="profile-right">
+                        <div class="row ">
+                            <form id="profileForm" class="" novalidate>
+                                <fieldset class="pofile-form">
+                                    <div class="form-group">
+                                        <label class="control-label required">姓名</label>
+                                        <input type="text" class="form-control" name="real_name" placeholder="姓名"
+                                               required
+                                               data-bv-trigger="blur"
+                                               data-bv-notempty-message="姓名必须填写">
+
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label required">联系电话</label>
+                                        <input type="text" class="form-control" name="phone" placeholder="联系电话"
+                                               required
+                                               data-bv-trigger="blur"
+                                               data-bv-notempty-message="联系电话必须填写">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label required">联系地址</label>
+                                        <input type="text" class="form-control" name="address"
+                                               placeholder="寄出奖品的默认地址"
+                                               required
+                                               data-bv-trigger="blur"
+                                               data-bv-notempty-message="联系地址必须填写">
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-xs-6 has-feedback">
+                                                <label class="control-label">性别</label>
+                                                <select class="form-control" name="gender">
+                                                    <option value="-1">秘密</option>
+                                                    <option value="1">男</option>
+                                                    <option value="0">女</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-xs-6 has-feedback">
+                                                <label class="control-label">年龄</label>
+                                                <input type="number" class="form-control" name="age"
+                                                       placeholder="年龄"
+                                                       value="20"
+                                                       min="1" max="99"
+                                                       data-bv-trigger="blur"
+                                                       data-bv-integer-message="请输入年龄">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-xs-6 has-feedback">
+                                                <label class="control-label">行业类型</label>
+                                                <select class="form-control" name="career_type">
+                                                    <option value="计算机/互联网/通信">计算机/互联网/通信</option>
+                                                    <option value="生产/工艺/制造">生产/工艺/制造</option>
+                                                    <option value="医疗/护理/制药">医疗/护理/制药</option>
+                                                    <option value="金融/银行/投资/保险">金融/银行/投资/保险</option>
+                                                    <option value="商业/服务业/个体经营户">商业/服务业/个体经营户</option>
+                                                    <option value="文化/广告/传媒">文化/广告/传媒</option>
+                                                    <option value="娱乐/艺术/表演">娱乐/艺术/表演</option>
+                                                    <option value="法律/法务">法律/法务</option>
+                                                    <option value="教育/培训">教育/培训</option>
+                                                    <option value="公务员/行政/事业单位">公务员/行政/事业单位</option>
+                                                    <option value="模特">模特</option>
+                                                    <option value="空姐">空姐</option>
+                                                    <option value="学生">学生</option>
+                                                    <option value="其他">其他</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-xs-6 has-feedback">
+                                                <label class="control-label">职务</label>
+                                                <input type="text" class="form-control" name="career" placeholder="职务">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-xs-6 has-feedback">
+                                                <label class="control-label">Skype</label>
+                                                <input type="text" class="form-control" name="skype"
+                                                       placeholder="Skype">
+                                            </div>
+                                            <div class="col-xs-6 has-feedback">
+                                                <label class="control-label">QQ</label>
+                                                <input type="text" class="form-control" name="qq" placeholder="QQ">
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-xs-6 has-feedback">
+                                                <label class="control-label">微信</label>
+                                                <input type="text" class="form-control" placeholder="微信" name="wechat">
+                                            </div>
+                                            <div class="col-xs-6 has-feedback">
+                                                <label class="control-label">微博</label>
+                                                <input type="text" class="form-control" placeholder="微博" name="weibo">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-xs-6 has-feedback">
+                                                <button type="submit" class="btn btn-success btn-block"><i
+                                                        class="fa fa-download"></i> 保存
+                                                </button>
+                                            </div>
+                                            <div class="col-xs-6 has-feedback">
+                                                <a href="/user/profile" class="btn btn-default btn-block"><i
+                                                        class="fa fa-arrow-circle-left"></i> 取消
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </fieldset>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade bs-example-modal-sm" id="alert" tabindex="-1" role="dialog"
+         aria-labelledby="mySmallModalLabel">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">提示</h4>
+                </div>
+                <div class="modal-body">
+                    <p>个人信息保存成功。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="bottom" class="btn btn-primary" data-type="ok">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="pictureModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <form id="pictureForm" class="form-horizontal" novalidate>
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">更新头像</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group"
+                             ng-class="{ 'has-error' : registerForm.team_name.$invalid && registerForm.team_name.$touched }">
+                            <label class="col-sm-3 control-label required">图片路径</label>
+
+                            <div class="col-sm-9">
+                                <input type="url" class="form-control" id="picture" name="picture" placeholder="图片路径"
+                                       required
+                                       data-bv-trigger="blur"
+                                       data-bv-message="请填写正确的图片访问路径"
+                                       data-bv-notempty-message="请填图片路径">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">确定</button>
+                        <button type="button" class="btn btn-warning" data-dismiss="modal">取消</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+{% block script %}
+    <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
+    <script type="text/javascript" src="/static/js/views/oh.user.profile.edit.js"></script>
+{% endblock %}

@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 """
 Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
- 
+
 The MIT License (MIT)
- 
+
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -30,9 +30,11 @@ import os
 from os.path import dirname, realpath, abspath, isfile
 import commands
 
-from hackathon.database import AzureKey, HackathonAzureKey, Hackathon
+from hackathon.hazure.cloud_service_adapter import CloudServiceAdapter
+from hackathon.hmongo.models import Hackathon, AzureKey, Experiment
+
 from hackathon import RequiredFeature, Component, Context
-from hackathon.hackathon_response import not_found, ok
+from hackathon.hackathon_response import ok
 from hackathon.constants import FILE_TYPE
 
 __all__ = ["AzureCertManager"]
@@ -66,6 +68,7 @@ class AzureCertManager(Component):
 
         base_url = '%s/%s' % (self.CERT_BASE, subscription_id)
         pem_url = base_url + '.pem'
+        cert_url = base_url + '.cer'
 
         # avoid duplicate pem generation
         if not os.path.isfile(pem_url):
@@ -75,7 +78,6 @@ class AzureCertManager(Component):
         else:
             self.log.debug('%s exists' % pem_url)
 
-        cert_url = base_url + '.cer'
         # avoid duplicate cert generation
         if not os.path.isfile(cert_url):
             cert_command = 'openssl x509 -inform pem -in %s -outform der -out %s' % (pem_url, cert_url)
@@ -83,46 +85,70 @@ class AzureCertManager(Component):
         else:
             self.log.debug('%s exists' % cert_url)
 
-        azure_key = self.db.find_first_object_by(AzureKey,
-                                                 cert_url=cert_url,
-                                                 pem_url=pem_url,
-                                                 subscription_id=subscription_id,
-                                                 management_host=management_host)
-        # avoid duplicate azure key
+        azure_key = AzureKey.objects(subscription_id=subscription_id, management_host=management_host).first()
+
         if azure_key is None:
-            azure_key = self.db.add_object_kwargs(AzureKey,
-                                                  cert_url=cert_url,
-                                                  pem_url=pem_url,
-                                                  subscription_id=subscription_id,
-                                                  management_host=management_host)
-            self.db.commit()
+            azure_key = AzureKey(
+                cert_url=base_url + '.cer',
+                pem_url=base_url + '.pem',
+                subscription_id=subscription_id,
+                management_host=management_host,
+                verified=False
+            )
+
+            azure_key.save()
+
+            hackathon.azure_keys.append(azure_key)
+            hackathon.save()
         else:
             self.log.debug('azure key exists')
 
-        hackathon_azure_key = self.db.find_first_object_by(HackathonAzureKey,
-                                                           hackathon_id=hackathon.id,
-                                                           azure_key_id=azure_key.id)
-        # avoid duplicate hackathon azure key
-        if hackathon_azure_key is None:
-            self.db.add_object_kwargs(HackathonAzureKey,
-                                      hackathon_id=hackathon.id,
-                                      azure_key_id=azure_key.id)
-            self.db.commit()
+        if not (azure_key in hackathon.azure_keys):
+            hackathon.azure_keys.append(azure_key)
+            hackathon.save()
         else:
             self.log.debug('hackathon azure key exists')
 
-        file_name = subscription_id + '.cer'
-        context = Context(
+        # store cer file
+        cer_context = Context(
             hackathon_name=hackathon.name,
-            file_name=file_name,
+            file_name=subscription_id + '.cer',
             file_type=FILE_TYPE.AZURE_CERT,
             content=file(cert_url)
         )
-        self.log.debug("saving cerf file [%s] to azure" % file_name)
-        context = self.storage.save(context)
-        azure_key.cert_url = context.url
-        self.db.commit()
-        return azure_key.cert_url
+        self.log.debug("saving cerf file [%s] to azure" % cer_context.file_name)
+        cer_context = self.storage.save(cer_context)
+        azure_key.cert_url = cer_context.url
+
+        # store pem file
+        # encrypt certification file before upload to storage
+        encrypted_pem_url = self.__encrypt_content(pem_url)
+        pem_contex = Context(
+            hackathon_name=hackathon.name,
+            file_name=subscription_id + '.pem',
+            file_type=FILE_TYPE.AZURE_CERT,
+            content=file(encrypted_pem_url)
+        )
+        self.log.debug("saving pem file [%s] to azure" % pem_contex.file_name)
+        pem_contex = self.storage.save(pem_contex)
+        os.remove(encrypted_pem_url)
+        azure_key.pem_url = pem_contex.url
+
+        azure_key.save()
+
+        return azure_key.dic()
+
+    def get_certificates_by_expr(self, expr_id):
+        """Get certificates by experiment id
+        """
+        # expr = self.db.get_object(Experiment, expr_id)
+        expr = Experiment.objects(id=expr_id)
+        # hak = self.db.find_all_objects_by(HackathonAzureKey, hackathon_id=expr.hackathon_id)
+        hak = Hackathon.objects(id=expr.hackathon_id).first().azure_keys[0]
+        if not hak:
+            raise Exception("no azure key configured")
+
+        return map(lambda key: self.db.get_object(AzureKey, key.azure_key_id), hak)
 
     def get_certificates(self, hackathon):
         """Get certificates by hackathon
@@ -133,14 +159,14 @@ class AzureCertManager(Component):
         :rtype list
         :return a list of AzureKey
         """
-        hackathon_azure_keys = self.db.find_all_objects_by(HackathonAzureKey, hackathon_id=hackathon.id)
+
+        hackathon_azure_keys = [a.dic() for a in hackathon.azure_keys]
+
         if len(hackathon_azure_keys) == 0:
             # if no certificates added before, return 404
             return []
 
-        certificates = map(lambda key: self.db.get_object(AzureKey, key.azure_key_id).dic(),
-                           hackathon_azure_keys)
-        return certificates
+        return hackathon_azure_keys
 
     def delete_certificate(self, certificate_id, hackathon):
         """Delete certificate by azureKey.id and hackathon
@@ -154,24 +180,52 @@ class AzureCertManager(Component):
         :param hackathon: instance of Hackathon
         """
         # delete all hackathon-azureKey relationships first
-        self.db.delete_all_objects_by(HackathonAzureKey, hackathon_id=hackathon.id, azure_key_id=certificate_id)
+
+        azure_key = AzureKey.objects(id=certificate_id).first()
 
         # if no relations left, delete the azureKey itself
-        if self.db.count_by(HackathonAzureKey, azure_key_id=certificate_id) == 0:
-            azure_key = self.db.get_object(AzureKey, certificate_id)
-            if azure_key:
-                try:
-                    if isfile(azure_key.cert_url):
-                        os.remove(azure_key.cert_url)
-                    else:
-                        self.storage.delete(azure_key.cert_url)
-                except Exception as e:
-                    self.log.error(e)
+        if azure_key in hackathon.azure_keys:
+            try:
+                if isfile(azure_key.cert_url):
+                    os.remove(azure_key.cert_url)
+                else:
+                    self.storage.delete(azure_key.cert_url)
+                if isfile(azure_key.pem_url):
+                    os.remove(azure_key.pem_url)
+                else:
+                    self.storage.delete(azure_key.pem_url)
+            except Exception as e:
+                self.log.error(e)
 
-                self.db.delete_all_objects_by(AzureKey, id=certificate_id)
-                self.db.commit()
+            hackathon.azure_keys.remove(azure_key)
+            hackathon.save()
 
-        return ok()
+        return ok(True)
+
+    def check_sub_id(self, subscription_id):
+
+        azure_key = AzureKey.objects(subscription_id=subscription_id).first()
+
+        if self.util.is_local():
+            if azure_key is not None:
+                azure_key.verified = True
+                azure_key.save()
+            return ok(True)
+
+        if azure_key is None:
+            return ok(False)
+
+        try:
+            sms = CloudServiceAdapter(azure_key.subscription_id,
+                                      azure_key.get_local_pem_url(),
+                                      host=azure_key.management_host)
+            sms.list_hosted_services()
+            azure_key.verified = True
+            azure_key.save()
+        except Exception:
+            return ok(False)
+
+        return ok(True)
 
     def __init__(self):
         self.CERT_BASE = self.util.get_config('azure.cert_base')
@@ -184,3 +238,26 @@ class AzureCertManager(Component):
 
         if not os.path.exists(self.CERT_BASE):
             os.makedirs(self.CERT_BASE)
+
+    def __encrypt_content(self, pem_url):
+        encrypted_pem_url = pem_url + ".encrypted"
+        cryptor = RequiredFeature("cryptor")
+        cryptor.encrypt(pem_url, encrypted_pem_url)
+        return encrypted_pem_url
+
+    def get_local_pem_url(self, pem_url):
+        local_pem_url = self.CERT_BASE + "/" + pem_url.split("/")[-1]
+        if not isfile(local_pem_url):
+            self.log.debug("Recover local %s.pem file from azure storage %s" % (local_pem_url, pem_url))
+            cryptor = RequiredFeature("cryptor")
+            cryptor.recover_local_file(pem_url, local_pem_url)
+        return local_pem_url
+
+
+# recover a pem file from azure
+def get_local_pem_url(azureKey):
+    azure_cert_manager = RequiredFeature("azure_cert_manager")
+    return azure_cert_manager.get_local_pem_url(azureKey.pem_url)
+
+
+AzureKey.get_local_pem_url = get_local_pem_url

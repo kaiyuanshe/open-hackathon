@@ -1,0 +1,27 @@
+{
+  "UserListResource": {
+    "get": {
+      "input": {
+        "title": "search for the user list",
+        "description": "GET the list of users. Return users according to the keyword",
+        "type": "object",
+        "properties": {
+          "keyword": {
+            "type": "string",
+            "description": "keyword to search for users"
+          },
+          "page": {
+            "description": "page num",
+            "pattern": "^[0-9]+$",
+            "required": false
+          },
+          "per_page": {
+            "description": "users num in each page",
+            "pattern": "^[0-9]+$",
+            "required": false
+          }
+        }
+      }
+    }
+  }
+}

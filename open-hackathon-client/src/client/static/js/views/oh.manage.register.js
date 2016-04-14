@@ -57,10 +57,29 @@
                 }
             });
         });
+
+    }
+
+    function deleteuRegister(data) {
+        return oh.api.admin.registration.delete(data);
     }
 
     function init() {
         pageLoad();
+        var confirmModal = $('#confirm_modal').on('show.bs.modal', function (e) {
+            console.log(e);
+            editLi = $(e.relatedTarget).parents('tr');
+        }).on('click', '[data-type="ok"]', function (e) {
+            var id = editLi.data('tmplItem').data.id;
+            confirmModal.modal('hide');
+            deleteuRegister({query: {id: id}, header: {hackathon_name: currentHackathon}}).then(function (data) {
+                if (data.error) {
+                    oh.comm.alert('delete registered user fail: ', data.error.friendly_message);
+                } else {
+                    editLi.detach();
+                }
+            });
+        });
     }
 
     $(function () {

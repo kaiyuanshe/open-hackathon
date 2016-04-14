@@ -68,14 +68,14 @@
     <script id="table_template" type="text/x-jquery-tmpl">
     {% raw %}
     <tr>
-        <td>${name}</td>
-        <td>${virtual_environment_count}</td>
-        <td>${$item.getStatus(status)}</td>
-        <td>${moment(create_time).format('YYYY/MM/DD HH:mm')}</td>
+        <td>${template.name}</td>
+        <td>${template.virtual_environment_count}</td>
+        <td>${$item.getStatus(template.status)}</td>
+        <td>${moment(template.create_time).format('YYYY/MM/DD HH:mm')}</td>
 
-        <td><a href="${azure_url}">下载</a></td>
+        <td><a href="${template.url}">下载</a></td>
         <td class="col-action">
-            <a type="button" class="btn btn-danger btn-sm" href="#" data-target="#confirm_modal" data-toggle="modal">
+            <a type="button" class="btn btn-danger btn-sm" href="#" data-role="delete">
                 <i class="fa fa-trash-o "></i>
             </a>
             <a type="button" class="btn btn-success btn-sm" href="/testtemplate?hackathon_name=${$item.hackathon_name}&temp_name=${name}" target="top" title="诊断">
@@ -99,7 +99,6 @@
         </div>
     </div>
     {% endraw %}
-
     </script>
     <script type="text/javascript" src="/static/js/views/oh.manage.template.js"></script>
 {% endblock %}

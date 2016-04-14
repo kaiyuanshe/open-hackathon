@@ -1,13 +1,79 @@
-.title {
-    color: #000;
-    font-weight: 500;
+.oh-main {
+    padding-top: 30px;
 }
 
-.title span {
-    font-size: 12px;
-    color: #505050;
+.oh-main .container {
+    width: 1080px !important;
+    padding: 0;
 }
 
+h1.title {
+    padding: 10px 0;
+    margin: 0;
+}
+
+#detail .title {
+    color: #7dba41;
+}
+
+.h-info {
+    min-height: 335px;
+    position: relative;
+    padding-left: 8px;
+}
+
+.h-info #status {
+    vertical-align: text-bottom;
+    position: absolute;
+    bottom: 10px;
+}
+
+.h-info .btn {
+    padding: 5px 24px;
+}
+
+.carousel-inner {
+    height: 335px;
+}
+
+.nav-tabs {
+    border-bottom: 2px solid #cfd2d2;
+}
+
+.nav-tabs > li {
+    margin-bottom: -2px;
+    margin-right: 30px;
+}
+
+.nav-tabs > li > a {
+    padding: 10px 0;
+    border-radius: 0;
+    background: none;
+    border: none;
+    color: #888;
+    margin: 0;
+    font-size: 15px;
+    border-bottom: 2px solid transparent;
+}
+
+.nav-tabs > li.active a,
+.nav-tabs > li.active a:hover,
+.nav-tabs > li.active a:focus {
+    background-color: inherit;
+    border: none;
+    color: #7dba41;
+    border-bottom: 2px solid #7dba41;
+}
+
+.nav-tabs > li > a:hover {
+    background-color: inherit;
+    border: none;
+    color: #7dba41;
+}
+
+.tab-content {
+    padding: 20px 0;
+}
 
 .tags {
     padding: 0;
@@ -35,13 +101,13 @@
     border-color: #b4b4b4;
 }
 
-
-
-
+.oh-detail-info .fa-map-marker {
+    margin-left: 2px;
+}
 
 .oh-detail-info dt {
     float: left;
-    width: 60px;
+    width: 80px;
     clear: left;
     font-weight: normal;
     overflow: hidden;
@@ -50,14 +116,15 @@
 }
 
 .oh-detail-info dd {
-    margin: 20px 0 30px 60px;
+    margin: 0 0 5px;
+    color: #777778;
 }
 
 .oh-latest-news dt {
     float: left;
     width: 75px;
     clear: left;
-    text-align: right;
+    text-align: left;
     font-weight: normal;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -65,7 +132,7 @@
 }
 
 .oh-latest-news {
-    font-size: 12px;
+    font-size: 14px;
     margin-bottom: 14px;
 }
 
@@ -78,7 +145,7 @@
 
 .oh-latest-news dd span {
     position: absolute;
-    top: -3px;
+    top: -2px;
     left: -32px;
     width: 25px;
     height: 25px;
@@ -120,10 +187,65 @@
 .baidu-map {
     height: 265px;
 }
-.teams .oh-thumb,
+
+.teams {
+    margin: 0 -6px;
+}
+
+.teams .media {
+    margin-bottom: 20px;
+}
+
+.teams .oh-thumb {
+    width: 50px;
+    max-height: 50px;
+    border-radius: 50%;
+}
+
 .organizer .oh-thumb {
-    width: 96px;
-    max-height: 96px;
+    width: 70px;
+    max-height: 70px;
+}
+
+.teams .item {
+    margin-bottom: 20px;
+    border: 1px solid #dbdedd;
+    padding: 10px;
+}
+.teams .team-body {
+    margin-left: 60px;
+}
+.teams .logo {
+    height: 50px;
+    width: 50px;
+    float: left;
+}
+
+.teams .item .footer {
+    padding-top: 10px;
+    border-top: 1px solid #f3f3f3;
+    color: #888;
+}
+
+.teams .item .footer span {
+    color: #141415;
+}
+
+.teams .item .footer p {
+    margin: 0;
+}
+
+.teams .item .footer img {
+    max-height: 24px;
+    max-width: 24px;
+}
+
+.teams .media-heading {
+    margin: 5px 0;
+    font-size: 15px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .interest .oh-thumb {
@@ -133,14 +255,24 @@
 
 .organizer .media,
 .interest .media {
-    padding-bottom: 14px;
-    border-bottom: 1px solid #D2D2D2;
+    border-bottom: 1px solid #edf0ef;
+    padding: 10px;
+}
+
+.organizer .media h4 {
+    font-size: 18px;
+    color: #141415;
+}
+
+.organizer .media .media-body {
+    color: #888;
+    font-size: 14px;
 }
 
 .organizer .media:last-child,
 .interest .media:last-child {
     border: none;
-    padding-bottom: 0;
+    margin: 0;
 }
 
 .reg-h-name {
@@ -150,10 +282,6 @@
 
 .jumbotron p {
     font-size: 15px;
-}
-
-.oh-main {
-    padding-bottom: 60px;
 }
 
 .oh-share, .oh-share * {
@@ -169,6 +297,12 @@
 
 .oh-share .jiathis_style_24x24 .jtico {
     margin-left: 0;
+}
+
+.oh-def-link,
+.oh-def-link:hover {
+    color: #1172c6 !important;
+    text-decoration: underline !important;
 }
 
 .users-list {
@@ -200,6 +334,176 @@
 }
 
 .no-team {
-    padding-top:20px;
+    padding-top: 20px;
     padding-bottom: 20px;
+}
+
+.iframe iframe {
+    width: 100% !important;
+    height: 500px !important;
+}
+
+.oh-thumb img.oh-thumbnail {
+    height: auto;
+    max-height: 450px;
+    width: 100%;
+}
+
+#team_show .item {
+    position: relative;
+    background-color: #fff;
+    border: 1px solid #d2d2d2;
+    margin-bottom: 20px;
+    height: 326px;
+}
+
+#team_show .item .header {
+    height:178px;
+    border-bottom:1px solid #d0d3d2;
+}
+
+#team_show .item .body {
+   padding:5px 20px;
+   height: 115px;
+   overflow:hidden;
+}
+#team_show .item .body p{
+    margin-bottom:5px;
+}
+#team_show .item .body .desc{
+    border-top:1px solid #d0d3d2;
+    font-size:12px;
+    padding: 5px 0;
+    color: #818182;
+}
+#team_show .item .body h4{
+    margin: 5px 0;
+    font-size: 15px;
+    min-height: 25px;
+}
+#team_show .item .footer{
+     padding:5px 20px;
+     background-color:#f1f1f2;
+     border-top: 1px solid #d0d3d2;
+}
+#team_show .item .footer p{
+    margin:0;
+}
+#team_show .item .footer a{
+    margin-left:15px;
+    color:#019e48;
+}
+#team_show .item .footer a:hover,
+#team_show .item .footer a:focus{
+    color:#7dba41;
+}
+.activity-info {
+    padding-right: 28px;
+}
+
+#comment #ds-thread #ds-reset .ds-comments-info {
+    margin: 0;
+}
+
+#comment #ds-thread #ds-reset .ds-textarea-wrapper {
+    background: none;
+    border-radius: 0;
+}
+
+#comment #ds-thread #ds-reset .ds-post-options {
+    border-radius: 0;
+    background: none;
+    border: 1px solid #ccc;
+}
+
+#comment #ds-thread #ds-reset .ds-post-button {
+    color: #fff;
+    background-image: none;
+    background-color: #7dba43;
+    border-color: #7dba43;
+    border-radius: 0;
+    text-shadow: none;
+    box-shadow: none;
+}
+
+#comment #ds-thread #ds-reset .ds-post-button:focus,
+#comment #ds-thread #ds-reset .ds-post-button.focus {
+    color: #ffffff;
+    background-color: #649535;
+    border-color: #649535;
+}
+
+#comment #ds-thread #ds-reset .ds-post-button:hover {
+    color: #ffffff;
+    background-color: #649535;
+    border-color: #649535;
+}
+
+#comment #ds-thread #ds-reset .ds-post-button:active,
+#comment #ds-thread #ds-reset .ds-post-button.active {
+    color: #ffffff;
+    background-color: #649535;
+    border-color: #649535;
+}
+
+.award {
+    position: relative;
+    float: left;
+    width: 200px;
+    height: 200px;
+    overflow: hidden;
+    margin: 0 10px 10px 0;
+}
+
+.award:before {
+    position: absolute;
+
+    width: 35px;
+    height: 44px;
+    z-index: 10;
+    top: 0;
+    right: 5px;
+}
+
+.award.award-1:before {
+    content: '';
+    background: url('/static/images/award-icon-01.png') no-repeat;
+}
+
+.award.award-2:before {
+    content: '';
+    background: url('/static/images/award-icon-02.png') no-repeat;
+}
+
+.award.award-3:before {
+    content: '';
+    background: url('/static/images/award-icon-03.png') no-repeat;
+}
+
+.award .award-body h3 {
+    font-size: 14px;
+    margin: 0
+}
+
+.award .award-body p {
+    margin-bottom: 0;
+    font-size: 12px;
+    overflow: hidden;
+    height: 20px;
+}
+
+.award .award-body {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 5px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    color: #fff;
+    line-height: 20px;
+}
+
+.award:hover .award-body p {
+    height: auto;
 }

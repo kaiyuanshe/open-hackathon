@@ -1,0 +1,32 @@
+{
+  "AdminExperimentListResource": {
+    "get": {
+      "input": {
+        "description": "get the list of experiments",
+        "type": "object",
+        "properties": {
+          "user_name": {
+            "description": "user_name of experiments",
+            "type": "string",
+            "required": false
+          },
+          "status": {
+            "description": "status of experiments",
+            "pattern": "^[0-9]+$",
+            "required": false
+          },
+          "page": {
+            "description": "the current page number",
+            "pattern": "^[0-9]+$",
+            "required": false
+          },
+          "per_page": {
+            "description": "number shown in each page",
+            "pattern": "^[0-9]+$",
+            "required": false
+          }
+        }
+      }
+    }
+  }
+}

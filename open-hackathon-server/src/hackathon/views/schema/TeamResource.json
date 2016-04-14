@@ -1,5 +1,17 @@
 {
   "TeamResource": {
+    "get": {
+      "input": {
+        "description": "get team info by team id",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "unique identifier of team",
+            "type": "string"
+          }
+        }
+      }
+    },
     "put": {
       "input": {
         "description": "update team information",
@@ -7,7 +19,7 @@
         "properties": {
           "id": {
             "description": "unique identifier of team",
-            "type": "integer"
+            "type": "string"
           }
         }
       }
@@ -19,7 +31,7 @@
         "properties": {
           "id": {
             "description": "unique identifier of team",
-            "pattern": "^[0-9]+$"
+            "type": "string"
           }
         }
       }

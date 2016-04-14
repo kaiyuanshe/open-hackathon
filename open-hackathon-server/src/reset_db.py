@@ -24,8 +24,8 @@
 # THE SOFTWARE.
 # -----------------------------------------------------------------------------------
 
-from hackathon.database import Base, engine
+from hackathon.hmongo import drop_db
 from setup_db import setup_db
 
-Base.metadata.drop_all(bind=engine)
+drop_db()
 setup_db()

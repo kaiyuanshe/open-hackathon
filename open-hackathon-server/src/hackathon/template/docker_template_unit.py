@@ -124,6 +124,12 @@ class DockerTemplateUnit(TemplateUnit):
     def get_name(self):
         return self.dic[DOCKER_UNIT.NAME]
 
+    def get_type(self):
+        return self.dic[DOCKER_UNIT.TYPE]
+
+    def get_description(self):
+        return self.dic[DOCKER_UNIT.DESCRIPTION]
+
     def get_container_config(self):
         """
         Compose post data for docker remote api create
@@ -137,13 +143,26 @@ class DockerTemplateUnit(TemplateUnit):
                   DOCKER_UNIT.HOST_CONFIG_HOST_PORT: str(p[DOCKER_UNIT.PORTS_HOST_PORT])}]
         self.dic.pop(DOCKER_UNIT.NAME, "")
         self.dic.pop(DOCKER_UNIT.TYPE, "")
+        self.dic.pop(DOCKER_UNIT.PROVIDER, "")
         self.dic.pop(DOCKER_UNIT.DESCRIPTION, "")
         self.dic.pop(DOCKER_UNIT.PORTS, None)
         self.dic.pop(DOCKER_UNIT.REMOTE, None)
+        if not self.dic[DOCKER_UNIT.CMD]:
+            self.dic.pop(DOCKER_UNIT.CMD, [])
+        if not self.dic[DOCKER_UNIT.ENTRY_POINT]:
+            self.dic.pop(DOCKER_UNIT.ENTRY_POINT, "")
         return self.dic
 
     def get_image_with_tag(self):
-        return self.dic[DOCKER_UNIT.IMAGE]
+        image = self.dic[DOCKER_UNIT.IMAGE]
+        data = image.split(':')
+        if len(data) == 2:
+            return image
+        else:
+            return image + ':latest'
+
+    def set_ports(self, port_cfg):
+        self.dic[DOCKER_UNIT.PORTS] = port_cfg
 
     def get_ports(self):
         return self.dic[DOCKER_UNIT.PORTS]
@@ -157,11 +176,7 @@ class DockerTemplateUnit(TemplateUnit):
 
     def get_tag(self):
         image = self.get_image_with_tag()
-        data = image.split(':')
-        if len(data) == 2:
-            return data[1]
-        else:
-            return 'latest'
+        return image.split(':')[1]
 
     def get_run_command(self):
         cmd = self.dic[DOCKER_UNIT.CMD]
@@ -177,7 +192,7 @@ class DockerTemplateUnit(TemplateUnit):
             if len(arr) == 2:
                 env_vars[arr[0]] = arr[1]
 
-        map(lambda env: convert(env), DOCKER_UNIT.ENV or [])
+        map(lambda env: convert(env), self.dic[DOCKER_UNIT.ENV] or [])
         return env_vars
 
     def get_instance_ports(self):

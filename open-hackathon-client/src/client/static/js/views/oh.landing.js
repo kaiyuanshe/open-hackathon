@@ -25,17 +25,29 @@
 (function ($, oh) {
 
     function bind_event() {
+        var wallpaper = $('.wallpaper');
         var activity1 = $('.activity').hover(function () {
-            activity2.addClass('opacity')
+            activity2.addClass('opacity');
+            wallpaper.addClass('active');
         }, function () {
             activity2.removeClass('opacity');
+            wallpaper.removeClass('active');
+        }).click(function () {
+            $.cookie("ohplpv", "true");
+            return true
         });
 
         var activity2 = $('.activity-create').hover(function () {
-            activity1.addClass('opacity')
+            activity1.addClass('opacity');
+            wallpaper.addClass('active');
         }, function () {
-            activity1.removeClass('opacity')
+            activity1.removeClass('opacity');
+            wallpaper.removeClass('active');
+        }).click(function () {
+            $.cookie("ohplpv", "true")
+            return true
         });
+        ;
     }
 
     function init() {

@@ -1,0 +1,154 @@
+.main-inner {
+  max-width: 1268px;
+  margin: 0 auto;
+}
+
+@media (max-width: 1297px) {
+  .main-inner {
+    max-width: 934px;
+  }
+}
+
+@media (max-width: 981px) {
+  .main-inner {
+    max-width: 617px;
+  }
+}
+
+@media (max-width: 664px) {
+  .main-inner {
+    max-width: 300px;
+  }
+}
+
+.activity-list {
+  margin-left: -17px;
+}
+
+.activity-list .item {
+  width: 300px;
+  margin-left: 17px;
+  float: left;
+  position: relative;
+  border: 1px solid #d0d2d3;
+  margin-bottom: 38px;
+  background-color: #fff;
+}
+
+.activity-list .item header {
+  height: 168px;
+  position: relative;
+  overflow: hidden;
+}
+
+.activity-list .item header img {}
+
+.activity-list .item header span {
+  position: absolute;
+  display: block;
+  padding: 10px 15px;
+  background: rgba(30, 29, 33, 0.5);
+  width: 100%;
+  color: #fff;
+  bottom: 0px;
+}
+
+.activity-list .item>a {
+  position: absolute;
+  z-index: 2;
+  right: 16px;
+  top: 16px;
+  border-radius: 0;
+  padding: 2px 10px;
+}
+
+.activity-list .item-body {
+  padding: 10px 10px 0;
+  min-height: 120px;
+  word-wrap: break-word;
+}
+
+.activity-list .item-body .name {
+  margin: 0;
+  font-size: 14px;
+  height: 50px;
+  overflow: hidden;
+}
+
+.activity-list time {
+  font-size: 13px;
+  color: #6d6e70;
+}
+
+.activity-list .description {
+  border-top: 1px solid #d0d2d3;
+  min-height: 40px;
+  color: #6d6e70;
+  font-size: 12px;
+  margin: 0;
+}
+
+.activity-list .btn-group-justified>.btn {
+  border-radius: 0;
+  border-color: #d0d2d3;
+  border-bottom: none;
+  border-right: none;
+}
+
+.activity-list .btn-group-justified>.btn:first-child:not(:last-child):not(.dropdown-toggle) {
+  border-left: none;
+}
+
+.activity-list .btn-default.disabled,
+.activity-list .btn-default[disabled],
+.activity-list fieldset[disabled] .btn-default,
+.activity-list .btn-default.disabled:hover,
+.activity-list .btn-default[disabled]:hover,
+.activity-list fieldset[disabled] .btn-default:hover,
+.activity-list .btn-default.disabled:focus,
+.activity-list .btn-default[disabled]:focus,
+.activity-list fieldset[disabled] .btn-default:focus,
+.activity-list .btn-default.disabled.focus,
+.activity-list .btn-default[disabled].focus,
+.activity-list fieldset[disabled] .btn-default.focus,
+.activity-list .btn-default.disabled:active,
+.activity-list .btn-default[disabled]:active,
+.activity-list fieldset[disabled] .btn-default:active,
+.activity-list .btn-default.disabled.active,
+.activity-list .btn-default[disabled].active,
+.activity-list fieldset[disabled] .btn-default.active {
+  background-color: #f1f1f2;
+  border-color: #d0d2d3;
+  color: #6d6e70;
+  opacity: 1;
+}
+
+.activity-list .btn-success.disabled,
+.activity-list .btn-success[disabled],
+.activity-list fieldset[disabled] .btn-success,
+.activity-list .btn-success.disabled:hover,
+.activity-list .btn-success[disabled]:hover,
+.activity-list fieldset[disabled] .btn-success:hover,
+.activity-list .btn-success.disabled:focus,
+.activity-list .btn-success[disabled]:focus,
+.activity-list fieldset[disabled] .btn-success:focus,
+.activity-list .btn-success.disabled.focus,
+.activity-list .btn-success[disabled].focus,
+.activity-list fieldset[disabled] .btn-success.focus,
+.activity-list .btn-success.disabled:active,
+.activity-list .btn-success[disabled]:active,
+.activity-list fieldset[disabled] .btn-success:active,
+.activity-list .btn-success.disabled.active,
+.activity-list .btn-success[disabled].active,
+.activity-list fieldset[disabled] .btn-success.active {
+  color: #ffffff;
+  background-color: #7dba43;
+  border-color: #7dba43;
+  opacity: 1;
+}
+
+
+
+.azure-subscription form{
+  padding: 60px 0;
+}

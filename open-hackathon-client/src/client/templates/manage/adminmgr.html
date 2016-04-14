@@ -15,6 +15,7 @@
           </h2>
         </div>
         <div class="box-content">
+
             <div id="adminlisttable">
                 <a data-type="new" href="javascript:;">添加</a>
                 <table class="table table-bordered">
@@ -25,9 +26,9 @@
                             <th>角色类型</th>
                             <th>状态</th>
                             <th>账户类别</th>
-                            <th>备注</th>
                             <th>最后登录时间</th>
                             <th>创建时间</th>
+                            <th>备注</th>
                             <th>操作</th>
                         </tr>
                     </thead>
@@ -35,58 +36,70 @@
                     </tbody>
                 </table>
             </div>
-            <div>
-                <form class="form-horizontal" id="adminform" style="display:none">
+
+            <div id="adminsearchbartable">
+                <form class="form-horizontal" id="adminsearchbarform" style="">
                     <fieldset>
                         <legend>
-                            添加管理员信息
+                            查找添加管理员信息
                         </legend>
                     </fieldset>
 
                     <div class="form-group has-feedback">
-                        <label class="col-md-3 control-label">邮箱</label>
+                        <label class="col-md-3 control-label">搜索用户</label>
+
                         <div class="col-md-6">
-                            <input type="email" class="form-control" name="admin_email" id="admin_email" placeholder=""
+                            <input type="searchadminuser" class="form-control" name="admin_searchbar"
+                                   id="admin_searchbar" placeholder="用户名/昵称/邮箱"
                                    required
                                    data-bv-trigger="blur"
-                                   data-bv-notempty-message="管理员邮箱地址不能为空">
-                        </div>
-                    </div>
-
-                    <div class="form-group has-feedback">
-                        <label class="col-md-3 control-label">角色类型</label>
-                        <div class="col-md-6">
-                            <select class="form-control" name="role_type" id="role_type">
-                                <option value="1" selected="selected">管理员</option>
-                                <option value="2">裁判</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group has-feedback">
-                        <label class="col-md-3 control-label">备注</label>
-                        <div class="col-md-6">
-                            <textarea rows="4" class="form-control" name="remarks" id="remarks" placeholder=""></textarea>
+                                   data-bv-notempty-message="搜索内容不能为空">
                         </div>
                     </div>
 
                     <div class="form-group has-feedback">
                         <div class="col-sm-offset-3 col-sm-6">
-                            <button type="button" class="btn btn btn-default" data-type="cancel"> 取消</button>
-                            <button type="submit" class="btn btn-primary"> 提交</button>
+                            <button type="button" class="btn btn-primary" data-type="search"> 搜索</button>
+                            <button type="button" class="btn btn btn-default" data-type="cancel"> 返回</button>
                         </div>
                     </div>
-
                 </form>
+            </div>
+
+            <div id="adminsearchlisttable">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>名称</th>
+                            <th>昵称</th>
+                            <th>真名</th>
+                            <th>邮箱</th>
+                            <th>状态</th>
+                            <th>账户类别</th>
+                            <th>电话</th>
+                            <th>地址</th>
+                            <th>备注</th>
+                            <th>角色类型</th>
+                        </tr>
+                    </thead>
+                    <tbody id="hackathon_search_list">
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
-<div class="modal fade bs-example-modal-sm" id="confirm_modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-api="oh.api.admin.register.delete">
+{% endblock body %}
+
+{% block script %}
+<div class="modal fade bs-example-modal-sm" id="delete_admin_modal" tabindex="-1" role="dialog"
+     aria-labelledby="mySmallModalLabel" aria-hidden="true" data-api="oh.api.admin.register.delete">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
                 <h4 class="modal-title">提示</h4>
             </div>
             <div class="modal-body">
@@ -99,9 +112,31 @@
         </div>
     </div>
 </div>
-{% endblock body %}
 
-{% block script %}
+<div class="modal fade bs-example-modal-sm" id="edit_remark_modal" tabindex="-1" role="dialog"
+     aria-labelledby="mySmallModalLabel" aria-hidden="true" data-api="">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">提示</h4>
+            </div>
+            <div class="modal-body">
+                <p>请输入备注的内容:</p>
+                <div class="col-md-6">
+                    <input class="form-control" name="remarks" id="remarks" placeholder="输入备注"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default wb-btn" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary wb-btn" data-type="ok">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {{ super() }}
 <script id="hackathon_template" type="text/x-jquery-tmpl">
     <option value=${id}>${name}</option>
@@ -109,23 +144,49 @@
 <script id="hackathon_admin_list_template" type="text/x-jquery-tmpl">
     <tr>
         <td>${user_info.nickname}</td>
-        <td>${$item.getEmails(user_info.email)}</td>
-        <td>${$item.getRole(role_type)}</td>
+        <td>${$item.getEmails(user_info.emails)}</td>
+        <td>
+            <a href="javascript:void(0);" id="searchlist_roletype" data-type="select" data-name="role_type"
+            data-value="${role_type}" class="editable" data-source='{"1":"管理员", "2":"裁判"}' data-placement="top">
+            </a>
+        </td>
         <td>${$item.getOnline(user_info.online)}</td>
         <td>${user_info.provider}</td>
-        <td>${remarks}</td>
         <td>${moment(user_info.last_login_time).format('YYYY-MM-DD HH:mm')}</td>
         <td>${moment(create_time).format('YYYY-MM-DD HH:mm')}</td>
 
+        <td>${remarks}</td>
         <td class="col-action">
-            <a class="btn btn-info btn-sm" data-type="edit">
-                <i class="fa fa-edit "></i>
+            <a class="btn btn-info btn-sm" data-type="edit" href="#" data-target="#edit_remark_modal"
+                data-toggle="modal">
+                <i class="fa fa-edit"></i>
             </a>
-            <a class="btn btn-danger btn-sm" href="#" data-target="#confirm_modal" data-toggle="modal">
+            <a class="btn btn-danger btn-sm" href="#" data-target="#delete_admin_modal" data-toggle="modal">
                 <i class="fa fa-trash-o "></i>
             </a>
         </td>
     </tr>
 </script>
+
+<script id="hackathon_admin_search_list_template" type="text/x-jquery-tmpl">
+    <tr>
+        <td>${name}</td>
+        <td>${nickname}</td>
+        <td>${user_profile.real_name}</td>
+        <td>${$item.getEmails(email)}</td>
+        <td>${$item.getOnline(online)}</td>
+        <td>${provider}</td>
+        <td>${user_profile.phone}</td>
+        <td>${user_profile.address}</td>
+        <td>${remarks}</td>
+        <td>
+            <a href="javascript:void(0);" id="searchlist_roletype" data-type="select" data-name="role_type"
+                data-value="${role_type}" class="editable" data-source='{"1":"管理员", "2":"裁判", "3":"普通用户"}'
+                data-placement="top"></a>
+        </td>
+    </tr>
+</script>
+
+<script type="text/javascript" src="/static/js/bootstrap/bootstrap-editable.js"></script>
 <script type="text/javascript" src="/static/js/views/oh.manage.adminmgr.js"></script>
 {% endblock %}

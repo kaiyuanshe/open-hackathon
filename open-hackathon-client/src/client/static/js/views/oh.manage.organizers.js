@@ -28,7 +28,7 @@
 
     var currentHackathon = oh.comm.getCurrentHackathon();
 
-    function bindAzurecertList() {
+    function bindOrganizerList() {
         var list = $('#organizerlist');
         oh.api.admin.hackathon.get({
             header: {hackathon_name: currentHackathon}
@@ -39,6 +39,12 @@
                 list.empty().append($('#hackathon_organizer').tmpl(data.organizer || [], {
                     substring: function (str, length) {
                         return oh.comm.stripTags(markdown.toHTML(str), length);
+                    },
+                    get_organization_type: function (organization_type) {
+                        switch(organization_type){
+                            case 2: return "合作伙伴"; break;
+                            default: return "主办方";
+                        }
                     }
                 }));
                 oh.comm.removeLoading();
@@ -57,9 +63,11 @@
     }
 
     function getFormData() {
+        var organizationtype = $('#organization_type').val()=="主办方"? 1:2;
         var formData = {
             id: $('#organizerform').data('id') || 0,
             name: $.trim($('#name').val()),
+            organization_type: organizationtype,
             description: $('#description').val(),
             homepage: $('#homepage').val(),
             logo: $('#logo').val()
@@ -70,6 +78,11 @@
     function setFormData(data) {
         $('#organizerform').data({id: data.id});
         $('#name').val(data.name);
+        switch(data.organization_type){
+            case 1: $('#organization_type').val("主办方"); break;
+            case 2: $('#organization_type').val("合作伙伴"); break;
+            default: alert("no such organization_type");
+        }
         $('#description').val(data.description);
         $('#homepage').val(data.homepage);
         $('#logo').val(data.logo);
@@ -91,7 +104,7 @@
             if (data.error) {
                 oh.comm.alert('错误', data.error.friendly_message);
             } else {
-                bindAzurecertList();
+                bindOrganizerList();
                 resetForm();
             }
         });
@@ -102,8 +115,18 @@
             if (data.error) {
                 oh.comm.alert('错误', data.error.friendly_message);
             } else {
-                bindAzurecertList();
+                bindOrganizerList();
                 resetForm();
+            }
+        });
+    }
+
+    function deleteOrganizers(data){
+        return oh.api.admin.hackathon.organizer.delete(data, function(data){
+            if (data.error) {
+                oh.comm.alert('错误', data.error.friendly_message);
+            } else {
+                bindOrganizerList();
             }
         });
     }
@@ -117,15 +140,14 @@
 
     function init() {
         var organizerform = $('#organizerform');
-        organizerform.bootstrapValidator()
-            .on('success.form.bv', function (e) {
-                e.preventDefault();
-                var itemData = getFormData();
-                var data = {body: itemData, header: {hackathon_name: hackathonName}};
-                (itemData.id == 0 ? createOrganizers(data) : updateOrganizers(data)).then(function () {
-                    toggleTable();
-                })
-            });
+        organizerform.bootstrapValidator().on('success.form.bv', function (e) {
+            e.preventDefault();
+            var itemData = getFormData();
+            var data = {body: itemData, header: {hackathon_name: currentHackathon}};
+            (itemData.id == 0 ? createOrganizers(data) : updateOrganizers(data)).then(function () {
+                toggleTable();
+            })
+        });
 
         $('#organizertable').on('click', '[data-type="edit"]', function (e) {
             editLi = $(this).parents('tr')
@@ -147,9 +169,9 @@
             console.log(e);
             editLi = $(e.relatedTarget).parents('tr');
         }).on('click', '[data-type="ok"]', function (e) {
-            editLi.data('tmplItem').data = undefined;
-            basic_info.organizers = getOrganizers();
-            updateOrganizers(basic_info);
+            var data_organizer_id = editLi.data('tmplItem').data.id;
+            var data = {header: {hackathon_name: currentHackathon}, query: {id: data_organizer_id}};
+            deleteOrganizers(data);
             confirmModal.modal('hide');
         });
 
@@ -158,7 +180,7 @@
             language: 'zh'
         });
 
-        bindAzurecertList();
+        bindOrganizerList();
     }
 
     $(function () {

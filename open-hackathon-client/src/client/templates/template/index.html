@@ -1,6 +1,7 @@
 {% extends "base/base.html" %}
 
 {% block style %}
+    <link href="/static/css/jquery.fileupload.css" rel="stylesheet">
 <style>
     body {
     background: none;
@@ -8,6 +9,13 @@
 
     body:after {
     content: initial;
+    }
+
+    td.remove-column {
+      text-align: center;
+    }
+    td.remove-column>a:hover{
+      color: #f32333;
     }
 </style>
 {% endblock %}
@@ -60,9 +68,11 @@
                 <a type="button" href="template/create" class="btn btn-primary btn-sm" data-type="template_item_add">
                     创建模板
                 </a>
-                <a type="button" class="btn btn-primary btn-sm" data-type="template_item_add">
-                    从文件创建模板
-                </a>
+                <span class="btn fileinput-button btn-primary btn-sm">
+                    <span>从文件创建模板</span>
+                    <input id="fileupload" type="file" name="files" multiple="">
+                </span>
+
                 <table class="table table-bordered">
                     <thead>
                     <tr>
@@ -73,6 +83,7 @@
                         <th>状态</th>
                         <th>创建时间</th>
                         <th>模板文件</th>
+                        <th></th>
                     </tr>
                     </thead>
                     <tbody id="alltemplatelist">
@@ -91,14 +102,18 @@
         <td>${$item.getIndex()}</td>
         <td>${name}</td>
         <td>${description}</td>
-        <td>${creator_id}</td>
+        <td>${creator}</td>
         <td>${$item.getStatus(status)}</td>
         <td>${moment(create_time).format('YYYY/MM/DD HH:mm')}</td>
-        <td><a href="${azure_url}">下载</a></td>
+        <td><a href="${url}" download="${url}">下载</a></td>
+        <td class="remove-column"><a data-template-id="${id}"><i class="fa fa-trash-o"></i></a></td>
     </tr>
     {% endraw %}
 </script>
 <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
+<script type="text/javascript" src="/static/js/jquery/jquery.ui.widget.js"></script>
+<script type="text/javascript" src="/static/js/jquery/jquery.iframe-transport.js"></script>
+<script type="text/javascript" src="/static/js/jquery/jquery.fileupload.js"></script>
 <script type="text/javascript" src="/static/js/jquery/moment.min.js"></script>
 <script type="text/javascript" src="/static/js/views/oh.template.index.js"></script>
 {% endblock %}

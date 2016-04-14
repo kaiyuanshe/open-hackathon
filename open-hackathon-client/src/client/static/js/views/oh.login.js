@@ -61,8 +61,14 @@
                 case 'weibo':
                     openWindow(CONFIG.weibo.authorize_url);
                     break;
+                case 'wechat':
+                    openWindow(CONFIG.wechat.authorize_url);
+                    break;
                 case 'gitcafe':
                     openWindow(CONFIG.gitcafe.authorize_url);
+                    break;
+                case 'alauda':
+                    openWindow(CONFIG.alauda.authorize_url);
                     break;
             }
         })

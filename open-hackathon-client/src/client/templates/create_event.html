@@ -1,0 +1,363 @@
+{% extends "base/manage.html" %}
+
+{% block style %}
+    <link href="/static/css/daterangepicker-bs3.css" rel="stylesheet">
+    <link href="/static/css/bootstrapValidator.css" rel="stylesheet">
+    <link href="/static/css/bootstrap-markdown.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: none;
+        }
+
+        body:after {
+            content: initial;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div id="content" class="container clearfix">
+        <div class="col-lg-12">
+            <div class="box">
+                <div class="box-header">
+                    <h2><i class="fa fa-edit"></i>创办黑客松
+                    </h2>
+                </div>
+                <div class="box-content">
+                    <div class="step-content">
+                        <div class="step-pane active" id="step1">
+                            <form class="form-horizontal" id="stepform1" method="post"
+                                  data-bv-feedbackicons-valid="glyphicon glyphicon-ok"
+                                  data-bv-feedbackicons-invalid="glyphicon glyphicon-remove"
+                                  data-bv-feedbackicons-validating="glyphicon glyphicon-refresh">
+                                <fieldset>
+                                    <legend>
+                                        1 创建黑客松基本信息
+                                    </legend>
+                                    <div class="">
+                                        <div class="form-group">
+                                            <label class="required col-sm-2 control-label">黑客松名称</label>
+
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="name" id="name"
+                                                       placeholder="请使用英文小字母、数字和'_'（下划线）'-'(中划线)"
+                                                       required
+                                                       data-bv-trigger="blur"
+                                                       data-bv-message="黑客松名称无效"
+                                                       data-bv-notempty-message="黑客松名称是必需的，不能为空"
+                                                       pattern="^(?!_)(?!.*?_$)[a-z0-9_-]+$"
+                                                       data-bv-regexp-message="黑客松名称只能由英文字母的，数字和下划线"
+                                                       minlength="5"
+                                                       data-bv-stringlength-message="黑客松名称必须至少有5个字符"
+                                                        >
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="required col-sm-2 control-label">黑客松显示名称</label>
+
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="display_name"
+                                                       id="display_name"
+                                                       required
+                                                       data-bv-trigger="blur"
+                                                       data-bv-notempty-message="黑客松显示名称是必需的，不能为空">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="required col-sm-2 control-label"
+                                                   for="event_time">活动时间</label>
+
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" id="event_time"
+                                                       name="event_time"
+                                                       placeholder=""
+                                                       required
+                                                       data-bv-notempty-message="活动时间，不能为空"
+                                                       data-bv-trigger="change input">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="required col-sm-2 control-label"
+                                                   for="register_time">报名时间</label>
+
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" id="register_time"
+                                                       name="register_time"
+                                                       placeholder=""
+                                                       required
+                                                       data-bv-notempty-message="报名时间，不能为空"
+                                                       data-bv-trigger="change input">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="required col-sm-2 control-label"
+                                                   for="judge_time">评分时间</label>
+
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" id="judge_time"
+                                                       name="judge_time"
+                                                       placeholder=""
+                                                       required
+                                                       data-bv-notempty-message="评分时间，不能为空"
+                                                       data-bv-trigger="change input">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="required col-sm-2 control-label"
+                                                   for="short_description">简介</label>
+
+                                            <div class="col-sm-10">
+                                                    <textarea class="form-control" name="short_description"
+                                                              id="short_description" maxlength="200"></textarea>
+                                            </div>
+
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="required col-sm-2 control-label"
+                                                   for="markdownEdit">活动介绍</label>
+
+                                            <div class="col-sm-10">
+                                                <textarea name="content" id="markdownEdit" rows="10"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="form-group text-right">
+                                            <div class="col-sm-12">
+                                                <button type="submit" class="btn btn-success btn-next">
+                                                    下一步 <i class="fa fa-arrow-right"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </form>
+                        </div>
+                        <div class="step-pane" id="step2">
+                            <form class="form-horizontal" id="stepform2">
+                                <fieldset>
+                                    <legend>
+                                        2 绑定模板
+                                    </legend>
+                                </fieldset>
+
+                                <div class="form-group text-right">
+                                    <div class="col-sm-12">
+                                        <a target="_blank" href="/template/create" class="btn btn-info">
+                                            <i class="fa fa-file-code-o"></i> 新建模板
+                                        </a>
+                                        <button class="btn btn-default" type="button" id="refresh_tmp">
+                                            <i class="fa fa-refresh"></i>
+                                            刷新
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div id="template_list">
+                                </div>
+                                <div class="form-group  text-right">
+                                    <div class="col-sm-12">
+                                        <button type="submit" class="btn btn-success btn-next">下一步 <i
+                                                class="fa fa-arrow-right"></i></button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="step-pane" id="step3">
+                            <form class="form-horizontal " id="stepform3">
+                                <fieldset>
+                                    <legend>
+                                        3 选择云服务商
+                                    </legend>
+                                </fieldset>
+                                <div class="clearfix text-center " style="margin:40px 0; ">
+                                    <div class="col-md-6">
+                                        <img src="/static/pic/azure-logo.png" alt="windows azure" height="100px">
+
+                                        <p></p>
+
+                                        <p>
+                                            <button type="button" class="btn btn-success" data-name="azure">使 用</button>
+                                        </p>
+                                        <p></p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <img src="/static/pic/alauda-logo-white.png" alt="alauda" height="100px">
+
+                                        <p></p>
+
+                                        <p>
+                                            <button type="button" class="btn btn-success" data-name="alauda">使 用
+                                            </button>
+                                        </p>
+                                        <p></p>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="step-pane" id="step4">
+                            <form class="form-horizontal" id="stepform4" method="post"
+                                  data-bv-feedbackicons-valid="glyphicon glyphicon-ok"
+                                  data-bv-feedbackicons-invalid="glyphicon glyphicon-remove"
+                                  data-bv-feedbackicons-validating="glyphicon glyphicon-refresh">
+                                <fieldset>
+                                    <legend>
+                                        4 创建新的Azure证书
+                                    </legend>
+                                    <div class="form-group text-right">
+                                        <div class="col-sm-12">
+                                            <button type="button" class="btn btn-info" data-toggle="modal"
+                                                    data-target="#crate_azure_modal">
+                                                <i class="fa fa-certificate"></i> 新建证书
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="clearfix" id="azure_list">
+
+                                    </div>
+                                    <ol>
+                                        <li>进入Azure虚拟主机DASHBOARD界面</li>
+                                        <li>找到SUBSCRIPTION ID</li>
+                                        <li>单击新建Azure证书，将SUBSCRIPTION ID值填写到订阅序号中，提交</li>
+                                        <li>下载cer证书文件</li>
+                                        <li>进入Azure settings的MANAGEMENT CERTIFICATES界面
+                                        </li>
+                                        <li>上传cer证书文件。</li>
+                                        <li>上传成功后，单击"检查"，如提示成功则完成证书配置，而提示失败请检查SUBSCRIPTION ID是否配对。</li>
+                                    </ol>
+                                    <div class="form-group text-right">
+                                        <div class="col-sm-12">
+                                            <button type="submit" class="btn btn-success btn-next" data-last="完成">下一步 <i
+                                                    class="fa fa-arrow-right"></i></button>
+                                        </div>
+                                    </div>
+
+                                    <!-- end widget content -->
+                                </fieldset>
+                            </form>
+                        </div>
+                        <div class="step-pane" id="step5">
+                            <fieldset>
+                                <legend>
+                                    创建黑客松完成
+                                </legend>
+                                <div class="form-group text-center">
+                                    <div class="col-sm-12">
+                                        <button type="button" class="btn btn-success btn-lg" id="online">立即上线
+                                            <i class="fa fa-arrow-right"></i></button>
+                                        <br/>
+                                        <h4>完善更多信息</h4>
+                                        <p class="links" id="links">
+                                            <a href="javascript:;" data-name="host_server">添加服务器</a>
+                                            <a href="javascript:;" data-name="edit">活动信息</a>
+                                            <a href="javascript:;" data-name="award">添加奖项</a>
+                                            <a href="javascript:;" data-name="experiment">添加环境</a>
+                                        </p>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade bs-example-modal-sm" id="crate_azure_modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-md">
+            <form class="form-horizontal" id="new_azurecertform" method="post"
+                  data-bv-feedbackicons-valid="glyphicon glyphicon-ok"
+                  data-bv-feedbackicons-invalid="glyphicon glyphicon-remove"
+                  data-bv-feedbackicons-validating="glyphicon glyphicon-refresh">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h4 class="modal-title">创建证书</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label class="col-md-2 control-label required">订阅序号</label>
+
+                            <div class="col-md-10">
+                                <input type="text" class="form-control" name="subscription_id"
+                                       id="subscription_id"
+                                       placeholder="SUBSCRIPTION ID"
+                                       data-bv-trigger="blur"
+                                       required
+                                       data-bv-notempty-message="订阅序号是必需的，不能为空"
+                                       pattern="[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
+                                       data-bv-regexp-message="订阅序号格式不正确">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-2 control-label required">服务URI</label>
+
+                            <div class="col-md-10">
+                                <select class="form-control" name="management_host"
+                                        id="management_host">
+                                    <option value="management.core.chinacloudapi.cn">
+                                        management.core.chinacloudapi.cn
+                                    </option>
+                                    <option value="management.core.windows.net">
+                                        management.core.windows.net
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default wb-btn" data-dismiss="modal">取消</button>
+                        <button type="submit" class="btn btn-primary wb-btn">完成</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block script %}
+    <script id="template_item" type="text/x-jquery-tmpl">
+    {% raw %}
+    <div class="col-md-4 col-sm-6">
+        <div class="oh-tempitem ${$item.getItemClass(id,status)}">
+            <div class="oh-temp-head">${name}</div>
+            <div class="oh-temp-body">
+                <p>${creator_id}</p>
+                <p>${$item.getStatus(status)}  <span>${moment(create_time).format('YYYY/MM/DD')} </span></p>
+                <p class="color-grey">${description}</p>
+            </div>
+        </div>
+    </div>
+    {% endraw %}
+
+
+
+    </script>
+    <script id="azure_cert_item" type="text/x-jquery-tmpl">
+    {% raw %}
+    <div class="col-md-4 col-sm-6 azure" >
+        <div class="oh-tempitem active">
+            <div class="oh-temp-head">${subscription_id}</div>
+            <div class="oh-temp-body">
+                <p>${management_host}</p>
+                <p><a href="${cert_url}" down>下载</a> <a href="javascript:;" data-type="check">检验</a></p>
+            </div>
+        </div>
+    </div>
+    {% endraw %}
+
+
+
+    </script>
+    <script type="text/javascript">
+        var islocal = {% if islocal %} true {% else %} false {% endif %};
+    </script>
+    <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
+    <script type="text/javascript" src="/static/js/jquery/bootstrap-tagsinput.min.js"></script>
+    <script type="text/javascript" src="/static/js/jquery/moment.min.js"></script>
+    <script type="text/javascript" src="/static/js/daterangepickerlocale.js"></script>
+    <script type="text/javascript" src="//cdn.ckeditor.com/4.5.6/full/ckeditor.js"></script>
+    <script type="text/javascript" src="/static/js/jquery/daterangepicker.js"></script>
+    <script type="text/javascript" src="/static/js/views/oh.create-event.js"></script>
+{% endblock %}

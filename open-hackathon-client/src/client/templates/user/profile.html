@@ -3,175 +3,147 @@
     <link href="/static/css/oh.user.profile.css" rel="stylesheet">
 {% endblock %}
 {% block content %}
-    <div class="oh-main">
-        <div class="container">
-            <h2 class="line-title">个人信息</h2>
-
-            <div class="oh-profileForm row">
-                <div class="col-md-3 col-sm-4">
-                    <div class="row">
-                        <div class="col-xs-12">
-                            <img src="{{ current_user.avatar_url }}" width="200px">
-                            <h4>详情</h4>
-                            <ul class="profileForm-details">
-                                <li>
-                                    <div>账户类型</div>
-                                    {{ current_user.provider }}
-                                </li>
-                                <li>
-                                    <div> 邮箱</div>
-                                    <p></p>
-                                </li>
-                            </ul>
+    <div class="oh-main profile">
+        <div class="container ">
+            <div class="profile-left">
+                <div class="user-warp">
+                    <div class="user-name">程序猿</div>
+                    <div class="clearfix">
+                        <div class="user-picture" data-parent>
+                            <img src="/static/pic/monkey-104-104px.jpg"
+                                 onerror="javascript:this.src='/static/pic/monkey-104-104px.jpg'">
+                        </div>
+                        <div class="career">
+                            程序猿
                         </div>
                     </div>
                 </div>
-                <div class="col-md-9 col-sm-8 ">
-                    <div class="row ">
-                        <form id="profileForm" class="form-horizontal" novalidate>
-                            <fieldset class="pofile-form">
-                                <div class="form-group">
-                                    <label class="col-md-2 col-sm-3 control-label required">姓名</label>
+                <div class="user-warp">
+                    <ul class="follow list-unstyled">
+                        <li><i class="fa fa-eye"></i> <span class="right">0</span> 关注</li>
+                        <li><i class="fa fa-heart"></i> <span class="right">0</span> 正在关注</li>
+                    </ul>
+                </div>
+                <div class="user-warp">
+                    <ul class="profile-provider">
+                        <li class="windows" data-toggle="tooltip" data-placement="top"
+                            title="Microsoft Account 登录"></li>
+                        <li class="github" data-toggle="tooltip" data-placement="top" title="Gihub 登录"></li>
+                        <li class="qq" data-toggle="tooltip" data-placement="top" title="QQ 登录"></li>
+                        <li class="weibo" data-toggle="tooltip" data-placement="top" title="Weibo 登录"></li>
+                        <li class="alauda" data-toggle="tooltip" data-placement="top" title="灵雀云 登录"></li>
+                    </ul>
+                </div>
+                <div class="user-warp">
+                    <div class="follow-event">
+                        <div class="title">
+                            <span><i class="fa fa-thumb-tack"></i></span>
+                            关注的活动
+                        </div>
+                        <div id="like_events">
 
-                                    <div class="col-md-7 col-sm-9">
-                                        <input type="text" class="form-control" name="real_name" placeholder="姓名"
-                                               required
-                                               data-bv-trigger="blur"
-                                               data-bv-notempty-message="姓名必须填写">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-md-2 col-sm-3 control-label required">联系电话</label>
-
-                                    <div class="col-md-7 col-sm-9">
-                                        <input type="text" class="form-control" name="phone" placeholder="联系电话"
-                                               required
-                                               data-bv-trigger="blur"
-                                               data-bv-notempty-message="联系电话必须填写">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-md-2 col-sm-3 control-label required">联系地址</label>
-
-                                    <div class="col-md-7 col-sm-9">
-                                        <input type="text" class="form-control" name="address" placeholder="寄出奖品的默认地址"
-                                               required
-                                               data-bv-trigger="blur"
-                                               data-bv-notempty-message="联系电话必须填写">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-md-2 col-sm-3 control-label">性别</label>
-
-                                    <div class="col-md-7 col-sm-9">
-                                        <select class="form-control" name="gender">
-                                            <option value="-1">秘密</option>
-                                            <option value="1">男</option>
-                                            <option value="0">女</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-md-2 col-sm-3 control-label">年龄</label>
-
-                                    <div class="col-md-7 col-sm-9">
-                                        <input type="number" class="form-control" name="age" placeholder="年龄"
-                                               value="20"
-                                               min="1" max="99"
-                                               data-bv-trigger="blur"
-                                               data-bv-integer-message="请输入年龄">
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="col-md-2 col-sm-3 control-label">行业类型</label>
-
-                                    <div class="col-md-7 col-sm-9">
-                                        <select class="form-control" name="career_type">
-                                            <option value="计算机/互联网/通信">计算机/互联网/通信</option>
-                                            <option value="生产/工艺/制造">生产/工艺/制造</option>
-                                            <option value="医疗/护理/制药">医疗/护理/制药</option>
-                                            <option value="金融/银行/投资/保险">金融/银行/投资/保险</option>
-                                            <option value="商业/服务业/个体经营户">商业/服务业/个体经营户</option>
-                                            <option value="文化/广告/传媒">文化/广告/传媒</option>
-                                            <option value="娱乐/艺术/表演">娱乐/艺术/表演</option>
-                                            <option value="法律/法务">法律/法务</option>
-                                            <option value="教育/培训">教育/培训</option>
-                                            <option value="公务员/行政/事业单位">公务员/行政/事业单位</option>
-                                            <option value="模特">模特</option>
-                                            <option value="空姐">空姐</option>
-                                            <option value="学生">学生</option>
-                                            <option value="其他">其他</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-md-2 col-sm-3 control-label">职务</label>
-
-                                    <div class="col-md-7 col-sm-9">
-                                        <input type="text" class="form-control" name="career" placeholder="职务">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class=" col-md-2 col-sm-3 control-label">Skype</label>
-
-                                    <div class="col-md-7 col-sm-9">
-                                        <input type="text" class="form-control" name="skype" placeholder="Skype">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-md-2 col-sm-3 control-label">微信</label>
-
-                                    <div class="col-md-7 col-sm-9">
-                                        <input type="text" class="form-control" placeholder="微信" name="wechat">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-md-2 col-sm-3 control-label">微博</label>
-
-                                    <div class="col-md-7 col-sm-9">
-                                        <input type="text" class="form-control" placeholder="微博" name="weibo">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-md-2 col-sm-3 control-label">QQ</label>
-
-                                    <div class="col-md-7 col-sm-9">
-                                        <input type="text" class="form-control" name="qq" placeholder="QQ">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <div class="col-md-offset-2 col-sm-offset-3 col-md-7 col-sm-9">
-                                        <button type="submit" class="btn btn-primary btn-block">保存</button>
-                                    </div>
-                                </div>
-                            </fieldset>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-    <div class="modal fade bs-example-modal-sm" id="alert" tabindex="-1" role="dialog"
-         aria-labelledby="mySmallModalLabel">
-        <div class="modal-dialog modal-sm">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                            aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="myModalLabel">提示</h4>
-                </div>
-                <div class="modal-body">
-                    <p>个人信息保存成功。</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="bottom" class="btn btn-primary" data-type="ok">确定</button>
+            <div class="profile-right">
+                <ul class="nav nav-tabs profile-tabs" role="tablist">
+                    <li role="presentation" class="active"><a href="#team_works" role="tab" data-toggle="tab">团队作品</a>
+                    </li>
+                    <li role="presentation"><a href="#my_register_events" role="tab" data-toggle="tab"></a></li>
+                    <li role="presentation" class="hide"><a href="#my_events" role="tab" data-toggle="tab">我发布的活动</a>
+                    </li>
+                </ul>
+
+                <!-- Tab panes -->
+                <div class="tab-content profile-tab-content">
+                    <div role="tabpanel" class="tab-pane active" id="team_works">
+                        <h5>还在建设中。。。</h5>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="my_register_events">
+                        <div class="text-center" data-type="pageloading"><img src="/static/pic/spinner-lg.gif"></div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="my_events">
+                        <div class="text-center" data-type="pageloading"><img src="/static/pic/spinner-lg.gif"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 {% endblock %}
 {% block script %}
+    <script id="like_event_item" type="text/x-jquery-tmpl">
+    {% raw %}
+    <div class="event-item" data-parent>
+        <a href="/site/${hackathon_info.name}">
+            <img src="${$item.get_banner(hackathon_info.banners)}" onload="oh.comm.imgLoad(this)" onerror="javascript:this.src='/static/pic/homepage.jpg'">
+        </a>
+        <p>${hackathon_info.display_name}</p>
+    </div>
+    {% endraw %}
+
+
+    </script>
+    <script id="my_event_item" type="text/x-jquery-tmpl">
+    {% raw %}
+    <div class="cbox">
+        <div class="cbox-header" data-parent>
+            <img src="${$item.get_banner(banners)}" onload="oh.comm.imgLoad(this)" onerror="javascript:this.src='/static/pic/homepage.jpg'">
+            <a class="edit" href="/manage/${name}/edit" data-toggle="tooltip" data-placement="top" title="编辑"><i class="fa fa-pencil"></i></a>
+        </div>
+        <div class="cbox-warp">
+            <div class="title"><a href="/site/${name}">${display_name}</a></div>
+            <div class="clearfix cbox-time">
+                <div class="left">
+                    <span class="fa fa-calendar"></span>
+                    ${moment(event_start_time).format('YY/MM/DD')}
+                </div>
+                <div class="right"><span class="fa fa-map-marker"></span> ${$item.get_status(status)}
+                </div>
+            </div>
+        </div>
+        <div class="cbox-warp">
+        ${tag}&nbsp;
+        </div>
+        <div class="cbox-footer">
+          
+        </div>
+    </div>
+    {% endraw %}
+
+
+    </script>
+    <script id="my_register_event_item" type="text/x-jquery-tmpl">
+    {% raw %}
+    <div class="cbox">
+        <div class="cbox-header" data-parent>
+            <a href="/site/${hackathon_info.name}">
+                <img src="${$item.get_banner(hackathon_info.banners)}" onload="oh.comm.imgLoad(this)" onerror="javascript:this.src='/static/pic/homepage.jpg'">
+            </a>
+        </div>
+        <div class="cbox-warp">
+            <div class="title"><a href="/site/${hackathon_info.name}">${hackathon_info.display_name}</a></div>
+            <div class="clearfix cbox-time">
+                <div class="left">
+                    <span class="fa fa-calendar"></span>
+                    ${moment(hackathon_info.event_start_time).format('YY/MM/DD')}
+                </div>
+                <div class="right"><span class="fa fa-map-marker"></span> ${$item.get_location(hackathon_info.location)}
+                </div>
+            </div>
+        </div>
+        <div class="cbox-warp">
+        ${hackathon_info.tags.join()}
+        </div>
+        <div class="cbox-footer">
+            <i class="fa fa-heart"> N/A</i>
+        </div>
+    </div>
+    {% endraw %}
+
+
+    </script>
+    <script type="text/javascript" src="/static/js/jquery/moment.min.js"></script>
     <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
     <script type="text/javascript" src="/static/js/views/oh.user.profile.js"></script>
 {% endblock %}

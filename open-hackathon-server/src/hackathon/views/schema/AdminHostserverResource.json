@@ -1,0 +1,123 @@
+{
+  "AdminHostserverResource": {
+    "get": {
+      "input": {
+        "title": "request to get the infomation of a host_server",
+        "description": "args to create new hackathon. Args that not listed here are NOT acceptable.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "the id of the host_server",
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "post": {
+      "input": {
+        "title": "request to create a new hackathon",
+        "description": "args to create new hackathon. Args that not listed here are NOT acceptable.",
+        "type": "object",
+        "properties": {
+          "vm_name": {
+            "description": "the name of vm/host_server",
+            "type": "string"
+          },
+          "public_dns": {
+            "description": "the public_dns of vm/host_server",
+            "type": "string"
+          },
+          "public_ip": {
+            "description": "the public_ip of vm/host_server",
+            "type": "string"
+          },
+          "public_docker_api_port": {
+            "description": "the public_docker_api_port of vm/host_server",
+            "pattern": "^[0-9]+$"
+          },
+          "private_ip": {
+            "description": "the private ip of vm/host_server",
+            "type": "string"
+          },
+          "private_docker_api_port": {
+            "description": "the private_docker_api_port of vm/host_server",
+            "pattern": "^[0-9]+$"
+          },
+          "container_max_count": {
+            "description": "the max container count of vm/host_server",
+            "pattern": "^[0-9]+$"
+          }
+        }
+      }
+    },
+
+    "put": {
+      "input": {
+        "title": "request to update the information of a host server",
+        "description": "args to update the information of a host server",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "id of the host_server",
+            "type": "string"
+          },
+          "vm_name": {
+            "description": "the name of vm/host_server",
+            "type": "string",
+            "required": false
+          },
+          "public_dns": {
+            "description": "the public_dns of vm/host_server",
+            "type": "string",
+            "required": false
+          },
+          "public_ip": {
+            "description": "the public_ip of vm/host_server",
+            "type": "string",
+            "required": false
+          },
+          "public_docker_api_port": {
+            "description": "the public_docker_api_port of vm/host_server",
+            "pattern": "^[0-9]+$",
+            "required": false
+          },
+          "private_ip": {
+            "description": "the private ip of vm/host_server",
+            "type": "string",
+            "required": false
+          },
+          "private_docker_api_port": {
+            "description": "the private_docker_api_port of vm/host_server",
+            "pattern": "^[0-9]+$",
+            "required": false
+          },
+          "container_max_count": {
+            "description": "the max container count of vm/host_server",
+            "pattern": "^[0-9]+$",
+            "required": false
+          },
+          "disabled": {
+            "description": "the max container count of vm/host_server",
+            "type": "boolean",
+            "required": false
+          }
+        }
+      }
+    },
+
+    "delete": {
+      "input": {
+        "title": "request to delete a host server",
+        "description": "args to delete a host server for a hackathon",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "the id of the host_server",
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 """
 Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved.
- 
+
 The MIT License (MIT)
- 
+
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -33,10 +33,12 @@ class TEMPLATE:
     VIRTUAL_ENVIRONMENTS = 'virtual_environments'
     VIRTUAL_ENVIRONMENT_PROVIDER = "provider"
 
+
 class DOCKER_UNIT:
     """constants in docker virtual_environment in template"""
     NAME = 'name'
     TYPE = 'type'
+    PROVIDER = 'provider'
     DESCRIPTION = 'description'
     PORTS = 'ports'
     PORTS_NAME = 'name'
@@ -106,53 +108,79 @@ class DOCKER_UNIT:
 
 class AZURE_UNIT:
     """constants for azure virtual_environment in template file"""
-    T_SA = 'storage_account'
-    T_SA_SN = 'service_name'
-    T_SA_D = 'description'
-    T_SA_LA = 'label'
-    T_SA_LO = 'location'
-    T_SA_UB = 'url_base'
-    T_C = 'container'
-    T_CS = 'cloud_service'
-    T_CS_SN = 'service_name'
-    T_CS_LA = 'label'
-    T_CS_LO = 'location'
-    T_D = 'deployment'
-    T_D_DN = 'deployment_name'
-    T_D_DS = 'deployment_slot'
-    T_L = 'label'
-    T_RN = 'role_name'
-    T_I = 'image'
-    T_I_T = 'type'
-    T_I_N = 'name'
-    T_SC = 'system_config'
-    T_SC_OF = 'os_family'
-    T_SC_HN = 'host_name'
-    T_SC_UN = 'user_name'
-    T_SC_UP = 'user_password'
-    T_NC = 'network_config'
-    T_NC_CST = 'configuration_set_type'
-    T_NC_IE = 'input_endpoints'
-    T_NC_IE_N = 'name'
-    T_NC_IE_PR = 'protocol'
-    T_NC_IE_LP = 'local_port'
-    T_NC_IE_PO = 'port'
-    T_R = 'remote'
-    T_R_PROV = 'provider'
-    T_R_PROT = 'protocol'
-    T_R_IEN = 'input_endpoint_name'
-    T_RS = 'role_size'
+    STORAGE_ACCOUNT = 'storage_account'
+    STORAGE_ACCOUNT_SERVICE_NAME = 'service_name'
+    STORAGE_ACCOUNT_DESCRIPTION = 'description'
+    STORAGE_ACCOUNT_LABEL = 'label'
+    STORAGE_ACCOUNT_LOCATION = 'location'
+    STORAGE_ACCOUNT_URL_BASE = 'url_base'
+
+    CONTAINER = 'container'
+
+    CLOUD_SERVICE = 'cloud_service'
+    CLOUD_SERVICE_SERVICE_NAME = 'service_name'
+    CLOUD_SERVICE_LABEL = 'label'
+    CLOUD_SERVICE_LOCATION = 'location'
+
+    DEPLOYMENT = 'deployment'
+    DEPLOYMENT_DEPLOYMENT_NAME = 'deployment_name'
+    DEPLOYMENT_DEPLOYMENT_SLOT = 'deployment_slot'
+
+    LABEL = 'label'
+    ROLE_NAME = 'role_name'
+    ROLE_SIZE = 'role_size'
+
+    IMAGE = 'image'
+    IMAGE_TYPE = 'type'
+    IMAGE_NAME = 'name'
+
+    SYSTEM_CONFIG = 'system_config'
+    SYSTEM_CONFIG_OS_FAMILY = 'os_family'
+    SYSTEM_CONFIG_HOST_NAME = 'host_name'
+    SYSTEM_CONFIG_USER_NAME = 'user_name'
+    SYSTEM_CONFIG_USER_PASSWORD = 'user_password'
+
+    NETWORK_CONFIG = 'network_config'
+    NETWORK_CONFIG_CONFIGURATION_SET_TYPE = 'configuration_set_type'
+    NETWORK_CONFIG_INPUT_ENDPOINTS = 'input_endpoints'
+    NETWORK_CONFIG_INPUT_ENDPOINTS_NAME = 'name'
+    NETWORK_CONFIG_INPUT_ENDPOINTS_PROTOCOL = 'protocol'
+    NETWORK_CONFIG_INPUT_ENDPOINTS_LOCAL_PORT = 'local_port'
+    NETWORK_CONFIG_INPUT_ENDPOINTS_PORT = 'port'
+    NETWORK_CONFIG_INPUT_ENDPOINTS_URL = 'url'
+
+    REMOTE = 'remote'
+    REMOTE_PROVIDER = 'provider'
+    REMOTE_PROTOCOL = 'protocol'
+    REMOTE_INPUT_ENDPOINT_NAME = 'input_endpoint_name'
+
     # image type name
     OS = 'os'
     VM = 'vm'
+
     # os family name
     WINDOWS = 'Windows'
     LINUX = 'Linux'
+
     # remote parameter name
-    RP_N = 'name'
-    RP_DN = 'displayname'
-    RP_HN = 'hostname'
-    RP_PR = 'protocol'
-    RP_PO = 'port'
-    RP_UN = 'username'
-    RP_PA = 'password'
+    REMOTE_PARAMETER_NAME = 'name'
+    REMOTE_PARAMETER_DISPLAY_NAME = 'displayname'
+    REMOTE_PARAMETER_HOST_NAME = 'hostname'
+    REMOTE_PARAMETER_PROTOCOL = 'protocol'
+    REMOTE_PARAMETER_PORT = 'port'
+    REMOTE_PARAMETER_USER_NAME = 'username'
+    REMOTE_PARAMETER_PASSWORD = 'password'
+
+    RESOUCE_EXTENSION_PUBLIC_KEY = "PublicConfig"
+    RESOUCE_EXTENSION_PUBLIC_TYPE = "Public"
+
+    class DISABLE_NLA_EXTENSION_REFRENCE:
+        REFRENCE_NAME = "CustomScriptExtension"
+        EXTENSION_NAME = "CustomScriptExtension"
+        PUBLISHER = "Microsoft.Compute"
+        VERSION = "1.*"
+        FILE_URIS = ["https://opentech0storage.blob.core.chinacloudapi.cn/public-scripts/disablenla.ps1"]
+        RUN = "powershell -ExecutionPolicy Unrestricted -file disablenla.ps1"
+
+        CONFIG_KEY_FILE_URIS = "fileUris"
+        CONFIG_KEY_RUN = "commandToExecute"

@@ -1,0 +1,103 @@
+{% extends "base/base.html" %}
+{% block style %}
+    <link href="/static/css/oh.events.css" rel="stylesheet">
+{% endblock %}
+{% block content %}
+    <div class="container  oh-feature oh-activity">
+        <div class="row" id="events">
+
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script id="event_list_template" type="text/x-jquery-tmpl">
+
+    <div class="col-lg-6 col-md-6">
+        <div class="oh-item">
+            <div class="oh-header">
+                <a href="/site/${name}" target="_blank">
+                    <img src="${$item.getEventImg(banners)}" class="hackathon-thumb" alt="${display_name}">
+                </a>
+                {% raw %}
+                {{if ribbon}}
+                  <span class="oh-flag">${ribbon}</span>
+                {{/if}}
+                {% endraw %}
+                {% if current_user.is_authenticated() %}
+                {% raw %}
+                <a href="javascript:void(0);" role="oh-like" class="oh-collect {{if like}} active {{/if}}"  data-name="${name}">
+                    <span>感兴趣</span>
+                    <img src="/static/pic/pushpin-icon.png">
+                </a>
+                {% endraw %}
+                {% endif %}
+            </div>
+                 {% raw %}
+            <div class="oh-body">
+                <h3>
+                    <a href="/site/${name}" target="_blank">
+                       ${display_name}
+                    </a>
+                </h3>
+                <ul class="oh-tags">
+                    {{each tags}}
+                         <li>
+                            <a href="#">${$value}</a> {{if $index != this.length}},{{/if}}
+                         </li>
+                    {{/each}}
+                </ul>
+                <p class="oh-desc">
+                    <a class="grey-link" href="/site/${name}" target="_blank">
+                        ${short_description}
+                    </a>
+                </p>
+                <div class="oh-time">
+                    <div><span class="fa fa-calendar"></span> ${$item.getDate(event_start_time)}</div>
+                    <div><span class="fa fa-map-marker"></span> ${$item.getLocation(config.location)}</div>
+                </div>
+                <div class="oh-progressbar"><span style="width:${$item.activity_progress(event_start_time ,event_end_time)}"></span>
+                </div>
+                <table>
+                    <tbody>
+                    <tr>
+                        <td class="text-left">
+                            <div>
+                                <span>${$item.getCloseDay(registration_end_time)}天</span>
+                                报名截止
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <div>
+                                <span data-likes="${name}">${stat.like ||  0}</span>
+                                感兴趣
+                            </div>
+                        </td>
+                        <td class="text-right">
+                            <div>
+                                <span>${stat.register || 0}/ {{if config.max_enrollment == '0'}} 无限 {{else}} ${config.max_enrollment} {{/if}}</span>
+                                报名人数
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <hr>
+                <div class="oh-org">
+                    {{each organizer}}
+                        <a href="${homepage}" data-toggle="tooltip" data-placement="top" title="${name}">
+                            <img src="${logo}" alt="${name}">
+                        </a>
+                    {{/each}}
+                </div>
+            </div>
+             {% endraw %}
+        </div>
+    </div>
+
+
+
+    </script>
+    <script type="text/javascript" src="/static/js/jquery/moment.min.js"></script>
+    <script type="text/javascript" src="/static/js/views/oh.events.js"></script>
+{% endblock %}

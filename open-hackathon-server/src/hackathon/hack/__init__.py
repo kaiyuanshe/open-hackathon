@@ -31,3 +31,4 @@ from host_server_manager import DockerHostManager
 from azure_cert_manager import AzureCertManager
 from register_manager import RegisterManager
 from hackathon_template_manager import HackathonTemplateManager
+from cryptor import Cryptor

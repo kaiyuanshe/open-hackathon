@@ -25,6 +25,12 @@ THE SOFTWARE.
 
 from log import log
 
+
+class HTTP_CODE:
+    CREATE_NOT_FINISHED = 412101
+    AZURE_KEY_NOT_READY = 412102
+
+
 __all__ = [
     "bad_request",
     "unauthorized",
@@ -35,6 +41,7 @@ __all__ = [
     "unsupported_mediatype",
     "internal_server_error",
     "ok",
+    "HTTP_CODE",
 ]
 
 
@@ -51,6 +58,14 @@ def __response_with_code(code, message, friendly_message=""):
             "friendly_message": friendly_message
         }
     }
+
+
+def general_error(code,
+                  message="",
+                  friendly_message=(
+                          'An unexpected error encountered'
+                  )):
+    return __response_with_code(code, message, friendly_message)
 
 
 def bad_request(message="",
@@ -109,6 +124,20 @@ def unsupported_mediatype(message="",
     return __response_with_code(415, message, friendly_message)
 
 
+def login_provider_error(message="",
+                         friendly_message=(
+                                 'Current hackathon must be logged in to use a specific way.'
+                         ), provides=""):
+    return {
+        "error": {
+            "code": 420,
+            "message": message,
+            "friendly_message": friendly_message,
+            "provides": provides
+        }
+    }
+
+
 def internal_server_error(message="",
                           friendly_message=(
                                   'The server encountered an internal error and was unable to '
@@ -123,3 +152,4 @@ def ok(message=""):
         "code": 200,
         "message": message
     }
+

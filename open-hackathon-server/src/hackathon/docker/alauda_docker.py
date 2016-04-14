@@ -29,22 +29,12 @@ import requests
 import json
 from datetime import datetime, timedelta
 
-from docker_formation_base import (
-    DockerFormationBase
-)
-from hackathon.constants import (
-    HEALTH_STATUS,
-    VE_PROVIDER,
-    VEStatus,
-    EStatus,
-    HEALTH,
-)
-from hackathon.database.models import VirtualEnvironment
-from hackathon.hackathon_exception import (
-    AlaudaException
-)
+from docker_formation_base import DockerFormationBase
+from hackathon.constants import HEALTH_STATUS, VE_PROVIDER, VEStatus, EStatus, HEALTH, OAUTH_PROVIDER
+from hackathon.hmongo.models import VirtualEnvironment
+from hackathon.hackathon_exception import AlaudaException
 from hackathon.template import DOCKER_UNIT
-from hackathon import Component, Context
+from hackathon import Component, Context, RequiredFeature
 
 
 class ALAUDA:
@@ -58,41 +48,54 @@ class ALAUDA:
 
 
 class AlaudaDockerFormation(DockerFormationBase, Component):
+    user_manager = RequiredFeature("user_manager")
+    expr_manager = RequiredFeature("expr_manager")
+
     def start(self, unit, **kwargs):
         virtual_environment = kwargs["virtual_environment"]
+        user = virtual_environment.experiment.user
 
         virtual_environment.provider = VE_PROVIDER.ALAUDA
         self.db.commit()
 
         service_config = self.__get_service_config(unit)
-        self.__create_service(service_config)
+        self.__create_service(user, service_config)
 
         service_name = unit.get_name()
-        service = self.__query_service(service_name)
+        service = self.__query_service(user, service_name)
         # service = {}
 
         context = Context(guacamole=unit.get_remote(),
                           service_name=service_name,
-                          virtual_environment_id=virtual_environment.id)
+                          user_id=user.id,
+                          virtual_environment_id=virtual_environment.id,
+                          ve_remote_paras=virtual_environment.remote_paras)
         self.__service_result_handler(service, context)
         return service
 
     def stop(self, name, **kwargs):
         """stop a alauda service"""
         virtual_environment = kwargs["virtual_environment"]
-        self.__stop_service(virtual_environment.name)
+        user = virtual_environment.experiment.user
+        self.__stop_service(user, virtual_environment.name)
 
     def delete(self, name, **kwargs):
         """delete a alauda service"""
         virtual_environment = kwargs["virtual_environment"]
-        self.__delete_service(virtual_environment.name)
+        user = virtual_environment.experiment.user
+        self.__delete_service(user, virtual_environment.name)
 
     def report_health(self):
         """send a ping for health check"""
         try:
             namespace = self.util.get_config("docker.alauda.namespace")
+            token = self.util.get_config("docker.alauda.token")
+            headers = {
+                "Authorization": "Token %s" % token,
+                "Content-Type": "application/json"
+            }
             path = "/v1/auth/%s/profile/" % namespace
-            self.__get(path)
+            self.__request("get", path, headers=headers)
             return {
                 HEALTH.STATUS: HEALTH_STATUS.OK
             }
@@ -118,7 +121,8 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
 
     def query_service_status_async(self, context):
         try:
-            service = self.__query_service(context.service_name)
+            user = self.__get_user_by_context(context)
+            service = self.__query_service(user, context.service_name)
             self.__service_result_handler(service, context)
         except AlaudaException as ae:
             self.log.error(ae)
@@ -128,7 +132,8 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
 
     def __service_started_handler(self, service, context):
         service_name = context.service_name
-        self.__flush_service_log(service_name)
+        user = self.__get_user_by_context(context)
+        self.__flush_service_log(user, service_name)
         ve = self.db.find_first_object_by(VirtualEnvironment, id=context.virtual_environment_id)
         if not ve:
             self.log.warn("virtual environment cannot be found by id:" + context.virtual_environment_id)
@@ -147,8 +152,10 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
                 "name": service_name,
                 "protocol": guacamole[DOCKER_UNIT.REMOTE_PROTOCOL],
                 "hostname": alauda_port.get(ALAUDA.DEFAULT_DOMAIN),
-                "port": alauda_port.get(ALAUDA.SERVICE_PORT)
+                "port": alauda_port.get(ALAUDA.SERVICE_PORT),
+                "enable-sftp": True
             }
+
             if DOCKER_UNIT.REMOTE_USERNAME in guacamole:
                 gc["username"] = guacamole[DOCKER_UNIT.REMOTE_USERNAME]
 
@@ -158,15 +165,13 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
             # save guacamole config into DB
             ve.remote_paras = json.dumps(gc)
         self.db.commit()
-
+        self.expr_manager.on_docker_completed(ve)
         # update experiment status
-        virtual_environment_list = ve.experiment.virtual_environments.all()
-        if all(x.status == VEStatus.RUNNING for x in virtual_environment_list):
-            ve.experiment.status = EStatus.RUNNING
-            self.db.commit()
+        self.expr_manager.check_expr_status(ve.experiment)
 
     def __service_failed_handler(self, context):
-        self.__flush_service_log(context.service_name)
+        user = self.__get_user_by_context(context)
+        self.__flush_service_log(user, context.service_name)
         ve = self.db.find_first_object_by(VirtualEnvironment, id=context.virtual_environment_id)
         if ve:
             # todo rollback
@@ -174,10 +179,12 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
             ve.experiment.status = EStatus.FAILED
             self.db.commit()
 
+    def __get_user_by_context(self, context):
+        return self.user_manager.get_user_by_id(context.user_id)
+
     def __get_default_service_config(self):
         default_service_config = {
             "service_name": "",
-            "namespace": self.util.get_config("docker.alauda.namespace"),
             "image_name": "",
             "image_tag": "latest",
             "run_command": "",
@@ -187,6 +194,7 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
             "custom_domain_name": "",
             "linked_to_apps": "{}",
             "target_num_instances": "1",
+            "region_name": self.util.safe_get_config("docker.alauda.region_name", "SHANGHAI1"),
             "instance_envvars": {},
             "instance_ports": [],
             "volumes": []  # todo volumes not implemented for now
@@ -203,15 +211,15 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
         service_config["instance_ports"] = unit.get_instance_ports()
         return service_config
 
-    def __get_service_log(self, service_name):
-        namespace = self.util.get_config("docker.alauda.namespace")
+    def __get_service_log(self, user, service_name):
+        namespace = self.__get_namespace(user)
         start_time = self.__format_time(datetime.utcnow() + timedelta(hours=-11))
         end_time = self.__format_time(datetime.utcnow() + timedelta(hours=1))
         path = "/v1/services/%s/%s/logs/?start_time=%s&end_time=%s" % (namespace, service_name, start_time, end_time)
-        return self.__get(path)
+        return self.__get(user, path)
 
-    def __flush_service_log(self, service_name):
-        service_logs = self.__get_service_log(service_name)
+    def __flush_service_log(self, user, service_name):
+        service_logs = self.__get_service_log(user, service_name)
         message = ["latest logs from alauda:"]
 
         def sub(li):
@@ -220,30 +228,30 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
         map(lambda li: sub(li), service_logs)
         self.log.debug("\n".join(message))
 
-    def __create_service(self, config):
-        namespace = self.util.get_config("docker.alauda.namespace")
+    def __create_service(self, user, config):
+        namespace = self.__get_namespace(user)
         path = "/v1/services/%s" % namespace
-        self.__post(path, config)
+        self.__post(user, path, config)
 
-    def __start_service(self, service_name):
-        namespace = self.util.get_config("docker.alauda.namespace")
+    def __start_service(self, user, service_name):
+        namespace = self.__get_namespace(user)
         path = "/v1/services/%s/%s/start/" % (namespace, service_name)
-        self.__put(path, None)
+        self.__put(user, path, None)
 
-    def __stop_service(self, service_name):
-        namespace = self.util.get_config("docker.alauda.namespace")
+    def __stop_service(self, user, service_name):
+        namespace = self.__get_namespace(user)
         path = "/v1/services/%s/%s/stop/" % (namespace, service_name)
-        self.__put(path, None)
+        self.__put(user, path, None)
 
-    def __delete_service(self, service_name):
-        namespace = self.util.get_config("docker.alauda.namespace")
+    def __delete_service(self, user, service_name):
+        namespace = self.__get_namespace(user)
         path = "/v1/services/%s/%s/" % (namespace, service_name)
-        self.__delete(path)
+        self.__delete(user, path)
 
-    def __query_service(self, service_name):
-        namespace = self.util.get_config("docker.alauda.namespace")
+    def __query_service(self, user, service_name):
+        namespace = self.__get_namespace(user)
         path = "/v1/services/%s/%s/" % (namespace, service_name)
-        return self.__get(path)
+        return self.__get(user, path)
 
     def __is_service_running(self, service):
         return service[ALAUDA.CURRENT_STATUS] == ALAUDA.RUNNING
@@ -263,33 +271,47 @@ class AlaudaDockerFormation(DockerFormationBase, Component):
         base_uri = self.util.safe_get_config("docker.alauda.endpoint", "https://api.alauda.cn")
         return "%s%s%s" % (base_uri, sep, path)
 
-    def __get_headers(self):
-        token = self.util.get_config("docker.alauda.token")
+    def __get_namespace(self, user):
+        if user.provider == OAUTH_PROVIDER.ALAUDA:
+            return user.name
+        else:
+            return self.util.get_config("docker.alauda.namespace")
+
+    def __get_token(self, user):
+        if user.provider == OAUTH_PROVIDER.ALAUDA:
+            return "Bearer %s" % user.access_token
+        return "Token %s" % self.util.get_config("docker.alauda.token")
+
+    def __get_headers(self, user):
         return {
-            "Authorization": "Token %s" % token,
+            "Authorization": self.__get_token(user),
             "Content-Type": "application/json"
         }
 
-    def __post(self, path, data):
+    def __post(self, user, path, data):
+        headers = self.__get_headers(user)
         if isinstance(data, dict):
             data = json.dumps(data)
-        return self.__request("post", path, data)
+        return self.__request("post", path, headers=headers, data=data)
 
-    def __put(self, path, data):
+    def __put(self, user, path, data):
+        headers = self.__get_headers(user)
         if isinstance(data, dict):
             data = json.dumps(data)
-        return self.__request("put", path, data)
+        return self.__request("put", path, headers=headers, data=data)
 
-    def __delete(self, path):
-        return self.__request("delete", path)
+    def __delete(self, user, path):
+        headers = self.__get_headers(user)
+        return self.__request("delete", path, headers=headers)
 
-    def __get(self, path):
-        resp = self.__request("get", path)
+    def __get(self, user, path):
+        headers = self.__get_headers(user)
+        resp = self.__request("get", path, headers=headers)
         return self.util.convert(json.loads(resp))
 
-    def __request(self, method, path, data=None):
+    def __request(self, method, path, headers=None, data=None):
         url = self.__get_full_url(path)
-        req = requests.request(method, url, headers=self.__get_headers(), data=data)
+        req = requests.request(method, url, headers=headers, data=data)
         if 200 <= req.status_code < 300:
             resp = req.content
             self.log.debug("'%s' response %d from alauda api '%s': %s" % (method, req.status_code, path, resp))

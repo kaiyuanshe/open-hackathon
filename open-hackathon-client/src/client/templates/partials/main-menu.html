@@ -1,5 +1,5 @@
 <ul class="nav main-menu">
-    {% if g.admin.is_super() %}
+    {% if g.user.is_super %}
         <li>
             <a class="dropmenu" href="sitemap#">
                 <i class="fa fa-sitemap"></i>
@@ -30,18 +30,8 @@
     {% endif %}
     <li>
         <a href="/manage">
-            <i class="fa fa-cloud"></i>
+            <i class="fa fa-list"></i>
             <span class="hidden-sm text"> 我的Hackathon</span>
-        </a>
-    </li>
-    <li>
-        <a href="/manage/{{ hackathon_name }}/user">
-            <i class="fa fa-users"></i><span class="hidden-sm text"> 用户管理</span>
-        </a>
-    </li>
-    <li>
-        <a href="/manage/{{ hackathon_name }}/adminmgr">
-            <i class="fa fa-adn"></i><span class="hidden-sm text"> 管理员管理</span>
         </a>
     </li>
     <li>
@@ -50,23 +40,53 @@
         </a>
     </li>
     <li>
+        <a href="/manage/{{ hackathon_name }}/notice">
+            <i class="fa fa-bullhorn"></i><span class="hidden-sm text"> 动态管理</span>
+        </a>
+    </li>
+    <li>
+        <a href="/manage/{{ hackathon_name }}/user">
+            <i class="fa fa-user"></i><span class="hidden-sm text"> 注册用户管理</span>
+        </a>
+    </li>
+    <li>
+        <a href="/manage/{{ hackathon_name }}/adminmgr">
+            <i class="fa fa-adn"></i><span class="hidden-sm text"> 管理员管理</span>
+        </a>
+    </li>
+    <li>
         <a href="/manage/{{ hackathon_name }}/organizers">
-            <i class="fa fa-briefcase"></i><span class="hidden-sm text"> 主办方</span>
+            <i class="fa fa-group"></i><span class="hidden-sm text"> 组织管理</span>
+        </a>
+    </li>
+    <li>
+        <a href="/manage/{{ hackathon_name }}/award">
+            <i class="fa fa-trophy"></i><span class="hidden-sm text"> 奖项设置</span>
+        </a>
+    </li>
+    <li>
+        <a href="/manage/{{ hackathon_name }}/team">
+            <i class="fa fa-diamond"></i><span class="hidden-sm text"> 评奖</span>
         </a>
     </li>
     <li>
         <a href="/manage/{{ hackathon_name }}/azurecert">
-            <i class="fa fa-users"></i><span class="hidden-sm text"> Azure证书管理</span>
+            <i class="fa fa-file"></i><span class="hidden-sm text"> Azure证书管理</span>
         </a>
     </li>
     <li>
         <a href="/manage/{{ hackathon_name }}/template">
-            <i class="fa fa-users"></i><span class="hidden-sm text"> 模板管理</span>
+            <i class="fa fa-book"></i><span class="hidden-sm text"> 模板管理</span>
         </a>
     </li>
     <li>
         <a href="/manage/{{ hackathon_name }}/experiment">
-            <i class="fa fa-users"></i><span class="hidden-sm text"> 环境管理</span>
+            <i class="fa fa-desktop"></i><span class="hidden-sm text"> 环境管理</span>
+        </a>
+    </li>
+    <li>
+        <a href="/manage/{{ hackathon_name }}/host_server">
+            <i class="fa fa-server"></i><span class="hidden-sm text"> 服务器管理</span>
         </a>
     </li>
 </ul>

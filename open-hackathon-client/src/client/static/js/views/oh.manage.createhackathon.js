@@ -116,9 +116,18 @@
         data.push({key: 'pre_allocate_enabled', value: false});
         data.push({key: 'pre_allocate_number', value: 1});
         data.push({key: 'freedom_team', value: $('#freedom_team').is(':checked')});
+        data.push({key: 'login_provider', value: getLoginProviderValue()});
         return data;
     }
 
+    function getLoginProviderValue() {
+        var value = 0;
+        $('[data-role="login_provider"]:checked').each(function (i, ele) {
+            var box = $(ele);
+            value += Number(box.val());
+        });
+        return value;
+    }
 
     function getTags() {
         var data = $('#tags').tagsinput('items');
@@ -142,7 +151,26 @@
         pageload();
     }
 
+    //setup ckeditor
+    function ckeditorSetup() {
+        var editorElement = CKEDITOR.document.getById( 'markdownEdit' );
+        CKEDITOR.replace(editorElement, {
+            language: 'zh-cn'
+            , width:  'auto'
+            , height: '220'
+        });
+    }
+
+    //update before uploading, otherwise changes won't be saved
+    function ckeditorUpdateTextarea() {
+        for (instance in CKEDITOR.instances ) {
+            CKEDITOR.instances[instance].updateElement();
+        }
+    }
+
     function pageload() {
+        ckeditorSetup();
+
         $('#event_time,#register_time,#judge_time').daterangepicker({
             timePicker: true,
             format: 'YYYY/MM/DD HH:mm',
@@ -153,11 +181,6 @@
         });
 
         $('.bootstrap-tagsinput input:text').removeAttr('style');
-
-        $('#markdownEdit').markdown({
-            hiddenButtons: 'cmdCode',
-            language: 'zh'
-        });
     }
 
 
@@ -212,14 +235,16 @@
         }).on('success.form.bv', function (e) {
             e.preventDefault();
 
+            ckeditorUpdateTextarea();
+            
             var hack_data = getHackthonData();
             var config_data = getConfig();
             var tags_data = getTags();
-
+            
             create_hackathon({body: hack_data}).then(function (data) {
                 if (data.error) {
                     if (data.error.code == 412) {
-                     $('#stepform1').data('bootstrapValidator')
+                        $('#stepform1').data('bootstrapValidator')
                             .updateStatus('name', 'INVALID', 'remote1')
                             .validateField('name');
                     } else {

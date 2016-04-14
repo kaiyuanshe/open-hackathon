@@ -31,11 +31,9 @@ QQ_OAUTH_STATE = "openhackathon"  # todo state should not be constant. Actually 
 
 HACKATHON_SERVER_ENDPOINT = "http://localhost:15000"
 
-MYSQL_HOST = "localhost"
-MYSQL_USER = "hackathon"
-MYSQL_PWD = "hackathon"
-MYSQL_DB = "hackathon"
-MYSQL_PORT = 3306
+MONGODB_HOST = "localhost"
+MONGODB_PORT = 27017
+MONGODB_DB = "hackathon"
 
 Config = {
     "environment": "local",
@@ -43,29 +41,12 @@ Config = {
     "app": {
         "secret_key": "secret_key"
     },
-    "mysql": {
-        "connection": 'mysql://%s:%s@%s:%s/%s' % (MYSQL_USER, MYSQL_PWD, MYSQL_HOST, MYSQL_PORT, MYSQL_DB)
+    "mongodb": {
+        "database": MONGODB_DB,
+        "host": MONGODB_HOST,
+        "port": MONGODB_PORT
     },
     "login": {
-        "github": {
-            "user_info_url": 'https://api.github.com/user?access_token=',
-            "emails_info_url": 'https://api.github.com/user/emails?access_token='
-        },
-        "qq": {
-            "openid_url": 'https://graph.qq.com/oauth2.0/me?access_token=',
-            "user_info_url": 'https://graph.qq.com/user/get_user_info?access_token=%s&oauth_consumer_key=%s&openid=%s'
-        },
-        "gitcafe": {
-            # gitcafe domain:  gcas.dgz.sh/gcs.dgz.sh for Staging, api.gitcafe.com/gitcafe.com for Production
-            "user_info_url": "https://gcas.dgz.sh/api/v1/user"
-        },
-        "weibo": {
-            "user_info_url": 'https://api.weibo.com/2/users/show.json?access_token=',
-            "email_info_url": 'https://api.weibo.com/2/account/profile/email.json?access_token='
-        },
-        "live": {
-            "user_info_url": 'https://apis.live.net/v5.0/me?access_token='
-        },
         "token_expiration_minutes": 60 * 24
     },
     "azure": {
@@ -75,13 +56,13 @@ Config = {
         "host": "http://localhost:8080"
     },
     "scheduler": {
-        "job_store": "mysql",
-        "job_store_url": 'mysql://%s:%s@%s:%s/%s' % (MYSQL_USER, MYSQL_PWD, MYSQL_HOST, MYSQL_PORT, MYSQL_DB)
-    },
-    "pre_allocate": {
-        "check_interval_minutes": 5,
-        "azure": 1,
-        "docker": 1
+        # "job_store": "mysql",
+        # "job_store_url": 'mysql://%s:%s@%s:%s/%s' % (MYSQL_USER, MYSQL_PWD, MYSQL_HOST, MYSQL_PORT, MYSQL_DB)
+        "job_store": "mongodb",
+        "database": MONGODB_DB,
+        "collection": "jobs",
+        "host": MONGODB_HOST,
+        "port": MONGODB_PORT
     },
     "storage": {
         "type": "local",
@@ -99,10 +80,40 @@ Config = {
         "alauda": {
             "token": "",
             "namespace": "",
-            "endpoint": "https://api.alauda.cn"
+            "endpoint": "http://api.int.alauda.io",
+            "region_name": "BEIJING1"
         }
     },
-    "cloud_eclipse": {
-        "api": "http://www.idehub.cn/api/ide"
+    "email": {
+        "host": "",
+        "port": 587,
+        "username": "",
+        "password": ""
+    },
+    "voice_verify": {
+        "enabled": False,
+        "provider": "",
+        "rong_lian": {
+            "account_sid": "",
+            "auth_token": "",
+            "app_id": "",
+            "server_ip": "https://app.cloopen.com",
+            "server_port": "8883",
+            "soft_version": "2013-12-26",
+            "play_times": 3,
+            "display_number": "",
+            "response_url": "",
+            "language": "zh"
+        }
+    },
+    "sms": {
+        "enabled": False,
+        "provider": "",
+        "china_telecom": {
+            "url": "http://api.189.cn/v2/emp/templateSms/sendSms",
+            "app_id": "",
+            "app_secret": "",
+            "url_access_token": "https://oauth.api.189.cn/emp/oauth2/v3/access_token"
+        }
     }
 }

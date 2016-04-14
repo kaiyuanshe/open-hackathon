@@ -59,3 +59,12 @@ class RemoteProvider:
 class EmailStatus:
     Primary = 1
     NonPrimary = 0
+
+
+class LoginProvider:
+    live = 1
+    github = 2
+    qq = 4
+    weibo = 8
+    gitcafe = 16
+    alauda = 32

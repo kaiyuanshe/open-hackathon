@@ -1,0 +1,144 @@
+{% extends "manage/main.html" %}
+
+{% block style %}
+
+<style>
+.a_img {
+    width: 120px;
+}
+.a_img img{
+    max-width: 100px;
+    max-height: 100px;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+    <div class="col-lg-12" data-team="{{ team_id }}" loading>
+        <div class="box" style="display:none">
+            <div class="box-header">
+                <h2><i class="fa fa-edit"></i>评奖</h2>
+            </div>
+            <a class="link" href="/manage/{{ hackathon_name }}/team" target="team">返回</a>
+            <a data-type="new" href="javascript:;">评奖</a>
+            <a class="link" href="/site/{{ hackathon_name }}/team/{{ team_id }}" target="_blank">查看团队作品</a>
+            <div class="box-content">
+                <div id="awardtable">
+                    <legend>
+                        已获奖项：
+                    </legend>
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th>奖项</th>
+                            <th>获奖理由</th>
+                            <th>描述</th>
+                            <th>奖项照片</th>
+                            <th>奖项时间</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody id="awardlist">
+
+                        </tbody>
+                    </table>
+                    <legend>
+                        裁判评分：
+                    </legend>
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th>分数</th>
+                            <th>评论</th>
+                            <th>时间</th>
+                        </tr>
+                        </thead>
+                        <tbody id="scorelist">
+
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+            <div>
+                <form class="form-horizontal" id="awardform" style="display:none">
+                        <fieldset>
+                            <legend>
+                                评奖：
+                            </legend>
+                        </fieldset>
+                        <div class="form-group has-feedback">
+                            <label class="col-md-3 control-label">奖项名称</label>
+
+                            <div class="col-md-6">
+                                <select class="form-control" id="award">
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group has-feedback">
+                            <label class="col-md-3 control-label">获奖理由</label>
+                            <div class="col-md-6">
+                                <textarea class="form-control" name="reason" id="reason" placeholder=""
+                                          rows="10"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group has-feedback">
+
+                            <div class="col-sm-offset-3 col-sm-6">
+                                <button type="button" class="btn btn btn-default" data-type="cancel"> 取消</button>
+                                <button type="submit" class="btn btn-primary"> 提交</button>
+                            </div>
+                        </div>
+                    </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock body %}
+
+{% block script %}
+    <div class="modal fade bs-example-modal-sm" id="confirm_modal" tabindex="-1" role="dialog"
+         aria-labelledby="mySmallModalLabel" aria-hidden="true" data-api="oh.api.admin.team.award.delete">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">提示</h4>
+                </div>
+                <div class="modal-body">
+                    <p>确定删除此奖项？</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default wb-btn" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary wb-btn" data-type="ok">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{ super() }}
+    <script id="team_award_tmpl" type="text/x-jquery-tmpl">
+    <tr>
+        <td>${award.name}</td>
+        <td>${reason}</td>
+        <td>${award.description}</td>
+        <td class="a_img"><img src="${award.award_url}"></td>
+        <td>${moment(create_time).format('YYYY-MM-DD HH:mm')}</td>
+        <td class="col-action">
+            <a class="btn btn-danger btn-sm" href="#" data-target="#confirm_modal" data-toggle="modal">
+                <i class="fa fa-trash-o "></i>
+            </a>
+        </td>
+    </tr>
+    </script>
+
+    <script id="team_score_tmpl" type="text/x-jquery-tmpl">
+    <tr>
+        <td>${score}</td>
+        <td>${reason}</td>
+        <td>${moment(create_time).format('YYYY-MM-DD HH:mm')}</td>
+    </tr>
+    </script>
+    <script type="text/javascript" src="/static/js/views/oh.manage.team_award.js"></script>
+{% endblock %}

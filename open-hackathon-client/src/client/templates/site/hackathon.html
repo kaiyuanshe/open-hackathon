@@ -1,217 +1,214 @@
-{% extends "base/base.html" %}
-{% block head %}
+{% extends "base/base.html" %} {% block head %}
     <title>{{ hackathon.display_name }}</title>
-{% endblock %}
-{% block style %}
-    <link href="/static/css/oh.site.hackathon.css" rel="stylesheet">
-{% endblock %}
-{% block content %}
+{% endblock %} {% block style %}
+    <link href="/static/css/oh.site.hackathon.css" rel="stylesheet"> {% endblock %} {% block content %}
     <div class="oh-main">
         <div class="container">
-
-            <h1 class="title">{{ hackathon.display_name }}</h1>
-            <ul class="tags">
-                {% for item  in  hackathon.tag.split(",") %}
-                    <li><a href="javascript:;">{{ item }}</a></li>
-                {% endfor %}
-            </ul>
             <div class="row">
-                <div class="col-lg-8 col-md-7">
+                <div class="col-xs-7">
                     <div id="banner" class="carousel slide" data-ride="carousel">
                         <ol class="carousel-indicators">
-                            {% for src in hackathon.banners.split(';') %}
-                                <li data-target="#banner" data-slide-to="{{ loop.index - 1 }}" {% if loop.index == 1 %}
+                            {% for src in hackathon.banners %}
+                                <li data-target="#banner" data-slide-to="{{ loop.index - 1 }}" {% if loop.index==1 %}
                                     class="active" {% endif %}></li>
                             {% endfor %}
                         </ol>
                         <div class="carousel-inner" role="listbox">
-                            {% for src in hackathon.banners.split(';') %}
+                            {% for src in hackathon.banners %}
                                 <div class="item {% if loop.index == 1 %} active {% endif %}">
                                     <img src="{{ src }}">
                                 </div>
                             {% endfor %}
                         </div>
                     </div>
-                    <div class="">
-                        <h2 id="detail" class="title">活动详情</h2>
-
-                        <div class="oh-body detail-body">
-                            {{ hackathon.description | mkHTML | safe }}
-                        </div>
-
-                        <h2 id="new" class="title">最新动态 <span>（3）</span></h2>
-
-                        <div class="oh-body grey-text">
-                            {#                            <dl class="oh-latest-news">#}
-                            {#                                <dt>昨天</dt>#}
-                            {#                                <dd><span class="t-bullhorn"></span>#}
-                            {#                                    公告消息公告消息公告消息公告消息公告消息公告消息公告消息公告消息#}
-                            {#                                </dd>#}
-                            {#                            </dl>#}
-                            {#                            <dl class="oh-latest-news">#}
-                            {#                                <dt>4天前</dt>#}
-                            {#                                <dd><span class="t-edit"></span>#}
-                            {#                                    2015/09/20 周日 00:00#}
-                            {#                                </dd>#}
-                            {#                            </dl>#}
-                            <dl class="oh-latest-news">
-                                <dt>{{ hackathon.create_time |date("%Y/%m/%d") }}</dt>
-                                <dd><span class="t-bullhorn"></span>
-                                    {{ hackathon.config.location }}
-                                </dd>
-                            </dl>
-                        </div>
-
-                        <h2 id="team" class="title">目前组队 <span>（0）</span></h2>
-
-                        <div class="oh-body teams clearfix " id="team_list">
-                        </div>
-
-                        <h2 id="works" class="title">作品公布 <span>（4）</span></h2>
-
-                        <div class="ob-body clearfix">
-                            <div class="col-md-4">
-                                <div class="">
-                                    <a href="javascirpt:;" class="oh-thumb">
-                                        <img src="/static/pic/homepage.jpg" class="oh-thumbnail">
-                                    </a>
-                                </div>
-                                <a class="grey-link" href="javascript:;">作品名称作品名称作品名称</a>
-
-                                <p class="grey-text">队伍名称</p>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="">
-                                    <a href="javascirpt:;" class="oh-thumb">
-                                        <img src="/static/pic/homepage.jpg" class="oh-thumbnail">
-                                    </a>
-                                </div>
-                                <a class="grey-link" href="javascript:;">作品名称作品名称作品名称</a>
-
-                                <p class="grey-text">队伍名称</p>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="">
-                                    <a href="javascirpt:;" class="oh-thumb">
-                                        <img src="/static/pic/homepage.jpg" class="oh-thumbnail">
-                                    </a>
-                                </div>
-                                <a class="grey-link" href="javascript:;">作品名称作品名称作品名称</a>
-
-                                <p class="grey-text">队伍名称</p>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="">
-                                    <a href="javascirpt:;" class="oh-thumb">
-                                        <img src="/static/pic/homepage.jpg" class="oh-thumbnail">
-                                    </a>
-                                </div>
-                                <a class="grey-link" href="javascript:;">作品名称作品名称作品名称</a>
-
-                                <p class="grey-text">队伍名称</p>
-                            </div>
-                        </div>
-
-                        <h2 id="comment" class="title">活动讨论 <span>（5）</span></h2>
-
-                        <div class="oh-body">
-
-                        </div>
-                    </div>
                 </div>
-                <div class="col-lg-4 col-md-5">
-                    <div class="oh-box">
-                        <div class="oh-body">
-                            <dl class="oh-detail-info">
-                                <dt>时间：</dt>
-                                <dd>
-                                    {{ hackathon.event_start_time | date("%Y/%m/%d %A %H:%M") }} <span
-                                        class="grey-text">- 开始</span><br/>
-                                    {{ hackathon.event_end_time | date("%Y/%m/%d %a %H:%M") }} <span
-                                        class="grey-text">- 结束</span>
-                                </dd>
-                                <dt>报名 ：</dt>
-                                <dd>
-                                    {{ hackathon.registration_end_time | date("%Y/%m/%d %a %H:%M") }} <span
-                                        class="grey-text">之前</span>
-                                </dd>
-                                <dt>地址：</dt>
-                                <dd>
-                                    {{ hackathon.config.location == '' and '在线' or hackathon.config.location }}
-                                </dd>
-                                <dt>限额：</dt>
-                                <dd>
-                                    {{ hackathon.config.max_enrollment == '0' and  '无限' or hackathon.config.max_enrollment +'人' }}
-                                    <span class="grey-text">（<span>{{ hackathon.stat.register or 0 }}</span>人已报名）</span>
-                                </dd>
-                                <dt>主办方：</dt>
-                                <dd>
-                                    {% for org in  hackathon.organizer %}
-                                        <a href="{{ org.homepage }}">{{ org.name }}</a>
-                                    {% endfor %}
-                                </dd>
-                            </dl>
-
-                            <div id="status">
-                                {% if hackathon.registration_end_time < get_now() %}
-                                    <p>报名已经结束。</p>
-                                {% elif hackathon.event_end_time < get_now() %}
-                                    <p>活动已结束。</p>
-                                {% elif user == None %}
-                                    <a class="btn btn-primary btn-lg"
-                                       href="{{ url_for('login', return_url=request.path) }}">我要报名</a>
-                                {% elif user.get("user_profile") == None %}
-                                    <a class="btn btn-primary btn-lg"
-                                       href="{{ url_for('user_profile',return_url=request.path) }}">我要报名</a>
-                                {% elif registration == None %}
-                                    <a class="btn btn-primary btn-lg" data-type="register">我要报名</a>
-                                {% elif hackathon.config.auto_approve =='1' or registration.status == 1 or (hackathon.config.auto_approve =='0' and registration.status == 3) %}
+                <div class="col-xs-5">
+                    <div class="h-info">
+                        <h1 class="title">{{ hackathon.display_name }}</h1>
+                        <ul class="tags">
+                            {% for item in hackathon.tags %}
+                                <li><a href="javascript:;">{{ item }}</a></li>
+                            {% endfor %}
+                        </ul>
+                        <dl class="oh-detail-info">
+                            <dt>报名时间 <span class="fa fa-calendar green-text"></span></dt>
+                            <dd>
+                                {{ hackathon.registration_start_time | date("%Y/%m/%d %H:%M") }}
+                                — {{ hackathon.registration_end_time | date("%Y/%m/%d %H:%M") }}
+                            </dd>
+                            <dt>活动时间 <span class="fa fa-calendar green-text"></span></dt>
+                            <dd>
+                                {{ hackathon.event_start_time | date("%Y/%m/%d %H:%M") }}
+                                — {{ hackathon.event_end_time | date("%Y/%m/%d %H:%M") }}
+                            </dd>
+                            <dt>活动地址 <span class="fa fa-map-marker green-text"></span></dt>
+                            <dd>
+                                {{ hackathon.location == '' and '在线编程' or hackathon.location }}
+                            </dd>
+                            <dt>报名人数</dt>
+                            <dd>
+                                {{(not hackathon.config.max_enrollment is defined or hackathon.config.max_enrollment|int == 0) and '无限' or hackathon.config.max_enrollment|int ~ '人' }}
+                                （<span class="red-text">{{ hackathon.stat.register or 0 }}</span>人已报名）
+                            </dd>
+                        </dl>
+                        <div id="status">
+                            {% if hackathon.event_end_time< get_now() %}
+                                <p>报名已经结束。</p>
+                                {% if team !=None %}
+                                    <a class="btn btn-success"
+                                       href="{{ url_for('create_join_team',hackathon_name=hackathon_name, tid=team.id) }}">我的团队</a>
+                                {% endif %}
+                            {% elif hackathon.registration_end_time < get_now() %}
+                                <p>报名已经结束。</p>
+                                {% if team !=None %}
+                                    <a class="btn btn-success"
+                                       href="{{ url_for('create_join_team',hackathon_name=hackathon_name, tid=team.id) }}">我的团队</a>
+                                {% endif %}
+                            {% elif user == None %}
+                                <a class="btn btn-primary"
+                                   href="{{ url_for('login', return_url=request.path, provides=get_provides(hackathon.config.login_provider)) }}">我要报名</a>
+                            {% elif user.is_admin %}
+                                <a class="btn btn-info" href="/manage/edit/{{ hackathon_name }}">管理</a>
+                            {% elif user.get("profile") == None %}
+                                <a class="btn btn-primary"
+                                   href="{{ url_for('user_profile_edit',return_url=request.path) }}">我要报名</a>
+                            {% elif registration == None %}
+                                <a class="btn btn-primary" data-type="register">我要报名</a>
+                            {% elif registration != None %}
+                                {% if registration.status == 1 or (hackathon.config.auto_approve and registration.status == 3) %}
+                                    <p>您的报名已经审核已通过。</p>
                                     {% if experiment == None %}
-                                        <a class="btn btn-primary btn-lg"
+                                        <a class="btn btn-primary"
                                            href="{{ url_for('temp_settings',hackathon_name=hackathon_name) }}">立即参加</a>
                                     {% else %}
-                                        <a class="btn btn-primary btn-lg"
+                                        <a class="btn btn-primary"
                                            href="{{ url_for('workspace',hackathon_name=hackathon_name) }}">立即参加</a>
                                     {% endif %}
-                                    <p>您的报名已经审核已通过。</p>
-                                {% elif (not hackathon.config.auto_approve == '0' and registration.status == 3 ) or  registration.status == 0 %}
+                                    {% if team !=None %}
+                                        <a class="btn btn-success"
+                                           href="{{ url_for('create_join_team',hackathon_name=hackathon_name, tid=team.id) }}">我的团队</a>
+                                    {% endif %}
+                                {% elif (hackathon.config.auto_approve == '0' and registration.status == 3 ) or registration.status == 0 %}
                                     <p>您的报名正在审核中，请等待。</p>
                                 {% elif registration.status == 2 %}
                                     <p>您的报名已被拒绝，如有疑问请联系主办方。</p>
                                 {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix visible-md-block visible-sm-block"></div>
+            </div>
+            <div class="row">
+                <div class="col-xs-9 activity-info">
+                    <ul class="nav nav-tabs profile-tabs" role="tablist">
+                        <li role="presentation" class="active">
+                            <a href="#detail" role="tab" data-toggle="tab">活动详情</a>
+                        </li>
+                        <li role="presentation">
+                            <a href="#news" role="tab" data-toggle="tab">最新动态</a>
+                        </li>
+                        <li role="presentation">
+                            <a href="#comment" role="tab" data-toggle="tab">讨论专区</a>
+                        </li>
+                        <li role="presentation">
+                            <a href="#team" role="tab" data-toggle="tab">所有团队</a>
+                        </li>
+                        <li role="presentation">
+                            <a href="#works" role="tab" data-toggle="tab">作品公布</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content profile-tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="detail">
+                            <div>
+                                {{ hackathon.description | safe }}
+                            </div>
+                            {% if hackathon.awards | length  > 0 %}
+                                <div>
+                                    <h3 class="title">奖品</h3>
+                                    {% for award in hackathon.awards %}
+                                        <div class="award award-{{ loop.index }}" data-parent>
+                                            <img data-loadsrc="{{ award.award_url }}" src="{{ award.award_url }}"
+                                                 alt="{{ award.name }}">
+                                            <div class="award-body">
+                                                <h3>{{ award.name }}</h3>
+                                                <p>{{ award.description }}</p>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="news">
+                            <div id="oh-latest-news">
+                            </div>
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="comment">
+                            <div class="ds-thread" data-thread-key="ohp-{{ hackathon.name }}"
+                                 data-title="{{ hackathon.display_name }}"
+                                 data-url="http://hacking.kaiyuanshe.cn/site/{{ hackathon.name }}"></div>
+
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="team">
+                            <div class="teams clearfix " id="team_list">
+                            </div>
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="works">
+
+                            <div class="ob-body row" id="team_show">
                             </div>
                         </div>
                     </div>
-                    <div class="oh-box">
-                        <h3 class="title">关于主办方</h3>
-
-                        <div class="oh-body organizer">
-                            {% for org in hackathon.organizer %}
-                                <div class="media">
-                                    <div class="media-left">
-                                        <a href="{{ org.homepage }}" class="oh-thumb">
-                                            <img class="media-object oh-thumbnail" src="{{ org.logo }}"
-                                                 alt="{{ org.name }}">
-                                        </a>
-                                    </div>
-                                    <div class="media-body">
-                                        <h4 class="media-heading">{{ org.name }}</h4>
-                                        {{ org.description | mkHTML | stripTags | limitTo(100) }}
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% if hackathon.config.location %}
+                </div>
+                <div class="col-xs-3">
+                    {% if hackathon.organizers | length > 0 %}
                         <div class="oh-box">
-                            <h3 class="title">活动地点</h3>
-
-                            <div id="map" class="baidu-map" title="{{ hackathon.config.location }}"></div>
+                            <h3 class="title">主办方</h3>
+                            <div class="oh-body organizer">
+                                {% for org in hackathon.organizers %}
+                                    <div class="media">
+                                        <div class="media-left">
+                                            <a href="{{ org.homepage }}" class="oh-thumb">
+                                                <img class="media-object oh-thumbnail" src="{{ org.logo }}"
+                                                     alt="{{ org.name }}">
+                                            </a>
+                                        </div>
+                                        <div class="media-body">
+                                            <h4 class="media-heading">{{ org.name }}</h4> {{ org.description | mkHTML | stripTags | limitTo(100) }}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
                         </div>
                     {% endif %}
-                    <div class="oh-box">
+                    {% if hackathon.partners | length  > 0 %}
+                        <div class="oh-box">
+                            <h3 class="title">合作伙伴</h3>
+                            <div class="oh-body parter">
+                                {% for org in hackathon.partners %}
+                                    <div class="media">
+                                        <div class="media-left">
+                                            <a href="{{ org.homepage }}" class="oh-thumb">
+                                                <img class="media-object oh-thumbnail" src="{{ org.logo }}"
+                                                     alt="{{ org.name }}">
+                                            </a>
+                                        </div>
+                                        <div class="media-body">
+                                            <h4 class="media-heading">{{ org.name }}</h4> {{ org.description | mkHTML | stripTags | limitTo(100) }}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                    {% if hackathon.location %}
+                        <div class="oh-box">
+                            <h3 class="title">活动地点</h3>
+                            <div id="map" class="baidu-map" title="{{ hackathon.location }}"></div>
+                        </div>
+                    {% endif %}
+                    <div class="oh-box" style="display:none">
                         <h3 class="title">您还可能感兴趣</h3>
-
                         <div class="oh-body interest">
                             <div class="media">
                                 <div class="media-left">
@@ -220,11 +217,9 @@
                                     </a>
                                 </div>
                                 <div class="media-body">
-                                    <h4 class="media-heading">Open xml</h4>
-                                    sdfasdfa
+                                    <h4 class="media-heading">Open xml</h4> sdfasdfa
                                 </div>
                             </div>
-
                             <div class="media">
                                 <div class="media-left">
                                     <a href="javascript:;" class="oh-thumb">
@@ -232,11 +227,9 @@
                                     </a>
                                 </div>
                                 <div class="media-body">
-                                    <h4 class="media-heading">Open xml</h4>
-                                    sdfasdfa
+                                    <h4 class="media-heading">Open xml</h4> sdfasdfa
                                 </div>
                             </div>
-
                             <div class="media">
                                 <div class="media-left">
                                     <a href="javascript:;" class="oh-thumb">
@@ -244,8 +237,7 @@
                                     </a>
                                 </div>
                                 <div class="media-body">
-                                    <h4 class="media-heading">Open xml</h4>
-                                    sdfasdfa
+                                    <h4 class="media-heading">Open xml</h4> sdfasdfa
                                 </div>
                             </div>
                         </div>
@@ -254,43 +246,24 @@
             </div>
         </div>
     </div>
-
     <div id="oh_lift">
-        <div class="container">
-            <ul class="nav nav-tabs" role="tablist">
-                <li><a href="#detail"><span>活动详情</span><i></i></a></li>
-                <li><a href="#new"><span>最新动态</span><i></i></a></li>
-                <li><a href="#team"><span>目前组队</span><i></i></a></li>
-                <li><a href="#works"><span>作品公布</span><i></i></a></li>
-                <li><a href="#comment"><span>活动讨论</span><i></i></a></li>
-            </ul>
-            <div class="full-shared hide">
-                <a class="lid">
-                    <i class="fa fa-share-alt"></i>
-                    <span>分享活动</span>
+        <div class="full-shared">
+            <div class="jiathis_style_32x32 share-btn">
+                <a class="jiathis_button_ishare">
+                    <label>一键分享</label>
                 </a>
-
-                <div class="jiathis_style_32x32 share-btn">
-                    <a class="jiathis_button_ishare">
-                        <label>一键分享</label>
-                    </a>
-                    <a class="jiathis_button_tsina">
-                        <label>微博分享</label>
-                    </a>
-                    <a class="jiathis_button_tqq">
-                        <label>腾讯微博</label>
-                    </a>
-                    <a class="jiathis_button_qzone">
-                        <label>QQ空间</label>
-                    </a>
-                    <a class="jiathis_button_weixin">
-                        <label>微信分享</label>
-                    </a>
-                </div>
+                <a class="jiathis_button_tsina">
+                    <label>微博分享</label>
+                </a>
+                <a class="jiathis_button_tqq">
+                    <label>腾讯微博</label>
+                </a>
+                <a class="jiathis_button_wechat">
+                    <label>微信分享</label>
+                </a>
             </div>
         </div>
     </div>
-
     <!-- Modal -->
     <div class="modal fade" id="registerModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog" role="document">
@@ -305,20 +278,15 @@
                         <div class="form-group"
                              ng-class="{ 'has-error' : registerForm.team_name.$invalid && registerForm.team_name.$touched }">
                             <label class="col-sm-3 control-label required">团队名称</label>
-
                             <div class="col-sm-9">
-                                <input type="text" class="form-control" name="team_name" placeholder="团队名称"
-                                       required
-                                       data-bv-trigger="blur"
-                                       data-bv-notempty-message="团队名称必须填写">
+                                <input type="text" class="form-control" name="team_name" placeholder="团队名称" required
+                                       data-bv-trigger="blur" data-bv-notempty-message="团队名称必须填写">
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="col-sm-3 control-label">代码托管地址</label>
-
                             <div class="col-sm-9">
-                                <input type="url" class="form-control" name="git_project"
-                                       placeholder="githubx项目地址">
+                                <input type="url" class="form-control" name="git_project" placeholder="githubx项目地址">
                             </div>
                         </div>
                     </div>
@@ -330,39 +298,85 @@
             </form>
         </div>
     </div>
-{% endblock %}
+{% endblock %} {% block script %}
+    <script id="notice_list_temp" type="text/x-jquery-tmpl">
+  {% raw %}
+  <dl class="oh-latest-news">
+    <dt>${$item.getNoticeTime(update_time)}</dt>
+    <dd style="word-break: break-all">
+      {{if link==''}}
+      <span class="${$item.getNoticeIcon(category)}"></span>${content} {{else}}
+      <span class="${$item.getNoticeIcon(category)}"></span><a href="${link}">${content}</a> {{/if}}
+    </dd>
+  </dl>
+  {% endraw %}
 
-{% block script %}
+
+
+    </script>
     <script id="team_list_temp" type="text/x-jquery-tmpl">
-       {% raw %}
-        <div class="col-md-6">
-            <div class="media">
-                <div class="media-left">
-                    <a href="${$item.get_link(id)}" class="oh-thumb">
-                        <img class="media-object oh-thumbnail" src="${$item.get_logo(logo)}"  onerror="javascript:this.src='/static/pic/team-logo.png'" alt="">
-                    </a>
-                </div>
-                <div class="media-body">
-                    <h4 class="media-heading"><a href="${$item.get_link(id)}">${name}</a></h4>
-                   ${$item.get_description(description)}
-                </div>
-            </div>
+  {% raw %}
+  <div class="col-xs-3">
+    <div class="item">
+       <div class="clearfix">
+          <div class="logo">
+            <a href="${$item.get_link(id)}" target="_blank" class="oh-thumb">
+              <img class="media-object oh-thumbnail" src="${$item.get_logo(logo)}" onerror="javascript:this.src='/static/pic/team-logo.png'" alt="${name}">
+            </a>
+          </div>
+          <div class="team-body">
+            <h4 class="media-heading"><a target="_blank" href="${$item.get_link(id)}" title="${name}">${name}</a></h4>
+            <p>共 <span class="green-text">${member_count}</span> 人</p>
+          </div>
+      </div>
+      <div class="footer">
+       <p>队长：<a href="/user/p_${leader.id}"><img src="${leader.avatar_url}"> ${leader.nickname}</a></p>
+      </div>
+    </div>
+  </div>
+  {% endraw %}
+
+    </script>
+    <script id="show_list_temp" type="text/x-jquery-tmpl">
+  {% raw %}
+  <div class="col-md-6">
+    <div class="item">
+        <div class="header" data-parent>
+            <a href="${$item.link(id)}">
+                <img src="${cover}" class="oh-thumbnail" alt="${project_name}" onload="oh.comm.imgLoad(this)" >
+            </a>
         </div>
-        {% endraw %}
+        <div class="body">
+            <h4>项目名称：${project_name}</h4>
+            <p>团队名：<a href="${$item.link(id)}">${name}</a></p>
+            <div class="desc">
+                ${description}
+            </div>
+         </div>
+        <div class="footer">
+            <p> 更多展示：{{html $item.getlinks(works,id)}}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endraw %}
+
     </script>
     <script id="register_list_temp" type="text/x-jquery-tmpl">
-    {% raw %}
-        <li>
-            <a href="javascript:;">
-              <img class="avatar" alt="Lucas" src="${avatar_url }">
-            </a>
+  {% raw %}
+  <li>
+    <a href="javascript:;">
+      <img class="avatar" alt="Lucas" src="${avatar_url }">
+    </a>
+    <div>
+      <strong>${name}</strong>
+    </div>
+    <div class="date">${create_time}</div>
+  </li>
+  {% endraw %}
 
-            <div>
-              <strong>${name}</strong>
-            </div>
-            <div class="date">${create_time}</div>
-        </li>
-    {% endraw %}
+
+
 
 
     </script>
@@ -377,35 +391,47 @@
             else document.body.appendChild(setupScript);
         }
         var opts = {
-            width: 100,     // 信息窗口宽度
-            height: 30       // 信息窗口高度题
+            width: 100, // 信息窗口宽度
+            height: 30 // 信息窗口高度题
         }
+
         function initializeMap() {
-            var map = new BMap.Map('map');
-            map.addControl(new BMap.OverviewMapControl());
-            var address = "{{ hackathon.config.location }}";
+            var address = "{{ hackathon.location }}";
+
+            var map = new BMap.Map("map");
             var myGeo = new BMap.Geocoder();
             myGeo.getPoint(address, function (point) {
                 if (point) {
-                    {#                    var s = new BMap.Icon("http://cdn.huodongxing.com/Content/img/mark1.png", new BMap.Size(32, 32), {"anchor": new BMap.Size(16, 32)});#}
-                    {#                    baiduMapMarker = new BMap.Marker(point, {icon: myIcon});#}
-                    {#                    var infoWindow = new BMap.InfoWindow(address, opts);#}
-                    {#                    baiduMapMarker.addEventListener("click", function () {#}
-                    {#                        this.openInfoWindow(infoWindow);#}
-                    {#                    });#}
-                    {#                    map.addOverlay(baiduMapMarker);#}
                     map.enableScrollWheelZoom();
                     map.centerAndZoom(point, 14);
+                } else {
+                    map.enableScrollWheelZoom();
+                    point = new BMap.Point(116.331398, 39.897445);
+                    map.centerAndZoom(point, 1);
                 }
             });
         }
         $(function () {
-            var ismap = {{ hackathon.config.location == '' and 'false' or 'true' }};
+            var ismap = {{hackathon.location == '' and 'false' or 'true'}};
             if (ismap) {
                 window.setTimeout("setupScriptDelay('api.map.baidu.com/api?v=2.0&ak=KIpwmISmRtIMMssrIQ4NF9ji&callback=initializeMap', true)", 300);
             }
         });
     </script>
     <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
+    <script type="text/javascript" src="/static/js/jquery/moment.min.js"></script>
     <script type="text/javascript" src="/static/js/views/oh.site.hackathon.js"></script>
+    <script type="text/javascript">
+        var duoshuoQuery = {
+            short_name: "ohp"
+        };
+        (function () {
+            var ds = document.createElement('script');
+            ds.type = 'text/javascript';
+            ds.async = true;
+            ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+            ds.charset = 'UTF-8';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);
+        })();
+    </script>
 {% endblock %}

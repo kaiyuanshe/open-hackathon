@@ -43,7 +43,7 @@
     }
 
     function getHackathonTemplates() {
-        return oh.api.admin.template.list.get({
+        return oh.api.admin.hackathon.template.list.get({
             header: {hackathon_name: currentHackathon}
         }, function (data) {
             if (data.error) {
@@ -68,7 +68,7 @@
                 getItemClass: function (id, status) {
                     var class_name = '';
                     $.each(hackathon_templates, function (i, item) {
-                        if (item.id == id) {
+                        if (item.template_id == id) {
                             class_name += 'active ';
                             return false;
                         }
@@ -81,14 +81,14 @@
     }
 
     function addHackathonTemplate(data) {
-        return oh.api.admin.template.post({
+        return oh.api.admin.hackathon.template.post({
             body: data,
             header: {hackathon_name: currentHackathon}
         });
     };
 
     function removeHackathonTemplate(data) {
-        return oh.api.admin.template.delete({
+        return oh.api.admin.hackathon.template.delete({
             query: data,
             header: {hackathon_name: currentHackathon}
         });
@@ -96,7 +96,6 @@
 
     function pageLoad() {
         getHackathonTemplates();
-        getPublictTempates();
     }
 
     function toggleTable() {
@@ -131,6 +130,21 @@
             toggleTable();
         });
 
+        $('#templatelist').on('click', 'a[data-role="delete"]', function (e) {
+            var tr = $(this).parents('tr')
+            var data = tr.data('tmplItem').data;
+            confirm_modal.find('.modal-body p').text('确定是否移除该模板？');
+            confirm_modal.modal('show', function () {
+                removeHackathonTemplate({template_id: data.id}).then(function (data) {
+                    if (data.error) {
+                        //todo remove hackathon template error;
+                    } else {
+                        tr.detach();
+                    }
+                    confirm_modal.modal('hide');
+                });
+            });
+        });
         $('#template_list').on('click', '.oh-tempitem', function (e) {
             var item = $(this);
             var data = item.parent().data('tmplItem').data;

@@ -29,26 +29,27 @@
     var def_expid = 0;
 
     function pageload() {
+        var temp_name = $.getUrlParam('t');
         def_expid = $('[data-experiment]').data('experiment') || 0;
         if (def_expid) {
-            getExperiment()
+            getExperiment(def_expid)
         } else {
-            getTemplate();
+            getTemplate(temp_name);
         }
         teamMember();
         hacakthonStat();
     }
 
     function teamMember() {
-        oh.api.team.member.list.get({header: {hackathon_name: hackathon_name}}, function (data) {
-            // todo 'Response team member'
-            if (data.error) {
-
-            } else {
-
-            }
-            console.log(data);
-        });
+//        oh.api.team.member.list.get({header: {hackathon_name: hackathon_name}}, function (data) {
+//            // todo 'Response team member'
+//            if (data.error) {
+//
+//            } else {
+//
+//            }
+//            console.log(data);
+//        });
     }
 
     function hacakthonStat() {
@@ -56,19 +57,27 @@
             header: {hackathon_name: hackathon_name}
         }, function (data) {
             $('#online').text(data.online);
-            $('#total').text(data.total);
+            $('#total').text(data.register);
             //setTimeout(hacakthonStat(), 600000)
         });
     }
 
-    function getTemplate() {
+    function getTemplate(name) {
         oh.api.hackathon.template.get({header: {hackathon_name: hackathon_name}}, function (data) {
             if (data.error) {
                 showErrorMsg(data);
             } else {
+                
                 if (data.length > 0) {
                     def_expid = data[0].id;
-                    postTemplate(data[0].name);
+                    var tname = data[0].name;
+                    $.each(data,function(i,item){
+                        if(item.name == name){
+                            def_expid = item.id;
+                            tname = item.name;
+                        }
+                    });
+                    postTemplate(tname);
                 } else {
                     showErrorMsg({
                         error: {
@@ -101,27 +110,54 @@
         errorbox.show();
     }
 
-    function getExperiment() {
-        oh.api.user.experiment.get({query: {id: def_expid}}, function (data) {
+    function getExperiment(expr_id) {
+        oh.api.user.experiment.get({query: {id: expr_id}}, function (data) {
             loadExperiment(data);
         });
     }
 
+    function get_guacamole_server_name(id, type, datasource) {
+        return btoa([
+            id,
+            type,
+            datasource
+        ].join('\0'));
+    };
+
     function loadExperiment(data) {
+        var tmpe = '<div class="row ">\
+                        <div class="col-md-12 text-center">\
+                            <a href="javascript:;" title="" class="vm-box"  id="{name}"  data-url="{surl}">\
+                                <img src="{imgUrl}" alt="">\
+                            </a>\
+                            <h4 name="dserie">{name}<h4>\
+                        </div>\
+                    </div>';
+        var url_tmpe = '<h4><a href="{url}" target="_blank" style="text-decoration:underline;color:#00abec;" class="col-md-offset-1">{name}</a></h4>';
         if (data.status == 2) {
             var dockers = []
             for (var i in data.remote_servers) {
                 dockers.push({
                     purl: "",
-                    imgUrl: data.remote_servers[i].name == 'cloud_eclipse' ? '/static/pic/idehub.png' : '/static/pic/dseries.png',
+                    imgUrl: '/static/pic/dseries.png',
                     name: data.remote_servers[i].name,
-                    surl: data.remote_servers[i].name == 'cloud_eclipse' ? data.remote_servers[i].url + window.location.origin : data.remote_servers[i].url + "&oh=" + $.cookie('token')
-                })
-                list.push(temp.format(dockers[i]));
+                    surl: data.remote_servers[i].guacamole_host + "/guacamole/#/client/" + get_guacamole_server_name(data.remote_servers[i].name, "c", "openhackathon") + "?oh=" + $.cookie('token') + "&name=" + data.remote_servers[i].name + "&_=" + new Date().getTime()
+                    })
+                $('#show').append(tmpe.format(dockers[i]));
             }
-            heartbeat(def_expid);
+            if(data.public_urls.length>0){
+                $('#show').append('<h4 class="col-md-offset-1">您可访问下面地址：</h4>');
+            }
+            $.each(data.public_urls,function(i,url){
+                $('#show').append(url_tmpe.format(url));
+            });
+            
+            $('.hackathon-nav a.vm-box:eq(0)').trigger('click');
+            heartbeat(data.expr_id);
         } else if (data.status == 1) {
-            setTimeout(getExperiment, 60000);
+            setTimeout(function(){
+                           getExperiment(data.expr_id)
+                       }, 5000);
         } else {
             showErrorMsg(data);
         }
@@ -175,7 +211,9 @@
             if (data.error) {
                 // todo 'heartbeat error'
             } else {
-                window.setTimeout(heartbeat(id), 300000)
+                window.setTimeout(function(){
+                        heartbeat(id)
+                    }, 300000)
             }
         });
     }
@@ -200,18 +238,7 @@
                 timing.minute = Math.floor(timing.distance / 60000)
                 timing.distance -= timing.minute * 60000;
                 timing.second = Math.floor(timing.distance / 1000)
-                if (timing.day == 0) {
-                    timing.day = null
-                }
-                if (timing.hour == 0 && timing.day == null) {
-                    timing.hour = null
-                }
-                if (timing.minute == 0 && timing.hour == null) {
-                    timing.minute = null
-                }
-                if (timing.second == 0 && timing.minute == null) {
-                    timing.second = null
-                }
+                
                 return timing;
             } else {
                 return null;

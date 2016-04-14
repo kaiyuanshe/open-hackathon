@@ -43,6 +43,7 @@ class OAUTH_PROVIDER:
     GITCAFE = "gitcafe"
     WEIBO = "weibo"
     LIVE = "live"
+    ALAUDA = "alauda"
 
 
 class HEALTH_STATUS:
@@ -76,7 +77,7 @@ class HACKATHON_STAT:
     REGISTER = "register"
 
 
-class HACKATHON_BASIC_INFO:
+class HACKATHON_CONFIG:
     """Basic settings of hackathon that saved into column 'basic_info' of table 'hackathon'
 
     Attributes:
@@ -87,23 +88,19 @@ class HACKATHON_BASIC_INFO:
         RECYCLE_MINUTES: int, the maximum time (unit:minute) of recycle for per experiment. default 0
         PRE_ALLOCATE_ENABLED: bool, whether to pre-start several environment. default false
         PRE_ALLOCATE_NUMBER: int, the maximum count of pre-start environment per hackathon and per template. default 1
+        PRE_ALLOCATE_INTERVAL_SECONDS: int, interval seconds for pre-allocate job
         ALAUDA_ENABLED: bool,default false, whether to use alauda service, no azure resource needed if true
         FREEDOM_TEAM: bool,default true,Whether to allow freedom of the team
     """
-    LOCATION = "location"
     MAX_ENROLLMENT = "max_enrollment"
     AUTO_APPROVE = "auto_approve"
     RECYCLE_ENABLED = "recycle_enabled"
     RECYCLE_MINUTES = "recycle_minutes"
     PRE_ALLOCATE_ENABLED = "pre_allocate_enabled"
     PRE_ALLOCATE_NUMBER = "pre_allocate_number"
-    ALAUDA_ENABLED = "alauda_enabled"
+    PRE_ALLOCATE_INTERVAL_SECONDS = "pre_allocate_interval_second"
     FREEDOM_TEAM = "freedom_team"
-
-
-class CLOUD_ECLIPSE:
-    """CloudEclipse Constans"""
-    CLOUD_ECLIPSE = "cloud_eclipse"
+    CLOUD_PROVIDER = "cloud_provider"
 
 
 class TEMPLATE_STATUS:
@@ -147,7 +144,6 @@ class EStatus:
     STARTING = 1
     RUNNING = 2
     STOPPED = 3
-    DELETED = 4
     FAILED = 5
     ROLL_BACKING = 6
     ROLL_BACKED = 7
@@ -160,19 +156,7 @@ class VEStatus:
     RUNNING = 1
     FAILED = 2
     STOPPED = 3
-    DELETED = 4
     UNEXPECTED_ERROR = 5
-
-
-class PortBindingType:
-    """Type of port binding
-
-    Attributes:
-        CloudService: type indicates public endpoint on cloudService
-        DOCKER: type indicates exposed port on docker host machine
-    """
-    CLOUD_SERVICE = 1
-    DOCKER = 2
 
 
 class VERemoteProvider:
@@ -262,7 +246,7 @@ class AVMStatus:
     STOPPED_DEALLOCATED = 'StoppedDeallocated'
 
 
-class RGStatus:
+class HACK_USER_STATUS:
     """
     For status in DB model Register for registration audit status
     """
@@ -272,16 +256,27 @@ class RGStatus:
     AUTO_PASSED = 3
 
 
-class ADMIN_ROLE_TYPE:
+class HACK_USER_TYPE:
     """
     admin role types
     """
+    VISITOR = 0
     ADMIN = 1
     JUDGE = 2
+    COMPETITOR = 3
+
+
+class ORGANIZATION_TYPE:
+    """
+    Organization role type
+    """
+    ORGANIZER = 1
+    PARTNER = 2
 
 
 class HACK_STATUS:
-    INIT = 0
+    INIT = -1
+    DRAFT = 0
     ONLINE = 1
     OFFLINE = 2
 
@@ -304,7 +299,7 @@ class FILE_TYPE:
     AZURE_CERT = "azure_cert"
 
 
-class TeamMemberStatus:
+class TEAM_MEMBER_STATUS:
     """Status of member of team
 
     Attributes:
@@ -312,9 +307,10 @@ class TeamMemberStatus:
         Approved: member approved by team leader or system administrator
         Denied: member denied by team leader or system administrator. Member of this status won't be saved in DB
     """
-    Init = 0
-    Approved = 1
-    Denied = 2
+    INIT = 0
+    APPROVED = 1
+    DENIED = 2
+
 
 class DockerHostServerStatus:
     """
@@ -332,27 +328,13 @@ class DockerHostServerStatus:
     DOCKER_READY = 2
     UNAVAILABLE = 3
 
-class DockerHostServerDisable:
-    """
-    whether the docker host server VM is disabled by manager or not
 
-    Attributes:
-        ABLE: VM is not disabled by manager
-        DISABLE: VM is disabled by manager
-    """
-    ABLE = 0
-    DISABLE = 1
+class DHS_QUERY_STATE:
+    """state to indicate the progress when query available docker host server"""
+    SUCCESS = 0
+    ONGOING = 1
+    FAILED = 2
 
-class AzureVMStartMethod:
-    """
-    the way how Azure VM is started
-
-    Attributes:
-        AUTO: VM is started by OHP server
-        MANUAL: VM is started manually
-    """
-    AUTO = 1
-    MANUAL = 2
 
 class AzureApiExceptionMessage:
     """
@@ -367,6 +349,7 @@ class AzureApiExceptionMessage:
     DEPLOYMENT_NOT_FOUND = 'Not found (Not Found)'
     CONTAINER_NOT_FOUND = 'Not found (The specified container does not exist.)'
 
+
 class AzureOperationStatus:
     """
     The status of Azure operation
@@ -377,6 +360,7 @@ class AzureOperationStatus:
     """
     IN_PROGRESS = 'InProgress'
     SUCCESS = 'Succeeded'
+
 
 class ServiceDeploymentSlot:
     """
@@ -389,6 +373,7 @@ class ServiceDeploymentSlot:
     PRODUCTION = 'production'
     STAGING = 'staging'
 
+
 class AzureVMSize:
     """
     the size of Azure VM
@@ -399,6 +384,7 @@ class AzureVMSize:
     """
     MEDIUM_SIZE = 'Medium'
     SMALL_SIZE = 'Small'
+
 
 class AzureVMEndpointName:
     """
@@ -413,6 +399,7 @@ class AzureVMEndpointName:
     SSH = 'SSH'
     HTTP = 'http'
 
+
 class AzureVMEndpointDefaultPort:
     """
     default local port (private port) of applications in Azure VM
@@ -423,6 +410,7 @@ class AzureVMEndpointDefaultPort:
     """
     DOCKER = 4243
     SSH = 22
+
 
 class TCPProtocol:
     """
@@ -435,6 +423,7 @@ class TCPProtocol:
     TCP = 'tcp'
     UDP = 'udp'
 
+
 class DockerPingResult:
     """
     the response of ping docker public port
@@ -443,6 +432,7 @@ class DockerPingResult:
         OK: the response content is 'OK'
     """
     OK = 'OK'
+
 
 class AzureVMPowerState:
     """
@@ -453,6 +443,7 @@ class AzureVMPowerState:
     """
     VM_STARTED = 'started'
 
+
 class AzureVMEnpointConfigType:
     """
     the type of Azure VM endpoint configuration
@@ -462,8 +453,91 @@ class AzureVMEnpointConfigType:
     """
     NETWORK = 'NetworkConfiguration'
 
-class Team_Show_Type:
-    """Type of resource to be shown"""
-    Image = 0
-    Video = 1
-    SourceCode = 2
+
+class TEAM_SHOW_TYPE:
+    """Type of resource to be shown. """
+    IMAGE = 0  # image
+    VIDEO = 1  # e.g. Youku link
+    SOURCE_CODE = 2  # e.g. github
+    POWER_POINT = 3  # ppt
+    EXCEL = 4  # excel
+    WORD = 5  # word
+    PDF = 6  # pdf
+    OTHER = 99  # other
+
+
+class LOGIN_PROVIDER:
+    LIVE = 1
+    GITHUB = 2
+    QQ = 4
+    WEIBO = 8
+    GITCAFE = 16
+    ALAUDA = 32
+
+
+class HACK_NOTICE_CATEGORY:
+    HACKATHON = 0  # hackathon related notice
+    USER = 1  # user related notice
+    EXPERIMENT = 2  # experiment related notice
+    AWARD = 3  # award related notice
+    TEMPLATE = 4  # template related notice
+
+
+class HACK_NOTICE_EVENT:
+    MANUAL = 0  # manually created hackatohon notice
+    HACK_CREATE = 1
+    HACK_EDIT = 2
+    HACK_ONLINE = 3
+    HACK_OFFLINE = 4  # hackathon create/edit/online/offline
+    EXPR_JOIN = 5  # user start to program
+    HACK_PLAN = 6  # remind user to submit plan
+    HACK_REGISTER_AZURE = 7 # remind user to register azure
+
+
+class EMAIL_SMTP_STATUSCODE:
+    """Status Code of email service(SMTP protocol)"""
+    SUCCESS = 250
+    SERVICE_NOT_AVAILABLE = 421
+    ACCESS_DENIED = 530
+
+
+class VOICEVERIFY_PROVIDER:
+    """Voice_Verify service providers"""
+    RONGLIAN = "rong_lian"
+
+
+class VOICEVERIFY_RONGLIAN_STATUSCODE:
+    """Status Code of RongLianYunTongXun Voice_Verify service"""
+    SUCCESS = "000000"
+    CONTENT_EMPTY = "111318"
+    CONTENT_LENGTH_WRONG = "111319"
+    INSUFFICIENT_BALANCE = "160014"
+    WRONG_PHONE_NUMBER = "160042"
+
+
+class SMS_PROVIDER:
+    """SMS service providers"""
+    CHINA_TELECOM = "china_telecom"
+
+
+class SMS_CHINATELECOM_TEMPLATE:
+    """SMS-template of ChinaTelecom"""
+    DEFAULT = ""
+
+
+class SMS_CHINATELECOM_STATUSCODE:
+    """Status Code of ChinaTelecom SMS service"""
+    SUCCESS = 0
+    INVALID_ACCESS_TOKEN = 110
+    ACCESS_TOKEN_EXPIRED = 111
+
+
+class CHINATELECOM_ACCESS_TOKEN_STATUSCODE:
+    """Status Code of requesting ChinaTelecom access_token"""
+    SUCCESS = "0"
+
+
+class CLOUD_PROVIDER:
+    NONE = 0
+    AZURE = 1
+    ALAUDA = 2

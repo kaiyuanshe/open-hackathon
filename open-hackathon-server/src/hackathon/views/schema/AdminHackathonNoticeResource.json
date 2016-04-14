@@ -1,0 +1,49 @@
+{
+  "AdminHackathonNoticeResource": {
+    "get": {
+      "input": {
+        "description": "get hackathon notice by id",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "post": {
+      "input": {
+        "description": "create hackathon notice",
+        "type": "object",
+        "properties": {
+          "content": {
+            "description": "hackathon notice content",
+            "type": "string"
+          }
+        }
+      }
+    },
+    "put": {
+      "input": {
+        "description": "update hackathon notice by id",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "delete": {
+      "input": {
+        "description": "delete hackathon notice by id",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
