@@ -588,7 +588,7 @@ class AdminExperimentResource(HackathonResource):
 class AdminExperimentListResource(HackathonResource):
     @admin_privilege_required
     def get(self):
-        return expr_manager.get_expr_list_by_hackathon_id(g.hackathon.id, self.context())
+        return expr_manager.get_expr_list_by_hackathon_id(g.hackathon, self.context())
 
 
 class AdminHackathonFileResource(HackathonResource):
