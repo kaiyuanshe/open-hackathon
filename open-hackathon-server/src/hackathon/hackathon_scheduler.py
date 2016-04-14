@@ -227,7 +227,7 @@ class HackathonScheduler(object):
 
         # NOT instantiate while in flask DEBUG mode or in the main thread
         # It's to avoid APScheduler being instantiated twice
-        if os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
+        if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
             self.__apscheduler = BackgroundScheduler(timezone=utc)
 
             # add MySQL job store
@@ -247,6 +247,6 @@ class HackathonScheduler(object):
                                                 port=safe_get_config("scheduler.port", 27017))
 
             # add event listener
-            self.__apscheduler.add_listener(scheduler_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR|EVENT_JOB_ADDED)
+            self.__apscheduler.add_listener(scheduler_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR | EVENT_JOB_ADDED)
             log.info("APScheduler loaded")
             self.__apscheduler.start()
