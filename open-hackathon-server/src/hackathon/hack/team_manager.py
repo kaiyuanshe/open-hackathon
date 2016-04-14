@@ -209,6 +209,7 @@ class TeamManager(Component):
         # team.description = kwargs.get("description", team.description)
         # team.logo = kwargs.get("logo", team.logo)
 
+        kwargs.pop('id', None) # id should not be included
         team.modify(**kwargs)
         team.update_time = self.util.get_now()
 
