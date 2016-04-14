@@ -227,7 +227,13 @@ h1.title {
     border-top: 1px solid #f3f3f3;
     color: #888;
 }
-
+.teams .item .footer .u-logo{
+    display:inline-block;
+    width:24px;
+    height:24px;
+    overflow:hidden;
+    vertical-align: bottom;
+}
 .teams .item .footer span {
     color: #141415;
 }
@@ -236,10 +242,6 @@ h1.title {
     margin: 0;
 }
 
-.teams .item .footer img {
-    max-height: 24px;
-    max-width: 24px;
-}
 
 .teams .media-heading {
     margin: 5px 0;
