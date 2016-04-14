@@ -294,6 +294,7 @@ class AzureHostedDockerStarter(DockerExprStarter):
             except Exception as e:
                 self.log.error(e)
                 self.log.error("container %s fail to create or start" % container_name)
+                # todo looks like the rollback is not valid
                 self._on_virtual_environment_failed(context)
                 return
 

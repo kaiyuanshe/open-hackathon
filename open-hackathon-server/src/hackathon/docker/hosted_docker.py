@@ -100,6 +100,7 @@ class HostedDockerFormation(Component):
         containers_url = '%s/containers/create?name=%s' % (self.__get_vm_url(docker_host), container_name)
         req = requests.post(containers_url, data=json.dumps(container_config), headers=self.application_json)
         self.log.debug(req.content)
+        # todo check the http code first
         container = json.loads(req.content)
         if container is None:
             raise AssertionError("container is none")
