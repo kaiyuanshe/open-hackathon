@@ -209,7 +209,7 @@ class TeamManager(Component):
         # team.description = kwargs.get("description", team.description)
         # team.logo = kwargs.get("logo", team.logo)
 
-        kwargs.pop('id', None) # id should not be included
+        kwargs.pop('id', None)  # id should not be included
         team.modify(**kwargs)
         team.update_time = self.util.get_now()
 
@@ -666,8 +666,8 @@ class TeamManager(Component):
         resp["leader"] = self.user_manager.user_display_info(team.leader)
         resp["member_count"] = team.members.filter(status=TEAM_MEMBER_STATUS.APPROVED).count()
         # all team action not allowed if frozen
-        resp["is_frozen"] = team.hackathon.judge_start_time > self.util.get_now() or \
-                            team.hackathon.judge_end_time < self.util.get_now()
+        resp["is_frozen"] = team.hackathon.judge_start_time < self.util.get_now() \
+                           and team.hackathon.judge_end_time > self.util.get_now()
 
         for i in xrange(0, len(team.members)):
             mem = team.members[i]
