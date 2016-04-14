@@ -25,7 +25,7 @@
             "role_name" : "ohp-win2016",
             "image" : {
                 "type" : "os",
-                "name" : "55bc2b193643443bb879a78bda516fc8__WindowsServerCore_en-us_TP4_Container_Azure-20151118"
+                "name" : "55bc2b193643443bb879a78bda516fc8__WindowsServerCore_en-us_TP4_Container_Azure-20151118.vhd"
             },
             "system_config" : {
                 "os_family" : "Windows",
