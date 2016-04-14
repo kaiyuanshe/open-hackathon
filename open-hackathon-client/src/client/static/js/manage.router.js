@@ -69,7 +69,7 @@ angular.module('oh.manage.router', [
       }
       $scope.offline = function(activity) {
         if (activity.status == 2) return;
-        api.admin.hackathon.online.post({
+        api.admin.hackathon.offline.post({
           header: {
             hackathon_name: activity.name
           }
@@ -96,7 +96,7 @@ angular.module('oh.manage.router', [
       }
     }
   }).state('create', {
-    url: '/create',
+    url: '/create?name',
     templateUrl: '/static/partials/manage/create.html?v=' + VERSION,
     controller: 'createController'
   }).state('404', {

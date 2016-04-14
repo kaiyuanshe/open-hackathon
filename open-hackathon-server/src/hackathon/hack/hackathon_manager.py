@@ -260,6 +260,9 @@ class HackathonManager(Component):
         self.log.debug("add a new hackathon:" + context.name)
         new_hack = self.__create_hackathon(g.user, context)
 
+        self.create_hackathon_notice(new_hack.id, HACK_NOTICE_EVENT.HACK_CREATE, 
+                                            HACK_NOTICE_CATEGORY.HACKATHON)  # hackathon create
+
         # init data is for local only
         if self.util.is_local():
             self.__create_default_data_for_local(new_hack)
@@ -284,10 +287,6 @@ class HackathonManager(Component):
             if 'config' in update_items:
                 self.set_basic_property(hackathon, update_items.get('config', {}))
                 update_items.pop('config', None)
-
-            if 'status' in update_items and int(update_items['status']) == HACK_STATUS.ONLINE:
-                self.create_hackathon_notice(hackathon.id, HACK_NOTICE_EVENT.HACK_ONLINE,
-                                             HACK_NOTICE_CATEGORY.HACKATHON)  # hackathon online
 
             # basic xss prevention
             if 'description' in update_items and update_items['description']:
@@ -568,10 +567,10 @@ class HackathonManager(Component):
                 hackathon_notice.content = u"%s即将火爆来袭，敬请期待！" % (hackathon.display_name)
             # elif notice_event == HACK_NOTICE_EVENT.HACK_EDIT and hackathon:
             #     hackathon_notice.content = u"%s更新啦，快去看看！" % (hackathon.display_name)
-            elif notice_event == HACK_NOTICE_EVENT.HACK_ONLINE and hackathon:
+            elif notice_event == HACK_NOTICE_EVENT.HACK_ONLINE:
                 hackathon_notice.content = u"%s开始啦，点击报名！" % (hackathon.display_name)
                 hackathon_notice.link = "/site/%s" % hackathon.name
-            elif notice_event == HACK_NOTICE_EVENT.HACK_OFFLINE and hackathon:
+            elif notice_event == HACK_NOTICE_EVENT.HACK_OFFLINE:
                 hackathon_notice.content = u"%s圆满结束，点击查看详情！" % (hackathon.display_name)
                 hackathon_notice.link = "/site/%s" % hackathon.name
             elif notice_event == HACK_NOTICE_EVENT.HACK_PLAN and body.get('receiver', None):
@@ -585,7 +584,7 @@ class HackathonManager(Component):
                 hackathon_notice.receiver = user
                 hackathon_notice.link = u"/site/%s/team" % (hackathon.name)
 
-            elif notice_event == HACK_NOTICE_EVENT.HACK_REGISTER_AZURE:
+            elif notice_event == HACK_NOTICE_EVENT.HACK_REGISTER_AZURE and body.get('receiver', None):
                 user = body.get('receiver')
                 old_hackathon_notice = HackathonNotice.objects(receiver=user,
                                                                event=HACK_NOTICE_EVENT.HACK_REGISTER_AZURE,
@@ -646,7 +645,7 @@ class HackathonManager(Component):
         :param body: valid key/values(all key/values are optional)
             body = {
                 hackathon_name: string,                  // filter by hackathon_name, default unfiltered
-                filter_by_user: int,                     // filter by user, default filter notice that has specfic receivers
+                filter_by_user: 'unread' | 'all',         // filter by user, default filter all notice that has specfic receivers
                 category: 'int[,int...]',                // filter by category, default unfiltered
                 event: 'int[,int...]',                   // filter by event, default unfiltered
                 order_by: 'time' | 'event' | 'category', // order by update_time, event, category, default by time
@@ -664,7 +663,7 @@ class HackathonManager(Component):
         """
 
         hackathon_name = body.get("hackathon_name")
-        filter_by_user = int(body.get("filter_by_user", 0))
+        filter_by_user = body.get("filter_by_user", "")
         notice_category = body.get("category")
         notice_event = body.get("event")
         order_by = body.get("order_by", "time")
@@ -685,14 +684,14 @@ class HackathonManager(Component):
             else:
                 return not_found('hackathon_name not found')
 
-        if filter_by_user:
-            user = None
-            if self.user_manager.validate_login():
-                user = g.user
+        if filter_by_user: # only return notices that are sent to the login user
+            user = g.user
+            if user:
                 user_filter = Q(receiver=user)
-                is_read_filter = Q(is_read=False)
+                if filter_by_user == 'unread':
+                    is_read_filter = Q(is_read=False)
             else:
-                pass
+                return BadRequest("Please login first.")
 
         if notice_category:
             notice_category_tuple = tuple([int(category) for category in notice_category.split(',')])
@@ -723,11 +722,17 @@ class HackathonManager(Component):
     def check_notice_and_set_read_if_necessary(self, id):
         hackathon_notice = HackathonNotice.objects(id=id).first()
         if hackathon_notice:
-            if hackathon_notice.event == HACK_NOTICE_EVENT.HACK_PLAN:  # set is_read only if dev_plan is complete
+            user = g.user
+            if not user or user.id != hackathon_notice.receiver.id: # not the user
+                return ok()
+
+            if hackathon_notice.event == HACK_NOTICE_EVENT.HACK_PLAN:  # set is_read = True if dev_plan is complete
                 user = hackathon_notice.receiver
                 hackathon = hackathon_notice.hackathon
                 team = Team.objects(members__user=user, hackathon=hackathon).first()
-                if not team or (team and team.dev_plan):
+                if not team: # no team, not paritpate in the hackathon
+                    hackathon_notice.is_read = True
+                elif team and team.dev_plan: # finish the dev_plan
                     hackathon_notice.is_read = True
                     self.create_hackathon_notice(hackathon.id, HACK_NOTICE_EVENT.HACK_REGISTER_AZURE,
                                                  HACK_NOTICE_CATEGORY.HACKATHON, {'receiver': user})
@@ -737,6 +742,8 @@ class HackathonManager(Component):
                 hackathon_notice.is_read = True
 
             hackathon_notice.save(validate=False)
+
+            return ok()
 
     def schedule_pre_allocate_expr_job(self):
         """Add an interval schedule job to check all hackathons"""
@@ -796,6 +803,8 @@ class HackathonManager(Component):
         if req.get('error') is None:
             hackathon.status = HACK_STATUS.ONLINE
             hackathon.save()
+            self.create_hackathon_notice(hackathon.id, HACK_NOTICE_EVENT.HACK_ONLINE, 
+                                            HACK_NOTICE_CATEGORY.HACKATHON)  # hackathon online
 
         return req
 
@@ -804,6 +813,9 @@ class HackathonManager(Component):
         if hackathon.status == HACK_STATUS.ONLINE or hackathon.status == HACK_STATUS.DRAFT:
             hackathon.status = HACK_STATUS.OFFLINE
             hackathon.save()
+            self.create_hackathon_notice(hackathon.id, HACK_NOTICE_EVENT.HACK_OFFLINE, 
+                                            HACK_NOTICE_CATEGORY.HACKATHON)  # hackathon offline
+
         elif hackathon.status == HACK_STATUS.INIT:
             req = general_error(code=HTTP_CODE.CREATE_NOT_FINISHED)
 
@@ -917,6 +929,8 @@ class HackathonManager(Component):
         # basic xss prevention
         if new_hack.description:  # case None type
             new_hack.description = self.cleaner.clean_html(new_hack.description)
+        new_hack.save()
+
         new_hack.save()
 
         # add the current login user as admin and creator

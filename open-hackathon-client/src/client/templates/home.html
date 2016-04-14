@@ -151,7 +151,7 @@
                                                 </div>
                                                 <div>
                                                     <span class="fa fa-map-marker"></span>
-                                                    {{ item.location or "线上" | limitTo(2) }}
+                                                    {{ item.location | limitTo(2) or "线上" }}
                                                 </div>
                                             </div>
                                             <div class="oh-progressbar"><span
@@ -249,7 +249,7 @@
                                                 </div>
                                                 <div>
                                                     <span class="fa fa-map-marker"></span>
-                                                    {{ item.location or "线上" | limitTo(2) }}
+                                                    {{ item.location | limitTo(2) or "线上" }}
                                                 </div>
                                             </div>
                                             <div class="oh-progressbar"><span
@@ -347,7 +347,7 @@
                                                 </div>
                                                 <div>
                                                     <span class="fa fa-map-marker"></span>
-                                                    {{ item.location or "线上" | limitTo(2) }}
+                                                    {{ item.location | limitTo(2) or "线上" }}
                                                 </div>
                                             </div>
                                             <div class="oh-progressbar"><span

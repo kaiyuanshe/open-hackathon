@@ -94,7 +94,7 @@ class ExprManager(Component):
             return ok()
 
     def get_expr_status(self, expr_id):
-        expr = Experiment.objects(id == expr_id).first()
+        expr = Experiment.objects(id=expr_id).first()
         if expr:
             return self.__report_expr_status(expr)
         else:
@@ -112,7 +112,7 @@ class ExprManager(Component):
             except:
                 pass
 
-    def get_expr_list_by_hackathon_id(self, hackathon_id, context):
+    def get_expr_list_by_hackathon_id(self, hackathon, context):
         # get a list of all experiments' detail
         user_name = context.user_name if "user_name" in context else None
         status = context.status if "status" in context else None
@@ -121,13 +121,13 @@ class ExprManager(Component):
         users = User.objects(name=user_name).all() if user_name else []
 
         if user_name and status:
-            experiments_pagi = Experiment.objects(status=status, user__in=users).paginate(page, per_page)
+            experiments_pagi = Experiment.objects(hackathon=hackathon, status=status, user__in=users).paginate(page, per_page)
         elif user_name and not status:
-            experiments_pagi = Experiment.objects(user__in=users).paginate(page, per_page)
+            experiments_pagi = Experiment.objects(hackathon=hackathon, user__in=users).paginate(page, per_page)
         elif not user_name and status:
-            experiments_pagi = Experiment.objects(status=status).paginate(page, per_page)
+            experiments_pagi = Experiment.objects(hackathon=hackathon, status=status).paginate(page, per_page)
         else:
-            experiments_pagi = Experiment.objects().paginate(page, per_page)
+            experiments_pagi = Experiment.objects(hackathon=hackathon).paginate(page, per_page)
 
         return self.util.paginate(experiments_pagi, self.__get_expr_with_detail)
 
@@ -342,7 +342,7 @@ class ExprManager(Component):
         :param template:
         :return:
         """
-        criterion = Q(status__in=[EStatus.RUNNING, EStatus.STARTING], hackathon=hackathon)
+        criterion = Q(status__in=[EStatus.RUNNING, EStatus.STARTING], hackathon=hackathon, user=user)
         is_admin = self.admin_manager.is_hackathon_admin(hackathon.id, user.id)
         if is_admin:
             criterion &= Q(template=template)
