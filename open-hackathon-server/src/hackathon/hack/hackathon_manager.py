@@ -260,6 +260,9 @@ class HackathonManager(Component):
         self.log.debug("add a new hackathon:" + context.name)
         new_hack = self.__create_hackathon(g.user, context)
 
+        self.create_hackathon_notice(new_hack.id, HACK_NOTICE_EVENT.HACK_CREATE, 
+                                            HACK_NOTICE_CATEGORY.HACKATHON)  # hackathon create
+
         # init data is for local only
         if self.util.is_local():
             self.__create_default_data_for_local(new_hack)
@@ -284,10 +287,6 @@ class HackathonManager(Component):
             if 'config' in update_items:
                 self.set_basic_property(hackathon, update_items.get('config', {}))
                 update_items.pop('config', None)
-
-            if 'status' in update_items and int(update_items['status']) == HACK_STATUS.ONLINE:
-                self.create_hackathon_notice(hackathon.id, HACK_NOTICE_EVENT.HACK_ONLINE,
-                                             HACK_NOTICE_CATEGORY.HACKATHON)  # hackathon online
 
             # basic xss prevention
             if 'description' in update_items and update_items['description']:
@@ -568,10 +567,10 @@ class HackathonManager(Component):
                 hackathon_notice.content = u"%s即将火爆来袭，敬请期待！" % (hackathon.display_name)
             # elif notice_event == HACK_NOTICE_EVENT.HACK_EDIT and hackathon:
             #     hackathon_notice.content = u"%s更新啦，快去看看！" % (hackathon.display_name)
-            elif notice_event == HACK_NOTICE_EVENT.HACK_ONLINE and hackathon:
+            elif notice_event == HACK_NOTICE_EVENT.HACK_ONLINE:
                 hackathon_notice.content = u"%s开始啦，点击报名！" % (hackathon.display_name)
                 hackathon_notice.link = "/site/%s" % hackathon.name
-            elif notice_event == HACK_NOTICE_EVENT.HACK_OFFLINE and hackathon:
+            elif notice_event == HACK_NOTICE_EVENT.HACK_OFFLINE:
                 hackathon_notice.content = u"%s圆满结束，点击查看详情！" % (hackathon.display_name)
                 hackathon_notice.link = "/site/%s" % hackathon.name
             elif notice_event == HACK_NOTICE_EVENT.HACK_PLAN and body.get('receiver', None):
@@ -646,7 +645,7 @@ class HackathonManager(Component):
         :param body: valid key/values(all key/values are optional)
             body = {
                 hackathon_name: string,                  // filter by hackathon_name, default unfiltered
-                filter_by_user: int,                     // filter by user, default filter notice that has specfic receivers
+                filter_by_user: int,                     // filter by user, default filter all notice that has specfic receivers
                 category: 'int[,int...]',                // filter by category, default unfiltered
                 event: 'int[,int...]',                   // filter by event, default unfiltered
                 order_by: 'time' | 'event' | 'category', // order by update_time, event, category, default by time
@@ -796,6 +795,8 @@ class HackathonManager(Component):
         if req.get('error') is None:
             hackathon.status = HACK_STATUS.ONLINE
             hackathon.save()
+            self.create_hackathon_notice(hackathon.id, HACK_NOTICE_EVENT.HACK_ONLINE, 
+                                            HACK_NOTICE_CATEGORY.HACKATHON)  # hackathon online
 
         return req
 
@@ -804,6 +805,9 @@ class HackathonManager(Component):
         if hackathon.status == HACK_STATUS.ONLINE or hackathon.status == HACK_STATUS.DRAFT:
             hackathon.status = HACK_STATUS.OFFLINE
             hackathon.save()
+            self.create_hackathon_notice(hackathon.id, HACK_NOTICE_EVENT.HACK_OFFLINE, 
+                                            HACK_NOTICE_CATEGORY.HACKATHON)  # hackathon offline
+
         elif hackathon.status == HACK_STATUS.INIT:
             req = general_error(code=HTTP_CODE.CREATE_NOT_FINISHED)
 
