@@ -3,7 +3,7 @@
     <div class="side-navigation">
       <div class="person">
         <div class="person-pic">
-          <img src="{{currentUser.avatar_url}}" title="{{currentUser.nickname}}" alt="{{currentUser.nickname}}" onerror="javascript:this.src='/static/pic/monkey-104-104px.jpg'">
+          <img src="{{ currentUser.avatar_url || '/static/pic/monkey-32-32px.png' }}" title="{{currentUser.nickname}}" alt="{{currentUser.nickname}}" onerror="javascript:this.src='/static/pic/monkey-104-104px.jpg'">
         </div>
         <span>{{currentUser.nickname}}</span>
       </div>
