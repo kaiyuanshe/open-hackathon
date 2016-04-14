@@ -626,6 +626,7 @@ class AzureFormation(Component):
                         self.log.error(e)
 
         ve.azure_resource = azure_resource
+        azure_resource.save()
         expr.save()
         self.expr_manager.check_expr_status(expr)
 
