@@ -94,7 +94,7 @@ class ExprManager(Component):
             return ok()
 
     def get_expr_status(self, expr_id):
-        expr = Experiment.objects(id == expr_id).first()
+        expr = Experiment.objects(id=expr_id).first()
         if expr:
             return self.__report_expr_status(expr)
         else:

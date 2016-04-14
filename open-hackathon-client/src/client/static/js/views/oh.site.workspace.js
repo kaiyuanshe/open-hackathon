@@ -101,11 +101,15 @@
     function showErrorMsg(data) {
         $('#load').hide();
         var errorbox = $('#error').hide();
-        if (data.error.code) {
-            errorbox.find('.code').text(data.error.code);
-        }
-        if (data.error.friendly_message) {
-            errorbox.find('.message').text(data.error.friendly_message);
+        if(data.error) {
+          if (data.error.code) {
+              errorbox.find('.code').text(data.error.code);
+          }
+          if (data.error.friendly_message) {
+              errorbox.find('.message').text(data.error.friendly_message);
+          }
+        } else {
+          errorbox.find('.message').text('部署实验环境失败，这可能是模板错误造成的，请联系系统管理员');
         }
         errorbox.show();
     }
