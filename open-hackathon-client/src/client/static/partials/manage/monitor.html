@@ -40,11 +40,12 @@
     </table>
 
     <uib-pagination
-        total-items="data.totalExprLength"
+        total-items=300
         ng-model="data.curPage"
         items-per-page="data.perPage"
         ng-click="changePage()"
         class="pagination-sm"
+        max-size=10
         force-ellipses="true">
     </uib-pagination>
   </div>
