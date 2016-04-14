@@ -260,8 +260,8 @@ class HackathonManager(Component):
         self.log.debug("add a new hackathon:" + context.name)
         new_hack = self.__create_hackathon(g.user, context)
 
-        self.create_hackathon_notice(new_hack.id, HACK_NOTICE_EVENT.HACK_CREATE, 
-                                            HACK_NOTICE_CATEGORY.HACKATHON)  # hackathon create
+        self.create_hackathon_notice(new_hack.id, HACK_NOTICE_EVENT.HACK_CREATE,
+                                     HACK_NOTICE_CATEGORY.HACKATHON)  # hackathon create
 
         # init data is for local only
         if self.util.is_local():
@@ -684,7 +684,7 @@ class HackathonManager(Component):
             else:
                 return not_found('hackathon_name not found')
 
-        if filter_by_user: # only return notices that are sent to the login user
+        if filter_by_user:  # only return notices that are sent to the login user
             user = None
             if self.user_manager.validate_login():
                 user = g.user
@@ -724,26 +724,22 @@ class HackathonManager(Component):
         hackathon_notice = HackathonNotice.objects(id=id).first()
         if hackathon_notice:
             user = g.user
-            if not user or user.id != hackathon_notice.receiver.id: # not the user
+            if not user or user.id != hackathon_notice.receiver.id:  # not the user
                 return ok()
 
+            hackathon_notice.is_read = True
             if hackathon_notice.event == HACK_NOTICE_EVENT.HACK_PLAN:  # set is_read = True if dev_plan is complete
                 user = hackathon_notice.receiver
                 hackathon = hackathon_notice.hackathon
                 team = Team.objects(members__user=user, hackathon=hackathon).first()
-                if not team: # no team, not paritpate in the hackathon
-                    hackathon_notice.is_read = True
-                elif team and team.dev_plan: # finish the dev_plan
-                    hackathon_notice.is_read = True
-                    self.create_hackathon_notice(hackathon.id, HACK_NOTICE_EVENT.HACK_REGISTER_AZURE,
-                                                 HACK_NOTICE_CATEGORY.HACKATHON, {'receiver': user})
-                else:
-                    hackathon_notice.is_read = False
-            else:  # set is_read
-                hackathon_notice.is_read = True
+                if team:
+                    if not team.dev_plan:  # the dev_plan isn't submitted
+                        hackathon_notice.is_read = False
+                    elif hackathon.config.get(HACKATHON_CONFIG.REAL_NAME_AUTH, False):
+                        self.create_hackathon_notice(hackathon.id, HACK_NOTICE_EVENT.HACK_REGISTER_AZURE,
+                                                     HACK_NOTICE_CATEGORY.HACKATHON, {'receiver': user})
 
-            hackathon_notice.save(validate=False)
-
+            hackathon_notice.save()
             return ok()
 
     def schedule_pre_allocate_expr_job(self):
@@ -804,8 +800,8 @@ class HackathonManager(Component):
         if req.get('error') is None:
             hackathon.status = HACK_STATUS.ONLINE
             hackathon.save()
-            self.create_hackathon_notice(hackathon.id, HACK_NOTICE_EVENT.HACK_ONLINE, 
-                                            HACK_NOTICE_CATEGORY.HACKATHON)  # hackathon online
+            self.create_hackathon_notice(hackathon.id, HACK_NOTICE_EVENT.HACK_ONLINE,
+                                         HACK_NOTICE_CATEGORY.HACKATHON)  # hackathon online
 
         return req
 
@@ -814,8 +810,8 @@ class HackathonManager(Component):
         if hackathon.status == HACK_STATUS.ONLINE or hackathon.status == HACK_STATUS.DRAFT:
             hackathon.status = HACK_STATUS.OFFLINE
             hackathon.save()
-            self.create_hackathon_notice(hackathon.id, HACK_NOTICE_EVENT.HACK_OFFLINE, 
-                                            HACK_NOTICE_CATEGORY.HACKATHON)  # hackathon offline
+            self.create_hackathon_notice(hackathon.id, HACK_NOTICE_EVENT.HACK_OFFLINE,
+                                         HACK_NOTICE_CATEGORY.HACKATHON)  # hackathon offline
 
         elif hackathon.status == HACK_STATUS.INIT:
             req = general_error(code=HTTP_CODE.CREATE_NOT_FINISHED)

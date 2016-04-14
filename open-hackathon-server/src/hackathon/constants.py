@@ -101,6 +101,8 @@ class HACKATHON_CONFIG:
     PRE_ALLOCATE_INTERVAL_SECONDS = "pre_allocate_interval_second"
     FREEDOM_TEAM = "freedom_team"
     CLOUD_PROVIDER = "cloud_provider"
+    DEV_PLAN = "dev_plan"
+    REAL_NAME_AUTH = "real_name_auth"
 
 
 class TEMPLATE_STATUS:
@@ -491,7 +493,7 @@ class HACK_NOTICE_EVENT:
     HACK_OFFLINE = 4  # hackathon create/edit/online/offline
     EXPR_JOIN = 5  # user start to program
     HACK_PLAN = 6  # remind user to submit plan
-    HACK_REGISTER_AZURE = 7 # remind user to register azure
+    HACK_REGISTER_AZURE = 7  # remind user to register azure
 
 
 class EMAIL_SMTP_STATUSCODE:
