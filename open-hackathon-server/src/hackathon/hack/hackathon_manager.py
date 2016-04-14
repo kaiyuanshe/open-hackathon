@@ -722,11 +722,17 @@ class HackathonManager(Component):
     def check_notice_and_set_read_if_necessary(self, id):
         hackathon_notice = HackathonNotice.objects(id=id).first()
         if hackathon_notice:
-            if hackathon_notice.event == HACK_NOTICE_EVENT.HACK_PLAN:  # set is_read only if dev_plan is complete
+            user = g.user
+            if not user or user.id != hackathon_notice.receiver.id: # not the user
+                return ok()
+
+            if hackathon_notice.event == HACK_NOTICE_EVENT.HACK_PLAN:  # set is_read = True if dev_plan is complete
                 user = hackathon_notice.receiver
                 hackathon = hackathon_notice.hackathon
                 team = Team.objects(members__user=user, hackathon=hackathon).first()
-                if not team or (team and team.dev_plan):
+                if not team: # no team, not paritpate in the hackathon
+                    hackathon_notice.is_read = True
+                elif team and team.dev_plan: # finish the dev_plan
                     hackathon_notice.is_read = True
                     self.create_hackathon_notice(hackathon.id, HACK_NOTICE_EVENT.HACK_REGISTER_AZURE,
                                                  HACK_NOTICE_CATEGORY.HACKATHON, {'receiver': user})
@@ -736,6 +742,8 @@ class HackathonManager(Component):
                 hackathon_notice.is_read = True
 
             hackathon_notice.save(validate=False)
+
+            return ok()
 
     def schedule_pre_allocate_expr_job(self):
         """Add an interval schedule job to check all hackathons"""
