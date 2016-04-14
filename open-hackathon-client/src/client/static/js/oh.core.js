@@ -234,7 +234,7 @@
         var getUserUnreadNotice = function() {
             oh.api.hackathon.notice.list.get({
                 query: {
-                    filter_by_user: 1
+                    filter_by_user: "unread" //"unread": list current user's unread notice; "all": list current user's all notices
                 }
             }, function(data){
                 if(!data.error) {
@@ -258,7 +258,7 @@
                         $('.m-nothing').css('display', 'block');
                         $('.m-messages').css('display', 'none');
                     }
-                } 
+                }
             });
         };
         

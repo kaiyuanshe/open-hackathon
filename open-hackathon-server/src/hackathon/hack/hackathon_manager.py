@@ -584,7 +584,7 @@ class HackathonManager(Component):
                 hackathon_notice.receiver = user
                 hackathon_notice.link = u"/site/%s/team" % (hackathon.name)
 
-            elif notice_event == HACK_NOTICE_EVENT.HACK_REGISTER_AZURE:
+            elif notice_event == HACK_NOTICE_EVENT.HACK_REGISTER_AZURE and body.get('receiver', None):
                 user = body.get('receiver')
                 old_hackathon_notice = HackathonNotice.objects(receiver=user,
                                                                event=HACK_NOTICE_EVENT.HACK_REGISTER_AZURE,
@@ -645,7 +645,7 @@ class HackathonManager(Component):
         :param body: valid key/values(all key/values are optional)
             body = {
                 hackathon_name: string,                  // filter by hackathon_name, default unfiltered
-                filter_by_user: int,                     // filter by user, default filter all notice that has specfic receivers
+                filter_by_user: 'unread' | 'all',         // filter by user, default filter all notice that has specfic receivers
                 category: 'int[,int...]',                // filter by category, default unfiltered
                 event: 'int[,int...]',                   // filter by event, default unfiltered
                 order_by: 'time' | 'event' | 'category', // order by update_time, event, category, default by time
@@ -663,7 +663,7 @@ class HackathonManager(Component):
         """
 
         hackathon_name = body.get("hackathon_name")
-        filter_by_user = int(body.get("filter_by_user", 0))
+        filter_by_user = body.get("filter_by_user", "")
         notice_category = body.get("category")
         notice_event = body.get("event")
         order_by = body.get("order_by", "time")
@@ -684,14 +684,14 @@ class HackathonManager(Component):
             else:
                 return not_found('hackathon_name not found')
 
-        if filter_by_user:
-            user = None
-            if self.user_manager.validate_login():
-                user = g.user
+        if filter_by_user: # only return notices that are sent to the login user
+            user = g.user
+            if user:
                 user_filter = Q(receiver=user)
-                is_read_filter = Q(is_read=False)
+                if filter_by_user == 'unread':
+                    is_read_filter = Q(is_read=False)
             else:
-                pass
+                return BadRequest("Please login first.")
 
         if notice_category:
             notice_category_tuple = tuple([int(category) for category in notice_category.split(',')])
