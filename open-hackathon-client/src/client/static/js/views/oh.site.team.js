@@ -490,7 +490,7 @@
             $('#cover').addClass('edit').prepend($('<a>').attr({'data-role': 'cover'}).text('编辑展示图'));
             $('#plan').before($('<a>').attr({'data-role': 'plan', 'class': 'btn btn-sm btn-info'}).text('添加项目说明书'),
                 $('<a id="down_plan"><i class="fa fa-download"></i></a>')
-                    .attr({class:'link',attr: 'https://opentech0storage.blob.core.chinacloudapi.cn/ohp/Azure%E4%BA%91%E4%B8%8A%E5%BC%80%E6%94%BE%E9%BB%91%E5%AE%A2%E6%9D%BE%E8%AE%A1%E5%88%92%E4%B9%A6%E6%8F%90%E4%BA%A4%E6%A8%A1%E6%9D%BF.pptx'})
+                    .attr({class:'link',attr: 'http://opentech0storage.blob.core.chinacloudapi.cn/ohp/%E4%BA%91%E4%B8%AD%E9%BB%91%E5%AE%A2%E6%9D%BE%E5%BC%80%E5%8F%91%E8%AE%A1%E5%88%92%E4%B9%A6%E6%A8%A1%E6%9D%BF.pptx'})
                     .append('下载开发计划书'));
 
             $('#show_works .sub-item').each(function (i, item) {
