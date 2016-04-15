@@ -139,9 +139,9 @@ class ExprManager(Component):
 
         :return:
         """
-        try:
-            self.log.debug("start checking recyclable experiment ... ")
-            for hackathon in self.hackathon_manager.get_recyclable_hackathon_list():
+        self.log.debug("start checking recyclable experiment ... ")
+        for hackathon in self.hackathon_manager.get_recyclable_hackathon_list():
+            try:
                 # check recycle enabled
                 mins = self.hackathon_manager.get_recycle_minutes(hackathon)
                 # filter out the experiments that need to be recycled
@@ -150,8 +150,8 @@ class ExprManager(Component):
                                            hackathon=hackathon)
                 for expr in exprs:
                     self.__recycle_expr(expr)
-        except Exception as e:
-            self.log.error(e)
+            except Exception as e:
+                self.log.error(e)
 
     def pre_allocate_expr(self, context):
         # TODO: too complex, not check
