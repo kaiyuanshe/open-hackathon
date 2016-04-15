@@ -276,7 +276,7 @@ class UserExperimentResource(HackathonResource, Component):
     def delete(self):
         # id is experiment id
         parser = reqparse.RequestParser()
-        parser.add_argument('id', type=int, location='args', required=True)
+        parser.add_argument('id', type=str, location='args', required=True)
         args = parser.parse_args()
         return expr_manager.stop_expr(args["id"])
 

@@ -148,15 +148,11 @@ def init_components():
     from hackathon.template import TemplateLibrary
     from hackathon.remote.guacamole import GuacamoleInfo
     from hackathon.cache.cache_mgr import CacheManagerExt
-    from hackathon.hazure.azure_formation import AzureFormation
 
     # dependencies MUST be provided in advance
     factory.provide("util", Utility)
     factory.provide("log", log)
     init_db()
-
-    # hazure
-    factory.provide("azure_formation", AzureFormation)
 
     # utils
     init_voice_verify()
