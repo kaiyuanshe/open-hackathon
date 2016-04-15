@@ -4,9 +4,9 @@
 <div class="col-lg-6 col-md-9 center">
   <form class="form-horizontal" ng-submit="setCloudProvider()" novalidate>
     <fieldset class="detail-wrapper">
-      <div class="form-group">
+      <div class="form-group form-horizontal">
 
-        <div class="col-md-6 text-center">
+        <div class="col-md-6 text-center" ng-show="">
           <label for="azure">
             <input id="azure" class="hide" type="radio" value="1" ng-model="cloudProvider"
                    ng-disabled="isProviderSelected" required>
@@ -21,7 +21,7 @@
           </label>
         </div>
 
-        <div class="col-md-6 text-center">
+        <div class="col-md-6 text-center" ng-show="">
           <label for="alauda">
             <input id="alauda" class="hide" type="radio" value="2" ng-model="cloudProvider"
                    ng-disabled="isProviderSelected" required>

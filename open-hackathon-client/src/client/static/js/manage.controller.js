@@ -1820,7 +1820,7 @@ angular.module('oh.controllers', [])
     }
 
 
-    $scope.clondFormSubmit = function() {
+    $scope.cloudFormSubmit = function() {
       dialog.confirm({
         title: '提示',
         body: '一旦确定服务商就不能在修改！是否确定？',
@@ -1828,13 +1828,13 @@ angular.module('oh.controllers', [])
         size: 'sm',
         status: 'warning'
       }).then(function() {
-        $scope.isAzureForm = $scope.clondservices == 1;
+        $scope.isAzureForm = $scope.cloudservices == 1;
         api.admin.hackathon.config.put({
           header: {
             hackathon_name: $scope.activity.name
           },
           body: {
-            cloud_provider: parseInt($scope.clondservices)
+            cloud_provider: parseInt($scope.cloudservices)
           }
         }).then(function(data) {
           if (data.error) {
@@ -1844,12 +1844,16 @@ angular.module('oh.controllers', [])
             });
           }
         });
+
+        if (!$scope.isAzureForm) {
+          $scope.wizard = 3;
+        }
       })
     };
 
     /*------------------------------------------------------*/
     $scope.azureFormDisabled = false;
-    $scope.azuse_download_cer = false;
+    $scope.azure_download_cer = false;
     $scope.azure = {
       management_host: 'management.core.chinacloudapi.cn',
     };
@@ -1890,7 +1894,7 @@ angular.module('oh.controllers', [])
 
           var cert_url = azure_key.cert_url;
           window.location.href = cert_url;
-          $scope.azuse_download_cer = true;
+          $scope.azure_download_cer = true;
           $scope.azurecer = cert_url;
         }
         $scope.azureFormDisabled = false;
@@ -2003,6 +2007,10 @@ angular.module('oh.controllers', [])
           content: '请绑定模板'
         });
       }
+    }
+
+    $scope.notUseTemplate = function() {
+      $scope.wizard = 4;
     }
 
     /*------------------------------------------------------*/

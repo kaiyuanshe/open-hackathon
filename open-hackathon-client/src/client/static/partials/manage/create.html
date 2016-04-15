@@ -198,12 +198,12 @@
             </div>
             <div id="step2" ng-show="wizard == 2">
               <div class="col-lg-6 col-md-9 center">
-                <form name="clondForm" class="form-horizontal" ng-show="!isAzureForm" ng-submit="clondFormSubmit()" novalidate>
+                <form name="clondForm" class="form-horizontal" ng-show="!isAzureForm" novalidate>
                   <fieldset class="detail-wrapper">
                     <div class="form-group">
                       <div class="col-md-6 text-center">
                         <label for="azure">
-                          <input id="azure" class="hide" type="radio" name="clond" value="1" ng-model="clondservices" required>
+                          <input id="azure" class="hide" type="radio" name="clond" value="1" ng-model="cloudservices" required>
                           <div class="info-box">
                             <div class="content text-centet">
                               <img src="/static/pic/azure-logo.jpg">
@@ -216,7 +216,7 @@
                       </div>
                       <div class="col-md-6 text-center">
                         <label for="alauda">
-                          <input id="alauda" class="hide" type="radio" name="clond" value="2" ng-model="clondservices" required>
+                          <input id="alauda" class="hide" type="radio" name="clond" value="2" ng-model="cloudservices" required>
                           <div class="info-box">
                             <div class="content text-centet">
                               <img src="/static/pic/alauda-logo-white.jpg">
@@ -232,8 +232,8 @@
                   <footer>
                     <div class="form-group">
                       <div class="col-xs-12">
-                        <button type="submit" class="btn btn-primary btn-long" ng-disabled="clondForm.$invalid"><i class="fa fa-arrow-circle-o-right"></i> 下一步</button>
-                        <a href="#" ng-click="notUseCloud()"> skip 不使用云资源</a>
+                        <button type="submit" class="btn btn-primary btn-long" ng-disabled="clondForm.$invalid" ng-click="cloudFormSubmit()"><i class="fa fa-arrow-circle-o-right"></i> 下一步</button>
+                        <button type="submit" class="btn btn-primary btn-long" ng-click=notUseCloud()><i class="fa fa-arrow-circle-o-right"></i> 不使用云资源</button>
                       </div>
                     </div>
                   </footer>
@@ -267,7 +267,7 @@
                         </select>
                       </div>
                     </div>
-                    <div class="form-group" ng-show="azuse_download_cer">
+                    <div class="form-group" ng-show="azure_download_cer">
                       <label class="col-xs-2 control-label">下载证书</label>
                       <div class="col-xs-10">
                         <a href="{{azurecer}}" download="{{azurecer}}">{{azurecer}}</a>
@@ -278,7 +278,8 @@
                     <div class="form-group">
                       <div class="col-xs-offset-2 col-xs-12">
                         <button type="submit" class="btn btn-success btn-long" ng-disabled="azureForm.$invalid || azureFormDisabled"><i class="fa fa-arrow-circle-o-right"></i> 提交 </button>
-                        <button type="button" class="btn btn-primary btn-long" ng-show="azuse_download_cer" ng-click="azureNext()"><i class="fa fa-arrow-circle-o-right"></i> 下一步</button>
+                        <button type="button" class="btn btn-primary btn-long" ng-show="azure_download_cer" ng-click="azureNext()"><i class="fa fa-arrow-circle-o-right"></i> 下一步</button>
+                        <a href="#" ng-show="!azure_download_cer" ng-click="azureNext()"> 跳过,暂时不提供证书</a>
                       </div>
                     </div>
                   </footer>
@@ -360,6 +361,7 @@
                       <div class="form-group">
                         <div class="col-xs-12">
                           <button type="submit" class="btn btn-primary btn-long"><i class="fa fa-arrow-circle-o-right"></i> 下一步</button>
+                          <a href="#" ng-click="notUseTemplate()"> skip 暂时不绑定模板</a>
                         </div>
                       </div>
                     </footer>
