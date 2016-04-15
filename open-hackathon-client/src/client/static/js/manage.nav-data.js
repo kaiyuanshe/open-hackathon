@@ -61,6 +61,10 @@ angular.module('oh.pages', [])
       name: "ADVANCED_SETTINGS.MAIN",
       type: 2,
       navGroups: [{
+        name: "ADVANCED_SETTINGS.CLOUD_RESOURCES",
+        state: "manage.cloud",
+        icon: 'fa-upload'
+      }, {
         name: "ADVANCED_SETTINGS.VIRTUAL_ENVIRONMENT",
         state: "manage.ve",
         icon: 'fa-th-large'
@@ -68,10 +72,6 @@ angular.module('oh.pages', [])
         name: "ADVANCED_SETTINGS.ENVIRONMENTAL_MONITOR",
         state: "manage.monitor",
         icon: 'fa-desktop'
-      }, {
-        name: "ADVANCED_SETTINGS.CLOUD_RESOURCES",
-        state: "manage.cloud",
-        icon: 'fa-upload'
       }, {
         name: "ADVANCED_SETTINGS.AZURECERT",
         state: "manage.azurecert",
