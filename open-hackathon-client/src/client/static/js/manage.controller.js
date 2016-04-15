@@ -142,13 +142,33 @@ angular.module('oh.controllers', [])
     }
 
     $scope.isShowNav = function(type) {
-      if (type == 1) {
+      if (type == 1 || type == 2) {
         return true;
       }
       if (activity.config) {
         return activity.config.cloud_provider != 0
       } else {
         return false;
+      }
+    }
+
+    $scope.isShowNavItem = function(type, item) {
+      if (type == 2) {
+        if (activity.config && activity.config.cloud_provider == 1)
+          return true;
+        else if (activity.config && activity.config.cloud_provider == 2)
+          switch(item.name) {
+            case "ADVANCED_SETTINGS.CLOUD_RESOURCES": return true;
+            case "ADVANCED_SETTINGS.VIRTUAL_ENVIRONMENT": return true;
+            case "ADVANCED_SETTINGS.ENVIRONMENTAL_MONITOR": return true;
+            default: return false;
+          }
+        else if (item.name == "ADVANCED_SETTINGS.CLOUD_RESOURCES")
+          return true;
+        else
+          return false;
+      } else {
+        return true;
       }
     }
 
@@ -1369,9 +1389,67 @@ angular.module('oh.controllers', [])
 
     pageLoad();
   })
-  .controller('cloudController', function($rootScope, $scope, activityService, api) {
+  .controller('cloudController', function($rootScope, $scope, $stateParams, $window, $timeout, api, dialog) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.CLOUD_RESOURCES');
 
+    $scope.cloudProvider = null;
+    $scope.isProviderSelected = false;
+
+    function getCloudProvider() {
+      api.admin.hackathon.config.get({
+        header: {
+          hackathon_name: $stateParams.name
+        }
+      }).then(function(data) {
+        if (data.error) {
+          $scope.$emit('showTip', {
+            level: 'tip-danger',
+            content: data.error.friendly_message
+          });
+        } else {
+          $scope.cloudProvider = data["cloud_provider"].toString();
+          if ($scope.cloudProvider == "1" || $scope.cloudProvider == "2")
+            $scope.isProviderSelected = true;
+        }
+      });
+    }
+
+    $scope.setCloudProvider = function() {
+      dialog.confirm({
+        title: '提示',
+        body: '一旦确定服务商就不能在修改！是否确定？',
+        icon: 'fa-exclamation',
+        size: 'sm',
+        status: 'warning'
+      }).then(function() {
+        api.admin.hackathon.config.put({
+          header: {
+            hackathon_name: $stateParams.name
+          },
+          body: {
+            cloud_provider: parseInt($scope.cloudProvider)
+          }
+        }).then(function(data) {
+          if (data.error) {
+            $scope.$emit('showTip', {
+              level: 'tip-danger',
+              content: data.error.friendly_message
+            });
+          } else {
+            $scope.$emit('showTip', {
+              level: 'tip-success',
+              content: "设置服务商成功！等待刷新..."
+            });
+
+            $timeout(function() {
+              $window.location.reload()
+            }, 500);
+          }
+        });
+      })
+    };
+
+    getCloudProvider();
   })
   .controller('azurecertController', function($rootScope, $scope, $stateParams, api, dialog) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.AZURECERT');

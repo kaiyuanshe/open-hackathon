@@ -21,9 +21,9 @@
   },
   "ADVANCED_SETTINGS": {
     "MAIN": "高级设置",
+    "CLOUD_RESOURCES": "云资源",
     "VIRTUAL_ENVIRONMENT": "虚拟环境",
     "ENVIRONMENTAL_MONITOR": "环境监控",
-    "CLOUD_RESOURCES": "云资源",
     "AZURECERT": "Azure订阅",
     "SERVERS": "服务器"
   },
@@ -165,6 +165,11 @@
     "CREATE_ADMIN": "增加管理员",
     "ADMIN_SEARCH_HINT": "用户名/昵称/邮箱",
     "SEARCH": "搜索"
+  },
+  "CLOUD_WEBPAGE_FIELDS": {
+    "USE": "使用",
+    "SELECT_CLOUD_PROVIDER": "选择云服务商",
+    "CONFIRM_HINT": "确认后将无法修改"
   },
   "EXPERIMENT_WEBPAGE_FIELDS": {
     "USERNAME": "用户名",
