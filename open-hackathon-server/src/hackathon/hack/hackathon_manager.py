@@ -187,8 +187,11 @@ class HackathonManager(Component):
         return [get_user_hackathon_detail(rel) for rel in user_hackathon_rels]
 
     def get_recyclable_hackathon_list(self):
-        # todo filter hackathons in a db-level
-        hackathons = Hackathon.objects().all()
+        # todo filter hackathons by hackathon.config in a db-level if possible
+        hackathons = Hackathon.objects(status=HACK_STATUS.ONLINE,
+                                       event_start_time__lt=self.util.get_now(),
+                                       event_end_time__gt=self.util.get_now()
+                                       ).all()
         return filter(lambda h: self.is_recycle_enabled(h), hackathons)
 
     def get_basic_property(self, hackathon, key, default=None):

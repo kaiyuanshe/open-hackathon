@@ -230,10 +230,11 @@ class ExprManager(Component):
             return starter
 
         if template.provider == VE_PROVIDER.DOCKER:
-            if hackathon.config[HACKATHON_CONFIG.CLOUD_PROVIDER] == CLOUD_PROVIDER.AZURE:
-                starter = RequiredFeature("azure_docker")
-            elif hackathon.config[HACKATHON_CONFIG.CLOUD_PROVIDER] == CLOUD_PROVIDER.ALAUDA:
-                starter = RequiredFeature("alauda_docker")
+            if HACKATHON_CONFIG.CLOUD_PROVIDER in hackathon.config:
+                if hackathon.config[HACKATHON_CONFIG.CLOUD_PROVIDER] == CLOUD_PROVIDER.AZURE:
+                    starter = RequiredFeature("azure_docker")
+                elif hackathon.config[HACKATHON_CONFIG.CLOUD_PROVIDER] == CLOUD_PROVIDER.ALAUDA:
+                    starter = RequiredFeature("alauda_docker")
         elif template.provider == VE_PROVIDER.AZURE:
             starter = RequiredFeature("azure_vm")
 
