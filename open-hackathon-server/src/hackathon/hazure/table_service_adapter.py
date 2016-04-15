@@ -26,7 +26,10 @@ THE SOFTWARE.
 __author__ = "rapidhere"
 __all__ = ["TableServiceAdapter"]
 
-from azure.storage.tableservice import TableService
+try:
+    from azure.storage.tableservice import TableService
+except ImportError:
+    from azure.storage.table import TableService
 
 from service_adapter import ServiceAdapter
 

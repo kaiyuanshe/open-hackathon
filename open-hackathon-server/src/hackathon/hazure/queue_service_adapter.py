@@ -26,7 +26,10 @@ THE SOFTWARE.
 __author__ = "rapidhere"
 __all__ = ["QueueServiceAdapter"]
 
-from azure.storage.queueservice import QueueService
+try:
+    from azure.storage.queueservice import QueueService
+except ImportError:
+    from azure.storage.queue import QueueService
 
 from service_adapter import ServiceAdapter
 
