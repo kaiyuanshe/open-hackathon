@@ -3,7 +3,7 @@
     {% if workspace %}
         <ul class="nav navbar-nav">
             <li>
-                <a id="workfull" title="全屏" class="btn" href="javascript:;">
+                <a id="workfull" title="全屏" href="javascript:;">
                     <span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span> 全屏
                 </a>
             </li>
@@ -101,19 +101,17 @@
                 </a>
             </li>
             <li class="dropdown">
-                <a type="button" class="btn  dropdown-toggle" data-toggle="dropdown">
+                <a class="dropdown-toggle" data-toggle="dropdown">
                     团队 <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
-                    <li>
-                        <span class="dropdown-menu-title">团队名称：{{ teamname }}</span>
+                    <li class="d-header">
+                        团队名称：{{ teamname }}
                     </li>
-
+                    <li class="divider"></li>
                     <li></li>
-
-                    <li>
-                        <span class="dropdown-menu-title" style="height: 22px;"></span>
-                    </li>
+                    <li class="divider"></li>
+                    <li class="d-footer">&nbsp;</li>
                 </ul>
             </li>
         </ul>

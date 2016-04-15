@@ -679,17 +679,17 @@ footer .oh-copyright hr {
     width: 195px;
 }
 
-.header .messages .dropdown-menu .d-header {
+.header .dropdown-menu .d-header {
     color: #fff;
     font-size: 12px;
     padding: 5px 20px;
     background-color: #2b2c39;
 }
 
-.header .messages .dropdown-menu .m-nothing, .header .messages .dropdown-menu .m-messages {
+.header .messages .dropdown-menu .m-nothing {
     min-height: 40px;
     color: #fff;
-    padding: 20px;
+     padding: 20px;
     text-align: left;
 }
 
@@ -701,7 +701,7 @@ footer .oh-copyright hr {
     border-bottom: 1px solid #2b2c39;
 }
 
-.header .messages .dropdown-menu .d-footer {
+.header .dropdown-menu .d-footer {
     color: #fff;
     font-size: 12px;
     padding: 5px 20px;
