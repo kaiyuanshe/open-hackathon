@@ -68,3 +68,4 @@ class LoginProvider:
     weibo = 8
     gitcafe = 16
     alauda = 32
+    wechat = 64

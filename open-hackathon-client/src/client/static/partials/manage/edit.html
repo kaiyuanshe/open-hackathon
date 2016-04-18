@@ -218,6 +218,15 @@
             </label>
           </div>
           <div class="form-group">
+            <label class="provider provider-success wechat">
+              Wechat
+            </label>
+            <label class="switchbox switchbox-success switchbox-inline">
+              <input type="checkbox" ng-model="provider.wechat" ng-change="providerChange(provider.wechat,64)" speech>
+              <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
+            </label>
+          </div>
+          <div class="form-group">
             <label class="provider provider-success weibo">
               Weibo
             </label>

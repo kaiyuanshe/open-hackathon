@@ -267,6 +267,7 @@ class RegisterManager(Component):
                     (LOGIN_PROVIDER.LIVE, "live"),
                     (LOGIN_PROVIDER.GITHUB, "github"),
                     (LOGIN_PROVIDER.QQ, "qq"),
+                    (LOGIN_PROVIDER.WECHAT, "wechat"),
                     (LOGIN_PROVIDER.WEIBO, "weibo"),
                     (LOGIN_PROVIDER.GITCAFE, "gitcafe"),
                     (LOGIN_PROVIDER.ALAUDA, "alauda")):
