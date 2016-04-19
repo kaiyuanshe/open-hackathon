@@ -1625,7 +1625,7 @@ angular.module('oh.controllers', [])
         pre_allocate_enabled: false,
         pre_allocate_number: 1,
         freedom_team: false,
-        login_provider: 127,
+        login_provider: 111,
         dev_plan_required: false,
         real_name_auth_21v: false
       }
