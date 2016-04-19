@@ -273,7 +273,10 @@
             });
         });
 
-        getUserUnreadNotice();
+        //if user login, get its unread notice
+        if($('.messages').length > 0) {
+            getUserUnreadNotice();
+        };
     }
 
     $(function () {

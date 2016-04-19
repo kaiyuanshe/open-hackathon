@@ -39,7 +39,7 @@ from mongoengine import Q
 
 from hackathon.hmongo.models import Hackathon, UserHackathon, DockerHostServer, User, HackathonNotice, HackathonStat, \
     Organization, Award, Team
-from hackathon.hackathon_response import internal_server_error, ok, not_found, general_error, HTTP_CODE
+from hackathon.hackathon_response import internal_server_error, ok, not_found, general_error, HTTP_CODE, unauthorized
 from hackathon.constants import HACKATHON_CONFIG, HACK_USER_TYPE, HACK_STATUS, HACK_USER_STATUS, HTTP_HEADER, \
     FILE_TYPE, HACK_TYPE, HACKATHON_STAT, DockerHostServerStatus, HACK_NOTICE_CATEGORY, HACK_NOTICE_EVENT, \
     ORGANIZATION_TYPE, CLOUD_PROVIDER
@@ -692,7 +692,7 @@ class HackathonManager(Component):
                 if filter_by_user == 'unread':
                     is_read_filter = Q(is_read=False)
             else:
-                return BadRequest("Please login first.")
+                return unauthorized("login required")
 
         if notice_category:
             notice_category_tuple = tuple([int(category) for category in notice_category.split(',')])
