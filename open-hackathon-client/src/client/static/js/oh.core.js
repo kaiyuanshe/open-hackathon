@@ -238,19 +238,22 @@
                 }
             }, function (data) {
                 if (!data.error) {
-                    $('[data-mq]').text(data.items.length);
+                    data = data.items;
+                    var message_num = data.length;
+                    $('[data-mq]').text(message_num);
                     var nothing = $('.m-nothing');
-                    if (data.items.length > 0) {
+                    if (message_num > 0) {
                         $('.m-count').addClass('active');
+                        $('.m-messages').remove();
                         nothing.hide();
                         for (var i = 0; i < message_num; ++i) {
-                            nothing.after('<li class="m-messages" data-id="' + data[i].id + '"><a target="_blank" href="' + data[i].link + '">' + data[i].content + '</a></li>');
+                            nothing.after('<li class="m-messages" data-id="' + data[i].id + '"><div><a target="_blank" href="' + data[i].link + '">' + data[i].content + '</a></div></li>');
                         }
                     }
                     else {
                         $('.m-count').removeClass('active');
+                        $('.m-messages').remove();
                         nothing.removeAttr('style');
-                        $('.m-messages').detach();
                     }
                 }
             });
@@ -267,7 +270,10 @@
             });
         });
 
-        getUserUnreadNotice();
+        //if user login, get its unread notice
+        if($('.messages').length > 0) {
+            getUserUnreadNotice();
+        };
     }
 
     $(function () {

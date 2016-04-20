@@ -122,3 +122,26 @@ figure > figcaption
 	display: block; /* For IE8 */
 }
 
+/*cross-browser display*/
+.cke_top, .cke_toolgroup, a.cke_combo_button {
+	background: #fff !important;
+	background-image: #fff !important;
+}
+
+.cke_button__save_icon  {
+  display: inline-block !important;
+  font: normal normal normal 18px/1 FontAwesome !important;
+  text-rendering: auto !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  transform: translate(0, 0) !important;
+}
+
+.cke_button__save {
+	background-color: #d0d0d0 !important;
+	cursor: pointer !important;
+}
+
+.cke_button__save_icon:before {
+    content: "\f0c7" !important;
+}
