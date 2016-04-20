@@ -123,6 +123,18 @@
             li_join.text('TA参与的活动');
             $('#my_events').detach();
         }
+
+        //choose which panel to open by urlParam
+        var active_panel = $.getUrlParam('active_panel') || 0;
+        if (active_panel == 1) {
+            $('#my_register_events_tab').trigger('click');
+        }
+        else if (active_panel == 2) {
+            $('#my_events_tab').trigger('click');
+        }
+        else {
+            $('#team_works_tab').trigger('click');
+        }
     }
 
     function bingUser(data) {
