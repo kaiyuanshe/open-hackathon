@@ -168,7 +168,9 @@
   },
   "CLOUD_WEBPAGE_FIELDS": {
     "USE": "使用",
+    "USED": "已使用",
     "SELECT_CLOUD_PROVIDER": "选择云服务商",
+    "NO_USE_CLOUD_PROVIDER": "不使用云服务商",
     "CONFIRM_HINT": "确认后将无法修改"
   },
   "EXPERIMENT_WEBPAGE_FIELDS": {

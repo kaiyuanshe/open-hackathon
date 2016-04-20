@@ -6,7 +6,27 @@
     <fieldset class="detail-wrapper">
       <div class="form-group form-horizontal">
 
-        <div class="col-md-6 text-center" ng-show="">
+        <div ng-class="isProviderSelected ? 'col-md-6 text-center center' : 'col-md-6 text-center'"
+             ng-show="!isProviderSelected || (isProviderSelected && cloudProvider=='0')">
+          <label for="nocloud">
+            <input id="nocloud" class="hide" type="radio" value="0" ng-model="cloudProvider"
+                   ng-disabled="isProviderSelected" required>
+            <div class="info-box">
+              <div class="content text-centet">
+                <img src="/static/pic/no-cloud.jpg">
+              </div>
+              <footer class="text-center" ng-show="!isProviderSelected">
+                {{'CLOUD_WEBPAGE_FIELDS.USE' | translate}}
+              </footer>
+              <footer class="text-center" ng-show="isProviderSelected">
+                {{'CLOUD_WEBPAGE_FIELDS.USED' | translate}}
+              </footer>
+            </div>
+          </label>
+        </div>
+
+        <div ng-class="isProviderSelected ? 'col-md-6 text-center center' : 'col-md-6 text-center'"
+             ng-show="!isProviderSelected || (isProviderSelected && cloudProvider=='1')">
           <label for="azure">
             <input id="azure" class="hide" type="radio" value="1" ng-model="cloudProvider"
                    ng-disabled="isProviderSelected" required>
@@ -14,14 +34,18 @@
               <div class="content text-centet">
                 <img src="/static/pic/azure-logo.jpg">
               </div>
-              <footer class="text-center">
+              <footer class="text-center" ng-show="!isProviderSelected">
                 {{'CLOUD_WEBPAGE_FIELDS.USE' | translate}}
+              </footer>
+              <footer class="text-center" ng-show="isProviderSelected">
+                {{'CLOUD_WEBPAGE_FIELDS.USED' | translate}}
               </footer>
             </div>
           </label>
         </div>
 
-        <div class="col-md-6 text-center" ng-show="">
+        <div ng-class="isProviderSelected ? 'col-md-6 text-center center' : 'col-md-6 text-center'"
+             ng-show="!isProviderSelected|| (isProviderSelected && cloudProvider=='2')">
           <label for="alauda">
             <input id="alauda" class="hide" type="radio" value="2" ng-model="cloudProvider"
                    ng-disabled="isProviderSelected" required>
@@ -29,8 +53,11 @@
               <div class="content text-centet">
                 <img src="/static/pic/alauda-logo-white.jpg">
               </div>
-              <footer class="text-center">
+              <footer class="text-center" ng-show="!isProviderSelected">
                 {{'CLOUD_WEBPAGE_FIELDS.USE' | translate}}
+              </footer>
+              <footer class="text-center" ng-show="isProviderSelected">
+                {{'CLOUD_WEBPAGE_FIELDS.USED' | translate}}
               </footer>
             </div>
           </label>
@@ -40,10 +67,9 @@
     </fieldset>
 
     <footer>
-      <div class="text-center">
+      <div class="text-center" ng-show="!isProviderSelected">
         <div class="col-xs-12">
-          <button type="submit" class="btn btn-primary btn-long" ng-disabled="cloudProvider!='1' && cloudProvider!='2'"
-                  ng-show="!isProviderSelected">
+          <button type="submit" class="btn btn-primary btn-long" ng-disabled="cloudProvider!='1' && cloudProvider!='2'">
             <i class="fa fa-arrow-circle-o-right"></i> {{'OK' | translate}}
           </button>
           <a> {{'CLOUD_WEBPAGE_FIELDS.CONFIRM_HINT' | translate}}</a>

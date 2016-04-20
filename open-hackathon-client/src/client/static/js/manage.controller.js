@@ -1408,7 +1408,7 @@ angular.module('oh.controllers', [])
           });
         } else {
           $scope.cloudProvider = data["cloud_provider"].toString();
-          if ($scope.cloudProvider == "1" || $scope.cloudProvider == "2")
+          if ($scope.cloudProvider == "0" || $scope.cloudProvider == "1" || $scope.cloudProvider == "2")
             $scope.isProviderSelected = true;
         }
       });
