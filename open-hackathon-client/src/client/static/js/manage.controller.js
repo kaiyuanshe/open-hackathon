@@ -1396,6 +1396,7 @@ angular.module('oh.controllers', [])
   .controller('cloudController', function($rootScope, $scope, $state, $window, $timeout, api, activity, dialog) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.CLOUD_RESOURCES');
 
+    // here $scope.cloudProdiver's type is String, like '1' or null.
     $scope.cloudProvider = null;
     $scope.isProviderSelected = true;
     $scope.isAzureCertSet = true;
