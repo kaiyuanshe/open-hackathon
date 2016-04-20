@@ -198,12 +198,12 @@
             </div>
             <div id="step2" ng-show="wizard == 2">
               <div class="col-lg-6 col-md-9 center">
-                <form name="clondForm" class="form-horizontal" ng-show="!isAzureForm" novalidate>
+                <form name="cloudForm" class="form-horizontal" ng-show="!isAzureForm" novalidate>
                   <fieldset class="detail-wrapper">
                     <div class="form-group">
                       <div class="col-md-6 text-center">
                         <label for="azure">
-                          <input id="azure" class="hide" type="radio" name="clond" value="1" ng-model="cloudservices" required>
+                          <input id="azure" class="hide" type="radio" name="cloud" value="1" ng-model="cloudservices" required>
                           <div class="info-box">
                             <div class="content text-centet">
                               <img src="/static/pic/azure-logo.jpg">
@@ -216,7 +216,7 @@
                       </div>
                       <div class="col-md-6 text-center">
                         <label for="alauda">
-                          <input id="alauda" class="hide" type="radio" name="clond" value="2" ng-model="cloudservices" required>
+                          <input id="alauda" class="hide" type="radio" name="cloud" value="2" ng-model="cloudservices" required>
                           <div class="info-box">
                             <div class="content text-centet">
                               <img src="/static/pic/alauda-logo-white.jpg">
@@ -232,7 +232,7 @@
                   <footer>
                     <div class="form-group">
                       <div class="col-xs-12">
-                        <button type="submit" class="btn btn-primary btn-long" ng-disabled="clondForm.$invalid" ng-click="cloudFormSubmit()"><i class="fa fa-arrow-circle-o-right"></i> 下一步</button>
+                        <button type="submit" class="btn btn-primary btn-long" ng-disabled="cloudForm.$invalid" ng-click="cloudFormSubmit()"><i class="fa fa-arrow-circle-o-right"></i> 下一步</button>
                         <button type="submit" class="btn btn-primary btn-long" ng-click=notUseCloud()><i class="fa fa-arrow-circle-o-right"></i> 不使用云资源</button>
                       </div>
                     </div>
@@ -319,7 +319,7 @@
                       </div>
                     </div>
                     <div class="clearfix">
-                      <div class="clond-templates">
+                      <div class="cloud-templates">
                         <div class="col-lg-4 col-md-6 col-sm-12" ng-repeat="image in image_templates">
                           <div class="item" ng-class="{active:isChecked(templates, image.id)}">
                             <header>

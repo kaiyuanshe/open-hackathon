@@ -142,6 +142,7 @@ angular.module('oh.controllers', [])
     }
 
     $scope.isShowNav = function(type) {
+      // type 1: SETTINGS. type 2: ADVANCED_SETTINGS
       if (type == 1 || type == 2) {
         return true;
       }
@@ -153,6 +154,9 @@ angular.module('oh.controllers', [])
     }
 
     $scope.isShowNavItem = function(type, item) {
+      // if cloud_provider is "Azure", show all.
+      // if cloud_provider is "Alauda", show "Cloud", "VirtualEnvirontment" and "Monitor".
+      // "Cloud" would be shown anyway.
       if (type == 2) {
         if (activity.config && activity.config.cloud_provider == 1)
           return true;

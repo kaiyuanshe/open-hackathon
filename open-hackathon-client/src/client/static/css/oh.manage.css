@@ -787,29 +787,29 @@ tags-input .tags .tag-item .remove-button {
   vertical-align: middle;
 }
 
-.clond-templates {
+.cloud-templates {
   margin: 0 -5px;
   min-height: 300px;
 }
 
-.clond-templates .item {
+.cloud-templates .item {
   border: 1px solid #d0d2d3;
   border-radius: 2px;
   margin-bottom: 20px;
 }
 
-.clond-templates .item.active {
+.cloud-templates .item.active {
   border-color: #7dba43;
 }
 
-.clond-templates .btn-group-justified>.btn {
+.cloud-templates .btn-group-justified>.btn {
   border-radius: 0;
   border-color: #d0d2d3;
   border-bottom: none;
   border-right: none;
 }
 
-.clond-templates .btn-group-justified>.btn:first-child:not(:last-child):not(.dropdown-toggle) {
+.cloud-templates .btn-group-justified>.btn:first-child:not(:last-child):not(.dropdown-toggle) {
   border-left: none;
 }
 
@@ -818,13 +818,13 @@ tags-input .tags .tag-item .remove-button {
   min-height: 0;
 }
 
-.clond-templates> .btn:last-child:not(:first-child),
+.cloud-templates> .btn:last-child:not(:first-child),
 .btn-group > .dropdown-toggle:not(:first-child) {
   border-bottom-left-radius: 0;
   border-top-left-radius: 0;
 }
 
-.clond-templates header {
+.cloud-templates header {
   padding: 10px 0 5px;
   margin: 0 15px;
   border-bottom: 1px solid #d0d2d3;
@@ -835,36 +835,36 @@ tags-input .tags .tag-item .remove-button {
   text-overflow: ellipsis;
 }
 
-.clond-templates .item-body {
+.cloud-templates .item-body {
   padding: 15px;
   max-height: 155px;
   overflow: hidden;
 }
 
-.clond-templates .item-body p {
+.cloud-templates .item-body p {
   font-size: 14px;
   margin-top: 15px;
   overflow: hidden;
   max-height: 40px;
 }
 
-.clond-templates [class*="col-"] {
+.cloud-templates [class*="col-"] {
   padding: 0 5px;
 }
 
-.clond-templates .author {
+.cloud-templates .author {
   margin-right: 120px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.clond-templates .author .picture {
+.cloud-templates .author .picture {
   width: 32px;
   height: 32px;
 }
 
-.clond-templates .author .picture img {
+.cloud-templates .author .picture img {
   max-width: 100%;
   max-height: 100%;
 }
