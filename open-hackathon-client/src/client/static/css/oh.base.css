@@ -686,10 +686,10 @@ footer .oh-copyright hr {
     background-color: #2b2c39;
 }
 
-.header .messages .dropdown-menu .m-nothing {
+.header .messages .dropdown-menu .m-nothing, .header .messages .dropdown-menu .m-messages {
     min-height: 40px;
     color: #fff;
-     padding: 20px;
+    padding: 20px;
     text-align: left;
 }
 
