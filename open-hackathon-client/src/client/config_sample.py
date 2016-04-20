@@ -28,12 +28,15 @@
 
 # NOTE: all following key/secrets for test purpose.
 HOSTNAME = "http://localhost"  # host name of the UI site
+# hacking.kaiyuanshe.cn is used for wechat oauth login
+# HOSTNAME = "http://hacking.kaiyuanshe.cn"
 # HOSTNAME = "http://open-hackathon-dev.chinacloudapp.cn"  # host name of the UI site
 # HOSTNAME = "http://hacking.kaiyuanshe.cn"
 
 QQ_OAUTH_STATE = "openhackathon"  # todo state should be constant. Actually it should be unguessable to prevent CSFA
 HACKATHON_API_ENDPOINT = "http://localhost:15000"
 # HACKATHON_API_ENDPOINT = "http://open-hackathon-dev.chinacloudapp.cn:15000"
+# HACKATHON_API_ENDPOINT = "http://hacking.kaiyuanshe.cn:15000"
 
 # github key for `localhost`
 GITHUB_CLIENT_ID = "b44f3d47bdeb26b9c4e6"

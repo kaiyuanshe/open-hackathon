@@ -40,6 +40,7 @@ class OAUTH_PROVIDER:
     """Social Login that open-hackathon platform support"""
     GITHUB = "github"
     QQ = "qq"
+    WECHAT = "wechat"
     GITCAFE = "gitcafe"
     WEIBO = "weibo"
     LIVE = "live"
@@ -475,6 +476,7 @@ class LOGIN_PROVIDER:
     WEIBO = 8
     GITCAFE = 16
     ALAUDA = 32
+    WECHAT = 64
 
 
 class HACK_NOTICE_CATEGORY:

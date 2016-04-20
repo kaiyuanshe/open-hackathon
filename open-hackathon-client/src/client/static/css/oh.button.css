@@ -872,6 +872,10 @@ label.switchbox input[type=checkbox][disabled]:checked ~ .switchbox-handle i {
   content: "\f1d6";
 }
 
+.provider.wechat:before {
+  content: "\f1d7";
+}
+
 .provider.weibo:before {
   content: "\f18a";
 }
