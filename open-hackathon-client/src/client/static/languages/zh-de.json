@@ -169,9 +169,15 @@
   "CLOUD_WEBPAGE_FIELDS": {
     "USE": "使用",
     "USED": "已使用",
-    "SELECT_CLOUD_PROVIDER": "选择云服务商",
+    "CLOUD_PROVIDER": "云服务商",
+    "SELECT_CLOUD_PROVIDER": "请选择云服务商",
     "NO_USE_CLOUD_PROVIDER": "不使用云服务商",
-    "CONFIRM_HINT": "确认后将无法修改"
+    "CONFIRM_HINT": "确认后将无法修改",
+    "NO_CLOUD_HINT": "已选择'不使用云服务商',无法修改",
+    "SET_AZURECERT_HINT": "尚未设置Azure证书，点此进行设置～",
+    "SET_TEMPLATE_HINT": "尚未设置模板，点此进行设置～",
+    "AZURE_CONFIG_HINT": "配置完成，点此进入中国Azure官网。",
+    "ALAUDA_CONFIG_HINT": "配置完成，点此进入灵雀云官网。"
   },
   "EXPERIMENT_WEBPAGE_FIELDS": {
     "USERNAME": "用户名",
