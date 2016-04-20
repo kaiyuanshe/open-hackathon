@@ -210,22 +210,24 @@ class AzureCertManager(Component):
             if azure_key is not None:
                 azure_key.verified = True
                 azure_key.save()
-            return ok(True)
+            return ok("success")
 
         if azure_key is None:
-            return ok(False)
+            return ok("bad_request")
 
         try:
             sms = CloudServiceAdapter(azure_key.subscription_id,
                                       azure_key.get_local_pem_url(),
                                       host=azure_key.management_host)
-            sms.list_hosted_services()
-            azure_key.verified = True
-            azure_key.save()
+            if sms.ping():
+                azure_key.verified = True
+                azure_key.save()
+            else:
+                return ok("bad_request")
         except Exception:
-            return ok(False)
+            return ok("internal_server_error")
 
-        return ok(True)
+        return ok("success")
 
     def __init__(self):
         self.CERT_BASE = self.util.get_config('azure.cert_base')
