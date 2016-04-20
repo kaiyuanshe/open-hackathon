@@ -179,6 +179,21 @@ angular.module('oh.manage.router', [
         });
       }
     }
+  }).state('manage.cloud', {
+    url: 'cloud/:name',
+    templateUrl: '/static/partials/manage/cloud.html?v=' + VERSION,
+    controller: 'cloudController',
+    resolve: {
+      activity: function($stateParams, api) {
+        return api.admin.hackathon.get({
+          header: {
+            hackathon_name: $stateParams.name
+          }
+        }).then(function(data) {
+          return data;
+        });
+      }
+    }
   }).state('manage.ve', {
     url: 've/:name',
     templateUrl: '/static/partials/manage/ve.html?v=' + VERSION,
@@ -198,10 +213,6 @@ angular.module('oh.manage.router', [
     url: 'monitor/:name',
     templateUrl: '/static/partials/manage/monitor.html?v=' + VERSION,
     controller: 'monitorController'
-  }).state('manage.cloud', {
-    url: 'cloud/:name',
-    templateUrl: '/static/partials/manage/cloud.html?v=' + VERSION,
-    controller: 'cloudController'
   }).state('manage.azurecert', {
     url: 'azure/:name',
     templateUrl: '/static/partials/manage/azurecert.html?v=' + VERSION,
