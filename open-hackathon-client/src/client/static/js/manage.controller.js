@@ -1421,7 +1421,7 @@ angular.module('oh.controllers', [])
           });
           $scope.isProviderSelected = false;
         } else {
-          var provider = data["cloud_provider"].toString();
+          var provider = typeof(data["cloud_provider"]) == "undefined" ? null : data["cloud_provider"].toString();
           if (provider == '0' || provider == '1' || provider == '2'){
             $scope.isProviderSelected = true;
             $scope.cloudProvider = provider;
