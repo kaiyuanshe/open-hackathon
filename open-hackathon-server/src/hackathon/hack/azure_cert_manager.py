@@ -33,8 +33,8 @@ import commands
 from hackathon.hazure.cloud_service_adapter import CloudServiceAdapter
 from hackathon.hmongo.models import Hackathon, AzureKey, Experiment
 
-from hackathon import RequiredFeature, Component, Context
-from hackathon.hackathon_response import ok
+from hackathon import RequiredFeature, Component, Context, internal_server_error
+from hackathon.hackathon_response import ok, bad_request
 from hackathon.constants import FILE_TYPE
 
 __all__ = ["AzureCertManager"]
@@ -213,19 +213,16 @@ class AzureCertManager(Component):
             return ok("success")
 
         if azure_key is None:
-            return ok("bad_request")
+            return internal_server_error("No available azure key on the server side.")
 
-        try:
-            sms = CloudServiceAdapter(azure_key.subscription_id,
-                                      azure_key.get_local_pem_url(),
-                                      host=azure_key.management_host)
-            if sms.ping():
-                azure_key.verified = True
-                azure_key.save()
-            else:
-                return ok("bad_request")
-        except Exception:
-            return ok("internal_server_error")
+        sms = CloudServiceAdapter(azure_key.subscription_id,
+                                  azure_key.get_local_pem_url(),
+                                  host=azure_key.management_host)
+        if sms.ping():
+            azure_key.verified = True
+            azure_key.save()
+        else:
+            return bad_request("Subscription id is not valid")
 
         return ok("success")
 

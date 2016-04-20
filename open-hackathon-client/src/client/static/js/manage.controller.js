@@ -1402,22 +1402,17 @@ angular.module('oh.controllers', [])
           hackathon_name: $stateParams.name
         }
       }).then(function(data) {
-        if (data.message == "success") {
+      if (data.error) {
+        $scope.$emit('showTip', {
+        level: 'tip-warning',
+        content: data.error.message
+        });
+      } else {
           $scope.$emit('showTip', {
             level: 'tip-success',
             content: '检验成功。'
           });
           ecert.verified = true;
-        } else if (data.message == "bad_request") {
-          $scope.$emit('showTip', {
-            level: 'tip-warning',
-            content: '证书授权失败，请检验SUBSCRIPTION ID是否正确。'
-          });
-        } else {
-          $scope.$emit('showTip', {
-            level: 'tip-warning',
-            content: '服务器端错误，请联系管理员。'
-          });
         }
       })
     };
