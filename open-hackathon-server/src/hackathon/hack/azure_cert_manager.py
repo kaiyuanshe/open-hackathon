@@ -222,7 +222,7 @@ class AzureCertManager(Component):
             azure_key.verified = True
             azure_key.save()
         else:
-            return bad_request("Subscription id is not valid")
+            return bad_request("Subscription id is not valid, check whether subscription id is valid and upload the right cer file to azure")
 
         return ok("success")
 
