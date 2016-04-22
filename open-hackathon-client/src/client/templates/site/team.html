@@ -65,7 +65,7 @@
                                class="btn btn-info btn-sm hide" data-role="addworks">
                                 <i class="fa fa-plus"></i>发布作品</a>
                         {% elif team.is_leader and team.is_frozen %}
-                           <div class="alert alert-info">已停止编辑功能，正在进行评审中。</div>
+                            <div class="alert alert-info">已停止编辑功能，正在进行评审中。</div>
                         {% elif team.is_admin %}
                             <a href="/manage/{{ hackathon_name }}/team/{{ team.id }}"
                                class="btn btn-info" target="manage">
@@ -87,7 +87,8 @@
                                 <div class="n-right" id="cover">
                                     {% if team.get('cover') %}
                                         <div data-parent>
-                                            <img class="cov" src="{{ team.cover }}" onload="oh.comm.imgLoad(this)" data-loadsrc="{{ team.cover }}">
+                                            <img class="cov" src="{{ team.cover }}" onload="oh.comm.imgLoad(this)"
+                                                 data-loadsrc="{{ team.cover }}">
                                         </div>
                                     {% endif %}
                                     <div class="nothing  {% if team.get('cover') %} hide {% endif %}">
@@ -108,7 +109,7 @@
                         <div class="inline">
                             <div class="group">
                                 <label class="">开发计划书</label>
-                                <div class="n-right plan" >
+                                <div class="n-right plan">
                                     <iframe data-src="{{ team.get('dev_plan','') }}" class="hide" id="plan"
                                             seamless="seamless" frameborder="0" scrolling="yes"></iframe>
                                 </div>
@@ -160,6 +161,57 @@
             </div>
         </div>
     </div>
+
+    {% if team.is_admin %}
+        <div class="referee">
+            <h2>裁判评分</h2>
+            <div class="container">
+                <div class="team-right">
+                    <form id="score_form" method="post" novalidate class="hide">
+                        <fieldset>
+                            <div class="form-group rating">
+                                <div class="oh-inline-block">
+                                    <input type="radio" name="trophies-rating" value="10" id="trophies-10">
+                                    <label for="trophies-10"><i class="fa fa-trophy"></i></label>
+                                    <input type="radio" name="trophies-rating" value="9" id="trophies-9">
+                                    <label for="trophies-9"><i class="fa fa-trophy"></i></label>
+                                    <input type="radio" name="trophies-rating" value="8" id="trophies-8">
+                                    <label for="trophies-8"><i class="fa fa-trophy"></i></label>
+                                    <input type="radio" name="trophies-rating" value="7" id="trophies-7">
+                                    <label for="trophies-7"><i class="fa fa-trophy"></i></label>
+                                    <input type="radio" name="trophies-rating" value="6" id="trophies-6">
+                                    <label for="trophies-6"><i class="fa fa-trophy"></i></label>
+                                    <input type="radio" name="trophies-rating" value="5" id="trophies-5">
+                                    <label for="trophies-5"><i class="fa fa-trophy"></i></label>
+                                    <input type="radio" name="trophies-rating" value="4" id="trophies-4">
+                                    <label for="trophies-4"><i class="fa fa-trophy"></i></label>
+                                    <input type="radio" name="trophies-rating" value="3" id="trophies-3">
+                                    <label for="trophies-3"><i class="fa fa-trophy"></i></label>
+                                    <input type="radio" name="trophies-rating" value="2" id="trophies-2">
+                                    <label for="trophies-2"><i class="fa fa-trophy"></i></label>
+                                    <input type="radio" name="trophies-rating" value="1" id="trophies-1">
+                                    <label for="trophies-1"><i class="fa fa-trophy"></i></label>
+                                    评分：
+                                </div>
+                            </div>
+                            <div class="form-group">
+                        <textarea class="form-control" id="comment" name="comment" rows="4" maxlength="200"
+                                  data-bv-stringlength="true"
+                                  placeholder="写下您的感想呗！"></textarea>
+                            </div>
+                        </fieldset>
+                        <fieldset class="text-right">
+                            <button type="submit" class="btn btn-success">提交</button>
+                        </fieldset>
+                    </form>
+                    <div class="score_p ">
+                        <ul id="score_list" class="list-unstyled"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% endif %}
 {% endblock %}
 
 {% block script %}
@@ -387,7 +439,6 @@
 
 
 
-
         </script>
     {% else %}
         <script id="team_item" type="text/x-jquery-tmpl">
@@ -406,10 +457,34 @@
 
 
 
-
         </script>
     {% endif %}
+    <script id="score_item" type="text/x-jquery-tmpl">
+        {% raw %}
+            <li>
+                <div class=" rating">
+                    <div class="oh-inline-block">
+                        <label for="10" {{if score==10 }}class="active"{{/if}} ><i class="fa fa-trophy"></i></label>
+                        <label for="9" {{if score==9 }}class="active"{{/if}}><i class="fa fa-trophy"></i></label>
+                        <label for="8" {{if score==8 }}class="active"{{/if}}><i class="fa fa-trophy"></i></label>
+                        <label for="7" {{if score==7 }}class="active"{{/if}}><i class="fa fa-trophy"></i></label>
+                        <label for="6" {{if score==6 }}class="active"{{/if}}><i class="fa fa-trophy"></i></label>
+                        <label for="5" {{if score==5 }}class="active"{{/if}}><i class="fa fa-trophy"></i></label>
+                        <label for="4" {{if score==4 }}class="active"{{/if}}><i class="fa fa-trophy"></i></label>
+                        <label for="3" {{if score==3 }}class="active"{{/if}}><i class="fa fa-trophy"></i></label>
+                        <label for="2" {{if score==2 }}class="active"{{/if}}><i class="fa fa-trophy"></i></label>
+                        <label for="1" {{if score==1 }}class="active"{{/if}}><i class="fa fa-trophy"></i></label>
+                        评分：
+                    </div>
+                </div>
+                ${score}分  时间：${moment(score_date).format('YYYY/MM/DD HH:mm')}
+                <p><span>点评：</span>${reason}</p>
+            </li>
+        {% endraw %}
+
+    </script>
     <script type="text/javascript" src="/static/js/jquery/jquery.magnific-popup.min.js"></script>
     <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
+    <script type="text/javascript" src="/static/js/jquery/moment.min.js"></script>
     <script type="text/javascript" src="/static/js/views/oh.site.team.js"></script>
 {% endblock %}

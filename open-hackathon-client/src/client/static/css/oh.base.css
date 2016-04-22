@@ -642,7 +642,7 @@ footer .oh-copyright hr {
 .header .dropdown-menu > li > a:focus {
     text-decoration: none;
     color: #fff;
-    background-color: #0F0F0F;
+    background-color: #2B2C39;
 }
 
 .header .dropdown-menu-title {
@@ -1037,7 +1037,9 @@ a#main-menu-toggle {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
-
+.fa-lg {
+    font-size: 17px;
+}
 .nav.main-menu > li > a .chevron,
 .nav.main-menu > li > ul > li > a .chevron,
 .nav.main-menu > li > ul > li > ul > li > a .chevron,
