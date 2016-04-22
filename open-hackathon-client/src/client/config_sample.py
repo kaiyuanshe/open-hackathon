@@ -54,10 +54,6 @@ WECHAT_APP_ID = "wxe75b8aef71c2059f"
 WECHAT_SECRET = "4532b90750f4c7bc70fcfbc42d881622"
 WECHAT_OAUTH_STATE = "openhackathon"  # NOTE: may be should be same as QQ_OAUTH_STATE?
 
-# gitcafe domain:  gcas.dgz.sh/gcs.dgz.sh for Staging, api.gitcafe.com/gitcafe.com for Production
-GITCAFE_CLIENT_ID = "1c33ecdf4dd0826325f60a92e91834522b1cdf47a7f90bdaa79f0526fdc48727"
-GITCAFE_CLIENT_SECRET = "80b63609000b20c1260df28081c08712617648e1b528086bbb089f0af4614509"
-
 WEIBO_CLIENT_ID = "479757037"
 WEIBO_CLIENT_SECRET = "efc5e75ff8891be37d90b4eaec5c02de"
 WEIBO_META_CONTENT = "ae884e09bc02b700"
@@ -94,12 +90,6 @@ Config = {
             "access_token_url": "https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%%s&grant_type=authorization_code" % (
                 WECHAT_APP_ID, WECHAT_SECRET),
             "user_info_url": "https://api.weixin.qq.com/sns/userinfo?access_token=%s&openid=%s"
-        },
-        "gitcafe": {
-            "client_id": GITCAFE_CLIENT_ID,
-            "access_token_url": 'https://gcas.dgz.sh/oauth/token?client_id=%s&client_secret=%s&redirect_uri=%s/gitcafe&grant_type=authorization_code&code=' % (
-                GITCAFE_CLIENT_ID, GITCAFE_CLIENT_SECRET, HOSTNAME),
-            "user_info_url": "https://gcas.dgz.sh/api/v1/user"
         },
         "weibo": {
             "client_id": WEIBO_CLIENT_ID,
@@ -144,10 +134,6 @@ Config = {
         "wechat": {
             "authorize_url": "https://open.weixin.qq.com/connect/qrconnect?appid=%s&redirect_uri=%s/wechat&response_type=code&scope=snsapi_login&state=%s#wechat_redirect" % (
                 WECHAT_APP_ID, HOSTNAME, WECHAT_OAUTH_STATE)
-        },
-        "gitcafe": {
-            "authorize_url": "https://gcs.dgz.sh/oauth/authorize?response_type=code&client_id=%s&redirect_uri=%s/gitcafe&scope=public" % (
-                GITCAFE_CLIENT_ID, HOSTNAME)
         },
         "live": {
             "authorize_url": "https://login.live.com/oauth20_authorize.srf?client_id=%s&scope=wl.basic+,wl.emails&response_type=code&redirect_uri=%s/live" % (

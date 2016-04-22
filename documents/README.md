@@ -40,7 +40,7 @@ Open Hackathon Platform is a cloud-based platform to enable Hacakthon organizers
 The Open Hacakthon can be deployed as a standalone web application, and can leverage Docker based technology to efficiently manage the cloud resources.
 ## Why OpenHackathon
 - **Free**. Open Hackathon Platform is an fully open-source under MIT license.
-- **imple**. Participants don't need to install or configure anything. A html5 capable web browser and a social login account are the only preconditions. Nowadays HTML5 is supported in all modern browsers. And Open Hackathon platform supports several major OAuth providers including QQ, weibo, github, gitcafe and microsoft live login. It's easy to support more.
+- **imple**. Participants don't need to install or configure anything. A html5 capable web browser and a social login account are the only preconditions. Nowadays HTML5 is supported in all modern browsers. And Open Hackathon platform supports several major OAuth providers including QQ, weibo, github, and microsoft live login. It's easy to support more.
 - **Scalable**. Every component of open hackathon platform can be scalable.
 
 # Glossary

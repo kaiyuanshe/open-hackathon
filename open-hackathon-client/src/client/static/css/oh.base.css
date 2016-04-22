@@ -1892,13 +1892,6 @@ ul.messages li {
     content: "\f17a";
 }
 
-.fa-gitcafe {
-    width: 16px;
-    height: 16px;
-    background: url('/static/pic/gitcafe-icon.png') no-repeat center;
-    vertical-align: text-top;
-}
-
 .oh-box {
     margin-bottom: 10px;
 }

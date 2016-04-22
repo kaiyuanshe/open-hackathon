@@ -358,103 +358,6 @@ class GithubLogin(LoginBase):
         return user_info
 
 
-class GitcafeLogin(LoginBase):
-    """Sign in with gitcafe
-
-    :Example:
-        from client.user.login import GitcafeLogin
-
-        GitcafeLogin()
-
-    .. notes::
-    """
-
-    def login(self, args):
-        """ gitcafe Login
-
-        :type args: dict
-        :param args:
-
-        :rtype: dict
-        :return: token and instance of user
-        """
-
-        log.info('login from Gitcafe')
-        code = args.get('code')
-        if not code:
-            return None
-
-        access_token = self.get_token(code)
-        user_info = self.get_user_info("Bearer " + access_token)
-
-        name = user_info['username']
-        email = user_info['email']
-        nickname = user_info['fullname']
-        if nickname is None:
-            nickname = name
-
-        if user_info['avatar_url'].startswith('https'):
-            avatar_url = user_info['avatar_url']
-        else:
-            avatar_url = "https" + user_info['avatar_url'][4:]
-
-        email_list = [
-            {
-                'name': name,
-                'email': email,
-                'verified': 1,
-                'primary': 1
-            }
-        ]
-
-        required_info = {
-            "openid": user_info['id'],
-            "provider": LOGIN_PROVIDER.GITCAFE,
-            "name": name,
-            "nickname": nickname,
-            "access_token": access_token,
-            "email_list": email_list,
-            "avatar_url": avatar_url
-        }
-
-        return required_info
-
-    def get_token(self, code):
-        """ Get gitcafe access token
-
-        :type code: str
-        :param code:
-
-        :rtype: str
-        :return: access token
-        """
-        token_resp = get_remote(get_config("login.gitcafe.access_token_url") + code)
-        query = qs_dict(token_resp)
-        if query.get("error") is not None:
-            raise Exception(query)
-
-        return query["access_token"]
-
-    def get_user_info(self, authorization):
-        """Get qq user info
-
-        :type authorization: str
-        :param authorization:
-
-        :rtype: dict
-        :return: user info
-        """
-        opener = urllib2.build_opener(urllib2.HTTPHandler)
-        request = urllib2.Request(get_config("login.gitcafe.user_info_url"))
-        request.add_header("Authorization", authorization)
-        user_info = json.loads(opener.open(request).read())
-
-        if user_info.get("error") is not None:
-            raise Exception(user_info)
-
-        return user_info
-
-
 class WeiboLogin(LoginBase):
     """Sign in with weibo
 
@@ -767,7 +670,6 @@ login_providers = {
     LOGIN_PROVIDER.GITHUB: GithubLogin(),
     LOGIN_PROVIDER.WEIBO: WeiboLogin(),
     LOGIN_PROVIDER.QQ: QQLogin(),
-    LOGIN_PROVIDER.GITCAFE: GitcafeLogin(),
     LOGIN_PROVIDER.ALAUDA: AlaudaLogin(),
     LOGIN_PROVIDER.LIVE: LiveLogin(),
     LOGIN_PROVIDER.WECHAT: WechatLogin()
