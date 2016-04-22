@@ -14,7 +14,7 @@
         <tbody id="registe_list">
             <tr ng-repeat="team in data.registerTeams">
                 <td><a ng-href= "/site/{{team.hackathon.name}}/team/{{team.id}}">{{team.name}}</a></td>
-                <td>{{team.leader.name}}</td>
+                <td><a ng-href="/user/p_{{team.leader.id}}">{{team.leader.name}}</a></td>
                 <td><p ng-repeat="member in team.members"><a ng-href="/user/p_{{member.user.id}}">{{member.user.name}}</a></p></td>
                 <td>{{team.project_name}}</td>
                 <td><p ng-repeat="work in team.works">{{work.uri}} </p></td>
