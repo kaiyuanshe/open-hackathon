@@ -37,6 +37,10 @@ angular.module('oh.pages', [])
         state: "manage.users",
         icon: 'fa-users'
       }, {
+        name: "SETTINGS.TEAMS",
+        state: "manage.teams",
+        icon: 'fa-users'
+      }, {
         name: "SETTINGS.ADMINISTRATORS",
         state: "manage.admin",
         icon: 'fa-users'

@@ -161,6 +161,61 @@ class TeamManager(Component):
 
         return [get_tema(x) for x in teams]
 
+    def get_admin_hackathon_team_list(self, hackathon_id, name=None, number=None):
+        """Get the team list of selected hackathon
+
+        :type hackathon_id: string or object_id
+        :param hackathon_id: hackathon id
+
+        :type name: str|unicode
+        :param name: name of team. optional
+
+        :type number: int
+        :param number: querying condition, return number of teams
+
+        :rtype: list
+        :return: a list of team filter by name and number on selected hackathon
+        """
+        query = Q(hackathon=hackathon_id)
+        if name is not None:
+            query &= Q(name__icontains=name)
+
+        try:
+            teams = Team.objects(query).order_by('name')[:number]
+        except ValidationError:
+            return []
+
+        # check whether it's anonymous user or not
+        user = None
+        if self.user_manager.validate_login():
+            user = g.user
+
+        def get_tema(team):
+            teamDic = team.dic()
+            teamDic['leader'] = {
+                'id': str(team.leader.id),
+                'name': team.leader.name,
+                'nickname': team.leader.nickname,
+                'avatar_url': team.leader.avatar_url
+            }
+            teamDic["hackathon"] = {
+                'name': team.hackathon.name
+            }
+            teamDic['cover'] = teamDic.get('cover', '')
+            teamDic['project_name'] = teamDic.get('project_name', '')
+            teamDic['dev_plan'] = teamDic.get('dev_plan', '')
+            teamDic["member_count"] = team.members.filter(status=TEAM_MEMBER_STATUS.APPROVED).count()
+            def sub(t):
+                m = to_dic(t)
+                m["user"] = self.user_manager.user_display_info(t.user)
+                return m
+
+            teamDic["members"] = [sub(t) for t in team.members]
+
+            return teamDic
+
+        return [get_tema(x) for x in teams]
+
     def create_default_team(self, hackathon, user):
         """Create a default new team for user after registration.
 

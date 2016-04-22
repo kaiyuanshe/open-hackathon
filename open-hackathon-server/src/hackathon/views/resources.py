@@ -422,6 +422,15 @@ class TalentResource(HackathonResource):
 
 """Resources for hackathon admin to manage hackathon and hackathon related resources and features"""
 
+class AdminHackathonTeamListResource(HackathonResource):
+    @hackathon_name_required
+    def get(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('name', type=str, location='args', required=False)
+        parse.add_argument('number', type=int, location='args', required=False)
+        result = parse.parse_args()
+        return team_manager.get_admin_hackathon_team_list(g.hackathon.id, result['name'], result['number'])
+
 
 class AdminHackathonResource(HackathonResource):
     """Resource for admin to create/update hackathon

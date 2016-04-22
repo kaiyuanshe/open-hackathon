@@ -73,8 +73,7 @@ def init_routes():
     # team APIs
     api.add_resource(TeamResource, "/api/team")  # create, update, dismiss and query team
     api.add_resource(MyTeamResource, "/api/team/my")  # get team of current login user
-    api.add_resource(HackathonTeamListResource, "/api/hackathon/team/list",
-                     "/api/admin/team/list")  # list teams of hackathon
+    api.add_resource(HackathonTeamListResource, "/api/hackathon/team/list")  # list teams of hackathon
     api.add_resource(TeamMemberResource, "/api/team/member")  # join or leave team, approve member
     api.add_resource(TeamScoreResource, "/api/team/score")  # query or set score by judge
     api.add_resource(TeamShowResource, "/api/team/show")  # query or add show by leader
@@ -83,6 +82,7 @@ def init_routes():
     api.add_resource(TeamTemplateResource, "/api/team/template")  # select or unselect template for team
 
     # APIs for admin to manage hackathon and hackathon resources, features and users
+    api.add_resource(AdminHackathonTeamListResource, "/api/admin/team/list")  # list teams of hackathon
     api.add_resource(AdminHackathonResource, "/api/admin/hackathon")  # create/update hackathon
     api.add_resource(AdminHackathonOnLineResource, "/api/admin/hackathon/online")
     api.add_resource(AdminHackathonOffLineResource, "/api/admin/hackathon/offline")
