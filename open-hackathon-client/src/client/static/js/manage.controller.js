@@ -514,13 +514,8 @@ angular.module('oh.controllers', [])
     $scope.data = {
       registerTeams: [], // we cannot use activity.registration here, its single
       regStatus: {},
-      checkAll: false,
-      checks: {},
       perPage: 20,
       curPage: 1,
-
-      freedomTeam: false,
-      autoApprove: false
     };
 
     var showTip = function(level, content, showTime) {
@@ -541,20 +536,9 @@ angular.module('oh.controllers', [])
           showTip('tip-danger', data.error.friendly_message);
         } else {
           $scope.data.regStatus = {};
-          $scope.data.checkAll = false;
-          $scope.data.checks = {};
-
-          var i;
-          for (i = 0; i < data.length; i++) {
-            $scope.data.regStatus[data[i].id] = '' + data[i].status;
-            $scope.data.checks[data[i].id] = false;
-          }
 
           $scope.data.registerTeams = data;
           $scope.data.curPage = 1;
-
-          $scope.data.autoApprove = activity.config.auto_approve;
-          $scope.data.freedomTeam = activity.config.freedom_team;
         }
       });
     };
