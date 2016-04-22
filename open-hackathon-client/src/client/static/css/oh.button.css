@@ -887,12 +887,6 @@ label.switchbox input[type=checkbox][disabled]:checked ~ .switchbox-handle i {
   background-position: 7px 7px;
 }
 
-.provider.gitcafe:before {
-  content: "";
-  background-repeat: no-repeat;
-  background-position: 7px 7px;
-}
-
 @media (min-width: 768px) {
   .modal-dialog {
     margin: 60px auto;

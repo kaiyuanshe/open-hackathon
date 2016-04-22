@@ -214,7 +214,7 @@ angular.module('oh.controllers', [])
       qq: $filter('isProvider')(activity.config.login_provider, 4),
       weibo: $filter('isProvider')(activity.config.login_provider, 8),
       alauda: $filter('isProvider')(activity.config.login_provider, 32),
-      gitcafe: $filter('isProvider')(activity.config.login_provider, 16),
+      // gitcafe: $filter('isProvider')(activity.config.login_provider, 16),
       wechat: $filter('isProvider')(activity.config.login_provider, 64),
     };
 
