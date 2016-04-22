@@ -247,6 +247,9 @@ Config = {
                     },
                     "notice": {
                         "read": ["put"]
+                    },
+                    "show": {
+                        "list": ["get"]
                     }
                 },
                 "hackathon": {

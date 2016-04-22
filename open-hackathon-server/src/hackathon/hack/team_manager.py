@@ -570,6 +570,19 @@ class TeamManager(Component):
 
         return works
 
+    def get_team_show_list_by_user(self, user_id):
+        teams = Team.objects(members__match={
+                    "user": user_id,
+                    "status": TEAM_MEMBER_STATUS.APPROVED}).all()
+
+        def get_team_show_detail(team):
+            dic = self.__team_detail(team)
+            dic["hackathon"] = team.hackathon.dic()
+            return dic
+
+        return [get_team_show_detail(team) for team in teams if not len(team.works) == 0]
+
+
     def get_team_source_code(self, team_id):
         try:
             team = Team.objects(id=team_id, works__type=TEAM_SHOW_TYPE.SOURCE_CODE)

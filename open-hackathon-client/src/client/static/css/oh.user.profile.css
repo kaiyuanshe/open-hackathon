@@ -375,6 +375,10 @@ ul.profile-details li {
     color: #141415;
 }
 
+.box-warp  p {
+    font-size: 12px;
+}
+
 .cbox-warp:last-child {
     border-bottom: none;
 }

@@ -264,7 +264,7 @@ class HackathonNotice(HDocumentBase):
 class TeamWork(EmbeddedDocument):
     id = UUIDField(required=True)
     description = StringField()
-    type = IntField(required=True)
+    type = IntField(required=True)  # see TEAM_SHOW_TYPE
     uri = StringField()
     create_time = DateTimeField(default=get_now())
 
