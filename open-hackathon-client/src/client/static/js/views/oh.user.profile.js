@@ -135,7 +135,7 @@
 
     function getMyRegisterEvents(query) {
         return oh.api.user.registration.list.get(query, function (data) {
-            var panel = $('#my_register_events').empty()
+            var panel = $('#my_register_events').empty();
             if (!data.error) {
                 if (data.length > 0) {
                     panel.append($('#my_register_event_item').tmpl(data, {
