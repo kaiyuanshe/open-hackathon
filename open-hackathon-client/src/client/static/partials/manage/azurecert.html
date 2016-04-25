@@ -18,11 +18,11 @@
             <td>
               <a href="{{cert.cert_url}}">{{cert.subscription_id}}.cer</a>
             </td>
-            <th>
+            <td>
               <span class="label label-success" ng-if="cert.verified">通过</span>
               <span class="label label-warning" ng-if="!cert.verified">未通过</span>
-            </th>
-            <td>
+            </td>
+            <td class="option">
               <button class="btn btn-info btn-sm" ng-if="!cert.verified" ng-click="checksubid(cert)"><i class="fa fa-stethoscope"></i> 检验</button>
               <a class="btn btn-danger btn-sm" ng-click="deleteCert(cert.id)" title="{{'DELETE' | translate}}">
                 <i class="fa fa-trash-o "></i>

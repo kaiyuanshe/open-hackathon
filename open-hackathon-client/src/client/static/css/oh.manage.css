@@ -4,7 +4,6 @@
 @import "oh.manage.edit.css";
 @import "oh.manage.users.css";
 @import "oh.manage.awards.css";
-
 html,
 body {
   position: relative;
@@ -292,6 +291,7 @@ body {
   min-height: 300px;
   border: 1px solid #d0d2d3;
   background-color: #fff;
+  position: relative;
 }
 
 .m-tabs .nav-tabs {
@@ -915,4 +915,61 @@ tags-input .tags .tag-item .remove-button {
   -ms-filter: 'alpha(opacity=0)';
   direction: ltr;
   cursor: pointer;
+}
+
+.inbox-wrap {
+  background: #fff;
+  overflow-x: hidden;
+  position: absolute;
+  left: 0;
+  right: 200px;
+}
+
+.inbox-side-bar {
+  height: 100%;
+  position: absolute;
+  background: #fff;
+  display: block;
+  width: 200px;
+  right: 0;
+  top: 0;
+  -webkit-overflow-scrolling: touch;
+  z-index: 1;
+  border-left: 1px solid #d0d2d3;
+}
+
+.inbox-toolbar {
+  padding: 5px 40px;
+}
+.inbox-toolbar.inbox-search{
+    padding: 3px 10px;
+}
+.paginate {
+  text-align: right;
+  padding: 0px 40px;
+}
+
+.inbox-wrap .table > thead:first-child > tr:first-child > th {
+  border-top: 1px solid #D0D2D3;
+  padding: 10px 8px 9px 8px;
+}
+
+.table label.checkbox,
+.table label.switchbox,
+.table label.radiobox,
+.inbox-toolbar .label.checkbox,
+.inbox-toolbar label.switchbox,
+.inbox-toolbar label.radiobox {
+  margin-top: 0;
+}
+
+.cell-input {
+  padding: 4px 8px!important;
+}
+
+.cell-input .form-control{
+
+}
+.option .btn{
+  display: inline;
 }
