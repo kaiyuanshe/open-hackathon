@@ -1,80 +1,78 @@
-<div class="col-lg-12" loading>
-    <script type="text/ng-template" id="noticeModel.html">
-        <div class="modal-header">
-            <h3 class="modal-title">发布公告</h3>
+<script type="text/ng-template" id="noticeModel.html">
+  <div class="modal-header">
+    <h3 class="modal-title">发布公告</h3>
+  </div>
+  <div class="modal-body">
+    <form class="form-horizontal" id="awardform">
+      <div class="form-group has-feedback">
+        <label class="col-md-3 control-label">公告内容</label>
+        <div class="col-md-6">
+          <input type="text" class="form-control" name="content" id="content" placeholder="公告内容" ng-model="data.content" required data-bv-trigger="blur" data-bv-notempty-message="公告内容不能为空">
         </div>
-        <div class="modal-body">
-            <form class="form-horizontal" id="awardform">
-                <div class="form-group has-feedback">
-                    <label class="col-md-3 control-label">公告内容</label>
-
-                    <div class="col-md-6">
-                        <input type="text" class="form-control" name="content" id="content" placeholder="公告内容"
-                            ng-model="data.content"
-                            required
-                            data-bv-trigger="blur"
-                            data-bv-notempty-message="公告内容不能为空">
-                    </div>
-                </div>
-                <div class="form-group has-feedback">
-                    <label class="col-md-3 control-label">链接地址</label>
-
-                    <div class="col-md-6">
-                        <input type="url" class="form-control" name="link" id="link" placeholder="链接地址"
-                            ng-model="data.link"
-                            data-bv-trigger="blur"
-                            data-bv-message="请填写正确的链接地址">
-                    </div>
-                </div>
-                <div class="form-group has-feedback">
-                    <label class="col-md-3 control-label">类型</label>
-                    <div class="col-md-6">
-                        <input type="number" class="form-control" name="category" id="category" ng-model="data.category"
-                            placeholder="" max="4" min="0">
-                        
-                    </div>
-                </div>
-            </form>
+      </div>
+      <div class="form-group has-feedback">
+        <label class="col-md-3 control-label">链接地址</label>
+        <div class="col-md-6">
+          <input type="url" class="form-control" name="link" id="link" placeholder="链接地址" ng-model="data.link" data-bv-trigger="blur" data-bv-message="请填写正确的链接地址">
         </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-default" ng-click="cancel()">取消</button>
-            <button type="button" class="btn btn-primary" ng-click="addNotice()">发布</button>
+      </div>
+      <div class="form-group has-feedback">
+        <label class="col-md-3 control-label">类型</label>
+        <div class="col-md-6">
+          <input type="number" class="form-control" name="category" id="category" ng-model="data.category" placeholder="" max="4" min="0">
         </div>
-    </script>
-
-    <div class="box">
-        <div class="box-header">
-            <button type="button" class="btn btn-primary" ng-click="add()">发布新公告</button>
-        </div>
-
-        <div class="box-content">
-            <div id="awardtable">
-                <table class="table table-bordered">
-                    <thead>
-                    <tr>
-                          <th>公告名称</th>
-                          <th>链接</th>
-                          <th>类型</th>
-                          <th>操作</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                        <tr ng-repeat="notice in data.notices">
-                            <td>{{notice.content}}</td>
-                            <td>{{notice.link}}</td>
-                            <td><span class="{{data.noticeIcon[notice.category]}}">&nbsp;</span>{{data.noticeDescription[notice.category]}}</td>
-                            <td class="col-action">
-                                <a class="btn btn-info btn-sm" ng-click="edit($index)">
-                                    <i class="fa fa-edit"></i>
-                                </a>
-                                <a class="btn btn-danger btn-sm" ng-click="delete(notice.id)">
-                                    <i class="fa fa-trash-o"></i>
-                                </a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-default" ng-click="cancel()">取消</button>
+    <button type="button" class="btn btn-primary" ng-click="addNotice()">发布</button>
+  </div>
+</script>
+<div class="prizes-container clearfix">
+  <div class="inbox-toolbar">
+    <button type="button" class="btn btn-sm btn-primary" ng-click="add()">
+      <i class="fa fa-plus"></i> 发布新公告
+    </button>
+    <button type="button" class="btn btn-sm btn-danger">
+      <i class="fa fa-trash"></i> 删除
+    </button>
+  </div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th style="width: 30px;">
+          <label class="checkbox checkbox-success">
+            <input type="checkbox" ng-model="data.checkAll" ng-change="toggleCheckAll()">
+            <span></span>
+          </label>
+        </th>
+        <th>公告名称</th>
+        <th>链接</th>
+        <th>类型</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="notice in data.notices">
+        <td>
+          <label class="checkbox checkbox-success">
+            <input type="checkbox" ng-model="data.checks[notice.id]">
+            <span></span>
+          </label>
+        </td>
+        <td>{{notice.content}}</td>
+        <td>{{notice.link}}</td>
+        <td><span class="{{data.noticeIcon[notice.category]}}">&nbsp;</span>{{data.noticeDescription[notice.category]}}</td>
+        <td class="col-action">
+          <a class="btn btn-info btn-sm" ng-click="edit($index)">
+            <i class="fa fa-edit"></i>
+          </a>
+          <a class="btn btn-danger btn-sm" ng-click="delete(notice.id)">
+            <i class="fa fa-trash-o"></i>
+          </a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </div>
