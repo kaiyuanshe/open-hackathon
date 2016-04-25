@@ -66,6 +66,11 @@
         return oh.api.user.show.list.get(query, function (data) {
             var panel = $('#team_works').empty();
             if (!data.error) {
+                if (data.length == 0) {
+                    panel.append('<h5>没有任何团队作品。。。</h5>');
+                    return;
+                }
+
                 for (var team_index in data) {
                     data[team_index].picUri = '/static/pic/homepage.jpg';
                     for (var work_index in data[team_index].works) {
@@ -108,6 +113,8 @@
                 if (user_id != 0) {
                     $('[name="edit-teamshow"]').hide();
                 }
+            } else {
+                console.log(data.error);
             }
         });
     }
