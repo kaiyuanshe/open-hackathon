@@ -90,26 +90,24 @@
         <div class="cbox-header" data-parent>
             <img src="${picUri}" onload="oh.comm.imgLoad(this)"
                 onerror="javascript:this.src='/static/pic/homepage.jpg'">
+            <a name="edit-teamshow" class="edit" href="/site/${hackathon.name}/team/${id}" data-toggle="tooltip"
+                data-placement="top" title="编辑"><i class="fa fa-pencil"></i>
+            </a>
         </div>
         <div class="cbox-warp">
-            <div class="title">
+            <div class="sub-title">
                 <p>活动：<a href="/site/${hackathon.name}">${hackathon.display_name}</a></p>
-                <p>团队名：<a href="/site/${hackathon.name}/team/${id}">${name}</a></p>
             </div>
-            <div class="clearfix cbox-time">
-                <div class="left">
-                    <span class="fa fa-calendar"></span>
-                    ${moment(hackathon.event_start_time).format('YY/MM/DD')}
-                </div>
-                <div class="right"><span class="fa fa-map-marker"></span> test
-                </div>
+            <div class="body">
+                <p>团队名：<a href="/site/${hackathon.name}/team/${id}">${name}</a></p>
+                <!--<p>作品名：${project_name}</a></p>-->
             </div>
         </div>
-        <div class="cbox-warp">
-        &nbsp;
+        <div class="cbox-content">
+            作品描述：${project_description}
         </div>
         <div class="cbox-footer">
-
+            <p class="items"> 作品内容：{{html $item.getlinks(hackathon.name, works, id)}}</p>
         </div>
     </div>
     {% endraw %}

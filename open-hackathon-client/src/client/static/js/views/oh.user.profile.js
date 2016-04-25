@@ -78,8 +78,36 @@
                 }
 
                 panel.append($('#team_work_item').tmpl(data, {
+                    getlinks: function (hackathon_name, works, team_id) {
+                        function getTeamlink(hackathon_name, team_id, tag) {
+                            return '/site/' + hackathon_name + '/team/' + team_id + tag;
+                        }
 
+                        var links = '';
+                        $.each(works, function (i, work) {
+                            var type = work.type;
+                            if (type == 0 && links.search('#works_img') == -1) {
+                                links += '<a href="' + getTeamlink(hackathon_name, team_id, '#works_img') +
+                                        '" target="_blank">图片</a>';
+                            } else if (type == 1 && links.search('#works_video') == -1) {
+                                links += '<a href="' + getTeamlink(hackathon_name, team_id, '#works_video') +
+                                        '" target="_blank">视频</a>';
+                            } else if (type == 2 && links.search('#works_code') == -1) {
+                                links += '<a href="' + getTeamlink(hackathon_name, team_id, '#works_code') +
+                                        '" target="_blank">源代码</a>';
+                            } else if (type >= 3 && type <= 6 && links.search('#works_doc') == -1) {
+                                links += '<a href="' + getTeamlink(hackathon_name, team_id, '#works_doc') +
+                                        '" target="_blank">文档</a>';
+                            }
+                        });
+                        return links;
+                    }
                 }));
+
+                // only allow to edit own team-show
+                if (user_id != 0) {
+                    $('[name="edit-teamshow"]').hide();
+                }
             }
         });
 
