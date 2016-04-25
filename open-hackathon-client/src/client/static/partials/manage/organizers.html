@@ -1,105 +1,109 @@
-<div class="col-lg-12" loading>
-    <script type="text/ng-template" id="orgModel.html">
-        <div class="modal-header">
-            <h3 class="modal-title">添加/编辑合作伙伴</h3>
+<script type="text/ng-template" id="orgModel.html">
+  <div class="modal-header">
+    <h3 class="modal-title">添加/编辑合作伙伴</h3>
+  </div>
+  <div class="modal-body">
+    <form class="form-horizontal" id="orgForm">
+      <div class="form-group has-feedback">
+        <label class="col-md-3 control-label">名称</label>
+        <div class="col-md-6">
+          <input type="text" class="form-control" name="name" id="name" placeholder="" ng-model="org.name" required data-bv-trigger="blur" data-bv-notempty-message="名称，不能为空">
         </div>
-        <div class="modal-body">
-            <form class="form-horizontal" id="orgForm">
-                <div class="form-group has-feedback">
-                    <label class="col-md-3 control-label">名称</label>
-
-                    <div class="col-md-6">
-                        <input type="text" class="form-control" name="name" id="name" placeholder=""
-                            ng-model="org.name"
-                            required
-                            data-bv-trigger="blur"
-                            data-bv-notempty-message="名称，不能为空">
-                    </div>
-                </div>
-                <div class="form-group has-feedback">
-                    <label class="col-md-3 control-label">类型</label>
-
-                    <div class="col-md-6">
-                        <select class="form-control" ng-model="org.organization_type">
-                            <option value="1">{{'ORGANIZATION_TYPE.ORGANIZER' | translate}}</option>
-                            <option value="2">{{'ORGANIZATION_TYPE.PARTNER' | translate}}</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group has-feedback">
-                    <label class="col-md-3 control-label">LOGO</label>
-
-                    <div class="col-md-6">
-                        <input type="url" class="form-control" name="logo" id="logo"
-                               ng-model="org.logo" placeholder="图片路径"
-                               data-bv-trigger="blur"
-                               data-bv-message="请填写正确的图片访问路径"
-                               data-bv-notempty-message="请填图片路径">
-                    </div>
-                </div>
-                <div class="form-group has-feedback">
-                    <label class="col-md-3 control-label">主页</label>
-
-                    <div class="col-md-6">
-                        <input type="url" class="form-control" name="homepage" id="homepage"
-                               ng-model="org.homepage" placeholder="主页"
-                               data-bv-trigger="blur">
-                    </div>
-                </div>
-                <div class="form-group has-feedback">
-                    <label class="col-md-3 control-label">描述</label>
-
-                    <div class="col-md-6">
-                        <textarea class="form-control" name="description" id="description" placeholder=""
-                            ng-model="org.description"
-                            rows="10"></textarea>
-                    </div>
-                </div>
-            </form>
+      </div>
+      <div class="form-group has-feedback">
+        <label class="col-md-3 control-label">类型</label>
+        <div class="col-md-6">
+          <select class="form-control" ng-model="org.organization_type">
+            <option value="1">{{'ORGANIZATION_TYPE.ORGANIZER' | translate}}</option>
+            <option value="2">{{'ORGANIZATION_TYPE.PARTNER' | translate}}</option>
+          </select>
         </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-default" ng-click="cancel()">取消</button>
-            <button type="button" class="btn btn-primary" ng-click="add_organizer()">提交</button>
+      </div>
+      <div class="form-group has-feedback">
+        <label class="col-md-3 control-label">LOGO</label>
+        <div class="col-md-6">
+          <input type="url" class="form-control" name="logo" id="logo" ng-model="org.logo" placeholder="图片路径" data-bv-trigger="blur" data-bv-message="请填写正确的图片访问路径" data-bv-notempty-message="请填图片路径">
         </div>
-    </script>
-
-    <div class="box">
-        <div class="box-header">
-            <button type="button" class="btn btn-primary" ng-click="add()">添加</button>
+      </div>
+      <div class="form-group has-feedback">
+        <label class="col-md-3 control-label">主页</label>
+        <div class="col-md-6">
+          <input type="url" class="form-control" name="homepage" id="homepage" ng-model="org.homepage" placeholder="主页" data-bv-trigger="blur">
         </div>
-
-        <div class="box-content">
-            <div id="serverTable">
-                <table class="table table-bordered">
-                    <thead>
-                    <tr>
-                        <th>名称</th>
-                        <th>类型</th>
-                        <th>LOGO</th>
-                        <th>描述</th>
-                        <th>主页</th>
-                        <th></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr ng-repeat="org in data.organizers">
-                        <td>{{org.name}}</td>
-                        <td>{{org.organization_type | organizationType}}</td>
-                        <td><img style="width:160px" src="{{org.logo}}"></td>
-                        <td>{{org.description}}</td>
-                        <td><a href="{{org.homepage}}">{{org.homepage}}</a></td>
-                        <td>
-                            <a class="btn btn-info btn-sm" ng-click="edit(org)">
-                                <i class="fa fa-edit"></i>
-                            </a>
-                            <a class="btn btn-danger btn-sm" ng-click="delete_organizer(org.id)">
-                                <i class="fa fa-trash-o"></i>
-                            </a>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
+      </div>
+      <div class="form-group has-feedback">
+        <label class="col-md-3 control-label">描述</label>
+        <div class="col-md-6">
+          <textarea class="form-control" name="description" id="description" placeholder="" ng-model="org.description" rows="10"></textarea>
         </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-default" ng-click="cancel()">取消</button>
+    <button type="button" class="btn btn-primary" ng-click="add_organizer()">提交</button>
+  </div>
+</script>
+<div class="organizers-container clearfix">
+  <div class="inbox-wrap">
+    <div class="inbox-toolbar">
+      <button type="button" class="btn btn-sm btn-success" ng-click="add()">
+        <i class="fa fa-plus"></i> 添加
+      </button>
+      <button type="button" class="btn btn-sm btn-danger">
+        <i class="fa fa-trash"></i> 删除
+      </button>
     </div>
+    <div id="serverTable">
+      <table class="table">
+        <thead>
+          <tr>
+            <th style="width: 30px;">
+              <label class="checkbox checkbox-success">
+                <input type="checkbox" ng-model="data.checkAll" ng-change="toggleCheckAll()">
+                <span></span>
+              </label>
+            </th>
+            <th>名称</th>
+            <th>类型</th>
+            <th>LOGO</th>
+            <th>描述</th>
+            <th>主页</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="org in data.organizers">
+            <td>
+              <label class="checkbox checkbox-success">
+                <input type="checkbox" ng-model="data.checks[org.id]">
+                <span></span>
+              </label>
+            </td>
+            <td>{{org.name}}</td>
+            <td>{{org.organization_type | organizationType}}</td>
+            <td>
+              <img style="max-width:100px;max-height: 100px;" src="{{org.logo}}"></td>
+            <td>{{org.description}}</td>
+            <td><a href="{{org.homepage}}">{{org.homepage}}</a></td>
+            <td>
+              <a class="btn btn-info btn-sm" ng-click="edit(org)">
+                <i class="fa fa-edit"></i>
+              </a>
+              <a class="btn btn-danger btn-sm" ng-click="delete_organizer(org.id)">
+                <i class="fa fa-trash-o"></i>
+              </a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="inbox-side-bar">
+    <div class="list-group">
+      <a href="#" class="list-group-item">全部（）</a>
+      <a href="#" class="list-group-item">{{'ORGANIZATION_TYPE.ORGANIZER' | translate}}</a>
+      <a href="#" class="list-group-item">{{'ORGANIZATION_TYPE.PARTNER' | translate}}</a>
+    </div>
+  </div>
 </div>

@@ -970,6 +970,13 @@ tags-input .tags .tag-item .remove-button {
 .cell-input .form-control{
 
 }
+
 .option .btn{
-  display: inline;
+  display:inline;
+}
+.option .btn+.btn{
+  margin-left:5px;
+}
+.option .btn i {
+  width:9px;
 }
