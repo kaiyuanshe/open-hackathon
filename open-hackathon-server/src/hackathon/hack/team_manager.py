@@ -582,7 +582,6 @@ class TeamManager(Component):
 
         return [get_team_show_detail(team) for team in teams if not len(team.works) == 0]
 
-
     def get_team_source_code(self, team_id):
         try:
             team = Team.objects(id=team_id, works__type=TEAM_SHOW_TYPE.SOURCE_CODE)

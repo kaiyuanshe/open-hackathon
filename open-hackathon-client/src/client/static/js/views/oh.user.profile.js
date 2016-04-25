@@ -104,13 +104,12 @@
                     }
                 }));
 
-                // only allow to edit own team-show
+                // only allow user to edit his own team-show
                 if (user_id != 0) {
                     $('[name="edit-teamshow"]').hide();
                 }
             }
         });
-
     }
 
     function getMyEvents() {
