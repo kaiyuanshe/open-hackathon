@@ -141,14 +141,17 @@ class ExprManager(Component):
         """
         self.log.debug("start checking recyclable experiment ... ")
         for hackathon in self.hackathon_manager.get_recyclable_hackathon_list():
-            # check recycle enabled
-            mins = self.hackathon_manager.get_recycle_minutes(hackathon)
-            # filter out the experiments that need to be recycled
-            exprs = Experiment.objects(create_time__lt=self.util.get_now() - timedelta(minutes=mins),
-                                       status=EStatus.RUNNING,
-                                       hackathon=hackathon)
-            for expr in exprs:
-                self.__recycle_expr(expr)
+            try:
+                # check recycle enabled
+                mins = self.hackathon_manager.get_recycle_minutes(hackathon)
+                # filter out the experiments that need to be recycled
+                exprs = Experiment.objects(create_time__lt=self.util.get_now() - timedelta(minutes=mins),
+                                           status=EStatus.RUNNING,
+                                           hackathon=hackathon)
+                for expr in exprs:
+                    self.__recycle_expr(expr)
+            except Exception as e:
+                self.log.error(e)
 
     def pre_allocate_expr(self, context):
         # TODO: too complex, not check
@@ -230,10 +233,11 @@ class ExprManager(Component):
             return starter
 
         if template.provider == VE_PROVIDER.DOCKER:
-            if hackathon.config[HACKATHON_CONFIG.CLOUD_PROVIDER] == CLOUD_PROVIDER.AZURE:
-                starter = RequiredFeature("azure_docker")
-            elif hackathon.config[HACKATHON_CONFIG.CLOUD_PROVIDER] == CLOUD_PROVIDER.ALAUDA:
-                starter = RequiredFeature("alauda_docker")
+            if HACKATHON_CONFIG.CLOUD_PROVIDER in hackathon.config:
+                if hackathon.config[HACKATHON_CONFIG.CLOUD_PROVIDER] == CLOUD_PROVIDER.AZURE:
+                    starter = RequiredFeature("azure_docker")
+                elif hackathon.config[HACKATHON_CONFIG.CLOUD_PROVIDER] == CLOUD_PROVIDER.ALAUDA:
+                    starter = RequiredFeature("alauda_docker")
         elif template.provider == VE_PROVIDER.AZURE:
             starter = RequiredFeature("azure_vm")
 

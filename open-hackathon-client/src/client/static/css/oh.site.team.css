@@ -3,32 +3,38 @@
     padding-bottom: 56px;
     background-color: #f8fbfb;
 }
-.breadcrumbs{
+
+.breadcrumbs {
     margin: -10px 0 15px 0;
-    padding:0;
-    list-style:none;
-    overflow:hidden;
+    padding: 0;
+    list-style: none;
+    overflow: hidden;
     color: #888;
 }
-.breadcrumbs li{
-    position:relative;
-    float:left;
+
+.breadcrumbs li {
+    position: relative;
+    float: left;
     margin-right: 20px;
 }
-.breadcrumbs li a{
-    color:#888;
-    text-decoration:underline;
+
+.breadcrumbs li a {
+    color: #888;
+    text-decoration: underline;
 }
+
 .breadcrumbs li a:hover,
-.breadcrumbs li a:focus{
-    color:#7dba41;
+.breadcrumbs li a:focus {
+    color: #7dba41;
 }
-.breadcrumbs li a:before{
-    position:absolute;
-    content:'>';
+
+.breadcrumbs li a:before {
+    position: absolute;
+    content: '>';
     right: -15px;
     color: #888;
 }
+
 .team-left {
     width: 283px;
     float: left;
@@ -44,9 +50,11 @@
     font-size: 14px;
     position: relative;
 }
-.team-left .warp{
-    padding:12px;
+
+.team-left .warp {
+    padding: 12px;
 }
+
 .warp {
     padding: 25px;
     border-bottom: 1px solid #e6e7e8;
@@ -56,35 +64,41 @@
     border-bottom: none;
 }
 
-.oh-users{
-   padding:0;
-   margin:0;
-   list-style:none;
+.oh-users {
+    padding: 0;
+    margin: 0;
+    list-style: none;
 }
-.oh-users .action{
-    position:absolute;
-    top :0;
-    right:0;
+
+.oh-users .action {
+    position: absolute;
+    top: 0;
+    right: 0;
 }
-.oh-users li{
-    position:relative;
+
+.oh-users li {
+    position: relative;
     line-height: 22px;
     margin-bottom: 5px;
 }
-.oh-users .oh-header{
+
+.oh-users .oh-header {
     width: 22px;
     height: 22px;
-    overflow:hidden;
-    display:inline-block;
-    vertical-align:middle;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
 }
-.oh-users .oh-header img{
-   vertical-align:top;
-   }
-.oh-users span{
-    color:#888;
+
+.oh-users .oh-header img {
+    vertical-align: top;
+}
+
+.oh-users span {
+    color: #888;
     margin-right: 5px;
 }
+
 .line-title {
     margin: 0;
     font-size: 15px;
@@ -101,149 +115,192 @@
     border-radius: 50%;
     position: relative;
 }
+
 .team-logo {
     max-width: 104px;
     max-height: 104px;
 
 }
-.career{text-align: center;font-size: 18px;margin: 10px 0;}
-.team-header{}
-.team-header .inline{
-    overflow:hidden;
+
+.career {
+    text-align: center;
+    font-size: 18px;
+    margin: 10px 0;
+}
+
+.team-header {
+}
+
+.team-header .inline {
+    overflow: hidden;
     font-size: 15px;
     margin-bottom: 15px;
 }
-.team-header .inline label{
-    font-weight:normal;
-    float:left;
+
+.team-header .inline label {
+    font-weight: normal;
+    float: left;
     width: 83px;
     color: #888;
     font-size: 15px;
 }
-.plan{
-    overflow:hidden;
+
+.plan {
+    overflow: hidden;
 }
-.plan iframe{
+
+.plan iframe {
     width: 100%;
     height: 425px;
 }
-.team-header .inline label+.n-right{
 
-margin-left: 80px;
+.team-header .inline label + .n-right {
+
+    margin-left: 80px;
 }
-.team-header .h4{
+
+#down_plan {
+    margin-left: 20px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.team-header .h4 {
     margin: 0;
-    font:14px;
+    font: 14px;
     color: #888;
 }
-.show_item{
-    margin-bottom:28px;
+
+.show_item {
+    margin-bottom: 28px;
 }
+
 .show_item .w-videos embed,
-.show_item .w-videos iframe{
+.show_item .w-videos iframe {
     width: 100%;
-    height: 486px!important;
+    height: 486px !important;
 }
-.show_item .w-doc .sub-item{
-    margin:26px 0;
+
+.show_item .w-doc .sub-item {
+    margin: 26px 0;
 }
-.show_item .w-doc iframe{
+
+.show_item .w-doc iframe {
     width: 100%;
     height: 470px;
 }
-.show_item h2{
-    color:#888;
-    margin-top:0;
-    margin-bottom:26px;
+
+.show_item h2 {
+    color: #888;
+    margin-top: 0;
+    margin-bottom: 26px;
 }
+
 .popup-gallery {
-    font-size:0;
+    font-size: 0;
     margin-left: -15px;
     /* overflow: hidden; */
 }
-.popup-gallery .nothing{left: 15px;position: relative;}
-.popup-gallery .sub-item{
-    position:relative;
-    width:187px;
-    height:187px;
+
+.popup-gallery .nothing {
+    left: 15px;
+    position: relative;
+}
+
+.popup-gallery .sub-item {
+    position: relative;
+    width: 187px;
+    height: 187px;
     margin-left: 15px;
     margin-bottom: 15px;
     float: left;
 }
-.popup-gallery a{
-   overflow:hidden;
-   width: 187px;
-   height: 187px;
-   display:inline-block;
-   border: 1px solid #ddd;
+
+.popup-gallery a {
+    overflow: hidden;
+    width: 187px;
+    height: 187px;
+    display: inline-block;
+    border: 1px solid #ddd;
 }
+
 .nothing {
-    width:300px;
-    height:178px;
-    background-color:#d1d4d4;
-    display:table-cell;
-    vertical-align:middle;
-    padding-left:30px;
+    width: 300px;
+    height: 178px;
+    background-color: #d1d4d4;
+    display: table-cell;
+    vertical-align: middle;
+    padding-left: 30px;
 
 }
-.nothing img{
-    float:left;
+
+.nothing img {
+    float: left;
 }
-.nothing p{
-    display:inline-block;
+
+.nothing p {
+    display: inline-block;
     font-size: 28px;
     color: #888;
     margin: 20px 0 0 15px;
-    vertical-align:middle;
+    vertical-align: middle;
 }
 
-#works_Modal [data-gtype]{
+#works_Modal [data-gtype] {
     display: none;
 }
-#works_Modal [data-gtype].active{
+
+#works_Modal [data-gtype].active {
     display: block;
 }
-#cover [data-parent]{
+
+#cover [data-parent] {
     width: 300px;
     height: 178px;
-    overflow:hidden;
+    overflow: hidden;
 }
-#cover.edit a{
-    position:absolute;
+
+#cover.edit a {
+    position: absolute;
     border: 1px dashed #7dba41;
     width: 300px;
     height: 178px;
-    text-align:right;
-    color:#7dba41;
-    cursor:pointer;
+    text-align: right;
+    color: #7dba41;
+    cursor: pointer;
 }
-#cover.edit a:hover{
+
+#cover.edit a:hover {
     color: #7dba41;
     background-color: rgba(0, 0, 0, .5);
 }
+
 .sub-item {
-    position:relative;
+    position: relative;
 
 }
-.sub-item a.edit{
-    position:absolute;
+
+.sub-item a.edit {
+    position: absolute;
     right: -15px;
     top: -15px;
-    width:30px;
-    height:30px;
-    background-color:#888;
+    width: 30px;
+    height: 30px;
+    background-color: #888;
     border: 2px solid #fff;
-    border-radius:50%;
-    text-align:center;
+    border-radius: 50%;
+    text-align: center;
     line-height: 26px;
-    color:#fff;
+    color: #fff;
     font-size: 18px;
     z-index: 2;
 }
+
 .sub-item a.edit:hover,
-.sub-item a.edit:focus{
-    background-color:#d9534f;
+.sub-item a.edit:focus {
+    background-color: #d9534f;
 }
+
 .edit input,
 .edit textarea {
     width: 100%;
@@ -258,6 +315,7 @@ margin-left: 80px;
 .edit textarea:focus {
     outline: none
 }
+
 #pro_name.edit,
 #pro_desc.edit,
 #team_name.edit,
@@ -271,23 +329,32 @@ margin-left: 80px;
 }
 
 #pro_name.edit input,
-#pro_desc.edit textarea{
-   text-align:left;
-   padding-left:10px;
+#pro_desc.edit textarea {
+    text-align: left;
+    padding-left: 10px;
 }
+
 #team_description.edit {
     font-size: 15px;
 }
+
 .w-other .sub-item a.edit,
-.w-code .sub-item a.edit{
-    right:auto;
-    top :-5px;
-    margin-left:30px;
+.w-code .sub-item a.edit {
+    right: auto;
+    top: -5px;
+    margin-left: 30px;
 }
-.oh-team-edit{
-    position:absolute;
-    right:0;
+
+.oh-team-edit {
+    position: absolute;
+    right: 0;
     top: 0;
+}
+
+.oh-team-edit .alert {
+    margin: 0;
+    padding: 5px 60px;
+    border-radius: 0;
 }
 
 .team-logo .edit {
@@ -304,4 +371,98 @@ margin-left: 80px;
 
 .team-logo:hover .edit {
     display: block;
+}
+
+.referee {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: #888;
+    padding: 0 0 20px 0;
+}
+.referee  .team-right{
+    background-color:transparent;
+    border:none;
+}
+.referee h2{
+    background-color:#7dba41;
+    margin:0 0 20px 0;
+    padding:5px 0;
+    color:#fff;
+    font-size:14px;
+    text-align:center;
+}
+.list-unstyled .rating {
+    display: inline-block;
+}
+
+.list-unstyled .rating label {
+    cursor: default;
+}
+
+.rating {
+    padding: 4px 6px 4px 0;
+    color: #000;
+    font-size: 13px;
+    line-height: 30px;
+    color: #FFFFFF;
+}
+
+.rating input {
+    position: absolute;
+    left: -9999px;
+}
+
+.rating label {
+    display: block;
+    float: right;
+    height: 20px;
+    margin-top: 5px;
+    padding: 0 2px;
+    font-size: 20px;
+    line-height: 20px;
+    cursor: pointer;
+    color: #ccc;
+    transition: color .3s;
+    -o-transition: color .3s;
+    -ms-transition: color .3s;
+    -moz-transition: color .3s;
+    -webkit-transition: color .3s;
+}
+
+.rating input + label:hover,
+.rating input + label:hover ~ label {
+    color: #7dba41;
+}
+
+.rating label.active,
+.rating label.active ~ label,
+.rating input:checked ~ label {
+    color: #7dba41;
+}
+
+.score_p{
+    max-height: 200px;
+    overflow: auto;
+    background-color: #fff;
+    color: #141415;
+    border: 1px solid #7dba41;
+    padding:5px 10px;
+    display: none;
+}
+.score_p.active{
+    display: block;
+}
+.score_p .rating{
+    color:#141415;
+    padding: 0;
+}
+.score_p p{
+    margin-bottom:0;
+}
+.score_p li{
+    padding:5px 0;
+    border-bottom: 1px solid #e6e7e8;
 }

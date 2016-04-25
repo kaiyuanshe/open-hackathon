@@ -66,5 +66,6 @@ class LoginProvider:
     github = 2
     qq = 4
     weibo = 8
-    gitcafe = 16
+    # gitcafe = 16 no longer support
     alauda = 32
+    wechat = 64

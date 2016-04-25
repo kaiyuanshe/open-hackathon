@@ -3,7 +3,7 @@
     {% if workspace %}
         <ul class="nav navbar-nav">
             <li>
-                <a id="workfull" title="全屏" class="btn" href="javascript:;">
+                <a id="workfull" title="全屏" href="javascript:;">
                     <span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span> 全屏
                 </a>
             </li>
@@ -30,16 +30,6 @@
         <!-- start: User Dropdown -->
         {% if current_user.nickname %}
             <li><a href="{{ url_for('create_event') }}">发布活动</a></li>
-            <!--<li class="dropdown oh-h-mgs">-->
-            <!--<a class="dropdown-toggle" data-toggle="dropdown" href="javascirpt:;">-->
-            <!--<i class="fa fa-envelope"></i>-->
-            <!--消息<span></span>-->
-            <!--<span class="oh-caret"></span>-->
-            <!--</a>-->
-            <!--<ul class="dropdown-menu">-->
-            <!--<li>暂无消息</li>-->
-            <!--</ul>-->
-            <!--</li>-->
             <li class="dropdown">
                 <a class="dropdown-toggle" data-toggle="dropdown" href="javascirpt:;">
                     <img class="avatar" data-role="picture"
@@ -59,7 +49,7 @@
                     </li>
                     <li class="divider"></li>
                     <li><a href="{{ url_for('user_profile') }}"><i class="fa fa-info-circle"></i> 个人信息</a></li>
-                    <li><a href="{{ url_for('myhackathon') }}"><i class="fa fa-trophy"></i> 我的活动</a></li>
+                    <li><a href="{{ url_for('user_profile', active_panel=1) }}"><i class="fa fa-trophy"></i> 我的活动</a></li>
                     <li><a target="_blank"
                            href="https://github.com/msopentechcn/open-hackathon/wiki/%E5%BC%80%E6%94%BE%E9%BB%91%E5%AE%A2%E6%9D%BE%E5%B9%B3%E5%8F%B0%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97"><i
                             class="fa fa-question-circle"></i> 新手帮助</a></li>
@@ -101,19 +91,17 @@
                 </a>
             </li>
             <li class="dropdown">
-                <a type="button" class="btn  dropdown-toggle" data-toggle="dropdown">
+                <a class="dropdown-toggle" data-toggle="dropdown">
                     团队 <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
-                    <li>
-                        <span class="dropdown-menu-title">团队名称：{{ teamname }}</span>
+                    <li class="d-header">
+                        团队名称：{{ teamname }}
                     </li>
-
+                    <li class="divider"></li>
                     <li></li>
-
-                    <li>
-                        <span class="dropdown-menu-title" style="height: 22px;"></span>
-                    </li>
+                    <li class="divider"></li>
+                    <li class="d-footer">&nbsp;</li>
                 </ul>
             </li>
         </ul>

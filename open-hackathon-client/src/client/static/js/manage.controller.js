@@ -214,7 +214,8 @@ angular.module('oh.controllers', [])
       qq: $filter('isProvider')(activity.config.login_provider, 4),
       weibo: $filter('isProvider')(activity.config.login_provider, 8),
       alauda: $filter('isProvider')(activity.config.login_provider, 32),
-      gitcafe: $filter('isProvider')(activity.config.login_provider, 16),
+      // gitcafe: $filter('isProvider')(activity.config.login_provider, 16),
+      wechat: $filter('isProvider')(activity.config.login_provider, 64),
     };
 
     $scope.open = {
@@ -1503,12 +1504,12 @@ angular.module('oh.controllers', [])
           hackathon_name: $stateParams.name
         }
       }).then(function(data) {
-        if (!data.message) {
-          $scope.$emit('showTip', {
-            level: 'tip-warning',
-            content: '证书授权失败，请检验SUBSCRIPTION ID是否正确。'
-          });
-        } else {
+      if (data.error) {
+        $scope.$emit('showTip', {
+        level: 'tip-warning',
+        content: data.error.message
+        });
+      } else {
           $scope.$emit('showTip', {
             level: 'tip-success',
             content: '检验成功。'
@@ -1726,7 +1727,7 @@ angular.module('oh.controllers', [])
         pre_allocate_enabled: false,
         pre_allocate_number: 1,
         freedom_team: false,
-        login_provider: 63,
+        login_provider: 111,
         dev_plan_required: false,
         real_name_auth_21v: false
       }

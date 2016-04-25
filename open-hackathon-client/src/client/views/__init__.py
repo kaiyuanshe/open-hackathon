@@ -75,7 +75,6 @@ def __oauth_api_key():
         LOGIN_PROVIDER.QQ: get_config('login.qq.client_id'),
         LOGIN_PROVIDER.LIVE: get_config('login.live.client_id'),
         LOGIN_PROVIDER.WECHAT: get_config("login.wechat.client_id"),
-        LOGIN_PROVIDER.GITCAFE: get_config('login.gitcafe.client_id'),
         LOGIN_PROVIDER.GITHUB: get_config('login.github.client_id')
     }
 
@@ -152,7 +151,7 @@ def utility_processor():
             return ""
         else:
             value = int(value)
-            if value == 127:
+            if value == 255:
                 return ""
             else:
                 if value & LoginProvider.live == LoginProvider.live:
@@ -163,8 +162,8 @@ def utility_processor():
                     prs.append("weibo")
                 if value & LoginProvider.qq == LoginProvider.qq:
                     prs.append("qq")
-                if value & LoginProvider.gitcafe == LoginProvider.gitcafe:
-                    prs.append("gitcafe")
+                if value & LoginProvider.wechat == LoginProvider.wechat:
+                    prs.append("wechat")
                 if value & LoginProvider.alauda == LoginProvider.alauda:
                     prs.append("alauda")
         return ",".join(prs)
@@ -226,7 +225,7 @@ def unauthorized_log():
     return render("/login.html",
                   error=None,
                   providers=safe_get_config("login.provider_enabled",
-                                            ["github", "qq", "gitcafe", "weibo", "live", "alauda"]))
+                                            ["github", "qq", "wechat", "weibo", "live", "alauda"]))
 
 
 @app.before_request
@@ -277,11 +276,6 @@ def wechat_login():
 @app.route('/qq')
 def qq_login():
     return __login(LOGIN_PROVIDER.QQ)
-
-
-@app.route('/gitcafe')
-def gitcafe_login():
-    return __login(LOGIN_PROVIDER.GITCAFE)
 
 
 @app.route('/live')
@@ -365,7 +359,7 @@ def logout():
 def login():
     session["return_url"] = request.args.get("return_url")
     provider = request.args.get("provides")
-    prs = ["github", "qq", "gitcafe", "weibo", "live", "alauda"]
+    prs = ["github", "qq", "wechat", "weibo", "live", "alauda"]
     if provider is None:
         provider = safe_get_config("login.provider_enabled", prs)
     else:

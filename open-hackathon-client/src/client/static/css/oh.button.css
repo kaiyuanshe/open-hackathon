@@ -872,6 +872,10 @@ label.switchbox input[type=checkbox][disabled]:checked ~ .switchbox-handle i {
   content: "\f1d6";
 }
 
+.provider.wechat:before {
+  content: "\f1d7";
+}
+
 .provider.weibo:before {
   content: "\f18a";
 }
@@ -879,12 +883,6 @@ label.switchbox input[type=checkbox][disabled]:checked ~ .switchbox-handle i {
 .provider.alauda:before {
   content: "";
   background-image: url('/static/pic/alauda-21-21.png');
-  background-repeat: no-repeat;
-  background-position: 7px 7px;
-}
-
-.provider.gitcafe:before {
-  content: "";
   background-repeat: no-repeat;
   background-position: 7px 7px;
 }

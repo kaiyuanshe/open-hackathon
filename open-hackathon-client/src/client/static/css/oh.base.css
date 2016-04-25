@@ -642,7 +642,7 @@ footer .oh-copyright hr {
 .header .dropdown-menu > li > a:focus {
     text-decoration: none;
     color: #fff;
-    background-color: #0F0F0F;
+    background-color: #2B2C39;
 }
 
 .header .dropdown-menu-title {
@@ -679,7 +679,7 @@ footer .oh-copyright hr {
     width: 195px;
 }
 
-.header .messages .dropdown-menu .d-header {
+.header .dropdown-menu .d-header {
     color: #fff;
     font-size: 12px;
     padding: 5px 20px;
@@ -701,7 +701,7 @@ footer .oh-copyright hr {
     border-bottom: 1px solid #2b2c39;
 }
 
-.header .messages .dropdown-menu .d-footer {
+.header .dropdown-menu .d-footer {
     color: #fff;
     font-size: 12px;
     padding: 5px 20px;
@@ -1037,7 +1037,9 @@ a#main-menu-toggle {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
-
+.fa-lg {
+    font-size: 17px;
+}
 .nav.main-menu > li > a .chevron,
 .nav.main-menu > li > ul > li > a .chevron,
 .nav.main-menu > li > ul > li > ul > li > a .chevron,
@@ -1888,13 +1890,6 @@ ul.messages li {
 
 .fa-live:before {
     content: "\f17a";
-}
-
-.fa-gitcafe {
-    width: 16px;
-    height: 16px;
-    background: url('/static/pic/gitcafe-icon.png') no-repeat center;
-    vertical-align: text-top;
 }
 
 .oh-box {

@@ -162,6 +162,10 @@ ul.profile-details li {
     content: "\f1d6";
 }
 
+.profile-provider .wechat:before {
+    content: "\f1d7";
+}
+
 .profile-provider .weibo:before {
     content: "\f18a";
 }

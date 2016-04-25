@@ -1,7 +1,7 @@
 <div class="manage-edit">
   <uib-tabset class="m-tabs">
     <uib-tab heading="{{'EDIT_ACTIVITY_TABS.INFORMATION' | translate}}">
-      <div class="container center">
+      <div class="center">
         <div class="col-lg-5 col-md-7 col-xs-10 center">
           <form name="activitForm" class="form-horizontal" ng-submit="updateBasicInformation()" novalidate>
             <fieldset>
@@ -218,6 +218,15 @@
             </label>
           </div>
           <div class="form-group">
+            <label class="provider provider-success wechat">
+              Wechat
+            </label>
+            <label class="switchbox switchbox-success switchbox-inline">
+              <input type="checkbox" ng-model="provider.wechat" ng-change="providerChange(provider.wechat,64)" speech>
+              <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
+            </label>
+          </div>
+          <div class="form-group">
             <label class="provider provider-success weibo">
               Weibo
             </label>
@@ -235,7 +244,7 @@
               <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
             </label>
           </div>
-          <div class="form-group">
+          <!--<div class="form-group">
             <label class="provider provider-success gitcafe">
               Gitcafe
             </label>
@@ -243,7 +252,7 @@
               <input type="checkbox" ng-model="provider.gitcafe" ng-change="providerChange(provider.gitcafe,16)" speech>
               <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
             </label>
-          </div>
+          </div>-->
         </fieldset>
       </ng-form>
     </uib-tab>
