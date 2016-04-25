@@ -303,7 +303,6 @@ class UserTeamShowResource(HackathonResource):
             return bad_request("must login or provide a user id")
 
 
-
 class UserNoticeReadResource(HackathonResource):
     @token_required
     def put(self):
