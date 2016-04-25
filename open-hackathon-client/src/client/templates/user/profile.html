@@ -58,7 +58,7 @@
                 <!-- Tab panes -->
                 <div class="tab-content profile-tab-content">
                     <div role="tabpanel" class="tab-pane active" id="team_works">
-                        <h5>还在建设中。。。</h5>
+                        <div class="text-center" data-type="pageloading"><img src="/static/pic/spinner-lg.gif"></div>
                     </div>
                     <div role="tabpanel" class="tab-pane" id="my_register_events">
                         <div class="text-center" data-type="pageloading"><img src="/static/pic/spinner-lg.gif"></div>
@@ -79,6 +79,36 @@
             <img src="${$item.get_banner(hackathon_info.banners)}" onload="oh.comm.imgLoad(this)" onerror="javascript:this.src='/static/pic/homepage.jpg'">
         </a>
         <p>${hackathon_info.display_name}</p>
+    </div>
+    {% endraw %}
+
+
+    </script>
+    <script id="team_work_item" type="text/x-jquery-tmpl">
+    {% raw %}
+    <div class="cbox">
+        <div class="cbox-header" data-parent>
+            <img src="${picUri}" onload="oh.comm.imgLoad(this)"
+                onerror="javascript:this.src='/static/pic/homepage.jpg'">
+            <a name="edit-teamshow" class="edit" href="/site/${hackathon.name}/team/${id}" data-toggle="tooltip"
+                data-placement="top" title="编辑"><i class="fa fa-pencil"></i>
+            </a>
+        </div>
+        <div class="cbox-warp">
+            <div class="sub-title">
+                <p>活动：<a href="/site/${hackathon.name}">${hackathon.display_name}</a></p>
+            </div>
+            <div class="body">
+                <p>团队名：<a href="/site/${hackathon.name}/team/${id}">${name}</a></p>
+                <!--<p>作品名：${project_name}</a></p>-->
+            </div>
+        </div>
+        <div class="cbox-content">
+            作品描述：${project_description}
+        </div>
+        <div class="cbox-footer">
+            <p class="items"> 作品内容：{{html $item.getlinks(hackathon.name, works, id)}}</p>
+        </div>
     </div>
     {% endraw %}
 
