@@ -26,7 +26,7 @@
     'use strict';
 
     var isProfile = false;
-    // user_id == 0 if the current user views his own profile.
+    // condition user_id == 0 means that the current user views his own profile.
     var user_id = 0;
     var edit_tmpl = '<a class="right btn btn-success btn-sm" href="/user/edit"><i class="fa fa-pencil"></i> 编辑个人资料</a>';
 
@@ -65,8 +65,8 @@
     function getUserTeamShow(query) {
         return oh.api.user.show.list.get(query, function (data) {
             var panel = $('#team_works').empty()
-            if(!data.error) {
-                for (var team_index in data){
+            if (!data.error) {
+                for (var team_index in data) {
                     data[team_index].picUri = '/static/pic/homepage.jpg';
                     for (var work_index in data[team_index].works) {
                         // TEAM_SHOW_TYPE 0: image
@@ -104,7 +104,7 @@
                     }
                 }));
 
-                // only allow user to edit his own team-show
+                // only allow login user to edit his own team-show
                 if (user_id != 0) {
                     $('[name="edit-teamshow"]').hide();
                 }
