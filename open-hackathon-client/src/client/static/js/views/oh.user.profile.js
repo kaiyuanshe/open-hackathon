@@ -64,7 +64,7 @@
 
     function getUserTeamShow(query) {
         return oh.api.user.show.list.get(query, function (data) {
-            var panel = $('#team_works').empty()
+            var panel = $('#team_works').empty();
             if (!data.error) {
                 for (var team_index in data) {
                     data[team_index].picUri = '/static/pic/homepage.jpg';
