@@ -73,13 +73,13 @@
               </div>
             </div>
           </div>
-          <div class="team-awards">
-            <span class="award-item" ng-repeat="award in team.awards">
-              <i>{{data.awardsMap[award].level}}</i>
-              <p>{{data.awardsMap[award].name}}</p>
-              <span class="cancel-award-cross fa fa-times" ng-click="cancelAward(award, team.id)"></span>
-            </span>
-          </div>
+        </div>
+        <div class="team-awards">
+          <span class="award-item" ng-repeat="award in team.awards">
+            <i>{{data.awardsMap[award].level}}</i>
+            <p>{{data.awardsMap[award].name}}</p>
+            <span class="cancel-award-cross fa fa-times" ng-click="cancelAward(award, team.id)"></span>
+          </span>
         </div>
       </div>
       <div style="clear: both;">
