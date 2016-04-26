@@ -153,10 +153,16 @@ class TeamManager(Component):
             teamDic['cover'] = teamDic.get('cover', '')
             teamDic['project_name'] = teamDic.get('project_name', '')
             teamDic['dev_plan'] = teamDic.get('dev_plan', '')
+            teamDic['works'] = teamDic.get('works', '')
             [teamDic.pop(key, None) for key in
-             ['assets', 'awards', 'azure_keys', 'scores', 'templates', 'members', 'works']]
+             ['assets', 'awards', 'azure_keys', 'scores', 'templates', 'hackathon']]
             teamDic["member_count"] = team.members.filter(status=TEAM_MEMBER_STATUS.APPROVED).count()
-
+            def sub(t):
+                m = to_dic(t)
+                m["user"] = self.user_manager.user_display_info(t.user)
+                return m
+            
+            teamDic["members"] = [sub(t) for t in team.members]
             return teamDic
 
         return [get_tema(x) for x in teams]
