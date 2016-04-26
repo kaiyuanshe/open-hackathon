@@ -508,6 +508,43 @@ angular.module('oh.controllers', [])
 
     refresh();
   })
+  .controller('teamsController', function($rootScope, $scope, activity, api, util, dialog) {
+    $scope.$emit('pageName', 'SETTINGS.TEAMS');
+
+    $scope.data = {
+      registerTeams: [], // we cannot use activity.registration here, its single
+      regStatus: {},
+      perPage: 20,
+      curPage: 1,
+    };
+
+    var showTip = function(level, content, showTime) {
+      $scope.$emit('showTip', {
+        level: level,
+        content: content,
+        showTime: showTime || 3000
+      });
+    };
+
+    var refresh = function() {
+      api.admin.team.list.get({
+        header: {
+          hackathon_name: activity.name
+        }
+      }, function(data) {
+        if (data.error) {
+          showTip('tip-danger', data.error.friendly_message);
+        } else {
+          $scope.data.regStatus = {};
+
+          $scope.data.registerTeams = data;
+          $scope.data.curPage = 1;
+        }
+      });
+    };
+
+    refresh();
+  })
   .controller('adminController', function($rootScope, $scope, $stateParams, $uibModal, api, dialog) {
     $scope.$emit('pageName', 'SETTINGS.ADMINISTRATORS');
 

@@ -35,11 +35,15 @@ angular.module('oh.pages', [])
       }, {
         name: "SETTINGS.USERS",
         state: "manage.users",
+        icon: 'fa-user'
+      }, {
+        name: "SETTINGS.TEAMS",
+        state: "manage.teams",
         icon: 'fa-users'
       }, {
         name: "SETTINGS.ADMINISTRATORS",
         state: "manage.admin",
-        icon: 'fa-users'
+        icon: 'fa-user-secret'
       }, {
         name: "SETTINGS.ORGANIZERS",
         state: "manage.organizers",

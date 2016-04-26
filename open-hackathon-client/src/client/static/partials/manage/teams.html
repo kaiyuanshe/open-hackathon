@@ -1,0 +1,34 @@
+<div class="register-users-container">
+  <div class="register-users">
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>队名</th>
+            <th>队长</th>
+            <th>队员</th>
+            <th>项目名称</th>
+            <th>作品</th>
+            <th>成绩</th>
+        </tr>
+        </thead>
+        <tbody id="registe_list">
+            <tr ng-repeat="team in data.registerTeams">
+                <td><a ng-href= "/site/{{team.hackathon.name}}/team/{{team.id}}">{{team.name}}</a></td>
+                <td><a ng-href="/user/p_{{team.leader.user.id}}">{{team.leader.name}}</a></td>
+                <td><p ng-repeat="member in team.members"><a ng-href="/user/p_{{member.user.id}}">{{member.user.name}}</a></p></td>
+                <td>{{team.project_name}}</td>
+                <td><p ng-repeat="work in team.works">{{work.uri}} </p></td>
+                <td><p ng-repeat="score in team.scores">{{score.score}} </p></td>
+            </tr>
+        </tbody>
+    </table>
+    <uib-pagination
+        total-items="data.registerUsers.length"
+        ng-model="data.curPage"
+        items-per-page="data.perPage"
+        max-size="6"
+        class="pagination-sm"
+        force-ellipses="true">
+    </uib-pagination>
+  </div>
+</div>

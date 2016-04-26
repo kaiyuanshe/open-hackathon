@@ -137,6 +137,21 @@ angular.module('oh.manage.router', [
         });
       }
     }
+  }).state('manage.teams', {
+    url: 'teams/:name',
+    templateUrl: '/static/partials/manage/teams.html?v=' + VERSION,
+    controller: 'teamsController',
+    resolve: {
+      activity: function($stateParams, api) {
+        return api.admin.hackathon.get({
+          header: {
+            hackathon_name: $stateParams.name
+          }
+        }).then(function(data) {
+          return data;
+        });
+      }
+    }
   }).state('manage.admin', {
     url: 'admin/:name',
     templateUrl: '/static/partials/manage/admin.html?v=' + VERSION,
