@@ -158,8 +158,8 @@ class ExprManager(Component):
         hackathon_id = context.hackathon_id
         self.log.debug("executing pre_allocate_expr for hackathon %s " % hackathon_id)
         hackathon = Hackathon.objects(id=hackathon_id).first()
-        hackthon_templates = hackathon.templates
-        for template in hackthon_templates:
+        hackathon_templates = hackathon.templates
+        for template in hackathon_templates:
             try:
                 template = template
                 pre_num = int(hackathon.config.get("pre_allocate_number", 1))

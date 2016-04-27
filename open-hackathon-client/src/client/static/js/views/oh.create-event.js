@@ -51,7 +51,7 @@
         is_local = islocal,
         _create_data = {};
 
-    function getHackthonData() {
+    function getHackathonData() {
         var event_time = $('#event_time').data('daterangepicker');
         var register_time = $('#register_time').data('daterangepicker');
         var judge_time = $('#judge_time').data('daterangepicker');
@@ -270,7 +270,7 @@
         }).on('success.form.bv', function (e) {
             e.preventDefault();
             ckeditorUpdateTextarea();
-            var hack_data = getHackthonData();
+            var hack_data = getHackathonData();
             var config_data = getConfig();
 
             create_hackathon({body: hack_data}).then(function (data) {

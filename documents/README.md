@@ -35,9 +35,9 @@
 
 # Introduction
 ## What is OpenHackathon
-Open Hackathon Platform is a cloud-based platform to enable Hacakthon organizers to host an offline/online hacakthon with most needed features; Hackathon event participants can use a HTML5 capable web browser to login an Hackathon event, provision his development environment of choice and collaborate with teammates.
+Open Hackathon Platform is a cloud-based platform to enable Hackathon organizers to host an offline/online hackathon with most needed features; Hackathon event participants can use a HTML5 capable web browser to login an Hackathon event, provision his development environment of choice and collaborate with teammates.
 
-The Open Hacakthon can be deployed as a standalone web application, and can leverage Docker based technology to efficiently manage the cloud resources.
+The Open Hackathon can be deployed as a standalone web application, and can leverage Docker based technology to efficiently manage the cloud resources.
 ## Why OpenHackathon
 - **Free**. Open Hackathon Platform is an fully open-source under MIT license.
 - **imple**. Participants don't need to install or configure anything. A html5 capable web browser and a social login account are the only preconditions. Nowadays HTML5 is supported in all modern browsers. And Open Hackathon platform supports several major OAuth providers including QQ, weibo, github, and microsoft live login. It's easy to support more.

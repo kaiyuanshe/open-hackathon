@@ -40,7 +40,7 @@ __all__ = ["HackathonTemplateManager"]
 
 
 class HackathonTemplateManager(Component):
-    """Components to manage hackaton-template relationships"""
+    """Components to manage hackathon-template relationships"""
 
     team_manager = RequiredFeature("team_manager")
     hackathon_manager = RequiredFeature("hackathon_manager")
