@@ -827,11 +827,40 @@ angular.module('oh.controllers', [])
       awards: [],
       teams: [],
       awardsMap: [],
+      currentScores: [],
       searchText: '',
+      hackathon_name: $stateParams.name,
 
       perPage: 6,
       curPage: 1,
     };
+
+    $scope.getTeamScore = function(team) {
+      getTeamScore(team);
+    }
+
+    function getTeamScore(team) {
+      return api.admin.team.score.list.get({
+         query: {team_id: team.id},
+         header: {hackathon_name: $stateParams.name}
+      }).then(function(res) {
+        if (res.error) {
+          showTip('tip-danger', error.friendly_message);
+          return;
+        }
+
+        var currentScores = [];
+        currentScores.scores= res.all;
+        var sum = 0;
+        var i = 0;
+        for (i = 0; i < currentScores.scores.length; i++) {
+          sum += currentScores.scores[i].score;
+        }
+        currentScores.average = sum / currentScores.scores.length;
+        $scope.currentScores = currentScores;
+        return;
+      });
+    }
 
     $scope.grantAward = function(awardId, teamId) {
       grantAward(awardId, teamId);
@@ -882,6 +911,7 @@ angular.module('oh.controllers', [])
         return refresh();
       });
     }
+
 
     function refresh() {
       return $q.all([

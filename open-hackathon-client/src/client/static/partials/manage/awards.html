@@ -10,22 +10,50 @@
       <div
         ng-repeat="team in ((teams = (data.teams | filter:{name: data.searchText})) | limitTo:data.perPage:(data.curPage - 1) * data.perPage) track by team.id"
         class="team-award-item">
-        <img ng-src="{{team.logo}}">
+        <a ng-href= "/site/{{data.hackathon_name}}/team/{{team.id}}"><img ng-src="{{team.logo}}"></a>
         <div class="team-data">
-          <h2>{{team.name}}</h2>
+          <a ng-href= "/site/{{data.hackathon_name}}/team/{{team.id}}"><h2>{{team.name}}</h2></a>
+          <p>
+              <a ng-href="/user/p_{{team.leader.id}}">队长: {{team.leader.nickname || team.leader.name}}</a>
+            </p>
           <span uib-dropdown>
             <p uib-dropdown-toggle>
               <i class="fa fa-angle-down" style="margin-right: 2px; color: #7f7f7f"></i>
-              {{team.leader.nickname || team.leader.name}}
+              <span>队 员 ({{team.member_count}})</span>
             </p>
             <ul uib-dropdown-menu>
               <li ng-repeat="member in team.members">
-                <img ng-src="{{member.user.avatar_url}}"><p>{{member.user.nickname || member.user.name}}</p>
+                <a ng-href="/user/p_{{member.user.id}}"><img ng-src="{{member.user.avatar_url}}">{{member.user.nickname || member.user.name}}</a>
               </li>
             </ul>
           </span>
-          <p>人数 ({{team.member_count}})</p>
-          <p>{{ team.works.length ? team.works[0].name : '暂无作品' }}</p>
+          <span uib-dropdown>
+            <p uib-dropdown-toggle>
+              <i class="fa fa-angle-down" style="margin-right: 2px; color: #7f7f7f"></i>
+              <span ng-click="getTeamScore(team)">成 绩</span>
+            </p>
+            <ul uib-dropdown-menu>
+              <p>平均成绩: {{currentScores.average}}</p>
+              <span>各个分数: </span>
+              <li ng-repeat="score in currentScores.scores">
+                {{score.score}}
+              </li>
+            </ul>
+          </span>
+          <div ng-if="team.works.length == 0">
+              <p>暂无作品</p>
+            </div>
+          <span uib-dropdown ng-if="team.works.length != 0">
+            <p uib-dropdown-toggle>
+              <i class="fa fa-angle-down" style="margin-right: 2px; color: #7f7f7f"></i>
+              <span>团队作品</span>
+            </p>
+            <ul uib-dropdown-menu>
+              <li ng-repeat="work in team.works">
+                <a ng-href="{{work.uri}}">作品: {{work.uri}}</a>
+              </li>
+            </ul>
+          </span>
         </div>
         <div class="team-awards-container">
           <div class="new-award-button-container">
@@ -45,13 +73,13 @@
               </div>
             </div>
           </div>
-          <div class="team-awards">
-            <span class="award-item" ng-repeat="award in team.awards">
-              <i>{{data.awardsMap[award].level}}</i>
-              <p>{{data.awardsMap[award].name}}</p>
-              <span class="cancel-award-cross fa fa-times" ng-click="cancelAward(award, team.id)"></span>
-            </span>
-          </div>
+        </div>
+        <div class="team-awards">
+          <span class="award-item" ng-repeat="award in team.awards">
+            <i>{{data.awardsMap[award].level}}</i>
+            <p>{{data.awardsMap[award].name}}</p>
+            <span class="cancel-award-cross fa fa-times" ng-click="cancelAward(award, team.id)"></span>
+          </span>
         </div>
       </div>
       <div style="clear: both;">
