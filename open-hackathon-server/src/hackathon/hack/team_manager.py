@@ -142,7 +142,7 @@ class TeamManager(Component):
         if self.user_manager.validate_login():
             user = g.user
 
-        def get_tema(team):
+        def get_team(team):
             teamDic = team.dic()
             teamDic['leader'] = {
                 'id': str(team.leader.id),
@@ -165,7 +165,7 @@ class TeamManager(Component):
             teamDic["members"] = [sub(t) for t in team.members]
             return teamDic
 
-        return [get_tema(x) for x in teams]
+        return [get_team(x) for x in teams]
 
     def create_default_team(self, hackathon, user):
         """Create a default new team for user after registration.
