@@ -58,6 +58,8 @@
                         return banners[0] || ''
                     }
                 }));
+            } else {
+                console.log(data.error);
             }
         });
     }
@@ -136,6 +138,8 @@
                 } else {
                     panel.append('<h5>没有发布任何活动,<a href="/manage/create_event">发布活动</a></h5>');
                 }
+            } else {
+                console.log(data.error);
             }
         });
     }
@@ -157,6 +161,8 @@
                 } else {
                     panel.append('<h5>没有参加过任何活动。。。</h5>');
                 }
+            } else {
+                console.log(data.error);
             }
         });
     }

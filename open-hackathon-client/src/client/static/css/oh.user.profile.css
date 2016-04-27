@@ -441,6 +441,8 @@ ul.profile-details li {
 
 .cbox-footer .items {
     margin-bottom: 0px;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 .cbox-footer span {

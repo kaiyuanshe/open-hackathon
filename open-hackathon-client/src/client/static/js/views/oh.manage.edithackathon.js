@@ -170,7 +170,7 @@
         return moment(startTime).format('YYYY/MM/DD HH:mm ') + '- ' + moment(endTime).format('YYYY/MM/DD HH:mm');
     }
 
-    function getHackthonData() {
+    function getHackathonData() {
         var event_time = $('#event_time').data('daterangepicker');
         var register_time = $('#register_time').data('daterangepicker');
         var judge_time = $('#judge_time').data('daterangepicker');
@@ -239,7 +239,7 @@
 
                 ckeditorUpdateTextarea();
 
-                var hack_data = getHackthonData();
+                var hack_data = getHackathonData();
                 var config_data = getConfig();
                 var tags_data = getTags();
 

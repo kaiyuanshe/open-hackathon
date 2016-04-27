@@ -71,9 +71,9 @@
     }
 
     function editBindHackathons(name, value) {
-        oh.api.admin.hackathon.list.get(function(hackahons) {
+        oh.api.admin.hackathon.list.get(function(hackathons) {
             var source = {};
-            $.each(hackahons, function(i, o) {
+            $.each(hackathons, function(i, o) {
                 source[o.id] = o.name;
             })
             var input = $('[data-name="' + name + '"]').attr({

@@ -101,9 +101,9 @@
   </div>
   <div class="inbox-side-bar">
     <div class="list-group">
-      <a href="#" class="list-group-item">全部（）</a>
-      <a href="#" class="list-group-item">{{'ORGANIZATION_TYPE.ORGANIZER' | translate}}</a>
-      <a href="#" class="list-group-item">{{'ORGANIZATION_TYPE.PARTNER' | translate}}</a>
+      <a href="#" class="list-group-item">{{'ALL' | translate}}({{data.organizers.length}})</a>
+      <a href="#" class="list-group-item">{{'ORGANIZATION_TYPE.ORGANIZER' | translate}}({{(data.organizers | filter:{organization_type:1}).length}})</a>
+      <a href="#" class="list-group-item">{{'ORGANIZATION_TYPE.PARTNER' | translate}}({{(data.organizers | filter:{organization_type:2}).length}})</a>
     </div>
   </div>
 </div>

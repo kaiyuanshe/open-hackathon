@@ -226,6 +226,8 @@ h1.title {
     padding-top: 10px;
     border-top: 1px solid #f3f3f3;
     color: #888;
+    white-space: nowrap;
+    overflow: hidden;
 }
 .teams .item .footer .u-logo{
     display:inline-block;
