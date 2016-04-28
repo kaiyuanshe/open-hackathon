@@ -11,7 +11,7 @@
 * [Glossary](#glossary)
 * [User Guide](https://github.com/msopentechcn/open-hackathon/wiki/%E5%BC%80%E6%94%BE%E9%BB%91%E5%AE%A2%E6%9D%BE%E5%B9%B3%E5%8F%B0%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97)
 * [Organizer Guide](#organizer-guide)
-  * [Create a new hackathon](#create-hackathon)
+  * [Create a new hackathon](https://github.com/msopentechcn/open-hackathon/wiki/%E5%88%9B%E5%BB%BA%E9%BB%91%E5%AE%A2%E6%9D%BE%E6%B4%BB%E5%8A%A8%E6%B5%81%E7%A8%8B)
   * [Edit hackathon basic info](#manage-hackathon-basic-info)
   * [Manage registered users](#manage-registered-users)
   * [Manage administrators and judges](#manage-administrators)
@@ -27,6 +27,7 @@
   * [API documemt](https://github.com/msopentechcn/open-hackathon/blob/master/documents/developer_guide.md#api-documemt)
   * [Python doc](https://github.com/msopentechcn/open-hackathon/blob/master/documents/developer_guide.md#python-doc)
   * [DB schema](https://github.com/msopentechcn/open-hackathon/blob/master/documents/developer_guide.md#db-schema)
+  * [Config doc](https://github.com/msopentechcn/open-hackathon/wiki/config,py%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E)
 * [Contribution.MD](https://github.com/msopentechcn/open-hackathon/blob/master/CONTRIBUTION.md)
 * [FAQ](https://github.com/msopentechcn/open-hackathon/blob/master/documents/FAQ.md)
 
@@ -35,9 +36,9 @@
 
 # Introduction
 ## What is OpenHackathon
-Open Hackathon Platform is a cloud-based platform to enable Hacakthon organizers to host an offline/online hacakthon with most needed features; Hackathon event participants can use a HTML5 capable web browser to login an Hackathon event, provision his development environment of choice and collaborate with teammates.
+Open Hackathon Platform is a cloud-based platform to enable Hackathon organizers to host an offline/online hackathon with most needed features; Hackathon event participants can use a HTML5 capable web browser to login an Hackathon event, provision his development environment of choice and collaborate with teammates.
 
-The Open Hacakthon can be deployed as a standalone web application, and can leverage Docker based technology to efficiently manage the cloud resources.
+The Open Hackathon can be deployed as a standalone web application, and can leverage Docker based technology to efficiently manage the cloud resources.
 ## Why OpenHackathon
 - **Free**. Open Hackathon Platform is an fully open-source under MIT license.
 - **imple**. Participants don't need to install or configure anything. A html5 capable web browser and a social login account are the only preconditions. Nowadays HTML5 is supported in all modern browsers. And Open Hackathon platform supports several major OAuth providers including QQ, weibo, github, and microsoft live login. It's easy to support more.

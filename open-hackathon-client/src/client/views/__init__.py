@@ -52,7 +52,7 @@ session_lifetime_minutes = 60
 API_HACKATHON = "/api/hackathon"
 API_HACKATHON_LIST = "/api/hackathon/list"
 API_HACKATHON_TEMPLATE = "/api/hackathon/template"
-API_HACAKTHON_REGISTRATION = "/api/user/registration"
+API_HACKATHON_REGISTRATION = "/api/user/registration"
 API_TEAM_MEMBER_LIST = "/api/team/member/list"
 API_TEAM_USER = "/api/user/team/list"
 API_TEAM = "/api/team"
@@ -374,7 +374,7 @@ def hackathon(hackathon_name):
     headers = {"hackathon_name": hackathon_name, "token": session.get("token")}
     data = __get_api(API_HACKATHON, headers)
     data = Context.from_object(data)
-    reg = Context.from_object(__get_api(API_HACAKTHON_REGISTRATION, headers))
+    reg = Context.from_object(__get_api(API_HACKATHON_REGISTRATION, headers))
     if data.get('error') is not None:
         return render("/404.html")
     else:
@@ -391,7 +391,7 @@ def hackathon(hackathon_name):
 @login_required
 def workspace(hackathon_name):
     headers = {"hackathon_name": hackathon_name, "token": session.get("token")}
-    reg = Context.from_object(__get_api(API_HACAKTHON_REGISTRATION, headers))
+    reg = Context.from_object(__get_api(API_HACKATHON_REGISTRATION, headers))
 
     if reg.get('registration') is not None:
         if reg.registration.status == 1 or reg.registration.status == 3:

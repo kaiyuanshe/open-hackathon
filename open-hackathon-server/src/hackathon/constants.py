@@ -487,7 +487,7 @@ class HACK_NOTICE_CATEGORY:
 
 
 class HACK_NOTICE_EVENT:
-    MANUAL = 0  # manually created hackatohon notice
+    MANUAL = 0  # manually created hackathon notice
     HACK_CREATE = 1
     HACK_EDIT = 2
     HACK_ONLINE = 3
