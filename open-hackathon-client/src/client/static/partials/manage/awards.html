@@ -76,6 +76,21 @@
           </div>
         </div>
         <div class="team-awards-container team-awards-dev-plan">
+          <div ng-if="team.dev_plan == ''">
+            <div class="new-award-button-container" uib-tooltip="计划书未提交！" tooltip-placement="bottom-left">
+              <div uib-dropdown>
+                <span class="dev-plan-button btn btn-primary btn-sm" uib-dropdown-toggle>
+                  <i class="fa fa-lightbulb-o" aria-hidden="true"></i>
+                </span>
+              <div uib-dropdown-menu class="new-award-menu">
+                  <span>
+                    <p>计划书已提交！</p>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+           <!--div ng-if="team.dev_plan == ''">
           <div class="new-award-button-container">
             <div uib-dropdown>
               <span class="new-award-button btn btn-primary btn-sm" uib-dropdown-toggle>
@@ -83,9 +98,14 @@
               </span>
               <div uib-dropdown-menu class="new-award-menu">
 
+                  <span>
+                    <p></p>
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
+          </div-->
+
         </div>
         <div class="team-awards">
           <span class="award-item" ng-repeat="award in team.awards">
