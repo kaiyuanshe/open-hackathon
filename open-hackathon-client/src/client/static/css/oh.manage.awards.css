@@ -111,6 +111,24 @@
 	flex-direction: row;
 }
 
+.team-award-item .dev-plan-container {
+  height: 40px;
+  width: 100px;
+
+  display: -webkit-box;
+	display: -webkit-flex;
+	display: -moz-flex;
+	display: -ms-flexbox;
+	display: flex;
+
+  -webkit-box-direction: normal;
+	-webkit-box-orient: horizontal;
+  -webkit-flex-direction: row;
+	-moz-flex-direction: row;
+	-ms-flex-direction: row;
+	flex-direction: row;
+}
+
 .team-award-item .team-awards-dev-plan {
   position: absolute;
   top: 3px;
@@ -208,6 +226,16 @@ span.new-award-button {
 }
 
 span.dev-plan-button {
+  padding: 0;
+  line-height: 1.5;
+  text-align: center;
+  width: 24px;
+  font-size: 14px;
+  background-color: #ffffff;
+  color: #019e48;
+}
+
+span.no_dev-plan-button {
   padding: 0;
   line-height: 1.5;
   text-align: center;
