@@ -11,6 +11,7 @@
         ng-repeat="team in ((teams = (data.teams | filter:{name: data.searchText})) | limitTo:data.perPage:(data.curPage - 1) * data.perPage) track by team.id"
         class="team-award-item">
         <a ng-href= "/site/{{data.hackathon_name}}/team/{{team.id}}"><img ng-src="{{team.logo}}"></a>
+
         <div class="team-data">
           <a ng-href= "/site/{{data.hackathon_name}}/team/{{team.id}}"><h2>{{team.name}}</h2></a>
           <p>
@@ -70,6 +71,18 @@
                   <i>{{award.level}}</i>
                   <p>{{award.name}}</p>
                 </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="team-awards-container team-awards-dev-plan">
+          <div class="new-award-button-container">
+            <div uib-dropdown>
+              <span class="new-award-button btn btn-primary btn-sm" uib-dropdown-toggle>
+                <i class="fa fa-lightbulb-o" aria-hidden="true"></i>
+              </span>
+              <div uib-dropdown-menu class="new-award-menu">
+
               </div>
             </div>
           </div>

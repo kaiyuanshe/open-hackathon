@@ -111,6 +111,12 @@
 	flex-direction: row;
 }
 
+.team-award-item .team-awards-dev-plan {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+}
+
 .team-award-item div.new-award-button-container {
   padding-top: 10px;
   -webkit-box-flex: 0;
@@ -199,6 +205,16 @@ span.new-award-button {
   font-size: 14px;
   background-color: #efefef;
   color: #019e48;
+}
+
+span.dev-plan-button {
+  padding: 0;
+  line-height: 1.5;
+  text-align: center;
+  width: 24px;
+  font-size: 14px;
+  background-color: #ffffff;
+  color: #C9531C;
 }
 
 .search-bar-container {
