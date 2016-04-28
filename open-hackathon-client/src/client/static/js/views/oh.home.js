@@ -99,9 +99,8 @@
                         return getTeamlink(name, team_id, '');
                     }
                 }));
-                infn3.removeClass('hide');
             }
-        })
+        });
 
         oh.api.hackathon.notice.list.get({
             query: {

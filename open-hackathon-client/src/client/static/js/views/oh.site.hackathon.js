@@ -62,13 +62,6 @@
             } else if (data.length > 0) {
                 $('#team span').text('（' + data.length + '）');
                 teamsbind(data);
-                // var btn = $('<button>')
-                //     .addClass('btn btn-default btn-sm btn-block')
-                //     .text('更多')
-                //     .bind('click', function (e) {
-                //         teamsbind(data.splice(0, 8))
-                //     }).trigger('click');
-                // $('#team_list').after(btn);
             } else {
                 showNoTeam();
             }
