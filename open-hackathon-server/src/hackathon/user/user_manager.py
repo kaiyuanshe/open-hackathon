@@ -219,7 +219,7 @@ class UserManager(Component):
 
     def get_talents(self):
         # todo real talents list
-        users = User.objects.order_by("-login_times")[:10]
+        users = User.objects(name__ne="admin").order_by("-login_times")[:10]
 
         return [self.user_display_info(u) for u in users]
 
