@@ -36,7 +36,7 @@ from mongoengine import Q, ValidationError
 from hackathon import Component, RequiredFeature
 from hackathon.hmongo.models import Team, TeamMember, TeamScore, TeamWork, Hackathon, UserHackathon, to_dic
 from hackathon.hackathon_response import not_found, bad_request, precondition_failed, ok, forbidden
-from hackathon.constants import TEAM_MEMBER_STATUS, TEAM_SHOW_TYPE, HACK_USER_TYPE
+from hackathon.constants import TEAM_MEMBER_STATUS, TEAM_SHOW_TYPE, HACK_USER_TYPE, HACKATHON_CONFIG
 
 __all__ = ["TeamManager"]
 hack_manager = RequiredFeature("hackathon_manager")
@@ -218,11 +218,10 @@ class TeamManager(Component):
         kwargs.pop('id', None)  # id should not be included
         team.modify(**kwargs)
         team.update_time = self.util.get_now()
-
         team.save()
 
-        if "dev_plan" in kwargs:
-            self.__notify_dev_plan_submitted(team)
+        if "dev_plan" in kwargs and team.hackathon.config.get(HACKATHON_CONFIG.DEV_PLAN_REQUIRED, False):
+            self.__email_notify_dev_plan_submitted(team)
 
         return self.__team_detail(team)
 
@@ -792,7 +791,7 @@ class TeamManager(Component):
         team_dic["hackathon"] = hack_manager.get_hackathon_detail(team.hackathon)
         return team_dic
 
-    def __notify_dev_plan_submitted(self, team):
+    def __email_notify_dev_plan_submitted(self, team):
         # send emails to all admins of this hackathon when one team dev plan is submitted.
         admins = UserHackathon.objects(hackathon=team.hackathon, role=HACK_USER_TYPE.ADMIN).distinct("user")
         email_title = self.util.safe_get_config("email.email_templates.dev_plan_submitted_notify.title", None)
