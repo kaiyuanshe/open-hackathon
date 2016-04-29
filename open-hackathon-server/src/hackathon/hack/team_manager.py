@@ -799,7 +799,7 @@ class TeamManager(Component):
         sender = self.util.safe_get_config("email.default_sender", "")
 
         try:
-            if email_title and email_content and not sender == "":
+            if email_title and email_content:
                 email_title = email_title % (team.name.encode("utf-8"))
                 email_content = email_content % (team.name.encode("utf-8"), team.hackathon.name.encode("utf-8"),
                                                  team.hackathon.name.encode("utf-8"), str(team.id))
@@ -821,7 +821,7 @@ class TeamManager(Component):
             if not len(primary_emails) == 0:
                 isSent = self.util.send_emails(sender, primary_emails, email_title, email_content)
 
-            # if fail to send emails to primary-mailboxes, sent to only one non-primary mailboxes.
+            # if fail to send emails to primary-mailboxes, sent email to one non-primary mailboxes.
             if not isSent and not len(nonprimary_emails) == 0:
                 for nonpri_email in nonprimary_emails:
                     if self.util.send_emails(sender, [nonpri_email], email_title, email_content):
