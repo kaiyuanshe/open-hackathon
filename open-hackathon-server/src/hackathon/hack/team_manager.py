@@ -157,11 +157,12 @@ class TeamManager(Component):
             [teamDic.pop(key, None) for key in
              ['assets', 'awards', 'azure_keys', 'scores', 'templates', 'hackathon']]
             teamDic["member_count"] = team.members.filter(status=TEAM_MEMBER_STATUS.APPROVED).count()
+
             def sub(t):
                 m = to_dic(t)
                 m["user"] = self.user_manager.user_display_info(t.user)
                 return m
-            
+
             teamDic["members"] = [sub(t) for t in team.members]
             return teamDic
 
@@ -578,8 +579,8 @@ class TeamManager(Component):
 
     def get_team_show_list_by_user(self, user_id):
         teams = Team.objects(members__match={
-                    "user": user_id,
-                    "status": TEAM_MEMBER_STATUS.APPROVED}).all()
+            "user": user_id,
+            "status": TEAM_MEMBER_STATUS.APPROVED}).all()
 
         def get_team_show_detail(team):
             dic = self.__team_detail(team)
@@ -619,12 +620,14 @@ class TeamManager(Component):
         return awards
 
     def get_all_granted_awards(self, limit):
-        teams = Team.objects.all()
+        teams = Team.objects().all()
+
         teams_with_awards = [team for team in teams if not team.awards == []]
         teams_with_awards.sort(key=lambda t: (
             t.hackathon.id,
             Hackathon.objects(id=t.hackathon.id, awards__id=t.awards[0]).first().awards.get(id=t.awards[0]).level
         ), reverse=True)  # sort by hackathon and then sort by award level.
+
         teams_with_awards = teams_with_awards[0: int(limit)]
 
         return [self.__get_hackathon_and_show_detail(team) for team in teams_with_awards]
@@ -685,7 +688,7 @@ class TeamManager(Component):
         resp["member_count"] = team.members.filter(status=TEAM_MEMBER_STATUS.APPROVED).count()
         # all team action not allowed if frozen
         resp["is_frozen"] = team.hackathon.judge_start_time < self.util.get_now() \
-                           and team.hackathon.judge_end_time > self.util.get_now()
+                            and team.hackathon.judge_end_time > self.util.get_now()
 
         for i in xrange(0, len(team.members)):
             mem = team.members[i]
@@ -786,5 +789,16 @@ class TeamManager(Component):
 
     def __get_hackathon_and_show_detail(self, team):
         team_dic = team.dic()
+        team_dic['leader'] = {
+            'id': str(team.leader.id),
+            'name': team.leader.name,
+            'nickname': team.leader.nickname,
+            'avatar_url': team.leader.avatar_url
+        }
+        team_dic['cover'] = team_dic.get('cover', '')
+        team_dic['project_name'] = team_dic.get('project_name', '')
+        team_dic['dev_plan'] = team_dic.get('dev_plan', '')
+        [team_dic.pop(key, None) for key in ['assets', 'awards', 'azure_keys', 'scores', 'templates', 'members']]
+
         team_dic["hackathon"] = hack_manager.get_hackathon_detail(team.hackathon)
         return team_dic
