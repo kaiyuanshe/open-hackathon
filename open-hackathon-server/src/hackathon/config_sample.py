@@ -85,10 +85,17 @@ Config = {
         }
     },
     "email": {
-        "host": "",
+        "host": "smtp.gmail.com",
         "port": 587,
+        "default_sender": "",
         "username": "",
-        "password": ""
+        "password": "",
+        "email_templates": {
+            "dev_plan_submitted_notify": {
+                "title": "开放黑客松: %s 团队开发计划书已提交",
+                "content": "<h2> %s 团队开发计划书已提交 (活动：%s)</h2><a href='http://hacking.kaiyuanshe.cn/site/%s/team/%s'>点此进入“开放黑客松”进行查看</a>"
+            }
+        }
     },
     "voice_verify": {
         "enabled": False,
