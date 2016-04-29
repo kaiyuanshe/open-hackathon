@@ -291,9 +291,9 @@ def alauda_login():
 @app.route('/')
 @app.route('/index')
 def index():
-    # landing_page_visited = request.cookies.get('ohplpv')
-    # if not landing_page_visited:
-    #     return redirect("/landing")
+    landing_page_visited = request.cookies.get('ohplpv')
+    if not landing_page_visited:
+        return redirect("/landing")
 
     empty_items = {
         "items": []
