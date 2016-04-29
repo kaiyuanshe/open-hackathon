@@ -34,7 +34,11 @@
             if (data.error) {
 
             } else {
-                $('#talent_list').append($('#talent_list_template').tmpl(data.splice(0, 6)));
+                $('#talent_list').append($('#talent_list_template').tmpl(data.splice(0, 6), {
+                    getCareertype: function (data) {
+                        return (data.profile || {}).career_type || '';
+                    }
+                }));
             }
         });
 

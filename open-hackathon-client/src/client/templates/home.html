@@ -490,30 +490,9 @@
         </li>
     {% endraw %}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     </script>
     <script id="talent_list_template" type="text/x-jquery-tmpl">
+      {% raw %}
         <div class="media oh-item">
           <div class="media-left">
               <a href="/user/p_${id}">
@@ -522,27 +501,28 @@
           </div>
           <div class="media-body">
             <a class="media-heading" href="/user/p_${id}">${nickname}</a>
-            <p>${profile.career_type}</p>
+            <p>${$item.getCareertype($data)}</p>
           </div>
         </div>
+        {% endraw %}
     </script>
     <script id="award_list_template" type="text/x-jquery-tmpl">
     {% raw %}
      <div class="item">
         <div class="header" data-parent>
             <a href="${$item.link(hackathon.name,id)}">
-                <img src="${cover}" class="oh-thumbnail" alt="${project_name}" onload="oh.comm.imgLoad(this)" >
+                <img src="${cover}" class="oh-thumbnail" alt="${project_name}" onerror="javasctip:this.src='/static/images/project_none.png'" onload="oh.comm.imgLoad(this)" >
             </a>
         </div>
         <div class="body">
-            <h4>${project_name}</h4>
+            <h4>${project_name || '【未取名】'}</h4>
             <p>团队名：<a href="${$item.link(hackathon.name,id)}">${name}</a></p>
             <div class="desc">
                 ${description}
             </div>
          </div>
         <div class="footer">
-            <p> 更多展示：{{html $item.getlinks(hackathon.name,works,id)}}</p>
+            <p> {{html $item.getlinks(hackathon.name,works,id)}}</p>
         </div>
       </div>
     </div>
