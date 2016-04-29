@@ -316,6 +316,7 @@
     padding: 0;
     font-size: 0;
     overflow: hidden;
+    height: 34px;
 }
 
 .oh-activity .oh-body .oh-tags li {
@@ -1006,6 +1007,8 @@ color: #888;
     font-size:12px;
     padding: 5px 0;
     color: #818182;
+    height: 42px;
+    overflow: hidden;
 }
 .oh-events .item .body h4{
     margin: 5px 0;
@@ -1013,7 +1016,7 @@ color: #888;
     min-height: 25px;
 }
 .oh-events .item .footer{
-     padding:5px 20px;
+     padding: 5px 20px 5px 5px;
      background-color:#f1f1f2;
      border-top: 1px solid #d0d3d2;
 }
