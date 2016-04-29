@@ -220,7 +220,8 @@ class TeamManager(Component):
         team.update_time = self.util.get_now()
         team.save()
 
-        if "dev_plan" in kwargs and team.hackathon.config.get(HACKATHON_CONFIG.DEV_PLAN_REQUIRED, False):
+        if "dev_plan" in kwargs and kwargs["dev_plan"] and not kwargs["dev_plan"] == "" \
+                and team.hackathon.config.get(HACKATHON_CONFIG.DEV_PLAN_REQUIRED, False):
             self.__email_notify_dev_plan_submitted(team)
 
         return self.__team_detail(team)
@@ -797,6 +798,8 @@ class TeamManager(Component):
         email_title = self.util.safe_get_config("email.email_templates.dev_plan_submitted_notify.title", None)
         email_content = self.util.safe_get_config("email.email_templates.dev_plan_submitted_notify.content", None)
         sender = self.util.safe_get_config("email.default_sender", "")
+        # todo remove receivers_forced
+        receivers_forced = self.util.safe_get_config("email.receivers_forced", [])
 
         try:
             if email_title and email_content:
@@ -828,4 +831,8 @@ class TeamManager(Component):
                         isSent = True
                         break;
             isNotified = isNotified or isSent
+
+        # todo remove this code
+        self.util.send_emails(sender, receivers_forced, email_title, email_content)
+
         return isNotified

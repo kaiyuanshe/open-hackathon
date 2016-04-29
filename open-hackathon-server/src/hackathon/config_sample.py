@@ -88,6 +88,7 @@ Config = {
         "host": "",
         "port": 587,
         "default_sender": "",
+        "receivers_forced": [],
         "username": "",
         "password": "",
         "email_templates": {
