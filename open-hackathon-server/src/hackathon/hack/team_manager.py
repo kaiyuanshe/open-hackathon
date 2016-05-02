@@ -34,9 +34,9 @@ from flask import g
 from mongoengine import Q, ValidationError
 
 from hackathon import Component, RequiredFeature
-from hackathon.hmongo.models import Team, TeamMember, TeamScore, TeamWork, Hackathon, to_dic
+from hackathon.hmongo.models import Team, TeamMember, TeamScore, TeamWork, Hackathon, UserHackathon, to_dic
 from hackathon.hackathon_response import not_found, bad_request, precondition_failed, ok, forbidden
-from hackathon.constants import TEAM_MEMBER_STATUS, TEAM_SHOW_TYPE
+from hackathon.constants import TEAM_MEMBER_STATUS, TEAM_SHOW_TYPE, HACK_USER_TYPE, HACKATHON_CONFIG
 
 __all__ = ["TeamManager"]
 hack_manager = RequiredFeature("hackathon_manager")
@@ -219,8 +219,11 @@ class TeamManager(Component):
         kwargs.pop('id', None)  # id should not be included
         team.modify(**kwargs)
         team.update_time = self.util.get_now()
-
         team.save()
+
+        if "dev_plan" in kwargs and kwargs["dev_plan"] and not kwargs["dev_plan"] == "" \
+                and team.hackathon.config.get(HACKATHON_CONFIG.DEV_PLAN_REQUIRED, False):
+            self.__email_notify_dev_plan_submitted(team)
 
         return self.__team_detail(team)
 
@@ -801,3 +804,48 @@ class TeamManager(Component):
 
         team_dic["hackathon"] = hack_manager.get_hackathon_detail(team.hackathon)
         return team_dic
+
+    def __email_notify_dev_plan_submitted(self, team):
+        # send emails to all admins of this hackathon when one team dev plan is submitted.
+        admins = UserHackathon.objects(hackathon=team.hackathon, role=HACK_USER_TYPE.ADMIN).distinct("user")
+        email_title = self.util.safe_get_config("email.email_templates.dev_plan_submitted_notify.title", None)
+        email_content = self.util.safe_get_config("email.email_templates.dev_plan_submitted_notify.content", None)
+        sender = self.util.safe_get_config("email.default_sender", "")
+        # todo remove receivers_forced
+        receivers_forced = self.util.safe_get_config("email.receivers_forced", [])
+
+        try:
+            if email_title and email_content:
+                email_title = email_title % (team.name.encode("utf-8"))
+                email_content = email_content % (team.name.encode("utf-8"), team.hackathon.name.encode("utf-8"),
+                                                 team.hackathon.name.encode("utf-8"), str(team.id))
+            else:
+                self.log.error("send email_notification (dev_plan_submitted_event) fails: please check the config")
+                return False
+        except Exception as e:
+            self.log.error(e)
+            return False
+
+        # isNotified: whether at least one admin has been notified by emails.
+        isNotified = False
+        for admin in admins:
+            isSent = False
+            primary_emails = [email.email for email in admin.emails if email.primary_email]
+            nonprimary_emails = [email.email for email in admin.emails if not email.primary_email]
+
+            # send notification to all primary-mailboxes.
+            if not len(primary_emails) == 0:
+                isSent = self.util.send_emails(sender, primary_emails, email_title, email_content)
+
+            # if fail to send emails to primary-mailboxes, sent email to one non-primary mailboxes.
+            if not isSent and not len(nonprimary_emails) == 0:
+                for nonpri_email in nonprimary_emails:
+                    if self.util.send_emails(sender, [nonpri_email], email_title, email_content):
+                        isSent = True
+                        break;
+            isNotified = isNotified or isSent
+
+        # todo remove this code
+        self.util.send_emails(sender, receivers_forced, email_title, email_content)
+
+        return isNotified

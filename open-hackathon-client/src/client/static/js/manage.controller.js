@@ -711,10 +711,17 @@ angular.module('oh.controllers', [])
   .controller('organizersController', function($rootScope, $scope, $stateParams, $uibModal, $cookies, api) {
     $scope.$emit('pageName', 'SETTINGS.ORGANIZERS');
 
+    $scope.filterCondition = 0;
+    $scope.data = {
+        "organizers": [],
+        "selectedOrgs": []
+    }
+
     // very quick and rough implementation, please feel free to update
     var refresh = function(data) {
       if (data) {
-        $scope.data = data
+        $scope.data.organizers = data.organizers;
+        $scope.data.selectedOrgs = [];
         return
       }
 
@@ -729,7 +736,8 @@ angular.module('oh.controllers', [])
             content: data.error.friendly_message
           });
         } else {
-          $scope.data = data
+          $scope.data.organizers = data.organizers;
+          $scope.data.selectedOrgs = [];
         }
       })
     }
@@ -815,6 +823,44 @@ angular.module('oh.controllers', [])
           })
         }
       })
+    }
+
+    $scope.filterOrganizer = function(item) {
+      if ($scope.filterCondition == 0)
+        return true;
+      return item.organization_type == $scope.filterCondition;
+    }
+
+    $scope.isOrganizerSelected = function(org) {
+      return $scope.data.selectedOrgs.indexOf(org.id) > -1;
+    }
+
+    $scope.isAllOrgsSelected = function() {
+      return $scope.data.selectedOrgs.length == $scope.data.organizers.length;
+    }
+
+    $scope.selectOrg = function(org) {
+      var index = $scope.data.selectedOrgs.indexOf(org.id)
+      if (index > -1) {
+        $scope.data.selectedOrgs.splice(index, 1)
+      } else {
+        $scope.data.selectedOrgs.push(org.id)
+      }
+    }
+
+    $scope.toggleAllOrgs = function() {
+      if ($scope.data.organizers.length == $scope.data.selectedOrgs.length) {
+        $scope.data.selectedOrgs = [];
+      } else {
+        $scope.data.selectedOrgs = [];
+        for (var index in $scope.data.organizers)
+          $scope.data.selectedOrgs.push($scope.data.organizers[index].id);
+      }
+    }
+
+    $scope.deleteSelectedOrgs = function() {
+      for (index in $scope.data.selectedOrgs)
+        $scope.delete_organizer($scope.data.selectedOrgs[index]);
     }
 
     refresh();

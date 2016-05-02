@@ -50,7 +50,7 @@
       <button type="button" class="btn btn-sm btn-success" ng-click="add()">
         <i class="fa fa-plus"></i> 添加
       </button>
-      <button type="button" class="btn btn-sm btn-danger">
+      <button type="button" class="btn btn-sm btn-danger" ng-click="deleteSelectedOrgs()">
         <i class="fa fa-trash"></i> 删除
       </button>
     </div>
@@ -60,7 +60,7 @@
           <tr>
             <th style="width: 30px;">
               <label class="checkbox checkbox-success">
-                <input type="checkbox" ng-model="data.checkAll" ng-change="toggleCheckAll()">
+                <input type="checkbox" ng-model="data.checkAll" ng-change="toggleCheckAll()" ng-checked="isAllOrgsSelected()" ng-click="toggleAllOrgs()">
                 <span></span>
               </label>
             </th>
@@ -73,10 +73,10 @@
           </tr>
         </thead>
         <tbody>
-          <tr ng-repeat="org in data.organizers">
+          <tr ng-repeat="org in data.organizers | filter:filterOrganizer">
             <td>
               <label class="checkbox checkbox-success">
-                <input type="checkbox" ng-model="data.checks[org.id]">
+                <input type="checkbox" ng-model="data.checks[org.id]" ng-checked="isOrganizerSelected(org)" ng-click="selectOrg(org)">
                 <span></span>
               </label>
             </td>
@@ -101,9 +101,9 @@
   </div>
   <div class="inbox-side-bar">
     <div class="list-group">
-      <a href="#" class="list-group-item">{{'ALL' | translate}}({{data.organizers.length}})</a>
-      <a href="#" class="list-group-item">{{'ORGANIZATION_TYPE.ORGANIZER' | translate}}({{(data.organizers | filter:{organization_type:1}).length}})</a>
-      <a href="#" class="list-group-item">{{'ORGANIZATION_TYPE.PARTNER' | translate}}({{(data.organizers | filter:{organization_type:2}).length}})</a>
+      <a href="#" class="list-group-item" ng-click="filterCondition=0">{{'ALL' | translate}}({{data.organizers.length}})</a>
+      <a href="#" class="list-group-item" ng-click="filterCondition=1">{{'ORGANIZATION_TYPE.ORGANIZER' | translate}}({{(data.organizers | filter:{organization_type:1}).length}})</a>
+      <a href="#" class="list-group-item" ng-click="filterCondition=2">{{'ORGANIZATION_TYPE.PARTNER' | translate}}({{(data.organizers | filter:{organization_type:2}).length}})</a>
     </div>
   </div>
 </div>
