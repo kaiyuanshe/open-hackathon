@@ -249,6 +249,10 @@ class UserManager(Component):
             if t and t.expire_date >= self.util.get_now():
                 g.authenticated = True
                 g.user = t.user
+                users_operation_time[g.user.id] = self.util.get_now()
+                dic = repr(users_operation_time)
+                f = open('/tmp/1.txt', 'w')
+                f.write(dic)
                 return t.user
 
         return None
