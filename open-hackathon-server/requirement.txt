@@ -7,7 +7,7 @@ requests
 apscheduler==3.0.3
 mock==1.0.1
 python-dateutil==2.4.2
-pytz==2.8.1
+pytz==2015.6
 validictory==1.0.0
 beaker==1.7.0
 pexpect==4.0.1
