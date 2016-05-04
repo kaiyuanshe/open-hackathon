@@ -680,12 +680,15 @@ class HackathonManager(Component):
         is_read_filter = Q()
         order_by_condition = '-update_time'
 
-        if hackathon_name:
+        if hackathon_name: #list notices that belong to specfic hackathon
             hackathon = Hackathon.objects(name=hackathon_name).only('name').first()
             if hackathon:
                 hackathon_filter = Q(hackathon=hackathon)
             else:
                 return not_found('hackathon_name not found')
+        else: #only list online hackathons' notices or notices that not belong to any hackathon
+            online_hackathon = Hackathon.objects(status=HACK_STATUS.ONLINE)
+            hackathon_filter = Q(hackathon__in=online_hackathon) | Q(hackathon=None)
 
         if filter_by_user:  # only return notices that are sent to the login user
             user = None
