@@ -4,7 +4,6 @@
 @import "oh.manage.edit.css";
 @import "oh.manage.users.css";
 @import "oh.manage.awards.css";
-
 html,
 body {
   position: relative;
@@ -292,6 +291,7 @@ body {
   min-height: 300px;
   border: 1px solid #d0d2d3;
   background-color: #fff;
+  position: relative;
 }
 
 .m-tabs .nav-tabs {
@@ -787,29 +787,29 @@ tags-input .tags .tag-item .remove-button {
   vertical-align: middle;
 }
 
-.clond-templates {
+.cloud-templates {
   margin: 0 -5px;
   min-height: 300px;
 }
 
-.clond-templates .item {
+.cloud-templates .item {
   border: 1px solid #d0d2d3;
   border-radius: 2px;
   margin-bottom: 20px;
 }
 
-.clond-templates .item.active {
+.cloud-templates .item.active {
   border-color: #7dba43;
 }
 
-.clond-templates .btn-group-justified>.btn {
+.cloud-templates .btn-group-justified>.btn {
   border-radius: 0;
   border-color: #d0d2d3;
   border-bottom: none;
   border-right: none;
 }
 
-.clond-templates .btn-group-justified>.btn:first-child:not(:last-child):not(.dropdown-toggle) {
+.cloud-templates .btn-group-justified>.btn:first-child:not(:last-child):not(.dropdown-toggle) {
   border-left: none;
 }
 
@@ -818,13 +818,13 @@ tags-input .tags .tag-item .remove-button {
   min-height: 0;
 }
 
-.clond-templates> .btn:last-child:not(:first-child),
+.cloud-templates> .btn:last-child:not(:first-child),
 .btn-group > .dropdown-toggle:not(:first-child) {
   border-bottom-left-radius: 0;
   border-top-left-radius: 0;
 }
 
-.clond-templates header {
+.cloud-templates header {
   padding: 10px 0 5px;
   margin: 0 15px;
   border-bottom: 1px solid #d0d2d3;
@@ -835,36 +835,36 @@ tags-input .tags .tag-item .remove-button {
   text-overflow: ellipsis;
 }
 
-.clond-templates .item-body {
+.cloud-templates .item-body {
   padding: 15px;
   max-height: 155px;
   overflow: hidden;
 }
 
-.clond-templates .item-body p {
+.cloud-templates .item-body p {
   font-size: 14px;
   margin-top: 15px;
   overflow: hidden;
   max-height: 40px;
 }
 
-.clond-templates [class*="col-"] {
+.cloud-templates [class*="col-"] {
   padding: 0 5px;
 }
 
-.clond-templates .author {
+.cloud-templates .author {
   margin-right: 120px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.clond-templates .author .picture {
+.cloud-templates .author .picture {
   width: 32px;
   height: 32px;
 }
 
-.clond-templates .author .picture img {
+.cloud-templates .author .picture img {
   max-width: 100%;
   max-height: 100%;
 }
@@ -915,4 +915,68 @@ tags-input .tags .tag-item .remove-button {
   -ms-filter: 'alpha(opacity=0)';
   direction: ltr;
   cursor: pointer;
+}
+
+.inbox-wrap {
+  background: #fff;
+  overflow-x: hidden;
+  position: absolute;
+  left: 0;
+  right: 200px;
+}
+
+.inbox-side-bar {
+  height: 100%;
+  position: absolute;
+  background: #fff;
+  display: block;
+  width: 200px;
+  right: 0;
+  top: 0;
+  -webkit-overflow-scrolling: touch;
+  z-index: 1;
+  border-left: 1px solid #d0d2d3;
+}
+
+.inbox-toolbar {
+  padding: 5px 40px;
+}
+.inbox-toolbar.inbox-search{
+    padding: 3px 10px;
+}
+.paginate {
+  text-align: right;
+  padding: 0px 40px;
+}
+
+.inbox-wrap .table > thead:first-child > tr:first-child > th {
+  border-top: 1px solid #D0D2D3;
+  padding: 10px 8px 9px 8px;
+}
+
+.table label.checkbox,
+.table label.switchbox,
+.table label.radiobox,
+.inbox-toolbar .label.checkbox,
+.inbox-toolbar label.switchbox,
+.inbox-toolbar label.radiobox {
+  margin-top: 0;
+}
+
+.cell-input {
+  padding: 4px 8px!important;
+}
+
+.cell-input .form-control{
+
+}
+
+.option .btn{
+  display:inline;
+}
+.option .btn+.btn{
+  margin-left:5px;
+}
+.option .btn i {
+  width:9px;
 }

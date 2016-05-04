@@ -532,35 +532,7 @@ footer .oh-copyright hr {
     position: relative;
 }
 
-.carousel-fade .carousel-inner .item {
-    -webkit-transition-property: opacity;
-    transition-property: opacity;
-}
 
-.carousel-fade .carousel-inner .item,
-.carousel-fade .carousel-inner .active.left,
-.carousel-fade .carousel-inner .active.right {
-    opacity: 0;
-}
-
-.carousel-fade .carousel-inner .active,
-.carousel-fade .carousel-inner .next.left,
-.carousel-fade .carousel-inner .prev.right {
-    opacity: 1;
-}
-
-.carousel-fade .carousel-inner .next,
-.carousel-fade .carousel-inner .prev,
-.carousel-fade .carousel-inner .active.left,
-.carousel-fade .carousel-inner .active.right {
-    left: 0;
-    -webkit-transform: translate3d(0, 0, 0);
-    transform: translate3d(0, 0, 0);
-}
-
-.carousel-fade .carousel-control {
-    z-index: 2;
-}
 
 /*------------Nav bar----------------------*/
 
@@ -642,7 +614,7 @@ footer .oh-copyright hr {
 .header .dropdown-menu > li > a:focus {
     text-decoration: none;
     color: #fff;
-    background-color: #0F0F0F;
+    background-color: #2B2C39;
 }
 
 .header .dropdown-menu-title {
@@ -1037,7 +1009,9 @@ a#main-menu-toggle {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
-
+.fa-lg {
+    font-size: 17px;
+}
 .nav.main-menu > li > a .chevron,
 .nav.main-menu > li > ul > li > a .chevron,
 .nav.main-menu > li > ul > li > ul > li > a .chevron,
@@ -1890,13 +1864,6 @@ ul.messages li {
     content: "\f17a";
 }
 
-.fa-gitcafe {
-    width: 16px;
-    height: 16px;
-    background: url('/static/pic/gitcafe-icon.png') no-repeat center;
-    vertical-align: text-top;
-}
-
 .oh-box {
     margin-bottom: 10px;
 }
@@ -1935,11 +1902,11 @@ h4.title {
     display: inline-block;
 }
 
-.left {
+.float-left {
     float: left;
 }
 
-.right {
+.float-right {
     float: right;
 }
 

@@ -32,7 +32,7 @@ from datetime import timedelta
 import uuid
 
 from flask import request, g
-from mongoengine import Q, NotUniqueError
+from mongoengine import Q, NotUniqueError, ValidationError
 
 from hackathon.hackathon_response import internal_server_error, not_found, ok
 from hackathon.constants import HTTP_HEADER, HACK_USER_TYPE
@@ -219,7 +219,7 @@ class UserManager(Component):
 
     def get_talents(self):
         # todo real talents list
-        users = User.objects.order_by("-login_times")[:10]
+        users = User.objects(name__ne="admin").order_by("-login_times")[:10]
 
         return [self.user_display_info(u) for u in users]
 
@@ -336,8 +336,9 @@ class UserManager(Component):
 
             try:
                 user.save()
-            except NotUniqueError:
-                return self.__oauth_login(provider, context)
+            except ValidationError as e:
+                self.log.error(e)
+                return internal_server_error("create user fail.")
 
             map(lambda x: self.__create_or_update_email(user, x), email_list)
 

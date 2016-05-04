@@ -110,7 +110,7 @@ class User(HDocumentBase):
     provider = StringField(max_length=20)
     openid = StringField(max_length=100)
     avatar_url = StringField()  # if avatar_url in UserProfile setted, this is not used
-    access_token = StringField(max_length=256)
+    access_token = StringField(max_length=1024)
     online = BooleanField(default=False)
     last_login_time = DateTimeField()
     login_times = IntField(default=1)  # a new user usually added upon whose first login, by default 1 thus
@@ -264,7 +264,7 @@ class HackathonNotice(HDocumentBase):
 class TeamWork(EmbeddedDocument):
     id = UUIDField(required=True)
     description = StringField()
-    type = IntField(required=True)
+    type = IntField(required=True)  # see TEAM_SHOW_TYPE
     uri = StringField()
     create_time = DateTimeField(default=get_now())
 

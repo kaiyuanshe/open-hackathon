@@ -1,1 +1,117 @@
-cloud.html
+<div class="box">
+  <h4 class="text-center" ng-show="!isProviderSelected">
+    {{'CLOUD_WEBPAGE_FIELDS.SELECT_CLOUD_PROVIDER' | translate}}
+  </h4>
+  <h4 class="text-center" ng-show="isProviderSelected">{{'CLOUD_WEBPAGE_FIELDS.CLOUD_PROVIDER' | translate}}</h4>
+</div>
+<div class="col-lg-6 col-md-9 center">
+  <form class="form-horizontal" ng-submit="setCloudProvider()" novalidate>
+    <fieldset class="detail-wrapper">
+      <div class="form-group form-horizontal">
+
+        <div ng-class="isProviderSelected ? 'col-md-6 text-center center' : 'col-md-6 text-center'"
+             ng-show="!isProviderSelected || (isProviderSelected && cloudProvider=='0')">
+          <label for="nocloud">
+            <input id="nocloud" class="hide" type="radio" value="0" ng-model="cloudProvider"
+                   ng-disabled="isProviderSelected" required>
+            <div class="info-box">
+              <div class="content text-centet">
+                <img src="/static/pic/no-cloud.jpg">
+              </div>
+              <footer class="text-center" ng-show="!isProviderSelected">
+                {{'CLOUD_WEBPAGE_FIELDS.USE' | translate}}
+              </footer>
+              <footer class="text-center" ng-show="isProviderSelected">
+                {{'CLOUD_WEBPAGE_FIELDS.USED' | translate}}
+              </footer>
+            </div>
+          </label>
+        </div>
+
+        <div ng-class="isProviderSelected ? 'col-md-6 text-center center' : 'col-md-6 text-center'"
+             ng-show="!isProviderSelected || (isProviderSelected && cloudProvider=='1')">
+          <label for="azure">
+            <input id="azure" class="hide" type="radio" value="1" ng-model="cloudProvider"
+                   ng-disabled="isProviderSelected" required>
+            <div class="info-box">
+              <div class="content text-centet">
+                <img src="/static/pic/azure-logo.jpg">
+              </div>
+              <footer class="text-center" ng-show="!isProviderSelected">
+                {{'CLOUD_WEBPAGE_FIELDS.USE' | translate}}
+              </footer>
+              <footer class="text-center" ng-show="isProviderSelected">
+                {{'CLOUD_WEBPAGE_FIELDS.USED' | translate}}
+              </footer>
+            </div>
+          </label>
+        </div>
+
+        <div ng-class="isProviderSelected ? 'col-md-6 text-center center' : 'col-md-6 text-center'"
+             ng-show="!isProviderSelected|| (isProviderSelected && cloudProvider=='2')">
+          <label for="alauda">
+            <input id="alauda" class="hide" type="radio" value="2" ng-model="cloudProvider"
+                   ng-disabled="isProviderSelected" required>
+            <div class="info-box">
+              <div class="content text-centet">
+                <img src="/static/pic/alauda-logo-white.jpg">
+              </div>
+              <footer class="text-center" ng-show="!isProviderSelected">
+                {{'CLOUD_WEBPAGE_FIELDS.USE' | translate}}
+              </footer>
+              <footer class="text-center" ng-show="isProviderSelected">
+                {{'CLOUD_WEBPAGE_FIELDS.USED' | translate}}
+              </footer>
+            </div>
+          </label>
+        </div>
+
+      </div>
+    </fieldset>
+
+    <footer>
+
+      <div class="text-center" ng-show="!isProviderSelected">
+        <div class="col-xs-12">
+          <button type="submit" class="btn btn-primary btn-long"
+                  ng-disabled="cloudProvider!='0' && cloudProvider!='1' && cloudProvider!='2'">
+            <i class="fa fa-arrow-circle-o-right"></i> {{'OK' | translate}}
+          </button>
+          <a> {{'CLOUD_WEBPAGE_FIELDS.CONFIRM_HINT' | translate}} </a>
+        </div>
+      </div>
+
+      <div class="text-center" ng-show="isProviderSelected && cloudProvider=='0'">
+        <div class="col-xs-12">
+          <a> {{'CLOUD_WEBPAGE_FIELDS.NO_CLOUD_HINT' | translate}} </a>
+        </div>
+      </div>
+
+      <div class="text-center" ng-show="isProviderSelected && !isAzureCertSet" ng-click="">
+        <div class="col-xs-12">
+          <a href="{{redirectTo('manage.azurecert')}}"> {{'CLOUD_WEBPAGE_FIELDS.SET_AZURECERT_HINT' | translate}} </a>
+        </div>
+      </div>
+
+      <div class="text-center" ng-show="isProviderSelected && !isTemplateSet">
+        <div class="col-xs-12">
+          <a href="{{redirectTo('manage.ve')}}"> {{'CLOUD_WEBPAGE_FIELDS.SET_TEMPLATE_HINT' | translate}} </a>
+        </div>
+      </div>
+
+      <div class="text-center" ng-show="isProviderSelected && cloudProvider == '1' && isTemplateSet && isAzureCertSet">
+        <div class="col-xs-12">
+          <a href="https://www.azure.cn/"> {{'CLOUD_WEBPAGE_FIELDS.AZURE_CONFIG_HINT' | translate}} </a>
+        </div>
+      </div>
+
+      <div class="text-center" ng-show="isProviderSelected && cloudProvider == '2' && isTemplateSet && isAzureCertSet">
+        <div class="col-xs-12">
+          <a href="http://www.alauda.cn/"> {{'CLOUD_WEBPAGE_FIELDS.ALAUDA_CONFIG_HINT' | translate}} </a>
+        </div>
+      </div>
+
+    </footer>
+  </form>
+
+</div>

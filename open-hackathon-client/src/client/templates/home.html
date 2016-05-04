@@ -4,85 +4,78 @@
 {% endblock %}
 {% block content %}
     {% if sc %}
-    <div id="sc_logo">
-        <div style="width:100%; height:200px; background:url('/static/pic/yantai_gov.png'); background-size:cover"></div>
-    </div>
+        <div id="sc_logo">
+            <div style="width:100%; height:200px; background:url('/static/pic/yantai_gov.png'); background-size:cover"></div>
+        </div>
     {% endif %}
+    <div class="banner">
 
-    <div id="carousel-example-generic" class="carousel slide carousel-fade" data-ride="carousel">
-        <ol class="carousel-indicators">
-            <li data-target="#carousel-example-generic" data-slide-to="0" class="active"></li>
-            <li data-target="#carousel-example-generic" data-slide-to="1"></li>
-            <li data-target="#carousel-example-generic" data-slide-to="2"></li>
-            <li data-target="#carousel-example-generic" data-slide-to="3"></li>
-            <li data-target="#carousel-example-generic" data-slide-to="4"></li>
-        </ol>
-        <div class="carousel-inner" role="listbox">
-            <div class="item active">
-                <div style="width: 100%; height: 100%;background: url('/static/pic/139-462x308-custom.jpg') 50% 50% / cover;"></div>
-                <div class="carousel-caption">
+        <div class="container">
+            <div class="carousel-left">
+                <div id="carousel-example-generic" class="carousel slide" data-ride="carousel">
+
+                    <ol class="carousel-indicators">
+                        <li data-target="#carousel-example-generic" data-slide-to="0" class="active"></li>
+                        <li data-target="#carousel-example-generic" data-slide-to="1"></li>
+                        <li data-target="#carousel-example-generic" data-slide-to="2"></li>
+                    </ol>
+                    <div class="carousel-inner" role="listbox">
+                        <div class="item active">
+
+                            <div style="width: 100%; height: 100%;background: url('/static/pic/139-462x308-custom.jpg') 50% 50% / cover;"></div>
+                            <div class="carousel-caption">
+                            </div>
+                        </div>
+                        <div class="item">
+                            <div style="width: 100%;height: 100%; background: url('/static/pic/hackthon-bg.jpg') 50% 50% / cover;"></div>
+
+                            <div class="carousel-caption">
+                            </div>
+                        </div>
+                        <div class="item">
+                            <div style=" width: 100%; height: 100%; background: url('/static/pic/Hackathon-Day1-07-695x463.jpg') 50% 50% / cover;"></div>
+                            <div class="carousel-caption">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Controls -->
+                    <a class="left carousel-control" href="#carousel-example-generic" role="button" data-slide="prev">
+                        <span class="glyphicon glyphicon-chevron-left glyphicon-menu-left" aria-hidden="true"></span>
+                        <span class="sr-only">Previous</span>
+                    </a>
+                    <a class="right carousel-control" href="#carousel-example-generic" role="button" data-slide="next">
+                        <span class="glyphicon glyphicon-chevron-right glyphicon-menu-right " aria-hidden="true"></span>
+                        <span class="sr-only">Next</span>
+                    </a>
                 </div>
             </div>
-            <div class="item">
-                <div style="width: 100%;height: 100%; background: url('/static/pic/hackthon-bg.jpg') 50% 50% / cover;"></div>
-
-                <div class="carousel-caption">
+            <div class="carousel-right">
+                <div class="item active" data-slide-to="0">
+                    <div style="width: 100%; height: 100%;background: url('/static/pic/139-462x308-custom.jpg') 50% 50% / cover;"></div>
                 </div>
-            </div>
-            <div class="item">
-                <div style=" width: 100%; height: 100%; background: url('/static/pic/Hackathon-Day1-07-695x463.jpg') 50% 50% / cover;"></div>
-
-                <div class="carousel-caption">
+                <div class="item" data-slide-to="1">
+                    <div style="width: 100%;height: 100%; background: url('/static/pic/hackthon-bg.jpg') 50% 50% / cover;"></div>
                 </div>
-            </div>
-            <div class="item">
-                <div style=" width: 100%; height: 100%; background: url('/static/pic/04_08_banner_1200.gif') 50% 50% / cover;"></div>
-
-                <div class="carousel-caption">
-                </div>
-            </div>
-            <div class="item">
-                <div style=" width: 100%; height: 100%; background: url('/static/pic/0709_hackforher_1080p.jpg') 50% 50% / cover;"></div>
-
-                <div class="carousel-caption">
+                <div class="item" data-slide-to="2">
+                    <div style=" width: 100%; height: 100%; background: url('/static/pic/Hackathon-Day1-07-695x463.jpg') 50% 50% / cover;"></div>
                 </div>
             </div>
         </div>
     </div>
-
     <div class="container oh-notice">
         <div class="row">
             <div class="col-md-12">
-                <div class="oh-notice-title"><img src="/static/pic/notice1-icon.png"> 最新公告：</div>
+                <div class="oh-notice-title green-text"><i class="fa fa-bullhorn green-text"></i> 最新公告：</div>
                 <ul class="oh-notice-list col-md-10">
                 </ul>
             </div>
-            {#
-        <div class="col-md-6">#}
-            {#
-            <div class="oh-notice-title"><img src="/static/pic/notice2-icon.png"> 热门话题：</div>
-            #}
-            {#
-            <ul class="oh-notice-list">#}
-            {#
-                <li><a href="#">话题名称 <span>[1324评论]</span></a></li>
-                #}
-            {#
-                <li><a href="#">话题名称 <span>[1324评论]</span></a></li>
-                #}
-            {#
-                <li><a href="#">话题名称 <span>[1324评论]</span></a></li>
-                #}
-            {#
-            </ul>
-            #}
-            {#
-        </div>
-        #}
         </div>
         <div class="btn-group btn-group-xs" role="group">
-            <button type="button" class="btn btn-default" id="btn-notice-down"><span class="glyphicon glyphicon-menu-down"></span></button>
-            <button type="button" class="btn btn-default" id="btn-notice-up"><span class="glyphicon glyphicon-menu-up"></span></button>
+            <button type="button" class="btn btn-default" id="btn-notice-down"><span
+                    class="glyphicon glyphicon-menu-down"></span></button>
+            <button type="button" class="btn btn-default" id="btn-notice-up"><span
+                    class="glyphicon glyphicon-menu-up"></span></button>
         </div>
     </div>
 
@@ -90,577 +83,396 @@
     <div id="info1" class="oh-grey-bg">
         <div class="container oh-feature oh-activity">
             <div class="oh-feature-header clearfix">
-                <h2>推荐活动</h2>
+                <div class="ob-feature-left">
+                    <h2>推荐活动</h2>
+                </div>
+                <div class="ob-feature-right">
+                    <ul class="oh-feature-tabs" role="tablist">
+                        <li class="active"><a href="#newest" role="tab" data-toggle="tab">最新发布</a></li>
+                        <li><a href="#hot" role="tab" data-toggle="tab">人气热点</a></li>
+                        <li><a href="#soon" role="tab" data-toggle="tab">即将开始</a></li>
+                        <li><a href="/events">更多活动 &gt;</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="ob-feature-body clearfix">
+                <div class="ob-feature-left">
+                    <img src="/static/images/index-07.png">
+                </div>
+                <div class="ob-feature-right">
+                    <div class="feature-tab">
+                        <div class="tab-content">
+                            <div role="tabpanel" class="tab-pane" id="hot">
+
+                                {% for item in hot_hackathons.get('items') %}
+
+                                    <div class="oh-item">
+                                        <div class="oh-header">
+                                            <a href="{{ url_for('hackathon', hackathon_name=item.name) }}"
+                                               target="_blank">
+                                                <img src="{{ item.banners[0] or url_for('static',filename='pic/homepage.jpg') }}"
+                                                     class="hackathon-thumb" alt="{{ item.display_name }}">
+                                            </a>
+                                            {% if item.ribbon != "" %}
+                                                <span class="oh-flag">{{ item.ribbon }}</span>
+                                            {% endif %}
+                                            {% if current_user.is_authenticated() %}
+                                                <a href="javascript:void(0);" role="oh-like"
+                                                   class="oh-collect {% if item.get('like') is not none %} active {% endif %}"
+                                                   data-name="{{ item.name }}"
+                                                ><span>感兴趣</span>
+                                                    <img src="/static/pic/pushpin-icon.png">
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                        <div class="oh-body">
+                                            <h3>
+                                                <a href="{{ url_for('hackathon', hackathon_name=item.name) }}"
+                                                   target="_blank">
+                                                    {{ item.display_name }}
+                                                </a>
+                                            </h3>
+                                            <p class="oh-desc"><a class="grey-link"
+                                                                  href="{{ url_for('hackathon', hackathon_name=item.name) }}"
+                                                                  target="_blank">
+                                                {{ item.get("short_description") | limitTo(60) }}</a></p>
+                                            <div class="oh-time">
+                                                <div><span
+                                                        class="fa fa-calendar green-text"></span> {{ item.event_start_time | date("%y/%m/%d
+                                            %a %H:%M") }}
+                                                </div>
+                                                <div>
+                                                    <span class="fa fa-map-marker green-text"></span>
+                                                    {{ item.location | limitTo(2) or "线上" }}
+                                                </div>
+                                            </div>
+                                            <div class="oh-progressbar"><span
+                                                    style="width: {{ activity_progress(item.event_start_time ,item.event_end_time) }}%"></span>
+                                            </div>
+                                            <ul class="oh-tags">
+                                                {% for name in item.tags %}
+                                                    <li>
+                                                        <a href="#">{{ name }}</a>
+                                                        {% if loop.index < (item.tag | length) %},{% endif %}
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                        <div class="oh-footer">
+                                            <table>
+                                                <tbody>
+                                                <tr>
+                                                    <td class="text-left">
+                                                        <div> 报名截止
+                                                            <span>{{ item.registration_end_time | deadline }}天</span>
+                                                        </div>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <div>
+                                                            <i class="fa fa-heart"></i>
+                                                            <span data-likes="{{ item.name }}">{{ item.stat.like or 0 }}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td class="text-right">
+                                                        <div>
+                                                            <span>{{ item.stat.register or 0 }}</span>人报名
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div role="tabpanel" class="tab-pane" id="soon">
+                                {% for item in soon_hackathon.get('items') %}
+
+                                    <div class="oh-item">
+                                        <div class="oh-header">
+                                            <a href="{{ url_for('hackathon', hackathon_name=item.name) }}"
+                                               target="_blank">
+                                                <img src="{{ item.banners[0] or url_for('static',filename='pic/homepage.jpg') }}"
+                                                     class="hackathon-thumb" alt="{{ item.display_name }}">
+                                            </a>
+                                            {% if item.ribbon != "" %}
+                                                <span class="oh-flag">{{ item.ribbon }}</span>
+                                            {% endif %}
+                                            {% if current_user.is_authenticated() %}
+                                                <a href="javascript:void(0);" role="oh-like"
+                                                   class="oh-collect {% if item.get('like') is not none %} active {% endif %}"
+                                                   data-name="{{ item.name }}"
+                                                ><span>感兴趣</span>
+                                                    <img src="/static/pic/pushpin-icon.png">
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                        <div class="oh-body">
+                                            <h3>
+                                                <a href="{{ url_for('hackathon', hackathon_name=item.name) }}"
+                                                   target="_blank">
+                                                    {{ item.display_name }}
+                                                </a>
+                                            </h3>
+                                            <p class="oh-desc"><a class="grey-link"
+                                                                  href="{{ url_for('hackathon', hackathon_name=item.name) }}"
+                                                                  target="_blank">
+                                                {{ item.get("short_description") | limitTo(60) }}</a></p>
+                                            <div class="oh-time">
+                                                <div><span
+                                                        class="fa fa-calendar green-text"></span> {{ item.event_start_time | date("%y/%m/%d
+                                            %a %H:%M") }}
+                                                </div>
+                                                <div>
+                                                    <span class="fa fa-map-marker green-text"></span>
+                                                    {{ item.location | limitTo(2) or "线上" }}
+                                                </div>
+                                            </div>
+                                            <div class="oh-progressbar"><span
+                                                    style="width: {{ activity_progress(item.event_start_time ,item.event_end_time) }}%"></span>
+                                            </div>
+                                            <ul class="oh-tags">
+                                                {% for name in item.tags %}
+                                                    <li>
+                                                        <a href="#">{{ name }}</a>
+                                                        {% if loop.index < (item.tag | length) %},{% endif %}
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                        <div class="oh-footer">
+                                            <table>
+                                                <tbody>
+                                                <tr>
+                                                    <td class="text-left">
+                                                        <div> 报名截止
+                                                            <span>{{ item.registration_end_time | deadline }}天</span>
+                                                        </div>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <div>
+                                                            <i class="fa fa-heart"></i>
+                                                            <span data-likes="{{ item.name }}">{{ item.stat.like or 0 }}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td class="text-right">
+                                                        <div>
+                                                            <span>{{ item.stat.register or 0 }}</span>人报名
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div role="tabpanel" class="tab-pane active" id="newest">
+                                {% for item in newest_hackathons.get('items') %}
+
+                                    <div class="oh-item">
+                                        <div class="oh-header">
+                                            <a href="{{ url_for('hackathon', hackathon_name=item.name) }}"
+                                               target="_blank">
+                                                <img src="{{ item.banners[0] or url_for('static',filename='pic/homepage.jpg') }}"
+                                                     class="hackathon-thumb" alt="{{ item.display_name }}">
+                                            </a>
+                                            {% if item.ribbon != "" %}
+                                                <span class="oh-flag">{{ item.ribbon }}</span>
+                                            {% endif %}
+                                            {% if current_user.is_authenticated() %}
+                                                <a href="javascript:void(0);" role="oh-like"
+                                                   class="oh-collect {% if item.get('like') is not none %} active {% endif %}"
+                                                   data-name="{{ item.name }}"
+                                                ><span>感兴趣</span>
+                                                    <img src="/static/pic/pushpin-icon.png">
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                        <div class="oh-body">
+                                            <h3>
+                                                <a href="{{ url_for('hackathon', hackathon_name=item.name) }}"
+                                                   target="_blank">
+                                                    {{ item.display_name }}
+                                                </a>
+                                            </h3>
+                                            <p class="oh-desc"><a class="grey-link"
+                                                                  href="{{ url_for('hackathon', hackathon_name=item.name) }}"
+                                                                  target="_blank">
+                                                {{ item.get("short_description") | limitTo(60) }}</a></p>
+                                            <div class="oh-time">
+                                                <div><span
+                                                        class="fa fa-calendar green-text"></span> {{ item.event_start_time | date("%y/%m/%d
+                                            %a %H:%M") }}
+                                                </div>
+                                                <div>
+                                                    <span class="fa fa-map-marker green-text"></span>
+                                                    {{ item.location | limitTo(2) or "线上" }}
+                                                </div>
+                                            </div>
+                                            <div class="oh-progressbar"><span
+                                                    style="width: {{ activity_progress(item.event_start_time ,item.event_end_time) }}%"></span>
+                                            </div>
+                                            <ul class="oh-tags">
+                                                {% for name in item.tags %}
+                                                    <li>
+                                                        <a href="#">{{ name }}</a>
+                                                        {% if loop.index < (item.tag | length) %},{% endif %}
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                        <div class="oh-footer">
+                                            <table>
+                                                <tbody>
+                                                <tr>
+                                                    <td class="text-left">
+                                                        <div> 报名截止
+                                                            <span>{{ item.registration_end_time | deadline }}天</span>
+                                                        </div>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <div>
+                                                            <i class="fa fa-heart"></i>
+                                                            <span data-likes="{{ item.name }}">{{ item.stat.like or 0 }}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td class="text-right">
+                                                        <div>
+                                                            <span>{{ item.stat.register or 0 }}</span>人报名
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="info3" class="hide">
+    </div>
+    <div class="container oh-feature">
+        <div class="oh-feature-header clearfix">
+            <div class="ob-feature-left">
+                <h2>成果展示</h2>
+            </div>
+            <div class="ob-feature-right">
                 <ul class="oh-feature-tabs" role="tablist">
-                    <li class="active"><a href="#newest" role="tab" data-toggle="tab">最新发布</a></li>
-                    <li><a href="#hot" role="tab" data-toggle="tab">人气热点</a></li>
-                    <li><a href="#soon" role="tab" data-toggle="tab">即将开始</a></li>
-                    <li><a href="/events" class="oh-def-link">更多活动 &gt;</a></li>
+                    <li class="active"><a href="#award" role="tab" data-toggle="tab">获奖作品</a></li>
                 </ul>
             </div>
-            <div class="ob-feature-body">
-                <div class="tab-content">
-                    <div role="tabpanel" class="tab-pane" id="hot">
-                        <div class="row">
-                            {% for item in hot_hackathons.get('items') %}
-                                <div class="col-lg-4 col-md-4">
-                                    <div class="oh-item">
-                                        <div class="oh-header">
-                                            <a href="{{ url_for('hackathon', hackathon_name=item.name) }}"
-                                               target="_blank">
-                                                <img src="{{ item.banners[0] or url_for('static',filename='pic/homepage.jpg') }}"
-                                                     class="hackathon-thumb" alt="{{ item.display_name }}">
-                                            </a>
-                                            {% if item.ribbon != "" %}
-                                                <span class="oh-flag">{{ item.ribbon }}</span>
-                                            {% endif %}
-                                            {% if current_user.is_authenticated() %}
-                                                <a href="javascript:void(0);" role="oh-like"
-                                                   class="oh-collect {% if item.get('like') is not none %} active {% endif %}"
-                                                   data-name="{{ item.name }}"
-                                                        ><span>感兴趣</span>
-                                                    <img src="/static/pic/pushpin-icon.png">
-                                                </a>
-                                            {% endif %}
-                                        </div>
-                                        <div class="oh-body">
-                                            <h3>
-                                                <a href="{{ url_for('hackathon', hackathon_name=item.name) }}"
-                                                   target="_blank">
-                                                    {{ item.display_name }}
-                                                </a>
-                                            </h3>
-                                            <ul class="oh-tags">
-                                                {% for name in item.tags %}
-                                                    <li>
-                                                        <a href="#">{{ name }}</a>
-                                                        {% if loop.index < (item.tag | length) %},{% endif %}
-                                                    </li>
-                                                {% endfor %}
-                                            </ul>
-                                            <p class="oh-desc"><a class="grey-link"
-                                                                  href="{{ url_for('hackathon', hackathon_name=item.name) }}"
-                                                                  target="_blank">
-                                                {{ item.get("short_description") | limitTo(60) }}</a>
-                                            </p>
+        </div>
 
-                                            <div class="oh-time">
-                                                <div><span
-                                                        class="fa fa-calendar"></span> {{ item.event_start_time | date("%y/%m/%d
-                                            %a %H:%M") }}
-                                                </div>
-                                                <div>
-                                                    <span class="fa fa-map-marker"></span>
-                                                    {{ item.location | limitTo(2) or "线上" }}
-                                                </div>
-                                            </div>
-                                            <div class="oh-progressbar"><span
-                                                    style="width: {{ activity_progress(item.event_start_time ,item.event_end_time) }}%"></span>
-                                            </div>
-                                            <table>
-                                                <tbody>
-                                                <tr>
-                                                    <td class="text-left">
-                                                        <div>
-                                                            <span>{{ item.registration_end_time | deadline }}天</span>
-                                                            报名截止
-                                                        </div>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <div>
-                                                            <span data-likes="{{ item.name }}">{{ item.stat.like or 0 }}</span>
-                                                            感兴趣
-                                                        </div>
-                                                    </td>
-                                                    <td class="text-right">
-                                                        <div>
-                                                            <span>{{ item.stat.register or 0 }}/{{ item.config.max_enrollment == '0' and '无限' or item.config.max_enrollment }}</span>
-                                                            报名人数
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                                </tbody>
-                                            </table>
-                                            <hr>
-                                            <div class="oh-org">
-                                                {% for org in item.organizer %}
-                                                    <a href="{{ org.homepage }}" data-toggle="tooltip"
-                                                       data-placement="top"
-                                                       title="{{ org.name }}">
-                                                        <img src="{{ org.logo }}"
-                                                             alt="{{ org.name }}">
-                                                    </a>
-                                                {% endfor %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div role="tabpanel" class="tab-pane" id="soon">
-                        <div class="row">
-                            {% for item in soon_hackathon.get('items') %}
-                                <div class="col-lg-4 col-md-4">
-                                    <div class="oh-item">
-                                        <div class="oh-header">
-                                            <a href="{{ url_for('hackathon', hackathon_name=item.name) }}"
-                                               target="_blank">
-                                                <img src="{{ item.banners[0] or url_for('static',filename='pic/homepage.jpg') }}"
-                                                     class="hackathon-thumb" alt="{{ item.display_name }}">
-                                            </a>
-                                            {% if item.ribbon != "" %}
-                                                <span class="oh-flag">{{ item.ribbon }}</span>
-                                            {% endif %}
-                                            {% if current_user.is_authenticated() %}
-                                                <a href="javascript:void(0);" role="oh-like"
-                                                   class="oh-collect {% if item.get('like') is not none %} active {% endif %}"
-                                                   data-name="{{ item.name }}"
-                                                        ><span>感兴趣</span>
-                                                    <img src="/static/pic/pushpin-icon.png">
-                                                </a>
-                                            {% endif %}
-                                        </div>
-                                        <div class="oh-body">
-                                            <h3>
-                                                <a href="{{ url_for('hackathon', hackathon_name=item.name) }}"
-                                                   target="_blank">
-                                                    {{ item.display_name }}
-                                                </a>
-                                            </h3>
-                                            <ul class="oh-tags">
-                                                {% for name in item.tags %}
-                                                    <li>
-                                                        <a href="#">{{ name }}</a>
-                                                        {% if loop.index < (item.tag | length) %},{% endif %}
-                                                    </li>
-                                                {% endfor %}
-                                            </ul>
-                                            <p class="oh-desc"><a class="grey-link"
-                                                                  href="{{ url_for('hackathon', hackathon_name=item.name) }}"
-                                                                  target="_blank">
-                                                {{ item.get("short_description") | limitTo(60) }}</a>
-                                            </p>
+        <div class="ob-feature-body oh-events">
+            <div class="ob-feature-left">
+                <img src="/static/images/index-06.png">
+            </div>
+            <div class="ob-feature-right">
+                <div class="feature-tab">
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="award">
 
-                                            <div class="oh-time">
-                                                <div><span
-                                                        class="fa fa-calendar"></span> {{ item.event_start_time | date("%y/%m/%d
-                                            %a %H:%M") }}
-                                                </div>
-                                                <div>
-                                                    <span class="fa fa-map-marker"></span>
-                                                    {{ item.location | limitTo(2) or "线上" }}
-                                                </div>
-                                            </div>
-                                            <div class="oh-progressbar"><span
-                                                    style="width: {{ activity_progress(item.event_start_time ,item.event_end_time) }}%"></span>
-                                            </div>
-                                            <table>
-                                                <tbody>
-                                                <tr>
-                                                    <td class="text-left">
-                                                        <div>
-                                                            <span>{{ item.registration_end_time | deadline }}天</span>
-                                                            报名截止
-                                                        </div>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <div>
-                                                            <span data-likes="{{ item.name }}">{{ item.stat.like or 0 }}</span>
-                                                            感兴趣
-                                                        </div>
-                                                    </td>
-                                                    <td class="text-right">
-                                                        <div>
-                                                            <span>{{ item.stat.register or 0 }}/{{ item.config.max_enrollment == '0' and '无限' or item.config.max_enrollment }}</span>
-                                                            报名人数
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                                </tbody>
-                                            </table>
-                                            <hr>
-                                            <div class="oh-org">
-                                                {% for org in item.organizer %}
-                                                    <a href="{{ org.homepage }}" data-toggle="tooltip"
-                                                       data-placement="top"
-                                                       title="{{ org.name }}">
-                                                        <img src="{{ org.logo }}"
-                                                             alt="{{ org.name }}">
-                                                    </a>
-                                                {% endfor %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div role="tabpanel" class="tab-pane active" id="newest">
-                        <div class="row">
-                            {% for item in newest_hackathons.get('items') %}
-                                <div class="col-lg-4 col-md-4">
-                                    <div class="oh-item">
-                                        <div class="oh-header">
-                                            <a href="{{ url_for('hackathon', hackathon_name=item.name) }}"
-                                               target="_blank">
-                                                <img src="{{ item.banners[0] or url_for('static',filename='pic/homepage.jpg') }}"
-                                                     class="hackathon-thumb" alt="{{ item.display_name }}">
-                                            </a>
-                                            {% if item.ribbon != "" %}
-                                                <span class="oh-flag">{{ item.ribbon }}</span>
-                                            {% endif %}
-                                            {% if current_user.is_authenticated() %}
-                                                <a href="javascript:void(0);" role="oh-like"
-                                                   class="oh-collect {% if item.get('like') is not none %} active {% endif %}"
-                                                   data-name="{{ item.name }}"
-                                                        ><span>感兴趣</span>
-                                                    <img src="/static/pic/pushpin-icon.png">
-                                                </a>
-                                            {% endif %}
-                                        </div>
-                                        <div class="oh-body">
-                                            <h3>
-                                                <a href="{{ url_for('hackathon', hackathon_name=item.name) }}"
-                                                   target="_blank">
-                                                    {{ item.display_name }}
-                                                </a>
-                                            </h3>
-                                            <ul class="oh-tags">
-                                                {% for name in item.tags %}
-                                                    <li>
-                                                        <a href="#">{{ name }}</a>
-                                                        {% if loop.index < (item.tag | length) %},{% endif %}
-                                                    </li>
-                                                {% endfor %}
-                                            </ul>
-                                            <p class="oh-desc"><a class="grey-link"
-                                                                  href="{{ url_for('hackathon', hackathon_name=item.name) }}"
-                                                                  target="_blank">
-                                                {{ item.get("short_description") | limitTo(60) }}</a>
-                                            </p>
-
-                                            <div class="oh-time">
-                                                <div><span
-                                                        class="fa fa-calendar"></span> {{ item.event_start_time | date("%y/%m/%d
-                                            %a %H:%M") }}
-                                                </div>
-                                                <div>
-                                                    <span class="fa fa-map-marker"></span>
-                                                    {{ item.location | limitTo(2) or "线上" }}
-                                                </div>
-                                            </div>
-                                            <div class="oh-progressbar"><span
-                                                    style="width: {{ activity_progress(item.event_start_time ,item.event_end_time) }}%"></span>
-                                            </div>
-                                            <table>
-                                                <tbody>
-                                                <tr>
-                                                    <td class="text-left">
-                                                        <div>
-                                                            <span>{{ item.registration_end_time | deadline }}天</span>
-                                                            报名截止
-                                                        </div>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <div>
-                                                            <span data-likes="{{ item.name }}">{{ item.stat.like or 0 }}</span>
-                                                            感兴趣
-                                                        </div>
-                                                    </td>
-                                                    <td class="text-right">
-                                                        <div>
-                                                            <span>{{ item.stat.register or 0 }}/{{ item.config.max_enrollment == '0' and '无限' or item.config.max_enrollment }}</span>
-                                                            报名人数
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                                </tbody>
-                                            </table>
-                                            <hr>
-                                            <div class="oh-org">
-                                                {% for org in item.organizer %}
-                                                    <a href="{{ org.homepage }}" data-toggle="tooltip"
-                                                       data-placement="top"
-                                                       title="{{ org.name }}">
-                                                        <img src="{{ org.logo }}"
-                                                             alt="{{ org.name }}">
-                                                    </a>
-                                                {% endfor %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            {% endfor %}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    {% if current_user.is_authenticated() == False %}
-        <div id="info2" class="oh-process">
-            <div class="container text-center">
-                <h2 class="oh-title">黑客松活动流程</h2>
-
-                <div class="row oh-wrap">
-                    <div class="col-md-3 oh-item">
-                        <img src="/static/pic/release-icon.png" alt="主办方发布活动">
-                    </div>
-                    <div class="col-md-3 oh-item">
-                        <img src="/static/pic/team-icon.png" alt="参加者报名组队">
-                    </div>
-                    <div class="col-md-3 oh-item">
-                        <img src="/static/pic/competition-icon.png" alt="参加者线上竞赛">
-                    </div>
-                    <div class="col-md-3">
-                        <img src="/static/pic/choose-icon.png" alt="主办方评选奖项">
-                    </div>
-                </div>
-                <a href="https://github.com/msopentechcn/open-hackathon/wiki/%E5%BC%80%E6%94%BE%E9%BB%91%E5%AE%A2%E6%9D%BE%E5%B9%B3%E5%8F%B0%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97"
-                   target="_blank" class="btn btn-help">新手帮助 <span>&gt;</span></a>
-            </div>
-        </div>
-    {% endif %}
-    <div id="info3" class="hide">
+    <div id="info5" class="oh-grey-bg">
         <div class="container oh-feature">
-            <div class="oh-feature-header clearfix">
-                <h2>近期成果</h2>
-                <a href="#info3" class="more">更多精彩&gt;</a>
-            </div>
-            <div class="ob-feature-body oh-events">
-                <div class="row">
-                    <div class="col-lg-3 col-md-3">
-                        <ul class="oh-tabs" role="tablist">
 
-                        </ul>
-                    </div>
-                    <div class="col-lg-9 col-md-9">
-                        <div class="tab-content">
-
-                        </div>
-                    </div>
+            <div class="organizer_left">
+                <div class="oh-feature-header clearfix">
+                    <h2>合作主办</h2>
+                    <!--<a href="#info5" class="more">更多主办方&gt;</a>-->
                 </div>
-            </div>
-        </div>
-
-    </div>
-    <div id="info4" class="">
-        <div class="container oh-feature oh-users">
-            <div class="oh-feature-header clearfix">
-                <h2>本季达人</h2>
-                <a href="#info4" class="more">更多达人&gt;</a>
-            </div>
-            <div class="ob-feature-body">
-                <div class="row" id="talent_list">
-
-                </div>
-            </div>
-        </div>
-    </div>
-    <div id="info5" class="">
-        <div class="container oh-feature">
-            <div class="oh-feature-header clearfix">
-                <h2>合作主办</h2>
-                <!--<a href="#info5" class="more">更多主办方&gt;</a>-->
-            </div>
-            <div class="ob-feature-body ">
-                <div class="oh-organizers">
-                    <div class="col-md-3 col-xs-6">
+                <div class="ob-feature-body ">
+                    <div class="oh-organizers">
                         <div class="oh-item">
-                            <a href="javascirp:;"><img src="/static/pic/microsoft.jpg" alt="microsoft"></a>
-
+                            <a href="http://www.microsoft.com">
+                                <img src="/static/images/microsoft.png" alt="microsoft">
+                            </a>
                             <div class="oh-body">
                                 <p><a href="http://www.microsoft.com" target="_blank">微软</a></p>
-
-                                {#
-                            <div class="oh-count">#}
-                                {#
-                                <div><span>1</span> 活动正在进行</div>
-                                #}
-                                {#
-                                <div><span>4</span> 活动已经发布</div>
-                                #}
-                                {#
-                            </div>
-                            #}
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-3 col-xs-6">
                         <div class="oh-item">
-
-                            <a href="javascirp:;"><img
-                                    src="/static/pic/gitcafe-small.png"
-                                    alt="gitcafe"></a>
-
+                            <a href="https://gitcafe.com">
+                                <img src="/static/images/gitcafe-small.png" alt="gitcafe"></a>
                             <div class="oh-body">
                                 <p><a href="https://gitcafe.com" target="_blank">Gitcafe</a></p>
-
-                                {#
-                            <div class="oh-count">#}
-                                {#
-                                <div><span>1</span> 活动正在进行</div>
-                                #}
-                                {#
-                                <div><span>4</span> 活动已经发布</div>
-                                #}
-                                {#
-                            </div>
-                            #}
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-3 col-xs-6">
                         <div class="oh-item">
-                            <a href="javascirp:;"><img
-                                    src="/static/pic/UbuntuKylinnew.png"
-                                    alt="ukylin"></a>
-
+                            <a href="http://www.ubuntukylin.com/">
+                                <img src="/static/images/UbuntuKylinnew.png" alt="ukylin">
+                            </a>
                             <div class="oh-body">
                                 <p><a href="http://www.ubuntukylin.com/" target="_blank">优麒麟</a></p>
-
-                                {#
-                            <div class="oh-count">#}
-                                {#
-                                <div><span>1</span> 活动正在进行</div>
-                                #}
-                                {#
-                                <div><span>4</span> 活动已经发布</div>
-                                #}
-                                {#
-                            </div>
-                            #}
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-3 col-xs-6">
                         <div class="oh-item">
-                            <a href="javascirp:;"><img
-                                    src="/static/pic/alauda-small.png"
-                                    alt="alauda"></a>
-
+                            <a href="http://www.alauda.cn/">
+                                <img src="/static/images/alauda-small.png" alt="alauda">
+                            </a>
                             <div class="oh-body">
                                 <p><a href="http://www.alauda.cn/" target="_blank">灵雀云</a></p>
-
-                                {#
-                            <div class="oh-count">#}
-                                {#
-                                <div><span>1</span> 活动正在进行</div>
-                                #}
-                                {#
-                                <div><span>4</span> 活动已经发布</div>
-                                #}
-                                {#
-                            </div>
-                            #}
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-3 col-xs-6">
                         <div class="oh-item">
-                            <a href="javascirp:;"><img src="http://e.jikexueyuan.com/headerandfooter/images/logo.png"
-                                                       alt="jikexueyuan"></a>
-
+                            <a href="http://www.jikexueyuan.com/">
+                                <img src="/static/images/jikexueyuan.png"
+                                     alt="jikexueyuan">
+                            </a>
                             <div class="oh-body">
                                 <p><a href="http://www.jikexueyuan.com/" target="_blank">极客学院</a></p>
-
-                                {#
-                            <div class="oh-count">#}
-                                {#
-                                <div><span>1</span> 活动正在进行</div>
-                                #}
-                                {#
-                                <div><span>4</span> 活动已经发布</div>
-                                #}
-                                {#
-                            </div>
-                            #}
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-3 col-xs-6">
                         <div class="oh-item">
-                            <a href="javascirp:;"><img
-                                    src="/static/pic/jstorm-small.png"
-                                    alt="jstorm"></a>
-
+                            <a href="https://github.com/alibaba/jstorm/wiki">
+                                <img src="/static/images/jstorm-small.png" alt="jstorm">
+                            </a>
                             <div class="oh-body">
                                 <p><a href="https://github.com/alibaba/jstorm/wiki" target="_blank">JStorm</a></p>
-
-                                {#
-                            <div class="oh-count">#}
-                                {#
-                                <div><span>1</span> 活动正在进行</div>
-                                #}
-                                {#
-                                <div><span>4</span> 活动已经发布</div>
-                                #}
-                                {#
-                            </div>
-                            #}
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-3 col-xs-6">
                         <div class="oh-item">
-                            <a href="javascirp:;"><img
-                                    src="/static/pic/wicresoft-small.png"
-                                    alt="wicresoft"></a>
-
+                            <a href="http://www.wicresoft.com/">
+                                <img src="/static/images/wicresoft-small.png" alt="wicresoft">
+                            </a>
                             <div class="oh-body">
                                 <p><a href="http://www.wicresoft.com/" target="_blank">微创科技</a></p>
-
-                                {#
-                            <div class="oh-count">#}
-                                {#
-                                <div><span>1</span> 活动正在进行</div>
-                                #}
-                                {#
-                                <div><span>4</span> 活动已经发布</div>
-                                #}
-                                {#
-                            </div>
-                            #}
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-3 col-xs-6">
                         <div class="oh-item">
-                            <a href="javascirp:;"><img src="https://www.juhe.cn/themes/v4/public/images/logo.png"
-                                                       alt="juhe"></a>
-
+                            <a href="https://www.juhe.cn/">
+                                <img src="/static/images/juhe.png" alt="juhe">
+                            </a>
                             <div class="oh-body">
                                 <p><a href="https://www.juhe.cn/" target="_blank">聚合数据</a></p>
-
-                                {#
-                            <div class="oh-count">#}
-                                {#
-                                <div><span>1</span> 活动正在进行</div>
-                                #}
-                                {#
-                                <div><span>4</span> 活动已经发布</div>
-                                #}
-                                {#
-                            </div>
-                            #}
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <div class="users_right">
+                <div class="oh-feature-header clearfix">
+                    <h2>活跃用户</h2>
+                    <a href="#info4" class="more">更多达人&gt;</a>
+                </div>
+                <div class="ob-feature-body oh-users">
+                    <div id="talent_list">
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-    <div id="oh_lift">
-        <ul class="nav nav-tabs" role="tablist">
-            <li><a href="#info1"><span>推荐活动</span><i></i></a></li>
-            {% if current_user.is_authenticated() == False %}
-                <li><a href="#info2"><span>活动流程</span><i></i></a></li>
-            {% endif %}
-            {#        <li><a href="#info3"><span>近期成果</span><i></i></a></li>#}
-            <li><a href="#info4"><span>本季达人</span><i></i></a></li>
-            <li><a href="#info5"><span>合作主办</span><i></i></a></li>
-        </ul>
     </div>
 {% endblock %}
 
@@ -680,96 +492,41 @@
 
     </script>
     <script id="talent_list_template" type="text/x-jquery-tmpl">
-          <div class="col-lg-2 col-md-4 col-xs-6">
-                <div class="oh-item">
-                    <div class="oh-header">
-                        <a href="/user/p_${id}"><img src="${avatar_url}" onerror="javascript:this.src='/static/pic/anon_user.png'"></a>
-                    </div>
-                    <div class="oh-body">
-                        <p class="text-center"><a href="javascript:;">${nickname}</a></p>
-                    </div>
-                </div>
+      {% raw %}
+        <div class="media oh-item">
+          <div class="media-left">
+              <a href="/user/p_${id}">
+                <img src="${avatar_url}" onerror="javascript:this.src='/static/pic/anon_user.png'">
+              </a>
           </div>
-
-    </script>
-    <script id="award_title_template" type="text/x-jquery-tmpl">
-     {% raw %}
-        <li>
-            <a href="#${hackathon.name}" role="tab" data-toggle="tab">
-                ${hackathon.display_name}
-
-                <div class="oh-org">
-                    {{each organizer}}
-                    <a href="${homepage }" data-toggle="tooltip" data-placement="top" title="${name}">
-                        <img src="${logo}" alt="${name}">
-                    </a>
-                    {{/each }}
-                </div>
-            </a>
-        </li>
-    {% endraw %}
-
+          <div class="media-body">
+            <a class="media-heading" href="/user/p_${id}">${nickname}</a>
+            <p>${$item.getCareertype($data)}</p>
+          </div>
+        </div>
+        {% endraw %}
     </script>
     <script id="award_list_template" type="text/x-jquery-tmpl">
     {% raw %}
-        <div role="tabpanel" class="tab-pane" id="${hackathon.name}">
-    <div class="row">
-        <div class="col-xs-5 oh-desc">
-            <h3 class="oh-title">${hackathon.display_name}</h3>
-            <div class="oh-count">
-                <div><span>${hackathon.stat.register}</span> 人报名</div>
-                <div><span>${hackathon.stat.like || 0}</span> 人感兴趣</div>
-            </div>
-            <p>${hackathon.short_description} </p>
-            <hr>
-            <h3 class="oh-title">获奖团队：${name}</h3>
-            <ul class="oh-list">
-                {{each members}}
-                    <li>
-                        <a href="/user/p_${id}"><img src="${user.avatar_url}"></a>
-                        <p><a class="grey-link" href="javasript:;">${user.nicknam}</a></p>
-                    </li>
-                {{/each}}
-            </ul>
+     <div class="item">
+        <div class="header" data-parent>
+            <a href="${$item.link(hackathon.name,id)}">
+                <img src="${cover}" class="oh-thumbnail" alt="${project_name}" onerror="javasctip:this.src='/static/images/project_none.png'" onload="oh.comm.imgLoad(this)" >
+            </a>
         </div>
-        <div class="col-xs-7 oh-show">
-            <div class="oh-thumbnail">
-                {{if works.length>0 }}
-                <div id="hackathon-${hackathon.id}" class="carousel slide" data-ride="carousel" data-wrap="true">
-                    <ol class="carousel-indicators">
-                        {{each works}}
-                            <li data-target="#hackathon-${$data.hackathon.id}" data-slide-to="${$index}"></li>
-                        {{/each}}
-                    </ol>
-                    <div class="carousel-inner" role="listbox">
-                        {{each works}}
-                            <div class="item">
-                                {{if type == 0}}
-                                    <img src="${uri}" alt="${note}">
-                                {{else type == 1}}
-                                     {{html uri}}
-                                {{else type == 2}}
-                                     ${note}:<a href="${uri}" target="_blank">${uri}</a>
-                                {{else type >= 3 && type<=5}}
-                                     <iframe src="https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(uri)}" seamless="seamless" frameborder="0" scrolling="yes"></iframe>
-                                {{else type == 6}}
-                                     <object data="${uri}" type="application/pdf" width="100%" height="100%">
-                                         <p>Your browser doesn't support PDF viewing. Please install PDF viewer plugin!</p>
-                                     </object>
-                                {{else}}
-                                    <li><a href="${uri}" target="_blank">${note}</a></li>
-                                {{/if}}
-                            </div>
-                        {{/each}}
-                    </div>
-                </div>
-                {{/if}}
+        <div class="body">
+            <h4>${project_name || '【未取名】'}</h4>
+            <p>团队名：<a href="${$item.link(hackathon.name,id)}">${name}</a></p>
+            <div class="desc">
+                ${description}
             </div>
+         </div>
+        <div class="footer">
+            <p> {{html $item.getlinks(hackathon.name,works,id)}}</p>
         </div>
+      </div>
     </div>
-</div>
   {% endraw %}
-
     </script>
     <script type="text/javascript" src="/static/js/jquery/moment.min.js"></script>
     <script type="text/javascript" src="/static/js/views/oh.home.js"></script>

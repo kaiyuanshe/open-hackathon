@@ -501,7 +501,12 @@ label.radiobox input[type=radio]+span:before {
   font-weight: 100;
   margin-right: 5px;
 }
-
+label.checkbox input[type=checkbox]+span:empty, 
+label.radiobox input[type=radio]+span:empty, 
+label.checkbox input[type=checkbox]+span:empty:before,
+label.radiobox input[type=radio]+span:empty:before{
+    margin-right: 0px;
+}
 label.checkbox input[type=checkbox]:checked+span,
 label.radiobox input[type=radio]:checked+span {
   font-weight: 600;
@@ -887,12 +892,6 @@ label.switchbox input[type=checkbox][disabled]:checked ~ .switchbox-handle i {
   background-position: 7px 7px;
 }
 
-.provider.gitcafe:before {
-  content: "";
-  background-repeat: no-repeat;
-  background-position: 7px 7px;
-}
-
 @media (min-width: 768px) {
   .modal-dialog {
     margin: 60px auto;
@@ -1250,6 +1249,14 @@ input[type=radio]:checked+.info-box footer {
   font-weight: normal;
 }
 
+.table > thead > tr > th {
+  border-width: 1px;
+}
+
+.table > tbody > tr:last-child > td {
+  border-bottom: 1px solid #dddddd;
+}
+
 .table-primary thead {
   background-color: #019e48;
   color: #fff;
@@ -1273,4 +1280,63 @@ input[type=radio]:checked+.info-box footer {
 .table-danger thead {
   background-color: #cf3c0e;
   color: #fff;
+}
+
+.list-group-item:first-child,
+.list-group-item:last-child {
+  border-radius: 0px;
+}
+
+.list-group .list-group-item {
+  border-left: none;
+  border-right: none;
+  height: 41px;
+  border-color: #d0d2d3;
+}
+
+.list-group .list-group-item:first-child {
+  border-color: transparent;
+}
+
+.list-group .list-group-item:last-child {
+  border-bottom: 1px solid #d0d2d3;
+  margin-bottom: 0;
+}
+
+select {
+  border: 1px solid #d0d0d3;
+  border-radius: 2px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+select.auto-approve,
+select.auto-info {
+  color: #fff;
+  background-color: #00a4ee;
+  border: 1px solid #d0d0d3;
+  border-color: #00a4ee;
+}
+
+select.accepted,
+select.success {
+  color: #fff;
+  background-color: #7dba43;
+  border: 1px solid #d0d0d3;
+  border-color: #7dba43;
+}
+
+select.rejected,
+select.danger {
+  color: #fff;
+  background-color: #cf3c0e;
+  border: 1px solid #d0d0d3;
+  border-color: #cf3c0e;
+}
+
+select.waiting {
+  color: #fff;
+  background-color: #ffb800;
+  border: 1px solid #d0d0d3;
+  border-color: #ffb800;
 }

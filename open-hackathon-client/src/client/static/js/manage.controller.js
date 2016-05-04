@@ -142,13 +142,37 @@ angular.module('oh.controllers', [])
     }
 
     $scope.isShowNav = function(type) {
-      if (type == 1) {
+      // type 1: SETTINGS. type 2: ADVANCED_SETTINGS
+      if (type == 1 || type == 2) {
         return true;
       }
       if (activity.config) {
         return activity.config.cloud_provider != 0
       } else {
         return false;
+      }
+    }
+
+    $scope.isShowNavItem = function(type, item) {
+      // if cloud_provider is "Azure", show all.
+      // if cloud_provider is "Alauda", show "Cloud", "VirtualEnvirontment" and "Monitor".
+      // "Cloud" would be shown anyway.
+      if (type == 2) {
+        if (activity.config && activity.config.cloud_provider == 1)
+          return true;
+        else if (activity.config && activity.config.cloud_provider == 2)
+          switch(item.name) {
+            case "ADVANCED_SETTINGS.CLOUD_RESOURCES": return true;
+            case "ADVANCED_SETTINGS.VIRTUAL_ENVIRONMENT": return true;
+            case "ADVANCED_SETTINGS.ENVIRONMENTAL_MONITOR": return true;
+            default: return false;
+          }
+        else if (item.name == "ADVANCED_SETTINGS.CLOUD_RESOURCES")
+          return true;
+        else
+          return false;
+      } else {
+        return true;
       }
     }
 
@@ -190,7 +214,7 @@ angular.module('oh.controllers', [])
       qq: $filter('isProvider')(activity.config.login_provider, 4),
       weibo: $filter('isProvider')(activity.config.login_provider, 8),
       alauda: $filter('isProvider')(activity.config.login_provider, 32),
-      gitcafe: $filter('isProvider')(activity.config.login_provider, 16),
+      // gitcafe: $filter('isProvider')(activity.config.login_provider, 16),
       wechat: $filter('isProvider')(activity.config.login_provider, 64),
     };
 
@@ -687,10 +711,17 @@ angular.module('oh.controllers', [])
   .controller('organizersController', function($rootScope, $scope, $stateParams, $uibModal, $cookies, api) {
     $scope.$emit('pageName', 'SETTINGS.ORGANIZERS');
 
+    $scope.filterCondition = 0;
+    $scope.data = {
+        "organizers": [],
+        "selectedOrgs": []
+    }
+
     // very quick and rough implementation, please feel free to update
     var refresh = function(data) {
       if (data) {
-        $scope.data = data
+        $scope.data.organizers = data.organizers;
+        $scope.data.selectedOrgs = [];
         return
       }
 
@@ -705,7 +736,8 @@ angular.module('oh.controllers', [])
             content: data.error.friendly_message
           });
         } else {
-          $scope.data = data
+          $scope.data.organizers = data.organizers;
+          $scope.data.selectedOrgs = [];
         }
       })
     }
@@ -793,6 +825,44 @@ angular.module('oh.controllers', [])
       })
     }
 
+    $scope.filterOrganizer = function(item) {
+      if ($scope.filterCondition == 0)
+        return true;
+      return item.organization_type == $scope.filterCondition;
+    }
+
+    $scope.isOrganizerSelected = function(org) {
+      return $scope.data.selectedOrgs.indexOf(org.id) > -1;
+    }
+
+    $scope.isAllOrgsSelected = function() {
+      return $scope.data.selectedOrgs.length == $scope.data.organizers.length;
+    }
+
+    $scope.selectOrg = function(org) {
+      var index = $scope.data.selectedOrgs.indexOf(org.id)
+      if (index > -1) {
+        $scope.data.selectedOrgs.splice(index, 1)
+      } else {
+        $scope.data.selectedOrgs.push(org.id)
+      }
+    }
+
+    $scope.toggleAllOrgs = function() {
+      if ($scope.data.organizers.length == $scope.data.selectedOrgs.length) {
+        $scope.data.selectedOrgs = [];
+      } else {
+        $scope.data.selectedOrgs = [];
+        for (var index in $scope.data.organizers)
+          $scope.data.selectedOrgs.push($scope.data.organizers[index].id);
+      }
+    }
+
+    $scope.deleteSelectedOrgs = function() {
+      for (index in $scope.data.selectedOrgs)
+        $scope.delete_organizer($scope.data.selectedOrgs[index]);
+    }
+
     refresh();
   })
   .controller('awardsController', function($rootScope, $scope, $stateParams, $q, api) {
@@ -803,11 +873,40 @@ angular.module('oh.controllers', [])
       awards: [],
       teams: [],
       awardsMap: [],
+      currentScores: [],
       searchText: '',
+      hackathon_name: $stateParams.name,
 
       perPage: 6,
       curPage: 1,
     };
+
+    $scope.getTeamScore = function(team) {
+      getTeamScore(team);
+    }
+
+    function getTeamScore(team) {
+      return api.admin.team.score.list.get({
+         query: {team_id: team.id},
+         header: {hackathon_name: $stateParams.name}
+      }).then(function(res) {
+        if (res.error) {
+          showTip('tip-danger', error.friendly_message);
+          return;
+        }
+
+        var currentScores = [];
+        currentScores.scores= res.all;
+        var sum = 0;
+        var i = 0;
+        for (i = 0; i < currentScores.scores.length; i++) {
+          sum += currentScores.scores[i].score;
+        }
+        currentScores.average = sum / currentScores.scores.length;
+        $scope.currentScores = currentScores;
+        return;
+      });
+    }
 
     $scope.grantAward = function(awardId, teamId) {
       grantAward(awardId, teamId);
@@ -858,6 +957,7 @@ angular.module('oh.controllers', [])
         return refresh();
       });
     }
+
 
     function refresh() {
       return $q.all([
@@ -1370,9 +1470,87 @@ angular.module('oh.controllers', [])
 
     pageLoad();
   })
-  .controller('cloudController', function($rootScope, $scope, activityService, api) {
+  .controller('cloudController', function($rootScope, $scope, $state, $window, $timeout, api, activity, dialog) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.CLOUD_RESOURCES');
 
+    // here $scope.cloudProdiver's type is String, like '1' or null.
+    $scope.cloudProvider = null;
+    $scope.isProviderSelected = true;
+    $scope.isAzureCertSet = true;
+    $scope.isTemplateSet = true;
+
+    $scope.redirectTo = function(state) {
+      return $state.href(state, {
+        name: activity.name
+      }, {});
+    }
+
+    function getCloudProvider() {
+      api.admin.hackathon.config.get({
+        header: {
+          hackathon_name: activity.name
+        }
+      }).then(function(data) {
+        if (data.error) {
+          $scope.$emit('showTip', {
+            level: 'tip-danger',
+            content: data.error.friendly_message
+          });
+          $scope.isProviderSelected = false;
+        } else {
+          var provider = typeof(data["cloud_provider"]) == "undefined" ? null : data["cloud_provider"].toString();
+          if (provider == '0' || provider == '1' || provider == '2'){
+            $scope.isProviderSelected = true;
+            $scope.cloudProvider = provider;
+          } else {
+            $scope.isProviderSelected = false;
+          }
+
+          // judge whether "AzureCert" and "Template" have been set.
+          if ($scope.cloudProvider == '1' && activity.azure_keys.length == 0)
+            $scope.isAzureCertSet = false;
+          if (($scope.cloudProvider == '1' || $scope.cloudProvider == '2') && activity.templates.length == 0)
+            $scope.isTemplateSet = false;
+        }
+      });
+    }
+
+    $scope.setCloudProvider = function() {
+      dialog.confirm({
+        title: '提示',
+        body: '一旦确定服务商就不能在修改！是否确定？',
+        icon: 'fa-exclamation',
+        size: 'sm',
+        status: 'warning'
+      }).then(function() {
+        api.admin.hackathon.config.put({
+          header: {
+            hackathon_name: activity.name
+          },
+          body: {
+            cloud_provider: parseInt($scope.cloudProvider)
+          }
+        }).then(function(data) {
+          if (data.error) {
+            $scope.$emit('showTip', {
+              level: 'tip-danger',
+              content: data.error.friendly_message
+            });
+          } else {
+            $scope.$emit('showTip', {
+              level: 'tip-success',
+              content: "设置服务商成功！等待刷新..."
+            });
+
+            $timeout(function() {
+              $window.location.reload()
+            }, 500);
+          }
+        });
+      })
+    };
+
+    getCloudProvider();
   })
   .controller('azurecertController', function($rootScope, $scope, $stateParams, api, dialog) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.AZURECERT');
@@ -1402,12 +1580,12 @@ angular.module('oh.controllers', [])
           hackathon_name: $stateParams.name
         }
       }).then(function(data) {
-        if (!data.message) {
-          $scope.$emit('showTip', {
-            level: 'tip-warning',
-            content: '证书授权失败，请检验SUBSCRIPTION ID是否正确。'
-          });
-        } else {
+      if (data.error) {
+        $scope.$emit('showTip', {
+        level: 'tip-warning',
+        content: data.error.message
+        });
+      } else {
           $scope.$emit('showTip', {
             level: 'tip-success',
             content: '检验成功。'
@@ -1729,21 +1907,6 @@ angular.module('oh.controllers', [])
 
     /*------------------------------------------------------*/
     $scope.notUseCloud = function() {
-      updateActivityStatus(0).then(function(data) {
-        if (data.error) {
-          $scope.$emit('showTip', {
-            level: 'tip-danger',
-            content: data.error.friendly_message
-          });
-        } else {
-          $scope.isShowAdvancedSettings = false;
-          $scope.wizard = 4;
-        }
-      });
-    }
-
-
-    $scope.clondFormSubmit = function() {
       dialog.confirm({
         title: '提示',
         body: '一旦确定服务商就不能在修改！是否确定？',
@@ -1751,13 +1914,36 @@ angular.module('oh.controllers', [])
         size: 'sm',
         status: 'warning'
       }).then(function() {
-        $scope.isAzureForm = $scope.clondservices == 1;
+        updateActivityStatus(0).then(function(data) {
+          if (data.error) {
+            $scope.$emit('showTip', {
+              level: 'tip-danger',
+              content: data.error.friendly_message
+            });
+          } else {
+            $scope.isShowAdvancedSettings = false;
+            $scope.wizard = 4;
+          }
+        });
+      });
+    }
+
+
+    $scope.cloudFormSubmit = function() {
+      dialog.confirm({
+        title: '提示',
+        body: '一旦确定服务商就不能在修改！是否确定？',
+        icon: 'fa-exclamation',
+        size: 'sm',
+        status: 'warning'
+      }).then(function() {
+        $scope.isAzureForm = $scope.cloudservices == 1;
         api.admin.hackathon.config.put({
           header: {
             hackathon_name: $scope.activity.name
           },
           body: {
-            cloud_provider: parseInt($scope.clondservices)
+            cloud_provider: parseInt($scope.cloudservices)
           }
         }).then(function(data) {
           if (data.error) {
@@ -1767,12 +1953,16 @@ angular.module('oh.controllers', [])
             });
           }
         });
+
+        if (!$scope.isAzureForm) {
+          $scope.wizard = 3;
+        }
       })
     };
 
     /*------------------------------------------------------*/
     $scope.azureFormDisabled = false;
-    $scope.azuse_download_cer = false;
+    $scope.azure_download_cer = false;
     $scope.azure = {
       management_host: 'management.core.chinacloudapi.cn',
     };
@@ -1813,7 +2003,7 @@ angular.module('oh.controllers', [])
 
           var cert_url = azure_key.cert_url;
           window.location.href = cert_url;
-          $scope.azuse_download_cer = true;
+          $scope.azure_download_cer = true;
           $scope.azurecer = cert_url;
         }
         $scope.azureFormDisabled = false;
@@ -1926,6 +2116,10 @@ angular.module('oh.controllers', [])
           content: '请绑定模板'
         });
       }
+    }
+
+    $scope.notUseTemplate = function() {
+      $scope.wizard = 4;
     }
 
     /*------------------------------------------------------*/

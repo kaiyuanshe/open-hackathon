@@ -292,6 +292,17 @@ class MyTeamResource(HackathonResource):
         return team_manager.get_my_current_team(g.hackathon, g.user)
 
 
+class UserTeamShowResource(HackathonResource):
+    def get(self):
+        user_id = self.context().user_id if "user_id" in self.context() else None
+        if user_id:
+            return team_manager.get_team_show_list_by_user(user_id)
+        elif user_manager.validate_login():
+            return team_manager.get_team_show_list_by_user(g.user.id)
+        else:
+            return bad_request("must login or provide a user id")
+
+
 class UserNoticeReadResource(HackathonResource):
     @token_required
     def put(self):

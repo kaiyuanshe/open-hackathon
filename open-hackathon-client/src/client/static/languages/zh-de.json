@@ -16,14 +16,14 @@
     "ADMINISTRATORS": "管理员",
     "ORGANIZERS": "主办方",
     "PRIZES": "奖项设置",
-    "AWARDS": "评奖",
+    "AWARDS": "报名团队/评奖",
     "NOTICES": "公告"
   },
   "ADVANCED_SETTINGS": {
     "MAIN": "高级设置",
+    "CLOUD_RESOURCES": "云资源",
     "VIRTUAL_ENVIRONMENT": "虚拟环境",
     "ENVIRONMENTAL_MONITOR": "环境监控",
-    "CLOUD_RESOURCES": "云资源",
     "AZURECERT": "Azure订阅",
     "SERVERS": "服务器"
   },
@@ -38,7 +38,7 @@
     "REJECT": "拒绝",
     "AUTO_PASS": "自动通过"
   },
-
+  "ALL": "全部",
   "ALL_USERS": "全部用户",
   "CREATE": "增加",
   "UPDATE": "更新",
@@ -165,6 +165,19 @@
     "CREATE_ADMIN": "增加管理员",
     "ADMIN_SEARCH_HINT": "用户名/昵称/邮箱",
     "SEARCH": "搜索"
+  },
+  "CLOUD_WEBPAGE_FIELDS": {
+    "USE": "使用",
+    "USED": "已使用",
+    "CLOUD_PROVIDER": "云服务商",
+    "SELECT_CLOUD_PROVIDER": "请选择云服务商",
+    "NO_USE_CLOUD_PROVIDER": "不使用云服务商",
+    "CONFIRM_HINT": "确认后将无法修改",
+    "NO_CLOUD_HINT": "已选择'不使用云服务商',无法修改",
+    "SET_AZURECERT_HINT": "尚未设置Azure证书，点此进行设置～",
+    "SET_TEMPLATE_HINT": "尚未设置模板，点此进行设置～",
+    "AZURE_CONFIG_HINT": "配置完成，点此进入中国Azure官网。",
+    "ALAUDA_CONFIG_HINT": "配置完成，点此进入灵雀云官网。"
   },
   "EXPERIMENT_WEBPAGE_FIELDS": {
     "USERNAME": "用户名",

@@ -18,11 +18,11 @@
             <td>
               <a href="{{cert.cert_url}}">{{cert.subscription_id}}.cer</a>
             </td>
-            <th>
+            <td>
               <span class="label label-success" ng-if="cert.verified">通过</span>
               <span class="label label-warning" ng-if="!cert.verified">未通过</span>
-            </th>
-            <td>
+            </td>
+            <td class="option">
               <button class="btn btn-info btn-sm" ng-if="!cert.verified" ng-click="checksubid(cert)"><i class="fa fa-stethoscope"></i> 检验</button>
               <a class="btn btn-danger btn-sm" ng-click="deleteCert(cert.id)" title="{{'DELETE' | translate}}">
                 <i class="fa fa-trash-o "></i>
@@ -61,7 +61,7 @@
                   </select>
                 </div>
               </div>
-              <div class="form-group" ng-show="azuse_download_cer">
+              <div class="form-group" ng-show="azure_download_cer">
                 <label class="col-xs-2 control-label">下载证书</label>
                 <div class="col-xs-10">
                   <a href="{{azurecer}}" download="{{azurecer}}">{{azurecer}}</a>
@@ -72,7 +72,7 @@
               <div class="form-group">
                 <div class="col-xs-offset-2 col-xs-12">
                   <button type="submit" class="btn btn-success btn-long" ng-disabled="azureForm.$invalid || azureFormDisabled"><i class="fa fa-arrow-circle-o-right"></i> 提交 </button>
-                  <button type="button" class="btn btn-primary btn-long" ng-show="azuse_download_cer" ng-click="azureNext()"><i class="fa fa-arrow-circle-o-right"></i> 下一步</button>
+                  <button type="button" class="btn btn-primary btn-long" ng-show="azure_download_cer" ng-click="azureNext()"><i class="fa fa-arrow-circle-o-right"></i> 下一步</button>
                 </div>
               </div>
             </footer>

@@ -253,9 +253,9 @@ class Utility(object):
     def is_local(self):
         return safe_get_config("environment", "local") == "local"
 
-    def send_emails(self, receivers, subject, content, cc=[], bcc=[], attachments=[]):
+    def send_emails(self, sender, receivers, subject, content, cc=[], bcc=[], attachments=[]):
         email_service = RequiredFeature("email")
-        return email_service.send_emails(receivers, subject, content, cc, bcc, attachments)
+        return email_service.send_emails(sender, receivers, subject, content, cc, bcc, attachments)
 
     def send_voice_verify(self, receiver, content):
         voice_verify_service = RequiredFeature("voice_verify")
