@@ -426,6 +426,7 @@ def temp_settings(hackathon_name):
 
 
 @app.route("/site/<hackathon_name>/team")
+@login_required
 def my_team(hackathon_name):
     headers = {"hackathon_name": hackathon_name, "token": session.get("token")}
     team = Context.from_object(__get_api(API_MY_TEAM, headers))
@@ -441,7 +442,7 @@ def create_join_team(hackathon_name, tid):
 
 def render_team_page(hackathon_name, team):
     if team.get('error') is not None:
-        return redirect('404')
+        return redirect(url_for('hackathon', hackathon_name=hackathon_name))
     else:
         role = team.get('is_admin') and 4 or 0
         role += team.get('is_leader') and 2 or 0
