@@ -299,11 +299,11 @@ def index():
         "items": []
     }
     newest_hackathons = __get_api(API_HACKATHON_LIST, {"token": session.get("token")},
-                                  params={"page": 1, "per_page": 3, "order_by": "create_time", "status": 1})
+                                  params={"page": 1, "per_page": 6, "order_by": "create_time", "status": 1})
     hot_hackathons = __get_api(API_HACKATHON_LIST, {"token": session.get("token")},
-                               params={"page": 1, "per_page": 3, "order_by": "registered_users_num", "status": 1})
+                               params={"page": 1, "per_page": 6, "order_by": "registered_users_num", "status": 1})
     soon_hackathon = __get_api(API_HACKATHON_LIST, {"token": session.get("token")},
-                               params={"page": 1, "per_page": 3, "order_by": "event_start_time", "status": 1})
+                               params={"page": 1, "per_page": 6, "order_by": "event_start_time", "status": 1})
 
     newest_hackathons = empty_items if "error" in newest_hackathons else newest_hackathons
     hot_hackathons = empty_items if "error" in hot_hackathons else hot_hackathons
