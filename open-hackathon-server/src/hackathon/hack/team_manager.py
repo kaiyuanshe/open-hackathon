@@ -796,16 +796,20 @@ class TeamManager(Component):
         # send emails to all admins of this hackathon when one team dev plan is submitted.
         admins = UserHackathon.objects(hackathon=team.hackathon, role=HACK_USER_TYPE.ADMIN).distinct("user")
         email_title = self.util.safe_get_config("email.email_templates.dev_plan_submitted_notify.title", None)
-        email_content = self.util.safe_get_config("email.email_templates.dev_plan_submitted_notify.content", None)
+        email_sub_body = self.util.safe_get_config("email.email_templates.dev_plan_submitted_notify.sub_content", None)
+        email_template = self.util.safe_get_config("email.email_templates.default_template", None)
         sender = self.util.safe_get_config("email.default_sender", "")
+
         # todo remove receivers_forced
         receivers_forced = self.util.safe_get_config("email.receivers_forced", [])
 
         try:
-            if email_title and email_content:
+            if email_title and email_sub_body and email_template:
                 email_title = email_title % (team.name.encode("utf-8"))
-                email_content = email_content % (team.name.encode("utf-8"), team.hackathon.name.encode("utf-8"),
-                                                 team.hackathon.name.encode("utf-8"), str(team.id))
+                email_sub_body = email_sub_body.replace("{{team_name}}", team.name.encode("utf-8"))
+                email_sub_body = email_sub_body.replace("{{team_id}}", str(team.id))
+                email_sub_body = email_sub_body.replace("{{hackathon_name}}", team.hackathon.name.encode("utf-8"))
+                email_content = email_template.replace("{{sub_body}}", email_sub_body)
             else:
                 self.log.error("send email_notification (dev_plan_submitted_event) fails: please check the config")
                 return False
