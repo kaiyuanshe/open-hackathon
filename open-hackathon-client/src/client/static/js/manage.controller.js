@@ -1064,16 +1064,16 @@ angular.module('oh.controllers', [])
     };
 
     var createNotice = function() {
-      var award = formData;
+      var notice = formData;
       var fn;
 
-      if (award.id)
+      if (notice.id)
         fn = api.admin.hackathon.notice.put;
       else
         fn = api.admin.hackathon.notice.post;
 
       return fn({
-        body: award,
+        body: notice,
         header: {
           hackathon_name: activity.name
         }

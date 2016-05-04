@@ -114,7 +114,7 @@
             }
         }, function (data) {
             if (data.error) {
-                oh.comm.alert(data.error.message);
+                // oh.comm.alert(data.error.message);
             } else if (data.items.length > 0) {
                 data = data.items;
                 //order: last', first, second, ..., last, first'
