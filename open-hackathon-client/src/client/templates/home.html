@@ -483,7 +483,7 @@
         {{if !link || link==''}}
             ${content}<span>${moment(update_time).format('YYYY-MM-DD')}</span>
         {{else}}
-            <a href="${link}">
+            <a href="${link}" target="_blank">
                 ${content}<span>${moment(update_time).format('YYYY-MM-DD')}</span>
             </a>
         {{/if}}
