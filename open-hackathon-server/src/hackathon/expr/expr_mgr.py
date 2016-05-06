@@ -68,6 +68,19 @@ class ExprManager(Component):
         # new expr
         return self.__start_new_expr(hackathon, template, user)
 
+    def restart_stopped_expr(self, experiment_id):
+        # todo: now just support hosted_docker, not support for alauda and windows
+        experiment = Experiment.objects(id=experiment_id).first()
+        self.hosted_docker_proxy = RequiredFeature("hosted_docker_proxy")
+        for ve in experiment.virtual_environments:
+            if ve.provider == VE_PROVIDER.DOCKER:
+                if not self.hosted_docker_proxy.is_container_running(ve.docker_container):
+                    self.hosted_docker_proxy.start_container(ve.docker_container.host_server,
+                                                             ve.docker_container.container_id)
+        self.__check_expr_real_status(experiment)
+        return experiment.dic()
+
+
     def heart_beat(self, expr_id):
         expr = Experiment.objects(id=expr_id, status=EStatus.RUNNING).first()
         if expr is None:
@@ -93,10 +106,10 @@ class ExprManager(Component):
         else:
             return ok()
 
-    def get_expr_status(self, expr_id):
+    def get_expr_status_and_start(self, expr_id):
         expr = Experiment.objects(id=expr_id).first()
         if expr:
-            return self.__report_expr_status(expr)
+            return self.__report_expr_status(expr, isToConfirmExprStarting=True)
         else:
             return not_found('Experiment Not found')
 
@@ -260,7 +273,8 @@ class ExprManager(Component):
         hackathon = experiment.hackathon
         user = experiment.user
 
-    def __report_expr_status(self, expr):
+    def __report_expr_status(self, expr, isToConfirmExprStarting=False):
+        # todo check whether need to restart Window-expr if it shutdown
         ret = {
             "expr_id": str(expr.id),
             "status": expr.status,
@@ -301,6 +315,12 @@ class ExprManager(Component):
         if expr.template.provider == VE_PROVIDER.DOCKER:
             for ve in expr.virtual_environments:
                 container = ve.docker_container
+                # to restart hosted_docker expr if it stopped.
+                if isToConfirmExprStarting:
+                    self.hosted_docker_proxy = RequiredFeature("hosted_docker_proxy")
+                    if not self.hosted_docker_proxy.is_container_running(container):
+                        self.hosted_docker_proxy.start_container(container.host_server, container.container_id)
+
                 for p in container.port_bindings.filter(is_public=True):
                     if p.url:
                         public_urls.append({
@@ -382,10 +402,30 @@ class ExprManager(Component):
         return starter.rollback(Context(experiment=expr))
 
     def __get_expr_with_detail(self, experiment):
+        self.__check_expr_real_status(experiment)
         info = experiment.dic()
         # replace OjbectId with user info
         info['user'] = self.user_manager.user_display_info(experiment.user)
         return info
+
+    def __check_expr_real_status(self, experiment):
+        # todo only support for hosted_docker right now. Not check for Window-expr and Alauda-expr
+        for ve in experiment.virtual_environments:
+            if ve.provider == VE_PROVIDER.DOCKER:
+                self.hosted_docker_proxy = RequiredFeature("hosted_docker_proxy")
+                if not self.hosted_docker_proxy.is_container_running(ve.docker_container):
+                    if ve.status == VEStatus.RUNNING:
+                        ve.status = VEStatus.STOPPED
+                else:
+                    if ve.status == VEStatus.STOPPED:
+                        ve.status = VEStatus.RUNNING
+        if all(ve.status == VEStatus.STOPPED for ve in experiment.virtual_environments):
+            experiment.status = EStatus.STOPPED
+        if all(ve.status == VEStatus.RUNNING for ve in experiment.virtual_environments):
+            experiment.status = EStatus.RUNNING
+        experiment.update_time = self.util.get_now()
+        experiment.save()
+
 
     def __recycle_expr(self, expr):
         """recycle expr

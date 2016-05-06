@@ -1,0 +1,16 @@
+{
+  "AdminExperimentResource": {
+    "put": {
+      "input": {
+        "description": "restart stopped experiment",
+        "type": "object",
+        "properties": {
+          "experiment_id": {
+            "description": "object_id of experiment",
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
