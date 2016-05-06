@@ -49,7 +49,7 @@
     <button type="button" class="btn btn-sm btn-primary" ng-click="add()">
       <i class="fa fa-plus"></i> 添加
     </button>
-    <button type="button" class="btn btn-sm btn-danger">
+    <button type="button" class="btn btn-sm btn-danger" ng-click="deleteSelectedPrizes()">
       <i class="fa fa-trash"></i> 删除
     </button>
   </div>
@@ -58,7 +58,7 @@
       <tr>
         <th style="width: 30px;">
           <label class="checkbox checkbox-success">
-            <input type="checkbox" ng-model="data.checkAll" ng-change="toggleCheckAll()">
+            <input type="checkbox" ng-click="toggleAllPrizes()" ng-checked="isAllPrizesSelected()">
             <span></span>
           </label>
         </th>
@@ -74,7 +74,7 @@
       <tr ng-repeat="award in data.awards">
         <td>
           <label class="checkbox checkbox-success">
-            <input type="checkbox" ng-model="data.checks[award.id]">
+            <input type="checkbox" ng-click="selectPrize(award)" ng-checked="isPrizeSelected(award)">
             <span></span>
           </label>
         </td>
