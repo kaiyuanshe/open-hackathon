@@ -59,10 +59,6 @@ class AzureVMExprStarter(ExprStarter):
 
     def _internal_stop_expr(self, context):
         try:
-            # todo support delete azure vm
-            # hosted_docker = RequiredFeature("hosted_docker")
-            # af = AzureFormation(hosted_docker.load_azure_key_id(expr_id))
-            # af.stop(expr_id, AVMStatus.STOPPED_DEALLOCATED)
             experiment = Experiment.objects.get(id=context.experiment_id)
             template_content = self.template_library.load_template(experiment.template)
             azure_key = experiment.azure_key
