@@ -34,7 +34,7 @@
     <button type="button" class="btn btn-sm btn-primary" ng-click="add()">
       <i class="fa fa-plus"></i> 发布新公告
     </button>
-    <button type="button" class="btn btn-sm btn-danger">
+    <button type="button" class="btn btn-sm btn-danger" ng-click="deleteSelectedNotices()">
       <i class="fa fa-trash"></i> 删除
     </button>
   </div>
@@ -43,7 +43,7 @@
       <tr>
         <th style="width: 30px;">
           <label class="checkbox checkbox-success">
-            <input type="checkbox" ng-model="data.checkAll" ng-change="toggleCheckAll()">
+            <input type="checkbox" ng-checked="isAllNoticesSelected()" ng-click="toggleAllNotices()">
             <span></span>
           </label>
         </th>
@@ -57,7 +57,7 @@
       <tr ng-repeat="notice in data.notices">
         <td>
           <label class="checkbox checkbox-success">
-            <input type="checkbox" ng-model="data.checks[notice.id]">
+            <input type="checkbox" ng-checked="isNoticeSelected(notice)" ng-click="selectNotice(notice)">
             <span></span>
           </label>
         </td>
