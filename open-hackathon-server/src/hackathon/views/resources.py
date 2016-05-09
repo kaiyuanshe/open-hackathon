@@ -265,7 +265,7 @@ class UserHackathonLikeResource(HackathonResource):
 
 class UserExperimentResource(HackathonResource, Component):
     def get(self):
-        return expr_manager.get_expr_status(self.context().id)
+        return expr_manager.get_expr_status_and_confirm_starting(self.context().id)
 
     @token_required
     def post(self):
@@ -587,6 +587,10 @@ class AdminExperimentResource(HackathonResource):
             return bad_request('template name name invalid')
         template_name = args['name']
         return expr_manager.start_expr(g.user, template_name, g.hackathon.name)
+
+    @admin_privilege_required
+    def put(self):
+        return expr_manager.restart_stopped_expr(self.context().experiment_id)
 
     @admin_privilege_required
     def delete(self):

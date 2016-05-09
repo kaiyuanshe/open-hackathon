@@ -29,6 +29,9 @@
           <td>{{experiment.create_time | date:'yyyy-MM-dd HH:mm:ss'}}</td>
           <td>{{experiment.virtual_environments | joinVMs}}</td>
           <td class="option">
+            <a class="btn btn-success btn-sm" ng-click="refreshExperiment(experiment)">
+              <i class="fa fa-refresh"></i>
+            </a>
             <a class="btn btn-info btn-sm" ng-click="updateExperiment(experiment)">
               <i class="fa fa-edit"></i>
             </a>

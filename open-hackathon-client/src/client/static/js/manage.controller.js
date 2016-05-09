@@ -1495,7 +1495,7 @@ angular.module('oh.controllers', [])
     }
 
   })
-  .controller('monitorController', function($rootScope, $scope, $stateParams, api) {
+  .controller('monitorController', function($rootScope, $scope, $stateParams, $window, $timeout, api, dialog) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.ENVIRONMENTAL_MONITOR');
 
     $scope.data = {
@@ -1528,6 +1528,31 @@ angular.module('oh.controllers', [])
 
     $scope.deleteExperiment = function(experiment) {
       showTip('tip-danger', "暂时不支持删除操作");
+    }
+
+    $scope.refreshExperiment = function(experiment) {
+      dialog.confirm({
+        title: '提示',
+        body: '是否尝试启动已停止的环境/容器?'
+      }).then(function() {
+        api.admin.experiment.put({
+          body: {
+            experiment_id: experiment.id
+          },
+          header: {
+            hackathon_name: $stateParams.name
+          }
+        }).then(function(data) {
+          if (data.error)
+            showTip('tip-danger', data.error.friendly_message);
+          else {
+            showTip('tip-success', '操作成功! 启动环境/容器需要一定时间，三秒后自动刷新查看最新状态。');
+            $timeout(function() {
+              $window.location.reload()
+            }, 3000);
+          }
+        });
+      });
     }
 
     $scope.searchExperiment = function() {
