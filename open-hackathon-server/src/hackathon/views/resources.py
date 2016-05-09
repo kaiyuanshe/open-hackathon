@@ -265,7 +265,7 @@ class UserHackathonLikeResource(HackathonResource):
 
 class UserExperimentResource(HackathonResource, Component):
     def get(self):
-        return expr_manager.get_expr_status_and_start(self.context().id)
+        return expr_manager.get_expr_status_and_confirm_starting(self.context().id)
 
     @token_required
     def post(self):

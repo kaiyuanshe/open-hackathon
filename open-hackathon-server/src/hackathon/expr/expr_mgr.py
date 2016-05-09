@@ -46,6 +46,7 @@ class ExprManager(Component):
     hackathon_manager = RequiredFeature("hackathon_manager")
     admin_manager = RequiredFeature("admin_manager")
     template_library = RequiredFeature("template_library")
+    hosted_docker_proxy = RequiredFeature("hosted_docker_proxy")
 
     def start_expr(self, user, template_name, hackathon_name=None):
         """
@@ -71,15 +72,17 @@ class ExprManager(Component):
     def restart_stopped_expr(self, experiment_id):
         # todo: now just support hosted_docker, not support for alauda and windows
         experiment = Experiment.objects(id=experiment_id).first()
-        self.hosted_docker_proxy = RequiredFeature("hosted_docker_proxy")
         for ve in experiment.virtual_environments:
             if ve.provider == VE_PROVIDER.DOCKER:
                 if not self.hosted_docker_proxy.is_container_running(ve.docker_container):
                     self.hosted_docker_proxy.start_container(ve.docker_container.host_server,
                                                              ve.docker_container.container_id)
+            elif ve.provider == VE_PROVIDER.ALAUDA:
+                pass
+            elif ve.provider == VE_PROVIDER.AZURE:
+                pass
         self.__check_expr_real_status(experiment)
         return experiment.dic()
-
 
     def heart_beat(self, expr_id):
         expr = Experiment.objects(id=expr_id, status=EStatus.RUNNING).first()
@@ -106,7 +109,7 @@ class ExprManager(Component):
         else:
             return ok()
 
-    def get_expr_status_and_start(self, expr_id):
+    def get_expr_status_and_confirm_starting(self, expr_id):
         expr = Experiment.objects(id=expr_id).first()
         if expr:
             return self.__report_expr_status(expr, isToConfirmExprStarting=True)
@@ -274,7 +277,7 @@ class ExprManager(Component):
         user = experiment.user
 
     def __report_expr_status(self, expr, isToConfirmExprStarting=False):
-        # todo check whether need to restart Window-expr if it shutdown
+        # todo check whether need to restart Window-expr and Alauda-expr if it shutdown
         ret = {
             "expr_id": str(expr.id),
             "status": expr.status,
@@ -317,7 +320,6 @@ class ExprManager(Component):
                 container = ve.docker_container
                 # to restart hosted_docker expr if it stopped.
                 if isToConfirmExprStarting:
-                    self.hosted_docker_proxy = RequiredFeature("hosted_docker_proxy")
                     if not self.hosted_docker_proxy.is_container_running(container):
                         self.hosted_docker_proxy.start_container(container.host_server, container.container_id)
 
@@ -409,23 +411,25 @@ class ExprManager(Component):
         return info
 
     def __check_expr_real_status(self, experiment):
-        # todo only support for hosted_docker right now. Not check for Window-expr and Alauda-expr
+        # todo: it is only support for hosted_docker right now. Please support Window-expr and Alauda-expr in future
         for ve in experiment.virtual_environments:
             if ve.provider == VE_PROVIDER.DOCKER:
-                self.hosted_docker_proxy = RequiredFeature("hosted_docker_proxy")
                 if not self.hosted_docker_proxy.is_container_running(ve.docker_container):
                     if ve.status == VEStatus.RUNNING:
                         ve.status = VEStatus.STOPPED
                 else:
                     if ve.status == VEStatus.STOPPED:
                         ve.status = VEStatus.RUNNING
+            elif ve.provider == VE_PROVIDER.ALAUDA:
+                pass
+            elif ve.provider == VE_PROVIDER.AZURE:
+                pass
         if all(ve.status == VEStatus.STOPPED for ve in experiment.virtual_environments):
             experiment.status = EStatus.STOPPED
         if all(ve.status == VEStatus.RUNNING for ve in experiment.virtual_environments):
             experiment.status = EStatus.RUNNING
         experiment.update_time = self.util.get_now()
         experiment.save()
-
 
     def __recycle_expr(self, expr):
         """recycle expr
