@@ -97,12 +97,10 @@ class UserManager(Component):
         if user is None:
             return False
         else:
-            new_toke_time = self.util.get_now()+timedelta(hours=1)
+            new_toke_time = self.util.get_now() + timedelta(hours=1)
             UserToken.objects(token=request.headers[HTTP_HEADER.TOKEN]).update(expire_date=new_toke_time)
 
         users_operation_time[user.id] = self.util.get_now()
-
-
 
         return True
 
@@ -110,7 +108,7 @@ class UserManager(Component):
         """Check whether the user is offline. If the answer is yes, update its status in DB."""
         overtime_user_ids = [user_id for user_id in users_operation_time
                              if (self.util.get_now() - users_operation_time[user_id]).seconds > 3600]
-                             # 3600s- expire as token expire
+        # 3600s- expire as token expire
 
         User.objects(id__in=overtime_user_ids).update(online=False)
         for user_id in overtime_user_ids:
