@@ -96,8 +96,14 @@ class UserManager(Component):
         user = self.__validate_token(request.headers[HTTP_HEADER.TOKEN])
         if user is None:
             return False
+        else:
+            new_toke_time = self.util.get_now()+timedelta(hours=1)
+            UserToken.objects(token=request.headers[HTTP_HEADER.TOKEN]).update(expire_date=new_toke_time)
 
         users_operation_time[user.id] = self.util.get_now()
+
+
+
         return True
 
     def check_user_online_status(self):
@@ -249,10 +255,6 @@ class UserManager(Component):
             if t and t.expire_date >= self.util.get_now():
                 g.authenticated = True
                 g.user = t.user
-                users_operation_time[g.user.id] = self.util.get_now()
-                dic = repr(users_operation_time)
-                f = open('/tmp/1.txt', 'w')
-                f.write(dic)
                 return t.user
 
         return None
