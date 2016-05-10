@@ -353,7 +353,8 @@ class Email(object):
                   cc=cc,
                   bcc=bcc,
                   subject=subject,
-                  content=content)
+                  content=content,
+                  attachments=attachments)
 
         try:
             response = self.postman.send(e)

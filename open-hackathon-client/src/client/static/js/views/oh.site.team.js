@@ -92,7 +92,7 @@
                     return id != lid;
                 },
                 getUserLogo: function (logo) {
-                    return logo.length == 0 ? '/static/pic/anon_user.png' : logo;
+                    return (logo == null || logo.length == 0) ? '/static/pic/anon_user.png' : logo;
                 }
             }));
         });

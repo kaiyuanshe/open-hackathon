@@ -6,13 +6,13 @@
       <div class="float-right">
         <span>允许组队：</span>
         <label class="switchbox switchbox-success switchbox-inline">
-          <input type="checkbox">
-          <span class="switchbox-handle" data-on="On" data-off="Off" ng-model="data.freedomTeam" ng-change="updateConfig()"><i></i></span>
+          <input type="checkbox" ng-model="data.freedomTeam" ng-change="updateConfig()">
+          <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
         </label>
         <span>自动审核：</span>
         <label class="switchbox switchbox-success switchbox-inline">
-          <input type="checkbox">
-          <span class="switchbox-handle" data-on="On" data-off="Off" ng-model="data.autoApprove" ng-change="updateConfig()"><i></i></span>
+          <input type="checkbox" ng-model="data.autoApprove" ng-change="updateConfig()">
+          <span class="switchbox-handle" data-on="On" data-off="Off"><i></i></span>
         </label>
       </div>
     </div>
@@ -35,7 +35,7 @@
         </tr>
       </thead>
       <tbody id="registe_list">
-        <tr ng-repeat="reg in data.registerUsers | limitTo:data.perPage:(data.curPage - 1) * data.perPage as curPageUsers track by reg.id">
+        <tr ng-repeat="reg in data.registerUsers | filter:filterUser | limitTo:data.perPage:(data.curPage - 1) * data.perPage as curPageUsers track by reg.id">
           <td>
             <label class="checkbox checkbox-success">
               <input type="checkbox" ng-model="data.checks[reg.id]" ng-change="checkCheckAll()">
@@ -73,11 +73,11 @@
   </div>
   <div class="inbox-side-bar">
     <div class="list-group">
-      <a href="#" class="list-group-item">全部用户（{{ data.registerUsers.length }}）</a>
-      <a href="#" class="list-group-item">通过（{{ (data.registerUsers|filter:{status: 1}).length }}）</a>
-      <a href="#" class="list-group-item">自动通过（{{ (data.registerUsers|filter:{status: 3}).length }}）</a>
-      <a href="#" class="list-group-item">未审核（{{ (data.registerUsers|filter:{status: 0}).length }}）</a>
-      <a href="#" class="list-group-item">拒绝（{{ (data.registerUsers|filter:{status: 2}).length }}）</a>
+      <a href="#" class="list-group-item" ng-click="filterCondition=-1">全部用户（{{ data.registerUsers.length }}）</a>
+      <a href="#" class="list-group-item" ng-click="filterCondition=1">通过（{{ (data.registerUsers|filter:{status: 1}).length }}）</a>
+      <a href="#" class="list-group-item" ng-click="filterCondition=3">自动通过（{{ (data.registerUsers|filter:{status: 3}).length }}）</a>
+      <a href="#" class="list-group-item" ng-click="filterCondition=0">未审核（{{ (data.registerUsers|filter:{status: 0}).length }}）</a>
+      <a href="#" class="list-group-item" ng-click="filterCondition=2">拒绝（{{ (data.registerUsers|filter:{status: 2}).length }}）</a>
     </div>
   </div>
 </div>

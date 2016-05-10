@@ -115,7 +115,7 @@ class ExprStarter(Component):
         ve.status = VEStatus.STOPPED
 
         if all(ve.status == VEStatus.STOPPED for ve in expr.virtual_environments):
-            expr.status = VEStatus.STOPPED
+            expr.status = EStatus.STOPPED
             expr.save()
 
     def _on_virtual_environment_unexpected_error(self, context):

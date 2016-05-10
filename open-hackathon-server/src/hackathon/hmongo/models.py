@@ -166,7 +166,7 @@ class Organization(DynamicEmbeddedDocument):
     description = StringField()
     homepage = URLField()
     logo = URLField()
-    organization_type = IntField()
+    organization_type = IntField()  # see ORGANIZATION_TYPE : ORGANIZER = 1, PARTNER = 2
 
 
 class Award(EmbeddedDocument):
