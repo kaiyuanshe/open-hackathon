@@ -230,7 +230,7 @@ def unauthorized_log():
 def make_session_permanent():
     g.user = current_user
     session.permanent = True
-    app.permanent_session_lifetime = timedelta(hours=get_config("SESSTION_VALID_TIME"))
+    app.permanent_session_lifetime = timedelta(minus=get_config("login.session_valid_time_minus"))
 
 
 @app.errorhandler(401)
