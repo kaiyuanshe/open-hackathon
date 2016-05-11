@@ -32,7 +32,7 @@ from datetime import timedelta
 import uuid
 
 from flask import request, g
-from mongoengine import Q, NotUniqueError
+from mongoengine import Q, NotUniqueError, ValidationError
 
 from hackathon.hackathon_response import internal_server_error, not_found, ok
 from hackathon.constants import HTTP_HEADER, HACK_USER_TYPE
@@ -96,15 +96,19 @@ class UserManager(Component):
         user = self.__validate_token(request.headers[HTTP_HEADER.TOKEN])
         if user is None:
             return False
+        else:
+            new_toke_time = self.util.get_now() + timedelta(hours=1)
+            UserToken.objects(token=request.headers[HTTP_HEADER.TOKEN]).update(expire_date=new_toke_time)
 
         users_operation_time[user.id] = self.util.get_now()
+
         return True
 
     def check_user_online_status(self):
         """Check whether the user is offline. If the answer is yes, update its status in DB."""
         overtime_user_ids = [user_id for user_id in users_operation_time
                              if (self.util.get_now() - users_operation_time[user_id]).seconds > 3600]
-                             # 3600s- expire as token expire
+        # 3600s- expire as token expire
 
         User.objects(id__in=overtime_user_ids).update(online=False)
         for user_id in overtime_user_ids:
@@ -219,7 +223,7 @@ class UserManager(Component):
 
     def get_talents(self):
         # todo real talents list
-        users = User.objects.order_by("-login_times")[:10]
+        users = User.objects(name__ne="admin").order_by("-login_times")[:10]
 
         return [self.user_display_info(u) for u in users]
 
@@ -336,8 +340,9 @@ class UserManager(Component):
 
             try:
                 user.save()
-            except NotUniqueError:
-                return self.__oauth_login(provider, context)
+            except ValidationError as e:
+                self.log.error(e)
+                return internal_server_error("create user fail.")
 
             map(lambda x: self.__create_or_update_email(user, x), email_list)
 

@@ -36,10 +36,6 @@ $(document).ready(function(){
         location.href = CONFIG.wechat.authorize_url;
     });
 
-    $('#gitcafelogin').click(function() {
-        location.href = CONFIG.gitcafe.authorize_url;
-    });
-
      $('#weibologin').click(function() {
         location.href = CONFIG.weibo.authorize_url;
     });

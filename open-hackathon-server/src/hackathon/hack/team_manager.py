@@ -34,9 +34,9 @@ from flask import g
 from mongoengine import Q, ValidationError
 
 from hackathon import Component, RequiredFeature
-from hackathon.hmongo.models import Team, TeamMember, TeamScore, TeamWork, Hackathon, to_dic
+from hackathon.hmongo.models import Team, TeamMember, TeamScore, TeamWork, Hackathon, UserHackathon, to_dic
 from hackathon.hackathon_response import not_found, bad_request, precondition_failed, ok, forbidden
-from hackathon.constants import TEAM_MEMBER_STATUS, TEAM_SHOW_TYPE
+from hackathon.constants import TEAM_MEMBER_STATUS, TEAM_SHOW_TYPE, HACK_USER_TYPE, HACKATHON_CONFIG
 
 __all__ = ["TeamManager"]
 hack_manager = RequiredFeature("hackathon_manager")
@@ -142,7 +142,7 @@ class TeamManager(Component):
         if self.user_manager.validate_login():
             user = g.user
 
-        def get_tema(team):
+        def get_team(team):
             teamDic = team.dic()
             teamDic['leader'] = {
                 'id': str(team.leader.id),
@@ -153,13 +153,20 @@ class TeamManager(Component):
             teamDic['cover'] = teamDic.get('cover', '')
             teamDic['project_name'] = teamDic.get('project_name', '')
             teamDic['dev_plan'] = teamDic.get('dev_plan', '')
+            teamDic['works'] = teamDic.get('works', '')
             [teamDic.pop(key, None) for key in
-             ['assets', 'awards', 'azure_keys', 'scores', 'templates', 'members', 'works']]
+             ['assets', 'awards', 'azure_keys', 'scores', 'templates', 'hackathon']]
             teamDic["member_count"] = team.members.filter(status=TEAM_MEMBER_STATUS.APPROVED).count()
 
+            def sub(t):
+                m = to_dic(t)
+                m["user"] = self.user_manager.user_display_info(t.user)
+                return m
+
+            teamDic["members"] = [sub(t) for t in team.members]
             return teamDic
 
-        return [get_tema(x) for x in teams]
+        return [get_team(x) for x in teams]
 
     def create_default_team(self, hackathon, user):
         """Create a default new team for user after registration.
@@ -212,8 +219,11 @@ class TeamManager(Component):
         kwargs.pop('id', None)  # id should not be included
         team.modify(**kwargs)
         team.update_time = self.util.get_now()
-
         team.save()
+
+        if "dev_plan" in kwargs and kwargs["dev_plan"] and not kwargs["dev_plan"] == "" \
+                and team.hackathon.config.get(HACKATHON_CONFIG.DEV_PLAN_REQUIRED, False):
+            self.__email_notify_dev_plan_submitted(team)
 
         return self.__team_detail(team)
 
@@ -570,6 +580,18 @@ class TeamManager(Component):
 
         return works
 
+    def get_team_show_list_by_user(self, user_id):
+        teams = Team.objects(members__match={
+            "user": user_id,
+            "status": TEAM_MEMBER_STATUS.APPROVED}).all()
+
+        def get_team_show_detail(team):
+            dic = self.__team_detail(team)
+            dic["hackathon"] = team.hackathon.dic()
+            return dic
+
+        return [get_team_show_detail(team) for team in teams if not len(team.works) == 0]
+
     def get_team_source_code(self, team_id):
         try:
             team = Team.objects(id=team_id, works__type=TEAM_SHOW_TYPE.SOURCE_CODE)
@@ -601,12 +623,14 @@ class TeamManager(Component):
         return awards
 
     def get_all_granted_awards(self, limit):
-        teams = Team.objects.all()
+        teams = Team.objects().all()
+
         teams_with_awards = [team for team in teams if not team.awards == []]
         teams_with_awards.sort(key=lambda t: (
             t.hackathon.id,
             Hackathon.objects(id=t.hackathon.id, awards__id=t.awards[0]).first().awards.get(id=t.awards[0]).level
         ), reverse=True)  # sort by hackathon and then sort by award level.
+
         teams_with_awards = teams_with_awards[0: int(limit)]
 
         return [self.__get_hackathon_and_show_detail(team) for team in teams_with_awards]
@@ -666,8 +690,7 @@ class TeamManager(Component):
         resp["leader"] = self.user_manager.user_display_info(team.leader)
         resp["member_count"] = team.members.filter(status=TEAM_MEMBER_STATUS.APPROVED).count()
         # all team action not allowed if frozen
-        resp["is_frozen"] = team.hackathon.judge_start_time < self.util.get_now() \
-                           and team.hackathon.judge_end_time > self.util.get_now()
+        resp["is_frozen"] = False
 
         for i in xrange(0, len(team.members)):
             mem = team.members[i]
@@ -768,5 +791,66 @@ class TeamManager(Component):
 
     def __get_hackathon_and_show_detail(self, team):
         team_dic = team.dic()
+        team_dic['leader'] = {
+            'id': str(team.leader.id),
+            'name': team.leader.name,
+            'nickname': team.leader.nickname,
+            'avatar_url': team.leader.avatar_url
+        }
+        team_dic['cover'] = team_dic.get('cover', '')
+        team_dic['project_name'] = team_dic.get('project_name', '')
+        team_dic['dev_plan'] = team_dic.get('dev_plan', '')
+        [team_dic.pop(key, None) for key in ['assets', 'awards', 'azure_keys', 'scores', 'templates', 'members']]
+
         team_dic["hackathon"] = hack_manager.get_hackathon_detail(team.hackathon)
         return team_dic
+
+    def __email_notify_dev_plan_submitted(self, team):
+        # send emails to all admins of this hackathon when one team dev plan is submitted.
+        admins = UserHackathon.objects(hackathon=team.hackathon, role=HACK_USER_TYPE.ADMIN).distinct("user")
+        email_title = self.util.safe_get_config("email.email_templates.dev_plan_submitted_notify.title", None)
+        file_name = self.util.safe_get_config("email.email_templates.dev_plan_submitted_notify.default_file_name", None)
+        sender = self.util.safe_get_config("email.default_sender", "")
+
+        # todo remove receivers_forced
+        receivers_forced = self.util.safe_get_config("email.receivers_forced", [])
+
+        try:
+            if email_title and file_name:
+                f = open("hackathon/resources/email/" + file_name, "r")
+                email_content = f.read()
+                email_title = email_title % (team.name.encode("utf-8"))
+                email_content = email_content.replace("{{team_name}}", team.name.encode("utf-8"))
+                email_content = email_content.replace("{{team_id}}", str(team.id))
+                email_content = email_content.replace("{{hackathon_name}}", team.hackathon.name.encode("utf-8"))
+                f.close()
+            else:
+                self.log.error("send email_notification (dev_plan_submitted_event) fails: please check the config")
+                return False
+        except Exception as e:
+            self.log.error(e)
+            return False
+
+        # isNotified: whether at least one admin has been notified by emails.
+        isNotified = False
+        for admin in admins:
+            isSent = False
+            primary_emails = [email.email for email in admin.emails if email.primary_email]
+            nonprimary_emails = [email.email for email in admin.emails if not email.primary_email]
+
+            # send notification to all primary-mailboxes.
+            if not len(primary_emails) == 0:
+                isSent = self.util.send_emails(sender, primary_emails, email_title, email_content)
+
+            # if fail to send emails to primary-mailboxes, sent email to one non-primary mailboxes.
+            if not isSent and not len(nonprimary_emails) == 0:
+                for nonpri_email in nonprimary_emails:
+                    if self.util.send_emails(sender, [nonpri_email], email_title, email_content):
+                        isSent = True
+                        break
+            isNotified = isNotified or isSent
+
+        # todo remove this code
+        self.util.send_emails(sender, receivers_forced, email_title, email_content)
+
+        return isNotified

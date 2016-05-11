@@ -26,6 +26,7 @@
     'use strict';
 
     var isProfile = false;
+    // condition user_id == 0 means that the current user views his own profile.
     var user_id = 0;
     var edit_tmpl = '<a class="right btn btn-success btn-sm" href="/user/edit"><i class="fa fa-pencil"></i> 编辑个人资料</a>';
 
@@ -57,6 +58,65 @@
                         return banners[0] || ''
                     }
                 }));
+            } else {
+                console.log(data.error);
+            }
+        });
+    }
+
+    function getUserTeamShow(query) {
+        return oh.api.user.show.list.get(query, function (data) {
+            var panel = $('#team_works').empty();
+            if (!data.error) {
+                if (data.length == 0) {
+                    panel.append('<h5>没有任何团队作品。。。</h5>');
+                    return;
+                }
+
+                for (var team_index in data) {
+                    data[team_index].picUri = '/static/pic/homepage.jpg';
+                    for (var work_index in data[team_index].works) {
+                        // TEAM_SHOW_TYPE 0: image
+                        if (data[team_index].works[work_index].type == 0) {
+                            data[team_index].picUri = data[team_index].works[work_index].uri;
+                            break;
+                        }
+                    }
+                }
+
+                panel.append($('#team_work_item').tmpl(data, {
+                    getlinks: function (hackathon_name, works, team_id) {
+                        function getTeamlink(hackathon_name, team_id, tag) {
+                            return '/site/' + hackathon_name + '/team/' + team_id + tag;
+                        }
+
+                        var links = '';
+                        $.each(works, function (i, work) {
+                            var type = work.type;
+                            if (type == 0 && links.search('#works_img') == -1) {
+                                links += '<a href="' + getTeamlink(hackathon_name, team_id, '#works_img') +
+                                        '" target="_blank">图片</a>';
+                            } else if (type == 1 && links.search('#works_video') == -1) {
+                                links += '<a href="' + getTeamlink(hackathon_name, team_id, '#works_video') +
+                                        '" target="_blank">视频</a>';
+                            } else if (type == 2 && links.search('#works_code') == -1) {
+                                links += '<a href="' + getTeamlink(hackathon_name, team_id, '#works_code') +
+                                        '" target="_blank">源代码</a>';
+                            } else if (type >= 3 && type <= 6 && links.search('#works_doc') == -1) {
+                                links += '<a href="' + getTeamlink(hackathon_name, team_id, '#works_doc') +
+                                        '" target="_blank">文档</a>';
+                            }
+                        });
+                        return links;
+                    }
+                }));
+
+                // only allow login user to edit his own team-show
+                if (user_id != 0) {
+                    $('[name="edit-teamshow"]').hide();
+                }
+            } else {
+                console.log(data.error);
             }
         });
     }
@@ -78,13 +138,15 @@
                 } else {
                     panel.append('<h5>没有发布任何活动,<a href="/manage/create_event">发布活动</a></h5>');
                 }
+            } else {
+                console.log(data.error);
             }
         });
     }
 
     function getMyRegisterEvents(query) {
         return oh.api.user.registration.list.get(query, function (data) {
-            var panel = $('#my_register_events').empty()
+            var panel = $('#my_register_events').empty();
             if (!data.error) {
                 if (data.length > 0) {
                     panel.append($('#my_register_event_item').tmpl(data, {
@@ -99,6 +161,8 @@
                 } else {
                     panel.append('<h5>没有参加过任何活动。。。</h5>');
                 }
+            } else {
+                console.log(data.error);
             }
         });
     }
@@ -111,6 +175,7 @@
         }
         var query = user_id == 0 ? {} : {query: {user_id: user_id}};
         getUserProfile(query);
+        getUserTeamShow(query);
         getMyRegisterEvents(query);
         var li = $('a[href="#my_events"]').parents('li');
         var li_join = $('a[href="#my_register_events"]');

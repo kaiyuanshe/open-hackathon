@@ -214,7 +214,7 @@ angular.module('oh.controllers', [])
       qq: $filter('isProvider')(activity.config.login_provider, 4),
       weibo: $filter('isProvider')(activity.config.login_provider, 8),
       alauda: $filter('isProvider')(activity.config.login_provider, 32),
-      gitcafe: $filter('isProvider')(activity.config.login_provider, 16),
+      // gitcafe: $filter('isProvider')(activity.config.login_provider, 16),
       wechat: $filter('isProvider')(activity.config.login_provider, 64),
     };
 
@@ -365,6 +365,7 @@ angular.module('oh.controllers', [])
       freedomTeam: false,
       autoApprove: false
     };
+    $scope.filterCondition = -1; // see HACK_USER_STATUS, -1 means all types
 
     var showTip = function(level, content, showTime) {
       $scope.$emit('showTip', {
@@ -373,6 +374,12 @@ angular.module('oh.controllers', [])
         showTime: showTime || 3000
       });
     };
+
+    $scope.filterUser = function(item) {
+      if ($scope.filterCondition == -1)
+        return true;
+      return item.status == $scope.filterCondition;
+    }
 
     var refresh = function() {
       api.admin.registration.list.get({
@@ -421,6 +428,8 @@ angular.module('oh.controllers', [])
         if (data.error) {
           showTip('tip-danger', 'some of the registration updates failed: ' + data.error.friendly_message);
         } else {
+          if (index == updates.length - 1)
+            showTip('tip-success', '批量修改状态成功');
           reg.status = parseInt(status);
           $scope.data.regStatus[reg.id] = '' + reg.status;
         }
@@ -443,6 +452,7 @@ angular.module('oh.controllers', [])
           showTip('tip-danger', data.error.friendly_message);
           $scope.data.regStatus[reg.id] = '' + reg.status;
         } else {
+          showTip('tip-success', '修改状态成功');
           reg.status = parseInt($scope.data.regStatus[reg.id]);
         }
       });
@@ -500,6 +510,7 @@ angular.module('oh.controllers', [])
           $scope.data.autoApprove = activity.config.auto_approve;
           $scope.data.freedomTeam = activity.config.freedom_team;
         } else {
+          showTip('tip-success', '修改配置成功');
           activity.config.auto_approve = $scope.data.autoApprove;
           activity.config.freedom_team = $scope.data.freedomTeam;
         }
@@ -711,10 +722,17 @@ angular.module('oh.controllers', [])
   .controller('organizersController', function($rootScope, $scope, $stateParams, $uibModal, $cookies, api) {
     $scope.$emit('pageName', 'SETTINGS.ORGANIZERS');
 
+    $scope.filterCondition = 0;
+    $scope.data = {
+        "organizers": [],
+        "selectedOrgs": []
+    }
+
     // very quick and rough implementation, please feel free to update
     var refresh = function(data) {
       if (data) {
-        $scope.data = data
+        $scope.data.organizers = data.organizers;
+        $scope.data.selectedOrgs = [];
         return
       }
 
@@ -729,7 +747,8 @@ angular.module('oh.controllers', [])
             content: data.error.friendly_message
           });
         } else {
-          $scope.data = data
+          $scope.data.organizers = data.organizers;
+          $scope.data.selectedOrgs = [];
         }
       })
     }
@@ -817,6 +836,44 @@ angular.module('oh.controllers', [])
       })
     }
 
+    $scope.filterOrganizer = function(item) {
+      if ($scope.filterCondition == 0)
+        return true;
+      return item.organization_type == $scope.filterCondition;
+    }
+
+    $scope.isOrganizerSelected = function(org) {
+      return $scope.data.selectedOrgs.indexOf(org.id) > -1;
+    }
+
+    $scope.isAllOrgsSelected = function() {
+      return $scope.data.selectedOrgs.length == $scope.data.organizers.length;
+    }
+
+    $scope.selectOrg = function(org) {
+      var index = $scope.data.selectedOrgs.indexOf(org.id)
+      if (index > -1) {
+        $scope.data.selectedOrgs.splice(index, 1)
+      } else {
+        $scope.data.selectedOrgs.push(org.id)
+      }
+    }
+
+    $scope.toggleAllOrgs = function() {
+      if ($scope.data.organizers.length == $scope.data.selectedOrgs.length) {
+        $scope.data.selectedOrgs = [];
+      } else {
+        $scope.data.selectedOrgs = [];
+        for (var index in $scope.data.organizers)
+          $scope.data.selectedOrgs.push($scope.data.organizers[index].id);
+      }
+    }
+
+    $scope.deleteSelectedOrgs = function() {
+      for (index in $scope.data.selectedOrgs)
+        $scope.delete_organizer($scope.data.selectedOrgs[index]);
+    }
+
     refresh();
   })
   .controller('awardsController', function($rootScope, $scope, $stateParams, $q, api) {
@@ -827,11 +884,40 @@ angular.module('oh.controllers', [])
       awards: [],
       teams: [],
       awardsMap: [],
+      currentScores: [],
       searchText: '',
+      hackathon_name: $stateParams.name,
 
       perPage: 6,
       curPage: 1,
     };
+
+    $scope.getTeamScore = function(team) {
+      getTeamScore(team);
+    }
+
+    function getTeamScore(team) {
+      return api.admin.team.score.list.get({
+         query: {team_id: team.id},
+         header: {hackathon_name: $stateParams.name}
+      }).then(function(res) {
+        if (res.error) {
+          showTip('tip-danger', error.friendly_message);
+          return;
+        }
+
+        var currentScores = [];
+        currentScores.scores= res.all;
+        var sum = 0;
+        var i = 0;
+        for (i = 0; i < currentScores.scores.length; i++) {
+          sum += currentScores.scores[i].score;
+        }
+        currentScores.average = sum / currentScores.scores.length;
+        $scope.currentScores = currentScores;
+        return;
+      });
+    }
 
     $scope.grantAward = function(awardId, teamId) {
       grantAward(awardId, teamId);
@@ -883,6 +969,7 @@ angular.module('oh.controllers', [])
       });
     }
 
+
     function refresh() {
       return $q.all([
         api.hackathon.grantedawards.get({
@@ -933,7 +1020,8 @@ angular.module('oh.controllers', [])
     $scope.$emit('pageName', 'SETTINGS.NOTICES');
 
     $scope.data = {
-      notices: activity.notices,
+      notices: [],
+      selectedNotices: [],
       noticeDescription: {
         0: '黑客松信息',
         1: '用户信息',
@@ -973,31 +1061,21 @@ angular.module('oh.controllers', [])
 
         activity.notices = data.items;
         $scope.data.notices = data.items;
-      });
-    };
-
-    var deleteNotice = function(id) {
-      return api.admin.hackathon.notice.delete({
-        query: {
-          id: id
-        },
-        header: {
-          hackathon_name: activity.name
-        }
+        $scope.data.selectedNotices = []
       });
     };
 
     var createNotice = function() {
-      var award = formData;
+      var notice = formData;
       var fn;
 
-      if (award.id)
+      if (notice.id)
         fn = api.admin.hackathon.notice.put;
       else
         fn = api.admin.hackathon.notice.post;
 
       return fn({
-        body: award,
+        body: notice,
         header: {
           hackathon_name: activity.name
         }
@@ -1034,14 +1112,21 @@ angular.module('oh.controllers', [])
         title: '提示',
         body: '确认删除该条公告?'
       }).then(function() {
-        return deleteNotice(id);
-      }).then(function(data) {
-        if (data.error)
-          showTip('tip-danger', data.error.friendly_message);
-        else {
-          showTip('tip-success', '删除成功');
-          return getHackathonNotices();
-        }
+        api.admin.hackathon.notice.delete({
+          query: {
+            id: id
+          },
+          header: {
+            hackathon_name: activity.name
+          }
+        }).then(function(data) {
+          if (data.error)
+            showTip('tip-danger', data.error.friendly_message);
+          else {
+            showTip('tip-success', '删除成功');
+            return getHackathonNotices();
+          }
+        });
       });
     };
 
@@ -1059,6 +1144,60 @@ angular.module('oh.controllers', [])
       openAddNoticeWizard();
     };
 
+    $scope.isNoticeSelected = function(notice) {
+      return $scope.data.selectedNotices.indexOf(notice.id) > -1;
+    }
+
+    $scope.isAllNoticesSelected = function() {
+      return $scope.data.selectedNotices.length == $scope.data.notices.length;
+    }
+
+    $scope.selectNotice = function(notice) {
+      var index = $scope.data.selectedNotices.indexOf(notice.id)
+      if (index > -1) {
+        $scope.data.selectedNotices.splice(index, 1)
+      } else {
+        $scope.data.selectedNotices.push(notice.id)
+      }
+    }
+
+    $scope.toggleAllNotices = function() {
+      if ($scope.data.notices.length == $scope.data.selectedNotices.length) {
+        $scope.data.selectedNotices = [];
+      } else {
+        $scope.data.selectedNotices = [];
+        for (var index in $scope.data.notices)
+          $scope.data.selectedNotices.push($scope.data.notices[index].id);
+      }
+    }
+
+    $scope.deleteSelectedNotices = function() {
+      function batchDelete(list, index) {
+        if (list.length == index) {
+          if (index != 0) {
+            showTip('tip-success', '批量删除成功');
+            $scope.data.selectedNotices = [];
+            getHackathonNotices();
+          }
+          return
+        }
+        api.admin.hackathon.notice.delete({
+          query: {
+            id: list[index]
+          },
+          header: {
+            hackathon_name: activity.name
+          }
+        }).then(function(data) {
+          if (data.error)
+            showTip('tip-danger', data.error.friendly_message);
+          batchDelete(list, index + 1);
+        });
+      }
+      // batch delete all selected notices.
+      batchDelete($scope.data.selectedNotices, 0);
+    }
+
     getHackathonNotices();
   })
   .controller('prizesController', function($rootScope, $scope, $uibModal, activity, api, dialog) {
@@ -1066,9 +1205,10 @@ angular.module('oh.controllers', [])
 
     $scope.data = {
       awards: activity.awards,
+      selectedPrizes: [] // use to batch-delete prizes
     };
 
-    var formData = {};
+    var formData = {}; // use to create/edit the prize.
 
     var showTip = function(level, msg) {
       $scope.$emit('showTip', {
@@ -1090,17 +1230,7 @@ angular.module('oh.controllers', [])
 
         activity.awards = data;
         $scope.data.awards = data;
-      });
-    };
-
-    var deleteAward = function(id) {
-      return api.admin.hackathon.award.delete({
-        query: {
-          id: id
-        },
-        header: {
-          hackathon_name: activity.name
-        }
+        $scope.data.selectedPrizes = [];
       });
     };
 
@@ -1151,14 +1281,21 @@ angular.module('oh.controllers', [])
         title: '提示',
         body: '确认删除此奖项?'
       }).then(function() {
-        return deleteAward(id);
-      }).then(function(data) {
-        if (data.error)
-          showTip('tip-danger', data.error.friendly_message);
-        else {
-          showTip('tip-success', '删除成功');
-          return refreshAward();
-        }
+        api.admin.hackathon.award.delete({
+          query: {
+            id: id
+          },
+          header: {
+            hackathon_name: activity.name
+          }
+        }).then(function(data) {
+          if (data.error)
+            showTip('tip-danger', data.error.friendly_message);
+          else {
+            showTip('tip-success', '删除成功');
+            return refreshAward();
+          }
+        });
       });
     };
 
@@ -1177,6 +1314,61 @@ angular.module('oh.controllers', [])
       };
       openAddAwardWizard();
     };
+
+    $scope.isPrizeSelected = function(prize) {
+      return $scope.data.selectedPrizes.indexOf(prize.id) > -1;
+    }
+
+    $scope.isAllPrizesSelected = function() {
+      return $scope.data.selectedPrizes.length == $scope.data.awards.length;
+    }
+
+    $scope.selectPrize = function(prize) {
+      var index = $scope.data.selectedPrizes.indexOf(prize.id)
+      if (index > -1) {
+        $scope.data.selectedPrizes.splice(index, 1)
+      } else {
+        $scope.data.selectedPrizes.push(prize.id)
+      }
+    }
+
+    $scope.toggleAllPrizes = function() {
+      if ($scope.data.awards.length == $scope.data.selectedPrizes.length) {
+        $scope.data.selectedPrizes = [];
+      } else {
+        $scope.data.selectedPrizes = [];
+        for (var index in $scope.data.awards)
+          $scope.data.selectedPrizes.push($scope.data.awards[index].id);
+      }
+    }
+
+    $scope.deleteSelectedPrizes = function() {
+      function batchDelete(list, index) {
+        if (list.length == index) {
+          if (index != 0) {
+            showTip('tip-success', '批量删除成功');
+            $scope.data.selectedPrizes = [];
+            refreshAward();
+          }
+          return
+        }
+        api.admin.hackathon.award.delete({
+          query: {
+            id: list[index]
+          },
+          header: {
+            hackathon_name: activity.name
+          }
+        }).then(function(data) {
+          if (data.error)
+            showTip('tip-danger', data.error.friendly_message);
+          batchDelete(list, index + 1);
+        });
+      }
+
+      // batch delete all selected prizes.
+      batchDelete($scope.data.selectedPrizes, 0);
+    }
 
     refreshAward();
   })
@@ -1303,7 +1495,7 @@ angular.module('oh.controllers', [])
     }
 
   })
-  .controller('monitorController', function($rootScope, $scope, $stateParams, api) {
+  .controller('monitorController', function($rootScope, $scope, $stateParams, $window, $timeout, api, dialog) {
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.ENVIRONMENTAL_MONITOR');
 
     $scope.data = {
@@ -1336,6 +1528,31 @@ angular.module('oh.controllers', [])
 
     $scope.deleteExperiment = function(experiment) {
       showTip('tip-danger', "暂时不支持删除操作");
+    }
+
+    $scope.refreshExperiment = function(experiment) {
+      dialog.confirm({
+        title: '提示',
+        body: '是否尝试启动已停止的环境/容器?'
+      }).then(function() {
+        api.admin.experiment.put({
+          body: {
+            experiment_id: experiment.id
+          },
+          header: {
+            hackathon_name: $stateParams.name
+          }
+        }).then(function(data) {
+          if (data.error)
+            showTip('tip-danger', data.error.friendly_message);
+          else {
+            showTip('tip-success', '操作成功! 启动环境/容器需要一定时间，三秒后自动刷新查看最新状态。');
+            $timeout(function() {
+              $window.location.reload()
+            }, 3000);
+          }
+        });
+      });
     }
 
     $scope.searchExperiment = function() {

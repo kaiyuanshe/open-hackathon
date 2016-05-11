@@ -37,7 +37,7 @@
             getTemplate(temp_name);
         }
         teamMember();
-        hacakthonStat();
+        hackathonStat();
     }
 
     function teamMember() {
@@ -52,13 +52,13 @@
 //        });
     }
 
-    function hacakthonStat() {
+    function hackathonStat() {
         oh.api.hackathon.stat.get({
             header: {hackathon_name: hackathon_name}
         }, function (data) {
             $('#online').text(data.online);
             $('#total').text(data.register);
-            //setTimeout(hacakthonStat(), 600000)
+            //setTimeout(hackathonStat(), 600000)
         });
     }
 

@@ -50,7 +50,7 @@ from client.log import log
 API_HACKATHON = "/api/hackathon"
 API_HACKATHON_LIST = "/api/hackathon/list"
 API_HACKATHON_TEMPLATE = "/api/hackathon/template"
-API_HACAKTHON_REGISTRATION = "/api/user/registration"
+API_HACKATHON_REGISTRATION = "/api/user/registration"
 API_TEAM_MEMBER_LIST = "/api/team/member/list"
 API_TEAM_USER = "/api/user/team/list"
 API_TEAM = "/api/team"
@@ -73,7 +73,6 @@ def __oauth_api_key():
         LOGIN_PROVIDER.QQ: get_config('login.qq.client_id'),
         LOGIN_PROVIDER.LIVE: get_config('login.live.client_id'),
         LOGIN_PROVIDER.WECHAT: get_config("login.wechat.client_id"),
-        LOGIN_PROVIDER.GITCAFE: get_config('login.gitcafe.client_id'),
         LOGIN_PROVIDER.GITHUB: get_config('login.github.client_id')
     }
 
@@ -163,8 +162,6 @@ def utility_processor():
                     prs.append("qq")
                 if value & LoginProvider.wechat == LoginProvider.wechat:
                     prs.append("wechat")
-                if value & LoginProvider.gitcafe == LoginProvider.gitcafe:
-                    prs.append("gitcafe")
                 if value & LoginProvider.alauda == LoginProvider.alauda:
                     prs.append("alauda")
         return ",".join(prs)
@@ -226,7 +223,7 @@ def unauthorized_log():
     return render("/login.html",
                   error=None,
                   providers=safe_get_config("login.provider_enabled",
-                                            ["github", "qq", "wechat", "gitcafe", "weibo", "live", "alauda"]))
+                                            ["github", "qq", "wechat", "weibo", "live", "alauda"]))
 
 
 @app.before_request
@@ -280,11 +277,6 @@ def qq_login():
     return __login(LOGIN_PROVIDER.QQ)
 
 
-@app.route('/gitcafe')
-def gitcafe_login():
-    return __login(LOGIN_PROVIDER.GITCAFE)
-
-
 @app.route('/live')
 def live_login():
     return __login(LOGIN_PROVIDER.LIVE)
@@ -306,11 +298,11 @@ def index():
         "items": []
     }
     newest_hackathons = __get_api(API_HACKATHON_LIST, {"token": session.get("token")},
-                                  params={"page": 1, "per_page": 3, "order_by": "create_time", "status": 1})
+                                  params={"page": 1, "per_page": 6, "order_by": "create_time", "status": 1})
     hot_hackathons = __get_api(API_HACKATHON_LIST, {"token": session.get("token")},
-                               params={"page": 1, "per_page": 3, "order_by": "registered_users_num", "status": 1})
+                               params={"page": 1, "per_page": 6, "order_by": "registered_users_num", "status": 1})
     soon_hackathon = __get_api(API_HACKATHON_LIST, {"token": session.get("token")},
-                               params={"page": 1, "per_page": 3, "order_by": "event_start_time", "status": 1})
+                               params={"page": 1, "per_page": 6, "order_by": "event_start_time", "status": 1})
 
     newest_hackathons = empty_items if "error" in newest_hackathons else newest_hackathons
     hot_hackathons = empty_items if "error" in hot_hackathons else hot_hackathons
@@ -366,7 +358,7 @@ def logout():
 def login():
     session["return_url"] = request.args.get("return_url")
     provider = request.args.get("provides")
-    prs = ["github", "qq", "wechat", "gitcafe", "weibo", "live", "alauda"]
+    prs = ["github", "qq", "wechat", "weibo", "live", "alauda"]
     if provider is None:
         provider = safe_get_config("login.provider_enabled", prs)
     else:
@@ -381,7 +373,7 @@ def hackathon(hackathon_name):
     headers = {"hackathon_name": hackathon_name, "token": session.get("token")}
     data = __get_api(API_HACKATHON, headers)
     data = Context.from_object(data)
-    reg = Context.from_object(__get_api(API_HACAKTHON_REGISTRATION, headers))
+    reg = Context.from_object(__get_api(API_HACKATHON_REGISTRATION, headers))
     if data.get('error') is not None:
         return render("/404.html")
     else:
@@ -398,7 +390,7 @@ def hackathon(hackathon_name):
 @login_required
 def workspace(hackathon_name):
     headers = {"hackathon_name": hackathon_name, "token": session.get("token")}
-    reg = Context.from_object(__get_api(API_HACAKTHON_REGISTRATION, headers))
+    reg = Context.from_object(__get_api(API_HACKATHON_REGISTRATION, headers))
 
     if reg.get('registration') is not None:
         if reg.registration.status == 1 or reg.registration.status == 3:
@@ -433,6 +425,7 @@ def temp_settings(hackathon_name):
 
 
 @app.route("/site/<hackathon_name>/team")
+@login_required
 def my_team(hackathon_name):
     headers = {"hackathon_name": hackathon_name, "token": session.get("token")}
     team = Context.from_object(__get_api(API_MY_TEAM, headers))
@@ -448,7 +441,7 @@ def create_join_team(hackathon_name, tid):
 
 def render_team_page(hackathon_name, team):
     if team.get('error') is not None:
-        return redirect('404')
+        return redirect(url_for('hackathon', hackathon_name=hackathon_name))
     else:
         role = team.get('is_admin') and 4 or 0
         role += team.get('is_leader') and 2 or 0

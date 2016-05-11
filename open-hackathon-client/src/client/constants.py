@@ -35,7 +35,6 @@ class LOGIN_PROVIDER:
     DB = "db"
     GITHUB = "github"
     QQ = "qq"
-    GITCAFE = "gitcafe"
     WEIBO = "weibo"
     LIVE = "live"
     ALAUDA = "alauda"

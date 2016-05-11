@@ -158,7 +158,7 @@ It's for simplicity that you enter a running docker container. A simple command 
 See `https://github.com/msopentechcn/open-hackathon/tree/master/tools/docker-enter` for more information.
 
 ### Logging && Hosts
-Make sure log folder is created and properly authorized. By default it's `/var/log/openhackathon`. You can update the logging path in `open-hacakthon-server/src/hackathon/logging.conf` and `open-hackathon-client/src/client/logging.conf`.
+Make sure log folder is created and properly authorized. By default it's `/var/log/openhackathon`. You can update the logging path in `open-hackathon-server/src/hackathon/logging.conf` and `open-hackathon-client/src/client/logging.conf`.
 ```
 sudo mkdir /var/log/open-hackathon
 sudo chmod -R 644 /var/log/open-hackathon
@@ -216,7 +216,7 @@ sudo service open-hackathon-server start
 sudo cp /home/opentech/open-hackathon/open-hackathon-client/src/open-hackathon-client.conf /etc/init/
 sudo service open-hackathon-client start
 ```
-- by default, open hackahton server and client listen on port 15000 and 80 respectively. Update the ini file if you want as well as other uwsgi configurations.
+- by default, open hackathon server and client listen on port 15000 and 80 respectively. Update the ini file if you want as well as other uwsgi configurations.
 
 ### things to know
 - You can deploy DB, open hackathon server, open hackathon client to different VM, correct configurations in `config.py` and `/etc/guacamole/guacamole.properties` then if you do so.
