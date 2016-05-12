@@ -240,9 +240,11 @@ class UserManager(Component):
 
         file_list = []
         storage = RequiredFeature("storage")
-        for pre_file_name in request.files:
-            file_content = request.files[pre_file_name]
-            new_file_name = self.__generate_file_name(user_id, file_type)
+        for file in request.files:
+            file_content = request.files[file]
+            pre_file_name = file_content.filename
+            file_suffix = pre_file_name[pre_file_name.rfind('.'):]
+            new_file_name = self.__generate_file_name(user_id, file_type, file_suffix)
             self.log.debug("upload file: " + new_file_name)
             context = Context(
                 file_name=new_file_name,
@@ -254,7 +256,7 @@ class UserManager(Component):
             # file_name is a random name created by server, pre_file_name is the original name
             file_info = {
                 "file_name": new_file_name,
-                "pre_file_name": file_content.filename,
+                "pre_file_name": pre_file_name,
                 "url": context.url
             }
             file_list.append(file_info)
@@ -401,9 +403,9 @@ class UserManager(Component):
             #     self.db.add_object(asset)
             #     self.db.commit()
 
-    def __generate_file_name(self, user_id, type):
+    def __generate_file_name(self, user_id, type, suffix):
         # may generate differrnt file_names for different type. see FILE_TYPE.
-        file_name = "%s-%s" % (str(user_id), str(uuid.uuid1())[0:8])
+        file_name = "%s-%s%s" % (str(user_id), str(uuid.uuid1())[0:8], suffix)
         return file_name
 
     def __validate_upload_files(self):

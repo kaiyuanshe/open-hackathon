@@ -271,15 +271,7 @@
             .on('success.form.bv', function (e) {
                 e.preventDefault();
                 var url = projectPlan_Form.find('[name="plan"]').val();
-                $('#projectPlanModal').modal('hide');
-                updateTeam({id: tid, dev_plan: url}).then(function (data) {
-                    if (data.error) {
-                        oh.comm.alert('错误', data.error.friendly_message);
-                    } else {
-                        var p = $('#plan');
-                        p.attr({src: 'https://view.officeapps.live.com/op/embed.aspx?src=' + encodeURIComponent(url)}).removeClass('hide');
-                    }
-                });
+                updateTeamDevPlan(url);
             });
         var src = $('#plan').data('src');
         if (src) {
@@ -400,6 +392,19 @@
 
     function updateTeam(data) {
         return oh.api.team.put({body: data, header: {hackathon_name: hackathon_name}});
+    }
+
+    function updateTeamDevPlan(url) {
+        $('#projectPlanModal').modal('hide');
+            updateTeam({id: tid, dev_plan: url}).then(function (data) {
+                if (data.error) {
+                    oh.comm.alert('错误', data.error.friendly_message);
+                } else {
+                    var p = $('#plan');
+                    p.attr({src: 'https://view.officeapps.live.com/op/embed.aspx?src=' +
+                            encodeURIComponent(url)}).removeClass('hide');
+                }
+        });
     }
 
     function addShow(data) {
@@ -586,19 +591,21 @@
             });
         });
 
+        // upload file about dev_plan
         $('#dev_plan_upload').fileupload({
             type: 'POST',
-            url: CONFIG.apiconfig.proxy + '/api/user/file?file_type=team_cover',
+            url: CONFIG.apiconfig.proxy + '/api/user/file?file_type=team_dev_plan',
             dataType: 'json',
             beforeSend: function (xhr, data) {
                 xhr.setRequestHeader('token', $.cookie('token'));
             },
             done: function (e, obj) {
                 var data = obj.result;
-                if (data.error) {
+                if (data.error || ! "files" in data || data.files.length == 0) {
                     oh.comm.alert('错误', data.error.friendly_message);
                 } else {
-                    getTemplateList();
+                    var url = data.files[0].url;
+                    updateTeamDevPlan(url);
                 }
             }
         });
