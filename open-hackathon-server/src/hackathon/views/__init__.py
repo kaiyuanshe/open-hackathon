@@ -69,6 +69,7 @@ def init_routes():
     api.add_resource(UserHackathonListResource, "/api/user/registration/list")  # participated hackathon list of user
     api.add_resource(UserExperimentResource, "/api/user/experiment")  # start or stop experiment
     api.add_resource(UserNoticeReadResource, "/api/user/notice/read")  # read the notice
+    api.add_resource(UserFileResource, "/api/user/file")  # login-in user can upload files about team, hackathon or user
 
     # team APIs
     api.add_resource(TeamResource, "/api/team")  # create, update, dismiss and query team
@@ -100,7 +101,6 @@ def init_routes():
     api.add_resource(AdminHackathonTemplateResource, "/api/admin/hackathon/template")  # select template for hackathon
     api.add_resource(AdminExperimentResource, "/api/admin/experiment")  # start expr by admin
     api.add_resource(AdminExperimentListResource, "/api/admin/experiment/list")  # get expr list of hackathon
-    api.add_resource(AdminHackathonFileResource, "/api/admin/file")  # upload hackathon image
     api.add_resource(HackathonAdminListResource, "/api/admin/hackathon/administrator/list")  # list admin/judges
     api.add_resource(HackathonAdminResource, "/api/admin/hackathon/administrator")  # add or delete admin/judge
     api.add_resource(AdminTeamScoreListResource, "/api/admin/team/score/list")  # select or unselect template for team

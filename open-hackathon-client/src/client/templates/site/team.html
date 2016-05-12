@@ -3,6 +3,7 @@
 {% block style %}
     <link href="/static/css/oh.site.team.css" rel="stylesheet">
     <link href="/static/css/magnific-popup.css" rel="stylesheet">
+    <link href="/static/css/jquery.fileupload.css" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
@@ -317,6 +318,10 @@
                             </div>
                         </div>
                         <div class="modal-footer">
+                            <span id="dev_plan_upload" class="btn btn-success fileinput-button">
+                                <span>上传文件</span>
+                                <input type="file" mutiple>
+                            </span>
                             <button type="submit" class="btn btn-primary">确定</button>
                             <button type="button" class="btn btn-warning" data-dismiss="modal">取消</button>
                         </div>
@@ -486,5 +491,6 @@
     <script type="text/javascript" src="/static/js/jquery/jquery.magnific-popup.min.js"></script>
     <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
     <script type="text/javascript" src="/static/js/jquery/moment.min.js"></script>
+    <script type="text/javascript" src="/static/js/jquery/jquery.fileupload.js"></script>
     <script type="text/javascript" src="/static/js/views/oh.site.team.js"></script>
 {% endblock %}

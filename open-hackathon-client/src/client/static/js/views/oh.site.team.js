@@ -561,7 +561,6 @@
             $('#teamLogoModal').modal('show');
         });
 
-
         $('#talent_list').on('click', '[data-role="denied"]', function (e) {
             var rel_id = $(this).data('id');
             var userItem = $(this).parents('[data-user]');
@@ -585,6 +584,23 @@
                     userItem.find('span').text('成员')
                 }
             });
+        });
+
+        $('#dev_plan_upload').fileupload({
+            type: 'POST',
+            url: CONFIG.apiconfig.proxy + '/api/user/file?file_type=team_cover',
+            dataType: 'json',
+            beforeSend: function (xhr, data) {
+                xhr.setRequestHeader('token', $.cookie('token'));
+            },
+            done: function (e, obj) {
+                var data = obj.result;
+                if (data.error) {
+                    oh.comm.alert('错误', data.error.friendly_message);
+                } else {
+                    getTemplateList();
+                }
+            }
         });
     }
 

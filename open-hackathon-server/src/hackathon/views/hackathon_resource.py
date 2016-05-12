@@ -134,7 +134,7 @@ class HackathonResource(Resource):
         :return Context object from request body or query
         """
         caller = sys._getframe().f_back.f_code.co_name.lower()
-        if caller in ["post", "put"]:
-            return Context.from_object(request.get_json(force=True))
+        if caller in ["post", "put"] and not request.path == "/api/user/file":
+            return Context.from_object(request.get_json())
         else:
             return Context.from_object(request.args)

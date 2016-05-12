@@ -239,6 +239,9 @@ Config = {
                     },
                     "show": {
                         "list": ["get"]
+                    },
+                    "file": {
+                        "": ["post"]
                     }
                 },
                 "hackathon": {
