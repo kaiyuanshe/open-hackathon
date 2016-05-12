@@ -135,6 +135,6 @@ class HackathonResource(Resource):
         """
         caller = sys._getframe().f_back.f_code.co_name.lower()
         if caller in ["post", "put"] and not request.path == "/api/user/file":
-            return Context.from_object(request.get_json())
+            return Context.from_object(request.get_json(force=True))
         else:
             return Context.from_object(request.args)

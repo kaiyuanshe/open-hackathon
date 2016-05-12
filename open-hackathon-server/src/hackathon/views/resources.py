@@ -312,11 +312,7 @@ class UserNoticeReadResource(HackathonResource):
 class UserFileResource(HackathonResource):
     @token_required
     def post(self):
-        context = self.context()
-        file_type = context.file_type
-        user_id = g.user.id
-        result = user_manager.upload_files(user_id, file_type)
-        return result
+        return user_manager.upload_files(g.user.id, self.context().file_type)
 
     @token_required
     def delete(self):

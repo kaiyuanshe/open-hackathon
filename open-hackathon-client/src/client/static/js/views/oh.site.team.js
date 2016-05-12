@@ -599,6 +599,9 @@
             beforeSend: function (xhr, data) {
                 xhr.setRequestHeader('token', $.cookie('token'));
             },
+            start: function() {
+                oh.comm.createLoading('#projectPlanForm');
+            },
             done: function (e, obj) {
                 var data = obj.result;
                 if (data.error || ! "files" in data || data.files.length == 0) {
