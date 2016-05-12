@@ -84,7 +84,7 @@ def validate(func):
         output_schema = get_output_schema(class_name, method_name)
 
         if input_schema:
-            if method_name in ["post", "put"]:
+            if method_name in ["post", "put"] and not request.path == "/api/user/file":
                 data = request.get_json(force=True)
             else:
                 data = request.args

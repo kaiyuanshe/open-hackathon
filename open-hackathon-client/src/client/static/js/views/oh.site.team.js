@@ -403,6 +403,7 @@
                     var p = $('#plan');
                     p.attr({src: 'https://view.officeapps.live.com/op/embed.aspx?src=' +
                             encodeURIComponent(url)}).removeClass('hide');
+                    oh.comm.alert("提示", "上传成功!");
                 }
         });
     }
@@ -600,7 +601,7 @@
                 xhr.setRequestHeader('token', $.cookie('token'));
             },
             start: function() {
-                oh.comm.createLoading('#projectPlanForm');
+                // todo show something when uploading
             },
             done: function (e, obj) {
                 var data = obj.result;

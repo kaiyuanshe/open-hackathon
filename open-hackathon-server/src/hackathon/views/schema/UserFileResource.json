@@ -1,0 +1,17 @@
+{
+  "UserFileResource": {
+    "post": {
+      "input": {
+        "title": "Api for user to upload files",
+        "description": "user upload file for team, hackathon or himself",
+        "type": "object",
+        "properties": {
+          "file_type": {
+            "type": "string",
+            "description": "see FILE_TYPE"
+          }
+        }
+      }
+    }
+  }
+}
