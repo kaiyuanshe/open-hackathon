@@ -97,7 +97,7 @@ class UserManager(Component):
         if user is None:
             return False
         else:
-            time_interval = timedelta(hours=self.util.safe_get_config("login.token_valid_time_minus", 60))
+            time_interval = timedelta(hours=self.util.safe_get_config("login.token_valid_time_minutes", 60))
             new_toke_time = self.util.get_now() + time_interval
             UserToken.objects(token=request.headers[HTTP_HEADER.TOKEN]).update(expire_date=new_toke_time)
 
@@ -260,7 +260,7 @@ class UserManager(Component):
 
     def __generate_api_token(self, admin):
         token_issue_date = self.util.get_now()
-        valid_period = timedelta(minutes=self.util.safe_get_config("login.token_valid_time_minus", 60))
+        valid_period = timedelta(minutes=self.util.safe_get_config("login.token_valid_time_minutes", 60))
         token_expire_date = token_issue_date + valid_period
         user_token = UserToken(token=str(uuid.uuid1()),
                                user=admin,

@@ -113,7 +113,7 @@ Config = {
             "access_token_url": 'http://console.int.alauda.io/oauth/token'
         },
         "provider_enabled": ["github", "wechat"],
-        "session_valid_time_minus": 60
+        "session_valid_time_minutes": 60
     },
     "hackathon-api": {
         "endpoint": HACKATHON_API_ENDPOINT
