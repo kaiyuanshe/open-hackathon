@@ -236,30 +236,13 @@
                 updateTeamLogo(logo_url);
             });
 
-        var projectCove_form = $('#projectCoverForm').bootstrapValidator()
+        var projectCover_Form = $('#projectCoverForm').bootstrapValidator()
             .on('success.form.bv', function (e) {
                 e.preventDefault();
-                var url = projectCove_form.find('[name="cover"]').val();
-                // $('#team_logo').attr({src: logo});
-                $('#projectCoverModal').modal('hide');
-                updateTeam({id: tid, cover: url}).then(function (data) {
-                    if (data.error) {
-                        oh.comm.alert('错误', data.error.friendly_message);
-                    } else {
-                        var c = $('#cover');
-                        var par = c.find('[data-parent]');
-                        var nothing = c.find('.nothing');
-                        if (par.length == 0) {
-                            par = $('<div data-parent>').append(
-                                $('<img>').load(function (e) {
-                                    oh.comm.imgLoad(this);
-                                })
-                            ).appendTo(c);
-                        }
-                        par.find('img').attr({src: url});
-                        nothing.addClass('hide');
-                    }
-                });
+                disableItems(['#project_cover_input', '#project_cover_upload_btn', '#project_cover_submit',
+                              '#project_cover_cancel']);
+                var url = projectCover_Form.find('[name="cover"]').val();
+                updateProjectCover(url)
             });
 
         // edit dev_plan by input resource address
@@ -422,6 +405,33 @@
                 $('#teamLogoModal').modal('hide');
                 $('#team_logo_upload_span').text('上传文件');
                 enableItems(['#team_logo_input', '#team_logo_upload_btn', '#team_logo_submit', '#team_logo_cancel']);
+                oh.comm.alert("提示", "设置成功!");
+            }
+        });
+    }
+
+    // update the project cover
+    function updateProjectCover(url) {
+        updateTeam({id: tid, cover: url}).then(function (data) {
+            if (data.error) {
+                oh.comm.alert('错误', data.error.friendly_message);
+            } else {
+                var c = $('#cover');
+                var par = c.find('[data-parent]');
+                var nothing = c.find('.nothing');
+                if (par.length == 0) {
+                    par = $('<div data-parent>').append($('<img>').load(function (e) {
+                            oh.comm.imgLoad(this);
+                        })).appendTo(c);
+                }
+                par.find('img').attr({src: url});
+                nothing.addClass('hide');
+
+                $('#projectCoverModal').modal('hide');
+                $('#projectCoverForm').find('#project_cover_input').val("");
+                $('#project_cover_upload_span').text('上传文件');
+                enableItems(['#project_cover_input', '#project_cover_upload_btn', '#project_cover_submit',
+                             '#project_cover_cancel']);
                 oh.comm.alert("提示", "设置成功!");
             }
         });
@@ -659,6 +669,14 @@
             $('#team_logo_upload_span').text('文件上传中，上传成功将会自动跳转，请稍等...');
             disableItems(['#team_logo_input', '#team_logo_upload_btn', '#team_logo_submit', '#team_logo_cancel']);
         }, updateTeamLogo)
+
+
+        // upload file about project_cover
+        uploadTeamFile('#project_cover_upload', function(){
+            $('#project_cover_upload_span').text('文件上传中，上传成功将会自动跳转，请稍等...');
+            disableItems(['#project_cover_input', '#project_cover_upload_btn', '#project_cover_submit',
+                          '#project_cover_cancel']);
+        }, updateProjectCover)
 
         // upload file about dev_plan
         uploadTeamFile('#dev_plan_upload', function(){
