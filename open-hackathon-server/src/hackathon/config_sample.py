@@ -47,7 +47,7 @@ Config = {
         "port": MONGODB_PORT
     },
     "login": {
-        "token_expiration_seconds": 60 * 60
+        "token_valid_time_minutes": 60
     },
     "azure": {
         "cert_base": "",

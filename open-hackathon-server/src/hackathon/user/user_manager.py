@@ -96,15 +96,20 @@ class UserManager(Component):
         user = self.__validate_token(request.headers[HTTP_HEADER.TOKEN])
         if user is None:
             return False
+        else:
+            time_interval = timedelta(hours=self.util.safe_get_config("login.token_valid_time_minutes", 60))
+            new_toke_time = self.util.get_now() + time_interval
+            UserToken.objects(token=request.headers[HTTP_HEADER.TOKEN]).update(expire_date=new_toke_time)
 
         users_operation_time[user.id] = self.util.get_now()
+
         return True
 
     def check_user_online_status(self):
         """Check whether the user is offline. If the answer is yes, update its status in DB."""
         overtime_user_ids = [user_id for user_id in users_operation_time
-                             if (self.util.get_now() - users_operation_time[user_id]).seconds > 3600]
-                             # 3600s- expire as token expire
+                             if (self.util.get_now() - users_operation_time[user_id]).minutes > 60]
+        # 3600s- expire as token expire
 
         User.objects(id__in=overtime_user_ids).update(online=False)
         for user_id in overtime_user_ids:
@@ -287,7 +292,7 @@ class UserManager(Component):
 
     def __generate_api_token(self, admin):
         token_issue_date = self.util.get_now()
-        valid_period = timedelta(minutes=self.util.safe_get_config("login.token_expiration_seconds", 3600))
+        valid_period = timedelta(minutes=self.util.safe_get_config("login.token_valid_time_minutes", 60))
         token_expire_date = token_issue_date + valid_period
         user_token = UserToken(token=str(uuid.uuid1()),
                                user=admin,

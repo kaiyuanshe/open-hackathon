@@ -47,8 +47,6 @@ from client.user.login_manager import login_manager_helper
 from client.functions import get_config, safe_get_config, get_now
 from client.log import log
 
-session_lifetime_minutes = 60
-
 API_HACKATHON = "/api/hackathon"
 API_HACKATHON_LIST = "/api/hackathon/list"
 API_HACKATHON_TEMPLATE = "/api/hackathon/template"
@@ -229,9 +227,10 @@ def unauthorized_log():
 
 
 @app.before_request
-def before_request():
+def make_session_permanent():
     g.user = current_user
-    app.permanent_session_lifetime = timedelta(minutes=session_lifetime_minutes)
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(minutes=safe_get_config("login.session_valid_time_minutes", 60))
 
 
 @app.errorhandler(401)
