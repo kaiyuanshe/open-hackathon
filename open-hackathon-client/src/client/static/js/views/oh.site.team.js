@@ -421,8 +421,8 @@
                 var nothing = c.find('.nothing');
                 if (par.length == 0) {
                     par = $('<div data-parent>').append($('<img>').load(function (e) {
-                            oh.comm.imgLoad(this);
-                        })).appendTo(c);
+                              oh.comm.imgLoad(this);
+                          })).appendTo(c);
                 }
                 par.find('img').attr({src: url});
                 nothing.addClass('hide');
@@ -669,7 +669,6 @@
             $('#team_logo_upload_span').text('文件上传中，上传成功将会自动跳转，请稍等...');
             disableItems(['#team_logo_input', '#team_logo_upload_btn', '#team_logo_submit', '#team_logo_cancel']);
         }, updateTeamLogo)
-
 
         // upload file about project_cover
         uploadTeamFile('#project_cover_upload', function(){
