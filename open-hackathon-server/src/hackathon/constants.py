@@ -299,7 +299,7 @@ class FILE_TYPE:
     AZURE_CERT = "azure_cert"
     TEMPLATE = "template"
     HACK_IMAGE = "hack_image"
-    USER_AVATAR = "user_avatar"
+    USER_FILE = "user_file"
     TEAM_FILE = "team_file"
 
 

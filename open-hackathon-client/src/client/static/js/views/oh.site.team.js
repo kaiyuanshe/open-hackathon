@@ -270,6 +270,8 @@
         var projectPlan_Form = $('#projectPlanForm').bootstrapValidator()
             .on('success.form.bv', function (e) {
                 e.preventDefault();
+                $('#dev_plan_submit').text('感谢提交开发计划书，正在邮件通知中。。。稍等将自动跳转');
+                disableItems(['#dev_plan_input', '#dev_plan_btn', '#dev_plan_submit', '#dev_plan_cancel']);
                 var url = projectPlan_Form.find('[name="plan"]').val();
                 updateTeamDevPlan(url);
             });
@@ -394,22 +396,7 @@
         return oh.api.team.put({body: data, header: {hackathon_name: hackathon_name}});
     }
 
-    function updateTeamDevPlan(url) {
-        updateTeam({id: tid, dev_plan: url}).then(function (data) {
-            if (data.error) {
-                oh.comm.alert('错误', data.error.friendly_message);
-            } else {
-                $('#projectPlanModal').modal('hide');
-                $('#dev_plan_span').text('上传文件');
-                enableItems(['#dev_plan_input', '#dev_plan_btn', '#dev_plan_submit', '#dev_plan_cancel']);
-                var p = $('#plan');
-                p.attr({src: 'https://view.officeapps.live.com/op/embed.aspx?src=' +
-                        encodeURIComponent(url)}).removeClass('hide');
-                oh.comm.alert("提示", "上传成功!");
-            }
-        });
-    }
-
+    // upload any type of team files
     function uploadTeamFile(filter_str, start_func, update_func) {
         // upload file about team
         $(filter_str).fileupload({
@@ -440,6 +427,24 @@
     function enableItems(list) {
         for (var index in list)
             $(list[index]).removeAttr('disabled');
+    }
+
+    // update the team dev_plan to this url
+    function updateTeamDevPlan(url) {
+        updateTeam({id: tid, dev_plan: url}).then(function (data) {
+            if (data.error) {
+                oh.comm.alert('错误', data.error.friendly_message);
+            } else {
+                $('#projectPlanModal').modal('hide');
+                $('#dev_plan_span').text('上传文件');
+                $('#dev_plan_submit').text('确定');
+                enableItems(['#dev_plan_input', '#dev_plan_btn', '#dev_plan_submit', '#dev_plan_cancel']);
+                var p = $('#plan');
+                p.attr({src: 'https://view.officeapps.live.com/op/embed.aspx?src=' +
+                        encodeURIComponent(url)}).removeClass('hide');
+                oh.comm.alert("提示", "设置成功!");
+            }
+        });
     }
 
     function addShow(data) {
@@ -532,7 +537,7 @@
             $('#plan').before($('<a>').attr({'data-role': 'plan', 'class': 'btn btn-sm btn-info'}).text('添加项目说明书'),
                 $('<a id="down_plan"><i class="fa fa-download"></i></a>')
                     .attr({class:'link',href: 'http://opentech0storage.blob.core.chinacloudapi.cn/ohp/%E4%BA%91%E4%B8%AD%E9%BB%91%E5%AE%A2%E6%9D%BE%E5%BC%80%E5%8F%91%E8%AE%A1%E5%88%92%E4%B9%A6%E6%A8%A1%E6%9D%BF.pptx'})
-                    .append('下载开发计划书'));
+                    .append('下载开发计划书模板'));
 
             $('#show_works .sub-item').each(function (i, item) {
                 $(item).append($('<a>').attr({
