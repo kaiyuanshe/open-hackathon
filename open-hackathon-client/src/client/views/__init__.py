@@ -450,6 +450,7 @@ def render_team_page(hackathon_name, team):
         return render("/site/team.html", hackathon_name=hackathon_name, team=team, role=role)
 
 
+@app.route("/signin", methods=['GET', 'POST'])
 @app.route("/admin", methods=['GET', 'POST'])
 def superadmin():
     if request.method == 'POST':
