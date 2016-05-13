@@ -247,19 +247,19 @@
 
                                 <div class="col-sm-9">
                                     <input type="text" class="form-control" name="note" maxlength="80"
-                                           placeholder="描述信息">
+                                           placeholder="描述信息" id="team_work_description">
                                 </div>
                             </div>
                             <div data-gtype="image">
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label required">图片路径</label>
+                                    <label class="col-sm-3 control-label required">图片链接</label>
                                     <div class="col-sm-9">
                                         <input type="url" class="form-control" data-name="uri" name="work_image"
                                                placeholder="http://"
                                                required
                                                data-bv-trigger="blur"
-                                               data-bv-message="请填写正确的图片访问路径"
-                                               data-bv-notempty-message="请填图片路径">
+                                               data-bv-message="请填写正确的图片链接地址"
+                                               data-bv-notempty-message="请填图片链接或者上传文件">
                                     </div>
                                 </div>
                             </div>
@@ -268,25 +268,25 @@
                                     <label class="col-sm-3 control-label required">视频地址</label>
 
                                     <div class="col-sm-9">
-                                <textarea type="text" class="form-control" data-name="uri" name="work_video"
-                                          placeholder="<embed src='http://player.youku.com/......"
-                                          data-bv-trigger="blur"
-                                          required
-                                          data-bv-notempty-message="请填嵌入视频代码"></textarea>
+                                        <textarea type="text" class="form-control" data-name="uri" name="work_video"
+                                                  placeholder="<embed src='http://player.youku.com/......"
+                                                  data-bv-trigger="blur"
+                                                  required
+                                                  data-bv-notempty-message="请填嵌入视频代码或者上传文件"></textarea>
                                     </div>
                                 </div>
                             </div>
                             <div data-gtype="doc">
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label required">文档路径</label>
+                                    <label class="col-sm-3 control-label required">文档链接</label>
 
                                     <div class="col-sm-9">
                                         <input type="url" class="form-control" data-name="uri" name="work_doc"
                                                placeholder="http://"
                                                required
                                                data-bv-trigger="blur"
-                                               data-bv-message="请填写正确的文档访问路径"
-                                               data-bv-notempty-message="请填文档路径">
+                                               data-bv-message="请填写正确的文档链接地址"
+                                               data-bv-notempty-message="请填文档链接或者上传文件">
                                     </div>
                                 </div>
                             </div>
@@ -299,27 +299,31 @@
                                                placeholder="https://github.com/......"
                                                data-bv-trigger="blur"
                                                data-bv-message="请填写正确的项目地址"
-                                               data-bv-notempty-message="请填项目地址">
+                                               data-bv-notempty-message="请填项目地址或者上传文件">
                                     </div>
                                 </div>
                             </div>
                             <div data-gtype="other">
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label required">作品路径</label>
+                                    <label class="col-sm-3 control-label required">作品链接</label>
                                     <div class="col-sm-9">
                                         <input type="url" class="form-control" data-name="uri" name="work_other"
                                                placeholder="http://"
                                                required
                                                data-bv-trigger="blur"
-                                               data-bv-message="请填写正确的访问路径"
-                                               data-bv-notempty-message="请填路径">
+                                               data-bv-message="请填写正确的作品链接地址"
+                                               data-bv-notempty-message="请填作品链接地址或者上传文件">
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="submit" class="btn btn-primary">确定</button>
-                            <button type="button" class="btn btn-warning" data-dismiss="modal">取消</button>
+                            <span id="team_work_upload" class="btn btn-success fileinput-button">
+                                <span id="team_work_upload_span">上传文件</span>
+                                <input id="team_work_upload_btn" type="file" mutiple>
+                            </span>
+                            <button id="team_work_submit" type="submit" class="btn btn-primary">确定</button>
+                            <button id="team_work_cancel" type="button" class="btn btn-warning" data-dismiss="modal">取消</button>
                         </div>
                     </div>
                 </form>
@@ -336,20 +340,26 @@
                         </div>
                         <div class="modal-body">
                             <div class="form-group">
-                                <label class="col-sm-3 control-label required">图片路径</label>
+                                <label class="col-sm-3 control-label required">图片链接</label>
 
                                 <div class="col-sm-9">
-                                    <input type="url" class="form-control" id="logo" name="logo" placeholder="图片路径"
+                                    <input type="url" class="form-control" id="team_logo_input" name="logo"
+                                           placeholder="图片链接"
                                            required
                                            data-bv-trigger="blur"
-                                           data-bv-message="请填写正确的图片访问路径"
-                                           data-bv-notempty-message="请填图片路径">
+                                           data-bv-message="请填写正确的图片链接地址"
+                                           data-bv-notempty-message="请填图片链接或者上传文件">
                                 </div>
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="submit" class="btn btn-primary">确定</button>
-                            <button type="button" class="btn btn-warning" data-dismiss="modal">取消</button>
+                            <span id="team_logo_upload" class="btn btn-success fileinput-button">
+                                <span id="team_logo_upload_span">上传文件</span>
+                                <input id="team_logo_upload_btn" type="file" mutiple>
+                            </span>
+                            <button id="team_logo_submit" type="submit" class="btn btn-primary">确定</button>
+                            <button id="team_logo_cancel" type="button" class="btn btn-warning" data-dismiss="modal">
+                                取消</button>
                         </div>
                     </div>
                 </form>
@@ -366,20 +376,26 @@
                         </div>
                         <div class="modal-body">
                             <div class="form-group">
-                                <label class="col-sm-3 control-label required">图片路径</label>
+                                <label class="col-sm-3 control-label required">图片链接</label>
 
                                 <div class="col-sm-9">
-                                    <input type="url" class="form-control" name="cover" placeholder="图片路径"
+                                    <input type="url" class="form-control" name="cover" placeholder="图片链接"
+                                           id="project_cover"
                                            required
                                            data-bv-trigger="blur"
-                                           data-bv-message="请填写正确的图片访问路径"
-                                           data-bv-notempty-message="请填图片路径">
+                                           data-bv-message="请填写正确的图片链接地址"
+                                           data-bv-notempty-message="请填图片链接或者上传文件">
                                 </div>
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="submit" class="btn btn-primary">确定</button>
-                            <button type="button" class="btn btn-warning" data-dismiss="modal">取消</button>
+                            <span id="project_cover_upload" class="btn btn-success fileinput-button">
+                                <span id="project_cover_upload_span">上传文件</span>
+                                <input id="project_cover_upload_btn" type="file" mutiple>
+                            </span>
+                            <button id="project_cover_submit" type="submit" class="btn btn-primary">确定</button>
+                            <button id="project_cover_cancel" type="button" class="btn btn-warning"
+                                    data-dismiss="modal">取消</button>
                         </div>
                     </div>
                 </form>
@@ -405,7 +421,7 @@
                                            required
                                            data-bv-trigger="blur"
                                            data-bv-message="请填写正确的链接访问地址"
-                                           data-bv-notempty-message="请填链接地址">
+                                           data-bv-notempty-message="请填链接地址或者上传文件">
                                 </div>
                             </div>
                         </div>
@@ -415,7 +431,8 @@
                                 <input id="dev_plan_btn" type="file" mutiple>
                             </span>
                             <button id="dev_plan_submit" type="submit" class="btn btn-primary">确定</button>
-                            <button id="dev_plan_cancel" type="button" class="btn btn-warning" data-dismiss="modal">取消</button>
+                            <button id="dev_plan_cancel" type="button" class="btn btn-warning" data-dismiss="modal">
+                                取消</button>
                         </div>
                     </div>
                 </form>

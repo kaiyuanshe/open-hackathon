@@ -227,18 +227,13 @@
             });
         }
 
-
+        // edit team logo by input image address
         var editLogo_form = $('#editLogoForm').bootstrapValidator()
             .on('success.form.bv', function (e) {
                 e.preventDefault();
-                var logo = editLogo_form.find('#logo').val();
-                $('#team_logo').attr({src: logo});
-                $('#teamLogoModal').modal('hide');
-                updateTeam({id: tid, logo: logo}).then(function (data) {
-                    if (data.error) {
-                        oh.comm.alert('错误', data.error.friendly_message);
-                    }
-                });
+                disableItems(['#team_logo_input', '#team_logo_upload_btn', '#team_logo_submit', '#team_logo_cancel']);
+                var logo_url = editLogo_form.find('#team_logo_input').val();
+                updateTeamLogo(logo_url);
             });
 
         var projectCove_form = $('#projectCoverForm').bootstrapValidator()
@@ -267,6 +262,7 @@
                 });
             });
 
+        // edit dev_plan by input resource address
         var projectPlan_Form = $('#projectPlanForm').bootstrapValidator()
             .on('success.form.bv', function (e) {
                 e.preventDefault();
@@ -305,24 +301,10 @@
         var worksForm = $('#addWorksForm').bootstrapValidator()
             .on('success.form.bv', function (e) {
                 e.preventDefault();
-                var data = {
-                    team_id: tid,
-                    type: +worksForm.find('#worktype').val(),
-                    note: worksForm.find('[name="note"]').val(),
-                    uri: worksForm.find('[data-gtype].active [data-name="uri"]').val()
-                };
-                addShow(data).then(function (data) {
-                    if (data.error) {
-                        oh.comm.alert('错误', data.error.friendly_message);
-                    } else {
-                        // var split_data = splitShow([data]);
-                        bindShow(splitShow([data]), true);
-                    }
-
-                });
-                works_Modal.modal('hide');
-                worksForm.data().bootstrapValidator.resetForm();
-                $('#worktype').trigger('change');
+                disableItems(['#dev_plan_input', '#dev_plan_btn', '#dev_plan_submit', '#dev_plan_cancel',
+                              '#team_work_description']);
+                var uri = worksForm.find('[data-gtype].active [data-name="uri"]').val()
+                addTeamWork(uri)
             });
 
 
@@ -429,6 +411,22 @@
             $(list[index]).removeAttr('disabled');
     }
 
+    // modify the team logo
+    function updateTeamLogo(url) {
+        updateTeam({id: tid, logo: url}).then(function (data) {
+            if (data.error) {
+                oh.comm.alert('错误', data.error.friendly_message);
+            } else {
+                $('#team_logo').attr({src: url});
+                $('#editLogoForm').find('#team_logo_input').val("");
+                $('#teamLogoModal').modal('hide');
+                $('#team_logo_upload_span').text('上传文件');
+                enableItems(['#team_logo_input', '#team_logo_upload_btn', '#team_logo_submit', '#team_logo_cancel']);
+                oh.comm.alert("提示", "设置成功!");
+            }
+        });
+    }
+
     // update the team dev_plan to this url
     function updateTeamDevPlan(url) {
         updateTeam({id: tid, dev_plan: url}).then(function (data) {
@@ -442,6 +440,31 @@
                 var p = $('#plan');
                 p.attr({src: 'https://view.officeapps.live.com/op/embed.aspx?src=' +
                         encodeURIComponent(url)}).removeClass('hide');
+                oh.comm.alert("提示", "设置成功!");
+            }
+        });
+    }
+
+    // add new team works
+    function addTeamWork(uri) {
+        var data = {
+            team_id: tid,
+            type: +$('#addWorksForm').find('#worktype').val(),
+            note: $('#addWorksForm').find('[name="note"]').val(),
+            uri: uri
+        };
+        addShow(data).then(function (data) {
+            if (data.error) {
+                oh.comm.alert('错误', data.error.friendly_message);
+            } else {
+                bindShow(splitShow([data]), true);
+                $('#works_Modal').modal('hide');
+                $('#addWorksForm').data().bootstrapValidator.resetForm();
+                $('#worktype').trigger('change');
+
+                $('#team_work_upload_span').text('上传文件');
+                enableItems(['[data-name="uri"]', '#team_work_upload_btn', '#team_work_submit', '#team_work_cancel',
+                             '#team_work_description']);
                 oh.comm.alert("提示", "设置成功!");
             }
         });
@@ -631,11 +654,24 @@
             });
         });
 
+        // upload file about team_logo
+        uploadTeamFile('#team_logo_upload', function(){
+            $('#team_logo_upload_span').text('文件上传中，上传成功将会自动跳转，请稍等...');
+            disableItems(['#team_logo_input', '#team_logo_upload_btn', '#team_logo_submit', '#team_logo_cancel']);
+        }, updateTeamLogo)
+
         // upload file about dev_plan
         uploadTeamFile('#dev_plan_upload', function(){
             $('#dev_plan_span').text('文件上传中，上传成功将会自动跳转，请稍等...');
             disableItems(['#dev_plan_input', '#dev_plan_btn', '#dev_plan_submit', '#dev_plan_cancel']);
         }, updateTeamDevPlan)
+
+        // upload file about team_work
+        uploadTeamFile('#team_work_upload', function(){
+            $('#team_work_upload_span').text('文件上传中，上传成功将会自动跳转，请稍等...');
+            disableItems(['[data-name="uri"]', '#team_work_upload_btn', '#team_work_submit', '#team_work_cancel',
+                          '#team_work_description']);
+        }, addTeamWork)
     }
 
     function init() {
