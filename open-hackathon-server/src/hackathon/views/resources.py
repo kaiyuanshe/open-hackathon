@@ -309,6 +309,17 @@ class UserNoticeReadResource(HackathonResource):
         return hackathon_manager.check_notice_and_set_read_if_necessary(self.context().id)
 
 
+class UserFileResource(HackathonResource):
+    @token_required
+    def post(self):
+        return user_manager.upload_files(g.user.id, self.context().file_type)
+
+    @token_required
+    def delete(self):
+        # TODO call storage api to delete file
+        return True
+
+
 class TeamResource(HackathonResource):
     @hackathon_name_required
     def get(self):
@@ -604,16 +615,6 @@ class AdminExperimentListResource(HackathonResource):
     @admin_privilege_required
     def get(self):
         return expr_manager.get_expr_list_by_hackathon_id(g.hackathon, self.context())
-
-
-class AdminHackathonFileResource(HackathonResource):
-    @admin_privilege_required
-    def post(self):
-        return hackathon_manager.upload_files()
-
-    def delete(self):
-        # TODO call storage api to delete file
-        return True
 
 
 class HackathonAdminListResource(HackathonResource):

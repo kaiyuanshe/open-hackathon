@@ -27,7 +27,6 @@ import random
 import sys
 
 sys.path.append("..")
-import imghdr
 import uuid
 from datetime import timedelta
 
@@ -303,33 +302,6 @@ class HackathonManager(Component):
         except Exception as e:
             self.log.error(e)
             return internal_server_error("fail to update hackathon")
-
-    def upload_files(self):
-        """Handle uploaded files from http request"""
-        self.__validate_upload_files()
-
-        images = []
-        storage = RequiredFeature("storage")
-        for file_name in request.files:
-            file_storage = request.files[file_name]
-            self.log.debug("upload image file : " + file_name)
-            context = Context(
-                hackathon_name=g.hackathon.name,
-                file_name=file_storage.filename,
-                file_type=FILE_TYPE.HACK_IMAGE,
-                content=file_storage
-            )
-            context = storage.save(context)
-            image = {
-                "name": file_storage.filename,
-                "url": context.url,
-                "thumbnailUrl": context.url,
-                "deleteUrl": '/api/admin/file?key=' + context.file_name
-            }
-            # context.file_name is a random name created by server, file.filename is the original name
-            images.append(image)
-
-        return {"files": images}
 
     def get_userlike_all_hackathon(self, user_id):
         user_hackathon_rels = UserHackathon.objects(user=user_id).all()
@@ -1061,18 +1033,6 @@ class HackathonManager(Component):
         except Exception as e:
             self.log.error(e)
             self.log.warn("fail to create test data")
-
-    def __validate_upload_files(self):
-        # check file size
-        if request.content_length > len(request.files) * self.util.get_config("storage.size_limit_kilo_bytes") * 1024:
-            raise BadRequest("more than the file size limited")
-
-        # check each file type
-        for file_name in request.files:
-            if request.files.get(file_name).filename.endswith('jpg'):
-                continue  # jpg is not considered in imghdr
-            if imghdr.what(request.files.get(file_name)) is None:
-                raise BadRequest("only images can be uploaded")
 
 
 '''

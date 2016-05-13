@@ -3,6 +3,7 @@
 {% block style %}
     <link href="/static/css/oh.site.team.css" rel="stylesheet">
     <link href="/static/css/magnific-popup.css" rel="stylesheet">
+    <link href="/static/css/jquery.fileupload.css" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
@@ -395,21 +396,26 @@
                         </div>
                         <div class="modal-body">
                             <div class="form-group">
-                                <label class="col-sm-3 control-label required">文件路径</label>
+                                <label class="col-sm-3 control-label required">文件链接地址</label>
 
                                 <div class="col-sm-9">
                                     <input type="url" class="form-control" name="plan"
+                                           id="dev_plan_input"
                                            placeholder="http://"
                                            required
                                            data-bv-trigger="blur"
-                                           data-bv-message="请填写正确的文档访问路径"
-                                           data-bv-notempty-message="请填文档路径">
+                                           data-bv-message="请填写正确的链接访问地址"
+                                           data-bv-notempty-message="请填链接地址">
                                 </div>
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="submit" class="btn btn-primary">确定</button>
-                            <button type="button" class="btn btn-warning" data-dismiss="modal">取消</button>
+                            <span id="dev_plan_upload" class="btn btn-success fileinput-button">
+                                <span id="dev_plan_span">上传文件</span>
+                                <input id="dev_plan_btn" type="file" mutiple>
+                            </span>
+                            <button id="dev_plan_submit" type="submit" class="btn btn-primary">确定</button>
+                            <button id="dev_plan_cancel" type="button" class="btn btn-warning" data-dismiss="modal">取消</button>
                         </div>
                     </div>
                 </form>
@@ -486,5 +492,6 @@
     <script type="text/javascript" src="/static/js/jquery/jquery.magnific-popup.min.js"></script>
     <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
     <script type="text/javascript" src="/static/js/jquery/moment.min.js"></script>
+    <script type="text/javascript" src="/static/js/jquery/jquery.fileupload.js"></script>
     <script type="text/javascript" src="/static/js/views/oh.site.team.js"></script>
 {% endblock %}

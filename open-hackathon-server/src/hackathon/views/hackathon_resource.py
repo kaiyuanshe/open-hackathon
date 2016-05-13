@@ -84,7 +84,7 @@ def validate(func):
         output_schema = get_output_schema(class_name, method_name)
 
         if input_schema:
-            if method_name in ["post", "put"]:
+            if method_name in ["post", "put"] and not request.path == "/api/user/file":
                 data = request.get_json(force=True)
             else:
                 data = request.args
@@ -134,7 +134,7 @@ class HackathonResource(Resource):
         :return Context object from request body or query
         """
         caller = sys._getframe().f_back.f_code.co_name.lower()
-        if caller in ["post", "put"]:
+        if caller in ["post", "put"] and not request.path == "/api/user/file":
             return Context.from_object(request.get_json(force=True))
         else:
             return Context.from_object(request.args)

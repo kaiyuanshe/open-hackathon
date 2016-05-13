@@ -34,9 +34,9 @@ import uuid
 from flask import request, g
 from mongoengine import Q, NotUniqueError, ValidationError
 
-from hackathon.hackathon_response import internal_server_error, not_found, ok
-from hackathon.constants import HTTP_HEADER, HACK_USER_TYPE
-from hackathon import Component, RequiredFeature
+from hackathon.hackathon_response import bad_request, internal_server_error, not_found, ok
+from hackathon.constants import HTTP_HEADER, HACK_USER_TYPE, FILE_TYPE
+from hackathon import Component, Context, RequiredFeature
 from hackathon.hmongo.models import UserToken, User, UserEmail, UserProfile, UserHackathon
 
 __all__ = ["UserManager"]
@@ -230,6 +230,38 @@ class UserManager(Component):
         user.save()
         return True
 
+    def upload_files(self, user_id, file_type):
+        """Handle uploaded files from http request"""
+        try:
+            self.__validate_upload_files()
+        except Exception as e:
+            self.log.error(e)
+            return bad_request("file size or file type unsupport")
+
+        file_list = []
+        storage = RequiredFeature("storage")
+        for file in request.files:
+            file_content = request.files[file]
+            pre_file_name = file_content.filename
+            file_suffix = pre_file_name[pre_file_name.rfind('.'):]
+            new_file_name = self.__generate_file_name(user_id, file_type, file_suffix)
+            self.log.debug("upload file: " + new_file_name)
+            context = Context(
+                file_name=new_file_name,
+                file_type=file_type,
+                content=file_content
+            )
+            context = storage.save(context)
+
+            # file_name is a random name created by server, pre_file_name is the original name
+            file_info = {
+                "file_name": new_file_name,
+                "pre_file_name": pre_file_name,
+                "url": context.url
+            }
+            file_list.append(file_info)
+        return {"files": file_list}
+
     # ----------------------------private methods-------------------------------------
 
     def __validate_token(self, token):
@@ -370,3 +402,21 @@ class UserManager(Component):
             #                                description="Token for Oxford API")
             #     self.db.add_object(asset)
             #     self.db.commit()
+
+    def __generate_file_name(self, user_id, type, suffix):
+        # may generate differrnt file_names for different type. see FILE_TYPE.
+        file_name = "%s-%s%s" % (str(user_id), str(uuid.uuid1())[0:8], suffix)
+        return file_name
+
+    def __validate_upload_files(self):
+        # todo check file size and file type
+        #if request.content_length > len(request.files) * self.util.get_config("storage.size_limit_kilo_bytes") * 1024:
+        #    raise BadRequest("more than the file size limited")
+
+        # check each file type and only jpg is allowed
+        #for file_name in request.files:
+        #    if request.files.get(file_name).filename.endswith('jpg'):
+        #        continue  # jpg is not considered in imghdr
+        #    if imghdr.what(request.files.get(file_name)) is None:
+        #        raise BadRequest("only images can be uploaded")
+        pass

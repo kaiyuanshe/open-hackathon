@@ -296,9 +296,11 @@ class FILE_TYPE:
 
     File of different types may saved in different position
     """
+    AZURE_CERT = "azure_cert"
     TEMPLATE = "template"
     HACK_IMAGE = "hack_image"
-    AZURE_CERT = "azure_cert"
+    USER_FILE = "user_file"
+    TEAM_FILE = "team_file"
 
 
 class TEAM_MEMBER_STATUS:
