@@ -395,17 +395,51 @@
     }
 
     function updateTeamDevPlan(url) {
-        $('#projectPlanModal').modal('hide');
-            updateTeam({id: tid, dev_plan: url}).then(function (data) {
-                if (data.error) {
+        updateTeam({id: tid, dev_plan: url}).then(function (data) {
+            if (data.error) {
+                oh.comm.alert('错误', data.error.friendly_message);
+            } else {
+                $('#projectPlanModal').modal('hide');
+                $('#dev_plan_span').text('上传文件');
+                enableItems(['#dev_plan_input', '#dev_plan_btn', '#dev_plan_submit', '#dev_plan_cancel']);
+                var p = $('#plan');
+                p.attr({src: 'https://view.officeapps.live.com/op/embed.aspx?src=' +
+                        encodeURIComponent(url)}).removeClass('hide');
+                oh.comm.alert("提示", "上传成功!");
+            }
+        });
+    }
+
+    function uploadTeamFile(filter_str, start_func, update_func) {
+        // upload file about team
+        $(filter_str).fileupload({
+            type: 'POST',
+            url: CONFIG.apiconfig.proxy + '/api/user/file?file_type=team_file',
+            dataType: 'json',
+            beforeSend: function (xhr, data) {
+                xhr.setRequestHeader('token', $.cookie('token'));
+            },
+            start: start_func,
+            done: function (e, obj) {
+                var data = obj.result;
+                if (data.error || ! "files" in data || data.files.length == 0) {
                     oh.comm.alert('错误', data.error.friendly_message);
                 } else {
-                    var p = $('#plan');
-                    p.attr({src: 'https://view.officeapps.live.com/op/embed.aspx?src=' +
-                            encodeURIComponent(url)}).removeClass('hide');
-                    oh.comm.alert("提示", "上传成功!");
+                    var url = data.files[0].url;
+                    update_func(url);
                 }
+            }
         });
+    }
+
+    function disableItems(list) {
+        for (var index in list)
+            $(list[index]).attr('disabled', true);
+    }
+
+    function enableItems(list) {
+        for (var index in list)
+            $(list[index]).removeAttr('disabled');
     }
 
     function addShow(data) {
@@ -593,26 +627,10 @@
         });
 
         // upload file about dev_plan
-        $('#dev_plan_upload').fileupload({
-            type: 'POST',
-            url: CONFIG.apiconfig.proxy + '/api/user/file?file_type=team_dev_plan',
-            dataType: 'json',
-            beforeSend: function (xhr, data) {
-                xhr.setRequestHeader('token', $.cookie('token'));
-            },
-            start: function() {
-                // todo show something when uploading
-            },
-            done: function (e, obj) {
-                var data = obj.result;
-                if (data.error || ! "files" in data || data.files.length == 0) {
-                    oh.comm.alert('错误', data.error.friendly_message);
-                } else {
-                    var url = data.files[0].url;
-                    updateTeamDevPlan(url);
-                }
-            }
-        });
+        uploadTeamFile('#dev_plan_upload', function(){
+            $('#dev_plan_span').text('文件上传中，上传成功将会自动跳转，请稍等...');
+            disableItems(['#dev_plan_input', '#dev_plan_btn', '#dev_plan_submit', '#dev_plan_cancel']);
+        }, updateTeamDevPlan)
     }
 
     function init() {

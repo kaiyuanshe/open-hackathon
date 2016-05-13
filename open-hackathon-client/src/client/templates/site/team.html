@@ -400,6 +400,7 @@
 
                                 <div class="col-sm-9">
                                     <input type="url" class="form-control" name="plan"
+                                           id="dev_plan_input"
                                            placeholder="http://"
                                            required
                                            data-bv-trigger="blur"
@@ -410,11 +411,11 @@
                         </div>
                         <div class="modal-footer">
                             <span id="dev_plan_upload" class="btn btn-success fileinput-button">
-                                <span>上传文件</span>
-                                <input type="file" mutiple>
+                                <span id="dev_plan_span">上传文件</span>
+                                <input id="dev_plan_btn" type="file" mutiple>
                             </span>
-                            <button type="submit" class="btn btn-primary">确定</button>
-                            <button type="button" class="btn btn-warning" data-dismiss="modal">取消</button>
+                            <button id="dev_plan_submit" type="submit" class="btn btn-primary">确定</button>
+                            <button id="dev_plan_cancel" type="button" class="btn btn-warning" data-dismiss="modal">取消</button>
                         </div>
                     </div>
                 </form>

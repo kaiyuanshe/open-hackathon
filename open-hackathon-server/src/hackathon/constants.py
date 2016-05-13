@@ -300,12 +300,7 @@ class FILE_TYPE:
     TEMPLATE = "template"
     HACK_IMAGE = "hack_image"
     USER_AVATAR = "user_avatar"
-    TEAM_LOGO = "team_logo"
-    TEAM_COVER = "team_cover"
-    TEAM_DEV_PLAN = "team_dev_plan"
-    TEAM_WORK_VIDEO = "team_work_video"
-    TEAM_WORK_DOC = "team_work_doc"  # including ppt, doc, excel, pdf
-    TEAM_WORK_IMG = "team_work_img"
+    TEAM_FILE = "team_file"
 
 
 class TEAM_MEMBER_STATUS:
