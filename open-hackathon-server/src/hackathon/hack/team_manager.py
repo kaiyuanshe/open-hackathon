@@ -33,6 +33,7 @@ import time
 from flask import g
 import threading
 from mongoengine import Q, ValidationError
+from os.path import realpath, abspath, dirname
 
 from hackathon import Component, RequiredFeature
 from hackathon.hmongo.models import Team, TeamMember, TeamScore, TeamWork, Hackathon, UserHackathon, to_dic
@@ -820,8 +821,8 @@ class TeamManager(Component):
 
         try:
             if email_title and file_name:
-                path = self.util.get_config("email.email_templates.path")
-                f = open(path + file_name, "r")
+                path = abspath("%s/.." % dirname(realpath(__file__)))
+                f = open(path + "/resources/email/" + file_name, "r")
                 email_content = f.read()
                 email_title = email_title % (team.name.encode("utf-8"))
                 email_content = email_content.replace("{{team_name}}", team.name.encode("utf-8"))
