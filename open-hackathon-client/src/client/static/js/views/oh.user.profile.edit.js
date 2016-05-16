@@ -107,7 +107,7 @@
                 var picture = $('#user_logo_input').val();
                 updatePicture(picture).then(function (data) {
                     if (data.error) {
-                        oh.comm.alert('����', data.error.friendly_message);
+                        oh.comm.alert('错误', data.error.friendly_message);
                     } else {
                         $('img[data-role="picture"]').attr({src: picture});
                         $.ajax({

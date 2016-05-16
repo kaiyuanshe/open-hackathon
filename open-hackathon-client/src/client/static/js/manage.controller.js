@@ -725,7 +725,8 @@ angular.module('oh.controllers', [])
     $scope.filterCondition = 0;
     $scope.data = {
         "organizers": [],
-        "selectedOrgs": []
+        "selectedOrgs": [],
+        "newOrgLogoFile": ""
     }
 
     // very quick and rough implementation, please feel free to update
@@ -872,6 +873,17 @@ angular.module('oh.controllers', [])
     $scope.deleteSelectedOrgs = function() {
       for (index in $scope.data.selectedOrgs)
         $scope.delete_organizer($scope.data.selectedOrgs[index]);
+    }
+
+    $scope.uploadFile = function() {
+      console.log("test");
+      var fd = new FormData();
+      fd.append('file', $scope.data.newOrgLogoFile);
+
+      $http.post('/api/user/file', fd, {
+        transformRequest: angular.identity,
+        headers: {'Content-Type': undefined}
+      })
     }
 
     refresh();

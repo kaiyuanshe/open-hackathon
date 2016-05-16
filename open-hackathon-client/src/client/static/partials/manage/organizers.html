@@ -22,7 +22,7 @@
       <div class="form-group has-feedback">
         <label class="col-md-3 control-label">LOGO</label>
         <div class="col-md-6">
-          <input type="url" class="form-control" name="logo" id="logo" ng-model="org.logo" placeholder="图片路径" data-bv-trigger="blur" data-bv-message="请填写正确的图片访问路径" data-bv-notempty-message="请填图片路径">
+          <input type="url" class="form-control" name="logo" id="logo" ng-model="org.logo" placeholder="图片链接" data-bv-trigger="blur" data-bv-message="请填写正确的图片链接地址或者上传图片" data-bv-notempty-message="请填图片链接或者上传图片">
         </div>
       </div>
       <div class="form-group has-feedback">
@@ -40,6 +40,11 @@
     </form>
   </div>
   <div class="modal-footer">
+    <button type="button" class="btn btn-info" ng-show="data.newOrgLogoFile != ''">上传文件</button>
+    <span class="btn btn-success org-fileinput-button">
+      <span>选择文件</span>
+      <input type="file" mutiple ng-model="data.newOrgLogoFile">
+    </span>
     <button type="button" class="btn btn-default" ng-click="cancel()">取消</button>
     <button type="button" class="btn btn-primary" ng-click="add_organizer()">提交</button>
   </div>
