@@ -31,6 +31,7 @@ sys.path.append("..")
 import uuid
 import time
 from flask import g
+import threading
 from mongoengine import Q, ValidationError
 
 from hackathon import Component, RequiredFeature
@@ -223,7 +224,9 @@ class TeamManager(Component):
 
         if "dev_plan" in kwargs and kwargs["dev_plan"] and not kwargs["dev_plan"] == "" \
                 and team.hackathon.config.get(HACKATHON_CONFIG.DEV_PLAN_REQUIRED, False):
-            self.__email_notify_dev_plan_submitted(team)
+            t = threading.Thread(target=self.__email_notify_dev_plan_submitted, args=(team,))
+            t.setDaemon(True)
+            t.start()
 
         return self.__team_detail(team)
 
@@ -817,7 +820,8 @@ class TeamManager(Component):
 
         try:
             if email_title and file_name:
-                f = open("hackathon/resources/email/" + file_name, "r")
+                path = self.util.get_config("email.email_templates.path")
+                f = open(path + file_name, "r")
                 email_content = f.read()
                 email_title = email_title % (team.name.encode("utf-8"))
                 email_content = email_content.replace("{{team_name}}", team.name.encode("utf-8"))
@@ -853,4 +857,5 @@ class TeamManager(Component):
         # todo remove this code
         self.util.send_emails(sender, receivers_forced, email_title, email_content)
 
+        self.log.debug(team.name + ": dev_plan email notification result: " + str(isNotified))
         return isNotified
