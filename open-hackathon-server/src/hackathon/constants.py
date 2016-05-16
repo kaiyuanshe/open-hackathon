@@ -301,6 +301,7 @@ class FILE_TYPE:
     HACK_IMAGE = "hack_image"
     USER_FILE = "user_file"
     TEAM_FILE = "team_file"
+    HACK_FILE = "hack_file"
 
 
 class TEAM_MEMBER_STATUS:

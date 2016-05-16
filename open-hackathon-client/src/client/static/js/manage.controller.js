@@ -719,14 +719,13 @@ angular.module('oh.controllers', [])
     // init the page and load admins-list
     pageLoad();
   })
-  .controller('organizersController', function($rootScope, $scope, $stateParams, $uibModal, $cookies, api) {
+  .controller('organizersController', function($rootScope, $scope, $stateParams, $uibModal, $cookies, $http, $window, api, uploadService) {
     $scope.$emit('pageName', 'SETTINGS.ORGANIZERS');
 
     $scope.filterCondition = 0;
     $scope.data = {
         "organizers": [],
-        "selectedOrgs": [],
-        "newOrgLogoFile": ""
+        "selectedOrgs": []
     }
 
     // very quick and rough implementation, please feel free to update
@@ -757,9 +756,34 @@ angular.module('oh.controllers', [])
     var openModel = function(org) {
       $uibModal.open({
         templateUrl: 'orgModel.html',
-        controller: function($scope, $stateParams, $uibModalInstance, $cookies, api) {
+        controller: function($scope, $stateParams, $uibModalInstance, $cookies, $http, $window, api, uploadService) {
           $scope.org = org;
           $scope.org.organization_type = $scope.org.organization_type.toString();
+          $scope.newOrgLogoFile = "";
+          $scope.uploadOrgLogoBtnHint = "上传图片";
+
+          $scope.selectFile = function() {
+            $scope.uploadOrgLogoBtnHint = "重选图片"
+          }
+
+          $scope.uploadFile = function() {
+            var fd = new FormData();
+            fd.append('file', $scope.newOrgLogoFile);
+            uploadService.uploadOneFile("hack_file", fd, function(url){
+              console.log(url);
+            });
+//            var fd = new FormData();
+//            fd.append('file', $scope.newOrgLogoFile);
+//
+//            $http.post($window.CONFIG.apiconfig.proxy + "/api/user/file?file_type=hack_file", fd, {
+//              transformRequest: angular.identity,
+//              headers: {'Content-Type': undefined}
+//            }).success(function(){
+//              console.log("success");
+//            }).error(function(){
+//              console.log("fail");
+//            });
+          }
 
           $scope.cancel = function() {
             $uibModalInstance.dismiss('cancel');

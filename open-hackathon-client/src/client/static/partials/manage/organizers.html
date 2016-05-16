@@ -40,10 +40,10 @@
     </form>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-info" ng-show="data.newOrgLogoFile != ''">上传文件</button>
+    <button type="button" class="btn btn-info" ng-show="newOrgLogoFile!=''" ng-click="uploadFile()">点击上传</button>
     <span class="btn btn-success org-fileinput-button">
-      <span>选择文件</span>
-      <input type="file" mutiple ng-model="data.newOrgLogoFile">
+      <span>{{uploadOrgLogoBtnHint}}</span>
+      <input type="file" mutiple file-model="newOrgLogoFile" ng-click="selectFile()">
     </span>
     <button type="button" class="btn btn-default" ng-click="cancel()">取消</button>
     <button type="button" class="btn btn-primary" ng-click="add_organizer()">提交</button>
