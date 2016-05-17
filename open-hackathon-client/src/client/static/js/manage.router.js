@@ -94,6 +94,27 @@ angular.module('oh.manage.router', [
           }
         })
       }
+      $scope.delete = function(activity) {
+        api.admin.hackathon.delete({
+          header: {
+            hackathon_name: activity.name
+          }
+        }).then(function(data) {
+          if (data.error) {
+            var message = ''
+            $scope.$emit('showTip', {
+              level: 'tip-danger',
+              content: message
+            });
+          } else {
+            $scope.$emit('showTip', {
+              level: 'tip-success',
+              content: '删除成功'
+            });
+            activity.status = 3;
+          }
+        })
+      }
     }
   }).state('create', {
     url: '/create?name',

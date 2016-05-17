@@ -281,6 +281,7 @@ class HACK_STATUS:
     DRAFT = 0
     ONLINE = 1
     OFFLINE = 2
+    DELETE = 3
 
 
 class HACK_TYPE:

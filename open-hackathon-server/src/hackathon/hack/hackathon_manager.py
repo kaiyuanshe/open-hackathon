@@ -303,6 +303,21 @@ class HackathonManager(Component):
             self.log.error(e)
             return internal_server_error("fail to update hackathon")
 
+    def delete_hackathon(self):
+        """delete hackathon
+        :return hackathon in dict if updated successfully.
+        """
+        hackathon = g.hackathon
+        try:
+            UserHackathon.objects(hackathon=hackathon).delete()
+            self.log.debug("delete hackathon:" + hackathon.name)
+            hackathon.delete()
+            hackathon.save()
+            return ok()
+        except Exception as e:
+            self.log.error(e)
+            return internal_server_error("fail to delete hackathon" + hackathon.name)
+
     def get_userlike_all_hackathon(self, user_id):
         user_hackathon_rels = UserHackathon.objects(user=user_id).all()
 
