@@ -4,6 +4,7 @@
   </nav>
   <article class="activity-list clearfix">
     <div class="item" ng-repeat="activity in activities">
+
       <a ui-sref="manage.edit({name:activity.name})" class="btn btn-sm btn-success"><i class="fa fa-cog"></i> <ANY translate="MANAGE">MANAGE</ANY></a>
       <header>
         <a href="/site/{{activity.name}}" target="_blank"><img src="{{activity.banners | defBanner}}" static-image max-width="298" max-height="168"></a>
@@ -21,8 +22,10 @@
           <a class="btn" ng-class="activity.status == 1? 'btn-success': 'btn-default'" ng-disabled="activity.status == 1" translate="ACTIVITY_STATUS.ONLINE" ng-click="online(activity)">ONLINE</a>
           <a class="btn" ng-class="activity.status == 0? 'btn-success': 'btn-default'" ng-disabled="true" translate="ACTIVITY_STATUS.DEFAULT">DEFAULT</a>
           <a class="btn" ng-class="activity.status == 2? 'btn-success': 'btn-default'" ng-disabled="activity.status == 2" translate="ACTIVITY_STATUS.OFFLINE" ng-click="offline(activity)">OFFLINE</a>
+          <a class="btn" ng-class="'btn-danger'" translate="ACTIVITY_STATUS.DELETE" ng-click="delete(activity)">DELETE</a>
         </div>
       </footer>
+
     </div>
   </article>
 </div>
