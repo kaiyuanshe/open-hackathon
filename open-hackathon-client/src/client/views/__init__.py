@@ -141,7 +141,7 @@ def utility_processor():
         return __date_serializer(get_now())
 
     def activity_progress(starttime, endtime):
-        return ((int(time.time() * 1e3) - starttime) * 1.0 / (endtime - starttime + 0.0000001) * 1.0) * 100
+        return ((int(time.time() * 1e3) - starttime) * 1.0 / (endtime - starttime + 0.0001) * 1.0) * 100
 
     def get_provides(value):
         prs = []

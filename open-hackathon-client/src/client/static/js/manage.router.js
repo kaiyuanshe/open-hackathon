@@ -107,11 +107,12 @@ angular.module('oh.manage.router', [
               content: message
             });
           } else {
+            var index = $scope.activities.indexOf(activity)
+            $scope.activities.splice(index, 1)
             $scope.$emit('showTip', {
               level: 'tip-success',
               content: '删除成功'
             });
-            activity.status = 3;
           }
         })
       }
