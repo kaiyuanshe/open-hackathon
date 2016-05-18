@@ -993,7 +993,7 @@ tags-input .tags .tag-item .remove-button {
     right: 0;
     margin: 0;
     opacity: 0;
-    -ms-filter: 'alpha(opacity=0)';
+    ms-filter: 'alpha(opacity=0)';
     font-size: 200px;
     direction: ltr;
     cursor: pointer;
