@@ -26,6 +26,7 @@
     'use strict';
 
     var hackathon_name = oh.comm.getCurrentHackathon();
+    var hackathon_detail = {};
     var tid = 0;
     var lid = 0;
     var uid = 0;
@@ -174,6 +175,13 @@
     }
 
     function pageload() {
+        getHackathonDetail().then(function(data){
+            if (data.error) {
+                oh.comm.alert('错误', data.error.friendly_message);
+            } else {
+                hackathon_detail = data;
+            }
+        });
 
         $('[data-loadsrc]').each(function (i, img) {
             var $img = $(img).load(function (e) {
@@ -323,6 +331,10 @@
                 $('#addWorksForm').get(0).reset();
                 worksForm.data().bootstrapValidator.resetForm();
             });
+    }
+
+    function getHackathonDetail() {
+        return oh.api.hackathon.get({header: {hackathon_name: hackathon_name}});
     }
 
     function getMemberList() {
@@ -567,11 +579,13 @@
             $('#team_name').addClass('edit').empty().append(input_name);
             $('#team_description').addClass('edit').empty().append(input_des);
             $('#cover').addClass('edit').prepend($('<a>').attr({'data-role': 'cover'}).text('编辑展示图'));
-            $('#plan').before($('<a>').attr({'data-role': 'plan', 'class': 'btn btn-sm btn-info'}).text('添加项目说明书'),
+            var dev_plan_template_url = "config" in hackathon_detail && "dev_plan_template_url" in hackathon_detail["config"] && hackathon_detail["config"]["dev_plan_template_url"] ?
+                                        hackathon_detail["config"]["dev_plan_template_url"] :
+                                        'http://opentech0storage.blob.core.chinacloudapi.cn/ohp/%E4%BA%91%E4%B8%AD%E9%BB%91%E5%AE%A2%E6%9D%BE%E5%BC%80%E5%8F%91%E8%AE%A1%E5%88%92%E4%B9%A6%E6%A8%A1%E6%9D%BF.pptx'
+            $('#plan').before($('<a>').attr({'data-role': 'plan', 'class': 'btn btn-sm btn-info'}).text('添加开发计划书'),
                 $('<a id="down_plan"><i class="fa fa-download"></i></a>')
-                    .attr({class:'link',href: 'http://opentech0storage.blob.core.chinacloudapi.cn/ohp/%E4%BA%91%E4%B8%AD%E9%BB%91%E5%AE%A2%E6%9D%BE%E5%BC%80%E5%8F%91%E8%AE%A1%E5%88%92%E4%B9%A6%E6%A8%A1%E6%9D%BF.pptx'})
+                    .attr({class:'link',href: dev_plan_template_url})
                     .append('下载开发计划书模板'));
-
             $('#show_works .sub-item').each(function (i, item) {
                 $(item).append($('<a>').attr({
                     title: '删除',

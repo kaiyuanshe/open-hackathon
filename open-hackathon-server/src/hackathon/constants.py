@@ -102,6 +102,7 @@ class HACKATHON_CONFIG:
     FREEDOM_TEAM = "freedom_team"
     CLOUD_PROVIDER = "cloud_provider"
     DEV_PLAN_REQUIRED = "dev_plan_required"
+    DEV_PLAN_TEMPLATE_URL = "dev_plan_template_url"
     REAL_NAME_AUTH_21V = "real_name_auth_21v"
 
 

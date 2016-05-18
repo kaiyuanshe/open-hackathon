@@ -52,23 +52,42 @@
                             </dd>
                         </dl>
                         <div id="status">
-                            {% if hackathon.event_end_time< get_now() %}
-                                <p>报名已经结束。</p>
-                                {% if team !=None %}
+                            {% if user.is_admin %}
+                                <a class="btn btn-info" href="/manage/edit/{{ hackathon_name }}">管理</a>
+                            {% elif hackathon.event_end_time< get_now() %}
+                                <p>活动已经结束。</p>
+                                {% if team != None %}
                                     <a class="btn btn-success"
                                        href="{{ url_for('create_join_team',hackathon_name=hackathon_name, tid=team.id) }}">我的团队</a>
                                 {% endif %}
                             {% elif hackathon.registration_end_time < get_now() %}
-                                <p>报名已经结束。</p>
-                                {% if team !=None %}
-                                    <a class="btn btn-success"
-                                       href="{{ url_for('create_join_team',hackathon_name=hackathon_name, tid=team.id) }}">我的团队</a>
+                                {% if registration.status == 1 or (hackathon.config.auto_approve and registration.status == 3) %}
+                                    <p>您的报名已经审核已通过。</p>
+                                    {% if experiment == None %}
+                                        <a class="btn btn-primary"
+                                           href="{{ url_for('temp_settings',hackathon_name=hackathon_name) }}">立即参加</a>
+                                    {% else %}
+                                        <a class="btn btn-primary"
+                                           href="{{ url_for('workspace',hackathon_name=hackathon_name) }}">立即参加</a>
+                                    {% endif %}
+                                    {% if team !=None %}
+                                        <a class="btn btn-success"
+                                           href="{{ url_for('create_join_team',hackathon_name=hackathon_name, tid=team.id) }}">我的团队</a>
+                                    {% endif %}
+                                {% elif (hackathon.config.auto_approve == '0' and registration.status == 3 ) or registration.status == 0 %}
+                                    <p>您的报名正在审核中，请等待。</p>
+                                {% elif registration.status == 2 %}
+                                    <p>您的报名已被拒绝，如有疑问请联系主办方。</p>
+                                {% else %}
+                                    {% if user == None %}
+                                        <p>报名已经结束, 已报名用户请先登录。</p>
+                                    {% else %}
+                                        <p>报名已经结束。</p>
+                                    {% endif %}
                                 {% endif %}
                             {% elif user == None %}
                                 <a class="btn btn-primary"
                                    href="{{ url_for('login', return_url=request.path, provides=get_provides(hackathon.config.login_provider)) }}">我要报名</a>
-                            {% elif user.is_admin %}
-                                <a class="btn btn-info" href="/manage/edit/{{ hackathon_name }}">管理</a>
                             {% elif user.get("profile") == None %}
                                 <a class="btn btn-primary"
                                    href="{{ url_for('user_profile_edit',return_url=request.path) }}">我要报名</a>

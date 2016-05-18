@@ -1973,6 +1973,7 @@ angular.module('oh.controllers', [])
         freedom_team: false,
         login_provider: 111,
         dev_plan_required: false,
+        dev_plan_template_url: "",
         real_name_auth_21v: false
       }
     }
