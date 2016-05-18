@@ -54,7 +54,7 @@
                         <div id="status">
                             {% if user.is_admin %}
                                 <a class="btn btn-info" href="/manage/edit/{{ hackathon_name }}">管理</a>
-                            {% elif hackathon.event_end_time< get_now() %}
+                            {% elif hackathon.event_end_time < get_now() %}
                                 <p>活动已经结束。</p>
                                 {% if team != None %}
                                     <a class="btn btn-success"
@@ -70,7 +70,7 @@
                                         <a class="btn btn-primary"
                                            href="{{ url_for('workspace',hackathon_name=hackathon_name) }}">立即参加</a>
                                     {% endif %}
-                                    {% if team !=None %}
+                                    {% if team != None %}
                                         <a class="btn btn-success"
                                            href="{{ url_for('create_join_team',hackathon_name=hackathon_name, tid=team.id) }}">我的团队</a>
                                     {% endif %}
@@ -103,7 +103,7 @@
                                         <a class="btn btn-primary"
                                            href="{{ url_for('workspace',hackathon_name=hackathon_name) }}">立即参加</a>
                                     {% endif %}
-                                    {% if team !=None %}
+                                    {% if team != None %}
                                         <a class="btn btn-success"
                                            href="{{ url_for('create_join_team',hackathon_name=hackathon_name, tid=team.id) }}">我的团队</a>
                                     {% endif %}

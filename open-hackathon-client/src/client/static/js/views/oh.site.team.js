@@ -579,6 +579,7 @@
             $('#team_name').addClass('edit').empty().append(input_name);
             $('#team_description').addClass('edit').empty().append(input_des);
             $('#cover').addClass('edit').prepend($('<a>').attr({'data-role': 'cover'}).text('编辑展示图'));
+
             var dev_plan_template_url = "config" in hackathon_detail && "dev_plan_template_url" in hackathon_detail["config"] && hackathon_detail["config"]["dev_plan_template_url"] ?
                                         hackathon_detail["config"]["dev_plan_template_url"] :
                                         'http://opentech0storage.blob.core.chinacloudapi.cn/ohp/%E4%BA%91%E4%B8%AD%E9%BB%91%E5%AE%A2%E6%9D%BE%E5%BC%80%E5%8F%91%E8%AE%A1%E5%88%92%E4%B9%A6%E6%A8%A1%E6%9D%BF.pptx'
@@ -586,6 +587,7 @@
                 $('<a id="down_plan"><i class="fa fa-download"></i></a>')
                     .attr({class:'link',href: dev_plan_template_url})
                     .append('下载开发计划书模板'));
+
             $('#show_works .sub-item').each(function (i, item) {
                 $(item).append($('<a>').attr({
                     title: '删除',
