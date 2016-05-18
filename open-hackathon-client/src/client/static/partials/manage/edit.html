@@ -186,6 +186,12 @@
           </div>
         </fieldset>
       </ng-form>
+      <span class="btn btn-success fileinput-button">
+        <span>{{data.descriptionUploadBtnHint}}</span>
+        <input type="file" mutiple file-model="data.descriptionUploadFile" ng-click="selectDescriptionFile()">
+      </span>
+      <button type="button" class="btn btn-info" ng-show="data.descriptionUploadFile" ng-click="uploadDescriptionFile()">开始上传</button>
+      <span>{{data.descriptionUrl}}</span>
     </uib-tab>
     <uib-tab heading="{{'EDIT_ACTIVITY_TABS.PROVIDERS' | translate}}">
       <ng-form name="providerForm">
@@ -271,12 +277,18 @@
           <input type="url" class="form-control"
                  ng-model="data.newBannerUrl"
                  placeholder="{{'ACTIVITY_FIELDS.PIC_ADDRESS_HINT' | translate}}"
-                 data-bv-trigger="blur"/>
+                 data-bv-trigger="blur">
+          <span class="help-block" style="margin-bottom:0px" ng-show="bannerFile!=''">{{uploadInputHint}}</span>
         </div>
       </div>
     </form>
   </div>
   <div class="modal-footer">
+    <button type="button" class="btn btn-info" ng-show="bannerFile!=''" ng-click="uploadBanner()">点击上传</button>
+    <span class="btn btn-success fileinput-button">
+      <span>{{uploadBannerBtnHint}}</span>
+      <input type="file" mutiple file-model="bannerFile" ng-click="selectFile()">
+    </span>
     <button type="button" class="btn btn-default" ng-click="cancel()">取消</button>
     <button type="button" class="btn btn-primary" ng-click="addBanner();cancel()">提交</button>
   </div>

@@ -183,7 +183,7 @@ angular.module('oh.controllers', [])
     }
 
   })
-  .controller('editController', function($rootScope, $scope, $filter, $uibModal, dialog, session, activityService, api, activity, speech) {
+  .controller('editController', function($rootScope, $scope, $filter, $uibModal, dialog, session, activityService, uploadService, api, activity, speech) {
     $scope.$emit('pageName', 'SETTINGS.EDIT_ACTIVITY');
 
     $scope.animationsEnabled = true;
@@ -198,7 +198,10 @@ angular.module('oh.controllers', [])
 
     $scope.modules = activity;
     $scope.data = {
-      newBannerUrl: ""
+      newBannerUrl: "",
+      descriptionUploadBtnHint: "上传文件",
+      descriptionUploadFile: null,
+      descriptionUrl: ""
     };
     $scope.tags = [];
     $scope.activityFormDisabled = false;
@@ -277,6 +280,11 @@ angular.module('oh.controllers', [])
     };
 
     function addBanner() {
+      if ($scope.data.newBannerUrl == "") {
+        $scope.showTip(level = 'tip-danger', content = '图片链接地址格式错误，请输入正确的url地址');
+        return;
+      }
+
       $scope.modules.banners.push($scope.data.newBannerUrl);
       $scope.data.newBannerUrl = "";
 
@@ -302,10 +310,27 @@ angular.module('oh.controllers', [])
         templateUrl: 'addBannersModel.html',
         controller: function($scope, $uibModalInstance) {
           $scope.data = data;
+          $scope.bannerFile = "";
+          $scope.uploadBannerBtnHint = "上传图片";
+          $scope.uploadInputHint = "";
+
           $scope.addBanner = addBanner;
           $scope.cancel = function() {
             $uibModalInstance.dismiss('cancel');
           };
+          $scope.selectFile = function() {
+            $scope.uploadBannerBtnHint = "重选图片"
+            $scope.uploadInputHint = "成功获取文件，请点击上传按钮开始上传";
+          }
+          $scope.uploadBanner = function() {
+            var fd = new FormData();
+            fd.append('file', $scope.bannerFile);
+            uploadService.uploadOneFile("hack_file", fd, function(url){
+              $scope.data.newBannerUrl = url;
+              $scope.addBanner();
+              $scope.cancel();
+            });
+          }
         },
       });
     };
@@ -326,6 +351,20 @@ angular.module('oh.controllers', [])
         }
       });
     };
+
+    $scope.selectDescriptionFile = function() {
+      $scope.data.descriptionUploadBtnHint = "重选文件";
+    }
+
+    $scope.uploadDescriptionFile = function() {
+      var fd = new FormData();
+      fd.append('file', $scope.data.descriptionUploadFile);
+      uploadService.uploadOneFile("hack_file", fd, function(url){
+        $scope.data.descriptionUrl = "上传成功，请复制链接： " + url;
+        $scope.data.descriptionUploadBtnHint = "继续上传文件";
+        $scope.data.descriptionUploadFile = null;
+      });
+    }
 
     $scope.providerChange = function(checked, value) {
       if (checked) {
