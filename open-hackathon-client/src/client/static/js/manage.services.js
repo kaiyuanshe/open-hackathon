@@ -93,8 +93,8 @@ angular.module('oh.api', [])
     return API($window.CONFIG.apiconfig.api, $window.CONFIG.apiconfig.proxy + '/api');
   }).factory('uploadService', function($rootScope, $http, $window, $cookies) {
     return {
-      uploadOneFile: function(file_type, formData, getUrlFunc) {
-        $http.post($window.CONFIG.apiconfig.proxy + "/api/user/file?file_type=" + file_type, formData, {
+      uploadOneFile: function(fileType, formData, getUrlFunc) {
+        $http.post($window.CONFIG.apiconfig.proxy + "/api/user/file?file_type=" + fileType, formData, {
           transformRequest: angular.identity,
           headers: {'Content-Type': undefined, token: $cookies.get('token')}
         }).success(function(data, status, headers, config){
@@ -105,12 +105,12 @@ angular.module('oh.api', [])
           return getUrlFunc("");
         });
       },
-      uploadFiles: function(file_type, formData, success_func, error_func) {
-        $http.post($window.CONFIG.apiconfig.proxy + "/api/user/file?file_type=" + file_type, formData, {
+      uploadFiles: function(fileType, formData, successFunc, errorFunc) {
+        $http.post($window.CONFIG.apiconfig.proxy + "/api/user/file?file_type=" + fileType, formData, {
           transformRequest: angular.identity,
           headers: {'Content-Type': undefined, token: $cookies.get('token')}
-        }).success(success_func(data, status, headers, config)
-        ).error(error_func(data, status, headers, config));
+        }).success(successFunc(data, status, headers, config)
+        ).error(errorFunc(data, status, headers, config));
       }
     }
   }).factory('activityService', function($rootScope, $q, api) {

@@ -785,7 +785,7 @@ angular.module('oh.controllers', [])
 
           $scope.add_organizer = function() {
             org.organization_type = parseInt(org.organization_type);
-            if(!$scope.org.name || !$scope.org.homepage || !$scope.org.logo) {
+            if (! $scope.org.name || ! $scope.org.homepage || ! $scope.org.logo) {
               $scope.$emit('showTip', {
                 level: 'tip-danger',
                 content: "主办方名称、logo和主页不能为空.  logo和主页请按标准url地址格式输入."
@@ -899,17 +899,6 @@ angular.module('oh.controllers', [])
     $scope.deleteSelectedOrgs = function() {
       for (index in $scope.data.selectedOrgs)
         $scope.delete_organizer($scope.data.selectedOrgs[index]);
-    }
-
-    $scope.uploadFile = function() {
-      console.log("test");
-      var fd = new FormData();
-      fd.append('file', $scope.data.newOrgLogoFile);
-
-      $http.post('/api/user/file', fd, {
-        transformRequest: angular.identity,
-        headers: {'Content-Type': undefined}
-      })
     }
 
     refresh();
