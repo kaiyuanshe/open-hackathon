@@ -1,5 +1,6 @@
 {% extends "base/base.html" %}
 {% block style %}
+    <link href="/static/css/jquery.fileupload.css" rel="stylesheet">
     <link href="/static/css/oh.user.profile.css" rel="stylesheet">
 {% endblock %}
 {% block content %}
@@ -11,7 +12,8 @@
                 <div class="clearfix">
                     <div class="profile-left">
                         <div class="picture">
-                            <img src="{{ current_user.get_avatar_url() }}" data-role="picture" onerror="javascript:this.src='/static/pic/monkey-204-204px.png'">
+                            <img id="user_logo" src="{{ current_user.get_avatar_url() }}" data-role="picture"
+                                 onerror="javascript:this.src='/static/pic/monkey-204-204px.png'">
                         </div>
                         <a href="#" data-toggle="modal" data-target="#pictureModal" class="update-picture"><i
                                 class="fa fa-cloud-upload"></i> 更新头像</a>
@@ -185,20 +187,26 @@
                     <div class="modal-body">
                         <div class="form-group"
                              ng-class="{ 'has-error' : registerForm.team_name.$invalid && registerForm.team_name.$touched }">
-                            <label class="col-sm-3 control-label required">图片路径</label>
+                            <label class="col-sm-3 control-label required">图片链接</label>
 
                             <div class="col-sm-9">
-                                <input type="url" class="form-control" id="picture" name="picture" placeholder="图片路径"
+                                <input type="url" class="form-control" id="user_logo_input" name="picture"
+                                       placeholder="图片链接"
                                        required
                                        data-bv-trigger="blur"
-                                       data-bv-message="请填写正确的图片访问路径"
-                                       data-bv-notempty-message="请填图片路径">
+                                       data-bv-message="请填写正确的图片链接地址或者上传文件"
+                                       data-bv-notempty-message="请填链接地址或者上传文件">
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary">确定</button>
-                        <button type="button" class="btn btn-warning" data-dismiss="modal">取消</button>
+                        <span id="user_logo_upload" class="btn btn-success fileinput-button">
+                            <span id="user_logo_upload_span">上传文件</span>
+                            <input id="user_logo_upload_btn" type="file" mutiple>
+                        </span>
+                        <button type="submit" id="user_logo_submit" class="btn btn-primary">确定</button>
+                        <button type="button" id="user_logo_cancel" class="btn btn-warning" data-dismiss="modal">
+                            取消</button>
                     </div>
                 </div>
             </form>
@@ -207,5 +215,6 @@
 {% endblock %}
 {% block script %}
     <script type="text/javascript" src="/static/js/jquery/bootstrapValidator.js"></script>
+    <script type="text/javascript" src="/static/js/jquery/jquery.fileupload.js"></script>
     <script type="text/javascript" src="/static/js/views/oh.user.profile.edit.js"></script>
 {% endblock %}

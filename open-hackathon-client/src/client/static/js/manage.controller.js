@@ -719,7 +719,7 @@ angular.module('oh.controllers', [])
     // init the page and load admins-list
     pageLoad();
   })
-  .controller('organizersController', function($rootScope, $scope, $stateParams, $uibModal, $cookies, api) {
+  .controller('organizersController', function($rootScope, $scope, $stateParams, $uibModal, api, uploadService) {
     $scope.$emit('pageName', 'SETTINGS.ORGANIZERS');
 
     $scope.filterCondition = 0;
@@ -756,9 +756,28 @@ angular.module('oh.controllers', [])
     var openModel = function(org) {
       $uibModal.open({
         templateUrl: 'orgModel.html',
-        controller: function($scope, $stateParams, $uibModalInstance, $cookies, api) {
+        controller: function($scope, $stateParams, $uibModalInstance, api, uploadService) {
           $scope.org = org;
           $scope.org.organization_type = $scope.org.organization_type.toString();
+          $scope.newOrgLogoFile = "";
+          $scope.uploadOrgLogoBtnHint = "本地图片";
+          $scope.uploadInputHint = "";
+
+          $scope.selectFile = function() {
+            $scope.uploadOrgLogoBtnHint = "重选图片"
+            $scope.uploadInputHint = "已选择文件，请点击上传按钮";
+          }
+
+          $scope.uploadFile = function() {
+            var fd = new FormData();
+            fd.append('file', $scope.newOrgLogoFile);
+            uploadService.uploadOneFile("hack_file", fd, function(url){
+              $scope.org.logo = url;
+              $scope.newOrgLogoFile = "success";
+              $scope.uploadOrgLogoBtnHint = "本地图片";
+              $scope.uploadInputHint = "上传图片成功！";
+            });
+          }
 
           $scope.cancel = function() {
             $uibModalInstance.dismiss('cancel');
@@ -766,6 +785,15 @@ angular.module('oh.controllers', [])
 
           $scope.add_organizer = function() {
             org.organization_type = parseInt(org.organization_type);
+            if (! $scope.org.name || ! $scope.org.homepage || ! $scope.org.logo) {
+              $scope.$emit('showTip', {
+                level: 'tip-danger',
+                content: "主办方名称、logo和主页不能为空.  logo和主页请按标准url地址格式输入."
+              });
+              $scope.cancel();
+              return;
+            }
+
             var fn;
             if (org.id) {
               fn = api.admin.hackathon.organizer.put
@@ -776,7 +804,6 @@ angular.module('oh.controllers', [])
               body: $scope.org,
               header: {
                 hackathon_name: $stateParams.name,
-                token: $cookies.get('token')
               }
             }).then(function(data) {
               if (data.error) {
