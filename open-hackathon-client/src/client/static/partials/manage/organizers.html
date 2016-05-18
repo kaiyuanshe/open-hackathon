@@ -23,12 +23,13 @@
         <label class="col-md-3 control-label">LOGO</label>
         <div class="col-md-6">
           <input type="url" class="form-control" name="logo" id="logo" ng-model="org.logo" placeholder="图片链接" data-bv-trigger="blur" data-bv-message="请填写正确的图片链接地址或者上传图片" data-bv-notempty-message="请填图片链接或者上传图片">
+          <span class="help-block" style="margin-bottom:0px" ng-show="newOrgLogoFile!=''">{{uploadInputHint}}</span>
         </div>
       </div>
       <div class="form-group has-feedback">
         <label class="col-md-3 control-label">主页</label>
         <div class="col-md-6">
-          <input type="url" class="form-control" name="homepage" id="homepage" ng-model="org.homepage" placeholder="主页" data-bv-trigger="blur">
+          <input type="url" class="form-control" name="homepage" id="homepage" ng-model="org.homepage" placeholder="主页地址" data-bv-trigger="blur">
         </div>
       </div>
       <div class="form-group has-feedback">
@@ -40,8 +41,8 @@
     </form>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-info" ng-show="newOrgLogoFile!=''" ng-click="uploadFile()">点击上传</button>
-    <span class="btn btn-success org-fileinput-button">
+    <button type="button" class="btn btn-info" ng-show="newOrgLogoFile!='success' && newOrgLogoFile!=''" ng-click="uploadFile()">点击上传</button>
+    <span class="btn btn-success fileinput-button" ng-show="newOrgLogoFile!='success'">
       <span>{{uploadOrgLogoBtnHint}}</span>
       <input type="file" mutiple file-model="newOrgLogoFile" ng-click="selectFile()">
     </span>

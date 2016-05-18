@@ -981,12 +981,16 @@ tags-input .tags .tag-item .remove-button {
   width:9px;
 }
 
-.org-fileinput-button input {
+.fileinput-button {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+}
+
+.fileinput-button input {
     position: absolute;
-    top: 490px;
-    right: 132px;
-    width: 100px;
-    height: 60px;
+    top: 0px;
+    right: 0px;
     margin: 0;
     opacity: 0;
     -ms-filter: 'alpha(opacity=0)';

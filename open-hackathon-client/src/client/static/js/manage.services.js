@@ -91,7 +91,7 @@ angular.module('oh.api', [])
     }
 
     return API($window.CONFIG.apiconfig.api, $window.CONFIG.apiconfig.proxy + '/api');
-  }).factory('uploadService', function($rootScope, $http, $window, $cookies, $q) {
+  }).factory('uploadService', function($rootScope, $http, $window, $cookies) {
     return {
       uploadOneFile: function(file_type, formData, getUrlFunc) {
         $http.post($window.CONFIG.apiconfig.proxy + "/api/user/file?file_type=" + file_type, formData, {
@@ -102,9 +102,15 @@ angular.module('oh.api', [])
             return getUrlFunc(data["files"][0]["url"]);
           return getUrlFunc("");
         }).error(function(data, status, headers, config){
-          console.log(data);
           return getUrlFunc("");
         });
+      },
+      uploadFiles: function(file_type, formData, success_func, error_func) {
+        $http.post($window.CONFIG.apiconfig.proxy + "/api/user/file?file_type=" + file_type, formData, {
+          transformRequest: angular.identity,
+          headers: {'Content-Type': undefined, token: $cookies.get('token')}
+        }).success(success_func(data, status, headers, config)
+        ).error(error_func(data, status, headers, config));
       }
     }
   }).factory('activityService', function($rootScope, $q, api) {
