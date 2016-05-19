@@ -204,7 +204,7 @@ class Hackathon(HDocumentBase):
     location = StringField()
     description = StringField()
     banners = ListField()
-    status = IntField(default=0)  # 0-new 1-online 2-offline
+    status = IntField(default=0)  # 0-new 1-online 2-offline 3-apply-online
     creator = ReferenceField(User)
     config = DictField()  # max_enrollment, auto_approve, login_provider
     type = IntField(default=1)  # enum.HACK_TYPE
