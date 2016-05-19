@@ -318,6 +318,22 @@ class HackathonManager(Component):
             self.log.error(e)
             return internal_server_error("fail to delete hackathon" + hackathon.name)
 
+    def apply_online_hackathon(self, hackathon):
+        """apply for onlining a hackathon, should be called by the hackathon creator
+        :return hackathon in dict if updated successfully.
+        """
+        try:
+            req = ok()
+            if hackathon.status == HACK_STATUS.OFFLINE or hackathon.status == HACK_STATUS.DRAFT:
+                hackathon.status = HACK_STATUS.APPLY_ONLINE
+                hackathon.save()
+            elif hackathon.status == HACK_STATUS.INIT:
+                req = general_error(code=HTTP_CODE.CREATE_NOT_FINISHED)
+            return req
+        except Exception as e:
+            self.log.error(e)
+            return internal_server_error("fail to delete hackathon" + hackathon.name)
+
     def get_userlike_all_hackathon(self, user_id):
         user_hackathon_rels = UserHackathon.objects(user=user_id).all()
 
@@ -788,7 +804,7 @@ class HackathonManager(Component):
     def hackathon_online(self, hackathon):
         req = ok()
 
-        if hackathon.status == HACK_STATUS.DRAFT or hackathon.status == HACK_STATUS.OFFLINE:
+        if hackathon.status == HACK_STATUS.DRAFT or hackathon.status == HACK_STATUS.OFFLINE or hackathon.status == HACK_STATUS.APPLY_ONLINE:
             if self.util.is_local() or hackathon.config.get('cloud_provider') == CLOUD_PROVIDER.NONE:
                 req = ok()
             elif hackathon.config.get('cloud_provider') == CLOUD_PROVIDER.AZURE:
@@ -811,7 +827,7 @@ class HackathonManager(Component):
 
     def hackathon_offline(self, hackathon):
         req = ok()
-        if hackathon.status == HACK_STATUS.ONLINE or hackathon.status == HACK_STATUS.DRAFT:
+        if hackathon.status == HACK_STATUS.ONLINE or hackathon.status == HACK_STATUS.DRAFT or hackathon.status == HACK_STATUS.APPLY_ONLINE:
             hackathon.status = HACK_STATUS.OFFLINE
             hackathon.save()
             self.create_hackathon_notice(hackathon.id, HACK_NOTICE_EVENT.HACK_OFFLINE,

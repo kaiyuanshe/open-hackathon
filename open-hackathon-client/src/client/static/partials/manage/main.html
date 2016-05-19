@@ -4,8 +4,9 @@
   </nav>
   <article class="activity-list clearfix">
     <div class="item" ng-repeat="activity in activities">
-
       <a ui-sref="manage.edit({name:activity.name})" class="btn btn-sm btn-success"><i class="fa fa-cog"></i> <ANY translate="MANAGE">MANAGE</ANY></a>
+
+      <a class="delete-pos fa fa-trash" ng-class="'btn-danger'"  ng-if="currentUser.is_super == true" ng-click="delete(activity)"></a>
       <header>
         <a href="/site/{{activity.name}}" target="_blank"><img src="{{activity.banners | defBanner}}" static-image max-width="298" max-height="168"></a>
         <span>{{activity.display_name}}</span>
@@ -19,10 +20,12 @@
       </div>
       <footer>
         <div class="btn-group btn-group-justified">
-          <a class="btn" ng-class="activity.status == 1? 'btn-success': 'btn-default'" ng-disabled="activity.status == 1" translate="ACTIVITY_STATUS.ONLINE" ng-click="online(activity)">ONLINE</a>
-          <a class="btn" ng-class="activity.status == 0? 'btn-success': 'btn-default'" ng-disabled="true" translate="ACTIVITY_STATUS.DEFAULT">DEFAULT</a>
-          <a class="btn" ng-class="activity.status == 2? 'btn-success': 'btn-default'" ng-disabled="activity.status == 2" translate="ACTIVITY_STATUS.OFFLINE" ng-click="offline(activity)">OFFLINE</a>
-          <a class="btn" ng-class="'btn-danger'" translate="ACTIVITY_STATUS.DELETE" ng-click="delete(activity)">DELETE</a>
+          <a class="btn" ng-class="activity.status == 1? 'btn-success': 'btn-default'" ng-if="currentUser.is_super == true" ng-disabled="activity.status == 1 || activity.status == -1" translate="ACTIVITY_STATUS.ONLINE" ng-click="online(activity)">ONLINE</a>
+          <a class="btn" ng-class="activity.status  == 3? 'btn-success': 'btn-default'"  ng-disabled="activity.status == 3 || activity.status == -1"  ng-if="activity.status != 1" translate="ACTIVITY_STATUS.APPLY_ONLINE" ng-click="applyOnline(activity)">APPLY_ONLINE</a>
+          <a class="btn" ng-class="'btn-success'"  ng-disabled="true"  ng-if="currentUser.is_super == false && activity.status == 1" translate="ACTIVITY_STATUS.ONLINE" ng-click="applyOnline(activity)">APPLY_ONLINE</a>
+          <a class="btn" ng-class="(activity.status == 0 || activity.status == -1)? 'btn-success': 'btn-default'" ng-disabled="true" translate="ACTIVITY_STATUS.DEFAULT">DEFAULT</a>
+          <a class="btn" ng-class="activity.status == 2? 'btn-success': 'btn-default'" ng-disabled="activity.status == 2 || activity.status == -1 || activity.status == 0" translate="ACTIVITY_STATUS.OFFLINE" ng-click="offline(activity)">OFFLINE</a>
+
         </div>
       </footer>
 

@@ -31,7 +31,8 @@
     "DEFAULT": "草稿",
     "ONLINE": "上线",
     "OFFLINE": "下线",
-    "DELETE": "删除"
+    "DELETE": "删除",
+    "APPLY_ONLINE": "申请上线"
   },
   "USER_STATUS": {
     "PASS": "通过",
