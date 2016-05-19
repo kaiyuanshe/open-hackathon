@@ -124,7 +124,10 @@ class AzureStorage(Storage):
         self.__containers = {
             FILE_TYPE.TEMPLATE: self.util.safe_get_config("storage.azure.template_container", "templates"),
             FILE_TYPE.HACK_IMAGE: self.util.safe_get_config("storage.azure.image_container", "images"),
-            FILE_TYPE.AZURE_CERT: self.util.safe_get_config("storage.azure.certificate_container", "certificate")
+            FILE_TYPE.AZURE_CERT: self.util.safe_get_config("storage.azure.certificate_container", "certificate"),
+            FILE_TYPE.USER_FILE: self.util.safe_get_config("storage.azure.user_file_container", "userfile"),
+            FILE_TYPE.TEAM_FILE: self.util.safe_get_config("storage.azure.team_file_container", "teamfile"),
+            FILE_TYPE.HACK_FILE: self.util.safe_get_config("storage.azure.hack_file_container", "hackfile"),
         }
         self.azure_blob_service = RequiredFeature("azure_blob_service")
 

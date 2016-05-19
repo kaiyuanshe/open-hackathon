@@ -249,6 +249,7 @@
                     } else {
                         message.append('<a class="btn btn-primary btn-lg" href="/site/' + hackathon_name + '/settings">立即参加</a>\
                                 <p>您的报名已经审核已通过。</p>');
+                        window.location.reload();
                     }
                 }
             })

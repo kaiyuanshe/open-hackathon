@@ -73,6 +73,9 @@ Config = {
             "image_container": "images",
             "template_container": "templates",
             "certificates_container": "certificates",
+            "user_file_container": "userfile",
+            "team_file_container": "teamfile",
+            "hack_file_container": "hackfile",
             "blob_service_host_base": ".blob.core.chinacloudapi.cn"
         }
     },
