@@ -314,17 +314,17 @@ angular.module('oh.controllers', [])
           $scope.bannerFile = "";
           $scope.uploadBannerBtnHint = "上传图片";
           $scope.uploadInputHint = "";
-          $scope.startUploadBtnHint = "点击上传"
+          $scope.startUploadBtnHint = "点击上传";
 
           $scope.addBanner = addBanner;
           $scope.cancel = function() {
             $uibModalInstance.dismiss('cancel');
           };
           $scope.selectFile = function() {
-            $scope.uploadBannerBtnHint = "重选图片"
-            $scope.startUploadBtnHint = "点击上传"
+            $scope.uploadBannerBtnHint = "重选图片";
+            $scope.startUploadBtnHint = "点击上传";
             $scope.uploadInputHint = "成功获取文件，请点击上传按钮开始上传";
-          }
+          };
           $scope.uploadBanner = function() {
             $scope.startUploadBtnHint = "上传中。。"
             var fd = new FormData();
@@ -334,7 +334,7 @@ angular.module('oh.controllers', [])
               $scope.addBanner();
               $scope.cancel();
             });
-          }
+          };
         },
       });
     };
@@ -1343,7 +1343,7 @@ angular.module('oh.controllers', [])
         controller: function($scope, $uibModalInstance) {
           $scope.data = formData;
           $scope.imgFile = "";
-          $scope.uploadImgBtnHint = "上传图片"
+          $scope.uploadImgBtnHint = "上传图片";
           $scope.startUploadBtnHint = "开始上传";
           $scope.uploadInputHint = "";
 
@@ -1366,13 +1366,13 @@ angular.module('oh.controllers', [])
               $scope.uploadImgBtnHint = "上传图片";
               $scope.uploadInputHint = "上传图片成功！";
             });
-          }
+          };
 
           $scope.selectFile = function() {
             $scope.startUploadBtnHint = "开始上传";
             $scope.uploadImgBtnHint = "重选图片";
             $scope.uploadInputHint = "已选择文件，请点击上传按钮";
-          }
+          };
         }, // end controller
       });
     };
