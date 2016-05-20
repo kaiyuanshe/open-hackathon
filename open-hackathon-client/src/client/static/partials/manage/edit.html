@@ -190,7 +190,7 @@
         <span>{{data.descriptionUploadBtnHint}}</span>
         <input type="file" mutiple file-model="data.descriptionUploadFile" ng-click="selectDescriptionFile()">
       </span>
-      <button type="button" class="btn btn-info" ng-show="data.descriptionUploadFile" ng-click="uploadDescriptionFile()">开始上传</button>
+      <button type="button" class="btn btn-info" ng-show="data.descriptionUploadFile" ng-click="uploadDescriptionFile()">{{data.startUploadBtnHint}}</button>
       <span>{{data.descriptionUrl}}</span>
     </uib-tab>
     <uib-tab heading="{{'EDIT_ACTIVITY_TABS.PROVIDERS' | translate}}">
@@ -284,7 +284,7 @@
     </form>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-info" ng-show="bannerFile!=''" ng-click="uploadBanner()">点击上传</button>
+    <button type="button" class="btn btn-info" ng-show="bannerFile!=''" ng-click="uploadBanner()">{{startUploadButHint}}</button>
     <span class="btn btn-success fileinput-button">
       <span>{{uploadBannerBtnHint}}</span>
       <input type="file" mutiple file-model="bannerFile" ng-click="selectFile()">

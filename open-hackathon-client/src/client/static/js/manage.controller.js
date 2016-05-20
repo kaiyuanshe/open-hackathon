@@ -200,6 +200,7 @@ angular.module('oh.controllers', [])
     $scope.data = {
       newBannerUrl: "",
       descriptionUploadBtnHint: "上传文件",
+      startUploadBtnHint: "开始上传",
       descriptionUploadFile: null,
       descriptionUrl: ""
     };
@@ -313,6 +314,7 @@ angular.module('oh.controllers', [])
           $scope.bannerFile = "";
           $scope.uploadBannerBtnHint = "上传图片";
           $scope.uploadInputHint = "";
+          $scope.startUploadButHint = "点击上传"
 
           $scope.addBanner = addBanner;
           $scope.cancel = function() {
@@ -320,9 +322,11 @@ angular.module('oh.controllers', [])
           };
           $scope.selectFile = function() {
             $scope.uploadBannerBtnHint = "重选图片"
+            $scope.startUploadButHint = "点击上传"
             $scope.uploadInputHint = "成功获取文件，请点击上传按钮开始上传";
           }
           $scope.uploadBanner = function() {
+            $scope.startUploadButHint = "上传中。。"
             var fd = new FormData();
             fd.append('file', $scope.bannerFile);
             uploadService.uploadOneFile("hack_file", fd, function(url){
@@ -353,10 +357,13 @@ angular.module('oh.controllers', [])
     };
 
     $scope.selectDescriptionFile = function() {
+      $scope.data.descriptionUrl = "";
       $scope.data.descriptionUploadBtnHint = "重选文件";
-    }
+      $scope.data.startUploadBtnHint = "开始上传";
+    };
 
     $scope.uploadDescriptionFile = function() {
+      $scope.data.startUploadBtnHint = "上传中。。";
       var fd = new FormData();
       fd.append('file', $scope.data.descriptionUploadFile);
       uploadService.uploadOneFile("hack_file", fd, function(url){
@@ -364,7 +371,7 @@ angular.module('oh.controllers', [])
         $scope.data.descriptionUploadBtnHint = "继续上传文件";
         $scope.data.descriptionUploadFile = null;
       });
-    }
+    };
 
     $scope.providerChange = function(checked, value) {
       if (checked) {
@@ -800,14 +807,17 @@ angular.module('oh.controllers', [])
           $scope.org.organization_type = $scope.org.organization_type.toString();
           $scope.newOrgLogoFile = "";
           $scope.uploadOrgLogoBtnHint = "本地图片";
+          $scope.startUploadButHint = "点击上传";
           $scope.uploadInputHint = "";
 
           $scope.selectFile = function() {
+            $scope.startUploadButHint = "点击上传";
             $scope.uploadOrgLogoBtnHint = "重选图片"
             $scope.uploadInputHint = "已选择文件，请点击上传按钮";
           }
 
           $scope.uploadFile = function() {
+            $scope.startUploadButHint = "上传中。。"
             var fd = new FormData();
             fd.append('file', $scope.newOrgLogoFile);
             uploadService.uploadOneFile("hack_file", fd, function(url){
@@ -881,8 +891,7 @@ angular.module('oh.controllers', [])
           id: organizer_id
         },
         header: {
-          hackathon_name: $stateParams.name,
-          token: $cookies.get('token')
+          hackathon_name: $stateParams.name
         }
       }).then(function(data) {
         if (data.error) {
@@ -1266,7 +1275,7 @@ angular.module('oh.controllers', [])
 
     getHackathonNotices();
   })
-  .controller('prizesController', function($rootScope, $scope, $uibModal, activity, api, dialog) {
+  .controller('prizesController', function($rootScope, $scope, $uibModal, activity, api, dialog, uploadService) {
     $scope.$emit('pageName', 'SETTINGS.PRIZES');
 
     $scope.data = {
@@ -1303,6 +1312,10 @@ angular.module('oh.controllers', [])
     var createAward = function() {
       var award = formData;
       var fn;
+      if (award.name == "") {
+        showTip('tip-danger', '奖项名称不能为空！');
+        return;
+      }
 
       if (award.id)
         fn = api.admin.hackathon.award.put;
@@ -1329,6 +1342,10 @@ angular.module('oh.controllers', [])
         templateUrl: 'awardModel.html',
         controller: function($scope, $uibModalInstance) {
           $scope.data = formData;
+          $scope.imgFile = "";
+          $scope.uploadImgBtnHint = "上传图片"
+          $scope.startUploadButHint = "开始上传";
+          $scope.uploadInputHint = "";
 
           $scope.cancel = function() {
             $uibModalInstance.dismiss('cancel');
@@ -1338,6 +1355,24 @@ angular.module('oh.controllers', [])
             createAward();
             $uibModalInstance.close();
           };
+
+          $scope.uploadFile = function() {
+            $scope.startUploadButHint = "上传中。。";
+            var fd = new FormData();
+            fd.append('file', $scope.imgFile);
+            uploadService.uploadOneFile("hack_file", fd, function(url){
+              $scope.data.award_url = url;
+              $scope.imgFile = "success";
+              $scope.uploadImgBtnHint = "上传图片";
+              $scope.uploadInputHint = "上传图片成功！";
+            });
+          }
+
+          $scope.selectFile = function() {
+            $scope.startUploadButHint = "开始上传";
+            $scope.uploadImgBtnHint = "重选图片";
+            $scope.uploadInputHint = "已选择文件，请点击上传按钮";
+          }
         }, // end controller
       });
     };

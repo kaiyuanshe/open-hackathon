@@ -64,7 +64,8 @@
 
 .activity-list .item-body {
   padding: 10px 10px 0;
-  min-height: 120px;
+  height: 150px;
+  overflow: hidden;
   word-wrap: break-word;
 }
 
