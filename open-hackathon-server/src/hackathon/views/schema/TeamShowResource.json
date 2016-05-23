@@ -23,8 +23,7 @@
             "type": "integer"
           },
           "uri": {
-            "type": "string",
-            "maxLength": 300
+            "type": "string"
           }
         }
       }
