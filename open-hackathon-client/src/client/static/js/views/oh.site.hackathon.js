@@ -189,6 +189,12 @@
                 noNotice();
             }
         });
+
+        if (window.location.href.search('#') != -1) {
+            var tabId = "#tab_" + window.location.href.substring(window.location.href.search('#') + 1);
+            $(tabId).trigger('click');
+            $('html, body').animate({scrollTop: 0}, 'fast');
+        }
     }
 
     function noNotice() {
@@ -212,7 +218,7 @@
         return oh.api.hackathon.show.list.get({header: {hackathon_name: hackathon_name}})
     }
 
-    function submintRegister() {
+    function submitRegister() {
         var regieter_btn = $('a[data-type="register"]').click(function (e) {
             e.preventDefault();
             oh.api.user.registration.post({
@@ -258,7 +264,7 @@
 
     function init() {
         pageLoad();
-        submintRegister();
+        submitRegister();
     };
 
     $(function () {

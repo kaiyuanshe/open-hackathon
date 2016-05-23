@@ -227,8 +227,8 @@
                                 <label class="col-sm-3 control-label required">类型</label>
                                 <div class="col-sm-9">
                                     <select class="form-control" id="worktype">
-                                        <option value="1">发布视频</option>
                                         <option value="0">发布图片</option>
+                                        <option value="1">发布视频</option>
                                         <option value="3">发布PowerPoint文档</option>
                                         <option value="4">发布Excel文档</option>
                                         <option value="5">发布Word文档</option>
@@ -246,7 +246,7 @@
                                            placeholder="描述信息" id="team_work_description">
                                 </div>
                             </div>
-                            <div data-gtype="image">
+                            <div data-gtype="image" class="active">
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label required">图片链接</label>
                                     <div class="col-sm-9">
@@ -259,16 +259,16 @@
                                     </div>
                                 </div>
                             </div>
-                            <div data-gtype="video" class="active">
+                            <div data-gtype="video">
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label required">视频地址</label>
+                                    <label class="col-sm-3 control-label required">视频代码</label>
 
                                     <div class="col-sm-9">
                                         <textarea type="text" class="form-control" data-name="uri" name="work_video"
-                                                  placeholder="<embed src='http://player.youku.com/......"
+                                                  placeholder="例如: <embed src='http://player.youku.com/../test.swf allowfullscreen='true' quality='high' width='480' height='400' align='middle' allowscriptaccess='always' type='application/x-shockwave-flash'>"
                                                   data-bv-trigger="blur"
                                                   required
-                                                  data-bv-notempty-message="请填嵌入视频代码或者上传文件"></textarea>
+                                                  data-bv-notempty-message="请填嵌入视频嵌入代码"></textarea>
                                     </div>
                                 </div>
                             </div>

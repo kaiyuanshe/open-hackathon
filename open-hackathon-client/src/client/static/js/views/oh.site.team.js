@@ -301,12 +301,15 @@
 
         var worktype = $('#worktype').change(function (e) {
             var type = parseInt(worktype.val());
-            var gtypename = 'video';
+            var gtypename = 'image';
+            $('#team_work_upload').show();
             switch (type) {
                 case 0:
                     gtypename = 'image';
                     break;
                 case 1:
+                    gtypename = 'video';
+                    $('#team_work_upload').hide();
                     break;
                 case 2:
                     gtypename = 'code';
