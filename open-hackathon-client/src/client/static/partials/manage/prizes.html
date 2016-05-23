@@ -14,6 +14,7 @@
         <label class="col-md-3 control-label">奖项照片</label>
         <div class="col-md-6">
           <input type="url" class="form-control" name="award_url" id="award_url" placeholder="图片路径" ng-model="data.award_url" data-bv-trigger="blur" data-bv-message="请填写正确的图片访问路径" data-bv-notempty-message="请填图片路径">
+          <span class="help-block" style="margin-bottom:0px" ng-show="imgFile!=''">{{uploadInputHint}}</span>
         </div>
       </div>
       <div class="form-group has-feedback">
@@ -40,6 +41,11 @@
     </form>
   </div>
   <div class="modal-footer">
+    <button type="button" class="btn btn-info" ng-show="imgFile!='' && imgFile!='success'" ng-click="uploadFile()">{{startUploadBtnHint}}</button>
+    <span class="btn btn-success fileinput-button" ng-show="imgFile!='success'">
+      <span>{{uploadImgBtnHint}}</span>
+      <input type="file" mutiple file-model="imgFile" ng-click="selectFile()">
+    </span>
     <button type="button" class="btn btn-default" ng-click="cancel()">取消</button>
     <button type="button" class="btn btn-primary" ng-click="addAward()">提交</button>
   </div>
