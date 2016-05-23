@@ -2380,6 +2380,36 @@ angular.module('oh.controllers', [])
 
 
     $scope.onlineDisabled = false;
+    $scope.applyOnline = function() {
+        $scope.onlineDisabled = true;
+        api.admin.hackathon.applyonline.post({
+          header: {
+            hackathon_name: $scope.activity.name
+          }
+        }).then(function(data) {
+          if (data.error) {
+            var message = ''
+            if (data.error.code == 412101) {
+              message = '当前黑客松没有还未创建成功。'
+            } else if (data.error.code == 412102) {
+              message = '证书授权失败，请检验SUBSCRIPTION ID是否正确。'
+            } else {
+              message = data.error.friendly_message
+            }
+            $scope.$emit('showTip', {
+              level: 'tip-danger',
+              content: message
+            });
+          } else {
+            $scope.$emit('showTip', {
+              level: 'tip-success',
+              content: '已经申请上线'
+            });
+            activity.status = 3;
+          }
+        })
+      }
+
     $scope.online = function() {
       $scope.onlineDisabled = true;
       api.admin.hackathon.online.post({

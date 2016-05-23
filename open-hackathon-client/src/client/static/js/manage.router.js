@@ -30,11 +30,12 @@ angular.module('oh.manage.router', [
   $stateProvider.state('main', {
     url: '/main',
     templateUrl: '/static/partials/manage/main.html?v=' + VERSION,
-    controller: function($scope, $rootScope, activityService, api) {
+    controller: function($scope, $rootScope, activityService, session, api) {
       activityService.reload();
 
       $rootScope.$on('getActivity', function(event, activities) {
         $scope.activities = activityService.getAll();
+        $scope.currentUser = session.user;
         event.stopPropagation();
       });
 
@@ -67,6 +68,36 @@ angular.module('oh.manage.router', [
           }
         })
       }
+
+      $scope.applyOnline = function(activity) {
+        if (activity.status == 1 || activity.status == 3) return;
+        api.admin.hackathon.applyonline.post({
+          header: {
+            hackathon_name: activity.name
+          }
+        }).then(function(data) {
+          if (data.error) {
+            var message = ''
+            if (data.error.code == 412101) {
+              message = '当前黑客松没有还未创建成功。'
+            } else if (data.error.code == 412102) {
+              message = '证书授权失败，请检验SUBSCRIPTION ID是否正确。'
+            } else {
+              message = data.error.friendly_message
+            }
+            $scope.$emit('showTip', {
+              level: 'tip-danger',
+              content: message
+            });
+          } else {
+            $scope.$emit('showTip', {
+              level: 'tip-success',
+              content: '已经申请上线'
+            });
+            activity.status = 3;
+          }
+        })
+      }
       $scope.offline = function(activity) {
         if (activity.status == 2) return;
         api.admin.hackathon.offline.post({
@@ -91,6 +122,28 @@ angular.module('oh.manage.router', [
               content: '成功'
             });
             activity.status = 2;
+          }
+        })
+      }
+      $scope.delete = function(activity) {
+        api.admin.hackathon.delete({
+          header: {
+            hackathon_name: activity.name
+          }
+        }).then(function(data) {
+          if (data.error) {
+            var message = ''
+            $scope.$emit('showTip', {
+              level: 'tip-danger',
+              content: message
+            });
+          } else {
+            var index = $scope.activities.indexOf(activity)
+            $scope.activities.splice(index, 1)
+            $scope.$emit('showTip', {
+              level: 'tip-success',
+              content: '删除成功'
+            });
           }
         })
       }

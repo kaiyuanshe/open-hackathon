@@ -25,6 +25,10 @@
   margin-left: -17px;
 }
 
+.delete-pos {
+  left: 10px;
+  max-width: 30px;
+}
 .activity-list .item {
   width: 300px;
   margin-left: 17px;

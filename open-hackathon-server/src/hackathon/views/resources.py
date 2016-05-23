@@ -463,6 +463,10 @@ class AdminHackathonResource(HackathonResource):
     def put(self):
         return hackathon_manager.update_hackathon(request.get_json())
 
+    @admin_privilege_required
+    def delete(self):
+        return hackathon_manager.delete_hackathon()
+
 
 class AdminHackathonConfigResource(HackathonResource):
     @hackathon_name_required
@@ -722,6 +726,12 @@ class AdminHackathonOnLineResource(HackathonResource):
     @admin_privilege_required
     def post(self):
         return hackathon_manager.hackathon_online(g.hackathon)
+
+
+class AdminHackathonApplyOnLineResource(HackathonResource):
+    @admin_privilege_required
+    def post(self):
+        return hackathon_manager.apply_online_hackathon(g.hackathon)
 
 
 class AdminHackathonOffLineResource(HackathonResource):

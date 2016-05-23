@@ -151,10 +151,11 @@ Config = {
             "api": {
                 "admin": {
                     "hackathon": {
-                        "": ["get", "post", "put"],
+                        "": ["get", "post", "put", "delete"],
                         "checkname": ["get"],
                         "list": ["get"],
                         "online": ["post"],
+                        "applyonline": ["post"],
                         "offline": ["post"],
                         "tags": ["get", "post", "put", "delete"],
                         "config": ["get", "post", "put", "delete"],
