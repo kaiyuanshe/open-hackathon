@@ -377,9 +377,12 @@ def hackathon(hackathon_name):
     if data.get('error') is not None:
         return render("/404.html")
     else:
+        hackathon = data.get("hackathon", data)
+        if len(hackathon.banners) == 0:
+            hackathon.banners = ['/static/pic/homepage.jpg']
         return render("/site/hackathon.html",
                       hackathon_name=hackathon_name,
-                      hackathon=data.get("hackathon", data),
+                      hackathon=hackathon,
                       user=data.get("user"),
                       registration=data.get("registration"),
                       team=data.get("team"),
