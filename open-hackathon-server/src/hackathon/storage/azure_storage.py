@@ -153,4 +153,4 @@ class AzureStorage(Storage):
             real_name = hackathon_name + str(uuid1())[0:9] + strftime("%Y%m%d%H%M%S") + "." + suffix
             return real_name
         else:
-            return file_name
+            return strftime("%Y%m%d/") + file_name

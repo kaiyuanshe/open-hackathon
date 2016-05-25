@@ -362,7 +362,7 @@
     <div class="item">
         <div class="header" data-parent>
             <a href="${$item.link(id)}">
-                <img src="${cover}" class="oh-thumbnail" alt="${project_name}" onload="oh.comm.imgLoad(this)" >
+                <img src="${cover}" class="oh-thumbnail" alt="${project_name}" onload="oh.comm.imgLoad(this)" onerror="javascript:this.src='/static/pic/wutu.jpg'">
             </a>
         </div>
         <div class="body">
