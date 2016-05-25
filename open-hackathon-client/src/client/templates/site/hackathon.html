@@ -361,13 +361,13 @@
   <div class="col-xs-6">
     <div class="item">
         <div class="header" data-parent>
-            <a href="${$item.link(id)}">
+            <a href="${$item.link(id)}" target="_blank">
                 <img src="${cover}" class="oh-thumbnail" alt="${project_name}" onload="oh.comm.imgLoad(this)" onerror="javascript:this.src='/static/pic/wutu.jpg'">
             </a>
         </div>
         <div class="body">
             <h4>项目名称：${project_name}</h4>
-            <p>团队名：<a href="${$item.link(id)}">${name}</a></p>
+            <p>团队名：<a href="${$item.link(id)}" target="_blank">${name}</a></p>
             <div class="desc">
                 ${description}
             </div>
