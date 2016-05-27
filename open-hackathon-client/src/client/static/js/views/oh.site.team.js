@@ -325,6 +325,7 @@
                     break;
                 case 2:
                     gtypename = 'code';
+                    $('#team_work_upload').hide();
                     break
                 case 3:
                 case 4:
@@ -334,6 +335,7 @@
                     break
                 case 99:
                     gtypename = 'other';
+                    $('#team_work_upload').hide();
                     break;
             }
             worksForm.find('[data-gtype]').removeClass('active');
