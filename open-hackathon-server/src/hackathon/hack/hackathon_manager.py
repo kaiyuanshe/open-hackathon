@@ -470,6 +470,7 @@ class HackathonManager(Component):
 
         award = Award(id=uuid.uuid4(),
                       name=body.get("name"),
+                      sub_name=body.get("sub_name"),
                       description=body.get("description"),
                       level=level,
                       quota=body.get("quota"),
@@ -492,6 +493,7 @@ class HackathonManager(Component):
                 level = 10
 
         award.name = body.get("name", award.name)
+        award.sub_name = body.get("name", award.sub_name)
         award.description = body.get("description", award.description)
         award.level = body.get("level", level)
         award.quota = body.get("quota", award.quota)

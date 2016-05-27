@@ -172,6 +172,7 @@ class Organization(DynamicEmbeddedDocument):
 class Award(EmbeddedDocument):
     id = UUIDField(required=True)
     name = StringField(required=True)
+    sub_name = StringField()
     description = StringField(required=True)
     level = IntField(min_value=0, max_value=10)  # 0-10
     quota = IntField(min_value=1, default=1, required=True)
