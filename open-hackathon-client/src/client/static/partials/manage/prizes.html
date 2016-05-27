@@ -7,7 +7,13 @@
       <div class="form-group has-feedback">
         <label class="col-md-3 control-label">奖项名称</label>
         <div class="col-md-6">
-          <input type="text" class="form-control" name="name" id="name" placeholder="" ng-model="data.name" required data-bv-trigger="blur" data-bv-notempty-message="奖项名称，不能为空">
+          <input type="text" class="form-control" name="name" id="name" placeholder="奖项名称" ng-model="data.name" required data-bv-trigger="blur" data-bv-notempty-message="奖项名称，不能为空">
+        </div>
+      </div>
+      <div class="form-group has-feedback">
+        <label class="col-md-3 control-label">奖项子名称</label>
+        <div class="col-md-6">
+          <input type="text" class="form-control" id="sub_name" placeholder="奖项子名称" ng-model="data.sub_name" data-bv-trigger="blur">
         </div>
       </div>
       <div class="form-group has-feedback">
@@ -70,6 +76,7 @@
         </th>
         <th>奖项图片</th>
         <th>奖项名称</th>
+        <th>奖项子名称</th>
         <th>等级</th>
         <th>限额</th>
         <th>描述</th>
@@ -86,6 +93,7 @@
         </td>
         <td class="a_img"><img style="max-width:96px;max-height: 96px;" ng-src="{{award.award_url}}"></td>
         <td>{{award.name}}</td>
+        <td>{{award.sub_name}}</td>
         <td>{{award.level}}</td>
         <td>{{award.quota}}</td>
         <td>{{award.description}}</td>

@@ -128,6 +128,32 @@
             }
         });
 
+        getGrantedAwards().then(function(data) {
+            if (data.error) {
+                console.log(data);
+            } else {
+                if (data.length == 0)
+                    $('#tab_item_awards').hide();
+
+                var awardList = {};
+                for (var index in data) {
+                    var award = data[index];
+                    if (award.level in awardList) {
+                        awardList[award.level].push(award);
+                    } else {
+                        awardList[award.level] = [award];
+                    }
+                }
+                console.log(awardList);
+                for (var i=0; i<=10; i++) {
+                    if (!(i in awardList))
+                        continue;
+                    $('#team_awards').append("<div><h4 class='title' style='padding-left: 25px;'>" + awardList[i][0].name + "</div></h4>");
+                    //<span class='label label-default label-pill pull-xs-right'>
+                }
+            }
+        });
+
         //get hackathon notice
         oh.api.hackathon.notice.list.get({
             query: {
@@ -216,6 +242,10 @@
 
     function getShowList() {
         return oh.api.hackathon.show.list.get({header: {hackathon_name: hackathon_name}})
+    }
+
+    function getGrantedAwards() {
+        return oh.api.hackathon.grantedawards.get({header: {hackathon_name: hackathon_name}})
     }
 
     function submitRegister() {
