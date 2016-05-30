@@ -160,7 +160,7 @@
                         for (var t in awardList[i][j].team) {
                             appendStr += "<a class='list-group-item' style='padding-left:40px; height:60px' target='_blank' href=/site/" + hackathon_name + "/team/" + awardList[i][j]['team'][t].id + ">"
                             if (awardList[i][j].sub_name)
-                                appendStr += "<span class='badge' style='font-weight:bold'>" + awardList[i][j].sub_name + "</span>";
+                                appendStr += "<span class='badge' style='font-weight:bold; font-size:12px'>" + awardList[i][j].sub_name + "</span>";
                             appendStr += "<p class='list-group-item-text'>" + (awardList[i][j]['team'][t].project_name || "项目") + "</p>";
                             appendStr += "<p class='list-group-item-text' style='font-weight:bold'>团队： " + awardList[i][j]['team'][t].name + "</p></a>";
                         }
