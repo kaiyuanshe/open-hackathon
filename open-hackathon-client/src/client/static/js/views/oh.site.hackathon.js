@@ -139,9 +139,9 @@
                 var awardIdSet = {}; // remove deplicated awards
                 for (var index in data) {
                     var award = data[index];
-
                     if (award.id in awardIdSet)
                         continue;
+
                     if (award.level in awardList) {
                         awardList[award.level].push(award);
                     } else {
@@ -149,10 +149,11 @@
                     }
                     awardIdSet[award.id] = true;
                 }
-                console.log(awardList);
+
                 for (var i=10; i>=0; i--) {
                     if (!(i in awardList))
                         continue;
+
                     var appendStr = "";
                     appendStr += "<div class='list-group' style='margin-left:40px;width:700px'><a class='list-group-item'><h4 class='list-group-item-heading'>" + awardList[i][0].name + "</h4></a>";
                     for (var j in awardList[i]) {
@@ -164,8 +165,8 @@
                             appendStr += "<p class='list-group-item-text' style='font-weight:bold'>团队： " + awardList[i][j]['team'][t].name + "</p></a>";
                         }
                     }
-                    //<span class='label label-default label-pill pull-xs-right'>
                     appendStr += "</div>";
+
                     $('#team_awards').append(appendStr);
                 }
             }
