@@ -136,20 +136,37 @@
                     $('#tab_item_awards').hide();
 
                 var awardList = {};
+                var awardIdSet = {}; // remove deplicated awards
                 for (var index in data) {
                     var award = data[index];
+
+                    if (award.id in awardIdSet)
+                        continue;
                     if (award.level in awardList) {
                         awardList[award.level].push(award);
                     } else {
                         awardList[award.level] = [award];
                     }
+                    awardIdSet[award.id] = true;
                 }
                 console.log(awardList);
-                for (var i=0; i<=10; i++) {
+                for (var i=10; i>=0; i--) {
                     if (!(i in awardList))
                         continue;
-                    $('#team_awards').append("<div><h4 class='title' style='padding-left: 25px;'>" + awardList[i][0].name + "</div></h4>");
+                    var appendStr = "";
+                    appendStr += "<div class='list-group' style='margin-left:40px;width:700px'><a class='list-group-item'><h4 class='list-group-item-heading'>" + awardList[i][0].name + "</h4></a>";
+                    for (var j in awardList[i]) {
+                        for (var t in awardList[i][j].team) {
+                            appendStr += "<a class='list-group-item' style='padding-left:40px; height:60px' target='_blank' href=/site/" + hackathon_name + "/team/" + awardList[i][j]['team'][t].id + ">"
+                            if (awardList[i][j].sub_name)
+                                appendStr += "<span class='badge' style='font-weight:bold'>" + awardList[i][j].sub_name + "</span>";
+                            appendStr += "<p class='list-group-item-text'>" + (awardList[i][j]['team'][t].project_name || "项目") + "</p>";
+                            appendStr += "<p class='list-group-item-text' style='font-weight:bold'>团队： " + awardList[i][j]['team'][t].name + "</p></a>";
+                        }
+                    }
                     //<span class='label label-default label-pill pull-xs-right'>
+                    appendStr += "</div>";
+                    $('#team_awards').append(appendStr);
                 }
             }
         });
