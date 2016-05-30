@@ -69,7 +69,7 @@
                     style="cursor: pointer;"
                     ng-click="grantAward(award.id, team.id)">
                   <i>{{award.level}}</i>
-                  <p>{{award.name}}</p>
+                  <p>{{award.name}} {{award.sub_name}}</p>
                 </span>
               </div>
             </div>
@@ -96,7 +96,7 @@
         <div class="team-awards">
           <span class="award-item" ng-repeat="award in team.awards">
             <i>{{data.awardsMap[award].level}}</i>
-            <p>{{data.awardsMap[award].name}}</p>
+            <p>{{data.awardsMap[award].name}} {{data.awardsMap[award].sub_name}}</p>
             <span class="cancel-award-cross fa fa-times" ng-click="cancelAward(award, team.id)"></span>
           </span>
         </div>
@@ -126,7 +126,7 @@
             <td>
               <span>{{$index + 1}}</span>
               <img ng-src="{{award.award_url}}">
-              {{award.name}} ( {{ (data.grantedAwards | filter:{id: award.id}).length }} )
+              {{award.name}} {{award.sub_name}} ( {{ (data.grantedAwards | filter:{id: award.id}).length }} )
              </td>
           </tr>
         </tbody>

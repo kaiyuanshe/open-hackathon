@@ -157,7 +157,7 @@ class TeamManager(Component):
             teamDic['dev_plan'] = teamDic.get('dev_plan', '')
             teamDic['works'] = teamDic.get('works', '')
             [teamDic.pop(key, None) for key in
-             ['assets', 'awards', 'azure_keys', 'scores', 'templates', 'hackathon']]
+             ['assets', 'azure_keys', 'scores', 'templates', 'hackathon']]
             teamDic["member_count"] = team.members.filter(status=TEAM_MEMBER_STATUS.APPROVED).count()
 
             def sub(t):
