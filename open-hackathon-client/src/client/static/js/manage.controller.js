@@ -1408,6 +1408,7 @@ angular.module('oh.controllers', [])
     $scope.add = function() {
       formData = {
         name: '',
+        sub_name: '',
         award_url: '',
         level: 5,
         quota: 1,

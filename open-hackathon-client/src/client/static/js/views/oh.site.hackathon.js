@@ -128,6 +128,50 @@
             }
         });
 
+        getGrantedAwards().then(function(data) {
+            if (data.error) {
+                console.log(data);
+            } else {
+                if (data.length == 0)
+                    $('#tab_item_awards').hide();
+
+                var awardList = {};
+                var awardIdSet = {}; // remove deplicated awards
+                for (var index in data) {
+                    var award = data[index];
+                    if (award.id in awardIdSet)
+                        continue;
+
+                    if (award.level in awardList) {
+                        awardList[award.level].push(award);
+                    } else {
+                        awardList[award.level] = [award];
+                    }
+                    awardIdSet[award.id] = true;
+                }
+
+                for (var i=10; i>=0; i--) {
+                    if (!(i in awardList))
+                        continue;
+
+                    var appendStr = "";
+                    appendStr += "<div class='list-group' style='margin-left:40px;width:700px'><a class='list-group-item' style='background-color: #eaeaea'><h4 class='list-group-item-heading'>" + awardList[i][0].name + "</h4></a>";
+                    for (var j in awardList[i]) {
+                        for (var t in awardList[i][j].team) {
+                            appendStr += "<a class='list-group-item' style='padding-left:40px; height:60px' target='_blank' href=/site/" + hackathon_name + "/team/" + awardList[i][j]['team'][t].id + ">"
+                            if (awardList[i][j].sub_name)
+                                appendStr += "<span class='badge' style='font-weight:bold; font-size:12px'>" + awardList[i][j].sub_name + "</span>";
+                            appendStr += "<p class='list-group-item-text'>" + (awardList[i][j]['team'][t].project_name || "项目") + "</p>";
+                            appendStr += "<p class='list-group-item-text' style='font-weight:bold'>团队： " + awardList[i][j]['team'][t].name + "</p></a>";
+                        }
+                    }
+                    appendStr += "</div>";
+
+                    $('#team_awards').append(appendStr);
+                }
+            }
+        });
+
         //get hackathon notice
         oh.api.hackathon.notice.list.get({
             query: {
@@ -216,6 +260,10 @@
 
     function getShowList() {
         return oh.api.hackathon.show.list.get({header: {hackathon_name: hackathon_name}})
+    }
+
+    function getGrantedAwards() {
+        return oh.api.hackathon.grantedawards.get({header: {hackathon_name: hackathon_name}})
     }
 
     function submitRegister() {

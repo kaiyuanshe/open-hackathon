@@ -157,7 +157,7 @@ class TeamManager(Component):
             teamDic['dev_plan'] = teamDic.get('dev_plan', '')
             teamDic['works'] = teamDic.get('works', '')
             [teamDic.pop(key, None) for key in
-             ['assets', 'awards', 'azure_keys', 'scores', 'templates', 'hackathon']]
+             ['assets', 'azure_keys', 'scores', 'templates', 'hackathon']]
             teamDic["member_count"] = team.members.filter(status=TEAM_MEMBER_STATUS.APPROVED).count()
 
             def sub(t):
@@ -618,12 +618,24 @@ class TeamManager(Component):
 
     def get_granted_awards(self, hackathon):
         awards = []
+        team_id_with_awards = []
         for team in Team.objects(hackathon=hackathon):
             awards += team.awards
+            if not len(team.awards) == 0:
+                team_id_with_awards.append(team.id)
 
         awards = [self.__award_with_detail(r) for r in awards]
         awards.sort(lambda a, b: b["level"] - a["level"])
 
+        # find teams who are granted these awards
+        for award in awards:
+            award["team"] = []
+            for team_id in team_id_with_awards:
+                team = Team.objects(id=team_id).first()
+                if uuid.UUID(award["id"]) in team.awards:
+                    award["team"].append(team.dic())
+
+        # len(awards) is equal to the number of all awards granted, so it's duplicated, remove duplicated items in JS.
         return awards
 
     def get_all_granted_awards(self, limit):
