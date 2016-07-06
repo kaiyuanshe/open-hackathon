@@ -973,7 +973,7 @@ class HackathonManager(Component):
 
         hackathon_dic = hackathon.dic()
         for key in dict(args):
-            if hackathon_dic.has_key(key) and dict(args)[key] != hackathon_dic[key]:
+            if hasattr(hackathon, key) and (key not in hackathon_dic or dict(args)[key] != hackathon_dic[key]):
                 result[key] = dict(args)[key]
 
         result.pop('id', None)
