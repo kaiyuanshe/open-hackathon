@@ -9,11 +9,13 @@ CKEDITOR.editorConfig = function(config) {
   // Define changes to default configuration here.
   // For complete reference see:
   // http://docs.ckeditor.com/#!/api/CKEDITOR.config
-  config.extraPlugins = 'save,div,colordialog,liststyle,font,colorbutton,showblocks,justify'; //
+  config.extraPlugins = 'save,div,colordialog,liststyle,font,colorbutton,showblocks,justify,video,sourcedialog';
+  // config.protectedSource.push(/<video[\s|\S]*video>/g);
+  // config.removePlugins = 'iframe,video';
   // The toolbar groups arrangement, optimized for two toolbar rows.
   config.language = 'zh-cn';
 
-  //config.allowedContent  = true;
+  config.allowedContent = true;
 
   config.toolbarGroups = [{
     name: 'clipboard',

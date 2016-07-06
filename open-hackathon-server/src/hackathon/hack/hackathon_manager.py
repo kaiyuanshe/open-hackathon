@@ -292,7 +292,7 @@ class HackathonManager(Component):
 
             # basic xss prevention
             if 'description' in update_items and update_items['description']:
-                update_items['description'] = self.cleaner.clean_html(update_items['description'])
+                #update_items['description'] = self.cleaner.clean_html(update_items['description'])
                 self.log.debug("hackathon description :" + update_items['description'])
 
             hackathon.modify(**update_items)
@@ -1006,7 +1006,7 @@ class HackathonManager(Component):
 
         hackathon_dic = hackathon.dic()
         for key in dict(args):
-            if hackathon_dic.has_key(key) and dict(args)[key] != hackathon_dic[key]:
+            if hasattr(hackathon, key) and (key not in hackathon_dic or dict(args)[key] != hackathon_dic[key]):
                 result[key] = dict(args)[key]
 
         result.pop('id', None)
