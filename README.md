@@ -20,11 +20,8 @@ Questions go to [dev team](mailto:msopentechdevsh@microsoft.com)
  - Read [manual](https://github.com/msopentechcn/open-hackathon/blob/master/documents/README.md) for more.
 
 # Author
-Microsoft Open Technology Center.
+The project is now maintained by Kaiyuanshe.
 
 # License
 This project is licensed under [MIT License](https://github.com/msopentechcn/open-hackathon/blob/master/license.txt)
-
-# Copyright
-Copyright (c) 2015 Microsoft
 
