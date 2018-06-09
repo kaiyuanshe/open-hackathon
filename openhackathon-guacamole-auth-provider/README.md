@@ -20,7 +20,7 @@ We build with `JDK 7`(minor version doesn't matter) and `maven 3`
 
 Simply build this project by:
 ```
-git clone https://github.com/msopentechcn/open-hackathon.git
+git clone https://github.com/kaiyuanshe/open-hackathon.git
 cd openhackathon-guacamole-auth-provider
 mvn verify
 ```
@@ -29,4 +29,4 @@ After project build successfully you will find the `openhackathon-gucamole-authe
 
 **_important_**
 
-We have already include the jar file in `deploy/guacamole` folder, so if only want to use it rather than contribute codes, making use of this jar file directly is the best choice. [How to install and configure guacamole for OHP?](https://github.com/msopentechcn/open-hackathon/blob/master/documents/developer_guide.md#install-and-configure-guacamole)
+We have already include the jar file in `deploy/guacamole` folder, so if only want to use it rather than contribute codes, making use of this jar file directly is the best choice. [How to install and configure guacamole for OHP?](https://github.com/kaiyuanshe/open-hackathon/blob/master/documents/developer_guide.md#install-and-configure-guacamole)
