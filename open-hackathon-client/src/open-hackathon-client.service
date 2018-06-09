@@ -1,0 +1,10 @@
+[Unit]
+Description=Open Hackathon Web Client
+After=network.target
+
+[Service]
+User=root
+ExecStart=/usr/local/bin/uwsgi --ini /home/opentech/open-hackathon-client/src/open-hackathon-client.ini
+
+[Install]
+WantedBy=multi-user.target
