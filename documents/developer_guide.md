@@ -1,8 +1,8 @@
 <h1 align="center">Developer Guide</h1>
 <p align="center">
-<a href="https://github.com/msopentechcn/open-hackathon/blob/master/documents/organizer_guide.md">Pre</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<a href="https://github.com/msopentechcn/open-hackathon/blob/master/documents/README.md">Back to manual</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<a href="https://github.com/msopentechcn/open-hackathon/blob/master/documents/FAQ.md">Next</a>
+<a href="https://github.com/kaiyuanshe/open-hackathon/blob/master/documents/organizer_guide.md">Pre</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="https://github.com/kaiyuanshe/open-hackathon/blob/master/documents/README.md">Back to manual</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="https://github.com/kaiyuanshe/open-hackathon/blob/master/documents/FAQ.md">Next</a>
 </p>
 ========================
 
@@ -19,7 +19,7 @@ On this page:
   * [DEBUG](#debug)
 * [Deploy](#deploy)
 * [Test](#test)
-* [API documemt](https://github.com/msopentechcn/open-hackathon/wiki/Open-hackathon-Restful-API)
+* [API documemt](https://github.com/kaiyuanshe/open-hackathon/wiki/Open-hackathon-Restful-API)
 * [Python doc](#python-doc)
 * [DB schema](#db-schema)
 
@@ -33,7 +33,7 @@ major parts of Open Hackathon:
 
 - open hackathon server, a resource manager which allows clients to manage hackathon events, hackathon related resources, templates and so on. 
 
-- [guacamole](http://guac-dev.org/) is an open-source html5-based clientless remote client. OHP leverage guacamole to enable client users access to remote VM/docker throw browers. And we provide a [customized authentication provider](https://github.com/msopentechcn/open-hackathon/tree/master/openhackathon-guacamole-auth-provider) to fit OHP.
+- [guacamole](http://guac-dev.org/) is an open-source html5-based clientless remote client. OHP leverage guacamole to enable client users access to remote VM/docker throw browers. And we provide a [customized authentication provider](https://github.com/kaiyuanshe/open-hackathon/tree/master/openhackathon-guacamole-auth-provider) to fit OHP.
 
 ## Setup Development Environement
 This section shows you how to setup local dev environment for both open-hackathon-server and open-hackathon-client.
@@ -45,7 +45,7 @@ And then clone source code from github to your local system. Any local folder is
 can change it to any directory you want.
 ```
 cd /opt/
-git clone https://github.com/msopentechcn/open-hackathon.git
+git clone https://github.com/kaiyuanshe/open-hackathon.git
 ```
 
 **_Notice that you MUST [folk](http://www.worldhello.net/gotgithub/04-work-with-others/010-fork-and-pull.html) the repository to your account/organization before contributing any changes. Pull Requests are welcome._**
@@ -201,14 +201,16 @@ As an example, we show how to deploy open hackathon using `uwsgi` in the followi
 ```
 <src_root>/open-hackathon-server/src/app.wsgi
 <src_root>/open-hackathon-server/src/open-hackathon-server.conf
+<src_root>/open-hackathon-server/src/open-hackathon-server.service
 <src_root>/open-hackathon-server/src/open-hackathon-server.ini
 <src_root>/open-hackathon-client/src/app.wsgi
 <src_root>/open-hackathon-client/src/open-hackathon-client.conf
+<src_root>/open-hackathon-client/src/open-hackathon-client.service
 <src_root>/open-hackathon-client/src/open-hackathon-client.ini
 ```
 
 - Follow [uwsgi install guide](http://uwsgi-docs.readthedocs.org/en/latest/Install.html) to install uwsgi
-- Deploy open hackathon server and client as ubuntu upstart services:
+- Deploy open hackathon server and client as ubuntu upstart services(Ubuntu 14.04):
 ```
 sudo cp /home/opentech/open-hackathon/open-hackathon-server/src/open-hackathon-server.conf /etc/init/
 sudo service open-hackathon-server start
@@ -216,6 +218,20 @@ sudo service open-hackathon-server start
 sudo cp /home/opentech/open-hackathon/open-hackathon-client/src/open-hackathon-client.conf /etc/init/
 sudo service open-hackathon-client start
 ```
+
+- Deploy open hackathon server and client as ubuntu upstart services(Ubuntu 16.04):
+```
+cp /home/opentech/open-hackathon/open-hackathon-server/src/open-hackathon-server.service /lib/systemd/system/
+systemctl start open-hackathon-server
+systemctl enable open-hackathon-server
+systemctl status open-hackathon-server
+
+cp /home/opentech/open-hackathon/open-hackathon-client/src/open-hackathon-client.service /lib/systemd/system/
+systemctl start open-hackathon-client
+systemctl enable open-hackathon-client
+systemctl status open-hackathon-client
+```
+
 - by default, open hackathon server and client listen on port 15000 and 80 respectively. Update the ini file if you want as well as other uwsgi configurations.
 
 ### things to know
