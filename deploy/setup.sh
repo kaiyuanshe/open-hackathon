@@ -76,7 +76,7 @@ function set_envirement() {
     cd $HOME
     if [ ! -d "$OHP_HOME" ]; then
         echo "git cloning open-hackathon source code"
-        result=$(git clone https://github.com/msopentechcn/open-hackathon.git)
+        result=$(git clone https://github.com/kaiyuanshe/open-hackathon.git)
         if grep -q "unable to access" <<< $result; then
             echo "Could not git clone open-hackathon source code, pls check your network"
             exit
