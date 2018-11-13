@@ -7,6 +7,7 @@
 ========================
 
 On this page:
+
 * [Implementation and Architecture](#implementation-and-architecture)
 * [Setup development Environement](#setup-development-environement)
   * [Clone SourceCode](#clone-sourcecode)
@@ -24,7 +25,7 @@ On this page:
 * [DB schema](#db-schema)
 
 ## Implementation and Architecture
-Open Hackathon is is made up of many parts. The UI(client) application is actually intended to be simple and minimal, with the majority of the gruntwork performed by backend API server.
+Open Hackathon is made up of many parts. The UI(client) application is actually intended to be simple and minimal, with the majority of the gruntwork performed by backend API server.
 
 ![index](http://i.imgur.com/EB7K1vP.png)
 
@@ -43,20 +44,20 @@ This section shows you how to setup local dev environment for both open-hackatho
 First of all, make sure `git` installed. Please follow the [Git installation guide](http://git-scm.com/book/en/v2/Getting-Started-Installing-Git) in case it's not ready.
 And then clone source code from github to your local system. Any local folder is OK, we will clone to `/opt` in this document. However you
 can change it to any directory you want.
-```
-cd /opt/
-git clone https://github.com/kaiyuanshe/open-hackathon.git
-```
+
+`cd /opt/`  
+`git clone https://github.com/kaiyuanshe/open-hackathon.git`
+
 
 **_Notice that you MUST [folk](http://www.worldhello.net/gotgithub/04-work-with-others/010-fork-and-pull.html) the repository to your account/organization before contributing any changes. Pull Requests are welcome._**
 
 ##### Copy configuration files
 There some several `config_sample.py` files in open hackathon repo. Please copy them to the same directory and remove `_sample`. Update the content if neccessary.
-```
-cd /opt/open-hackathon
-cp open-hackathon-server/src/hackathon/config_sample.py open-hackathon-server/src/hackathon/config.py
-cp open-hackathon-client/src/client/config_sample.py open-hackathon-client/src/client/config.py
-```
+
+`cd /opt/open-hackathon`  
+`cp open-hackathon-server/src/hackathon/config_sample.py open-hackathon-server/src/hackathon/config.py`  
+`cp open-hackathon-client/src/client/config_sample.py open-hackathon-client/src/client/config.py`
+
 
 As a convention, we put default configurations suitable for development environment in `config_sample.py`. And everytime you want to add/update/delete a configuration section, please update `config_sample.py` first.  By contrast, `config.py` can contains whatever customized or private data, they are ignored automatically by git and will **NEVER** be pushed to github.
 
@@ -64,14 +65,12 @@ As a convention, we put default configurations suitable for development environm
 By default, Pythoon is already included in Ubuntu. Run `python -V` to check your python version. We are currently develeping and running OHP under python 2.7. If python not installed, please [download Python 2.7](https://www.python.org/downloads/) and add script `python` to your `$PATH`. Again, make sure the version of python is 2.7. python 3.* may be supported but we didn't test it.
 
 And install required libs:
-```
-sudo apt-get install python-dev python-setuptools
-sudo easy_install pip
-cd /opt/open-hackathon/
-sudo pip install -r open-hackathon-server/requirement.txt
-sudo pip install -r open-hackathon-client/requirement.txt
-```
 
+`sudo apt-get install python-dev python-setuptools`  
+`sudo easy_install pip`  
+`cd /opt/open-hackathon/`  
+`sudo pip install -r open-hackathon-server/requirement.txt`  
+`sudo pip install -r open-hackathon-client/requirement.txt`  
 
 ### Install and Configure guacamole
 
@@ -79,23 +78,21 @@ Firstly please [download](http://guac-dev.org/release/release-notes-0-9-9) guaca
 
 Since open hackathon has [customized guacamole authentication provider](https://github.com/msopentechcn/open-hackathon/tree/master/openhackathon-guacamole-auth-provider), we need additional steps for it:
 
-```
-sudo mkdir /usr/share/tomcat7/.guacamole
-sudo mkdir /etc/guacamole
-cd /opt/open-hackathon/deploy/guacamole
-cp guacamole-sample.properties /etc/guacamole/guacamole.properties
-cp *.jar /etc/guacamole
-sudo ln -s /etc/guacamole/guacamole.properties /usr/share/tomcat7/.guacamole/guacamole.properties
-```
+`sudo mkdir /usr/share/tomcat7/.guacamole`  
+`sudo mkdir /etc/guacamole`  
+`cd /opt/open-hackathon/deploy/guacamole`  
+`cp guacamole-sample.properties /etc/guacamole/guacamole.properties`  
+`cp *.jar /etc/guacamole`  
+`sudo ln -s /etc/guacamole/guacamole.properties /usr/share/tomcat7/.guacamole/guacamole.properties`  
 
-Then [download] (http://guac-dev.org/release/release-notes-0-9-9) guacamole-0.9.9.war, and then copy it to /var/lib/tomcat7/webapps/guacamole.war:
-```
-cp guacamole-0.9.9.war /var/lib/tomcat7/webapps/guacamole.war
-sudo service guacd restart
-sudo service tomcat7 restart
-```
+Then [download](http://guac-dev.org/release/release-notes-0-9-9) guacamole-0.9.9.war, and then copy it to /var/lib/tomcat7/webapps/guacamole.war:
 
-By default you don't need to change `/etc/guacamole/guacamole.properties` on your local machine. And usually the only config need to update is `auth-request-url` if your open-hackathon-server listens on a different port other than `15000`. _You need to restart tomcat7 and guacd service if `guacamole.properties` updated_.
+`cp guacamole-0.9.9.war /var/lib/tomcat7/webapps/guacamole.war`  
+`sudo service guacd restart`  
+`sudo service tomcat7 restart`  
+
+
+By default you don't need to change `/etc/guacamole/guacamole.properties` on your local machine. And usually the only config which needs to be updated is `auth-request-url` if your open-hackathon-server listens on a different port other than `15000`. _You need to restart tomcat7 and guacd service if `guacamole.properties` updated_.
 
 
 [Click](http://guac-dev.org/doc/gug/custom-authentication.html) for more about custom authentication.
@@ -108,19 +105,19 @@ Navigate to [MongoDB installation](https://docs.mongodb.org/v3.0/installation/) 
 
 2. Make sure mongodb correctly installed.  You can run `sudo service mongod status` to see the running service. Or issue command `mongo` to try mongodb command line.
 
-3. Init required data by:
+3. Initiate required data by:
 Update DB connection parameters in `open-hackathon-server/src/hackathon/config_sample.py` if required(For example you run mongodb on a port other than the default
 `27017`). And then setup DB by:
 ```
 sudo python open-hackathon-server/src/setup_db.py
 ```
 
-You can run `sudo python open-hackathon-server/src/reset_db.py` to re-create all tables. But remember, the existing data will be erased while reset the database.
+You can run `sudo python open-hackathon-server/src/reset_db.py` to re-create all tables. But remember, the existing data will be erased after having reset the database.
 
 
 ### Install Docker
 Follow [docker installation guide](https://docs.docker.com/installation/ubuntulinux/) to install docker. You can choose install the latest version of docker. But we strongly recommend you to
- install a stable version since docker itself is developing and updating. Usually lasted version has unexpected issues.
+ install a stable version since docker itself is being developed and updated. Usually lasted version has unexpected issues.
 
 after docker installed, you can try pulling down some docker images:
 ```
@@ -130,13 +127,13 @@ sudo docker pull rastasheep/ubuntu-sshd
 ##### enable docker remote api
 ###### Ubuntu 15.04
 Make sure docker remote api enabled. As [Official Docs](https://docs.docker.com/articles/systemd) said, the best way is to update `systemd` in the newer versions of docker.
-Open file `/lib/systemd/system/docker.service` for editing and change line starting with `ExecStart` to following:
+Open file `/lib/systemd/system/docker.service` for editing and changing line started with `ExecStart` to following:
 ```
 ExecStart=/usr/bin/docker daemon -H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock
 ```
 Change `4243` to other port on demand. And then run `systemctl daemon-reload` in shell to reload the new configuration. And restart docker by `service docker restart`.
 
-Now, brower to `http://localhost:4243/_ping`. A simple `OK` shown indicates the remote API is working now. 
+Now, browse to `http://localhost:4243/_ping`. A simple `OK` shown indicates the remote API is working now. 
 Browse to `http://localhost:4243/containers/json` to see the information of running containers. 
 For more API, please refer to [Docker remote API Docs](https://docs.docker.com/reference/api/docker_remote_api/)
 
@@ -146,10 +143,10 @@ Add new line `DOCKER_OPTS='-H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock'
 
 ##### run docker without sudo(Optional)
 And add user into docker group so that you can run docker commands without sudo
-```
-sudo groupadd docker
-sudo gpasswd -a ${USER} docker
-```
+
+`sudo groupadd docker`  
+`sudo gpasswd -a ${USER} docker`
+
 Relogin USER and restart the docker process: `sudo service docker restart`
 
 ##### enable docker-enter(Optional)
@@ -159,20 +156,20 @@ See `https://github.com/msopentechcn/open-hackathon/tree/master/tools/docker-ent
 
 ### Logging && Hosts
 Make sure log folder is created and properly authorized. By default it's `/var/log/openhackathon`. You can update the logging path in `open-hackathon-server/src/hackathon/logging.conf` and `open-hackathon-client/src/client/logging.conf`.
-```
-sudo mkdir /var/log/open-hackathon
-sudo chmod -R 644 /var/log/open-hackathon
-```
+
+`sudo mkdir /var/log/open-hackathon`  
+`sudo chmod -R 644 /var/log/open-hackathon`
+
 
 And also, please adding row `127.0.0.1 open-hackathon-dev.chinacloudapp.cn` to your local `/etc/hosts`. That's because most oauth login providers doest't accept domain `localhost` and the default oauth parameters in `config_sample.py` are binded to domain `open-hackathon-dev.chinacloudapp.cn`
 
 ### Run
 Everything is OK now! Start the open hackathon in command line:
-```
-cd /opt/open-hackathon
-sudo python open-hackathon-server/src/run.py
-sudo python open-hackathon-client/src/run.py
-```
+
+`cd /opt/open-hackathon`  
+`sudo python open-hackathon-server/src/run.py`  
+`sudo python open-hackathon-client/src/run.py`  
+
 open your browser and try browsing pages:
 - open hackathon server health page: http://open-hackathon-dev.chinacloudapp.cn:15000. The output is json-like and  status should be OK
 - open hackathon client: http://open-hackathon-dev.chinacloudapp.cn, the entrance of open hackathon web UI
@@ -198,46 +195,43 @@ As an example, we show how to deploy open hackathon using `uwsgi` in the followi
 
 ### deploy open hackathon with uwsgi
  **We assume the source codes are cloned to /home/opentech/openhackathon**. If not, please rectify the file path of following files:
-```
-<src_root>/open-hackathon-server/src/app.wsgi
-<src_root>/open-hackathon-server/src/open-hackathon-server.conf
-<src_root>/open-hackathon-server/src/open-hackathon-server.service
-<src_root>/open-hackathon-server/src/open-hackathon-server.ini
-<src_root>/open-hackathon-client/src/app.wsgi
-<src_root>/open-hackathon-client/src/open-hackathon-client.conf
-<src_root>/open-hackathon-client/src/open-hackathon-client.service
-<src_root>/open-hackathon-client/src/open-hackathon-client.ini
-```
+
+`<src_root>/open-hackathon-server/src/app.wsgi`  
+`<src_root>/open-hackathon-server/src/open-hackathon-server.conf`  
+`<src_root>/open-hackathon-server/src/open-hackathon-server.service`  
+`<src_root>/open-hackathon-server/src/open-hackathon-server.ini`  
+`<src_root>/open-hackathon-client/src/app.wsgi`  
+`<src_root>/open-hackathon-client/src/open-hackathon-client.conf`  
+`<src_root>/open-hackathon-client/src/open-hackathon-client.service`  
+`<src_root>/open-hackathon-client/src/open-hackathon-client.ini`  
+
 
 - Follow [uwsgi install guide](http://uwsgi-docs.readthedocs.org/en/latest/Install.html) to install uwsgi
 - Deploy open hackathon server and client as ubuntu upstart services(Ubuntu 14.04):
-```
-sudo cp /home/opentech/open-hackathon/open-hackathon-server/src/open-hackathon-server.conf /etc/init/
-sudo service open-hackathon-server start
 
-sudo cp /home/opentech/open-hackathon/open-hackathon-client/src/open-hackathon-client.conf /etc/init/
-sudo service open-hackathon-client start
-```
+`sudo cp /home/opentech/open-hackathon/open-hackathon-server/src/open-hackathon-server.conf /etc/init/`  
+`sudo service open-hackathon-server start`  
+`sudo cp /home/opentech/open-hackathon/open-hackathon-client/src/open-hackathon-client.conf /etc/init/`  
+`sudo service open-hackathon-client start`  
 
 - Deploy open hackathon server and client as ubuntu upstart services(Ubuntu 16.04):
-```
-cp /home/opentech/open-hackathon/open-hackathon-server/src/open-hackathon-server.service /lib/systemd/system/
-systemctl start open-hackathon-server
-systemctl enable open-hackathon-server
-systemctl status open-hackathon-server
 
-cp /home/opentech/open-hackathon/open-hackathon-client/src/open-hackathon-client.service /lib/systemd/system/
-systemctl start open-hackathon-client
-systemctl enable open-hackathon-client
-systemctl status open-hackathon-client
-```
+`cp /home/opentech/open-hackathon/open-hackathon-server/src/open-hackathon-server.service /lib/systemd/system/`  
+`systemctl start open-hackathon-server`  
+`systemctl enable open-hackathon-server`  
+`systemctl status open-hackathon-server`  
+
+`cp /home/opentech/open-hackathon/open-hackathon-client/src/open-hackathon-client.service /lib/systemd/system/`  
+`systemctl start open-hackathon-client`  
+`systemctl enable open-hackathon-client`  
+`systemctl status open-hackathon-client`  
 
 - by default, open hackathon server and client listen on port 15000 and 80 respectively. Update the ini file if you want as well as other uwsgi configurations.
 
 ### things to know
 - You can deploy DB, open hackathon server, open hackathon client to different VM, correct configurations in `config.py` and `/etc/guacamole/guacamole.properties` then if you do so.
 - It's getting harder to debug on staging/production environment. One of the most useful tools is logging. By default, logs are in directory `/var/log/open-hackathon` where `open-hackathon-server.log` and `open-hackathon-client.log` are logs for open hackathon API server and UI respectively. Logs for guacamole are `/var/log/syslog` for guacd and `/var/log/tomcat7/*.log` for guacamole client.
-- **Very Important**, update `environment` in `config.py` files for both client and server because many features not enabled in default `local` environment. You can change to any value other than `local`.
+- **Very Important**, update `environment` in `config.py` files for both client and server because many features are not enabled in default `local` environment. You can change to any value other than `local`.
 - And also, review the whole `config.py` files, update values suitable for your environment. For example, oauth key/secrets, DB connections, storage type and configurations.
 - By default, Port 80(open hackathon UI), 15000(open hackathon API), 8080(guacamole) should be accessed from public. Which means you have to allow it in your firewall and configure the endpoints in you CloudService(azure), Security group(AWS) and so on.
 - By default, the password of super admin, who has the highest privilege and cannot be deleted, is not secure. Don't forgot to update it.
