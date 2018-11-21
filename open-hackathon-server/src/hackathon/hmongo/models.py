@@ -120,7 +120,7 @@ class User(HDocumentBase):
             {
                 # default unqiue is not sparse, so we have to set it by ourselves
                 "fields": ["provider", "openid"],
-                "unqiue": True,
+                "unique": True,
                 "sparse": True}]}
 
     def __init__(self, **kwargs):
