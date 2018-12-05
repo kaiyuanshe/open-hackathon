@@ -1,6 +1,4 @@
 /*
- * Copyright (c) Microsoft Open Technologies (Shanghai) Co. Ltd.  All rights reserved. 
- *
  * The MIT License (MIT)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,12 +22,13 @@
 
 package com.openhackathon.guacamole;
 
-import org.glyptodon.guacamole.GuacamoleException;
-import org.glyptodon.guacamole.net.auth.Credentials;
-import org.glyptodon.guacamole.net.auth.simple.SimpleAuthenticationProvider;
-import org.glyptodon.guacamole.properties.StringGuacamoleProperty;
-import org.glyptodon.guacamole.properties.GuacamoleProperties;
-import org.glyptodon.guacamole.protocol.GuacamoleConfiguration;
+import org.apache.guacamole.GuacamoleException;
+import org.apache.guacamole.environment.Environment;
+import org.apache.guacamole.environment.LocalEnvironment;
+import org.apache.guacamole.net.auth.simple.SimpleAuthenticationProvider;
+import org.apache.guacamole.net.auth.Credentials;
+import org.apache.guacamole.properties.StringGuacamoleProperty;
+import org.apache.guacamole.protocol.GuacamoleConfiguration;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +49,11 @@ public class OpenHackathonAuthenticationProvider extends SimpleAuthenticationPro
         }
     };
 
+    private static final String getAuthRequestUrl() throws GuacamoleException {
+        Environment environment = new LocalEnvironment();
+        return environment.getProperty(AUTH_REQUEST_URL);
+    }
+
     public OpenHackathonAuthenticationProvider() {
         initConnection();
         logger.info("initialize OpenHackathonAuthenticationProvider");
@@ -67,6 +71,7 @@ public class OpenHackathonAuthenticationProvider extends SimpleAuthenticationPro
             return configs;
         }
 
+
         configs.put(config.getParameter("name"), config);
         return configs;
     }
@@ -78,7 +83,7 @@ public class OpenHackathonAuthenticationProvider extends SimpleAuthenticationPro
         final String connectionName = request.getParameter("name");
         logger.info("open hackathon tokenString is : " + tokenString + ", connectionName is:" + connectionName);
 
-        if(tokenString == null || connectionName==null){
+        if (tokenString == null || connectionName == null) {
             return null;
         }
 
@@ -98,7 +103,7 @@ public class OpenHackathonAuthenticationProvider extends SimpleAuthenticationPro
         if (conn != null)
             return;
         try {
-            final String authRequestURL = GuacamoleProperties.getProperty(AUTH_REQUEST_URL);
+            final String authRequestURL = getAuthRequestUrl();
             this.conn = new Connect2OpenHackathon(authRequestURL);
         } catch (GuacamoleException e) {
             logger.error("fail to get AUTH_REQUEST_URL from config file", e);
@@ -115,14 +120,14 @@ public class OpenHackathonAuthenticationProvider extends SimpleAuthenticationPro
         try {
 
             final JSONObject json = new JSONObject(jsonString);
-            if(json.has("error")){
+            if (json.has("error")) {
                 logger.info("error returned from open hackathon platform");
                 return null;
             }
 
             final GuacamoleConfiguration configuration = new GuacamoleConfiguration();
             final Iterator<String> keys = json.keys();
-            while(keys.hasNext()){
+            while (keys.hasNext()) {
                 final String key = keys.next();
                 if (key.equals("displayname")) {
                     continue;
