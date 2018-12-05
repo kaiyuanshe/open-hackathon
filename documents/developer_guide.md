@@ -73,7 +73,16 @@ And install required libs:
 `sudo pip install -r open-hackathon-client/requirement.txt`  
 
 ### Install and Configure guacamole
+###### Docker
+Guacamole official docker images([guacamole/guacamole](https://hub.docker.com/r/guacamole/guacamole/), [guacamole/guacd](https://hub.docker.com/r/guacamole/guacd/)) have been available in docker hub, but we still need to do some additional work to make it run based on the official images because of the customization of openhachathon authentication.
 
+All the relevant files are placed in {CODE_BASE}/deploy/guacamole, and all the docker commands with their parameters have been well specified in the scripts, just follow the steps below:
+
+`cd /opt/open-hackathon/deploy/guacamole`
+`./buildImage.sh`
+`./runContainer.sh`
+
+###### Host
 Firstly please [download](http://guac-dev.org/release/release-notes-0-9-9) guacamole-server-0.9.9.tar.gz, and then [install](http://guac-dev.org/doc/gug/installing-guacamole.html) guacamole server 0.9.9 firstly. Make sure all protocols including VNC, RDP, ssh and telnet are properly installed.
 
 Since open hackathon has [customized guacamole authentication provider](https://github.com/msopentechcn/open-hackathon/tree/master/openhackathon-guacamole-auth-provider), we need additional steps for it:
