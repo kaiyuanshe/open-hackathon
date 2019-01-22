@@ -131,7 +131,7 @@ class VE_PROVIDER:
     DOCKER = 0
     AZURE = 1
     ALAUDA = 2
-
+    K8S = 3
 
 class AZURE_RESOURCE_TYPE:
     """Resource type used by ALOperation(Azure log operation)"""

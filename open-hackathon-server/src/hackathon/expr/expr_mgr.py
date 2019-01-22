@@ -256,6 +256,8 @@ class ExprManager(Component):
                     starter = RequiredFeature("alauda_docker")
         elif template.provider == VE_PROVIDER.AZURE:
             starter = RequiredFeature("azure_vm")
+        elif template.provider == VE_PROVIDER.K8S:
+            starter = RequiredFeature("k8s_service")
 
         return starter
 
