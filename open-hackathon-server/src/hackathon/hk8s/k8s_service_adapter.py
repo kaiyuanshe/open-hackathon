@@ -30,13 +30,13 @@ from kubernetes import client, config, utils
 
 from hackathon import RequiredFeature, Component, Context
 from hackathon.constants import HEALTH, HEALTH_STATUS, HACKATHON_CONFIG, CLOUD_PROVIDER
-
+from hackathon.hazure import ServiceAdapter
 
 sys.path.append("..")
 
-__all__ = ["K8sDeploymentServiceAdapter"]
+__all__ = ["K8SServiceAdapter"]
 
-class K8sDeploymentServiceAdapter():
+class K8SServiceAdapter(ServiceAdapter):
     k8s_client = client.ApiClient()
     def __init__(self):
         config.load_kube_config("jw-test-new.json")
