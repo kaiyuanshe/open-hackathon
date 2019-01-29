@@ -43,34 +43,35 @@ class K8SServiceAdapter(ServiceAdapter):
         #self.k8s_client = client.ApiClient()
         return
 
-    def create_depolyment_from_yaml(self):
+    def create_k8s_depolyment_with_yaml(self, yaml):
         k8s_api = utils.create_from_yaml(self.k8s_client, "nginx-deployment.yaml")
         deps = k8s_api.read_namespaced_deployment("nginx-test", "default")
-#        self.log.debug("Deployment {0} created".format(deps.metadata.name))
+        #self.log.debug("Deployment {0} created".format(deps.metadata.name))
         return deps.metadata.name
 
     def report_health(self):
-        return
+        raise NotImplementedError()
 
 
 
-    def start_container(self):
-        return
+    def start_k8s_service(self):
+        raise NotImplementedError()
 
 
-    def stop_container(self):
-        return
+    def stop_k8s_service(self):
+        raise NotImplementedError()
 
-
+    def deployment_exists(self):
+        raise NotImplementedError()
 
     def ping(self, docker_host, timeout=20):
-        return
+        raise NotImplementedError()
 
 #    def get_deployment_detail_by_name(self, deployment_name):
 #        return
 
     def list_deployments(self, deployment_name, timeout=20):
-        return
+        raise NotImplementedError()
 
     def get_deployment_by_name(self, deployment_name):
         deps = self.k8s_api.read_namespaced_deployment(deployment_name, "default")
