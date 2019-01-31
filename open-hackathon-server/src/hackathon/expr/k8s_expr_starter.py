@@ -42,7 +42,7 @@ class K8SExprStarter(ExprStarter):
             hackathon = Hackathon.objects.get(id=context.hackathon_id)
             experiment = Experiment.objects.get(id=context.experiment_id)
 
-            self.__start_vm(experiment, hackathon, context.template_content.units)
+            self.__start_k8s_service(experiment, hackathon, context.template_content.units)
         except Exception as e:
             self.log.error(e)
             experiment.status = EStatus.FAILED
@@ -50,15 +50,26 @@ class K8SExprStarter(ExprStarter):
             return internal_server_error('Failed starting k8s')
 
     def _internal_stop_expr(self, context):
-        raise NotImplementedError()
+        try:
+            experiment = Experiment.objects.get(id=context.experiment_id)
+            template_content = self.template_library.load_template(experiment.template)
+
+            self.__stop_k8s_service(experiment, hackathon, context.template_content.units)
+        except Exception as e:
+            self.log.error(e)
+            experiment.status = EStatus.FAILED
+            experiment.save()
+            return internal_server_error('Failed stopping k8s')
+
+
 
     def _internal_rollback(self, context):
         raise NotImplementedError()
 
     #private functions
-    def __start_vm(self, experiment, hackathon, template_units):
+    def __start_k8s_service(self, experiment, hackathon, template_units):
         job_ctxs = []
-        ctx = Context(
+        ctx = context(
             job_ctxs=job_ctxs,
             current_job_index=0,
             experiment_id=experiment.id,
@@ -78,97 +89,64 @@ class K8SExprStarter(ExprStarter):
 
         # save constructed experiment, and execute from first job content
         experiment.save()
-        self.__schedule_setup(ctx)
+        self.__schedule_start(ctx)
 
-    def __schedule_setup(self, sctx):
-        self.scheduler.add_once("k8s_service", "schedule_k8s_service", context=sctx,
+    def __schedule_start(self, sctx):
+        self.scheduler.add_once("k8s_service", "__schedule_start_k8s_service", context=sctx,
                                 id="schedule_setup_" + str(sctx.experiment_id), seconds=0)
 
-    def setup_k8s_service(self, sctx):
+    def __schedule_start_k8s_service(self, sctx):
         # get context from super context
         ctx = sctx.job_ctxs[sctx.current_job_index]
         adapter = self.__get_adapter_from_sctx(sctx, K8SServiceAdapter)
-        # TODO: Implement deployment_exists in K8SServiceAdapter
-        if adapter.deployment_exists(ctx.cloud_service_name, ctx.deployment_slot):
-            self.__setup_k8s_with_deployment_existed(sctx)
-        else:
-            self.__setup_k8s_without_deployment_existed(sctx)
+        # create k8s deployment with yaml if it doesn't exist
+        if not adapter.deployment_exists(ctx.cloud_service_name, ctx.deployment_slot):
+            adapter.create_k8s_deployment_with_yaml(yaml)
 
-    def __setup_k8s_with_deployment_existed(self, sctx):
-        # get context from super context
-        #ctx = sctx.job_ctxs[sctx.current_job_index]
-        #adapter = self.__get_adapter_from_sctx(sctx, K8SServiceAdapter)
-
+        # wait for an existing deployment ready and start it
         try:
-            self.start_k8s_deployment(sctx, name)
-            self.__wait_for_start_k8s_service(sctx)
+            adapter.start_k8s_service()
+            self.__on_message("wait_for_start_k8s_service", sctx)
             return
         except Exception as e:
             self.log.error(
                 "k8s  %d start a service %r failed: %r"
                 % (sctx.current_job_index, ctx.virtual_machine_name, str(e)))
-            self._on_setup_k8s_failed(sctx)
 
 
-    def __setup_k8s_without_deployment_existed(self, sctx):
-        #ctx = sctx.job_ctxs[sctx.current_job_index]
-        #adapter = self.__get_adapter_from_sctx(sctx, K8SServiceAdapter)
-        try:
-            self.create_k8s_deployment(sctx, yaml)
-            self.__wait_for_create_k8s_service(sctx)
-        except Exception as e:
-            self.log.error(
-                "k8s %d create service %r failed: %r"
-                % (sctx.current_job_index, ctx.virtual_machine_name, str(e)))
-            self._on_setup_k8s_failed(sctx)
+    def __stop_k8s_service(self, experiment, hackathon, template_units):
+        self.__schedule_stop(ctx)
 
-    def __wait_for_create_k8s_service(self, sctx):
-        #TODO: check its status
-        raise NotImplementedError()
+    def __schedule_stop(self, sctx):
+        self.scheduler.add_once("k8s_service", "__schedule_stop_k8s_service", context=sctx,
+                                id="schedule_stop_" + str(sctx.experiment_id), seconds=0)
 
-    def __wait_for_start_k8s_service(self, sctx):
-        #TODO: check its status
-        raise NotImplementedError()
-
-    def _on_setup_k8s_failed(self, sctx):
-        try:
-            self.log.debug("k8s environment %d vm setup failed" % sctx.current_job_index)
-            expr = Experiment.objects(id=sctx.experiment_id).first()
-            ve = expr.virtual_environments[sctx.current_job_index]
-
-            ve.status = VEStatus.FAILED
-            expr.status = EStatus.FAILED
-            expr.save()
-        finally:
-            self.log.debug(
-                "k8s environment %d vm fail callback done, roll back start"
-                % sctx.current_job_index)
-            # rollback reverse
-            self._internal_rollback(sctx)
-
-    def _internal_rollback(self, sctx):
-        try:
-            #TODO figure out what rollback is and rollback
-            self.log.debug("k8s environment %d rollback done" % sctx.current_job_index)
-        except Exception as e:
-                self.log.error(
-                    "k8s environment %d error while rollback: %r" %
-                    (sctx.current_job_index, str(e)))
-
-    def create_k8s_deployment(self, sctx,  yaml):
-        # TODO: create a k8s service with yaml
+    def __schedule_stop_k8s_service(self, sctx):
+        # get context from super context
+        ctx = sctx.job_ctxs[sctx.current_job_index]
         adapter = self.__get_adapter_from_sctx(sctx, K8SServiceAdapter)
-        #adapter.xxx()
-        raise NotImplementedError()
+        # TODO: How to stop an running deployment in k8s
+        adapter.stop_k8s_service(name)
+        self.__on_message("wait_for_stop_k8s_service", sctx)
 
-    def start_k8s_deployment(self, sctx, name):
-        adapter = self.__get_adapter_from_sctx(sctx, K8SServiceAdapter)
-        #adapter.xxx()
-        # TODO: start an existing k8s service
-        raise NotImplementedError()
+    def __on_message(self, msg, sctx):
+        self.log.debug("k8s on_message: %d" % msg)
+        self.scheduler.add_once(
+            "k8s_service", "__msg_handler",
+            id="k8s_msg_handler_" + str(sctx.experiment_id),
+            context=sctx, seconds=ASYNC_OiP_QUERY_INTERVAL)
 
-    def stop_k8s_deployment(self, name):
-        raise NotImplementedError()
+    def __msg_handler(msg, sctx):
+        switcher = {
+            "wait_for_start_k8s_service": "aaaaa",
+            "k8s_service_start_completed":"aaaaa",
+            "k8s_service_start_failed":"aaaaa",
+            "wait_for_stop_k8s_service":"aaaaa",
+            "k8s_service_stop_completed":"aaaaa",
+            "k8s_service_stop_failed":"aaaaa",
+        }
+        msg = switcher.get(item,"nothing")
+        #TODO: try to abstract common behavior
 
     def __get_adapter_from_sctx(self, sctx, adapter_class):
         return adapter_class()
