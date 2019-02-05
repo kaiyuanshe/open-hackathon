@@ -203,7 +203,7 @@ To deploy open hackathon to staging or production environment, you need follow a
 As an example, we show how to deploy open hackathon using `uwsgi` in the following section. However, both `open hackathon platform` and `flask` don't have any limitation on this, choose whatever application you like.
 
 ### deploy open hackathon with uwsgi
- **We assume the source codes are cloned to /home/opentech/openhackathon**. If not, please rectify the file path of following files:
+ **We assume the source codes are cloned to /opt/open-hackathon. If not, please rectify the file path of following files:
 
 `<src_root>/open-hackathon-server/src/app.wsgi`  
 `<src_root>/open-hackathon-server/src/open-hackathon-server.conf`  
@@ -218,19 +218,19 @@ As an example, we show how to deploy open hackathon using `uwsgi` in the followi
 - Follow [uwsgi install guide](http://uwsgi-docs.readthedocs.org/en/latest/Install.html) to install uwsgi
 - Deploy open hackathon server and client as ubuntu upstart services(Ubuntu 14.04):
 
-`sudo cp /home/opentech/open-hackathon/open-hackathon-server/src/open-hackathon-server.conf /etc/init/`  
+`sudo cp /opt/open-hackathon/open-hackathon-server/src/open-hackathon-server.conf /etc/init/`  
 `sudo service open-hackathon-server start`  
-`sudo cp /home/opentech/open-hackathon/open-hackathon-client/src/open-hackathon-client.conf /etc/init/`  
+`sudo cp /opt/open-hackathon/open-hackathon-client/src/open-hackathon-client.conf /etc/init/`  
 `sudo service open-hackathon-client start`  
 
 - Deploy open hackathon server and client as ubuntu upstart services(Ubuntu 16.04):
 
-`cp /home/opentech/open-hackathon/open-hackathon-server/src/open-hackathon-server.service /lib/systemd/system/`  
+`cp /opt/open-hackathon/open-hackathon-server/src/open-hackathon-server.service /lib/systemd/system/`  
 `systemctl start open-hackathon-server`  
 `systemctl enable open-hackathon-server`  
 `systemctl status open-hackathon-server`  
 
-`cp /home/opentech/open-hackathon/open-hackathon-client/src/open-hackathon-client.service /lib/systemd/system/`  
+`cp /opt/open-hackathon/open-hackathon-client/src/open-hackathon-client.service /lib/systemd/system/`  
 `systemctl start open-hackathon-client`  
 `systemctl enable open-hackathon-client`  
 `systemctl status open-hackathon-client`  
