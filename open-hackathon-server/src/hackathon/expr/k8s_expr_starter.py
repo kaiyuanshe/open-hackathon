@@ -100,18 +100,23 @@ class K8SExprStarter(ExprStarter):
         ctx = sctx.job_ctxs[sctx.current_job_index]
         adapter = self.__get_adapter_from_sctx(sctx, K8SServiceAdapter)
         # create k8s deployment with yaml if it doesn't exist
-        if not adapter.deployment_exists(ctx.cloud_service_name, ctx.deployment_slot):
-            adapter.create_k8s_deployment_with_yaml(yaml)
+        if not adapter.deployment_exists(ctx.cloud_service_name):
+            status = adapter.create_k8s_deployment_with_yaml(yaml, ctx.cloud_service_name, "default")
 
+        if status != "200":
+            self.__on_message("k8s_service_start_failed", sctx)
+            return
         # wait for an existing deployment ready and start it
         try:
-            adapter.start_k8s_service()
-            self.__on_message("wait_for_start_k8s_service", sctx)
+            # call it in synchronized way and get result immediately
+            adapter.start_k8s_service(ctx.cloud.service_name, "default")
+            self.__on_message("k8s_service_start_completed", sctx)
             return
         except Exception as e:
-            self.log.error(
-                "k8s  %d start a service %r failed: %r"
-                % (sctx.current_job_index, ctx.virtual_machine_name, str(e)))
+            self.__on_message("k8s_service_start_failed", sctx)
+            #self.log.error(
+            #    "k8s  %d start a service %r failed: %r"
+            #    % (sctx.current_job_index, ctx.virtual_machine_name, str(e)))
 
 
     def __stop_k8s_service(self, experiment, hackathon, template_units):
