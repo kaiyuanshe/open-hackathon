@@ -43,39 +43,58 @@ class K8SServiceAdapter(ServiceAdapter):
         #self.k8s_client = client.ApiClient()
         return
 
-    def create_k8s_depolyment_with_yaml(self, yaml):
-        k8s_api = utils.create_from_yaml(self.k8s_client, "nginx-deployment.yaml")
-        deps = k8s_api.read_namespaced_deployment("nginx-test", "default")
-        #self.log.debug("Deployment {0} created".format(deps.metadata.name))
-        return deps.metadata.name
+    def create_k8s_deployment_with_yaml(self, yaml, name, namespace):
+        k8s_api = utils.create_from_yaml(self.k8s_client, yaml)
+        resp = k8s_api.read_namespaced_deployment(name, namespace)
+        return str(resp.status)
+
+    def deployment_exists(self, name):
+        return name in lis_deployments(name)
+
+#        v1 = client.ExtensionsV1beta1Api()
+#        ret = v1.list_deployment_for_all_namespaces(watch=False)
+#        for i in ret.items:
+#            if name == i.metadata.name:
+#                return true
+#        return false
 
     def report_health(self):
         raise NotImplementedError()
 
 
 
-    def start_k8s_service(self):
+    def start_k8s_service(self, name, namespace):
         raise NotImplementedError()
 
 
     def stop_k8s_service(self):
         raise NotImplementedError()
 
-    def deployment_exists(self):
-        raise NotImplementedError()
 
-    def ping(self, docker_host, timeout=20):
-        raise NotImplementedError()
+    def ping(self, url, timeout=20):
+         try:
+            req = requests.get(url, timeout=timeout)
+            return req.status_code == 200 and req.content == 'OK'
+         except Exception as e:
+            return False
+
 
 #    def get_deployment_detail_by_name(self, deployment_name):
 #        return
 
     def list_deployments(self, deployment_name, timeout=20):
-        raise NotImplementedError()
+        list = []
+        v1 = client.ExtensionsV1beta1Api()
+        ret = v1.list_deployment_for_all_namespaces(watch=False)
 
-    def get_deployment_by_name(self, deployment_name):
-        deps = self.k8s_api.read_namespaced_deployment(deployment_name, "default")
-        return deps.metadata.name
+        for i in ret.items:
+            list.append(i.metadata.name)
+
+        return list
+
+    def get_deployment_by_name(self, deployment_name, namespace):
+        deps = self.k8s_api.read_namespaced_deployment(deployment_name, namespace)
+        return deps.metadata.available
 
 #if __name__ == '__main__':
 #    main()
