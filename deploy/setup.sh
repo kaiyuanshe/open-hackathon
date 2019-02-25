@@ -87,9 +87,9 @@ function set_envirement() {
     git reset --hard
     git pull
     echo "pip is installing required python library"
-    result=$(pip install -r open-hackathon-server/requirement.txt)
+    result=$(pip install -r open-hackathon-server/requirements.txt)
 
-    result=$(pip install -r open-hackathon-client/requirement.txt)
+    result=$(pip install -r open-hackathon-client/requirements.txt)
     cp open-hackathon-server/src/hackathon/config_sample.py open-hackathon-server/src/hackathon/config.py
     cp open-hackathon-server/src/hackathon/config_sample.py open-hackathon-server/src/hackathon/config.py
 }
