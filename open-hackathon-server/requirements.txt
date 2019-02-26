@@ -1,11 +1,11 @@
-werkzeug==0.9.6
-flask==0.10.1
-flask-restful==0.2.12
+werkzeug==0.14.1
+flask==1.0.2
+flask-restful==0.3.5
 flask-cors==1.9.0
 azure==1.0.2
 requests
 apscheduler==3.0.3
-mock==1.0.1
+mock==2.0.0
 python-dateutil==2.4.2
 pytz==2015.6
 validictory==1.0.0

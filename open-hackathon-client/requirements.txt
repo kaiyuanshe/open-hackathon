@@ -1,10 +1,10 @@
-werkzeug==0.9.6
-flask==0.10.1
+werkzeug==0.14.1
+flask==1.0.2
 flask-debugtoolbar==0.10.0
 sqlalchemy==1.0.8
 flask-sqlalchemy==2.0
 flask-login==0.2.11
-requests==2.8.1
-mock==1.0.1
+requests==2.21.0
+mock==2.0.0
 pytz==2015.6
-markdown==2.6.2
+markdown==2.6.8
