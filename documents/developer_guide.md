@@ -69,8 +69,8 @@ And install required libs:
 `sudo apt-get install python-dev python-setuptools`  
 `sudo easy_install pip`  
 `cd /opt/open-hackathon/`  
-`sudo pip install -r open-hackathon-server/requirement.txt`  
-`sudo pip install -r open-hackathon-client/requirement.txt`  
+`sudo pip install -r open-hackathon-server/requirements.txt`
+`sudo pip install -r open-hackathon-client/requirements.txt`
 
 ### Install and Configure guacamole
 ###### Docker
