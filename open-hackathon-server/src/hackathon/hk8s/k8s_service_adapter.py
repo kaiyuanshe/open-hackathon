@@ -44,12 +44,21 @@ class K8SServiceAdapter(ServiceAdapter):
         return
 
     def create_k8s_deployment_with_yaml(self, yaml, name, namespace):
-        k8s_api = utils.create_from_yaml(self.k8s_client, yaml)
-        resp = k8s_api.read_namespaced_deployment(name, namespace)
-        return str(resp.status)
+        try:
+            #TODO: k8s_api should be a global variable in this file, need further investigation how
+            k8s_api = utils.create_from_yaml(self.k8s_client, yaml)
+            #see https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/AppsV1Api.md#read_namespaced_deployment
+            resp = k8s_api.read_namespaced_deployment(name, namespace)
+            return format(deps.metadata.name)
+        except Exception as e:
+            if 'Exists' in e:
+                return name
+            else:
+                self.log.error(e)
+                return None
 
     def deployment_exists(self, name):
-        return name in lis_deployments(name)
+        return name in list_deployments(name)
 
 #        v1 = client.ExtensionsV1beta1Api()
 #        ret = v1.list_deployment_for_all_namespaces(watch=False)
@@ -85,6 +94,7 @@ class K8SServiceAdapter(ServiceAdapter):
     def list_deployments(self, deployment_name, timeout=20):
         list = []
         v1 = client.ExtensionsV1beta1Api()
+        #see https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/AppsV1Api.md#list_deployment_for_all_namespaces
         ret = v1.list_deployment_for_all_namespaces(watch=False)
 
         for i in ret.items:
@@ -93,6 +103,7 @@ class K8SServiceAdapter(ServiceAdapter):
         return list
 
     def get_deployment_by_name(self, deployment_name, namespace):
+        #https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/AppsV1Api.md#read_namespaced_deployment
         deps = self.k8s_api.read_namespaced_deployment(deployment_name, namespace)
         return deps.metadata.available
 

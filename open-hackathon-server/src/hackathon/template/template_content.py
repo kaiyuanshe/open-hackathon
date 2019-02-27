@@ -31,6 +31,7 @@ from hackathon.constants import VE_PROVIDER
 from template_constants import TEMPLATE
 from docker_template_unit import DockerTemplateUnit
 from azure_template_unit import AzureTemplateUnit
+from k8s_template_unit import K8STemplateUnit
 
 __all__ = ["TemplateContent"]
 
@@ -57,6 +58,8 @@ class TemplateContent:
                 return DockerTemplateUnit(unit_dict)
             elif provider == VE_PROVIDER.AZURE:
                 return AzureTemplateUnit(unit_dict)
+            elif provider == VE_PROVIDER.K8S:
+                return K8STemplateUnit(unit_dict)
             else:
                 raise Exception("unsupported virtual environment provider")
 
