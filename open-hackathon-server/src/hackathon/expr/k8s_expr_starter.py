@@ -31,7 +31,7 @@ from hackathon import RequiredFeature, Context
 from hackathon.hmongo.models import Hackathon, VirtualEnvironment, Experiment, AzureVirtualMachine, AzureEndPoint
 from hackathon.constants import (VE_PROVIDER, VERemoteProvider, VEStatus, ADStatus, AVMStatus, EStatus)
 from hackathon.hackathon_response import internal_server_error
-from hackathon.template.template_constants import AZURE_UNIT
+from hackathon.template.template_constants import K8S_UNIT
 from hackathon.hk8s import K8SServiceAdapter
 
 class K8SExprStarter(ExprStarter):
@@ -67,25 +67,25 @@ class K8SExprStarter(ExprStarter):
         raise NotImplementedError()
 
     #private functions
-    def __start_k8s_service(self, experiment, hackathon, template_units):
-        job_ctxs = []
-        ctx = context(
-            job_ctxs=job_ctxs,
-            current_job_index=0,
-            experiment_id=experiment.id,
+    def __start_k8s_service(self, experiment, hackathon, template_unit):
+        yaml = template_unit.get_yaml_file()
+        deployment = template_unit.get_deployment_name()
 
-            #subscription_id=azure_key.subscription_id,
-            #pem_url=azure_key.get_local_pem_url(),
-            #management_host=azure_key.management_host
+        ctx = Context(
+            current_job_index = 0,
+            experiment_id = experiment.id,
+            yame_file = yaml,
+            deployment_name = deployment
             )
 
 
+        k8s_dict = {"yaml":yaml, "deployment":deployment}
         experiment.virtual_environments.append(VirtualEnvironment(
-                provider=VE_PROVIDER.K8S,
-                name=vm_name,
-                image=unit.get_image_name(),
-                status=VEStatus.INIT,
-                remote_provider=VERemoteProvider.Guacamole))
+                provider = VE_PROVIDER.K8S,
+                name = hackathon.name,
+                k8s_resource = k8s_dict,
+                status = VEStatus.INIT,
+                remote_provider = VERemoteProvider.Guacamole))
 
         # save constructed experiment, and execute from first job content
         experiment.save()
@@ -96,14 +96,13 @@ class K8SExprStarter(ExprStarter):
                                 id="schedule_setup_" + str(sctx.experiment_id), seconds=0)
 
     def __schedule_start_k8s_service(self, sctx):
-        # get context from super context
-        ctx = sctx.job_ctxs[sctx.current_job_index]
-        adapter = self.__get_adapter_from_sctx(sctx, K8SServiceAdapter)
+        adapter = self.__get_adapter_from_sctx(K8SServiceAdapter)
         # create k8s deployment with yaml if it doesn't exist
-        if not adapter.deployment_exists(ctx.cloud_service_name):
-            status = adapter.create_k8s_deployment_with_yaml(yaml, ctx.cloud_service_name, "default")
+        if not adapter.deployment_exists(ctx.deployment_name):
+            ret = adapter.create_k8s_deployment_with_yaml(ctx.yaml_file, ctx.deployment_name, "default")
+            #print ret
 
-        if status != "200":
+        if ret is None:
             self.__on_message("k8s_service_start_failed", sctx)
             return
         # wait for an existing deployment ready and start it
@@ -128,10 +127,10 @@ class K8SExprStarter(ExprStarter):
 
     def __schedule_stop_k8s_service(self, sctx):
         # get context from super context
-        ctx = sctx.job_ctxs[sctx.current_job_index]
-        adapter = self.__get_adapter_from_sctx(sctx, K8SServiceAdapter)
+        #ctx = sctx.job_ctxs[sctx.current_job_index]
+        adapter = self.__get_adapter_from_sctx(K8SServiceAdapter)
         # TODO: How to stop an running deployment in k8s
-        adapter.stop_k8s_service(name)
+        adapter.stop_k8s_service(sctx.deployment_name)
         self.__on_message("wait_for_stop_k8s_service", sctx)
 
     def __on_message(self, msg, sctx):
@@ -153,5 +152,5 @@ class K8SExprStarter(ExprStarter):
         msg = switcher.get(item,"nothing")
         #TODO: try to abstract common behavior
 
-    def __get_adapter_from_sctx(self, sctx, adapter_class):
+    def __get_adapter_from_sctx(self, adapter_class):
         return adapter_class()

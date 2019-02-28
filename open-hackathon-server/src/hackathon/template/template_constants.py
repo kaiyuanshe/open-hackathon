@@ -174,6 +174,14 @@ class AZURE_UNIT:
     RESOUCE_EXTENSION_PUBLIC_KEY = "PublicConfig"
     RESOUCE_EXTENSION_PUBLIC_TYPE = "Public"
 
+class K8S_UNIT:
+    """constants for k8s virtual_environment in template file"""
+    NAME = 'Kubernetes'
+    YAML_FILE = 'yaml_file'
+    DEPLOYMENT_NAME = 'deployment_name'
+
+
+
     class DISABLE_NLA_EXTENSION_REFRENCE:
         REFRENCE_NAME = "CustomScriptExtension"
         EXTENSION_NAME = "CustomScriptExtension"
