@@ -52,6 +52,7 @@ class K8STemplateUnit(TemplateUnit):
             K8S_UNIT.NAME: 'Kubernetes',
             K8S_UNIT.YAML_FILE: 'default location',
             K8S_UNIT.DEPLOYMENT_NAME: 'default name',
+            K8S_UNIT.CONFIG: ""
         }
         return dic
 
@@ -74,3 +75,8 @@ class K8STemplateUnit(TemplateUnit):
     def get_deployment_name(self):
         return self.dic[K8S_UNIT.DEPLOYMENT_NAME]
 
+    def set_config(self, config):
+        self.dic[K8S_UNIT.DEPLOYMENT_NAME] = config
+
+    def get_config(self):
+        return self.dic[K8S_UNIT.CONFIG]
