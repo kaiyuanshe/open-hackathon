@@ -38,10 +38,17 @@ __all__ = ["K8SServiceAdapter"]
 
 class K8SServiceAdapter(ServiceAdapter):
     k8s_client = client.ApiClient()
-    def __init__(self):
-        config.load_kube_config("jw-test-new.json")
-        #self.k8s_client = client.ApiClient()
-        return
+    default_config_file = "./kubeconfig.json"
+
+    def __init__(self, config_file):
+        try:
+            if config_file == None : config_file = default_config_file
+            config.load_kube_config(config_file)
+            #self.k8s_client = client.ApiClient()
+        except Exception as e:
+            self.log.error(e)
+            return False
+        return True
 
     def create_k8s_deployment_with_yaml(self, yaml, name, namespace):
         try:

@@ -70,16 +70,18 @@ class K8SExprStarter(ExprStarter):
     def __start_k8s_service(self, experiment, hackathon, template_unit):
         yaml = template_unit.get_yaml_file()
         deployment = template_unit.get_deployment_name()
+        config_file = template_unit.get_config()
 
         ctx = Context(
             current_job_index = 0,
             experiment_id = experiment.id,
             yame_file = yaml,
-            deployment_name = deployment
+            deployment_name = deployment,
+            config = config_file
             )
 
 
-        k8s_dict = {"yaml":yaml, "deployment":deployment}
+        k8s_dict = {"yaml":yaml, "deployment":deployment, "config":config_file}
         experiment.virtual_environments.append(VirtualEnvironment(
                 provider = VE_PROVIDER.K8S,
                 name = hackathon.name,
@@ -91,56 +93,52 @@ class K8SExprStarter(ExprStarter):
         experiment.save()
         self.__schedule_start(ctx)
 
-    def __schedule_start(self, sctx):
-        self.scheduler.add_once("k8s_service", "__schedule_start_k8s_service", context=sctx,
-                                id="schedule_setup_" + str(sctx.experiment_id), seconds=0)
+    def __schedule_start(self, ctx):
+        self.scheduler.add_once("k8s_service", "__schedule_start_k8s_service", context=ctx,
+                                id="schedule_setup_" + str(ctx.experiment_id), seconds=0)
 
-    def __schedule_start_k8s_service(self, sctx):
-        adapter = self.__get_adapter_from_sctx(K8SServiceAdapter)
+    def __schedule_start_k8s_service(self, ctx):
+        adapter = self.__get_adapter_from_ctx(K8SServiceAdapter. ctx.config)
         # create k8s deployment with yaml if it doesn't exist
         if not adapter.deployment_exists(ctx.deployment_name):
             ret = adapter.create_k8s_deployment_with_yaml(ctx.yaml_file, ctx.deployment_name, "default")
             #print ret
 
         if ret is None:
-            self.__on_message("k8s_service_start_failed", sctx)
+            self.__on_message("k8s_service_start_failed", ctx)
             return
         # wait for an existing deployment ready and start it
         try:
             # call it in synchronized way and get result immediately
-            adapter.start_k8s_service(ctx.cloud.service_name, "default")
-            self.__on_message("k8s_service_start_completed", sctx)
+            adapter.start_k8s_service(ctx.deployment_name, "default")
+            self.__on_message("k8s_service_start_completed", ctx)
             return
         except Exception as e:
-            self.__on_message("k8s_service_start_failed", sctx)
-            #self.log.error(
-            #    "k8s  %d start a service %r failed: %r"
-            #    % (sctx.current_job_index, ctx.virtual_machine_name, str(e)))
+            self.__on_message("k8s_service_start_failed", ctx)
 
 
     def __stop_k8s_service(self, experiment, hackathon, template_units):
         self.__schedule_stop(ctx)
 
-    def __schedule_stop(self, sctx):
-        self.scheduler.add_once("k8s_service", "__schedule_stop_k8s_service", context=sctx,
-                                id="schedule_stop_" + str(sctx.experiment_id), seconds=0)
+    def __schedule_stop(self, ctx):
+        self.scheduler.add_once("k8s_service", "__schedule_stop_k8s_service", context=ctx,
+                                id="schedule_stop_" + str(ctx.experiment_id), seconds=0)
 
-    def __schedule_stop_k8s_service(self, sctx):
+    def __schedule_stop_k8s_service(self, ctx):
         # get context from super context
-        #ctx = sctx.job_ctxs[sctx.current_job_index]
-        adapter = self.__get_adapter_from_sctx(K8SServiceAdapter)
+        adapter = self.__get_adapter_from_ctx(K8SServiceAdapter, ctx.config)
         # TODO: How to stop an running deployment in k8s
-        adapter.stop_k8s_service(sctx.deployment_name)
-        self.__on_message("wait_for_stop_k8s_service", sctx)
+        adapter.stop_k8s_service(ctx.deployment_name)
+        self.__on_message("wait_for_stop_k8s_service", ctx)
 
-    def __on_message(self, msg, sctx):
+    def __on_message(self, msg, ctx):
         self.log.debug("k8s on_message: %d" % msg)
         self.scheduler.add_once(
             "k8s_service", "__msg_handler",
-            id="k8s_msg_handler_" + str(sctx.experiment_id),
-            context=sctx, seconds=ASYNC_OiP_QUERY_INTERVAL)
+            id="k8s_msg_handler_" + str(ctx.experiment_id),
+            context=ctx, seconds=ASYNC_OiP_QUERY_INTERVAL)
 
-    def __msg_handler(msg, sctx):
+    def __msg_handler(msg, ctx):
         switcher = {
             "wait_for_start_k8s_service": "aaaaa",
             "k8s_service_start_completed":"aaaaa",
@@ -152,5 +150,5 @@ class K8SExprStarter(ExprStarter):
         msg = switcher.get(item,"nothing")
         #TODO: try to abstract common behavior
 
-    def __get_adapter_from_sctx(self, adapter_class):
-        return adapter_class()
+    def __get_adapter_from_ctx(self, adapter_class, config):
+        return adapter_class(config)
