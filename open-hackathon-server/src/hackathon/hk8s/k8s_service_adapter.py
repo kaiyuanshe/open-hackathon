@@ -37,14 +37,16 @@ sys.path.append("..")
 __all__ = ["K8SServiceAdapter"]
 
 class K8SServiceAdapter(ServiceAdapter):
-    k8s_client = client.ApiClient()
-    default_config_file = "./kubeconfig.json"
 
     def __init__(self, config_file):
+
+        self.default_config_file = "./kubeconfig.json"
+        self.k8s_client = client.ApiClient()
+
         try:
-            if config_file == None : config_file = default_config_file
+            if config_file == None : config_file = self.default_config_file
             config.load_kube_config(config_file)
-            #self.k8s_client = client.ApiClient()
+            self.k8s_api = client.AppsV1Api(client.ApiClient(config))
         except Exception as e:
             self.log.error(e)
             return False
@@ -52,13 +54,13 @@ class K8SServiceAdapter(ServiceAdapter):
 
     def create_k8s_deployment_with_yaml(self, yaml, name, namespace):
         try:
-            #TODO: k8s_api should be a global variable in this file, need further investigation how
-            k8s_api = utils.create_from_yaml(self.k8s_client, yaml)
+            #k8s_api is reinitialized with create_from_yaml
+            self.k8s_api = utils.create_from_yaml(self.k8s_client, yaml)
             #see https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/AppsV1Api.md#read_namespaced_deployment
-            resp = k8s_api.read_namespaced_deployment(name, namespace)
+            resp = self.k8s_api.read_namespaced_deployment(name, namespace)
             return format(deps.metadata.name)
         except Exception as e:
-            if 'Exists' in e:
+            if 'Confilct' == e.reason:
                 return name
             else:
                 self.log.error(e)
