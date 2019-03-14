@@ -23,5 +23,5 @@ Questions go to [dev team](mailto:msopentechdevsh@microsoft.com)
 The project is now maintained by Kaiyuanshe.
 
 # License
-This project is licensed under [MIT License](https://github.com/kaiyuanshe/open-hackathon/blob/master/license.txt)
+This project is licensed under [MIT License](https://github.com/kaiyuanshe/open-hackathon/blob/master/LICENSE.md)
 

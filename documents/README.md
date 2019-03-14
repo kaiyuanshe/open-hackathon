@@ -1,7 +1,7 @@
 
 <h1 align = "center">OpenHackathon Manual</h1>
-<p align = "center">Microsot Open Technology Center</p>
-<p align = "center">Copyright (c) 2015 Microsoft</p>
+<p align = "center">Kaiyuanshe</p>
+<p align = "center">Copyright (c) 2019 Kaiyuanshe</p>
 
 
 

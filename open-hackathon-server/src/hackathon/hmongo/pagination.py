@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-copy from flask-mongoengine's Pagination class
-
-provided similar interfaces with SQL-Alchemy's Pagination
+This file is covered by the LICENSING file in the root of this project.
 """
+
 import math
 import sys
 
