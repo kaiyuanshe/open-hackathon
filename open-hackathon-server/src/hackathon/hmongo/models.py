@@ -393,7 +393,7 @@ class VirtualEnvironment(DynamicEmbeddedDocument):
     update_time = DateTimeField()
     docker_container = EmbeddedDocumentField(DockerContainer)
     azure_resource = EmbeddedDocumentField(AzureVirtualMachine)
-
+    k8s_resource = DictField()
 
 class Experiment(HDocumentBase):
     status = IntField()  # EStatus in enum.py

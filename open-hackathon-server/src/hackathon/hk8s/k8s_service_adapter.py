@@ -18,19 +18,37 @@ sys.path.append("..")
 __all__ = ["K8SServiceAdapter"]
 
 class K8SServiceAdapter(ServiceAdapter):
-    k8s_client = client.ApiClient()
-    def __init__(self):
-        config.load_kube_config("jw-test-new.json")
-        #self.k8s_client = client.ApiClient()
-        return
+
+    def __init__(self, config_file):
+
+        self.default_config_file = "./kubeconfig.json"
+        self.k8s_client = client.ApiClient()
+
+        try:
+            if config_file == None : config_file = self.default_config_file
+            config.load_kube_config(config_file)
+            self.k8s_api = client.AppsV1Api(client.ApiClient(config))
+        except Exception as e:
+            self.log.error(e)
+            return False
+        return True
 
     def create_k8s_deployment_with_yaml(self, yaml, name, namespace):
-        k8s_api = utils.create_from_yaml(self.k8s_client, yaml)
-        resp = k8s_api.read_namespaced_deployment(name, namespace)
-        return str(resp.status)
+        try:
+            #k8s_api is reinitialized with create_from_yaml
+            self.k8s_api = utils.create_from_yaml(self.k8s_client, yaml)
+            #see https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/AppsV1Api.md#read_namespaced_deployment
+            resp = self.k8s_api.read_namespaced_deployment(name, namespace)
+            return format(deps.metadata.name)
+        except Exception as e:
+            if 'Confilct' == e.reason:
+                return name
+            else:
+                self.log.error(e)
+                return None
 
     def deployment_exists(self, name):
-        return name in lis_deployments(name)
+        return name in list_deployments(name)
 
 #        v1 = client.ExtensionsV1beta1Api()
 #        ret = v1.list_deployment_for_all_namespaces(watch=False)
@@ -66,6 +84,7 @@ class K8SServiceAdapter(ServiceAdapter):
     def list_deployments(self, deployment_name, timeout=20):
         list = []
         v1 = client.ExtensionsV1beta1Api()
+        #see https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/AppsV1Api.md#list_deployment_for_all_namespaces
         ret = v1.list_deployment_for_all_namespaces(watch=False)
 
         for i in ret.items:
@@ -74,6 +93,7 @@ class K8SServiceAdapter(ServiceAdapter):
         return list
 
     def get_deployment_by_name(self, deployment_name, namespace):
+        #https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/AppsV1Api.md#read_namespaced_deployment
         deps = self.k8s_api.read_namespaced_deployment(deployment_name, namespace)
         return deps.metadata.available
 
