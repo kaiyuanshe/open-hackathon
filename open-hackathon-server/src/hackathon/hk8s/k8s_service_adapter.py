@@ -30,7 +30,7 @@ from kubernetes import client, config, utils
 
 from hackathon import RequiredFeature, Component, Context
 from hackathon.constants import HEALTH, HEALTH_STATUS, HACKATHON_CONFIG, CLOUD_PROVIDER
-from hackathon.hazure import ServiceAdapter
+from hackathon.hazure.service_adapter import ServiceAdapter
 
 sys.path.append("..")
 
@@ -40,25 +40,30 @@ class K8SServiceAdapter(ServiceAdapter):
 
     def __init__(self, config_file):
 
-        self.default_config_file = "./kubeconfig.json"
-        self.k8s_client = client.ApiClient()
+        self.default_kube_config_file = "./kubeconfig.json"
+#        self.k8s_client = client.ApiClient()
 
-        try:
-            if config_file == None : config_file = self.default_config_file
-            config.load_kube_config(config_file)
-            self.k8s_api = client.AppsV1Api(client.ApiClient(config))
-        except Exception as e:
-            self.log.error(e)
-            return False
-        return True
+
+        if config_file == None :
+            self.kube_config_file = self.default_config_file
+        else:
+            self.kube_config_file = config_file
+
+#        try:
+#            config.load_kube_config(self.kube_config_file)
+            #self.k8s_api = client.AppsV1Api(client.ApiClient(config))
+#        except Exception as e:
+#            self.log.error(e)
 
     def create_k8s_deployment_with_yaml(self, yaml, name, namespace):
         try:
             #k8s_api is reinitialized with create_from_yaml
+            config.load_kube_config(self.kube_config_file)
+            self.k8s_client = client.ApiClient()
             self.k8s_api = utils.create_from_yaml(self.k8s_client, yaml)
             #see https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/AppsV1Api.md#read_namespaced_deployment
             resp = self.k8s_api.read_namespaced_deployment(name, namespace)
-            return format(deps.metadata.name)
+            return format(resp.metadata.name)
         except Exception as e:
             if 'Confilct' == e.reason:
                 return name
@@ -67,7 +72,7 @@ class K8SServiceAdapter(ServiceAdapter):
                 return None
 
     def deployment_exists(self, name):
-        return name in list_deployments(name)
+        return name in self.list_deployments(name)
 
 #        v1 = client.ExtensionsV1beta1Api()
 #        ret = v1.list_deployment_for_all_namespaces(watch=False)
@@ -90,12 +95,7 @@ class K8SServiceAdapter(ServiceAdapter):
 
 
     def ping(self, url, timeout=20):
-         try:
-            req = requests.get(url, timeout=timeout)
-            return req.status_code == 200 and req.content == 'OK'
-         except Exception as e:
-            return False
-
+        pass
 
 #    def get_deployment_detail_by_name(self, deployment_name):
 #        return
