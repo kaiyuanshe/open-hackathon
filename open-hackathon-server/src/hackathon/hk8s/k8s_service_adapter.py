@@ -11,7 +11,7 @@ from kubernetes import client, config, utils
 
 from hackathon import RequiredFeature, Component, Context
 from hackathon.constants import HEALTH, HEALTH_STATUS, HACKATHON_CONFIG, CLOUD_PROVIDER
-from hackathon.hazure import ServiceAdapter
+from hackathon.hazure.service_adapter import ServiceAdapter
 
 sys.path.append("..")
 
@@ -20,26 +20,22 @@ __all__ = ["K8SServiceAdapter"]
 class K8SServiceAdapter(ServiceAdapter):
 
     def __init__(self, config_file):
+        self.default_kube_config_file = "./kubeconfig.json"
 
-        self.default_config_file = "./kubeconfig.json"
+        if config_file == None :
+            self.kube_config_file = self.default_config_file
+        else:
+            self.kube_config_file = config_file
+
+        config.load_kube_config(self.kube_config_file)
         self.k8s_client = client.ApiClient()
-
-        try:
-            if config_file == None : config_file = self.default_config_file
-            config.load_kube_config(config_file)
-            self.k8s_api = client.AppsV1Api(client.ApiClient(config))
-        except Exception as e:
-            self.log.error(e)
-            return False
-        return True
 
     def create_k8s_deployment_with_yaml(self, yaml, name, namespace):
         try:
-            #k8s_api is reinitialized with create_from_yaml
             self.k8s_api = utils.create_from_yaml(self.k8s_client, yaml)
             #see https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/AppsV1Api.md#read_namespaced_deployment
             resp = self.k8s_api.read_namespaced_deployment(name, namespace)
-            return format(deps.metadata.name)
+            return format(resp.metadata.name)
         except Exception as e:
             if 'Confilct' == e.reason:
                 return name
@@ -48,14 +44,7 @@ class K8SServiceAdapter(ServiceAdapter):
                 return None
 
     def deployment_exists(self, name):
-        return name in list_deployments(name)
-
-#        v1 = client.ExtensionsV1beta1Api()
-#        ret = v1.list_deployment_for_all_namespaces(watch=False)
-#        for i in ret.items:
-#            if name == i.metadata.name:
-#                return true
-#        return false
+        return name in self.list_deployments(name)
 
     def report_health(self):
         raise NotImplementedError()
@@ -71,12 +60,7 @@ class K8SServiceAdapter(ServiceAdapter):
 
 
     def ping(self, url, timeout=20):
-         try:
-            req = requests.get(url, timeout=timeout)
-            return req.status_code == 200 and req.content == 'OK'
-         except Exception as e:
-            return False
-
+        pass
 
 #    def get_deployment_detail_by_name(self, deployment_name):
 #        return
@@ -93,9 +77,10 @@ class K8SServiceAdapter(ServiceAdapter):
         return list
 
     def get_deployment_by_name(self, deployment_name, namespace):
+        raise NotImplementedError()
         #https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/AppsV1Api.md#read_namespaced_deployment
-        deps = self.k8s_api.read_namespaced_deployment(deployment_name, namespace)
-        return deps.metadata.available
+        #deps = self.k8s_api.read_namespaced_deployment(deployment_name, namespace)
+        #return deps.metadata.available
 
 #if __name__ == '__main__':
 #    main()
