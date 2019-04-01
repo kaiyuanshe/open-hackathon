@@ -35,7 +35,7 @@
                    ng-disabled="isProviderSelected" required>
             <div class="info-box">
               <div class="content text-centet">
-                <img src="/static/pic/azure-logo.jpg">
+                <img src="/static/pic/azure_new.png">
               </div>
               <footer class="text-center" ng-show="!isProviderSelected">
                 {{'CLOUD_WEBPAGE_FIELDS.USE' | translate}}
@@ -66,6 +66,25 @@
           </label>
         </div>
 
+        <div ng-class="isProviderSelected ? 'col-md-6 text-center center' : 'col-md-6 text-center'"
+             ng-show="!isProviderSelected|| (isProviderSelected && cloudProvider=='3')">
+          <label for="kubernetes">
+            <input id="kubernetes" class="hide" type="radio" value="3" ng-model="cloudProvider"
+                   ng-disabled="isProviderSelected" required>
+            <div class="info-box">
+              <div class="content text-centet">
+                <img src="/static/pic/kubernetes_logo_new.png">
+              </div>
+              <footer class="text-center" ng-show="!isProviderSelected">
+                {{'CLOUD_WEBPAGE_FIELDS.USE' | translate}}
+              </footer>
+              <footer class="text-center" ng-show="isProviderSelected">
+                {{'CLOUD_WEBPAGE_FIELDS.USED' | translate}}
+              </footer>
+            </div>
+          </label>
+        </div>
+
       </div>
     </fieldset>
 
@@ -74,7 +93,7 @@
       <div class="text-center" ng-show="!isProviderSelected">
         <div class="col-xs-12">
           <button type="submit" class="btn btn-primary btn-long"
-                  ng-disabled="cloudProvider!='0' && cloudProvider!='1' && cloudProvider!='2'">
+                  ng-disabled="cloudProvider!='0' && cloudProvider!='1' && cloudProvider!='2' && cloudProvider!='3'">
             <i class="fa fa-arrow-circle-o-right"></i> {{'OK' | translate}}
           </button>
           <a> {{'CLOUD_WEBPAGE_FIELDS.CONFIRM_HINT' | translate}} </a>
