@@ -68,7 +68,7 @@ angular.module('oh.controllers', [])
               $state.go('create', {
                 name: toParams.name
               });
-            } else if (activity.config.cloud_provide == 0) {
+            } else if (activity.config.cloud_provider == 0) {
               switch (toState.name) {
                 case 'manage.ve':
                 case 'manage.monitor':
@@ -135,13 +135,15 @@ angular.module('oh.controllers', [])
     }
 
     $scope.isShowNavItem = function(type, item) {
-      // if cloud_provider is "Azure", show all.
-      // if cloud_provider is "Alauda", show "Cloud", "VirtualEnvirontment" and "Monitor".
+      // 1： No cloud is selected
+      // 1： if cloud_provider is "Azure", show all.
+      // 2： if cloud_provider is "Alauda", show "Cloud", "VirtualEnvirontment" and "Monitor".
+      // 3： if cloud_provider is "Kubernetes", show "Cloud", "VirtualEnvirontment" and "Monitor".
       // "Cloud" would be shown anyway.
       if (type == 2) {
         if (activity.config && activity.config.cloud_provider == 1)
           return true;
-        else if (activity.config && activity.config.cloud_provider == 2)
+        else if (activity.config && (activity.config.cloud_provider == 2 || activity.config.cloud_provider == 3))
           switch(item.name) {
             case "ADVANCED_SETTINGS.CLOUD_RESOURCES": return true;
             case "ADVANCED_SETTINGS.VIRTUAL_ENVIRONMENT": return true;
@@ -1723,7 +1725,7 @@ angular.module('oh.controllers', [])
           $scope.isProviderSelected = false;
         } else {
           var provider = typeof(data["cloud_provider"]) == "undefined" ? null : data["cloud_provider"].toString();
-          if (provider == '0' || provider == '1' || provider == '2'){
+          if (provider == '0' || provider == '1' || provider == '2' || provider == '3'){
             $scope.isProviderSelected = true;
             $scope.cloudProvider = provider;
           } else {

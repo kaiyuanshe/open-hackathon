@@ -8,12 +8,12 @@ import sys
 
 sys.path.append("..")
 
-from client import app
+# from client import app
 
 
 def encode(plaintext):
     m = hashlib.md5()
-    origin = plaintext + app.config['SECRET_KEY']
+    origin = 'admin' + 'secret_key'
     m.update(origin)
     return m.hexdigest()
 
