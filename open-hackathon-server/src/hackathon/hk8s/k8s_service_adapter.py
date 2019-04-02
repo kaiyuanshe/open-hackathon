@@ -20,11 +20,10 @@ __all__ = ["K8SServiceAdapter"]
 
 class K8SServiceAdapter(ServiceAdapter):
 
-    def __init__(self):
-        # TODO add kube config
+    def __init__(self, api_url, token):
         configuration = client.Configuration()
-        configuration.host = 'KUBE_API_SERVER'
-        configuration.api_key['authorization'] = 'bearer ' + 'SERVICE_ACCOUNT_TOKEN'
+        configuration.host = api_url
+        configuration.api_key['authorization'] = 'bearer ' + token
         # FIXME import ca cert file?
         configuration.verify_ssl = False
 
@@ -57,26 +56,41 @@ class K8SServiceAdapter(ServiceAdapter):
                 HEALTH.DESCRIPTION: "Get cluster info error: {}".format(e),
             }
 
-    def start_k8s_service(self, name, namespace):
+    def start_k8s_deployment(self, yaml):
         raise NotImplementedError()
 
-    def pause_k8s_service(self):
+    def pause_k8s_service(self, deployment_name, namespace):
         raise NotImplementedError()
 
-    def stop_k8s_service(self):
+    def delete_k8s_deployment(self, deployment_name, namespace):
+        raise NotImplementedError()
+
+    def create_k8s_service(self, yaml):
+        raise NotImplementedError()
+
+    def delete_k8s_service(self, service_name, namespace):
         raise NotImplementedError()
 
     def ping(self, url, timeout=20):
         report = self.report_health()
         return report[HEALTH.STATUS] == HEALTH_STATUS.OK
 
-    def list_deployments(self, namespace=None, timeout=20):
+    def list_deployments(self, namespace=None, labels=None, timeout=20):
         _deployments = []
+        kwargs = {"timeout_seconds": timeout, "watch": False}
+        if labels and isinstance(labels, dict):
+            label_selector = ",".join(["{}={}".format(k, v) for k, v in labels.items()])
+            kwargs['label_selector'] = label_selector
+
         apps_v1_group = client.AppsV1Api(self.api_client)
-        if not namespace:
-            ret = apps_v1_group.list_deployment_for_all_namespaces(timeout_seconds=timeout, watch=False)
-        else:
-            ret = apps_v1_group.list_namespaced_deployment(namespace, timeout_seconds=timeout, watch=False)
+        try:
+            if not namespace:
+                ret = apps_v1_group.list_deployment_for_all_namespaces(**kwargs)
+            else:
+                ret = apps_v1_group.list_namespaced_deployment(namespace, **kwargs)
+        except ApiException as e:
+            self.log.error(e)
+            return []
 
         for i in ret.items:
             _deployments.append(i.metadata.name)
