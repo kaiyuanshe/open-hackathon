@@ -14,7 +14,7 @@
               <div class="form-group" ng-class="{'has-error': activitForm.display_name.$touched && activitForm.display_name.$invalid,'has-success':activitForm.display_name.$valid}">
                 <label for="inputPassword" class="col-xs-2 control-label" translate="ACTIVITY_FIELDS.DISPLAY_NAME">DISPLAY_NAME</label>
                 <div class="col-xs-10 required">
-                  <input type="text" class="form-control" name="display_name" placeholder="{{'ACTIVITY_FIELDS.DISPLAY_NAME' | translate}}" ng-model="modules.display_name" ng-trim="true" ng-maxlength="8" required>
+                  <input type="text" class="form-control" name="display_name" placeholder="{{'ACTIVITY_FIELDS.DISPLAY_NAME' | translate}}" ng-model="modules.display_name" ng-trim="true" ng-maxlength="10" required>
                   <div class="messages" ng-messages="activitForm.display_name.$error" ng-if="activitForm.display_name.$touched && activitForm.display_name.$invalid">
                     <span ng-message="maxlength"><i class="fa fa-close" uib-tooltip="" tooltip-placement="right auto" ></i></span>
                     <span ng-message="required"><i class="fa fa-close" uib-tooltip="" tooltip-placement="right auto"></i></span>
