@@ -533,6 +533,6 @@ class CLOUD_PROVIDER:
 
 class K8S_DEPLOYMENT_STATUS:
     PENDING = 0
-    READY = 1
+    AVAILABLE = 1
     PAUSE = 2
     ERROR = 3

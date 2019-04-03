@@ -22,16 +22,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
-import sys
-
-sys.path.append("..")
 
 from template_constants import K8S_UNIT
 from template_unit import TemplateUnit
 from hackathon.constants import VE_PROVIDER
-
-
-
 
 __all__ = ["K8STemplateUnit"]
 
@@ -42,17 +36,51 @@ class K8STemplateUnit(TemplateUnit):
     """
 
     def __init__(self, dic):
-        super(DockerTemplateUnit, self).__init__(VE_PROVIDER.DOCKER)
+        super(K8STemplateUnit, self).__init__(VE_PROVIDER.K8S)
         self.dic = self.load_default_config()
         for key, value in dic.iteritems():
             self.dic[key] = value
 
-    def load_default_config(self):
+    @staticmethod
+    def load_default_config():
         dic = {
             K8S_UNIT.NAME: 'Kubernetes',
-            K8S_UNIT.YAML_FILE: 'default location',
-            K8S_UNIT.DEPLOYMENT_NAME: 'default name',
-            K8S_UNIT.CONFIG: ""
+            K8S_UNIT.CONFIG_CLUSTER: {
+                K8S_UNIT.CONFIG_API_SERVER: "",
+                K8S_UNIT.CONFIG_API_TOKEN: "",
+                K8S_UNIT.CONFIG_NAMESPACES: "",
+            },
+            K8S_UNIT.IMAGES: [
+                {
+                    K8S_UNIT.IMAGES_IMAGE: "busybox",
+                }
+            ],
+            K8S_UNIT.PORTS: [
+                {
+                    K8S_UNIT.PORTS_NAME: 'Deploy',
+                    K8S_UNIT.PORTS_PORT: 22,
+                    K8S_UNIT.PORTS_PUBLIC: True,
+                    K8S_UNIT.PORTS_PROTOCOL: 'TCP',
+                    K8S_UNIT.PORTS_PUBLIC_PORT: 22,
+                }
+            ],
+            K8S_UNIT.REMOTE: {
+                K8S_UNIT.REMOTE_PROVIDER: 'guacamole',
+                K8S_UNIT.REMOTE_PROTOCOL: 'ssh',
+                K8S_UNIT.REMOTE_USERNAME: 'root',
+                K8S_UNIT.REMOTE_PASSWORD: 'root',
+                K8S_UNIT.REMOTE_PORT: 22,
+            },
+            K8S_UNIT.RESOURCES: {
+                K8S_UNIT.RESOURCES_REQUESTS: {
+                    K8S_UNIT.RESOURCES_REQUESTS_CPU: "1",
+                    K8S_UNIT.RESOURCES_REQUESTS_MEM: "500Mi",
+                },
+                K8S_UNIT.RESOURCES_LIMITS: {
+                    K8S_UNIT.RESOURCES_LIMITS_CPU: "10",
+                    K8S_UNIT.RESOURCES_LIMITS_MEM: "10Gi",
+                },
+            }
         }
         return dic
 
@@ -62,21 +90,33 @@ class K8STemplateUnit(TemplateUnit):
     def get_name(self):
         return self.dic[K8S_UNIT.NAME]
 
+    def get_cluster(self):
+        return self.dic[K8S_UNIT.CONFIG_CLUSTER]
 
-    def set_yaml_file(self, yaml):
-        self.dic[K8S_UNIT.YAML_FILE] = yaml
+    def set_cluster(self, cluster_info):
+        self.dic[K8S_UNIT.CONFIG_CLUSTER] = cluster_info
 
-    def get_yaml_file(self):
-        return self.dic[K8S_UNIT.YAML_FILE]
+    def get_ports(self):
+        return self.dic[K8S_UNIT.PORTS]
 
-    def set_deployment_name(self, deployment):
-        self.dic[K8S_UNIT.DEPLOYMENT_NAME] = deployment
+    def set_ports(self, ports):
+        self.dic[K8S_UNIT.PORTS] = ports
 
-    def get_deployment_name(self):
-        return self.dic[K8S_UNIT.DEPLOYMENT_NAME]
+    def get_remote(self):
+        return self.dic[K8S_UNIT.REMOTE]
 
-    def set_config(self, config):
-        self.dic[K8S_UNIT.DEPLOYMENT_NAME] = config
+    def set_remote(self, remote):
+        self.dic[K8S_UNIT.REMOTE] = remote
 
-    def get_config(self):
-        return self.dic[K8S_UNIT.CONFIG]
+    def get_images(self):
+        return self.dic[K8S_UNIT.IMAGES]
+
+    def set_images(self, images):
+        assert isinstance(images, list)
+        self.dic[K8S_UNIT.IMAGES] = images
+
+    def get_resources(self):
+        return self.dic[K8S_UNIT.RESOURCES]
+
+    def set_resources(self, resources):
+        self.dic[K8S_UNIT.RESOURCES] = resources
