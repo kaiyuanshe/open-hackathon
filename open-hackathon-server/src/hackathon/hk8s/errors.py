@@ -1,4 +1,4 @@
-class BaseError(Exception):
+class K8sResourceError(Exception):
     err_id = ""
     err_msg_format = "{}: {}"
 
@@ -10,11 +10,11 @@ class BaseError(Exception):
         return self.err_msg_format.format(self.err_id, self._err_msg)
 
 
-class YmlParseError(BaseError):
+class YmlParseError(K8sResourceError):
     err_id = "K8s Yaml parse error"
 
 
-class EnvError(BaseError):
+class EnvError(K8sResourceError):
     err_id = "K8s environment error"
 
 

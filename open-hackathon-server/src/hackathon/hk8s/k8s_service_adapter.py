@@ -3,9 +3,8 @@
 This file is covered by the LICENSING file in the root of this project.
 """
 
-import time
 from urllib3 import disable_warnings
-from urllib3.exceptions import InsecureRequestWarning
+from urllib3.exceptions import InsecureRequestWarning, HTTPError
 
 import yaml as yaml_tool
 from kubernetes import client, utils
@@ -32,6 +31,7 @@ class K8SServiceAdapter(ServiceAdapter):
         configuration.verify_ssl = False
 
         self.namespace = namespace
+        self.api_url = api_url
         self.api_client = client.ApiClient(configuration)
         super(K8SServiceAdapter, self).__init__(self.api_client)
 
@@ -58,6 +58,11 @@ class K8SServiceAdapter(ServiceAdapter):
             return {
                 HEALTH.STATUS: HEALTH_STATUS.ERROR,
                 HEALTH.DESCRIPTION: "Get Pod info error: {}".format(e),
+            }
+        except HTTPError:
+            return {
+                HEALTH.STATUS: HEALTH_STATUS.ERROR,
+                HEALTH.DESCRIPTION: "Connect K8s ApiServer {} error: connection timeout".format(self.api_url),
             }
 
     def create_k8s_deployment(self, yaml):
