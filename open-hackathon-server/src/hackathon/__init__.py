@@ -183,13 +183,12 @@ def init_db():
 
 
 def init_expr_components():
-    from expr import ExprManager, AzureVMExprStarter, AzureHostedDockerStarter, AlaudaDockerStarter
-    #, K8SExprStarter
+    from expr import ExprManager, AzureVMExprStarter, AzureHostedDockerStarter, AlaudaDockerStarter, K8SExprStarter
     factory.provide("expr_manager", ExprManager)
     factory.provide("alauda_docker", AlaudaDockerStarter)
     factory.provide("azure_docker", AzureHostedDockerStarter)
     factory.provide("azure_vm", AzureVMExprStarter)
-    # factory.provide("k8s_service", K8SExprStarter)
+    factory.provide("k8s_service", K8SExprStarter)
 
 
 def init_voice_verify():

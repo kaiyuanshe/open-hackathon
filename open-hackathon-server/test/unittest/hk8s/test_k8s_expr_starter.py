@@ -34,6 +34,6 @@ class K8SExprStarterTest(unittest.TestCase):
     #@unittest.skip("skip test_start_expr")
     def test_start_expr(self):
         #TODO: mock record in db
-        ctx = Context(template = template, user = user, hackathon = hackathon)
+        ctx = Context(template = "test_template", user = "test_user", hackathon = "test_hackathon")
         self.assertTrue(self.service.start_expr(ctx))
 
