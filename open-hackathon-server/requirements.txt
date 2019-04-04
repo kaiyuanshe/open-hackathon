@@ -14,6 +14,6 @@ pexpect==4.0.1
 mailthon==0.1.1
 pymongo==3.2.1
 mongoengine==0.10.6
-kubernetes==8.0.0
+kubernetes==9.0.0
 lxml==4.3.0
 pycrypto==2.6.1

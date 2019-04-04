@@ -112,6 +112,7 @@ class VE_PROVIDER:
     ALAUDA = 2
     K8S = 3
 
+
 class AZURE_RESOURCE_TYPE:
     """Resource type used by ALOperation(Azure log operation)"""
     STORAGE_ACCOUNT = 'storage account'
@@ -262,6 +263,7 @@ class HACK_STATUS:
     ONLINE = 1
     OFFLINE = 2
     APPLY_ONLINE = 3
+
 
 class HACK_TYPE:
     """
@@ -527,3 +529,10 @@ class CLOUD_PROVIDER:
     NONE = 0
     AZURE = 1
     ALAUDA = 2
+
+
+class K8S_DEPLOYMENT_STATUS:
+    PENDING = 0
+    AVAILABLE = 1
+    PAUSE = 2
+    ERROR = 3

@@ -3,84 +3,179 @@
 This file is covered by the LICENSING file in the root of this project.
 """
 
-import sys
+from urllib3 import disable_warnings
+from urllib3.exceptions import InsecureRequestWarning, HTTPError
 
-
-from os import path
-from kubernetes import client, config, utils
+import yaml as yaml_tool
+from kubernetes import client, utils
+from kubernetes.client.rest import ApiException
 
 from hackathon import RequiredFeature, Component, Context
-from hackathon.constants import HEALTH, HEALTH_STATUS, HACKATHON_CONFIG, CLOUD_PROVIDER
+from hackathon.constants import HEALTH, HEALTH_STATUS, HACKATHON_CONFIG, K8S_DEPLOYMENT_STATUS
 from hackathon.hazure.service_adapter import ServiceAdapter
 
-sys.path.append("..")
+from .yaml_helper import YamlBuilder
+from .errors import DeploymentError, ServiceError
 
 __all__ = ["K8SServiceAdapter"]
+disable_warnings(InsecureRequestWarning)
+
 
 class K8SServiceAdapter(ServiceAdapter):
 
-    def __init__(self, config_file):
-        self.default_kube_config_file = "./kubeconfig.json"
+    def __init__(self, api_url, token, namespace):
+        configuration = client.Configuration()
+        configuration.host = api_url
+        configuration.api_key['authorization'] = 'bearer ' + token
+        # FIXME import ca cert file?
+        configuration.verify_ssl = False
 
-        if config_file == None :
-            self.kube_config_file = self.default_config_file
-        else:
-            self.kube_config_file = config_file
+        self.namespace = namespace
+        self.api_url = api_url
+        self.api_client = client.ApiClient(configuration)
+        super(K8SServiceAdapter, self).__init__(self.api_client)
 
-        config.load_kube_config(self.kube_config_file)
-        self.k8s_client = client.ApiClient()
+    def create_k8s_environment(self, template_unit, labels=None):
+        # auto create deployment and service for environment
+        yb = YamlBuilder(template_unit, labels)
+        yb.build()
+        self.create_k8s_service(yb.get_service())
+        deploy_name = self.create_k8s_deployment(yb.get_deployment())
 
-    def create_k8s_deployment_with_yaml(self, yaml, name, namespace):
-        try:
-            self.k8s_api = utils.create_from_yaml(self.k8s_client, yaml)
-            #see https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/AppsV1Api.md#read_namespaced_deployment
-            resp = self.k8s_api.read_namespaced_deployment(name, namespace)
-            return format(resp.metadata.name)
-        except Exception as e:
-            if 'Confilct' == e.reason:
-                return name
-            else:
-                self.log.error(e)
-                return None
+        # NEED check deployment status later.
+        return deploy_name
 
     def deployment_exists(self, name):
         return name in self.list_deployments(name)
 
-    def report_health(self):
-        raise NotImplementedError()
+    def report_health(self, timeout=20):
+        try:
+            api_instance = client.CoreV1Api(self.api_client)
+            api_instance.list_namespaced_pod(self.namespace, timeout_seconds=timeout)
+            return {HEALTH.STATUS: HEALTH_STATUS.OK}
+        except ApiException as e:
+            self.log.error(e)
+            return {
+                HEALTH.STATUS: HEALTH_STATUS.ERROR,
+                HEALTH.DESCRIPTION: "Get Pod info error: {}".format(e),
+            }
+        except HTTPError:
+            return {
+                HEALTH.STATUS: HEALTH_STATUS.ERROR,
+                HEALTH.DESCRIPTION: "Connect K8s ApiServer {} error: connection timeout".format(self.api_url),
+            }
 
+    def create_k8s_deployment(self, yaml):
+        api_instance = client.AppsV1Api(self.api_client)
+        if isinstance(yaml, str):
+            # Only support ONE deployment yaml
+            yaml = yaml_tool.load(yaml)
+        assert isinstance(yaml, dict), "Start a deployment without legal yaml."
+        metadata = yaml.get("metadata", {})
+        deploy_name = metadata.get("name")
 
+        try:
+            if self.get_deployment_by_name(deploy_name):
+                raise DeploymentError("Deployment name was existed.")
 
-    def start_k8s_service(self, name, namespace):
-        raise NotImplementedError()
+            api_instance.create_namespaced_deployment(self.namespace, yaml, async_req=False)
+        except ApiException as e:
+            self.log.error("Start deployment error: {}".format(e))
+            raise DeploymentError("Start deployment error: {}".format(e))
+        return deploy_name
 
+    def get_deployment_by_name(self, deployment_name):
+        api_instance = client.AppsV1Api(self.api_client)
+        try:
+            _deploy = api_instance.read_namespaced_deployment_status(deployment_name, self.namespace)
+        except ApiException:
+            return None
+        return _deploy
 
-    def stop_k8s_service(self):
-        raise NotImplementedError()
+    def get_deployment_status(self, deployment_name):
+        _deploy = self.get_deployment_by_name(deployment_name)
+        _status = _deploy.status
+        if not _status.replicas:
+            return K8S_DEPLOYMENT_STATUS.PAUSE
+        if _status.replicas == _status.available_replicas:
+            return K8S_DEPLOYMENT_STATUS.AVAILABLE
+        if _status.unavailable_replicas > 0:
+            return K8S_DEPLOYMENT_STATUS.ERROR
+        return K8S_DEPLOYMENT_STATUS.PENDING
 
+    def start_k8s_deployment(self, deployment_name):
+        _deploy = self.get_deployment_by_name(deployment_name)
+        api_instance = client.AppsV1Api(self.api_client)
+        if not _deploy:
+            raise DeploymentError("Deployment {} not found".format(deployment_name))
 
-    def ping(self, url, timeout=20):
-        pass
+        _spec = _deploy.spec
+        if _spec.replicas > 0:
+            return deployment_name
+        _spec.replicas = 1
+        api_instance.patch_namespaced_deployment(deployment_name, self.namespace, _deploy)
+        self.log.info("Started existed deployment: {}".format(deployment_name))
 
-#    def get_deployment_detail_by_name(self, deployment_name):
-#        return
+    def pause_k8s_deployment(self, deployment_name):
+        _deploy = self.get_deployment_by_name(deployment_name)
+        _spec = _deploy.spec
+        _spec.replicas = 0
+        api_instance = client.AppsV1Api(self.api_client)
+        try:
+            api_instance.patch_namespaced_deployment(deployment_name, self.namespace, _deploy)
+        except ApiException as e:
+            self.log.error("Pause deployment error: {}".format(e))
+            raise DeploymentError("Pause {} error {}".format(deployment_name, e))
+        self.log.info("Paused existed deployment: {}".format(deployment_name))
 
-    def list_deployments(self, deployment_name, timeout=20):
-        list = []
-        v1 = client.ExtensionsV1beta1Api()
-        #see https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/AppsV1Api.md#list_deployment_for_all_namespaces
-        ret = v1.list_deployment_for_all_namespaces(watch=False)
+    def delete_k8s_deployment(self, deployment_name):
+        api_instance = client.AppsV1Api(self.api_client)
+        try:
+            api_instance.delete_namespaced_deployment(deployment_name, self.namespace)
+        except ApiException as e:
+            self.log.error("Delete deployment error: {}".format(e))
+            raise DeploymentError("Delete {} error {}".format(deployment_name, e))
+        self.log.info("Deleted existed deployment: {}".format(deployment_name))
+
+    def create_k8s_service(self, yaml):
+        if isinstance(yaml, str):
+            # Only support ONE deployment yaml
+            yaml = yaml_tool.load(yaml)
+        assert isinstance(yaml, dict), "Create a service without legal yaml."
+
+        api_instance = client.CoreV1Api(self.api_client)
+        try:
+            api_instance.create_namespaced_service(self.namespace, yaml)
+        except ApiException as e:
+            self.log.error("Create service error: {}".format(e))
+            raise ServiceError("Create service error: {}".format(e))
+
+    def delete_k8s_service(self, service_name):
+        api_instance = client.CoreV1Api(self.api_client)
+        try:
+            api_instance.delete_namespaced_service(service_name, self.namespace)
+        except ApiException as e:
+            self.log.error("Delete service error: {}".format(e))
+            raise ServiceError("Delete service error: {}".format(e))
+
+    def ping(self, timeout=20):
+        report = self.report_health(timeout)
+        return report[HEALTH.STATUS] == HEALTH_STATUS.OK
+
+    def list_deployments(self, labels=None, timeout=20):
+        _deployments = []
+        kwargs = {"timeout_seconds": timeout, "watch": False}
+        if labels and isinstance(labels, dict):
+            label_selector = ",".join(["{}={}".format(k, v) for k, v in labels.items()])
+            kwargs['label_selector'] = label_selector
+
+        apps_v1_group = client.AppsV1Api(self.api_client)
+        try:
+            ret = apps_v1_group.list_namespaced_deployment(self.namespace, **kwargs)
+        except ApiException as e:
+            self.log.error(e)
+            return []
 
         for i in ret.items:
-            list.append(i.metadata.name)
-
-        return list
-
-    def get_deployment_by_name(self, deployment_name, namespace):
-        raise NotImplementedError()
-        #https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/AppsV1Api.md#read_namespaced_deployment
-        #deps = self.k8s_api.read_namespaced_deployment(deployment_name, namespace)
-        #return deps.metadata.available
-
-#if __name__ == '__main__':
-#    main()
+            _deployments.append(i.metadata.name)
+        return _deployments
