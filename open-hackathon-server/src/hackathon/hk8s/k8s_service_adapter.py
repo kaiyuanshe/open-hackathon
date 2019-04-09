@@ -75,7 +75,7 @@ class K8SServiceAdapter(ServiceAdapter):
         deploy_name = metadata.get("name")
 
         try:
-            if self.get_deployment_by_name(deploy_name):
+            if self.get_deployment_by_name(deploy_name, need_raise=False):
                 raise DeploymentError("Deployment name was existed.")
 
             api_instance.create_namespaced_deployment(self.namespace, yaml, async_req=False)
@@ -84,11 +84,13 @@ class K8SServiceAdapter(ServiceAdapter):
             raise DeploymentError("Start deployment error: {}".format(e))
         return deploy_name
 
-    def get_deployment_by_name(self, deployment_name):
+    def get_deployment_by_name(self, deployment_name, need_raise=True):
         api_instance = client.AppsV1Api(self.api_client)
         try:
-            _deploy = api_instance.read_namespaced_deployment_status(deployment_name, self.namespace)
+            _deploy = api_instance.read_namespaced_deployment(deployment_name, self.namespace)
         except ApiException:
+            if need_raise:
+                raise DeploymentError("Deplotment {} not found".format(deployment_name))
             return None
         return _deploy
 
