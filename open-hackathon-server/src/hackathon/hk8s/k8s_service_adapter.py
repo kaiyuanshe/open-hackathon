@@ -46,7 +46,7 @@ class K8SServiceAdapter(ServiceAdapter):
         return deploy_name
 
     def deployment_exists(self, name):
-        return name in self.list_deployments(name)
+        return self.get_deployment_by_name(name) != None
 
     def report_health(self, timeout=20):
         try:
