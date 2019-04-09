@@ -16,7 +16,7 @@ from mongoengine import Q, ValidationError
 from os.path import realpath, abspath, dirname
 
 from hackathon import Component, RequiredFeature
-from hackathon.hmongo.models import Team, TeamMember, TeamScore, TeamWork, Hackathon, UserHackathon, to_dic
+from hackathon.hmongo.models import Team, TeamMember, TeamScore, TeamWork, Hackathon, UserHackathon, to_dic, Azure
 from hackathon.hackathon_response import not_found, bad_request, precondition_failed, ok, forbidden
 from hackathon.constants import TEAM_MEMBER_STATUS, TEAM_SHOW_TYPE, HACK_USER_TYPE, HACKATHON_CONFIG
 
@@ -666,6 +666,38 @@ class TeamManager(Component):
                 break
 
         return ok()
+
+    def send_email_azure(self, kwargs):
+
+        # team information
+        team = self.__get_team_by_id(kwargs["id"])
+        if not team:
+            return not_found("team not exists")
+
+        azure = team.azure
+        if not azure.strip():
+            if Azure.objects(status="0").count() == 0:
+                return ok("请联系管理员.")
+            azure_info = Azure.objects(status="0").first()
+        else:
+            azure_info = Azure.objects(account=azure).first()
+        if not azure_info:
+            return ok("请联系管理员!")
+
+        primary_emails = []
+        for i in xrange(0, len(team.members)):
+            mem = team.members[i]
+            resp = self.user_manager.user_display_info(mem.user)
+            primary_emails.append(resp['emails'][0]['email'])
+
+        Azure.objects(account=azure_info.account).update_one(status="1")
+        Team.objects(id=team.id).update_one(azure=azure_info.account)
+
+        sender = ''
+        email_title = ''
+        email_content = ''
+
+        return self.util.send_emails(sender, primary_emails, email_title, email_content)
 
     def __init__(self):
         pass

@@ -64,6 +64,7 @@ def init_routes():
     api.add_resource(UserTeamShowResource, "/api/user/show/list")  # get all team_shows of a user
     api.add_resource(TeamMemberListResource, "/api/team/member/list")  # list team members
     api.add_resource(TeamTemplateResource, "/api/team/template")  # select or unselect template for team
+    api.add_resource(TeamSendEmailResource, "/api/team/email")  # send email
 
     # APIs for admin to manage hackathon and hackathon resources, features and users
     api.add_resource(AdminHackathonResource, "/api/admin/hackathon")  # create/update hackathon
