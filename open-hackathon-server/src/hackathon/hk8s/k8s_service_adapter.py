@@ -7,11 +7,10 @@ from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning, HTTPError
 
 import yaml as yaml_tool
-from kubernetes import client, utils
+from kubernetes import client
 from kubernetes.client.rest import ApiException
 
-from hackathon import RequiredFeature, Component, Context
-from hackathon.constants import HEALTH, HEALTH_STATUS, HACKATHON_CONFIG, K8S_DEPLOYMENT_STATUS
+from hackathon.constants import HEALTH, HEALTH_STATUS, K8S_DEPLOYMENT_STATUS
 from hackathon.hazure.service_adapter import ServiceAdapter
 
 from .yaml_helper import YamlBuilder
@@ -35,9 +34,9 @@ class K8SServiceAdapter(ServiceAdapter):
         self.api_client = client.ApiClient(configuration)
         super(K8SServiceAdapter, self).__init__(self.api_client)
 
-    def create_k8s_environment(self, template_unit, labels=None):
+    def create_k8s_environment(self, env_name, template_unit, labels=None):
         # auto create deployment and service for environment
-        yb = YamlBuilder(template_unit, labels)
+        yb = YamlBuilder(env_name, template_unit, labels)
         yb.build()
         self.create_k8s_service(yb.get_service())
         deploy_name = self.create_k8s_deployment(yb.get_deployment())

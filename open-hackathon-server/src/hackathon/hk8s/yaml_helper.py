@@ -1,9 +1,5 @@
 import re
-import string
-import random
 from copy import deepcopy
-import yaml as yaml_util
-from yaml.parser import ParserError
 
 from hackathon.template.template_constants import K8S_UNIT
 
@@ -41,17 +37,16 @@ SERVICE_TEMPLATE = {
 
 
 class YamlBuilder(object):
-    def __init__(self, template_unit, labels):
+    def __init__(self, env_name, template_unit, labels):
+        self.deploy_name = env_name
         self.deploy_yamls = deepcopy(DEPLOYMENT_TEMPLATE)
         self.svc_yamls = deepcopy(SERVICE_TEMPLATE)
         self.namespace = template_unit
         self.labels = labels or {}
 
-        self.template_name = template_unit.get_name()
-        m = RESOURCE_NAME_PATTERN.match(self.template_name)
-        if not m or not m.group() != self.template_name:
-            self.template_name = "".join(
-                filter(lambda x: x in string.ascii_letters, self.template_name))
+        m = RESOURCE_NAME_PATTERN.match(self.deploy_name)
+        if not m or not m.group() != self.deploy_name:
+            raise YmlParseError("Deployment name Cannot be used as a K8s resource name")
 
         self.cluster = template_unit.get_cluster()
         self.namespace = self.cluster[K8S_UNIT.CONFIG_NAMESPACES]
@@ -60,10 +55,9 @@ class YamlBuilder(object):
         self.resources = template_unit.get_resources()
 
     def build(self):
-        env_name = self.gen_resource_name(prefix="env")
+        env_name = self.deploy_name
         self.labels['env'] = env_name
-        deployment_name = self.gen_resource_name(
-            prefix="{}-".format(self.template_name))
+        deployment_name = self.deploy_name
         service_name = deployment_name
 
         # Gen Deployment
@@ -79,16 +73,17 @@ class YamlBuilder(object):
         p_metadata = template['metadata']
         assert isinstance(p_metadata, dict), "Pod metadata not a dict"
         p_metadata['labels'].update(self.labels)
-        p_metadata['name'] = self.template_name
+        p_metadata['name'] = self.deploy_name
 
         containers = []
         _requests = self.resources[K8S_UNIT.RESOURCES_REQUESTS]
         _limits = self.resources[K8S_UNIT.RESOURCES_LIMITS]
+        _count = 0
         for i in self.images:
             image = i[K8S_UNIT.IMAGES_IMAGE]
             containers.append({
                 'image': image,
-                'name': self.gen_resource_name(length=6),
+                'name': "{}-{}".format(self.deploy_name, _count),
                 'resources': {
                     'limits': {
                         'cpu': str(_limits[K8S_UNIT.RESOURCES_LIMITS_CPU]),
@@ -109,6 +104,7 @@ class YamlBuilder(object):
         s_metadata['labels'].update(self.labels)
 
         spec = self.svc_yamls['spec']
+        assert isinstance(spec, dict)
         spec['selector']['env'] = env_name
         ports = []
         for p in self.ports:
@@ -126,8 +122,3 @@ class YamlBuilder(object):
 
     def get_service(self):
         return self.svc_yamls
-
-    @staticmethod
-    def gen_resource_name(prefix='', length=8):
-        return str(prefix).lower() + ''.join(random.choice(
-            string.lowercase + string.digits) for _ in range(length))
