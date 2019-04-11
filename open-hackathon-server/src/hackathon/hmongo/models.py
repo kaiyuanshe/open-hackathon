@@ -407,3 +407,12 @@ class Experiment(HDocumentBase):
 
     def __init__(self, **kwargs):
         super(Experiment, self).__init__(**kwargs)
+
+
+class Azure(HDocumentBase):
+    account = StringField()
+    password = StringField()
+    status = StringField()
+
+    def __init__(self, **kwargs):
+        super(Azure, self).__init__(**kwargs)

@@ -40,6 +40,18 @@
                     <ul class="oh-users" id="talent_list">
                     </ul>
                 </div>
+
+                {% if not team.azure %}
+                    <div class="warp" id="azure_show_space">
+                        <button type="button" class="btn btn-sm btn-info" data-id={{ team.id }} data-role="send">获取账号</button>
+                    </div>
+                {% else %}
+                    <div class="warp" id="azure_show_space">
+                        <button type="button" class="btn btn-sm btn-info" data-id={{ team.id }} data-role="send">获取密码</button>
+                    </div>
+                {% endif %}
+
+
             </div>
 
             <div class="team-right">
