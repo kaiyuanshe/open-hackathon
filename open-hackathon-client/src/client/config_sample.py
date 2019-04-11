@@ -251,7 +251,8 @@ Config = {
                         "list": ["get"]
                     },
                     "show": ["get", "post", "delete"],
-                    "template": ["post", "delete"]
+                    "template": ["post", "delete"],
+                    "email": ["put"]
                 },
                 "talent": {
                     "list": ["get"]

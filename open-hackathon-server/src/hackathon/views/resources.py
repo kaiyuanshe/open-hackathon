@@ -743,3 +743,10 @@ class AdminHackathonNoticeResource(HackathonResource):
 class HackathonNoticeListResource(HackathonResource):
     def get(self):
         return hackathon_manager.get_hackathon_notice_list(self.context())
+
+
+class TeamSendEmailResource(HackathonResource):
+    @token_required
+    def put(self):
+        args = request.get_json()
+        return team_manager.send_email_azure(args)

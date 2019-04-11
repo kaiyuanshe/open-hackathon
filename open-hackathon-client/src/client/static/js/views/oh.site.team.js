@@ -79,6 +79,14 @@
         });
     }
 
+    function showAzureAccount() {
+         if("team" in hackathon_detail && "azure" in hackathon_detail["team"] && hackathon_detail["team"]["azure"]){
+             $('#azure_show_space').prepend('Azure 账号：' + hackathon_detail["team"]["azure"]);
+         } else {
+             $('#azure_show_space').prepend('暂无 Azure 账号');
+         }
+    }
+
     function isEdit() {
         return value;
     }
@@ -172,6 +180,7 @@
                 oh.comm.alert('错误', data.error.friendly_message);
             } else {
                 hackathon_detail = data;
+                showAzureAccount();
             }
         });
 
@@ -419,6 +428,21 @@
         });
     }
 
+    // send email
+    function sendEmailAzure(team_id) {
+        sendEmailTeam({id: team_id}).then(function (data) {
+            if (data.error) {
+                oh.comm.alert('错误', data.error.friendly_message);
+            } else {
+                oh.comm.alert("提示", "发送成功!");
+            }
+        });
+    }
+
+    function sendEmailTeam(data) {
+        return oh.api.team.email.put({body: data, header: {hackathon_name: hackathon_name}});
+    }
+
     // update the project cover
     function updateProjectCover(url) {
         updateTeam({id: tid, cover: url}).then(function (data) {
@@ -650,6 +674,14 @@
 
         $('body').on('click', '[data-role="logo-edit"]', function (e) {
             $('#teamLogoModal').modal('show');
+        });
+
+        $('body').on('click', '[data-role="send"]', function (e) {
+
+            var btn = $(this);
+            var team_id = btn.data('id');
+
+            sendEmailAzure(team_id);
         });
 
         $('#talent_list').on('click', '[data-role="denied"]', function (e) {
