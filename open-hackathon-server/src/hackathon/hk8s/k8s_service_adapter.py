@@ -7,11 +7,10 @@ from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning, HTTPError
 
 import yaml as yaml_tool
-from kubernetes import client, utils
+from kubernetes import client
 from kubernetes.client.rest import ApiException
 
-from hackathon import RequiredFeature, Component, Context
-from hackathon.constants import HEALTH, HEALTH_STATUS, HACKATHON_CONFIG, K8S_DEPLOYMENT_STATUS
+from hackathon.constants import HEALTH, HEALTH_STATUS, K8S_DEPLOYMENT_STATUS
 from hackathon.hazure.service_adapter import ServiceAdapter
 
 from .yaml_helper import YamlBuilder
@@ -35,9 +34,9 @@ class K8SServiceAdapter(ServiceAdapter):
         self.api_client = client.ApiClient(configuration)
         super(K8SServiceAdapter, self).__init__(self.api_client)
 
-    def create_k8s_environment(self, template_unit, labels=None):
+    def create_k8s_environment(self, env_name, template_unit, labels=None):
         # auto create deployment and service for environment
-        yb = YamlBuilder(template_unit, labels)
+        yb = YamlBuilder(env_name, template_unit, labels)
         yb.build()
         self.create_k8s_service(yb.get_service())
         deploy_name = self.create_k8s_deployment(yb.get_deployment())
@@ -75,7 +74,7 @@ class K8SServiceAdapter(ServiceAdapter):
         deploy_name = metadata.get("name")
 
         try:
-            if self.get_deployment_by_name(deploy_name):
+            if self.get_deployment_by_name(deploy_name, need_raise=False):
                 raise DeploymentError("Deployment name was existed.")
 
             api_instance.create_namespaced_deployment(self.namespace, yaml, async_req=False)
@@ -84,11 +83,13 @@ class K8SServiceAdapter(ServiceAdapter):
             raise DeploymentError("Start deployment error: {}".format(e))
         return deploy_name
 
-    def get_deployment_by_name(self, deployment_name):
+    def get_deployment_by_name(self, deployment_name, need_raise=True):
         api_instance = client.AppsV1Api(self.api_client)
         try:
-            _deploy = api_instance.read_namespaced_deployment_status(deployment_name, self.namespace)
+            _deploy = api_instance.read_namespaced_deployment(deployment_name, self.namespace)
         except ApiException:
+            if need_raise:
+                raise DeploymentError("Deplotment {} not found".format(deployment_name))
             return None
         return _deploy
 

@@ -395,6 +395,7 @@ class VirtualEnvironment(DynamicEmbeddedDocument):
     azure_resource = EmbeddedDocumentField(AzureVirtualMachine)
     k8s_resource = DictField()
 
+
 class Experiment(HDocumentBase):
     status = IntField()  # EStatus in enum.py
     last_heart_beat_time = DateTimeField()

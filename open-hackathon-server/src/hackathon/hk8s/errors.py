@@ -24,4 +24,3 @@ class DeploymentError(EnvError):
 
 class ServiceError(EnvError):
     err_id = "K8s service error"
-
