@@ -168,7 +168,7 @@ class AZURE_UNIT:
 
 class K8S_UNIT:
     """constants for k8s virtual_environment in template file"""
-    NAME = 'Kubernetes'
+    NAME = 'name'
 
     CONFIG_CLUSTER = 'cluster'
     CONFIG_NAMESPACES = "namespace"
