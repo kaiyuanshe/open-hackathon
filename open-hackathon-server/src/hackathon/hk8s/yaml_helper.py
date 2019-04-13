@@ -38,14 +38,16 @@ SERVICE_TEMPLATE = {
 
 class YamlBuilder(object):
     def __init__(self, env_name, template_unit, labels):
-        self.deploy_name = env_name
+        self.deploy_name = str(env_name).lower()
         self.deploy_yamls = deepcopy(DEPLOYMENT_TEMPLATE)
         self.svc_yamls = deepcopy(SERVICE_TEMPLATE)
         self.namespace = template_unit
-        self.labels = labels or {}
+        self.labels = {}
+        for k, v in labels.items():
+            self.labels[str(k)] = str(v)
 
         m = RESOURCE_NAME_PATTERN.match(self.deploy_name)
-        if not m or not m.group() != self.deploy_name:
+        if not m or m.group() != self.deploy_name:
             raise YmlParseError("Deployment name Cannot be used as a K8s resource name")
 
         self.cluster = template_unit.get_cluster()

@@ -76,7 +76,7 @@ class K8SExprStarter(ExprStarter):
                                 id="schedule_stop_" + str(ctx.experiment_id), seconds=0)
 
     def schedule_create_k8s_service(self, context):
-        template_unit = context.template_content.units
+        template_unit = context.template_content.units[0]
         experiment = Experiment.objects.get(id=context.experiment_id)
         virtual_env = experiment.virtual_environments[0]
         k8s_dict = virtual_env.k8s_resource
@@ -166,13 +166,15 @@ class K8SExprStarter(ExprStarter):
         count = 0
         name = None
         while count < 100:
+            count += 1
             name = "{}-{}-{}".format(template_unit.name, user_id, count)
             if name not in _names:
                 break
         if count >= 100:
             raise RuntimeError("Can't get useful env name.")
 
-        _max_port = 0
+        # TODO do not leave magic number
+        _max_port = 31000
         for v in _virtual_envs:
             k8s_resource = v.k8s_resource
             _ports = k8s_resource['ports']
@@ -191,7 +193,7 @@ class K8SExprStarter(ExprStarter):
             p[K8S_UNIT.PORTS_PUBLIC_PORT] = _max_port
 
         return {
-            "name": name,
+            "name": "{}".format(name).lower(),
             "ports": ports,
         }
 
@@ -209,7 +211,7 @@ class K8SExprStarter(ExprStarter):
 
     @staticmethod
     def __get_adapter_from_ctx(adapter_class, context):
-        template_unit = context.template_content.units
+        template_unit = context.template_content.units[0]
         cluster = template_unit.get_cluster()
         api_url = cluster[K8S_UNIT.CONFIG_API_SERVER]
         token = cluster[K8S_UNIT.CONFIG_API_TOKEN]

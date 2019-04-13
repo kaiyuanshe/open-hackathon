@@ -120,3 +120,9 @@ class K8STemplateUnit(TemplateUnit):
 
     def set_resources(self, resources):
         self.dic[K8S_UNIT.RESOURCES] = resources
+
+    def __getattr__(self, item):
+        if item in self.__getattribute__("dic"):
+            return self.__getattribute__("dic")[item]
+        return self.__getattribute__(item)
+
