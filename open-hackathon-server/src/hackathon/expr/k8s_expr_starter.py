@@ -93,7 +93,7 @@ class K8SExprStarter(ExprStarter):
 
             # check deployment's status
             if self.__wait_for_k8s_status(adapter, virtual_env.name, K8S_DEPLOYMENT_STATUS.AVAILABLE):
-                self.__on_message("k8s_service_create_completed", context)
+                self.__on_create_success(context)
             else:
                 self.__on_message("k8s_service_create_failed", context)
         except Exception as e:
@@ -110,7 +110,7 @@ class K8SExprStarter(ExprStarter):
 
             adapter.start_k8s_deployment(virtual_env.name)
             if self.__wait_for_k8s_status(adapter, virtual_env.name, K8S_DEPLOYMENT_STATUS.AVAILABLE):
-                self.__on_message("k8s_service_start_completed", context)
+                self.__on_message("k8s_service_start_sucess", context)
             else:
                 self.__on_message("k8s_service_start_failed", context)
         except Exception as e:
@@ -217,3 +217,28 @@ class K8SExprStarter(ExprStarter):
         token = cluster[K8S_UNIT.CONFIG_API_TOKEN]
         namespace = cluster[K8S_UNIT.CONFIG_NAMESPACES]
         return adapter_class(api_url, token, namespace)
+
+    @staticmethod
+    def __update_ve_paras(context):
+        experiment = Experiment.objects.get(id=context.experiment_id)
+        ve = experiment.virtual_environments
+        k8s_dict = virtual_env.k8s_resource
+        gc = {
+            K8S_UNIT.REMOTE_PARAMETER_NAME:k8s_dict['name'],
+            K8S_UNIT.REMOTE_PARAMETER_DISPLAY_NAME: k8s_dict['name'],
+            K8S_UNIT.REMOTE_PARAMETER_HOST_NAME: "127.0.0.1", #to be hard coded
+            K8S_UNIT.REMOTE_PARAMETER_PROTOCOL:"vnc" ,
+            K8S_UNIT.REMOTE_PARAMETER_PORT: k8s_dict['ports'][K8S_UNIT.PORTS_PORT],
+            K8S_UNIT.REMOTE_PARAMETER_USER_NAME:context.user_id,
+            K8S_UNIT.REMOTE_PARAMETER_PASSWORD: "",
+        }
+
+        ve.remote_paras = gc
+        experiment.save()
+
+
+
+    @staticmethod
+    def __on_create_success(context):
+        __update_ve_paras(context)
+

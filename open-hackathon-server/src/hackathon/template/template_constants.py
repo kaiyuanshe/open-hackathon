@@ -189,6 +189,16 @@ class K8S_UNIT:
     REMOTE_PASSWORD = 'password'
     REMOTE_PORT = 'port'
 
+
+    # remote parameter name
+    REMOTE_PARAMETER_NAME = 'name'
+    REMOTE_PARAMETER_DISPLAY_NAME = 'displayname'
+    REMOTE_PARAMETER_HOST_NAME = 'hostname'
+    REMOTE_PARAMETER_PROTOCOL = 'protocol'
+    REMOTE_PARAMETER_PORT = 'port'
+    REMOTE_PARAMETER_USER_NAME = 'username'
+    REMOTE_PARAMETER_PASSWORD = 'password'
+
     IMAGES = 'images'
     IMAGES_IMAGE = 'image'
 
