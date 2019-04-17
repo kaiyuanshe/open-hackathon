@@ -14,7 +14,7 @@ from mongoengine import Q
 from hackathon import Component, RequiredFeature, Context
 from hackathon.constants import EStatus, VERemoteProvider, VE_PROVIDER, VEStatus, ReservedUser, \
     HACK_NOTICE_EVENT, HACK_NOTICE_CATEGORY, CLOUD_PROVIDER, HACKATHON_CONFIG
-from hackathon.hmongo.models import Experiment, User, Hackathon, UserHackathon
+from hackathon.hmongo.models import Experiment, User, Hackathon, UserHackathon, Template
 from hackathon.hackathon_response import not_found, ok
 
 __all__ = ["ExprManager"]
@@ -226,6 +226,10 @@ class ExprManager(Component):
         starter = None
         if not hackathon or not template:
             return starter
+
+        # TODO Interim workaround for kubernetes, need real implementation
+        if hackathon.config.get('cloud_provider') == CLOUD_PROVIDER.KUBERNETES:
+            return RequiredFeature("k8s_service")
 
         if template.provider == VE_PROVIDER.DOCKER:
             if HACKATHON_CONFIG.CLOUD_PROVIDER in hackathon.config:
