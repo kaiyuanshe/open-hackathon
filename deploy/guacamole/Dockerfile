@@ -6,7 +6,7 @@
 ### Dockerfile for guacamole
 ### based on guacamole official image
 
-FROM guacamole/guacamole:latest
+FROM guacamole/guacamole:0.9.14
 
 ENV GUACAMOLE_HOME /etc/guacamole
 
