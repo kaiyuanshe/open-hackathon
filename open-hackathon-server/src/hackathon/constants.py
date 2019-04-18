@@ -529,6 +529,7 @@ class CLOUD_PROVIDER:
     NONE = 0
     AZURE = 1
     ALAUDA = 2
+    KUBERNETES = 3
 
 
 class K8S_DEPLOYMENT_STATUS:

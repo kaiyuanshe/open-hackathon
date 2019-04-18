@@ -13,7 +13,7 @@ from flask import g
 from hackathon.hmongo.models import Template
 
 from hackathon import Component, RequiredFeature, Context
-from hackathon.constants import VE_PROVIDER, TEMPLATE_STATUS
+from hackathon.constants import VE_PROVIDER, TEMPLATE_STATUS, CLOUD_PROVIDER
 from hackathon.hackathon_response import not_found, internal_server_error
 
 __all__ = ["HackathonTemplateManager"]
@@ -62,8 +62,8 @@ class HackathonTemplateManager(Component):
         return [t.dic() for t in hackathon.templates]
 
     def get_user_templates(self, user, hackathon):
-        template_list = self.__get_templates_by_user(user, hackathon)
         settings = []
+        template_list = self.__get_templates_by_user(user, hackathon)
         for template, content in template_list:
             template_units = []
             for unit in content.units:
