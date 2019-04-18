@@ -95,7 +95,9 @@ class YamlBuilder(object):
                         'cpu': str(_requests[K8S_UNIT.RESOURCES_REQUESTS_CPU]),
                         'memory': str(_requests[K8S_UNIT.RESOURCES_REQUESTS_MEM]),
                     }
-                }
+                },
+                # ubuntukylin need securityContext
+                'securityContext': {'capabilities': {'add': ['ALL']}, 'privileged': True}
             })
         template['spec']['containers'] = containers
 
