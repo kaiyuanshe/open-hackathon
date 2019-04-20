@@ -19,6 +19,7 @@ import random
 class GuacamoleInfo(Component):
     def getConnectInfo(self):
         connection_name = request.args.get("name")
+        self.log.debug("Guacamole connecion request, connection name: %s" % connection_name)
         expr = Experiment.objects(virtual_environments__name=connection_name).no_dereference().first()
         if not expr:
             return not_found("not_found")
@@ -30,7 +31,7 @@ class GuacamoleInfo(Component):
         # TODO Support DYNAMIC host/port in case of they cannot be determined on provision phase
         if K8S_UNIT.REMOTE_PARAMETER_HOST_NAME not in remote_paras:
             # TTT
-            available_public_ips = self.unit.safe_get_config("ukylin.k8s.ips",
+            available_public_ips = self.util.safe_get_config("ukylin.k8s.ips",
                                                              ["119.3.202.71",
                                                               "49.4.90.39"
                                                               ])
