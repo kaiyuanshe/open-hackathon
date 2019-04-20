@@ -23,37 +23,6 @@ from template_content import TemplateContent
 
 __all__ = ["TemplateLibrary"]
 
-ubuntu_template = {
-    "name":"Kubernetes",
-    "description":"Kubernetes",
-    "virtual_environments":[
-        {
-            "images":[
-                {
-                    "image":"daocloud.io/w0v0w/ubuntukylin-vnc-docker:19.04-vnc-forever"
-                }
-            ],
-            "cluster":{
-                "token":"eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6InVidW50dS1hZG1pbi10b2tlbi01NzVuaiIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJ1YnVudHUtYWRtaW4iLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI1ZDAyOTU1My02MWU2LTExZTktYjBhMS1mYTE2M2U4YjkwYzQiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6ZGVmYXVsdDp1YnVudHUtYWRtaW4ifQ.SJZ9Ok2AXvTNOZREdM_pbgCYsgqhhrhEjKYtkI72kU8EE9--tqrzy-BmLdGat6paEhmAj5wGNWEoHSh-N_KgUE2hSD9Af1OoqHdPGX7wSjoWAugIXKUR1yD7SRhe3BtSkO8CgHVA2G8h3RQj1k5VYqLph64q8zAJVJjOu2yAFEkQ_JbHaUNXNywu3s_Dci7WLhUOrpjLOmeOyi7xPKaHGa1_UAwwpka5G5QRdqEL_EEWaG8rmK9nkrV5-A1K0lbinhzkCoz_CBH04W1N03wpDnX4yU0k_OCydLRKm6nAdCAs4NwdSKXNUJ_r-hdj3uVidRbT9v4iKSj5cYDtRs7LwA",
-                "namespace":"default",
-                "api_url":"https://119.3.202.71:6443"
-            },
-            "ports":[
-                {
-                    "public":True,
-                    "public_port":30006,
-                    "protocol":"TCP",
-                    "name":"UKylin",
-                    "port":5900
-                }
-            ],
-            "provider":3,
-            "name":"ukylin"
-        }
-    ]
-}
-
-
 
 class TemplateLibrary(Component):
     """Component to manage templates"""
@@ -99,7 +68,7 @@ class TemplateLibrary(Component):
 
             try:
                 # req = requests.get(template.url)
-                return TemplateContent.from_dict(ubuntu_template)
+                return TemplateContent.from_dict(self.util.get_config("ukylin.k8s.template"))
             except Exception as e:
                 self.log.warn("Fail to load template from remote file %s" % template.url)
                 self.log.error(e)
