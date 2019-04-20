@@ -168,7 +168,7 @@ Config = {
                     },
                     "experiment": {
                         "list": ["get"],
-                        "": ["post", "put"]
+                        "": ["post", "put", "delete"]
                     },
                     "team": {
                         "list": ["get"],

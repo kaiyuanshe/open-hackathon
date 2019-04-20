@@ -21,7 +21,6 @@ disable_warnings(InsecureRequestWarning)
 
 
 class K8SServiceAdapter(ServiceAdapter):
-
     def __init__(self, api_url, token, namespace):
         configuration = client.Configuration()
         configuration.host = api_url
@@ -35,6 +34,8 @@ class K8SServiceAdapter(ServiceAdapter):
         super(K8SServiceAdapter, self).__init__(self.api_client)
 
     def create_k8s_environment(self, env_name, template_unit, labels=None):
+        self.log.debug("create_k8s_environment, env_name:%s, unit: %s, labels: %s"
+                       % (env_name, str(template_unit), str(labels)))
         # auto create deployment and service for environment
         yb = YamlBuilder(env_name, template_unit, labels)
         yb.build()

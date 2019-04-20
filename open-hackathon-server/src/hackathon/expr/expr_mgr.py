@@ -78,7 +78,7 @@ class ExprManager(Component):
         :return:
         """
         self.log.debug("begin to stop %s" % str(expr_id))
-        expr = Experiment.objects(id=expr_id, status=EStatus.RUNNING).first()
+        expr = Experiment.objects(id=expr_id).first()
         if expr is not None:
             starter = self.get_starter(expr.hackathon, expr.template)
             if starter:
@@ -116,7 +116,8 @@ class ExprManager(Component):
         users = User.objects(name=user_name).all() if user_name else []
 
         if user_name and status:
-            experiments_pagi = Experiment.objects(hackathon=hackathon, status=status, user__in=users).paginate(page, per_page)
+            experiments_pagi = Experiment.objects(hackathon=hackathon, status=status, user__in=users).paginate(page,
+                                                                                                               per_page)
         elif user_name and not status:
             experiments_pagi = Experiment.objects(hackathon=hackathon, user__in=users).paginate(page, per_page)
         elif not user_name and status:
@@ -299,8 +300,9 @@ class ExprManager(Component):
         ret["remote_servers"] = remote_servers
 
         # return public accessible web url
+        ve_provider = expr.virtual_environments[0].provider
         public_urls = []
-        if expr.template.provider == VE_PROVIDER.DOCKER:
+        if ve_provider == VE_PROVIDER.DOCKER:
             for ve in expr.virtual_environments:
                 container = ve.docker_container
                 # to restart hosted_docker expr if it stopped.
@@ -313,7 +315,7 @@ class ExprManager(Component):
                         public_urls.append({
                             "name": p.name,
                             "url": p.url.format(container.host_server.public_dns, p.public_port)})
-        else:
+        elif ve_provider == VE_PROVIDER.AZURE:
             for ve in expr.virtual_environments:
                 vm = ve.azure_resource
                 if not vm or not vm.end_points:
@@ -325,6 +327,12 @@ class ExprManager(Component):
                             "name": endpoint.name,
                             "url": endpoint.url.format(vm.dns, endpoint.public_port)
                         })
+        elif ve_provider == VE_PROVIDER.K8S:
+            # TODO public accessible http url
+            public_urls.append({
+                "name": "活动教程",
+                "url": "http://www.ubuntukylin.com/public/pdf/UK1804install.pdf"
+            })
 
         ret["public_urls"] = public_urls
         return ret
