@@ -30,3 +30,9 @@ After project build successfully you will find the `openhackathon-gucamole-authe
 **_important_**
 
 We have already include the jar file in `deploy/guacamole` folder, so if only want to use it rather than contribute codes, making use of this jar file directly is the best choice. [How to install and configure guacamole for OHP?](https://github.com/kaiyuanshe/open-hackathon/blob/master/documents/developer_guide.md#install-and-configure-guacamole)
+
+#### tomcat7 deployment instructions
+
+- Copy the jar to GUACAMOLE_HOME/extensions. GUACAMOLE_HOME could be `/etc/guacamole` or `/usr/share/tomcat7/.guacamole`
+- Find the dependency json library `json-20090211.jar` to `/usr/share/tomcat7/lib`
+- Restart tomcat, make sure Open Hackathon extension loaded

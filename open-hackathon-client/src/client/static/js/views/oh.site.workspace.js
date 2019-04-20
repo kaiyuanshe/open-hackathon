@@ -114,7 +114,7 @@
                             <a href="javascript:;" title="" class="vm-box"  id="{name}"  data-url="{surl}">\
                                 <img src="{imgUrl}" alt="">\
                             </a>\
-                            <h4 name="dserie">{name}<h4>\
+                            <h4 name="dserie">{displayName}<h4>\
                         </div>\
                     </div>';
         var url_tmpe = '<h4><a href="{url}" target="_blank" style="text-decoration:underline;color:#00abec;" class="col-md-offset-1">{name}</a></h4>';
@@ -125,6 +125,7 @@
                     purl: "",
                     imgUrl: '/static/pic/dseries.png',
                     name: data.remote_servers[i].name,
+                    displayName: data.remote_servers[i].display_name,
                     surl: data.remote_servers[i].guacamole_host + "/guacamole/#/client/" + get_guacamole_server_name(data.remote_servers[i].name, "c", "openhackathon") + "?oh=" + $.cookie('token') + "&name=" + data.remote_servers[i].name + "&_=" + new Date().getTime()
                     })
                 $('#show').append(tmpe.format(dockers[i]));

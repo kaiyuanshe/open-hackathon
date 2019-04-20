@@ -234,14 +234,14 @@ class K8SExprStarter(ExprStarter):
         vnc_port = k8s_dict['ports']
         if len(vnc_port):
             gc = {
-                K8S_UNIT.REMOTE_PARAMETER_NAME: vnc_port[0][K8S_UNIT.PORTS_NAME],
-                K8S_UNIT.REMOTE_PARAMETER_DISPLAY_NAME: k8s_dict['name'],
+                K8S_UNIT.REMOTE_PARAMETER_NAME: virtual_env.name,
+                K8S_UNIT.REMOTE_PARAMETER_DISPLAY_NAME: vnc_port[0][K8S_UNIT.PORTS_NAME],
                 # TODO need to query K8S list all supported IPs and pick one randomly either here or connecting phase
                 # K8S_UNIT.REMOTE_PARAMETER_HOST_NAME: "49.4.90.39",
                 K8S_UNIT.REMOTE_PARAMETER_PROTOCOL: "vnc",
                 K8S_UNIT.REMOTE_PARAMETER_PORT: vnc_port[0][K8S_UNIT.PORTS_PUBLIC_PORT],
-                K8S_UNIT.REMOTE_PARAMETER_USER_NAME: "",
-                K8S_UNIT.REMOTE_PARAMETER_PASSWORD: "",
+                # K8S_UNIT.REMOTE_PARAMETER_USER_NAME: "",
+                # K8S_UNIT.REMOTE_PARAMETER_PASSWORD: "",
             }
             self.log.debug("expriment %s remote parameters: %s" % (expr.id, str(gc)))
             virtual_env.remote_paras = gc
