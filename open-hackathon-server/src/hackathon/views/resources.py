@@ -589,9 +589,9 @@ class AdminExperimentResource(HackathonResource):
 
     @admin_privilege_required
     def delete(self):
-        args = request.get_json()
-        if 'experiment_id' not in args:
-            return bad_request('experiment id invalid')
+        parse = reqparse.RequestParser()
+        parse.add_argument('experiment_id', type=str, location='args', required=True)
+        args = parse.parse_args()
         return expr_manager.stop_expr(args['experiment_id'])
 
 

@@ -105,5 +105,39 @@ Config = {
             "app_secret": "",
             "url_access_token": "https://oauth.api.189.cn/emp/oauth2/v3/access_token"
         }
+    },
+    "ukylin": {
+        "k8s": {
+            "ips": ["119.3.202.71", "49.4.90.39"],
+            "template": {
+                "name": "Kubernetes",
+                "description": "Kubernetes",
+                "virtual_environments": [
+                    {
+                        "images": [
+                            {
+                                "image": "SOME IMAGE"
+                            }
+                        ],
+                        "cluster": {
+                            "token": "SOME TOKEN",
+                            "namespace": "default",
+                            "api_url": "SOME URL"
+                        },
+                        "ports": [
+                            {
+                                "public": True,
+                                "public_port": 30006,
+                                "protocol": "TCP",
+                                "name": "UKylin",
+                                "port": 5900
+                            }
+                        ],
+                        "provider": 3,
+                        "name": "ukylin"
+                    }
+                ]
+            }
+        }
     }
 }

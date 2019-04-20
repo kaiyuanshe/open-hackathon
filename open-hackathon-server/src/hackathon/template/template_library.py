@@ -65,9 +65,10 @@ class TemplateLibrary(Component):
             #     with open(local_path) as template_file:
             #         return TemplateContent.from_dict(json.load(template_file))
             # else:
+
             try:
-                req = requests.get(template.url)
-                return TemplateContent.from_dict(json.loads(req.content))
+                # req = requests.get(template.url)
+                return TemplateContent.from_dict(self.util.get_config("ukylin.k8s.template"))
             except Exception as e:
                 self.log.warn("Fail to load template from remote file %s" % template.url)
                 self.log.error(e)

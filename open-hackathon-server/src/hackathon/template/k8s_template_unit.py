@@ -90,6 +90,12 @@ class K8STemplateUnit(TemplateUnit):
     def get_name(self):
         return self.dic[K8S_UNIT.NAME]
 
+    def get_description(self):
+        return self.get_name()
+
+    def get_type(self):
+        return "kubernetes"
+
     def get_cluster(self):
         return self.dic[K8S_UNIT.CONFIG_CLUSTER]
 
