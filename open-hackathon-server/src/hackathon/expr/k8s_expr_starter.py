@@ -92,11 +92,18 @@ class K8SExprStarter(ExprStarter):
             "experiment_id": context.experiment_id,
         }
         try:
-            adapter.create_k8s_environment(virtual_env.name, template_unit, labels=labels)
+            deploy_name, port = adapter.create_k8s_environment(virtual_env.name, template_unit, labels=labels)
+
+            expr = Experiment.objects(id=context.experiment_id).first()
+            virtual_env = expr.virtual_environments[0]
+            k8s_dict = virtual_env.k8s_resource
+            vnc_port = k8s_dict['ports']
+            vnc_port[0][K8S_UNIT.PORTS_PUBLIC_PORT] = port
+            expr.save()
 
             # check deployment's status
             if self.__wait_for_k8s_status(adapter, virtual_env.name, K8S_DEPLOYMENT_STATUS.AVAILABLE):
-                self.log.debug("k8s deployment succeeds: %s" % str(context));
+                self.log.debug("k8s deployment succeeds: %s" % str(context))
                 self.__on_create_success(context)
             else:
                 self.log.error("k8s deployment fails: %s" % str(context))
