@@ -114,13 +114,10 @@ class YamlBuilder(object):
         for p in self.ports:
             if not p[K8S_UNIT.PORTS_PUBLIC]:
                 continue
-            _p = {
+            ports.append({
                 'port': int(p[K8S_UNIT.PORTS_PORT]),
                 'protocol': str(p[K8S_UNIT.PORTS_PROTOCOL]).upper(),
-            }
-            if p.get(K8S_UNIT.PORTS_PUBLIC_PORT):
-                _p['nodePort'] = int(p[K8S_UNIT.PORTS_PUBLIC_PORT])
-            ports.append(_p)
+            })
         spec['ports'] = ports
 
     def get_deployment(self):

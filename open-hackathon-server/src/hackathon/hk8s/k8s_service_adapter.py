@@ -47,7 +47,7 @@ class K8SServiceAdapter(ServiceAdapter):
         ports = svc.spec.ports
         port = None
         if len(ports):
-            port = ports[0].nodePort
+            port = ports[0].node_port
 
         # NEED check deployment status later.
         return deploy_name, port
