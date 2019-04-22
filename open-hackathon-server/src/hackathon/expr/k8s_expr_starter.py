@@ -3,16 +3,15 @@
 This file is covered by the LICENSING file in the root of this project.
 """
 import copy
+import time
 
 from expr_starter import ExprStarter
-from hackathon import RequiredFeature, Context
 from hackathon.hmongo.models import Hackathon, VirtualEnvironment, Experiment, AzureVirtualMachine, AzureEndPoint
 from hackathon.constants import (VE_PROVIDER, VERemoteProvider, VEStatus, ADStatus, AVMStatus, EStatus)
 from hackathon.hackathon_response import internal_server_error
 from hackathon.constants import K8S_DEPLOYMENT_STATUS
 from hackathon.template.template_constants import K8S_UNIT
 from hackathon.hk8s.k8s_service_adapter import K8SServiceAdapter
-import time
 
 
 class K8SExprStarter(ExprStarter):
@@ -176,25 +175,8 @@ class K8SExprStarter(ExprStarter):
         if count >= 100:
             raise RuntimeError("Can't get useful env name.")
 
-        # TODO do not leave magic number
-        _max_port = 31000
-        for v in _virtual_envs:
-            k8s_resource = v.k8s_resource
-            _ports = k8s_resource['ports']
-            for p in _ports:
-                if not p[K8S_UNIT.PORTS_PUBLIC]:
-                    continue
-                if _max_port < p[K8S_UNIT.PORTS_PUBLIC_PORT]:
-                    _max_port = p[K8S_UNIT.PORTS_PUBLIC_PORT]
-
         # Ensure that the external ports do not conflict
         ports = copy.deepcopy(template_unit.get_ports())
-        for p in ports:
-            if not p[K8S_UNIT.PORTS_PUBLIC]:
-                continue
-            _max_port += 1
-            p[K8S_UNIT.PORTS_PUBLIC_PORT] = _max_port
-
         return {
             "name": "{}".format(name).lower(),
             "ports": ports,
@@ -209,6 +191,8 @@ class K8SExprStarter(ExprStarter):
             attempts -= 1
             time.sleep(10)
             if adapter.get_deployment_status(service_name) == status:
+                # sleep for setup
+                time.sleep(30)
                 return True
         return False
 
