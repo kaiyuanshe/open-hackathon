@@ -156,9 +156,6 @@ class K8SExprStarter(ExprStarter):
     @staticmethod
     def __create_useful_k8s_dict(hackathon, experiment, template_unit):
         # FIXME K8s dict need a db model, not a dict
-        user = experiment.user or None
-        user_id = user.id if user else "None"
-
         _experiments = Experiment.objects(hackathon=hackathon).all()
         _virtual_envs = []
         for e in _experiments:
@@ -170,7 +167,7 @@ class K8SExprStarter(ExprStarter):
         name = None
         while count < 100:
             count += 1
-            name = "{}-{}-{}".format(template_unit.name, user_id, count)
+            name = "{}-{}-{}".format(template_unit.name, experiment.id, count)
             if name not in _names:
                 break
         if count >= 100:
