@@ -97,7 +97,27 @@ class YamlBuilder(object):
                     }
                 },
                 # ubuntukylin need securityContext
-                'securityContext': {'capabilities': {'add': ['ALL']}, 'privileged': True}
+                'securityContext': {'capabilities': {'add': ['ALL']}, 'privileged': True},
+                "readinessProbe": {
+                    "failureThreshold": 3,
+                    "initialDelaySeconds": 30,
+                    "periodSeconds": 30,
+                    "successThreshold": 1,
+                    "tcpSocket": {
+                        "port": 5900  # VNC Port
+                    },
+                    "timeoutSeconds": 1
+                },
+                "livenessProbe": {
+                    "failureThreshold": 2,
+                    "initialDelaySeconds": 120,
+                    "periodSeconds": 30,
+                    "successThreshold": 1,
+                    "tcpSocket": {
+                        "port": 5900  # VNC Port
+                    },
+                    "timeoutSeconds": 1
+                },
             })
         template['spec']['containers'] = containers
 

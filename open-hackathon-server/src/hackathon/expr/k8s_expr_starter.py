@@ -198,8 +198,6 @@ class K8SExprStarter(ExprStarter):
             attempts -= 1
             time.sleep(10)
             if adapter.get_deployment_status(service_name) == status:
-                # sleep for setup
-                time.sleep(30)
                 return True
         return False
 
