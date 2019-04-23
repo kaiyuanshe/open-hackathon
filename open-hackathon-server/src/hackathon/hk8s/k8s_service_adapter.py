@@ -40,13 +40,20 @@ class K8SServiceAdapter(ServiceAdapter):
         yb = YamlBuilder(env_name, template_unit, labels)
         yb.build()
         self.create_k8s_service(yb.get_service())
+        svc = self.get_service_by_name(env_name)
         deploy_name = self.create_k8s_deployment(yb.get_deployment())
 
+        # FIXME single port for ukylin
+        ports = svc.spec.ports
+        port = None
+        if len(ports):
+            port = ports[0].node_port
+
         # NEED check deployment status later.
-        return deploy_name
+        return deploy_name, port
 
     def deployment_exists(self, name):
-        return self.get_deployment_by_name(name) != None
+        return self.get_deployment_by_name(name, need_raise=False) is not None
 
     def report_health(self, timeout=20):
         try:
@@ -93,6 +100,16 @@ class K8SServiceAdapter(ServiceAdapter):
                 raise DeploymentError("Deplotment {} not found".format(deployment_name))
             return None
         return _deploy
+
+    def get_service_by_name(self, service_name, need_raise=True):
+        api_instance = client.CoreV1Api(self.api_client)
+        try:
+            _svc = api_instance.read_namespaced_service(service_name, self.namespace)
+        except ApiException:
+            if need_raise:
+                raise ServiceError("Service {} not found".format(service_name))
+            return None
+        return _svc
 
     def get_deployment_status(self, deployment_name):
         _deploy = self.get_deployment_by_name(deployment_name)
