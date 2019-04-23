@@ -331,8 +331,12 @@ class ExprManager(Component):
         elif ve_provider == VE_PROVIDER.K8S:
             # TODO public accessible http url
             public_urls.append({
-                "name": "活动教程",
-                "url": "http://www.ubuntukylin.com/public/pdf/UK1804install.pdf"
+                "name": "码云操作说明",
+                "url": "http://www.ubuntukylin.com/public/pdf/gitee.pdf"
+            })
+            public_urls.append({
+                "name": "Github操作说明",
+                "url": "http://www.ubuntukylin.com/public/pdf/github.pdf"
             })
 
         ret["public_urls"] = public_urls
