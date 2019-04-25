@@ -1612,7 +1612,28 @@ angular.module('oh.controllers', [])
     }
 
     $scope.deleteExperiment = function(experiment) {
-      showTip('tip-danger', "暂时不支持删除操作");
+      dialog.confirm({
+        title: '提示',
+        body: '你确定要删除吗?'
+      }).then(function() {
+        api.admin.experiment.delete({
+          query: {
+            experiment_id: experiment.id
+          },
+          header: {
+            hackathon_name: $stateParams.name
+          }
+        }).then(function(data) {
+          if (data.error)
+            showTip('tip-danger', data.error.friendly_message);
+          else {
+            showTip('tip-success', '操作成功! 参赛者可以在活动页面重新启动实验环境。');
+            $timeout(function() {
+              $window.location.reload()
+            }, 3000);
+          }
+        });
+      });
     }
 
     $scope.refreshExperiment = function(experiment) {

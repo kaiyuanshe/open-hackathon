@@ -16,6 +16,7 @@ from hackathon import Component, RequiredFeature, Context
 from hackathon.constants import VE_PROVIDER, TEMPLATE_STATUS, CLOUD_PROVIDER
 from hackathon.hackathon_response import not_found, internal_server_error
 
+
 __all__ = ["HackathonTemplateManager"]
 
 

@@ -74,11 +74,11 @@ class K8STemplateUnit(TemplateUnit):
             K8S_UNIT.RESOURCES: {
                 K8S_UNIT.RESOURCES_REQUESTS: {
                     K8S_UNIT.RESOURCES_REQUESTS_CPU: "1",
-                    K8S_UNIT.RESOURCES_REQUESTS_MEM: "500Mi",
+                    K8S_UNIT.RESOURCES_REQUESTS_MEM: "3Gi",
                 },
                 K8S_UNIT.RESOURCES_LIMITS: {
-                    K8S_UNIT.RESOURCES_LIMITS_CPU: "10",
-                    K8S_UNIT.RESOURCES_LIMITS_MEM: "10Gi",
+                    K8S_UNIT.RESOURCES_LIMITS_CPU: "2",
+                    K8S_UNIT.RESOURCES_LIMITS_MEM: "4Gi",
                 },
             }
         }
@@ -89,6 +89,12 @@ class K8STemplateUnit(TemplateUnit):
 
     def get_name(self):
         return self.dic[K8S_UNIT.NAME]
+
+    def get_description(self):
+        return self.get_name()
+
+    def get_type(self):
+        return "kubernetes"
 
     def get_cluster(self):
         return self.dic[K8S_UNIT.CONFIG_CLUSTER]

@@ -3,19 +3,18 @@
 This file is covered by the LICENSING file in the root of this project.
 """
 import copy
+import time
 
 from expr_starter import ExprStarter
-from hackathon import RequiredFeature, Context
 from hackathon.hmongo.models import Hackathon, VirtualEnvironment, Experiment, AzureVirtualMachine, AzureEndPoint
 from hackathon.constants import (VE_PROVIDER, VERemoteProvider, VEStatus, ADStatus, AVMStatus, EStatus)
 from hackathon.hackathon_response import internal_server_error
 from hackathon.constants import K8S_DEPLOYMENT_STATUS
 from hackathon.template.template_constants import K8S_UNIT
 from hackathon.hk8s.k8s_service_adapter import K8SServiceAdapter
-import time
+
 
 class K8SExprStarter(ExprStarter):
-
     def _internal_start_expr(self, context):
         hackathon = Hackathon.objects.get(id=context.hackathon_id)
         experiment = Experiment.objects.get(id=context.experiment_id)
@@ -39,6 +38,7 @@ class K8SExprStarter(ExprStarter):
 
                     # save constructed experiment, and execute from first job content
                     experiment.save()
+                    self.log.debug("virtual_environments %s created, creating k8s..." % k8s_dict['name'])
                     self.__schedule_create(context)
             else:
                 self.__schedule_start(context)
@@ -53,7 +53,10 @@ class K8SExprStarter(ExprStarter):
         if not experiment:
             return internal_server_error('Failed stop k8s: experiment not found.')
         try:
+            context.virtual_environments = experiment.virtual_environments
             self.__schedule_stop(context)
+
+            experiment.delete()
         except Exception as e:
             self.log.error(e)
             experiment.status = EStatus.FAILED
@@ -89,12 +92,21 @@ class K8SExprStarter(ExprStarter):
             "experiment_id": context.experiment_id,
         }
         try:
-            adapter.create_k8s_environment(virtual_env.name, template_unit, labels=labels)
+            deploy_name, port = adapter.create_k8s_environment(virtual_env.name, template_unit, labels=labels)
+
+            expr = Experiment.objects(id=context.experiment_id).first()
+            virtual_env = expr.virtual_environments[0]
+            k8s_dict = virtual_env.k8s_resource
+            vnc_port = k8s_dict['ports']
+            vnc_port[0][K8S_UNIT.PORTS_PUBLIC_PORT] = port
+            expr.save()
 
             # check deployment's status
             if self.__wait_for_k8s_status(adapter, virtual_env.name, K8S_DEPLOYMENT_STATUS.AVAILABLE):
+                self.log.debug("k8s deployment succeeds: %s" % str(context))
                 self.__on_create_success(context)
             else:
+                self.log.error("k8s deployment fails: %s" % str(context))
                 self.__on_message("k8s_service_create_failed", context)
         except Exception as e:
             self.__on_message("k8s_service_create_failed", context)
@@ -117,11 +129,9 @@ class K8SExprStarter(ExprStarter):
             self.__on_message("k8s_service_start_failed", context)
 
     def schedule_stop_k8s_service(self, context):
-        experiment = Experiment.objects.get(id=context.experiment_id)
-        virtual_envs = experiment.virtual_environments
-        adapter = self.__get_adapter_from_ctx(K8SServiceAdapter, context)
-
+        virtual_envs = context.virtual_environments
         try:
+            adapter = self.__get_adapter_from_ctx(K8SServiceAdapter, context)
             for virtual_env in virtual_envs:
                 if adapter.get_deployment_status(virtual_env.name) == K8S_DEPLOYMENT_STATUS.PAUSE:
                     continue
@@ -131,12 +141,11 @@ class K8SExprStarter(ExprStarter):
             self.__on_message("k8s_service_stop_failed", context)
 
     def __on_message(self, msg, ctx):
-        self.log.debug("k8s on_message: %d" % msg)
+        self.log.debug("k8s on_message: {}".format(msg))
         # self.scheduler.add_once(
         # "k8s_service", "__msg_handler",
         # id="k8s_msg_handler_" + str(ctx.experiment_id),
         # context=ctx, seconds=ASYNC_OiP_QUERY_INTERVAL)
-
 
     def __msg_handler(msg, ctx):
         switcher = {
@@ -153,9 +162,6 @@ class K8SExprStarter(ExprStarter):
     @staticmethod
     def __create_useful_k8s_dict(hackathon, experiment, template_unit):
         # FIXME K8s dict need a db model, not a dict
-        user = experiment.user or None
-        user_id = user.id if user else "None"
-
         _experiments = Experiment.objects(hackathon=hackathon).all()
         _virtual_envs = []
         for e in _experiments:
@@ -167,42 +173,25 @@ class K8SExprStarter(ExprStarter):
         name = None
         while count < 100:
             count += 1
-            name = "{}-{}-{}".format(template_unit.name, user_id, count)
+            name = "{}-{}-{}".format(template_unit.name, experiment.id, count)
             if name not in _names:
                 break
         if count >= 100:
             raise RuntimeError("Can't get useful env name.")
 
-        # TODO do not leave magic number
-        _max_port = 31000
-        for v in _virtual_envs:
-            k8s_resource = v.k8s_resource
-            _ports = k8s_resource['ports']
-            for p in _ports:
-                if not p[K8S_UNIT.PORTS_PUBLIC]:
-                    continue
-                if _max_port < p[K8S_UNIT.PORTS_PUBLIC_PORT]:
-                    _max_port = p[K8S_UNIT.PORTS_PUBLIC_PORT]
-
         # Ensure that the external ports do not conflict
         ports = copy.deepcopy(template_unit.get_ports())
-        for p in ports:
-            if not p[K8S_UNIT.PORTS_PUBLIC]:
-                continue
-            _max_port += 1
-            p[K8S_UNIT.PORTS_PUBLIC_PORT] = _max_port
-
         return {
             "name": "{}".format(name).lower(),
             "ports": ports,
         }
 
-
-    @staticmethod
-    def __wait_for_k8s_status(adapter, service_name, status):
-        attempts = 10
+    def __wait_for_k8s_status(self, adapter, service_name, status):
+        attempts = 30
 
         while attempts:
+            self.log.debug("__wait_for_k8s_status, service_name: %s, target status: %d, remaining attempts: %d"
+                           % (service_name, status, attempts))
             attempts -= 1
             time.sleep(10)
             if adapter.get_deployment_status(service_name) == status:
@@ -218,27 +207,31 @@ class K8SExprStarter(ExprStarter):
         namespace = cluster[K8S_UNIT.CONFIG_NAMESPACES]
         return adapter_class(api_url, token, namespace)
 
-    @staticmethod
-    def __update_ve_paras(context):
-        experiment = Experiment.objects.get(id=context.experiment_id)
-        ve = experiment.virtual_environments
+    def __on_create_success(self, context):
+        self.log.debug("experiment started %s successfully. Setting remote parameters." % context.experiment_id)
+        # set experiment status
+        # update the status of virtual environment
+        expr = Experiment.objects(id=context.experiment_id).first()
+        virtual_env = expr.virtual_environments[0]
+
+        # guacamole parameters
         k8s_dict = virtual_env.k8s_resource
-        gc = {
-            K8S_UNIT.REMOTE_PARAMETER_NAME:k8s_dict['name'],
-            K8S_UNIT.REMOTE_PARAMETER_DISPLAY_NAME: k8s_dict['name'],
-            K8S_UNIT.REMOTE_PARAMETER_HOST_NAME: "127.0.0.1", #to be hard coded
-            K8S_UNIT.REMOTE_PARAMETER_PROTOCOL:"vnc" ,
-            K8S_UNIT.REMOTE_PARAMETER_PORT: k8s_dict['ports'][K8S_UNIT.PORTS_PORT],
-            K8S_UNIT.REMOTE_PARAMETER_USER_NAME:context.user_id,
-            K8S_UNIT.REMOTE_PARAMETER_PASSWORD: "",
-        }
+        # TODO need to choose right port/protocol based on template
+        vnc_port = k8s_dict['ports']
+        if len(vnc_port):
+            gc = {
+                K8S_UNIT.REMOTE_PARAMETER_NAME: virtual_env.name,
+                K8S_UNIT.REMOTE_PARAMETER_DISPLAY_NAME: vnc_port[0][K8S_UNIT.PORTS_NAME],
+                # TODO need to query K8S list all supported IPs and pick one randomly either here or connecting phase
+                # K8S_UNIT.REMOTE_PARAMETER_HOST_NAME: "49.4.90.39",
+                K8S_UNIT.REMOTE_PARAMETER_PROTOCOL: "vnc",
+                K8S_UNIT.REMOTE_PARAMETER_PORT: vnc_port[0][K8S_UNIT.PORTS_PUBLIC_PORT],
+                # K8S_UNIT.REMOTE_PARAMETER_USER_NAME: "",
+                # K8S_UNIT.REMOTE_PARAMETER_PASSWORD: "",
+            }
+            self.log.debug("expriment %s remote parameters: %s" % (expr.id, str(gc)))
+            virtual_env.remote_paras = gc
 
-        ve.remote_paras = gc
-        experiment.save()
-
-
-
-    @staticmethod
-    def __on_create_success(context):
-        __update_ve_paras(context)
-
+        virtual_env.status = VEStatus.RUNNING
+        expr.status = EStatus.RUNNING
+        expr.save()

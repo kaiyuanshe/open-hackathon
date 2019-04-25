@@ -95,7 +95,29 @@ class YamlBuilder(object):
                         'cpu': str(_requests[K8S_UNIT.RESOURCES_REQUESTS_CPU]),
                         'memory': str(_requests[K8S_UNIT.RESOURCES_REQUESTS_MEM]),
                     }
-                }
+                },
+                # ubuntukylin need securityContext
+                'securityContext': {'capabilities': {'add': ['ALL']}, 'privileged': True},
+                "readinessProbe": {
+                    "failureThreshold": 3,
+                    "initialDelaySeconds": 30,
+                    "periodSeconds": 30,
+                    "successThreshold": 1,
+                    "tcpSocket": {
+                        "port": 5900  # VNC Port
+                    },
+                    "timeoutSeconds": 1
+                },
+                "livenessProbe": {
+                    "failureThreshold": 2,
+                    "initialDelaySeconds": 120,
+                    "periodSeconds": 30,
+                    "successThreshold": 1,
+                    "tcpSocket": {
+                        "port": 5900  # VNC Port
+                    },
+                    "timeoutSeconds": 1
+                },
             })
         template['spec']['containers'] = containers
 
@@ -113,7 +135,6 @@ class YamlBuilder(object):
             if not p[K8S_UNIT.PORTS_PUBLIC]:
                 continue
             ports.append({
-                'nodePort': int(p[K8S_UNIT.PORTS_PUBLIC_PORT]),
                 'port': int(p[K8S_UNIT.PORTS_PORT]),
                 'protocol': str(p[K8S_UNIT.PORTS_PROTOCOL]).upper(),
             })
