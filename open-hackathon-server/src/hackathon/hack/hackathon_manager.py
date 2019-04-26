@@ -760,27 +760,24 @@ class HackathonManager(Component):
         Otherwise try to remove the schedule job
         """
         hackathon_list = Hackathon.objects()
-        for hack in hackathon_list:
-            job_id = "pre_allocate_expr_" + str(hack.id)
-            is_job_exists = self.scheduler.has_job(job_id)
-            if self.__is_pre_allocate_enabled(hack):
-                if is_job_exists:
-                    self.log.debug("pre_allocate job already exists for hackathon %s" % str(hack.name))
-                    continue
 
+        for hack in hackathon_list:
+
+            job_id = "pre_allocate_expr_" + str(hack.id)
+            job_exists = self.scheduler.has_job(job_id)
+            if job_exists:
+                continue
+
+            if self.__is_pre_allocate_enabled(hack):
                 self.log.debug("add pre_allocate job for hackathon %s" % str(hack.name))
                 next_run_time = self.util.get_now() + timedelta(seconds=(20 * random.random()))
                 pre_allocate_interval = self.__get_pre_allocate_interval(hack)
-                self.scheduler.add_interval(feature="expr_manager",
-                                            method="pre_allocate_expr",
-                                            id=job_id,
-                                            context=Context(hackathon_id=hack.id),
-                                            next_run_time=next_run_time,
-                                            seconds=pre_allocate_interval
-                                            )
-            elif is_job_exists:
-                self.log.debug("remove job for hackathon %s since pre_allocate is disabled" % str(hack.id))
-                self.scheduler.remove_job(job_id)
+                self.scheduler.add_once(feature="expr_manager",
+                                        method="pre_allocate_expr",
+                                        context=Context(hackathon_id=hack.id),
+                                        id=job_id,
+                                        seconds=0
+                                        )
         return True
 
     def hackathon_online(self, hackathon):
