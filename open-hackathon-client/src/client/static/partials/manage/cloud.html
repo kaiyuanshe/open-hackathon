@@ -1,8 +1,8 @@
 <div class="box">
   <h4 class="text-center" ng-show="!isProviderSelected">
-    {{'CLOUD_WEBPAGE_FIELDS.SELECT_CLOUD_PROVIDER' | translate}}
+    {{ 'CLOUD_WEBPAGE_FIELDS.SELECT_CLOUD_PROVIDER' | translate }}
   </h4>
-  <h4 class="text-center" ng-show="isProviderSelected">{{'CLOUD_WEBPAGE_FIELDS.CLOUD_PROVIDER' | translate}}</h4>
+  <h4 class="text-center" ng-show="isProviderSelected">{{ 'CLOUD_WEBPAGE_FIELDS.CLOUD_PROVIDER' | translate }}</h4>
 </div>
 <div class="col-lg-6 col-md-9 center">
   <form class="form-horizontal" ng-submit="setCloudProvider()" novalidate>
@@ -19,10 +19,10 @@
                 <img src="/static/pic/no-cloud.jpg">
               </div>
               <footer class="text-center" ng-show="!isProviderSelected">
-                {{'CLOUD_WEBPAGE_FIELDS.USE' | translate}}
+                {{ 'CLOUD_WEBPAGE_FIELDS.USE' | translate }}
               </footer>
               <footer class="text-center" ng-show="isProviderSelected">
-                {{'CLOUD_WEBPAGE_FIELDS.USED' | translate}}
+                {{ 'CLOUD_WEBPAGE_FIELDS.USED' | translate }}
               </footer>
             </div>
           </label>
@@ -38,10 +38,10 @@
                 <img src="/static/pic/azure_new.png">
               </div>
               <footer class="text-center" ng-show="!isProviderSelected">
-                {{'CLOUD_WEBPAGE_FIELDS.USE' | translate}}
+                {{ 'CLOUD_WEBPAGE_FIELDS.USE' | translate }}
               </footer>
               <footer class="text-center" ng-show="isProviderSelected">
-                {{'CLOUD_WEBPAGE_FIELDS.USED' | translate}}
+                {{ 'CLOUD_WEBPAGE_FIELDS.USED' | translate }}
               </footer>
             </div>
           </label>
@@ -57,10 +57,10 @@
                 <img src="/static/pic/alauda-logo-white.jpg">
               </div>
               <footer class="text-center" ng-show="!isProviderSelected">
-                {{'CLOUD_WEBPAGE_FIELDS.USE' | translate}}
+                {{ 'CLOUD_WEBPAGE_FIELDS.USE' | translate }}
               </footer>
               <footer class="text-center" ng-show="isProviderSelected">
-                {{'CLOUD_WEBPAGE_FIELDS.USED' | translate}}
+                {{ 'CLOUD_WEBPAGE_FIELDS.USED' | translate }}
               </footer>
             </div>
           </label>
@@ -76,10 +76,10 @@
                 <img src="/static/pic/kubernetes_logo_new.png">
               </div>
               <footer class="text-center" ng-show="!isProviderSelected">
-                {{'CLOUD_WEBPAGE_FIELDS.USE' | translate}}
+                {{ 'CLOUD_WEBPAGE_FIELDS.USE' | translate }}
               </footer>
               <footer class="text-center" ng-show="isProviderSelected">
-                {{'CLOUD_WEBPAGE_FIELDS.USED' | translate}}
+                {{ 'CLOUD_WEBPAGE_FIELDS.USED' | translate }}
               </footer>
             </div>
           </label>
@@ -94,43 +94,89 @@
         <div class="col-xs-12">
           <button type="submit" class="btn btn-primary btn-long"
                   ng-disabled="cloudProvider!='0' && cloudProvider!='1' && cloudProvider!='2' && cloudProvider!='3'">
-            <i class="fa fa-arrow-circle-o-right"></i> {{'OK' | translate}}
+            <i class="fa fa-arrow-circle-o-right"></i> {{ 'OK' | translate }}
           </button>
-          <a> {{'CLOUD_WEBPAGE_FIELDS.CONFIRM_HINT' | translate}} </a>
+          <a> {{ 'CLOUD_WEBPAGE_FIELDS.CONFIRM_HINT' | translate }} </a>
         </div>
       </div>
 
       <div class="text-center" ng-show="isProviderSelected && cloudProvider=='0'">
         <div class="col-xs-12">
-          <a> {{'CLOUD_WEBPAGE_FIELDS.NO_CLOUD_HINT' | translate}} </a>
+          <a> {{ 'CLOUD_WEBPAGE_FIELDS.NO_CLOUD_HINT' | translate }} </a>
         </div>
       </div>
 
       <div class="text-center" ng-show="isProviderSelected && !isAzureCertSet" ng-click="">
         <div class="col-xs-12">
-          <a href="{{redirectTo('manage.azurecert')}}"> {{'CLOUD_WEBPAGE_FIELDS.SET_AZURECERT_HINT' | translate}} </a>
+          <a href="{{ redirectTo('manage.azurecert') }}"> {{ 'CLOUD_WEBPAGE_FIELDS.SET_AZURECERT_HINT' | translate }} </a>
         </div>
       </div>
 
       <div class="text-center" ng-show="isProviderSelected && !isTemplateSet">
         <div class="col-xs-12">
-          <a href="{{redirectTo('manage.ve')}}"> {{'CLOUD_WEBPAGE_FIELDS.SET_TEMPLATE_HINT' | translate}} </a>
+          <a href="{{ redirectTo('manage.ve') }}"> {{ 'CLOUD_WEBPAGE_FIELDS.SET_TEMPLATE_HINT' | translate }} </a>
         </div>
       </div>
 
       <div class="text-center" ng-show="isProviderSelected && cloudProvider == '1' && isTemplateSet && isAzureCertSet">
         <div class="col-xs-12">
-          <a href="https://www.azure.cn/"> {{'CLOUD_WEBPAGE_FIELDS.AZURE_CONFIG_HINT' | translate}} </a>
+          <a href="https://www.azure.cn/"> {{ 'CLOUD_WEBPAGE_FIELDS.AZURE_CONFIG_HINT' | translate }} </a>
         </div>
       </div>
 
       <div class="text-center" ng-show="isProviderSelected && cloudProvider == '2' && isTemplateSet && isAzureCertSet">
         <div class="col-xs-12">
-          <a href="http://www.alauda.cn/"> {{'CLOUD_WEBPAGE_FIELDS.ALAUDA_CONFIG_HINT' | translate}} </a>
+          <a href="http://www.alauda.cn/"> {{ 'CLOUD_WEBPAGE_FIELDS.ALAUDA_CONFIG_HINT' | translate }} </a>
         </div>
       </div>
-
     </footer>
   </form>
+</div>
 
+<div class="box" ng-show="isProviderSelected">
+  <h4 class="text-center" ng-show="isProviderSelected">{{ 'CLOUD_WEBPAGE_FIELDS.ADVANCED_CONFIG' | translate }}</h4>
+</div>
+<div class="col-lg-6 col-md-9 center">
+  <div class="col-xs-12 center">
+    <form name="allocationForm" class="form-horizontal" ng-submit="updateAdvancedConfig()" novalidate>
+      <div class="form-group"></div>
+      <div class="form-group"
+           ng-class="{'has-error': allocationForm.pre_allocate_enabled.$touched && allocationForm.pre_allocate_enabled.$invalid,'has-success':allocationForm.pre_allocate_enabled.$touched && allocationForm.pre_allocate_enabled.$valid}">
+        <label for="inputPassword" class="col-xs-4 control-label" translate="CLOUD_WEBPAGE_FIELDS.PRE_ALLOCATE_ENABLED">PRE_ALLOCATE_ENABLED</label>
+        <div class="col-xs-8">
+          <input type="checkbox" name="pre_allocate_enabled" class="form-control" placeholder="" checked="pre_allocate_enabled"
+                 ng-model="pre_allocate_enabled">
+        </div>
+      </div>
+      <div class="form-group"
+           ng-class="{'has-error': allocationForm.pre_allocate_number.$touched && allocationForm.pre_allocate_number.$invalid,'has-success':allocationForm.pre_allocate_number.$touched && allocationForm.pre_allocate_number.$valid}">
+        <label for="inputPassword" class="col-xs-4 control-label" translate="CLOUD_WEBPAGE_FIELDS.PRE_ALLOCATE_NUMBER">PRE_ALLOCATE_NUMBER</label>
+        <div class="col-xs-4">
+          <input type="number" name="pre_allocate_number" class="form-control" placeholder="10"
+                 min="1" max="100" string-to-number ng-min="0" pattern="[0-9]+"
+                 ng-model="pre_allocate_number">
+          <div class="messages" ng-messages="allocationForm.pre_allocate_number.$error"
+               ng-if="allocationForm.pre_allocate_number.$touched">
+            <span ng-message="min"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.PRE_ALLOCATE_NUMBER' | translate }}"
+                                      tooltip-placement="right auto"></i></span>
+            <span ng-message="max"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.PRE_ALLOCATE_NUMBER' | translate }}"
+                                      tooltip-placement="right auto"></i></span>
+            <span ng-message="pattern"><i class="fa fa-close"
+                                          uib-tooltip="{{ 'VALIDATE.PRE_ALLOCATE_NUMBER' | translate }}"
+                                          tooltip-placement="right auto"></i></span>
+          </div>
+          <div class="messages" ng-if="allocationForm.pre_allocate_number.$touched && allocationForm.pre_allocate_number.$valid">
+            <i class="fa fa-check"></i>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-xs-offset-4 col-xs-8">
+          <button type="submit" class="btn btn-primary btn-long"
+                  ng-disabled="allocationForm.$invalid" translate="UPDATE">UPDATE
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
 </div>
