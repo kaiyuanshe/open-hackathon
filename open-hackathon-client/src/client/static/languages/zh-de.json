@@ -98,8 +98,6 @@
   },
   "VALIDATE": {
     "DATETIME": "请填写正确的日期时间",
-
-
     "EVENT_NAME_REQUIRED": "黑客松名称是必需的，不能为空",
     "EVENT_NAME_MINLENGTH": "黑客松名称必须5到20个字符",
     "EVENT_NAME_MAXLENGTH": "黑客松名称必须5到20个字符",
@@ -108,19 +106,17 @@
     "EVENT_START_TIME_MAX": "开始时间不能大于结束时间",
     "EVENT_END_TIME_REQUIRED": "请填写活动结束时间",
     "EVENT_END_TIME_MIN": "结束时间不能小于开始时间",
-
     "REGISTRATION_START_TIME_REQUIRED": "请填写报名开始时间",
     "REGISTRATION_START_TIME_MAX": "报名开始时间不能大于结束时间",
     "REGISTRATION_END_TIME_REQUIRED": "请填写报名结束时间",
     "REGISTRATION_END_TIME_MIN": "报名结束时间不能小于开始时间",
-
     "JUDGE_START_TIME_REQUIRED": "请填写评分开始时间",
     "JUDGE_START_TIME_MAX": "评分开始时间不能大于结束时间",
     "JUDGE_END_TIME_REQUIRED": "请填写评分结束时间",
     "JUDGE_END_TIME_MIN": "评分结束时间不能小于开始时间",
-
     "MAX_ENROLLMENT_MIN": "不能小于0，而0则表示无线人数",
-    "MAX_ENROLLMENT_PATTERN": "请输入整数"
+    "MAX_ENROLLMENT_PATTERN": "请输入整数",
+    "PRE_ALLOCATE_NUMBER": "请输入1-100之间的整数"
   },
   "TEMPLATE_STATUS": {
     "ALL": "全部",
@@ -179,7 +175,10 @@
     "SET_AZURECERT_HINT": "尚未设置Azure证书，点此进行设置～",
     "SET_TEMPLATE_HINT": "尚未设置模板，点此进行设置～",
     "AZURE_CONFIG_HINT": "配置完成，点此进入中国Azure官网。",
-    "ALAUDA_CONFIG_HINT": "配置完成，点此进入灵雀云官网。"
+    "ALAUDA_CONFIG_HINT": "配置完成，点此进入灵雀云官网。",
+    "ADVANCED_CONFIG": "云资源高级配置",
+    "PRE_ALLOCATE_ENABLED": "预置虚拟环境",
+    "PRE_ALLOCATE_NUMBER": "预置环境数量"
   },
   "EXPERIMENT_WEBPAGE_FIELDS": {
     "USERNAME": "用户名",
