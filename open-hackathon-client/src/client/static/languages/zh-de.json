@@ -116,7 +116,9 @@
     "JUDGE_END_TIME_MIN": "评分结束时间不能小于开始时间",
     "MAX_ENROLLMENT_MIN": "不能小于0，而0则表示无线人数",
     "MAX_ENROLLMENT_PATTERN": "请输入整数",
-    "PRE_ALLOCATE_NUMBER": "请输入1-100之间的整数"
+    "PRE_ALLOCATE_NUMBER": "请输入1-100之间的整数",
+    "PRE_ALLOCATE_CONCURRENT": "请输入1-10之间的整数",
+    "PRE_ALLOCATE_INTERVAL": "请输入有效整数，最少30秒，最多3600秒(1小时)"
   },
   "TEMPLATE_STATUS": {
     "ALL": "全部",
@@ -178,7 +180,9 @@
     "ALAUDA_CONFIG_HINT": "配置完成，点此进入灵雀云官网。",
     "ADVANCED_CONFIG": "云资源高级配置",
     "PRE_ALLOCATE_ENABLED": "预置虚拟环境",
-    "PRE_ALLOCATE_NUMBER": "预置环境数量"
+    "PRE_ALLOCATE_NUMBER": "预置环境数量",
+    "PRE_ALLOCATE_CONCURRENT": "并发数量",
+    "PRE_ALLOCATE_INTERVAL": "扫描间隔(秒）"
   },
   "EXPERIMENT_WEBPAGE_FIELDS": {
     "USERNAME": "用户名",

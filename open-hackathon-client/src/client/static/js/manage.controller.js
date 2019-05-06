@@ -1732,6 +1732,8 @@ angular.module('oh.controllers', [])
     $scope.isTemplateSet = true;
     $scope.pre_allocate_enabled = false;
     $scope.pre_allocate_number = 1;
+    $scope.pre_allocate_concurrent = 1;
+    $scope.pre_allocate_interval_second = 60;
 
     $scope.redirectTo = function(state){
       return $state.href(state, {
@@ -1768,6 +1770,8 @@ angular.module('oh.controllers', [])
 
           $scope.pre_allocate_enabled = typeof(data["pre_allocate_enabled"]) == "undefined" ? false : data["pre_allocate_enabled"];
           $scope.pre_allocate_number = typeof(data["pre_allocate_number"]) == "undefined" ? 1 : parseInt(data["pre_allocate_number"]);
+          $scope.pre_allocate_concurrent = typeof(data["pre_allocate_concurrent"]) == "undefined" ? 1 : parseInt(data["pre_allocate_concurrent"]);
+          $scope.pre_allocate_interval_second = typeof(data["pre_allocate_interval_second"]) == "undefined" ? 300 : parseInt(data["pre_allocate_interval_second"]);
         }
       });
     }
@@ -1814,7 +1818,9 @@ angular.module('oh.controllers', [])
         },
         body: {
           pre_allocate_enabled: $scope.pre_allocate_enabled,
-          pre_allocate_number: parseInt($scope.pre_allocate_number)
+          pre_allocate_number: parseInt($scope.pre_allocate_number),
+          pre_allocate_concurrent: parseInt($scope.pre_allocate_concurrent),
+          pre_allocate_interval_second: parseInt($scope.pre_allocate_interval_second)
         }
       }).then(function(data){
         if (data.error) {
