@@ -18,6 +18,8 @@ class K8SExprStarter(ExprStarter):
     def _internal_start_expr(self, context):
         hackathon = Hackathon.objects.get(id=context.hackathon_id)
         experiment = Experiment.objects.get(id=context.experiment_id)
+        pre_alloc_enabled = context.pre_alloc_enabled
+
         if not experiment or not hackathon:
             return internal_server_error('Failed starting k8s: experiment or hackathon not found.')
         user = experiment.user or None
@@ -38,15 +40,21 @@ class K8SExprStarter(ExprStarter):
 
                     # save constructed experiment, and execute from first job content
                     experiment.save()
-                    self.log.debug("virtual_environments %s created, creating k8s..." % k8s_dict['name'])
-                    self.__schedule_create(context)
+                    if pre_alloc_enabled == True:
+                        self.log.debug("pre allocate vn, creating k8s... %s" % k8s_dict['name'])
+                        return self.schedule_create_k8s_service(context)
+                    else:
+                        self.log.debug("virtual_environments %s created, creating k8s..." % k8s_dict['name'])
+                        self.__schedule_create(context)
             else:
                 self.__schedule_start(context)
         except Exception as e:
             self.log.error(e)
             experiment.status = EStatus.FAILED
             experiment.save()
-            return internal_server_error('Failed starting k8s')
+            return False
+
+        return True
 
     def _internal_stop_expr(self, context):
         experiment = Experiment.objects.get(id=context.experiment_id)
@@ -105,11 +113,14 @@ class K8SExprStarter(ExprStarter):
             if self.__wait_for_k8s_status(adapter, virtual_env.name, K8S_DEPLOYMENT_STATUS.AVAILABLE):
                 self.log.debug("k8s deployment succeeds: %s" % str(context))
                 self.__on_create_success(context)
+                return True
             else:
                 self.log.error("k8s deployment fails: %s" % str(context))
                 self.__on_message("k8s_service_create_failed", context)
         except Exception as e:
             self.__on_message("k8s_service_create_failed", context)
+
+        return False
 
     def schedule_start_k8s_service(self, context):
         experiment = Experiment.objects.get(id=context.experiment_id)
@@ -156,7 +167,6 @@ class K8SExprStarter(ExprStarter):
             "k8s_service_stop_completed": "k8s_service_stop_completed",
             "k8s_service_stop_failed": "k8s_service_stop_failed",
         }
-        msg = switcher.get(item, "nothing")
         # TODO: try to abstract common behavior
 
     @staticmethod
