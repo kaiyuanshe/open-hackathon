@@ -48,7 +48,6 @@ class ExprManager(Component):
         # new expr
         return self.__start_new_expr(hackathon, template, user)
 
-
     def restart_stopped_expr(self, experiment_id):
         # todo: now just support hosted_docker, not support for alauda and windows
         experiment = Experiment.objects(id=experiment_id).first()
@@ -156,15 +155,33 @@ class ExprManager(Component):
         self.log.debug("executing pre_allocate_expr for hackathon %s " % hackathon_id)
         hackathon = Hackathon.objects(id=hackathon_id).first()
         hackathon_templates = hackathon.templates
-        template = hackathon_templates[0]
-        query = Q(status=EStatus.STARTING) | Q(status=EStatus.RUNNING)
+        for template in hackathon_templates:
+            try:
+                template = template
+                pre_num = int(hackathon.config.get(HACKATHON_CONFIG.PRE_ALLOCATE_NUMBER, 1))
+                query = Q(status=EStatus.STARTING) | Q(status=EStatus.RUNNING)
+                curr_num = Experiment.objects(user=None, hackathon=hackathon, template=template).filter(query).count()
+                self.log.debug("pre_alloc_exprs: pre_num is %d, curr_num is %d, remain_num is %d " %
+                               (pre_num, curr_num, pre_num - curr_num))
 
-        pre_num = int(hackathon.config.get("pre_allocate_number", 1))
-        curr_num = Experiment.objects(user=None, hackathon=hackathon, template=template).filter(query).count()
-        self.log.debug("pre_alloc_exprs: pre_num is %d, curr_num is %d, remain_num is %d " % (pre_num, curr_num, pre_num - curr_num))
-
-        if curr_num < pre_num:
-            self.start_pre_alloc_exprs(None, template.name, hackathon.name, pre_num - curr_num)
+                # TODO Should support VE_PROVIDER.K8S only in future after k8s Template is supported
+                # if template.provider == VE_PROVIDER.K8S:
+                if curr_num < pre_num:
+                    start_num = Experiment.objects(user=None, template=template, status=EStatus.STARTING).count()
+                    allowed_currency = int(hackathon.config.get(HACKATHON_CONFIG.PRE_ALLOCATE_CONCURRENT, 1))
+                    if start_num >= allowed_currency:
+                        self.log.debug(
+                            "there are already %d Experiments starting, will check later ... " % allowed_currency)
+                        return
+                    else:
+                        remain_num = min(allowed_currency, pre_num) - start_num
+                        self.log.debug(
+                            "no starting template: %s , remain num is %d ... " % (template.name, remain_num))
+                        self.start_pre_alloc_exprs(None, template.name, hackathon.name, remain_num)
+                        break
+            except Exception as e:
+                self.log.error(e)
+                self.log.error("check default experiment failed")
 
     def assign_expr_to_admin(self, expr):
         """assign expr to admin to trun expr into pre_allocate_expr
@@ -228,17 +245,17 @@ class ExprManager(Component):
             template=template,
             user=user,
             hackathon=hackathon,
-            pre_alloc_enabled = False))
+            pre_alloc_enabled=False))
 
         return self.__report_expr_status(context.experiment)
 
-    def start_pre_alloc_exprs(self, user, template_name, hackathon_name=None, pre_alloc_num = 0):
+    def start_pre_alloc_exprs(self, user, template_name, hackathon_name=None, pre_alloc_num=0):
         self.log.debug("start_pre_alloc_exprs: %d " % pre_alloc_num)
-        if pre_alloc_num == 0: return
+        if pre_alloc_num == 0:
+            return
 
         hackathon = self.__verify_hackathon(hackathon_name)
         template = self.__verify_template(hackathon, template_name)
-
 
         starter = self.get_starter(hackathon, template)
         if not starter:
@@ -249,7 +266,7 @@ class ExprManager(Component):
                 template=template,
                 user=user,
                 hackathon=hackathon,
-                pre_alloc_enabled = True))
+                pre_alloc_enabled=True))
 
             if context == None:
                 self.log.debug("pre_alloc_num left: %d " % pre_alloc_num)

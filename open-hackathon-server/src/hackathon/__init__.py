@@ -269,7 +269,6 @@ def __init_schedule_jobs():
     sche = RequiredFeature("scheduler")
     if not util.is_local():
         hackathon_manager = RequiredFeature("hackathon_manager")
-        host_server_manager = RequiredFeature("docker_host_manager")
 
         # schedule job to check recycle operation
         next_run_time = util.get_now() + timedelta(seconds=10)

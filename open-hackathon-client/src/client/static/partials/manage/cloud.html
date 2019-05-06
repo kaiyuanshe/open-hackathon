@@ -170,6 +170,50 @@
           </div>
         </div>
       </div>
+      <div class="form-group"
+           ng-class="{'has-error': allocationForm.pre_allocate_concurrent.$touched && allocationForm.pre_allocate_concurrent.$invalid,'has-success':allocationForm.pre_allocate_concurrent.$touched && allocationForm.pre_allocate_concurrent.$valid}">
+        <label for="inputPassword" class="col-xs-4 control-label" translate="CLOUD_WEBPAGE_FIELDS.PRE_ALLOCATE_CONCURRENT">PRE_ALLOCATE_CONCURRENT</label>
+        <div class="col-xs-4">
+          <input type="number" name="pre_allocate_concurrent" class="form-control" placeholder="1"
+                 min="1" max="10" string-to-number ng-min="1" pattern="[0-9]+"
+                 ng-model="pre_allocate_concurrent">
+          <div class="messages" ng-messages="allocationForm.pre_allocate_concurrent.$error"
+               ng-if="allocationForm.pre_allocate_concurrent.$touched">
+            <span ng-message="min"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.PRE_ALLOCATE_CONCURRENT' | translate }}"
+                                      tooltip-placement="right auto"></i></span>
+            <span ng-message="max"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.PRE_ALLOCATE_CONCURRENT' | translate }}"
+                                      tooltip-placement="right auto"></i></span>
+            <span ng-message="pattern"><i class="fa fa-close"
+                                          uib-tooltip="{{ 'VALIDATE.PRE_ALLOCATE_CONCURRENT' | translate }}"
+                                          tooltip-placement="right auto"></i></span>
+          </div>
+          <div class="messages" ng-if="allocationForm.pre_allocate_concurrent.$touched && allocationForm.pre_allocate_concurrent.$valid">
+            <i class="fa fa-check"></i>
+          </div>
+        </div>
+      </div>
+      <div class="form-group"
+           ng-class="{'has-error': allocationForm.pre_allocate_interval_second.$touched && allocationForm.pre_allocate_interval_second.$invalid,'has-success':allocationForm.pre_allocate_interval_second.$touched && allocationForm.pre_allocate_interval_second.$valid}">
+        <label for="inputPassword" class="col-xs-4 control-label" translate="CLOUD_WEBPAGE_FIELDS.PRE_ALLOCATE_INTERVAL">PRE_ALLOCATE_INTERVAL</label>
+        <div class="col-xs-4">
+          <input type="number" name="pre_allocate_interval_second" class="form-control" placeholder="300"
+                 min="30" max="3600" string-to-number ng-min="1" pattern="[0-9]+"
+                 ng-model="pre_allocate_interval_second">
+          <div class="messages" ng-messages="allocationForm.pre_allocate_interval_second.$error"
+               ng-if="allocationForm.pre_allocate_interval_second.$touched">
+            <span ng-message="min"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.PRE_ALLOCATE_INTERVAL' | translate }}"
+                                      tooltip-placement="right auto"></i></span>
+            <span ng-message="max"><i class="fa fa-close" uib-tooltip="{{ 'VALIDATE.PRE_ALLOCATE_INTERVAL' | translate }}"
+                                      tooltip-placement="right auto"></i></span>
+            <span ng-message="pattern"><i class="fa fa-close"
+                                          uib-tooltip="{{ 'VALIDATE.PRE_ALLOCATE_INTERVAL' | translate }}"
+                                          tooltip-placement="right auto"></i></span>
+          </div>
+          <div class="messages" ng-if="allocationForm.pre_allocate_interval_second.$touched && allocationForm.pre_allocate_interval_second.$valid">
+            <i class="fa fa-check"></i>
+          </div>
+        </div>
+      </div>
       <div class="form-group">
         <div class="col-xs-offset-4 col-xs-8">
           <button type="submit" class="btn btn-primary btn-long"

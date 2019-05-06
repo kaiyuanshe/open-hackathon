@@ -68,6 +68,7 @@ class HACKATHON_CONFIG:
         PRE_ALLOCATE_ENABLED: bool, whether to pre-start several environment. default false
         PRE_ALLOCATE_NUMBER: int, the maximum count of pre-start environment per hackathon and per template. default 1
         PRE_ALLOCATE_INTERVAL_SECONDS: int, interval seconds for pre-allocate job
+        PRE_ALLOCATE_CONCURRENT: int, how many Experiment can be started at the same time
         ALAUDA_ENABLED: bool,default false, whether to use alauda service, no azure resource needed if true
         FREEDOM_TEAM: bool,default true,Whether to allow freedom of the team
     """
@@ -78,6 +79,7 @@ class HACKATHON_CONFIG:
     PRE_ALLOCATE_ENABLED = "pre_allocate_enabled"
     PRE_ALLOCATE_NUMBER = "pre_allocate_number"
     PRE_ALLOCATE_INTERVAL_SECONDS = "pre_allocate_interval_second"
+    PRE_ALLOCATE_CONCURRENT = "pre_allocate_concurrent"
     FREEDOM_TEAM = "freedom_team"
     CLOUD_PROVIDER = "cloud_provider"
     DEV_PLAN_REQUIRED = "dev_plan_required"

@@ -64,6 +64,8 @@
         data.push({key: 'recycle_minutes', value: 0});
         data.push({key: 'pre_allocate_enabled', value: false});
         data.push({key: 'pre_allocate_number', value: 1});
+        data.push({key: 'pre_allocate_concurrent', value: 1});
+        data.push({key: 'pre_allocate_interval_second', value: 300});
         data.push({key: 'freedom_team', value: true});
         data.push({key: 'login_provider', value: 1 | 2 | 4 | 8 | 32 | 64});
         return data;
