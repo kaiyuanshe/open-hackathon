@@ -197,13 +197,14 @@ class K8SExprStarter(ExprStarter):
         }
 
     def __wait_for_k8s_status(self, adapter, service_name, status):
-        attempts = 30
+        # Wait up to 15 minutes
+        attempts = 60
 
         while attempts:
             self.log.debug("__wait_for_k8s_status, service_name: %s, target status: %d, remaining attempts: %d"
                            % (service_name, status, attempts))
             attempts -= 1
-            time.sleep(10)
+            time.sleep(15)
             if adapter.get_deployment_status(service_name) == status:
                 return True
         return False
