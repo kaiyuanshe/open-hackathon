@@ -6,6 +6,7 @@ This file is covered by the LICENSING file in the root of this project.
 import json, os, requests, urllib2
 from datetime import datetime
 from urlparse import parse_qs
+import ssl
 
 try:
     from config import Config
@@ -56,6 +57,7 @@ def get_class(kls):
 
 
 def post_to_remote(url, post_data, headers=None):
+    ssl.match_hostname = lambda cert, hostname: True
     default_headers = {"content-type": "application/json"}
     if headers is not None and isinstance(headers, dict):
         default_headers.update(headers)
@@ -66,6 +68,7 @@ def post_to_remote(url, post_data, headers=None):
 
 
 def put_to_remote(url, post_data, headers=None):
+    ssl.match_hostname = lambda cert, hostname: True
     default_headers = {"content-type": "application/json"}
     if headers is not None and isinstance(headers, dict):
         default_headers.update(headers)
@@ -76,6 +79,7 @@ def put_to_remote(url, post_data, headers=None):
 
 
 def get_remote(url, headers={}):
+    ssl.match_hostname = lambda cert, hostname: True
     opener = urllib2.build_opener(urllib2.HTTPHandler)
     request = urllib2.Request(url, None, headers)
     resp = opener.open(request)
@@ -83,6 +87,7 @@ def get_remote(url, headers={}):
 
 
 def delete_remote(url, headers=None):
+    ssl.match_hostname = lambda cert, hostname: True
     default_headers = {"content-type": "application/json"}
     if headers is not None and isinstance(headers, dict):
         default_headers.update(headers)

@@ -745,7 +745,8 @@ class HackathonManager(Component):
     def __is_pre_allocate_enabled(self, hackathon):
         if hackathon.event_end_time < self.util.get_now():
             return False
-        if hackathon.event_start_time > self.util.get_now():
+        # using registration time for better test before event_start_time
+        if hackathon.registration_start_time > self.util.get_now():
             return False
         if hackathon.status != HACK_STATUS.ONLINE:
             return False
