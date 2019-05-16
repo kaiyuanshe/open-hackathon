@@ -355,6 +355,10 @@ class ExprManager(Component):
                 "name": "Github操作说明",
                 "url": "http://www.ubuntukylin.com/public/pdf/github.pdf"
             })
+            public_urls.append({
+                "name": "黑客松活动问卷",
+                "url": "https://www.wjx.cn/m/39517441.aspx"
+            })
 
         ret["public_urls"] = public_urls
         return ret
