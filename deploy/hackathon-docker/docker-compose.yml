@@ -1,0 +1,25 @@
+version: '3'
+services:
+  web:
+    image: "kaiyuanshe/hackathon:latest"
+    build:
+      context: ../../
+      dockerfile: deploy/hackathon-docker/Dockerfile
+    ports:
+      - "9988:80"
+    #command: python /opt/open-hackathon/open-hackathon-server/src/run.py
+    environment:
+      - DB_SERVER=db
+      - DB_PORT=27017
+    links:
+      - 'db'
+    volumes:
+      - "./logs:/var/log/open-hackathon"
+    container_name: "kaiyuanshe-hackathon"
+  db:
+    image: "mongo"
+    ports:
+     - "27017:27017"
+    volumes:
+     - "./db:/data/db"
+    container_name: "kaiyuanshe-mongo"

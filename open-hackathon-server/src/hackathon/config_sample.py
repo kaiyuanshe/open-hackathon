@@ -10,8 +10,16 @@ QQ_OAUTH_STATE = "openhackathon"  # todo state should not be constant. Actually 
 
 HACKATHON_SERVER_ENDPOINT = "http://localhost:15000"
 
-MONGODB_HOST = "localhost"
-MONGODB_PORT = 27017
+if "DB_SERVER" in os.environ:
+    MONGODB_HOST = os.environ["DB_SERVER"]
+else:
+    MONGODB_HOST = "localhost"
+
+if "DB_PORT" in os.environ:
+    MONGODB_PORT = int(os.environ["DB_PORT"])
+else:
+    MONGODB_PORT = 27017
+
 MONGODB_DB = "hackathon"
 
 Config = {
