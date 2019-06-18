@@ -2,7 +2,7 @@
 """
 This file is covered by the LICENSING file in the root of this project.
 """
-
+import os
 # "javascript" section for javascript. see @app.route('/config.js') in app/views.py
 
 # oauth constants
@@ -10,8 +10,8 @@ QQ_OAUTH_STATE = "openhackathon"  # todo state should not be constant. Actually 
 
 HACKATHON_SERVER_ENDPOINT = "http://localhost:15000"
 
-MONGODB_HOST = "localhost"
-MONGODB_PORT = 27017
+MONGODB_HOST = os.environ["DB_SERVER"]
+MONGODB_PORT = int(os.environ["DB_PORT"])
 MONGODB_DB = "hackathon"
 
 Config = {
@@ -33,6 +33,8 @@ Config = {
     },
     "guacamole": {
         "host": "http://localhost:8080"
+        #"host": "http://" + os.environ["GUACAMOLE"] + ":" + int(os.environ[GUACAMOLE_PORT])
+
     },
     "scheduler": {
         # "job_store": "mysql",
