@@ -13,7 +13,9 @@ HOSTNAME = "http://localhost"  # host name of the UI site
 # HOSTNAME = "http://hacking.kaiyuanshe.cn"
 
 QQ_OAUTH_STATE = "openhackathon"  # todo state should be constant. Actually it should be unguessable to prevent CSFA
-HACKATHON_API_ENDPOINT = "http://" + os.environ["HACKATHON_SERVER"] + ":" + int(os.environ["HACKATHON_SERVER_PORT"])
+
+HACKATHON_API_ENDPOINT = "http://" + os.environ["HACKATHON_SERVER"] + ":" + os.environ["HACKATHON_SERVER_PORT"]
+
 # HACKATHON_API_ENDPOINT = "http://open-hackathon-dev.chinacloudapp.cn:15000"
 # HACKATHON_API_ENDPOINT = "http://hacking.kaiyuanshe.cn:15000"
 
