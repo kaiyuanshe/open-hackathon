@@ -32,8 +32,7 @@ Config = {
         "cert_base": "",
     },
     "guacamole": {
-        "host": "http://localhost:8080"
-        #"host": "http://" + os.environ["GUACAMOLE"] + ":" + int(os.environ[GUACAMOLE_PORT])
+        "host": "http://" + os.environ["GUACAMOLE"] + ":" + os.environ["GUACAMOLE_PORT"]
 
     },
     "scheduler": {
