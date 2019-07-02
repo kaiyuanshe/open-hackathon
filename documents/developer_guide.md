@@ -201,6 +201,17 @@ make sure `debug` mode is set `True` in `run.py` files. Start PyCharm and:
 To deploy open hackathon to staging or production environment, you need follow all steps of [Setup Development Environment](https://github.com/msopentechcn/open-hackathon/blob/master/documents/developer_guide.md#setup-development-environement) except `Install Docker`, `Run` and `Debug` section. Instead, you should choose one of the python web containers for production usage. For example, [Apache2](http://flask.pocoo.org/docs/0.10/deploying/mod_wsgi/#creating-a-wsgi-file), [DotCloud](http://flask.pocoo.org/snippets/48/), [uwsgi](https://uwsgi-docs.readthedocs.org/en/latest/), [gunicorn](http://gunicorn.org/) and so on.
 
 As an example, we show how to deploy open hackathon using `uwsgi` in the following section. However, both `open hackathon platform` and `flask` don't have any limitation on this, choose whatever application you like.
+### deploy open hackathon as a docker container
+ **We assume the source codes are cloned to /opt/open-hackathon. If not, please rectify the file path of following files:
+cd `<src_root>/deploy/hackathon-docker
+sudo ./build.sh  (to build the hackathon image, so far, client is running at the same container with server)
+sudo ./up.sh     (to attch hackathon image to the mongo container which is running in a seperated container)
+open the browser and visit ip:9988   (givend 80 is always occupied in the host, i prefer to map it in another port)
+
+sudo ./down.sh   (to shut down the service)
+
+I haven't figured out why sudo is necessary when running docker-compose.
+
 
 ### deploy open hackathon with uwsgi
  **We assume the source codes are cloned to /opt/open-hackathon. If not, please rectify the file path of following files:

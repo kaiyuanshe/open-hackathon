@@ -1,0 +1,65 @@
+version: '3'
+services:
+  client:
+    image: "kaiyuanshe/hackathon-client:latest"
+    build:
+      context: ../../
+      dockerfile: deploy/hackathon-docker/Dockerfile-client
+    ports:
+      - "9988:80"
+    environment:
+      - HACKATHON_SERVER=server
+      - HACKATHON_SERVER_PORT=15000
+    links:
+      - 'server'
+    volumes:
+      - "./logs/client:/var/log/open-hackathon"
+    container_name: "kaiyuanshe-hackathon-client"
+ 
+  server:
+    image: "kaiyuanshe/hackathon-server:latest"
+    build:
+      context: ../../
+      dockerfile: deploy/hackathon-docker/Dockerfile-server
+    ports:
+      - "15000:15000"
+    environment:
+      - DB_SERVER=db
+      - DB_PORT=27017
+      - GUACAMOLE=guacamole
+      - GUACAMOLE_PORT=8080
+    links:
+      - 'db'
+      - 'guacamole'
+    volumes:
+      - "./logs/server:/var/log/open-hackathon"
+    container_name: "kaiyuanshe-hackathon-server"
+
+  db:
+    image: "mongo"
+    ports:
+     - "27017:27017"
+    volumes:
+     - "./db:/data/db"
+    container_name: "kaiyuanshe-mongo"
+
+  guacamole:
+    image: "kaiyuanshe/guacamole:latest"
+    build:
+      context: ../../
+      dockerfile: deploy/guacamole/Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - "./../guacamole/properties:/etc/guacamole"
+    environment:
+      - GUACD_HOSTNAME=guacd
+    links:
+      - "guacd"
+    container_name: "kaiyuanshe-guacamole-guacamole"
+
+  guacd:
+    image: "guacamole/guacd"
+    ports:
+     - "4822:4822"
+    container_name: "kaiyuanshe-guacamole-guacd"  
