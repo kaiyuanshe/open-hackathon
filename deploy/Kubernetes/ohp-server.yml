@@ -44,8 +44,7 @@ spec:
   - port: 15000
     protocol: TCP
     targetPort: 15000
+    nodePort: 30150
   selector:
     haking.kaiyuanshe.cn/service: server
-  # server is a internal service
-  # do not use nodeport in pord
   type: NodePort
