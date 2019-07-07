@@ -42,14 +42,29 @@
                     openWindow(CONFIG.weibo.authorize_url);
                     break;
                 case 'wechat':
-                    openWindow(CONFIG.wechat.authorize_url);
-                    break;
+                    if(isWechatBrowser()){
+                        openWindow(CONFIG.wechat_mobile.authorize_url);
+                        break;
+                    } else {
+                        openWindow(CONFIG.wechat.authorize_url);
+                        break;
+                    }
                 case 'alauda':
                     openWindow(CONFIG.alauda.authorize_url);
                     break;
             }
         })
     };
+
+    //判断是否是微信浏览器
+    function isWechatBrowser() {
+        var ua = window.navigator.userAgent.toLowerCase();
+        if (ua.match(/MicroMessenger/i) == 'micromessenger') {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     function scale() {
         var width = $(window).width() - 400,

@@ -114,6 +114,10 @@ Config = {
             "authorize_url": "https://open.weixin.qq.com/connect/qrconnect?appid=%s&redirect_uri=%s/wechat&response_type=code&scope=snsapi_login&state=%s#wechat_redirect" % (
                 WECHAT_APP_ID, HOSTNAME, WECHAT_OAUTH_STATE)
         },
+        "wechat_mobile": {
+            "authorize_url": "https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s/wechat&response_type=code&scope=snsapi_base&state=%s#wechat_redirect" % (
+                WECHAT_APP_ID, HOSTNAME, WECHAT_OAUTH_STATE)
+        },
         "live": {
             "authorize_url": "https://login.live.com/oauth20_authorize.srf?client_id=%s&scope=wl.basic+,wl.emails&response_type=code&redirect_uri=%s/live" % (
                 LIVE_CLIENT_ID, HOSTNAME)
