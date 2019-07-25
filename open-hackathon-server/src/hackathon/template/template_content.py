@@ -4,6 +4,8 @@ This file is covered by the LICENSING file in the root of this project.
 """
 
 import sys
+import yaml
+from collections import defaultdict
 
 sys.path.append("..")
 
@@ -22,11 +24,33 @@ class TemplateContent:
     It's the only type that for template saving and loading.
     """
 
-    def __init__(self, name, description, units):
+    def __init__(self, name, description):
         self.name = name
         self.description = description
-        self.units = units
+        self.resource = defaultdict(list)
 
+        # FIXME unit bundle is useless for K8s
+        self.units = []
+
+    @classmethod
+    def from_yaml(cls, template_model, yaml_content):
+        yamls = yaml.load_all(yaml_content)
+        resource = {}
+
+        for y in yamls:
+            kind = y['kind']
+            resource[kind].append(y)
+
+        tc = TemplateContent(template_model.name, template_model.description)
+        tc.resource = resource
+
+        return tc
+
+    def get_resource(self, resource_type):
+        # always return a list of resource desc dict or empty
+        return self.resource[resource_type]
+
+    # FIXME deprecated this when support K8s ONLY
     @staticmethod
     def from_dict(args):
         name = args[TEMPLATE.TEMPLATE_NAME]
@@ -44,8 +68,11 @@ class TemplateContent:
                 raise Exception("unsupported virtual environment provider")
 
         units = map(convert_to_unit, args[TEMPLATE.VIRTUAL_ENVIRONMENTS])
-        return TemplateContent(name, description, units)
+        tc = TemplateContent(name, description)
+        tc.units = units
+        return tc
 
+    # FIXME deprecated this when support K8s ONLY
     def to_dict(self):
         dic = {
             TEMPLATE.TEMPLATE_NAME: self.name,

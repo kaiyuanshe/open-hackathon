@@ -130,10 +130,10 @@ class UserToken(HDocumentBase):
 
 class Template(HDocumentBase):
     name = StringField(required=True, unique=True)
-    url = URLField(required=True)
     provider = IntField()
     status = IntField(default=TEMPLATE_STATUS.UNCHECKED)  # constants.TEMPLATE_STATUS
     description = StringField()
+    content = StringField()  # template content
     virtual_environment_count = IntField(min_value=1, required=True)
     creator = ReferenceField(User)
 
