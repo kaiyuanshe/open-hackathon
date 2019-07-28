@@ -4,10 +4,12 @@ This file is covered by the LICENSING file in the root of this project.
 """
 import copy
 import time
+import string
+import random
 
 from expr_starter import ExprStarter
-from hackathon.hmongo.models import Hackathon, VirtualEnvironment, Experiment, AzureVirtualMachine, AzureEndPoint
-from hackathon.constants import (VE_PROVIDER, VERemoteProvider, VEStatus, ADStatus, AVMStatus, EStatus)
+from hackathon.hmongo.models import Hackathon, VirtualEnvironment, Experiment, K8sEnvironment
+from hackathon.constants import (VE_PROVIDER, VERemoteProvider, VEStatus, EStatus)
 from hackathon.hackathon_response import internal_server_error
 from hackathon.constants import K8S_DEPLOYMENT_STATUS
 from hackathon.template.template_constants import K8S_UNIT
@@ -19,33 +21,37 @@ class K8SExprStarter(ExprStarter):
         hackathon = Hackathon.objects.get(id=context.hackathon_id)
         experiment = Experiment.objects.get(id=context.experiment_id)
         pre_alloc_enabled = context.pre_alloc_enabled
+        template_content = context.template_content
 
         if not experiment or not hackathon:
             return internal_server_error('Failed starting k8s: experiment or hackathon not found.')
         user = experiment.user or None
         _virtual_envs = []
+        _env_name = str("k8s-" + hackathon.name + template_content.name).lower()
         try:
             if user:
                 _virtual_envs = experiment.virtual_environments
+                _env_name += str("-" + user.name).lower()
+
             if not _virtual_envs:
                 # Get None VirtualEnvironment, create new one:
-                for template_unit in context.template_content.units:
-                    k8s_dict = self.__create_useful_k8s_dict(hackathon, experiment, template_unit)
-                    experiment.virtual_environments.append(VirtualEnvironment(
-                        provider=VE_PROVIDER.K8S,
-                        name=k8s_dict['name'],
-                        k8s_resource=k8s_dict,
-                        status=VEStatus.INIT,
-                        remote_provider=VERemoteProvider.Guacamole))
+                k8s_env = self.__create_useful_k8s_resource(hackathon, _env_name, template_content)
 
-                    # save constructed experiment, and execute from first job content
-                    experiment.save()
-                    if pre_alloc_enabled == True:
-                        self.log.debug("pre allocate vn, creating k8s... %s" % k8s_dict['name'])
-                        return self.schedule_create_k8s_service(context)
-                    else:
-                        self.log.debug("virtual_environments %s created, creating k8s..." % k8s_dict['name'])
-                        self.__schedule_create(context)
+                experiment.virtual_environments.append(VirtualEnvironment(
+                    provider=VE_PROVIDER.K8S,
+                    name=_env_name,
+                    k8s_resource=k8s_env,
+                    status=VEStatus.INIT,
+                    remote_provider=VERemoteProvider.Guacamole))
+
+                # save constructed experiment, and execute from first job content
+                experiment.save()
+                if pre_alloc_enabled:
+                    self.log.debug("pre allocate vn, creating k8s... %s" % _env_name)
+                    return self.__schedule_create(context)
+                else:
+                    self.log.debug("virtual_environments %s created, creating k8s..." % _env_name)
+                    self.__schedule_create(context)
             else:
                 self.__schedule_start(context)
         except Exception as e:
@@ -72,7 +78,7 @@ class K8SExprStarter(ExprStarter):
             return internal_server_error('Failed stopping k8s')
 
     def _internal_rollback(self, context):
-        raise NotImplementedError()
+        pass
 
     def __schedule_create(self, ctx):
         self.scheduler.add_once("k8s_service", "schedule_create_k8s_service", context=ctx,
@@ -87,36 +93,52 @@ class K8SExprStarter(ExprStarter):
                                 id="schedule_stop_" + str(ctx.experiment_id), seconds=0)
 
     def schedule_create_k8s_service(self, context):
-        template_unit = context.template_content.units[0]
         experiment = Experiment.objects.get(id=context.experiment_id)
         virtual_env = experiment.virtual_environments[0]
-        k8s_dict = virtual_env.k8s_resource
+        k8s_resource = virtual_env.k8s_resource
         adapter = self.__get_adapter_from_ctx(K8SServiceAdapter, context)
 
-        template_unit.set_ports(k8s_dict['ports'])
         labels = {
             "template_name": context.template_name,
             "hackathon_id": context.hackathon_id,
             "experiment_id": context.experiment_id,
         }
         try:
-            deploy_name, port = adapter.create_k8s_environment(virtual_env.name, template_unit, labels=labels)
+            for s_yaml in k8s_resource.services:
+                metadata = s_yaml['metadata']
+                metadata['name'] = "{}-{}".format(k8s_resource.name, metadata['name'])
+                labels.update(metadata.get("labels") or {})
+                metadata['labels'] = labels
+                svc_name = adapter.create_k8s_service(s_yaml)
+                s_yaml.update(adapter.get_service_by_name(svc_name))
+
+            for d_yaml in k8s_resource.deployments:
+                metadata = d_yaml['metadata']
+                metadata['name'] = "{}-{}".format(k8s_resource.name, metadata['name'])
+                labels.update(metadata.get("labels") or {})
+                metadata['labels'] = labels
+                adapter.create_k8s_deployment(d_yaml)
 
             expr = Experiment.objects(id=context.experiment_id).first()
-            virtual_env = expr.virtual_environments[0]
-            k8s_dict = virtual_env.k8s_resource
-            vnc_port = k8s_dict['ports']
-            vnc_port[0][K8S_UNIT.PORTS_PUBLIC_PORT] = port
             expr.save()
 
             # check deployment's status
-            if self.__wait_for_k8s_status(adapter, virtual_env.name, K8S_DEPLOYMENT_STATUS.AVAILABLE):
+            is_finish = True
+            for d_yaml in k8s_resource.deployments:
+                metadata = d_yaml['metadata']
+                d_name = metadata['name']
+                if not self.__wait_for_k8s_status(adapter, d_name, K8S_DEPLOYMENT_STATUS.AVAILABLE):
+                    is_finish = False
+                    break
+
+            if is_finish:
                 self.log.debug("k8s deployment succeeds: %s" % str(context))
                 self.__on_create_success(context)
                 return True
             else:
                 self.log.error("k8s deployment fails: %s" % str(context))
-                self.__on_message("k8s_service_create_failed", context)
+                self._internal_rollback(context)
+
         except Exception as e:
             self.__on_message("k8s_service_create_failed", context)
 
@@ -131,11 +153,13 @@ class K8SExprStarter(ExprStarter):
             if adapter.get_deployment_status(virtual_env.name) != K8S_DEPLOYMENT_STATUS.PAUSE:
                 raise RuntimeError("K8s Service not has paused")
 
-            adapter.start_k8s_deployment(virtual_env.name)
-            if self.__wait_for_k8s_status(adapter, virtual_env.name, K8S_DEPLOYMENT_STATUS.AVAILABLE):
-                self.__on_message("k8s_service_start_sucess", context)
-            else:
-                self.__on_message("k8s_service_start_failed", context)
+            k8s_resource = virtual_env.k8s_resource
+            for deploy in k8s_resource.deployments:
+                metadata = deploy['metadata']
+                d_name = metadata['name']
+                adapter.start_k8s_deployment(d_name)
+                if not self.__wait_for_k8s_status(adapter, virtual_env.name, K8S_DEPLOYMENT_STATUS.AVAILABLE):
+                    raise RuntimeError("Deploy {} start error".format(d_name))
         except Exception as e:
             self.__on_message("k8s_service_start_failed", context)
 
@@ -170,31 +194,31 @@ class K8SExprStarter(ExprStarter):
         # TODO: try to abstract common behavior
 
     @staticmethod
-    def __create_useful_k8s_dict(hackathon, experiment, template_unit):
-        # FIXME K8s dict need a db model, not a dict
+    def __create_useful_k8s_resource(hackathon, env_name, template_content):
         _experiments = Experiment.objects(hackathon=hackathon).all()
         _virtual_envs = []
         for e in _experiments:
             _virtual_envs += list(e.virtual_environments)
 
-        # TODO Need to check the rules about K8s resource name
         _names = [v.name for v in _virtual_envs]
         count = 0
         name = None
         while count < 100:
             count += 1
-            name = "{}-{}-{}".format(template_unit.name, experiment.id, count)
+            name = "{}-{}".format(env_name, count)
             if name not in _names:
                 break
         if count >= 100:
             raise RuntimeError("Can't get useful env name.")
 
-        # Ensure that the external ports do not conflict
-        ports = copy.deepcopy(template_unit.get_ports())
-        return {
-            "name": "{}".format(name).lower(),
-            "ports": ports,
-        }
+        k8s_env = K8sEnvironment(
+            name=name,
+            deployments=template_content.get_resource("deployment"),
+            services=template_content.get_resource("service"),
+            statefulsets=template_content.get_resource("statefulset"),
+        )
+
+        return k8s_env
 
     def __wait_for_k8s_status(self, adapter, service_name, status):
         # Wait up to 15 minutes
@@ -211,12 +235,9 @@ class K8SExprStarter(ExprStarter):
 
     @staticmethod
     def __get_adapter_from_ctx(adapter_class, context):
-        template_unit = context.template_content.units[0]
-        cluster = template_unit.get_cluster()
-        api_url = cluster[K8S_UNIT.CONFIG_API_SERVER]
-        token = cluster[K8S_UNIT.CONFIG_API_TOKEN]
-        namespace = cluster[K8S_UNIT.CONFIG_NAMESPACES]
-        return adapter_class(api_url, token, namespace)
+        template_content = context.template_content
+        cluster = template_content.cluster_info
+        return adapter_class(cluster.api_url, cluster.token, cluster.namespace)
 
     def __on_create_success(self, context):
         self.log.debug("experiment started %s successfully. Setting remote parameters." % context.experiment_id)

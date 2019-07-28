@@ -128,11 +128,18 @@ class UserToken(HDocumentBase):
         super(UserToken, self).__init__(**kwargs)
 
 
+class K8sCluster(DynamicEmbeddedDocument):
+    api_url = StringField(required=True)
+    token = StringField(required=True)
+    namespace = StringField()
+
+
 class Template(HDocumentBase):
     name = StringField(required=True, unique=True)
     provider = IntField()
     status = IntField(default=TEMPLATE_STATUS.UNCHECKED)  # constants.TEMPLATE_STATUS
     description = StringField()
+    k8s_cluster = EmbeddedDocumentField(K8sCluster)
     content = StringField()  # template content
     virtual_environment_count = IntField(min_value=1, required=True)
     creator = ReferenceField(User)
@@ -380,6 +387,14 @@ class AzureVirtualMachine(DynamicEmbeddedDocument):
     end_points = EmbeddedDocumentListField(AzureEndPoint, default=[])
 
 
+class K8sEnvironment(DynamicEmbeddedDocument):
+    # define k8s resource
+    name = StringField(required=True)
+    deployments = ListField()
+    services = ListField()
+    statefulsets = ListField()
+
+
 class VirtualEnvironment(DynamicEmbeddedDocument):
     """
     Virtual environment is abstraction of smallest environment unit in template
@@ -393,7 +408,7 @@ class VirtualEnvironment(DynamicEmbeddedDocument):
     update_time = DateTimeField()
     docker_container = EmbeddedDocumentField(DockerContainer)
     azure_resource = EmbeddedDocumentField(AzureVirtualMachine)
-    k8s_resource = DictField()
+    k8s_resource = EmbeddedDocumentField(K8sEnvironment)
 
 
 class Experiment(HDocumentBase):

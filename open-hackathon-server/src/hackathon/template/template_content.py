@@ -29,6 +29,8 @@ class TemplateContent:
         self.description = description
         self.resource = defaultdict(list)
 
+        self.cluster_info = None
+
         # FIXME unit bundle is useless for K8s
         self.units = []
 
@@ -38,7 +40,7 @@ class TemplateContent:
         resource = {}
 
         for y in yamls:
-            kind = y['kind']
+            kind = str(y['kind']).lower()
             resource[kind].append(y)
 
         tc = TemplateContent(template_model.name, template_model.description)

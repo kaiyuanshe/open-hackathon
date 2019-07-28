@@ -33,25 +33,6 @@ class K8SServiceAdapter(ServiceAdapter):
         self.api_client = client.ApiClient(configuration)
         super(K8SServiceAdapter, self).__init__(self.api_client)
 
-    def create_k8s_environment(self, env_name, template_unit, labels=None):
-        self.log.debug("create_k8s_environment, env_name:%s, unit: %s, labels: %s"
-                       % (env_name, str(template_unit), str(labels)))
-        # auto create deployment and service for environment
-        yb = YamlBuilder(env_name, template_unit, labels)
-        yb.build()
-        self.create_k8s_service(yb.get_service())
-        svc = self.get_service_by_name(env_name)
-        deploy_name = self.create_k8s_deployment(yb.get_deployment())
-
-        # FIXME single port for ukylin
-        ports = svc.spec.ports
-        port = None
-        if len(ports):
-            port = ports[0].node_port
-
-        # NEED check deployment status later.
-        return deploy_name, port
-
     def deployment_exists(self, name):
         return self.get_deployment_by_name(name, need_raise=False) is not None
 
@@ -109,7 +90,7 @@ class K8SServiceAdapter(ServiceAdapter):
             if need_raise:
                 raise ServiceError("Service {} not found".format(service_name))
             return None
-        return _svc
+        return _svc.to_dict()
 
     def get_deployment_status(self, deployment_name):
         _deploy = self.get_deployment_by_name(deployment_name)

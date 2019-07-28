@@ -61,7 +61,9 @@ class TemplateLibrary(Component):
 
         if template.provider != VE_PROVIDER.K8S:
             raise RuntimeError("Using deprecated VirtualEnvironment provider")
-        return TemplateContent.from_yaml(template, template.content)
+        tc = TemplateContent.from_yaml(template, template.content)
+        tc.cluster_info = template.k8s_cluster
+        return tc
 
     def create_template(self, args):
         """ Create template """
