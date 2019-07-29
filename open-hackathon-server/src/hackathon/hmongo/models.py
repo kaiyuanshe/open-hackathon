@@ -159,13 +159,11 @@ class Award(EmbeddedDocument):
     quota = IntField(min_value=1, default=1, required=True)
     award_url = StringField()
 
-
 class AzureKey(HDocumentBase):
     """
     Azure certificate information of user/hackathon
     Open-hackathon will try to use local certification file, if it doesn't exist, open-hackathon will try to
-    recover it from azure.
-    """
+    recover it from azure.abs    """
     cert_url = StringField(required=True)  # cert_url is cert file path in azure
     # pem_url is "encrypted" pem file path in azure, so be careful to use this,
     # at the most time you should use get_local_pem_url()
@@ -176,7 +174,6 @@ class AzureKey(HDocumentBase):
 
     def __init__(self, **kwargs):
         super(AzureKey, self).__init__(**kwargs)
-
 
 class Hackathon(HDocumentBase):
     name = StringField(unique=True, required=True)
@@ -325,61 +322,6 @@ class DockerContainer(DynamicEmbeddedDocument):
     port_bindings = EmbeddedDocumentListField(PortBinding, default=[])
 
 
-class AzureStorageAccount(DynamicEmbeddedDocument):
-    name = StringField(required=True)
-    description = StringField()
-    label = StringField()
-    location = StringField(required=True)
-    # ASAStatus in enum.py
-    status = StringField()
-    create_time = DateTimeField()
-    update_time = DateTimeField()
-    deletable = BooleanField()  # F-cannot delete T-can be deleted
-
-
-class AzureCloudService(DynamicEmbeddedDocument):
-    name = StringField()
-    label = StringField()
-    location = StringField()
-    # ACSStatus in enum.py
-    status = StringField()
-    azure_key = ReferenceField(AzureKey)
-    deletable = BooleanField()  # F-cannot delete T-can be deleted
-
-
-class AzureDeployment(DynamicEmbeddedDocument):
-    name = StringField()
-    slot = StringField()
-    # ADStatus in enum.py
-    status = StringField()
-    cloud_service = EmbeddedDocumentField(AzureCloudService)
-    create_time = DateTimeField()
-    update_time = DateTimeField()
-    deletable = BooleanField()  # F-cannot delete T-can be deleted
-
-
-class AzureEndPoint(DynamicEmbeddedDocument):
-    name = StringField()
-    protocol = StringField()
-    public_port = IntField()
-    private_port = IntField()
-    url = StringField()
-
-
-class AzureVirtualMachine(DynamicEmbeddedDocument):
-    name = StringField(required=True)
-    label = StringField()
-    # AVMStatus in enum.py
-    dns = StringField()
-    public_ip = StringField()
-    private_ip = StringField()
-    deployment = EmbeddedDocumentField(AzureDeployment)
-    create_time = DateTimeField()
-    update_time = DateTimeField()
-    deletable = BooleanField()  # F-cannot delete T-can be deleted
-    end_points = EmbeddedDocumentListField(AzureEndPoint, default=[])
-
-
 class VirtualEnvironment(DynamicEmbeddedDocument):
     """
     Virtual environment is abstraction of smallest environment unit in template
@@ -392,7 +334,6 @@ class VirtualEnvironment(DynamicEmbeddedDocument):
     create_time = DateTimeField(default=get_now())
     update_time = DateTimeField()
     docker_container = EmbeddedDocumentField(DockerContainer)
-    azure_resource = EmbeddedDocumentField(AzureVirtualMachine)
     k8s_resource = DictField()
 
 
@@ -401,7 +342,6 @@ class Experiment(HDocumentBase):
     last_heart_beat_time = DateTimeField()
     template = ReferenceField(Template)
     user = ReferenceField(User)
-    azure_key = ReferenceField(AzureKey)
     hackathon = ReferenceField(Hackathon)
     virtual_environments = EmbeddedDocumentListField(VirtualEnvironment, default=[])
 
@@ -409,10 +349,4 @@ class Experiment(HDocumentBase):
         super(Experiment, self).__init__(**kwargs)
 
 
-class Azure(HDocumentBase):
-    account = StringField()
-    password = StringField()
-    status = StringField()
 
-    def __init__(self, **kwargs):
-        super(Azure, self).__init__(**kwargs)
