@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    kaiyuanshe.cn/app: ohp
+    haking.kaiyuanshe.cn/service: server
+  name: ohp-server
+  namespace: ohp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      haking.kaiyuanshe.cn/service: server
+  template:
+    metadata:
+      labels:
+        haking.kaiyuanshe.cn/service: server
+    spec:
+      containers:
+      - image: kaiyuanshe/hackathon-server
+        name: ohp-server
+        env:
+        - name: DB_SERVER
+          value: mongo
+        - name: DB_PORT
+          value: "27017"
+        - name: GUACAMOLE
+          value: guacamole
+        - name: GUACAMOLE_PORT
+          value: "8080"
+        ports:
+        - containerPort: 15000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    kaiyuanshe.cn/app: ohp
+    haking.kaiyuanshe.cn/service: server
+  name: ohp-server
+  namespace: ohp
+spec:
+  ports:
+  - port: 15000
+    protocol: TCP
+    targetPort: 15000
+    nodePort: 30150
+  selector:
+    haking.kaiyuanshe.cn/service: server
+  type: NodePort
