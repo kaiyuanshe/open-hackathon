@@ -24,3 +24,11 @@ class DeploymentError(EnvError):
 
 class ServiceError(EnvError):
     err_id = "K8s service error"
+
+
+class StatefulSetError(EnvError):
+    err_id = "K8s StatefulSet error"
+
+
+class PVCError(EnvError):
+    err_id = "K8s PersistentVolumeClaims error"

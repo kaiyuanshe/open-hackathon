@@ -13,8 +13,7 @@ from kubernetes.client.rest import ApiException
 from hackathon.constants import HEALTH, HEALTH_STATUS, K8S_DEPLOYMENT_STATUS
 from hackathon.hazure.service_adapter import ServiceAdapter
 
-from .yaml_helper import YamlBuilder
-from .errors import DeploymentError, ServiceError
+from .errors import DeploymentError, ServiceError, StatefulSetError, PVCError
 
 __all__ = ["K8SServiceAdapter"]
 disable_warnings(InsecureRequestWarning)
@@ -33,8 +32,9 @@ class K8SServiceAdapter(ServiceAdapter):
         self.api_client = client.ApiClient(configuration)
         super(K8SServiceAdapter, self).__init__(self.api_client)
 
-    def deployment_exists(self, name):
-        return self.get_deployment_by_name(name, need_raise=False) is not None
+    def ping(self, timeout=20):
+        report = self.report_health(timeout)
+        return report[HEALTH.STATUS] == HEALTH_STATUS.OK
 
     def report_health(self, timeout=20):
         try:
@@ -52,6 +52,31 @@ class K8SServiceAdapter(ServiceAdapter):
                 HEALTH.STATUS: HEALTH_STATUS.ERROR,
                 HEALTH.DESCRIPTION: "Connect K8s ApiServer {} error: connection timeout".format(self.api_url),
             }
+
+    ###
+    # Deployment
+    ###
+
+    def list_deployments(self, labels=None, timeout=20):
+        _deployments = []
+        kwargs = {"timeout_seconds": timeout, "watch": False}
+        if labels and isinstance(labels, dict):
+            label_selector = ",".join(["{}={}".format(k, v) for k, v in labels.items()])
+            kwargs['label_selector'] = label_selector
+
+        apps_v1_group = client.AppsV1Api(self.api_client)
+        try:
+            ret = apps_v1_group.list_namespaced_deployment(self.namespace, **kwargs)
+        except ApiException as e:
+            self.log.error(e)
+            return []
+
+        for i in ret.items:
+            _deployments.append(i.metadata.name)
+        return _deployments
+
+    def deployment_exists(self, name):
+        return self.get_deployment_by_name(name, need_raise=False) is not None
 
     def create_k8s_deployment(self, yaml):
         api_instance = client.AppsV1Api(self.api_client)
@@ -81,16 +106,6 @@ class K8SServiceAdapter(ServiceAdapter):
                 raise DeploymentError("Deplotment {} not found".format(deployment_name))
             return None
         return _deploy
-
-    def get_service_by_name(self, service_name, need_raise=True):
-        api_instance = client.CoreV1Api(self.api_client)
-        try:
-            _svc = api_instance.read_namespaced_service(service_name, self.namespace)
-        except ApiException:
-            if need_raise:
-                raise ServiceError("Service {} not found".format(service_name))
-            return None
-        return _svc.to_dict()
 
     def get_deployment_status(self, deployment_name):
         _deploy = self.get_deployment_by_name(deployment_name)
@@ -137,6 +152,20 @@ class K8SServiceAdapter(ServiceAdapter):
             raise DeploymentError("Delete {} error {}".format(deployment_name, e))
         self.log.info("Deleted existed deployment: {}".format(deployment_name))
 
+    ###
+    # Service
+    ###
+
+    def get_service_by_name(self, service_name, need_raise=True):
+        api_instance = client.CoreV1Api(self.api_client)
+        try:
+            _svc = api_instance.read_namespaced_service(service_name, self.namespace)
+        except ApiException:
+            if need_raise:
+                raise ServiceError("Service {} not found".format(service_name))
+            return None
+        return _svc.to_dict()
+
     def create_k8s_service(self, yaml):
         if isinstance(yaml, str):
             # Only support ONE deployment yaml
@@ -158,24 +187,52 @@ class K8SServiceAdapter(ServiceAdapter):
             self.log.error("Delete service error: {}".format(e))
             raise ServiceError("Delete service error: {}".format(e))
 
-    def ping(self, timeout=20):
-        report = self.report_health(timeout)
-        return report[HEALTH.STATUS] == HEALTH_STATUS.OK
+    ###
+    # StatefulSet
+    ###
 
-    def list_deployments(self, labels=None, timeout=20):
-        _deployments = []
-        kwargs = {"timeout_seconds": timeout, "watch": False}
-        if labels and isinstance(labels, dict):
-            label_selector = ",".join(["{}={}".format(k, v) for k, v in labels.items()])
-            kwargs['label_selector'] = label_selector
+    def create_k8s_statefulset(self, yaml):
+        if isinstance(yaml, str):
+            # Only support ONE deployment yaml
+            yaml = yaml_tool.load(yaml)
+        assert isinstance(yaml, dict), "Create a statefulset without legal yaml."
 
-        apps_v1_group = client.AppsV1Api(self.api_client)
+        api_instance = client.AppsV1Api(self.api_client)
         try:
-            ret = apps_v1_group.list_namespaced_deployment(self.namespace, **kwargs)
+            api_instance.create_namespaced_stateful_set(self.namespace, yaml)
         except ApiException as e:
-            self.log.error(e)
-            return []
+            self.log.error("Create StatefulSet error: {}".format(e))
+            raise StatefulSetError("Create StatefulSet error: {}".format(e))
 
-        for i in ret.items:
-            _deployments.append(i.metadata.name)
-        return _deployments
+    def delete_k8s_statefulset(self, statefulset_name):
+        api_instance = client.AppsV1Api(self.api_client)
+        try:
+            api_instance.delete_namespaced_stateful_set(statefulset_name, self.namespace)
+        except ApiException as e:
+            self.log.error("Delete StatefulSet error: {}".format(e))
+            raise StatefulSetError("Delete StatefulSet error: {}".format(e))
+
+    ###
+    # PersistentVolumeClaim
+    ###
+
+    def create_k8s_pvc(self, yaml):
+        if isinstance(yaml, str):
+            # Only support ONE deployment yaml
+            yaml = yaml_tool.load(yaml)
+        assert isinstance(yaml, dict), "Create a PVC without legal yaml."
+
+        api_instance = client.CoreV1Api(self.api_client)
+        try:
+            api_instance.create_namespaced_persistent_volume_claim(self.namespace, yaml)
+        except ApiException as e:
+            self.log.error("Create PVC error: {}".format(e))
+            raise PVCError("Create PVC error: {}".format(e))
+
+    def delete_k8s_pvc(self, pvc_name):
+        api_instance = client.CoreV1Api(self.api_client)
+        try:
+            api_instance.delete_namespaced_persistent_volume_claim(pvc_name, self.namespace)
+        except ApiException as e:
+            self.log.error("Delete PVC error: {}".format(e))
+            raise PVCError("Delete PVC error: {}".format(e))

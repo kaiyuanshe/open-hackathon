@@ -391,8 +391,9 @@ class K8sEnvironment(DynamicEmbeddedDocument):
     # define k8s resource
     name = StringField(required=True)
     deployments = ListField()
+    persistent_volume_claims = ListField()
     services = ListField()
-    statefulsets = ListField()
+    stateful_sets = ListField()
 
 
 class VirtualEnvironment(DynamicEmbeddedDocument):
