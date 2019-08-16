@@ -69,7 +69,7 @@ class HACKATHON_CONFIG:
         PRE_ALLOCATE_NUMBER: int, the maximum count of pre-start environment per hackathon and per template. default 1
         PRE_ALLOCATE_INTERVAL_SECONDS: int, interval seconds for pre-allocate job
         PRE_ALLOCATE_CONCURRENT: int, how many Experiment can be started at the same time
-        ALAUDA_ENABLED: bool,default false, whether to use alauda service, no azure resource needed if true
+        ALAUDA_ENABLED: bool,default false, whether to use alauda service
         FREEDOM_TEAM: bool,default true,Whether to allow freedom of the team
     """
     MAX_ENROLLMENT = "max_enrollment"
@@ -105,8 +105,7 @@ class VE_PROVIDER:
     """VirtualEnvironment provider in db model VirtualEnvironment and Template
 
     Attributes:
-        DOCKER: VirtualEnvironment is based on docker. Docker host can be any cloud such as azure, aws or others
-        CHECK_PASS: VirtualEnvironment is based on azure vm usually a windows VE
+        DOCKER: VirtualEnvironment is based on docker. Docker host can be any cloud such as aws or others
         CHECK_FAILED: VirtualEnvironment is based on Alauda web service
     """
     DOCKER = 0
@@ -114,13 +113,6 @@ class VE_PROVIDER:
     ALAUDA = 2
     K8S = 3
 
-
-class AZURE_RESOURCE_TYPE:
-    """Resource type used by ALOperation(Azure log operation)"""
-    STORAGE_ACCOUNT = 'storage account'
-    CLOUD_SERVICE = 'cloud service'
-    DEPLOYMENT = 'deployment'
-    VIRTUAL_MACHINE = 'virtual machine'
 
 
 class EStatus:
@@ -176,54 +168,17 @@ class ReservedUser:
     DefaultSuperAdmin = 1
 
 
-class ALOperation:
-    """
-    For operation in db model AzureLog
-    """
-    CREATE = 'create'
-    CREATE_STORAGE_ACCOUNT = CREATE + ' ' + AZURE_RESOURCE_TYPE.STORAGE_ACCOUNT
-    CREATE_CLOUD_SERVICE = CREATE + ' ' + AZURE_RESOURCE_TYPE.CLOUD_SERVICE
-    CREATE_DEPLOYMENT = CREATE + ' ' + AZURE_RESOURCE_TYPE.DEPLOYMENT
-    CREATE_VIRTUAL_MACHINE = CREATE + ' ' + AZURE_RESOURCE_TYPE.VIRTUAL_MACHINE
-    STOP = 'stop'
-    STOP_VIRTUAL_MACHINE = STOP + ' ' + AZURE_RESOURCE_TYPE.VIRTUAL_MACHINE
-    START = 'start'
-    START_VIRTUAL_MACHINE = START + AZURE_RESOURCE_TYPE.VIRTUAL_MACHINE
-
-
-class ALStatus:
-    """
-    For status in db model AzureLog
-    """
-    START = 'start'
-    FAIL = 'fail'
-    END = 'end'
-
-
-class ASAStatus:
-    """
-    For status in db model AzureStorageAccount
-    """
-    ONLINE = 'Online'
-
-
-class ACSStatus:
-    """
-    For status in db model AzureCloudService
-    """
-    CREATED = 'Created'
-
 
 class ADStatus:
     """
-    For status in db model AzureDeployment
+    For status in db model
     """
     RUNNING = 'Running'
 
 
 class AVMStatus:
     """
-    For status in db model AzureVirtualMachine
+    For status in db model
     """
     READY_ROLE = 'ReadyRole'
     STOPPED_VM = 'StoppedVM'
@@ -280,7 +235,6 @@ class FILE_TYPE:
 
     File of different types may saved in different position
     """
-    AZURE_CERT = "azure_cert"
     TEMPLATE = "template"
     HACK_IMAGE = "hack_image"
     USER_FILE = "user_file"
@@ -307,7 +261,7 @@ class DockerHostServerStatus:
 
     Attributes:
         STARTING: VM is in the process of starting
-        DOCKER_INIT: VM starts successfully according to the feedback of Azure and docker application is in the process
+        DOCKER_INIT: VM starts successfully according to the feedback of docker application is in the process
                      of initialization
         DOCKER_READY: VM docker api port is OK
         UNAVAILABLE: VM is unavailable
@@ -325,31 +279,6 @@ class DHS_QUERY_STATE:
     FAILED = 2
 
 
-class AzureApiExceptionMessage:
-    """
-    The message returned by azure api when exception occurs
-
-    Attributes:
-        SERVICE_NOT_FOUND: the service is not found
-        DEPLOYMENT_NOT_FOUND: the service deployment is not found
-        CONTAINER_NOT_FOUND: the container is not found
-    """
-    SERVICE_NOT_FOUND = 'Not found (Not Found)'
-    DEPLOYMENT_NOT_FOUND = 'Not found (Not Found)'
-    CONTAINER_NOT_FOUND = 'Not found (The specified container does not exist.)'
-
-
-class AzureOperationStatus:
-    """
-    The status of Azure operation
-
-    Attributes:
-        IN_PROGRESS: the operation is in process
-        SUCCESS: the operation is successful
-    """
-    IN_PROGRESS = 'InProgress'
-    SUCCESS = 'Succeeded'
-
 
 class ServiceDeploymentSlot:
     """
@@ -362,43 +291,6 @@ class ServiceDeploymentSlot:
     PRODUCTION = 'production'
     STAGING = 'staging'
 
-
-class AzureVMSize:
-    """
-    the size of Azure VM
-
-    Attributes:
-        MEDIUM_SIZE: medium size
-        SMALL_SIZE: small size
-    """
-    MEDIUM_SIZE = 'Medium'
-    SMALL_SIZE = 'Small'
-
-
-class AzureVMEndpointName:
-    """
-    the name of Azure VM endpoint
-
-    Attributes:
-        DOCKER: docker
-        SSH: ssh
-        HTTP: http
-    """
-    DOCKER = 'docker'
-    SSH = 'SSH'
-    HTTP = 'http'
-
-
-class AzureVMEndpointDefaultPort:
-    """
-    default local port (private port) of applications in Azure VM
-
-    Attributes:
-        DOCKER: the default local port of docker
-        SSH: the default local port of SSH
-    """
-    DOCKER = 4243
-    SSH = 22
 
 
 class TCPProtocol:
@@ -421,26 +313,6 @@ class DockerPingResult:
         OK: the response content is 'OK'
     """
     OK = 'OK'
-
-
-class AzureVMPowerState:
-    """
-    the state of Azure VM power
-
-    Attributes:
-        VM_STARTED: the VM is started
-    """
-    VM_STARTED = 'started'
-
-
-class AzureVMEnpointConfigType:
-    """
-    the type of Azure VM endpoint configuration
-
-    Attributes:
-        NETWORK: type is 'NetworkConfiguration'
-    """
-    NETWORK = 'NetworkConfiguration'
 
 
 class TEAM_SHOW_TYPE:
@@ -481,7 +353,6 @@ class HACK_NOTICE_EVENT:
     HACK_OFFLINE = 4  # hackathon create/edit/online/offline
     EXPR_JOIN = 5  # user start to program
     HACK_PLAN = 6  # remind user to submit plan
-    HACK_REGISTER_AZURE = 7  # remind user to register azure
 
 
 class EMAIL_SMTP_STATUSCODE:

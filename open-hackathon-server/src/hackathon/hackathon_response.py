@@ -8,7 +8,7 @@ from log import log
 
 class HTTP_CODE:
     CREATE_NOT_FINISHED = 412101
-    AZURE_KEY_NOT_READY = 412102
+    OBSOLETE = 412102
 
 
 __all__ = [

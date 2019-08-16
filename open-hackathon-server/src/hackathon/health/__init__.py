@@ -24,7 +24,6 @@ all_health_items = {
     "docker": RequiredFeature("health_check_hosted_docker"),
     "alauda": RequiredFeature("health_check_alauda_docker"),
     "guacamole": RequiredFeature("health_check_guacamole"),
-    "azure": RequiredFeature("health_check_azure"),
     "storage": RequiredFeature("storage"),
     "mongodb": RequiredFeature("health_check_mongodb")
 }

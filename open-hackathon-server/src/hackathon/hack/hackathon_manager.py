@@ -571,18 +571,6 @@ class HackathonManager(Component):
                 hackathon_notice.content = u"您有未完成的任务，请提交开发说明书"
                 hackathon_notice.receiver = user
                 hackathon_notice.link = u"/site/%s/team" % (hackathon.name)
-
-            elif notice_event == HACK_NOTICE_EVENT.HACK_REGISTER_AZURE and body.get('receiver', None):
-                user = body.get('receiver')
-                old_hackathon_notice = HackathonNotice.objects(receiver=user,
-                                                               event=HACK_NOTICE_EVENT.HACK_REGISTER_AZURE,
-                                                               hackathon=hackathon).first()
-                if old_hackathon_notice:  # duplicate
-                    return old_hackathon_notice.dic()
-
-                hackathon_notice.content = u"请完成实名认证"
-                hackathon_notice.receiver = user
-                hackathon_notice.link = u"https://www.azure.cn/pricing/1rmb-trial-full/?form-type=waitinglist"
             else:
                 pass
 
@@ -726,10 +714,6 @@ class HackathonManager(Component):
                 if team:
                     if not team.dev_plan:  # the dev_plan isn't submitted
                         hackathon_notice.is_read = False
-                    elif hackathon.config.get(HACKATHON_CONFIG.REAL_NAME_AUTH_21V, False):
-                        self.create_hackathon_notice(hackathon.id, HACK_NOTICE_EVENT.HACK_REGISTER_AZURE,
-                                                     HACK_NOTICE_CATEGORY.HACKATHON, {'receiver': user})
-
             hackathon_notice.save()
             return ok()
 
@@ -791,9 +775,7 @@ class HackathonManager(Component):
             if self.util.is_local() or hackathon.config.get('cloud_provider') == CLOUD_PROVIDER.NONE:
                 req = ok()
             elif hackathon.config.get('cloud_provider') == CLOUD_PROVIDER.AZURE:
-                is_success = docker_host_manager.check_subscription_id(hackathon.id)
-                if not is_success:
-                    req = general_error(code=HTTP_CODE.AZURE_KEY_NOT_READY)  # azure sub id is invalide
+                raise NotImplementedError()
 
         elif hackathon.status == HACK_STATUS.ONLINE:
             req = ok()
