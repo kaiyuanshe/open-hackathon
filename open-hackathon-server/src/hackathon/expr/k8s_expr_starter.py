@@ -20,19 +20,19 @@ class K8SExprStarter(ExprStarter):
     def _internal_start_expr(self, context):
         hackathon = Hackathon.objects.get(id=context.hackathon_id)
         experiment = Experiment.objects.get(id=context.experiment_id)
-        pre_alloc_enabled = context.pre_alloc_enabled
         template_content = context.template_content
 
         if not experiment or not hackathon:
             return internal_server_error('Failed starting k8s: experiment or hackathon not found.')
+
         user = experiment.user or None
         _virtual_envs = []
-        _env_name = str("k8s-" + hackathon.name + template_content.name).lower()
-        try:
-            if user:
-                _virtual_envs = experiment.virtual_environments
-                _env_name += str("-" + user.name).lower()
+        _env_name = str(hackathon.name + "-" + template_content.name).lower()
+        if user:
+            _virtual_envs = experiment.virtual_environments
+            _env_name += str("-" + user.name).lower()
 
+        try:
             if not _virtual_envs:
                 # Get None VirtualEnvironment, create new one:
                 k8s_env = self.__create_useful_k8s_resource(hackathon, _env_name, template_content)
@@ -44,14 +44,8 @@ class K8SExprStarter(ExprStarter):
                     status=VEStatus.INIT,
                     remote_provider=VERemoteProvider.Guacamole))
 
-                # save constructed experiment, and execute from first job content
-                experiment.save()
-                if pre_alloc_enabled:
-                    self.log.debug("pre allocate vn, creating k8s... %s" % _env_name)
-                    return self.__schedule_create(context)
-                else:
-                    self.log.debug("virtual_environments %s created, creating k8s..." % _env_name)
-                    self.__schedule_create(context)
+                self.log.debug("virtual_environments %s created, creating k8s..." % _env_name)
+                self.__schedule_create(context)
             else:
                 self.__schedule_start(context)
         except Exception as e:
@@ -78,7 +72,7 @@ class K8SExprStarter(ExprStarter):
             return internal_server_error('Failed stopping k8s')
 
     def _internal_rollback(self, context):
-        pass
+        self.__schedule_stop(context)
 
     def __schedule_create(self, ctx):
         self.scheduler.add_once("k8s_service", "schedule_create_k8s_service", context=ctx,
@@ -195,6 +189,19 @@ class K8SExprStarter(ExprStarter):
 
     @staticmethod
     def __create_useful_k8s_resource(hackathon, env_name, template_content):
+        """ helper func to generate available and unique resources yaml
+
+        Currently supported resources
+            - Deployment
+            - Service
+            - StatefulSet
+            - PersistentVolumeClaim
+
+        :param hackathon:
+        :param env_name:
+        :param template_content:
+        :return:
+        """
         _experiments = Experiment.objects(hackathon=hackathon).all()
         _virtual_envs = []
         for e in _experiments:
@@ -216,6 +223,7 @@ class K8SExprStarter(ExprStarter):
             deployments=template_content.get_resource("deployment"),
             services=template_content.get_resource("service"),
             statefulsets=template_content.get_resource("statefulset"),
+            persistent_volume_claims=template_content.get_resource("persistentvolumeclaim"),
         )
 
         return k8s_env
@@ -267,3 +275,70 @@ class K8SExprStarter(ExprStarter):
         virtual_env.status = VEStatus.RUNNING
         expr.status = EStatus.RUNNING
         expr.save()
+
+
+class TemplateRender:
+
+    def __init__(self, resource_name, resource_type, yml, labels):
+        self.resource_name = resource_name
+        self.resource_type = resource_type
+        self.yaml = yml
+        self.labels = labels
+
+    def __render_deploy(self):
+        metadata = self.yaml['metadata']
+        metadata["name"] = "{}-{}".format(self.resource_name, metadata["name"])
+        deploy_labels = metadata.get("labels") or {}
+        deploy_labels.update(self.labels)
+        metadata['labels'] = deploy_labels
+
+        spec = self.yaml['spec']
+        pod_template = spec['template']
+        pod_metadata = pod_template['metadata']
+        pod_labels = pod_metadata.get("labels") or {}
+        pod_labels.update(self.labels)
+        pod_metadata['labels'] = pod_labels
+
+        if "selector" in spec:
+            match_labels = spec['selector'].get("matchLabels") or {}
+            match_labels.update(self.labels)
+            spec['selector']['matchLabels'] = match_labels
+
+        # Make sure PVC is no conflict
+        if "volumes" in spec:
+            for v in spec['volumes']:
+                if "persistentVolumeClaim" not in v:
+                    continue
+                pvc = v['persistentVolumeClaim']
+                pvc['claimName'] = "{}-{}".format(self.resource_name, pvc['claimName'])
+
+    def __render_svc(self):
+        metadata = self.yaml['metadata']
+        metadata["name"] = "{}-{}".format(self.resource_name, metadata["name"])
+        svc_labels = metadata.get("labels") or {}
+        svc_labels.update(self.labels)
+        metadata['labels'] = svc_labels
+
+        spec = self.yaml['spec']
+        label_selector = spec.get("selector") or {}
+        label_selector.update(self.labels)
+
+    def __render_stateful_set(self):
+        metadata = self.yaml['metadata']
+        metadata["name"] = "{}-{}".format(self.resource_name, metadata["name"])
+        ss_labels = metadata.get("labels") or {}
+        ss_labels.update(self.labels)
+        metadata['labels'] = ss_labels
+
+        spec = self.yaml['spec']
+        if "selector" in spec:
+            match_labels = spec['selector'].get("matchLabels") or {}
+            match_labels.update(self.labels)
+            spec['selector']['matchLabels'] = match_labels
+
+    def __render_pvc(self):
+        metadata = self.yaml['metadata']
+        metadata["name"] = "{}-{}".format(self.resource_name, metadata["name"])
+        pvc_labels = metadata.get("labels") or {}
+        pvc_labels.update(self.labels)
+        metadata['labels'] = pvc_labels
