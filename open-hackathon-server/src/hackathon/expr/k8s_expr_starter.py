@@ -2,7 +2,7 @@
 """
 This file is covered by the LICENSING file in the root of this project.
 """
-import copy
+import yaml
 import time
 import string
 import random
@@ -31,11 +31,17 @@ class K8SExprStarter(ExprStarter):
         if user:
             _virtual_envs = experiment.virtual_environments
             _env_name += str("-" + user.name).lower()
+        _env_name = "{}-{}".format(_env_name, "".join(random.sample(string.ascii_letters, 6)))
 
         try:
             if not _virtual_envs:
                 # Get None VirtualEnvironment, create new one:
-                k8s_env = self.__create_useful_k8s_resource(hackathon, _env_name, template_content)
+                labels = {
+                    "hacking.kaiyuanshe.cn/hackathon": hackathon.id,
+                    "hacking.kaiyuanshe.cn/experiment": experiment.id,
+                    "hacking.kaiyuanshe.cn/virtual_environment": _env_name,
+                }
+                k8s_env = self.__create_useful_k8s_resource(_env_name, template_content, labels)
 
                 experiment.virtual_environments.append(VirtualEnvironment(
                     provider=VE_PROVIDER.K8S,
@@ -188,7 +194,7 @@ class K8SExprStarter(ExprStarter):
         # TODO: try to abstract common behavior
 
     @staticmethod
-    def __create_useful_k8s_resource(hackathon, env_name, template_content):
+    def __create_useful_k8s_resource(env_name, template_content, labels):
         """ helper func to generate available and unique resources yaml
 
         Currently supported resources
@@ -197,33 +203,30 @@ class K8SExprStarter(ExprStarter):
             - StatefulSet
             - PersistentVolumeClaim
 
-        :param hackathon:
         :param env_name:
         :param template_content:
+        :param labels:
         :return:
         """
-        _experiments = Experiment.objects(hackathon=hackathon).all()
-        _virtual_envs = []
-        for e in _experiments:
-            _virtual_envs += list(e.virtual_environments)
-
-        _names = [v.name for v in _virtual_envs]
-        count = 0
-        name = None
-        while count < 100:
-            count += 1
-            name = "{}-{}".format(env_name, count)
-            if name not in _names:
-                break
-        if count >= 100:
-            raise RuntimeError("Can't get useful env name.")
 
         k8s_env = K8sEnvironment(
-            name=name,
-            deployments=template_content.get_resource("deployment"),
-            services=template_content.get_resource("service"),
-            statefulsets=template_content.get_resource("statefulset"),
-            persistent_volume_claims=template_content.get_resource("persistentvolumeclaim"),
+            name=env_name,
+            deployments=[
+                TemplateRender(env_name, "deployment", yaml.load(d), labels).render()
+                for d in template_content.get_resource("deployment")
+            ],
+            services=[
+                TemplateRender(env_name, "service", yaml.load(s), labels).render()
+                for s in template_content.get_resource("service")
+            ],
+            statefulsets=[
+                TemplateRender(env_name, "statefulset", yaml.load(s), labels).render()
+                for s in template_content.get_resource("statefulset")
+            ],
+            persistent_volume_claims=[
+                TemplateRender(env_name, "statefulset", yaml.load(p), labels).render()
+                for p in template_content.get_resource("persistentvolumeclaim")
+            ],
         )
 
         return k8s_env
@@ -278,12 +281,33 @@ class K8SExprStarter(ExprStarter):
 
 
 class TemplateRender:
+    """
+    Types:
+        - Deployment
+        - Service
+        - StatefulSet
+        - PersistentVolumeClaim
+    """
 
     def __init__(self, resource_name, resource_type, yml, labels):
         self.resource_name = resource_name
-        self.resource_type = resource_type
+        self.resource_type = str(resource_type).lower()
         self.yaml = yml
         self.labels = labels
+
+    def render(self):
+
+        if self.resource_type == "deployment":
+            return self.__render_deploy()
+
+        if self.resource_type == "service":
+            return self.__render_svc()
+
+        if self.resource_type == "statefulset":
+            return self.__render_stateful_set()
+
+        if self.resource_type == "persistentvolumeclaim":
+            return self.__render_pvc()
 
     def __render_deploy(self):
         metadata = self.yaml['metadata']
