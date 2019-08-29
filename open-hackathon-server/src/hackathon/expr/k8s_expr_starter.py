@@ -6,7 +6,7 @@ import copy
 import time
 
 from expr_starter import ExprStarter
-from hackathon.hmongo.models import Hackathon, VirtualEnvironment, Experiment, AzureVirtualMachine, AzureEndPoint
+from hackathon.hmongo.models import Hackathon, VirtualEnvironment, Experiment
 from hackathon.constants import (VE_PROVIDER, VERemoteProvider, VEStatus, ADStatus, AVMStatus, EStatus)
 from hackathon.hackathon_response import internal_server_error
 from hackathon.constants import K8S_DEPLOYMENT_STATUS

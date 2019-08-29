@@ -104,22 +104,6 @@
               }
             }
           },
-          "azure": {
-            "type": "object",
-            "description": "status of azure cloud",
-            "required": false,
-            "properties": {
-              "status": {
-                "type": "string",
-                "description": "'ok' means everything is ok. 'warning' means it's working but might have issues. 'error' means it's not working.",
-                "enum": [
-                  "ok",
-                  "warning",
-                  "error"
-                ]
-              }
-            }
-          }
         }
       }
     }

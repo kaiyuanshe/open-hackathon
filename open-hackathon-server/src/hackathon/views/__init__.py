@@ -75,8 +75,6 @@ def init_routes():
     api.add_resource(AdminHackathonOrganizerResource, "/api/admin/hackathon/organizer")  # manage hackathon organizers
     api.add_resource(HackathonCheckNameResource, "/api/admin/hackathon/checkname")  # check hackathon name exists
     api.add_resource(AdminHackathonListResource, "/api/admin/hackathon/list")  # get entitled hackathon list
-    api.add_resource(AdminAzureResource, '/api/admin/azure')  # manage azure subscription and certs
-    api.add_resource(AdminAzureCheckSubIdResource, '/api/admin/azure/checksubid')
     api.add_resource(AdminRegisterListResource, "/api/admin/registration/list")  # get registered users
     api.add_resource(AdminRegisterResource, "/api/admin/registration")  # create, delete or query registration
     api.add_resource(AdminHackathonTemplateListResource,

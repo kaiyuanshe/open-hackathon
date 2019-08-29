@@ -10,7 +10,6 @@ sys.path.append("..")
 from hackathon.constants import VE_PROVIDER
 from template_constants import TEMPLATE
 from docker_template_unit import DockerTemplateUnit
-from azure_template_unit import AzureTemplateUnit
 from k8s_template_unit import K8STemplateUnit
 
 __all__ = ["TemplateContent"]
@@ -37,7 +36,7 @@ class TemplateContent:
             if provider == VE_PROVIDER.DOCKER:
                 return DockerTemplateUnit(unit_dict)
             elif provider == VE_PROVIDER.AZURE:
-                return AzureTemplateUnit(unit_dict)
+                raise NotImplementedError()
             elif provider == VE_PROVIDER.K8S:
                 return K8STemplateUnit(unit_dict)
             else:
@@ -56,7 +55,7 @@ class TemplateContent:
             if unit.provider == VE_PROVIDER.DOCKER:
                 return unit.dic
             elif unit.provider == VE_PROVIDER.AZURE:
-                return unit.virtual_environment
+                raise NotImplementedError()
             return unit
 
         dic[TEMPLATE.VIRTUAL_ENVIRONMENTS] = map(convert_to_dict, self.units)
