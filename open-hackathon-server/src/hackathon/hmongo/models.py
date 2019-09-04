@@ -132,6 +132,7 @@ class K8sCluster(DynamicEmbeddedDocument):
     api_url = StringField(required=True)
     token = StringField(required=True)
     namespace = StringField()
+    ingress = ListField()
 
 
 class Template(HDocumentBase):
