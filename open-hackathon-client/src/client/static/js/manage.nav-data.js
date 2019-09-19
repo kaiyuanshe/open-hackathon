@@ -53,10 +53,6 @@ angular.module('oh.pages', [])
         state: "manage.monitor",
         icon: 'fa-desktop'
       }, {
-        name: "ADVANCED_SETTINGS.AZURECERT",
-        state: "manage.azurecert",
-        icon: 'fa-cloud-upload'
-      }, {
         name: "ADVANCED_SETTINGS.SERVERS",
         state: "manage.servers",
         icon: 'fa-server'

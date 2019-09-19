@@ -246,10 +246,6 @@ angular.module('oh.manage.router', [
     url: 'monitor/:name',
     templateUrl: '/static/partials/manage/monitor.html?v=' + VERSION,
     controller: 'monitorController'
-  }).state('manage.azurecert', {
-    url: 'azure/:name',
-    templateUrl: '/static/partials/manage/azurecert.html?v=' + VERSION,
-    controller: 'azurecertController'
   }).state('manage.servers', {
     url: 'servers/:name',
     templateUrl: '/static/partials/manage/servers.html?v=' + VERSION,
