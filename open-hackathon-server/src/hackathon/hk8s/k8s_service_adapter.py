@@ -80,7 +80,7 @@ class K8SServiceAdapter(ServiceAdapter):
 
     def create_k8s_deployment(self, yaml):
         api_instance = client.AppsV1Api(self.api_client)
-        if isinstance(yaml, str):
+        if isinstance(yaml, str) or isinstance(yaml, unicode):
             # Only support ONE deployment yaml
             yaml = yaml_tool.load(yaml)
         assert isinstance(yaml, dict), "Start a deployment without legal yaml."
@@ -167,7 +167,7 @@ class K8SServiceAdapter(ServiceAdapter):
         return _svc.to_dict()
 
     def create_k8s_service(self, yaml):
-        if isinstance(yaml, str):
+        if isinstance(yaml, str) or isinstance(yaml, unicode):
             # Only support ONE deployment yaml
             yaml = yaml_tool.load(yaml)
         assert isinstance(yaml, dict), "Create a service without legal yaml."
@@ -193,7 +193,7 @@ class K8SServiceAdapter(ServiceAdapter):
     ###
 
     def create_k8s_statefulset(self, yaml):
-        if isinstance(yaml, str):
+        if isinstance(yaml, str) or isinstance(yaml, unicode):
             # Only support ONE deployment yaml
             yaml = yaml_tool.load(yaml)
         assert isinstance(yaml, dict), "Create a statefulset without legal yaml."
@@ -218,7 +218,7 @@ class K8SServiceAdapter(ServiceAdapter):
     ###
 
     def create_k8s_pvc(self, yaml):
-        if isinstance(yaml, str):
+        if isinstance(yaml, str) or isinstance(yaml, unicode):
             # Only support ONE deployment yaml
             yaml = yaml_tool.load(yaml)
         assert isinstance(yaml, dict), "Create a PVC without legal yaml."

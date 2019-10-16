@@ -32,14 +32,14 @@ class K8SExprStarter(ExprStarter):
         if user:
             _virtual_envs = experiment.virtual_environments
             _env_name += str("-" + user.name).lower()
-        _env_name = "{}-{}".format(_env_name, "".join(random.sample(string.ascii_letters, 6)))
+        _env_name = "{}-{}".format(_env_name, "".join(random.sample(string.lowercase, 6)))
 
         try:
             if not _virtual_envs:
                 # Get None VirtualEnvironment, create new one:
                 labels = {
-                    "hacking.kaiyuanshe.cn/hackathon": hackathon.id,
-                    "hacking.kaiyuanshe.cn/experiment": experiment.id,
+                    "hacking.kaiyuanshe.cn/hackathon": str(hackathon.id),
+                    "hacking.kaiyuanshe.cn/experiment": str(experiment.id),
                     "hacking.kaiyuanshe.cn/virtual_environment": _env_name,
                 }
                 k8s_env = self.__create_useful_k8s_resource(_env_name, template_content, labels)
@@ -89,23 +89,24 @@ class K8SExprStarter(ExprStarter):
     def schedule_start_k8s_service(self, context):
         experiment = Experiment.objects.get(id=context.experiment_id)
         virtual_env = experiment.virtual_environments[0]
+        k8s_resource = virtual_env.k8s_resource
         adapter = self.__get_adapter_from_ctx(K8SServiceAdapter, context)
 
         try:
-            for pvc in virtual_env.persistent_volume_claims:
+            for pvc in k8s_resource.persistent_volume_claims:
                 adapter.create_k8s_pvc(pvc)
 
-            for s in virtual_env.services:
+            for s in k8s_resource.services:
                 adapter.create_k8s_service(s)
 
-            for d in virtual_env.deployments:
+            for d in k8s_resource.deployments:
                 adapter.create_k8s_deployment(d)
 
-            for s in virtual_env.stateful_sets:
+            for s in k8s_resource.stateful_sets:
                 adapter.create_k8s_statefulset(s)
 
-            self.__wait_for_k8s_ready(adapter, virtual_env.deployments, virtual_env.stateful_sets)
-            self.__config_endpoint(experiment, virtual_env.services)
+            self.__wait_for_k8s_ready(adapter, k8s_resource.deployments, k8s_resource.stateful_sets)
+            self.__config_endpoint(experiment, k8s_resource.services)
         except Exception as e:
             self.log.error("k8s_service_start_failed: {}".format(e))
 
@@ -151,19 +152,19 @@ class K8SExprStarter(ExprStarter):
         k8s_env = K8sEnvironment(
             name=env_name,
             deployments=[
-                TemplateRender(env_name, "deployment", yaml.load(d), labels).render()
+                yaml.dump(TemplateRender(env_name, "deployment", d, labels).render())
                 for d in template_content.get_resource("deployment")
             ],
             services=[
-                TemplateRender(env_name, "service", yaml.load(s), labels).render()
+                yaml.dump(TemplateRender(env_name, "service", s, labels).render())
                 for s in template_content.get_resource("service")
             ],
             statefulsets=[
-                TemplateRender(env_name, "statefulset", yaml.load(s), labels).render()
+                yaml.dump(TemplateRender(env_name, "statefulset", s, labels).render())
                 for s in template_content.get_resource("statefulset")
             ],
             persistent_volume_claims=[
-                TemplateRender(env_name, "statefulset", yaml.load(p), labels).render()
+                yaml.dump(TemplateRender(env_name, "statefulset", p, labels).render())
                 for p in template_content.get_resource("persistentvolumeclaim")
             ],
         )
@@ -176,7 +177,8 @@ class K8SExprStarter(ExprStarter):
         # Wait up to 30 minutes
         end_time = int(time.time()) + 60 * 60 * 30
 
-        for d in deployments:
+        for d_yaml in deployments:
+            d = yaml.load(d_yaml)
             while adapter.get_deployment_status(d['metadata']['name']) != K8S_DEPLOYMENT_STATUS.AVAILABLE:
                 time.sleep(1)
                 if int(time.time()) > end_time:
@@ -187,7 +189,7 @@ class K8SExprStarter(ExprStarter):
             pass
 
     def __config_endpoint(self, expr, services):
-        self.log.debug("experiment started %s successfully. Setting remote parameters." % expr.experiment_id)
+        self.log.debug("experiment started %s successfully. Setting remote parameters." % expr.id)
         # set experiment status
         # update the status of virtual environment
         virtual_env = expr.virtual_environments[0]
@@ -292,6 +294,7 @@ class TemplateRender:
                     continue
                 pvc = v['persistentVolumeClaim']
                 pvc['claimName'] = "{}-{}".format(self.resource_name, pvc['claimName'])
+        return self.yaml
 
     def __render_svc(self):
         metadata = self.yaml['metadata']
@@ -303,6 +306,7 @@ class TemplateRender:
         spec = self.yaml['spec']
         label_selector = spec.get("selector") or {}
         label_selector.update(self.labels)
+        return self.yaml
 
     def __render_stateful_set(self):
         metadata = self.yaml['metadata']
@@ -316,6 +320,7 @@ class TemplateRender:
             match_labels = spec['selector'].get("matchLabels") or {}
             match_labels.update(self.labels)
             spec['selector']['matchLabels'] = match_labels
+        return self.yaml
 
     def __render_pvc(self):
         metadata = self.yaml['metadata']
@@ -323,3 +328,4 @@ class TemplateRender:
         pvc_labels = metadata.get("labels") or {}
         pvc_labels.update(self.labels)
         metadata['labels'] = pvc_labels
+        return self.yaml
