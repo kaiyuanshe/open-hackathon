@@ -37,7 +37,7 @@ class TemplateContent:
     @classmethod
     def from_yaml(cls, template_model, yaml_content):
         yamls = yaml.load_all(yaml_content)
-        resource = {}
+        resource = defaultdict(list)
 
         for y in yamls:
             kind = str(y['kind']).lower()

@@ -174,7 +174,8 @@ class K8SServiceAdapter(ServiceAdapter):
 
         api_instance = client.CoreV1Api(self.api_client)
         try:
-            api_instance.create_namespaced_service(self.namespace, yaml)
+            svc = api_instance.create_namespaced_service(self.namespace, yaml)
+            return svc.to_dict()['metadata']['name']
         except ApiException as e:
             self.log.error("Create service error: {}".format(e))
             raise ServiceError("Create service error: {}".format(e))
