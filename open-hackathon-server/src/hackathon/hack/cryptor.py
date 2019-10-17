@@ -21,10 +21,8 @@ class Cryptor(Component):
 
     def __init__(self):
         """
-        Use storage azure account key as password
-        :return:
         """
-        self.password = self.util.safe_get_config("storage.azure.account_key", "123456")
+        self.password = "123456"
 
     def __derive_key_and_iv(self, salt, key_length, iv_length):
         d = d_i = ''

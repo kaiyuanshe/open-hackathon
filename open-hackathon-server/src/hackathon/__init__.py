@@ -124,7 +124,7 @@ def init_components():
     """Init hackathon factory"""
     from hackathon.user import UserManager, UserProfileManager
     from hackathon.hack import HackathonManager, AdminManager, TeamManager, DockerHostManager, \
-        AzureCertManager, RegisterManager, HackathonTemplateManager, Cryptor
+        RegisterManager, HackathonTemplateManager, Cryptor
     from hackathon.template import TemplateLibrary
     from hackathon.remote.guacamole import GuacamoleInfo
     from hackathon.cache.cache_mgr import CacheManagerExt
@@ -150,7 +150,6 @@ def init_components():
     factory.provide("user_profile_manager", UserProfileManager)
     factory.provide("hackathon_manager", HackathonManager)
     factory.provide("register_manager", RegisterManager)
-    factory.provide("azure_cert_manager", AzureCertManager)
     factory.provide("cryptor", Cryptor)
     factory.provide("docker_host_manager", DockerHostManager)
     factory.provide("hackathon_template_manager", HackathonTemplateManager)
@@ -166,7 +165,6 @@ def init_components():
     factory.provide("health_check_hosted_docker", get_class("hackathon.health.health_check.HostedDockerHealthCheck"))
     factory.provide("health_check_alauda_docker", get_class("hackathon.health.health_check.AlaudaDockerHealthCheck"))
     factory.provide("health_check_guacamole", get_class("hackathon.health.health_check.GuacamoleHealthCheck"))
-    factory.provide("health_check_azure", get_class("hackathon.health.health_check.AzureHealthCheck"))
     factory.provide("health_check_mongodb", get_class("hackathon.health.health_check.MongoDBHealthCheck"))
 
     # docker
@@ -183,11 +181,9 @@ def init_db():
 
 
 def init_expr_components():
-    from expr import ExprManager, AzureVMExprStarter, AzureHostedDockerStarter, AlaudaDockerStarter, K8SExprStarter
+    from expr import ExprManager, AlaudaDockerStarter, K8SExprStarter
     factory.provide("expr_manager", ExprManager)
     factory.provide("alauda_docker", AlaudaDockerStarter)
-    factory.provide("azure_docker", AzureHostedDockerStarter)
-    factory.provide("azure_vm", AzureVMExprStarter)
     factory.provide("k8s_service", K8SExprStarter)
 
 
@@ -233,20 +229,8 @@ def init_sms():
 
 
 def init_hackathon_storage():
-    """Add storage implementation to hackathon factory
-
-    The type of storage is configured by ""storage.type"" in config.py which is 'local' by default
-    """
-    from hackathon.storage import AzureStorage, LocalStorage
-
-    storage_type = safe_get_config("storage.type", "azure")
-    if storage_type == "azure":
-        # init BlobServiceAdapter first since AzureStorage depends on it. And accountKey must be included in config file
-        from hackathon.hazure import BlobServiceAdapter
-        factory.provide("azure_blob_service", BlobServiceAdapter)
-        factory.provide("storage", AzureStorage)
-    else:
-        factory.provide("storage", LocalStorage)
+    from hackathon.storage import LocalStorage
+    factory.provide("storage", LocalStorage)
 
 
 def init_schedule_jobs():

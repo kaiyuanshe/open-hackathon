@@ -59,7 +59,8 @@ class ExprManager(Component):
             elif ve.provider == VE_PROVIDER.ALAUDA:
                 pass
             elif ve.provider == VE_PROVIDER.AZURE:
-                pass
+                raise NotImplementedError()
+
         self.__check_expr_real_status(experiment)
         return experiment.dic()
 
@@ -223,13 +224,9 @@ class ExprManager(Component):
             return RequiredFeature("k8s_service")
 
         if template.provider == VE_PROVIDER.DOCKER:
-            if HACKATHON_CONFIG.CLOUD_PROVIDER in hackathon.config:
-                if hackathon.config[HACKATHON_CONFIG.CLOUD_PROVIDER] == CLOUD_PROVIDER.AZURE:
-                    starter = RequiredFeature("azure_docker")
-                elif hackathon.config[HACKATHON_CONFIG.CLOUD_PROVIDER] == CLOUD_PROVIDER.ALAUDA:
-                    starter = RequiredFeature("alauda_docker")
+            starter = RequiredFeature("alauda_docker")
         elif template.provider == VE_PROVIDER.AZURE:
-            starter = RequiredFeature("azure_vm")
+            raise NotImplementedError()
         elif template.provider == VE_PROVIDER.K8S:
             starter = RequiredFeature("k8s_service")
 
@@ -333,18 +330,8 @@ class ExprManager(Component):
                         public_urls.append({
                             "name": p.name,
                             "url": p.url.format(container.host_server.public_dns, p.public_port)})
-        elif ve_provider == VE_PROVIDER.AZURE:
-            for ve in expr.virtual_environments:
-                vm = ve.azure_resource
-                if not vm or not vm.end_points:
-                    continue
-
-                for endpoint in vm.end_points:
-                    if endpoint.url:
-                        public_urls.append({
-                            "name": endpoint.name,
-                            "url": endpoint.url.format(vm.dns, endpoint.public_port)
-                        })
+        elif ve.provider == VE_PROVIDER.AZURE:
+            raise NotImplementedError()
         elif ve_provider == VE_PROVIDER.K8S:
             # TODO public accessible http url
             public_urls.append({
@@ -442,7 +429,7 @@ class ExprManager(Component):
             elif ve.provider == VE_PROVIDER.ALAUDA:
                 pass
             elif ve.provider == VE_PROVIDER.AZURE:
-                pass
+                raise NotImplementedError()
         if all(ve.status == VEStatus.STOPPED for ve in experiment.virtual_environments):
             experiment.status = EStatus.STOPPED
         if all(ve.status == VEStatus.RUNNING for ve in experiment.virtual_environments):

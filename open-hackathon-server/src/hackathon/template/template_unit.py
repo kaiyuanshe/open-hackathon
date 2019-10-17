@@ -7,7 +7,6 @@ This file is covered by the LICENSING file in the root of this project.
 class TemplateUnit(object):
     """Unit of TemplateContent.
 
-    An unit is a dict too that includes arguments for docker container or azure VM.
     Each unit represents a virtual_environment that can be started or stopped independently"""
 
     def __init__(self, provider):

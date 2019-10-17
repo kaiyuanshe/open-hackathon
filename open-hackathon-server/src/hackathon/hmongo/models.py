@@ -172,8 +172,7 @@ class AzureKey(HDocumentBase):
     """
     Azure certificate information of user/hackathon
     Open-hackathon will try to use local certification file, if it doesn't exist, open-hackathon will try to
-    recover it from azure.
-    """
+    recover it from azure.abs    """
     cert_url = StringField(required=True)  # cert_url is cert file path in azure
     # pem_url is "encrypted" pem file path in azure, so be careful to use this,
     # at the most time you should use get_local_pem_url()
@@ -418,18 +417,8 @@ class Experiment(HDocumentBase):
     last_heart_beat_time = DateTimeField()
     template = ReferenceField(Template)
     user = ReferenceField(User)
-    azure_key = ReferenceField(AzureKey)
     hackathon = ReferenceField(Hackathon)
     virtual_environments = EmbeddedDocumentListField(VirtualEnvironment, default=[])
 
     def __init__(self, **kwargs):
         super(Experiment, self).__init__(**kwargs)
-
-
-class Azure(HDocumentBase):
-    account = StringField()
-    password = StringField()
-    status = StringField()
-
-    def __init__(self, **kwargs):
-        super(Azure, self).__init__(**kwargs)

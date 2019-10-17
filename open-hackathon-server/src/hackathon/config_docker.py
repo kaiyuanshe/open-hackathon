@@ -28,9 +28,6 @@ Config = {
     "login": {
         "token_valid_time_minutes": 60
     },
-    "azure": {
-        "cert_base": "",
-    },
     "guacamole": {
         "host": "http://" + os.environ["GUACAMOLE"] + ":" + os.environ["GUACAMOLE_PORT"]
 
@@ -47,18 +44,7 @@ Config = {
     "storage": {
         "type": "local",
         "size_limit_kilo_bytes": 5 * 1024,
-        "azure": {
-            "account_name": "",
-            "account_key": "",
-            "image_container": "images",
-            "template_container": "templates",
-            "certificates_container": "certificates",
-            "user_file_container": "userfile",
-            "team_file_container": "teamfile",
-            "hack_file_container": "hackfile",
-            "blob_service_host_base": ".blob.core.chinacloudapi.cn"
-        }
-    },
+        },
     "docker": {
         "alauda": {
             "token": "",

@@ -24,7 +24,6 @@ register_manager = RequiredFeature("register_manager")
 hackathon_template_manager = RequiredFeature("hackathon_template_manager")
 template_library = RequiredFeature("template_library")
 team_manager = RequiredFeature("team_manager")
-azure_cert_manager = RequiredFeature("azure_cert_manager")
 expr_manager = RequiredFeature("expr_manager")
 admin_manager = RequiredFeature("admin_manager")
 guacamole = RequiredFeature("guacamole")
@@ -496,28 +495,6 @@ class AdminHackathonListResource(HackathonResource):
     def get(self):
         return admin_manager.get_entitled_hackathons_list(g.user)
 
-
-class AdminAzureResource(HackathonResource):
-    @hackathon_name_required
-    def get(self):
-        return azure_cert_manager.get_certificates(g.hackathon)
-
-    @admin_privilege_required
-    def post(self):
-        ctx = self.context()
-        return azure_cert_manager.create_certificate(ctx.subscription_id, ctx.management_host, g.hackathon)
-
-    @admin_privilege_required
-    def delete(self):
-        ctx = self.context()
-        return azure_cert_manager.delete_certificate(ctx.certificate_id, g.hackathon)
-
-
-class AdminAzureCheckSubIdResource(HackathonResource):
-    @admin_privilege_required
-    def post(self):
-        ctx = self.context()
-        return azure_cert_manager.check_sub_id(ctx.subscription_id)
 
 
 class AdminRegisterListResource(HackathonResource):

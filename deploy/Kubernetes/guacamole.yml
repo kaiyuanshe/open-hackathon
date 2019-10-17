@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: guacamole
+  namespace: ohp
+data:
+  guacamole.properties: |
+    guacd-hostname: localhost
+    guacd-port:     4822
+    auth-request-url: http://ohp-server:15000/api/user/guacamoleconfig
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: guacamole
+  name: guacamole
+  namespace: ohp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: guacamole
+  template:
+    metadata:
+      labels:
+        app: guacamole
+    spec:
+      containers:
+      - image: kaiyuanshe/guacamole
+        name: guacamole
+        env:
+          - name: GUACD_HOSTNAME
+            value: localhost
+        ports:
+          - containerPort: 8080
+            name: guacamole
+        volumeMounts:
+          - name: config-volume
+            mountPath: /etc/guacamole
+      - image: guacamole/guacd
+        name: guacd
+        ports:
+          - containerPort: 4822
+            name: guacd
+        volumeMounts:
+          - name: config-volume
+            mountPath: /etc/guacamole
+      volumes:
+      - name: config-volume
+        configMap:
+           name: guacamole
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: guacamole
+  name: guacamole
+  namespace: ohp
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+    name: guacamole
+  - port: 4822
+    protocol: TCP
+    targetPort: 4822
+    name: guacd
+  selector:
+    app: guacamole
+  type: NodePort
+

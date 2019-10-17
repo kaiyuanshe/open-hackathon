@@ -11,7 +11,7 @@ from kubernetes import client
 from kubernetes.client.rest import ApiException
 
 from hackathon.constants import HEALTH, HEALTH_STATUS, K8S_DEPLOYMENT_STATUS
-from hackathon.hazure.service_adapter import ServiceAdapter
+from .service_adapter import ServiceAdapter
 
 from .errors import DeploymentError, ServiceError, StatefulSetError, PVCError
 

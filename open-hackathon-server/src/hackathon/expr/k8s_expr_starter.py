@@ -3,13 +3,13 @@
 This file is covered by the LICENSING file in the root of this project.
 """
 import yaml
-import copy
 import time
 import string
 import random
 
 from expr_starter import ExprStarter
-from hackathon.hmongo.models import Hackathon, VirtualEnvironment, Experiment, K8sEnvironment
+from hackathon.hmongo.models import K8sEnvironment
+from hackathon.hmongo.models import Hackathon, VirtualEnvironment, Experiment
 from hackathon.constants import (VE_PROVIDER, VERemoteProvider, VEStatus, EStatus)
 from hackathon.hackathon_response import internal_server_error
 from hackathon.constants import K8S_DEPLOYMENT_STATUS

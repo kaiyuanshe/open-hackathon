@@ -5,8 +5,6 @@ This file is covered by the LICENSING file in the root of this project.
 
 import sys
 
-from hackathon.hazure.cloud_service_adapter import CloudServiceAdapter
-
 sys.path.append("..")
 
 from compiler.ast import flatten
@@ -26,7 +24,7 @@ class HostedDockerFormation(Component):
     expr_manager = RequiredFeature("expr_manager")
     """
     Docker resource management based on docker remote api v1.18
-    Host resource are required. Azure key required in case of azure.
+    Host resource are required.
     """
     application_json = {'content-type': 'application/json'}
     docker_host_manager = RequiredFeature("docker_host_manager")

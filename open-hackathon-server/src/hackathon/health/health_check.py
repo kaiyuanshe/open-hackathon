@@ -5,8 +5,7 @@ This file is covered by the LICENSING file in the root of this project.
 
 import sys
 
-from hackathon.hazure.cloud_service_adapter import CloudServiceAdapter
-from hackathon.hmongo.models import AzureKey, User
+from hackathon.hmongo.models import User
 
 sys.path.append("..")
 import requests
@@ -101,27 +100,6 @@ class GuacamoleHealthCheck(HealthCheck):
             STATUS: HEALTH_STATUS.ERROR
         }
 
-
-class AzureHealthCheck(HealthCheck):
-    """Check the status of azure to make sure config is right and azure is available"""
-
-    def report_health(self):
-        azure_key = AzureKey.objects().first()
-        if not azure_key:
-            return {
-                STATUS: HEALTH_STATUS.WARNING,
-                DESCRIPTION: "No Azure key found"
-            }
-        service = CloudServiceAdapter(azure_key.id)
-        if service.ping():
-            return {
-                STATUS: HEALTH_STATUS.OK,
-                "type": "Azure Storage"
-            }
-        else:
-            return {
-                STATUS: HEALTH_STATUS.ERROR
-            }
 
 
 class StorageHealthCheck(HealthCheck):

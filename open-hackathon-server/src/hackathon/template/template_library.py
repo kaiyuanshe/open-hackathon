@@ -54,7 +54,7 @@ class TemplateLibrary(Component):
 
     def load_template(self, template):
         """load template into memory either from a local cache path or an remote uri
-        load template from local file > from from azure
+        load template from local file
         :param template:
         :return:
         """
