@@ -96,8 +96,10 @@ class K8SExprStarter(ExprStarter):
             for pvc in k8s_resource.persistent_volume_claims:
                 adapter.create_k8s_pvc(pvc)
 
-            for s in k8s_resource.services:
-                adapter.create_k8s_service(s)
+            for i, s in enumerate(k8s_resource.services):
+                svc_name = adapter.create_k8s_service(s)
+                # overwrite service config and get the public port from K8s
+                k8s_resource.services[i] = yaml.dump(adapter.get_service_by_name(svc_name))
 
             for d in k8s_resource.deployments:
                 adapter.create_k8s_deployment(d)
@@ -201,18 +203,19 @@ class K8SExprStarter(ExprStarter):
             return
         assert isinstance(ingress, list)
         svc = None
-        for s in services:
-            if s.get("type") == "NodePort":
+        for s_yaml in services:
+            s = yaml.load(s_yaml)
+            if s['spec'].get("type") == "NodePort":
                 svc = s
                 break
         if not svc:
             return
 
-        ports = svc.get("ports", [])
+        ports = svc['spec'].get("ports", [])
         if not ports:
             self.log.info("Has no endpoint config")
             return
-        public_port = ports[0].get("nodePort")
+        public_port = ports[0].get("node_port")
         if not public_port:
             return
 
