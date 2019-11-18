@@ -26,11 +26,6 @@ class PortBindingType:
     Docker = 2
 
 
-class VirtualEnvironmentProvider:
-    AzureVM = "azure-vm"
-    Docker = "docker"
-
-
 class RemoteProvider:
     Guacamole = "guacamole"
 

@@ -164,10 +164,6 @@ Config = {
                         "": ["get", "post", "delete", "put"],
                         "list": ["get"]
                     },
-                    "azure": {
-                        "": ["get", "post", "delete", "put"],
-                        "checksubid": ["post"]
-                    },
                     "experiment": {
                         "list": ["get"],
                         "": ["post", "put", "delete"]

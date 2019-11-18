@@ -1728,7 +1728,6 @@ angular.module('oh.controllers', [])
     // here $scope.cloudProdiver's type is String, like '1' or null.
     $scope.cloudProvider = null;
     $scope.isProviderSelected = true;
-    $scope.isAzureCertSet = true;
     $scope.isTemplateSet = true;
     $scope.pre_allocate_enabled = false;
     $scope.pre_allocate_number = 1;
@@ -1764,7 +1763,7 @@ angular.module('oh.controllers', [])
 
           // judge whether "AzureCert" and "Template" have been set.
           if ($scope.cloudProvider == '1' && activity.azure_keys.length == 0)
-            $scope.isAzureCertSet = false;
+            // $scope.isAzureCertSet = false;
           if (($scope.cloudProvider == '1' || $scope.cloudProvider == '2') && activity.templates.length == 0)
             $scope.isTemplateSet = false;
 
@@ -1842,112 +1841,6 @@ angular.module('oh.controllers', [])
     };
 
     getHackathonConfig();
-  })
-  .controller('azurecertController', function($rootScope, $scope, $stateParams, api, dialog){
-    $scope.$emit('pageName', 'ADVANCED_SETTINGS.AZURECERT');
-    var isDeleteCerDisabled = false;
-    $scope.azureFormDisabled = false;
-    $scope.azure = {
-      management_host: 'management.core.chinacloudapi.cn',
-    };
-
-    function getAzureCer(){
-      api.admin.azure.get({
-        header: {
-          hackathon_name: $stateParams.name
-        }
-      }).then(function(data){
-        $scope.azurecerts = data;
-        // console.log(data);
-      });
-    }
-
-    $scope.checksubid = function(ecert){
-      api.admin.azure.checksubid.post({
-        body: {
-          subscription_id: ecert.subscription_id
-        },
-        header: {
-          hackathon_name: $stateParams.name
-        }
-      }).then(function(data){
-        if (data.error) {
-          $scope.$emit('showTip', {
-            level: 'tip-warning',
-            content: data.error.message
-          });
-        } else {
-          $scope.$emit('showTip', {
-            level: 'tip-success',
-            content: '检验成功。'
-          });
-          ecert.verified = true;
-        }
-      })
-    };
-
-    $scope.azureFormSubmit = function(){
-      $scope.azureFormDisabled = true;
-      api.admin.azure.post({
-        body: $scope.azure,
-        header: {
-          hackathon_name: $stateParams.name
-        }
-      }).then(function(azure_key){
-        if (azure_key.error) {
-          $scope.$emit('showTip', {
-            level: 'tip-danger',
-            content: azure_key.error.friendly_message
-          });
-        } else {
-          $scope.$emit('showTip', {
-            level: 'tip-success',
-            content: '创建SUBSCRIPTION ID成功'
-          });
-          $scope.azure.subscription_id = '';
-          $scope.azure.management_host = 'management.core.chinacloudapi.cn';
-        }
-        $scope.azureFormDisabled = false;
-      });
-    };
-
-    $scope.deleteCert = function(id){
-      if (!isDeleteCerDisabled) {
-        isDeleteCerDisabled = !isDeleteCerDisabled;
-        dialog.confirm({
-          title: '提示',
-          body: '确定删除此Azure证书？',
-          icon: 'fa-exclamation',
-          size: 'sm',
-          status: 'warning'
-        }).then(function(){
-          api.admin.azure.delete({
-            header: {
-              hackathon_name: $stateParams.name
-            },
-            query: {
-              certificate_id: id
-            }
-          }).then(function(data){
-            if (data.error) {
-              $scope.$emit('showTip', {
-                level: 'tip-danger',
-                content: data.error.friendly_message
-              });
-            } else {
-              $scope.$emit('showTip', {
-                level: 'tip-success',
-                content: '删除成功'
-              });
-              getAzureCer();
-            }
-            isDeleteCerDisabled = !isDeleteCerDisabled;
-          });
-        })
-      }
-    }
-
-    getAzureCer();
   })
   .controller('serversController', function($rootScope, $scope, $stateParams, $uibModal, $cookies, api, dialog){
     $scope.$emit('pageName', 'ADVANCED_SETTINGS.SERVERS');
@@ -2226,7 +2119,7 @@ angular.module('oh.controllers', [])
         size: 'sm',
         status: 'warning'
       }).then(function(){
-        $scope.isAzureForm = $scope.cloudservices == 1;
+        $scope.cloudservices == 1;
         api.admin.hackathon.config.put({
           header: {
             hackathon_name: $scope.activity.name
@@ -2243,62 +2136,9 @@ angular.module('oh.controllers', [])
           }
         });
 
-        if (!$scope.isAzureForm) {
-          $scope.wizard = 3;
-        }
       })
     };
 
-    /*------------------------------------------------------*/
-    $scope.azureFormDisabled = false;
-    $scope.azure_download_cer = false;
-    $scope.azure = {
-      management_host: 'management.core.chinacloudapi.cn',
-    };
-
-    $scope.azureNext = function(){
-      $scope.wizard = 3;
-    }
-
-    $scope.azureFormSubmit = function(){
-      $scope.azureFormDisabled = true;
-      api.admin.azure.post({
-        body: $scope.azure,
-        header: {
-          hackathon_name: $scope.activity.name
-        }
-      }).then(function(azure_key){
-        if (azure_key.error) {
-          $scope.$emit('showTip', {
-            level: 'tip-danger',
-            content: azure_key.error.friendly_message
-          });
-        } else {
-          api.admin.azure.checksubid.post({
-            body: {
-              subscription_id: $scope.azure.subscription_id
-            },
-            header: {
-              hackathon_name: $scope.activity.name
-            }
-          }).then(function(data){
-            if (!data.message) {
-              $scope.$emit('showTip', {
-                level: 'tip-warning',
-                content: '证书授权失败，请检验SUBSCRIPTION ID是否正确。'
-              });
-            }
-          })
-
-          var cert_url = azure_key.cert_url;
-          window.location.href = cert_url;
-          $scope.azure_download_cer = true;
-          $scope.azurecer = cert_url;
-        }
-        $scope.azureFormDisabled = false;
-      });
-    };
-    /*------------------------------------------------------*/
 
     var uploader = $scope.uploader = new FileUploader({
       url: api.template.file.post._path_,

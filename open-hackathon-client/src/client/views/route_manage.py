@@ -39,12 +39,6 @@ def manageddas(path):
 #     return render("/manage/registerusers.html", hackathon_name=hackathon_name)
 #
 #
-# @app.route("/manage/<hackathon_name>/azurecert")
-# @login_required
-# def azurecert(hackathon_name):
-#     return render("/manage/azurecert.html", hackathon_name=hackathon_name)
-#
-#
 # @app.route("/manage/<hackathon_name>/organizers")
 # @login_required
 # def organizers(hackathon_name):

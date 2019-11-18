@@ -55,10 +55,6 @@
     "DETAILS": "活动详情",
     "PROVIDERS": "登陆方式"
   },
-  "AZURECERT_TABS": {
-    "AZURECERT_LIST": "Azure证书列表",
-    "CREATE_AZURECERT": "创建Azure证书"
-  },
   "ACTIVITY_FIELDS": {
     "NAME": "名称",
     "DISPLAY_NAME": "显示名称",
@@ -174,7 +170,6 @@
     "NO_USE_CLOUD_PROVIDER": "不使用云服务商",
     "CONFIRM_HINT": "确认后将无法修改",
     "NO_CLOUD_HINT": "已选择'不使用云服务商',无法修改",
-    "SET_AZURECERT_HINT": "尚未设置Azure证书，点此进行设置～",
     "SET_TEMPLATE_HINT": "尚未设置模板，点此进行设置～",
     "AZURE_CONFIG_HINT": "配置完成，点此进入中国Azure官网。",
     "ALAUDA_CONFIG_HINT": "配置完成，点此进入灵雀云官网。",

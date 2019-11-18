@@ -29,25 +29,6 @@
         </div>
 
         <div ng-class="isProviderSelected ? 'col-md-6 text-center center' : 'col-md-6 text-center'"
-             ng-show="!isProviderSelected || (isProviderSelected && cloudProvider=='1')">
-          <label for="azure">
-            <input id="azure" class="hide" type="radio" value="1" ng-model="cloudProvider"
-                   ng-disabled="isProviderSelected" required>
-            <div class="info-box">
-              <div class="content text-centet">
-                <img src="/static/pic/azure_new.png">
-              </div>
-              <footer class="text-center" ng-show="!isProviderSelected">
-                {{ 'CLOUD_WEBPAGE_FIELDS.USE' | translate }}
-              </footer>
-              <footer class="text-center" ng-show="isProviderSelected">
-                {{ 'CLOUD_WEBPAGE_FIELDS.USED' | translate }}
-              </footer>
-            </div>
-          </label>
-        </div>
-
-        <div ng-class="isProviderSelected ? 'col-md-6 text-center center' : 'col-md-6 text-center'"
              ng-show="!isProviderSelected|| (isProviderSelected && cloudProvider=='2')">
           <label for="alauda">
             <input id="alauda" class="hide" type="radio" value="2" ng-model="cloudProvider"
@@ -106,25 +87,13 @@
         </div>
       </div>
 
-      <div class="text-center" ng-show="isProviderSelected && !isAzureCertSet" ng-click="">
-        <div class="col-xs-12">
-          <a href="{{ redirectTo('manage.azurecert') }}"> {{ 'CLOUD_WEBPAGE_FIELDS.SET_AZURECERT_HINT' | translate }} </a>
-        </div>
-      </div>
-
       <div class="text-center" ng-show="isProviderSelected && !isTemplateSet">
         <div class="col-xs-12">
           <a href="{{ redirectTo('manage.ve') }}"> {{ 'CLOUD_WEBPAGE_FIELDS.SET_TEMPLATE_HINT' | translate }} </a>
         </div>
       </div>
 
-      <div class="text-center" ng-show="isProviderSelected && cloudProvider == '1' && isTemplateSet && isAzureCertSet">
-        <div class="col-xs-12">
-          <a href="https://www.azure.cn/"> {{ 'CLOUD_WEBPAGE_FIELDS.AZURE_CONFIG_HINT' | translate }} </a>
-        </div>
-      </div>
-
-      <div class="text-center" ng-show="isProviderSelected && cloudProvider == '2' && isTemplateSet && isAzureCertSet">
+      <div class="text-center" ng-show="isProviderSelected && cloudProvider == '2' && isTemplateSet">
         <div class="col-xs-12">
           <a href="http://www.alauda.cn/"> {{ 'CLOUD_WEBPAGE_FIELDS.ALAUDA_CONFIG_HINT' | translate }} </a>
         </div>
