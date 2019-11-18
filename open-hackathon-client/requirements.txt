@@ -1,4 +1,4 @@
-werkzeug==0.14.1
+werkzeug==0.15.3
 flask==1.0.2
 flask-debugtoolbar==0.10.0
 sqlalchemy==1.0.8
