@@ -47,9 +47,9 @@ class ExprStarter(Component):
             new_context.user_id = context.user.id
         if self._internal_start_expr(new_context):
             new_context.experiment = expr
-        else:
-            new_context = None
-        return new_context
+            return new_context
+        self.rollback(new_context)
+        return None
 
     def stop_expr(self, context):
         """Stop experiment asynchronously

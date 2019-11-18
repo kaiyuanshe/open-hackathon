@@ -128,12 +128,20 @@ class UserToken(HDocumentBase):
         super(UserToken, self).__init__(**kwargs)
 
 
+class K8sCluster(DynamicEmbeddedDocument):
+    api_url = StringField(required=True)
+    token = StringField(required=True)
+    namespace = StringField()
+    ingress = ListField()
+
+
 class Template(HDocumentBase):
     name = StringField(required=True, unique=True)
-    url = URLField(required=True)
     provider = IntField()
     status = IntField(default=TEMPLATE_STATUS.UNCHECKED)  # constants.TEMPLATE_STATUS
     description = StringField()
+    k8s_cluster = EmbeddedDocumentField(K8sCluster)
+    content = StringField()  # template content
     virtual_environment_count = IntField(min_value=1, required=True)
     creator = ReferenceField(User)
 
@@ -159,6 +167,7 @@ class Award(EmbeddedDocument):
     quota = IntField(min_value=1, default=1, required=True)
     award_url = StringField()
 
+
 class AzureKey(HDocumentBase):
     """
     Azure certificate information of user/hackathon
@@ -174,6 +183,7 @@ class AzureKey(HDocumentBase):
 
     def __init__(self, **kwargs):
         super(AzureKey, self).__init__(**kwargs)
+
 
 class Hackathon(HDocumentBase):
     name = StringField(unique=True, required=True)
@@ -322,6 +332,70 @@ class DockerContainer(DynamicEmbeddedDocument):
     port_bindings = EmbeddedDocumentListField(PortBinding, default=[])
 
 
+class AzureStorageAccount(DynamicEmbeddedDocument):
+    name = StringField(required=True)
+    description = StringField()
+    label = StringField()
+    location = StringField(required=True)
+    # ASAStatus in enum.py
+    status = StringField()
+    create_time = DateTimeField()
+    update_time = DateTimeField()
+    deletable = BooleanField()  # F-cannot delete T-can be deleted
+
+
+class AzureCloudService(DynamicEmbeddedDocument):
+    name = StringField()
+    label = StringField()
+    location = StringField()
+    # ACSStatus in enum.py
+    status = StringField()
+    azure_key = ReferenceField(AzureKey)
+    deletable = BooleanField()  # F-cannot delete T-can be deleted
+
+
+class AzureDeployment(DynamicEmbeddedDocument):
+    name = StringField()
+    slot = StringField()
+    # ADStatus in enum.py
+    status = StringField()
+    cloud_service = EmbeddedDocumentField(AzureCloudService)
+    create_time = DateTimeField()
+    update_time = DateTimeField()
+    deletable = BooleanField()  # F-cannot delete T-can be deleted
+
+
+class AzureEndPoint(DynamicEmbeddedDocument):
+    name = StringField()
+    protocol = StringField()
+    public_port = IntField()
+    private_port = IntField()
+    url = StringField()
+
+
+class AzureVirtualMachine(DynamicEmbeddedDocument):
+    name = StringField(required=True)
+    label = StringField()
+    # AVMStatus in enum.py
+    dns = StringField()
+    public_ip = StringField()
+    private_ip = StringField()
+    deployment = EmbeddedDocumentField(AzureDeployment)
+    create_time = DateTimeField()
+    update_time = DateTimeField()
+    deletable = BooleanField()  # F-cannot delete T-can be deleted
+    end_points = EmbeddedDocumentListField(AzureEndPoint, default=[])
+
+
+class K8sEnvironment(DynamicEmbeddedDocument):
+    # define k8s resource
+    name = StringField(required=True)
+    deployments = ListField()
+    persistent_volume_claims = ListField()
+    services = ListField()
+    stateful_sets = ListField()
+
+
 class VirtualEnvironment(DynamicEmbeddedDocument):
     """
     Virtual environment is abstraction of smallest environment unit in template
@@ -334,7 +408,8 @@ class VirtualEnvironment(DynamicEmbeddedDocument):
     create_time = DateTimeField(default=get_now())
     update_time = DateTimeField()
     docker_container = EmbeddedDocumentField(DockerContainer)
-    k8s_resource = DictField()
+    azure_resource = EmbeddedDocumentField(AzureVirtualMachine)
+    k8s_resource = EmbeddedDocumentField(K8sEnvironment)
 
 
 class Experiment(HDocumentBase):
@@ -347,6 +422,3 @@ class Experiment(HDocumentBase):
 
     def __init__(self, **kwargs):
         super(Experiment, self).__init__(**kwargs)
-
-
-

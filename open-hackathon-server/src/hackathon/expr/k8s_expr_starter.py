@@ -2,12 +2,15 @@
 """
 This file is covered by the LICENSING file in the root of this project.
 """
-import copy
+import yaml
 import time
+import string
+import random
 
 from expr_starter import ExprStarter
+from hackathon.hmongo.models import K8sEnvironment
 from hackathon.hmongo.models import Hackathon, VirtualEnvironment, Experiment
-from hackathon.constants import (VE_PROVIDER, VERemoteProvider, VEStatus, ADStatus, AVMStatus, EStatus)
+from hackathon.constants import (VE_PROVIDER, VERemoteProvider, VEStatus, EStatus)
 from hackathon.hackathon_response import internal_server_error
 from hackathon.constants import K8S_DEPLOYMENT_STATUS
 from hackathon.template.template_constants import K8S_UNIT
@@ -18,36 +21,40 @@ class K8SExprStarter(ExprStarter):
     def _internal_start_expr(self, context):
         hackathon = Hackathon.objects.get(id=context.hackathon_id)
         experiment = Experiment.objects.get(id=context.experiment_id)
-        pre_alloc_enabled = context.pre_alloc_enabled
+        template_content = context.template_content
 
         if not experiment or not hackathon:
             return internal_server_error('Failed starting k8s: experiment or hackathon not found.')
+
         user = experiment.user or None
         _virtual_envs = []
+        _env_name = str(hackathon.name + "-" + template_content.name).lower()
+        if user:
+            _virtual_envs = experiment.virtual_environments
+            _env_name += str("-" + user.name).lower()
+        _env_name = "{}-{}".format(_env_name, "".join(random.sample(string.lowercase, 6)))
+
         try:
-            if user:
-                _virtual_envs = experiment.virtual_environments
             if not _virtual_envs:
                 # Get None VirtualEnvironment, create new one:
-                for template_unit in context.template_content.units:
-                    k8s_dict = self.__create_useful_k8s_dict(hackathon, experiment, template_unit)
-                    experiment.virtual_environments.append(VirtualEnvironment(
-                        provider=VE_PROVIDER.K8S,
-                        name=k8s_dict['name'],
-                        k8s_resource=k8s_dict,
-                        status=VEStatus.INIT,
-                        remote_provider=VERemoteProvider.Guacamole))
+                labels = {
+                    "hacking.kaiyuanshe.cn/hackathon": str(hackathon.id),
+                    "hacking.kaiyuanshe.cn/experiment": str(experiment.id),
+                    "hacking.kaiyuanshe.cn/virtual_environment": _env_name,
+                }
+                k8s_env = self.__create_useful_k8s_resource(_env_name, template_content, labels)
 
-                    # save constructed experiment, and execute from first job content
-                    experiment.save()
-                    if pre_alloc_enabled == True:
-                        self.log.debug("pre allocate vn, creating k8s... %s" % k8s_dict['name'])
-                        return self.schedule_create_k8s_service(context)
-                    else:
-                        self.log.debug("virtual_environments %s created, creating k8s..." % k8s_dict['name'])
-                        self.__schedule_create(context)
-            else:
-                self.__schedule_start(context)
+                experiment.virtual_environments.append(VirtualEnvironment(
+                    provider=VE_PROVIDER.K8S,
+                    name=_env_name,
+                    k8s_resource=k8s_env,
+                    status=VEStatus.INIT,
+                    remote_provider=VERemoteProvider.Guacamole))
+
+                experiment.status = EStatus.INIT
+                experiment.save()
+                self.log.debug("virtual_environments %s created, creating k8s..." % _env_name)
+            self.__schedule_start(context)
         except Exception as e:
             self.log.error(e)
             experiment.status = EStatus.FAILED
@@ -61,10 +68,7 @@ class K8SExprStarter(ExprStarter):
         if not experiment:
             return internal_server_error('Failed stop k8s: experiment not found.')
         try:
-            context.virtual_environments = experiment.virtual_environments
             self.__schedule_stop(context)
-
-            experiment.delete()
         except Exception as e:
             self.log.error(e)
             experiment.status = EStatus.FAILED
@@ -72,11 +76,7 @@ class K8SExprStarter(ExprStarter):
             return internal_server_error('Failed stopping k8s')
 
     def _internal_rollback(self, context):
-        raise NotImplementedError()
-
-    def __schedule_create(self, ctx):
-        self.scheduler.add_once("k8s_service", "schedule_create_k8s_service", context=ctx,
-                                id="schedule_setup_" + str(ctx.experiment_id), seconds=0)
+        self.__schedule_stop(context)
 
     def __schedule_start(self, ctx):
         self.scheduler.add_once("k8s_service", "schedule_start_k8s_service", context=ctx,
@@ -86,163 +86,249 @@ class K8SExprStarter(ExprStarter):
         self.scheduler.add_once("k8s_service", "schedule_stop_k8s_service", context=ctx,
                                 id="schedule_stop_" + str(ctx.experiment_id), seconds=0)
 
-    def schedule_create_k8s_service(self, context):
-        template_unit = context.template_content.units[0]
-        experiment = Experiment.objects.get(id=context.experiment_id)
-        virtual_env = experiment.virtual_environments[0]
-        k8s_dict = virtual_env.k8s_resource
-        adapter = self.__get_adapter_from_ctx(K8SServiceAdapter, context)
-
-        template_unit.set_ports(k8s_dict['ports'])
-        labels = {
-            "template_name": context.template_name,
-            "hackathon_id": context.hackathon_id,
-            "experiment_id": context.experiment_id,
-        }
-        try:
-            deploy_name, port = adapter.create_k8s_environment(virtual_env.name, template_unit, labels=labels)
-
-            expr = Experiment.objects(id=context.experiment_id).first()
-            virtual_env = expr.virtual_environments[0]
-            k8s_dict = virtual_env.k8s_resource
-            vnc_port = k8s_dict['ports']
-            vnc_port[0][K8S_UNIT.PORTS_PUBLIC_PORT] = port
-            expr.save()
-
-            # check deployment's status
-            if self.__wait_for_k8s_status(adapter, virtual_env.name, K8S_DEPLOYMENT_STATUS.AVAILABLE):
-                self.log.debug("k8s deployment succeeds: %s" % str(context))
-                self.__on_create_success(context)
-                return True
-            else:
-                self.log.error("k8s deployment fails: %s" % str(context))
-                self.__on_message("k8s_service_create_failed", context)
-        except Exception as e:
-            self.__on_message("k8s_service_create_failed", context)
-
-        return False
-
     def schedule_start_k8s_service(self, context):
         experiment = Experiment.objects.get(id=context.experiment_id)
         virtual_env = experiment.virtual_environments[0]
+        k8s_resource = virtual_env.k8s_resource
         adapter = self.__get_adapter_from_ctx(K8SServiceAdapter, context)
 
         try:
-            if adapter.get_deployment_status(virtual_env.name) != K8S_DEPLOYMENT_STATUS.PAUSE:
-                raise RuntimeError("K8s Service not has paused")
+            for pvc in k8s_resource.persistent_volume_claims:
+                adapter.create_k8s_pvc(pvc)
 
-            adapter.start_k8s_deployment(virtual_env.name)
-            if self.__wait_for_k8s_status(adapter, virtual_env.name, K8S_DEPLOYMENT_STATUS.AVAILABLE):
-                self.__on_message("k8s_service_start_sucess", context)
-            else:
-                self.__on_message("k8s_service_start_failed", context)
+            for i, s in enumerate(k8s_resource.services):
+                svc_name = adapter.create_k8s_service(s)
+                # overwrite service config and get the public port from K8s
+                k8s_resource.services[i] = yaml.dump(adapter.get_service_by_name(svc_name))
+
+            for d in k8s_resource.deployments:
+                adapter.create_k8s_deployment(d)
+
+            for s in k8s_resource.stateful_sets:
+                adapter.create_k8s_statefulset(s)
+
+            self.__wait_for_k8s_ready(adapter, k8s_resource.deployments, k8s_resource.stateful_sets)
+            self.__config_endpoint(experiment, k8s_resource.services)
         except Exception as e:
-            self.__on_message("k8s_service_start_failed", context)
+            self.log.error("k8s_service_start_failed: {}".format(e))
 
     def schedule_stop_k8s_service(self, context):
-        virtual_envs = context.virtual_environments
+        experiment = Experiment.objects.get(id=context.experiment_id)
+        virtual_envs = experiment.virtual_environments
+        adapter = self.__get_adapter_from_ctx(K8SServiceAdapter, context)
         try:
-            adapter = self.__get_adapter_from_ctx(K8SServiceAdapter, context)
             for virtual_env in virtual_envs:
-                if adapter.get_deployment_status(virtual_env.name) == K8S_DEPLOYMENT_STATUS.PAUSE:
-                    continue
-                adapter.pause_k8s_deployment(virtual_env.name)
-            self.__on_message("k8s_service_stop", context)
+                for d in virtual_env.deployments:
+                    adapter.delete_k8s_deployment(d['metadata']['name'])
+
+                for pvc in virtual_env.persistent_volume_claims:
+                    adapter.delete_k8s_pvc(pvc['metadata']['name'])
+
+                for s in virtual_env.stateful_sets:
+                    adapter.delete_k8s_statefulset(s['metadata']['name'])
+
+                for s in virtual_env.services:
+                    adapter.delete_k8s_service(s['metadata']['name'])
+
+            self.log.debug("k8s_service_stop: {}".format(context))
         except Exception as e:
-            self.__on_message("k8s_service_stop_failed", context)
-
-    def __on_message(self, msg, ctx):
-        self.log.debug("k8s on_message: {}".format(msg))
-        # self.scheduler.add_once(
-        # "k8s_service", "__msg_handler",
-        # id="k8s_msg_handler_" + str(ctx.experiment_id),
-        # context=ctx, seconds=ASYNC_OiP_QUERY_INTERVAL)
-
-    def __msg_handler(msg, ctx):
-        switcher = {
-            "wait_for_start_k8s_service": "wait_for_start_k8s_service",
-            "k8s_service_start_completed": "k8s_service_start_completed",
-            "k8s_service_start_failed": "k8s_service_start_failed",
-            "wait_for_stop_k8s_service": "wait_for_stop_k8s_service",
-            "k8s_service_stop_completed": "k8s_service_stop_completed",
-            "k8s_service_stop_failed": "k8s_service_stop_failed",
-        }
-        # TODO: try to abstract common behavior
+            self.log.error("k8s_service_stop_failed: {}".format(e))
+        experiment.delete()
 
     @staticmethod
-    def __create_useful_k8s_dict(hackathon, experiment, template_unit):
-        # FIXME K8s dict need a db model, not a dict
-        _experiments = Experiment.objects(hackathon=hackathon).all()
-        _virtual_envs = []
-        for e in _experiments:
-            _virtual_envs += list(e.virtual_environments)
+    def __create_useful_k8s_resource(env_name, template_content, labels):
+        """ helper func to generate available and unique resources yaml
 
-        # TODO Need to check the rules about K8s resource name
-        _names = [v.name for v in _virtual_envs]
-        count = 0
-        name = None
-        while count < 100:
-            count += 1
-            name = "{}-{}-{}".format(template_unit.name, experiment.id, count)
-            if name not in _names:
-                break
-        if count >= 100:
-            raise RuntimeError("Can't get useful env name.")
+        Currently supported resources
+            - Deployment
+            - Service
+            - StatefulSet
+            - PersistentVolumeClaim
 
-        # Ensure that the external ports do not conflict
-        ports = copy.deepcopy(template_unit.get_ports())
-        return {
-            "name": "{}".format(name).lower(),
-            "ports": ports,
-        }
+        :param env_name:
+        :param template_content:
+        :param labels:
+        :return:
+        """
 
-    def __wait_for_k8s_status(self, adapter, service_name, status):
-        # Wait up to 15 minutes
-        attempts = 60
+        k8s_env = K8sEnvironment(
+            name=env_name,
+            deployments=[
+                yaml.dump(TemplateRender(env_name, "deployment", d, labels).render())
+                for d in template_content.get_resource("deployment")
+            ],
+            services=[
+                yaml.dump(TemplateRender(env_name, "service", s, labels).render())
+                for s in template_content.get_resource("service")
+            ],
+            statefulsets=[
+                yaml.dump(TemplateRender(env_name, "statefulset", s, labels).render())
+                for s in template_content.get_resource("statefulset")
+            ],
+            persistent_volume_claims=[
+                yaml.dump(TemplateRender(env_name, "statefulset", p, labels).render())
+                for p in template_content.get_resource("persistentvolumeclaim")
+            ],
+        )
 
-        while attempts:
-            self.log.debug("__wait_for_k8s_status, service_name: %s, target status: %d, remaining attempts: %d"
-                           % (service_name, status, attempts))
-            attempts -= 1
-            time.sleep(15)
-            if adapter.get_deployment_status(service_name) == status:
-                return True
-        return False
+        return k8s_env
 
     @staticmethod
-    def __get_adapter_from_ctx(adapter_class, context):
-        template_unit = context.template_content.units[0]
-        cluster = template_unit.get_cluster()
-        api_url = cluster[K8S_UNIT.CONFIG_API_SERVER]
-        token = cluster[K8S_UNIT.CONFIG_API_TOKEN]
-        namespace = cluster[K8S_UNIT.CONFIG_NAMESPACES]
-        return adapter_class(api_url, token, namespace)
+    def __wait_for_k8s_ready(adapter, deployments, stateful_sets):
+        # TODO Sleep for ready is NOT GOOD IDEA, Why not use watch api?
+        # Wait up to 30 minutes
+        end_time = int(time.time()) + 60 * 60 * 30
 
-    def __on_create_success(self, context):
-        self.log.debug("experiment started %s successfully. Setting remote parameters." % context.experiment_id)
+        for d_yaml in deployments:
+            d = yaml.load(d_yaml)
+            while adapter.get_deployment_status(d['metadata']['name']) != K8S_DEPLOYMENT_STATUS.AVAILABLE:
+                time.sleep(1)
+                if int(time.time()) > end_time:
+                    raise RuntimeError("Start deployment error: Timeout")
+
+        for s in stateful_sets:
+            # TODO check statfulSet status
+            pass
+
+    def __config_endpoint(self, expr, services):
+        self.log.debug("experiment started %s successfully. Setting remote parameters." % expr.id)
         # set experiment status
         # update the status of virtual environment
-        expr = Experiment.objects(id=context.experiment_id).first()
         virtual_env = expr.virtual_environments[0]
+        template = expr.template
+        cluster = template.k8s_cluster
+        ingress = cluster.ingress
+        if not ingress or not services:
+            self.log.info("Has no endpoint config")
+            return
+        assert isinstance(ingress, list)
+        svc = None
+        for s_yaml in services:
+            s = yaml.load(s_yaml)
+            if s['spec'].get("type") == "NodePort":
+                svc = s
+                break
+        if not svc:
+            return
 
-        # guacamole parameters
-        k8s_dict = virtual_env.k8s_resource
-        # TODO need to choose right port/protocol based on template
-        vnc_port = k8s_dict['ports']
-        if len(vnc_port):
-            gc = {
-                K8S_UNIT.REMOTE_PARAMETER_NAME: virtual_env.name,
-                K8S_UNIT.REMOTE_PARAMETER_DISPLAY_NAME: vnc_port[0][K8S_UNIT.PORTS_NAME],
-                # TODO need to query K8S list all supported IPs and pick one randomly either here or connecting phase
-                # K8S_UNIT.REMOTE_PARAMETER_HOST_NAME: "49.4.90.39",
-                K8S_UNIT.REMOTE_PARAMETER_PROTOCOL: "vnc",
-                K8S_UNIT.REMOTE_PARAMETER_PORT: vnc_port[0][K8S_UNIT.PORTS_PUBLIC_PORT],
-                # K8S_UNIT.REMOTE_PARAMETER_USER_NAME: "",
-                # K8S_UNIT.REMOTE_PARAMETER_PASSWORD: "",
-            }
-            self.log.debug("expriment %s remote parameters: %s" % (expr.id, str(gc)))
-            virtual_env.remote_paras = gc
+        ports = svc['spec'].get("ports", [])
+        if not ports:
+            self.log.info("Has no endpoint config")
+            return
+        public_port = ports[0].get("node_port")
+        if not public_port:
+            return
+
+        gc = {
+            K8S_UNIT.REMOTE_PARAMETER_NAME: virtual_env.name,
+            K8S_UNIT.REMOTE_PARAMETER_DISPLAY_NAME: svc['metadata']['name'],
+            K8S_UNIT.REMOTE_PARAMETER_HOST_NAME: random.choice(ingress),
+            K8S_UNIT.REMOTE_PARAMETER_PROTOCOL: "vnc",
+            K8S_UNIT.REMOTE_PARAMETER_PORT: public_port,
+            # K8S_UNIT.REMOTE_PARAMETER_USER_NAME: "",
+            # K8S_UNIT.REMOTE_PARAMETER_PASSWORD: "",
+        }
+        self.log.debug("expriment %s remote parameters: %s" % (expr.id, str(gc)))
+        virtual_env.remote_paras = gc
 
         virtual_env.status = VEStatus.RUNNING
         expr.status = EStatus.RUNNING
         expr.save()
+
+    @staticmethod
+    def __get_adapter_from_ctx(adapter_class, context):
+        template_content = context.template_content
+        cluster = template_content.cluster_info
+        return adapter_class(cluster.api_url, cluster.token, cluster.namespace)
+
+
+class TemplateRender:
+    """
+    Types:
+        - Deployment
+        - Service
+        - StatefulSet
+        - PersistentVolumeClaim
+    """
+
+    def __init__(self, resource_name, resource_type, yml, labels):
+        self.resource_name = resource_name
+        self.resource_type = str(resource_type).lower()
+        self.yaml = yml
+        self.labels = labels
+
+    def render(self):
+
+        if self.resource_type == "deployment":
+            return self.__render_deploy()
+
+        if self.resource_type == "service":
+            return self.__render_svc()
+
+        if self.resource_type == "statefulset":
+            return self.__render_stateful_set()
+
+        if self.resource_type == "persistentvolumeclaim":
+            return self.__render_pvc()
+
+    def __render_deploy(self):
+        metadata = self.yaml['metadata']
+        metadata["name"] = "{}-{}".format(self.resource_name, metadata["name"])
+        deploy_labels = metadata.get("labels") or {}
+        deploy_labels.update(self.labels)
+        metadata['labels'] = deploy_labels
+
+        spec = self.yaml['spec']
+        pod_template = spec['template']
+        pod_metadata = pod_template['metadata']
+        pod_labels = pod_metadata.get("labels") or {}
+        pod_labels.update(self.labels)
+        pod_metadata['labels'] = pod_labels
+
+        if "selector" in spec:
+            match_labels = spec['selector'].get("matchLabels") or {}
+            match_labels.update(self.labels)
+            spec['selector']['matchLabels'] = match_labels
+
+        # Make sure PVC is no conflict
+        if "volumes" in spec:
+            for v in spec['volumes']:
+                if "persistentVolumeClaim" not in v:
+                    continue
+                pvc = v['persistentVolumeClaim']
+                pvc['claimName'] = "{}-{}".format(self.resource_name, pvc['claimName'])
+        return self.yaml
+
+    def __render_svc(self):
+        metadata = self.yaml['metadata']
+        metadata["name"] = "{}-{}".format(self.resource_name, metadata["name"])
+        svc_labels = metadata.get("labels") or {}
+        svc_labels.update(self.labels)
+        metadata['labels'] = svc_labels
+
+        spec = self.yaml['spec']
+        label_selector = spec.get("selector") or {}
+        label_selector.update(self.labels)
+        return self.yaml
+
+    def __render_stateful_set(self):
+        metadata = self.yaml['metadata']
+        metadata["name"] = "{}-{}".format(self.resource_name, metadata["name"])
+        ss_labels = metadata.get("labels") or {}
+        ss_labels.update(self.labels)
+        metadata['labels'] = ss_labels
+
+        spec = self.yaml['spec']
+        if "selector" in spec:
+            match_labels = spec['selector'].get("matchLabels") or {}
+            match_labels.update(self.labels)
+            spec['selector']['matchLabels'] = match_labels
+        return self.yaml
+
+    def __render_pvc(self):
+        metadata = self.yaml['metadata']
+        metadata["name"] = "{}-{}".format(self.resource_name, metadata["name"])
+        pvc_labels = metadata.get("labels") or {}
+        pvc_labels.update(self.labels)
+        metadata['labels'] = pvc_labels
+        return self.yaml

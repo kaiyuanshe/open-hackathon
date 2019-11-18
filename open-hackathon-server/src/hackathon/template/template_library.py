@@ -15,6 +15,7 @@ from flask import g, request
 from mongoengine import Q
 
 from hackathon import Component, RequiredFeature, Context
+from hackathon.constants import VE_PROVIDER
 from hackathon.hmongo.models import Template, Experiment
 from hackathon.hackathon_response import ok, internal_server_error, forbidden
 from hackathon.constants import FILE_TYPE, TEMPLATE_STATUS
@@ -58,24 +59,11 @@ class TemplateLibrary(Component):
         :return:
         """
 
-        def internal_load_template():
-            # todo local cache not valid, disabled temprary
-            # local_path = template.local_path
-            # if local_path is not None and isfile(local_path):
-            #     with open(local_path) as template_file:
-            #         return TemplateContent.from_dict(json.load(template_file))
-            # else:
-
-            try:
-                # req = requests.get(template.url)
-                return TemplateContent.from_dict(self.util.get_config("ukylin.k8s.template"))
-            except Exception as e:
-                self.log.warn("Fail to load template from remote file %s" % template.url)
-                self.log.error(e)
-                return None
-
-        cache_key = self.__get_template_cache_key(template.id)
-        return self.cache.get_cache(key=cache_key, createfunc=internal_load_template)
+        if template.provider != VE_PROVIDER.K8S:
+            raise RuntimeError("Using deprecated VirtualEnvironment provider")
+        tc = TemplateContent.from_yaml(template, template.content)
+        tc.cluster_info = template.k8s_cluster
+        return tc
 
     def create_template(self, args):
         """ Create template """
