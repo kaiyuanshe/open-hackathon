@@ -1,1 +1,1 @@
-Open Hackathon Platform API service
+Open Hackathon Platform API Backend Service
