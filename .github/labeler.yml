@@ -1,0 +1,12 @@
+need-review:
+  - **/*
+
+# Add 'document' to any changes within 'document' folder or any subfolders
+document:
+  - documents/**/*
+
+ohp-client:
+  - open-hackathon-client/**/*
+
+ohp-server:
+  - open-hackathon-server/**/*
