@@ -1,5 +1,5 @@
 THIRD-PARTY SOFTWARE NOTICES AND INFORMATION FOR OPEN HACKATHON PLATFORM
-Do Not Translate or Localize
+Do Not Translate or Localize.
 
 This package incorporates material from the projects listed below (collectively, “Third Party Code”). Microsoft Open Technologies (Shanghai) Co. Ltd. (“Microsoft Open Tech”) is not the original author of the Third Party Code. The original copyright notices and licenses, under which Microsoft Open Tech received such Third Party Code, are set out below. This Third Party Code is licensed to you under the licenses set forth below.  Microsoft Open Tech reserves all other rights not expressly granted under these terms, whether by implication, estoppel or otherwise. 
 
