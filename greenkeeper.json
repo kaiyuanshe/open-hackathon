@@ -1,0 +1,9 @@
+{
+  "groups": {
+    "default": {
+      "packages": [
+        "open-hackathon-client/src/client/static/package.json"
+      ]
+    }
+  }
+}
