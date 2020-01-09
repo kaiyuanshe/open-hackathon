@@ -9,7 +9,7 @@ name: Labeler
 on: [pull_request]
 
 jobs:
-  need-review:
+  triage:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/labeler@v2
