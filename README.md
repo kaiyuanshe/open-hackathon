@@ -1,6 +1,8 @@
 Open Hackathon Platform
 ======
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/kaiyuanshe/open-hackathon.svg)](https://greenkeeper.io/)
+
 # Introduction
 Open Hackathon Platform
 
