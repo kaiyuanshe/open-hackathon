@@ -1,8 +1,12 @@
-repo: ./*
+repo:
+  - ./*
 
 # Add 'document' to any changes within 'document' folder or any subfolders
-document: documents/**/*
+document:
+  - documents/**/*
 
-ohp-client: open-hackathon-client/**/*
+ohp-client:
+  - open-hackathon-client/**/*
 
-ohp-server: open-hackathon-server/**/*
+ohp-server:
+  - open-hackathon-server/**/*
