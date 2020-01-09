@@ -6,8 +6,10 @@
 # https://github.com/actions/labeler/blob/master/README.md
 
 name: Labeler
-on: [pull_request]
-
+on: 
+  schedule:
+  - cron: "0 * * * *"
+    
 jobs:
   triage:
     runs-on: ubuntu-latest
