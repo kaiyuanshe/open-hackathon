@@ -44,14 +44,6 @@ Config = {
         "type": "local",
         "size_limit_kilo_bytes": 5 * 1024,
     },
-    "docker": {
-        "alauda": {
-            "token": "",
-            "namespace": "",
-            "endpoint": "http://api.int.alauda.io",
-            "region_name": "BEIJING1"
-        }
-    },
     "email": {
         "host": "",
         "port": 587,

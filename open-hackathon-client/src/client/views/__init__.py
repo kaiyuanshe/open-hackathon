@@ -4,6 +4,8 @@ This file is covered by the LICENSING file in the root of this project.
 """
 
 import sys
+import os.path
+from os.path import realpath, abspath, dirname
 from client.enum import LoginProvider
 
 sys.path.append("..")
@@ -141,8 +143,6 @@ def utility_processor():
                     prs.append("qq")
                 if value & LoginProvider.wechat == LoginProvider.wechat:
                     prs.append("wechat")
-                if value & LoginProvider.alauda == LoginProvider.alauda:
-                    prs.append("alauda")
         return ",".join(prs)
 
     return dict(get_now=get_now_serialized, activity_progress=activity_progress, get_provides=get_provides)
@@ -202,7 +202,7 @@ def unauthorized_log():
     return render("/login.html",
                   error=None,
                   providers=safe_get_config("login.provider_enabled",
-                                            ["github", "qq", "wechat", "weibo", "live", "alauda"]))
+                                            ["github", "qq", "wechat", "weibo", "live"]))
 
 
 @app.before_request
@@ -261,9 +261,17 @@ def live_login():
     return __login(LOGIN_PROVIDER.LIVE)
 
 
-@app.route('/alauda')
-def alauda_login():
-    return __login(LOGIN_PROVIDER.ALAUDA)
+@app.route('/.well-known/acme-challenge/<challenge>')
+def lets_encrypt(challenge):
+    client_dir = abspath("%s/.." % dirname(realpath(__file__)))
+    challenge_file_path = "%s/.well-known/acme-challenge/%s" % (client_dir, challenge)
+    if os.path.isfile(challenge_file_path):
+        with open(challenge_file_path, 'r') as reader:
+            resp = Response(response=reader.read(),
+                            status=200,
+                            mimetype="text/plain")
+            return resp
+    return render('/404.html'), 404
 
 
 @app.route('/')
@@ -337,7 +345,7 @@ def logout():
 def login():
     session["return_url"] = request.args.get("return_url")
     provider = request.args.get("provides")
-    prs = ["github", "qq", "wechat", "weibo", "live", "alauda"]
+    prs = ["github", "qq", "wechat", "weibo", "live"]
     if provider is None:
         provider = safe_get_config("login.provider_enabled", prs)
     else:

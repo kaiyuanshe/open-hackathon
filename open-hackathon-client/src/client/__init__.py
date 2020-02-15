@@ -16,7 +16,6 @@ app.config['SECRET_KEY'] = safe_get_config("app.secret_key", "secret_key")
 app.config['DEBUG_TB_ENABLED'] = False
 toolbar = DebugToolbarExtension(app)
 
-
 class Context(object):
     """Helper class for JSON. We can access dict similarly as literal in JS
 

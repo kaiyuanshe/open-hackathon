@@ -22,7 +22,6 @@ STATUS = "status"
 # all available health check items
 all_health_items = {
     "docker": RequiredFeature("health_check_hosted_docker"),
-    "alauda": RequiredFeature("health_check_alauda_docker"),
     "guacamole": RequiredFeature("health_check_guacamole"),
     "storage": RequiredFeature("storage"),
     "mongodb": RequiredFeature("health_check_mongodb")

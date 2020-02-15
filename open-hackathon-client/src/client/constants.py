@@ -16,7 +16,6 @@ class LOGIN_PROVIDER:
     QQ = "qq"
     WEIBO = "weibo"
     LIVE = "live"
-    ALAUDA = "alauda"
     WECHAT = "wechat"
 
 

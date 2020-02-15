@@ -248,8 +248,7 @@ class RegisterManager(Component):
                     (LOGIN_PROVIDER.GITHUB, "github"),
                     (LOGIN_PROVIDER.QQ, "qq"),
                     (LOGIN_PROVIDER.WECHAT, "wechat"),
-                    (LOGIN_PROVIDER.WEIBO, "weibo"),
-                    (LOGIN_PROVIDER.ALAUDA, "alauda")):
+                    (LOGIN_PROVIDER.WEIBO, "weibo")):
                 if (hackathon_login_provider & mask) > 0:
                     data["provides"].append(provide)
 

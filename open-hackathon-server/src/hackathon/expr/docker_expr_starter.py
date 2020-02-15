@@ -76,14 +76,14 @@ class DockerExprStarter(ExprStarter):
         experiment.virtual_environments.append(ve)
         experiment.save()
 
-        # start container remotely , use hosted docker or alauda docker
+        # start container remotely , use hosted docker
         context.virtual_environment_name = ve.name
         context.unit = docker_template_unit
         self._internal_start_virtual_environment(context)
 
     def _enable_guacd_file_transfer(self, context):
         """
-        This function should be invoked after container is started in alauda_docker.py and hosted_docker.py
+        This function should be invoked after container is started in hosted_docker.py
         :param ve: virtual environment
         """
         expr = Experiment.objects(id=context.experiment_id).no_dereference().first()
