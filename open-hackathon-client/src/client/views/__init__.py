@@ -112,7 +112,7 @@ def __get_api(url, headers=None, **kwargs):
         req = requests.get(get_config("hackathon-api.endpoint") + url, headers=default_headers, **kwargs)
         resp = req.content
         return json.loads(resp)
-    except Exception:
+    except Exception as e:
         abort(500, 'API Service is not yet open')
 
 
