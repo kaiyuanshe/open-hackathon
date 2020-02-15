@@ -19,7 +19,7 @@
     <!-- end: CSS -->
     <!-- The HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
-    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <script src="https://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <script src="/static/js/respond.min.js"></script>
     <![endif]-->
     <!-- start: Favicon and Touch Icons -->
@@ -97,16 +97,7 @@
 <script type="text/javascript" src="/static/js/bootstrap/bootstrap.min.js"></script>
 <script type="text/javascript" src="/static/js/oh.core.js"></script>
 <script type="text/javascript" src="/static/js/oh.api.js"></script>
-<script>
-    var jiathis_config = {
-        appkey: {
-            "tsina": '{{ oauth_api_key.weibo }}',
-            "tqq": '{{ oauth_api_key.qq }}'
-        }
-    }
 
-</script>
-<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
 {% block script %}{% endblock %}
 </body>
 
