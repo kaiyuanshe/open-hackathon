@@ -212,6 +212,13 @@ sudo ./down.sh   (to shut down the service)
 
 I haven't figured out why sudo is necessary when running docker-compose.
 
+### enable LetsEncrypt
+Follow the official document of [Lets encrypt](https://letsencrypt.org/zh-cn/docs/) and [certbot](https://certbot.eff.org/lets-encrypt/ubuntuxenial-other) to request certificate.
+We are currently running on Ubuntu 16.04 using uwsgi, please follow script for this scenario. The typical command should be `certbot certonly --webroot`. And
+for `webroot`, please use `<src_root>/open-hackathon-client/src/client`
+
+We may deploy OHP using docker in future, we may need to request standalone certs after that.
+
 
 ### deploy open hackathon with uwsgi
  **We assume the source codes are cloned to /opt/open-hackathon. If not, please rectify the file path of following files:
