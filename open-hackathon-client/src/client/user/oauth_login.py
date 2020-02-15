@@ -560,96 +560,10 @@ class LiveLogin(LoginBase):
         return user_info
 
 
-class AlaudaLogin(LoginBase):
-    """Sign in with alauda account
-
-    ### 步骤四：客户端根据code请求 Token
-        #### 参数
-        | name         | value              |      |
-        |--------------+--------------------+------|
-        | grant_type   | authorization_code |  必选 |
-        | code         |  上一步获得的code     | 必选  |
-        | redirect_uri |  重定向URI           | 必选  |
-        | client_id    |  客户端ID            | 必选  |
-        ### 认证方式
-        灵云雀
-        Basic Auth:
-             username：client_id
-             password: client_secret
-        #### 举例
-        `
-        POST /token HTTP/1.1
-        Host: server.example.com
-        Authorization: Basic czZCaGRSa3F0MzpnWDFmQmF0M2JW
-        Content-Type: application/x-www-form-urlencoded
-
-        grant_type=authorization_code&code=SplxlOBeZQQYbYS6WxSbIA
-        &redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom%2Fcb
-    """
-
-    def login(self, args):
-        code = args.get('code')
-        if not code:
-            return None
-
-        log.info('login from alauda, code = ' + code)
-
-        # basic auth header, content_type and post data
-        client_id = get_config("login.alauda.client_id")
-        client_secret = get_config("login.alauda.client_secret")
-        basic_auth = HTTPBasicAuth(client_id, client_secret)
-
-        headers = {'Content-type': 'application/x-www-form-urlencoded'}
-        data = {
-            'grant_type': 'authorization_code',
-            'code': code,
-            'redirect_uri': get_config('login.alauda.redirect_uri'),
-            'client_id': client_id
-        }
-
-        # Post request
-        url = get_config('login.alauda.access_token_url')
-        r = requests.post(url, data=data, headers=headers, auth=basic_auth)
-        resp = r.json()
-
-        # {u'username': u'junbowang', u'realname': u'junbowang', u'success': True,
-        # u'access_token': u'3MyZLF8RVo5X8lDLZQSj5s4OpIGQGn', u'token_type': u'Bearer',
-        # u'logo_file': u'/static/images/user/default-logo.png', u'email': u'juniwang@microsoft.com'}
-        if not resp.get("success"):
-            log.debug("get access token failed from alauda: %r" % resp)
-            return None
-
-        # username will used as openid too since its unique. And also it's the 'namespace' for user's alauda resource
-        username = resp["username"]
-        email = resp["email"]
-        email_list = [
-            {
-                'name': username,
-                'email': email,
-                'verified': 1,
-                'primary': 1
-            }
-        ]
-
-        required_info = {
-            "openid": username,
-            "provider": LOGIN_PROVIDER.ALAUDA,
-            "name": username,
-            "nickname": resp.get("realname", username),
-            "access_token": resp["access_token"],
-            "email_list": email_list,
-            "avatar_url": resp.get("logo_file"),
-            "oxford_api": resp.get("oxford_api")
-        }
-
-        return required_info
-
-
 login_providers = {
     LOGIN_PROVIDER.GITHUB: GithubLogin(),
     LOGIN_PROVIDER.WEIBO: WeiboLogin(),
     LOGIN_PROVIDER.QQ: QQLogin(),
-    LOGIN_PROVIDER.ALAUDA: AlaudaLogin(),
     LOGIN_PROVIDER.LIVE: LiveLogin(),
     LOGIN_PROVIDER.WECHAT: WechatLogin()
 }

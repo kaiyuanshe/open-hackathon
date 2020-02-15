@@ -90,7 +90,6 @@
         data.push({key: 'location', value: $.trim($('#location').val())});
         data.push({key: 'max_enrollment', value: $('#max_enrollment').val()});
         data.push({key: 'auto_approve', value: $('#auto_approve').is(':checked')});
-        data.push({key: 'alauda_enabled', value: $('#alauda_enabled').is(':checked')});
         data.push({key: 'recycle_enabled', value: false});
         data.push({key: 'recycle_minutes', value: 0});
         data.push({key: 'pre_allocate_enabled', value: false});

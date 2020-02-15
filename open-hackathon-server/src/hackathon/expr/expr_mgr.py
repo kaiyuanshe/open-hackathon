@@ -49,15 +49,12 @@ class ExprManager(Component):
         return self.__start_new_expr(hackathon, template, user)
 
     def restart_stopped_expr(self, experiment_id):
-        # todo: now just support hosted_docker, not support for alauda and windows
         experiment = Experiment.objects(id=experiment_id).first()
         for ve in experiment.virtual_environments:
             if ve.provider == VE_PROVIDER.DOCKER:
                 if not self.hosted_docker_proxy.is_container_running(ve.docker_container):
                     self.hosted_docker_proxy.start_container(ve.docker_container.host_server,
                                                              ve.docker_container.container_id)
-            elif ve.provider == VE_PROVIDER.ALAUDA:
-                pass
             elif ve.provider == VE_PROVIDER.AZURE:
                 raise NotImplementedError()
 
@@ -224,7 +221,7 @@ class ExprManager(Component):
             return RequiredFeature("k8s_service")
 
         if template.provider == VE_PROVIDER.DOCKER:
-            starter = RequiredFeature("alauda_docker")
+            raise NotImplementedError()
         elif template.provider == VE_PROVIDER.AZURE:
             raise NotImplementedError()
         elif template.provider == VE_PROVIDER.K8S:
@@ -277,7 +274,7 @@ class ExprManager(Component):
         user = experiment.user
 
     def __report_expr_status(self, expr, isToConfirmExprStarting=False):
-        # todo check whether need to restart Window-expr and Alauda-expr if it shutdown
+        # todo check whether need to restart Window-expr if it shutdown
         ret = {
             "expr_id": str(expr.id),
             "status": expr.status,
@@ -417,7 +414,7 @@ class ExprManager(Component):
         return info
 
     def __check_expr_real_status(self, experiment):
-        # todo: it is only support for hosted_docker right now. Please support Window-expr and Alauda-expr in future
+        # todo: it is only support for hosted_docker right now. Please support Window-expr in future
         for ve in experiment.virtual_environments:
             if ve.provider == VE_PROVIDER.DOCKER:
                 if not self.hosted_docker_proxy.is_container_running(ve.docker_container):
@@ -426,8 +423,6 @@ class ExprManager(Component):
                 else:
                     if ve.status == VEStatus.STOPPED:
                         ve.status = VEStatus.RUNNING
-            elif ve.provider == VE_PROVIDER.ALAUDA:
-                pass
             elif ve.provider == VE_PROVIDER.AZURE:
                 raise NotImplementedError()
         if all(ve.status == VEStatus.STOPPED for ve in experiment.virtual_environments):

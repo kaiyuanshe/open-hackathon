@@ -358,10 +358,6 @@ class UserManager(Component):
 
             map(lambda x: self.__create_or_update_email(user, x), email_list)
 
-        # oxford only
-        if provider == "alauda":
-            self.__oxford(user, context.get("oxford_api"))
-
         # generate API token
         token = self.__generate_api_token(user)
         return {

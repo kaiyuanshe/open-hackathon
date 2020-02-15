@@ -41,5 +41,5 @@ class LoginProvider:
     qq = 4
     weibo = 8
     # gitcafe = 16 no longer support
-    alauda = 32
+    # alauda = 32
     wechat = 64

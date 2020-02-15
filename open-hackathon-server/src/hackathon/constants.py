@@ -22,7 +22,6 @@ class OAUTH_PROVIDER:
     WECHAT = "wechat"
     WEIBO = "weibo"
     LIVE = "live"
-    ALAUDA = "alauda"
 
 
 class HEALTH_STATUS:
@@ -69,7 +68,6 @@ class HACKATHON_CONFIG:
         PRE_ALLOCATE_NUMBER: int, the maximum count of pre-start environment per hackathon and per template. default 1
         PRE_ALLOCATE_INTERVAL_SECONDS: int, interval seconds for pre-allocate job
         PRE_ALLOCATE_CONCURRENT: int, how many Experiment can be started at the same time
-        ALAUDA_ENABLED: bool,default false, whether to use alauda service
         FREEDOM_TEAM: bool,default true,Whether to allow freedom of the team
     """
     MAX_ENROLLMENT = "max_enrollment"
@@ -106,11 +104,9 @@ class VE_PROVIDER:
 
     Attributes:
         DOCKER: VirtualEnvironment is based on docker. Docker host can be any cloud such as aws or others
-        CHECK_FAILED: VirtualEnvironment is based on Alauda web service
     """
     DOCKER = 0
     AZURE = 1
-    ALAUDA = 2
     K8S = 3
 
 
@@ -333,7 +329,6 @@ class LOGIN_PROVIDER:
     QQ = 4
     WEIBO = 8
     # GITCAFE = 16 no longer support gitcafe
-    ALAUDA = 32
     WECHAT = 64
 
 
@@ -401,7 +396,7 @@ class CHINATELECOM_ACCESS_TOKEN_STATUSCODE:
 class CLOUD_PROVIDER:
     NONE = 0
     AZURE = 1
-    ALAUDA = 2
+    # ALAUDA = 2 # retired
     KUBERNETES = 3
 
 

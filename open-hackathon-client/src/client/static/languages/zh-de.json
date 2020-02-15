@@ -172,7 +172,6 @@
     "NO_CLOUD_HINT": "已选择'不使用云服务商',无法修改",
     "SET_TEMPLATE_HINT": "尚未设置模板，点此进行设置～",
     "AZURE_CONFIG_HINT": "配置完成，点此进入中国Azure官网。",
-    "ALAUDA_CONFIG_HINT": "配置完成，点此进入灵雀云官网。",
     "ADVANCED_CONFIG": "云资源高级配置",
     "PRE_ALLOCATE_ENABLED": "预置虚拟环境",
     "PRE_ALLOCATE_NUMBER": "预置环境数量",

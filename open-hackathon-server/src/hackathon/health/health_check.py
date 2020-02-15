@@ -16,7 +16,6 @@ from hackathon import RequiredFeature, Component
 
 __all__ = [
     "HostedDockerHealthCheck",
-    "AlaudaDockerHealthCheck",
     "GuacamoleHealthCheck",
     "StorageHealthCheck"
 ]
@@ -65,20 +64,6 @@ class HostedDockerHealthCheck(HealthCheck):
 
     def report_health(self):
         return self.hosted_docker.report_health()
-
-
-class AlaudaDockerHealthCheck(HealthCheck):
-    """Report status of Alauda service
-
-    see more on docker/alauda_docker.py
-    """
-
-    def __init__(self):
-        self.alauda_docker = RequiredFeature("alauda_docker_proxy")
-
-    def report_health(self):
-        return self.alauda_docker.report_health()
-
 
 class GuacamoleHealthCheck(HealthCheck):
     """Check the status of Guacamole Server by request its homepage"""

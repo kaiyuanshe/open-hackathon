@@ -42,9 +42,6 @@ WEIBO_META_CONTENT = "ae884e09bc02b700"
 LIVE_CLIENT_ID = "000000004414E0A6"
 LIVE_CLIENT_SECRET = "b4mkfVqjtwHY2wJh0T4tj74lxM5LgAT2"
 
-ALAUDA_CLIENT_ID = "4VR9kzNZVyWcnk9OnAwMuSus7xOOcozJIpic6W6y"
-ALAUDA_CLIENT_SECRET = "E5PUL5h9feLlEirec5HQhjIzYecv7vVbEBjWLBkRMoCoFXdvS1PzNmd4AAeNgu4M2AJ87uGnnJaoDLCcDuVxkBoHRWCn6LmfB4SKK1Dty1SkGukkTcZPEk9wpHLSiRQ3"
-
 Config = {
     "environment": "local",
     "app": {
@@ -87,12 +84,6 @@ Config = {
             "access_token_url": 'https://login.live.com/oauth20_token.srf',
             "user_info_url": 'https://apis.live.net/v5.0/me?access_token='
         },
-        "alauda": {
-            "client_id": ALAUDA_CLIENT_ID,
-            "client_secret": ALAUDA_CLIENT_SECRET,
-            "redirect_uri": '%s/alauda' % HOSTNAME,
-            "access_token_url": 'http://console.int.alauda.io/oauth/token'
-        },
         "provider_enabled": ["github", "wechat"],
         "session_valid_time_minutes": 60
     },
@@ -119,10 +110,6 @@ Config = {
         "live": {
             "authorize_url": "https://login.live.com/oauth20_authorize.srf?client_id=%s&scope=wl.basic+,wl.emails&response_type=code&redirect_uri=%s/live" % (
                 LIVE_CLIENT_ID, HOSTNAME)
-        },
-        "alauda": {
-            "authorize_url": "http://console.int.alauda.io/oauth/authorize?response_type=code&client_id=%s&state=state&redirect_uri=%s/alauda" % (
-                ALAUDA_CLIENT_ID, HOSTNAME)
         },
         "hackathon": {
             "endpoint": HACKATHON_API_ENDPOINT

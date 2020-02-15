@@ -163,13 +163,11 @@ def init_components():
 
     # health check items
     factory.provide("health_check_hosted_docker", get_class("hackathon.health.health_check.HostedDockerHealthCheck"))
-    factory.provide("health_check_alauda_docker", get_class("hackathon.health.health_check.AlaudaDockerHealthCheck"))
     factory.provide("health_check_guacamole", get_class("hackathon.health.health_check.GuacamoleHealthCheck"))
     factory.provide("health_check_mongodb", get_class("hackathon.health.health_check.MongoDBHealthCheck"))
 
     # docker
     factory.provide("hosted_docker_proxy", get_class("hackathon.docker.hosted_docker.HostedDockerFormation"))
-    factory.provide("alauda_docker_proxy", get_class("hackathon.docker.alauda_docker.AlaudaDockerFormation"))
 
     # storage
     init_hackathon_storage()
@@ -181,9 +179,8 @@ def init_db():
 
 
 def init_expr_components():
-    from expr import ExprManager, AlaudaDockerStarter, K8SExprStarter
+    from expr import ExprManager, K8SExprStarter
     factory.provide("expr_manager", ExprManager)
-    factory.provide("alauda_docker", AlaudaDockerStarter)
     factory.provide("k8s_service", K8SExprStarter)
 
 
@@ -264,11 +261,6 @@ def __init_schedule_jobs():
 
         # schedule job to pre-allocate environment
         hackathon_manager.schedule_pre_allocate_expr_job()
-
-        # schedule job to pull docker images automatically
-        #if not safe_get_config("docker.alauda.enabled", False):
-        #     docker = RequiredFeature("hosted_docker_proxy")
-        #     docker.ensure_images()
 
         # schedule job to pre-create a docker host server VM
         #host_server_manager.schedule_pre_allocate_host_server_job()
