@@ -94,7 +94,7 @@ Since open hackathon has [customized guacamole authentication provider](https://
 `cp *.jar /etc/guacamole`  
 `sudo ln -s /etc/guacamole/guacamole.properties /usr/share/tomcat7/.guacamole/guacamole.properties`  
 
-Then [download](http://guac-dev.org/release/release-notes-0-9-9) guacamole-0.9.9.war, and then copy it to /var/lib/tomcat7/webapps/guacamole.war:
+Then [download](https://sourceforge.net/projects/guacamole/files/current/binary/guacamole-0.9.9.war/download?use_mirror=jaist) guacamole-0.9.9.war, and then copy it to /var/lib/tomcat7/webapps/guacamole.war:
 
 `cp guacamole-0.9.9.war /var/lib/tomcat7/webapps/guacamole.war`  
 `sudo service guacd restart`  
@@ -102,7 +102,6 @@ Then [download](http://guac-dev.org/release/release-notes-0-9-9) guacamole-0.9.9
 
 
 By default you don't need to change `/etc/guacamole/guacamole.properties` on your local machine. And usually the only config which needs to be updated is `auth-request-url` if your open-hackathon-server listens on a different port other than `15000`. _You need to restart tomcat7 and guacd service if `guacamole.properties` updated_.
-
 
 [Click](http://guac-dev.org/doc/gug/custom-authentication.html) for more about custom authentication.
 
@@ -117,7 +116,7 @@ Navigate to [MongoDB installation](https://docs.mongodb.org/v3.0/installation/) 
 3. Initiate required data by:
 Update DB connection parameters in `open-hackathon-server/src/hackathon/config_sample.py` if required(For example you run mongodb on a port other than the default
 `27017`). And then setup DB by:
-```
+```bash
 sudo python open-hackathon-server/src/setup_db.py
 ```
 
@@ -129,7 +128,7 @@ Follow [docker installation guide](https://docs.docker.com/installation/ubuntuli
  install a stable version since docker itself is being developed and updated. Usually lasted version has unexpected issues.
 
 after docker installed, you can try pulling down some docker images:
-```
+```bash
 sudo docker pull rastasheep/ubuntu-sshd
 ```
 
@@ -137,7 +136,8 @@ sudo docker pull rastasheep/ubuntu-sshd
 ###### Ubuntu 15.04
 Make sure docker remote api enabled. As [Official Docs](https://docs.docker.com/articles/systemd) said, the best way is to update `systemd` in the newer versions of docker.
 Open file `/lib/systemd/system/docker.service` for editing and changing line started with `ExecStart` to following:
-```
+
+```bash
 ExecStart=/usr/bin/docker daemon -H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock
 ```
 Change `4243` to other port on demand. And then run `systemctl daemon-reload` in shell to reload the new configuration. And restart docker by `service docker restart`.
