@@ -59,7 +59,7 @@ def __get_api(url, headers=None, **kwargs):
     if headers is not None and isinstance(headers, dict):
         default_headers.update(headers)
     try:
-        req = requests.get(get_config("hackathon-api.endpoint") + url, headers=default_headers, **kwargs)
+        req = requests.get(get_config("endpoint.hackathon_api") + url, headers=default_headers, **kwargs)
         resp = req.content
         return json.loads(resp)
     except Exception:
