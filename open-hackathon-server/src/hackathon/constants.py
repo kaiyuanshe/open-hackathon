@@ -332,6 +332,15 @@ class LOGIN_PROVIDER:
     WECHAT = 64
 
 
+class LOGIN_PROVIDER_NAME:
+    DB = "db"
+    GITHUB = "github"
+    QQ = "qq"
+    WEIBO = "weibo"
+    LIVE = "live"
+    WECHAT = "wechat"
+
+
 class HACK_NOTICE_CATEGORY:
     HACKATHON = 0  # hackathon related notice
     USER = 1  # user related notice

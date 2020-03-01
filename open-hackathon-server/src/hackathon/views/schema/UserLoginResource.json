@@ -17,9 +17,13 @@
         "title": "user login",
         "type": "object",
         "properties": {
-          "openid": {
+          "code": {
             "type": "string",
-            "description": "unique identifier of user in certain oauth provider"
+            "description": "authorization code from OAuth login providers"
+          },
+          "redirect_uri": {
+            "type": "string",
+            "description": "redirect URI allowed by OAuth Login proverders"
           },
           "provider": {
             "type": "string",
