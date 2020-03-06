@@ -58,4 +58,4 @@ for js_file in json_files:
         with open(js_file) as fs:
             schemas.update(json.load(fs))
     except Exception as e:
-        print e
+        print(e)

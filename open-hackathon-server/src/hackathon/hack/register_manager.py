@@ -35,7 +35,7 @@ class RegisterManager(Component):
         registers = UserHackathon.objects(hackathon=hackathon_id,
                                           role=HACK_USER_TYPE.COMPETITOR).order_by('-create_time')[:num]
 
-        return map(lambda x: self.__get_registration_with_profile(x), registers)
+        return [self.__get_registration_with_profile(x) for x in registers]
 
     def get_registration_by_id(self, registration_id):
         return UserHackathon.objects(id=registration_id).first()

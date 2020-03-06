@@ -11,7 +11,7 @@ from mongoengine import *
 
 from hackathon.util import get_now, make_serializable
 from hackathon.constants import TEMPLATE_STATUS, HACK_USER_TYPE
-from pagination import Pagination
+from .pagination import Pagination
 
 
 def to_dic(obj):

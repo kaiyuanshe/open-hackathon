@@ -6,7 +6,7 @@ This file is covered by the LICENSING file in the root of this project.
 __author__ = 'root'
 
 import sys
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 sys.path.append("..")
 

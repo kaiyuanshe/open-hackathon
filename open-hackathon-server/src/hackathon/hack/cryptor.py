@@ -6,7 +6,7 @@ This file is covered by the LICENSING file in the root of this project.
 from hashlib import md5
 from Crypto.Cipher import AES
 from Crypto import Random
-from urllib2 import urlopen
+from urllib.request import urlopen
 import os
 
 from hackathon import Component

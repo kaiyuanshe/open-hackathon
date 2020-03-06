@@ -316,7 +316,7 @@ class TeamManager(Component):
         if not team:
             return not_found()
 
-        mem = filter(lambda x: str(x.user.id) == user_id, team.members)
+        mem = [x for x in team.members if str(x.user.id) == user_id]
         assert len(mem) < 2
         if not mem:
             return not_found()
@@ -375,7 +375,7 @@ class TeamManager(Component):
 
         if not team:
             return not_found()
-        mem = filter(lambda x: str(x.user.id) == user_id, team.members)
+        mem = [x for x in team.members if str(x.user.id) == user_id]
         assert len(mem) < 2
         if not mem:
             return not_found()
@@ -441,7 +441,7 @@ class TeamManager(Component):
         if not self.admin_manager.is_hackathon_admin(team.hackathon.id, judge.id):
             return forbidden()
 
-        score = filter(lambda x: x.judge.id == judge.id, team.scores)
+        score = [x for x in team.scores if x.judge.id == judge.id]
         assert len(score) < 2
         if score:
             score = score[0]
@@ -473,7 +473,7 @@ class TeamManager(Component):
         resp = {
             "all": [to_dic(s) for s in scores]}
 
-        my = filter(lambda sc: sc.judge.id == user.id, scores)
+        my = [sc for sc in scores if sc.judge.id == user.id]
         assert len(my) < 2
         if my:
             resp["my"] = to_dic(my[0])
@@ -512,7 +512,7 @@ class TeamManager(Component):
 
         if team:
             self.__validate_team_permission(team.hackathon.id, team, user)
-            for i in xrange(len(team.works)):
+            for i in range(len(team.works)):
                 if str(team.works[i].id) == show_id:
                     team.works.pop(i)
                     team.save()
@@ -585,7 +585,7 @@ class TeamManager(Component):
         if not team:
             return None
 
-        return filter(lambda w: w.type == TEAM_SHOW_TYPE.SOURCE_CODE, team.works)[0]
+        return [w for w in team.works if w.type == TEAM_SHOW_TYPE.SOURCE_CODE][0]
 
     def query_team_awards(self, team_id):
         team = self.__get_team_by_id(team_id)
@@ -636,7 +636,7 @@ class TeamManager(Component):
         if not team:
             return not_found("team not found")
 
-        award = filter(lambda a: str(a.id) == context.award_id, hackathon.awards)
+        award = [a for a in hackathon.awards if str(a.id) == context.award_id]
         assert len(award) < 2
         if not award:
             return not_found("award not found")
@@ -645,7 +645,7 @@ class TeamManager(Component):
         if team.hackathon.id != hackathon.id:
             return precondition_failed("hackathon doesn't match")
 
-        team_award = filter(lambda a: str(a) == context.award_id, team.awards)
+        team_award = [a for a in team.awards if str(a) == context.award_id]
         assert len(team_award) < 2
 
         if not team_award:
@@ -685,7 +685,7 @@ class TeamManager(Component):
             return ok("请联系管理员!")
 
         primary_emails = []
-        for i in xrange(0, len(team.members)):
+        for i in range(0, len(team.members)):
             mem = team.members[i]
             resp = self.user_manager.user_display_info(mem.user)
             primary_emails.append(resp['emails'][0]['email'])
@@ -708,7 +708,7 @@ class TeamManager(Component):
             hackathon = g.hackathon
 
         try:
-            award = filter(lambda a: str(a.id) == str(team_award), hackathon.awards)[0]
+            award = [a for a in hackathon.awards if str(a.id) == str(team_award)][0]
         except IndexError:
             return None
 
@@ -721,7 +721,7 @@ class TeamManager(Component):
         # all team action not allowed if frozen
         resp["is_frozen"] = False
 
-        for i in xrange(0, len(team.members)):
+        for i in range(0, len(team.members)):
             mem = team.members[i]
             resp["members"][i]["user"] = self.user_manager.user_display_info(mem.user)
 

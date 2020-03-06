@@ -4,7 +4,7 @@ This file is covered by the LICENSING file in the root of this project.
 """
 
 #!flask/bin/python
-from client import app
+from .client import app
 
 
 if __name__ == "__main__":

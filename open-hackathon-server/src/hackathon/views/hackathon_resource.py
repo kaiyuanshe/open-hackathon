@@ -14,7 +14,7 @@ from flask_restful import Resource
 from flask import request
 import validictory
 
-from api_schema import schemas
+from .api_schema import schemas
 from hackathon import RequiredFeature, Context
 
 __all__ = ["Resource", "HackathonResource"]
@@ -56,7 +56,7 @@ def validate(func):
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        class_name = func.im_class.__name__
+        class_name = func.__self__.__class__.__name__
         method_name = func.__name__.lower()
         if hasattr(func, "original"):
             method_name = func.original

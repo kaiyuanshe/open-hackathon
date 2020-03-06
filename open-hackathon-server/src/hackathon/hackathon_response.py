@@ -3,7 +3,7 @@
 This file is covered by the LICENSING file in the root of this project.
 """
 
-from log import log
+from .log import log
 
 
 class HTTP_CODE:

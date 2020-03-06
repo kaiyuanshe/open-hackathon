@@ -9,7 +9,7 @@ sys.path.append("..")
 
 from hackathon import api
 
-from resources import *
+from .resources import *
 
 __all__ = ["init_routes"]
 

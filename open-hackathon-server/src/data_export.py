@@ -3,11 +3,11 @@
 This file is covered by the LICENSING file in the root of this project.
 """
 
-from hackathon.hmongo.models import *
-from hackathon.constants import *
+from .hackathon.hmongo.models import *
+from .hackathon.constants import *
 from mongoengine import Q
 import uuid
-from hackathon.util import *
+from .hackathon.util import *
 from bson import *
 import hashlib
 import xlwt
@@ -16,7 +16,7 @@ import xlwt
 def export_registered_users(filename, hackathon_name):
     hackathon = Hackathon.objects(name=hackathon_name).no_dereference().first()
     if not hackathon:
-        print "hackathon %s cannot be found" % hackathon_name
+        print("hackathon %s cannot be found" % hackathon_name)
         return
 
     gender = {

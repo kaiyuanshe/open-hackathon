@@ -17,7 +17,7 @@ except ImportError:
 
 from hackathon.hk8s.k8s_service_adapter import K8SServiceAdapter
 from hackathon import Context
-import test_k8s_conf
+from . import test_k8s_conf
 
 class K8SServiceAdapterTest(unittest.TestCase):
     def setUp(self):

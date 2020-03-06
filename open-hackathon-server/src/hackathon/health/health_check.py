@@ -25,9 +25,8 @@ DESCRIPTION = "description"
 VERSION = "version"
 
 
-class HealthCheck(Component):
+class HealthCheck(Component, metaclass=abc.ABCMeta):
     """Base class for health check item"""
-    __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
     def report_health(self):

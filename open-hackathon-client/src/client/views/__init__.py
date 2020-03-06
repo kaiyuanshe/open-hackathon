@@ -7,9 +7,10 @@ import sys
 import os.path
 from os.path import realpath, abspath, dirname
 from client.enum import LoginProvider
+import importlib
 
 sys.path.append("..")
-reload(sys)
+importlib.reload(sys)
 sys.setdefaultencoding('utf-8')
 
 import time
@@ -101,7 +102,7 @@ def __login(provider):
 
 
 def __date_serializer(date):
-    return long((date - datetime(1970, 1, 1)).total_seconds() * 1000)
+    return int((date - datetime(1970, 1, 1)).total_seconds() * 1000)
 
 
 def __get_api(url, headers=None, **kwargs):
@@ -166,7 +167,7 @@ def strip_tags(html):
 def limit_to(text, limit=100):
     if text is None:
         text = ""
-    text = unicode(text)
+    text = str(text)
     return text[0:limit]
 
 
@@ -458,7 +459,7 @@ def events():
     return render("/events.html")
 
 
-from route_manage import *
-from route_template import *
-from route_user import *
-from route_team import *
+from .route_manage import *
+from .route_template import *
+from .route_user import *
+from .route_team import *
