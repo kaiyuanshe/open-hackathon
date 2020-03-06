@@ -284,8 +284,7 @@ class GithubLogin(LoginBase):
         query = qs_dict(token_resp)
         if query.get("error") is not None:
             raise Exception(query)
-
-        return query["access_token"]
+        return query[b"access_token"]
 
     def get_emails(self, token):
         """Get user primary email
