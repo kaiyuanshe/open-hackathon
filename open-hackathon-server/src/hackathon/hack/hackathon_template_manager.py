@@ -6,7 +6,8 @@ This file is covered by the LICENSING file in the root of this project.
 import sys
 
 sys.path.append("..")
-from compiler.ast import flatten
+# from compiler.ast import flatten
+
 
 from flask import g
 
@@ -15,6 +16,17 @@ from hackathon.hmongo.models import Template
 from hackathon import Component, RequiredFeature, Context
 from hackathon.constants import VE_PROVIDER, TEMPLATE_STATUS, CLOUD_PROVIDER
 from hackathon.hackathon_response import not_found, internal_server_error
+
+import collections
+def flatten(x):
+    result = []
+    for el in x:
+        if isinstance(x, collections.Iterable) and not isinstance(el, str):
+            result.extend(flatten(el))
+        else:
+            result.append(el)
+    return result
+ 
 
 
 __all__ = ["HackathonTemplateManager"]
