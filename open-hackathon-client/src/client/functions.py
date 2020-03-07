@@ -79,11 +79,15 @@ def put_to_remote(url, post_data, headers=None):
 
 
 def get_remote(url, headers={}):
-    ssl.match_hostname = lambda cert, hostname: True
-    opener = urllib.request.build_opener(urllib.request.HTTPHandler)
-    request = urllib.request.Request(url, None, headers)
-    resp = opener.open(request)
-    return resp.read()
+    # ssl.match_hostname = lambda cert, hostname: True
+    # opener = urllib.request.build_opener(urllib.request.HTTPHandler)
+    # request = urllib.request.Request(url, None, headers)
+    # print(request)
+    # resp = opener.open(request)
+    
+    r = requests.get(url, headers=headers)
+    # return resp.read()
+    return r.text
 
 
 def delete_remote(url, headers=None):
