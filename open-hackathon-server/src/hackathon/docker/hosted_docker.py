@@ -7,7 +7,6 @@ import sys
 
 sys.path.append("..")
 
-from compiler.ast import flatten
 from threading import Lock
 import json
 import requests
@@ -17,6 +16,15 @@ from hackathon import RequiredFeature, Component, Context
 from hackathon.hmongo.models import DockerContainer, DockerHostServer
 from hackathon.constants import HEALTH, HEALTH_STATUS, HACKATHON_CONFIG, CLOUD_PROVIDER
 
+import collections
+def flatten(x):
+    result = []
+    for el in x:
+        if isinstance(x, collections.Iterable) and not isinstance(el, str):
+            result.extend(flatten(el))
+        else:
+            result.append(el)
+    return result
 
 class HostedDockerFormation(Component):
     hackathon_template_manager = RequiredFeature("hackathon_template_manager")
