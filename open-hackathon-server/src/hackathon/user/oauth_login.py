@@ -300,7 +300,7 @@ class GithubLogin(LoginBase):
 
         token_resp = post_to_remote(token_url, data_to_post, headers)
         if token_resp.get("error") is not None:
-            raise Exception(json.dump(token_resp))
+            raise Exception(json.dumps(token_resp))
 
         return token_resp.get("access_token")
 
