@@ -291,8 +291,7 @@ class GithubLogin(LoginBase):
         data_to_post = {
             "client_id": get_config("login.github.client_id"),
             "client_secret": get_config("login.github.client_secret"),
-            "code": str(code),
-            "redirect_uri": redirect_uri
+            "code": str(code)
         }
 
         headers = {

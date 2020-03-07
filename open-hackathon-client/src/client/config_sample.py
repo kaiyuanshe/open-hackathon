@@ -32,8 +32,8 @@ Config = {
     },
     "javascript": {
         "github": {
-            "authorize_url": "https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s/github&scope=user" % (
-                GITHUB_CLIENT_ID, ENDPOINT_WEB)
+            "authorize_url": "https://github.com/login/oauth/authorize?client_id=%s&scope=user" % (
+                GITHUB_CLIENT_ID)
         },
         "weibo": {
             "authorize_url": "https://api.weibo.com/oauth2/authorize?client_id=%s&redirect_uri=%s/weibo&scope=all" % (
