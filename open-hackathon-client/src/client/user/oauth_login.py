@@ -284,7 +284,7 @@ class GithubLogin(LoginBase):
         query = qs_dict(token_resp)
         if query.get("error") is not None:
             raise Exception(query)
-        return query[b"access_token"]
+        return query.get("access_token")
 
     def get_emails(self, token):
         """Get user primary email
@@ -327,7 +327,7 @@ class GithubLogin(LoginBase):
             "total_private_repos":0,"owned_private_repos":0,"disk_usage":14179,"collaborators":0,
 
         """
-        user_info_resp = get_remote(get_config('login.github.user_info_url') + token)
+        user_info_resp = get_remote(str(get_config('login.github.user_info_url')) + str(token))
 
         user_info = json.loads(user_info_resp)
         if user_info.get("message") is not None:
