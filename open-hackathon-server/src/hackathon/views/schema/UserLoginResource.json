@@ -21,10 +21,6 @@
             "type": "string",
             "description": "authorization code from OAuth login providers"
           },
-          "redirect_uri": {
-            "type": "string",
-            "description": "redirect URI allowed by OAuth Login proverders"
-          },
           "provider": {
             "type": "string",
             "description": "login provider"
