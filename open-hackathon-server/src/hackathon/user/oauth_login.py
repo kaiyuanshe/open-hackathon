@@ -243,11 +243,10 @@ class GithubLogin(LoginBase):
 
         self.log.info('login from GitHub')
         code = context.get('code')
-        redirect_uri = context.get('redirect_uri')
-        if not code or not redirect_uri:
+        if not code:
             return None
 
-        access_token = self.get_token(code, redirect_uri)
+        access_token = self.get_token(code)
         self.log.info('Successfully get access token from github using code %s' % code)
 
         user_info = self.get_user_info(access_token)
@@ -273,14 +272,11 @@ class GithubLogin(LoginBase):
 
         return required_info
 
-    def get_token(self, code, redirect_uri):
+    def get_token(self, code):
         """ Get github access token
 
         :type code: str
         :param code:
-
-        :type redirect_uri: str
-        :param redirect_uri:
 
         :rtype: str
         :return: access token
@@ -351,7 +347,8 @@ class GithubLogin(LoginBase):
         """
         user_info_url = get_config('login.github.user_info_url')
         headers = {
-            "Authorization": "token %s" % token
+            "Authorization": "token %s" % token,
+            "Accept": "application/json"
         }
         user_info_resp = get_remote(user_info_url, headers)
 
