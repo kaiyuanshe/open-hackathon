@@ -14,7 +14,7 @@ from client import app
 def encode(plaintext):
     m = hashlib.md5()
     origin = plaintext + app.config['SECRET_KEY']
-    m.update(origin)
+    m.update(origin.encode('utf8'))
     return m.hexdigest()
 
 
