@@ -4,7 +4,7 @@ This file is covered by the LICENSING file in the root of this project.
 """
 
 # try:
-from .hackathon.hmongo.models import User
+from hackathon.hmongo.models import User
 # except ImportError:
 #     pass
 
