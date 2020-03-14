@@ -7,11 +7,12 @@ import json, os, requests, urllib.request, urllib.error, urllib.parse
 from datetime import datetime
 from urllib.parse import parse_qs
 import ssl
+from flask import jsonify
 
 try:
     from config import Config
 except ImportError:
-    from .config_sample import Config
+    from client.config_sample import Config
 
 
 def convert(input):
@@ -84,8 +85,11 @@ def get_remote(url, headers={}):
     # request = urllib.request.Request(url, None, headers)
     # print(request)
     # resp = opener.open(request)
-    
+    # print(resp.read())
     r = requests.get(url, headers=headers)
+    # print(r.text)
+    # print(jsonify(r.text))
+    r.encoding = r.apparent_encoding
     # return resp.read()
     return r.text
 

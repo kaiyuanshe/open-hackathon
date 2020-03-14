@@ -66,7 +66,7 @@ def __oauth_api_key():
 
 def render(template_name_or_list, **context):
     ui = ""
-    if current_user and current_user.is_authenticated:
+    if current_user and current_user.is_authenticated():
         ui = " for user '%s'" % current_user.name
     log.debug("rendering template '%s' %s" % (template_name_or_list, ui))
     return render_template(template_name_or_list,

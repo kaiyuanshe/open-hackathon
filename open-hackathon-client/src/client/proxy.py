@@ -3,9 +3,9 @@
 This file is covered by the LICENSING file in the root of this project.
 """
 
-from .constants import HTTP_HEADER
+from client.constants import HTTP_HEADER
 from flask import session
-from .functions import safe_get_config
+from client.functions import safe_get_config
 
 
 def __get_headers(hackathon_id):
