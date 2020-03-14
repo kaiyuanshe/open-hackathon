@@ -72,6 +72,7 @@ class GuacamoleHealthCheck(HealthCheck):
 
     def report_health(self):
         try:
+            print(self.guacamole_url)
             req = requests.get(self.guacamole_url)
             self.log.debug(req.status_code)
             if req.status_code == 200:
