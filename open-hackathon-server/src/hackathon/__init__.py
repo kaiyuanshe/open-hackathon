@@ -13,14 +13,14 @@ from flask_restful import Api
 from flask_cors import CORS
 from datetime import timedelta
 
-from .util import safe_get_config, get_class, Utility, Email, DisabledVoiceVerify, RonglianVoiceVerify, DisabledSms, \
+from hackathon.util import safe_get_config, get_class, Utility, Email, DisabledVoiceVerify, RonglianVoiceVerify, DisabledSms, \
     ChinaTelecomSms
-from .hackathon_factory import factory, RequiredFeature
-from .hackathon_scheduler import HackathonScheduler
-from .hackathon_response import *
-from .hackathon_exception import *
-from .log import log
-from .context import Context
+from hackathon.hackathon_factory import factory, RequiredFeature
+from hackathon.hackathon_scheduler import HackathonScheduler
+from hackathon.hackathon_response import *
+from hackathon.hackathon_exception import *
+from hackathon.log import log
+from hackathon.context import Context
 
 __all__ = [
     "app",
