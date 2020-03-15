@@ -19,4 +19,4 @@ def encode(plaintext):
 
 
 if __name__ == "__main__":
-    print(encode("admin"))
+    print(encode("flag"))
