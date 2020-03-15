@@ -12,7 +12,7 @@ from werkzeug.datastructures import FileStorage
 
 from hackathon import RequiredFeature
 from hackathon.constants import FILE_TYPE, HEALTH_STATUS, HEALTH
-from .storage import Storage
+from hackathon.storage.storage import Storage
 
 __all__ = ["AzureStorage"]
 

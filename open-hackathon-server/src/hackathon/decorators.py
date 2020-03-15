@@ -4,7 +4,7 @@ This file is covered by the LICENSING file in the root of this project.
 """
 
 from hackathon import RequiredFeature
-from .hackathon_response import unauthorized, bad_request, forbidden
+from hackathon.hackathon_response import unauthorized, bad_request, forbidden
 
 __all__ = [
     "token_required",

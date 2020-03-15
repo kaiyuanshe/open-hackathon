@@ -10,9 +10,9 @@ from collections import defaultdict
 sys.path.append("..")
 
 from hackathon.constants import VE_PROVIDER
-from .template_constants import TEMPLATE
-from .docker_template_unit import DockerTemplateUnit
-from .k8s_template_unit import K8STemplateUnit
+from hackathon.template.template_constants import TEMPLATE
+from hackathon.template.docker_template_unit import DockerTemplateUnit
+from hackathon.template.k8s_template_unit import K8STemplateUnit
 
 __all__ = ["TemplateContent"]
 

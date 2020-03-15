@@ -14,7 +14,7 @@ from flask_restful import Resource
 from flask import request
 import validictory
 
-from .api_schema import schemas
+from hackathon.views.api_schema import schemas
 from hackathon import RequiredFeature, Context
 
 __all__ = ["Resource", "HackathonResource"]

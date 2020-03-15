@@ -19,7 +19,7 @@ from mailthon.postman import Postman
 from mailthon.middleware import TLS, Auth
 from bson import ObjectId
 
-from .hackathon_factory import RequiredFeature
+from hackathon.hackathon_factory import RequiredFeature
 from hackathon.log import log
 from hackathon.constants import EMAIL_SMTP_STATUSCODE, VOICEVERIFY_RONGLIAN_STATUSCODE, SMS_CHINATELECOM_TEMPLATE, \
     SMS_CHINATELECOM_STATUSCODE, CHINATELECOM_ACCESS_TOKEN_STATUSCODE

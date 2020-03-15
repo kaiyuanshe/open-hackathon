@@ -7,8 +7,8 @@ import sys
 
 sys.path.append("..")
 
-from .template_constants import DOCKER_UNIT
-from .template_unit import TemplateUnit
+from hackathon.template.template_constants import DOCKER_UNIT
+from hackathon.template.template_unit import TemplateUnit
 from hackathon.constants import VE_PROVIDER
 
 __all__ = ["DockerTemplateUnit"]

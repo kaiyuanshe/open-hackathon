@@ -23,8 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-from .template_constants import K8S_UNIT
-from .template_unit import TemplateUnit
+from hackathon.template.template_constants import K8S_UNIT
+from hackathon.template.template_unit import TemplateUnit
 from hackathon.constants import VE_PROVIDER
 
 __all__ = ["K8STemplateUnit"]

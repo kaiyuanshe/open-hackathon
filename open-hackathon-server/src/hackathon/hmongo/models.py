@@ -11,8 +11,9 @@ from mongoengine import *
 
 from hackathon.util import get_now, make_serializable
 from hackathon.constants import TEMPLATE_STATUS, HACK_USER_TYPE
-from .pagination import Pagination
+from hackathon.hmongo.pagination import Pagination
 
+from werkzeug.security import generate_password_hash, check_password_hash
 
 def to_dic(obj):
     ret = make_serializable(obj.to_mongo().to_dict())
