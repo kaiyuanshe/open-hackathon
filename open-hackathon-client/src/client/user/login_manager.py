@@ -72,16 +72,27 @@ class LoginManagerHelper():
         try:
             req = requests.post(self.login_url, json=data, headers=self.headers)
             resp = req.json()
-            if "error" in resp:
-                log.debug("login failed: %r" % resp)
-                return None
-            else:
+            # if "error" in resp:
+            #     log.debug("login failed: %r" % resp)
+            #     return None
+            # else:
+            #     login_user = User(resp["user"])
+            #     token = resp["token"]
+            #     return {
+            #         "user": login_user,
+            #         "token": token["token"]
+            #     }
+            if resp:
+                # if login isn't successful, it will return None
                 login_user = User(resp["user"])
                 token = resp["token"]
                 return {
                     "user": login_user,
                     "token": token["token"]
                 }
+            else: 
+                log.debug("login failed: %r" % resp)
+                return None
         except Exception as e:
             log.error(e)
             return None
