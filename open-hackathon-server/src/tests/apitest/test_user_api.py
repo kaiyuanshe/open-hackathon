@@ -1,8 +1,22 @@
 from unittest import TestCase
 
+from hackathon.hmongo.database import drop_db, setup_db
+
+from . import TestClient
+
 
 class TestUserLoginApi(TestCase):
-    def test_login(self):
+
+    def setUp(self):
+        drop_db()
+        setup_db()
+
+        self.client = TestClient()
+
+    def tearDown(self):
+        drop_db()
+
+    def test_login(self, user1):
         pass
 
     def test_logout(self):
