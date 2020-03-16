@@ -3,11 +3,11 @@
 This file is covered by the LICENSING file in the root of this project.
 """
 
-import sys
-
-sys.path.append("..")
-
-from mongoengine import *
+import hashlib
+from flask import current_app as app
+from mongoengine import QuerySet, DateTimeField, DynamicDocument, EmbeddedDocument, StringField, \
+    BooleanField, IntField, DynamicEmbeddedDocument, EmbeddedDocumentListField, URLField, ListField, \
+    EmbeddedDocumentField, ReferenceField, UUIDField, DictField, DynamicField, PULL
 
 from hackathon.util import get_now, make_serializable
 from hackathon.constants import TEMPLATE_STATUS, HACK_USER_TYPE
@@ -106,6 +106,19 @@ class User(HDocumentBase):
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
+
+    @staticmethod
+    def get_encode_password(pwd):
+        m = hashlib.md5()
+        m.update(pwd)
+        m.update(app.config['SECRET_KEY'])
+        return m.hexdigest()
+
+    def set_password(self, pwd):
+        self.password = self.get_encode_password(pwd)
+
+    def check_password(self, pwd):
+        return self.get_encode_password(pwd) == self.password
 
 
 class UserToken(HDocumentBase):
