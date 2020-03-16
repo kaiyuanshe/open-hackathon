@@ -16,7 +16,3 @@ def encode(plaintext):
     origin = plaintext + app.config['SECRET_KEY']
     m.update(origin.encode('utf8'))
     return m.hexdigest()
-
-
-if __name__ == "__main__":
-    print(encode("flag"))
