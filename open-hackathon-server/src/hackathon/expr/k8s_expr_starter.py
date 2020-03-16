@@ -7,7 +7,7 @@ import time
 import string
 import random
 
-from .expr_starter import ExprStarter
+from hackathon.expr.expr_starter import ExprStarter
 from hackathon.hmongo.models import K8sEnvironment
 from hackathon.hmongo.models import Hackathon, VirtualEnvironment, Experiment
 from hackathon.constants import (VE_PROVIDER, VERemoteProvider, VEStatus, EStatus)

@@ -15,7 +15,7 @@ from os.path import abspath, dirname, realpath
 
 from hackathon.hmongo.models import Experiment, VirtualEnvironment
 from hackathon.constants import VE_PROVIDER, VEStatus, VERemoteProvider, EStatus
-from .expr_starter import ExprStarter
+from hackathon.expr.expr_starter import ExprStarter
 
 
 class DockerExprStarter(ExprStarter):
