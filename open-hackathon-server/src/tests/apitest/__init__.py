@@ -1,4 +1,6 @@
 import json
+import logging
+
 from hackathon import app
 
 DEFAULT_TEST_CLIENT_HEADERS = {
@@ -37,22 +39,23 @@ class TestClient(object):
         self._app = app
         self._client = app.test_client()
         self._headers = DEFAULT_TEST_CLIENT_HEADERS
+        self.log = logging.getLogger("test_client")
 
-    @staticmethod
-    def result(resp, is_json):
+    def result(self, resp, is_json):
         text = resp.data.decode()
+        self.log.info("get response content: {}".format(text))
         if is_json:
             return json.loads(text)
         return text
 
-    def get(self, url, status_code=200, is_json=False, **kwargs):
+    def get(self, url, status_code=200, is_json=True, **kwargs):
         with self._app.app_context():
             resp = self._client.get(url, headers=self._headers, **kwargs)
         if resp.status_code != status_code:
             raise ApiStatusCodeError(status_code, resp.status_code)
         return self.result(resp, is_json)
 
-    def post(self, url, json_data=None, status_code=200, is_json=False, **kwargs):
+    def post(self, url, json_data=None, status_code=200, is_json=True, **kwargs):
         data = json.dumps(json_data)
         with self._app.app_context():
             resp = self._client.post(url, headers=self._headers, data=data, **kwargs)
@@ -60,7 +63,7 @@ class TestClient(object):
             raise ApiStatusCodeError(status_code, resp.status_code)
         return self.result(resp, is_json)
 
-    def put(self, url, json_data=None, status_code=200, is_json=False, **kwargs):
+    def put(self, url, json_data=None, status_code=200, is_json=True, **kwargs):
         data = json.dumps(json_data)
         with self._app.app_context():
             resp = self._client.put(url, headers=self._headers, data=data, **kwargs)
@@ -68,7 +71,7 @@ class TestClient(object):
             raise ApiStatusCodeError(status_code, resp.status_code)
         return self.result(resp, is_json)
 
-    def patch(self, url, json_data=None, status_code=200, is_json=False, **kwargs):
+    def patch(self, url, json_data=None, status_code=200, is_json=True, **kwargs):
         data = json.dumps(json_data)
         with self._app.app_context():
             resp = self._client.patch(url, headers=self._headers, data=data, **kwargs)
@@ -76,10 +79,14 @@ class TestClient(object):
             raise ApiStatusCodeError(status_code, resp.status_code)
         return self.result(resp, is_json)
 
-    def delete(self, url, json_data=None, status_code=200, is_json=False, **kwargs):
+    def delete(self, url, json_data=None, status_code=200, is_json=True, **kwargs):
         data = json.dumps(json_data)
         with self._app.app_context():
             resp = self._client.delete(url, headers=self._headers, data=data, **kwargs)
         if resp.status_code != status_code:
             raise ApiStatusCodeError(status_code, resp.status_code)
         return self.result(resp, is_json)
+
+
+class ApiTestCase(object):
+    client = TestClient()

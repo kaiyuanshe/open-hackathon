@@ -1,7 +1,7 @@
-from unittest import TestCase
+from . import ApiTestCase
 
 
-class TestTeamApi(TestCase):
+class TestTeamApi(ApiTestCase):
     def test_create_team(self):
         pass
 
@@ -27,7 +27,7 @@ class TestTeamApi(TestCase):
         pass
 
 
-class TestTeamMemberApi(TestCase):
+class TestTeamMemberApi(ApiTestCase):
     def test_get_user_team(self):
         pass
 

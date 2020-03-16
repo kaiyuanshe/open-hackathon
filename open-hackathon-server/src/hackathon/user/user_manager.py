@@ -13,7 +13,7 @@ import uuid
 from flask import request, g
 from mongoengine import Q, NotUniqueError, ValidationError
 
-from hackathon.hackathon_response import bad_request, internal_server_error, not_found, ok
+from hackathon.hackathon_response import bad_request, internal_server_error, not_found, ok, unauthorized
 from hackathon.constants import HTTP_HEADER, HACK_USER_TYPE, FILE_TYPE
 from hackathon import Component, Context, RequiredFeature
 from hackathon.hmongo.models import UserToken, User, UserEmail, UserProfile, UserHackathon
@@ -288,7 +288,7 @@ class UserManager(Component):
         user = User.objects(name=username, password=enc_pwd).first()
         if user is None:
             self.log.warn("invalid user/pwd login: username=%s, encoded pwd=%s" % (username, enc_pwd))
-            return None
+            return unauthorized("username or password error")
 
         user.online = True
         user.login_times = (user.login_times or 0) + 1
@@ -328,7 +328,6 @@ class UserManager(Component):
         self.log.info("Oauth login with %s and code: %s" % (provider, context.code))
         oauth_resp = self.oauth_login_manager.oauth_login(provider, context)
         return self.__oauth_login_db(provider, Context.from_object(oauth_resp))
-
 
     def __oauth_login_db(self, provider, context):
         # update db

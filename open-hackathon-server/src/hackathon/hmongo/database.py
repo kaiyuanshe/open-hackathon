@@ -39,4 +39,5 @@ def add_super_user(name, nickname, password):
         is_super=True)
     admin.set_password(password)
 
-    User.objects(name="admin").update_one(__raw__={"$set": admin.to_mongo().to_dict()}, upsert=True)
+    User.objects(name=name).update_one(__raw__={"$set": admin.to_mongo().to_dict()}, upsert=True)
+    return admin

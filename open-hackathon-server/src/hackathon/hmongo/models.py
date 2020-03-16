@@ -4,7 +4,6 @@ This file is covered by the LICENSING file in the root of this project.
 """
 
 import hashlib
-from flask import current_app as app
 from mongoengine import QuerySet, DateTimeField, DynamicDocument, EmbeddedDocument, StringField, \
     BooleanField, IntField, DynamicEmbeddedDocument, EmbeddedDocumentListField, URLField, ListField, \
     EmbeddedDocumentField, ReferenceField, UUIDField, DictField, DynamicField, PULL
@@ -111,7 +110,6 @@ class User(HDocumentBase):
     def get_encode_password(pwd):
         m = hashlib.md5()
         m.update(pwd)
-        m.update(app.config['SECRET_KEY'])
         return m.hexdigest()
 
     def set_password(self, pwd):

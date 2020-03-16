@@ -1,7 +1,7 @@
-from unittest import TestCase
+from . import ApiTestCase
 
 
-class TestAdminApi(TestCase):
+class TestAdminApi(ApiTestCase):
     def test_create_hackathon(self):
         pass
 

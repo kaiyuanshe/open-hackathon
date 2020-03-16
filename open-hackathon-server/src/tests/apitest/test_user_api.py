@@ -1,29 +1,40 @@
-from unittest import TestCase
+from . import ApiTestCase
 
-from hackathon.hmongo.database import drop_db, setup_db
+USER_ONE_USERNAME = "test_one"
+USER_ONE_ENCODE_PASSWORD = "16ec1ebb01fe02ded9b7d5447d3dfc65"
 
-from . import TestClient
 
-
-class TestUserLoginApi(TestCase):
-
-    def setUp(self):
-        drop_db()
-        setup_db()
-
-        self.client = TestClient()
-
-    def tearDown(self):
-        drop_db()
+class TestUserLoginApi(ApiTestCase):
 
     def test_login(self, user1):
-        pass
+        # test login by DB
+        data = {
+            "provider": "db",
+            "username": USER_ONE_USERNAME,
+            "password": USER_ONE_ENCODE_PASSWORD,
+            "code": "test-only"
+        }
+        payload = self.client.post("/api/user/login", json_data=data)
+        user_info = payload['user']
+        assert user_info['id'], user1.id
+
+        data = {
+            "provider": "db",
+            "username": "user_one_not_found",
+            "password": USER_ONE_ENCODE_PASSWORD,
+            "code": "test-only"
+        }
+        payload = self.client.post("/api/user/login", json_data=data)
+        assert "error" in payload
+
+        # todo add sso when support authing
 
     def test_logout(self):
         pass
 
 
-class TestUserInfoApi(TestCase):
+class TestUserInfoApi(ApiTestCase):
+
     def test_get_user_profile(self):
         pass
 
@@ -34,11 +45,13 @@ class TestUserInfoApi(TestCase):
         pass
 
 
-class TestUserFile(TestCase):
+class TestUserFile(ApiTestCase):
+
     def test_user_upload_files(self):
         pass
 
 
-class TestTalents(TestCase):
+class TestTalents(ApiTestCase):
+
     def test_get_talents(self):
         pass

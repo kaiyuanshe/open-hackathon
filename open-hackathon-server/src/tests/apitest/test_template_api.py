@@ -1,7 +1,7 @@
-from unittest import TestCase
+from . import ApiTestCase
 
 
-class TestTemplateApi(TestCase):
+class TestTemplateApi(ApiTestCase):
     def test_create_template(self):
         pass
 

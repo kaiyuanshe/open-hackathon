@@ -1,7 +1,7 @@
-from unittest import TestCase
+from . import ApiTestCase
 
 
-class TestHackathonApi(TestCase):
+class TestHackathonApi(ApiTestCase):
     def test_list_hackathons(self):
         pass
 
@@ -18,7 +18,7 @@ class TestHackathonApi(TestCase):
         pass
 
 
-class TestParticipantApi(TestCase):
+class TestParticipantApi(ApiTestCase):
     def test_registration(self):
         pass
 
@@ -29,12 +29,12 @@ class TestParticipantApi(TestCase):
         pass
 
 
-class TestHackathonNotifyApi(TestCase):
+class TestHackathonNotifyApi(ApiTestCase):
     def test_list_notifies(self):
         pass
 
 
-class TestGrantedAwards(TestCase):
+class TestGrantedAwards(ApiTestCase):
     def test_get_granted_awards(self):
         pass
 

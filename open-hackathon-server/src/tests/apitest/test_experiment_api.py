@@ -1,7 +1,7 @@
-from unittest import TestCase
+from . import ApiTestCase
 
 
-class TestUserExperiment(TestCase):
+class TestUserExperiment(ApiTestCase):
     def test_start_experiment(self):
         pass
 
