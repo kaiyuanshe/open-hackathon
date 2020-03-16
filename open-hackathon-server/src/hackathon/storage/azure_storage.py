@@ -73,7 +73,6 @@ class AzureStorage(Storage):
             url_arr = url.split('/')
             blob_name = url_arr[-1]
             container_name = url_arr[-2]
-            print(container_name, blob_name)
 
             self.azure_blob_service.delete_file_from_azure(container_name, blob_name)
             return True
