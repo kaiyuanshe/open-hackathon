@@ -2,13 +2,8 @@
 """
 This file is covered by the LICENSING file in the root of this project.
 """
-
-import sys
-
-sys.path.append("..")
-
-from datetime import timedelta
 import uuid
+from datetime import timedelta
 
 from flask import request, g
 from mongoengine import Q, NotUniqueError, ValidationError

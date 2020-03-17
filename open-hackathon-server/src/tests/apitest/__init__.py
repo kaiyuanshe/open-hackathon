@@ -1,7 +1,10 @@
+import uuid
 import json
 import logging
+from datetime import timedelta, datetime
 
 from hackathon import app
+from hackathon.hmongo.models import UserToken
 
 DEFAULT_TEST_CLIENT_HEADERS = {
     'User-Agent': "OH/TestClient",
@@ -87,6 +90,21 @@ class TestClient(object):
             raise ApiStatusCodeError(status_code, resp.status_code)
         return self.result(resp, is_json)
 
+    def update_headers(self, headers):
+        self._headers.update(headers)
+
 
 class ApiTestCase(object):
     client = TestClient()
+
+    def login(self, user):
+        token_issue_date = datetime.utcnow()
+        valid_period = timedelta(minutes=1)
+        token_expire_date = token_issue_date + valid_period
+        user_token = UserToken(token=str(uuid.uuid1()),
+                               user=user,
+                               expire_date=token_expire_date,
+                               issue_date=token_issue_date)
+        user_token.save()
+        self.client.update_headers(dict(token=user_token.token))
+        return user_token

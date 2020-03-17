@@ -27,7 +27,7 @@ class TestUserLoginApi(ApiTestCase):
         payload = self.client.post("/api/user/login", json_data=data)
         assert "error" in payload
 
-        # todo add sso when support authing
+        # todo add sso test when support authing
 
     def test_logout(self):
         pass
@@ -35,13 +35,15 @@ class TestUserLoginApi(ApiTestCase):
 
 class TestUserInfoApi(ApiTestCase):
 
-    def test_get_user_profile(self):
+    def test_get_user_profile(self, user1):
+        self.login(user1)
+        payload = self.client.get("/api/user/profile")
+        assert payload["id"] == str(user1.id)
+
+    def test_get_user_picture(self, user1):
         pass
 
-    def test_get_user_picture(self):
-        pass
-
-    def test_get_user_notice(self):
+    def test_get_user_notice(self, user1):
         pass
 
 

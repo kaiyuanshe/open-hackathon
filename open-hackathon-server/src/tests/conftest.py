@@ -5,7 +5,7 @@ from hackathon.hmongo.database import add_super_user
 from hackathon.hmongo.database import drop_db, setup_db
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="class")
 def user1():
     # return new user named one
     one = User(
@@ -14,12 +14,11 @@ def user1():
         avatar_url="/static/pic/monkey-32-32px.png",
         is_super=False)
     one.set_password("test_password")
-
-    User.objects(name="test_one").update_one(__raw__={"$set": one.to_mongo().to_dict()}, upsert=True)
+    one.save()
     return one
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="class")
 def user2():
     # return new user named two
     two = User(
@@ -28,12 +27,11 @@ def user2():
         avatar_url="/static/pic/monkey-32-32px.png",
         is_super=False)
     two.set_password("test_password")
-
-    User.objects(name="test_two").update_one(__raw__={"$set": two.to_mongo().to_dict()}, upsert=True)
+    two.save()
     return two
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="class")
 def admin1():
     # return new admin named one
     return add_super_user("admin_one", "admin_one", "test_password")
