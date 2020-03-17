@@ -46,12 +46,16 @@ class HDocumentBase(DynamicDocument):
         'allow_inheritance': True,
         'abstract': True,
         'queryset_class': HQuerySet}
+    unsafe_columns = []
 
     def __init__(self, **kwargs):
         super(HDocumentBase, self).__init__(**kwargs)
 
     def dic(self):
-        return to_dic(self)
+        result = to_dic(self)
+        for k in self.unsafe_columns:
+            result.pop(k, None)
+        return result
 
     def __repr__(self):
         return '%s: %s' % (self.__class__.__name__, self.to_json())
@@ -94,6 +98,8 @@ class User(HDocumentBase):
     online = BooleanField(default=False)
     last_login_time = DateTimeField()
     login_times = IntField(default=1)  # a new user usually added upon whose first login, by default 1 thus
+
+    unsafe_columns = ["password"]
 
     meta = {
         "indexes": [
