@@ -48,6 +48,8 @@ class UserManager(Component):
             if user:
                 user.online = False
                 user.save()
+            g.user = None
+            g.token.delete()
             return ok()
         except Exception as e:
             self.log.error(e)
@@ -261,6 +263,8 @@ class UserManager(Component):
             if t and t.expire_date >= self.util.get_now():
                 g.authenticated = True
                 g.user = t.user
+                # save token to g, to determine which one to remove, when logout
+                g.token = t
                 return t.user
 
         return None

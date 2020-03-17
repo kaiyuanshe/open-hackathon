@@ -10,6 +10,7 @@ DEFAULT_TEST_CLIENT_HEADERS = {
     'User-Agent': "OH/TestClient",
     'Accept-Encoding': ', '.join(('gzip', 'deflate')),
     'Accept': '*/*',
+    "Content-Type": "application/json",
     'Connection': 'keep-alive',
 }
 
