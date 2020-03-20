@@ -29,7 +29,6 @@ __all__ = [
     "Component",
 ]
 
-
 # initialize flask and flask restful
 app = Flask(__name__)
 app.config['SECRET_KEY'] = safe_get_config("app.secret_key", "secret_key")
@@ -122,7 +121,7 @@ class Component(object):
 
 def init_components():
     """Init hackathon factory"""
-    from hackathon.user import UserManager, UserProfileManager
+    from hackathon.user import UserManager, UserProfileManager, OAuthLoginManager
     from hackathon.hack import HackathonManager, AdminManager, TeamManager, DockerHostManager, \
         RegisterManager, HackathonTemplateManager, Cryptor
     from hackathon.template import TemplateLibrary
@@ -148,6 +147,7 @@ def init_components():
     # business components
     factory.provide("user_manager", UserManager)
     factory.provide("user_profile_manager", UserProfileManager)
+    factory.provide("oauth_login_manager", OAuthLoginManager)
     factory.provide("hackathon_manager", HackathonManager)
     factory.provide("register_manager", RegisterManager)
     factory.provide("cryptor", Cryptor)
@@ -263,7 +263,7 @@ def __init_schedule_jobs():
         hackathon_manager.schedule_pre_allocate_expr_job()
 
         # schedule job to pre-create a docker host server VM
-        #host_server_manager.schedule_pre_allocate_host_server_job()
+        # host_server_manager.schedule_pre_allocate_host_server_job()
     # init the overtime-sessions detection to update users' online status
     sche.add_interval(feature="user_manager",
                       method="check_user_online_status",

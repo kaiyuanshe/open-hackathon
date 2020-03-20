@@ -11,8 +11,12 @@ import base64
 import urllib.request, urllib.parse, urllib.error
 import urllib.request, urllib.error, urllib.parse
 import abc
+import ssl
+import requests
+
 from uuid import UUID
 from datetime import datetime, timedelta
+from urlparse import parse_qs
 
 from mailthon import email
 from mailthon.postman import Postman
@@ -36,6 +40,10 @@ __all__ = [
     "load_template",
     "call",
     "get_now",
+    "get_remote",
+    "post_to_remote",
+    "qs_dict",
+    "convert",
     "Utility",
     "Email",
     "DisabledVoiceVerify",
@@ -158,6 +166,39 @@ def call(mdl_cls_func, cls_args, func_args):
 def get_now():
     """Return the current local date and time without tzinfo"""
     return datetime.utcnow()  # tzinfo=None
+
+def convert(input):
+    if isinstance(input, dict):
+        return {convert(key): convert(value) for key, value in input.iteritems()}
+    elif isinstance(input, list):
+        return [convert(element) for element in input]
+    elif isinstance(input, unicode):
+        return input.encode('utf-8')
+    else:
+        return input
+
+
+def get_remote(url, headers={}):
+    ssl.match_hostname = lambda cert, hostname: True
+    opener = urllib2.build_opener(urllib2.HTTPHandler)
+    request = urllib2.Request(url, None, headers)
+    resp = opener.open(request)
+    return resp.read()
+
+
+def post_to_remote(url, post_data, headers=None):
+    ssl.match_hostname = lambda cert, hostname: True
+    default_headers = {"content-type": "application/json"}
+    if headers is not None and isinstance(headers, dict):
+        default_headers.update(headers)
+    req = requests.post(url, data=json.dumps(post_data), headers=default_headers)
+    resp = json.loads(req.content)
+
+    return convert(resp)
+
+
+def qs_dict(query):
+    return dict([(k, v[0]) for k, v in parse_qs(query).items()])
 
 
 class Utility(object):

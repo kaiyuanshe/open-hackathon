@@ -17,9 +17,9 @@
         "title": "user login",
         "type": "object",
         "properties": {
-          "openid": {
+          "code": {
             "type": "string",
-            "description": "unique identifier of user in certain oauth provider"
+            "description": "authorization code from OAuth login providers"
           },
           "provider": {
             "type": "string",

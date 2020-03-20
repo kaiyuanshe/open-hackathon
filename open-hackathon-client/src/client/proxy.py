@@ -19,4 +19,4 @@ def __get_headers(hackathon_id):
 def __get_uri(path):
     if path.startswith("/"):
         path = path.lstrip("/")
-    return "%s/%s" % (safe_get_config('hackathon-api.endpoint', 'http://localhost:15000'), path)
+    return "%s/%s" % (safe_get_config('endpoint.hackathon_api', 'http://localhost:15000'), path)

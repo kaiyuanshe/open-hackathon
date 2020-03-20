@@ -26,6 +26,7 @@ users_operation_time = {}
 class UserManager(Component):
     """Component for user management"""
     admin_manager = RequiredFeature("admin_manager")
+    oauth_login_manager = RequiredFeature("oauth_login_manager")
 
     def validate_login(self):
         """Make sure user token is included in http request headers and it must NOT be expired
@@ -324,6 +325,12 @@ class UserManager(Component):
         return User.objects(openid=openid, provider=provider).first()
 
     def __oauth_login(self, provider, context):
+        self.log.info("Oauth login with %s and code: %s" % (provider, context.code))
+        oauth_resp = self.oauth_login_manager.oauth_login(provider, context)
+        return self.__oauth_login_db(provider, Context.from_object(oauth_resp))
+
+
+    def __oauth_login_db(self, provider, context):
         # update db
         email_list = context.get('email_list', [])
         openid = context.openid
@@ -360,9 +367,10 @@ class UserManager(Component):
 
         # generate API token
         token = self.__generate_api_token(user)
-        return {
+        resp = {
             "token": token.dic(),
             "user": user.dic()}
+        return resp
 
     def __oxford(self, user, oxford_api):
         if not oxford_api:
@@ -390,11 +398,11 @@ class UserManager(Component):
 
     def __validate_upload_files(self):
         # todo check file size and file type
-        #if request.content_length > len(request.files) * self.util.get_config("storage.size_limit_kilo_bytes") * 1024:
+        # if request.content_length > len(request.files) * self.util.get_config("storage.size_limit_kilo_bytes") * 1024:
         #    raise BadRequest("more than the file size limited")
 
         # check each file type and only jpg is allowed
-        #for file_name in request.files:
+        # for file_name in request.files:
         #    if request.files.get(file_name).filename.endswith('jpg'):
         #        continue  # jpg is not considered in imghdr
         #    if imghdr.what(request.files.get(file_name)) is None:
