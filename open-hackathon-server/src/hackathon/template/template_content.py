@@ -10,9 +10,9 @@ from collections import defaultdict
 sys.path.append("..")
 
 from hackathon.constants import VE_PROVIDER
-from template_constants import TEMPLATE
-from docker_template_unit import DockerTemplateUnit
-from k8s_template_unit import K8STemplateUnit
+from hackathon.template.template_constants import TEMPLATE
+from hackathon.template.docker_template_unit import DockerTemplateUnit
+from hackathon.template.k8s_template_unit import K8STemplateUnit
 
 __all__ = ["TemplateContent"]
 
@@ -68,7 +68,7 @@ class TemplateContent:
             else:
                 raise Exception("unsupported virtual environment provider")
 
-        units = map(convert_to_unit, args[TEMPLATE.VIRTUAL_ENVIRONMENTS])
+        units = list(map(convert_to_unit, args[TEMPLATE.VIRTUAL_ENVIRONMENTS]))
         tc = TemplateContent(name, description)
         tc.units = units
         return tc
@@ -87,5 +87,5 @@ class TemplateContent:
                 raise NotImplementedError()
             return unit
 
-        dic[TEMPLATE.VIRTUAL_ENVIRONMENTS] = map(convert_to_dict, self.units)
+        dic[TEMPLATE.VIRTUAL_ENVIRONMENTS] = list(map(convert_to_dict, self.units))
         return dic

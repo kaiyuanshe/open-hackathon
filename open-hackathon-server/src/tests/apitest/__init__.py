@@ -98,6 +98,7 @@ class TestClient(object):
 
 class ApiTestCase(object):
     client = TestClient()
+    log = logging.getLogger("api_test")
 
     def login(self, user):
         token_issue_date = datetime.utcnow()
@@ -113,9 +114,11 @@ class ApiTestCase(object):
 
     @classmethod
     def setup_class(cls):
+        cls.log.info("init database")
         drop_db()
         setup_db()
 
     @classmethod
     def teardown_class(cls):
+        cls.log.info("clean database")
         drop_db()

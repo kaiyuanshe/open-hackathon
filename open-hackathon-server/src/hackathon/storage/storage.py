@@ -14,10 +14,8 @@ from hackathon import Component
 __all__ = ["Storage"]
 
 
-class Storage(Component):
+class Storage(Component, metaclass=abc.ABCMeta):
     """Base for template storage"""
-
-    __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
     def save(self, context):

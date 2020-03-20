@@ -15,7 +15,7 @@ from hackathon import RequiredFeature, Component
 from hackathon.decorators import hackathon_name_required, token_required, admin_privilege_required
 from hackathon.health import report_health
 from hackathon.hackathon_response import bad_request, not_found
-from hackathon_resource import HackathonResource
+from .hackathon_resource import HackathonResource
 
 hackathon_manager = RequiredFeature("hackathon_manager")
 user_manager = RequiredFeature("user_manager")
@@ -42,7 +42,7 @@ class HealthResource(HackathonResource):
 class CurrentTimeResource(HackathonResource):
     def get(self):
         return {
-            "currenttime": long(time.time() * 1000)
+            "currenttime": int(time.time() * 1000)
         }
 
 
@@ -467,7 +467,7 @@ class AdminHackathonConfigResource(HackathonResource):
 
     @admin_privilege_required
     def delete(self):
-        return hackathon_manager.delete_basic_property(g.hackathon, self.context().to_dict().values())
+        return hackathon_manager.delete_basic_property(g.hackathon, list(self.context().to_dict().values()))
 
 
 class AdminHackathonOrganizerResource(HackathonResource):

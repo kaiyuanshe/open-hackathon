@@ -7,8 +7,8 @@ import sys
 
 sys.path.append("..")
 
-from template_constants import DOCKER_UNIT
-from template_unit import TemplateUnit
+from hackathon.template.template_constants import DOCKER_UNIT
+from hackathon.template.template_unit import TemplateUnit
 from hackathon.constants import VE_PROVIDER
 
 __all__ = ["DockerTemplateUnit"]
@@ -22,7 +22,7 @@ class DockerTemplateUnit(TemplateUnit):
     def __init__(self, dic):
         super(DockerTemplateUnit, self).__init__(VE_PROVIDER.DOCKER)
         self.dic = self.load_default_config()
-        for key, value in dic.iteritems():
+        for key, value in dic.items():
             self.dic[key] = value
 
     def load_default_config(self):
@@ -173,7 +173,7 @@ class DockerTemplateUnit(TemplateUnit):
             if len(arr) == 2:
                 env_vars[arr[0]] = arr[1]
 
-        map(lambda env: convert(env), self.dic[DOCKER_UNIT.ENV] or [])
+        list(map(lambda env: convert(env), self.dic[DOCKER_UNIT.ENV] or []))
         return env_vars
 
     def get_instance_ports(self):
@@ -187,5 +187,5 @@ class DockerTemplateUnit(TemplateUnit):
                 "endpoint_type": "tcp-endpoint"
             })
 
-        map(lambda p: convert(p), self.dic[DOCKER_UNIT.PORTS])
+        list(map(lambda p: convert(p), self.dic[DOCKER_UNIT.PORTS]))
         return instance_ports

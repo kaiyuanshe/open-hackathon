@@ -47,7 +47,7 @@ def __report_detail(health, items):
     :rtype dict
     :return health status including overall status and details of sub items
     """
-    for key, value in items.iteritems():
+    for key, value in items.items():
         sub_report = value.report_health()
         health[key] = sub_report
         if sub_report[STATUS] != HEALTH_STATUS.OK and health[STATUS] != HEALTH_STATUS.ERROR:
@@ -67,7 +67,7 @@ def report_health(q):
     items = basic_health_items
     if q == "all":
         items = all_health_items
-    elif q in all_health_items.keys():
+    elif q in list(all_health_items.keys()):
         items = {
             q: all_health_items[q]
         }

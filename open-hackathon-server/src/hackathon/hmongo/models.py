@@ -10,8 +10,9 @@ from mongoengine import QuerySet, DateTimeField, DynamicDocument, EmbeddedDocume
 
 from hackathon.util import get_now, make_serializable
 from hackathon.constants import TEMPLATE_STATUS, HACK_USER_TYPE
-from pagination import Pagination
+from hackathon.hmongo.pagination import Pagination
 
+# from werkzeug.security import generate_password_hash, check_password_hash
 
 def to_dic(obj):
     ret = make_serializable(obj.to_mongo().to_dict())
@@ -115,7 +116,7 @@ class User(HDocumentBase):
     @staticmethod
     def get_encode_password(pwd):
         m = hashlib.md5()
-        m.update(pwd)
+        m.update(pwd.encode())
         return m.hexdigest()
 
     def set_password(self, pwd):

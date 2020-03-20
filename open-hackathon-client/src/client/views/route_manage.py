@@ -8,7 +8,7 @@ import sys
 sys.path.append("..")
 
 from client import app
-from . import render
+from client.views import render
 from flask_login import login_required
 from client.functions import is_local
 

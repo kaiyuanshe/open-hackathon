@@ -442,7 +442,7 @@ class ExprManager(Component):
 
         :return:
         """
-        providers = map(lambda x: x.provider, expr.virtual_environments)
+        providers = [x.provider for x in expr.virtual_environments]
         if VE_PROVIDER.DOCKER in providers:
             self.stop_expr(expr.id)
             self.log.debug("it's stopping " + str(expr.id) + " inactive experiment now")

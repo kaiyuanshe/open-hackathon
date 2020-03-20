@@ -202,10 +202,12 @@ class UserManager(Component):
     def get_talents(self):
         # todo real talents list
         users = User.objects(name__ne="admin").order_by("-login_times")[:10]
-
+        # fixme why delete this log will panic
+        self.log.debug("get talents {}".format(users))
         return [self.user_display_info(u) for u in users]
 
-    def update_user_avatar_url(self, user, url):
+    @staticmethod
+    def update_user_avatar_url(user, url):
         if not user.profile:
             user.profile = UserProfile()
         user.profile.avatar_url = url
@@ -344,7 +346,7 @@ class UserManager(Component):
                 last_login_time=self.util.get_now(),
                 login_times=user.login_times + 1,
                 online=True)
-            map(lambda x: self.__create_or_update_email(user, x), email_list)
+            list(map(lambda x: self.__create_or_update_email(user, x), email_list))
         else:
             user = User(openid=openid,
                         name=context.name,
@@ -361,7 +363,7 @@ class UserManager(Component):
                 self.log.error(e)
                 return internal_server_error("create user fail.")
 
-            map(lambda x: self.__create_or_update_email(user, x), email_list)
+            list(map(lambda x: self.__create_or_update_email(user, x), email_list))
 
         # generate API token
         token = self.__generate_api_token(user)

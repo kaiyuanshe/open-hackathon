@@ -10,7 +10,7 @@ sys.path.append("..")
 
 class User():
     def __init__(self, dic):
-        for key, value in dic.iteritems():
+        for key, value in dic.items():
             setattr(self, key, value)
 
     def get_avatar_url(self):
@@ -36,7 +36,7 @@ class User():
         return False
 
     def get_id(self):
-        return unicode(self.get_user_id())
+        return str(self.get_user_id())
 
     def is_super(self):
         return self.is_super

@@ -12,7 +12,7 @@ import requests
 from flask_login import login_required, current_user
 from flask import request, session, abort, redirect
 
-from . import render
+from client.views import render
 from client import app, Context
 from client.functions import get_config
 

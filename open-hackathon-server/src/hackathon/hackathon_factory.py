@@ -48,7 +48,7 @@ class HackathonFactory:
 
         """
         if not self.allow_replace:
-            assert not self.providers.has_key(feature), "Duplicate feature: %r" % feature
+            assert feature not in self.providers, "Duplicate feature: %r" % feature
         if callable(provider) and not suspend_callable:
             def call():
                 return provider(*args, **kwargs)
@@ -61,7 +61,7 @@ class HackathonFactory:
         try:
             provider = self.providers[feature]
         except KeyError:
-            raise KeyError, "Unknown feature named %r" % feature
+            raise KeyError("Unknown feature named %r" % feature)
         return provider()
 
 

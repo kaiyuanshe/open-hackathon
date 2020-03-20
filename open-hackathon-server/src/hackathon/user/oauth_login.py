@@ -6,7 +6,7 @@ This file is covered by the LICENSING file in the root of this project.
 __author__ = 'root'
 
 import sys
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 sys.path.append("..")
 
@@ -174,7 +174,6 @@ class QQLogin(LoginBase):
         if token_resp.find('callback') == 0:
             error = json.loads(token_resp[10:-4])
             raise Exception(error)
-
         query = qs_dict(token_resp)
         return query["access_token"]
 
