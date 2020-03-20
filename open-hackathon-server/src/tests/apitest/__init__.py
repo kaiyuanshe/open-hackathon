@@ -5,6 +5,7 @@ from datetime import timedelta, datetime
 
 from hackathon import app
 from hackathon.hmongo.models import UserToken
+from hackathon.hmongo.database import drop_db, setup_db
 
 DEFAULT_TEST_CLIENT_HEADERS = {
     'User-Agent': "OH/TestClient",
@@ -109,3 +110,12 @@ class ApiTestCase(object):
         user_token.save()
         self.client.update_headers(dict(token=user_token.token))
         return user_token
+
+    @classmethod
+    def setup_class(cls):
+        drop_db()
+        setup_db()
+
+    @classmethod
+    def teardown_class(cls):
+        drop_db()

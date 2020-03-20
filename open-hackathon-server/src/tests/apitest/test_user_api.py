@@ -1,5 +1,8 @@
 from . import ApiTestCase
 
+from hackathon.constants import HACK_NOTICE_EVENT, HACK_NOTICE_CATEGORY
+from hackathon.hmongo.models import HackathonNotice
+
 USER_ONE_USERNAME = "test_one"
 USER_ONE_ENCODE_PASSWORD = "16ec1ebb01fe02ded9b7d5447d3dfc65"
 
@@ -60,18 +63,37 @@ class TestUserInfoApi(ApiTestCase):
         # fixme api response is too arbitrary
         assert payload
 
-    def test_get_user_notice(self, user1):
+    def test_read_user_notice(self, user1):
         self.login(user1)
-        payload = self.client.put("/api/user/notice/read", json_data={})
+
+        # init new unread msg
+        hackathon_notice = HackathonNotice(
+            content='',
+            link='',
+            event=HACK_NOTICE_EVENT.HACK_CREATE,
+            category=HACK_NOTICE_CATEGORY.HACKATHON,
+            receiver=user1,
+            creator=user1,
+        )
+        hackathon_notice.save()
+        assert not hackathon_notice.is_read
+
+        # test read msg
+        payload = self.client.put("/api/user/notice/read", json_data=dict(id=str(hackathon_notice.id)))
+        assert payload['code'] == 200
+        hackathon_notice = HackathonNotice.objects(id=str(hackathon_notice.id)).first()
+        assert hackathon_notice.is_read
 
 
 class TestUserFile(ApiTestCase):
 
     def test_user_upload_files(self):
+        # TODO test for upload files
         pass
 
 
 class TestTalents(ApiTestCase):
 
-    def test_get_talents(self):
-        pass
+    def test_get_talents(self, user1):
+        payload = self.client.get("/api/talent/list")
+        assert len(payload) == 1 and payload[0]['id'] == str(user1.id)

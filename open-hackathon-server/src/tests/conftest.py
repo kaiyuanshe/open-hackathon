@@ -2,7 +2,6 @@ import pytest
 
 from hackathon.hmongo.models import User
 from hackathon.hmongo.database import add_super_user
-from hackathon.hmongo.database import drop_db, setup_db
 
 
 @pytest.fixture(scope="class")
@@ -37,10 +36,6 @@ def admin1():
     return add_super_user("admin_one", "admin_one", "test_password")
 
 
-def setup_class():
-    drop_db()
-    setup_db()
-
-
-def teardown_class():
-    drop_db()
+@pytest.fixture(scope="class")
+def default_template():
+    return None
