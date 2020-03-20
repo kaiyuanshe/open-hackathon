@@ -7,7 +7,6 @@ import sys
 
 sys.path.append("..")
 
-from compiler.ast import flatten
 from threading import Lock
 import json
 import requests
@@ -17,6 +16,15 @@ from hackathon import RequiredFeature, Component, Context
 from hackathon.hmongo.models import DockerContainer, DockerHostServer
 from hackathon.constants import HEALTH, HEALTH_STATUS, HACKATHON_CONFIG, CLOUD_PROVIDER
 
+import collections
+def flatten(x):
+    result = []
+    for el in x:
+        if isinstance(x, collections.Iterable) and not isinstance(el, str):
+            result.extend(flatten(el))
+        else:
+            result.append(el)
+    return result
 
 class HostedDockerFormation(Component):
     hackathon_template_manager = RequiredFeature("hackathon_template_manager")
@@ -118,12 +126,12 @@ class HostedDockerFormation(Component):
     def get_pulled_images(self, docker_host):
         get_images_url = self.__get_vm_url(docker_host) + "/images/json?all=0"
         current_images_info = json.loads(requests.get(get_images_url).content)  # [{},{},{}]
-        current_images_tags = map(lambda x: x['RepoTags'], current_images_info)  # [[],[],[]]
+        current_images_tags = [x['RepoTags'] for x in current_images_info]  # [[],[],[]]
         return flatten(current_images_tags)  # [ imange:tag, image:tag ]
 
     def ensure_images(self):
         hackathons = self.hackathon_manager.get_online_hackathons()
-        map(lambda h: self.__ensure_images_for_hackathon(h), hackathons)
+        list(map(lambda h: self.__ensure_images_for_hackathon(h), hackathons))
 
     def is_container_running(self, docker_container):
         """check container's running status on docker host

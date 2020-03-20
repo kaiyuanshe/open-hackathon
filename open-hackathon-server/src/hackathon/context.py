@@ -38,7 +38,7 @@ class Context(object):
     """
 
     def __init__(self, **kwargs):
-        for key, value in kwargs.items():
+        for key, value in list(kwargs.items()):
             self.__dict__[key] = value
 
     def __getattr__(self, name):
@@ -87,7 +87,7 @@ class Context(object):
             return [Context.from_object(a) for a in arg]
         elif isinstance(arg, dict):
             ctx = Context()
-            for k, v in arg.iteritems():
+            for k, v in arg.items():
                 if isinstance(v, dict):
                     setattr(ctx, k, Context.from_object(v))
                 elif isinstance(v, list):

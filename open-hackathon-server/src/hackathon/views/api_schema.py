@@ -26,6 +26,7 @@ for each Resource to prevent this file from being too large.
 from os import listdir
 from os.path import isfile, join, dirname, realpath
 import json
+from hackathon.log import log
 
 __all__ = [
     "schemas"
@@ -58,4 +59,4 @@ for js_file in json_files:
         with open(js_file) as fs:
             schemas.update(json.load(fs))
     except Exception as e:
-        print e
+        log.debug("[server api_schema] %s" % str(e)) 

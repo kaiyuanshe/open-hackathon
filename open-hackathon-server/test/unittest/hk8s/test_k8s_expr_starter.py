@@ -19,7 +19,7 @@ except ImportError:
 from hackathon import Component, RequiredFeature, Context
 from hackathon.expr.k8s_expr_starter import K8SExprStarter
 from hackathon import Context
-import test_k8s_conf
+from . import test_k8s_conf
 
 class K8SExprStarterTest(unittest.TestCase):
     def setUp(self):

@@ -3,7 +3,7 @@
 This file is covered by the LICENSING file in the root of this project.
 """
 
-from template_library import TemplateLibrary
-from template_constants import *
-from template_content import TemplateContent
-from docker_template_unit import DockerTemplateUnit
+from hackathon.template.template_library import TemplateLibrary
+from hackathon.template.template_constants import *
+from hackathon.template.template_content import TemplateContent
+from hackathon.template.docker_template_unit import DockerTemplateUnit

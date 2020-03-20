@@ -19,8 +19,8 @@ from hackathon.constants import VE_PROVIDER
 from hackathon.hmongo.models import Template, Experiment
 from hackathon.hackathon_response import ok, internal_server_error, forbidden
 from hackathon.constants import FILE_TYPE, TEMPLATE_STATUS
-from template_constants import TEMPLATE
-from template_content import TemplateContent
+from hackathon.template.template_constants import TEMPLATE
+from hackathon.template.template_content import TemplateContent
 
 __all__ = ["TemplateLibrary"]
 

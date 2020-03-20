@@ -23,8 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-from template_constants import K8S_UNIT
-from template_unit import TemplateUnit
+from hackathon.template.template_constants import K8S_UNIT
+from hackathon.template.template_unit import TemplateUnit
 from hackathon.constants import VE_PROVIDER
 
 __all__ = ["K8STemplateUnit"]
@@ -38,7 +38,7 @@ class K8STemplateUnit(TemplateUnit):
     def __init__(self, dic):
         super(K8STemplateUnit, self).__init__(VE_PROVIDER.K8S)
         self.dic = self.load_default_config()
-        for key, value in dic.iteritems():
+        for key, value in dic.items():
             self.dic[key] = value
 
     @staticmethod

@@ -75,7 +75,7 @@ class AdminManager(Component):
             dic["user_info"] = self.user_manager.user_display_info(rel.user)
             return dic
 
-        return map(lambda rel: get_admin_details(rel), user_hackathon_rels)
+        return [get_admin_details(rel) for rel in user_hackathon_rels]
 
     def add_admin(self, args):
         """Add a new administrator on a hackathon

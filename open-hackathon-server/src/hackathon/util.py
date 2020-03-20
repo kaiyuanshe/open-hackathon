@@ -8,8 +8,8 @@ import json
 import os
 import hashlib
 import base64
-import urllib
-import urllib2
+import urllib.request, urllib.parse, urllib.error
+import urllib.request, urllib.error, urllib.parse
 import abc
 import ssl
 import requests
@@ -23,7 +23,7 @@ from mailthon.postman import Postman
 from mailthon.middleware import TLS, Auth
 from bson import ObjectId
 
-from hackathon_factory import RequiredFeature
+from hackathon.hackathon_factory import RequiredFeature
 from hackathon.log import log
 from hackathon.constants import EMAIL_SMTP_STATUSCODE, VOICEVERIFY_RONGLIAN_STATUSCODE, SMS_CHINATELECOM_TEMPLATE, \
     SMS_CHINATELECOM_STATUSCODE, CHINATELECOM_ACCESS_TOKEN_STATUSCODE
@@ -31,7 +31,7 @@ from hackathon.constants import EMAIL_SMTP_STATUSCODE, VOICEVERIFY_RONGLIAN_STAT
 try:
     from config import Config
 except ImportError:
-    from config_sample import Config
+    from .config_sample import Config
 
 __all__ = [
     "get_config",
@@ -59,13 +59,13 @@ def make_serializable(item):
     if isinstance(item, list):
         return [make_serializable(sub) for sub in item]
     elif isinstance(item, dict):
-        for k, v in item.items():
+        for k, v in list(item.items()):
             item[k] = make_serializable(v)
         return item
     elif isinstance(item, datetime):
         item = item.replace(tzinfo=None)
         epoch = datetime.utcfromtimestamp(0)
-        return long((item - epoch).total_seconds() * 1000)
+        return int((item - epoch).total_seconds() * 1000)
     elif isinstance(item, ObjectId) or isinstance(item, UUID):
         return str(item)
     else:
@@ -211,10 +211,10 @@ class Utility(object):
     def convert(self, value):
         """Convert unicode string to str"""
         if isinstance(value, dict):
-            return {self.convert(key): self.convert(value) for key, value in value.iteritems()}
+            return {self.convert(key): self.convert(value) for key, value in value.items()}
         elif isinstance(value, list):
             return [self.convert(element) for element in value]
-        elif isinstance(value, unicode):
+        elif isinstance(value, str):
             return value.encode('utf-8')
         else:
             return value
@@ -261,7 +261,7 @@ class Utility(object):
         """
         items = pagination.items
         if func:
-            items = map(lambda item: func(item), pagination.items)
+            items = [func(item) for item in pagination.items]
 
         return {
             "items": items,
@@ -387,9 +387,8 @@ class Email(object):
             return False
 
 
-class VoiceVerify(object):
+class VoiceVerify(object, metaclass=abc.ABCMeta):
     """Base and abstract class for voice verify"""
-    __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
     def send_voice_verify(self, receiver, content):
@@ -482,7 +481,7 @@ class RonglianVoiceVerify(VoiceVerify):
                     "lang": self.language, "appId": self.app_id}
             req.add_data(str(body))
 
-            res = urllib2.urlopen(req)
+            res = urllib.request.urlopen(req)
             data = res.read()
             res.close()
             response = json.loads(data)
@@ -511,7 +510,7 @@ class RonglianVoiceVerify(VoiceVerify):
         auth = base64.encodestring(self.account_sid + ":" + nowdate).strip()
 
         # generate request
-        req = urllib2.Request(url)
+        req = urllib.request.Request(url)
         req.add_header("Accept", "application/json")
         req.add_header("Content-Type", "application/json;charset=utf-8")
         req.add_header("Authorization", auth)
@@ -519,9 +518,8 @@ class RonglianVoiceVerify(VoiceVerify):
         return req
 
 
-class Sms(object):
+class Sms(object, metaclass=abc.ABCMeta):
     """Base and abstract class for SMS"""
-    __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
     def send_sms(self, receiver, template_id, content):
@@ -608,10 +606,10 @@ class ChinaTelecomSms(Sms):
                     "app_id": self.app_id,
                     "access_token": self.access_token,
                     "timestamp": timestamp}
-            req = urllib2.Request(self.url)
-            post_data = urllib.urlencode(data)
+            req = urllib.request.Request(self.url)
+            post_data = urllib.parse.urlencode(data)
             req.add_data(post_data)
-            response = urllib2.urlopen(req)
+            response = urllib.request.urlopen(req)
             response_json = json.loads(response.read())
             if response_json["res_code"] == SMS_CHINATELECOM_STATUSCODE.SUCCESS:
                 return True
@@ -632,10 +630,10 @@ class ChinaTelecomSms(Sms):
                 "app_secret": self.app_secret}
 
         try:
-            req = urllib2.Request(self.url_access_token)
-            post_data = urllib.urlencode(data)
+            req = urllib.request.Request(self.url_access_token)
+            post_data = urllib.parse.urlencode(data)
             req.add_data(post_data)
-            response = urllib2.urlopen(req)
+            response = urllib.request.urlopen(req)
             response_json = json.loads(response.read())
             if response_json["res_code"] == CHINATELECOM_ACCESS_TOKEN_STATUSCODE.SUCCESS:
                 # access_token's expiration time is 30 days.

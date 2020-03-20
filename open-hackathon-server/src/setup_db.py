@@ -5,6 +5,7 @@ This file is covered by the LICENSING file in the root of this project.
 
 # try:
 from hackathon.hmongo.models import User
+from hackathon.md5 import encode
 # except ImportError:
 #     pass
 
@@ -24,7 +25,7 @@ def setup_db():
     admin = User(
         name="admin",
         nickname="admin",
-        password="e8104164dfc4a479e42a9f6c0aefd2be",
+        password=encode("admin"),
         avatar_url="/static/pic/monkey-32-32px.png",
         is_super=True)
 

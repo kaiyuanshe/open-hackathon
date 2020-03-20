@@ -4,11 +4,6 @@ This file is covered by the LICENSING file in the root of this project.
 """
 
 import hashlib
-import sys
-
-sys.path.append("..")
-
-from client import app
 
 
 def encode(plaintext):

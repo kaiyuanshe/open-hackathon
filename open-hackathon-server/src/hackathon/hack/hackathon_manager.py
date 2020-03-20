@@ -171,7 +171,7 @@ class HackathonManager(Component):
                                        event_start_time__lt=self.util.get_now(),
                                        event_end_time__gt=self.util.get_now()
                                        ).all()
-        return filter(lambda h: self.is_recycle_enabled(h), hackathons)
+        return [h for h in hackathons if self.is_recycle_enabled(h)]
 
     def get_basic_property(self, hackathon, key, default=None):
         """Get basic property of hackathon from HackathonConfig"""
@@ -196,7 +196,7 @@ class HackathonManager(Component):
         if isinstance(keys, str):
             keys = keys.split()
 
-        map(lambda key: hackathon.config.pop(key, None), keys)
+        list(map(lambda key: hackathon.config.pop(key, None), keys))
 
         hackathon.save()
         self.cache.invalidate(self.__get_config_cache_key(hackathon))
@@ -264,7 +264,7 @@ class HackathonManager(Component):
 
         try:
             update_items = self.__parse_update_items(args, hackathon)
-            self.log.debug("update hackathon items :" + str(args.keys()))
+            self.log.debug("update hackathon items :" + str(list(args.keys())))
 
             if 'config' in update_items:
                 self.set_basic_property(hackathon, update_items.get('config', {}))
@@ -552,14 +552,14 @@ class HackathonManager(Component):
         # notice creation logic for different notice_events
         if hackathon:
             if notice_event == HACK_NOTICE_EVENT.HACK_CREATE:
-                hackathon_notice.content = u"%s即将火爆来袭，敬请期待！" % (hackathon.display_name)
+                hackathon_notice.content = "%s即将火爆来袭，敬请期待！" % (hackathon.display_name)
             # elif notice_event == HACK_NOTICE_EVENT.HACK_EDIT and hackathon:
             #     hackathon_notice.content = u"%s更新啦，快去看看！" % (hackathon.display_name)
             elif notice_event == HACK_NOTICE_EVENT.HACK_ONLINE:
-                hackathon_notice.content = u"%s开始啦，点击报名！" % (hackathon.display_name)
+                hackathon_notice.content = "%s开始啦，点击报名！" % (hackathon.display_name)
                 hackathon_notice.link = "/site/%s" % hackathon.name
             elif notice_event == HACK_NOTICE_EVENT.HACK_OFFLINE:
-                hackathon_notice.content = u"%s圆满结束，点击查看详情！" % (hackathon.display_name)
+                hackathon_notice.content = "%s圆满结束，点击查看详情！" % (hackathon.display_name)
                 hackathon_notice.link = "/site/%s" % hackathon.name
             elif notice_event == HACK_NOTICE_EVENT.HACK_PLAN and body.get('receiver', None):
                 user = body.get('receiver')
@@ -568,16 +568,16 @@ class HackathonManager(Component):
                 if old_hackathon_notice:  # duplicate
                     return old_hackathon_notice.dic()
 
-                hackathon_notice.content = u"您有未完成的任务，请提交开发说明书"
+                hackathon_notice.content = "您有未完成的任务，请提交开发说明书"
                 hackathon_notice.receiver = user
-                hackathon_notice.link = u"/site/%s/team" % (hackathon.name)
+                hackathon_notice.link = "/site/%s/team" % (hackathon.name)
             else:
                 pass
 
         if notice_event == HACK_NOTICE_EVENT.EXPR_JOIN and body.get('user_id'):
             user_id = body.get('user_id')
             user = self.user_manager.get_user_by_id(user_id)
-            hackathon_notice.content = u"用户 %s 开始编程" % (user.nickname)
+            hackathon_notice.content = "用户 %s 开始编程" % (user.nickname)
         else:
             pass
 

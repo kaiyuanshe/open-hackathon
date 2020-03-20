@@ -107,7 +107,7 @@ class Pagination(object):
             {% endmacro %}
         """
         last = 0
-        for num in range(1, self.pages + 1) if sys.version_info >= (3, 0) else xrange(1, self.pages + 1):
+        for num in list(range(1, self.pages + 1)) if sys.version_info >= (3, 0) else range(1, self.pages + 1):
             if (num <= left_edge or
                     (num >= self.page - left_current and
                      num <= self.page + right_current) or

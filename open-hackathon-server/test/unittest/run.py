@@ -21,30 +21,30 @@ __usage__ = '''
 
 def show_detail(items):
     for i in items:
-        print repr(i)
+        print(repr(i))
 
 
 def show_test_result(result):
-    print
-    print "---- START OF TEST RESULTS"
-    print result
-    print
-    print "Result::errors"
-    print show_detail(result.errors)
-    print
-    print "Result::failures"
-    print show_detail(result.failures)
-    print
-    print "Result::skipped"
-    print show_detail(result.skipped)
-    print
-    print "Result::successful"
-    print result.wasSuccessful()
-    print
-    print "Result::test-run"
-    print result.testsRun
-    print "---- END OF TEST RESULTS"
-    print
+    print()
+    print("---- START OF TEST RESULTS")
+    print(result)
+    print()
+    print("Result::errors")
+    print(show_detail(result.errors))
+    print()
+    print("Result::failures")
+    print(show_detail(result.failures))
+    print()
+    print("Result::skipped")
+    print(show_detail(result.skipped))
+    print()
+    print("Result::successful")
+    print(result.wasSuccessful())
+    print()
+    print("Result::test-run")
+    print(result.testsRun)
+    print("---- END OF TEST RESULTS")
+    print()
 
 
 if __name__ == '__main__':

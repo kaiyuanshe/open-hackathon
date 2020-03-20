@@ -13,14 +13,14 @@ from flask_restful import Api
 from flask_cors import CORS
 from datetime import timedelta
 
-from util import safe_get_config, get_class, Utility, Email, DisabledVoiceVerify, RonglianVoiceVerify, DisabledSms, \
+from hackathon.util import safe_get_config, get_class, Utility, Email, DisabledVoiceVerify, RonglianVoiceVerify, DisabledSms, \
     ChinaTelecomSms
-from hackathon_factory import factory, RequiredFeature
-from hackathon_scheduler import HackathonScheduler
-from hackathon_response import *
-from hackathon_exception import *
-from log import log
-from context import Context
+from hackathon.hackathon_factory import factory, RequiredFeature
+from hackathon.hackathon_scheduler import HackathonScheduler
+from hackathon.hackathon_response import *
+from hackathon.hackathon_exception import *
+from hackathon.log import log
+from hackathon.context import Context
 
 __all__ = [
     "app",
@@ -174,12 +174,12 @@ def init_components():
 
 
 def init_db():
-    from hmongo import db
+    from .hmongo import db
     factory.provide("db", db, suspend_callable=True)
 
 
 def init_expr_components():
-    from expr import ExprManager, K8SExprStarter
+    from .expr import ExprManager, K8SExprStarter
     factory.provide("expr_manager", ExprManager)
     factory.provide("k8s_service", K8SExprStarter)
 
@@ -281,7 +281,7 @@ def init_app():
     """
     init_components()
 
-    from views import init_routes
+    from .views import init_routes
     init_routes()
     init_schedule_jobs()
 

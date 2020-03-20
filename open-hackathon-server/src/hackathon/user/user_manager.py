@@ -346,7 +346,7 @@ class UserManager(Component):
                 last_login_time=self.util.get_now(),
                 login_times=user.login_times + 1,
                 online=True)
-            map(lambda x: self.__create_or_update_email(user, x), email_list)
+            list(map(lambda x: self.__create_or_update_email(user, x), email_list))
         else:
             user = User(openid=openid,
                         name=context.name,
@@ -363,7 +363,7 @@ class UserManager(Component):
                 self.log.error(e)
                 return internal_server_error("create user fail.")
 
-            map(lambda x: self.__create_or_update_email(user, x), email_list)
+            list(map(lambda x: self.__create_or_update_email(user, x), email_list))
 
         # generate API token
         token = self.__generate_api_token(user)

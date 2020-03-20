@@ -16,7 +16,12 @@ from client.functions import get_config
 from client.log import log
 from client.md5 import encode
 from client.constants import LOGIN_PROVIDER
+<<<<<<< HEAD
+from client.user.user import User
+from client.user.oauth_login import login_providers
+=======
 from user import User
+>>>>>>> 358084b57e01efe6919d26a83fe86a0995c9ba78
 
 
 class LoginManagerHelper():
@@ -72,10 +77,8 @@ class LoginManagerHelper():
         try:
             req = requests.post(self.login_url, json=data, headers=self.headers)
             resp = req.json()
-            if "error" in resp:
-                log.debug("login failed: %r" % resp)
-                return None
-            else:
+            if resp:
+                # if login isn't successful, it will return None
                 login_user = User(resp["user"])
                 token = resp["token"]
                 log.debug("Login successfully %s" % login_user.get_user_id())
@@ -83,6 +86,9 @@ class LoginManagerHelper():
                     "user": login_user,
                     "token": token["token"]
                 }
+            else: 
+                log.debug("login failed: %r" % resp)
+                return None
         except Exception as e:
             log.error(e)
             return None

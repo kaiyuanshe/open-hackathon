@@ -6,7 +6,8 @@ This file is covered by the LICENSING file in the root of this project.
 import sys
 
 sys.path.append("..")
-from compiler.ast import flatten
+# from compiler.ast import flatten
+
 
 from flask import g
 
@@ -15,6 +16,17 @@ from hackathon.hmongo.models import Template
 from hackathon import Component, RequiredFeature, Context
 from hackathon.constants import VE_PROVIDER, TEMPLATE_STATUS, CLOUD_PROVIDER
 from hackathon.hackathon_response import not_found, internal_server_error
+
+import collections
+def flatten(x):
+    result = []
+    for el in x:
+        if isinstance(x, collections.Iterable) and not isinstance(el, str):
+            result.extend(flatten(el))
+        else:
+            result.append(el)
+    return result
+ 
 
 
 __all__ = ["HackathonTemplateManager"]
@@ -83,7 +95,7 @@ class HackathonTemplateManager(Component):
     def pull_images_for_hackathon(self, context):
         hackathon_id = context.hackathon_id
         templates = self.__get_templates_for_pull(hackathon_id)
-        images = map(lambda x: self.__get_images_from_template(x), templates)
+        images = [self.__get_images_from_template(x) for x in templates]
         images_to_pull = flatten(images)
 
         self.log.debug('expected images: %s on hackathon: %s' % (images_to_pull, hackathon_id))
@@ -133,15 +145,14 @@ class HackathonTemplateManager(Component):
     # template may have multiple images
     def __get_images_from_template(self, template):
         template_content = self.template_library.load_template(template)
-        docker_units = filter(lambda u: u.provider == VE_PROVIDER.DOCKER, template_content.units)
+        docker_units = [u for u in template_content.units if u.provider == VE_PROVIDER.DOCKER]
         docker_images = [du.get_image_with_tag() for du in docker_units]
         return docker_images
 
     def __get_templates_for_pull(self, hackathon_id):
         htrs = self.db.find_all_objects_by(HackathonTemplateRel, hackathon_id=hackathon_id)
         templates = [h.template for h in htrs]
-        templates = filter(lambda t: t.provider == VE_PROVIDER.DOCKER and t.status == TEMPLATE_STATUS.CHECK_PASS,
-                           templates)
+        templates = [t for t in templates if t.provider == VE_PROVIDER.DOCKER and t.status == TEMPLATE_STATUS.CHECK_PASS]
         return templates
 
     def __get_undownloaded_images_on_docker_host(self, docker_host, expected_images):
