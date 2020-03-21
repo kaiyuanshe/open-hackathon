@@ -168,10 +168,10 @@ def get_now():
 
 def convert(input):
     if isinstance(input, dict):
-        return {convert(key): convert(value) for key, value in input.iteritems()}
+        return {convert(key): convert(value) for key, value in input.items()}
     elif isinstance(input, list):
         return [convert(element) for element in input]
-    elif isinstance(input, unicode):
+    elif isinstance(input, str):
         return input.encode('utf-8')
     else:
         return input
@@ -179,8 +179,8 @@ def convert(input):
 
 def get_remote(url, headers={}):
     ssl.match_hostname = lambda cert, hostname: True
-    opener = urllib2.build_opener(urllib2.HTTPHandler)
-    request = urllib2.Request(url, None, headers)
+    opener = urllib.request.build_opener(urllib.request.HTTPHandler)
+    request = urllib.request.Request(url, None, headers)
     resp = opener.open(request)
     return resp.read()
 
