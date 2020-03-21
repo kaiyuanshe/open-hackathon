@@ -12,14 +12,13 @@ sys.path.append("..")
 
 import json
 import requests
-from requests.auth import HTTPBasicAuth
 
-from client.functions import get_remote, get_config, post_to_remote, convert, qs_dict
-from client.log import log
-from client.constants import LOGIN_PROVIDER
+from hackathon import Component, Context, RequiredFeature
+from hackathon.util import safe_get_config, get_remote, get_config, post_to_remote, convert, qs_dict
+from hackathon.constants import LOGIN_PROVIDER_NAME
 
 
-class LoginBase():
+class LoginBase(Component):
     def login(self, args):
         pass
 
@@ -35,18 +34,18 @@ class WechatLogin(LoginBase):
     .. notes::
     """
 
-    def login(self, args):
+    def login(self, context):
         """ Wechat Login
 
-        :type args: dict
-        :param args:
+        :type context: Context
+        :param context:
 
         :rtype: dict
         :return: token and instance of user
         """
-        log.info("login from Wechat")
+        self.log.info("login from Wechat")
 
-        code = args.get('code')
+        code = context.get('code')
         if not code:
             return None
         access_token, openid = self.get_access_token(code)
@@ -54,7 +53,7 @@ class WechatLogin(LoginBase):
 
         return {
             "openid": openid,
-            "provider": LOGIN_PROVIDER.WECHAT,
+            "provider": LOGIN_PROVIDER_NAME.WECHAT,
             "name": user_detail["nickname"],
             "nickname": user_detail["nickname"],
             "access_token": access_token,
@@ -120,22 +119,23 @@ class QQLogin(LoginBase):
     .. notes::
     """
 
-    def login(self, args):
+    def login(self, context):
         """ QQ Login
 
-        :type args: dict
-        :param args:
+        :type context: Context
+        :param context:
 
         :rtype: dict
         :return: token and instance of user
         """
 
-        log.info("login from QQ")
-        code = args.get('code')
-        if not code:
+        self.log.info("login from QQ")
+        code = context.get('code')
+        redirect_uri = context.get('redirect_uri')
+        if not code or not redirect_uri:
             return None
 
-        access_token = self.get_token(code)
+        access_token = self.get_token(code, redirect_uri)
         info = self.get_info(access_token)
         user_info = self.get_user_info(access_token, info["openid"], info["client_id"])
 
@@ -147,7 +147,7 @@ class QQLogin(LoginBase):
 
         required_info = {
             "openid": info["openid"],
-            "provider": LOGIN_PROVIDER.QQ,
+            "provider": LOGIN_PROVIDER_NAME.QQ,
             "name": user_info["nickname"],
             "nickname": user_info["nickname"],
             "access_token": access_token,
@@ -157,18 +157,20 @@ class QQLogin(LoginBase):
 
         return required_info
 
-    def get_token(self, code):
+    def get_token(self, code, redirect_uri):
         """ Get qq access token
 
         :type code: str
-        :param code:
+        :param code: authorization code
+
+        :type redirect_uri: str
+        :param redirect_uri: redirect uri for oauth
 
         :rtype: str
         :return: access token
         """
 
-        state = "openhackathon"
-        token_resp = get_remote(get_config("login.qq.access_token_url") + code + "&state=" + state)
+        token_resp = get_remote(get_config("login.qq.access_token_url") % (redirect_uri, code))
         if token_resp.find('callback') == 0:
             error = json.loads(token_resp[10:-4])
             raise Exception(error)
@@ -186,7 +188,7 @@ class QQLogin(LoginBase):
         """
 
         openid_resp = get_remote(get_config("login.qq.openid_url") + token)
-        log.debug("get access_token from qq:" + token)
+        self.log.debug("get access_token from qq:" + token)
         info = json.loads(openid_resp[10:-4])
 
         if info.get("error") is not None:
@@ -223,32 +225,32 @@ class QQLogin(LoginBase):
 class GithubLogin(LoginBase):
     """Sign in with github
 
-    :Example:
-        from client.user.login import GithubLogin
-
-        GithubLogin()
+    docs: https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#web-application-flow
 
     .. notes::
     """
 
-    def login(self, args):
+    def login(self, context):
         """ github Login
 
-        :type args: dict
-        :param args:
+        :type context: Context
+        :param context:
 
         :rtype: dict
         :return: token and instance of user
         """
 
-        log.info('login from GitHub')
-        code = args.get('code')
+        self.log.info('login from GitHub')
+        code = context.get('code')
         if not code:
             return None
 
         access_token = self.get_token(code)
+        self.log.info('Successfully get access token from github using code %s' % code)
+
         user_info = self.get_user_info(access_token)
         email_list = self.get_emails(access_token)
+        self.log.info("Successfully get user info and emails from github: %s" % user_info["login"])
 
         name = user_info["login"]
         nickname = name
@@ -259,7 +261,7 @@ class GithubLogin(LoginBase):
 
         required_info = {
             "openid": str(user_info["id"]),
-            "provider": LOGIN_PROVIDER.GITHUB,
+            "provider": LOGIN_PROVIDER_NAME.GITHUB,
             "name": name,
             "nickname": nickname,
             "access_token": access_token,
@@ -279,11 +281,23 @@ class GithubLogin(LoginBase):
         :return: access token
         """
 
-        token_resp = get_remote(get_config('login.github.access_token_url') + str(code))
-        query = qs_dict(token_resp)
-        if query.get("error") is not None:
-            raise Exception(query)
-        return query.get("access_token")
+        token_url = get_config('login.github.access_token_url')
+
+        data_to_post = {
+            "client_id": get_config("login.github.client_id"),
+            "client_secret": get_config("login.github.client_secret"),
+            "code": str(code)
+        }
+
+        headers = {
+            "Accept": "application/json"
+        }
+
+        token_resp = post_to_remote(token_url, data_to_post, headers)
+        if token_resp.get("error") is not None:
+            raise Exception(json.dumps(token_resp))
+
+        return token_resp.get("access_token")
 
     def get_emails(self, token):
         """Get user primary email
@@ -294,7 +308,11 @@ class GithubLogin(LoginBase):
         :rtype: dict
         :return: emails
         """
-        email_info_resp = get_remote(get_config('login.github.emails_info_url') + token)
+        user_email_url = get_config('login.github.emails_info_url')
+        headers = {
+            "Authorization": "token %s" % token
+        }
+        email_info_resp = get_remote(user_email_url, headers)
         email_list = json.loads(email_info_resp)
 
         return email_list
@@ -308,7 +326,7 @@ class GithubLogin(LoginBase):
         :rtype: dict
         :return:
             "url":"https://api.github.com/users/juniwang","html_url":"https://github.com/juniwang",
-            "followers_url":"https://api.github.com/users/juniwang/followers",        log.debug("get admin user info from " + provider + " : "  + user_info_resp + '\n' )
+            "followers_url":"https://api.github.com/users/juniwang/followers",        self.log.debug("get admin user info from " + provider + " : "  + user_info_resp + '\n' )
 
             "following_url":"https://api.github.com/users/juniwang/following{/other_user}",
             "starred_url":"https://api.github.com/users/juniwang/starred{/owner}{/repo}",
@@ -326,7 +344,12 @@ class GithubLogin(LoginBase):
             "total_private_repos":0,"owned_private_repos":0,"disk_usage":14179,"collaborators":0,
 
         """
-        user_info_resp = get_remote(str(get_config('login.github.user_info_url')) + str(token))
+        user_info_url = get_config('login.github.user_info_url')
+        headers = {
+            "Authorization": "token %s" % token,
+            "Accept": "application/json"
+        }
+        user_info_resp = get_remote(user_info_url, headers)
 
         user_info = json.loads(user_info_resp)
         if user_info.get("message") is not None:
@@ -346,22 +369,23 @@ class WeiboLogin(LoginBase):
     .. notes::
     """
 
-    def login(self, args):
+    def login(self, context):
         """ weibo Login
 
-        :type args: dict
-        :param args:
+        :type context: Context
+        :param context:
 
         :rtype: dict
         :return: token and instance of user
         """
 
-        log.info("login from Weibo Sina")
-        code = args.get("code")
-        if not code:
+        self.log.info("login from Weibo Sina")
+        code = context.get("code")
+        redirect_uri = context.get("redirect_uri")
+        if not code or not redirect_uri:
             return None
 
-        access_token = self.get_token(code)
+        access_token = self.get_token(code, redirect_uri)
         user_info = self.get_user_info(access_token["access_token"], access_token["uid"])
 
         # Get email need to apply high-level interface
@@ -373,7 +397,7 @@ class WeiboLogin(LoginBase):
 
         required_info = {
             "openid": str(user_info["id"]),
-            "provider": LOGIN_PROVIDER.WEIBO,
+            "provider": LOGIN_PROVIDER_NAME.WEIBO,
             "name": name,
             "nickname": user_info["screen_name"],
             "access_token": access_token["access_token"],
@@ -383,17 +407,20 @@ class WeiboLogin(LoginBase):
 
         return required_info
 
-    def get_token(self, code):
+    def get_token(self, code, redirect_uri):
         """ Get weibo access token
 
         :type code: str
         :param code:
 
+        :type redirect_uri: str
+        :param redirect_uri:
+
         :rtype: dict
         :return: access token and uid
         """
 
-        token_resp = post_to_remote(get_config('login.weibo.access_token_url') + code, {})
+        token_resp = post_to_remote(get_config('login.weibo.access_token_url') % (redirect_uri, code), {})
         if token_resp.get("error") is not None:
             raise Exception(token_resp)
 
@@ -463,18 +490,18 @@ class LiveLogin(LoginBase):
     .. notes::
     """
 
-    def login(self, args):
+    def login(self, context):
         """ live Login
 
-        :type args: dict
-        :param args:
+        :type context: Context
+        :param context:
 
         :rtype: dict
         :return: token and instance of user
         """
 
-        log.info('login from  Live')
-        code = args.get('code')
+        self.log.info('login from Live')
+        code = context.get('code')
         if not code:
             return None
 
@@ -494,7 +521,7 @@ class LiveLogin(LoginBase):
 
         required_info = {
             "openid": user_info["id"],
-            "provider": LOGIN_PROVIDER.LIVE,
+            "provider": LOGIN_PROVIDER_NAME.LIVE,
             "name": name,
             "nickname": name,
             "access_token": access_token,
@@ -559,9 +586,14 @@ class LiveLogin(LoginBase):
 
 
 login_providers = {
-    LOGIN_PROVIDER.GITHUB: GithubLogin(),
-    LOGIN_PROVIDER.WEIBO: WeiboLogin(),
-    LOGIN_PROVIDER.QQ: QQLogin(),
-    LOGIN_PROVIDER.LIVE: LiveLogin(),
-    LOGIN_PROVIDER.WECHAT: WechatLogin()
+    LOGIN_PROVIDER_NAME.GITHUB: GithubLogin(),
+    LOGIN_PROVIDER_NAME.WEIBO: WeiboLogin(),
+    LOGIN_PROVIDER_NAME.QQ: QQLogin(),
+    LOGIN_PROVIDER_NAME.LIVE: LiveLogin(),
+    LOGIN_PROVIDER_NAME.WECHAT: WechatLogin()
 }
+
+
+class OAuthLoginManager(Component):
+    def oauth_login(self, provider, context):
+        return login_providers[provider].login(context)

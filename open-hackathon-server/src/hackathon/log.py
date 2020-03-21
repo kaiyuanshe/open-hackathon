@@ -67,7 +67,7 @@ class Log(object):
     def __init__(self):
         """initialize the log wrapper through 'logging.conf' file which should be in the same dir of this file"""
         logging.config.fileConfig("%s/logging.conf" % dirname(realpath(__file__)))
-        self.logger = logging.getLogger("myLogger")
+        self.logger = logging.getLogger("hackathon_server")
 
 
 log = Log()

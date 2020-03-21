@@ -172,6 +172,11 @@ class UserListResource(HackathonResource):
 
 class UserProfileResource(HackathonResource):
     @token_required
+    def get(self):
+        user = g.user
+        return user_profile_manager.get_user_profile(user.id)
+
+    @token_required
     def post(self):
         args = request.get_json()
         args["user_id"] = g.user.id
@@ -494,7 +499,6 @@ class AdminHackathonListResource(HackathonResource):
     @token_required
     def get(self):
         return admin_manager.get_entitled_hackathons_list(g.user)
-
 
 
 class AdminRegisterListResource(HackathonResource):

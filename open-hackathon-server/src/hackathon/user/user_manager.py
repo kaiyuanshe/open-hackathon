@@ -2,18 +2,13 @@
 """
 This file is covered by the LICENSING file in the root of this project.
 """
-
-import sys
-
-sys.path.append("..")
-
-from datetime import timedelta
 import uuid
+from datetime import timedelta
 
 from flask import request, g
 from mongoengine import Q, NotUniqueError, ValidationError
 
-from hackathon.hackathon_response import bad_request, internal_server_error, not_found, ok
+from hackathon.hackathon_response import bad_request, internal_server_error, not_found, ok, unauthorized
 from hackathon.constants import HTTP_HEADER, HACK_USER_TYPE, FILE_TYPE
 from hackathon import Component, Context, RequiredFeature
 from hackathon.hmongo.models import UserToken, User, UserEmail, UserProfile, UserHackathon
@@ -26,6 +21,7 @@ users_operation_time = {}
 class UserManager(Component):
     """Component for user management"""
     admin_manager = RequiredFeature("admin_manager")
+    oauth_login_manager = RequiredFeature("oauth_login_manager")
 
     def validate_login(self):
         """Make sure user token is included in http request headers and it must NOT be expired
@@ -52,6 +48,8 @@ class UserManager(Component):
             if user:
                 user.online = False
                 user.save()
+            g.user = None
+            g.token.delete()
             return ok()
         except Exception as e:
             self.log.error(e)
@@ -204,10 +202,12 @@ class UserManager(Component):
     def get_talents(self):
         # todo real talents list
         users = User.objects(name__ne="admin").order_by("-login_times")[:10]
-
+        # fixme why delete this log will panic
+        self.log.debug("get talents {}".format(users))
         return [self.user_display_info(u) for u in users]
 
-    def update_user_avatar_url(self, user, url):
+    @staticmethod
+    def update_user_avatar_url(user, url):
         if not user.profile:
             user.profile = UserProfile()
         user.profile.avatar_url = url
@@ -265,6 +265,8 @@ class UserManager(Component):
             if t and t.expire_date >= self.util.get_now():
                 g.authenticated = True
                 g.user = t.user
+                # save token to g, to determine which one to remove, when logout
+                g.token = t
                 return t.user
 
         return None
@@ -287,7 +289,7 @@ class UserManager(Component):
         user = User.objects(name=username, password=enc_pwd).first()
         if user is None:
             self.log.warn("invalid user/pwd login: username=%s, encoded pwd=%s" % (username, enc_pwd))
-            return None
+            return unauthorized("username or password error")
 
         user.online = True
         user.login_times = (user.login_times or 0) + 1
@@ -324,6 +326,11 @@ class UserManager(Component):
         return User.objects(openid=openid, provider=provider).first()
 
     def __oauth_login(self, provider, context):
+        self.log.info("Oauth login with %s and code: %s" % (provider, context.code))
+        oauth_resp = self.oauth_login_manager.oauth_login(provider, context)
+        return self.__oauth_login_db(provider, Context.from_object(oauth_resp))
+
+    def __oauth_login_db(self, provider, context):
         # update db
         email_list = context.get('email_list', [])
         openid = context.openid
@@ -360,9 +367,10 @@ class UserManager(Component):
 
         # generate API token
         token = self.__generate_api_token(user)
-        return {
+        resp = {
             "token": token.dic(),
             "user": user.dic()}
+        return resp
 
     def __oxford(self, user, oxford_api):
         if not oxford_api:
@@ -390,11 +398,11 @@ class UserManager(Component):
 
     def __validate_upload_files(self):
         # todo check file size and file type
-        #if request.content_length > len(request.files) * self.util.get_config("storage.size_limit_kilo_bytes") * 1024:
+        # if request.content_length > len(request.files) * self.util.get_config("storage.size_limit_kilo_bytes") * 1024:
         #    raise BadRequest("more than the file size limited")
 
         # check each file type and only jpg is allowed
-        #for file_name in request.files:
+        # for file_name in request.files:
         #    if request.files.get(file_name).filename.endswith('jpg'):
         #        continue  # jpg is not considered in imghdr
         #    if imghdr.what(request.files.get(file_name)) is None:

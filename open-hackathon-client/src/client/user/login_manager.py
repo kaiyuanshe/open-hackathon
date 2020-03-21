@@ -17,13 +17,12 @@ from client.log import log
 from client.md5 import encode
 from client.constants import LOGIN_PROVIDER
 from client.user.user import User
-from client.user.oauth_login import login_providers
 
 
 class LoginManagerHelper():
     '''Helper class for flask-login.LoginManager'''
     headers = {"Content-Type": "application/json"}
-    login_url = get_config("hackathon-api.endpoint") + "/api/user/login"
+    login_url = get_config("endpoint.hackathon_api") + "/api/user/login"
 
     def load_user(self, id):
         try:
@@ -51,17 +50,18 @@ class LoginManagerHelper():
 
     def __oauth_login(self, provider):
         code = request.args.get('code')
-        oauth_resp = login_providers[provider].login({
-            "code": code
-        })
+        oauth_data = {
+            "code": code,
+            "redirect_uri": get_config("endpoint.hackathon_web") + "/" + provider,
+            "provider": provider
+        }
 
-        return self.__remote_login(oauth_resp)
+        return self.__remote_login(oauth_data)
 
     def __mysql_login(self):
 
         data = {
             "provider": LOGIN_PROVIDER.DB,
-            "openid": request.form['username'],
             "username": request.form['username'],
             "password": encode(request.form['password'])
         }
@@ -76,6 +76,7 @@ class LoginManagerHelper():
                 # if login isn't successful, it will return None
                 login_user = User(resp["user"])
                 token = resp["token"]
+                log.debug("Login successfully %s" % login_user.get_user_id())
                 return {
                     "user": login_user,
                     "token": token["token"]
