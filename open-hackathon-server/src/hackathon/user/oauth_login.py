@@ -216,7 +216,6 @@ class GithubLogin(LoginBase):
 
         access_token = self.get_token(code)
         self.log.info('Successfully get access token from github using code %s' % code)
-
         user_info = self.get_user_info(access_token)
         email_list = self.get_emails(access_token)
         self.log.info("Successfully get user info and emails from github: %s" % user_info["login"])
@@ -263,8 +262,7 @@ class GithubLogin(LoginBase):
         token_resp = post_to_remote(token_url, data_to_post, headers)
         if token_resp.get("error") is not None:
             raise Exception(json.dumps(token_resp))
-
-        return token_resp.get("access_token")
+        return str(token_resp.get(b'access_token'), encoding="utf-8")
 
     def get_emails(self, token):
         """Get user primary email
