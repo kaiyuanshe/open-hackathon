@@ -16,12 +16,7 @@ from client.functions import get_config
 from client.log import log
 from client.md5 import encode
 from client.constants import LOGIN_PROVIDER
-<<<<<<< HEAD
 from client.user.user import User
-from client.user.oauth_login import login_providers
-=======
-from user import User
->>>>>>> 358084b57e01efe6919d26a83fe86a0995c9ba78
 
 
 class LoginManagerHelper():
