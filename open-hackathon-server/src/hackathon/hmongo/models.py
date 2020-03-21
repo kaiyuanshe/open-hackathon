@@ -11,7 +11,6 @@ from mongoengine import QuerySet, DateTimeField, DynamicDocument, EmbeddedDocume
 from hackathon.util import get_now, make_serializable
 from hackathon.constants import TEMPLATE_STATUS, HACK_USER_TYPE
 from hackathon.hmongo.pagination import Pagination
-from hackathon import app
 
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -115,7 +114,7 @@ class User(HDocumentBase):
         super(User, self).__init__(**kwargs)
 
     def set_password(self, password_user):
-        self.password_hash = generate_password_hash(password_user)
+        self.password = generate_password_hash(password_user)
 
     def check_password(self, password_user):
         return check_password_hash(self.password, password_user)
