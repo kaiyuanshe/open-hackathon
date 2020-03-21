@@ -16,7 +16,7 @@ import requests
 
 from uuid import UUID
 from datetime import datetime, timedelta
-from urlparse import parse_qs
+from urllib.parse import parse_qs
 
 from mailthon import email
 from mailthon.postman import Postman

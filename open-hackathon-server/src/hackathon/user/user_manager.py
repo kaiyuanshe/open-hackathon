@@ -2,18 +2,13 @@
 """
 This file is covered by the LICENSING file in the root of this project.
 """
-
-import sys
-
-sys.path.append("..")
-
-from datetime import timedelta
 import uuid
+from datetime import timedelta
 
 from flask import request, g
 from mongoengine import Q, NotUniqueError, ValidationError
 
-from hackathon.hackathon_response import bad_request, internal_server_error, not_found, ok
+from hackathon.hackathon_response import bad_request, internal_server_error, not_found, ok, unauthorized
 from hackathon.constants import HTTP_HEADER, HACK_USER_TYPE, FILE_TYPE
 from hackathon import Component, Context, RequiredFeature
 from hackathon.hmongo.models import UserToken, User, UserEmail, UserProfile, UserHackathon
@@ -53,6 +48,8 @@ class UserManager(Component):
             if user:
                 user.online = False
                 user.save()
+            g.user = None
+            g.token.delete()
             return ok()
         except Exception as e:
             self.log.error(e)
@@ -205,10 +202,12 @@ class UserManager(Component):
     def get_talents(self):
         # todo real talents list
         users = User.objects(name__ne="admin").order_by("-login_times")[:10]
-
+        # fixme why delete this log will panic
+        self.log.debug("get talents {}".format(users))
         return [self.user_display_info(u) for u in users]
 
-    def update_user_avatar_url(self, user, url):
+    @staticmethod
+    def update_user_avatar_url(user, url):
         if not user.profile:
             user.profile = UserProfile()
         user.profile.avatar_url = url
@@ -266,6 +265,8 @@ class UserManager(Component):
             if t and t.expire_date >= self.util.get_now():
                 g.authenticated = True
                 g.user = t.user
+                # save token to g, to determine which one to remove, when logout
+                g.token = t
                 return t.user
 
         return None
@@ -288,7 +289,7 @@ class UserManager(Component):
         user = User.objects(name=username, password=enc_pwd).first()
         if user is None:
             self.log.warn("invalid user/pwd login: username=%s, encoded pwd=%s" % (username, enc_pwd))
-            return None
+            return unauthorized("username or password error")
 
         user.online = True
         user.login_times = (user.login_times or 0) + 1
@@ -328,7 +329,6 @@ class UserManager(Component):
         self.log.info("Oauth login with %s and code: %s" % (provider, context.code))
         oauth_resp = self.oauth_login_manager.oauth_login(provider, context)
         return self.__oauth_login_db(provider, Context.from_object(oauth_resp))
-
 
     def __oauth_login_db(self, provider, context):
         # update db

@@ -281,13 +281,6 @@ class GithubLogin(LoginBase):
         :return: access token
         """
 
-<<<<<<< HEAD:open-hackathon-client/src/client/user/oauth_login.py
-        token_resp = get_remote(get_config('login.github.access_token_url') + str(code))
-        query = qs_dict(token_resp)
-        if query.get("error") is not None:
-            raise Exception(query)
-        return query.get("access_token")
-=======
         token_url = get_config('login.github.access_token_url')
 
         data_to_post = {
@@ -305,7 +298,6 @@ class GithubLogin(LoginBase):
             raise Exception(json.dumps(token_resp))
 
         return token_resp.get("access_token")
->>>>>>> 358084b57e01efe6919d26a83fe86a0995c9ba78:open-hackathon-server/src/hackathon/user/oauth_login.py
 
     def get_emails(self, token):
         """Get user primary email
@@ -352,16 +344,12 @@ class GithubLogin(LoginBase):
             "total_private_repos":0,"owned_private_repos":0,"disk_usage":14179,"collaborators":0,
 
         """
-<<<<<<< HEAD:open-hackathon-client/src/client/user/oauth_login.py
-        user_info_resp = get_remote(str(get_config('login.github.user_info_url')) + str(token))
-=======
         user_info_url = get_config('login.github.user_info_url')
         headers = {
             "Authorization": "token %s" % token,
             "Accept": "application/json"
         }
         user_info_resp = get_remote(user_info_url, headers)
->>>>>>> 358084b57e01efe6919d26a83fe86a0995c9ba78:open-hackathon-server/src/hackathon/user/oauth_login.py
 
         user_info = json.loads(user_info_resp)
         if user_info.get("message") is not None:

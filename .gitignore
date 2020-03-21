@@ -74,4 +74,4 @@ docs/_build/
 *.log~
 *.log.*
 
-open-hackathon-server/src/hackathon/test.py
+.pytest_cache

@@ -3,11 +3,10 @@
 This file is covered by the LICENSING file in the root of this project.
 """
 
-import sys
-
-sys.path.append("..")
-
-from mongoengine import *
+import hashlib
+from mongoengine import QuerySet, DateTimeField, DynamicDocument, EmbeddedDocument, StringField, \
+    BooleanField, IntField, DynamicEmbeddedDocument, EmbeddedDocumentListField, URLField, ListField, \
+    EmbeddedDocumentField, ReferenceField, UUIDField, DictField, DynamicField, PULL
 
 from hackathon.util import get_now, make_serializable
 from hackathon.constants import TEMPLATE_STATUS, HACK_USER_TYPE
@@ -48,12 +47,16 @@ class HDocumentBase(DynamicDocument):
         'allow_inheritance': True,
         'abstract': True,
         'queryset_class': HQuerySet}
+    unsafe_columns = []
 
     def __init__(self, **kwargs):
         super(HDocumentBase, self).__init__(**kwargs)
 
     def dic(self):
-        return to_dic(self)
+        result = to_dic(self)
+        for k in self.unsafe_columns:
+            result.pop(k, None)
+        return result
 
     def __repr__(self):
         return '%s: %s' % (self.__class__.__name__, self.to_json())
@@ -97,6 +100,8 @@ class User(HDocumentBase):
     last_login_time = DateTimeField()
     login_times = IntField(default=1)  # a new user usually added upon whose first login, by default 1 thus
 
+    unsafe_columns = ["password"]
+
     meta = {
         "indexes": [
             {
@@ -107,6 +112,18 @@ class User(HDocumentBase):
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
+
+    @staticmethod
+    def get_encode_password(pwd):
+        m = hashlib.md5()
+        m.update(pwd.encode())
+        return m.hexdigest()
+
+    def set_password(self, pwd):
+        self.password = self.get_encode_password(pwd)
+
+    def check_password(self, pwd):
+        return self.get_encode_password(pwd) == self.password
 
 
 class UserToken(HDocumentBase):
