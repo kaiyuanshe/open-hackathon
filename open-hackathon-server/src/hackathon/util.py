@@ -9,7 +9,6 @@ import os
 import hashlib
 import base64
 import urllib.request, urllib.parse, urllib.error
-import urllib.request, urllib.error, urllib.parse
 import abc
 from uuid import UUID
 from datetime import datetime, timedelta
@@ -27,7 +26,7 @@ from hackathon.constants import EMAIL_SMTP_STATUSCODE, VOICEVERIFY_RONGLIAN_STAT
 try:
     from config import Config
 except ImportError:
-    from .config_sample import Config
+    from hackathon.config_sample import Config
 
 __all__ = [
     "get_config",
