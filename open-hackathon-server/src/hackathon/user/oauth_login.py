@@ -25,21 +25,16 @@ class LoginBase(Component):
 
 class WechatLogin(LoginBase):
     """Sign in with Wechat OAuth 2.0 [https://wohugb.gitbooks.io/wechat/content/qrconnent/README.html]
-
     :Example:
         from client.user.login import WechatLogin
-
         WechatLogin()
-
     .. notes::
     """
 
     def login(self, context):
         """ Wechat Login
-
         :type context: Context
         :param context:
-
         :rtype: dict
         :return: token and instance of user
         """
@@ -62,7 +57,6 @@ class WechatLogin(LoginBase):
 
     def _access_wxapi_or_raise(self, *args, **kwargs):
         """access remote with under wechat'api's interface
-
         just a simple wrapper on `get_remote`
         raise error on response error
         """
@@ -75,13 +69,10 @@ class WechatLogin(LoginBase):
 
     def get_access_token(self, code):
         """get access token from wx-api
-
         this is the second step to login with wechat after the
         client get the code
-
         :type code: str
         :param code: code get from wx
-
         :rtype: tuple
         :return: then access token and user open id in a tuple
         """
@@ -92,15 +83,11 @@ class WechatLogin(LoginBase):
 
     def get_user_info(self, access_token, openid):
         """get user info from wx-api
-
         this is the final step to login with wechat
-
         :type access_token: str
         :param access_token: the access token get from wx
-
         :type openid: str
         :param openid: the openid get from wx to specified user
-
         :rtype: dict
         :return: then user info accessed from wechat
         """
@@ -110,21 +97,16 @@ class WechatLogin(LoginBase):
 
 class QQLogin(LoginBase):
     """Sign in with QQ
-
     :Example:
         from client.user.login import QQLogin
-
         QQLogin()
-
     .. notes::
     """
 
     def login(self, context):
         """ QQ Login
-
         :type context: Context
         :param context:
-
         :rtype: dict
         :return: token and instance of user
         """
@@ -159,13 +141,10 @@ class QQLogin(LoginBase):
 
     def get_token(self, code, redirect_uri):
         """ Get qq access token
-
         :type code: str
         :param code: authorization code
-
         :type redirect_uri: str
         :param redirect_uri: redirect uri for oauth
-
         :rtype: str
         :return: access token
         """
@@ -179,10 +158,8 @@ class QQLogin(LoginBase):
 
     def get_info(self, token):
         """ Get qq open id
-
         :type token: str
         :param token:
-
         :rtype: dict
         :return: info
         """
@@ -198,16 +175,12 @@ class QQLogin(LoginBase):
 
     def get_user_info(self, token, openid, client_id):
         """Get qq user info
-
         :type token: str
         :param token:
-
         :type openid: str
         :param openid:
-
         :type client_id: str
         :param client_id:
-
         :rtype: dict
         :return: user info
         """
@@ -224,18 +197,14 @@ class QQLogin(LoginBase):
 
 class GithubLogin(LoginBase):
     """Sign in with github
-
     docs: https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#web-application-flow
-
     .. notes::
     """
 
     def login(self, context):
         """ github Login
-
         :type context: Context
         :param context:
-
         :rtype: dict
         :return: token and instance of user
         """
@@ -273,10 +242,8 @@ class GithubLogin(LoginBase):
 
     def get_token(self, code):
         """ Get github access token
-
         :type code: str
         :param code:
-
         :rtype: str
         :return: access token
         """
@@ -301,10 +268,8 @@ class GithubLogin(LoginBase):
 
     def get_emails(self, token):
         """Get user primary email
-
         :type token: str
         :param token:
-
         :rtype: dict
         :return: emails
         """
@@ -319,15 +284,12 @@ class GithubLogin(LoginBase):
 
     def get_user_info(self, token):
         """Get qq user info
-
         :type token: str
         :param token:
-
         :rtype: dict
         :return:
             "url":"https://api.github.com/users/juniwang","html_url":"https://github.com/juniwang",
             "followers_url":"https://api.github.com/users/juniwang/followers",        self.log.debug("get admin user info from " + provider + " : "  + user_info_resp + '\n' )
-
             "following_url":"https://api.github.com/users/juniwang/following{/other_user}",
             "starred_url":"https://api.github.com/users/juniwang/starred{/owner}{/repo}",
             "gists_url":"https://api.github.com/users/juniwang/gists{/gist_id}",
@@ -337,12 +299,10 @@ class GithubLogin(LoginBase):
             "received_events_url":"https://api.github.com/users/juniwang/received_events","type":"User","site_admin":false,
             "name":"Junbo Wang","company":"","blog":"","location":"Shanghai China",
             "organizations_url":"https://api.github.com/users/juniwang/orgs","repos_url":"https://api.github.com/users/juniwang/repos",
-
             "email":"wangjunbo924@gmail.com","hireable":false,"bio":null,"public_repos":12,"public_gists":0,"followers":0,
             "following":1,"created_at":"2014-09-18T01:30:30Z","updated_at":"2014-11-25T09:00:37Z","private_gists":0,
             "plan":{"name":"free","space":307200,"collaborators":0,"private_repos":0}}
             "total_private_repos":0,"owned_private_repos":0,"disk_usage":14179,"collaborators":0,
-
         """
         user_info_url = get_config('login.github.user_info_url')
         headers = {
@@ -360,21 +320,16 @@ class GithubLogin(LoginBase):
 
 class WeiboLogin(LoginBase):
     """Sign in with weibo
-
     :Example:
         from client.user.login import WeiboLogin
-
         WeiboLogin()
-
     .. notes::
     """
 
     def login(self, context):
         """ weibo Login
-
         :type context: Context
         :param context:
-
         :rtype: dict
         :return: token and instance of user
         """
@@ -409,13 +364,10 @@ class WeiboLogin(LoginBase):
 
     def get_token(self, code, redirect_uri):
         """ Get weibo access token
-
         :type code: str
         :param code:
-
         :type redirect_uri: str
         :param redirect_uri:
-
         :rtype: dict
         :return: access token and uid
         """
@@ -428,13 +380,10 @@ class WeiboLogin(LoginBase):
 
     def get_user_info(self, token, uid):
         """Get weibo user info
-
         :type token: str
         :param token:
-
         :type uid: str
         :param uid:
-
         :rtype: dict
         :return:
             {"id":2330622122,"idstr":"2330622122","class":1,"screen_name":"test name","name":"test name",
@@ -462,10 +411,8 @@ class WeiboLogin(LoginBase):
 
     def get_email(self, token, uid):
         """Get weibo user info
-
         :type token: str
         :param token:
-
         :rtype: str
         :return : email
         """
@@ -481,21 +428,16 @@ class WeiboLogin(LoginBase):
 
 class LiveLogin(LoginBase):
     """Sign in with live
-
     :Example:
         from client.user.login import LiveLogin
-
         LiveLogin()
-
     .. notes::
     """
 
     def login(self, context):
         """ live Login
-
         :type context: Context
         :param context:
-
         :rtype: dict
         :return: token and instance of user
         """
@@ -533,10 +475,8 @@ class LiveLogin(LoginBase):
 
     def get_token(self, code):
         """ Get live access token
-
         :type code: str
         :param code:
-
         :rtype: str
         :return: access token and uid
         """
@@ -562,10 +502,8 @@ class LiveLogin(LoginBase):
 
     def get_user_info(self, token):
         """Get live user info
-
         :type token: str
         :param token:
-
         :rtype: dict
         :return:
             {'first_name': 'Ice', 'last_name': 'Shi', 'name': 'Ice Shi', 'locale': 'en_US',
