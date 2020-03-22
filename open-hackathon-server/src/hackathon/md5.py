@@ -4,7 +4,7 @@ This file is covered by the LICENSING file in the root of this project.
 """
 
 import hashlib
-
+from hackathon import app
 
 def encode(plaintext):
     m = hashlib.md5()

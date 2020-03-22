@@ -9,7 +9,6 @@ import os
 import hashlib
 import base64
 import urllib.request, urllib.parse, urllib.error
-import urllib.request, urllib.error, urllib.parse
 import abc
 import ssl
 import requests
@@ -31,7 +30,7 @@ from hackathon.constants import EMAIL_SMTP_STATUSCODE, VOICEVERIFY_RONGLIAN_STAT
 try:
     from config import Config
 except ImportError:
-    from .config_sample import Config
+    from hackathon.config_sample import Config
 
 __all__ = [
     "get_config",
@@ -169,21 +168,18 @@ def get_now():
 
 def convert(input):
     if isinstance(input, dict):
-        return {convert(key): convert(value) for key, value in input.iteritems()}
+        return {convert(key): convert(value) for key, value in input.items()}
     elif isinstance(input, list):
         return [convert(element) for element in input]
-    elif isinstance(input, unicode):
+    elif isinstance(input, str):
         return input.encode('utf-8')
     else:
         return input
 
 
 def get_remote(url, headers={}):
-    ssl.match_hostname = lambda cert, hostname: True
-    opener = urllib2.build_opener(urllib2.HTTPHandler)
-    request = urllib2.Request(url, None, headers)
-    resp = opener.open(request)
-    return resp.read()
+    r = requests.get(url, headers=headers)
+    return r.text
 
 
 def post_to_remote(url, post_data, headers=None):
