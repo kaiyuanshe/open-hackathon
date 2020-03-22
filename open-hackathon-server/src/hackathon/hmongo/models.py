@@ -13,6 +13,7 @@ from hackathon.constants import TEMPLATE_STATUS, HACK_USER_TYPE
 from hackathon.hmongo.pagination import Pagination
 from hackathon import app
 
+
 # from werkzeug.security import generate_password_hash, check_password_hash
 
 def to_dic(obj):
@@ -127,12 +128,6 @@ class User(HDocumentBase):
     def check_password(self, pwd):
         return self.get_encode_password(pwd) == self.password
 
-    
-    # def set_password(self, password_user):
-    #     self.password = generate_password_hash(password_user)
-
-    # def check_password(self, password_user):
-    #     return check_password_hash(self.password, password_user)
 
 class UserToken(HDocumentBase):
     token = UUIDField(required=True)
