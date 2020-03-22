@@ -146,44 +146,15 @@ class TemplateLibrary(Component):
         :type template_content: TemplateContent
         :param template_content: instance of TemplateContent that owns the full content of a template
         """
-        context = self.__save_template_to_storage(template_content)
-        if not context:
-            return internal_server_error("save template failed")
+        return self.__save_template_to_database(template_content)
 
-        return self.__save_template_to_database(template_content, context)
-
-    def __save_template_to_storage(self, template_content):
-        """save template to a file in storage whose type is configurable
-
-        :type template_content: TemplateContent
-        :param template_content: instance of TemplateContent that owns the full content of a template
-
-        :return: context if no exception raised
-        """
-        try:
-            file_name = '%s.js' % template_content.name
-            context = Context(
-                file_name=file_name,
-                file_type=FILE_TYPE.TEMPLATE,
-                content=template_content.to_dict())
-
-            self.log.debug("saving template as file [%s]" % file_name)
-            context = self.storage.save(context)
-            return context
-        except Exception as ex:
-            self.log.error(ex)
-            return None
-
-    def __save_template_to_database(self, template_content, context):
+    def __save_template_to_database(self, template_content):
         """save template date to db
 
         According to the args , find out whether it is ought to insert or update a record
 
         :type template_content: TemplateContent
         :param template_content: instance of TemplateContent that owns the full content of a template
-
-        :type context: Context
-        :param context: the context that return from self.__save_template_to_storage
 
         :return: if raised exception return InternalServerError else return nothing
 
@@ -194,8 +165,6 @@ class TemplateLibrary(Component):
             if template is None:
                 template = Template.objects.create(
                     name=template_content.name,
-                    url=context.url,
-                    local_path=context.get("physical_path"),
                     provider=provider,
                     creator=g.user,
                     status=TEMPLATE_STATUS.UNCHECKED,
@@ -203,13 +172,10 @@ class TemplateLibrary(Component):
                     virtual_environment_count=len(template_content.units))
             else:
                 template.update(
-                    url=context.url,
-                    local_path=context.get("physical_path"),
                     update_time=self.util.get_now(),
                     provider=provider,
                     description=template_content.description,
                     virtual_environment_count=len(template_content.units))
-                self.cache.invalidate(self.__get_template_cache_key(template.id))
 
             return template.dic()
         except Exception as ex:
@@ -259,7 +225,8 @@ class TemplateLibrary(Component):
         self.__validate_template_content(args)
         return TemplateContent.from_dict(args)
 
-    def __validate_template_content(self, args):
+    @staticmethod
+    def __validate_template_content(args):
         """ validate args when creating a template
 
         :type args: dict
