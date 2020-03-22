@@ -78,7 +78,7 @@ def validate(func):
                 log.debug("input validated for %s.%s" % (class_name, method_name))
             except validictory.MultipleValidationError as me:
                 log.debug("input validation of '%s.%s' failed: %s" % (class_name, method_name, repr(me.errors)))
-                # raise BadRequest(repr(me.errors))
+                raise BadRequest(repr(me.errors))
 
         output_data = func(*args, **kwargs)
         if output_schema:

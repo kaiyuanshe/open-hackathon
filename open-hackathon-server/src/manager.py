@@ -29,7 +29,7 @@ def make_shell_context():
     }
 
 
-manager.add_command("runserver", Server(host="0.0.0.0", port=15000, use_debugger=False))
+manager.add_command("runserver", Server(host="0.0.0.0", port=15000, use_debugger=True))
 manager.add_command("shell", Shell(banner=banner, make_context=make_shell_context))
 
 
