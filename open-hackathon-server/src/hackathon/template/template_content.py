@@ -3,18 +3,23 @@
 This file is covered by the LICENSING file in the root of this project.
 """
 
-import sys
 import yaml
 from collections import defaultdict
 
-sys.path.append("..")
-
 from hackathon.constants import VE_PROVIDER
-from hackathon.template.template_constants import TEMPLATE
+from hackathon.template.template_constants import TEMPLATE, DOCKER_TEMPLATE
 from hackathon.template.docker_template_unit import DockerTemplateUnit
 from hackathon.template.k8s_template_unit import K8STemplateUnit
 
 __all__ = ["TemplateContent"]
+
+
+class NetworkConfig:
+
+    def __init__(self, name, protocol, port):
+        self.name = name
+        self.protocol = protocol
+        self.port = port
 
 
 class TemplateContent:
@@ -28,10 +33,48 @@ class TemplateContent:
         self.description = description
         self.resource = defaultdict(list)
 
-        self.cluster_info = None
+        self.provider = None
+
+        self.docker_image = None
+        self.network_configs = []
+
+        self.yml_template = ""
+        self.template_args = {}
 
         # FIXME unit bundle is useless for K8s
+        self.cluster_info = None
         self.units = []
+
+    def from_docker_image(self, docker_image, network_configs):
+        self.provider = VE_PROVIDER.DOCKER
+        self.docker_image = docker_image
+
+        for cfg in network_configs:
+            self.network_configs.append(NetworkConfig(
+                cfg[DOCKER_TEMPLATE.NET_NAME],
+                cfg[DOCKER_TEMPLATE.NET_PROTOCOL],
+                cfg[DOCKER_TEMPLATE.NET_PORT],
+            ))
+
+    def from_kube_yaml_template(self, yml_template, template_args):
+        self.provider = VE_PROVIDER.K8S
+        self.yml_template = yml_template
+        self.template_args = template_args
+
+    def is_valid(self):
+        if self.provider is None:
+            return False
+
+        if self.provider == VE_PROVIDER.DOCKER:
+            return True
+
+        if self.provider == VE_PROVIDER.K8S:
+            # todo Make sure yml content is different in different environments
+            pass
+
+    def expr_k8s_yaml(self, expr_name) -> str:
+        # todo Generate usable expr k8s yaml content
+        pass
 
     @classmethod
     def from_yaml(cls, template_model, yaml_content):

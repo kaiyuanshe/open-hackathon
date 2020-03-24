@@ -14,6 +14,13 @@ class TEMPLATE:
     VIRTUAL_ENVIRONMENT_PROVIDER = "provider"
 
 
+class DOCKER_TEMPLATE:
+    IMAGE = "image"
+    NET_NAME = "name"
+    NET_PROTOCOL = "protocol"
+    NET_PORT = "port"
+
+
 class DOCKER_UNIT:
     """constants in docker virtual_environment in template"""
     NAME = 'name'
@@ -86,7 +93,6 @@ class DOCKER_UNIT:
     HOST_CONFIG_CGROUP_PARENT = 'CgroupParent'
 
 
-
 class K8S_UNIT:
     """constants for k8s virtual_environment in template file"""
     NAME = 'name'
@@ -109,7 +115,6 @@ class K8S_UNIT:
     REMOTE_USERNAME = 'username'
     REMOTE_PASSWORD = 'password'
     REMOTE_PORT = 'port'
-
 
     # remote parameter name
     REMOTE_PARAMETER_NAME = 'name'

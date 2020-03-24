@@ -152,8 +152,17 @@ class UserToken(HDocumentBase):
 class K8sCluster(DynamicEmbeddedDocument):
     api_url = StringField(required=True)
     token = StringField(required=True)
-    namespace = StringField()
-    ingress = ListField()
+    namespace = StringField(default="default")
+    gateway = ListField()
+    creator = ReferenceField(User)
+
+
+class NetworkConfigTemplate(HDocumentBase):
+    """ Network config for generate K8s yml"""
+
+    name = StringField(required=True, unique=True)
+    protocol = StringField()
+    port = IntField(max_value=65535)
 
 
 class Template(HDocumentBase):
@@ -161,9 +170,19 @@ class Template(HDocumentBase):
     provider = IntField()
     status = IntField(default=TEMPLATE_STATUS.UNCHECKED)  # constants.TEMPLATE_STATUS
     description = StringField()
+
+    # todo delete K8s cluster info: Templates should be more generic and cluster unrelated
     k8s_cluster = EmbeddedDocumentField(K8sCluster)
+
+    # K8s yml template
     content = StringField()  # template content
-    virtual_environment_count = IntField(min_value=1, required=True)
+    template_args = DictField()
+
+    # Docker image template
+    docker_image = StringField()
+    network_configs = ListField(NetworkConfigTemplate)
+
+    virtual_environment_count = IntField(min_value=0, required=True)
     creator = ReferenceField(User)
 
     def __init__(self, **kwargs):

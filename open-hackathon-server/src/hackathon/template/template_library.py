@@ -3,22 +3,17 @@
 This file is covered by the LICENSING file in the root of this project.
 """
 
-import sys
-from werkzeug.exceptions import BadRequest, InternalServerError, Forbidden
-
-sys.path.append("..")
-from os.path import isfile
 import json
-import requests
 
 from flask import g, request
+from werkzeug.exceptions import BadRequest, InternalServerError, Forbidden
 from mongoengine import Q
 
-from hackathon import Component, RequiredFeature, Context
+from hackathon import Component, RequiredFeature
 from hackathon.constants import VE_PROVIDER
-from hackathon.hmongo.models import Template, Experiment
+from hackathon.hmongo.models import Template, Experiment, NetworkConfigTemplate
 from hackathon.hackathon_response import ok, internal_server_error, forbidden
-from hackathon.constants import FILE_TYPE, TEMPLATE_STATUS
+from hackathon.constants import TEMPLATE_STATUS
 from hackathon.template.template_constants import TEMPLATE
 from hackathon.template.template_content import TemplateContent
 
@@ -52,17 +47,23 @@ class TemplateLibrary(Component):
         criterion = self.__generate_search_criterion(args)
         return [t.dic() for t in Template.objects(criterion)]
 
-    def load_template(self, template):
-        """load template into memory either from a local cache path or an remote uri
-        load template from local file
+    @staticmethod
+    def load_template(template):
+        """load template content
         :param template:
         :return:
         """
 
-        if template.provider != VE_PROVIDER.K8S:
+        tc = TemplateContent(template.name, template.description)
+        if template.provider == VE_PROVIDER.K8S:
+            tc.from_kube_yaml_template(template.content, template.template_args)
+        elif template.provider == VE_PROVIDER.DOCKER:
+            tc.from_docker_image(
+                template.docker_image,
+                [cfg.to_dic() for cfg in template.network_configs],
+            )
+        else:
             raise RuntimeError("Using deprecated VirtualEnvironment provider")
-        tc = TemplateContent.from_yaml(template, template.content)
-        tc.cluster_info = template.k8s_cluster
         return tc
 
     def create_template(self, args):
@@ -146,6 +147,8 @@ class TemplateLibrary(Component):
         :type template_content: TemplateContent
         :param template_content: instance of TemplateContent that owns the full content of a template
         """
+        if not template_content.is_valid():
+            raise BadRequest("template content is illegal")
         return self.__save_template_to_database(template_content)
 
     def __save_template_to_database(self, template_content):
@@ -159,37 +162,44 @@ class TemplateLibrary(Component):
         :return: if raised exception return InternalServerError else return nothing
 
         """
+        network_configs = [
+            NetworkConfigTemplate(name=c.name, protocol=c.protocol, port=c.port)
+            for c in template_content.network_configs]
+
         template = self.get_template_info_by_name(template_content.name)
+        if template:
+            if template.provider != template.provider:
+                raise BadRequest(description="template provider cannot be modified")
+            try:
+                template.update(
+                    update_time=self.util.get_now(),
+                    description=template_content.description,
+                    content=template_content.yml_template,
+                    template_args=template_content.template_args,
+                    docker_image=template_content.docker_image,
+                    network_configs=network_configs,
+                )
+                return template.dic()
+            except Exception as ex:
+                self.log.error(ex)
+                raise InternalServerError(description="update record in db failed")
         try:
-            provider = self.__get_provider_from_template_dic(template_content)
             if template is None:
                 template = Template.objects.create(
                     name=template_content.name,
-                    provider=provider,
-                    creator=g.user,
+                    provider=template_content.provider,
                     status=TEMPLATE_STATUS.UNCHECKED,
+                    content=template_content.yml_template,
                     description=template_content.description,
-                    virtual_environment_count=len(template_content.units))
-            else:
-                template.update(
-                    update_time=self.util.get_now(),
-                    provider=provider,
-                    description=template_content.description,
-                    virtual_environment_count=len(template_content.units))
-
+                    template_args=template_content.template_args,
+                    docker_image=template_content.docker_image,
+                    network_configs=network_configs,
+                    creator=g.user,
+                    virtual_environment_count=0)
             return template.dic()
         except Exception as ex:
             self.log.error(ex)
-            raise InternalServerError(description="insert or update record in db failed")
-
-    def __get_provider_from_template_dic(self, template_content):
-        """get the provider from template
-
-        :type template_content: TemplateContent
-        :param template_content: instance of TemplateContent that owns the full content of a template
-        """
-        providers = [int(u.provider) for u in template_content.units]
-        return providers[0]
+            raise InternalServerError(description="insert record in db failed")
 
     def __generate_search_criterion(self, args):
         """generate DB query criterion according to Querystring of request.
