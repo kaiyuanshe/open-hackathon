@@ -6,7 +6,7 @@
 ### Dockerfile for open-hacnathon(client)
 ### based on python official image
 
-FROM python:2.7
+FROM python:3.7-alpine
 
 USER root
 
@@ -18,7 +18,10 @@ ADD ./open-hackathon-client /opt/open-hackathon/open-hackathon-client
 #config
 RUN cp /opt/open-hackathon/open-hackathon-client/src/client/config_docker.py /opt/open-hackathon/open-hackathon-client/src/client/config.py
 #init
-ADD ./deploy/hackathon-docker/docker-entrypoint-client.sh /opt/open-hackathon
+COPY ./deploy/hackathon-docker/docker-entrypoint-client.sh /opt/open-hackathon
+
+RUN chmod 777 /opt/open-hackathon/docker-entrypoint-client.sh && \
+    dos2unix /opt/open-hackathon/docker-entrypoint-client.sh
 
 RUN pip install -r /opt/open-hackathon/open-hackathon-client/requirements.txt
 

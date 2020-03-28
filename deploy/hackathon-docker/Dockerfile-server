@@ -6,7 +6,7 @@
 ### Dockerfile for open-hacnathon(server)
 ### based on python official image
 
-FROM python:2.7
+FROM python:3.7-alpine
 
 USER root
 
@@ -14,11 +14,14 @@ USER root
 RUN mkdir -p /var/log/open-hackathon/
 # server
 RUN mkdir -p /opt/open-hackathon/open-hackathon-server
-ADD ./open-hackathon-server /opt/open-hackathon/open-hackathon-server
+COPY ./open-hackathon-server /opt/open-hackathon/open-hackathon-server
 #config
 RUN cp /opt/open-hackathon/open-hackathon-server/src/hackathon/config_docker.py /opt/open-hackathon/open-hackathon-server/src/hackathon/config.py
 #init
-ADD ./deploy/hackathon-docker/docker-entrypoint-server.sh /opt/open-hackathon
+COPY ./deploy/hackathon-docker/docker-entrypoint-server.sh /opt/open-hackathon
+
+RUN chmod 777 /opt/open-hackathon/docker-entrypoint-server.sh && \
+    dos2unix /opt/open-hackathon/docker-entrypoint-server.sh
 
 RUN pip install -r /opt/open-hackathon/open-hackathon-server/requirements.txt
 
