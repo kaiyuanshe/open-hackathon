@@ -53,18 +53,7 @@ class TemplateLibrary(Component):
         :param template:
         :return:
         """
-
-        tc = TemplateContent(template.name, template.description)
-        if template.provider == VE_PROVIDER.K8S:
-            tc.from_kube_yaml_template(template.content, template.template_args)
-        elif template.provider == VE_PROVIDER.DOCKER:
-            tc.from_docker_image(
-                template.docker_image,
-                [cfg.to_dic() for cfg in template.network_configs],
-            )
-        else:
-            raise RuntimeError("Using deprecated VirtualEnvironment provider")
-        return tc
+        return TemplateContent.load_from_template(template)
 
     def create_template(self, args):
         """ Create template """
@@ -233,7 +222,14 @@ class TemplateLibrary(Component):
         :return: instance of TemplateContent
         """
         self.__validate_template_content(args)
-        return TemplateContent.from_dict(args)
+        name = args[TEMPLATE.TEMPLATE_NAME]
+        description = args[TEMPLATE.DESCRIPTION]
+
+        environment_config = args[TEMPLATE.VIRTUAL_ENVIRONMENT]
+        environment = TemplateContent.load_environment(environment_config)
+
+        tc = TemplateContent(name, description, environment)
+        return tc
 
     @staticmethod
     def __validate_template_content(args):
@@ -254,15 +250,15 @@ class TemplateLibrary(Component):
         if TEMPLATE.DESCRIPTION not in args:
             raise BadRequest(description="template description invalid")
 
-        if TEMPLATE.VIRTUAL_ENVIRONMENTS not in args:
-            raise BadRequest(description="template virtual_environments invalid")
+        if TEMPLATE.VIRTUAL_ENVIRONMENT not in args:
+            raise BadRequest(description="template virtual_environment invalid")
 
         if len(args[TEMPLATE.VIRTUAL_ENVIRONMENTS]) == 0:
             raise BadRequest(description="template virtual_environments invalid")
 
-        for unit in args[TEMPLATE.VIRTUAL_ENVIRONMENTS]:
-            if TEMPLATE.VIRTUAL_ENVIRONMENT_PROVIDER not in unit:
-                raise BadRequest(description="virtual_environment provider invalid")
+        if args[TEMPLATE.VIRTUAL_ENVIRONMENT][TEMPLATE.VIRTUAL_ENVIRONMENT_PROVIDER] not in (
+                VE_PROVIDER.DOCKER, VE_PROVIDER.K8S):
+            raise BadRequest(description="virtual_environment provider invalid")
 
     def __get_template_from_request(self):
         """ get template dic from http post request

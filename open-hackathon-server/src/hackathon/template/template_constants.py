@@ -10,7 +10,9 @@ class TEMPLATE:
     """constants in template level"""
     TEMPLATE_NAME = 'name'
     DESCRIPTION = 'description'
+    # todo delete VIRTUAL_ENVIRONMENTS
     VIRTUAL_ENVIRONMENTS = 'virtual_environments'
+    VIRTUAL_ENVIRONMENT = 'virtual_environment'
     VIRTUAL_ENVIRONMENT_PROVIDER = "provider"
 
 

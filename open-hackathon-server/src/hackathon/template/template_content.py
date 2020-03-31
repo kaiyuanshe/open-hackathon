@@ -28,10 +28,10 @@ class TemplateContent:
     It's the only type that for template saving and loading.
     """
 
-    def __init__(self, name, description):
+    def __init__(self, name, description, environment):
         self.name = name
         self.description = description
-        self.resource = defaultdict(list)
+        self.environment = environment
 
         self.provider = None
 
@@ -42,6 +42,7 @@ class TemplateContent:
         self.template_args = {}
 
         # FIXME unit bundle is useless for K8s
+        self.resource = defaultdict(list)
         self.cluster_info = None
         self.units = []
 
@@ -72,49 +73,33 @@ class TemplateContent:
             # todo Make sure yml content is different in different environments
             pass
 
-    def expr_k8s_yaml(self, expr_name) -> str:
-        # todo Generate usable expr k8s yaml content
-        pass
-
-    @classmethod
-    def from_yaml(cls, template_model, yaml_content):
-        yamls = yaml.load_all(yaml_content)
-        resource = defaultdict(list)
-
-        for y in yamls:
-            kind = str(y['kind']).lower()
-            resource[kind].append(y)
-
-        tc = TemplateContent(template_model.name, template_model.description)
-        tc.resource = resource
-
-        return tc
-
     def get_resource(self, resource_type):
         # always return a list of resource desc dict or empty
         return self.resource[resource_type]
 
-    # FIXME deprecated this when support K8s ONLY
-    @staticmethod
-    def from_dict(args):
-        name = args[TEMPLATE.TEMPLATE_NAME]
-        description = args[TEMPLATE.DESCRIPTION]
-
-        def convert_to_unit(unit_dict):
-            provider = int(unit_dict[TEMPLATE.VIRTUAL_ENVIRONMENT_PROVIDER])
-            if provider == VE_PROVIDER.DOCKER:
-                return DockerTemplateUnit(unit_dict)
-            elif provider == VE_PROVIDER.AZURE:
-                raise NotImplementedError()
-            elif provider == VE_PROVIDER.K8S:
-                return K8STemplateUnit(unit_dict)
-            else:
-                raise Exception("unsupported virtual environment provider")
-
-        units = list(map(convert_to_unit, args[TEMPLATE.VIRTUAL_ENVIRONMENTS]))
-        tc = TemplateContent(name, description)
-        tc.units = units
+    @classmethod
+    def load_from_template(cls, template):
+        tc = TemplateContent(template.name, template.description, TemplateContent.load_environment(t))
+        if template.provider == VE_PROVIDER.K8S:
+            tc.from_kube_yaml_template(template.content, template.template_args)
+        elif template.provider == VE_PROVIDER.DOCKER:
+            tc.from_docker_image(
+                template.docker_image,
+                [cfg.to_dic() for cfg in template.network_configs],
+            )
+        else:
+            raise RuntimeError("Using deprecated VirtualEnvironment provider")
         return tc
+
+    @classmethod
+    def load_environment(cls, environment_config):
+        provider = int(environment_config[TEMPLATE.VIRTUAL_ENVIRONMENT_PROVIDER])
+        if provider == VE_PROVIDER.DOCKER:
+            return DockerTemplateUnit(environment_config)
+        elif provider == VE_PROVIDER.K8S:
+            return K8STemplateUnit(environment_config)
+        else:
+            raise Exception("unsupported virtual environment provider")
 
     # FIXME deprecated this when support K8s ONLY
     def to_dict(self):
