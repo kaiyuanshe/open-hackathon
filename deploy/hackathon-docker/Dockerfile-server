@@ -10,6 +10,9 @@ FROM python:3.7-alpine
 
 USER root
 
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && \
+    apk update && \
+    apk add --no-cache g++ gcc musl-dev libxslt-dev
 #logs
 RUN mkdir -p /var/log/open-hackathon/
 # server
