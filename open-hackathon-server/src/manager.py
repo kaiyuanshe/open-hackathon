@@ -6,7 +6,6 @@ from flask_script import Manager, Server, Shell
 
 from hackathon import app
 from hackathon.hmongo.database import drop_db, setup_db, add_super_user
-from hackathon.hmongo.models import User
 
 banner = r"""
  _____                          __  __                   __                __    __                         

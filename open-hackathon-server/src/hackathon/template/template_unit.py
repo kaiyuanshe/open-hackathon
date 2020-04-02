@@ -16,11 +16,5 @@ class TemplateUnit(object):
         """
         self.provider = provider
 
-    def get_name(self):
-        raise NotImplemented
-
-    def get_type(self):
-        raise NotImplemented
-
-    def get_description(self):
+    def gen_k8s_yaml(self, expr_name):
         raise NotImplemented

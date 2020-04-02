@@ -109,10 +109,6 @@ class TemplateLibrary(Component):
             if Experiment.objects(template=template).count() > 0:
                 return forbidden("template already in use")
 
-            # remove template cache and storage
-            self.cache.invalidate(self.__get_template_cache_key(template_id))
-            self.storage.delete(template.url)
-
             # remove record in DB
             # the Hackathon used this template will imply the mongoengine's PULL reverse_delete_rule
             template.delete()
@@ -209,9 +205,6 @@ class TemplateLibrary(Component):
 
         return criterion
 
-    def __get_template_cache_key(self, template_id):
-        return "__template__%s__" % str(template_id)
-
     def __load_template_content(self, args):
         """ Convert dict of template content into TemplateContent object
 
@@ -226,9 +219,8 @@ class TemplateLibrary(Component):
         description = args[TEMPLATE.DESCRIPTION]
 
         environment_config = args[TEMPLATE.VIRTUAL_ENVIRONMENT]
-        environment = TemplateContent.load_environment(environment_config)
 
-        tc = TemplateContent(name, description, environment)
+        tc = TemplateContent(name, description, environment_config)
         return tc
 
     @staticmethod
@@ -252,9 +244,6 @@ class TemplateLibrary(Component):
 
         if TEMPLATE.VIRTUAL_ENVIRONMENT not in args:
             raise BadRequest(description="template virtual_environment invalid")
-
-        if len(args[TEMPLATE.VIRTUAL_ENVIRONMENTS]) == 0:
-            raise BadRequest(description="template virtual_environments invalid")
 
         if args[TEMPLATE.VIRTUAL_ENVIRONMENT][TEMPLATE.VIRTUAL_ENVIRONMENT_PROVIDER] not in (
                 VE_PROVIDER.DOCKER, VE_PROVIDER.K8S):

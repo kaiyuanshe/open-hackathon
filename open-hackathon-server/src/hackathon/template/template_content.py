@@ -3,23 +3,14 @@
 This file is covered by the LICENSING file in the root of this project.
 """
 
-import yaml
 from collections import defaultdict
 
 from hackathon.constants import VE_PROVIDER
-from hackathon.template.template_constants import TEMPLATE, DOCKER_TEMPLATE
+from hackathon.template.template_constants import TEMPLATE
 from hackathon.template.docker_template_unit import DockerTemplateUnit
 from hackathon.template.k8s_template_unit import K8STemplateUnit
 
 __all__ = ["TemplateContent"]
-
-
-class NetworkConfig:
-
-    def __init__(self, name, protocol, port):
-        self.name = name
-        self.protocol = protocol
-        self.port = port
 
 
 class TemplateContent:
@@ -28,39 +19,46 @@ class TemplateContent:
     It's the only type that for template saving and loading.
     """
 
-    def __init__(self, name, description, environment):
+    def __init__(self, name, description, environment_config):
         self.name = name
         self.description = description
-        self.environment = environment
+        self.environment = self.__load_environment(environment_config)
 
-        self.provider = None
+        self.provider = self.environment.provider
 
-        self.docker_image = None
-        self.network_configs = []
-
-        self.yml_template = ""
-        self.template_args = {}
-
-        # FIXME unit bundle is useless for K8s
+        # TODO delete
         self.resource = defaultdict(list)
         self.cluster_info = None
         self.units = []
 
-    def from_docker_image(self, docker_image, network_configs):
-        self.provider = VE_PROVIDER.DOCKER
-        self.docker_image = docker_image
+    @classmethod
+    def load_from_template(cls, template):
+        env_cfg = template.unit_config()
+        return TemplateContent(template.name, template.description, env_cfg)
 
-        for cfg in network_configs:
-            self.network_configs.append(NetworkConfig(
-                cfg[DOCKER_TEMPLATE.NET_NAME],
-                cfg[DOCKER_TEMPLATE.NET_PROTOCOL],
-                cfg[DOCKER_TEMPLATE.NET_PORT],
-            ))
+    @property
+    def docker_image(self):
+        if self.provider != VE_PROVIDER.DOCKER:
+            return ""
+        return self.environment.image
 
-    def from_kube_yaml_template(self, yml_template, template_args):
-        self.provider = VE_PROVIDER.K8S
-        self.yml_template = yml_template
-        self.template_args = template_args
+    @property
+    def network_configs(self):
+        if self.provider != VE_PROVIDER.DOCKER:
+            return []
+        return self.environment.network_configs
+
+    @property
+    def yml_template(self):
+        if self.provider != VE_PROVIDER.K8S:
+            return ""
+        return self.environment.yml_template
+
+    @property
+    def template_args(self):
+        if self.provider != VE_PROVIDER.K8S:
+            return {}
+        return self.environment.template_args
 
     def is_valid(self):
         if self.provider is None:
@@ -70,29 +68,10 @@ class TemplateContent:
             return True
 
         if self.provider == VE_PROVIDER.K8S:
-            # todo Make sure yml content is different in different environments
-            pass
-
-    def get_resource(self, resource_type):
-        # always return a list of resource desc dict or empty
-        return self.resource[resource_type]
+            return self.environment.is_valid() is True
 
     @classmethod
-    def load_from_template(cls, template):
-        tc = TemplateContent(template.name, template.description, TemplateContent.load_environment(t))
-        if template.provider == VE_PROVIDER.K8S:
-            tc.from_kube_yaml_template(template.content, template.template_args)
-        elif template.provider == VE_PROVIDER.DOCKER:
-            tc.from_docker_image(
-                template.docker_image,
-                [cfg.to_dic() for cfg in template.network_configs],
-            )
-        else:
-            raise RuntimeError("Using deprecated VirtualEnvironment provider")
-        return tc
-
-    @classmethod
-    def load_environment(cls, environment_config):
+    def __load_environment(cls, environment_config):
         provider = int(environment_config[TEMPLATE.VIRTUAL_ENVIRONMENT_PROVIDER])
         if provider == VE_PROVIDER.DOCKER:
             return DockerTemplateUnit(environment_config)
@@ -100,6 +79,11 @@ class TemplateContent:
             return K8STemplateUnit(environment_config)
         else:
             raise Exception("unsupported virtual environment provider")
+
+    # todo delete
+    def get_resource(self, resource_type):
+        # always return a list of resource desc dict or empty
+        return self.resource[resource_type]
 
     # FIXME deprecated this when support K8s ONLY
     def to_dict(self):
