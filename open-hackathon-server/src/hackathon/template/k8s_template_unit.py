@@ -22,6 +22,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
+import time
+from jinja2 import Template
 
 from hackathon.template.template_constants import K8S_UNIT
 from hackathon.template.template_unit import TemplateUnit
@@ -42,8 +44,10 @@ class K8STemplateUnit(TemplateUnit):
         self.template_args = {}
 
     def gen_k8s_yaml(self, expr_name):
-        pass
+        return Template(self.yml_template).render(**{
+            "expr_name": expr_name,
+            "created_at": "{}".format(time.time())
+        })
 
     def is_valid(self):
-        # todo Make sure yml content is different in different environments
-        pass
+        return self.gen_k8s_yaml("first") != self.gen_k8s_yaml("second")

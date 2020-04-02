@@ -4,9 +4,51 @@ from hackathon.constants import VE_PROVIDER
 from . import ApiTestCase
 
 valid_k8s_yml_template = """
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ expr_name }}-nginx-deployment
+  labels:
+    app: {{ expr_name }}-nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: {{ expr_name }}-nginx
+  template:
+    metadata:
+      labels:
+        app: {{ expr_name }}-nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.7.9
+        ports:
+        - containerPort: 80
 """
 
 invalid_k8s_yml_template = """
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.7.9
+        ports:
+        - containerPort: 80
 """
 
 
@@ -34,15 +76,19 @@ class TestTemplateApi(ApiTestCase):
                 "yaml_template": invalid_k8s_yml_template,
             },
         }
+        payload = self.client.post("/api/template", json_data=invalid_data)
+        assert "error" in payload
 
         valid_data = {
             "name": "test_create_k8s_template",
             "description": "中文测试",
             "virtual_environment": {
                 "provider": VE_PROVIDER.K8S,
-                "yaml_template": invalid_k8s_yml_template,
+                "yaml_template": valid_k8s_yml_template,
             },
         }
+        payload = self.client.post("/api/template", json_data=valid_data)
+        assert payload['name'] == 'test_create_k8s_template'
 
     def test_create_template_failed_case(self, user1):
         self.login(user1)
