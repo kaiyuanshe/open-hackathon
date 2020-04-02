@@ -6,7 +6,7 @@
 ### Dockerfile for open-hacnathon(server)
 ### based on python official image
 
-FROM python:3.7-alpine
+FROM python:3.6-alpine
 
 USER root
 
