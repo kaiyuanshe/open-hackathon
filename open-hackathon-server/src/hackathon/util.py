@@ -107,6 +107,7 @@ def safe_get_config(key, default_value):
     :return configured value if specified key exists else the default value
     :rtype str or unicode or dict
     """
+    print(key)
     r = get_config(key)
     return r if r else default_value
 

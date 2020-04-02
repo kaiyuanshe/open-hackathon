@@ -1,4 +1,3 @@
 #!/bin/sh
 
-python /opt/open-hackathon/open-hackathon-server/src/manager.py init_db
-python /opt/open-hackathon/open-hackathon-server/src/manager.py runserver
+gunicorn -w 1 -b 0.0.0.0:15000 manager:app

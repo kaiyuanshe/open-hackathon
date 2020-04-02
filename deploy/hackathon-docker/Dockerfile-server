@@ -21,11 +21,13 @@ COPY ./open-hackathon-server /opt/open-hackathon/open-hackathon-server
 #config
 RUN mv /opt/open-hackathon/open-hackathon-server/src/hackathon/config_docker.py /opt/open-hackathon/open-hackathon-server/src/hackathon/config_sample.py
 #init
-COPY ./deploy/hackathon-docker/docker-entrypoint-server.sh /opt/open-hackathon
+COPY ./deploy/hackathon-docker/docker-entrypoint-server.sh /opt/open-hackathon/open-hackathon-server/src
 
-RUN chmod 777 /opt/open-hackathon/docker-entrypoint-server.sh && \
-    dos2unix /opt/open-hackathon/docker-entrypoint-server.sh
+RUN chmod 777 /opt/open-hackathon/open-hackathon-server/src/docker-entrypoint-server.sh && \
+    dos2unix /opt/open-hackathon/open-hackathon-server/src/docker-entrypoint-server.sh
 
 RUN pip install -r /opt/open-hackathon/open-hackathon-server/requirements.txt
 
-ENTRYPOINT ./opt/open-hackathon/docker-entrypoint-server.sh
+WORKDIR /opt/open-hackathon/open-hackathon-server/src
+
+ENTRYPOINT ./opt/open-hackathon/open-hackathon-server/src/docker-entrypoint-server.sh
