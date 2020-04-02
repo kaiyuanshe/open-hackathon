@@ -19,7 +19,7 @@ RUN mkdir -p /var/log/open-hackathon/
 RUN mkdir -p /opt/open-hackathon/open-hackathon-server
 COPY ./open-hackathon-server /opt/open-hackathon/open-hackathon-server
 #config
-RUN cp /opt/open-hackathon/open-hackathon-server/src/hackathon/config_docker.py /opt/open-hackathon/open-hackathon-server/src/hackathon/config.py
+RUN mv /opt/open-hackathon/open-hackathon-server/src/hackathon/config_docker.py /opt/open-hackathon/open-hackathon-server/src/hackathon/config_sample.py
 #init
 COPY ./deploy/hackathon-docker/docker-entrypoint-server.sh /opt/open-hackathon
 
