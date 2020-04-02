@@ -60,21 +60,6 @@ class TemplateLibrary(Component):
         template_content = self.__load_template_content(args)
         return self.__create_or_update_template(template_content)
 
-    def create_template_by_file(self):
-        """create a template from uploaded file
-
-        The whole logic contains 4 main steps:
-        1 : get template dic from PostRequest
-        2 : args validate
-        3 : parse args and save to storage
-        4 : save to database
-
-        :return:
-        """
-        template_dic = self.__get_template_from_request()
-        template_content = self.__load_template_content(template_dic)
-        return self.__create_or_update_template(template_content)
-
     def update_template(self, args):
         """update a exist template
 
@@ -248,19 +233,3 @@ class TemplateLibrary(Component):
         if args[TEMPLATE.VIRTUAL_ENVIRONMENT][TEMPLATE.VIRTUAL_ENVIRONMENT_PROVIDER] not in (
                 VE_PROVIDER.DOCKER, VE_PROVIDER.K8S):
             raise BadRequest(description="virtual_environment provider invalid")
-
-    def __get_template_from_request(self):
-        """ get template dic from http post request
-
-        get file from request , then json load it to a dic
-
-        :return: template dic , if load file failed raise BadRequest exception
-        """
-        for file_name in request.files:
-            try:
-                template = json.load(request.files[file_name])
-                self.log.debug("create template from file: %r" % template)
-                return template
-            except Exception as ex:
-                self.log.error(ex)
-                raise BadRequest(description="invalid template file")

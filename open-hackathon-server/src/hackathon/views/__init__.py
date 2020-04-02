@@ -24,7 +24,6 @@ def init_routes():
 
     # APIs for template library
     api.add_resource(TemplateResource, "/api/template")  # query, create or delete template
-    api.add_resource(TemplateCreateByFileResource, "/api/template/file")  # create template from file
     api.add_resource(TemplateListResource, "/api/template/list")  # list templates
 
     # APIs for hackathon query that not related to user or admin
