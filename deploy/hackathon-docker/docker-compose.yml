@@ -6,7 +6,7 @@ services:
       context: ../../
       dockerfile: deploy/hackathon-docker/Dockerfile-client
     ports:
-      - "9988:80"
+      - "80:80"
     environment:
       - HACKATHON_SERVER=server
       - HACKATHON_SERVER_PORT=15000
