@@ -3,7 +3,7 @@
 This file is covered by the LICENSING file in the root of this project.
 """
 from flask import g
-from werkzeug.exceptions import BadRequest, InternalServerError, Forbidden
+from werkzeug.exceptions import BadRequest, InternalServerError, Forbidden, NotFound
 from mongoengine import Q
 
 from hackathon import Component, RequiredFeature
@@ -76,6 +76,8 @@ class TemplateLibrary(Component):
             # user can only modify the template which created by himself except super admin
             if g.user.id != template.creator.id and not g.user.is_super:
                 raise Forbidden()
+        else:
+            raise NotFound()
 
         return self.__create_or_update_template(template_content)
 
@@ -93,6 +95,7 @@ class TemplateLibrary(Component):
 
             # remove record in DB
             # the Hackathon used this template will imply the mongoengine's PULL reverse_delete_rule
+            self.log.debug("delete template {}".format(template.name))
             template.delete()
 
             return ok("delete template success")

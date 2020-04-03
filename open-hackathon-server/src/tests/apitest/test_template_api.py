@@ -100,11 +100,50 @@ class TestTemplateApi(ApiTestCase):
     def test_get_template_by_id(self, user1, default_template):
         self.login(user1)
 
+        payload = self.client.get("/api/template", query_string="id={}".format(str(default_template.id)))
+        assert payload['name'] == 'test_default_template'
+
     def test_update_template(self, user1, default_template):
         self.login(user1)
 
-    def test_list_templates(self, user1):
+        data = {
+            "name": "test_default_template",
+            "description": "new desc",
+            "virtual_environment": {
+                "provider": VE_PROVIDER.DOCKER,
+                "image": "open-hackathon-server:test-only"
+            },
+        }
+
+        # get template old info
+        payload = self.client.get("/api/template", query_string="id={}".format(str(default_template.id)))
+        assert payload['name'] == 'test_default_template'
+
+        # update template info
+        payload = self.client.put("/api/template", json_data=data)
+        assert "error" not in payload
+
+        # get template new info
+        payload = self.client.get("/api/template", query_string="id={}".format(str(default_template.id)))
+        assert payload['description'] == 'new desc'
+
+    def test_list_templates(self, user1, default_template):
+        self.login(user1)
+        payload = self.client.get("/api/template/list")
+        template_names = [t['name'] for t in payload]
+        assert default_template.name in template_names
+
+    def test_delete_template(self, user1, default_template):
         self.login(user1)
 
-    def test_delete_template(self, user1):
-        self.login(user1)
+        # get template info succeed
+        payload = self.client.get("/api/template", query_string="id={}".format(str(default_template.id)))
+        assert payload['name'] == 'test_default_template'
+
+        # delete template
+        payload = self.client.delete("/api/template", query_string="id={}".format(str(default_template.id)))
+        assert "error" not in payload
+
+        # get template failed
+        payload = self.client.get("/api/template", query_string="id={}".format(str(default_template.id)))
+        assert "error" in payload
