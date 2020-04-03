@@ -52,8 +52,6 @@ coverage.xml
 # Sphinx documentation
 docs/_build/
 
-*config.py
-
 # uploaded images and templates
 hackathon/static/upload/
 hackathon/resources/lib/
