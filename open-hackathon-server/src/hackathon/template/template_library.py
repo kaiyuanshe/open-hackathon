@@ -2,10 +2,7 @@
 """
 This file is covered by the LICENSING file in the root of this project.
 """
-
-import json
-
-from flask import g, request
+from flask import g
 from werkzeug.exceptions import BadRequest, InternalServerError, Forbidden
 from mongoengine import Q
 

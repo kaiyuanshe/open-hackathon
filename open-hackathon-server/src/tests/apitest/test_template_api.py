@@ -103,9 +103,6 @@ class TestTemplateApi(ApiTestCase):
     def test_update_template(self, user1, default_template):
         self.login(user1)
 
-    def test_create_template_from_file(self, user1):
-        self.login(user1)
-
     def test_list_templates(self, user1):
         self.login(user1)
 
