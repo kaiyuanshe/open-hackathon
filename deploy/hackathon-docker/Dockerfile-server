@@ -10,24 +10,24 @@ FROM python:3.6-alpine
 
 USER root
 
+RUN mkdir -p /var/log/open-hackathon/ \
+    && mkdir -p /opt/open-hackathon/open-hackathon-server
+
+
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && \
     apk update && \
     apk add --no-cache g++ gcc musl-dev libxslt-dev
-#logs
-RUN mkdir -p /var/log/open-hackathon/
-# server
-RUN mkdir -p /opt/open-hackathon/open-hackathon-server
+
+COPY ./open-hackathon-server/requirements.txt /opt/open-hackathon/open-hackathon-server
+
+RUN pip install -r /opt/open-hackathon/open-hackathon-server/requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple --no-cache-dir
+
 COPY ./open-hackathon-server /opt/open-hackathon/open-hackathon-server
-#config
+
+# TODO use yaml config
 RUN mv /opt/open-hackathon/open-hackathon-server/src/hackathon/config_docker.py /opt/open-hackathon/open-hackathon-server/src/hackathon/config_sample.py
-#init
-COPY ./deploy/hackathon-docker/docker-entrypoint-server.sh /opt/open-hackathon
-
-RUN chmod 777 /opt/open-hackathon/docker-entrypoint-server.sh && \
-    dos2unix /opt/open-hackathon/docker-entrypoint-server.sh
-
-RUN pip install -r /opt/open-hackathon/open-hackathon-server/requirements.txt
 
 WORKDIR /opt/open-hackathon/open-hackathon-server/src
+CMD ["gunicorn", "-w", "5", "-b", "0.0.0.0:15000", "hackathon:app"]
 
-ENTRYPOINT ./opt/open-hackathon/docker-entrypoint-server.sh
+EXPOSE 15000
