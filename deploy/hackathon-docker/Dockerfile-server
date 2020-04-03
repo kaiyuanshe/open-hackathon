@@ -24,9 +24,6 @@ RUN pip install -r /opt/open-hackathon/open-hackathon-server/requirements.txt -i
 
 COPY ./open-hackathon-server /opt/open-hackathon/open-hackathon-server
 
-# TODO use yaml config
-RUN mv /opt/open-hackathon/open-hackathon-server/src/hackathon/config_docker.py /opt/open-hackathon/open-hackathon-server/src/hackathon/config_sample.py
-
 WORKDIR /opt/open-hackathon/open-hackathon-server/src
 CMD ["gunicorn", "-w", "5", "-b", "0.0.0.0:15000", "hackathon:app"]
 
