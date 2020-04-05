@@ -41,8 +41,11 @@ def reset_db():
 @manager.command
 def init_db():
     setup_db()
-    # todo custom username and password
-    add_super_user("admin", "admin", "admin")
+
+
+@manager.command
+def create_super_user(username, password):
+    add_super_user(username, username, password)
 
 
 if __name__ == "__main__":
