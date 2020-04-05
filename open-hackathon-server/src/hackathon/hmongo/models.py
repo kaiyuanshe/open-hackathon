@@ -9,9 +9,10 @@ from mongoengine import QuerySet, DateTimeField, DynamicDocument, EmbeddedDocume
     EmbeddedDocumentField, ReferenceField, UUIDField, DictField, DynamicField, PULL
 
 from hackathon.util import get_now, make_serializable
-from hackathon.constants import TEMPLATE_STATUS, HACK_USER_TYPE
+from hackathon.constants import TEMPLATE_STATUS, HACK_USER_TYPE, VE_PROVIDER
 from hackathon.hmongo.pagination import Pagination
 from hackathon import app
+
 
 # from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -127,12 +128,6 @@ class User(HDocumentBase):
     def check_password(self, pwd):
         return self.get_encode_password(pwd) == self.password
 
-    
-    # def set_password(self, password_user):
-    #     self.password = generate_password_hash(password_user)
-
-    # def check_password(self, password_user):
-    #     return check_password_hash(self.password, password_user)
 
 class UserToken(HDocumentBase):
     token = UUIDField(required=True)
@@ -157,8 +152,17 @@ class UserToken(HDocumentBase):
 class K8sCluster(DynamicEmbeddedDocument):
     api_url = StringField(required=True)
     token = StringField(required=True)
-    namespace = StringField()
-    ingress = ListField()
+    namespace = StringField(default="default")
+    gateway = ListField()
+    creator = ReferenceField(User)
+
+
+class NetworkConfigTemplate(HDocumentBase):
+    """ Network config for generate K8s yml"""
+
+    name = StringField(required=True, unique=True)
+    protocol = StringField()
+    port = IntField(max_value=65535)
 
 
 class Template(HDocumentBase):
@@ -166,13 +170,54 @@ class Template(HDocumentBase):
     provider = IntField()
     status = IntField(default=TEMPLATE_STATUS.UNCHECKED)  # constants.TEMPLATE_STATUS
     description = StringField()
+
+    # todo delete K8s cluster info: Templates should be more generic and cluster unrelated
     k8s_cluster = EmbeddedDocumentField(K8sCluster)
+
+    # K8s yml template
     content = StringField()  # template content
-    virtual_environment_count = IntField(min_value=1, required=True)
+    template_args = DictField()
+
+    # Docker image template
+    docker_image = StringField()
+    network_configs = ListField(NetworkConfigTemplate)
+
+    virtual_environment_count = IntField(min_value=0, required=True)
     creator = ReferenceField(User)
 
     def __init__(self, **kwargs):
         super(Template, self).__init__(**kwargs)
+
+    def unit_config(self):
+        if self.provider == VE_PROVIDER.K8S:
+            return self._k8s_unit_config()
+        elif self.provider == VE_PROVIDER.DOCKER:
+            return self._docker_unit_config()
+        else:
+            raise RuntimeError("Using deprecated VirtualEnvironment provider")
+
+    def _k8s_unit_config(self):
+        from hackathon.template.template_constants import TEMPLATE, K8S_UNIT
+
+        return {
+            TEMPLATE.VIRTUAL_ENVIRONMENT_PROVIDER: VE_PROVIDER.K8S,
+            K8S_UNIT.YAML_TEMPLATE: self.content,
+        }
+
+    def _docker_unit_config(self):
+        from hackathon.template.template_constants import TEMPLATE, DOCKER_UNIT
+
+        net_cfg = [{
+            DOCKER_UNIT.NET_NAME: cfg.name,
+            DOCKER_UNIT.NET_PROTOCOL: cfg.protocol,
+            DOCKER_UNIT.NET_PORT: cfg.port,
+        } for cfg in self.network_configs]
+
+        return {
+            TEMPLATE.VIRTUAL_ENVIRONMENT_PROVIDER: VE_PROVIDER.K8S,
+            DOCKER_UNIT.IMAGE: self.docker_image,
+            DOCKER_UNIT.NET_CONFIG: net_cfg,
+        }
 
 
 class Organization(DynamicEmbeddedDocument):
