@@ -5,7 +5,7 @@ class TestTemplateApi(ApiTestCase):
     def test_create_template(self, user1):
         self.login(user1)
         data = {}
-        payload = self.client.put("/api/template", json_data=data)
+        payload = self.client.post("/api/template", json_data=data)
 
     def test_get_template_by_id(self, user1, default_template):
         self.login(user1)
@@ -21,3 +21,4 @@ class TestTemplateApi(ApiTestCase):
 
     def test_delete_template(self, user1):
         self.login(user1)
+        payload = self.client.delete("/api/template")

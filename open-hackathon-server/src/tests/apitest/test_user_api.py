@@ -4,7 +4,7 @@ from hackathon.constants import HACK_NOTICE_EVENT, HACK_NOTICE_CATEGORY
 from hackathon.hmongo.models import HackathonNotice
 
 USER_ONE_USERNAME = "test_one"
-USER_ONE_ENCODE_PASSWORD = "16ec1ebb01fe02ded9b7d5447d3dfc65"
+USER_ONE_ENCODE_PASSWORD = "0b92d6bab65b9b4cbd746a3effc516a7"
 
 
 class TestUserLoginApi(ApiTestCase):
