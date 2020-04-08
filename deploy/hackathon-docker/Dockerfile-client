@@ -14,9 +14,15 @@ USER root
 RUN mkdir -p /var/log/open-hackathon/
 #client
 RUN mkdir -p /opt/open-hackathon/open-hackathon-client
+
 COPY ./open-hackathon-client /opt/open-hackathon/open-hackathon-client
+
+#pip
+RUN pip install -r /opt/open-hackathon/open-hackathon-client/requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple --no-cache-dir
+
 #config
 RUN mv /opt/open-hackathon/open-hackathon-client/src/client/config_docker.py /opt/open-hackathon/open-hackathon-client/src/client/config.py
+
 #init
 COPY ./deploy/hackathon-docker/docker-entrypoint-client.sh /opt/open-hackathon
 
