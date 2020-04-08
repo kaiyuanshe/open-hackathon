@@ -3,6 +3,7 @@
 This file is covered by the LICENSING file in the root of this project.
 """
 import os
+
 # "javascript" section for javascript. see @app.route('/config.js') in app/views.py
 
 # oauth constants
@@ -96,7 +97,7 @@ Config = {
     "storage": {
         "type": "local",
         "size_limit_kilo_bytes": 5 * 1024,
-        },
+    },
     "email": {
         "host": "",
         "port": 587,

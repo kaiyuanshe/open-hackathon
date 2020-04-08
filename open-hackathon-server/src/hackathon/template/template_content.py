@@ -3,11 +3,7 @@
 This file is covered by the LICENSING file in the root of this project.
 """
 
-import sys
-import yaml
 from collections import defaultdict
-
-sys.path.append("..")
 
 from hackathon.constants import VE_PROVIDER
 from hackathon.template.template_constants import TEMPLATE
@@ -23,55 +19,71 @@ class TemplateContent:
     It's the only type that for template saving and loading.
     """
 
-    def __init__(self, name, description):
+    def __init__(self, name, description, environment_config):
         self.name = name
         self.description = description
+        self.environment = self.__load_environment(environment_config)
+
+        self.provider = self.environment.provider
+
+        # TODO delete
         self.resource = defaultdict(list)
-
         self.cluster_info = None
-
-        # FIXME unit bundle is useless for K8s
         self.units = []
 
     @classmethod
-    def from_yaml(cls, template_model, yaml_content):
-        yamls = yaml.load_all(yaml_content)
-        resource = defaultdict(list)
+    def load_from_template(cls, template):
+        env_cfg = template.unit_config()
+        return TemplateContent(template.name, template.description, env_cfg)
 
-        for y in yamls:
-            kind = str(y['kind']).lower()
-            resource[kind].append(y)
+    @property
+    def docker_image(self):
+        if self.provider != VE_PROVIDER.DOCKER:
+            return ""
+        return self.environment.image
 
-        tc = TemplateContent(template_model.name, template_model.description)
-        tc.resource = resource
+    @property
+    def network_configs(self):
+        if self.provider != VE_PROVIDER.DOCKER:
+            return []
+        return self.environment.network_configs
 
-        return tc
+    @property
+    def yml_template(self):
+        if self.provider != VE_PROVIDER.K8S:
+            return ""
+        return self.environment.yml_template
 
+    @property
+    def template_args(self):
+        if self.provider != VE_PROVIDER.K8S:
+            return {}
+        return self.environment.template_args
+
+    def is_valid(self):
+        if self.provider is None:
+            return False
+
+        if self.provider == VE_PROVIDER.DOCKER:
+            return True
+
+        if self.provider == VE_PROVIDER.K8S:
+            return self.environment.is_valid() is True
+
+    @classmethod
+    def __load_environment(cls, environment_config):
+        provider = int(environment_config[TEMPLATE.VIRTUAL_ENVIRONMENT_PROVIDER])
+        if provider == VE_PROVIDER.DOCKER:
+            return DockerTemplateUnit(environment_config)
+        elif provider == VE_PROVIDER.K8S:
+            return K8STemplateUnit(environment_config)
+        else:
+            raise Exception("unsupported virtual environment provider")
+
+    # todo delete
     def get_resource(self, resource_type):
         # always return a list of resource desc dict or empty
         return self.resource[resource_type]
-
-    # FIXME deprecated this when support K8s ONLY
-    @staticmethod
-    def from_dict(args):
-        name = args[TEMPLATE.TEMPLATE_NAME]
-        description = args[TEMPLATE.DESCRIPTION]
-
-        def convert_to_unit(unit_dict):
-            provider = int(unit_dict[TEMPLATE.VIRTUAL_ENVIRONMENT_PROVIDER])
-            if provider == VE_PROVIDER.DOCKER:
-                return DockerTemplateUnit(unit_dict)
-            elif provider == VE_PROVIDER.AZURE:
-                raise NotImplementedError()
-            elif provider == VE_PROVIDER.K8S:
-                return K8STemplateUnit(unit_dict)
-            else:
-                raise Exception("unsupported virtual environment provider")
-
-        units = list(map(convert_to_unit, args[TEMPLATE.VIRTUAL_ENVIRONMENTS]))
-        tc = TemplateContent(name, description)
-        tc.units = units
-        return tc
 
     # FIXME deprecated this when support K8s ONLY
     def to_dict(self):

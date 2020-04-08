@@ -65,7 +65,6 @@ docs/_build/
 *.pem
 
 #*guacamole.properties
-*config.py
 *.rb~
 *.erb~
 *.json~

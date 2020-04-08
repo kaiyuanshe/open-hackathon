@@ -78,13 +78,6 @@ class TemplateResource(HackathonResource):
         return template_library.delete_template(args['id'])
 
 
-class TemplateCreateByFileResource(HackathonResource):
-    # create template by file
-    @token_required
-    def post(self):
-        return template_library.create_template_by_file()
-
-
 class TemplateListResource(HackathonResource):
     def get(self):
         return template_library.search_template(request.args)
