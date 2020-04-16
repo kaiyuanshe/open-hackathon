@@ -96,6 +96,7 @@ class TestAdminApi(ApiTestCase):
         assert payload
     
     def test_list_hackathon_admin(self, admin1):
+        # not found!
         # self.login(admin1)
         # self.client.get("/api/admin/hackathon/adminstrator/list")
         pass
@@ -109,31 +110,27 @@ class TestAdminApi(ApiTestCase):
         #     "role": 1,
         #     "remark": "test"
         # }
-        # self.client.post('/api/admin/hackathon/adminstrator', json_data=data)
+        # self.client.post('/api/admin/hackathon/administrator', json_data=data)
         # assert payload['code'] == 200
         pass
 
     def test_update_hackathon(self, admin1):
-        # not found!
-        # self.login(admin1)
-        # data = {
-        #     "id": str(admin1.id),
-        #     "role": 1,
-        #     "remark": "test"
-        # }
-        # payload = self.client.put("/api/admin/hackathon/adminstrator", json_data=data)
-        # assert payload['code'] == 200
-        pass
-
-    def test_delete_hackathon_admin(self, admin1):
-        # ok
+        # ok but not found json file!
         self.login(admin1)
         data = {
-            "id": str(admin1.id)
+            'id': str(admin1.id)
         }
-        self.client.delete('/api/admin/hackathon/adminstrator', json_data=data)
-        assert payload['code'] == 200
-        pass
+        payload = self.client.put("/api/admin/hackathon", json_data=data)
+        assert payload
+        
+    def test_delete_hackathon_admin(self, admin1):
+        # ok but not found json file!
+        self.login(admin1)
+        data = {
+            'name':'test'
+        }
+        payload = self.client.delete('/api/admin/hackathon/administrator', json_data=data)
+        assert payload
 
     def test_get_team_score(self, admin1):
         self.login(admin1)
@@ -146,22 +143,45 @@ class TestAdminApi(ApiTestCase):
 
     def test_list_user(self, admin1):
         self.login(admin1)
-        self.client.get("/api/user/show/list")
+        # self.client.get("/api/user/show/list")
 
     def test_list_host_server(self, admin1):
+        # ok but not found json file
         self.login(admin1)
+        payload = self.client.get('/api/admin/hostserver')
+        assert payload
 
     def test_create_host_server(self, admin1):
+        # ok but not found json file
         self.login(admin1)
+        data = {
+            'name':'test'
+        }
+        payload = self.client.post('/api/admin/hostserver', json_data=data)
+        assert payload
 
     def test_update_host_server(self, admin1):
+        # ok but not found json file
         self.login(admin1)
+        data = {
+            'id': str(admin1.id)
+        }
+        payload = self.client.put('/api/admin/hostserver', json_data=data)
+        assert payload
 
     def test_delete_host_server(self, admin1):
+        # ok but not found json file
         self.login(admin1)
+        data = {
+            'id': str(admin1.id)
+        }
+        payload = self.client.delete('/api/admin/hostserver', json_data=data)
+        assert payload
+
 
     def test_get_host_server(self, admin1):
         self.login(admin1)
+        
 
     def test_create_hackathon_notice(self, admin1):
         # ok
