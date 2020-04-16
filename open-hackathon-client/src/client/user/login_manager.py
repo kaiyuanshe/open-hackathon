@@ -63,7 +63,8 @@ class LoginManagerHelper():
         data = {
             "provider": LOGIN_PROVIDER.DB,
             "username": request.form['username'],
-            "password": encode(request.form['password'])
+            "password": encode(request.form['password']),
+            "code": "user_load"
         }
 
         return self.__remote_login(data)
@@ -71,9 +72,13 @@ class LoginManagerHelper():
     def __remote_login(self, data):
         try:
             req = requests.post(self.login_url, json=data, headers=self.headers)
+            print("============login_url==========", self.login_url)
+            print("============data=========", data)
+            print("=============headers==========", self.headers)
             resp = req.json()
             if resp:
                 # if login isn't successful, it will return None
+                print("=========resp=========", resp)
                 login_user = User(resp["user"])
                 token = resp["token"]
                 log.debug("Login successfully %s" % login_user.get_user_id())
