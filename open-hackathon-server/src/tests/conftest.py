@@ -34,8 +34,14 @@ def user2():
 @pytest.fixture(scope="class")
 def admin1():
     # return new admin named one
-    return add_super_user("admin_one", "admin_one", "test_password")
-
+    admin_one = User(
+        name="admin_one",
+        nickname="admin_one",
+        avatar_url="/static/pic/monkey-32-32px.png",
+        is_super=True)
+    admin_one.set_password("test_password")
+    admin_one.save()
+    return admin_one
 
 @pytest.fixture(scope="class")
 def default_template(user1):
@@ -53,16 +59,3 @@ def default_template(user1):
     )
     tmpl.save()
     return tmpl
-
-# @pytest.fixture(scope='class')
-# def default_admin(admin1):
-#     adminmsg = UserHackathon(
-#         user = 'test_default_admin',
-#         # hackathon = ReferenceField(Hackathon)
-#         role = 1  # 0-visitor 1-admin 2-judge 3-competitor
-#         status = 1  # 0-not approved user 1-approved user 2-refused user 3-auto approved user
-#         like = True,
-#         assets = {},
-#         remark = 'test'
-#         # deleted = BooleanField(default=False)
-#     )
