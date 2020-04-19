@@ -24,6 +24,9 @@ class Provider:
     def delete_expr(self, hackathon, experiment, template_content):
         pass
 
+    def wait_for_ready(self):
+        pass
+
 
 def registry_provider(name, provider):
     _provider_classes[name] = provider

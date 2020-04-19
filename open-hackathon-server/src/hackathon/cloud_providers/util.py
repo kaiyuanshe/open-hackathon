@@ -26,5 +26,9 @@ class BaseProvider(abc.ABC):
     def delete_instance(self, ins_cfg):
         pass
 
+    @abc.abstractmethod
+    def wait_instance_ready(self, ins_cfg, timeout=None):
+        pass
+
 
 Instance = namedtuple("Instance", field_names=[])
