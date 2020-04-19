@@ -2,15 +2,10 @@
 """
 This file is covered by the LICENSING file in the root of this project.
 """
-
-import random
-import sys
-
-sys.path.append("..")
 import uuid
 from datetime import timedelta
 
-from werkzeug.exceptions import PreconditionFailed, InternalServerError, BadRequest
+from werkzeug.exceptions import PreconditionFailed, InternalServerError
 from flask import g, request
 import lxml
 from lxml.html.clean import Cleaner
@@ -20,8 +15,8 @@ from hackathon.hmongo.models import Hackathon, UserHackathon, DockerHostServer, 
     Organization, Award, Team
 from hackathon.hackathon_response import internal_server_error, ok, not_found, general_error, HTTP_CODE, bad_request
 from hackathon.constants import HACKATHON_CONFIG, HACK_USER_TYPE, HACK_STATUS, HACK_USER_STATUS, HTTP_HEADER, \
-    FILE_TYPE, HACK_TYPE, HACKATHON_STAT, DockerHostServerStatus, HACK_NOTICE_CATEGORY, HACK_NOTICE_EVENT, \
-    ORGANIZATION_TYPE, CLOUD_PROVIDER
+    HACK_TYPE, HACKATHON_STAT, DockerHostServerStatus, HACK_NOTICE_CATEGORY, HACK_NOTICE_EVENT, \
+    CLOUD_PROVIDER
 from hackathon import RequiredFeature, Component, Context
 from hackathon.worker.hackathon_tasks import check_and_pre_allocate_expr
 

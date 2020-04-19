@@ -3,12 +3,9 @@ from mongoengine import Q
 
 from hackathon import RequiredFeature
 from hackathon.hmongo.models import Experiment, Hackathon
-from hackathon.template.template_content import TemplateContent
-from hackathon.cloud_providers import Provider, ProviderError
 from hackathon.constants import HACK_STATUS, HACKATHON_CONFIG, EStatus
 
 from . import celery_app as worker
-from .expr_tasks import start_new_expr
 
 LOG = logging.getLogger(__name__)
 

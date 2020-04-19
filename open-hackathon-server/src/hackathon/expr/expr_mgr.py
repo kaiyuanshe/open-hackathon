@@ -7,9 +7,9 @@ from datetime import timedelta
 from werkzeug.exceptions import PreconditionFailed, NotFound
 from mongoengine import Q
 
-from hackathon import Component, RequiredFeature, Context
-from hackathon.constants import EStatus, VERemoteProvider, VE_PROVIDER, VEStatus, CLOUD_PROVIDER, HACKATHON_CONFIG
-from hackathon.hmongo.models import Experiment, User, Hackathon
+from hackathon import Component, RequiredFeature
+from hackathon.constants import EStatus, VERemoteProvider, VE_PROVIDER, VEStatus, HACKATHON_CONFIG
+from hackathon.hmongo.models import Experiment, User
 from hackathon.hackathon_response import not_found, ok
 from hackathon.worker.expr_tasks import start_new_expr, stop_expr
 
