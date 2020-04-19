@@ -1,57 +1,145 @@
-# -*- coding: utf-8 -*-
-"""
-This file is covered by the LICENSING file in the root of this project.
-"""
-
+import time
+import logging
+import yaml as yaml_tool
 from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning, HTTPError
-
-import yaml as yaml_tool
 from kubernetes import client
 from kubernetes.client.rest import ApiException
 
 from hackathon.constants import HEALTH, HEALTH_STATUS, K8S_DEPLOYMENT_STATUS
-from .service_adapter import ServiceAdapter
 
-from .errors import DeploymentError, ServiceError, StatefulSetError, PVCError
+from .util import BaseProvider
 
-__all__ = ["K8SServiceAdapter"]
+LOG = logging.getLogger(__name__)
+DEFAULT_CONNECT_TIMEOUT = 60
+DEFAULT_RESYNC_TIME = 10
+
+# 忽略自签名 ca 的告警日志
 disable_warnings(InsecureRequestWarning)
 
 
-class K8SServiceAdapter(ServiceAdapter):
-    def __init__(self, api_url, token, namespace):
+class K8sError(Exception):
+    pass
+
+
+class K8sResourceError(K8sError):
+    err_id = ""
+    err_msg_format = "{}: {}"
+
+    def __init__(self, err_msg):
+        self._err_msg = err_msg
+
+    @property
+    def err_msg(self):
+        return self.err_msg_format.format(self.err_id, self._err_msg)
+
+
+class DeploymentError(K8sResourceError):
+    err_id = "K8s deployment error"
+
+
+class ServiceError(K8sResourceError):
+    err_id = "K8s service error"
+
+
+class StatefulSetError(K8sResourceError):
+    err_id = "K8s StatefulSet error"
+
+
+class PVCError(K8sResourceError):
+    err_id = "K8s PersistentVolumeClaims error"
+
+
+class K8sProvider(BaseProvider):
+    def __init__(self, cfg):
+        super(K8sProvider, self).__init__(cfg)
+
+        self.namespace = cfg['namespace']
+        self.api_url = cfg['api_url']
+        self.token = cfg['token']
+
         configuration = client.Configuration()
-        configuration.host = api_url
-        configuration.api_key['authorization'] = 'bearer ' + token
-        # FIXME import ca cert file?
+        configuration.host = self.api_url
+        configuration.api_key['authorization'] = 'bearer ' + self.token
+
+        # TODO support ca
         configuration.verify_ssl = False
+        self.configuration = configuration
 
-        self.namespace = namespace
-        self.api_url = api_url
-        self.api_client = client.ApiClient(configuration)
-        super(K8SServiceAdapter, self).__init__(self.api_client)
+        self.api_client = None
 
-    def ping(self, timeout=20):
-        report = self.report_health(timeout)
-        return report[HEALTH.STATUS] == HEALTH_STATUS.OK
-
-    def report_health(self, timeout=20):
+    def connect(self, timeout=DEFAULT_CONNECT_TIMEOUT):
         try:
             api_instance = client.CoreV1Api(self.api_client)
             api_instance.list_namespaced_pod(self.namespace, timeout_seconds=timeout)
-            return {HEALTH.STATUS: HEALTH_STATUS.OK}
+            return True
         except ApiException as e:
-            self.log.error(e)
-            return {
-                HEALTH.STATUS: HEALTH_STATUS.ERROR,
-                HEALTH.DESCRIPTION: "Get Pod info error: {}".format(e),
-            }
+            raise K8sError("Connect k8s api server error: {}".format(e))
         except HTTPError:
-            return {
-                HEALTH.STATUS: HEALTH_STATUS.ERROR,
-                HEALTH.DESCRIPTION: "Connect K8s ApiServer {} error: connection timeout".format(self.api_url),
-            }
+            raise K8sError("Connect K8s ApiServer {} error: connection timeout".format(self.api_url))
+
+    def create_instance(self, ve_cfg):
+        ins_cfg = ve_cfg.k8s_resource
+        try:
+            for pvc in ins_cfg.persistent_volume_claims:
+                self.create_k8s_pvc(pvc)
+
+            for i, s in enumerate(ins_cfg.services):
+                svc_name = self.create_k8s_service(s)
+                # overwrite service config and get the public port from K8s
+                ins_cfg.services[i] = yaml_tool.dump(self.get_service_by_name(svc_name))
+
+            for d in ins_cfg.deployments:
+                self.create_k8s_deployment(d)
+
+            for s in ins_cfg.stateful_sets:
+                self.create_k8s_statefulset(s)
+        except Exception as e:
+            LOG.error("k8s_service_start_failed: {}".format(e))
+        return ins_cfg
+
+    def start_instance(self, ve_cfg):
+        # TODO
+        pass
+
+    def pause_instance(self, ve_cfg):
+        # TODO
+        pass
+
+    def delete_instance(self, ve_cfg):
+        ins_cfg = ve_cfg.k8s_resource
+        for d in ins_cfg.deployments:
+            self.delete_k8s_deployment(d['metadata']['name'])
+
+        for pvc in ins_cfg.persistent_volume_claims:
+            self.delete_k8s_pvc(pvc['metadata']['name'])
+
+        for s in ins_cfg.stateful_sets:
+            self.delete_k8s_statefulset(s['metadata']['name'])
+
+        for s in ins_cfg.services:
+            self.delete_k8s_service(s['metadata']['name'])
+
+    def wait_instance_ready(self, ve_cfg, timeout=None):
+        ins_cfg = ve_cfg.k8s_resource
+        start_at = time.time()
+        while True:
+            all_ready = True
+            for d in ins_cfg.deployments:
+                if all_ready and self.get_deployment_status(d['metadata']['name']) != K8S_DEPLOYMENT_STATUS.AVAILABLE:
+                    all_ready = False
+                    continue
+
+            for s in ins_cfg.stateful_sets:
+                # TODO check statfulSet status
+                pass
+
+            if all_ready:
+                return all_ready
+
+            time.sleep(DEFAULT_RESYNC_TIME)
+            if timeout is not None and time.time() > start_at + timeout:
+                raise RuntimeError("Start deployment error: Timeout")
 
     ###
     # Deployment
@@ -68,7 +156,7 @@ class K8SServiceAdapter(ServiceAdapter):
         try:
             ret = apps_v1_group.list_namespaced_deployment(self.namespace, **kwargs)
         except ApiException as e:
-            self.log.error(e)
+            LOG.error(e)
             return []
 
         for i in ret.items:
@@ -82,7 +170,7 @@ class K8SServiceAdapter(ServiceAdapter):
         api_instance = client.AppsV1Api(self.api_client)
         if isinstance(yaml, str) or isinstance(yaml, str):
             # Only support ONE deployment yaml
-            yaml = yaml_tool.load(yaml)
+            yaml = yaml_tool.safe_load(yaml)
         assert isinstance(yaml, dict), "Start a deployment without legal yaml."
         metadata = yaml.get("metadata", {})
         deploy_name = metadata.get("name")
@@ -93,7 +181,7 @@ class K8SServiceAdapter(ServiceAdapter):
 
             api_instance.create_namespaced_deployment(self.namespace, yaml, async_req=False)
         except ApiException as e:
-            self.log.error("Start deployment error: {}".format(e))
+            LOG.error("Start deployment error: {}".format(e))
             raise DeploymentError("Start deployment error: {}".format(e))
         return deploy_name
 
@@ -129,7 +217,7 @@ class K8SServiceAdapter(ServiceAdapter):
             return deployment_name
         _spec.replicas = 1
         api_instance.patch_namespaced_deployment(deployment_name, self.namespace, _deploy)
-        self.log.info("Started existed deployment: {}".format(deployment_name))
+        LOG.info("Started existed deployment: {}".format(deployment_name))
 
     def pause_k8s_deployment(self, deployment_name):
         _deploy = self.get_deployment_by_name(deployment_name)
@@ -139,18 +227,18 @@ class K8SServiceAdapter(ServiceAdapter):
         try:
             api_instance.patch_namespaced_deployment(deployment_name, self.namespace, _deploy)
         except ApiException as e:
-            self.log.error("Pause deployment error: {}".format(e))
+            LOG.error("Pause deployment error: {}".format(e))
             raise DeploymentError("Pause {} error {}".format(deployment_name, e))
-        self.log.info("Paused existed deployment: {}".format(deployment_name))
+        LOG.info("Paused existed deployment: {}".format(deployment_name))
 
     def delete_k8s_deployment(self, deployment_name):
         api_instance = client.AppsV1Api(self.api_client)
         try:
             api_instance.delete_namespaced_deployment(deployment_name, self.namespace)
         except ApiException as e:
-            self.log.error("Delete deployment error: {}".format(e))
+            LOG.error("Delete deployment error: {}".format(e))
             raise DeploymentError("Delete {} error {}".format(deployment_name, e))
-        self.log.info("Deleted existed deployment: {}".format(deployment_name))
+        LOG.info("Deleted existed deployment: {}".format(deployment_name))
 
     ###
     # Service
@@ -169,7 +257,7 @@ class K8SServiceAdapter(ServiceAdapter):
     def create_k8s_service(self, yaml):
         if isinstance(yaml, str) or isinstance(yaml, str):
             # Only support ONE deployment yaml
-            yaml = yaml_tool.load(yaml)
+            yaml = yaml_tool.safe_load(yaml)
         assert isinstance(yaml, dict), "Create a service without legal yaml."
 
         api_instance = client.CoreV1Api(self.api_client)
@@ -177,7 +265,7 @@ class K8SServiceAdapter(ServiceAdapter):
             svc = api_instance.create_namespaced_service(self.namespace, yaml)
             return svc.to_dict()['metadata']['name']
         except ApiException as e:
-            self.log.error("Create service error: {}".format(e))
+            LOG.error("Create service error: {}".format(e))
             raise ServiceError("Create service error: {}".format(e))
 
     def delete_k8s_service(self, service_name):
@@ -185,7 +273,7 @@ class K8SServiceAdapter(ServiceAdapter):
         try:
             api_instance.delete_namespaced_service(service_name, self.namespace)
         except ApiException as e:
-            self.log.error("Delete service error: {}".format(e))
+            LOG.error("Delete service error: {}".format(e))
             raise ServiceError("Delete service error: {}".format(e))
 
     ###
@@ -195,14 +283,14 @@ class K8SServiceAdapter(ServiceAdapter):
     def create_k8s_statefulset(self, yaml):
         if isinstance(yaml, str) or isinstance(yaml, str):
             # Only support ONE deployment yaml
-            yaml = yaml_tool.load(yaml)
+            yaml = yaml_tool.safe_load(yaml)
         assert isinstance(yaml, dict), "Create a statefulset without legal yaml."
 
         api_instance = client.AppsV1Api(self.api_client)
         try:
             api_instance.create_namespaced_stateful_set(self.namespace, yaml)
         except ApiException as e:
-            self.log.error("Create StatefulSet error: {}".format(e))
+            LOG.error("Create StatefulSet error: {}".format(e))
             raise StatefulSetError("Create StatefulSet error: {}".format(e))
 
     def delete_k8s_statefulset(self, statefulset_name):
@@ -210,7 +298,7 @@ class K8SServiceAdapter(ServiceAdapter):
         try:
             api_instance.delete_namespaced_stateful_set(statefulset_name, self.namespace)
         except ApiException as e:
-            self.log.error("Delete StatefulSet error: {}".format(e))
+            LOG.error("Delete StatefulSet error: {}".format(e))
             raise StatefulSetError("Delete StatefulSet error: {}".format(e))
 
     ###
@@ -220,14 +308,14 @@ class K8SServiceAdapter(ServiceAdapter):
     def create_k8s_pvc(self, yaml):
         if isinstance(yaml, str) or isinstance(yaml, str):
             # Only support ONE deployment yaml
-            yaml = yaml_tool.load(yaml)
+            yaml = yaml_tool.safe_load(yaml)
         assert isinstance(yaml, dict), "Create a PVC without legal yaml."
 
         api_instance = client.CoreV1Api(self.api_client)
         try:
             api_instance.create_namespaced_persistent_volume_claim(self.namespace, yaml)
         except ApiException as e:
-            self.log.error("Create PVC error: {}".format(e))
+            LOG.error("Create PVC error: {}".format(e))
             raise PVCError("Create PVC error: {}".format(e))
 
     def delete_k8s_pvc(self, pvc_name):
@@ -235,5 +323,5 @@ class K8SServiceAdapter(ServiceAdapter):
         try:
             api_instance.delete_namespaced_persistent_volume_claim(pvc_name, self.namespace)
         except ApiException as e:
-            self.log.error("Delete PVC error: {}".format(e))
+            LOG.error("Delete PVC error: {}".format(e))
             raise PVCError("Delete PVC error: {}".format(e))

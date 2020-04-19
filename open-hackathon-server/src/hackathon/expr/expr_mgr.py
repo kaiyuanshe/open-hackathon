@@ -2,20 +2,16 @@
 """
 This file is covered by the LICENSING file in the root of this project.
 """
-
-import sys
-
-sys.path.append("..")
 from datetime import timedelta
 
 from werkzeug.exceptions import PreconditionFailed, NotFound
 from mongoengine import Q
 
-from hackathon import Component, RequiredFeature, Context
-from hackathon.constants import EStatus, VERemoteProvider, VE_PROVIDER, VEStatus, ReservedUser, \
-    HACK_NOTICE_EVENT, HACK_NOTICE_CATEGORY, CLOUD_PROVIDER, HACKATHON_CONFIG
-from hackathon.hmongo.models import Experiment, User, Hackathon, UserHackathon, Template
+from hackathon import Component, RequiredFeature
+from hackathon.constants import EStatus, VERemoteProvider, VE_PROVIDER, VEStatus, HACKATHON_CONFIG
+from hackathon.hmongo.models import Experiment, User
 from hackathon.hackathon_response import not_found, ok
+from hackathon.worker.expr_tasks import start_new_expr, stop_expr
 
 __all__ = ["ExprManager"]
 
@@ -78,9 +74,8 @@ class ExprManager(Component):
         self.log.debug("begin to stop %s" % str(expr_id))
         expr = Experiment.objects(id=expr_id).first()
         if expr is not None:
-            starter = self.get_starter(expr.hackathon, expr.template)
-            if starter:
-                starter.stop_expr(Context(experiment_id=expr.id, experiment=expr))
+            hackathon = expr.hackathon
+            stop_expr.delay(str(hackathon.id), str(expr.id))
             self.log.debug("experiment %s ended success" % expr_id)
             return ok('OK')
         else:
@@ -88,22 +83,9 @@ class ExprManager(Component):
 
     def get_expr_status_and_confirm_starting(self, expr_id):
         expr = Experiment.objects(id=expr_id).first()
-        if expr:
-            return self.__report_expr_status(expr, isToConfirmExprStarting=True)
-        else:
+        if not expr:
             return not_found('Experiment Not found')
-
-    def check_expr_status(self, experiment):
-        # update experiment status
-        virtual_environment_list = experiment.virtual_environments
-        if all(x.status == VEStatus.RUNNING for x in virtual_environment_list) \
-                and len(virtual_environment_list) == experiment.template.virtual_environment_count:
-            experiment.status = EStatus.RUNNING
-            experiment.save()
-            try:
-                self.template_library.template_verified(experiment.template.id)
-            except:
-                pass
+        return self.__report_expr_status(expr, isToConfirmExprStarting=True)
 
     def get_expr_list_by_hackathon_id(self, hackathon, context):
         # get a list of all experiments' detail
@@ -147,40 +129,6 @@ class ExprManager(Component):
             except Exception as e:
                 self.log.error(e)
 
-    def pre_allocate_expr(self, context):
-        # TODO: too complex, not check
-        hackathon_id = context.hackathon_id
-        self.log.debug("executing pre_allocate_expr for hackathon %s " % hackathon_id)
-        hackathon = Hackathon.objects(id=hackathon_id).first()
-        hackathon_templates = hackathon.templates
-        for template in hackathon_templates:
-            try:
-                template = template
-                pre_num = int(hackathon.config.get(HACKATHON_CONFIG.PRE_ALLOCATE_NUMBER, 1))
-                query = Q(status=EStatus.STARTING) | Q(status=EStatus.RUNNING)
-                curr_num = Experiment.objects(user=None, hackathon=hackathon, template=template).filter(query).count()
-                self.log.debug("pre_alloc_exprs: pre_num is %d, curr_num is %d, remain_num is %d " %
-                               (pre_num, curr_num, pre_num - curr_num))
-
-                # TODO Should support VE_PROVIDER.K8S only in future after k8s Template is supported
-                # if template.provider == VE_PROVIDER.K8S:
-                if curr_num < pre_num:
-                    start_num = Experiment.objects(user=None, template=template, status=EStatus.STARTING).count()
-                    allowed_currency = int(hackathon.config.get(HACKATHON_CONFIG.PRE_ALLOCATE_CONCURRENT, 1))
-                    if start_num >= allowed_currency:
-                        self.log.debug(
-                            "there are already %d Experiments starting, will check later ... " % allowed_currency)
-                        return
-                    else:
-                        remain_num = min(allowed_currency, pre_num) - start_num
-                        self.log.debug(
-                            "no starting template: %s , remain num is %d ... " % (template.name, remain_num))
-                        self.start_pre_alloc_exprs(None, template.name, hackathon.name, remain_num)
-                        break
-            except Exception as e:
-                self.log.error(e)
-                self.log.error("check default experiment failed")
-
     def assign_expr_to_admin(self, expr):
         """assign expr to admin to trun expr into pre_allocate_expr
 
@@ -210,68 +158,40 @@ class ExprManager(Component):
         else:
             raise NotFound("Hackathon with name %s not found" % hackathon_name)
 
-    def get_starter(self, hackathon, template):
-        # load expr starter
-        starter = None
-        if not hackathon or not template:
-            return starter
-
-        # TODO Interim workaround for kubernetes, need real implementation
-        if hackathon.config.get('cloud_provider') == CLOUD_PROVIDER.KUBERNETES:
-            return RequiredFeature("k8s_service")
-
-        if template.provider == VE_PROVIDER.DOCKER:
-            raise NotImplementedError()
-        elif template.provider == VE_PROVIDER.AZURE:
-            raise NotImplementedError()
-        elif template.provider == VE_PROVIDER.K8S:
-            starter = RequiredFeature("k8s_service")
-
-        return starter
-
     def __start_new_expr(self, hackathon, template, user):
-        starter = self.get_starter(hackathon, template)
-
-        if not starter:
-            raise PreconditionFailed("either template not supported or hackathon resource not configured")
-
-        context = starter.start_expr(Context(
+        expr = Experiment(
+            status=EStatus.INIT,
             template=template,
             user=user,
-            hackathon=hackathon,
-            pre_alloc_enabled=False))
+            virtual_environments=[],
+            hackathon=hackathon)
+        expr.save()
 
-        return self.__report_expr_status(context.experiment)
+        template_content = self.template_library.load_template(template)
+        start_new_expr.delay(str(hackathon.id), str(expr.id), template_content)
 
-    def start_pre_alloc_exprs(self, user, template_name, hackathon_name=None, pre_alloc_num=0):
+        return self.__report_expr_status(expr)
+
+    def start_pre_alloc_exprs(self, template_name, hackathon_name=None, pre_alloc_num=0):
         self.log.debug("start_pre_alloc_exprs: %d " % pre_alloc_num)
+        try_create = 0
         if pre_alloc_num == 0:
-            return
+            return try_create
 
         hackathon = self.__verify_hackathon(hackathon_name)
         template = self.__verify_template(hackathon, template_name)
+        template_content = self.template_library.load_template(template)
 
-        starter = self.get_starter(hackathon, template)
-        if not starter:
-            raise PreconditionFailed("either template not supported or hackathon resource not configured")
-
-        while pre_alloc_num > 0:
-            context = starter.start_expr(Context(
-                template=template,
-                user=user,
-                hackathon=hackathon,
-                pre_alloc_enabled=True))
-
-            if context == None:
-                self.log.debug("pre_alloc_num left: %d " % pre_alloc_num)
-                break
-            else:
-                self.__report_expr_status(context.experiment)
-                pre_alloc_num -= 1
-
-    def on_expr_started(self, experiment):
-        hackathon = experiment.hackathon
-        user = experiment.user
+        while pre_alloc_num > try_create:
+            expr = Experiment(status=EStatus.INIT,
+                              template=template,
+                              virtual_environments=[],
+                              hackathon=hackathon)
+            expr.save()
+            start_new_expr.delay(str(hackathon.id), str(expr.id), template_content)
+            try_create += 1
+        self.log.debug("start_pre_alloc_exprs: finish")
+        return try_create
 
     def __report_expr_status(self, expr, isToConfirmExprStarting=False):
         # todo check whether need to restart Window-expr if it shutdown
@@ -399,12 +319,8 @@ class ExprManager(Component):
             self.log.warn("rollback failed due to experiment not found")
             return
 
-        starter = self.get_starter(expr.hackathon, expr.template)
-        if not starter:
-            self.log.warn("rollback failed due to no starter found")
-            return
-
-        return starter.rollback(Context(experiment=expr))
+        hackathon = expr.hackathon
+        stop_expr.delay(str(hackathon.id), str(expr.id))
 
     def __get_expr_with_detail(self, experiment):
         self.__check_expr_real_status(experiment)

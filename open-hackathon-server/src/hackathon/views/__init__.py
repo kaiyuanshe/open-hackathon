@@ -2,11 +2,6 @@
 """
 This file is covered by the LICENSING file in the root of this project.
 """
-
-import sys
-
-sys.path.append("..")
-
 from hackathon import api
 
 from hackathon.views.resources import *

@@ -76,8 +76,11 @@ class HACKATHON_CONFIG:
     RECYCLE_MINUTES = "recycle_minutes"
     PRE_ALLOCATE_ENABLED = "pre_allocate_enabled"
     PRE_ALLOCATE_NUMBER = "pre_allocate_number"
+
+    # TODO delete this: Use MQ and Worker to limit the number of concurrency
     PRE_ALLOCATE_INTERVAL_SECONDS = "pre_allocate_interval_second"
     PRE_ALLOCATE_CONCURRENT = "pre_allocate_concurrent"
+
     FREEDOM_TEAM = "freedom_team"
     CLOUD_PROVIDER = "cloud_provider"
     DEV_PLAN_REQUIRED = "dev_plan_required"
@@ -108,7 +111,6 @@ class VE_PROVIDER:
     DOCKER = 0
     AZURE = 1
     K8S = 3
-
 
 
 class EStatus:
@@ -162,7 +164,6 @@ class ReservedUser:
     """
     DefaultUserID = -1
     DefaultSuperAdmin = 1
-
 
 
 class ADStatus:
@@ -275,7 +276,6 @@ class DHS_QUERY_STATE:
     FAILED = 2
 
 
-
 class ServiceDeploymentSlot:
     """
     the slot of service deployment
@@ -286,7 +286,6 @@ class ServiceDeploymentSlot:
     """
     PRODUCTION = 'production'
     STAGING = 'staging'
-
 
 
 class TCPProtocol:

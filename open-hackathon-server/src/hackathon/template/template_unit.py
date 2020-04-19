@@ -3,8 +3,10 @@
 This file is covered by the LICENSING file in the root of this project.
 """
 
+import abc
 
-class TemplateUnit(object):
+
+class TemplateUnit(abc.ABC):
     """Unit of TemplateContent.
 
     Each unit represents a virtual_environment that can be started or stopped independently"""
@@ -16,5 +18,6 @@ class TemplateUnit(object):
         """
         self.provider = provider
 
+    @abc.abstractmethod
     def gen_k8s_yaml(self, expr_name):
         raise NotImplemented

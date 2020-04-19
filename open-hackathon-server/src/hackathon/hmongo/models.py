@@ -3,13 +3,15 @@
 This file is covered by the LICENSING file in the root of this project.
 """
 
+import yaml
 import hashlib
+from datetime import datetime
 from mongoengine import QuerySet, DateTimeField, DynamicDocument, EmbeddedDocument, StringField, \
     BooleanField, IntField, DynamicEmbeddedDocument, EmbeddedDocumentListField, URLField, ListField, \
     EmbeddedDocumentField, ReferenceField, UUIDField, DictField, DynamicField, PULL
 
 from hackathon.util import get_now, make_serializable
-from hackathon.constants import TEMPLATE_STATUS, HACK_USER_TYPE, VE_PROVIDER
+from hackathon.constants import TEMPLATE_STATUS, HACK_USER_TYPE, VE_PROVIDER, HACK_STATUS, HACKATHON_CONFIG
 from hackathon.hmongo.pagination import Pagination
 from hackathon import app
 
@@ -264,7 +266,7 @@ class Hackathon(HDocumentBase):
     location = StringField()
     description = StringField()
     banners = ListField()
-    status = IntField(default=0)  # 0-new 1-online 2-offline 3-apply-online
+    status = IntField(default=HACK_STATUS.DRAFT)  # 0-new 1-online 2-offline 3-apply-online
     creator = ReferenceField(User)
     config = DictField()  # max_enrollment, auto_approve, login_provider
     type = IntField(default=1)  # enum.HACK_TYPE
@@ -284,6 +286,23 @@ class Hackathon(HDocumentBase):
 
     def __init__(self, **kwargs):
         super(Hackathon, self).__init__(**kwargs)
+
+    @property
+    def in_progress(self):
+        now = datetime.utcnow()
+        if self.event_end_time < now:
+            return False
+        if self.registration_start_time > now:
+            return False
+        if self.status != HACK_STATUS.ONLINE:
+            return False
+        return True
+
+    @property
+    def enable_pre_allocate(self):
+        if not self.in_progress:
+            return False
+        return self.config.get(HACKATHON_CONFIG.PRE_ALLOCATE_ENABLED, False)
 
 
 class UserHackathon(HDocumentBase):
@@ -465,6 +484,35 @@ class K8sEnvironment(DynamicEmbeddedDocument):
     persistent_volume_claims = ListField()
     services = ListField()
     stateful_sets = ListField()
+
+    @classmethod
+    def load_from_yaml(cls, name, content):
+        deployments = []
+        services = []
+
+        # TODO
+        persistent_volume_claims = []
+        stateful_sets = []
+
+        resources = yaml.safe_load_all(content)
+
+        for r in resources:
+            if 'Kind' not in r:
+                continue
+
+            if r['Kind'] == "Deployment":
+                deployments.append(r)
+
+            if r['Kind'] == "Service":
+                services.append(r)
+
+        return cls(
+            name=name,
+            deployments=deployments,
+            persistent_volume_claims=persistent_volume_claims,
+            services=services,
+            stateful_sets=stateful_sets,
+        )
 
 
 class VirtualEnvironment(DynamicEmbeddedDocument):
