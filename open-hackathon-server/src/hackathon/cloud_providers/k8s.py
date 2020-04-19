@@ -18,7 +18,11 @@ DEFAULT_RESYNC_TIME = 10
 disable_warnings(InsecureRequestWarning)
 
 
-class K8sResourceError(Exception):
+class K8sError(Exception):
+    pass
+
+
+class K8sResourceError(K8sError):
     err_id = ""
     err_msg_format = "{}: {}"
 
@@ -30,27 +34,19 @@ class K8sResourceError(Exception):
         return self.err_msg_format.format(self.err_id, self._err_msg)
 
 
-class YmlParseError(K8sResourceError):
-    err_id = "K8s Yaml parse error"
-
-
-class EnvError(K8sResourceError):
-    err_id = "K8s environment error"
-
-
-class DeploymentError(EnvError):
+class DeploymentError(K8sResourceError):
     err_id = "K8s deployment error"
 
 
-class ServiceError(EnvError):
+class ServiceError(K8sResourceError):
     err_id = "K8s service error"
 
 
-class StatefulSetError(EnvError):
+class StatefulSetError(K8sResourceError):
     err_id = "K8s StatefulSet error"
 
 
-class PVCError(EnvError):
+class PVCError(K8sResourceError):
     err_id = "K8s PersistentVolumeClaims error"
 
 
@@ -73,25 +69,14 @@ class K8sProvider(BaseProvider):
         self.api_client = None
 
     def connect(self, timeout=DEFAULT_CONNECT_TIMEOUT):
-        report = self.report_health(timeout)
-        return report[HEALTH.STATUS] == HEALTH_STATUS.OK
-
-    def report_health(self, timeout=20):
         try:
             api_instance = client.CoreV1Api(self.api_client)
             api_instance.list_namespaced_pod(self.namespace, timeout_seconds=timeout)
-            return {HEALTH.STATUS: HEALTH_STATUS.OK}
+            return True
         except ApiException as e:
-            LOG.error("connect k8s api server error: {}".format(e))
-            return {
-                HEALTH.STATUS: HEALTH_STATUS.ERROR,
-                HEALTH.DESCRIPTION: "Get Pod info error: {}".format(e),
-            }
+            raise K8sError("Connect k8s api server error: {}".format(e))
         except HTTPError:
-            return {
-                HEALTH.STATUS: HEALTH_STATUS.ERROR,
-                HEALTH.DESCRIPTION: "Connect K8s ApiServer {} error: connection timeout".format(self.api_url),
-            }
+            raise K8sError("Connect K8s ApiServer {} error: connection timeout".format(self.api_url))
 
     def create_instance(self, ve_cfg):
         ins_cfg = ve_cfg.k8s_resource

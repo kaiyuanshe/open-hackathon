@@ -25,6 +25,7 @@ class TemplateContent:
         self.unit = self.__load_unit(environment_config)
 
         self.provider = self.unit.provider
+        self.provider_cfg = {}
 
         # TODO delete
         self.resource = defaultdict(list)
@@ -34,7 +35,9 @@ class TemplateContent:
     @classmethod
     def load_from_template(cls, template):
         env_cfg = template.unit_config()
-        return TemplateContent(template.name, template.description, env_cfg)
+        provider_cfg = template.k8s_cluster
+        content = TemplateContent(template.name, template.description, env_cfg)
+        content.provider_cfg.update(provider_cfg.dic)
 
     @property
     def docker_image(self):
@@ -79,11 +82,6 @@ class TemplateContent:
             return K8STemplateUnit(environment_config)
         else:
             raise Exception("unsupported virtual environment provider")
-
-    # todo delete
-    def get_resource(self, resource_type):
-        # always return a list of resource desc dict or empty
-        return self.resource[resource_type]
 
     # FIXME deprecated this when support K8s ONLY
     def to_dict(self):
