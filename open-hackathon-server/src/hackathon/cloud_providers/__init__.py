@@ -102,13 +102,13 @@ class Provider:
         raise ProviderError("not found {} instance config".format(self.provider_type))
 
 
-def registry_provider(provider_type, provider_class):
+def register_provider(provider_type, provider_class):
     _provider_classes[provider_type] = provider_class
 
 
-def _registry():
+def _register():
     from .k8s import K8sProvider
-    registry_provider(VE_PROVIDER.K8S, K8sProvider)
+    register_provider(VE_PROVIDER.K8S, K8sProvider)
 
 
-_registry()
+_register()

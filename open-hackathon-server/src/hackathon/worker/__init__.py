@@ -31,7 +31,7 @@ celery_app = Celery(
 celery_app.conf.update(
     CELERY_BROKER_URL=safe_get_config("CELERY_BROKER_URL", ""),
     CELERY_RESULT_BACKEND=safe_get_config("CELERY_RESULT_BACKEND", ""),
-    CELERY_DEFAULT_EXCHANGE='oph',
+    CELERY_DEFAULT_EXCHANGE='ohp',
     CELERYD_CONCURRENCY=20,
     CELERYD_MAX_TASKS_PER_CHILD=50,
     CELERY_DEFAULT_QUEUE='ohp.tasks.queue',
