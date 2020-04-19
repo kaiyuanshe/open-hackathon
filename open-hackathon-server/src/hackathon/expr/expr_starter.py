@@ -34,15 +34,12 @@ class ExprStarter(Component):
         expr.save()
 
         template_content = self.template_library.load_template(context.template)
-        expr.status = EStatus.STARTING
-        expr.save()
-
         # context contains complex object, we need create another serializable one with only simple fields
         new_context = Context(template_content=template_content,
                               template_name=context.template.name,
                               hackathon_id=context.hackathon.id,
                               experiment_id=expr.id,
-                              pre_alloc_enabled = context.pre_alloc_enabled)
+                              pre_alloc_enabled=context.pre_alloc_enabled)
         if context.get("user", None):
             new_context.user_id = context.user.id
         if self._internal_start_expr(new_context):

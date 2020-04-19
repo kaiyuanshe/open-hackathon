@@ -51,7 +51,7 @@ class K8SExprStarter(ExprStarter):
                     status=VEStatus.INIT,
                     remote_provider=VERemoteProvider.Guacamole))
 
-                experiment.status = EStatus.INIT
+                experiment.status = EStatus.STARTING
                 experiment.save()
                 self.log.debug("virtual_environments %s created, creating k8s..." % _env_name)
             self.__schedule_start(context)
