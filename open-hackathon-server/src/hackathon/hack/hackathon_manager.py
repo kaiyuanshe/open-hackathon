@@ -23,6 +23,7 @@ from hackathon.constants import HACKATHON_CONFIG, HACK_USER_TYPE, HACK_STATUS, H
     FILE_TYPE, HACK_TYPE, HACKATHON_STAT, DockerHostServerStatus, HACK_NOTICE_CATEGORY, HACK_NOTICE_EVENT, \
     ORGANIZATION_TYPE, CLOUD_PROVIDER
 from hackathon import RequiredFeature, Component, Context
+from hackathon.worker.hackathon_tasks import check_and_pre_allocate_expr
 
 docker_host_manager = RequiredFeature("docker_host_manager")
 __all__ = ["HackathonManager"]
@@ -272,7 +273,7 @@ class HackathonManager(Component):
 
             # basic xss prevention
             if 'description' in update_items and update_items['description']:
-                #update_items['description'] = self.cleaner.clean_html(update_items['description'])
+                # update_items['description'] = self.cleaner.clean_html(update_items['description'])
                 self.log.debug("hackathon description :" + update_items['description'])
 
             hackathon.modify(**update_items)
@@ -653,13 +654,13 @@ class HackathonManager(Component):
         is_read_filter = Q()
         order_by_condition = '-update_time'
 
-        if hackathon_name: #list notices that belong to specfic hackathon
+        if hackathon_name:  # list notices that belong to specfic hackathon
             hackathon = Hackathon.objects(name=hackathon_name).only('name').first()
             if hackathon:
                 hackathon_filter = Q(hackathon=hackathon)
             else:
                 return not_found('hackathon_name not found')
-        else: #only list online hackathons' notices or notices that not belong to any hackathon
+        else:  # only list online hackathons' notices or notices that not belong to any hackathon
             online_hackathon = Hackathon.objects(status=HACK_STATUS.ONLINE)
             hackathon_filter = Q(hackathon__in=online_hackathon) | Q(hackathon=None)
 
@@ -726,47 +727,13 @@ class HackathonManager(Component):
                                     next_run_time=next_run_time,
                                     minutes=20)
 
-    def __is_pre_allocate_enabled(self, hackathon):
-        if hackathon.event_end_time < self.util.get_now():
-            return False
-        # using registration time for better test before event_start_time
-        if hackathon.registration_start_time > self.util.get_now():
-            return False
-        if hackathon.status != HACK_STATUS.ONLINE:
-            return False
-        if hackathon.config.get(HACKATHON_CONFIG.CLOUD_PROVIDER, CLOUD_PROVIDER.NONE) == CLOUD_PROVIDER.NONE:
-            return False
-        return hackathon.config.get(HACKATHON_CONFIG.PRE_ALLOCATE_ENABLED, False)
-
     def check_hackathon_for_pre_allocate_expr(self):
         """Check all hackathon for pre-allocate
 
         Add an interval job for hackathon if it's pre-allocate is enabled.
         Otherwise try to remove the schedule job
         """
-        hackathon_list = Hackathon.objects()
-        for hack in hackathon_list:
-            job_id = "pre_allocate_expr_" + str(hack.id)
-            is_job_exists = self.scheduler.has_job(job_id)
-            if self.__is_pre_allocate_enabled(hack):
-                if is_job_exists:
-                    self.log.debug("pre_allocate job already exists for hackathon %s" % str(hack.name))
-                    continue
-
-                self.log.debug("add pre_allocate job for hackathon %s" % str(hack.name))
-                next_run_time = self.util.get_now() + timedelta(seconds=(20 * random.random()))
-                pre_allocate_interval = self.__get_pre_allocate_interval(hack)
-                self.scheduler.add_interval(feature="expr_manager",
-                                            method="pre_allocate_expr",
-                                            id=job_id,
-                                            context=Context(hackathon_id=hack.id),
-                                            next_run_time=next_run_time,
-                                            seconds=pre_allocate_interval
-                                            )
-            elif is_job_exists:
-                self.log.debug("remove job for hackathon %s since pre_allocate is disabled" % str(hack.id))
-                self.scheduler.remove_job(job_id)
-        return True
+        check_and_pre_allocate_expr.delay()
 
     def hackathon_online(self, hackathon):
         req = ok()
@@ -825,7 +792,7 @@ class HackathonManager(Component):
 
             detail["user"] = self.user_manager.user_display_info(user)
             detail["user"]["is_admin"] = user.is_super or (
-                user_hackathon and user_hackathon.role == HACK_USER_TYPE.ADMIN)
+                    user_hackathon and user_hackathon.role == HACK_USER_TYPE.ADMIN)
 
             # TODO: we need to review those items one by one to decide the API output
             # asset = self.db.find_all_objects_by(UserHackathonAsset, user_id=user.id, hackathon_id=hackathon.id)
@@ -927,28 +894,6 @@ class HackathonManager(Component):
             raise InternalServerError("fail to create the default administrator")
 
         return new_hack
-
-    def __get_pre_allocate_interval(self, hackathon):
-        interval = self.get_basic_property(hackathon, HACKATHON_CONFIG.PRE_ALLOCATE_INTERVAL_SECONDS)
-        if interval:
-            return int(interval)
-        else:
-            return 300 + random.random() * 50
-
-    def __get_hackathon_configs(self, hackathon):
-
-        def __internal_get_config():
-            configs = {}
-            for c in hackathon.configs.all():
-                configs[c.key] = c.value
-            return configs
-
-        cache_key = self.__get_config_cache_key(hackathon)
-        return self.cache.get_cache(key=cache_key, createfunc=__internal_get_config)
-
-    def __get_hackathon_organizers(self, hackathon):
-        organizers = self.db.find_all_objects_by(HackathonOrganizer, hackathon_id=hackathon.id)
-        return [o.dic() for o in organizers]
 
     def __parse_update_items(self, args, hackathon):
         """Parse properties that need to update

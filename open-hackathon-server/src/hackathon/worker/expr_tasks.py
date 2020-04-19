@@ -7,7 +7,6 @@ from hackathon.cloud_providers import Provider, ProviderError
 
 from . import celery_app as worker
 
-template_library = RequiredFeature("template_library")
 LOG = logging.getLogger(__name__)
 
 

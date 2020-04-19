@@ -11,7 +11,7 @@ from hackathon import Component, RequiredFeature, Context
 from hackathon.constants import EStatus, VERemoteProvider, VE_PROVIDER, VEStatus, CLOUD_PROVIDER, HACKATHON_CONFIG
 from hackathon.hmongo.models import Experiment, User, Hackathon
 from hackathon.hackathon_response import not_found, ok
-from hackathon.worker.expr_tasks import start_new_expr, stop_expr, clean_resources
+from hackathon.worker.expr_tasks import start_new_expr, stop_expr
 
 __all__ = ["ExprManager"]
 
@@ -129,40 +129,6 @@ class ExprManager(Component):
             except Exception as e:
                 self.log.error(e)
 
-    def pre_allocate_expr(self, context):
-        # TODO: too complex, not check
-        hackathon_id = context.hackathon_id
-        self.log.debug("executing pre_allocate_expr for hackathon %s " % hackathon_id)
-        hackathon = Hackathon.objects(id=hackathon_id).first()
-        hackathon_templates = hackathon.templates
-        for template in hackathon_templates:
-            try:
-                template = template
-                pre_num = int(hackathon.config.get(HACKATHON_CONFIG.PRE_ALLOCATE_NUMBER, 1))
-                query = Q(status=EStatus.STARTING) | Q(status=EStatus.RUNNING)
-                curr_num = Experiment.objects(user=None, hackathon=hackathon, template=template).filter(query).count()
-                self.log.debug("pre_alloc_exprs: pre_num is %d, curr_num is %d, remain_num is %d " %
-                               (pre_num, curr_num, pre_num - curr_num))
-
-                # TODO Should support VE_PROVIDER.K8S only in future after k8s Template is supported
-                # if template.provider == VE_PROVIDER.K8S:
-                if curr_num < pre_num:
-                    start_num = Experiment.objects(user=None, template=template, status=EStatus.STARTING).count()
-                    allowed_currency = int(hackathon.config.get(HACKATHON_CONFIG.PRE_ALLOCATE_CONCURRENT, 1))
-                    if start_num >= allowed_currency:
-                        self.log.debug(
-                            "there are already %d Experiments starting, will check later ... " % allowed_currency)
-                        return
-                    else:
-                        remain_num = min(allowed_currency, pre_num) - start_num
-                        self.log.debug(
-                            "no starting template: %s , remain num is %d ... " % (template.name, remain_num))
-                        self.start_pre_alloc_exprs(template.name, hackathon.name, remain_num)
-                        break
-            except Exception as e:
-                self.log.error(e)
-                self.log.error("check default experiment failed")
-
     def assign_expr_to_admin(self, expr):
         """assign expr to admin to trun expr into pre_allocate_expr
 
@@ -208,23 +174,24 @@ class ExprManager(Component):
 
     def start_pre_alloc_exprs(self, template_name, hackathon_name=None, pre_alloc_num=0):
         self.log.debug("start_pre_alloc_exprs: %d " % pre_alloc_num)
+        try_create = 0
         if pre_alloc_num == 0:
-            return
+            return try_create
 
         hackathon = self.__verify_hackathon(hackathon_name)
         template = self.__verify_template(hackathon, template_name)
         template_content = self.template_library.load_template(template)
 
-        while pre_alloc_num > 0:
+        while pre_alloc_num > try_create:
             expr = Experiment(status=EStatus.INIT,
                               template=template,
                               virtual_environments=[],
                               hackathon=hackathon)
             expr.save()
             start_new_expr.delay(str(hackathon.id), str(expr.id), template_content)
-            pre_alloc_num -= 1
-
+            try_create += 1
         self.log.debug("start_pre_alloc_exprs: finish")
+        return try_create
 
     def __report_expr_status(self, expr, isToConfirmExprStarting=False):
         # todo check whether need to restart Window-expr if it shutdown
