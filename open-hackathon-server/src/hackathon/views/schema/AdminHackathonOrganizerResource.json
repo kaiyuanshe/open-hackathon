@@ -14,7 +14,7 @@
         }
       }
     },
-    "update": {
+    "put": {
       "input": {
         "title": "request to update an existing hackathon organizer",
         "type": "object",

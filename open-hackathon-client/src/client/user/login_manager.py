@@ -63,7 +63,8 @@ class LoginManagerHelper():
         data = {
             "provider": LOGIN_PROVIDER.DB,
             "username": request.form['username'],
-            "password": encode(request.form['password'])
+            "password": encode(request.form['password']),
+            "code": "user_load"
         }
 
         return self.__remote_login(data)

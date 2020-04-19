@@ -1,7 +1,7 @@
 import pytest
 
 from hackathon.constants import VE_PROVIDER, TEMPLATE_STATUS
-from hackathon.hmongo.models import User, Template
+from hackathon.hmongo.models import User, Template, UserHackathon
 from hackathon.hmongo.database import add_super_user
 
 
@@ -34,8 +34,14 @@ def user2():
 @pytest.fixture(scope="class")
 def admin1():
     # return new admin named one
-    return add_super_user("admin_one", "admin_one", "test_password")
-
+    admin_one = User(
+        name="admin_one",
+        nickname="admin_one",
+        avatar_url="/static/pic/monkey-32-32px.png",
+        is_super=True)
+    admin_one.set_password("test_password")
+    admin_one.save()
+    return admin_one
 
 @pytest.fixture(scope="class")
 def default_template(user1):
