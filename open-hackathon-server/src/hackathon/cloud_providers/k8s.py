@@ -93,7 +93,8 @@ class K8sProvider(BaseProvider):
                 HEALTH.DESCRIPTION: "Connect K8s ApiServer {} error: connection timeout".format(self.api_url),
             }
 
-    def create_instance(self, ins_cfg):
+    def create_instance(self, ve_cfg):
+        ins_cfg = ve_cfg.k8s_resource
         try:
             for pvc in ins_cfg.persistent_volume_claims:
                 self.create_k8s_pvc(pvc)
@@ -112,15 +113,16 @@ class K8sProvider(BaseProvider):
             LOG.error("k8s_service_start_failed: {}".format(e))
         return ins_cfg
 
-    def start_instance(self, ins_cfg):
+    def start_instance(self, ve_cfg):
         # TODO
         pass
 
-    def pause_instance(self, ins_cfg):
+    def pause_instance(self, ve_cfg):
         # TODO
         pass
 
-    def delete_instance(self, ins_cfg):
+    def delete_instance(self, ve_cfg):
+        ins_cfg = ve_cfg.k8s_resource
         for d in ins_cfg.deployments:
             self.delete_k8s_deployment(d['metadata']['name'])
 
@@ -133,7 +135,8 @@ class K8sProvider(BaseProvider):
         for s in ins_cfg.services:
             self.delete_k8s_service(s['metadata']['name'])
 
-    def wait_instance_ready(self, ins_cfg, timeout=None):
+    def wait_instance_ready(self, ve_cfg, timeout=None):
+        ins_cfg = ve_cfg.k8s_resource
         start_at = time.time()
         while True:
             all_ready = True
@@ -182,7 +185,7 @@ class K8sProvider(BaseProvider):
         api_instance = client.AppsV1Api(self.api_client)
         if isinstance(yaml, str) or isinstance(yaml, str):
             # Only support ONE deployment yaml
-            yaml = yaml_tool.load(yaml)
+            yaml = yaml_tool.safe_load(yaml)
         assert isinstance(yaml, dict), "Start a deployment without legal yaml."
         metadata = yaml.get("metadata", {})
         deploy_name = metadata.get("name")
@@ -269,7 +272,7 @@ class K8sProvider(BaseProvider):
     def create_k8s_service(self, yaml):
         if isinstance(yaml, str) or isinstance(yaml, str):
             # Only support ONE deployment yaml
-            yaml = yaml_tool.load(yaml)
+            yaml = yaml_tool.safe_load(yaml)
         assert isinstance(yaml, dict), "Create a service without legal yaml."
 
         api_instance = client.CoreV1Api(self.api_client)
@@ -295,7 +298,7 @@ class K8sProvider(BaseProvider):
     def create_k8s_statefulset(self, yaml):
         if isinstance(yaml, str) or isinstance(yaml, str):
             # Only support ONE deployment yaml
-            yaml = yaml_tool.load(yaml)
+            yaml = yaml_tool.safe_load(yaml)
         assert isinstance(yaml, dict), "Create a statefulset without legal yaml."
 
         api_instance = client.AppsV1Api(self.api_client)
@@ -320,7 +323,7 @@ class K8sProvider(BaseProvider):
     def create_k8s_pvc(self, yaml):
         if isinstance(yaml, str) or isinstance(yaml, str):
             # Only support ONE deployment yaml
-            yaml = yaml_tool.load(yaml)
+            yaml = yaml_tool.safe_load(yaml)
         assert isinstance(yaml, dict), "Create a PVC without legal yaml."
 
         api_instance = client.CoreV1Api(self.api_client)

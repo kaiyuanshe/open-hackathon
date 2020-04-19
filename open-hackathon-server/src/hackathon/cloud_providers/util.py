@@ -11,23 +11,23 @@ class BaseProvider(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def create_instance(self, ins_cfg):
+    def create_instance(self, ve_cfg):
         pass
 
     @abc.abstractmethod
-    def start_instance(self, ins_cfg):
+    def start_instance(self, ve_cfg):
         pass
 
     @abc.abstractmethod
-    def pause_instance(self, ins_cfg):
+    def pause_instance(self, ve_cfg):
         pass
 
     @abc.abstractmethod
-    def delete_instance(self, ins_cfg):
+    def delete_instance(self, ve_cfg):
         pass
 
     @abc.abstractmethod
-    def wait_instance_ready(self, ins_cfg, timeout=None):
+    def wait_instance_ready(self, ve_cfg, timeout=None):
         pass
 
 

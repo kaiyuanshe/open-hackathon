@@ -179,9 +179,8 @@ def init_db():
 
 
 def init_expr_components():
-    from .expr import ExprManager, K8SExprStarter
+    from .expr import ExprManager
     factory.provide("expr_manager", ExprManager)
-    factory.provide("k8s_service", K8SExprStarter)
 
 
 def init_voice_verify():

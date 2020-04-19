@@ -3,6 +3,7 @@
 This file is covered by the LICENSING file in the root of this project.
 """
 
+import yaml
 import hashlib
 from mongoengine import QuerySet, DateTimeField, DynamicDocument, EmbeddedDocument, StringField, \
     BooleanField, IntField, DynamicEmbeddedDocument, EmbeddedDocumentListField, URLField, ListField, \
@@ -465,6 +466,35 @@ class K8sEnvironment(DynamicEmbeddedDocument):
     persistent_volume_claims = ListField()
     services = ListField()
     stateful_sets = ListField()
+
+    @classmethod
+    def load_from_yaml(cls, name, content):
+        deployments = []
+        services = []
+
+        # TODO
+        persistent_volume_claims = []
+        stateful_sets = []
+
+        resources = yaml.safe_load_all(content)
+
+        for r in resources:
+            if 'Kind' not in r:
+                continue
+
+            if r['Kind'] == "Deployment":
+                deployments.append(r)
+
+            if r['Kind'] == "Service":
+                services.append(r)
+
+        return cls(
+            name=name,
+            deployments=deployments,
+            persistent_volume_claims=persistent_volume_claims,
+            services=services,
+            stateful_sets=stateful_sets,
+        )
 
 
 class VirtualEnvironment(DynamicEmbeddedDocument):

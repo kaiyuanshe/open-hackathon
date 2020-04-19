@@ -60,7 +60,9 @@ class DockerTemplateUnit(TemplateUnit):
     """
 
     def __init__(self, config):
-        super(DockerTemplateUnit, self).__init__(VE_PROVIDER.DOCKER)
+        # Conversion provider type to K8s
+        # all docker container will be created on K8s
+        super(DockerTemplateUnit, self).__init__(VE_PROVIDER.K8S)
 
         self.image = DOCKER_UNIT.IMAGE
         net_configs = config.get(DOCKER_UNIT.NET_CONFIG, [])

@@ -22,9 +22,9 @@ class TemplateContent:
     def __init__(self, name, description, environment_config):
         self.name = name
         self.description = description
-        self.environment = self.__load_environment(environment_config)
+        self.unit = self.__load_unit(environment_config)
 
-        self.provider = self.environment.provider
+        self.provider = self.unit.provider
 
         # TODO delete
         self.resource = defaultdict(list)
@@ -40,25 +40,25 @@ class TemplateContent:
     def docker_image(self):
         if self.provider != VE_PROVIDER.DOCKER:
             return ""
-        return self.environment.image
+        return self.unit.image
 
     @property
     def network_configs(self):
         if self.provider != VE_PROVIDER.DOCKER:
             return []
-        return self.environment.network_configs
+        return self.unit.network_configs
 
     @property
     def yml_template(self):
         if self.provider != VE_PROVIDER.K8S:
             return ""
-        return self.environment.yml_template
+        return self.unit.yml_template
 
     @property
     def template_args(self):
         if self.provider != VE_PROVIDER.K8S:
             return {}
-        return self.environment.template_args
+        return self.unit.template_args
 
     def is_valid(self):
         if self.provider is None:
@@ -68,10 +68,10 @@ class TemplateContent:
             return True
 
         if self.provider == VE_PROVIDER.K8S:
-            return self.environment.is_valid() is True
+            return self.unit.is_valid() is True
 
     @classmethod
-    def __load_environment(cls, environment_config):
+    def __load_unit(cls, environment_config):
         provider = int(environment_config[TEMPLATE.VIRTUAL_ENVIRONMENT_PROVIDER])
         if provider == VE_PROVIDER.DOCKER:
             return DockerTemplateUnit(environment_config)
