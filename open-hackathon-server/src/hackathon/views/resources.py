@@ -302,11 +302,11 @@ class TeamResource(HackathonResource):
     def get(self):
         return team_manager.get_team_by_id(self.context().id)
 
-    # @token_required
-    # @hackathon_name_required
-    # def post(self):
-    #     args = request.get_json()
-    #     return team_manager.create_team(args)
+    @token_required
+    @hackathon_name_required
+    def post(self):
+        args = request.get_json()
+        return team_manager.create_team(args)
 
     @token_required
     @hackathon_name_required

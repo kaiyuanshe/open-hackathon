@@ -76,8 +76,7 @@ def init_routes():
     api.add_resource(AdminHackathonListResource, "/api/admin/hackathon/list")  # get entitled hackathon list
     api.add_resource(AdminRegisterListResource, "/api/admin/registration/list")  # get registered users
     api.add_resource(AdminRegisterResource, "/api/admin/registration")  # create, delete or query registration
-    api.add_resource(AdminHackathonTemplateListResource,
-                     "/api/admin/hackathon/template/list")  # get templates of hackathon
+    api.add_resource(AdminHackathonTemplateListResource,"/api/admin/hackathon/template/list")  # get templates of hackathon
     api.add_resource(AdminHackathonTemplateResource, "/api/admin/hackathon/template")  # select template for hackathon
     api.add_resource(AdminExperimentResource, "/api/admin/experiment")  # start expr by admin
     api.add_resource(AdminExperimentListResource, "/api/admin/experiment/list")  # get expr list of hackathon
