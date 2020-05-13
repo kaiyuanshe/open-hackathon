@@ -29,14 +29,15 @@ def setup_db():
     # reserved user is deleted, may not need in mongodb implementation
 
     # default super admin
+    add_super_user('admin', 'admin', 'admin')
 
 
-def add_super_user(name, nickname, password):
+def add_super_user(name, nickname, password, is_super=True):
     admin = User(
         name=name,
         nickname=nickname,
         avatar_url="/static/pic/monkey-32-32px.png",
-        is_super=True)
+        is_super=is_super)
     admin.set_password(password)
 
     User.objects(name=name).update_one(__raw__={"$set": admin.to_mongo().to_dict()}, upsert=True)
