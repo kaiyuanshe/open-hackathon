@@ -116,7 +116,7 @@
                                             {% if item.ribbon != "" %}
                                                 <span class="oh-flag">{{ item.ribbon }}</span>
                                             {% endif %}
-                                            {% if current_user.is_authenticated() %}
+                                            {% if current_user.is_authenticated %}
                                                 <a href="javascript:void(0);" role="oh-like"
                                                    class="oh-collect {% if item.get('like') is not none %} active {% endif %}"
                                                    data-name="{{ item.name }}"
@@ -198,7 +198,7 @@
                                             {% if item.ribbon != "" %}
                                                 <span class="oh-flag">{{ item.ribbon }}</span>
                                             {% endif %}
-                                            {% if current_user.is_authenticated() %}
+                                            {% if current_user.is_authenticated %}
                                                 <a href="javascript:void(0);" role="oh-like"
                                                    class="oh-collect {% if item.get('like') is not none %} active {% endif %}"
                                                    data-name="{{ item.name }}"
@@ -280,7 +280,7 @@
                                             {% if item.ribbon != "" %}
                                                 <span class="oh-flag">{{ item.ribbon }}</span>
                                             {% endif %}
-                                            {% if current_user.is_authenticated() %}
+                                            {% if current_user.is_authenticated %}
                                                 <a href="javascript:void(0);" role="oh-like"
                                                    class="oh-collect {% if item.get('like') is not none %} active {% endif %}"
                                                    data-name="{{ item.name }}"
