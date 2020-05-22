@@ -10,7 +10,6 @@ ENDPOINT_WEB = "http://localhost"  # host name of the UI site
 ENDPOINT_HACKATHON_API = "http://localhost:15000"
 
 GITHUB_CLIENT_ID = "b44f3d47bdeb26b9c4e6"
-GITHUB_STATE = "5eab9266d0a330d74c668c80"  # Authing_UserPool_ID
 QQ_CLIENT_ID = "101200890"
 QQ_OAUTH_STATE = "openhackathon"  # todo state should be constant. Actually it should be unguessable to prevent CSFA
 WECHAT_APP_ID = "wxe75b8aef71c2059f"
