@@ -12,6 +12,7 @@ class HTTP_HEADER:
         HACKATHON_NAME: the name of hackathon related to the API call
     """
     TOKEN = "token"
+    AUTHORIZATION = "Authorization"
     HACKATHON_NAME = "hackathon_name"
 
 
@@ -110,7 +111,6 @@ class VE_PROVIDER:
     K8S = 3
 
 
-
 class EStatus:
     """Status for db model Experiment"""
     INIT = 0
@@ -162,7 +162,6 @@ class ReservedUser:
     """
     DefaultUserID = -1
     DefaultSuperAdmin = 1
-
 
 
 class ADStatus:
@@ -275,7 +274,6 @@ class DHS_QUERY_STATE:
     FAILED = 2
 
 
-
 class ServiceDeploymentSlot:
     """
     the slot of service deployment
@@ -286,7 +284,6 @@ class ServiceDeploymentSlot:
     """
     PRODUCTION = 'production'
     STAGING = 'staging'
-
 
 
 class TCPProtocol:

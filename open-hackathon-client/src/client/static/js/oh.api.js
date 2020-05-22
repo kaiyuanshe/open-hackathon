@@ -42,7 +42,7 @@
                     if (!$.isEmptyObject(options.query)) {
                         url += '?'+$.param(options.query);
                     }
-                    options.header.token = $.cookie('token');
+                    options.header.Authorization = "token " + $.cookie('token');
                     return $.ajax({
                         method: obj,
                         url: url,

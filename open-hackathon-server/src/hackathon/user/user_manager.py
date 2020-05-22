@@ -23,7 +23,7 @@ class UserManager(Component):
     admin_manager = RequiredFeature("admin_manager")
     oauth_login_manager = RequiredFeature("oauth_login_manager")
 
-    def validate_login(self):
+    def validate_token(self):
         """Make sure user token is included in http request headers and it must NOT be expired
 
         If valid token is found , the related user will be set int flask global g. So you can access g.user to get the
@@ -32,10 +32,10 @@ class UserManager(Component):
         :rtype: bool
         :return True if valid token found in DB otherwise False
         """
-        if HTTP_HEADER.TOKEN not in request.headers:
+        if HTTP_HEADER.AUTHORIZATION not in request.headers:
             return False
 
-        user = self.__validate_token(request.headers[HTTP_HEADER.TOKEN])
+        user = self.__validate_token(request.headers[HTTP_HEADER.AUTHORIZATION])
         if user is None:
             return False
 
@@ -60,27 +60,6 @@ class UserManager(Component):
             return self.__db_login(context)
         else:
             return self.__oauth_login(provider, context)
-
-    def update_user_operation_time(self):
-        """Update the user's last operation time.
-
-        :rtype:bool
-        :return True if success in updating, return False if token not found or token is overtime.
-        """
-        if HTTP_HEADER.TOKEN not in request.headers:
-            return False
-
-        user = self.__validate_token(request.headers[HTTP_HEADER.TOKEN])
-        if user is None:
-            return False
-        else:
-            time_interval = timedelta(hours=self.util.safe_get_config("login.token_valid_time_minutes", 60))
-            new_toke_time = self.util.get_now() + time_interval
-            UserToken.objects(token=request.headers[HTTP_HEADER.TOKEN]).update(expire_date=new_toke_time)
-
-        users_operation_time[user.id] = self.util.get_now()
-
-        return True
 
     def check_user_online_status(self):
         """Check whether the user is offline. If the answer is yes, update its status in DB."""
@@ -371,25 +350,6 @@ class UserManager(Component):
             "token": token.dic(),
             "user": user.dic()}
         return resp
-
-    def __oxford(self, user, oxford_api):
-        if not oxford_api:
-            return
-
-            # TODO: not finish
-            # hackathon = Hackathon.objects(name="oxford").first()
-            # if hackathon:
-            #     exist = self.db.find_first_object_by(UserHackathonAsset, asset_value=oxford_api)
-            #     if exist:
-            #         return
-            #
-            #     asset = UserHackathonAsset(user_id=user.id,
-            #                                hackathon_id=hackathon.id,
-            #                                asset_name="Oxford Token",
-            #                                asset_value=oxford_api,
-            #                                description="Token for Oxford API")
-            #     self.db.add_object(asset)
-            #     self.db.commit()
 
     def __generate_file_name(self, user_id, type, suffix):
         # may generate differrnt file_names for different type. see FILE_TYPE.

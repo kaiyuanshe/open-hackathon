@@ -21,4 +21,5 @@ class LOGIN_PROVIDER:
 
 class HTTP_HEADER:
     TOKEN = "token"
+    AUTHORIZATION = "Authorization"
     HACKATHON_ID = "hackathon_id"

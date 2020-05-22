@@ -130,7 +130,7 @@ class User(HDocumentBase):
 
 
 class UserToken(HDocumentBase):
-    token = UUIDField(required=True)
+    token = StringField(required=True)
     user = ReferenceField(User)
     issue_date = DateTimeField(default=get_now())
     expire_date = DateTimeField(required=True)

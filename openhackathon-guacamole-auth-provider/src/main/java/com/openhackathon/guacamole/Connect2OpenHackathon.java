@@ -39,7 +39,7 @@ public class Connect2OpenHackathon {
             conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setUseCaches(false);
-            conn.setRequestProperty("token", tokenString);
+            conn.setRequestProperty("Authorization", "token " + tokenString);
             conn.connect();
 
             int status = conn.getResponseCode();

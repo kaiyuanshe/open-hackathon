@@ -149,7 +149,7 @@ class UserResource(HackathonResource):
 
         if uid:
             user = user_manager.get_user_by_id(uid)
-        elif user_manager.validate_login():
+        elif user_manager.validate_token():
             user = user_manager.get_user_by_id(g.user.id)
         else:
             return bad_request("must login or provide a user id")
@@ -274,7 +274,7 @@ class UserTeamShowResource(HackathonResource):
         user_id = self.context().user_id if "user_id" in self.context() else None
         if user_id:
             return team_manager.get_team_show_list_by_user(user_id)
-        elif user_manager.validate_login():
+        elif user_manager.validate_token():
             return team_manager.get_team_show_list_by_user(g.user.id)
         else:
             return bad_request("must login or provide a user id")
