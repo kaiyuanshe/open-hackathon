@@ -17,6 +17,7 @@ class LOGIN_PROVIDER:
     WEIBO = "weibo"
     LIVE = "live"
     WECHAT = "wechat"
+    AUTHING = "authing"
 
 
 class HTTP_HEADER:

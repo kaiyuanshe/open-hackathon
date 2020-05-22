@@ -139,6 +139,15 @@ class UserLoginResource(HackathonResource):
         return user_manager.logout(g.user.id)
 
 
+class UserAuthingResource(HackathonResource):
+    """User login/logout processing"""
+
+    def post(self):
+        """user login"""
+        context = self.context()
+        return user_manager.authing(context)
+
+
 class UserResource(HackathonResource):
     def get(self):
         parse = reqparse.RequestParser()

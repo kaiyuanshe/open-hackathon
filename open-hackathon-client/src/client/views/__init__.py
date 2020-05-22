@@ -110,7 +110,7 @@ def __authing_login(provider):
         log.info("Login with authing:%s successfully. Sending user info `%s` to hackathon server."
                  % (provider, user_name))
 
-        remote_user = __authing_ohp_server(provider, user_info)
+        remote_user = login_manager_helper.authing(user_info)
         login_user(remote_user)
         token = user_info["token"]
         session["token"] = token
@@ -290,7 +290,7 @@ def js_config():
 
 @app.route('/authing/github')
 def authing_github_callback():
-    return __authing_login(LOGIN_PROVIDER.GITHUB)
+    return __authing_login(LOGIN_PROVIDER.AUTHING)
 
 
 @app.route('/github')

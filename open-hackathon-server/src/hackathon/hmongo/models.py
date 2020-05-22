@@ -96,6 +96,7 @@ class User(HDocumentBase):
     profile = EmbeddedDocumentField(UserProfile)
     provider = StringField(max_length=20)
     openid = StringField(max_length=100)
+    authing_id = StringField(max_length=100)
     avatar_url = StringField()  # if avatar_url in UserProfile setted, this is not used
     access_token = StringField(max_length=1024)
     online = BooleanField(default=False)

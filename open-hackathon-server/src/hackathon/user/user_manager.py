@@ -3,7 +3,8 @@
 This file is covered by the LICENSING file in the root of this project.
 """
 import uuid
-from datetime import timedelta
+import json
+from datetime import timedelta, datetime
 
 from flask import request, g
 from mongoengine import Q, NotUniqueError, ValidationError
@@ -12,6 +13,7 @@ from hackathon.hackathon_response import bad_request, internal_server_error, not
 from hackathon.constants import HTTP_HEADER, HACK_USER_TYPE, FILE_TYPE
 from hackathon import Component, Context, RequiredFeature
 from hackathon.hmongo.models import UserToken, User, UserEmail, UserProfile, UserHackathon
+from hackathon.util import get_remote, get_config
 
 __all__ = ["UserManager"]
 
@@ -60,6 +62,95 @@ class UserManager(Component):
             return self.__db_login(context)
         else:
             return self.__oauth_login(provider, context)
+
+    def authing(self, context):
+        token = context.token
+        username = context.username
+
+        if not token or not username:
+            self.log.info(
+                "Unable to handle authing login request. Either token or username is empty. username: " % username)
+            return unauthorized("Unable to handle authing login request. Either token or username is empty")
+
+        # validate access token
+        self.log.info("Validate authing token for user %s" % username)
+        validate_url = get_config("login.authing.validate_token_url") + token
+        validate_raw_resp = get_remote(validate_url)
+        validate_resp = json.loads(validate_raw_resp)
+
+        if int(validate_resp["code"]) != 200 or not bool(validate_resp["status"]):
+            self.log.info("Token invalid: %s" % validate_raw_resp)
+            return unauthorized("Token invalid: %s" % validate_raw_resp)
+
+        authing_id = context._id
+        open_id = context.unionid
+        provider = context.registerMethod
+        if "oauth" in provider:
+            # OAuth like github. registerMethod example: "oauth:github"
+            provider = provider[6:]
+        else:
+            # Authing user: using authing_id as open_id
+            open_id = authing_id
+
+        email_list = [{
+            "email": context.get("email", ""),
+            "primary": True,
+            "verified": bool(context.get("emailVerified", False))
+        }]
+
+        user = self.__get_existing_user(open_id, provider)
+        if user is not None:
+            nickname = context.get("nickname", user.nickname)
+            if not nickname:
+                nickname = user.name
+            user.update(
+                name=context.get("username", user.name),
+                nickname=nickname,
+                access_token=context.get("token", user.access_token),
+                avatar_url=context.get("photo", user.avatar_url),
+                authing_id=authing_id,
+                last_login_time=self.util.get_now(),
+                login_times=user.login_times + 1,
+                online=True)
+            list(map(lambda x: self.__create_or_update_email(user, x), email_list))
+        else:
+            user = User(openid=open_id,
+                        name=username,
+                        provider=provider,
+                        authing_id=authing_id,
+                        nickname=context.nickname,
+                        access_token=token,
+                        avatar_url=context.get("photo", ""),
+                        login_times=int(context.get("loginsCount", "1")),
+                        online=True)
+
+            try:
+                user.save()
+            except ValidationError as e:
+                self.log.error(e)
+                return internal_server_error("create user fail.")
+
+            list(map(lambda x: self.__create_or_update_email(user, x), email_list))
+
+        # save API token
+        token_expire_date = self.util.get_now() + timedelta(hours=1)
+        if "tokenExpiredAt" in context:
+            try:
+                token_expire_date = datetime.strptime(context.tokenExpiredAt, '%a %b %d %Y %H:%M:%S GMT%z (CST)')
+            except Exception as e:
+                self.log.warn("Unable to parse tokenExpiredAt: %s. Will use 1 hour as expiry." % context.tokenExpiredAt)
+        else:
+            self.log.info("tokenExpiredAt not included in authing response. Will use 1 hour as expiry.")
+
+        user_token = UserToken(token=token,
+                               user=user,
+                               expire_date=token_expire_date)
+        user_token.save()
+        resp = {
+            "token": user_token.dic(),
+            "user": user.dic()
+        }
+        return resp
 
     def check_user_online_status(self):
         """Check whether the user is offline. If the answer is yes, update its status in DB."""
