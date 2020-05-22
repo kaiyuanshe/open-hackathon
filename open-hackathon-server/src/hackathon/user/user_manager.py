@@ -146,10 +146,12 @@ class UserManager(Component):
                                user=user,
                                expire_date=token_expire_date)
         user_token.save()
-        resp = {
-            "token": user_token.dic(),
-            "user": user.dic()
-        }
+        # resp = {
+        #     "token": user_token.dic(),
+        #     "user": user.dic()
+        # }
+        resp = context.to_dict()
+        resp.update(user.dic())
         return resp
 
     def check_user_online_status(self):

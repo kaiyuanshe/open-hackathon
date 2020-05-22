@@ -52,7 +52,7 @@ class LoginManagerHelper():
             resp = req.json()
             if resp:
                 # if login isn't successful, it will return None
-                login_user = User(resp["user"])
+                login_user = User(resp)
                 log.debug("Login successfully %s" % login_user.get_user_id())
                 return login_user
             else:
