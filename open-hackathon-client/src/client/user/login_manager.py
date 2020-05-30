@@ -23,6 +23,7 @@ class LoginManagerHelper():
     '''Helper class for flask-login.LoginManager'''
     headers = {"Content-Type": "application/json"}
     login_url = get_config("endpoint.hackathon_api") + "/api/user/login"
+    authing_url = get_config("endpoint.hackathon_api") + "/api/user/authing"
 
     def load_user(self, id):
         try:
@@ -34,10 +35,7 @@ class LoginManagerHelper():
             return None
 
     def logout(self, token):
-        try:
-            requests.delete(self.login_url, headers={"token": token})
-        except Exception as e:
-            log.error(e)
+
 
         session.pop("token", "")
         logout_user()
@@ -47,6 +45,22 @@ class LoginManagerHelper():
             return self.__mysql_login()
         else:
             return self.__oauth_login(provider)
+
+    def authing(self, user_info):
+        try:
+            req = requests.post(self.authing_url, json=user_info, headers=self.headers)
+            resp = req.json()
+            if resp:
+                # if login isn't successful, it will return None
+                login_user = User(resp)
+                log.debug("Login successfully %s" % login_user.get_user_id())
+                return login_user
+            else:
+                log.debug("login failed: %r" % resp)
+                return None
+        except Exception as e:
+            log.error(e)
+            return None
 
     def __oauth_login(self, provider):
         code = request.args.get('code')

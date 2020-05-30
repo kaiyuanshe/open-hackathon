@@ -39,7 +39,7 @@ angular.module('oh.api', [])
             options = {};
           }
           options = angular.extend(_params, options);
-          options.header.token = $cookies.get('token');
+          options.header.Authorization = "token " + $cookies.get('token');
 
           var config = {
             method: method,
@@ -76,7 +76,7 @@ angular.module('oh.api', [])
       uploadOneFile: function(fileType, formData, getUrlFunc) {
         $http.post($window.CONFIG.apiconfig.proxy + "/api/user/file?file_type=" + fileType, formData, {
           transformRequest: angular.identity,
-          headers: {'Content-Type': undefined, token: $cookies.get('token')}
+          headers: {'Content-Type': undefined, 'Authorization': "token " + $cookies.get('token')}
         }).success(function(data, status, headers, config){
           if ("files" in data && data["files"].length > 0 && "url" in data["files"][0])
             return getUrlFunc(data["files"][0]["url"]);
@@ -88,7 +88,7 @@ angular.module('oh.api', [])
       uploadFiles: function(fileType, formData, successFunc, errorFunc) {
         $http.post($window.CONFIG.apiconfig.proxy + "/api/user/file?file_type=" + fileType, formData, {
           transformRequest: angular.identity,
-          headers: {'Content-Type': undefined, token: $cookies.get('token')}
+          headers: {'Content-Type': undefined, 'Authorization': 'token ' + $cookies.get('token')}
         }).success(successFunc(data, status, headers, config)
         ).error(errorFunc(data, status, headers, config));
       }

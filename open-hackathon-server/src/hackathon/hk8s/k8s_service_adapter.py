@@ -23,7 +23,7 @@ class K8SServiceAdapter(ServiceAdapter):
     def __init__(self, api_url, token, namespace):
         configuration = client.Configuration()
         configuration.host = api_url
-        configuration.api_key['authorization'] = 'bearer ' + token
+        configuration.api_key['Authorization'] = 'bearer ' + token
         # FIXME import ca cert file?
         configuration.verify_ssl = False
 

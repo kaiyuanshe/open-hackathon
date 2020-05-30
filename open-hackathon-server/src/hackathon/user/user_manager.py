@@ -3,7 +3,8 @@
 This file is covered by the LICENSING file in the root of this project.
 """
 import uuid
-from datetime import timedelta
+import json
+from datetime import timedelta, datetime
 
 from flask import request, g
 from mongoengine import Q, NotUniqueError, ValidationError
@@ -12,6 +13,7 @@ from hackathon.hackathon_response import bad_request, internal_server_error, not
 from hackathon.constants import HTTP_HEADER, HACK_USER_TYPE, FILE_TYPE
 from hackathon import Component, Context, RequiredFeature
 from hackathon.hmongo.models import UserToken, User, UserEmail, UserProfile, UserHackathon
+from hackathon.util import get_remote, get_config
 
 __all__ = ["UserManager"]
 
@@ -23,7 +25,7 @@ class UserManager(Component):
     admin_manager = RequiredFeature("admin_manager")
     oauth_login_manager = RequiredFeature("oauth_login_manager")
 
-    def validate_login(self):
+    def validate_token(self):
         """Make sure user token is included in http request headers and it must NOT be expired
 
         If valid token is found , the related user will be set int flask global g. So you can access g.user to get the
@@ -32,10 +34,10 @@ class UserManager(Component):
         :rtype: bool
         :return True if valid token found in DB otherwise False
         """
-        if HTTP_HEADER.TOKEN not in request.headers:
+        if HTTP_HEADER.AUTHORIZATION not in request.headers:
             return False
 
-        user = self.__validate_token(request.headers[HTTP_HEADER.TOKEN])
+        user = self.__validate_token(request.headers[HTTP_HEADER.AUTHORIZATION])
         if user is None:
             return False
 
@@ -61,26 +63,96 @@ class UserManager(Component):
         else:
             return self.__oauth_login(provider, context)
 
-    def update_user_operation_time(self):
-        """Update the user's last operation time.
+    def authing(self, context):
+        token = context.token
+        username = context.username
 
-        :rtype:bool
-        :return True if success in updating, return False if token not found or token is overtime.
-        """
-        if HTTP_HEADER.TOKEN not in request.headers:
-            return False
+        if not token or not username:
+            self.log.info(
+                "Unable to handle authing login request. Either token or username is empty. username: " % username)
+            return unauthorized("Unable to handle authing login request. Either token or username is empty")
 
-        user = self.__validate_token(request.headers[HTTP_HEADER.TOKEN])
-        if user is None:
-            return False
+        # validate access token
+        self.log.info("Validate authing token for user %s" % username)
+        validate_url = get_config("login.authing.validate_token_url") + token
+        validate_raw_resp = get_remote(validate_url)
+        validate_resp = json.loads(validate_raw_resp)
+
+        if int(validate_resp["code"]) != 200 or not bool(validate_resp["status"]):
+            self.log.info("Token invalid: %s" % validate_raw_resp)
+            return unauthorized("Token invalid: %s" % validate_raw_resp)
+
+        authing_id = context._id
+        open_id = context.unionid
+        provider = context.registerMethod
+        if "oauth" in provider:
+            # OAuth like github. registerMethod example: "oauth:github"
+            provider = provider[6:]
         else:
-            time_interval = timedelta(hours=self.util.safe_get_config("login.token_valid_time_minutes", 60))
-            new_toke_time = self.util.get_now() + time_interval
-            UserToken.objects(token=request.headers[HTTP_HEADER.TOKEN]).update(expire_date=new_toke_time)
+            # Authing user: using authing_id as open_id
+            open_id = authing_id
 
-        users_operation_time[user.id] = self.util.get_now()
+        email_list = [{
+            "email": context.get("email", ""),
+            "primary": True,
+            "verified": bool(context.get("emailVerified", False))
+        }]
 
-        return True
+        user = self.__get_existing_user(open_id, provider)
+        if user is not None:
+            nickname = context.get("nickname", user.nickname)
+            if not nickname:
+                nickname = user.name
+            user.update(
+                name=context.get("username", user.name),
+                nickname=nickname,
+                access_token=context.get("token", user.access_token),
+                avatar_url=context.get("photo", user.avatar_url),
+                authing_id=authing_id,
+                last_login_time=self.util.get_now(),
+                login_times=user.login_times + 1,
+                online=True)
+            list(map(lambda x: self.__create_or_update_email(user, x), email_list))
+        else:
+            user = User(openid=open_id,
+                        name=username,
+                        provider=provider,
+                        authing_id=authing_id,
+                        nickname=context.nickname,
+                        access_token=token,
+                        avatar_url=context.get("photo", ""),
+                        login_times=int(context.get("loginsCount", "1")),
+                        online=True)
+
+            try:
+                user.save()
+            except ValidationError as e:
+                self.log.error(e)
+                return internal_server_error("create user fail.")
+
+            list(map(lambda x: self.__create_or_update_email(user, x), email_list))
+
+        # save API token
+        token_expire_date = self.util.get_now() + timedelta(hours=1)
+        if "tokenExpiredAt" in context:
+            try:
+                token_expire_date = datetime.strptime(context.tokenExpiredAt, '%a %b %d %Y %H:%M:%S GMT%z (CST)')
+            except Exception as e:
+                self.log.warn("Unable to parse tokenExpiredAt: %s. Will use 1 hour as expiry." % context.tokenExpiredAt)
+        else:
+            self.log.info("tokenExpiredAt not included in authing response. Will use 1 hour as expiry.")
+
+        user_token = UserToken(token=token,
+                               user=user,
+                               expire_date=token_expire_date)
+        user_token.save()
+        # resp = {
+        #     "token": user_token.dic(),
+        #     "user": user.dic()
+        # }
+        resp = context.to_dict()
+        resp.update(user.dic())
+        return resp
 
     def check_user_online_status(self):
         """Check whether the user is offline. If the answer is yes, update its status in DB."""
@@ -371,25 +443,6 @@ class UserManager(Component):
             "token": token.dic(),
             "user": user.dic()}
         return resp
-
-    def __oxford(self, user, oxford_api):
-        if not oxford_api:
-            return
-
-            # TODO: not finish
-            # hackathon = Hackathon.objects(name="oxford").first()
-            # if hackathon:
-            #     exist = self.db.find_first_object_by(UserHackathonAsset, asset_value=oxford_api)
-            #     if exist:
-            #         return
-            #
-            #     asset = UserHackathonAsset(user_id=user.id,
-            #                                hackathon_id=hackathon.id,
-            #                                asset_name="Oxford Token",
-            #                                asset_value=oxford_api,
-            #                                description="Token for Oxford API")
-            #     self.db.add_object(asset)
-            #     self.db.commit()
 
     def __generate_file_name(self, user_id, type, suffix):
         # may generate differrnt file_names for different type. see FILE_TYPE.

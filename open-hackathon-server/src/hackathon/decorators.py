@@ -21,7 +21,7 @@ def token_required(func):
     """User must login when this decorator is enabled (for both user and admin)"""
 
     def authenticate_and_call(*args, **kwargs):
-        if not user_manager.validate_login():
+        if not user_manager.validate_token():
             return unauthorized("login required")
         return func(*args, **kwargs)
 
@@ -53,7 +53,7 @@ def admin_privilege_required(func):
     """user must login , hackathon_name must be available, and 'user' has proper admin privilege on this hackathon"""
 
     def authenticate_and_call(*args, **kwargs):
-        if not user_manager.validate_login():
+        if not user_manager.validate_token():
             return unauthorized("login required")
 
         if not hack_manager.validate_hackathon_name():

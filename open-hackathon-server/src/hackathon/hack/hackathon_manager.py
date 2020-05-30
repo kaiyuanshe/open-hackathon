@@ -85,7 +85,7 @@ class HackathonManager(Component):
 
     def get_hackathon_detail(self, hackathon):
         user = None
-        if self.user_manager.validate_login():
+        if self.user_manager.validate_token():
             user = g.user
 
         return self.__get_hackathon_detail(hackathon, user)
@@ -141,7 +141,7 @@ class HackathonManager(Component):
         user = None
         user_hackathon = []
         team = []
-        if self.user_manager.validate_login():
+        if self.user_manager.validate_token():
             user = g.user
             user_hackathon = UserHackathon.objects(user=user, hackathon__in=hackathon_list)
             team = Team.objects(members__user=user, hackathon__in=hackathon_list)
@@ -665,7 +665,7 @@ class HackathonManager(Component):
 
         if filter_by_user:  # only return notices that are sent to the login user
             user = None
-            if self.user_manager.validate_login():
+            if self.user_manager.validate_token():
                 user = g.user
                 user_filter = Q(receiver=user)
                 if filter_by_user == 'unread':

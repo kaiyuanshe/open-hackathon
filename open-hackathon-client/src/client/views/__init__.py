@@ -82,6 +82,51 @@ def __login_failed(provider):
     return redirect("/")
 
 
+def __authing_ohp_server(provider, user_info):
+    # persist info in ohp server
+    data_to_post = user_info
+    data_to_post["provider"] = provider
+
+
+    return None
+
+
+def __authing_login(provider):
+    try:
+        # https://docs.authing.cn/authing/social-login/web/github
+        # code: 错误或成功代码，200 为成功，非 200 为失败
+        # message: 成功或错误信息
+        # data: userInfo，若 code 为非 200 不返回此参数
+
+        code = request.args.get('code')
+        message = request.args.get('message')
+        if (code != "200"):
+            log.info("Login with authing:%s failed with code: %s, message: %s " % (provider, code, message))
+            return __login_failed(provider)
+
+        data = request.args.get('data')
+        user_info = json.loads(data)
+        user_name = user_info["username"]
+        log.info("Login with authing:%s successfully. Sending user info `%s` to hackathon server."
+                 % (provider, user_name))
+
+        remote_user = login_manager_helper.authing(user_info)
+        login_user(remote_user)
+        token = user_info["token"]
+        session["token"] = token
+        if session.get("return_url") is not None:
+            resp = make_response(redirect(session["return_url"]))
+            session["return_url"] = None
+        else:
+            resp = make_response(redirect(url_for("index")))
+
+        resp.set_cookie('token', token)
+        return resp
+    except Exception as ex:
+        log.error(ex)
+        return __login_failed(provider)
+
+
 def __login(provider):
     try:
         user_with_token = login_manager_helper.login(provider)
@@ -188,6 +233,7 @@ def deadline(endtime):
 # week = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
 week = ['MON', 'TUE', 'WED', 'WED', 'FRI', 'SAT', 'SUN']
 
+
 @app.template_filter('date')
 def to_datetime(datelong, fmt=''):
     if fmt:
@@ -240,6 +286,11 @@ def js_config():
                     status=200,
                     mimetype="application/javascript")
     return resp
+
+
+@app.route('/authing/github')
+def authing_github_callback():
+    return __authing_login(LOGIN_PROVIDER.AUTHING)
 
 
 @app.route('/github')

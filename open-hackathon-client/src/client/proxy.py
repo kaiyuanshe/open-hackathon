@@ -11,7 +11,7 @@ from client.functions import safe_get_config
 def __get_headers(hackathon_id):
     return {
         "content-type": "application/json",
-        HTTP_HEADER.TOKEN: session[HTTP_HEADER.TOKEN] if HTTP_HEADER.TOKEN in session else "",
+        HTTP_HEADER.AUTHORIZATION: "token " + session[HTTP_HEADER.TOKEN] if HTTP_HEADER.TOKEN in session else "",
         HTTP_HEADER.HACKATHON_ID: hackathon_id
     }
 

@@ -13,7 +13,8 @@ from flask_restful import Api
 from flask_cors import CORS
 from datetime import timedelta
 
-from hackathon.util import safe_get_config, get_class, Utility, Email, DisabledVoiceVerify, RonglianVoiceVerify, DisabledSms, \
+from hackathon.util import safe_get_config, get_class, Utility, Email, DisabledVoiceVerify, RonglianVoiceVerify, \
+    DisabledSms, \
     ChinaTelecomSms
 from hackathon.hackathon_factory import factory, RequiredFeature
 from hackathon.hackathon_scheduler import HackathonScheduler
@@ -99,12 +100,6 @@ def precondition_failed_handler(error):
 def exception_handler(error):
     log.error(error)
     return internal_server_error(error.message)
-
-
-@app.before_request
-def before_request():
-    user_manager = RequiredFeature("user_manager")
-    user_manager.update_user_operation_time()
 
 
 class Component(object):

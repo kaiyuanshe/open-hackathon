@@ -96,6 +96,7 @@ class User(HDocumentBase):
     profile = EmbeddedDocumentField(UserProfile)
     provider = StringField(max_length=20)
     openid = StringField(max_length=100)
+    authing_id = StringField(max_length=100)
     avatar_url = StringField()  # if avatar_url in UserProfile setted, this is not used
     access_token = StringField(max_length=1024)
     online = BooleanField(default=False)
@@ -130,7 +131,7 @@ class User(HDocumentBase):
 
 
 class UserToken(HDocumentBase):
-    token = UUIDField(required=True)
+    token = StringField(required=True)
     user = ReferenceField(User)
     issue_date = DateTimeField(default=get_now())
     expire_date = DateTimeField(required=True)

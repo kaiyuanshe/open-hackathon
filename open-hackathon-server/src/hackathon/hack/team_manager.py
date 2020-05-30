@@ -36,7 +36,7 @@ class TeamManager(Component):
 
         # check whether it's anonymous user or not
         user = None
-        if self.user_manager.validate_login():
+        if self.user_manager.validate_token():
             user = g.user
 
         if team:
@@ -66,7 +66,7 @@ class TeamManager(Component):
 
         # check whether it's anonymous user or not
         user = None
-        if self.user_manager.validate_login():
+        if self.user_manager.validate_token():
             user = g.user
 
         if team:
@@ -121,7 +121,7 @@ class TeamManager(Component):
 
         # check whether it's anonymous user or not
         user = None
-        if self.user_manager.validate_login():
+        if self.user_manager.validate_token():
             user = g.user
 
         def get_team(team):

@@ -41,6 +41,9 @@
                 case 'weibo':
                     openWindow(CONFIG.weibo.authorize_url);
                     break;
+                case 'authing':
+                    openWindow(CONFIG.authing.authorize_url);
+                    break;
                 case 'wechat':
                     if(isWechatBrowser()){
                         openWindow(CONFIG.wechat_mobile.authorize_url);

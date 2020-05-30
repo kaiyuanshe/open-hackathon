@@ -44,6 +44,9 @@ Config = {
         "port": MONGODB_PORT
     },
     "login": {
+        "authing": {
+            "validate_token_url": "https://users.authing.cn/authing/token?access_token="
+        },
         "github": {
             "client_id": GITHUB_CLIENT_ID,
             "client_secret": GITHUB_CLIENT_SECRET,

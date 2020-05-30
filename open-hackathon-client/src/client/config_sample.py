@@ -16,6 +16,8 @@ WECHAT_APP_ID = "wxe75b8aef71c2059f"
 WECHAT_OAUTH_STATE = "openhackathon"  # NOTE: may be should be same as QQ_OAUTH_STATE?
 WEIBO_CLIENT_ID = "479757037"
 LIVE_CLIENT_ID = "000000004414E0A6"
+AUTHING_CLIENT_ID = "c95ef74d7ab93a9d2357"
+AUTHING_STATE = "5eab9266d0a330d74c668c80"
 
 Config = {
     "environment": "local",
@@ -23,7 +25,7 @@ Config = {
         "secret_key": "secret_key"
     },
     "login": {
-        "provider_enabled": ["github", "wechat"],
+        "provider_enabled": ["github", "wechat", "authing"],
         "session_valid_time_minutes": 60
     },
     "endpoint": {
@@ -34,6 +36,10 @@ Config = {
         "github": {
             "authorize_url": "https://github.com/login/oauth/authorize?client_id=%s&scope=user" % (
                 GITHUB_CLIENT_ID)
+        },
+        "authing": {
+            "authorize_url": "https://github.com/login/oauth/authorize/?client_id=%s&state=%s" % (
+                AUTHING_CLIENT_ID, AUTHING_STATE)
         },
         "weibo": {
             "authorize_url": "https://api.weibo.com/oauth2/authorize?client_id=%s&redirect_uri=%s/weibo&scope=all" % (

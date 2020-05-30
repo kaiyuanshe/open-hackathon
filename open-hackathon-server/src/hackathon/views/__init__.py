@@ -38,6 +38,7 @@ def init_routes():
     api.add_resource(HackathonNoticeListResource, "/api/hackathon/notice/list")  # list specfic notices
 
     # APIs for user(participant) to join hackathon
+    api.add_resource(UserAuthingResource, "/api/user/authing") # login using Authing
     api.add_resource(GuacamoleResource, "/api/user/guacamoleconfig")  # get remote paras for guacamole
     api.add_resource(UserResource, "/api/user")  # get current login user
     api.add_resource(UserLoginResource, "/api/user/login")  # user login/logout

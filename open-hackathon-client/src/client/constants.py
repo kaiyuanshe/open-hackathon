@@ -17,8 +17,10 @@ class LOGIN_PROVIDER:
     WEIBO = "weibo"
     LIVE = "live"
     WECHAT = "wechat"
+    AUTHING = "authing"
 
 
 class HTTP_HEADER:
     TOKEN = "token"
+    AUTHORIZATION = "Authorization"
     HACKATHON_ID = "hackathon_id"
