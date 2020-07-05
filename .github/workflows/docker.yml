@@ -28,5 +28,6 @@ jobs:
 
     # Runs a set of commands using the runners shell
     - run: |
-        docker build deploy/hackathon-docker -f Dockerfile-server -t openhackathon.azurecr.cn/ohp-server:${{ github.sha }}
+        pwd
+        docker build ./deploy/hackathon-docker -f Dockerfile-server -t openhackathon.azurecr.cn/ohp-server:${{ github.sha }}
         docker push openhackathon.azurecr.cn/ohp-server:${{ github.sha }}
