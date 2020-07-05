@@ -20,7 +20,8 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 
 COPY ./open-hackathon-server/requirements.txt /opt/open-hackathon/open-hackathon-server
 
-RUN pip install -r /opt/open-hackathon/open-hackathon-server/requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple --no-cache-dir
+### RUN pip install -r /opt/open-hackathon/open-hackathon-server/requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple --no-cache-dir
+RUN pip install -r /opt/open-hackathon/open-hackathon-server/requirements.txt
 
 COPY ./open-hackathon-server /opt/open-hackathon/open-hackathon-server
 
