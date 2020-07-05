@@ -22,10 +22,11 @@ jobs:
       
     - uses: docker/build-push-action@v1
       with:
+        registry: openhackathon.azurecr.cn
         username: ${{ secrets.REGISTRY_USERNAME }}
         password: ${{ secrets.REGISTRY_PASSWORD }}
-        registry: openhackathon.azurecr.cn
-        repository: openhackathon.azurecr.cn/ohp-server
+        repository: ohp-server
+        dockerfile: ./deploy/hackathon-docker/Dockerfile-server 
         tag_with_ref: true
         tag_with_sha: true
         tags: latest
