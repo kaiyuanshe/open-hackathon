@@ -7,31 +7,34 @@ import os
 # "javascript" section for javascript. see @app.route('/config.js') in app/views.py
 
 # oauth constants
-QQ_OAUTH_STATE = "openhackathon"  # todo state should not be constant. Actually it should be unguessable to prevent CSFA
+HACKATHON_SERVER_ENDPOINT = os.environ("HACKATHON_SERVER_ENDPOINT", "http://localhost:15000")
 
-HACKATHON_SERVER_ENDPOINT = "http://localhost:15000"
+MONGODB_HOST = os.environ("DB_SERVER", "mongo")
+MONGODB_PORT = int(os.environ("DB_PORT", "27017"))
+MONGODB_DB = os.environ("MONGODB_DB", "hackathon")
 
-MONGODB_HOST = os.environ["DB_SERVER"]
-MONGODB_PORT = int(os.environ["DB_PORT"])
-MONGODB_DB = "hackathon"
+GITHUB_CLIENT_ID = os.environ("GITHUB_CLIENT_ID", "b44f3d47bdeb26b9c4e6")
+GITHUB_CLIENT_SECRET = os.getenv("GITHUB_CLIENT_SECRET", "98de14161c4b2ed3ea7a19787d62cda73b8e292c")
 
-GITHUB_CLIENT_ID = "b44f3d47bdeb26b9c4e6"
-GITHUB_CLIENT_SECRET = "98de14161c4b2ed3ea7a19787d62cda73b8e292c"
+AUTHING_CLIENT_ID = os.environ("AUTHING_CLIENT_ID", "ebfd4eea09a3cf2f6e16")
+AUTHING_STATE = os.environ("AUTHING_STATE", "5f0e628e4ba608e9a69533ae")
 
-QQ_CLIENT_ID = "101200890"
-QQ_CLIENT_SECRET = "88ad67bd4521c4cc47136854781cb9b5"
-QQ_META_CONTENT = "274307566465013314076545663016134754100636"
+QQ_CLIENT_ID = os.getenv("QQ_CLIENT_ID", "101200890")
+QQ_CLIENT_SECRET = os.getenv("QQ_CLIENT_SECRET", "88ad67bd4521c4cc47136854781cb9b5")
+QQ_META_CONTENT = os.getenv("QQ_META_CONTENT", "274307566465013314076545663016134754100636")
+QQ_OAUTH_STATE = os.environ("QQ_OAUTH_STATE", "openhackathon")  # todo state should not be constant. Actually it should be unguessable to prevent CSFA
 
-WECHAT_APP_ID = "wxe75b8aef71c2059f"
-WECHAT_SECRET = "4532b90750f4c7bc70fcfbc42d881622"
-WECHAT_OAUTH_STATE = "openhackathon"  # NOTE: may be should be same as QQ_OAUTH_STATE?
 
-WEIBO_CLIENT_ID = "479757037"
-WEIBO_CLIENT_SECRET = "efc5e75ff8891be37d90b4eaec5c02de"
-WEIBO_META_CONTENT = "ae884e09bc02b700"
+WECHAT_APP_ID = os.getenv("WECHAT_APP_ID", "wxe75b8aef71c2059f")
+WECHAT_SECRET = os.getenv("WECHAT_SECRET", "4532b90750f4c7bc70fcfbc42d881622")
+WECHAT_OAUTH_STATE = os.getenv("WECHAT_OAUTH_STATE", "openhackathon")  # NOTE: may be should be same as QQ_OAUTH_STATE?
 
-LIVE_CLIENT_ID = "000000004414E0A6"
-LIVE_CLIENT_SECRET = "b4mkfVqjtwHY2wJh0T4tj74lxM5LgAT2"
+WEIBO_CLIENT_ID = os.getenv("WEIBO_CLIENT_ID", "479757037")
+WEIBO_CLIENT_SECRET = os.getenv("WEIBO_CLIENT_SECRET", "efc5e75ff8891be37d90b4eaec5c02de")
+WEIBO_META_CONTENT = os.getenv("WEIBO_META_CONTENT", "ae884e09bc02b700")
+
+LIVE_CLIENT_ID = os.getenv("LIVE_CLIENT_ID", "000000004414E0A6")
+LIVE_CLIENT_SECRET = os.getenv("LIVE_CLIENT_SECRET", "b4mkfVqjtwHY2wJh0T4tj74lxM5LgAT2")
 
 Config = {
     "environment": "local",
