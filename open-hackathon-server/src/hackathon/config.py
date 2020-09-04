@@ -7,22 +7,22 @@ import os
 # "javascript" section for javascript. see @app.route('/config.js') in app/views.py
 
 # oauth constants
-HACKATHON_SERVER_ENDPOINT = os.environ("HACKATHON_SERVER_ENDPOINT", "http://localhost:15000")
+HACKATHON_SERVER_ENDPOINT = os.getenv("HACKATHON_SERVER_ENDPOINT", "http://localhost:15000")
 
-MONGODB_HOST = os.environ("DB_SERVER", "mongo")
-MONGODB_PORT = int(os.environ("DB_PORT", "27017"))
-MONGODB_DB = os.environ("MONGODB_DB", "hackathon")
+MONGODB_HOST = os.getenv("DB_SERVER", "localhost")
+MONGODB_PORT = int(os.getenv("DB_PORT", "27017"))
+MONGODB_DB = os.getenv("MONGODB_DB", "hackathon")
 
-GITHUB_CLIENT_ID = os.environ("GITHUB_CLIENT_ID", "b44f3d47bdeb26b9c4e6")
+GITHUB_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID", "b44f3d47bdeb26b9c4e6")
 GITHUB_CLIENT_SECRET = os.getenv("GITHUB_CLIENT_SECRET", "98de14161c4b2ed3ea7a19787d62cda73b8e292c")
 
-AUTHING_CLIENT_ID = os.environ("AUTHING_CLIENT_ID", "ebfd4eea09a3cf2f6e16")
-AUTHING_STATE = os.environ("AUTHING_STATE", "5f0e628e4ba608e9a69533ae")
+AUTHING_CLIENT_ID = os.getenv("AUTHING_CLIENT_ID", "ebfd4eea09a3cf2f6e16")
+AUTHING_STATE = os.getenv("AUTHING_STATE", "5f0e628e4ba608e9a69533ae")
 
 QQ_CLIENT_ID = os.getenv("QQ_CLIENT_ID", "101200890")
 QQ_CLIENT_SECRET = os.getenv("QQ_CLIENT_SECRET", "88ad67bd4521c4cc47136854781cb9b5")
 QQ_META_CONTENT = os.getenv("QQ_META_CONTENT", "274307566465013314076545663016134754100636")
-QQ_OAUTH_STATE = os.environ("QQ_OAUTH_STATE", "openhackathon")  # todo state should not be constant. Actually it should be unguessable to prevent CSFA
+QQ_OAUTH_STATE = os.getenv("QQ_OAUTH_STATE", "openhackathon")  # todo state should not be constant. Actually it should be unguessable to prevent CSFA
 
 
 WECHAT_APP_ID = os.getenv("WECHAT_APP_ID", "wxe75b8aef71c2059f")
@@ -86,7 +86,7 @@ Config = {
         "token_valid_time_minutes": 60
     },
     "guacamole": {
-        "host": "http://" + os.environ["GUACAMOLE"] + ":" + os.environ["GUACAMOLE_PORT"]
+        "host": "http://" + os.getenv("GUACAMOLE", "guacamole") + ":" + os.getenv("GUACAMOLE_PORT", "8080")
     },
     "scheduler": {
         # "job_store": "mysql",
