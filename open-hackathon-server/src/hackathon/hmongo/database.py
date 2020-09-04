@@ -4,9 +4,9 @@ from hackathon.hmongo.models import User
 from hackathon.util import safe_get_config
 from hackathon.config import Config
 
-mongodb_host = safe_get_config("mongodb.host", Config.get("scheduler").get("host"))
-mongodb_port = safe_get_config("mongodb.port", Config.get("scheduler").get("port"))
-ohp_db = safe_get_config("mongodb.database", Config.get("scheduler").get("database"))
+mongodb_host = Config.get("scheduler").get("host")
+mongodb_port = Config.get("scheduler").get("port")
+ohp_db = Config.get("scheduler").get("database")
 
 # mongodb client
 client = connect(ohp_db, host=mongodb_host, port=mongodb_port)

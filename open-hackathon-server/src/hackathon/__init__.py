@@ -21,6 +21,7 @@ from hackathon.hackathon_response import *
 from hackathon.hackathon_exception import *
 from hackathon.log import log
 from hackathon.context import Context
+from hackathon.config import Config
 
 __all__ = [
     "app",
@@ -195,8 +196,8 @@ def init_voice_verify():
         }
     }
     """
-    provider_name = safe_get_config("voice_verify.provider", None)
-    enabled = safe_get_config("voice_verify.enabled", False)
+    provider_name = Config.get("voice_verify").get("provider")
+    enabled = Config.get("voice_verify").get("enabled")
     if not enabled:
         log.warn("voice verify disabled")
         factory.provide("voice_verify", DisabledVoiceVerify)
