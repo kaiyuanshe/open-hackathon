@@ -2,7 +2,7 @@
 """
 This file is covered by the LICENSING file in the root of this project.
 """
-
+from flask import request
 import importlib
 import json
 import os
@@ -178,6 +178,8 @@ def convert(input):
 
 
 def get_remote(url, headers={}):
+    user_agent = request.headers.get("User-Agent")
+    headers['User-Agent'] = user_agent
     r = requests.get(url, headers=headers)
     return r.text
 

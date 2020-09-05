@@ -16,6 +16,7 @@ from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR, EVENT_JOB_AD
 from hackathon.hackathon_factory import RequiredFeature
 from hackathon.util import safe_get_config, get_config, get_now
 from hackathon.log import log
+from hackathon.config import Config
 
 __all__ = ["HackathonScheduler"]
 
@@ -219,14 +220,14 @@ class HackathonScheduler(object):
                                                 alias=self.jobstore,
                                                 url=get_config("scheduler.job_store_url"))
             elif job_store_type == "mongodb":
+                # safe_get_config
                 log.debug("add aps_cheduler job store based on mongodb")
                 self.__apscheduler.add_jobstore('mongodb',
                                                 alias=self.jobstore,
-                                                database=safe_get_config("scheduler.database", "apscheduler"),
-                                                collection=safe_get_config("scheduler.collection", "jobs"),
-                                                host=safe_get_config("scheduler.host", "localhost"),
-                                                port=safe_get_config("scheduler.port", 27017))
-
+                                                database=Config.get("scheduler").get("database"),
+                                                collection=Config.get('scheduler').get('collection'),
+                                                host=Config.get("scheduler").get("host"),
+                                                port=Config.get("scheduler").get("port"))
             # add event listener
             self.__apscheduler.add_listener(scheduler_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR | EVENT_JOB_ADDED)
             log.info("APScheduler loaded")

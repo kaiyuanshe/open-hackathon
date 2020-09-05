@@ -2,10 +2,11 @@ from mongoengine import connect
 
 from hackathon.hmongo.models import User
 from hackathon.util import safe_get_config
+from hackathon.config import Config
 
-mongodb_host = safe_get_config("mongodb.host", "localhost")
-mongodb_port = safe_get_config("mongodb.port", 27017)
-ohp_db = safe_get_config("mongodb.database", "hackathon")
+mongodb_host = Config.get("scheduler").get("host")
+mongodb_port = Config.get("scheduler").get("port")
+ohp_db = Config.get("scheduler").get("database")
 
 # mongodb client
 client = connect(ohp_db, host=mongodb_host, port=mongodb_port)
@@ -29,14 +30,15 @@ def setup_db():
     # reserved user is deleted, may not need in mongodb implementation
 
     # default super admin
+    add_super_user('admin', 'admin', 'admin')
 
 
-def add_super_user(name, nickname, password):
+def add_super_user(name, nickname, password, is_super=True):
     admin = User(
         name=name,
         nickname=nickname,
         avatar_url="/static/pic/monkey-32-32px.png",
-        is_super=True)
+        is_super=is_super)
     admin.set_password(password)
 
     User.objects(name=name).update_one(__raw__={"$set": admin.to_mongo().to_dict()}, upsert=True)

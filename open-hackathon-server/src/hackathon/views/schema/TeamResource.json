@@ -12,6 +12,18 @@
         }
       }
     },
+    "post": {
+      "input": {
+        "description": "create team information",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "unique identifier of team",
+            "type": "string"
+          }
+        }
+      }
+    },
     "put": {
       "input": {
         "description": "update team information",

@@ -6,16 +6,16 @@ import os
 # "javascript" section for javascript. see @app.route('/config.js') in app/views.py
 
 # NOTE: all following key/secrets for test purpose.
-ENDPOINT_WEB = "http://localhost"  # host name of the UI site
+ENDPOINT_WEB = os.getenv("ENDPOINT_WEB", "http://localhost")  # host name of the UI site
 ENDPOINT_HACKATHON_API = "http://" + os.environ["HACKATHON_SERVER"] + ":" + os.environ["HACKATHON_SERVER_PORT"]
 
-GITHUB_CLIENT_ID = "b44f3d47bdeb26b9c4e6"
-QQ_CLIENT_ID = "101200890"
-QQ_OAUTH_STATE = "openhackathon"  # todo state should be constant. Actually it should be unguessable to prevent CSFA
-WECHAT_APP_ID = "wxe75b8aef71c2059f"
-WECHAT_OAUTH_STATE = "openhackathon"  # NOTE: may be should be same as QQ_OAUTH_STATE?
-WEIBO_CLIENT_ID = "479757037"
-LIVE_CLIENT_ID = "000000004414E0A6"
+GITHUB_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID", "b44f3d47bdeb26b9c4e6")
+QQ_CLIENT_ID = os.getenv("QQ_CLIENT_ID", "101200890")
+QQ_OAUTH_STATE = os.getenv("QQ_OAUTH_STATE", "openhackathon")  # todo state should be constant. Actually it should be unguessable to prevent CSFA
+WECHAT_APP_ID = os.getenv("WECHAT_APP_ID", "wxe75b8aef71c2059f")
+WECHAT_OAUTH_STATE = os.getenv("WECHAT_OAUTH_STATE", "openhackathon")  # NOTE: may be should be same as QQ_OAUTH_STATE?
+WEIBO_CLIENT_ID = os.getenv("WEIBO_CLIENT_ID", "479757037")
+LIVE_CLIENT_ID = os.getenv("LIVE_CLIENT_ID", "000000004414E0A6")
 
 Config = {
     "environment": "local",

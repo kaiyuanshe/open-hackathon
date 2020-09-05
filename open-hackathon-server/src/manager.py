@@ -7,6 +7,8 @@ from flask_script import Manager, Server, Shell
 from hackathon import app
 from hackathon.hmongo.database import drop_db, setup_db, add_super_user
 
+import click
+
 banner = r"""
  _____                          __  __                   __                __    __                         
 /\  __`\                       /\ \/\ \                 /\ \              /\ \__/\ \                        
@@ -34,19 +36,29 @@ manager.add_command("shell", Shell(banner=banner, make_context=make_shell_contex
 
 @manager.command
 def reset_db():
+    click.confirm('This operation will delete the database, do you want to continue?', abort=True)
     drop_db()
-    init_db()
+    setup_db()
+    click.echo('Success reset database.')
+    click.echo('Success Add A New Admin Count. (admin@admin)')
 
 
 @manager.command
 def init_db():
     setup_db()
+    click.echo('Success init database.')
+    click.echo('Success Add A New Admin Count. (admin@admin)')
 
 
 @manager.command
 def create_super_user(username, password):
     add_super_user(username, username, password)
+    click.echo('Success Add A Super Count. ({0}@{1})'.format(username, password))
 
+@manager.command
+def create_test_user(username, password):
+    add_super_user(username, username, password, is_super=False)
+    click.echo('Success Add A Test Count. ({0}@{1})'.format(username, password))
 
 if __name__ == "__main__":
     manager.run()
