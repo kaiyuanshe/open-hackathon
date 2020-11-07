@@ -78,7 +78,7 @@ class HackathonApi(Api):
 api = HackathonApi(app)
 
 # Enable CORS support. Currently requests of all methods from all domains are allowed
-app.config['CORS_HEADERS'] = 'Content-Type, token, hackathon_name'
+app.config['CORS_HEADERS'] = 'Content-Type, token, hackathon_name, Authorization'
 cors = CORS(app)
 
 # initialize hackathon scheduler
