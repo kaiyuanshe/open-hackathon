@@ -37,7 +37,7 @@ class UserManager(Component):
         if HTTP_HEADER.AUTHORIZATION not in request.headers:
             return False
 
-        user = self.__validate_token(request.headers[HTTP_HEADER.AUTHORIZATION])
+        user = self.__validate_token(request.headers[HTTP_HEADER.AUTHORIZATION][6::])
         if user is None:
             return False
 

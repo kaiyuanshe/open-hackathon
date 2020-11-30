@@ -13,6 +13,7 @@ import json
 import time
 import uuid
 from werkzeug.datastructures import FileStorage
+from io import IOBase
 
 from hackathon.constants import FILE_TYPE, HEALTH_STATUS, HEALTH
 from hackathon.storage.storage import Storage
@@ -90,7 +91,7 @@ class LocalStorage(Storage):
         with open(path, 'w') as f:
             if isinstance(content, dict):
                 json.dump(content, f)
-            elif isinstance(content, file) or isinstance(content, FileStorage):
+            elif isinstance(content, IOBase) or isinstance(content, FileStorage):
                 f.write(content.read())
             else:
                 f.write(str(content))

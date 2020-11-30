@@ -113,6 +113,7 @@
             dataType: 'json',
             beforeSend: function (xhr, data) {
                 xhr.setRequestHeader('token', $.cookie('token'));
+                xhr.setRequestHeader('Authorization', "token " + $.cookie('token'));
             },
             start: function () {
                 $('#user_logo_upload_span').text('文件上传中，上传成功将会自动跳转，请稍等...');

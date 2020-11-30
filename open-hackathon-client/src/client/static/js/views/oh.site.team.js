@@ -388,6 +388,7 @@
             dataType: 'json',
             beforeSend: function (xhr, data) {
                 xhr.setRequestHeader('token', $.cookie('token'));
+                xhr.setRequestHeader('Authorization', "token " + $.cookie('token'));
             },
             start: start_func,
             done: function (e, obj) {

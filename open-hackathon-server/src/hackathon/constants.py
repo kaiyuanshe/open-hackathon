@@ -8,8 +8,9 @@ class HTTP_HEADER:
     """Http header that hackathon server api requires
 
     Attributes:
-        TOKEN: token for current login user to access the hackathon server APIs with @token_required
+        Authorization: "token SOME TOKEN" for current login user to access the hackathon server APIs with @token_required
         HACKATHON_NAME: the name of hackathon related to the API call
+        TOKEN: obsolete, legacy header
     """
     TOKEN = "token"
     AUTHORIZATION = "Authorization"

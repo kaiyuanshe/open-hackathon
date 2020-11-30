@@ -1480,7 +1480,8 @@ angular.module('oh.controllers', [])
     var uploader = $scope.uploader = new FileUploader({
       url: api.template.file.post._path_,
       headers: {
-        token: $cookies.get('token')
+        token: $cookies.get('token'),
+        Authorization: "token " + $cookies.get('token')
       },
       autoUpload: true
     });
@@ -1849,7 +1850,8 @@ angular.module('oh.controllers', [])
       api.admin.hostserver.list.get({
         header: {
           hackathon_name: $stateParams.name,
-          token: $cookies.get('token')
+          token: $cookies.get('token'),
+          Authorization: "token " + $cookies.get('token')
         }
       }).then(function(data){
         if (data.error) {
@@ -1908,7 +1910,8 @@ angular.module('oh.controllers', [])
               body: $scope.data,
               header: {
                 hackathon_name: $stateParams.name,
-                token: $cookies.get('token')
+                token: $cookies.get('token'),
+                Authorization: "token " + $cookies.get('token')
               }
             }).then(function(data){
               if (data.error) {
@@ -1941,7 +1944,8 @@ angular.module('oh.controllers', [])
         },
         header: {
           hackathon_name: $stateParams.name,
-          token: $cookies.get('token')
+          token: $cookies.get('token'),
+          Authorization: "token " + $cookies.get('token')
         }
       }).then(function(data){
         if (data.error) {
@@ -2143,7 +2147,8 @@ angular.module('oh.controllers', [])
     var uploader = $scope.uploader = new FileUploader({
       url: api.template.file.post._path_,
       headers: {
-        token: $cookies.get('token')
+        token: $cookies.get('token'),
+        Authorization: "token " + $cookies.get('token')
       },
       autoUpload: true
     });
