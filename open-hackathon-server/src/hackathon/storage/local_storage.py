@@ -88,18 +88,13 @@ class LocalStorage(Storage):
         :param path: the file path
         """
         self.__ensure_dir(path)
-        if isinstance(content, bytes):
-            with open(path, "wb") as f:
-                # 用于保存二进制文件（例如：图片）
-                f.write(content)
-        else:
-            with open(path, 'w') as f:
-                if isinstance(content, dict):
-                    json.dump(content, f)
-                elif isinstance(content, IOBase) or isinstance(content, FileStorage):
-                    f.write(content.read())
-                else:
-                    f.write(str(content))
+        with open(path, 'w') as f:
+            if isinstance(content, dict):
+                json.dump(content, f)
+            elif isinstance(content, IOBase) or isinstance(content, FileStorage):
+                content.save(path)
+            else:
+                f.write(str(content))
 
     @staticmethod
     def __get_storage_base_dir():
