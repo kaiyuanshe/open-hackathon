@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30310.162
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kaiyuanshe.OpenHackathon.Server", "Kaiyuanshe.OpenHackathon.Server\Kaiyuanshe.OpenHackathon.Server.csproj", "{02A89E0E-7A6B-4383-BD60-3D622B8A23A2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{02A89E0E-7A6B-4383-BD60-3D622B8A23A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02A89E0E-7A6B-4383-BD60-3D622B8A23A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02A89E0E-7A6B-4383-BD60-3D622B8A23A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02A89E0E-7A6B-4383-BD60-3D622B8A23A2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EC63CBAF-288F-44E8-A39C-E4325CF4CCF3}
+	EndGlobalSection
+EndGlobal
