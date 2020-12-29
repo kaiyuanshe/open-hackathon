@@ -6,10 +6,20 @@ document:
   - documents/*
   - documents/**/*
 
-ohp-client:
+deploy:
+  - deploy/*
+  - deploy/**/*
+  - src/deploy/*
+  - src/deploy/**/*
+
+oph-client:
   - open-hackathon-client/*
   - open-hackathon-client/**/*
 
-ohp-server:
+oph-server:
   - open-hackathon-server/*
   - open-hackathon-server/**/*
+
+oph-server-v2:
+  - src/open-hackathon-server/*
+  - src/open-hackathon-server/**/*
