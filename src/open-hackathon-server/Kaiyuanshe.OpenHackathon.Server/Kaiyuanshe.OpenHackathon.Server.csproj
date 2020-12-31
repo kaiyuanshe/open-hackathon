@@ -4,5 +4,9 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Kaiyuanshe.OpenHackathon.Storage\Kaiyuanshe.OpenHackathon.Storage.csproj" />
+  </ItemGroup>
+
 
 </Project>
