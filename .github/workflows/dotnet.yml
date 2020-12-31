@@ -47,10 +47,25 @@ jobs:
         file: ./src/deploy/hackathon-docker/Dockerfile
         push: true
         tags: ${{ steps.docker_meta.outputs.tags }}
+        sep-tags: ','
         labels: ${{ steps.docker_meta.outputs.labels }}
-        
+
+    - name: 'Login via Azure CLI'
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+  
+    - uses: benjlevesque/short-sha@v1.2
+      id: short-sha
+      with:
+        length: 7
+          
     - uses: azure/webapps-deploy@v2
       with:
         app-name: 'hackathon-api'
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-        images: 'openhackathon/oph-server-v2:${{ github.sha }}'
+        images: 'openhackathon/oph-server-v2:sha-${{ steps.short-sha.outputs.sha }}'
+        
+    - name: Azure logout
+      run: |
+        az logout
