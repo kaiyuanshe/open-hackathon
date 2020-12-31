@@ -49,11 +49,6 @@ jobs:
         tags: ${{ steps.docker_meta.outputs.tags }}
         sep-tags: ','
         labels: ${{ steps.docker_meta.outputs.labels }}
-
-    - name: 'Login via Azure CLI'
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
   
     - uses: benjlevesque/short-sha@v1.2
       id: short-sha
@@ -66,6 +61,3 @@ jobs:
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
         images: 'openhackathon/oph-server-v2:sha-${{ steps.short-sha.outputs.sha }}'
         
-    - name: Azure logout
-      run: |
-        az logout
