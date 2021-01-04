@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Kaiyuanshe.OpenHackathon.Storage\Kaiyuanshe.OpenHackathon.Storage.csproj" />
   </ItemGroup>
 
