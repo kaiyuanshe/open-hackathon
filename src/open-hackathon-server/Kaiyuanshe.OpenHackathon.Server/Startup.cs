@@ -1,17 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Kaiyuanshe.OpenHackathon.Server.Controllers;
+using Kaiyuanshe.OpenHackathon.Server.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace Kaiyuanshe.OpenHackathon.Server
 {
@@ -24,46 +19,61 @@ namespace Kaiyuanshe.OpenHackathon.Server
 
         public IConfiguration Configuration { get; }
 
-        public IContainer ApplicationContainer { get; private set; }
+        public ILifetimeScope AutofacContainer { get; private set; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        public IServiceProvider ConfigureServices(IServiceCollection services)
+        // ConfigureServices is where you register dependencies. This gets
+        // called by the runtime before the ConfigureContainer method, below.
+        public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
-            //services.Add(ServiceDescriptor.Transient<IControllerActivator, ServiceBasedControllerActivator>());
-
-            var builder = new ContainerBuilder();
-
-            // Note that Populate is basically a foreach to add things
-            // into Autofac that are in the collection. If you register
-            // things in Autofac BEFORE Populate then the stuff in the
-            // ServiceCollection can override those things; if you register
-            // AFTER Populate those registrations can override things
-            // in the ServiceCollection. Mix and match as needed.
-            builder.Populate(services);
-            ApplicationContainer = builder.Build();
-
-            return new AutofacServiceProvider(this.ApplicationContainer);
+            // Add services to the collection. Don't build or return
+            // any IServiceProvider or the ConfigureContainer method
+            // won't get called. Don't create a ContainerBuilder
+            // for Autofac here, and don't call builder.Populate() - that
+            // happens in the AutofacServiceProviderFactory for you.
+            services.AddMvc().AddControllersAsServices();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        // ConfigureContainer is where you can register things directly
+        // with Autofac. This runs after ConfigureServices so the things
+        // here will override registrations made in ConfigureServices.
+        // Don't build the container; that gets done for you by the factory.
+        public void ConfigureContainer(ContainerBuilder builder)
+        {
+            // Register your own things directly with Autofac here. Don't
+            // call builder.Populate(), that happens in AutofacServiceProviderFactory
+            // for you.
+            builder.RegisterModule(new HackathonDefaultModule());
+            RegisterControllers(builder);
+        }
+
+        // Configure is where you add middleware. This is called after
+        // ConfigureContainer. You can use IApplicationBuilder.ApplicationServices
+        // here if you need to resolve things from the container.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            // If, for some reason, you need a reference to the built container, you
+            // can use the convenience extension method GetAutofacRoot.
+            AutofacContainer = app.ApplicationServices.GetAutofacRoot();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseHttpsRedirection();
-
+            // app.UseHttpsRedirection();
             app.UseRouting();
-
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
+        }
+
+        private void RegisterControllers(ContainerBuilder builder)
+        {
+            var controllers = typeof(HackathonControllerBase).SubTypes();
+            builder.RegisterTypes(controllers).PropertiesAutowired();
         }
     }
 }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Kaiyuanshe.OpenHackathon.Storage.Tables
+namespace Kaiyuanshe.OpenHackathon.Server.Storage.Tables
 {
     public static class TableNames
     {

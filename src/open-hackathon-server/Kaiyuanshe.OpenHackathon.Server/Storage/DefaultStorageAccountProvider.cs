@@ -1,7 +1,7 @@
-﻿using Kaiyuanshe.OpenHackathon.Common;
+﻿using Kaiyuanshe.OpenHackathon.Server;
 using Microsoft.WindowsAzure.Storage;
 
-namespace Kaiyuanshe.OpenHackathon.Storage
+namespace Kaiyuanshe.OpenHackathon.Server.Storage
 {
     public interface IStorageAccountProvider
     {

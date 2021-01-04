@@ -2,7 +2,7 @@
 using Microsoft.WindowsAzure.Storage.Table;
 using System.Collections.Generic;
 
-namespace Kaiyuanshe.OpenHackathon.Storage.Entities
+namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
 {
     public abstract class AdvancedTableEntity : TableEntity
     {

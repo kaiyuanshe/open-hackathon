@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 
-namespace Kaiyuanshe.OpenHackathon.Storage.Entities
+namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
 {
     /// <summary>
     /// An Attribute to enable us write complex objects into Azure table

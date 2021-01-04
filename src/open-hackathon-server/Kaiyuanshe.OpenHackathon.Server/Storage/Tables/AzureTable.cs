@@ -1,13 +1,10 @@
 ﻿using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AzSignalR.Storage
+namespace Kaiyuanshe.OpenHackathon.Server.Storage.Tables
 {
     public interface IAzureTable<TEntity> where TEntity : ITableEntity, new()
     {
