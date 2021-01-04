@@ -1,9 +1,9 @@
-﻿using Kaiyuanshe.OpenHackathon.Storage.Tables;
+﻿using Kaiyuanshe.OpenHackathon.Server.Storage.Tables;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Kaiyuanshe.OpenHackathon.Storage
+namespace Kaiyuanshe.OpenHackathon.Server.Storage
 {
     public interface IStorageContext
     {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System;
 
-namespace Kaiyuanshe.OpenHackathon.Common
+namespace Kaiyuanshe.OpenHackathon.Server
 {
     [Flags]
     public enum ConfigSource

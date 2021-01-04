@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Kaiyuanshe.OpenHackathon.Storage.Entities
+namespace Kaiyuanshe.OpenHackathon.Server.Storage.Entities
 {
     public static class EntityPropertyConverter
     {

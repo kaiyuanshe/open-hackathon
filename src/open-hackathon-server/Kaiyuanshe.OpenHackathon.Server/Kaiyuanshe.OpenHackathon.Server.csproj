@@ -6,11 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.1.0" />
+    <PackageReference Include="WindowsAzure.Storage" Version="9.3.3" />
   </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Kaiyuanshe.OpenHackathon.Storage\Kaiyuanshe.OpenHackathon.Storage.csproj" />
-  </ItemGroup>
-
 
 </Project>
